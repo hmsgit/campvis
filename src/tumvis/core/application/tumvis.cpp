@@ -4,27 +4,25 @@
 
 #include "tumvispainter.h"
 
-namespace TUMVis {
+using namespace TUMVis;
 
-    int main(int argc, char** argv) {  
-        tgt::QtApplication* app = new tgt::QtApplication(argc, argv);
-        tgt::QtCanvas* canvas = new tgt::QtCanvas("TUMVis");
+int main(int argc, char** argv) {  
+    tgt::QtApplication* app = new tgt::QtApplication(argc, argv);
+    tgt::QtCanvas* canvas = new tgt::QtCanvas("TUMVis");
 
-        app->addCanvas(canvas);  
+    app->addCanvas(canvas);  
 
-        app->init();  
+    app->init();  
 
-        tgt::Camera camera;  
-        canvas->setCamera(&camera);  
-        TumVisPainter painter(canvas);  
-        canvas->setPainter(&painter);  
+    tgt::Camera camera;  
+    canvas->setCamera(&camera);  
+    TumVisPainter painter(canvas);  
+    canvas->setPainter(&painter);  
 
-        app->run();  
+    app->run();  
 
-        delete canvas;  
-        delete app;  
+    delete canvas;  
+    delete app;  
 
-        return 0;  
-    }
-
+    return 0;  
 }
