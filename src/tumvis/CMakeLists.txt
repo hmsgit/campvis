@@ -13,6 +13,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 OPTION(TUMVIS_SHARED_LIBS          "Build shared libraries?"                                       ON )
 OPTION(TUMVIS_PRECOMPILED_HEADER   "Use pre-compiled headers?"                                     ON )
 OPTION(TUMVIS_DEBUG                "Activate debug code?"                                          ON )
+OPTION(TUMVIS_BUILD_CORE           "Build TUMVis Core"                                             ON )
 OPTION(TUMVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON )
 
 IF(WIN32)
@@ -29,6 +30,10 @@ include(cmake/commonconf.cmake)
 
 IF(TUMVIS_BUILD_LIB_TGT)
     ADD_SUBDIRECTORY(ext/tgt)
+ENDIF()
+
+IF(TUMVIS_BUILD_CORE)
+    ADD_SUBDIRECTORY(core)
 ENDIF()
 
 #

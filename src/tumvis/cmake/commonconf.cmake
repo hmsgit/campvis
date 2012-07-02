@@ -59,7 +59,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${TUMVIS_HOME}/bin")
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${TUMVIS_HOME}/bin")
 
 # common include directories
-LIST(APPEND TUMVIS_INCLUDE_DIRECTORIES "${TUMVIS_HOME}" "${TUMVIS_HOME}/ext")
+LIST(APPEND TUMVIS_INCLUDE_DIRECTORIES "${TUMVIS_HOME}/core" "${TUMVIS_HOME}/ext" "${TUMVIS_HOME}/tools")
 LIST(APPEND TUMVIS_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}) 
 
 # platform-dependent configuration
@@ -79,6 +79,7 @@ IF(WIN32)
     # C4390: ';' : empty controlled statement found; is this the intent?
     #        occurs when OpenGL error logging macros are disabled
     #LIST(APPEND TUMVIS_DEFINITIONS /wd4305 /wd4800 /wd4290 /wd4068 /wd4251 /wd4355 /wd4390)
+    LIST(APPEND TUMVIS_DEFINITIONS /wd4290 /wd4390)
     
     # enable parallel builds in Visual Studio
     LIST(APPEND TUMVIS_DEFINITIONS /MP)
