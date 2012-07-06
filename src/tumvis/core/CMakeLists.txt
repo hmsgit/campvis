@@ -4,14 +4,25 @@ INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring TUMVis Core")
 
-SET(TUMVIS_CORE_SOURCES
-    application/tumvis.cpp
-    application/tumvispainter.cpp
+FILE(GLOB TUMVIS_CORE_SOURCES
+    application/*.cpp
+    datastructures/*.cpp
 )
 
-SET(TUMVIS_CORE_HEADERS 
-    application/tumvispainter.h
+FILE(GLOB TUMVIS_CORE_HEADERS
+    application/*.h
+    datastructures/*.h
 )
+
+#SET(TUMVIS_CORE_SOURCES
+#    application/tumvis.cpp
+#    application/tumvispainter.cpp
+#    datastructures/
+#)
+
+#SET(TUMVIS_CORE_HEADERS 
+#    application/tumvispainter.h
+#)
 
 #
 # Qt related stuff:
