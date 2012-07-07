@@ -10,7 +10,7 @@ namespace {
     template<typename T, size_t N>
     struct SwapHelper {
         static inline T swap(T value) {
-            LERRORC("TUMVis.Tools.EndianHelper", "Tried to call SwapHelper<T,N>::swap() with unsupported template arguments.")
+            LERRORC("TUMVis.Tools.EndianHelper", "Tried to call SwapHelper<T,N>::swap() with unsupported template arguments.");
             return value;
         }
     };
@@ -93,7 +93,7 @@ namespace TUMVis {
          * \return  Endian-swapped version of \a value.
          */
         template<typename T>
-        inline T swapEndian(T value) {
+        static inline T swapEndian(T value) {
             return SwapHelper<T, sizeof(T)>::swap(value);
         }
 

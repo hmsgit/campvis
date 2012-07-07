@@ -2,7 +2,7 @@
 #define datahandle_h__
 
 #include "tgt/logmanager.h"
-#include "datastructures/abstractdata.h"
+#include "core/datastructures/abstractdata.h"
 
 #include <string>
 #include <set>

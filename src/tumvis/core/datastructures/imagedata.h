@@ -1,8 +1,8 @@
-#ifndef imagedata_h__
-#define imagedata_h__
+#ifndef IMAGEDATA_H__
+#define IMAGEDATA_H__
 
-#include "datastructures/abstractdata.h"
-#include "datastructures/imagemappinginformation.h"
+#include "core/datastructures/abstractdata.h"
+#include "core/datastructures/imagemappinginformation.h"
 #include "tgt/vector.h"
 
 namespace TUMVis {
@@ -52,9 +52,9 @@ namespace TUMVis {
          * \param   urb     Upper-Right-Back coordinates of subimage
          * \return  An image containing the subimage of this with the given coordinates.
          */
-        virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) = 0;
+        virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
-    private:
+    protected:
         size_t _dimensionality;                         ///< Dimensionality of this image
         tgt::svec3 _size;                               ///< Size of this image (number of elements per dimension)
         ImageMappingInformation _mappingInformation;    ///< Mapping information of this image
@@ -64,4 +64,4 @@ namespace TUMVis {
 
 }
 
-#endif // imagedata_h__
+#endif // IMAGEDATA_H__

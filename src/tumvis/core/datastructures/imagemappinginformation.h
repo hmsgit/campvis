@@ -2,7 +2,7 @@
 #define imagemapping_h__
 
 #include "tgt/matrix.h"
-#include "tools/mapping.h"
+#include "core/tools/mapping.h"
 
 namespace TUMVis {
 

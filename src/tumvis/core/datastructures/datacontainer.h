@@ -1,6 +1,8 @@
+#ifndef DATACONTAINER_H__
+#define DATACONTAINER_H__
 
-#include "datastructures/abstractdata.h"
-#include "datastructures/datahandle.h"
+#include "core/datastructures/abstractdata.h"
+#include "core/datastructures/datahandle.h"
 
 #include <string>
 #include <map>
@@ -76,3 +78,5 @@ namespace TUMVis {
     };
 
 }
+
+#endif // DATACONTAINER_H__
