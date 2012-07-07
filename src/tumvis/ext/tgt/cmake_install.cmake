@@ -1,4 +1,4 @@
-# Install script for directory: D:/Daten/Christian/Visual Studio 2008/Projects/tumvis/ext/tgt
+# Install script for directory: D:/Daten/Christian/Dokumente/Eigene Dokumente/TUM/work/tumvis/ext/tgt
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

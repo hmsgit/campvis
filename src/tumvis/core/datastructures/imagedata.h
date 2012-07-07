@@ -2,7 +2,7 @@
 #define imagedata_h__
 
 #include "datastructures/abstractdata.h"
-#include "datastructures/imagemapping.h"
+#include "datastructures/imagemappinginformation.h"
 #include "tgt/vector.h"
 
 namespace TUMVis {

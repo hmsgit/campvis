@@ -1,4 +1,4 @@
-#include "imagemapping.h"
+#include "imagemappinginformation.h"
 
 namespace TUMVis {
 
