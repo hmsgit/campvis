@@ -5,19 +5,25 @@
 
 namespace TUMVis {
 
-    
+    /**
+     * Struct for handling void pointers slightly more typesafe.
+     * Therfore it stores an enum value together with the pointer infering its data type.
+     **/
     struct WeaklyTypedPointer {
+        /**
+         * Base data type.
+         **/
         enum PointerType {
-            UCHAR,
-            CHAR,
-            USHORT,
-            SHORT,
-            UINT,
-            INT,
-            FLOAT,
-            ULONG,
-            LONG,
-            DOUBLE
+            UCHAR,      ///< unsigned char
+            CHAR,       ///< char
+            USHORT,     ///< unsigned short
+            SHORT,      ///< short
+            UINT,       ///< unsigned int
+            INT,        ///< int
+            FLOAT,      ///< float
+            ULONG,      ///< unsigned long
+            LONG,       ///< long
+            DOUBLE      ///< double
         };
 
         /**
@@ -49,20 +55,18 @@ namespace TUMVis {
         };
 
         /**
-         *
-         *
-         * \param	pt
-         * \param	ptr
-         **/
+         * Constructs a new weakly typed pointer.
+         * \param pt    Base data type of the pointer.
+         * \param ptr   Pointer to the data.
+         */
         WeaklyTypedPointer(PointerType pt, void* ptr)
             : _pointerType(pt)
             , _pointer(ptr)
         {
         };
 
-
-        PointerType _pointerType;
-        void* _pointer;
+        PointerType _pointerType;   ///< Base data type of the pointer
+        void* _pointer;             ///< Pointer to the data
     };
 
 }
