@@ -68,7 +68,7 @@ namespace TUMVis {
         return toReturn;
     }
 
-    std::vector<std::string> StringUtils::spiltStringsafe(const std::string& str, const std::string& delimiter, char quotes /*= '"'*/, const std::string& whitespace /*= " \t"*/) {
+    std::vector<std::string> StringUtils::splitStringsafe(const std::string& str, const std::string& delimiter, char quotes /*= '"'*/, const std::string& whitespace /*= " \t"*/) {
         std::vector<std::string> toReturn;
         std::string::size_type strpos = 0;
         std::string::size_type endpos = 0;

@@ -16,8 +16,6 @@ namespace TUMVis {
 
         /// flag whether the data type is signed
         static const bool isSigned;
-
-        static const T swapEndian(T value);
     };
 
 // - Template implementation - let the evil template magic party begin ----------------------------

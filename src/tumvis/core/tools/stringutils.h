@@ -1,7 +1,7 @@
 #ifndef STRINGUTILS_H__
 #define STRINGUTILS_H__
 
-#include "tgt/logmanager.h"
+#include <exception>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -16,6 +16,7 @@ namespace TUMVis {
      * \todo    Test, test, test!
      */
     class StringUtils {
+    public:
         /**
          * Converts the string \a str to lowercase.
          * \param str   String to convert.
@@ -69,7 +70,7 @@ namespace TUMVis {
          * \param whitespace    Set of whitespace characters which shall be removed during trimming.
          * \return  Vector of the split substrings.
          */
-        static std::vector<std::string> spiltStringsafe(const std::string& str, const std::string& delimiter, char quotes = '"', const std::string& whitespace = " \t");
+        static std::vector<std::string> splitStringsafe(const std::string& str, const std::string& delimiter, char quotes = '"', const std::string& whitespace = " \t");
 
         /**
          * Trims the string \a str.
@@ -87,15 +88,16 @@ namespace TUMVis {
          * \return  A string representation of \a value.
          */
         template<class T>
-        std::string toString(const T& value);
+        static std::string toString(const T& value);
 
         /**
          * Converts the string \a str to its original value.
          * \param str   The string to convert
          * \return  The back-converted value of \a str, type must be compatible with std::stringstream.
+         * \throw   std::exception on conversion failure
          */
         template<class T>
-        T fromString(const std::string& str);
+        static T fromString(const std::string& str) throw (std::exception);
 
         /**
          * Joins the substrings in \a tokens together using \a delimiter in between.
@@ -117,12 +119,12 @@ namespace TUMVis {
     }
 
     template<class T>
-    T fromString(const std::string& str) {
+    T fromString(const std::string& str) throw (std::exception) {
         T toReturn;
         std::istringstream stream;
         stream.str(str);
         if (!(stream >> toReturn))
-            LERRORC("TumVis.core.tools.StringUtils::fromString()", "failed to convert string '" + str + "'");
+            throw std::exception("Failed to convert string '" + str + "'");
         return toReturn;
     }
 
