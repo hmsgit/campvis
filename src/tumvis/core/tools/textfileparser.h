@@ -59,7 +59,7 @@ namespace TUMVis {
          * \param key   The key to search for.
          * \return  True if a key-value pair with the given key is existent, otherwise false.
          */
-        bool hasToken(const std::string& key) const;
+        bool hasKey(const std::string& key) const;
 
         /**
          * Returns the value to the given key \a key.
@@ -108,6 +108,39 @@ namespace TUMVis {
          * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
          */
         tgt::ivec4 getIvec4(const std::string& key) const throw (tgt::CorruptedFileException);
+
+
+        /**
+         * Returns the size_t representation of the value for the given key \a key.
+         * \param key   The key to search for.
+         * \return      size_t representation for the corresponding value to the given key.
+         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         */
+        size_t getSizeT(const std::string& key) const throw (tgt::CorruptedFileException);
+
+        /**
+         * Returns the svec2 representation of the value for the given key \a key.
+         * \param key   The key to search for.
+         * \return      svec2 representation for the corresponding value to the given key.
+         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         */
+        tgt::svec2 getSvec2(const std::string& key) const throw (tgt::CorruptedFileException);
+
+        /**
+         * Returns the svec3 representation of the value for the given key \a key.
+         * \param key   The key to search for.
+         * \return      svec3 representation for the corresponding value to the given key.
+         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         */
+        tgt::svec3 getSvec3(const std::string& key) const throw (tgt::CorruptedFileException);
+
+        /**
+         * Returns the svec4 representation of the value for the given key \a key.
+         * \param key   The key to search for.
+         * \return      svec4 representation for the corresponding value to the given key.
+         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         */
+        tgt::svec4 getSvec4(const std::string& key) const throw (tgt::CorruptedFileException);
 
 
         /**
@@ -197,6 +230,8 @@ namespace TUMVis {
             lines.push_back(file->getLine('\n'));
         }
         std::string data = StringUtils::join(lines, "\n");
+        file->close();
+        delete file;
 
         T itemSplitter;
         return itemSplitter(data);
@@ -215,6 +250,8 @@ namespace TUMVis {
         while (!file->eof()) {
             lines.push_back(file->getLine());
         }
+        file->close();
+        delete file;
         return lines;
     }
 

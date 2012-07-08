@@ -13,7 +13,7 @@ namespace TUMVis {
     {
     }
 
-    bool TextFileParser::hasToken(const std::string& key) const {
+    bool TextFileParser::hasKey(const std::string& key) const {
         return (_tokens.find(key) != _tokens.end());
     }
 
@@ -75,6 +75,46 @@ namespace TUMVis {
         }
         catch (std::exception& e) {
             throw tgt::CorruptedFileException("Error parsing key " + key + " to ivec4: " + e.what(), _url);
+        }        
+    }
+
+    size_t TextFileParser::getSizeT(const std::string& key) const throw (tgt::CorruptedFileException) {
+        std::string str = getString(key);
+        try {
+            return StringUtils::fromString<size_t>(str);
+        }
+        catch (std::exception& e) {
+            throw tgt::CorruptedFileException("Error parsing key " + key + " to size_t: " + e.what(), _url);
+        }        
+    }
+
+    tgt::svec2 TextFileParser::getSvec2(const std::string& key) const  throw (tgt::CorruptedFileException){
+        std::string str = getString(key);
+        try {
+            return StringUtils::fromString<tgt::svec2>(str);
+        }
+        catch (std::exception& e) {
+            throw tgt::CorruptedFileException("Error parsing key " + key + " to svec2: " + e.what(), _url);
+        }        
+    }
+
+    tgt::svec3 TextFileParser::getSvec3(const std::string& key) const  throw (tgt::CorruptedFileException){
+        std::string str = getString(key);
+        try {
+            return StringUtils::fromString<tgt::svec3>(str);
+        }
+        catch (std::exception& e) {
+            throw tgt::CorruptedFileException("Error parsing key " + key + " to svec3: " + e.what(), _url);
+        }        
+    }
+
+    tgt::svec4 TextFileParser::getSvec4(const std::string& key) const  throw (tgt::CorruptedFileException){
+        std::string str = getString(key);
+        try {
+            return StringUtils::fromString<tgt::svec4>(str);
+        }
+        catch (std::exception& e) {
+            throw tgt::CorruptedFileException("Error parsing key " + key + " to svec4: " + e.what(), _url);
         }        
     }
 
