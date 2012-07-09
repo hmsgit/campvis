@@ -20,4 +20,17 @@ namespace TUMVis {
     const DataContainer& AbstractProcessor::getDataContainer() const {
         return _data;
     }
+
+    int AbstractProcessor::getInvalidationLevel() const {
+        return _invalidationLevel;
+    }
+
+    void AbstractProcessor::setInvalidationLevel(InvalidationLevel il) {
+        if (il == VALID) {
+            _invalidationLevel = static_cast<int>(VALID);
+        }
+        else {
+            _invalidationLevel |= static_cast<int>(il);
+        }        
+    }
 }

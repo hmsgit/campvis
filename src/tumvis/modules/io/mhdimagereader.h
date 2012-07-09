@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "core/datastructures/abstractprocessor.h"
+#include "core/pipeline/abstractprocessor.h"
 
 namespace TUMVis {
     /**

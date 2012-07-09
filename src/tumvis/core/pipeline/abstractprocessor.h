@@ -13,6 +13,12 @@ namespace TUMVis {
      */
     class AbstractProcessor {
     public:
+        enum InvalidationLevel {
+            VALID               = 0,
+            INVALID_RESULT      = 1 << 0,
+            INVALID_SHADER      = 1 << 1,
+        };
+
         /**
          * Creates a AbstractProcessor.
          */
@@ -44,8 +50,24 @@ namespace TUMVis {
          **/
         const DataContainer& getDataContainer() const;
 
+        /**
+         * Returns the invalidation level of this processor.
+         * Remind, that this is internally handled as a integer bit-set, so make sure to test via logic or.
+         * \return Integer representation of _invalidationLevel
+         */
+        int getInvalidationLevel() const;
+
+        /**
+         * Update the processor's invalidation level by \a il.
+         * If \a il is VALID, the processor's invalidation level will be set to VALID.
+         * If \a il is one of the INVALID_X state, the processor's corresponding flag will be set.
+         * \param il    Invalidation level to set.
+         */
+        void setInvalidationLevel(InvalidationLevel il);
+
     protected:
         DataContainer _data;                    ///< DataContainer containing local working set of data for this Processor
+        int _invalidationLevel;                 ///< Invalidation level of this processor
 
         static const std::string loggerCat_;
     };

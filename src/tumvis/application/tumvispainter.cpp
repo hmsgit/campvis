@@ -16,7 +16,7 @@ namespace TUMVis {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);  
         getCamera()->look();  
         glColor3f(1.f, 0.f, 0.f);  
-        tgt::Sphere sphere(_size, 64, 32);  
+        tgt::Sphere sphere(.5f, 64, 32);  
         sphere.render();  
     }
 
