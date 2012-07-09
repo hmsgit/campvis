@@ -5,7 +5,8 @@
 #include "tgt/logmanager.h"
 #include "tgt/event/eventlistener.h"
 #include "core/datastructures/datacontainer.h"
-#include "core/eventhandler/abstracteventhandler.h"
+#include "core/eventhandlers/abstracteventhandler.h"
+#include "core/properties/propertycollection.h"
 
 #include <vector>
 
@@ -46,11 +47,18 @@ namespace TUMVis {
          */
         void setCanvas(tgt::GLCanvas* canvas);
 
+        /**
+         * Returns the PropertyCollection of this processor.
+         * \return _properties
+         */
+        PropertyCollection& getPropertyCollection();
+
     protected:
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
         tgt::GLCanvas* _canvas;                             ///< Target canvas for rendering
 
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
+        PropertyCollection _properties;                     ///< PropertyCollection of this pipeline
 
         static const std::string loggerCat_;
     };

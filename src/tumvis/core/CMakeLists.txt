@@ -6,15 +6,17 @@ MESSAGE(STATUS "Configuring TUMVis Core")
 
 FILE(GLOB TUMVIS_CORE_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     datastructures/*.cpp
-    eventhandler/*.cpp
+    eventhandlers/*.cpp
     pipeline/*.cpp
+    properties/*.cpp
     tools/*.cpp
 )
 
 FILE(GLOB TUMVIS_CORE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     datastructures/*.h
-    eventhandler/*.h
+    eventhandlers/*.h
     pipeline/*.h
+    properties/*.h
 	tools/*.h
 )
 

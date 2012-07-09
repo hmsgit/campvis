@@ -21,16 +21,24 @@ namespace TUMVis {
         return _data;
     }
 
-    int AbstractProcessor::getInvalidationLevel() const {
+    const InvalidationLevel& AbstractProcessor::getInvalidationLevel() const {
         return _invalidationLevel;
     }
 
-    void AbstractProcessor::setInvalidationLevel(InvalidationLevel il) {
-        if (il == VALID) {
-            _invalidationLevel = static_cast<int>(VALID);
+    void AbstractProcessor::applyInvalidationLevel(InvalidationLevel::NamedLevels nl) {
+        _invalidationLevel.setLevel(nl);
+    }
+
+    void AbstractProcessor::onNotify(const PropertyObserverArgs& poa) {
+        _invalidationLevel.setLevel(poa._invalidationLevel);
+
+        // If processor is no longer valid, notify observers
+        if (! _invalidationLevel.isValid()) {
+            notifyObservers(ProcessorObserverArgs(this, _invalidationLevel));
         }
-        else {
-            _invalidationLevel |= static_cast<int>(il);
-        }        
+    }
+
+    PropertyCollection& AbstractProcessor::getPropertyCollection() {
+        return _properties;
     }
 }

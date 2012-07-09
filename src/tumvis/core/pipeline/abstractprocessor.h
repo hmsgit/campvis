@@ -2,22 +2,42 @@
 #define PROCESSOR_H__
 
 #include "tgt/logmanager.h"
+#include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
+#include "core/properties/abstractproperty.h"
+#include "core/properties/propertycollection.h"
+
+#include <string>
+#include <vector>
 
 namespace TUMVis {
+    class AbstractProcessor;
+
+    /**
+     * Observer Arguments for Property observers.
+     */
+    struct ProcessorObserverArgs : public GenericObserverArgs<AbstractProcessor> {
+        /**
+         * Creates new PropertyObserverArgs.
+         * \param subject               Subject that emits the notification
+         * \param invalidationLevel     Invalidation level of that property
+         */
+        ProcessorObserverArgs(const AbstractProcessor* subject, InvalidationLevel invalidationLevel)
+            : GenericObserverArgs<AbstractProcessor>(subject)
+            , _invalidationLevel(invalidationLevel)
+        {}
+
+        InvalidationLevel _invalidationLevel;       ///< Invalidation level of that processor
+    };
+
 
     /**
      * Abstract base class for TUMVis Processors.
      * 
      * \sa AbstractPipeline
      */
-    class AbstractProcessor {
+    class AbstractProcessor : GenericObserver<PropertyObserverArgs>, public GenericObservable<ProcessorObserverArgs> {
     public:
-        enum InvalidationLevel {
-            VALID               = 0,
-            INVALID_RESULT      = 1 << 0,
-            INVALID_SHADER      = 1 << 1,
-        };
 
         /**
          * Creates a AbstractProcessor.
@@ -52,22 +72,39 @@ namespace TUMVis {
 
         /**
          * Returns the invalidation level of this processor.
-         * Remind, that this is internally handled as a integer bit-set, so make sure to test via logic or.
-         * \return Integer representation of _invalidationLevel
+         * \return _invalidationLevel
          */
-        int getInvalidationLevel() const;
+        const InvalidationLevel& getInvalidationLevel() const;
 
         /**
-         * Update the processor's invalidation level by \a il.
-         * If \a il is VALID, the processor's invalidation level will be set to VALID.
-         * If \a il is one of the INVALID_X state, the processor's corresponding flag will be set.
-         * \param il    Invalidation level to set.
+         * Returns the PropertyCollection of this processor.
+         * \return _properties
          */
-        void setInvalidationLevel(InvalidationLevel il);
+        PropertyCollection& getPropertyCollection();
+
+        /**
+         * Update the processor's invalidation level by \a nl.
+         * If \a nl is VALID, the processor's invalidation level will be set to VALID.
+         * If \a nl is one of the INVALID_X state, the processor's corresponding flag will be set.
+         * \param nl    Invalidation level to apply.
+         */
+        void applyInvalidationLevel(InvalidationLevel::NamedLevels nl);
+
+
+        /**
+         * Gets called when one of the observed properties changed notifies its observers.
+         * \sa GenericObserver::onNotify, AbstractProperty
+         * \param poa   PropertyObserverArgs    ObserverArgument struct containing the emitting property and its InvalidationLevel
+         */
+        virtual void onNotify(const PropertyObserverArgs& poa);
+
 
     protected:
-        DataContainer _data;                    ///< DataContainer containing local working set of data for this Processor
-        int _invalidationLevel;                 ///< Invalidation level of this processor
+        DataContainer _data;                        ///< DataContainer containing local working set of data for this Processor
+        InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
+
+        PropertyCollection _properties;             ///< PropertyCollection of this processor
+
 
         static const std::string loggerCat_;
     };

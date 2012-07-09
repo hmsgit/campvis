@@ -16,4 +16,8 @@ namespace TUMVis {
     void AbstractPipeline::setCanvas(tgt::GLCanvas* canvas) {
         _canvas = canvas;
     }
+
+    PropertyCollection& AbstractPipeline::getPropertyCollection() {
+        return _properties;
+    }
 }
