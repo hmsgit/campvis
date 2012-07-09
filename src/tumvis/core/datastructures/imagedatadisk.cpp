@@ -16,13 +16,13 @@ namespace TUMVis {
 
     }
 
-    ImageData* ImageDataDisk::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be componentwise smaller than the ones in URB!");
+    ImageDataDisk* ImageDataDisk::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
+        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
         tgt::svec3 newSize = urb - llf;
         if (newSize == _size) {
             // nothing has changed, just provide a copy:
-            return static_cast<ImageData*>(clone());
+            return clone();
         }
 
         size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type) * llf.x;
@@ -175,7 +175,7 @@ namespace TUMVis {
         return tgt::svec3(0, size.x, size.x * size.y);
     }
 
-    AbstractData* ImageDataDisk::clone() const {
+    ImageDataDisk* ImageDataDisk::clone() const {
         return new ImageDataDisk(_url, _dimensionality, _size, _type, _offset, _endianess, _stride);
     }
 }

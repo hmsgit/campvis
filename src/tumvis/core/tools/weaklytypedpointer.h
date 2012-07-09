@@ -73,6 +73,14 @@ namespace TUMVis {
         {
         };
 
+        /**
+         * Returns the number of bytes occupied by one element of the type of this pointer.
+         * \returns The number of bytes occupied by one element of the type of this pointer.
+         */
+        size_t numBytes() const {
+            return WeaklyTypedPointer::numBytes(_pointerType);
+        }
+
         PointerType _pointerType;   ///< Base data type of the pointer
         void* _pointer;             ///< Pointer to the data
     };

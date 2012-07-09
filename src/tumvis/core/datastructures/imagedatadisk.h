@@ -50,12 +50,12 @@ namespace TUMVis {
         /**
          * \see AbstractData::clone()
          **/
-        virtual AbstractData* clone() const;
+        virtual ImageDataDisk* clone() const;
 
         /**
          * \see ImageData::getSubImage
          */
-        virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ImageDataDisk* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
 
 
         /**
@@ -84,6 +84,7 @@ namespace TUMVis {
          **/
         tgt::svec3 _stride;
 
+        static const std::string loggerCat_;
     };
 
 }
