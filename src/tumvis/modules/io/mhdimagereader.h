@@ -4,6 +4,7 @@
 #include <string>
 
 #include "core/pipeline/abstractprocessor.h"
+#include "core/properties/genericproperty.h"
 
 namespace TUMVis {
     /**
@@ -30,7 +31,7 @@ namespace TUMVis {
         void parseHeader();
 
         // TODO make this a property as soon as the property system exists
-        std::string _url;
+        GenericProperty<std::string> _url;
 
         static const std::string loggerCat_;
     };

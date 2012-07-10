@@ -35,6 +35,14 @@ namespace TUMVis {
 
 
         /**
+         * Adds the given property \a prop to the set of shared properties.
+         * All shared properties will be changed when this property changes.
+         * \note        Make sure not to build circular sharing or you will encounter endless loops!
+         * \param prop  Property to add, must be of the same type as this property.
+         */
+        virtual void addSharedProperty(AbstractProperty* prop);
+
+        /**
          * Returns the current value of this property.
          * \return _value
          */
@@ -49,6 +57,7 @@ namespace TUMVis {
 
     protected:
         T _value;           ///< value of the property
+
         static const std::string loggerCat_;
     };
 
@@ -67,6 +76,17 @@ namespace TUMVis {
     }
 
     template<typename T>
+    void TUMVis::GenericProperty<T>::addSharedProperty(AbstractProperty* prop) {
+        // make type check first, then call base method.
+        tgtAssert(prop != 0, "Shared property must not be 0!");
+        if (dynamic_cast< GenericProperty<T>* >(prop) == 0) {
+            tgtAssert(false, "Shared property must be of the same type as this property!");
+            return;
+        }
+        AbstractProperty::addSharedProperty(prop);
+    }
+
+    template<typename T>
     const T TUMVis::GenericProperty<T>::getValue() const {
         return _value;
     }
@@ -74,6 +94,14 @@ namespace TUMVis {
     template<typename T>
     void TUMVis::GenericProperty<T>::setValue(const T& value) {
         _value = value;
+        // TODO:    think about the correct/reasonable order of observer notification
+        //          thread-safety might play a role thereby...
+        for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
+            // We ensure all shared properties to be of type GenericProperty<T> in the addSharedProperty overload.
+            // Hence, static_cast ist safe.
+            GenericProperty<T>* child = static_cast< GenericProperty<T>* >(*it);
+            child->setValue(value);
+        }
         notifyObservers(PropertyObserverArgs(this, _invalidationLevel));
     }
 

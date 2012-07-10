@@ -14,11 +14,11 @@ namespace TUMVis {
     }
 
     void AbstractProcessor::addDataHandle(const std::string& name, const DataHandle* dh) {
-        _data.addDataHandle(name, dh);
+        _dataContainer.addDataHandle(name, dh);
     }
 
     const DataContainer& AbstractProcessor::getDataContainer() const {
-        return _data;
+        return _dataContainer;
     }
 
     const InvalidationLevel& AbstractProcessor::getInvalidationLevel() const {

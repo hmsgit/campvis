@@ -15,8 +15,9 @@ namespace TUMVis {
 
     MhdImageReader::MhdImageReader() 
         : AbstractProcessor()
+        , _url("url", "Image URL", "")
     {
-
+        _properties.addProperty(&_url);
     }
 
     MhdImageReader::~MhdImageReader() {
@@ -24,7 +25,7 @@ namespace TUMVis {
     }
 
     void MhdImageReader::process() {
-        TextFileParser tfp(_url, true, "=");
+        TextFileParser tfp(_url.getValue(), true, "=");
         tfp.parse<TextFileParser::ItemSeparatorLines>();
 
         std::string url;
@@ -92,11 +93,11 @@ namespace TUMVis {
             // get raw image location:
             url = tfp.getString("ElementDataFile");
             if (url == "LOCAL") {
-                url = _url;
+                url = _url.getValue();
                 // find beginning of local data:
-                tgt::File* file = FileSys.open(_url);
+                tgt::File* file = FileSys.open(_url.getValue());
                 if (!file || !file->isOpen())
-                    throw tgt::FileException("Could not open file " + _url + " for reading.", _url);
+                    throw tgt::FileException("Could not open file " + _url.getValue() + " for reading.", _url.getValue());
 
                 while (!file->eof()) {
                     std::string line = StringUtils::trim(file->getLine());
@@ -115,7 +116,7 @@ namespace TUMVis {
 
             // all parsing done - lets create the image:
             ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, offset, e);
-            _data.addData("output.image.read", image);
+            _dataContainer.addData("output.image.read", image);
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());

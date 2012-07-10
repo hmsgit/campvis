@@ -29,4 +29,18 @@ namespace TUMVis {
     void AbstractProperty::setInvalidationLevel(const InvalidationLevel& il) {
         _invalidationLevel = il;
     }
+
+    void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
+        tgtAssert(prop != 0, "Shared property must not be 0!");
+        _sharedProperties.insert(prop);
+    }
+
+    void AbstractProperty::removeSharedProperty(AbstractProperty* prop) {
+        tgtAssert(prop != 0, "Shared property must not be 0!");
+        _sharedProperties.erase(prop);
+    }
+
+    const std::set<AbstractProperty*>& AbstractProperty::getSharedProperties() const {
+        return _sharedProperties;
+    }
 }

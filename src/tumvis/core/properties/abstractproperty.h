@@ -5,6 +5,7 @@
 #include "core/tools/invalidationlevel.h"
 #include "core/tools/observer.h"
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -77,11 +78,42 @@ namespace TUMVis {
         void setInvalidationLevel(const InvalidationLevel& il);
 
 
+        /**
+         * Adds the given property \a prop to the set of shared properties.
+         * All shared properties will be changed when this property changes.
+         * Overload in subclasses to make sure that shared properties are of the same type.
+         * \note        Make sure not to build circular sharing or you will encounter endless loops!
+         * \param prop  Property to add.
+         */
+        virtual void addSharedProperty(AbstractProperty* prop);
+
+        /**
+         * Removes the given property \a prop from the set of shared properties.
+         * \param prop  Property to remove.
+         */
+        void removeSharedProperty(AbstractProperty* prop);
+
+        /**
+         * Returns the list of shared properties, which will be changed when this property changes.
+         * \note    Property sharing only works in one direction, i.e. shared properties act as child properties.
+         *          Make sure not to build circular sharing structures or you will encounter endless loops.
+         * \return  _sharedProperties
+         */
+        const std::set<AbstractProperty*>& getSharedProperties() const;
+
+
     protected:
         // DO NOT REMOVE THE CONSTNESS OF _name. PropertyCollection relies on it!
         const std::string _name;                ///< Property name (unchangable on purpose!)
         std::string _title;                     ///< Property title (e.g. used for GUI)
         InvalidationLevel _invalidationLevel;   ///< Invalidation level that this property triggers
+
+        /**
+         * List of shared properties that will be changed when this property changes.
+         * \note    Property sharing only works in one direction, i.e. shared properties act as child properties.
+         *          Make sure not to build circular sharing structures or you will encounter endless loops.
+         */
+        std::set<AbstractProperty*> _sharedProperties;
 
         static const std::string loggerCat_;
     };

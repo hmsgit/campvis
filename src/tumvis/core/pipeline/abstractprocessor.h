@@ -66,7 +66,7 @@ namespace TUMVis {
 
         /**
          * Returns the local DataContainer of this Processor.
-         * \returns Processor::_data
+         * \return _dataContainer
          **/
         const DataContainer& getDataContainer() const;
 
@@ -100,7 +100,7 @@ namespace TUMVis {
 
 
     protected:
-        DataContainer _data;                        ///< DataContainer containing local working set of data for this Processor
+        DataContainer _dataContainer;               ///< DataContainer containing local working set of data for this Processor
         InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
 
         PropertyCollection _properties;             ///< PropertyCollection of this processor
