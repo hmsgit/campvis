@@ -4,6 +4,7 @@
 
 #include "tgt/filesystem.h"
 #include "core/datastructures/imagedatadisk.h"
+#include "core/datastructures/imagedataram.h"
 #include "core/tools/textfileparser.h"
 
 /*
@@ -18,6 +19,8 @@ namespace TUMVis {
         , _url("url", "Image URL", "")
     {
         _properties.addProperty(&_url);
+
+        ImageDataRAMTraits<float, 2>::ImageType* img = new ImageDataRAMTraits<float, 2>::ImageType(2, tgt::svec3(2, 2, 1), 0);
     }
 
     MhdImageReader::~MhdImageReader() {
@@ -57,17 +60,17 @@ namespace TUMVis {
             // element type
             std::string et = tfp.getString("ElementType");
             if (et == "MET_UCHAR")
-                pt = WeaklyTypedPointer::UCHAR;
+                pt = WeaklyTypedPointer::UINT8;
             else if (et == "MET_CHAR")
-                pt = WeaklyTypedPointer::CHAR;
+                pt = WeaklyTypedPointer::INT8;
             else if (et == "MET_USHORT")
-                pt = WeaklyTypedPointer::USHORT;
+                pt = WeaklyTypedPointer::UINT16;
             else if (et == "MET_SHORT")
-                pt = WeaklyTypedPointer::SHORT;
+                pt = WeaklyTypedPointer::INT16;
             else if (et == "MET_UINT")
-                pt = WeaklyTypedPointer::UINT;
+                pt = WeaklyTypedPointer::UINT32;
             else if (et == "MET_INT")
-                pt = WeaklyTypedPointer::INT;
+                pt = WeaklyTypedPointer::INT32;
             else if (et == "MET_FLOAT")
                 pt = WeaklyTypedPointer::FLOAT;
             else if (et == "MET_DOUBLE")

@@ -110,23 +110,23 @@ namespace TUMVis {
             if (_endianess != localEndianess) {
                 // This is not the most beautiful design, but unfortunately swapEndian needs to know the number of bytes at compiletime...
                 switch (_type) {
-                    case WeaklyTypedPointer::UCHAR:
-                    case WeaklyTypedPointer::CHAR:
+                    case WeaklyTypedPointer::UINT8:
+                    case WeaklyTypedPointer::INT8:
                         for (size_t i = 0; i < numElements; ++i)
                             data[i] = EndianHelper::swapEndian(data[i]);
                         break;
 
-                    case WeaklyTypedPointer::USHORT:
-                    case WeaklyTypedPointer::SHORT: {
-                        short* tmp = reinterpret_cast<short*>(data);
+                    case WeaklyTypedPointer::UINT16:
+                    case WeaklyTypedPointer::INT16: {
+                        int16_t* tmp = reinterpret_cast<int16_t*>(data);
                         for (size_t i = 0; i < numElements; ++i)
                             tmp[i] = EndianHelper::swapEndian(tmp[i]);
                         break;
                         }
 
-                    case WeaklyTypedPointer::UINT:
-                    case WeaklyTypedPointer::INT: {
-                        int* tmp = reinterpret_cast<int*>(data);
+                    case WeaklyTypedPointer::UINT32:
+                    case WeaklyTypedPointer::INT32: {
+                        int32_t* tmp = reinterpret_cast<int32_t*>(data);
                         for (size_t i = 0; i < numElements; ++i)
                             tmp[i] = EndianHelper::swapEndian(tmp[i]);
                         break;
@@ -139,9 +139,9 @@ namespace TUMVis {
                         break;
                         }
 
-                    case WeaklyTypedPointer::ULONG:
-                    case WeaklyTypedPointer::LONG: {
-                        long* tmp = reinterpret_cast<long*>(data);
+                    case WeaklyTypedPointer::UINT64:
+                    case WeaklyTypedPointer::INT64: {
+                        int64_t* tmp = reinterpret_cast<int64_t*>(data);
                         for (size_t i = 0; i < numElements; ++i)
                             tmp[i] = EndianHelper::swapEndian(tmp[i]);
                         break;

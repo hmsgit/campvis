@@ -1,8 +1,9 @@
 #include "imagedataram.h"
 
-#include <cstring>
 
 namespace TUMVis {
+
+/*
     const std::string ImageDataRAM::loggerCat_ = "TUMVis.core.datastructures.ImageDataRAM";
 
     ImageDataRAM::ImageDataRAM(size_t dimensionality, const tgt::svec3& size, WeaklyTypedPointer data)
@@ -10,6 +11,8 @@ namespace TUMVis {
         , _data(data)
     {
 
+        Full<int, 2> f;
+        f.foo(tgt::ivec2(1, 2));
     }
 
     ImageDataRAM::~ImageDataRAM() {
@@ -56,5 +59,5 @@ namespace TUMVis {
 
     const WeaklyTypedPointer& ImageDataRAM::getImageData() const {
         return _data;
-    }
+    }*/
 }

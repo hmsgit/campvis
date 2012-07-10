@@ -16,7 +16,7 @@ namespace TUMVis {
     /**
      * Subclass of ImageData offering access to image data stored in binary form on the local harddisk.
      * 
-     * \todo 
+     * \todo    Number of channels
      */
     class ImageDataDisk : public ImageData {
     public:

@@ -2,6 +2,7 @@
 #define WEAKLYTYPEDPOINTER_H__
 
 #include "tgt/assert.h"
+#include "tgt/types.h"
 
 namespace TUMVis {
 
@@ -14,15 +15,15 @@ namespace TUMVis {
          * Base data type.
          **/
         enum PointerType {
-            UCHAR,      ///< unsigned char
-            CHAR,       ///< char
-            USHORT,     ///< unsigned short
-            SHORT,      ///< short
-            UINT,       ///< unsigned int
-            INT,        ///< int
+            UINT8,      ///< unsigned 8 bit integer
+            INT8,       ///< signed 8 bit integer
+            UINT16,     ///< unsigned 16 bit integer
+            INT16,      ///< signed 16 bit integer
+            UINT32,     ///< unsigned 32 bit integer
+            INT32,      ///< signed 32 bit integer
             FLOAT,      ///< float
-            ULONG,      ///< unsigned long
-            LONG,       ///< long
+            UINT64,     ///< unsigned 64 bit integer
+            INT64,      ///< signed 64 bit integer  q   
             DOUBLE      ///< double
         };
 
@@ -36,24 +37,20 @@ namespace TUMVis {
          */
         static size_t numBytes(PointerType pt) {
             switch (pt) {
-                case WeaklyTypedPointer::UCHAR:
-                    return sizeof(unsigned char);
-                case WeaklyTypedPointer::CHAR:
-                    return sizeof(char);
-                case WeaklyTypedPointer::USHORT:
-                    return sizeof(unsigned short);
-                case WeaklyTypedPointer::SHORT:
-                    return sizeof(short);
-                case WeaklyTypedPointer::UINT:
-                    return sizeof(unsigned int);
-                case WeaklyTypedPointer::INT:
-                    return sizeof(int);
+                case WeaklyTypedPointer::UINT8:
+                case WeaklyTypedPointer::INT8:
+                    return 1;
+                case WeaklyTypedPointer::UINT16:
+                case WeaklyTypedPointer::INT16:
+                    return 2;
+                case WeaklyTypedPointer::UINT32:
+                case WeaklyTypedPointer::INT32:
+                    return sizeof(4);
                 case WeaklyTypedPointer::FLOAT:
                     return sizeof(float);
-                case WeaklyTypedPointer::ULONG:
-                    return sizeof(unsigned long);
-                case WeaklyTypedPointer::LONG:
-                    return sizeof(long);
+                case WeaklyTypedPointer::UINT64:
+                case WeaklyTypedPointer::INT64:
+                    return sizeof(8);
                 case WeaklyTypedPointer::DOUBLE:
                     return sizeof(double);
                 default:
@@ -106,33 +103,33 @@ namespace TUMVis {
 // - Template Specialization ----------------------------------------------------------------------
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::UCHAR> {
-        static size_t numBytesLocal() { return sizeof(unsigned char); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::UINT8> {
+        static size_t numBytesLocal() { return 1; };
     };
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::CHAR> {
-        static size_t numBytes() { return sizeof(char); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::INT8> {
+        static size_t numBytes() { return 1; };
     };
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::USHORT> {
-        static size_t numBytes() { return sizeof(unsigned short); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::UINT16> {
+        static size_t numBytes() { return 2; };
     };
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::SHORT> {
-        static size_t numBytes() { return sizeof(short); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::INT16> {
+        static size_t numBytes() { return 2; };
     };
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::UINT> {
-        static size_t numBytes() { return sizeof(unsigned int); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::UINT32> {
+        static size_t numBytes() { return 4; };
     };
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::INT> {
-        static size_t numBytes() { return sizeof(int); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::INT32> {
+        static size_t numBytes() { return 4; };
     };
 
     template<>
@@ -141,13 +138,13 @@ namespace TUMVis {
     };
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::ULONG> {
-        static size_t numBytes() { return sizeof(unsigned long); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::UINT64> {
+        static size_t numBytes() { return 8; };
     };
 
     template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::LONG> {
-        static size_t numBytes() { return sizeof(long); };
+    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::INT64> {
+        static size_t numBytes() { return 8; };
     };
 
     template<>
