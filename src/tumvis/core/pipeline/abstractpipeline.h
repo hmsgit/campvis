@@ -58,7 +58,7 @@ namespace TUMVis {
         tgt::GLCanvas* _canvas;                             ///< Target canvas for rendering
 
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
-        PropertyCollection _properties;                     ///< PropertyCollection of this pipeline
+        PropertyCollection _properties;                     ///< PropertyCollection of this pipeline, put in here all properties you want to be publicly accessible
 
         static const std::string loggerCat_;
     };

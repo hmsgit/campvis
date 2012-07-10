@@ -1,8 +1,15 @@
 #include "abstractpipeline.h"
 
 namespace TUMVis {
-
     const std::string AbstractPipeline::loggerCat_ = "TUMVis.core.datastructures.AbstractPipeline";
+
+    AbstractPipeline::AbstractPipeline(tgt::GLCanvas* canvas /*= 0*/) 
+        : _canvas(canvas)
+    {
+    }
+
+    AbstractPipeline::~AbstractPipeline() {
+    }
 
     void AbstractPipeline::onEvent(tgt::Event* e) {
         // cycle through event handlers, ask each one if it handles the event and if so, execute it.
