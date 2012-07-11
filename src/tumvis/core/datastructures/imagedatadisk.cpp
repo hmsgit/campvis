@@ -39,7 +39,7 @@ namespace TUMVis {
         // open file and prepare for read
         std::ifstream file(_url.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
         if (file.is_open()) {
-            size_t fileSize = file.tellg();
+            size_t fileSize = static_cast<size_t>(file.tellg());
             if (fileSize < numBytes) {
                 LERROR("File is smaller than expected.");
                 return WeaklyTypedPointer(_type, 0);
