@@ -33,9 +33,10 @@ namespace TUMVis {
          */
         ImageDataDisk(
             const std::string& url,
-            size_t dimensionality, 
+            size_t dimensionality,
             const tgt::svec3& size,
-            WeaklyTypedPointer::PointerType type,
+            WeaklyTypedPointer::BaseType type,
+            size_t numChannels,
             size_t offset = 0,
             EndianHelper::Endianness endianness = EndianHelper::LITTLE_ENDIAN,
             const tgt::svec3& stride = tgt::svec3::zero
@@ -74,7 +75,8 @@ namespace TUMVis {
 
         std::string _url;                       ///< path to file with raw data
         size_t _offset;                         ///< offset of first data element in file (in bytes)
-        WeaklyTypedPointer::PointerType _type;  ///< base type of data
+        WeaklyTypedPointer::BaseType _type;     ///< base type of data
+        size_t _numChannels;                    ///< number of channels per element
         EndianHelper::Endianness _endianess;    ///< endianess of data
         
         /**

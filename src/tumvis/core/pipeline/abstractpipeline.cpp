@@ -21,7 +21,13 @@ namespace TUMVis {
     }
 
     void AbstractPipeline::setCanvas(tgt::GLCanvas* canvas) {
+        if (_canvas != 0 && _canvas->getEventHandler() != 0) {
+            _canvas->getEventHandler()->removeListener(this);
+        }
         _canvas = canvas;
+        if (_canvas->getEventHandler() != 0) {
+            _canvas->getEventHandler()->addListenerToFront(this);
+        }
     }
 
     PropertyCollection& AbstractPipeline::getPropertyCollection() {

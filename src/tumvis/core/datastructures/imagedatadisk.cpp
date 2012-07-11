@@ -3,10 +3,12 @@
 namespace TUMVis {
     const std::string ImageDataDisk::loggerCat_ = "TUMVis.core.datastructures.ImageDataDisk";
 
-    ImageDataDisk::ImageDataDisk(const std::string& url, size_t dimensionality, const tgt::svec3& size, WeaklyTypedPointer::PointerType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
+    ImageDataDisk::ImageDataDisk(const std::string& url, size_t dimensionality, const tgt::svec3& size, WeaklyTypedPointer::BaseType type, size_t numChannels, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
         : ImageData(dimensionality, size)
         , _url(url)
         , _offset(offset)
+        , _type(type)
+        , _numChannels(numChannels)
         , _endianess(endianness)
         , _stride(stride)
     {
@@ -25,15 +27,15 @@ namespace TUMVis {
             return clone();
         }
 
-        size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type) * llf.x;
+        size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _numChannels) * llf.x;
         // the stride doesn't change!
         tgt::svec3 newStride = (_stride == tgt::svec3::zero) ? getCanonicStride(_size) : _stride;
-        return new ImageDataDisk(_url, _dimensionality, newSize,_type, newOffset, _endianess, newStride);
+        return new ImageDataDisk(_url, _dimensionality, newSize, _type, _numChannels, newOffset, _endianess, newStride);
     }
 
     TUMVis::WeaklyTypedPointer ImageDataDisk::getImageData() const {
         size_t numElements = tgt::hmul(_size);
-        size_t numBytesPerElement = WeaklyTypedPointer::numBytes(_type);
+        size_t numBytesPerElement = WeaklyTypedPointer::numBytes(_type, _numChannels);
         size_t numBytes = numElements * numBytesPerElement;
 
         // open file and prepare for read
@@ -42,7 +44,7 @@ namespace TUMVis {
             size_t fileSize = static_cast<size_t>(file.tellg());
             if (fileSize < numBytes) {
                 LERROR("File is smaller than expected.");
-                return WeaklyTypedPointer(_type, 0);
+                return WeaklyTypedPointer(_type, _numChannels, 0);
             }
 
             file.seekg(_offset, std::ios::beg);
@@ -162,11 +164,11 @@ namespace TUMVis {
             }
 
 
-            return WeaklyTypedPointer(_type, static_cast<void*>(data));
+            return WeaklyTypedPointer(_type, _numChannels, static_cast<void*>(data));
         }
         else {
             LERROR("Could not open file " << _url << " for reading.");
-            return WeaklyTypedPointer(_type, 0);
+            return WeaklyTypedPointer(_type, _numChannels, 0);
         }
 
     }
@@ -176,6 +178,6 @@ namespace TUMVis {
     }
 
     ImageDataDisk* ImageDataDisk::clone() const {
-        return new ImageDataDisk(_url, _dimensionality, _size, _type, _offset, _endianess, _stride);
+        return new ImageDataDisk(_url, _dimensionality, _size, _type, _numChannels, _offset, _endianess, _stride);
     }
 }

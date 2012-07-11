@@ -34,7 +34,7 @@ namespace TUMVis {
         std::string url;
         size_t dimensionality;
         tgt::svec3 size;
-        WeaklyTypedPointer::PointerType pt;
+        WeaklyTypedPointer::BaseType pt;
         size_t offset = 0;
         EndianHelper::Endianness e = EndianHelper::LITTLE_ENDIAN;
 

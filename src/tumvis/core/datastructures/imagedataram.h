@@ -5,7 +5,6 @@
 #include "core/datastructures/imagedata.h"
 
 #include "core/tools/endianhelper.h"
-#include "core/tools/typetraits.h"
 #include "core/tools/weaklytypedpointer.h"
 
 #include <cstring>
@@ -21,7 +20,7 @@ namespace TUMVis {
      *          encouraged to use ImageDataRAMTraits for a clearer approach and better support 
      *          of the ImageData converters.
      * \sa      ImageDataRAMTraits
-     * \todo    implement padding
+     * \todo    implement padding, add some kind of cool iterators
      * \tparam  T   base class of elements
      */
     template<typename T>
@@ -75,6 +74,12 @@ namespace TUMVis {
         T* _data;               ///< pointer to image data
 
         static const std::string loggerCat_;
+
+    private:
+        // We don't want this data to be copied - clone() must be enough
+        // (read: We are too lazy to implement a correct copy constructor / assignment-operator)
+        ImageDataRAM(const ImageDataRAM<T>& rhs) {};
+        ImageDataRAM<T>& operator=(const ImageDataRAM& rhs) {};
     };
 
 // - Template implementation ----------------------------------------------------------------------
@@ -152,6 +157,7 @@ namespace TUMVis {
      */
     template<typename BASETYPE, size_t NUMCHANNELS>
     struct ImageDataRAMTraits {
+        //typedef ImageDataRAM<BASETYPE> ImageType;
         
         /**
          * Returns the size of the element base type in bytes.
@@ -206,7 +212,7 @@ namespace TUMVis {
      * \tparam  BASETYPE    Base data type
      */
     template<typename BASETYPE>
-    class ImageDataRAMTraits<BASETYPE, 4> {
+    struct ImageDataRAMTraits<BASETYPE, 4> {
         typedef ImageDataRAM< tgt::Vector4<BASETYPE> > ImageType;
     };
 
