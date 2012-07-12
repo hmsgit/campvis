@@ -13,24 +13,12 @@ namespace TUMVis {
 
     }
 
-    void AbstractProcessor::addDataHandle(const std::string& name, const DataHandle* dh) {
-        _dataContainer.addDataHandle(name, dh);
-    }
-
-    const DataContainer& AbstractProcessor::getDataContainer() const {
-        return _dataContainer;
-    }
-
     const InvalidationLevel& AbstractProcessor::getInvalidationLevel() const {
         return _invalidationLevel;
     }
 
-    void AbstractProcessor::applyInvalidationLevel(InvalidationLevel::NamedLevels nl) {
-        _invalidationLevel.setLevel(nl);
-    }
-
-    void AbstractProcessor::onNotify(const PropertyObserverArgs& poa) {
-        _invalidationLevel.setLevel(poa._invalidationLevel);
+    void AbstractProcessor::applyInvalidationLevel(InvalidationLevel il) {
+        _invalidationLevel.setLevel(il);
 
         // If processor is no longer valid, notify observers
         if (! _invalidationLevel.isValid()) {
@@ -38,7 +26,12 @@ namespace TUMVis {
         }
     }
 
+    void AbstractProcessor::onNotify(const PropertyObserverArgs& poa) {
+        applyInvalidationLevel(poa._invalidationLevel);
+    }
+
     PropertyCollection& AbstractProcessor::getPropertyCollection() {
         return _properties;
     }
+
 }

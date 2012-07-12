@@ -33,10 +33,28 @@ namespace TUMVis {
 
     /**
      * Abstract base class for TUMVis Processors.
+     * A processor implements a specific task, which it performs on the DataCollection passed
+     * during process(). Properties provide a transparent layer for adjusting the processor's 
+     * behaviour.
+     * Once a processor has finished it sets it should set its invalidation level to valid. As
+     * soon as one of its properties changes, the processor will be notified and possibliy
+     * change its invalidation level. Observing pipelines will be notified of this and can
+     * and have to decide which part of the pipeline has to be re-evaluated wrt. the processor's
+     * invalidation level.
      * 
      * \sa AbstractPipeline
      */
     class AbstractProcessor : GenericObserver<PropertyObserverArgs>, public GenericObservable<ProcessorObserverArgs> {
+
+    /**
+     * We have to find a trade-off:
+     * On the one hand, we want to follow the information-hiding concept and keep the processor's
+     * properties private. On the other hand pipelines will usually want direct access to them
+     * (e.g. in order to setup data IDs or property sharing) and the properties in the PropertyCollection
+     * are not strongly typed. Hence, we declare AbstractPipeline as our friend.
+     */
+    friend class AbstractPipeline;
+
     public:
 
         /**
@@ -52,23 +70,9 @@ namespace TUMVis {
 
         /**
          * Execute this processor.
+         * \param data      DataContainer to work on.
          **/
-        virtual void process() = 0;
-
-        /**
-         * Adds the given DataHandle \a data, accessible by the key \name, to this DataContainer.
-         * Already existing DataHandles with the same key will be removed from this DataContainer.
-         *
-         * \param   name    Key for accessing the DataHandle within this DataContainer
-         * \param   data    DataHandle to add.
-         **/
-        virtual void addDataHandle(const std::string& name, const DataHandle* dh);
-
-        /**
-         * Returns the local DataContainer of this Processor.
-         * \return _dataContainer
-         **/
-        const DataContainer& getDataContainer() const;
+        virtual void process(DataContainer& data) = 0;
 
         /**
          * Returns the invalidation level of this processor.
@@ -78,7 +82,7 @@ namespace TUMVis {
 
         /**
          * Returns the PropertyCollection of this processor.
-         * \return _properties
+         * \return  _properties
          */
         PropertyCollection& getPropertyCollection();
 
@@ -88,9 +92,8 @@ namespace TUMVis {
          * If \a nl is one of the INVALID_X state, the processor's corresponding flag will be set.
          * \param nl    Invalidation level to apply.
          */
-        void applyInvalidationLevel(InvalidationLevel::NamedLevels nl);
-
-
+        void applyInvalidationLevel(InvalidationLevel il);
+        
         /**
          * Gets called when one of the observed properties changed notifies its observers.
          * \sa GenericObserver::onNotify, AbstractProperty
@@ -100,7 +103,6 @@ namespace TUMVis {
 
 
     protected:
-        DataContainer _dataContainer;               ///< DataContainer containing local working set of data for this Processor
         InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
 
         PropertyCollection _properties;             ///< PropertyCollection of this processor

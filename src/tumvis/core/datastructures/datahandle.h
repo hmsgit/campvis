@@ -23,7 +23,7 @@ namespace TUMVis {
      *          given AbstractData instance. So do not delete it once it has been assigned to a 
      *          DataHandle (respectively DataContainer).
      *
-     * \todo 
+     * \todo    implement locks/mutexes as soon as we have a convenient library for that.
      */
     class DataHandle {
     
@@ -47,6 +47,7 @@ namespace TUMVis {
          * \return  _data;
          */
         AbstractData* getData();
+
 
     private:
         /**

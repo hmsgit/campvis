@@ -18,6 +18,8 @@ namespace TUMVis {
      * also ensures (hopefully) that nobody can do messy things, such as adding the same AbstractData instance
      * twice to a DataContainer (which would really mess up the lifetime management!).
      * 
+     * \todo    We definately want thread-safety here!
+     * 
      * \todo    If the original data changes, the other objects accessing that very DataHandle might want to 
      *          get notified of the change. Hence, some observer pattern might be useful.
      */

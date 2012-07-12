@@ -36,6 +36,7 @@ namespace TUMVis {
      * Abstract base class for TUMVis Property.
      * 
      * \todo    Add PropertyWidgets, add clone()?
+     *          Think about a reasonable locking mechanism and implement that
      */
     class AbstractProperty : public GenericObservable<PropertyObserverArgs> {
     public:

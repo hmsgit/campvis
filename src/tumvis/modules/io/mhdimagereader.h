@@ -8,7 +8,7 @@
 
 namespace TUMVis {
     /**
-     * 
+     * Reads a MHD image file into the pipeline.
      *
      * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
      */
@@ -25,13 +25,16 @@ namespace TUMVis {
         virtual ~MhdImageReader();
 
 
-        virtual void process();
+        /**
+         * Reads the MHD file into an ImageDataDisk representation
+         * \param data  DataContainer to work on
+         */
+        virtual void process(DataContainer& data);
 
     private:
-        void parseHeader();
 
-        // TODO make this a property as soon as the property system exists
-        GenericProperty<std::string> _url;
+        GenericProperty<std::string> _url;              ///< URL for file to read
+        GenericProperty<std::string> _targetImageID;    ///< image ID for read image
 
         static const std::string loggerCat_;
     };

@@ -1,4 +1,5 @@
 #include "tumvispainter.h"
+#include "tgt/assert.h"
 #include "tgt/camera.h"
 #include "tgt/quadric.h"
 
@@ -6,7 +7,9 @@ namespace TUMVis {
     const std::string TumVisPainter::loggerCat_ = "TUMVis.core.TumVisPainter";
 
     TumVisPainter::TumVisPainter(tgt::GLCanvas* canvas)
-        : tgt::Painter(canvas) {
+        : tgt::Painter(canvas)
+    {
+        tgtAssert(getCanvas() != 0, "The given canvas must not be 0!");
     }
 
     void TumVisPainter::paint() {

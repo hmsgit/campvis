@@ -27,7 +27,7 @@ namespace TUMVis {
             INT32,      ///< signed 32 bit integer
             FLOAT,      ///< float
             UINT64,     ///< unsigned 64 bit integer
-            INT64,      ///< signed 64 bit integer  q   
+            INT64,      ///< signed 64 bit integer
             DOUBLE      ///< double
         };
 

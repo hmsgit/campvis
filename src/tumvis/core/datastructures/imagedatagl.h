@@ -4,6 +4,7 @@
 #include "tgt/texture.h"
 #include "tgt/vector.h"
 #include "core/datastructures/imagedata.h"
+#include "core/tools/typetraits.h"
 #include "core/tools/weaklytypedpointer.h"
 
 namespace TUMVis {

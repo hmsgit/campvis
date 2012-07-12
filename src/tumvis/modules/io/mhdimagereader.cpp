@@ -17,20 +17,24 @@ namespace TUMVis {
     MhdImageReader::MhdImageReader() 
         : AbstractProcessor()
         , _url("url", "Image URL", "")
+        , _targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output")
     {
         _properties.addProperty(&_url);
+        _properties.addProperty(&_targetImageID);
 
-        ImageDataRAMTraits<float, 2>::ImageType* img = new ImageDataRAMTraits<float, 2>::ImageType(2, tgt::svec3(2, 2, 1), 0);
+        // just testing some type traits...
+        //ImageDataRAMTraits<float, 2>::ImageType* img = new ImageDataRAMTraits<float, 2>::ImageType(2, tgt::svec3(2, 2, 1), 0);
     }
 
     MhdImageReader::~MhdImageReader() {
 
     }
 
-    void MhdImageReader::process() {
+    void MhdImageReader::process(DataContainer& data) {
         TextFileParser tfp(_url.getValue(), true, "=");
         tfp.parse<TextFileParser::ItemSeparatorLines>();
 
+        // init optional parameters with sane default values
         std::string url;
         size_t dimensionality;
         tgt::svec3 size;
@@ -119,7 +123,7 @@ namespace TUMVis {
 
             // all parsing done - lets create the image:
             ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, offset, e);
-            _dataContainer.addData("output.image.read", image);
+            data.addData(_targetImageID.getValue(), image);
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
