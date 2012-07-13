@@ -219,4 +219,9 @@ namespace TUMVis {
                 return WeaklyTypedPointer::INT8;
         }
     }
+
+    bool WeaklyTypedPointer::operator==(const WeaklyTypedPointer& rhs) const {
+        return (_pointerType == rhs._pointerType) && (_numChannels == rhs._numChannels) && (_pointer == rhs._pointer);
+    }
+
 }

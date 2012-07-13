@@ -74,6 +74,8 @@ namespace TUMVis {
          */
         virtual ~WeaklyTypedPointer();
 
+        bool operator==(const WeaklyTypedPointer& rhs) const;
+
 
         /**
          * Returns the number of bytes occupied by one element of the type of this pointer.
