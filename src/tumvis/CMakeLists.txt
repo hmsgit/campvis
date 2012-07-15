@@ -11,7 +11,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 #
 
 OPTION(TUMVIS_SHARED_LIBS          "Build shared libraries?"                                       ON )
-OPTION(TUMVIS_PRECOMPILED_HEADER   "Use pre-compiled headers?"                                     ON )
+#OPTION(TUMVIS_PRECOMPILED_HEADER   "Use pre-compiled headers?"                                     ON )
 OPTION(TUMVIS_DEBUG                "Activate debug code?"                                          ON )
 OPTION(TUMVIS_BUILD_APPLICATION    "Build TUMVis Application"                                      ON )
 OPTION(TUMVIS_BUILD_CORE           "Build TUMVis Core"                                             ON )
@@ -21,7 +21,7 @@ OPTION(TUMVIS_BUILD_LIB_TGT        "Build TGT Library"                          
 IF(WIN32)
     OPTION(TUMVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON )
     OPTION(TUMVIS_INCREMENTAL_LINKING  "Enable incremental linking in Visual Studio debug builds?" ON )
-    OPTION(TUMVIS_GENERATE_MANIFEST    "Generate manifest in Visual Studio debug builds?"          OFF)
+    OPTION(TUMVIS_GENERATE_MANIFEST    "Generate manifest in Visual Studio debug builds (switch on when encountering errors using incremental linking)?"          OFF)
 ENDIF()
 
 #

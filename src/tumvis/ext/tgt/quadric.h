@@ -1100,7 +1100,7 @@ public:
 
             Quadric::render();
             // for angles, lengths etc. see http://en.wikipedia.org/wiki/Tetrahedron
-            float faceAngle = 70.5288;
+            float faceAngle = 70.5288f;
             double length = size_*sqrt(3.0)/6;
 
             glPushMatrix();

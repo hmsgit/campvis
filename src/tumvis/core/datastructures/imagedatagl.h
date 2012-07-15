@@ -4,7 +4,7 @@
 #include "tgt/texture.h"
 #include "tgt/vector.h"
 #include "core/datastructures/imagedata.h"
-#include "core/tools/typetraits.h"
+#include "core/datastructures/genericimagedatalocal.h"
 #include "core/tools/weaklytypedpointer.h"
 
 namespace TUMVis {
@@ -25,16 +25,16 @@ namespace TUMVis {
         ImageDataGL(size_t dimensionality, const tgt::svec3& size, const WeaklyTypedPointer& wtp);
 
         /**
-         * Creates a new ImageDataGL representation from ImageDataRAM.
+         * Creates a new ImageDataGL representation from GenericImageDataLocal.
          *
          * \param dimensionality    Dimensionality of data
          * \param size              Size of this image (number of elements per dimension)
-         * \param data              Pointer to the ImageDataRAM instance, must not be 0, type has to match the template parameters.
+         * \param data              Pointer to the GenericImageDataLocal instance, must not be 0
          * \tparam  BASETYPE        Base type of image data
          * \tparam  NUMCHANNELS     Number of channels per element
          */
         template<typename BASETYPE, size_t NUMCHANNELS>
-        ImageDataGL(size_t dimensionality, const tgt::svec3& size, typename TypeTraits<BASETYPE, NUMCHANNELS>::ImageRAMType* data);
+        ImageDataGL(size_t dimensionality, const tgt::svec3& size, const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data);
 
         /**
          * Destructor
@@ -64,12 +64,12 @@ namespace TUMVis {
 
         /**
          * Creates the OpenGL texture from the given ImageDataRAM \a data.
-         * \param data              Pointer to the ImageDataRAM instance, must not be 0, type has to match the template parameters.
+         * \param data              Pointer to the GenericImageDataLocal instance, must not be 0
          * \tparam  BASETYPE        Base type of image data
          * \tparam  NUMCHANNELS     Number of channels per element
          */
         template<typename BASETYPE, size_t NUMCHANNELS>
-        void createTexture(typename TypeTraits<BASETYPE, NUMCHANNELS>::ImageRAMType* data);
+        void createTexture(const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data);
 
         tgt::Texture* _texture;             //< OpenGL texture
 
@@ -79,14 +79,14 @@ namespace TUMVis {
 // = Template definition ==========================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    TUMVis::ImageDataGL::ImageDataGL(size_t dimensionality, const tgt::svec3& size, typename TypeTraits<BASETYPE, NUMCHANNELS>::ImageRAMType* imageRAM) 
+    TUMVis::ImageDataGL::ImageDataGL(size_t dimensionality, const tgt::svec3& size, const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data) 
         : ImageData(dimensionality, size)
     {
         createTexture<BASETYPE, NUMCHANNELS>(data);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void TUMVis::ImageDataGL::createTexture(typename TypeTraits<BASETYPE, NUMCHANNELS>::ImageRAMType* data) {
+    void TUMVis::ImageDataGL::createTexture(const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data) {
         tgtAssert(data != 0, "Pointer to image must not be 0!");
 
         _texture = new tgt::Texture(

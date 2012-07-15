@@ -4,7 +4,7 @@ namespace TUMVis {
     const std::string WeaklyTypedPointer::loggerCat_ = "TUMVis.core.tools.WeaklyTypedPointer";
 
     WeaklyTypedPointer::WeaklyTypedPointer(BaseType pt, size_t numChannels, void* ptr)
-        : _pointerType(pt)
+        : _baseType(pt)
         , _numChannels(numChannels)
         , _pointer(ptr)
     {
@@ -40,7 +40,7 @@ namespace TUMVis {
     };
 
     size_t WeaklyTypedPointer::getNumBytesPerElement() const {
-        return WeaklyTypedPointer::numBytes(_pointerType, _numChannels);
+        return WeaklyTypedPointer::numBytes(_baseType, _numChannels);
     }
 
     GLint WeaklyTypedPointer::getGlFormat() const {
@@ -60,7 +60,7 @@ namespace TUMVis {
     }
 
     GLenum WeaklyTypedPointer::getGlDataType() const  {
-        switch (_pointerType) {
+        switch (_baseType) {
             case WeaklyTypedPointer::UINT8:
                 return GL_UNSIGNED_BYTE;
             case WeaklyTypedPointer::INT8:
@@ -88,7 +88,7 @@ namespace TUMVis {
     GLint WeaklyTypedPointer::getGlInternalFormat() const{
         switch (_numChannels) {
             case 1:
-                switch (_pointerType) {
+                switch (_baseType) {
                     case WeaklyTypedPointer::UINT8:
                     case WeaklyTypedPointer::INT8:
                         return GL_ALPHA8;
@@ -112,7 +112,7 @@ namespace TUMVis {
             case 2:
                 return GL_LUMINANCE_ALPHA;
             case 3:
-                switch (_pointerType) {
+                switch (_baseType) {
                     case WeaklyTypedPointer::UINT8:
                     case WeaklyTypedPointer::INT8:
                         return GL_RGB8;
@@ -134,7 +134,7 @@ namespace TUMVis {
                         return GL_BYTE;
                 }
             case 4:
-                switch (_pointerType) {
+                switch (_baseType) {
                     case WeaklyTypedPointer::UINT8:
                     case WeaklyTypedPointer::INT8:
                         return GL_RGBA8;
@@ -221,7 +221,7 @@ namespace TUMVis {
     }
 
     bool WeaklyTypedPointer::operator==(const WeaklyTypedPointer& rhs) const {
-        return (_pointerType == rhs._pointerType) && (_numChannels == rhs._numChannels) && (_pointer == rhs._pointer);
+        return (_baseType == rhs._baseType) && (_numChannels == rhs._numChannels) && (_pointer == rhs._pointer);
     }
 
 }

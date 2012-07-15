@@ -4,7 +4,7 @@
 
 #include "tgt/filesystem.h"
 #include "core/datastructures/imagedatadisk.h"
-#include "core/datastructures/imagedataram.h"
+#include "core/datastructures/genericimagedatalocal.h"
 #include "core/tools/textfileparser.h"
 
 /*
@@ -23,7 +23,9 @@ namespace TUMVis {
         _properties.addProperty(&_targetImageID);
 
         // just testing some type traits...
-        //ImageDataRAMTraits<float, 2>::ImageType* img = new ImageDataRAMTraits<float, 2>::ImageType(2, tgt::svec3(2, 2, 1), 0);
+        tgt::Vector3<int8_t>* v = new tgt::Vector3<int8_t>[6];
+        GenericImageDataLocal<int8_t, 3> data(3, tgt::svec3(1, 2, 3), v);
+        data.clone();
     }
 
     MhdImageReader::~MhdImageReader() {

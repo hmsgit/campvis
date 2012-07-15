@@ -14,7 +14,7 @@
 namespace TUMVis {
 
     /**
-     * Abstract base class for strongly typed (templated) ImageDataRAM
+     * Abstract base class for storing image data in the local memory
      * 
      * \todo    implement padding, add some kind of cool iterators
      */
@@ -43,20 +43,6 @@ namespace TUMVis {
          * \see ImageData::getSubImage
          */
         virtual ImageDataLocal* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
-
-
-        /**
-         * Returns the WeaklyTypedPointer to the image data.
-         * \return  Pointer to the image data.
-         */
-        virtual WeaklyTypedPointer& getImageData() = 0;
-
-        /**
-         * Returns the WeaklyTypedPointer to the image data.
-         * \return  Pointer to the image data.
-         */
-        virtual const WeaklyTypedPointer& getImageData() const = 0;
-
 
         /**
          * Returns the normalized value of the element at the given position and channel.

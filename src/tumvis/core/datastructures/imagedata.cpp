@@ -6,6 +6,7 @@ namespace TUMVis {
     ImageData::ImageData(size_t dimensionality, const tgt::svec3& size) 
         : _dimensionality(dimensionality)
         , _size(size)
+        , _numElements(tgt::hmul(size))
     {
     }
 
@@ -26,5 +27,13 @@ namespace TUMVis {
 
     ImageMappingInformation& ImageData::getMappingInformation() {
         return _mappingInformation;
+    }
+
+    size_t ImageData::getNumElements() const {
+        return _numElements;
+    }
+
+    size_t ImageData::positionToIndex(const tgt::svec3& position) const {
+        return position.x + (position.y * _size.x) + (position.z * _size.x * _size.y);
     }
 }

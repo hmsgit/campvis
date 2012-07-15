@@ -32,14 +32,14 @@ namespace TUMVis {
         };
 
         /**
-         * Returns the number of bytes occupied by one element of the type \a pt.
+         * Returns the number of bytes occupied by one element of the type \a bt.
          * 
          * \note    There is a compiletime version in WeaklyTypedPointerTraits.
          * \sa      WeaklyTypedPointerTraits::numBytes()
-         * \param   pt  Data type to check.
-         * \returns The number of bytes occupied by one element of the type \a pt.
+         * \param   bt  Data type to check.
+         * \returns The number of bytes occupied by one element of the type \a bt.
          */
-        static size_t numBytes(BaseType pt, size_t numChannels);
+        static size_t numBytes(BaseType bt, size_t numChannels);
 
         /**
          * Calculates the number of channels for the given OpenGL format.
@@ -89,7 +89,7 @@ namespace TUMVis {
 
         GLint getGlInternalFormat() const;
 
-        BaseType _pointerType;      ///< Base data type of the pointer
+        BaseType _baseType;         ///< Base data type of the pointer
         size_t _numChannels;        ///< Number of channels, must be in [1, 4]!
         void* _pointer;             ///< Pointer to the data
 
@@ -111,7 +111,7 @@ namespace TUMVis {
          * 
          * \note    There is a runtime version in WeaklyTypedPointer.
          * \sa      WeaklyTypedPointer::numBytes()
-         * \tparam  pt  Data type to check.
+         * \tparam  bt  Data type to check.
          * \returns The number of bytes occupied by one element of the given type.
          */
         static size_t numBytes() { return 0; };
