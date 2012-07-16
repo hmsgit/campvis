@@ -14,7 +14,7 @@ namespace TUMVis {
      */
     class AbstractData {
     public:
-        AbstractData();
+        AbstractData() {};
         virtual ~AbstractData() {};
 
         virtual AbstractData* clone() const = 0;

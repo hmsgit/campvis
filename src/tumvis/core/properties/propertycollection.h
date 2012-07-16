@@ -49,6 +49,18 @@ namespace TUMVis {
          */
         const std::vector<AbstractProperty*>& getProperties() const;
 
+        /**
+         * Calls AbstractProperty::lock() for every registered property.
+         * \sa  AbstractProperty::lock, PropertyCollection::unlockAllProperties
+         */
+        void lockAllProperties();
+
+        /**
+         * Calls AbstractProperty::unlock() for every registered property.
+         * \sa  AbstractProperty::unlock, PropertyCollection::lockAllProperties
+         */
+        virtual void unlockAllProperties();
+
     private:
         /**
          * Searches _properties for a property named \a name.

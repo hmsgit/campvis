@@ -8,6 +8,7 @@ namespace TUMVis {
         : _name(name)
         , _title(title)
         , _invalidationLevel(il)
+        , _inUse(false)
     {
     }
 
@@ -43,4 +44,15 @@ namespace TUMVis {
     const std::set<AbstractProperty*>& AbstractProperty::getSharedProperties() const {
         return _sharedProperties;
     }
+
+    void AbstractProperty::lock() {
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
+        _inUse = true;
+    }
+
+    void AbstractProperty::unlock() {
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
+        _inUse = false;
+    }
+
 }

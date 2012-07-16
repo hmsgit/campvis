@@ -3,6 +3,8 @@
 #include "tgt/qt/qtcanvas.h"
 
 #include "tumvispainter.h"
+#include "modules/pipelines/slicevis.h"
+
 
 using namespace TUMVis;
 
@@ -23,6 +25,9 @@ int main(int argc, char** argv) {
 
     tgt::Camera camera;  
     canvas->setCamera(&camera);  
+
+    //SliceVis sliceVis(canvas);
+    //canvas->setPainter(&sliceVis);  
     TumVisPainter painter(canvas);  
     canvas->setPainter(&painter);  
 

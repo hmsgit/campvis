@@ -6,10 +6,14 @@ MESSAGE(STATUS "Configuring TUMVis Modules")
 
 FILE(GLOB TUMVIS_MODULES_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     io/*.cpp
+    pipelines/*.cpp
+    vis/*.cpp
 )
 
 FILE(GLOB TUMVIS_MODULES_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     io/*.h
+    pipelines/*.h
+    vis/*.h
 )
 
 #SET(TUMVIS_MODULES_SOURCES

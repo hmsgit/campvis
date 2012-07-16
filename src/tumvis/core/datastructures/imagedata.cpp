@@ -4,7 +4,8 @@ namespace TUMVis {
     const std::string ImageData::loggerCat_ = "TUMVis.core.datastructures.ImageData";
 
     ImageData::ImageData(size_t dimensionality, const tgt::svec3& size) 
-        : _dimensionality(dimensionality)
+        : AbstractData()
+        , _dimensionality(dimensionality)
         , _size(size)
         , _numElements(tgt::hmul(size))
     {

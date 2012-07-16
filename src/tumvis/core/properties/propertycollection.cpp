@@ -52,4 +52,16 @@ namespace TUMVis {
         return _properties.end();
     }
 
+    void PropertyCollection::lockAllProperties() {
+        for (std::vector<AbstractProperty*>::iterator it = _properties.begin(); it != _properties.end(); ++it) {
+            (*it)->lock();
+        }
+    }
+
+    void PropertyCollection::unlockAllProperties() {
+        for (std::vector<AbstractProperty*>::iterator it = _properties.begin(); it != _properties.end(); ++it) {
+            (*it)->unlock();
+        }
+    }
+
 }

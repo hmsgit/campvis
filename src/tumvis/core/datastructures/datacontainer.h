@@ -75,12 +75,29 @@ namespace TUMVis {
          */
         const DataHandle* getData(const std::string& name) const;
 
+        /**
+         * Get the DataHandle with the given name from this container and tries to dynamic_cast it to const T*.
+         * If no such DataHandle exists or the dynamic_cast fails, this method returns 0.
+         *
+         * \param   name    Key of the DataHandle to search for
+         * \tparam  T       Target type of data for dynamic_cast.
+         * \return  The stored DataHandle with the given name, casted to const T*, 0 if no such DataHandle exists or conversion failed.
+         */
+        template<typename T>
+        inline const T* getTypedData(const std::string& name) const;
+
     private:
         std::map<std::string, const DataHandle*> _handles;
         mutable tbb::spin_mutex _localMutex;
 
         static const std::string loggerCat_;
     };
+
+    template<typename T>
+    const T* TUMVis::DataContainer::getTypedData(const std::string& name) const {
+        const DataHandle* dh = getData(name);
+        return dynamic_cast<const T*>(dh);
+    }
 
 }
 

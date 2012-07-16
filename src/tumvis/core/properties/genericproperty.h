@@ -62,14 +62,14 @@ namespace TUMVis {
          * the back buffer. The buffers will be swapped on unlocking the property.
          * \sa  GenericProperty::unlock
          */
-        void lock();
+        virtual void lock();
 
         /**
          * Unlocks the property. If the back buffer has changed, the changes will be written to the front
          * buffer and all observers will be notified.
          * \sa  GenericProperty::lock
          */
-        void unlock();
+        virtual void unlock();
 
 
     protected:
@@ -90,9 +90,6 @@ namespace TUMVis {
         
         T _value;                               ///< value of the property
         T _backBuffer;                          ///< back buffer for values when property is in use
-        bool _inUse;                            ///< flag whether property is currently in use and values are written to back buffer
-
-        tbb::spin_mutex _localMutex;            ///< Mutex used when altering local members
 
         static const std::string loggerCat_;
     };
@@ -104,7 +101,6 @@ namespace TUMVis {
         : AbstractProperty(name, title, il)
         , _value(value)
         , _backBuffer(value)
-        , _inUse(false)
     {
     }
 
@@ -131,7 +127,7 @@ namespace TUMVis {
 
     template<typename T>
     void TUMVis::GenericProperty<T>::setValue(const T& value) {
-        tbb::spin_mutex::scoped_lock lock(_intrinsicsMutex);
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
 
         if (_inUse)
             setBackValue(value);
@@ -141,13 +137,13 @@ namespace TUMVis {
 
     template<typename T>
     void TUMVis::GenericProperty<T>::lock() {
-        tbb::spin_mutex::scoped_lock lock(_intrinsicsMutex);
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
         _inUse = true;
     }
 
     template<typename T>
     void TUMVis::GenericProperty<T>::unlock() {
-        tbb::spin_mutex::scoped_lock lock(_intrinsicsMutex);
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
 
         if (_backBuffer != _value)
             setFrontValue(_backBuffer);

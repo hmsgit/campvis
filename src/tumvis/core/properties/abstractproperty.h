@@ -1,6 +1,7 @@
 #ifndef ABSTRACTPROPERTY_H__
 #define ABSTRACTPROPERTY_H__
 
+#include "tbb/include/tbb/spin_mutex.h"
 #include "tgt/logmanager.h"
 #include "core/tools/invalidationlevel.h"
 #include "core/tools/observer.h"
@@ -103,11 +104,27 @@ namespace TUMVis {
         const std::set<AbstractProperty*>& getSharedProperties() const;
 
 
+        /**
+         * Locks the property and marks it as "in use". Overwrite if necessary.
+         * \sa  AbstractProperty::unlock
+         */
+        virtual void lock();
+
+        /**
+         * Unlocks the property and marks it as "not in use". Overwrite if necessary.
+         * \sa  AbstractProperty::lock
+         */
+        virtual void unlock();
+
+
     protected:
         // DO NOT REMOVE THE CONSTNESS OF _name. PropertyCollection relies on it!
         const std::string _name;                ///< Property name (unchangable on purpose!)
         std::string _title;                     ///< Property title (e.g. used for GUI)
         InvalidationLevel _invalidationLevel;   ///< Invalidation level that this property triggers
+
+        bool _inUse;                            ///< flag whether property is currently in use and values are written to back buffer
+        tbb::spin_mutex _localMutex;            ///< Mutex used when altering local members
 
         /**
          * List of shared properties that will be changed when this property changes.
