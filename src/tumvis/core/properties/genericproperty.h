@@ -1,6 +1,7 @@
 #ifndef GENERICPROPERTY_H__
 #define GENERICPROPERTY_H__
 
+#include "tbb/include/tbb/spin_mutex.h"
 #include "tgt/logmanager.h"
 #include "core/properties/abstractproperty.h"
 
@@ -10,7 +11,7 @@ namespace TUMVis {
      * Generic class for value-based properties.
      *
      * \tparam  T   Base type of the property's value.
-     * \todo    Add PropertyWidgets
+     * \todo    Add PropertyWidgets, review use of mutex
      */
     template<typename T>
     class GenericProperty : public AbstractProperty {
@@ -50,13 +51,48 @@ namespace TUMVis {
 
         /**
          * Sets the property value to \a value and notifies all observers.
+         * Depending on the current lock state of the property, the value will either be written to the front or back buffer.
          * \param value     New value for this property.
          */
         void setValue(const T& value);
 
 
+        /**
+         * Locks the property and marks it as "in use". All changes to its value will be written to
+         * the back buffer. The buffers will be swapped on unlocking the property.
+         * \sa  GenericProperty::unlock
+         */
+        void lock();
+
+        /**
+         * Unlocks the property. If the back buffer has changed, the changes will be written to the front
+         * buffer and all observers will be notified.
+         * \sa  GenericProperty::lock
+         */
+        void unlock();
+
+
     protected:
-        T _value;           ///< value of the property
+        /**
+         * Sets the property value to \a value and notifies all observers.
+         * \note    _localMutex has to be acquired before calling!
+         * \param   value   New value for _value.
+         */
+        void setFrontValue(const T& value);
+
+        /**
+         * Sets the property's back buffer value to \a value.
+         * \note    _localMutex has to be acquired before calling!
+         * \param   value   New value for _backBuffer.
+         */
+        void setBackValue(const T& value);
+
+        
+        T _value;                               ///< value of the property
+        T _backBuffer;                          ///< back buffer for values when property is in use
+        bool _inUse;                            ///< flag whether property is currently in use and values are written to back buffer
+
+        tbb::spin_mutex _localMutex;            ///< Mutex used when altering local members
 
         static const std::string loggerCat_;
     };
@@ -67,6 +103,8 @@ namespace TUMVis {
     TUMVis::GenericProperty<T>::GenericProperty(const std::string& name, const std::string& title, const T& value, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/) 
         : AbstractProperty(name, title, il)
         , _value(value)
+        , _backBuffer(value)
+        , _inUse(false)
     {
     }
 
@@ -93,6 +131,31 @@ namespace TUMVis {
 
     template<typename T>
     void TUMVis::GenericProperty<T>::setValue(const T& value) {
+        tbb::spin_mutex::scoped_lock lock(_intrinsicsMutex);
+
+        if (_inUse)
+            setBackValue(value);
+        else
+            setFrontValue(value);
+    }
+
+    template<typename T>
+    void TUMVis::GenericProperty<T>::lock() {
+        tbb::spin_mutex::scoped_lock lock(_intrinsicsMutex);
+        _inUse = true;
+    }
+
+    template<typename T>
+    void TUMVis::GenericProperty<T>::unlock() {
+        tbb::spin_mutex::scoped_lock lock(_intrinsicsMutex);
+
+        if (_backBuffer != _value)
+            setFrontValue(_backBuffer);
+        _inUse = false;
+    }
+
+    template<typename T>
+    void TUMVis::GenericProperty<T>::setFrontValue(const T& value) {
         _value = value;
         // TODO:    think about the correct/reasonable order of observer notification
         //          thread-safety might play a role thereby...
@@ -103,6 +166,11 @@ namespace TUMVis {
             child->setValue(value);
         }
         notifyObservers(PropertyObserverArgs(this, _invalidationLevel));
+    }
+
+    template<typename T>
+    void TUMVis::GenericProperty<T>::setBackValue(const T& value) {
+        _backBuffer = value;
     }
 
     template<typename T>

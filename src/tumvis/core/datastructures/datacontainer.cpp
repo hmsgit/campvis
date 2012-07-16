@@ -17,20 +17,24 @@ namespace TUMVis {
 
     const DataHandle* DataContainer::addData(const std::string& name, AbstractData* data) {
         DataHandle* dh = new DataHandle(this, data);
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
         _handles.insert(std::make_pair(name, dh));
         return dh;
     }
 
     void DataContainer::addDataHandle(const std::string& name, const DataHandle* dh) {
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
         _handles.insert(std::make_pair(name, dh));
         DataHandle::addOwner(dh, this);
     }
 
     bool DataContainer::hasData(const std::string& name) const {
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
         return (_handles.find(name) != _handles.end());
     }
 
     const DataHandle* DataContainer::getData(const std::string& name) const {
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
         std::map<std::string, const DataHandle*>::const_iterator it = _handles.find(name);
         if (it == _handles.end())
             return 0;

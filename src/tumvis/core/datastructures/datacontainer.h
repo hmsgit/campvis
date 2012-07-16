@@ -1,6 +1,7 @@
 #ifndef DATACONTAINER_H__
 #define DATACONTAINER_H__
 
+#include "tbb/include/tbb/spin_mutex.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datahandle.h"
 
@@ -15,8 +16,9 @@ namespace TUMVis {
      * as soon as an AbstractData instance is added to a DataContainer via DataContainer::addData(), its 
      * lifetime is managed by the wrapping DataHandle instance.
      * Because the DataHandles are stored as const handles, the underlying data cannot be changed anymore. This
-     * also ensures (hopefully) that nobody can do messy things, such as adding the same AbstractData instance
-     * twice to a DataContainer (which would really mess up the lifetime management!).
+     * also ensures (hopefully) that nobody can do messy things, such as changing the data while some other 
+     * thread is reading it or adding the same AbstractData instance twice to a DataContainer (which would 
+     * really mess up the lifetime management!).
      * 
      * \todo    We definately want thread-safety here!
      * 
@@ -75,6 +77,7 @@ namespace TUMVis {
 
     private:
         std::map<std::string, const DataHandle*> _handles;
+        mutable tbb::spin_mutex _localMutex;
 
         static const std::string loggerCat_;
     };

@@ -1,6 +1,7 @@
 #ifndef datahandle_h__
 #define datahandle_h__
 
+#include "tbb/include/tbb/spin_mutex.h"
 #include "tgt/logmanager.h"
 #include "core/datastructures/abstractdata.h"
 
@@ -93,8 +94,9 @@ namespace TUMVis {
         static void removeOwner(const DataHandle* handle, const DataContainer* owner);
 
 
-        AbstractData* _data;                                ///< managed data
+        AbstractData* const _data;                          ///< managed data
         mutable std::set<const DataContainer*> _owners;     ///< set of owners of this DataHandle
+        mutable tbb::spin_mutex _localMutex;                ///< Mutex used when altering local members
 
         static const std::string loggerCat_;
     };
