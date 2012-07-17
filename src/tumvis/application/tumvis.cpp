@@ -1,4 +1,6 @@
 #include "tgt/camera.h"
+#include "tgt/exception.h"
+#include "tgt/shadermanager.h"
 #include "tgt/qt/qtapplication.h"
 #include "tgt/qt/qtcanvas.h"
 
@@ -18,22 +20,40 @@ using namespace TUMVis;
 int main(int argc, char** argv) {  
     tgt::QtApplication* app = new tgt::QtApplication(argc, argv);
     tgt::QtCanvas* canvas = new tgt::QtCanvas("TUMVis");
+    SliceVis* sliceVis = 0;
 
     app->addCanvas(canvas);  
     app->init();
-    
+
+    if (argc > 0) {
+        // ugly hack
+        std::string programPath(argv[0]);
+        programPath = tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(programPath)));
+        ShdrMgr.addPath(programPath);
+        ShdrMgr.addPath(programPath + "/core/glsl");
+    }
 
     tgt::Camera camera;  
     canvas->setCamera(&camera);  
 
-    //SliceVis sliceVis(canvas);
-    //canvas->setPainter(&sliceVis);  
-    TumVisPainter painter(canvas);  
-    canvas->setPainter(&painter);  
+    try {
+        sliceVis = new SliceVis(canvas);
+        canvas->setPainter(sliceVis);  
+        //     TumVisPainter painter(canvas);  
+        //     canvas->setPainter(&painter);  
 
-    app->run();  
+    }
+    catch (tgt::Exception& e) {
+        LERRORC("main.cpp", "Encountered tgt::Exception: " << e.what());
+    }
+    catch (std::exception& e) {
+        LERRORC("main.cpp", "Encountered std::exception: " << e.what());
+    }
 
-    delete canvas;  
+    app->run();
+
+    delete sliceVis;
+    delete canvas;
     delete app;  
 
     return 0;  

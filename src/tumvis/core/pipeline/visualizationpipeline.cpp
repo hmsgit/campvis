@@ -79,6 +79,7 @@ namespace TUMVis {
             // TODO: render some nifty error texture
             //       so long, we do some dummy rendering
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);  
+            getCamera()->setPosition(tgt::vec3(0.f,0.f,2.f)); 
             getCamera()->look();  
             glColor3f(1.f, 0.f, 0.f);  
             tgt::Sphere sphere(.5f, 64, 32);  

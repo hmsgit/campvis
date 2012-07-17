@@ -127,8 +127,8 @@ namespace TUMVis {
     void ImageDataRenderTarget::bind(tgt::Shader* shader, GLint colorTexUnit /*= GL_TEXTURE0*/, GLint depthTexUnit /*= GL_TEXTURE1*/, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
         bindColorTexture(colorTexUnit);
         bindDepthTexture(depthTexUnit);
-        shader->setUniform(colorTexUniform, 0);
-        shader->setUniform(depthTexUniform, 1);
+        shader->setUniform(colorTexUniform, colorTexUnit - GL_TEXTURE0);
+        shader->setUniform(depthTexUniform, depthTexUnit - GL_TEXTURE0);
         shader->setUniform(textureParametersUniform + "._size", tgt::vec2(_size.xy()));
         shader->setUniform(textureParametersUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
     }
