@@ -6,7 +6,6 @@ namespace TUMVis {
 
 
     AbstractProcessor::AbstractProcessor() {
-
     }
 
     AbstractProcessor::~AbstractProcessor() {
@@ -32,6 +31,10 @@ namespace TUMVis {
 
     PropertyCollection& AbstractProcessor::getPropertyCollection() {
         return _properties;
+    }
+
+    void AbstractProcessor::init() {
+
     }
 
 }

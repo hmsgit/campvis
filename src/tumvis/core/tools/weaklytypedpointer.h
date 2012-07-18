@@ -25,21 +25,18 @@ namespace TUMVis {
             INT16,      ///< signed 16 bit integer
             UINT32,     ///< unsigned 32 bit integer
             INT32,      ///< signed 32 bit integer
-            FLOAT,      ///< float
-            UINT64,     ///< unsigned 64 bit integer
-            INT64,      ///< signed 64 bit integer
-            DOUBLE      ///< double
+            FLOAT      ///< float
         };
 
         /**
-         * Returns the number of bytes occupied by one element of the type \a bt.
+         * Returns the number of bytes occupied by one element of the type \a bt with \a numChannels channels.
          * 
          * \note    There is a compiletime version in WeaklyTypedPointerTraits.
          * \sa      WeaklyTypedPointerTraits::numBytes()
          * \param   bt  Data type to check.
          * \returns The number of bytes occupied by one element of the type \a bt.
          */
-        static size_t numBytes(BaseType bt, size_t numChannels);
+        static size_t numBytes(BaseType bt, size_t numChannels = 1);
 
         /**
          * Calculates the number of channels for the given OpenGL format.
@@ -153,22 +150,6 @@ namespace TUMVis {
     struct WeaklyTypedPointerTraits<WeaklyTypedPointer::FLOAT> {
         static size_t numBytes() { return sizeof(float); };
     };
-
-    template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::UINT64> {
-        static size_t numBytes() { return 8; };
-    };
-
-    template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::INT64> {
-        static size_t numBytes() { return 8; };
-    };
-
-    template<>
-    struct WeaklyTypedPointerTraits<WeaklyTypedPointer::DOUBLE> {
-        static size_t numBytes() { return sizeof(double); };
-    };
-
 
 }
 

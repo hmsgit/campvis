@@ -1,5 +1,6 @@
 #include "visualizationpipeline.h"
 #include "tgt/camera.h"
+#include "tgt/quadrenderer.h"
 #include "tgt/quadric.h"
 #include "core/datastructures/imagedatarendertarget.h"
 
@@ -8,10 +9,11 @@ namespace TUMVis {
 
     VisualizationPipeline::VisualizationPipeline(tgt::GLCanvas* canvas /*= 0*/) 
         : AbstractPipeline()
-        , _canvas(canvas)
+        , _canvas(0)
         , _canvasSize("canvasSize", "Canvas Size", tgt::ivec2(128, 128))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget")
     {
+        setCanvas(canvas);
     }
 
     VisualizationPipeline::~VisualizationPipeline() {
@@ -24,6 +26,10 @@ namespace TUMVis {
                 (*it)->execute(e);
             }
         }
+
+        if (e->isAccepted()) {
+            EventListener::onEvent(e);
+        }
     }
 
     void VisualizationPipeline::setCanvas(tgt::GLCanvas* canvas) {
@@ -31,6 +37,7 @@ namespace TUMVis {
             _canvas->getEventHandler()->removeListener(this);
         }
         _canvas = canvas;
+        _canvasSize.setValue(_canvas->getSize());
         if (_canvas->getEventHandler() != 0) {
             _canvas->getEventHandler()->addListenerToFront(this);
         }
@@ -43,11 +50,18 @@ namespace TUMVis {
     void VisualizationPipeline::init() {
         AbstractPipeline::init();
 
-        // TODO:    Remove hardcoded paths, and use ShdrMgr.addPath() at some central location
-        _copyShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "", false);
+        try {
+            // TODO:    Remove hardcoded paths, and use ShdrMgr.addPath() at some central location
+            _copyShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "", false);
+        }
+        catch (tgt::Exception& e) {
+            LERRORC("main.cpp", "Encountered tgt::Exception: " << e.what());
+        }
     }
 
     void VisualizationPipeline::paint() {
+        execute();
+
         if (_canvas == 0)
             return;
 
@@ -67,11 +81,12 @@ namespace TUMVis {
             _copyShader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_canvasSize.getValue()));
 
             // bind input textures
-            image->bind(_copyShader);
+            tgt::TextureUnit colorUnit, depthUnit;
+            image->bind(_copyShader, colorUnit, depthUnit);
             LGL_ERROR;
 
             // execute the shader
-            //renderQuad();
+            tgt::QuadRenderer::renderQuad();
             _copyShader->deactivate();
             LGL_ERROR;
         }
@@ -112,6 +127,10 @@ namespace TUMVis {
             // this should be enough here: Changing the property issues a notification of the 
             // owner (i.e. this pipeline), who is then up to decide how to proceed.
         }
+    }
+
+    const tgt::ivec2& VisualizationPipeline::getCanvasSize() const {
+        return _canvasSize.getValue();
     }
 
 }

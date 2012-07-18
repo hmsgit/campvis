@@ -43,6 +43,9 @@ namespace TUMVis {
             case GL_RGBA:
                 _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
                 break;
+            case GL_RGBA8:
+                _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                break;
             case GL_RGBA16:
                 _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
                 break;
@@ -110,8 +113,8 @@ namespace TUMVis {
         _colorTexture->bind();
     }
 
-    void ImageDataRenderTarget::bindColorTexture(GLint texUnit) const {
-        glActiveTexture(texUnit);
+    void ImageDataRenderTarget::bindColorTexture(const tgt::TextureUnit& texUnit) const {
+        texUnit.activate();
         _colorTexture->bind();
     }
 
@@ -119,16 +122,16 @@ namespace TUMVis {
         _depthTexture->bind();
     }
 
-    void ImageDataRenderTarget::bindDepthTexture(GLint texUnit) const {
-        glActiveTexture(texUnit);
+    void ImageDataRenderTarget::bindDepthTexture(const tgt::TextureUnit& texUnit) const {
+        texUnit.activate();
         _depthTexture->bind();
     }
 
-    void ImageDataRenderTarget::bind(tgt::Shader* shader, GLint colorTexUnit /*= GL_TEXTURE0*/, GLint depthTexUnit /*= GL_TEXTURE1*/, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
+    void ImageDataRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const tgt::TextureUnit& depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
         bindColorTexture(colorTexUnit);
         bindDepthTexture(depthTexUnit);
-        shader->setUniform(colorTexUniform, colorTexUnit - GL_TEXTURE0);
-        shader->setUniform(depthTexUniform, depthTexUnit - GL_TEXTURE0);
+        shader->setUniform(colorTexUniform, colorTexUnit.getUnitNumber());
+        shader->setUniform(depthTexUniform, depthTexUnit.getUnitNumber());
         shader->setUniform(textureParametersUniform + "._size", tgt::vec2(_size.xy()));
         shader->setUniform(textureParametersUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
     }

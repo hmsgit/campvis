@@ -28,11 +28,6 @@ namespace TUMVis {
                     return 4 * numChannels;
                 case WeaklyTypedPointer::FLOAT:
                     return sizeof(float) * numChannels;
-                case WeaklyTypedPointer::UINT64:
-                case WeaklyTypedPointer::INT64:
-                    return 8 * numChannels;
-                case WeaklyTypedPointer::DOUBLE:
-                    return sizeof(double) * numChannels;
                 default:
                     tgtAssert(false, "Should not reach this - called WeaklyTypedPointer::numBytes() with wrong argument!");
                     return 1;
@@ -75,11 +70,6 @@ namespace TUMVis {
                 return GL_INT;
             case WeaklyTypedPointer::FLOAT:
                 return GL_FLOAT;
-            case WeaklyTypedPointer::UINT64:
-            case WeaklyTypedPointer::INT64:
-            case WeaklyTypedPointer::DOUBLE:
-                tgtAssert(false, "Base data type unsupported by OpenGL!");
-                return GL_BYTE;
             default:
                 tgtAssert(false, "Should not reach this - wrong base data type!");
                 return GL_BYTE;
@@ -100,11 +90,6 @@ namespace TUMVis {
                         return GL_ALPHA;
                     case WeaklyTypedPointer::FLOAT:
                         return GL_ALPHA32F_ARB;
-                    case WeaklyTypedPointer::UINT64:
-                    case WeaklyTypedPointer::INT64:
-                    case WeaklyTypedPointer::DOUBLE:
-                        tgtAssert(false, "Base data type unsupported by OpenGL!");
-                        return GL_BYTE;
                     default:
                         tgtAssert(false, "Should not reach this - wrong base data type!");
                         return GL_BYTE;
@@ -124,11 +109,6 @@ namespace TUMVis {
                         return GL_RGB;
                     case WeaklyTypedPointer::FLOAT:
                         return GL_RGB32F_ARB;
-                    case WeaklyTypedPointer::UINT64:
-                    case WeaklyTypedPointer::INT64:
-                    case WeaklyTypedPointer::DOUBLE:
-                        tgtAssert(false, "Base data type unsupported by OpenGL!");
-                        return GL_BYTE;
                     default:
                         tgtAssert(false, "Should not reach this - wrong base data type!");
                         return GL_BYTE;
@@ -146,11 +126,6 @@ namespace TUMVis {
                         return GL_RGBA;
                     case WeaklyTypedPointer::FLOAT:
                         return GL_RGBA32F_ARB;
-                    case WeaklyTypedPointer::UINT64:
-                    case WeaklyTypedPointer::INT64:
-                    case WeaklyTypedPointer::DOUBLE:
-                        tgtAssert(false, "Base data type unsupported by OpenGL!");
-                        return GL_BYTE;
                     default:
                         tgtAssert(false, "Should not reach this - wrong base data type!");
                         return GL_BYTE;

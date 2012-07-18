@@ -1,4 +1,5 @@
 #include "imagedatadisk.h"
+#include "tgt/filesystem.h"
 
 namespace TUMVis {
     const std::string ImageDataDisk::loggerCat_ = "TUMVis.core.datastructures.ImageDataDisk";
@@ -15,7 +16,6 @@ namespace TUMVis {
     }
 
     ImageDataDisk::~ImageDataDisk() {
-
     }
 
     ImageDataDisk* ImageDataDisk::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
@@ -141,21 +141,6 @@ namespace TUMVis {
                         break;
                         }
 
-                    case WeaklyTypedPointer::UINT64:
-                    case WeaklyTypedPointer::INT64: {
-                        int64_t* tmp = reinterpret_cast<int64_t*>(data);
-                        for (size_t i = 0; i < numElements; ++i)
-                            tmp[i] = EndianHelper::swapEndian(tmp[i]);
-                        break;
-                        }
-
-                    case WeaklyTypedPointer::DOUBLE: {
-                        double* tmp = reinterpret_cast<double*>(data);
-                        for (size_t i = 0; i < numElements; ++i)
-                            tmp[i] = EndianHelper::swapEndian(tmp[i]);
-                        break;
-                        }
-
                     default:
                         tgtAssert(false, "Should not reach this!");
                         LERROR("Tried to swap endianess with unsupported number of bytes per element (" << numBytesPerElement << ")");
@@ -180,4 +165,13 @@ namespace TUMVis {
     ImageDataDisk* ImageDataDisk::clone() const {
         return new ImageDataDisk(_url, _dimensionality, _size, _type, _numChannels, _offset, _endianess, _stride);
     }
+
+    WeaklyTypedPointer::BaseType ImageDataDisk::getBaseType() const {
+        return _type;
+    }
+
+    size_t ImageDataDisk::getNumChannels() const {
+        return _numChannels;
+    }
+
 }

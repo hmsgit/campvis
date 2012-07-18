@@ -1,5 +1,6 @@
 #include "datahandle.h"
 #include "tgt/assert.h"
+#include "tgt/logmanager.h"
 
 namespace TUMVis {
     const std::string DataHandle::loggerCat_ = "TUMVis.core.datastructures.DataHandle";
@@ -8,10 +9,12 @@ namespace TUMVis {
     DataHandle::DataHandle(const DataContainer* owner, AbstractData* data) 
         : _data(data)
     {
+        LDEBUG("DataHandle()");
         addOwner(this, owner);
     }
 
     DataHandle::~DataHandle() {
+        LDEBUG("~DataHandle()");
         delete _data;
     }
 
@@ -25,8 +28,10 @@ namespace TUMVis {
     void DataHandle::removeOwner(const DataHandle* handle, const DataContainer* owner) {
         tgtAssert(handle != 0, "Handle must not be 0!");
         tgtAssert(owner != 0, "Owning DataContainer must not be 0!");
-        tbb::spin_mutex::scoped_lock lock(handle->_localMutex);
-        handle->_owners.erase(owner);
+        {
+            tbb::spin_mutex::scoped_lock lock(handle->_localMutex);
+            handle->_owners.erase(owner);
+        }
         if (handle->_owners.empty()) {
             delete handle;
         }

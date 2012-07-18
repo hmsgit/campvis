@@ -31,10 +31,10 @@ namespace TUMVis {
          */
         virtual void process(DataContainer& data);
 
-    private:
-
         GenericProperty<std::string> _url;              ///< URL for file to read
         GenericProperty<std::string> _targetImageID;    ///< image ID for read image
+
+    protected:
 
         static const std::string loggerCat_;
     };

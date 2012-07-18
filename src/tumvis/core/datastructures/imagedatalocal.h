@@ -44,6 +44,8 @@ namespace TUMVis {
          */
         virtual ImageDataLocal* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
+        virtual const WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
+
         /**
          * Returns the normalized value of the element at the given position and channel.
          *  - for \em unsigned integer types, the value range is mapped linearly to [0.0;1.0]

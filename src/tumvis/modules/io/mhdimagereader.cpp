@@ -12,7 +12,7 @@
  */
 
 namespace TUMVis {
-    const std::string AbstractProcessor::loggerCat_ = "TUMVis.modules.io.MhdImageReader";
+    const std::string MhdImageReader::loggerCat_ = "TUMVis.modules.io.MhdImageReader";
 
     MhdImageReader::MhdImageReader() 
         : AbstractProcessor()
@@ -33,19 +33,19 @@ namespace TUMVis {
     }
 
     void MhdImageReader::process(DataContainer& data) {
-        TextFileParser tfp(_url.getValue(), true, "=");
-        tfp.parse<TextFileParser::ItemSeparatorLines>();
-
-        // init optional parameters with sane default values
-        std::string url;
-        size_t dimensionality;
-        tgt::svec3 size;
-        WeaklyTypedPointer::BaseType pt;
-        size_t offset = 0;
-        EndianHelper::Endianness e = EndianHelper::LITTLE_ENDIAN;
-
-        // start parsing
         try {
+            // start parsing
+            TextFileParser tfp(_url.getValue(), true, "=");
+            tfp.parse<TextFileParser::ItemSeparatorLines>();
+
+            // init optional parameters with sane default values
+            std::string url;
+            size_t dimensionality;
+            tgt::svec3 size;
+            WeaklyTypedPointer::BaseType pt;
+            size_t offset = 0;
+            EndianHelper::Endianness e = EndianHelper::LITTLE_ENDIAN;
+
             // image type
             if (tfp.getString("ObjectType") != "Image") {
                 LERROR("Error while parsing MHD header: ObjectType = Image expected");
@@ -79,8 +79,6 @@ namespace TUMVis {
                 pt = WeaklyTypedPointer::INT32;
             else if (et == "MET_FLOAT")
                 pt = WeaklyTypedPointer::FLOAT;
-            else if (et == "MET_DOUBLE")
-                pt = WeaklyTypedPointer::DOUBLE;
             else {
                 LERROR("Error while parsing MHD header: Unsupported element type: " << et);
                 return;
@@ -100,7 +98,7 @@ namespace TUMVis {
 
 
             // get raw image location:
-            url = tfp.getString("ElementDataFile");
+            url = StringUtils::trim(tfp.getString("ElementDataFile"));
             if (url == "LOCAL") {
                 url = _url.getValue();
                 // find beginning of local data:
@@ -121,10 +119,14 @@ namespace TUMVis {
                 LERROR("Error while loading MHD file: Image list currently not supported.");
                 return;
             }
+            else {
+                url = tgt::FileSystem::cleanupPath(tgt::FileSystem::dirName(_url.getValue()) + "/" + url);
+            } 
+
 
 
             // all parsing done - lets create the image:
-            ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, offset, e);
+            ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, 1, offset, e);
             data.addData(_targetImageID.getValue(), image);
         }
         catch (tgt::Exception& e) {

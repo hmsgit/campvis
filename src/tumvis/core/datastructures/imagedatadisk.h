@@ -65,6 +65,19 @@ namespace TUMVis {
          */
         WeaklyTypedPointer getImageData() const;
 
+
+        /**
+         * Returns the base type of the data
+         * \return _type
+         */
+        WeaklyTypedPointer::BaseType getBaseType() const;
+
+        /**
+         * Returns the number of channels per element
+         * \return _numChannels
+         */
+        size_t getNumChannels() const;
+
     private:
         /**
          * Calculates the canonical stride for the given image size.

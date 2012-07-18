@@ -3,6 +3,7 @@
 
 #include "tgt/framebufferobject.h"
 #include "tgt/texture.h"
+#include "tgt/textureunit.h"
 #include "tgt/vector.h"
 #include "core/datastructures/imagedata.h"
 
@@ -73,18 +74,18 @@ namespace TUMVis {
          * Activates the texture unit \a texUnit and binds the color texture.
          * \param   texUnit     Texture unit to activate
          */
-        void bindColorTexture(GLint texUnit) const;
+        void bindColorTexture(const tgt::TextureUnit& texUnit) const;
 
         /**
          * Activates the texture unit \a texUnit and binds the depth texture.
          * \param   texUnit     Texture unit to activate
          */
-        void bindDepthTexture(GLint texUnit) const;
+        void bindDepthTexture(const tgt::TextureUnit& texUnit) const;
 
         void bind(
             tgt::Shader* shader,
-            GLint colorTexUnit = GL_TEXTURE0, 
-            GLint depthTexUnit = GL_TEXTURE1, 
+            const tgt::TextureUnit& colorTexUnit, 
+            const tgt::TextureUnit& depthTexUnit, 
             const std::string& colorTexUniform = "_colorTexture",
             const std::string& depthTexUniform = "_depthTexture",
             const std::string& textureParametersUniform = "_textureParameters") const;

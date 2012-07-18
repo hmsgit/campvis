@@ -96,7 +96,9 @@ namespace TUMVis {
     template<typename T>
     const T* TUMVis::DataContainer::getTypedData(const std::string& name) const {
         const DataHandle* dh = getData(name);
-        return dynamic_cast<const T*>(dh);
+        if (dh != 0)
+            return dynamic_cast<const T*>(dh->getData());
+        return 0;
     }
 
 }

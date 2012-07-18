@@ -1,7 +1,7 @@
 #ifndef STRINGUTILS_H__
 #define STRINGUTILS_H__
 
-#include <exception>
+#include "tgt/exception.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -70,7 +70,7 @@ namespace TUMVis {
          * \param whitespace    Set of whitespace characters which shall be removed during trimming.
          * \return  Vector of the split substrings.
          */
-        static std::vector<std::string> splitStringsafe(const std::string& str, const std::string& delimiter, char quotes = '"', const std::string& whitespace = " \t");
+        static std::vector<std::string> splitStringsafe(const std::string& str, const std::string& delimiter, char quotes = '"', const std::string& whitespace = " \t\n\r\0\x0B");
 
         /**
          * Trims the string \a str.
@@ -80,7 +80,7 @@ namespace TUMVis {
          * \param whitespace    Set of whitespace characters which shall be removed at the beginning and the end.
          * \return  The original string without leading and trailing whitespaces.
          */
-        static std::string trim(const std::string& str, const std::string& whitespace = " \t");
+        static std::string trim(const std::string& str, const std::string& whitespace = " \t\n\r\0\x0B");
 
         /**
          * Converts the value \a value to a string.
@@ -94,10 +94,10 @@ namespace TUMVis {
          * Converts the string \a str to its original value.
          * \param str   The string to convert
          * \return  The back-converted value of \a str, type must be compatible with std::stringstream.
-         * \throw   std::exception on conversion failure
+         * \throw   tgt::Exception on conversion failure
          */
         template<class T>
-        static T fromString(const std::string& str) throw (std::exception);
+        static T fromString(const std::string& str) throw (tgt::Exception);
 
         /**
          * Joins the substrings in \a tokens together using \a delimiter in between.
@@ -112,24 +112,24 @@ namespace TUMVis {
 // - Template definition --------------------------------------------------------------------------
 
     template<class T>
-    std::string toString(const T& value) {
+    std::string StringUtils::toString(const T& value) {
         std::ostringstream stream;
         stream << value;
         return stream.str();
     }
 
     template<class T>
-    T fromString(const std::string& str) throw (std::exception) {
+    T StringUtils::fromString(const std::string& str) throw (tgt::Exception) {
         T toReturn;
         std::istringstream stream;
         stream.str(str);
         if (!(stream >> toReturn))
-            throw std::exception("Failed to convert string '" + str + "'");
+            throw tgt::Exception("Failed to convert string '" + str + "'");
         return toReturn;
     }
 
     template<typename T>
-    std::string join(const std::vector<T>& tokens, const std::string& delimiter) {
+    std::string StringUtils::join(const std::vector<T>& tokens, const std::string& delimiter) {
         if (tokens.empty())
             return "";
         std::stringstream s;

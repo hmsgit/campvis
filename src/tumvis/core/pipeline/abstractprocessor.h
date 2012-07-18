@@ -44,7 +44,7 @@ namespace TUMVis {
      * 
      * \sa AbstractPipeline
      */
-    class AbstractProcessor : GenericObserver<PropertyObserverArgs>, public GenericObservable<ProcessorObserverArgs> {
+    class AbstractProcessor : public GenericObserver<PropertyObserverArgs>, public GenericObservable<ProcessorObserverArgs> {
 
     /**
      * We have to find a trade-off:
@@ -67,6 +67,12 @@ namespace TUMVis {
          **/
         virtual ~AbstractProcessor();
 
+
+        /**
+         * Initializes the OpenGL context of the processor.
+         * \note    When overwriting this method, make sure to call the base class version first.
+         */
+        virtual void init();
 
         /**
          * Execute this processor.

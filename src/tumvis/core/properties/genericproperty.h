@@ -47,7 +47,7 @@ namespace TUMVis {
          * Returns the current value of this property.
          * \return _value
          */
-        const T getValue() const;
+        const T& getValue() const;
 
         /**
          * Sets the property value to \a value and notifies all observers.
@@ -113,15 +113,16 @@ namespace TUMVis {
     void TUMVis::GenericProperty<T>::addSharedProperty(AbstractProperty* prop) {
         // make type check first, then call base method.
         tgtAssert(prop != 0, "Shared property must not be 0!");
-        if (dynamic_cast< GenericProperty<T>* >(prop) == 0) {
-            tgtAssert(false, "Shared property must be of the same type as this property!");
+        if (GenericProperty<T>* tmp = dynamic_cast< GenericProperty<T>* >(prop)) {
+            AbstractProperty::addSharedProperty(prop);
+            tmp->setValue(getValue());
             return;
         }
-        AbstractProperty::addSharedProperty(prop);
+        tgtAssert(false, "Shared property must be of the same type as this property!");
     }
 
     template<typename T>
-    const T TUMVis::GenericProperty<T>::getValue() const {
+    const T& TUMVis::GenericProperty<T>::getValue() const {
         return _value;
     }
 
@@ -131,8 +132,10 @@ namespace TUMVis {
 
         if (_inUse)
             setBackValue(value);
-        else
+        else {
             setFrontValue(value);
+            setBackValue(value);
+        }
     }
 
     template<typename T>

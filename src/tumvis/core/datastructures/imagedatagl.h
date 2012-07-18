@@ -1,11 +1,17 @@
 #ifndef IMAGEDATAGL_H__
 #define IMAGEDATAGL_H__
 
+#include "tgt/tgt_gl.h"
 #include "tgt/texture.h"
+#include "tgt/textureunit.h"
 #include "tgt/vector.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagedatalocal.h"
 #include "core/tools/weaklytypedpointer.h"
+
+namespace tgt {
+    class Shader;
+}
 
 namespace TUMVis {
 
@@ -52,6 +58,24 @@ namespace TUMVis {
          * \see ImageData::getSubImage
          */
         virtual ImageDataGL* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
+
+
+        /**
+         * Binds the texture without activating a texture unit.
+         */
+        void bind() const;
+
+        /**
+         * Activates the texture unit \a texUnit and binds the texture.
+         * \param   texUnit     Texture unit to activate
+         */
+        void bind(const tgt::TextureUnit& texUnit) const;
+
+        void bind(
+            tgt::Shader* shader,
+            const tgt::TextureUnit& texUnit, 
+            const std::string& texUniform = "_texture",
+            const std::string& textureParametersUniform = "_textureParameters") const;
 
 
 

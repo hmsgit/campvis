@@ -71,6 +71,12 @@ namespace TUMVis {
          */
         PropertyCollection& getPropertyCollection();
 
+        /**
+         * Returns the viewport size of the target canvas
+         * \return _canvasSize
+         */
+        const tgt::ivec2& getCanvasSize() const;
+
     protected:
         tgt::GLCanvas* _canvas;                             ///< Target canvas for rendering
         GenericProperty<tgt::ivec2> _canvasSize;            ///< Viewport size of target canvas

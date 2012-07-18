@@ -45,6 +45,8 @@ namespace TUMVis {
         /// \see ImageData::getSubImage
         virtual ThisType* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
 
+        virtual const WeaklyTypedPointer getWeaklyTypedPointer() const;
+
         /// \see ImageDataLocal::getElementNormalized
         virtual float getElementNormalized(const tgt::svec3& position, size_t channel) const;
 
@@ -146,12 +148,19 @@ namespace TUMVis {
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     GenericImageDataLocal<BASETYPE, NUMCHANNELS>* TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
+        tgtAssert(tgt::hor(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
-        tgt::svec3 newSize = urb - llf;
+        tgt::svec3 newSize = urb - llf + tgt::svec3(1);
         if (newSize == _size) {
             // nothing has changed, just provide a copy:
             return clone();
+        }
+
+        tgt::bvec3 tmp(tgt::greaterThan(newSize, tgt::svec3(1)));
+        size_t newDimensionality = 0;
+        for (size_t i = 0; i < 3; ++i) {
+            if (tmp[i] == true)
+                ++newDimensionality;
         }
 
         size_t numBytesPerElement = sizeof(ElementType);
@@ -160,15 +169,20 @@ namespace TUMVis {
 
         // slice image data into new array
         size_t index = 0;
-        for (size_t z = llf.z; z < urb.z; ++z) {
-            for (size_t y = llf.y; y < urb.y; ++y) {
+        for (size_t z = llf.z; z <= urb.z; ++z) {
+            for (size_t y = llf.y; y <= urb.y; ++y) {
                 size_t offset = llf.x + (y * _size.x) + (z * _size.y * _size.x);
                 memcpy(newData + index, _data + offset, newSize.x * numBytesPerElement);
                 index += newSize.x;
             }
         }        
 
-        return new ThisType(_dimensionality, newSize, newData);
+        return new ThisType(newDimensionality, newSize, newData);
+    }
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    const WeaklyTypedPointer TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getWeaklyTypedPointer() const {
+        return WeaklyTypedPointer(TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType, NUMCHANNELS, _data);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>

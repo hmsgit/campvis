@@ -17,7 +17,11 @@ FILE(GLOB TUMVIS_CORE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     eventhandlers/*.h
     pipeline/*.h
     properties/*.h
-	tools/*.h
+    tools/*.h
+    glsl/*.vert
+    glsl/*.frag
+    glsl/tools/*.vert
+    glsl/tools/*.frag
 )
 
 #SET(TUMVIS_CORE_SOURCES

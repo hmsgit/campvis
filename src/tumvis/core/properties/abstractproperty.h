@@ -118,6 +118,7 @@ namespace TUMVis {
 
 
     protected:
+        
         // DO NOT REMOVE THE CONSTNESS OF _name. PropertyCollection relies on it!
         const std::string _name;                ///< Property name (unchangable on purpose!)
         std::string _title;                     ///< Property title (e.g. used for GUI)

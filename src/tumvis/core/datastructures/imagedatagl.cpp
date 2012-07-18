@@ -1,5 +1,6 @@
 #include "imagedatagl.h"
 #include "tgt/assert.h"
+#include "tgt/shadermanager.h"
 #include "tgt/tgt_gl.h"
 
 namespace TUMVis {
@@ -59,6 +60,22 @@ namespace TUMVis {
         _texture->setPixelData(0);
 
         LGL_ERROR;
+    }
+
+    void ImageDataGL::bind() const {
+        _texture->bind();
+    }
+
+    void ImageDataGL::bind(const tgt::TextureUnit& texUnit) const {
+        texUnit.activate();
+        _texture->bind();
+    }
+
+    void ImageDataGL::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
+        bind(texUnit);
+        shader->setUniform(texUniform, texUnit.getUnitNumber());
+        shader->setUniform(textureParametersUniform + "._size", tgt::vec2(_size.xy()));
+        shader->setUniform(textureParametersUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
     }
 
 }

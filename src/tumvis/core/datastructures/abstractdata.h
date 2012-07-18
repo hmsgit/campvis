@@ -1,7 +1,5 @@
-#ifndef abstractdata_h__
-#define abstractdata_h__
-
-#include <set>
+#ifndef ABSTRACTDATA_H__
+#define ABSTRACTDATA_H__
 
 namespace TUMVis {
 
@@ -14,8 +12,9 @@ namespace TUMVis {
      */
     class AbstractData {
     public:
-        AbstractData() {};
-        virtual ~AbstractData() {};
+        AbstractData();
+
+        virtual ~AbstractData();
 
         virtual AbstractData* clone() const = 0;
 
@@ -25,4 +24,4 @@ namespace TUMVis {
 
 }
 
-#endif // abstractdata_h__
+#endif // ABSTRACTDATA_H__
