@@ -1,7 +1,3 @@
-
-uniform vec2 _viewportSize;
-uniform vec2 _viewportSizeRCP;
-
 struct TextureParameters {
     vec2 _size;
     vec2 _sizeRCP;

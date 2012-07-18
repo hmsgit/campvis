@@ -73,9 +73,12 @@ namespace TUMVis {
 
     void ImageDataGL::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
         bind(texUnit);
+        bool tmp = shader->getIgnoreUniformLocationError();
+        shader->setIgnoreUniformLocationError(true);
         shader->setUniform(texUniform, texUnit.getUnitNumber());
         shader->setUniform(textureParametersUniform + "._size", tgt::vec2(_size.xy()));
         shader->setUniform(textureParametersUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+        shader->setIgnoreUniformLocationError(tmp);
     }
 
 }

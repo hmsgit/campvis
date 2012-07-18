@@ -20,12 +20,9 @@ namespace TUMVis {
         , _targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output")
     {
         _properties.addProperty(&_url);
+        _url.addObserver(this);
         _properties.addProperty(&_targetImageID);
-
-        // just testing some type traits...
-        tgt::Vector3<int8_t>* v = new tgt::Vector3<int8_t>[6];
-        GenericImageDataLocal<int8_t, 3> data(3, tgt::svec3(1, 2, 3), v);
-        data.clone();
+        _targetImageID.addObserver(this);
     }
 
     MhdImageReader::~MhdImageReader() {
@@ -138,5 +135,6 @@ namespace TUMVis {
             return;
         }
 
+        _invalidationLevel.setValid();
     }
 }

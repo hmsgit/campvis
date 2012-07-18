@@ -77,8 +77,10 @@ namespace TUMVis {
 
             // activate shader
             _copyShader->activate();
+            _copyShader->setIgnoreUniformLocationError(true);
             _copyShader->setUniform("_viewportSize", tgt::vec2(_canvasSize.getValue()));
             _copyShader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_canvasSize.getValue()));
+            _copyShader->setIgnoreUniformLocationError(false);
 
             // bind input textures
             tgt::TextureUnit colorUnit, depthUnit;

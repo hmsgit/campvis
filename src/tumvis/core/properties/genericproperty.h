@@ -50,11 +50,12 @@ namespace TUMVis {
         const T& getValue() const;
 
         /**
-         * Sets the property value to \a value and notifies all observers.
+         * On successful validation it sets the property value to \a value and notifies all observers.
          * Depending on the current lock state of the property, the value will either be written to the front or back buffer.
+         * \sa GenericProperty::validateValue
          * \param value     New value for this property.
          */
-        void setValue(const T& value);
+        virtual void setValue(const T& value);
 
 
         /**
@@ -73,6 +74,14 @@ namespace TUMVis {
 
 
     protected:
+
+        /**
+         * Adapts \a value, so that is is a valid value for this property.
+         * Default implementation does nothing and always returns \a value, subclasses can overwrite this method to fit their needs.
+         * \param   value   value to validate.
+         */
+        virtual T validateValue(const T& value);
+
         /**
          * Sets the property value to \a value and notifies all observers.
          * \note    _localMutex has to be acquired before calling!
@@ -128,13 +137,14 @@ namespace TUMVis {
 
     template<typename T>
     void TUMVis::GenericProperty<T>::setValue(const T& value) {
+        T vv = validateValue(value);
         tbb::spin_mutex::scoped_lock lock(_localMutex);
 
         if (_inUse)
-            setBackValue(value);
+            setBackValue(vv);
         else {
-            setFrontValue(value);
-            setBackValue(value);
+            setFrontValue(vv);
+            setBackValue(vv);
         }
     }
 
@@ -170,6 +180,11 @@ namespace TUMVis {
     template<typename T>
     void TUMVis::GenericProperty<T>::setBackValue(const T& value) {
         _backBuffer = value;
+    }
+
+    template<typename T>
+    T TUMVis::GenericProperty<T>::validateValue(const T& value) {
+        return value;
     }
 
     template<typename T>

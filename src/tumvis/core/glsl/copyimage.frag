@@ -1,6 +1,8 @@
 
 #include "tools/sampler2d.frag"
 
+uniform vec2 _viewportSize;
+uniform vec2 _viewportSizeRCP;
 uniform sampler2D _colorTexture;
 uniform sampler2D _depthTexture;
 uniform TextureParameters _textureParameters;

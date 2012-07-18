@@ -27,19 +27,24 @@ namespace TUMVis {
         _imageReader->_targetImageID.setValue("reader.output");
 
         _sliceExtractor->_sourceImageID.setValue("se.input");
+        _sliceExtractor->_sliceNumber.setValue(0);
 
         _renderTargetID.setValue("renderTarget");
         _renderTargetID.addSharedProperty(&(_sliceExtractor->_targetImageID));
     }
 
     void SliceVis::execute() {
-        _imageReader->process(_data);
+        if (! _imageReader->getInvalidationLevel().isValid()) {
+            _imageReader->process(_data);
 
-        // convert data
-        const ImageData* img = _data.getTypedData<ImageData>("reader.output");
-        ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
-        if (local != 0) {
-            _data.addData("se.input", local);
+            // convert data
+            const ImageData* img = _data.getTypedData<ImageData>("reader.output");
+            ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
+            if (local != 0) {
+                _data.addData("se.input", local);
+            }
+        }
+        if (! _sliceExtractor->getInvalidationLevel().isValid()) {
             _sliceExtractor->process(_data);
         }
     }
@@ -48,10 +53,10 @@ namespace TUMVis {
         if (e->pressed()) {
             switch (e->keyCode()) {
                 case tgt::KeyEvent::K_UP:
-                    _sliceExtractor->_sliceNumber.setValue(_sliceExtractor->_sliceNumber.getValue()+1);
+                    _sliceExtractor->_sliceNumber.increment();
                     break;
                 case tgt::KeyEvent::K_DOWN:
-                    _sliceExtractor->_sliceNumber.setValue(_sliceExtractor->_sliceNumber.getValue()-1);
+                    _sliceExtractor->_sliceNumber.decrement();
                     break;
             }
         }

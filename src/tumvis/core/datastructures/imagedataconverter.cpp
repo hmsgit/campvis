@@ -7,11 +7,9 @@ namespace TUMVis {
 
     template<>
     TUMVis::ImageDataLocal* ImageDataConverter::convert(const ImageDataDisk* source) {
-        WeaklyTypedPointer wtp = source->getImageData();
-
 #define DISPATCH_CONVERSION(numChannels) \
         if (source->getNumChannels() == (numChannels)) { \
-            switch (wtp._baseType) { \
+            switch (source->getBaseType()) { \
                 case WeaklyTypedPointer::UINT8: \
                     return convertToGenericLocal<uint8_t, (numChannels)>(source); \
                 case WeaklyTypedPointer::INT8: \

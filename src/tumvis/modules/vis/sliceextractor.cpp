@@ -14,12 +14,13 @@ namespace TUMVis {
         : VisualizationProcessor(canvasSize)
         , _sourceImageID("sourceImageID", "Input Image", "")
         , _targetImageID("targetImageID", "Output Image", "")
-        , _sliceNumber("sliceNumber", "Slice Number", 0)
+        , _sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , _shader(0)
     {
         _properties.addProperty(&_sourceImageID);
         _properties.addProperty(&_targetImageID);
         _properties.addProperty(&_sliceNumber);
+        _sliceNumber.addObserver(this);
     }
 
     SliceExtractor::~SliceExtractor() {
@@ -35,6 +36,7 @@ namespace TUMVis {
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
+                updateProperties(img);
                 const tgt::svec3& imgSize = img->getSize();
                 ImageDataLocal* slice = img->getSubImage(tgt::svec3(0, 0, _sliceNumber.getValue()), tgt::svec3(imgSize.x-1, imgSize.y-1, _sliceNumber.getValue()));
                 ImageDataGL* glData = ImageDataConverter::tryConvert<ImageDataGL>(slice);
@@ -62,5 +64,15 @@ namespace TUMVis {
         else {
             LERROR("No suitable input image found.");
         }
+
+        _invalidationLevel.setValid();
     }
+
+    void SliceExtractor::updateProperties(const ImageData* img) {
+        const tgt::svec3& imgSize = img->getSize();
+        if (_sliceNumber.getMaxValue() != imgSize.z - 1){
+            _sliceNumber.setMaxValue(imgSize.z - 1);
+        }
+    }
+
 }

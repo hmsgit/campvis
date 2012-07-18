@@ -24,6 +24,7 @@ int main(int argc, char** argv) {
 
     app->addCanvas(canvas);  
     app->init();
+    LogMgr.getConsoleLog()->addCat("", true);
 
     if (argc > 0) {
         // ugly hack

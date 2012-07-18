@@ -9,12 +9,10 @@ namespace TUMVis {
     DataHandle::DataHandle(const DataContainer* owner, AbstractData* data) 
         : _data(data)
     {
-        LDEBUG("DataHandle()");
         addOwner(this, owner);
     }
 
     DataHandle::~DataHandle() {
-        LDEBUG("~DataHandle()");
         delete _data;
     }
 

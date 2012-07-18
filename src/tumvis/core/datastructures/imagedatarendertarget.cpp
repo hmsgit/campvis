@@ -130,10 +130,13 @@ namespace TUMVis {
     void ImageDataRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const tgt::TextureUnit& depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
         bindColorTexture(colorTexUnit);
         bindDepthTexture(depthTexUnit);
+        bool tmp = shader->getIgnoreUniformLocationError();
+        shader->setIgnoreUniformLocationError(true);
         shader->setUniform(colorTexUniform, colorTexUnit.getUnitNumber());
         shader->setUniform(depthTexUniform, depthTexUnit.getUnitNumber());
         shader->setUniform(textureParametersUniform + "._size", tgt::vec2(_size.xy()));
         shader->setUniform(textureParametersUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+        shader->setIgnoreUniformLocationError(tmp);
     }
 
     ImageDataRenderTarget* ImageDataRenderTarget::clone() const {
