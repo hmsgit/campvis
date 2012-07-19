@@ -1,6 +1,7 @@
 #ifndef OBSERVER_H__
 #define OBSERVER_H__
 
+#include "tbb/include/tbb/spin_mutex.h"
 #include <set>
 
 namespace TUMVis {
@@ -53,6 +54,7 @@ namespace TUMVis {
         void notifyObservers() const;
 
         mutable std::set<Observer*> _observers;     ///< Set of all observers for this subject
+        mutable tbb::spin_mutex _localMutex;
     };
 
 // - Generic variant ------------------------------------------------------------------------------
@@ -93,6 +95,7 @@ namespace TUMVis {
          * \param o     GenericObserver<T> to add
          */
         void addObserver(GenericObserver<T>* o) const {
+            tbb::spin_mutex::scoped_lock lock(_localMutex);
             _observers.insert(o);
         };
 
@@ -102,6 +105,7 @@ namespace TUMVis {
          * \param o     GenericObserver<T> to remove
          */
         void removeObserver(GenericObserver<T>* o) const {
+            tbb::spin_mutex::scoped_lock lock(_localMutex);
             _observers.erase(o);
         };
 
@@ -112,12 +116,14 @@ namespace TUMVis {
          * \param args  Argument struct to be passed to observer.
          */
         void notifyObservers(const T& args) const {
+            tbb::spin_mutex::scoped_lock lock(_localMutex);
             for (std::set< GenericObserver<T>* >::iterator it = _observers.begin(); it != _observers.end(); ++it) {
                 (*it)->onNotify(args);
             }
         };
 
         mutable std::set< GenericObserver<T>* > _observers;     ///< Set of all observers for this subject
+        mutable tbb::spin_mutex _localMutex;
     };
 
 
