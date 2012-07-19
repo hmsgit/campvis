@@ -53,13 +53,13 @@ namespace TUMVis {
     private:
         /**
          * Creates a new DataHandle for \a data and takes its ownership in terms of lifetime management. 
-         * The DataContainer \a owner will automatically be added to the set of owners of this DataHandle, so
-         * it is NOT needed to call DataHandle::addOwner().
+         * If \a owner != 0, it will automatically be added to the set of owners of this DataHandle, so
+         * in this case it is NOT needed to call DataHandle::addOwner().
          *
-         * \param   owner   Initial owner of this DataHandle (usually the DataContainer creating the handle)
          * \param   data    AbstractData instance to manage
+         * \param   owner   Initial owner of this DataHandle, may be 0.
          */
-        DataHandle(const DataContainer* owner, AbstractData* data);
+        DataHandle(AbstractData* data, const DataContainer* owner = 0);
 
         /**
          * DO NOT USE - it is private on purpose!

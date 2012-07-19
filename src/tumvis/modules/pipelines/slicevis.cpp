@@ -4,10 +4,10 @@
 
 namespace TUMVis {
 
-    SliceVis::SliceVis(tgt::GLCanvas* canvas /*= 0*/)
-        : VisualizationPipeline(canvas)
+    SliceVis::SliceVis()
+        : VisualizationPipeline()
         , _imageReader()
-        , _sliceExtractor(_canvasSize)
+        , _sliceExtractor(_renderTargetSize)
         , _wheelHandler(&_sliceExtractor._sliceNumber)
     {
         _processors.push_back(&_imageReader);
@@ -53,10 +53,6 @@ namespace TUMVis {
         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
             _sliceExtractor.process(_data);
         }
-
-        // TODO:    separate execution of the pipeline and rendering to canvas, as we want
-        //          to do this asynchroniously in the mere future.
-        _canvas->repaint();
     }
 
     void SliceVis::keyEvent(tgt::KeyEvent* e) {

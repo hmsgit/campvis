@@ -4,6 +4,8 @@
 #include "tgt/qt/qtapplication.h"
 #include "tgt/qt/qtcanvas.h"
 
+#include "tbb/include/tbb/task_scheduler_init.h"
+
 #include "tumvispainter.h"
 #include "modules/pipelines/slicevis.h"
 
@@ -22,6 +24,7 @@ int main(int argc, char** argv) {
     tgt::QtCanvas* canvas = new tgt::QtCanvas("TUMVis");
     SliceVis* sliceVis = 0;
 
+    tbb::task_scheduler_init init;
     app->addCanvas(canvas);  
     app->init();
     LogMgr.getConsoleLog()->addCat("", true);
@@ -35,14 +38,14 @@ int main(int argc, char** argv) {
     }
 
     tgt::Camera camera;  
-    canvas->setCamera(&camera);  
+    canvas->setCamera(&camera); 
+    TumVisPainter* painter;
 
     try {
-        sliceVis = new SliceVis(canvas);
-        canvas->setPainter(sliceVis);  
-        //     TumVisPainter painter(canvas);  
-        //     canvas->setPainter(&painter);  
-
+        sliceVis = new SliceVis();
+        painter = new TumVisPainter(canvas, sliceVis);
+        canvas->setPainter(painter);
+        sliceVis->init();
     }
     catch (tgt::Exception& e) {
         LERRORC("main.cpp", "Encountered tgt::Exception: " << e.what());
@@ -53,6 +56,7 @@ int main(int argc, char** argv) {
 
     app->run();
 
+    delete painter;
     delete sliceVis;
     delete canvas;
     delete app;  

@@ -2,6 +2,9 @@
 #define ABSTRACTPIPELINE_H__
 
 #include "tgt/logmanager.h"
+#include "tbb/include/tbb/spin_mutex.h"
+#include "core/tools/observer.h"
+#include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/propertycollection.h"
@@ -14,7 +17,7 @@ namespace TUMVis {
      * Abstract base class for TUMVis Pipelines.
      * 
      */
-    class AbstractPipeline {
+    class AbstractPipeline : public GenericObserver<ProcessorObserverArgs> {
     public:
         /**
          * Creates a AbstractPipeline.
@@ -40,16 +43,33 @@ namespace TUMVis {
         virtual void execute() = 0;
 
         /**
-         * Returns the PropertyCollection of this processor.
+         * Returns the PropertyCollection of this pipeline.
          * \return _properties
          */
         PropertyCollection& getPropertyCollection();
+
+        /**
+         * Returns the DataContainer of this pipeline
+         * \return _data
+         */
+        const DataContainer& getDataContainer() const;
+        
+        /**
+         * Gets called when one of the observed processors changed and thus notifies its observers.
+         * The default behaviour is just to set the invalidation level to invalid.
+         * \sa GenericObserver::onNotify, AbstractProcessor
+         * \param poa   ProcessorObserverArgs   ObserverArgument struct containing the emitting processor and its InvalidationLevel
+         */
+        virtual void onNotify(const ProcessorObserverArgs& poa);
 
     protected:
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
         PropertyCollection _properties;                     ///< PropertyCollection of this pipeline, put in here all properties you want to be publicly accessible
+        InvalidationLevel _invalidationLevel;               ///< current invalidation level
+
+        tbb::spin_mutex _localMutex;                        ///< mutex for altering local members
 
         static const std::string loggerCat_;
     };

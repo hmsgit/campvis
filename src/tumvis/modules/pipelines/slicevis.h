@@ -13,7 +13,7 @@ namespace TUMVis {
         /**
          * Creates a VisualizationPipeline.
          */
-        SliceVis(tgt::GLCanvas* canvas = 0);
+        SliceVis();
 
         /**
          * Virtual Destructor

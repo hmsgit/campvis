@@ -1,6 +1,7 @@
 #ifndef VISUALIZATIONPIPELINE_H__
 #define VISUALIZATIONPIPELINE_H__
 
+#include "sigslot/sigslot.h"
 #include "tgt/glcanvas.h"
 #include "tgt/painter.h"
 #include "tgt/shadermanager.h"
@@ -12,17 +13,18 @@
 #include <vector>
 
 namespace TUMVis {
+    class ImageDataRenderTarget;
 
     /**
      * Abstract base class for TUMVis Pipelines.
      * 
      */
-    class VisualizationPipeline : public AbstractPipeline, public tgt::EventListener, public tgt::Painter {
+    class VisualizationPipeline : public AbstractPipeline, public tgt::EventListener, public sigslot::has_slots<> {
     public:
         /**
          * Creates a VisualizationPipeline.
          */
-        VisualizationPipeline(tgt::GLCanvas* canvas = 0);
+        VisualizationPipeline();
 
         /**
          * Virtual Destructor
@@ -49,40 +51,47 @@ namespace TUMVis {
         virtual void onEvent(tgt::Event* e);
 
         /**
-         * Acquires the OpenGL context, and executes the pipeline
-         */
-        virtual void paint();
-
-        /**
-         * Is called when the viewport dimensions change, notifies the pipeline of that.
-         * \param size  New viewport dimensions
-         */
-        virtual void sizeChanged(const tgt::ivec2& size);
-
-        /**
-         * Sets the target canvas for rendering.
-         * \param canvas    Target canvas for rendering
-         */
-        void setCanvas(tgt::GLCanvas* canvas);
-
-        /**
          * Returns the PropertyCollection of this processor.
          * \return _properties
          */
         PropertyCollection& getPropertyCollection();
 
         /**
-         * Returns the viewport size of the target canvas
-         * \return _canvasSize
+         * Sets the size of the render target
+         * \param size  New viewport dimensions
          */
-        const tgt::ivec2& getCanvasSize() const;
+        void setRenderTargetSize(const tgt::ivec2& size);
+
+        /**
+         * Returns the viewport size of the target canvas
+         * \return _renderTargetSize
+         */
+        const tgt::ivec2& getRenderTargetSize() const;
+
+        /**
+         * Returns the DataHandle with the render target of this VisualizationPipeline in its current state.
+         * 
+         * \todo    This is not thread-safe, the object might be destroyed at any time. 
+         *          Time for implementing reference counting?
+         *          
+         * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
+         */
+        const ImageDataRenderTarget* getRenderTarget() const;
+
+        /**
+         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
+         * The default behaviour is to do nothing
+         * \sa GenericObserver::onNotify, DataContainer
+         * \param poa   DataContainerObserverArgs   ObserverArgument struct containing the emitting DataContainer and hints to its changes
+         */
+        void onDataContainerDataAdded(const std::string& name, const DataHandle* dh);
+
+
+        sigslot::signal0<> s_renderTargetChanged;
 
     protected:
-        tgt::GLCanvas* _canvas;                             ///< Target canvas for rendering
-        GenericProperty<tgt::ivec2> _canvasSize;            ///< Viewport size of target canvas
+        GenericProperty<tgt::ivec2> _renderTargetSize;      ///< Viewport size of target canvas
         GenericProperty<std::string> _renderTargetID;       ///< ID of the render target image to be rendered to the canvas
-        tgt::Shader* _copyShader;                           ///< Shader for copying the render target to the framebuffer.
-
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
 
         static const std::string loggerCat_;

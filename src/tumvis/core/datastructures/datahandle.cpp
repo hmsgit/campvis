@@ -6,10 +6,11 @@ namespace TUMVis {
     const std::string DataHandle::loggerCat_ = "TUMVis.core.datastructures.DataHandle";
 
 
-    DataHandle::DataHandle(const DataContainer* owner, AbstractData* data) 
+    DataHandle::DataHandle(AbstractData* data, const DataContainer* owner /*= 0*/) 
         : _data(data)
     {
-        addOwner(this, owner);
+        if (owner != 0)
+            addOwner(this, owner);
     }
 
     DataHandle::~DataHandle() {

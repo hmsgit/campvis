@@ -1,15 +1,16 @@
 #ifndef DATACONTAINER_H__
 #define DATACONTAINER_H__
 
+#include "sigslot/sigslot.h"
 #include "tbb/include/tbb/spin_mutex.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datahandle.h"
+#include "core/tools/observer.h"
 
 #include <string>
 #include <map>
 
 namespace TUMVis {
-
     /**
      * A DataContainer manages instances of AbstractData and offers access to them via string identifiers (names/keys).
      * Therefore, it stores them in DataHandles which take ownership of the AbstractData instance. Hence,
@@ -41,7 +42,7 @@ namespace TUMVis {
         /**
          * Adds the given AbstractData instance \a data, accessible by the key \name, to this DataContainer.
          * In doing so, the DataContainer (respectively the created DataHandle) takes ownership of \a data
-         * and will manage its lifetime. So don't even dare to delete \a data yourself!
+         * and will manage its lifetime. So don't even think about deleting \a data yourself!
          *
          * \param   name    Key for accessing the DataHandle within this DataContainer
          * \param   data    DataHandle to add.
@@ -85,6 +86,9 @@ namespace TUMVis {
          */
         template<typename T>
         inline const T* getTypedData(const std::string& name) const;
+
+
+        sigslot::signal2<const std::string&, const DataHandle*> s_dataAdded;
 
     private:
         std::map<std::string, const DataHandle*> _handles;
