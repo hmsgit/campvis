@@ -2,6 +2,7 @@
 #define SLICEVIS_H__
 
 #include "core/datastructures/imagedatalocal.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/io/mhdimagereader.h"
 #include "modules/vis/sliceextractor.h"
@@ -30,8 +31,10 @@ namespace TUMVis {
         virtual void keyEvent(tgt::KeyEvent* e);
 
     protected:
-        MhdImageReader* _imageReader;
-        SliceExtractor* _sliceExtractor;
+        MhdImageReader _imageReader;
+        SliceExtractor _sliceExtractor;
+
+        MWheelToNumericPropertyEventHandler _wheelHandler;
 
     };
 }

@@ -6,36 +6,42 @@ namespace TUMVis {
 
     SliceVis::SliceVis(tgt::GLCanvas* canvas /*= 0*/)
         : VisualizationPipeline(canvas)
-        , _imageReader(0)
-        , _sliceExtractor(0)
+        , _imageReader()
+        , _sliceExtractor(_canvasSize)
+        , _wheelHandler(&_sliceExtractor._sliceNumber)
     {
-        _imageReader = new MhdImageReader();
-        _processors.push_back(_imageReader);
-        _sliceExtractor = new SliceExtractor(_canvasSize);
-        _processors.push_back(_sliceExtractor);
+        _processors.push_back(&_imageReader);
+        _processors.push_back(&_sliceExtractor);
+        _eventHandlers.push_back(&_wheelHandler);
     }
 
     SliceVis::~SliceVis() {
-        delete _imageReader;
-        delete _sliceExtractor;
     }
 
     void SliceVis::init() {
         VisualizationPipeline::init();
 
-        _imageReader->_url.setValue("D:\\Medical Data\\smallHeart.mhd");
-        _imageReader->_targetImageID.setValue("reader.output");
+        _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
+        _imageReader._targetImageID.setValue("reader.output");
 
-        _sliceExtractor->_sourceImageID.setValue("se.input");
-        _sliceExtractor->_sliceNumber.setValue(0);
+        _sliceExtractor._sourceImageID.setValue("se.input");
+        _sliceExtractor._sliceNumber.setValue(0);
 
         _renderTargetID.setValue("renderTarget");
-        _renderTargetID.addSharedProperty(&(_sliceExtractor->_targetImageID));
+        _renderTargetID.addSharedProperty(&(_sliceExtractor._targetImageID));
+
+        _imageReader.addObserver(this);
+        _sliceExtractor.addObserver(this);
+        execute();
     }
 
     void SliceVis::execute() {
-        if (! _imageReader->getInvalidationLevel().isValid()) {
-            _imageReader->process(_data);
+        {
+            tbb::spin_mutex::scoped_lock lock(_localMutex);
+            _invalidationLevel.setValid();
+        }
+        if (! _imageReader.getInvalidationLevel().isValid()) {
+            _imageReader.process(_data);
 
             // convert data
             const ImageData* img = _data.getTypedData<ImageData>("reader.output");
@@ -44,23 +50,26 @@ namespace TUMVis {
                 _data.addData("se.input", local);
             }
         }
-        if (! _sliceExtractor->getInvalidationLevel().isValid()) {
-            _sliceExtractor->process(_data);
+        if (! _sliceExtractor.getInvalidationLevel().isValid()) {
+            _sliceExtractor.process(_data);
         }
+
+        // TODO:    separate execution of the pipeline and rendering to canvas, as we want
+        //          to do this asynchroniously in the mere future.
+        _canvas->repaint();
     }
 
     void SliceVis::keyEvent(tgt::KeyEvent* e) {
         if (e->pressed()) {
             switch (e->keyCode()) {
                 case tgt::KeyEvent::K_UP:
-                    _sliceExtractor->_sliceNumber.increment();
+                    _sliceExtractor._sliceNumber.increment();
                     break;
                 case tgt::KeyEvent::K_DOWN:
-                    _sliceExtractor->_sliceNumber.decrement();
+                    _sliceExtractor._sliceNumber.decrement();
                     break;
             }
         }
-        _canvas->repaint();
     }
 
 }

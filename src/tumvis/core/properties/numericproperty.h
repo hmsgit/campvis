@@ -7,6 +7,12 @@
 
 namespace TUMVis {
 
+    class INumericProperty {
+    public:
+        virtual void increment() = 0;
+        virtual void decrement() = 0;
+    };
+
     /**
      * Generic class for numeric properties.
      * Numeric properties manage a minimum and maximum value and ensure, that the property's 
@@ -15,7 +21,7 @@ namespace TUMVis {
      * \tparam  T   Base type of the property's value.
      */
     template<typename T>
-    class NumericProperty : public GenericProperty<T> {
+    class NumericProperty : public GenericProperty<T>, public INumericProperty {
     public:
         /**
          * Creates a new NumericProperty.
@@ -72,8 +78,8 @@ namespace TUMVis {
          */
         virtual void setMaxValue(const T& value);
 
-        void increment();
-        void decrement();
+        virtual void increment();
+        virtual void decrement();
 
 
     protected:
