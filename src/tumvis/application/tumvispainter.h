@@ -1,8 +1,9 @@
 #include "sigslot/sigslot.h"
 #include "tbb/include/tbb/mutex.h"
+
 #include "tgt/logmanager.h"
 #include "tgt/glcanvas.h"
-#include "tgt/painter.h"
+#include "tgt/qt/qtthreadedpainter.h"
 #include "tgt/event/eventhandler.h"
 
 #include "core/pipeline/visualizationpipeline.h"
@@ -18,9 +19,9 @@ namespace TUMVis {
      * 
      * \todo 
      */
-    class TumVisPainter : public tgt::Painter, public sigslot::has_slots<> {
+    class TumVisPainter : public tgt::QtThreadedPainter, public sigslot::has_slots<> {
     public:
-        TumVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline);
+        TumVisPainter(tgt::QtCanvas* canvas, VisualizationPipeline* pipeline);
 
         virtual void paint();  
         virtual void sizeChanged(const tgt::ivec2& size);  

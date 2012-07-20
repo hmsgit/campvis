@@ -2,6 +2,7 @@
 
 #include "tgt/assert.h"
 #include "tgt/camera.h"
+#include "tgt/glcontext.h"
 #include "tgt/quadrenderer.h"
 #include "tgt/quadric.h"
 
@@ -10,8 +11,8 @@
 namespace TUMVis {
     const std::string TumVisPainter::loggerCat_ = "TUMVis.core.TumVisPainter";
 
-    TumVisPainter::TumVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline)
-        : tgt::Painter(canvas)
+    TumVisPainter::TumVisPainter(tgt::QtCanvas* canvas, VisualizationPipeline* pipeline)
+        : tgt::QtThreadedPainter(canvas)
         , _pipeline(0)
         , _dirty(0)
         , _currentlyRendering(false)
@@ -24,14 +25,7 @@ namespace TUMVis {
     void TumVisPainter::paint() {
         if (getCanvas() == 0)
             return;
-        {
-            tbb::mutex::scoped_lock lock(_localMutex);
-            _currentlyRendering = true;
-            _dirty = false;
-        }
 
-        // get OpenGL focus and setup context
-        getCanvas()->getGLFocus();
         const tgt::ivec2 size = getCanvas()->getSize();
         glViewport(0, 0, size.x, size.y);
 
@@ -62,8 +56,8 @@ namespace TUMVis {
             // TODO: render some nifty error texture
             //       so long, we do some dummy rendering
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);  
-            getCamera()->setPosition(tgt::vec3(0.f,0.f,2.f)); 
-            getCamera()->look();  
+            tgt::Camera c(tgt::vec3(0.f,0.f,2.f)); 
+            c.look();  
             glColor3f(1.f, 0.f, 0.f);  
             tgt::Sphere sphere(.5f, 64, 32);  
             sphere.render();  
@@ -96,9 +90,6 @@ namespace TUMVis {
     }
 
     void TumVisPainter::sizeChanged(const tgt::ivec2& size) {
-        if (getCanvas()) {
-            getCanvas()->getGLFocus();
-        }
         _pipeline->setRenderTargetSize(size);
     }
 
@@ -128,12 +119,9 @@ namespace TUMVis {
     }
 
     void TumVisPainter::onPipelineInvalidated() {
-        if (! _currentlyRendering)
-            getCanvas()->repaint();
-        else {
-            tbb::mutex::scoped_lock lock(_localMutex);
-            _dirty = true;
-        }
+        // TODO:    What happens, if the mutex is still acquired?
+        //          Will the render thread woken up as soon as it is released?
+        _renderCondition.wakeAll();
     }
 
 }

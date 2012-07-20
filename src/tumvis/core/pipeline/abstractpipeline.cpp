@@ -28,10 +28,10 @@ namespace TUMVis {
     }
 
     void AbstractPipeline::onNotify(const ProcessorObserverArgs& poa) {
-//         tbb::spin_mutex::scoped_lock lock(_localMutex);
-//         _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
+        _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
 
-        execute();
+        //execute();
     }
 
     const DataContainer& AbstractPipeline::getDataContainer() const {

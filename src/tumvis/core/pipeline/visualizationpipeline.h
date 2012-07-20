@@ -23,8 +23,9 @@ namespace TUMVis {
     public:
         /**
          * Creates a VisualizationPipeline.
+         * \param   canvas  Canvas hosting the OpenGL context for this pipeline.
          */
-        VisualizationPipeline();
+        VisualizationPipeline(tgt::GLCanvas* canvas);
 
         /**
          * Virtual Destructor
@@ -93,6 +94,8 @@ namespace TUMVis {
         GenericProperty<tgt::ivec2> _renderTargetSize;      ///< Viewport size of target canvas
         GenericProperty<std::string> _renderTargetID;       ///< ID of the render target image to be rendered to the canvas
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
+
+        tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
 
         static const std::string loggerCat_;
     };

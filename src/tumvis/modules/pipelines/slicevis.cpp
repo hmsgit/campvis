@@ -1,11 +1,12 @@
 #include "slicevis.h"
 
+#include "tgt/glcontext.h"
 #include "core/datastructures/imagedataconverter.h"
 
 namespace TUMVis {
 
-    SliceVis::SliceVis()
-        : VisualizationPipeline()
+    SliceVis::SliceVis(tgt::GLCanvas* canvas)
+        : VisualizationPipeline(canvas)
         , _imageReader()
         , _sliceExtractor(_renderTargetSize)
         , _wheelHandler(&_sliceExtractor._sliceNumber)
@@ -51,6 +52,7 @@ namespace TUMVis {
             }
         }
         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
+            tgt::GLContextScopedLock lock(_canvas->getContext());
             _sliceExtractor.process(_data);
         }
     }

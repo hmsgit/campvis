@@ -37,12 +37,12 @@ int main(int argc, char** argv) {
         ShdrMgr.addPath(programPath + "/core/glsl");
     }
 
-    tgt::Camera camera;  
+    tgt::Camera camera;
     canvas->setCamera(&camera); 
     TumVisPainter* painter;
 
     try {
-        sliceVis = new SliceVis();
+        sliceVis = new SliceVis(canvas);
         painter = new TumVisPainter(canvas, sliceVis);
         canvas->setPainter(painter);
         sliceVis->init();

@@ -26,6 +26,7 @@
 #define TGT_QTCANVAS_H
 
 #include "tgt/glcanvas.h"
+#include "tgt/qt/qtglcontext.h"
 
 #include <QGLWidget>
 #include <QGLFormat>
@@ -103,10 +104,11 @@ public:
     virtual void swap();
 
     /**
-     * If we use several GLCanvases, we have to switch the OpenGL context when we switch between
-     * canvases; this method sets the context of this canvas as the current one.
+    * If we use several GLCanvases, we have to switch the OpenGL context when we switch between
+    * canvases; this method returns the context of this canvas.
      */
-    virtual void getGLFocus();
+    virtual QtGLContext* getContext();
+
     virtual void toggleFullScreen();
 
     virtual void enterEvent(QEvent* e);
@@ -134,7 +136,8 @@ public:
     static QGLFormat getQGLFormat(const Buffers buffers);
 
 protected:
-    static QGLWidget* shareWidget_;  ///< widget that this canvas shares the OpenGL context with
+    static QGLWidget* shareWidget_;     ///< widget that this canvas shares the OpenGL context with
+    QtGLContext _context;               ///< OpenGL context of this canvas
 
 };
 

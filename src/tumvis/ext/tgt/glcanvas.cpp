@@ -23,6 +23,7 @@
  **********************************************************************/
 
 #include "tgt/glcanvas.h"
+#include "tgt/glcontext.h"
 #include "tgt/camera.h"
 #include "tgt/painter.h"
 
@@ -62,6 +63,7 @@ void GLCanvas::sizeChanged(const ivec2& size) {
 }
 
 void GLCanvas::paint() {
+    GLContextScopedLock lock(getContext());
     if (painter_)
         painter_->paint();
     if (autoFlush_) {
@@ -91,8 +93,10 @@ Painter* GLCanvas::getPainter() const {
 
 void GLCanvas::initPainter() {
     if (painter_) {
-        getGLFocus();
-        painter_->init();
+        {
+            GLContextScopedLock lock(getContext());
+            painter_->init();
+        }
         painter_->sizeChanged(size_);
     }
 }

@@ -2,17 +2,20 @@
 #include "tgt/camera.h"
 #include "tgt/quadrenderer.h"
 #include "tgt/quadric.h"
+#include "tgt/glcontext.h"
 #include "core/datastructures/imagedatarendertarget.h"
 
 namespace TUMVis {
     const std::string VisualizationPipeline::loggerCat_ = "TUMVis.core.datastructures.VisualizationPipeline";
 
-    VisualizationPipeline::VisualizationPipeline() 
+    VisualizationPipeline::VisualizationPipeline(tgt::GLCanvas* canvas) 
         : AbstractPipeline()
         , tgt::EventListener()
         , _renderTargetSize("canvasSize", "Canvas Size", tgt::ivec2(128, 128))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget")
+        , _canvas(canvas)
     {
+        tgtAssert(canvas != 0, "Canvas must not be 0.");
         _data.s_dataAdded.connect(this, &VisualizationPipeline::onDataContainerDataAdded);
     }
 
@@ -38,6 +41,7 @@ namespace TUMVis {
     }
 
     void VisualizationPipeline::init() {
+        tgt::GLContextScopedLock lock(_canvas->getContext());
         AbstractPipeline::init();
     }
 

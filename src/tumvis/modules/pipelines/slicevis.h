@@ -12,8 +12,9 @@ namespace TUMVis {
     public:
         /**
          * Creates a VisualizationPipeline.
+         * \param   canvas  Canvas hosting the OpenGL context for this pipeline.
          */
-        SliceVis();
+        SliceVis(tgt::GLCanvas* canvas);
 
         /**
          * Virtual Destructor

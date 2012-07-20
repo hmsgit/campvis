@@ -38,6 +38,7 @@
 namespace tgt {
 
 class Camera;
+class GLContext;
 class Painter;
 
 /**
@@ -103,7 +104,15 @@ public:
      *
      * To be overridden by derived Canvas classes.
      */
-    virtual void getGLFocus() = 0;
+    //virtual void getGLFocus() = 0;
+
+    /**
+    * If we use several GLCanvases, we have to switch the OpenGL context when we switch between
+    * canvases; this method returns the context of this canvas.
+    *
+    * To be overridden by derived Canvas classes.
+     */
+    virtual GLContext* getContext() = 0;
 
     /**
      * Toggles fullscreen mode.
