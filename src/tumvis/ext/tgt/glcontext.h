@@ -7,16 +7,15 @@ namespace tgt {
     /**
      * Abstract base class for thread-safe OpenGL contexts.
      */
-    class GLContext {
+    class TGT_API GLContext {
     public:
         GLContext();
         ~GLContext();
 
         virtual void acquire() = 0;
-        virtual void release() = 0;
 
         virtual void lockAndAcquire() = 0;
-        virtual void releaseAndUnlock() = 0;
+        virtual void unlock() = 0;
 
         virtual ivec2 getViewportSize() const = 0;
     };
@@ -24,7 +23,7 @@ namespace tgt {
     /**
      * Scoped lockAndAcquire for a GLContext, that automatically unlocks the context on destruction.
      */
-    class GLContextScopedLock {
+    class TGT_API GLContextScopedLock {
     public:
         GLContextScopedLock(GLContext* context)
             : _context(context)
@@ -34,7 +33,7 @@ namespace tgt {
         };
         ~GLContextScopedLock() {
             if (_context)
-                _context->releaseAndUnlock();
+                _context->unlock();
         }
     private:
         GLContext* _context;

@@ -12,10 +12,9 @@ namespace tgt {
     /**
      * Implementation of a tgt::Painter that runs in its own thread.
      */
-    class QtThreadedPainter : public QThread, public tgt::Painter {
+    class TGT_API QtThreadedPainter : public QThread, public tgt::Painter {
     public:
         QtThreadedPainter(QtCanvas* canvas);
-        void resizeViewport(const QSize &size);
         void run();
         void stop();
 
@@ -26,9 +25,6 @@ namespace tgt {
 
     protected:
         bool _evaluateRenderingLoop;
-        bool _viewportSizeChanged;
-        int w;
-        int h;
         int rotAngle;
         QWaitCondition _renderCondition;
     };

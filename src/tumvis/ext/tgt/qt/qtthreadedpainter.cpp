@@ -1,6 +1,7 @@
 #include "qtthreadedpainter.h"
 #include "tgt/qt/qtcanvas.h"
 #include "tgt/qt/qtthreadedcanvas.h"
+#include "tgt/qt/qtcontextmanager.h"
 
 namespace tgt {
 
@@ -9,39 +10,36 @@ namespace tgt {
         , tgt::Painter(canvas)
     {
         _evaluateRenderingLoop = true;
-        _viewportSizeChanged = false;
     }
 
-    void QtThreadedPainter::stop()
-    {
+    void QtThreadedPainter::stop() {
         _evaluateRenderingLoop = false;
+        _renderCondition.wakeAll();
     }
 
-    void QtThreadedPainter::resizeViewport(const QSize &size)
-    {
-        w = size.width();
-        h = size.height();
-        _viewportSizeChanged = true;
-    }    
-
-    void QtThreadedPainter::run()
-    {
+    void QtThreadedPainter::run() {
         QtGLContext* qtContext = static_cast<QtCanvas*>(getCanvas())->getContext();
         GLContextScopedLock lock(qtContext);
 
         LGL_ERROR;
         while (_evaluateRenderingLoop) {
-            if (_viewportSizeChanged) {
-                glViewport(0, 0, w, h);
-                _viewportSizeChanged = false;
-            }
             paint();
+            glFlush();
+            qtContext->getCanvas()->swap();
 
+            /*if (qtContext->getCanvas()->doubleBuffer()) {
+                if (d->autoSwap)
+                    swapBuffers();
+            } else {
+                glFlush();
+            }*/
+
+            
             // suspend rendering thread until there is again sth. to render.
-            qtContext->release();
-            _renderCondition.wait(&qtContext->getRenderMutex());
+            _renderCondition.wait(&CtxtMgr.getGlMutex());
             qtContext->acquire();
         }
+        //exit();
     }
 
     void QtThreadedPainter::setCanvas(GLCanvas* canvas) {

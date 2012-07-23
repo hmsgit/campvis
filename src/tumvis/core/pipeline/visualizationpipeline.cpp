@@ -63,4 +63,10 @@ namespace TUMVis {
         _renderTargetSize.setValue(size);
     }
 
+    void VisualizationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor& processor) {
+        tgt::GLContextScopedLock lock(_canvas->getContext());
+        executeProcessor(processor);
+        glFlush();
+    }
+
 }

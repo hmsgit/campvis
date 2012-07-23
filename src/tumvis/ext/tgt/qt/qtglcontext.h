@@ -10,7 +10,7 @@ namespace tgt {
     /**
      * Manages the OpenGL context of a QtCanvas and offers methods for thread-safe access.
      */
-    class QtGLContext : public GLContext {
+    class TGT_API QtGLContext : public GLContext {
     public:
         /**
          * Creates a new QtGLContext for the OpenGL context of \a canvas.
@@ -29,20 +29,15 @@ namespace tgt {
         virtual void acquire();
 
         /**
-         * Releases the OpenGL context.
-         */
-        virtual void release();
-
-        /**
          * Acquires the OpenGL context of the canvas and locks it for thread-safety
-         * \note    Do not forget to call releaseAndUnlock() when finished rendering!
+         * \note    Do not forget to call unlock() when finished rendering!
          */
         virtual void lockAndAcquire();
 
         /**
-         * Releases and unlocks the OpenGL context of the canvas.
+         * Unlocks the OpenGL context manager.
          */
-        virtual void releaseAndUnlock();
+        virtual void unlock();
 
         /**
          * Returns the viewport size of the managed OpenGL context.
@@ -51,14 +46,13 @@ namespace tgt {
         virtual ivec2 getViewportSize() const;
 
         /**
-         * Returns the mutex protecting the context for multi-threaded access.
-         * \return  _renderMutex
+         * Returns the QtCanvas owning this context.
+         * \return QtCanvas owning this context.
          */
-        QMutex& getRenderMutex();
+        QtCanvas* getCanvas();
 
     protected:
-        QtCanvas* _canvas;          ///< QtCanvas with the OpenGL context to manage
-        QMutex _renderMutex;        ///< Mutex protecting the context for multi-threaded access
+        QtCanvas* _canvas;          ///< QtCanvas owning this context.
     };
 
 } // namespace tgt

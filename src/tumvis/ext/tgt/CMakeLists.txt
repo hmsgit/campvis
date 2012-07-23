@@ -21,7 +21,7 @@ IF(TGT_WITH_WMI)
 ENDIF(TGT_WITH_WMI)    
 
 # headers
-FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h qt/*.qt)
+FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h qt/*.h)
 
 # sources
 SET(TGT_SOURCES
@@ -72,6 +72,7 @@ SET(TGT_SOURCES
 #qt
 	qt/qtapplication.cpp
 	qt/qtcanvas.cpp
+	qt/qtcontextmanager.cpp
 	qt/qtglcontext.cpp
 	qt/qtthreadedcanvas.cpp
 	qt/qtthreadedpainter.cpp

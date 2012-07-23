@@ -82,7 +82,6 @@ namespace TUMVis {
         /**
          * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
          * The default behaviour is to do nothing
-         * \sa GenericObserver::onNotify, DataContainer
          * \param poa   DataContainerObserverArgs   ObserverArgument struct containing the emitting DataContainer and hints to its changes
          */
         void onDataContainerDataAdded(const std::string& name, const DataHandle* dh);
@@ -91,6 +90,13 @@ namespace TUMVis {
         sigslot::signal0<> s_renderTargetChanged;
 
     protected:
+        /**
+         * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 
+         * and locks its properties meanwhile.
+         * \param   processor   Processor to execute.
+         */
+        void lockGLContextAndExecuteProcessor(AbstractProcessor& processor);
+
         GenericProperty<tgt::ivec2> _renderTargetSize;      ///< Viewport size of target canvas
         GenericProperty<std::string> _renderTargetID;       ///< ID of the render target image to be rendered to the canvas
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline

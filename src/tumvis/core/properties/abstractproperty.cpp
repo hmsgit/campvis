@@ -33,11 +33,13 @@ namespace TUMVis {
 
     void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
         tgtAssert(prop != 0, "Shared property must not be 0!");
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
         _sharedProperties.insert(prop);
     }
 
     void AbstractProperty::removeSharedProperty(AbstractProperty* prop) {
         tgtAssert(prop != 0, "Shared property must not be 0!");
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
         _sharedProperties.erase(prop);
     }
 
@@ -46,12 +48,10 @@ namespace TUMVis {
     }
 
     void AbstractProperty::lock() {
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
         _inUse = true;
     }
 
     void AbstractProperty::unlock() {
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
         _inUse = false;
     }
 

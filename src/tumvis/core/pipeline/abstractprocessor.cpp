@@ -37,4 +37,13 @@ namespace TUMVis {
 
     }
 
+    void AbstractProcessor::lockProperties() {
+        _properties.lockAllProperties();
+    }
+
+    void AbstractProcessor::unlockProperties() {
+        _properties.unlockAllProperties();
+    }
+
+
 }

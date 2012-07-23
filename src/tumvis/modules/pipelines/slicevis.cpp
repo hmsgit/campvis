@@ -33,16 +33,16 @@ namespace TUMVis {
 
         _imageReader.addObserver(this);
         _sliceExtractor.addObserver(this);
-        execute();
     }
 
     void SliceVis::execute() {
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
             _invalidationLevel.setValid();
+            // TODO:    think whether we want to lock all processors already here.
         }
         if (! _imageReader.getInvalidationLevel().isValid()) {
-            _imageReader.process(_data);
+            executeProcessor(_imageReader);
 
             // convert data
             const ImageData* img = _data.getTypedData<ImageData>("reader.output");
@@ -52,8 +52,7 @@ namespace TUMVis {
             }
         }
         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
-            tgt::GLContextScopedLock lock(_canvas->getContext());
-            _sliceExtractor.process(_data);
+            lockGLContextAndExecuteProcessor(_sliceExtractor);
         }
     }
 

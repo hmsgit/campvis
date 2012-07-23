@@ -1,5 +1,6 @@
 #include "qtglcontext.h"
 #include "tgt/qt/qtcanvas.h"
+#include "tgt/qt/qtcontextmanager.h"
 #include "tgt/assert.h"
 
 namespace tgt {
@@ -16,30 +17,27 @@ namespace tgt {
     }
 
     void QtGLContext::acquire() {
-        _canvas->makeCurrent();
-    }
-
-    void QtGLContext::release() {
-        _canvas->doneCurrent();
+        CtxtMgr.setCurrent(this);
     }
 
     void QtGLContext::lockAndAcquire() {
-        _renderMutex.lock();
+        CtxtMgr.lock();
         acquire();
+        LGL_ERROR;
     }
 
-    void QtGLContext::releaseAndUnlock() {
-        release();
-        _renderMutex.unlock();
+    void QtGLContext::unlock() {
+        CtxtMgr.unlock();
     }
 
     ivec2 QtGLContext::getViewportSize() const {
         return _canvas->getSize();
     }
 
-    QMutex& QtGLContext::getRenderMutex() {
-        return _renderMutex;
+    QtCanvas* QtGLContext::getCanvas() {
+        return _canvas;
     }
+
 
 
 }

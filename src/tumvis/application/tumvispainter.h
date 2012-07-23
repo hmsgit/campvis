@@ -24,7 +24,7 @@ namespace TUMVis {
         TumVisPainter(tgt::QtCanvas* canvas, VisualizationPipeline* pipeline);
 
         virtual void paint();  
-        virtual void sizeChanged(const tgt::ivec2& size);  
+        virtual void sizeChanged(const tgt::ivec2& size);
         virtual void init();
 
         void setPipeline(VisualizationPipeline* pipeline);

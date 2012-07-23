@@ -26,15 +26,13 @@ namespace TUMVis {
         if (getCanvas() == 0)
             return;
 
-        const tgt::ivec2 size = getCanvas()->getSize();
+        const tgt::ivec2& size = getCanvas()->getSize();
         glViewport(0, 0, size.x, size.y);
 
         // try get Data
         const ImageDataRenderTarget* image = _pipeline->getRenderTarget();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (image != 0) {
-            
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
             // activate shader
             _copyShader->activate();
             _copyShader->setIgnoreUniformLocationError(true);
@@ -51,11 +49,11 @@ namespace TUMVis {
             tgt::QuadRenderer::renderQuad();
             _copyShader->deactivate();
             LGL_ERROR;
+
         }
         else {
             // TODO: render some nifty error texture
             //       so long, we do some dummy rendering
-            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);  
             tgt::Camera c(tgt::vec3(0.f,0.f,2.f)); 
             c.look();  
             glColor3f(1.f, 0.f, 0.f);  
@@ -91,6 +89,7 @@ namespace TUMVis {
 
     void TumVisPainter::sizeChanged(const tgt::ivec2& size) {
         _pipeline->setRenderTargetSize(size);
+        _renderCondition.wakeAll();
     }
 
     void TumVisPainter::init() {

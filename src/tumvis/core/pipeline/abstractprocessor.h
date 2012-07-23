@@ -107,6 +107,18 @@ namespace TUMVis {
          */
         virtual void onNotify(const PropertyObserverArgs& poa);
 
+        /**
+         * Locks all properties in the processor's PropertyCollection and marks them as "in use".
+         * \sa  AbstractProcessor::unlock
+         */
+        void lockProperties();
+
+        /**
+         * Unlocks all properties in the processor's PropertyCollection and marks them as "not in use".
+         * \sa  AbstractProcessor::lock
+         */
+        void unlockProperties();
+
 
     protected:
         InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor

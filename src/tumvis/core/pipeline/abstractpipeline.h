@@ -1,8 +1,11 @@
 #ifndef ABSTRACTPIPELINE_H__
 #define ABSTRACTPIPELINE_H__
 
+#include "sigslot/sigslot.h"
 #include "tgt/logmanager.h"
 #include "tbb/include/tbb/spin_mutex.h"
+#include "tbb/include/tbb/mutex.h"
+#include "tbb/include/tbb/compat/condition_variable"
 #include "core/tools/observer.h"
 #include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
@@ -62,7 +65,19 @@ namespace TUMVis {
          */
         virtual void onNotify(const ProcessorObserverArgs& poa);
 
+        tbb::mutex& getEvaluationMutex();
+
+        InvalidationLevel& getInvalidationLevel();
+
+
+        sigslot::signal0<> s_PipelineInvalidated;
+
     protected:
+        /**
+         * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
+         * \param   processor   Processor to execute.
+         */
+        void executeProcessor(AbstractProcessor& processor);
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
@@ -70,6 +85,7 @@ namespace TUMVis {
         InvalidationLevel _invalidationLevel;               ///< current invalidation level
 
         tbb::spin_mutex _localMutex;                        ///< mutex for altering local members
+        tbb::mutex _evaluationMutex;                ///< mutex for the evaluation of this pipeline
 
         static const std::string loggerCat_;
     };
