@@ -2,9 +2,9 @@
 #define QTGLCONTEXTMANAGER_H__
 
 #include "tgt/singleton.h"
-#include "tgt/qt/qtcanvas.h"
+#include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/qt/qtglcontext.h"
-#include <qmutex.h>
+#include "tbb/include/tbb/mutex.h"  // TODO: TBB dependency in TGT is not that beautiful...
 #include <map>
 #include <string>
 
@@ -14,7 +14,7 @@ namespace tgt {
      * Manages multiple shared OpenGL contexts and offers methods to ensure that only one context is active at a time.
      * 
      */
-    class TGT_API QtContextManager : public Singleton<QtContextManager> {
+    class QtContextManager : public Singleton<QtContextManager> {
     friend class QtGLContext;
 
     public:
@@ -31,8 +31,8 @@ namespace tgt {
 
 
         /**
-         * Creates a new OpenGL context in a QtCanvas with the given arguments.
-         * Parameters are the same as in QtCanvas() but context sharing is enables per default.
+         * Creates a new OpenGL context in a QtThreadedCanvas with the given arguments.
+         * Parameters are the same as in QtThreadedCanvas() but context sharing is enables per default.
          * The newly created context will be active, but the OpenGL mutex not be locked.
          * 
          * \note    The created canvas/context is owned by this ContextManager. Hence, you may not
@@ -41,9 +41,9 @@ namespace tgt {
          * \param   key     Key of the context to create, must be unique.
          * \param   title   Window title
          * \param   size    Window size
-         * \return  The newly created QtCanvas.
+         * \return  The newly created QtThreadedCanvas.
          */
-        QtCanvas* createContext(
+        QtThreadedCanvas* createContext(
             const std::string& key,
             const std::string& title = "",
             const ivec2& size = ivec2(GLCanvas::DEFAULT_WINDOW_WIDTH, GLCanvas::DEFAULT_WINDOW_HEIGHT),
@@ -57,7 +57,7 @@ namespace tgt {
          */
         QtGLContext* getContextByKey(const std::string& key);
 
-        QMutex& getGlMutex();
+        tbb::mutex& getGlMutex();
 
         void releaseCurrentContext();
         
@@ -84,7 +84,7 @@ namespace tgt {
 
         std::map<std::string, QtCanvas*> _contexts;  ///< Map of all OpenGL contexts
         QtGLContext* _currentContext;                   ///< Current active OpenGL context
-        QMutex _glMutex;                                ///< Mutex protecting OpenGL for multi-threaded access
+        tbb::mutex _glMutex;                                ///< Mutex protecting OpenGL for multi-threaded access
     };
 
 } // namespace tgt

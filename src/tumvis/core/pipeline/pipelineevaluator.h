@@ -4,9 +4,7 @@
 #include "sigslot/sigslot.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/tools/runnable.h"
-#include "tbb/include/tbb/compat/thread"
 #include "tbb/include/tbb/compat/condition_variable"
-#include "tbb/include/tbb/atomic.h"
 
 namespace TUMVis {
 
@@ -14,6 +12,7 @@ namespace TUMVis {
      * The PipelineEvaluator evaluates its pipeline in its own thread.
      * Evaluation is implemented using condidional wait - hence the pipeline is only evaluated when
      * \a pipeline emits the s_PipelineInvalidated signal.
+     * 
      * \sa  Runnable
      */
     class PipelineEvaluator : public Runnable, public sigslot::has_slots<> {
@@ -27,7 +26,7 @@ namespace TUMVis {
         /**
          * Destructor, stops and waits for the evaluation thread if it's still running.
          */
-        ~PipelineEvaluator();
+        virtual ~PipelineEvaluator();
 
         /// \see Runnable::stop
         void stop();

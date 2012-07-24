@@ -18,9 +18,6 @@ SliceVis* sliceVis = 0;
 TumVisPainter* painter = 0;
 PipelineEvaluator* pe;
 
-void startPainter() {
-    painter->run();
-}
 /**
  * TUMVis main function, application entry point
  *
@@ -31,8 +28,8 @@ void startPainter() {
 int main(int argc, char** argv) {  
     tgt::QtApplication* app = new tgt::QtApplication(argc, argv);
     tgt::QtContextManager::init();
-    tgt::QtCanvas* renderCanvas = CtxtMgr.createContext("render", "TUMVis");
-    tgt::QtCanvas* sliceVisCanvas = CtxtMgr.createContext("sliceVis", "SliceVis");
+    tgt::QtThreadedCanvas* renderCanvas = CtxtMgr.createContext("render", "TUMVis");
+    tgt::QtThreadedCanvas* sliceVisCanvas = CtxtMgr.createContext("sliceVis", "SliceVis");
     
     tbb::task_scheduler_init init;
     renderCanvas->getContext()->acquire();
@@ -75,14 +72,12 @@ int main(int argc, char** argv) {
 
     pe = new PipelineEvaluator(sliceVis);
     pe->start();
-    std::thread painterThread(&startPainter);
+    painter->start();
 
     app->run();
 
-    painter->stop();
     pe->stop();
-
-    painterThread.join();
+    painter->stop();
 
     sliceVis->deinit();
     painter->deinit();

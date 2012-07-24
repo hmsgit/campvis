@@ -16,14 +16,15 @@ namespace tgt {
         _contexts.clear();
     }
 
-    QtCanvas* QtContextManager::createContext(const std::string& key, const std::string& title /*= ""*/, const ivec2& size /*= ivec2(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)*/, const GLCanvas::Buffers buffers /*= RGBADD*/, QWidget* parent /*= 0*/, bool shared /*= true*/, Qt::WFlags f /*= 0*/, char* name /*= 0*/)
+    QtThreadedCanvas* QtContextManager::createContext(const std::string& key, const std::string& title /*= ""*/, const ivec2& size /*= ivec2(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)*/, const GLCanvas::Buffers buffers /*= RGBADD*/, QWidget* parent /*= 0*/, bool shared /*= true*/, Qt::WFlags f /*= 0*/, char* name /*= 0*/)
     {
         tgtAssert(_contexts.find(key) == _contexts.end(), "A context with the same key already exists!");
 
-        QtCanvas* toReturn = new QtCanvas(title, size, buffers, parent, shared, f, name);
+        QtThreadedCanvas* toReturn = new QtThreadedCanvas(title, size, buffers, parent, shared, f, name);
         _contexts.insert(std::make_pair(key, toReturn));
 
         toReturn->makeCurrent();
+        // Init GLEW for this context
         GLenum err = glewInit();
         if (err != GLEW_OK) {
             // Problem: glewInit failed, something is seriously wrong.
@@ -75,7 +76,7 @@ namespace tgt {
         _glMutex.unlock();
     }
 
-    QMutex& QtContextManager::getGlMutex() {
+    tbb::mutex& QtContextManager::getGlMutex() {
         return _glMutex;
     }
 

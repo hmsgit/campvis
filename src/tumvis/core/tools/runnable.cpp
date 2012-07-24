@@ -21,7 +21,8 @@ namespace TUMVis {
     void Runnable::stop() {
         _stopExecution = true; 
         try { 
-            _thread.join(); 
+            if (_thread.joinable())
+                _thread.join(); 
         } 
         catch(std::exception& e) { 
             LERRORC("TUMVis.core.tools.Runnable", "Caught exception during _thread.join: " << e.what());

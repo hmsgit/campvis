@@ -2,7 +2,9 @@
 
 #include "tgt/assert.h"
 #include "tgt/camera.h"
-#include "tgt/glcontext.h"
+#include "tgt/qt/qtthreadedcanvas.h"
+#include "tgt/qt/qtglcontext.h"
+#include "tgt/qt/qtcontextmanager.h"
 #include "tgt/quadrenderer.h"
 #include "tgt/quadric.h"
 
@@ -11,80 +13,104 @@
 namespace TUMVis {
     const std::string TumVisPainter::loggerCat_ = "TUMVis.core.TumVisPainter";
 
-    TumVisPainter::TumVisPainter(tgt::QtCanvas* canvas, VisualizationPipeline* pipeline)
-        : tgt::QtThreadedPainter(canvas)
+    TumVisPainter::TumVisPainter(tgt::QtThreadedCanvas* canvas, VisualizationPipeline* pipeline)
+        : Runnable()
+        , tgt::Painter(canvas)
         , _pipeline(0)
-        , _dirty(0)
-        , _currentlyRendering(false)
         , _copyShader(0)
     {
         tgtAssert(getCanvas() != 0, "The given canvas must not be 0!");
+        _dirty = true;
         setPipeline(pipeline);
+    }
+
+    TumVisPainter::~TumVisPainter() {
+
+    }
+
+    void TumVisPainter::stop() {
+        // we need to execute run() one more time to ensure correct release of the OpenGL context
+        _stopExecution = true;
+        _renderCondition.notify_all();
+
+        Runnable::stop();
+    }
+
+    void TumVisPainter::run() {
+        std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
+
+        while (! _stopExecution) {
+            getCanvas()->getContext()->acquire();
+            paint();
+            getCanvas()->swap();
+
+            while (!_stopExecution && !_dirty)
+                _renderCondition.wait(lock);
+        }
+
+        // release OpenGL context, so that other threads can access it
+        CtxtMgr.releaseCurrentContext();
     }
 
     void TumVisPainter::paint() {
         if (getCanvas() == 0)
             return;
 
-        const tgt::ivec2& size = getCanvas()->getSize();
-        glViewport(0, 0, size.x, size.y);
+        while (_dirty) {
+            _dirty = false;
 
-        // try get Data
-        const ImageDataRenderTarget* image = _pipeline->getRenderTarget();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        if (image != 0) {
-            // activate shader
-            _copyShader->activate();
-            _copyShader->setIgnoreUniformLocationError(true);
-            _copyShader->setUniform("_viewportSize", size);
-            _copyShader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(size));
-            _copyShader->setIgnoreUniformLocationError(false);
+            const tgt::ivec2& size = getCanvas()->getSize();
+            glViewport(0, 0, size.x, size.y);
 
-            // bind input textures
-            tgt::TextureUnit colorUnit, depthUnit;
-            image->bind(_copyShader, colorUnit, depthUnit);
-            LGL_ERROR;
+            // try get Data
+            const ImageDataRenderTarget* image = _pipeline->getRenderTarget();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            if (image != 0) {
+                // activate shader
+                _copyShader->activate();
+                _copyShader->setIgnoreUniformLocationError(true);
+                _copyShader->setUniform("_viewportSize", size);
+                _copyShader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(size));
+                _copyShader->setIgnoreUniformLocationError(false);
 
-            // execute the shader
-            tgt::QuadRenderer::renderQuad();
-            _copyShader->deactivate();
-            LGL_ERROR;
+                // bind input textures
+                tgt::TextureUnit colorUnit, depthUnit;
+                image->bind(_copyShader, colorUnit, depthUnit);
+                LGL_ERROR;
 
-        }
-        else {
-            // TODO: render some nifty error texture
-            //       so long, we do some dummy rendering
-            tgt::Camera c(tgt::vec3(0.f,0.f,2.f)); 
-            c.look();  
-            glColor3f(1.f, 0.f, 0.f);  
-            tgt::Sphere sphere(.5f, 64, 32);  
-            sphere.render();  
-
-            /*
-            // render error texture
-            if (!errorTex_) {
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                return;
+                // execute the shader
+                tgt::QuadRenderer::renderQuad();
+                _copyShader->deactivate();
+                LGL_ERROR;
             }
-            glClear(GL_DEPTH_BUFFER_BIT);
+            else {
+                // TODO: render some nifty error texture
+                //       so long, we do some dummy rendering
+                tgt::Camera c(tgt::vec3(0.f,0.f,2.f)); 
+                c.look();  
+                glColor3f(1.f, 0.f, 0.f);  
+                tgt::Sphere sphere(.5f, 64, 32);  
+                sphere.render();  
 
-            glActiveTexture(GL_TEXTURE0);
-            errorTex_->bind();
-            errorTex_->enable();
+                /*
+                // render error texture
+                if (!errorTex_) {
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    return;
+                }
+                glClear(GL_DEPTH_BUFFER_BIT);
 
-            glColor3f(1.f, 1.f, 1.f);
-            renderQuad();
+                glActiveTexture(GL_TEXTURE0);
+                errorTex_->bind();
+                errorTex_->enable();
 
-            errorTex_->disable();*/
+                glColor3f(1.f, 1.f, 1.f);
+                renderQuad();
+
+                errorTex_->disable();*/
+            }
+            LGL_ERROR;
         }
-        LGL_ERROR;
-
-        {
-            tbb::mutex::scoped_lock lock(_localMutex);
-            _currentlyRendering = false;
-        }
-        if (_dirty)
-            getCanvas()->repaint();
     }
 
     void TumVisPainter::sizeChanged(const tgt::ivec2& size) {
@@ -114,16 +140,23 @@ namespace TUMVis {
         }
 
         _pipeline = pipeline;
-        _pipeline->s_renderTargetChanged.connect(this, &TumVisPainter::onPipelineInvalidated);
+        _pipeline->s_renderTargetChanged.connect(this, &TumVisPainter::onRenderTargetChanged);
         _pipeline->setRenderTargetSize(getCanvas()->getSize());
         if (getCanvas()->getEventHandler() != 0)
             getCanvas()->getEventHandler()->addListenerToFront(_pipeline);
     }
 
-    void TumVisPainter::onPipelineInvalidated() {
+    void TumVisPainter::onRenderTargetChanged() {
         // TODO:    What happens, if the mutex is still acquired?
         //          Will the render thread woken up as soon as it is released?
-        _renderCondition.wakeAll();
+        if (!_stopExecution) {
+            _dirty = true;
+            _renderCondition.notify_all();
+        }
     }
 
+    void TumVisPainter::setCanvas(tgt::GLCanvas* canvas) {
+        tgtAssert(dynamic_cast<tgt::QtThreadedCanvas*>(canvas) != 0, "Canvas must be of type QtThreadedCanvas!");
+        Painter::setCanvas(canvas);
+    }
 }

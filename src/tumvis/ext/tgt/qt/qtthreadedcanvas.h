@@ -20,20 +20,13 @@ namespace tgt {
 
         ~QtThreadedCanvas();
 
-        virtual void setPainter(tgt::Painter* p, bool initPainter = true);
+        // override Qt events so that they don't interfere with the threading.
+        void resizeEvent(QResizeEvent *event) {
+            sizeChanged(ivec2(event->size().width(), event->size().height()));
+        };
 
-        void startRendering();
-        void stopRendering();
-
-
-        /**
-         * This is called by the Qt framework every time the canvas is resized.
-         * This function calls the corresponding GLCanvas method \a sizeChanged.
-         *
-         * @param w The new width of the canvas.
-         * @param h The new height of the canvas.
-         */
-        virtual void resizeGL(int w, int h);
+        // override Qt events so that they don't interfere with the threading.
+        void paintEvent(QPaintEvent *event) { };
 
         /**
          * Called by Qt if there is a paint event; it uses the \a painter_ to paint() something.
@@ -49,8 +42,6 @@ namespace tgt {
          * via updateGL(). This will cause immediate repainting.
          */
         virtual void repaint();
-
-        virtual void closeEvent(QCloseEvent *evt);
 
     protected:
 

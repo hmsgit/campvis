@@ -29,8 +29,10 @@ namespace TUMVis {
     }
 
     void PipelineEvaluator::stop() {
+        // we need to execute run() one more time to ensure correct release of the OpenGL context
         _stopExecution = true;
         _evaluationCondition.notify_all();
+
         Runnable::stop();
     }
 

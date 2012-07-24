@@ -65,13 +65,6 @@ public:
      */
     ~QtCanvas();
 
-    // override Qt events so that they don't interfere with the threading.
-    void resizeEvent(QResizeEvent *event) {
-        sizeChanged(ivec2(event->size().width(), event->size().height()));
-    };
-
-    void paintEvent(QPaintEvent *event) {};
-
 
     /// initialize canvas
     virtual void init();

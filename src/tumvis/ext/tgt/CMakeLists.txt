@@ -75,7 +75,6 @@ SET(TGT_SOURCES
 	qt/qtcontextmanager.cpp
 	qt/qtglcontext.cpp
 	qt/qtthreadedcanvas.cpp
-	qt/qtthreadedpainter.cpp
 	qt/qttimer.cpp
 )
 
