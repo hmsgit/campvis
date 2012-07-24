@@ -18,11 +18,6 @@ SliceVis* sliceVis = 0;
 TumVisPainter* painter = 0;
 PipelineEvaluator* pe;
 
-void startEvaluator() {
-    pe = new PipelineEvaluator(sliceVis);
-    pe->startEvaluation();
-}
-
 void startPainter() {
     painter->run();
 }
@@ -78,15 +73,15 @@ int main(int argc, char** argv) {
     // disconnect OpenGL context from this thread so that the other threads can acquire an OpenGL context.
     CtxtMgr.releaseCurrentContext();
 
-    std::thread evaluatorThread(&startEvaluator);
+    pe = new PipelineEvaluator(sliceVis);
+    pe->start();
     std::thread painterThread(&startPainter);
 
     app->run();
 
     painter->stop();
-    pe->stopEvaluation();
+    pe->stop();
 
-    evaluatorThread.join();
     painterThread.join();
 
     sliceVis->deinit();

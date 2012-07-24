@@ -28,7 +28,7 @@ SET(TGT_SOURCES
 	assert.cpp
 	bounds.cpp
 	bspline.cpp
-	buffer.cpp
+#	buffer.cpp
 	camera.cpp
 	catmullromspline.cpp
 	curve.cpp

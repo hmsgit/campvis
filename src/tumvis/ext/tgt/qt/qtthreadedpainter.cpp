@@ -39,7 +39,9 @@ namespace tgt {
             _renderCondition.wait(&CtxtMgr.getGlMutex());
             qtContext->acquire();
         }
-        //exit();
+
+        // release OpenGL context, so that other threads can access it
+        CtxtMgr.releaseCurrentContext();
     }
 
     void QtThreadedPainter::setCanvas(GLCanvas* canvas) {
