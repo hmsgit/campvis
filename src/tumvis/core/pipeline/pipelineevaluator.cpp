@@ -6,19 +6,21 @@ namespace TUMVis {
 
     PipelineEvaluator::PipelineEvaluator(AbstractPipeline* pipeline)
         : _pipeline(pipeline)
-        , _evaluatePipeline(false)
+        , _evaluationThread()
     {
         tgtAssert(pipeline != 0, "Pipeline must not be 0.");
+        _evaluatePipeline = false;
         pipeline->s_PipelineInvalidated.connect(this, &PipelineEvaluator::OnPipelineInvalidated);
     }
 
     PipelineEvaluator::~PipelineEvaluator() {
         _pipeline->s_PipelineInvalidated.disconnect(this);
+
     }
 
     void PipelineEvaluator::startEvaluation() {
         _evaluatePipeline = true;
-        std::unique_lock<tbb::mutex> lock(_pipeline->getEvaluationMutex());
+        std::unique_lock<tbb::mutex> lock(_pipeline->_evaluationMutex);
 
         while (_evaluatePipeline) {
             _pipeline->execute();

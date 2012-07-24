@@ -67,7 +67,6 @@ public:
 
     // override Qt events so that they don't interfere with the threading.
     void resizeEvent(QResizeEvent *event) {
-        QWidget::resizeEvent(event);
         sizeChanged(ivec2(event->size().width(), event->size().height()));
     };
 

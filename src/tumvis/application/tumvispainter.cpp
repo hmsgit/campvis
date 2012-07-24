@@ -89,7 +89,6 @@ namespace TUMVis {
 
     void TumVisPainter::sizeChanged(const tgt::ivec2& size) {
         _pipeline->setRenderTargetSize(size);
-        _renderCondition.wakeAll();
     }
 
     void TumVisPainter::init() {
@@ -100,6 +99,10 @@ namespace TUMVis {
         catch (tgt::Exception& e) {
             LERRORC("main.cpp", "Encountered tgt::Exception: " << e.what());
         }
+    }
+
+    void TumVisPainter::deinit() {
+        ShdrMgr.dispose(_copyShader);
     }
 
     void TumVisPainter::setPipeline(VisualizationPipeline* pipeline) {

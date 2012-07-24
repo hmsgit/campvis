@@ -4,9 +4,10 @@ namespace TUMVis {
 
     VisualizationProcessor::VisualizationProcessor(GenericProperty<tgt::ivec2>& canvasSize)
         : AbstractProcessor()
-        , _canvasSize("canvasSize", "Canvas Size", canvasSize.getValue())
+        , _renderTargetSize("canvasSize", "Canvas Size", canvasSize.getValue())
     {
-        canvasSize.addSharedProperty(&_canvasSize);
+        canvasSize.addSharedProperty(&_renderTargetSize);
+        _renderTargetSize.addObserver(this);
     }
 
     VisualizationProcessor::~VisualizationProcessor() {

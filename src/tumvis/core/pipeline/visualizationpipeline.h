@@ -40,6 +40,12 @@ namespace TUMVis {
         virtual void init();
 
         /**
+         * Deinitializes this pipeline and all of its processors.
+         * \note    When overwriting this method, make sure to call the base class version first.
+         */
+        virtual void deinit();
+
+        /**
          * Execute this pipeline.
          **/
         virtual void execute() = 0;
@@ -86,7 +92,7 @@ namespace TUMVis {
          */
         void onDataContainerDataAdded(const std::string& name, const DataHandle* dh);
 
-
+        /// Signal emitted when the pipeline's render target has changed
         sigslot::signal0<> s_renderTargetChanged;
 
     protected:

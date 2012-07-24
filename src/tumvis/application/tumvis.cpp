@@ -12,8 +12,6 @@
 #include "core/pipeline/pipelineevaluator.h"
 #include "modules/pipelines/slicevis.h"
 
-#include <functional>
-
 using namespace TUMVis;
 
 SliceVis* sliceVis = 0;
@@ -44,7 +42,6 @@ int main(int argc, char** argv) {
     tbb::task_scheduler_init init;
     renderCanvas->getContext()->acquire();
     app->addCanvas(renderCanvas);
-    //app->addCanvas(sliceVisCanvas);
     app->init();
     LogMgr.getConsoleLog()->addCat("", true);
     LGL_ERROR;
@@ -91,6 +88,12 @@ int main(int argc, char** argv) {
 
     evaluatorThread.join();
     painterThread.join();
+
+    sliceVis->deinit();
+    painter->deinit();
+    tgt::deinitGL();
+    tgt::QtContextManager::deinit();
+    tgt::deinit();
 
     delete painter;
     delete sliceVis;

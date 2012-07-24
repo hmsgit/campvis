@@ -15,12 +15,14 @@
 #include <vector>
 
 namespace TUMVis {
-
+    class PipelineEvaluator;
     /**
      * Abstract base class for TUMVis Pipelines.
      * 
      */
     class AbstractPipeline : public GenericObserver<ProcessorObserverArgs> {
+    friend class PipelineEvaluator;
+
     public:
         /**
          * Creates a AbstractPipeline.
@@ -34,11 +36,18 @@ namespace TUMVis {
 
 
         /**
-         * Initializes the OpenGL context of the pipeline and its processors.
+         * Initializes this pipeline and all of its processors.
+         * Everything that requires a valid OpenGL context or is otherwise expensive gets in here.
          * 
          * \note    When overwriting this method, make sure to call the base class version first.
          */
         virtual void init();
+
+        /**
+         * Deinitializes this pipeline and all of its processors.
+         * \note    When overwriting this method, make sure to call the base class version first.
+         */
+        virtual void deinit();
 
         /**
          * Execute this pipeline.
@@ -65,8 +74,6 @@ namespace TUMVis {
          */
         virtual void onNotify(const ProcessorObserverArgs& poa);
 
-        tbb::mutex& getEvaluationMutex();
-
         InvalidationLevel& getInvalidationLevel();
 
 
@@ -85,7 +92,7 @@ namespace TUMVis {
         InvalidationLevel _invalidationLevel;               ///< current invalidation level
 
         tbb::spin_mutex _localMutex;                        ///< mutex for altering local members
-        tbb::mutex _evaluationMutex;                ///< mutex for the evaluation of this pipeline
+        tbb::mutex _evaluationMutex;                        ///< mutex for the evaluation of this pipeline
 
         static const std::string loggerCat_;
     };

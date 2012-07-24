@@ -31,6 +31,10 @@ namespace TUMVis {
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/sliceextractor.frag", "", false);
     }
 
+    void SliceExtractor::deinit() {
+        ShdrMgr.dispose(_shader);
+    }
+
     void SliceExtractor::process(DataContainer& data) {
         const ImageDataLocal* img = data.getTypedData<ImageDataLocal>(_sourceImageID.getValue());
 
@@ -40,7 +44,7 @@ namespace TUMVis {
                 const tgt::svec3& imgSize = img->getSize();
                 ImageDataLocal* slice = img->getSubImage(tgt::svec3(0, 0, _sliceNumber.getValue()), tgt::svec3(imgSize.x-1, imgSize.y-1, _sliceNumber.getValue()));
                 ImageDataGL* glData = ImageDataConverter::tryConvert<ImageDataGL>(slice);
-                ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_canvasSize.getValue(), 1));
+                ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
 
                 _shader->activate();
                 tgt::TextureUnit inputUnit;

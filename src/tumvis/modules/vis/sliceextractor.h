@@ -26,8 +26,11 @@ namespace TUMVis {
          **/
         virtual ~SliceExtractor();
 
-
+        /// \see AbstractProcessor::init
         virtual void init();
+
+        /// \see AbstractProcessor::deinit
+        virtual void deinit();
 
         virtual void process(DataContainer& data);
 

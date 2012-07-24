@@ -45,6 +45,11 @@ namespace TUMVis {
         AbstractPipeline::init();
     }
 
+    void VisualizationPipeline::deinit() {
+        tgt::GLContextScopedLock lock(_canvas->getContext());
+        AbstractPipeline::deinit();
+    }
+
     const tgt::ivec2& VisualizationPipeline::getRenderTargetSize() const {
         return _renderTargetSize.getValue();
     }
@@ -66,7 +71,7 @@ namespace TUMVis {
     void VisualizationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor& processor) {
         tgt::GLContextScopedLock lock(_canvas->getContext());
         executeProcessor(processor);
-        glFlush();
+        glFlush();  // TODO: is glFlush enough or do we need a glFinish here?
     }
 
 }

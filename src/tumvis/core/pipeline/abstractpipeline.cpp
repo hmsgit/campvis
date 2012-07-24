@@ -27,6 +27,18 @@ namespace TUMVis {
          }
     }
 
+    void AbstractPipeline::deinit() {
+        // deinitialize all processors:
+        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
+            try {
+                (*it)->deinit();
+            }
+            catch (tgt::Exception& e) {
+                LERROR("Caught Exception during deinitialization of processor: " << e.what());
+            }
+        }
+    }
+
     void AbstractPipeline::onNotify(const ProcessorObserverArgs& poa) {
         _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
         s_PipelineInvalidated();
@@ -40,10 +52,6 @@ namespace TUMVis {
         processor.lockProperties();
         processor.process(_data);
         processor.unlockProperties();
-    }
-
-    tbb::mutex& AbstractPipeline::getEvaluationMutex() {
-        return _evaluationMutex;
     }
 
     InvalidationLevel& AbstractPipeline::getInvalidationLevel() {

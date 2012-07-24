@@ -9,25 +9,25 @@
 namespace TUMVis {
 
     /**
-     * Abstract base class for TUMVis Processors.
-     * A processor implements a specific task, which it performs on the DataCollection passed
-     * during process(). Properties provide a transparent layer for adjusting the processor's 
-     * behaviour.
-     * Once a processor has finished it sets it should set its invalidation level to valid. As
-     * soon as one of its properties changes, the processor will be notified and possibliy
-     * change its invalidation level. Observing pipelines will be notified of this and can
-     * and have to decide which part of the pipeline has to be re-evaluated wrt. the processor's
-     * invalidation level.
+     * Specialization of AbstractProcessor for visualization purposes.
+     * VisualizationProcessors are required to be called by a VisualizationPipeline which ensure
+     * to provide a valid OpenGL context when calling the processor's process() method. Hence, a
+     * VisualizationProcessor is allowed/capable of performing OpenGl operations.
+     * For determining the canvas/viewport size, a VisualizationProcessor gets a reference to the
+     * parent pipeline's render target size property during instantiation.
      * 
-     * \sa AbstractPipeline
+     * \sa VisualizationPipeline
      */
     class VisualizationProcessor : public AbstractProcessor {
     public:
 
         /**
          * Creates a VisualizationProcessor.
+         * \note    The render target size property of this VisualizationProcessor will automatically 
+         *          be assigned as shared property of the given \a renderTargetSize property.
+         * \param   renderTargetSize    Reference to the parent pipeline's render target size property.
          */
-        VisualizationProcessor(GenericProperty<tgt::ivec2>& canvasSize);
+        VisualizationProcessor(GenericProperty<tgt::ivec2>& renderTargetSize);
 
         /**
          * Virtual Destructor
@@ -36,7 +36,7 @@ namespace TUMVis {
 
 
     protected:
-        GenericProperty<tgt::ivec2> _canvasSize;        ///< Viewport size of target canvas
+        GenericProperty<tgt::ivec2> _renderTargetSize;        ///< Viewport size of target canvas
     };
 
 }

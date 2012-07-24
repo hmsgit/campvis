@@ -69,10 +69,18 @@ namespace TUMVis {
 
 
         /**
-         * Initializes the OpenGL context of the processor.
+         * Initializes the processor.
+         * Everything that requires a valid OpenGL context or is otherwise expensive gets in here.
+         * 
          * \note    When overwriting this method, make sure to call the base class version first.
          */
         virtual void init();
+        
+        /**
+         * Deinitializes this processors.
+         * \note    When overwriting this method, make sure to call the base class version first.
+         */
+        virtual void deinit();
 
         /**
          * Execute this processor.

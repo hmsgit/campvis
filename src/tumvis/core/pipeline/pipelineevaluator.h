@@ -3,12 +3,14 @@
 
 #include "sigslot/sigslot.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "tbb/include/tbb/compat/thread"
 #include "tbb/include/tbb/compat/condition_variable"
+#include "tbb/include/tbb/atomic.h"
 
 namespace TUMVis {
 
     /**
-     * 
+     * The PipelineEvaluator
      */
     class PipelineEvaluator : public sigslot::has_slots<> {
     public:
@@ -18,8 +20,9 @@ namespace TUMVis {
 
 
         void startEvaluation();
-
         void stopEvaluation();
+
+        void evaluate();
 
         void OnPipelineInvalidated();
 
@@ -27,7 +30,8 @@ namespace TUMVis {
     protected:
 
         AbstractPipeline* _pipeline;
-        bool _evaluatePipeline;
+        tbb::atomic<bool> _evaluatePipeline;
+        std::thread _evaluationThread;
         std::condition_variable _evaluationCondition;
 
         static const std::string loggerCat_;
