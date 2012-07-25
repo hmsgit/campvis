@@ -60,8 +60,8 @@ namespace TUMVis {
         }
     }
 
-    const ImageDataRenderTarget* VisualizationPipeline::getRenderTarget() const {
-        return _data.getTypedData<ImageDataRenderTarget>(_renderTargetID.getValue());
+    const std::string& VisualizationPipeline::getRenderTargetID() const {
+        return _renderTargetID.getValue();
     }
 
     void VisualizationPipeline::setRenderTargetSize(const tgt::ivec2& size) {

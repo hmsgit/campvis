@@ -47,7 +47,7 @@ namespace TUMVis {
             executeProcessor(_imageReader);
 
             // convert data
-            const ImageData* img = _data.getTypedData<ImageData>("reader.output");
+            DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
             ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
             if (local != 0) {
                 _data.addData("se.input", local);

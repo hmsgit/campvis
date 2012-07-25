@@ -76,14 +76,10 @@ namespace TUMVis {
         const tgt::ivec2& getRenderTargetSize() const;
 
         /**
-         * Returns the DataHandle with the render target of this VisualizationPipeline in its current state.
-         * 
-         * \todo    This is not thread-safe, the object might be destroyed at any time. 
-         *          Time for implementing reference counting?
-         *          
+         * Returns the ID of the render target image to be rendered to the canvas
          * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
          */
-        const ImageDataRenderTarget* getRenderTarget() const;
+        const std::string& getRenderTargetID() const;
 
         /**
          * Gets called when the data collection of this pipeline has changed and thus has notified its observers.

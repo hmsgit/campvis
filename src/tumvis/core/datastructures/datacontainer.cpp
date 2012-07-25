@@ -1,4 +1,5 @@
 #include "datacontainer.h"
+#include "tgt/assert.h"
 
 namespace TUMVis {
     const std::string DataContainer::loggerCat_ = "TUMVis.core.datastructures.DataContainer";
@@ -22,6 +23,7 @@ namespace TUMVis {
     }
 
     void DataContainer::addDataHandle(const std::string& name, const DataHandle* dh) {
+        tgtAssert(dh != 0, "DataHandle must not be 0.");
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
             std::map<std::string, const DataHandle*>::iterator it = _handles.lower_bound(name);
@@ -47,6 +49,6 @@ namespace TUMVis {
         if (it == _handles.end())
             return 0;
         else
-            return it->second;
+            return new DataHandle(*it->second);
     }
 }

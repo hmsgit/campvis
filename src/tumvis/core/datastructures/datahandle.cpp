@@ -11,7 +11,6 @@ namespace TUMVis {
     DataHandle::DataHandle(AbstractData* data) 
         : _data(data)
     {
-        tgtAssert(_data != 0, "Provided data must not be 0!");
         init();
     }
 
@@ -35,7 +34,8 @@ namespace TUMVis {
     }
 
     DataHandle::~DataHandle() {
-        _data->removeReference();
+        if (_data)
+            _data->removeReference();
     }
 
 
@@ -52,6 +52,9 @@ namespace TUMVis {
     }
 
     void DataHandle::init() {
+        if (_data == 0)
+            return;
+
         if (! _data->isShareable())
             _data = _data->clone();
         _data->addReference();

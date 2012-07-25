@@ -41,7 +41,7 @@ namespace TUMVis {
     }
 
     void SliceExtractor::process(DataContainer& data) {
-        const ImageDataLocal* img = data.getTypedData<ImageDataLocal>(_sourceImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataLocal> img(data, _sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {

@@ -29,6 +29,66 @@ namespace TUMVis {
     class DataContainer {
     public:
         /**
+         * Proxy class for scoped strongly-typed access to the data of a DataContainer.
+         * From the outside ScopedTypedData<T> behaves exactly like a const T*, but internally it preserves the
+         * reference counting of a DataHandle. Use this class when you want temporary access to a strongly-typed
+         * data item in a DataContainer but don't want to to the dynamic_cast yourself.
+         *
+         * \tparam  T   Base class of the DataHandle data to test for
+         */
+        template<typename T>
+        struct ScopedTypedData {
+            /**
+             * Creates a new DataHandle to the data item with the key \a name in \a dc, that behaves like a T*.
+             * \param   dc      DataContainer to grab data from
+             * \param   name    Key of the DataHandle to search for
+             */
+            ScopedTypedData(const DataContainer& dc, const std::string& name)
+                : dh(dc.getData(name))
+                , data(0)
+            {
+                if (dh != 0 && dh->getData() != 0) {
+                    data = dynamic_cast<const T*>(dh->getData());
+                }
+            };
+
+            /**
+             * Destructor, deletes the internal DataHandle.
+             */
+            ~ScopedTypedData() {
+                if (dh) {
+                    delete dh;
+                }
+            };
+
+            /**
+             * Implicit conversion operator to const T*.
+             * \return  The data in the DataHandle, may be 0 when no DataHandle was found, or the data is of the wrong type.
+             */
+            operator const T*() {
+                return data;
+            }
+
+            /**
+             * Implicit arrow operator to const T*.
+             * \return  The data in the DataHandle, may be 0 when no DataHandle was found, or the data is of the wrong type.
+             */
+            const T* operator->() const {
+                return data;
+            }
+
+        private:
+            /// Not copy-constructable
+            ScopedTypedData(const ScopedTypedData& rhs);
+            /// Not assignable
+            ScopedTypedData& operator=(const ScopedTypedData& rhs);
+
+            const DataHandle* dh;   ///< DataHandle, may be 0
+            const T* data;          ///< strongly-typed pointer to data, may be 0
+        };
+
+
+        /**
          * Creates a new empty DataContainer
          */
         DataContainer();
@@ -76,17 +136,6 @@ namespace TUMVis {
          */
         const DataHandle* getData(const std::string& name) const;
 
-        /**
-         * Get the DataHandle with the given name from this container and tries to dynamic_cast it to const T*.
-         * If no such DataHandle exists or the dynamic_cast fails, this method returns 0.
-         *
-         * \param   name    Key of the DataHandle to search for
-         * \tparam  T       Target type of data for dynamic_cast.
-         * \return  The stored DataHandle with the given name, casted to const T*, 0 if no such DataHandle exists or conversion failed.
-         */
-        template<typename T>
-        inline const T* getTypedData(const std::string& name) const;
-
 
         sigslot::signal2<const std::string&, const DataHandle*> s_dataAdded;
 
@@ -96,14 +145,6 @@ namespace TUMVis {
 
         static const std::string loggerCat_;
     };
-
-    template<typename T>
-    const T* TUMVis::DataContainer::getTypedData(const std::string& name) const {
-        const DataHandle* dh = getData(name);
-        if (dh != 0)
-            return dynamic_cast<const T*>(dh->getData());
-        return 0;
-    }
 
 }
 
