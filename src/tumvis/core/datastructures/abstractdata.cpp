@@ -2,7 +2,9 @@
 
 namespace TUMVis {
 
-    AbstractData::AbstractData() {
+    AbstractData::AbstractData() 
+        : ReferenceCounted()
+    {
     }
 
     AbstractData::~AbstractData() {

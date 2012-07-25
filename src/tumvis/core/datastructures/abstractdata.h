@@ -1,6 +1,8 @@
 #ifndef ABSTRACTDATA_H__
 #define ABSTRACTDATA_H__
 
+#include "core/tools/referencecounted.h"
+
 namespace TUMVis {
 
     class DataHandle;
@@ -10,7 +12,7 @@ namespace TUMVis {
      * 
      * \todo 
      */
-    class AbstractData {
+    class AbstractData : public ReferenceCounted {
     public:
         AbstractData();
 

@@ -15,13 +15,13 @@ namespace TUMVis {
      * A DataContainer manages instances of AbstractData and offers access to them via string identifiers (names/keys).
      * Therefore, it stores them in DataHandles which take ownership of the AbstractData instance. Hence,
      * as soon as an AbstractData instance is added to a DataContainer via DataContainer::addData(), its 
-     * lifetime is managed by the wrapping DataHandle instance.
+     * lifetime is managed by the wrapping DataHandle instance and its reference counting mechanism.
      * Because the DataHandles are stored as const handles, the underlying data cannot be changed anymore. This
      * also ensures (hopefully) that nobody can do messy things, such as changing the data while some other 
-     * thread is reading it or adding the same AbstractData instance twice to a DataContainer (which would 
-     * really mess up the lifetime management!).
+     * thread is reading it. Theoretically this should be possible, but a correct implementation would require
+     * some brain fuck.
      * 
-     * \todo    We definately want thread-safety here!
+     * \todo    Check thread-safety
      * 
      * \todo    If the original data changes, the other objects accessing that very DataHandle might want to 
      *          get notified of the change. Hence, some observer pattern might be useful.
