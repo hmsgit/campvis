@@ -2,8 +2,6 @@
 #define QTTHREADEDCANVAS_H__
 
 #include "tgt/qt/qtcanvas.h"
-#include <qmutex.h>
-#include <qwaitcondition.h>
 
 namespace tgt {
 

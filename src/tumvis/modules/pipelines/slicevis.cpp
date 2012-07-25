@@ -27,6 +27,8 @@ namespace TUMVis {
 
         _sliceExtractor._sourceImageID.setValue("se.input");
         _sliceExtractor._sliceNumber.setValue(0);
+        // TODO: replace this hardcoded domain by automatically determined from image min/max values
+        _sliceExtractor._transferFunction.getTF()->setIntensityDomain(tgt::vec2(0, 0.05f));
 
         _renderTargetID.setValue("renderTarget");
         _renderTargetID.addSharedProperty(&(_sliceExtractor._targetImageID));

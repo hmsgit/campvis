@@ -5,6 +5,7 @@ INCLUDE(../cmake/commonconf.cmake)
 MESSAGE(STATUS "Configuring TUMVis Core")
 
 FILE(GLOB TUMVIS_CORE_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    classification/*.cpp
     datastructures/*.cpp
     eventhandlers/*.cpp
     pipeline/*.cpp
@@ -13,6 +14,7 @@ FILE(GLOB TUMVIS_CORE_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 FILE(GLOB TUMVIS_CORE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    classification/*.h
     datastructures/*.h
     eventhandlers/*.h
     pipeline/*.h

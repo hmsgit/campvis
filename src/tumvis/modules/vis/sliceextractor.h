@@ -4,9 +4,11 @@
 #include <string>
 
 #include "tgt/shadermanager.h"
+#include "core/classification/abstracttransferfunction.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
+#include "core/properties/transferfunctionproperty.h"
 
 namespace TUMVis {
     class ImageData;
@@ -38,6 +40,7 @@ namespace TUMVis {
         GenericProperty<std::string> _targetImageID;    ///< image ID for output image
 
         NumericProperty<size_t> _sliceNumber;           ///< number of the slice to extract
+        TransferFunctionProperty _transferFunction;     ///< Transfer function
 
     protected:
         void updateProperties(const ImageData* img);

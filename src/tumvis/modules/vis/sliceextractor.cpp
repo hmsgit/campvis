@@ -2,10 +2,13 @@
 #include "tgt/logmanager.h"
 #include "tgt/quadrenderer.h"
 #include "tgt/textureunit.h"
+
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/imagedatarendertarget.h"
 #include "core/datastructures/imagedataconverter.h"
+
+#include "core/classification/simpletransferfunction.h"
 
 namespace TUMVis {
     const std::string SliceExtractor::loggerCat_ = "TUMVis.modules.vis.SliceExtractor";
@@ -15,11 +18,13 @@ namespace TUMVis {
         , _sourceImageID("sourceImageID", "Input Image", "")
         , _targetImageID("targetImageID", "Output Image", "")
         , _sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
+        , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
         _properties.addProperty(&_sourceImageID);
         _properties.addProperty(&_targetImageID);
         _properties.addProperty(&_sliceNumber);
+        _properties.addProperty(&_transferFunction);
         _sliceNumber.addObserver(this);
     }
 
@@ -47,8 +52,9 @@ namespace TUMVis {
                 ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
 
                 _shader->activate();
-                tgt::TextureUnit inputUnit;
+                tgt::TextureUnit inputUnit, tfUnit;
                 glData->bind(_shader, inputUnit);
+                _transferFunction.getTF()->bind(_shader, tfUnit);
 
                 rt->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
