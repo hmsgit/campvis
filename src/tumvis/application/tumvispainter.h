@@ -4,9 +4,7 @@
 
 #include "tgt/logmanager.h"
 #include "tgt/painter.h"
-
 #include "core/tools/runnable.h"
-#include "core/pipeline/visualizationpipeline.h"
 
 namespace tgt {
     class Shader;
@@ -14,6 +12,7 @@ namespace tgt {
 }
 
 namespace TUMVis {
+    class VisualizationPipeline;
 
     /**
      * Painter class for TUMVis, rendering the render target of a VisualizationPipeline.

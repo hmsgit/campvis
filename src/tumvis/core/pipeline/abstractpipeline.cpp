@@ -1,5 +1,7 @@
 #include "abstractpipeline.h"
+
 #include "tgt/exception.h"
+#include "core/pipeline/abstractprocessor.h"
 
 namespace TUMVis {
     const std::string AbstractPipeline::loggerCat_ = "TUMVis.core.datastructures.AbstractPipeline";

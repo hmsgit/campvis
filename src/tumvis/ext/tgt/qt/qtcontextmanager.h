@@ -3,12 +3,13 @@
 
 #include "tgt/singleton.h"
 #include "tgt/qt/qtthreadedcanvas.h"
-#include "tgt/qt/qtglcontext.h"
 #include "tbb/include/tbb/mutex.h"  // TODO: TBB dependency in TGT is not that beautiful...
 #include <map>
 #include <string>
 
 namespace tgt {
+    class QtGLContext;
+    class QtThreadedCanvas;
 
     /**
      * Manages multiple shared OpenGL contexts and offers methods to ensure that only one context is active at a time.
@@ -82,7 +83,7 @@ namespace tgt {
         void unlock();
 
 
-        std::map<std::string, QtCanvas*> _contexts;  ///< Map of all OpenGL contexts
+        std::map<std::string, QtThreadedCanvas*> _contexts;  ///< Map of all OpenGL contexts
         QtGLContext* _currentContext;                   ///< Current active OpenGL context
         tbb::mutex _glMutex;                                ///< Mutex protecting OpenGL for multi-threaded access
     };

@@ -1,5 +1,7 @@
 #include "qtcontextmanager.h"
+
 #include "tgt/assert.h"
+#include "tgt/qt/qtglcontext.h"
 
 namespace tgt {
 
@@ -10,7 +12,7 @@ namespace tgt {
 
     QtContextManager::~QtContextManager()
     {
-        for (std::map<std::string, QtCanvas*>::iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
+        for (std::map<std::string, QtThreadedCanvas*>::iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
             delete it->second;
         }
         _contexts.clear();
@@ -37,24 +39,15 @@ namespace tgt {
     }
 
     QtGLContext* QtContextManager::getContextByKey(const std::string& key) {
-        std::map<std::string, QtCanvas*>::iterator it = _contexts.find(key);
+        std::map<std::string, QtThreadedCanvas*>::iterator it = _contexts.find(key);
         if (it != _contexts.end())
             return it->second->getContext();
         else
             return 0;
     }
 
-
     void QtContextManager::setCurrent(QtGLContext* context) {
         if (_currentContext != context) {
-            if (_currentContext != 0) {
-//                 // TODO:    check whether this is necessary or Qt is already doing this
-//                    glFlush();
-//                    LGL_ERROR;
-//                  _currentContext->getCanvas()->doneCurrent();
-//                  LGL_ERROR;
-            }
-
             if (context == 0) {
                 // explicitely release OpenGL context
                 _currentContext->getCanvas()->doneCurrent();
@@ -84,12 +77,5 @@ namespace tgt {
         glFlush();
         setCurrent(0);
     }
-
-
-
-
-
-
-
 
 }

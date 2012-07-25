@@ -9,6 +9,7 @@
 #include "tgt/quadric.h"
 
 #include "core/datastructures/imagedatarendertarget.h"
+#include "core/pipeline/visualizationpipeline.h"
 
 namespace TUMVis {
     const std::string TumVisPainter::loggerCat_ = "TUMVis.core.TumVisPainter";

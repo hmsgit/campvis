@@ -8,7 +8,7 @@
 namespace tgt {
 
     /**
-     * Subclass of QtCanvas that manages a separate rendering thread.
+     * Subclass of QtCanvas that supports multi-threading.
      */
     class QtThreadedCanvas : public tgt::QtCanvas {
     public:
