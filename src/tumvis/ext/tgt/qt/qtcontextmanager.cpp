@@ -22,6 +22,7 @@ namespace tgt {
     {
         tgtAssert(_contexts.find(key) == _contexts.end(), "A context with the same key already exists!");
 
+        tbb::mutex::scoped_lock lock(_glMutex);
         QtThreadedCanvas* toReturn = new QtThreadedCanvas(title, size, buffers, parent, shared, f, name);
         _contexts.insert(std::make_pair(key, toReturn));
 

@@ -1,3 +1,6 @@
+#ifndef TUMVISPAINTER_H__
+#define TUMVISPAINTER_H__
+
 #include "sigslot/sigslot.h"
 #include "tbb/include/tbb/atomic.h"
 #include "tbb/include/tbb/compat/condition_variable"
@@ -91,3 +94,5 @@ namespace TUMVis {
     };
 
 }
+
+#endif // TUMVISPAINTER_H__

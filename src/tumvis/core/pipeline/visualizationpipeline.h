@@ -23,9 +23,8 @@ namespace TUMVis {
     public:
         /**
          * Creates a VisualizationPipeline.
-         * \param   canvas  Canvas hosting the OpenGL context for this pipeline.
          */
-        VisualizationPipeline(tgt::GLCanvas* canvas);
+        VisualizationPipeline();
 
         /**
          * Virtual Destructor
@@ -35,6 +34,7 @@ namespace TUMVis {
 
         /**
          * Initializes the OpenGL context of the pipeline and its processors.
+         * Pipeline must have a valid canvas set before calling this method.
          * \note    When overwriting this method, make sure to call the base class version first.
          */
         virtual void init();
@@ -47,6 +47,7 @@ namespace TUMVis {
 
         /**
          * Execute this pipeline.
+         * Pipeline must have a valid canvas set before calling this method.
          **/
         virtual void execute() = 0;
 
@@ -62,6 +63,12 @@ namespace TUMVis {
          * \return _properties
          */
         PropertyCollection& getPropertyCollection();
+
+        /**
+         * Sets the Canvas hosting the OpenGL context for this pipeline.
+         * \param   canvas  Canvas hosting the OpenGL context for this pipeline
+         */
+        void setCanvas(tgt::GLCanvas* canvas);
 
         /**
          * Sets the size of the render target

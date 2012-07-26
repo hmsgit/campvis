@@ -8,14 +8,13 @@
 namespace TUMVis {
     const std::string VisualizationPipeline::loggerCat_ = "TUMVis.core.datastructures.VisualizationPipeline";
 
-    VisualizationPipeline::VisualizationPipeline(tgt::GLCanvas* canvas) 
+    VisualizationPipeline::VisualizationPipeline() 
         : AbstractPipeline()
         , tgt::EventListener()
         , _renderTargetSize("canvasSize", "Canvas Size", tgt::ivec2(128, 128))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget")
-        , _canvas(canvas)
+        , _canvas(0)
     {
-        tgtAssert(canvas != 0, "Canvas must not be 0.");
         _data.s_dataAdded.connect(this, &VisualizationPipeline::onDataContainerDataAdded);
     }
 
@@ -41,11 +40,13 @@ namespace TUMVis {
     }
 
     void VisualizationPipeline::init() {
+        tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         tgt::GLContextScopedLock lock(_canvas->getContext());
         AbstractPipeline::init();
     }
 
     void VisualizationPipeline::deinit() {
+        tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         tgt::GLContextScopedLock lock(_canvas->getContext());
         AbstractPipeline::deinit();
     }
@@ -69,9 +70,14 @@ namespace TUMVis {
     }
 
     void VisualizationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor& processor) {
+        tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         tgt::GLContextScopedLock lock(_canvas->getContext());
         executeProcessor(processor);
         glFlush();  // TODO: is glFlush enough or do we need a glFinish here?
+    }
+
+    void VisualizationPipeline::setCanvas(tgt::GLCanvas* canvas) {
+        _canvas = canvas;
     }
 
 }

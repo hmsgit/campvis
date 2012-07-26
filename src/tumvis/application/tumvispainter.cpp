@@ -65,7 +65,6 @@ namespace TUMVis {
 
             // try get Data
             DataContainer::ScopedTypedData<ImageDataRenderTarget> image(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
-            //const ImageDataRenderTarget* image = _pipeline->getRenderTarget();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             if (image != 0) {
                 // activate shader

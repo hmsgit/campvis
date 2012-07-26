@@ -5,8 +5,8 @@
 
 namespace TUMVis {
 
-    SliceVis::SliceVis(tgt::GLCanvas* canvas)
-        : VisualizationPipeline(canvas)
+    SliceVis::SliceVis()
+        : VisualizationPipeline()
         , _imageReader()
         , _sliceExtractor(_renderTargetSize)
         , _wheelHandler(&_sliceExtractor._sliceNumber)
