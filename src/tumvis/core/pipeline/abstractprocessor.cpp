@@ -5,7 +5,9 @@ namespace TUMVis {
     const std::string AbstractProcessor::loggerCat_ = "TUMVis.core.datastructures.Processor";
 
 
-    AbstractProcessor::AbstractProcessor() {
+    AbstractProcessor::AbstractProcessor()
+        : HasPropertyCollection()
+    {
     }
 
     AbstractProcessor::~AbstractProcessor() {
@@ -27,10 +29,6 @@ namespace TUMVis {
 
     void AbstractProcessor::onNotify(const PropertyObserverArgs& poa) {
         applyInvalidationLevel(poa._invalidationLevel);
-    }
-
-    PropertyCollection& AbstractProcessor::getPropertyCollection() {
-        return _properties;
     }
 
     void AbstractProcessor::init() {

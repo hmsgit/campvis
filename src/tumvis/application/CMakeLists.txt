@@ -23,6 +23,7 @@ FILE(GLOB TUMVIS_APPLICATION_HEADERS
 SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/mainwindow.h
     gui/pipelinetreewidget.h
+    gui/propertycollectionwidget.h
 )
 
 #

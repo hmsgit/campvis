@@ -20,7 +20,7 @@ namespace TUMVis {
      * Abstract base class for TUMVis Pipelines.
      * 
      */
-    class AbstractPipeline : public GenericObserver<ProcessorObserverArgs> {
+    class AbstractPipeline : public HasPropertyCollection, public GenericObserver<ProcessorObserverArgs> {
     friend class PipelineEvaluator;
 
     public:
@@ -53,12 +53,6 @@ namespace TUMVis {
          * Execute this pipeline.
          **/
         virtual void execute() = 0;
-
-        /**
-         * Returns the PropertyCollection of this pipeline.
-         * \return _properties
-         */
-        PropertyCollection& getPropertyCollection();
 
         /**
          * Returns the DataContainer of this pipeline
@@ -100,7 +94,6 @@ namespace TUMVis {
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
-        PropertyCollection _properties;                     ///< PropertyCollection of this pipeline, put in here all properties you want to be publicly accessible
         InvalidationLevel _invalidationLevel;               ///< current invalidation level
 
         tbb::spin_mutex _localMutex;                        ///< mutex for altering local members

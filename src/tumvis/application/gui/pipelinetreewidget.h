@@ -36,7 +36,7 @@ namespace TUMVis {
          * \param   column  Column
          * \return  The data of this item at \a column.
          */
-        virtual QVariant getData(int column) const = 0;
+        virtual QVariant getData(int column, int role) const = 0;
 
         /**
          * Returns the parent TreeItem
@@ -77,7 +77,7 @@ namespace TUMVis {
         virtual ~RootTreeItem();
 
         /// \see TreeItem::getData()
-        virtual QVariant getData(int column) const;
+        virtual QVariant getData(int column, int role) const;
     };
 
     /**
@@ -89,7 +89,7 @@ namespace TUMVis {
         virtual ~PipelineTreeItem();
 
         /// \see TreeItem::getData()
-        virtual QVariant getData(int column) const;
+        virtual QVariant getData(int column, int role) const;
 
     private:
         AbstractPipeline* _pipeline;        ///< Base pipeline
@@ -104,7 +104,7 @@ namespace TUMVis {
         virtual ~ProcessorTreeItem();
 
         /// \see TreeItem::getData()
-        virtual QVariant getData(int column) const;
+        virtual QVariant getData(int column, int role) const;
 
     private:
         AbstractProcessor* _processor;      ///< Base processor

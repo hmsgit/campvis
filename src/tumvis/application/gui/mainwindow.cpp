@@ -2,6 +2,8 @@
 
 #include "tgt/assert.h"
 #include "application/tumvisapplication.h"
+#include "core/pipeline/abstractpipeline.h"
+#include "core/pipeline/abstractprocessor.h"
 
 namespace TUMVis {
 
@@ -19,15 +21,49 @@ namespace TUMVis {
     }
 
     void MainWindow::setup() {
-        _pipelineWidget = new PipelineTreeWidget(this);
-        setCentralWidget(_pipelineWidget);
+        _centralWidget = new QWidget(this);
+        QHBoxLayout* boxLayout = new QHBoxLayout();
 
-        connect(this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), _pipelineWidget, SLOT(update(const std::vector<AbstractPipeline*>&)));
+        _pipelineWidget = new PipelineTreeWidget(_centralWidget);
+        boxLayout->addWidget(_pipelineWidget);
+
+        _propCollectionWidget = new PropertyCollectionWidget(_centralWidget);
+        boxLayout->addWidget(_propCollectionWidget);
+
+        _centralWidget->setLayout(boxLayout);
+        setCentralWidget(_centralWidget);
+
+        connect(
+            this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), 
+            _pipelineWidget, SLOT(update(const std::vector<AbstractPipeline*>&)));
+        connect(
+            _pipelineWidget, SIGNAL(clicked(const QModelIndex&)), 
+            this, SLOT(onPipelineWidgetItemClicked(const QModelIndex&)));
+        connect(
+            this, SIGNAL(updatePropCollectionWidget(PropertyCollection*)),
+            _propCollectionWidget, SLOT(updatePropCollection(PropertyCollection*)));
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
     }
 
     void MainWindow::onPipelinesChanged() {
         emit updatePipelineWidget(_application->_pipelines);
+    }
+
+    void MainWindow::onPipelineWidgetItemClicked(const QModelIndex& index) {
+        if (index.isValid()) {
+            // Yak, this is so ugly - another reason why GUI programming sucks...
+            QVariant item = index.data(Qt::UserRole);
+            HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
+            if (ptr != 0) {
+                emit updatePropCollectionWidget(&(ptr->getPropertyCollection()));
+            }
+            else {
+                emit updatePropCollectionWidget(0);
+            }
+        }
+        else {
+            emit updatePropCollectionWidget(0);
+        }
     }
 
 }

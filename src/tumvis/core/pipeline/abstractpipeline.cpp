@@ -7,14 +7,11 @@ namespace TUMVis {
     const std::string AbstractPipeline::loggerCat_ = "TUMVis.core.datastructures.AbstractPipeline";
 
     AbstractPipeline::AbstractPipeline() 
+        : HasPropertyCollection()
     {
     }
 
     AbstractPipeline::~AbstractPipeline() {
-    }
-
-    PropertyCollection& AbstractPipeline::getPropertyCollection() {
-        return _properties;
     }
 
     void AbstractPipeline::init() {

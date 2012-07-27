@@ -4,8 +4,11 @@
 #include "sigslot/sigslot.h"
 #include "application/tumvisapplication.h"
 #include "application/gui/pipelinetreewidget.h"
+#include "application/gui/propertycollectionwidget.h"
 
 #include <QMainWindow>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <vector>
 
 namespace TUMVis {
@@ -35,9 +38,17 @@ namespace TUMVis {
         void onPipelinesChanged();
 
     signals:
-         /// Qt signal for updating the PipelineWidget.
+        /// Qt signal for updating the PipelineWidget.
         void updatePipelineWidget(const std::vector<AbstractPipeline*>&);
+        /// Qt signal for updating the PropertyCollectionWidget
+        void updatePropCollectionWidget(PropertyCollection*);
 
+    private slots:
+        /**
+         * Slot to be called by the PipelineWidget when the selected item changes.
+         * \param   index   Index of the selected item
+         */
+        void onPipelineWidgetItemClicked(const QModelIndex& index);
 
     private:
         /**
@@ -45,10 +56,11 @@ namespace TUMVis {
          */
         void setup();
 
-        TumVisApplication* _application;            ///< Pointer to the application hosting the whole stuff
+        TumVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
 
-        PipelineTreeWidget* _pipelineWidget;        ///< Widget for browsing the active pipelines
-
+        QWidget* _centralWidget;                            ///< Central widget of the MainWindow
+        PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
+        PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
     };
 }
 

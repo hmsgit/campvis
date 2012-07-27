@@ -44,7 +44,7 @@ namespace TUMVis {
      * 
      * \sa AbstractPipeline
      */
-    class AbstractProcessor : public GenericObserver<PropertyObserverArgs>, public GenericObservable<ProcessorObserverArgs> {
+    class AbstractProcessor : public HasPropertyCollection, public GenericObserver<PropertyObserverArgs>, public GenericObservable<ProcessorObserverArgs> {
 
     /**
      * We have to find a trade-off:
@@ -95,12 +95,6 @@ namespace TUMVis {
         const InvalidationLevel& getInvalidationLevel() const;
 
         /**
-         * Returns the PropertyCollection of this processor.
-         * \return  _properties
-         */
-        PropertyCollection& getPropertyCollection();
-
-        /**
          * Gets the name of this very processor. To be defined by every subclass.
          * \return  The name of this processor.
          */
@@ -137,7 +131,6 @@ namespace TUMVis {
     protected:
         InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
 
-        PropertyCollection _properties;             ///< PropertyCollection of this processor
 
 
         static const std::string loggerCat_;

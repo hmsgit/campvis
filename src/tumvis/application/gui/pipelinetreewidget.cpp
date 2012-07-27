@@ -45,11 +45,16 @@ namespace TUMVis {
         tgtAssert(_pipeline != 0, "Pipeline must not be 0.");
     }
 
-    QVariant PipelineTreeItem::getData(int column) const {
-        if (column == 0)
-            return QVariant(QString::fromStdString(_pipeline->getName()));
-
-        return QVariant();
+    QVariant PipelineTreeItem::getData(int column, int role) const {
+        switch (role) {
+            case Qt::DisplayRole:
+                if (column == 0)
+                    return QVariant(QString::fromStdString(_pipeline->getName()));
+            case Qt::UserRole:
+                return qVariantFromValue(static_cast<void*>(_pipeline));
+            default:
+                return QVariant();
+        }
     }
 
     PipelineTreeItem::~PipelineTreeItem() {
@@ -63,11 +68,16 @@ namespace TUMVis {
         tgtAssert(_processor != 0, "Processor must not be 0.");
     }
 
-    QVariant ProcessorTreeItem::getData(int column) const {
-        if (column == 0)
-            return QVariant(QString::fromStdString(_processor->getName()));
-
-        return QVariant();
+    QVariant ProcessorTreeItem::getData(int column, int role) const {
+        switch (role) {
+            case Qt::DisplayRole:
+                if (column == 0)
+                    return QVariant(QString::fromStdString(_processor->getName()));
+            case Qt::UserRole:
+                return qVariantFromValue(static_cast<void*>(_processor));
+            default:
+                return QVariant();
+        }
     }
 
     ProcessorTreeItem::~ProcessorTreeItem() {
@@ -77,11 +87,13 @@ namespace TUMVis {
         : TreeItem(parent)
     {}
 
-    QVariant RootTreeItem::getData(int column) const {
-        if (column == 0)
-            return QVariant(QString("Pipeline/Processor"));
-        else if (column == 1)
-            return QVariant(QString("Description"));
+    QVariant RootTreeItem::getData(int column, int role) const {
+        if (role == Qt::DisplayRole) {
+            if (column == 0)
+                return QVariant(QString("Pipeline/Processor"));
+            else if (column == 1)
+                return QVariant(QString("Description"));
+        }
 
         return QVariant();
     }
@@ -106,11 +118,8 @@ namespace TUMVis {
         if (!index.isValid())
             return QVariant();
 
-        if (role != Qt::DisplayRole)
-            return QVariant();
-
         TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-        return item->getData(index.column());
+        return item->getData(index.column(), role);
     }
 
     Qt::ItemFlags PipelineTreeModel::flags(const QModelIndex &index) const {
@@ -122,7 +131,7 @@ namespace TUMVis {
 
     QVariant PipelineTreeModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const {
         if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-            return _rootItem->getData(section);
+            return _rootItem->getData(section, role);
 
         return QVariant();
     }

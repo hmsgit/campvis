@@ -8,7 +8,6 @@
 
 
 namespace TUMVis {
-
     /**
      * Wrapper for a vector of Properties.
      * Properties can be registered and then accessed via their names.
@@ -77,6 +76,21 @@ namespace TUMVis {
         std::vector<AbstractProperty*>::const_iterator findProperty(const std::string& name) const;
 
         std::vector<AbstractProperty*> _properties;     ///< list of all registered properties
+    };
+
+    class HasPropertyCollection {
+    public:
+        HasPropertyCollection() {};
+        virtual ~HasPropertyCollection() = 0 {};
+
+        /**
+         * Returns the PropertyCollection of this processor.
+         * \return  _properties
+         */
+        PropertyCollection& getPropertyCollection() { return _properties; };
+
+    protected:
+        PropertyCollection _properties;             ///< PropertyCollection of this object
     };
 
 }
