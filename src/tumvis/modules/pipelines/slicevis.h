@@ -21,8 +21,11 @@ namespace TUMVis {
          **/
         virtual ~SliceVis();
 
-        /// \see VisualizationPipeline::init
+        /// \see VisualizationPipeline::init()
         virtual void init();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const;
 
         /**
          * Execute this pipeline.

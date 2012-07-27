@@ -65,6 +65,18 @@ namespace TUMVis {
          * \return _data
          */
         const DataContainer& getDataContainer() const;
+
+        /**
+         * Returns the list of processors of this pipeline.
+         * \return  _processors
+         */
+        const std::vector<AbstractProcessor*>& getProcessors() const;
+
+        /**
+         * Gets the name of this very pipeline. To be defined by every subclass.
+         * \return  The name of this pipeline.
+         */
+        virtual const std::string getName() const = 0;
         
         /**
          * Gets called when one of the observed processors changed and thus notifies its observers.

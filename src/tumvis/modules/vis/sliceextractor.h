@@ -34,6 +34,9 @@ namespace TUMVis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "SliceExtractor"; };
+
         virtual void process(DataContainer& data);
 
         GenericProperty<std::string> _sourceImageID;    ///< image ID for input image

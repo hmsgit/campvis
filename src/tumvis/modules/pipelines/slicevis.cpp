@@ -71,4 +71,8 @@ namespace TUMVis {
         }
     }
 
+    const std::string SliceVis::getName() const {
+        return "SliceVis";
+    }
+
 }

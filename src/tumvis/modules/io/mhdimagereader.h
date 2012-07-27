@@ -31,6 +31,9 @@ namespace TUMVis {
          */
         virtual void process(DataContainer& data);
 
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "MhdImageReader"; };
+
         GenericProperty<std::string> _url;              ///< URL for file to read
         GenericProperty<std::string> _targetImageID;    ///< image ID for read image
 

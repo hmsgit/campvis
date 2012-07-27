@@ -60,4 +60,8 @@ namespace TUMVis {
         return _invalidationLevel;
     }
 
+    const std::vector<AbstractProcessor*>& AbstractPipeline::getProcessors() const {
+        return _processors;
+    }
+
 }

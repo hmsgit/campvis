@@ -3,10 +3,6 @@
 
 using namespace TUMVis;
 
-SliceVis* sliceVis = 0;
-TumVisPainter* painter = 0;
-PipelineEvaluator* pe;
-
 /**
  * TUMVis main function, application entry point
  *

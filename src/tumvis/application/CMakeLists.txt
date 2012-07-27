@@ -6,10 +6,12 @@ MESSAGE(STATUS "Configuring TUMVis Application")
 
 FILE(GLOB TUMVIS_APPLICATION_SOURCES
     *.cpp
+    gui/*.cpp
 )
 
 FILE(GLOB TUMVIS_APPLICATION_HEADERS
     *.h
+    gui/*.h
 )
 
 #SET(TUMVIS_APPLICATION_SOURCES
@@ -19,7 +21,8 @@ FILE(GLOB TUMVIS_APPLICATION_HEADERS
 #)
 
 SET(TUMVIS_APPLICATION_TO_BE_MOCCED
-    tumvisapplication.h
+    gui/mainwindow.h
+    gui/pipelinetreewidget.h
 )
 
 #

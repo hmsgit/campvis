@@ -3,6 +3,7 @@
 #include "tgt/assert.h"
 #include "tgt/exception.h"
 #include "tgt/glcontext.h"
+#include "tgt/gpucapabilities.h"
 #include "tgt/shadermanager.h"
 #include "tgt/qt/qtapplication.h"
 #include "tgt/qt/qtthreadedcanvas.h"
@@ -10,21 +11,28 @@
 #include "tbb/include/tbb/compat/thread"
 
 #include "application/tumvispainter.h"
+#include "application/gui/mainwindow.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/pipeline/pipelineevaluator.h"
 
 namespace TUMVis {
 
+    const std::string TumVisApplication::loggerCat_ = "TUMVis.application.TumVisApplication";
+
     TumVisApplication::TumVisApplication(int argc, char** argv) 
         : QApplication(argc, argv)
         , _localContext(0)
+        , _mainWindow(0)
         , _initialized(false)
         , _argc(argc)
         , _argv(argv)
     {
-        tgt::QtContextManager::init();
+        // Make Xlib and GLX thread safe under X11
+        QApplication::setAttribute(Qt::AA_X11InitThreads);
 
+        _mainWindow = new MainWindow(this);
+        tgt::QtContextManager::init();
     }
 
     TumVisApplication::~TumVisApplication() {
@@ -41,6 +49,7 @@ namespace TUMVis {
             delete *it;
         }
 
+        // TODO: _mainWindow is a Qt pointer and does not need to be deleted - right?
     }
 
     void TumVisApplication::init() {
@@ -56,6 +65,14 @@ namespace TUMVis {
         tgtAssert(_localContext != 0, "Could not create local OpenGL context");
         tgt::initGL(featureset);
         LGL_ERROR;
+
+        // ensure matching OpenGL specs
+        if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_0) {
+            LERROR("Your system does not support OpenGL 3.0, which is mandatory. TUMVis will probably not work as intendet.");
+        }
+        if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_130) {
+            LERROR("Your system does not support GLSL Shader Version 1.30, which is mandatory. TUMVis will probably not work as intendet.");
+        }
 
         if (_argc > 0) {
             // ugly hack
@@ -105,6 +122,8 @@ namespace TUMVis {
         // disconnect OpenGL context from this thread so that the other threads can acquire an OpenGL context.
         CtxtMgr.releaseCurrentContext();
 
+        _mainWindow->show();
+
         // Start evaluator/render threads
         for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
             (*it)->start();
@@ -128,20 +147,19 @@ namespace TUMVis {
     }
 
     void TumVisApplication::addPipeline(AbstractPipeline* pipeline) {
+        tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(pipeline != 0, "Pipeline must not be 0.");
         _pipelines.push_back(pipeline);
 
         PipelineEvaluator* pe = new PipelineEvaluator(pipeline);
         _pipelineEvaluators.push_back(pe);
+
+        s_PipelinesChanged();
     }
 
     void TumVisApplication::addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp) {
+        tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(vp != 0, "Pipeline must not be 0.");
-
-        // TODO: is there a more leightweight method to create a context for the pipeline (just performing off-screen rendering)?
-        tgt::QtThreadedCanvas* evaluationContext = CtxtMgr.createContext(name + "_eval", "", tgt::ivec2(512, 512));
-        vp->setCanvas(evaluationContext);
-        addPipeline(vp);
 
         // create canvas and painter for the VisPipeline and connect all together
         tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "TUMVis", tgt::ivec2(512, 512));
@@ -152,6 +170,11 @@ namespace TUMVis {
         CtxtMgr.releaseCurrentContext();
 
         _visualizations.push_back(std::make_pair(vp, painter));
+
+        // TODO: is there a more leightweight method to create a context for the pipeline (just performing off-screen rendering)?
+        tgt::QtThreadedCanvas* evaluationContext = CtxtMgr.createContext(name + "_eval", "", tgt::ivec2(512, 512));
+        vp->setCanvas(evaluationContext);
+        addPipeline(vp);
     }
 
 }

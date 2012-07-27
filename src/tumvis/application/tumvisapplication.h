@@ -1,6 +1,7 @@
 #ifndef TUMVISAPPLICATION_H__
 #define TUMVISAPPLICATION_H__
 
+#include "sigslot/sigslot.h"
 #include <QApplication>
 #include <utility>
 #include <vector>
@@ -11,6 +12,7 @@ namespace tgt {
 
 namespace TUMVis {
     class AbstractPipeline;
+    class MainWindow;
     class PipelineEvaluator;
     class TumVisPainter;
     class VisualizationPipeline;
@@ -28,6 +30,8 @@ namespace TUMVis {
      *  6) You can now safely destroy your TumVisApplication
      */
     class TumVisApplication : QApplication {
+    friend class MainWindow;
+
     public:
         /**
          * Creates a new TumVisApplication.
@@ -80,22 +84,28 @@ namespace TUMVis {
          */
         int run();
 
+        sigslot::signal0<> s_PipelinesChanged;
+
     private:
         /// All pipelines (incuding VisualizationPipelines)
         std::vector<AbstractPipeline*> _pipelines;
-        /// All pipeline evaluators
+        /// All pipeline evaluators (separated from _pipelines because we probably want multiple pipelines per evaluator later)
         std::vector<PipelineEvaluator*> _pipelineEvaluators;
         /// All visualisations (i.e. VisualizationPipelines with their corresponding painters/canvases)
         std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> > _visualizations;
 
         /// A local OpenGL context used for initialization
         tgt::QtThreadedCanvas* _localContext;
+        /// Main window hosting GUI stuff
+        MainWindow* _mainWindow;
 
         /// Flag, whether TumVisApplication was correctly initialized
         bool _initialized;
 
         int _argc;
         char** _argv;
+
+        static const std::string loggerCat_;
     };
 }
 
