@@ -15,7 +15,7 @@ namespace TUMVis {
     }
 
     MainWindow::~MainWindow() {
-
+        _application->s_PipelinesChanged.disconnect(this);
     }
 
     void MainWindow::setup() {
