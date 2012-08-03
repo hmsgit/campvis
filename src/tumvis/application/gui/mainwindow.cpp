@@ -40,8 +40,8 @@ namespace TUMVis {
             _pipelineWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onPipelineWidgetItemClicked(const QModelIndex&)));
         connect(
-            this, SIGNAL(updatePropCollectionWidget(PropertyCollection*)),
-            _propCollectionWidget, SLOT(updatePropCollection(PropertyCollection*)));
+            this, SIGNAL(updatePropCollectionWidget(HasPropertyCollection*)),
+            _propCollectionWidget, SLOT(updatePropCollection(HasPropertyCollection*)));
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
     }
 
@@ -55,7 +55,7 @@ namespace TUMVis {
             QVariant item = index.data(Qt::UserRole);
             HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
             if (ptr != 0) {
-                emit updatePropCollectionWidget(&(ptr->getPropertyCollection()));
+                emit updatePropCollectionWidget(ptr);
             }
             else {
                 emit updatePropCollectionWidget(0);

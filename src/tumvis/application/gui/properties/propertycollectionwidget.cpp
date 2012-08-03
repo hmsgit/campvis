@@ -1,5 +1,7 @@
 #include "propertycollectionwidget.h"
 
+#include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/abstractproperty.h"
 #include "core/properties/propertycollection.h"
 
@@ -20,7 +22,7 @@ namespace TUMVis {
         qDeleteAll(_widgetList);
     }
 
-    void PropertyCollectionWidget::updatePropCollection(PropertyCollection* propertyCollection) {
+    void PropertyCollectionWidget::updatePropCollection(HasPropertyCollection* propertyCollection) {
         // just some dummy implementation for property widget listing:
         for (QList<QWidget*>::iterator it = _widgetList.begin(); it != _widgetList.end(); ++it) {
             _layout->removeWidget(*it);
@@ -30,7 +32,10 @@ namespace TUMVis {
         
 
         for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
-            QPushButton* propWidget = new QPushButton(QString::fromStdString((*it)->getTitle()));
+            QWidget* propWidget = PropertyWidgetFactory::createWidget(*it);
+            if (propWidget == 0)
+                propWidget = new QPushButton(QString::fromStdString((*it)->getTitle()));
+
             _widgetList.push_back(propWidget);
             _layout->addWidget(propWidget);
         }

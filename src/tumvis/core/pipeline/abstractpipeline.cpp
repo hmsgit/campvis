@@ -38,7 +38,12 @@ namespace TUMVis {
         }
     }
 
-    void AbstractPipeline::onNotify(const ProcessorObserverArgs& poa) {
+    void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
+        _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
+        s_PipelineInvalidated();
+    }
+
+    void AbstractPipeline::onProcessorInvalidated(const AbstractProcessor* processor) {
         _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
         s_PipelineInvalidated();
     }

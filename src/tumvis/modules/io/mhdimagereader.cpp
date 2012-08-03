@@ -19,10 +19,8 @@ namespace TUMVis {
         , _url("url", "Image URL", "")
         , _targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output")
     {
-        _properties.addProperty(&_url);
-        _url.addObserver(this);
-        _properties.addProperty(&_targetImageID);
-        _targetImageID.addObserver(this);
+        addProperty(&_url);
+        addProperty(&_targetImageID);
     }
 
     MhdImageReader::~MhdImageReader() {

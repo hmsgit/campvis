@@ -21,11 +21,10 @@ namespace TUMVis {
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
-        _properties.addProperty(&_sourceImageID);
-        _properties.addProperty(&_targetImageID);
-        _properties.addProperty(&_sliceNumber);
-        _properties.addProperty(&_transferFunction);
-        _sliceNumber.addObserver(this);
+        addProperty(&_sourceImageID);
+        addProperty(&_targetImageID);
+        addProperty(&_sliceNumber);
+        addProperty(&_transferFunction);
     }
 
     SliceExtractor::~SliceExtractor() {

@@ -101,8 +101,11 @@ namespace TUMVis {
         static const std::string loggerCat_;
     };
 
+// = Typedefs =====================================================================================
 
-// - template implementation ----------------------------------------------------------------------
+    typedef NumericProperty<size_t> SizeTProperty;
+
+// = Template Implementation ======================================================================
 
     template<typename T>
     TUMVis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value, const T& minValue, const T& maxValue, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)

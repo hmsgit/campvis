@@ -1,6 +1,7 @@
 #ifndef PROPERTYCOLLECTION_H__
 #define PROPERTYCOLLECTION_H__
 
+#include "sigslot/sigslot.h"
 #include "core/properties/abstractproperty.h"
 
 #include <vector>
@@ -8,18 +9,21 @@
 
 
 namespace TUMVis {
+    /// A PropertyCollection wraps around a bunch of properties - currently its just a typedef...
+    typedef std::vector<AbstractProperty*> PropertyCollection;
+
     /**
-     * Wrapper for a vector of Properties.
-     * Properties can be registered and then accessed via their names.
+     * Abstract base class for classes having a PropertyCollection.
      */
-    class PropertyCollection {
+    class HasPropertyCollection : public sigslot::has_slots<> {
     public:
-        PropertyCollection();
+        HasPropertyCollection();
+
+        virtual ~HasPropertyCollection() = 0;
 
         /**
-         * Registers \a prop as property of this processor. Registered properties can be accessed from
-         * the outside, e.g. via getProperty(). An already existing property with the same name will 
-         * be replaced.
+         * Registers \a prop as property . Registered properties can be accessed from the outside,
+         * e.g. via getProperty(). An already existing property with the same name will be replaced.
          * \note        Processor does _not_ take ownership of the property. Hence, make sure to
          *              unregister the property before destroying/deleting it.
          * \param prop  Property to register
@@ -28,8 +32,8 @@ namespace TUMVis {
 
         /**
          * Unregisters \a prop from this processor.
-         * \sa AbstractProcessor::addProperty
-         * \param prop  Property to unregister.
+         * \sa      HasPropertyCollection::addProperty
+         * \param   prop  Property to unregister.
          */
         void removeProperty(AbstractProperty* prop);
 
@@ -42,11 +46,18 @@ namespace TUMVis {
         AbstractProperty* getProperty(const std::string& name) const;
 
         /**
+         * Returns the PropertyCollection of this processor.
+         * \note    There is also a const overload of this method.
+         * \return  _properties
+         */
+        PropertyCollection& getProperties();
+
+        /**
          * Returns the list of all registered properties.
          * \note    Please do not mess with the non-const pointers in the vector.
          * \return  _properties
          */
-        const std::vector<AbstractProperty*>& getProperties() const;
+        const PropertyCollection& getProperties() const;
 
         /**
          * Calls AbstractProperty::lock() for every registered property.
@@ -60,37 +71,28 @@ namespace TUMVis {
          */
         virtual void unlockAllProperties();
 
-    private:
         /**
-         * Searches _properties for a property named \a name.
-         * \param name  Property name to search for.
-         * \return      An iterator to the search result, _properties.end() if no such property was found.
+         * Slot getting called when one of the observed properties changed and notifies its observers.
+         * \param   prop    Property that emitted the signal
          */
-        std::vector<AbstractProperty*>::iterator findProperty(const std::string& name);
-
-        /**
-         * Searches _properties for a property named \a name.
-         * \param name  Property name to search for.
-         * \return      An iterator to the search result, _properties.end() if no such property was found.
-         */
-        std::vector<AbstractProperty*>::const_iterator findProperty(const std::string& name) const;
-
-        std::vector<AbstractProperty*> _properties;     ///< list of all registered properties
-    };
-
-    class HasPropertyCollection {
-    public:
-        HasPropertyCollection() {};
-        virtual ~HasPropertyCollection() = 0 {};
-
-        /**
-         * Returns the PropertyCollection of this processor.
-         * \return  _properties
-         */
-        PropertyCollection& getPropertyCollection() { return _properties; };
+        virtual void onPropertyChanged(const AbstractProperty* prop) = 0;
 
     protected:
-        PropertyCollection _properties;             ///< PropertyCollection of this object
+        /**
+         * Searches _properties for a property named \a name.
+         * \param name  Property name to search for.
+         * \return      An iterator to the search result, _properties.end() if no such property was found.
+         */
+        PropertyCollection::iterator findProperty(const std::string& name);
+
+        /**
+         * Searches _properties for a property named \a name.
+         * \param name  Property name to search for.
+         * \return      An iterator to the search result, _properties.end() if no such property was found.
+         */
+        PropertyCollection::const_iterator findProperty(const std::string& name) const;
+
+        PropertyCollection _properties;     ///< list of all registered properties
     };
 
 }

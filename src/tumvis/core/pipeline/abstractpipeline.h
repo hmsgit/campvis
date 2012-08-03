@@ -20,7 +20,7 @@ namespace TUMVis {
      * Abstract base class for TUMVis Pipelines.
      * 
      */
-    class AbstractPipeline : public HasPropertyCollection, public GenericObserver<ProcessorObserverArgs> {
+    class AbstractPipeline : public HasPropertyCollection {
     friend class PipelineEvaluator;
 
     public:
@@ -72,18 +72,24 @@ namespace TUMVis {
          */
         virtual const std::string getName() const = 0;
         
-        /**
-         * Gets called when one of the observed processors changed and thus notifies its observers.
-         * The default behaviour is just to set the invalidation level to invalid.
-         * \sa GenericObserver::onNotify, AbstractProcessor
-         * \param poa   ProcessorObserverArgs   ObserverArgument struct containing the emitting processor and its InvalidationLevel
-         */
-        virtual void onNotify(const ProcessorObserverArgs& poa);
-
         InvalidationLevel& getInvalidationLevel();
 
 
         sigslot::signal0<> s_PipelineInvalidated;
+
+        /**
+         * Slot getting called when one of the observed properties changed and notifies its observers.
+         * The default behaviour is just to set the invalidation level to invalid.
+         * \param   prop    Property that emitted the signal
+         */
+        virtual void onPropertyChanged(const AbstractProperty* prop);
+
+        /**
+         * Slot getting called when one of the observed processors got invalidated.
+         * The default behaviour is just to set the invalidation level to invalid.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorInvalidated(const AbstractProcessor* processor);
 
     protected:
         /**

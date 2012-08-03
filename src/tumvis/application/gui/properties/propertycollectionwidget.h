@@ -6,7 +6,7 @@
 #include <QWidget>
 
 namespace TUMVis {
-    class PropertyCollection;
+    class HasPropertyCollection;
 
     /**
      * Main Window for the TUMVis application.
@@ -30,9 +30,9 @@ namespace TUMVis {
     public slots:
         /**
          * Updates the property collection this widget works on.
-         * \param   propertyCollection  New PropertyCollection for this widget, may be 0.
+         * \param   propertyCollection  New HasPropertyCollection instance for this widget, may be 0.
          */
-        void updatePropCollection(PropertyCollection* propertyCollection);
+        void updatePropCollection(HasPropertyCollection* propertyCollection);
 
 
     private:
@@ -41,7 +41,7 @@ namespace TUMVis {
          */
         void setupWidget();
 
-        PropertyCollection* _propCollection;    ///< The PropertyCollection this widget is currently working on.
+        HasPropertyCollection* _propCollection;    ///< The HasPropertyCollection instance this widget is currently working on.
         QVBoxLayout* _layout;
         QList<QWidget*> _widgetList;
     };

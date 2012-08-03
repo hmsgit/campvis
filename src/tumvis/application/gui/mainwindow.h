@@ -4,7 +4,7 @@
 #include "sigslot/sigslot.h"
 #include "application/tumvisapplication.h"
 #include "application/gui/pipelinetreewidget.h"
-#include "application/gui/propertycollectionwidget.h"
+#include "application/gui/properties/propertycollectionwidget.h"
 
 #include <QMainWindow>
 #include <QVBoxLayout>
@@ -41,7 +41,7 @@ namespace TUMVis {
         /// Qt signal for updating the PipelineWidget.
         void updatePipelineWidget(const std::vector<AbstractPipeline*>&);
         /// Qt signal for updating the PropertyCollectionWidget
-        void updatePropCollectionWidget(PropertyCollection*);
+        void updatePropCollectionWidget(HasPropertyCollection*);
 
     private slots:
         /**

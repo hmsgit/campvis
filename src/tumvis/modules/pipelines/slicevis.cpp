@@ -33,8 +33,8 @@ namespace TUMVis {
         _renderTargetID.setValue("renderTarget");
         _renderTargetID.addSharedProperty(&(_sliceExtractor._targetImageID));
 
-        _imageReader.addObserver(this);
-        _sliceExtractor.addObserver(this);
+        _imageReader.s_invalidated.connect<SliceVis>(this, &SliceVis::onProcessorInvalidated);
+        _sliceExtractor.s_invalidated.connect<SliceVis>(this, &SliceVis::onProcessorInvalidated);
     }
 
     void SliceVis::execute() {

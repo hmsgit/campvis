@@ -103,7 +103,11 @@ namespace TUMVis {
         static const std::string loggerCat_;
     };
 
-// - template implementation ----------------------------------------------------------------------
+// = Typedefs =====================================================================================
+
+    typedef GenericProperty<std::string> StringProperty;
+
+// = Template Implementation ======================================================================
 
     template<typename T>
     TUMVis::GenericProperty<T>::GenericProperty(const std::string& name, const std::string& title, const T& value, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/) 
@@ -174,7 +178,7 @@ namespace TUMVis {
             GenericProperty<T>* child = static_cast< GenericProperty<T>* >(*it);
             child->setValue(value);
         }
-        notifyObservers(PropertyObserverArgs(this, _invalidationLevel));
+        s_changed(this);
     }
 
     template<typename T>

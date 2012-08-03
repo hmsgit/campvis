@@ -7,7 +7,7 @@ namespace TUMVis {
         , _renderTargetSize("canvasSize", "Canvas Size", canvasSize.getValue())
     {
         canvasSize.addSharedProperty(&_renderTargetSize);
-        _renderTargetSize.addObserver(this);
+        _renderTargetSize.s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
     }
 
     VisualizationProcessor::~VisualizationProcessor() {

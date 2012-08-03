@@ -19,7 +19,7 @@ namespace TUMVis {
      * Abstract base class for TUMVis Pipelines.
      * 
      */
-    class VisualizationPipeline : public AbstractPipeline, public tgt::EventListener, public sigslot::has_slots<> {
+    class VisualizationPipeline : public AbstractPipeline, public tgt::EventListener {
     public:
         /**
          * Creates a VisualizationPipeline.

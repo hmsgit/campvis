@@ -7,11 +7,13 @@ MESSAGE(STATUS "Configuring TUMVis Application")
 FILE(GLOB TUMVIS_APPLICATION_SOURCES
     *.cpp
     gui/*.cpp
+    gui/properties/*.cpp
 )
 
 FILE(GLOB TUMVIS_APPLICATION_HEADERS
     *.h
     gui/*.h
+    gui/properties/*.h
 )
 
 #SET(TUMVIS_APPLICATION_SOURCES
@@ -23,7 +25,10 @@ FILE(GLOB TUMVIS_APPLICATION_HEADERS
 SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/mainwindow.h
     gui/pipelinetreewidget.h
-    gui/propertycollectionwidget.h
+    gui/properties/abstractpropertywidget.h
+    gui/properties/propertycollectionwidget.h
+    gui/properties/propertywidgetfactory.h
+    gui/properties/stringpropertywidget.h
 )
 
 #

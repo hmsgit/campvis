@@ -21,7 +21,7 @@ namespace TUMVis {
     }
 
     void TransferFunctionProperty::onTFChanged() {
-        notifyObservers(PropertyObserverArgs(this, _invalidationLevel));
+        s_changed(this);
     }
 
 }

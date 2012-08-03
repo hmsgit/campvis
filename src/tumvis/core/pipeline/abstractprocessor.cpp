@@ -23,12 +23,8 @@ namespace TUMVis {
 
         // If processor is no longer valid, notify observers
         if (! _invalidationLevel.isValid()) {
-            notifyObservers(ProcessorObserverArgs(this, _invalidationLevel));
+            s_invalidated(this);
         }
-    }
-
-    void AbstractProcessor::onNotify(const PropertyObserverArgs& poa) {
-        applyInvalidationLevel(poa._invalidationLevel);
     }
 
     void AbstractProcessor::init() {
@@ -39,12 +35,15 @@ namespace TUMVis {
 
 
     void AbstractProcessor::lockProperties() {
-        _properties.lockAllProperties();
+        lockAllProperties();
     }
 
     void AbstractProcessor::unlockProperties() {
-        _properties.unlockAllProperties();
+        unlockAllProperties();
     }
 
+    void AbstractProcessor::onPropertyChanged(const AbstractProperty* prop) {
+        applyInvalidationLevel(prop->getInvalidationLevel());
+    }
 
 }

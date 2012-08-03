@@ -1,10 +1,10 @@
 #ifndef ABSTRACTPROPERTY_H__
 #define ABSTRACTPROPERTY_H__
 
+#include "sigslot/sigslot.h"
 #include "tbb/include/tbb/spin_mutex.h"
 #include "tgt/logmanager.h"
 #include "core/tools/invalidationlevel.h"
-#include "core/tools/observer.h"
 
 #include <set>
 #include <string>
@@ -16,30 +16,12 @@ namespace TUMVis {
     class AbstractProperty;
 
     /**
-     * Observer Arguments for Property observers.
-     */
-    struct PropertyObserverArgs : public GenericObserverArgs<AbstractProperty> {
-        /**
-         * Creates new PropertyObserverArgs.
-         * \param subject               Subject that emits the notification
-         * \param invalidationLevel     Invalidation level of that property
-         */
-        PropertyObserverArgs(const AbstractProperty* subject, InvalidationLevel invalidationLevel)
-            : GenericObserverArgs<AbstractProperty>(subject)
-            , _invalidationLevel(invalidationLevel)
-        {}
-
-        InvalidationLevel _invalidationLevel;       ///< Invalidation level of that property
-    };
-
-
-    /**
      * Abstract base class for TUMVis Property.
      * 
      * \todo    Add PropertyWidgets, add clone()?
      *          Think about a reasonable locking mechanism and implement that
      */
-    class AbstractProperty : public GenericObservable<PropertyObserverArgs> {
+    class AbstractProperty {
     public:
         /**
          * Creates a new AbstractProperty
@@ -116,6 +98,9 @@ namespace TUMVis {
          */
         virtual void unlock();
 
+
+        /// Signal emitted, when the property changes.
+        sigslot::signal1<const AbstractProperty*> s_changed;
 
     protected:
         

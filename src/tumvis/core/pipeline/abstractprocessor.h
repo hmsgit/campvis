@@ -1,6 +1,7 @@
 #ifndef PROCESSOR_H__
 #define PROCESSOR_H__
 
+#include "sigslot/sigslot.h"
 #include "tgt/logmanager.h"
 #include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
@@ -11,26 +12,6 @@
 #include <vector>
 
 namespace TUMVis {
-    class AbstractProcessor;
-
-    /**
-     * Observer Arguments for Property observers.
-     */
-    struct ProcessorObserverArgs : public GenericObserverArgs<AbstractProcessor> {
-        /**
-         * Creates new PropertyObserverArgs.
-         * \param subject               Subject that emits the notification
-         * \param invalidationLevel     Invalidation level of that property
-         */
-        ProcessorObserverArgs(const AbstractProcessor* subject, InvalidationLevel invalidationLevel)
-            : GenericObserverArgs<AbstractProcessor>(subject)
-            , _invalidationLevel(invalidationLevel)
-        {}
-
-        InvalidationLevel _invalidationLevel;       ///< Invalidation level of that processor
-    };
-
-
     /**
      * Abstract base class for TUMVis Processors.
      * A processor implements a specific task, which it performs on the DataCollection passed
@@ -44,7 +25,7 @@ namespace TUMVis {
      * 
      * \sa AbstractPipeline
      */
-    class AbstractProcessor : public HasPropertyCollection, public GenericObserver<PropertyObserverArgs>, public GenericObservable<ProcessorObserverArgs> {
+    class AbstractProcessor : public HasPropertyCollection {
 
     /**
      * We have to find a trade-off:
@@ -109,13 +90,6 @@ namespace TUMVis {
         void applyInvalidationLevel(InvalidationLevel il);
         
         /**
-         * Gets called when one of the observed properties changed notifies its observers.
-         * \sa GenericObserver::onNotify, AbstractProperty
-         * \param poa   PropertyObserverArgs    ObserverArgument struct containing the emitting property and its InvalidationLevel
-         */
-        virtual void onNotify(const PropertyObserverArgs& poa);
-
-        /**
          * Locks all properties in the processor's PropertyCollection and marks them as "in use".
          * \sa  AbstractProcessor::unlock
          */
@@ -126,6 +100,16 @@ namespace TUMVis {
          * \sa  AbstractProcessor::lock
          */
         void unlockProperties();
+
+
+        /// Signal emitted when the processor has been invalidated.
+        sigslot::signal1<const AbstractProcessor*> s_invalidated;
+
+        /**
+         * Slot getting called when one of the observed properties changed and notifies its observers.
+         * \param   prop    Property that emitted the signal
+         */
+        virtual void onPropertyChanged(const AbstractProperty* prop);
 
 
     protected:
