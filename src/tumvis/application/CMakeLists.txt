@@ -16,20 +16,14 @@ FILE(GLOB TUMVIS_APPLICATION_HEADERS
     gui/properties/*.h
 )
 
-#SET(TUMVIS_APPLICATION_SOURCES
-#    application/tumvis.cpp
-#    application/tumvispainter.cpp
-#    datastructures/
-#)
-
 SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/mainwindow.h
     gui/pipelinetreewidget.h
     gui/properties/abstractpropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/propertycollectionwidget.h
-    gui/properties/propertywidgetfactory.h
     gui/properties/stringpropertywidget.h
+    gui/properties/transferfunctionpropertywidget.h
 )
 
 #

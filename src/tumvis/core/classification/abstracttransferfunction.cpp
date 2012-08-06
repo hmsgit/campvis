@@ -49,11 +49,16 @@ namespace TUMVis {
     }
 
     void AbstractTransferFunction::setIntensityDomain(const tgt::vec2& newDomain) {
+        tgtAssert(newDomain.x <= newDomain.y, "Intensity domain is not a valid interval.");
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             _intensityDomain = newDomain;
         }
         s_Changed();
+    }
+
+    const tgt::vec2& AbstractTransferFunction::getIntensityDomain() const {
+        return _intensityDomain;
     }
 
 

@@ -67,10 +67,16 @@ namespace TUMVis {
         void bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& textureUniform = "_tfTex", const std::string& textureParametersUniform = "_tfTextureParameters");
 
         /**
-         * Sets the intensity Domain where the transfer function is mapped to during classification.
+         * Sets the intensity domain where the transfer function is mapped to during classification.
          * \param   newDomain   new intensity domain
          */
         void setIntensityDomain(const tgt::vec2& newDomain);
+
+        /**
+         * Returns the intensity domain where the transfer function is mapped to during classification.
+         * \return _intensityDomain
+         */
+        const tgt::vec2& getIntensityDomain() const;
 
         /// Signal emitted when transfer function has changed.
         sigslot::signal0<> s_Changed;
