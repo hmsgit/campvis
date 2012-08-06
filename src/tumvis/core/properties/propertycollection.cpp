@@ -74,4 +74,16 @@ namespace TUMVis {
         }
     }
 
+    void HasPropertyCollection::initAllProperties() {
+        for (PropertyCollection::iterator it = _properties.begin(); it != _properties.end(); ++it) {
+            (*it)->init();
+        }
+    }
+
+    void HasPropertyCollection::deinitAllProperties() {
+        for (PropertyCollection::iterator it = _properties.begin(); it != _properties.end(); ++it) {
+            (*it)->deinit();
+        }
+    }
+
 }

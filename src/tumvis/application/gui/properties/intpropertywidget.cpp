@@ -17,7 +17,7 @@ namespace TUMVis {
     }
 
     IntPropertyWidget::~IntPropertyWidget() {
-
+        static_cast<IntProperty*>(_property)->s_minMaxChanged.disconnect(this);
     }
 
     void IntPropertyWidget::updateWidgetFromProperty() {

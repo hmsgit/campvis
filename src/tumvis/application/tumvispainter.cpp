@@ -130,6 +130,13 @@ namespace TUMVis {
 
     void TumVisPainter::deinit() {
         ShdrMgr.dispose(_copyShader);
+
+        if (_pipeline != 0) {
+            _pipeline->s_renderTargetChanged.disconnect(this);
+            if (getCanvas()->getEventHandler() != 0)
+                getCanvas()->getEventHandler()->removeListener(_pipeline);
+            _pipeline = 0;
+        }
     }
 
     void TumVisPainter::setPipeline(VisualizationPipeline* pipeline) {

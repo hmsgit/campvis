@@ -32,10 +32,12 @@ namespace TUMVis {
     }
 
     void SliceExtractor::init() {
+        VisualizationProcessor::init();
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/sliceextractor.frag", "", false);
     }
 
     void SliceExtractor::deinit() {
+        VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
     }
 

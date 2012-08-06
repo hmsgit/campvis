@@ -48,8 +48,6 @@ namespace TUMVis {
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
             delete *it;
         }
-
-        // TODO: _mainWindow is a Qt pointer and does not need to be deleted - right?
     }
 
     void TumVisApplication::init() {
@@ -112,6 +110,8 @@ namespace TUMVis {
         tgt::deinitGL();
         tgt::QtContextManager::deinit();
         tgt::deinit();
+
+        delete _mainWindow;
 
         _initialized = false;
     }

@@ -55,4 +55,12 @@ namespace TUMVis {
         _inUse = false;
     }
 
+    void AbstractProperty::init() {
+
+    }
+
+    void AbstractProperty::deinit() {
+
+    }
+
 }

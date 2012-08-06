@@ -28,9 +28,11 @@ namespace TUMVis {
     }
 
     void AbstractProcessor::init() {
+        initAllProperties();
     }
 
     void AbstractProcessor::deinit() {
+        deinitAllProperties();
     }
 
 

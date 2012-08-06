@@ -22,6 +22,8 @@ namespace TUMVis {
          **/
         virtual ~TransferFunctionProperty();
 
+        /// \overload
+        virtual void deinit();
 
         AbstractTransferFunction* getTF();
 

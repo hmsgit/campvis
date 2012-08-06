@@ -13,7 +13,8 @@ namespace TUMVis {
     }
 
     TransferFunctionProperty::~TransferFunctionProperty() {
-
+        _transferFunction->s_changed.disconnect(this);
+        delete _transferFunction;
     }
 
     AbstractTransferFunction* TransferFunctionProperty::getTF() {
@@ -22,6 +23,10 @@ namespace TUMVis {
 
     void TransferFunctionProperty::onTFChanged() {
         s_changed(this);
+    }
+
+    void TransferFunctionProperty::deinit() {
+        _transferFunction->deinit();
     }
 
 }

@@ -33,6 +33,18 @@ namespace TUMVis {
 
 
         /**
+         * Initializes the property.
+         * Everything that requires a valid OpenGL context or is otherwise expensive gets in here.
+         */
+        virtual void init();
+        
+        /**
+         * Deinitializes this property.
+         * Everything that requires a valid OpenGL context gets in here instead into the dtor.
+         */
+        virtual void deinit();
+
+        /**
          * Returns the property name.
          * \return  _name
          */

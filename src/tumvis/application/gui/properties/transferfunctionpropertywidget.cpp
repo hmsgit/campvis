@@ -17,7 +17,7 @@ namespace TUMVis {
         , _spinDomainLeft(0)
         , _spinDomainRight(0)
         , _btnEditTF(0)
-        ,_dockWidget(0)
+        , _dockWidget(0)
         , _editor(0)
     {
         _widget = new QWidget(this);
@@ -54,7 +54,6 @@ namespace TUMVis {
 
     TransferFunctionPropertyWidget::~TransferFunctionPropertyWidget() {
         delete _dockWidget;
-        delete _editor;
     }
 
     void TransferFunctionPropertyWidget::updateWidgetFromProperty() {

@@ -72,6 +72,16 @@ namespace TUMVis {
         virtual void unlockAllProperties();
 
         /**
+         * Initializes all properties.
+         */
+        virtual void initAllProperties();
+        
+        /**
+         * Deinitializes all properties.
+         */
+        virtual void deinitAllProperties();
+
+        /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * \param   prop    Property that emitted the signal
          */
