@@ -3,6 +3,7 @@
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
+#include "tgt/texture.h"
 #include "tgt/textureunit.h"
 
 namespace TUMVis {
@@ -19,7 +20,7 @@ namespace TUMVis {
 
     AbstractTransferFunction::~AbstractTransferFunction() {
         if (_texture != 0)
-            LWARNING("Called TranfserFunction dtor without proper deinitialization - you just wasted resources!");
+            LWARNING("Called AbstractTransferFunction dtor without proper deinitialization - you just wasted resources!");
     }
 
     void AbstractTransferFunction::deinit() {

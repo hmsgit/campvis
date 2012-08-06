@@ -3,6 +3,7 @@
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
+#include "tgt/texture.h"
 #include "tgt/textureunit.h"
 
 namespace TUMVis {

@@ -2,7 +2,6 @@
 #define ABSTRACTTRANSFERFUNCTION_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/texture.h"
 #include "tgt/vector.h"
 #include "tbb/include/tbb/atomic.h"
 #include "tbb/include/tbb/mutex.h"
@@ -11,6 +10,7 @@
 
 namespace tgt {
     class Shader;
+    class Texture;
     class TextureUnit;
 }
 
@@ -29,7 +29,7 @@ namespace TUMVis {
      *             context. Even though other internals might be changed meanwhile, this ensures that
      *             the OpenGL stuff (e.g. the texture) stays valid for this time.
      * 
-     * \todo    Check thread-safety, probably the private local lock is probably not the best design.
+     * \todo    Check thread-safety, the private local lock is probably not the best design.
      */
     class AbstractTransferFunction {
     public:

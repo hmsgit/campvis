@@ -23,6 +23,7 @@ namespace TUMVis {
     void MainWindow::setup() {
         _centralWidget = new QWidget(this);
         QHBoxLayout* boxLayout = new QHBoxLayout();
+        boxLayout->setSpacing(4);
 
         _pipelineWidget = new PipelineTreeWidget(_centralWidget);
         boxLayout->addWidget(_pipelineWidget);
@@ -54,12 +55,7 @@ namespace TUMVis {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
             HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
-            if (ptr != 0) {
-                emit updatePropCollectionWidget(ptr);
-            }
-            else {
-                emit updatePropCollectionWidget(0);
-            }
+            emit updatePropCollectionWidget(ptr);
         }
         else {
             emit updatePropCollectionWidget(0);

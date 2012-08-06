@@ -2,8 +2,9 @@
 #define ABSTRACTPROPERTYWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include <QWidget>
 #include <QBoxLayout>
+#include <QLabel>
+#include <QWidget>
 
 namespace TUMVis {
     class AbstractProperty;
@@ -51,6 +52,7 @@ namespace TUMVis {
         virtual void onPropertyChanged(const AbstractProperty* property);
 
         QBoxLayout* _layout;
+        QLabel* _titleLabel;
     };
 }
 

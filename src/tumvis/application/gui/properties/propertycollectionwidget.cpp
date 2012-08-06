@@ -23,14 +23,14 @@ namespace TUMVis {
     }
 
     void PropertyCollectionWidget::updatePropCollection(HasPropertyCollection* propertyCollection) {
-        // just some dummy implementation for property widget listing:
+        // remove and delete all widgets of the previous PropertyCollection
         for (QList<QWidget*>::iterator it = _widgetList.begin(); it != _widgetList.end(); ++it) {
             _layout->removeWidget(*it);
         }
         qDeleteAll(_widgetList);
         _widgetList.clear();
         
-
+        // create widgets for the new PropertyCollection
         for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
             QWidget* propWidget = PropertyWidgetFactory::createWidget(*it);
             if (propWidget == 0)
