@@ -4,12 +4,15 @@
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "core/properties/transferfunctionproperty.h"
 
-#include <QDoubleSpinBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QPushButton>
+class QDockWidget;
+class QDoubleSpinBox;
+class QGridLayout;
+class QLabel;
+class QPushButton;
 
 namespace TUMVis {
+    class AbstractTransferFunctionEditor;
+
     /**
      * Widget for a TransferFunctionProperty
      */
@@ -50,6 +53,8 @@ namespace TUMVis {
         QDoubleSpinBox* _spinDomainRight;   ///< spin edit for intensity domain upper bound
         QPushButton* _btnEditTF;            ///< button for showing the TF editor widget
 
+        QDockWidget* _dockWidget;                   ///< DockWidget for transfer function editor
+        AbstractTransferFunctionEditor* _editor;    ///< Transfer function editor
     };
 }
 

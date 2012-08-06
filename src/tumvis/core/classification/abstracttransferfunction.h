@@ -79,7 +79,7 @@ namespace TUMVis {
         const tgt::vec2& getIntensityDomain() const;
 
         /// Signal emitted when transfer function has changed.
-        sigslot::signal0<> s_Changed;
+        sigslot::signal0<> s_changed;
 
     protected:
         /**

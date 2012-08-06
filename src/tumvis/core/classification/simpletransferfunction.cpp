@@ -50,15 +50,25 @@ namespace TUMVis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _leftColor = color;
         }
-        s_Changed;
+        _dirty = true;
+        s_changed();
     }
 
     void SimpleTransferFunction::setRightColor(const tgt::col4& color) {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
-            _leftColor = color;
+            _rightColor = color;
         }
-        s_Changed;
+        _dirty = true;
+        s_changed();
+    }
+
+    const tgt::col4& SimpleTransferFunction::getLeftColor() const {
+        return _leftColor;
+    }
+
+    const tgt::col4& SimpleTransferFunction::getRightColor() const {
+        return _rightColor;
     }
 
 }

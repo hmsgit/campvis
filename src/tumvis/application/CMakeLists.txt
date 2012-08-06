@@ -19,9 +19,12 @@ FILE(GLOB TUMVIS_APPLICATION_HEADERS
 SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/mainwindow.h
     gui/pipelinetreewidget.h
+    gui/qtcolortools.h
     gui/properties/abstractpropertywidget.h
+    gui/properties/abstracttransferfunctioneditor.h
     gui/properties/intpropertywidget.h
     gui/properties/propertycollectionwidget.h
+    gui/properties/simpletransferfunctioneditor.h
     gui/properties/stringpropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
 )

@@ -54,7 +54,7 @@ namespace TUMVis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _intensityDomain = newDomain;
         }
-        s_Changed();
+        s_changed();
     }
 
     const tgt::vec2& AbstractTransferFunction::getIntensityDomain() const {

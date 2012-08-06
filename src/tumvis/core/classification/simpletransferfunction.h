@@ -28,7 +28,9 @@ namespace TUMVis {
          */
         virtual size_t getDimensionality() const;
 
+        const tgt::col4& getLeftColor() const;
         void setLeftColor(const tgt::col4& color);
+        const tgt::col4& getRightColor() const;
         void setRightColor(const tgt::col4& color);
 
     protected:

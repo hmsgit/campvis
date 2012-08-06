@@ -9,7 +9,7 @@ namespace TUMVis {
         , _transferFunction(tf)
     {
         tgtAssert(tf != 0, "Assigned transfer function must not be 0.");
-        tf->s_Changed.connect(this, &TransferFunctionProperty::onTFChanged);
+        tf->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
     }
 
     TransferFunctionProperty::~TransferFunctionProperty() {

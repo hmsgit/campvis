@@ -1,5 +1,13 @@
 #include "transferfunctionpropertywidget.h"
 
+#include "application/gui/properties/abstracttransferfunctioneditor.h"
+#include "application/gui/properties/transferfunctioneditorfactory.h"
+#include <QDockWidget>
+#include <QDoubleSpinBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QPushButton>
+
 namespace TUMVis {
     TransferFunctionPropertyWidget::TransferFunctionPropertyWidget(TransferFunctionProperty* property, QWidget* parent /*= 0*/)
         : AbstractPropertyWidget(property, parent)
@@ -9,6 +17,8 @@ namespace TUMVis {
         , _spinDomainLeft(0)
         , _spinDomainRight(0)
         , _btnEditTF(0)
+        ,_dockWidget(0)
+        , _editor(0)
     {
         _widget = new QWidget(this);
         _gridLayout = new QGridLayout(_widget);
@@ -43,7 +53,8 @@ namespace TUMVis {
     }
 
     TransferFunctionPropertyWidget::~TransferFunctionPropertyWidget() {
-
+        delete _dockWidget;
+        delete _editor;
     }
 
     void TransferFunctionPropertyWidget::updateWidgetFromProperty() {
@@ -73,7 +84,15 @@ namespace TUMVis {
     }
 
     void TransferFunctionPropertyWidget::onEditClicked(bool checked) {
-        // open editor window
+        if (_editor == 0) {
+            TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
+            _editor = TransferFunctionEditorFactory::createEditor(prop->getTF());
+
+            _dockWidget = new QDockWidget("Transfer Function Editor");
+            _dockWidget->setWidget(_editor);
+        }
+
+        _dockWidget->setVisible(true);
     }
 
 
