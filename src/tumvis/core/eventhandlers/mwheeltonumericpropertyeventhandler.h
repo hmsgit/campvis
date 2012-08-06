@@ -3,9 +3,9 @@
 
 #include "tgt/logmanager.h"
 #include "core/eventhandlers/abstracteventhandler.h"
-#include "core/properties/numericproperty.h"
 
 namespace TUMVis {
+    class INumericProperty;
 
     /**
      * Event handler that maps mouse wheel events to a numeric property.

@@ -1,6 +1,7 @@
 #include "propertywidgetfactory.h"
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/intpropertywidget.h"
 #include "application/gui/properties/stringpropertywidget.h"
 
 #include "core/properties/abstractproperty.h"
@@ -15,6 +16,10 @@ namespace TUMVis {
 
         if (StringProperty* tester = dynamic_cast<StringProperty*>(property)) {
         	return new StringPropertyWidget(tester);
+        }
+
+        if (IntProperty* tester = dynamic_cast<IntProperty*>(property)) {
+            return new IntPropertyWidget(tester);
         }
 
         return 0;

@@ -2,15 +2,17 @@
 #define VISUALIZATIONPIPELINE_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/glcanvas.h"
-#include "tgt/painter.h"
-#include "tgt/shadermanager.h"
+#include "tgt/vector.h"
 #include "tgt/event/eventlistener.h"
 #include "core/eventhandlers/abstracteventhandler.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/properties/genericproperty.h"
 
 #include <vector>
+
+namespace tgt {
+    class GLCanvas;
+}
 
 namespace TUMVis {
     class ImageDataRenderTarget;
@@ -107,7 +109,7 @@ namespace TUMVis {
         void lockGLContextAndExecuteProcessor(AbstractProcessor& processor);
 
         GenericProperty<tgt::ivec2> _renderTargetSize;      ///< Viewport size of target canvas
-        GenericProperty<std::string> _renderTargetID;       ///< ID of the render target image to be rendered to the canvas
+        StringProperty _renderTargetID;                     ///< ID of the render target image to be rendered to the canvas
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
 
         tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.

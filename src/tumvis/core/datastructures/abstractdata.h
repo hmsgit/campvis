@@ -4,9 +4,6 @@
 #include "core/tools/referencecounted.h"
 
 namespace TUMVis {
-
-    class DataHandle;
-
     /**
      * Abstract base class for data handled by a DataHandle and stored in a DataContainer.
      * 

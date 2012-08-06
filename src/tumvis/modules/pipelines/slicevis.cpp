@@ -1,6 +1,6 @@
 #include "slicevis.h"
 
-#include "tgt/glcontext.h"
+#include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedataconverter.h"
 
 namespace TUMVis {

@@ -2,18 +2,19 @@
 #define PIPELINEEVALUATOR_H__
 
 #include "sigslot/sigslot.h"
-#include "core/pipeline/abstractpipeline.h"
 #include "core/tools/runnable.h"
 #include "tbb/include/tbb/compat/condition_variable"
 
 namespace TUMVis {
+    class AbstractPipeline;
 
     /**
      * The PipelineEvaluator evaluates its pipeline in its own thread.
      * Evaluation is implemented using condidional wait - hence the pipeline is only evaluated when
      * \a pipeline emits the s_PipelineInvalidated signal.
      * 
-     * \sa  Runnable
+     * \todo    Let one PipelineEvaluator evaluate multiple pipelines.
+     * \sa      Runnable
      */
     class PipelineEvaluator : public Runnable, public sigslot::has_slots<> {
     public:

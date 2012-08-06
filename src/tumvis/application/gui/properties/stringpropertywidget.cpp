@@ -5,11 +5,12 @@ namespace TUMVis {
         : AbstractPropertyWidget(property, parent)
         , _lineEdit(0)
     {
-        _lineEdit = new QLineEdit(QString::fromStdString(property->getValue()));
+        _lineEdit = new QLineEdit(this);
+        _lineEdit->setText(QString::fromStdString(property->getValue()));
         
         addWidget(_lineEdit);
 
-        connect(_lineEdit, SIGNAL(textChanged(const QString&)), this, SIGNAL(onTextChanged(const QString&)));
+        connect(_lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
     }
 
     StringPropertyWidget::~StringPropertyWidget() {
@@ -28,6 +29,8 @@ namespace TUMVis {
 
     void StringPropertyWidget::onTextChanged(const QString& text) {
         StringProperty* prop = static_cast<StringProperty*>(_property);
+        _ignorePropertyUpdates = true;
         prop->setValue(text.toStdString());
+        _ignorePropertyUpdates = false;
     }
 }

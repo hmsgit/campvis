@@ -1,5 +1,7 @@
 #include "datacontainer.h"
+
 #include "tgt/assert.h"
+#include "core/datastructures/abstractdata.h"
 
 namespace TUMVis {
     const std::string DataContainer::loggerCat_ = "TUMVis.core.datastructures.DataContainer";
@@ -50,5 +52,14 @@ namespace TUMVis {
             return 0;
         else
             return new DataHandle(*it->second);
+    }
+
+    void DataContainer::removeData(const std::string& name) {
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
+        std::map<std::string, const DataHandle*>::const_iterator it = _handles.find(name);
+        if (it != _handles.end()) {
+            delete it->second;
+            _handles.erase(it);
+        }
     }
 }

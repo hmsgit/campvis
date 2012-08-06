@@ -41,8 +41,10 @@ namespace TUMVis {
          */
         virtual void updateWidgetFromProperty() = 0;
 
-        AbstractProperty* _property;        ///< The property this widget handles
-        bool _ignorePropertyUpdates;      ///< Flag whether the widget shall ignore incoming signals from properties being updated.
+        AbstractProperty* _property;    ///< The property this widget handles
+
+        // TODO: This flag is not thread-safe, it probably should be...
+        bool _ignorePropertyUpdates;    ///< Flag whether the widget shall ignore incoming signals from properties being updated.
 
     private:
         /// Slot getting called when the property has changed, so that the widget can be updated.

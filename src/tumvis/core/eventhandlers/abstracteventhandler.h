@@ -2,7 +2,7 @@
 #define ABSTRACTEVENTHANDLER_H__
 
 #include "tgt/logmanager.h"
-#include "tgt/event/eventlistener.h"
+#include "tgt/event/event.h"
 
 namespace TUMVis {
 

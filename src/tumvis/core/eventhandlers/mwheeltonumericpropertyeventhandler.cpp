@@ -1,6 +1,7 @@
 #include "mwheeltonumericpropertyeventhandler.h"
 #include "tgt/assert.h"
 #include "tgt/event/mouseevent.h"
+#include "core/properties/numericproperty.h"
 
 namespace TUMVis {
     const std::string MWheelToNumericPropertyEventHandler::loggerCat_ = "TUMVis.core.eventhandler.MWheelToNumericPropertyEventHandler";

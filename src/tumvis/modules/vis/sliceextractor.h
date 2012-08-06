@@ -42,7 +42,7 @@ namespace TUMVis {
         GenericProperty<std::string> _sourceImageID;    ///< image ID for input image
         GenericProperty<std::string> _targetImageID;    ///< image ID for output image
 
-        NumericProperty<size_t> _sliceNumber;           ///< number of the slice to extract
+        IntProperty _sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty _transferFunction;     ///< Transfer function
 
     protected:

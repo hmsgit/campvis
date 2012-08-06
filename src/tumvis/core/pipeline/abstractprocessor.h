@@ -3,15 +3,16 @@
 
 #include "sigslot/sigslot.h"
 #include "tgt/logmanager.h"
-#include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
-#include "core/properties/abstractproperty.h"
+#include "core/tools/invalidationlevel.h"
 #include "core/properties/propertycollection.h"
 
 #include <string>
 #include <vector>
 
 namespace TUMVis {
+    class AbstractProperty;
+
     /**
      * Abstract base class for TUMVis Processors.
      * A processor implements a specific task, which it performs on the DataCollection passed

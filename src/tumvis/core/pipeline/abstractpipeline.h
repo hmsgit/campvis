@@ -6,16 +6,16 @@
 #include "tbb/include/tbb/spin_mutex.h"
 #include "tbb/include/tbb/mutex.h"
 #include "tbb/include/tbb/compat/condition_variable"
-#include "core/tools/observer.h"
 #include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
-#include "core/pipeline/abstractprocessor.h"
 #include "core/properties/propertycollection.h"
 
 #include <vector>
 
 namespace TUMVis {
+    class AbstractProcessor;
     class PipelineEvaluator;
+
     /**
      * Abstract base class for TUMVis Pipelines.
      * 

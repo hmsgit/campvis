@@ -1,8 +1,6 @@
 #ifndef datahandle_h__
 #define datahandle_h__
 
-#include <string>
-
 namespace TUMVis {
     class AbstractData;
 
@@ -70,8 +68,6 @@ namespace TUMVis {
         void init();
 
         AbstractData* _data;                          ///< managed data
-
-        static const std::string loggerCat_;
     };
 
 }

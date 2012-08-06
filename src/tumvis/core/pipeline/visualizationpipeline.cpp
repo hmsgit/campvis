@@ -1,7 +1,5 @@
 #include "visualizationpipeline.h"
-#include "tgt/camera.h"
-#include "tgt/quadrenderer.h"
-#include "tgt/quadric.h"
+#include "tgt/glcanvas.h"
 #include "tgt/glcontext.h"
 #include "core/datastructures/imagedatarendertarget.h"
 

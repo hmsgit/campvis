@@ -1,13 +1,9 @@
 #include "datahandle.h"
 
 #include "tgt/assert.h"
-#include "tgt/logmanager.h"
 #include "core/datastructures/abstractdata.h"
 
 namespace TUMVis {
-    const std::string DataHandle::loggerCat_ = "TUMVis.core.datastructures.DataHandle";
-
-
     DataHandle::DataHandle(AbstractData* data) 
         : _data(data)
     {

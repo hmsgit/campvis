@@ -8,13 +8,8 @@
 
 #include <set>
 #include <string>
-#include <vector>
 
 namespace TUMVis {
-    // TODO:    Hopefully this forward declaration works for the template definition.
-    //          But as its only used as pointer within the template, it should be okay.
-    class AbstractProperty;
-
     /**
      * Abstract base class for TUMVis Property.
      * 

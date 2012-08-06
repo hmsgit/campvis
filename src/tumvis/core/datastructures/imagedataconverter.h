@@ -35,6 +35,9 @@ namespace TUMVis {
 
     template<class TO>
     TO* TUMVis::ImageDataConverter::tryConvert(const ImageData* source) {
+        if (source == 0)
+            return 0;
+
         // test source image type via dynamic cast
         if (const ImageDataDisk* tester = dynamic_cast<const ImageDataDisk*>(source)) {
             return convert<ImageDataDisk, TO>(tester);

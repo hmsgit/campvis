@@ -1,5 +1,6 @@
 #include "pipelineevaluator.h"
 #include "tgt/qt/qtcontextmanager.h"
+#include "core/pipeline/abstractpipeline.h"
 
 namespace TUMVis {
     PipelineEvaluator::PipelineEvaluator(AbstractPipeline* pipeline)

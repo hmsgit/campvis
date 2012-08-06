@@ -1,15 +1,18 @@
 #ifndef NUMERICPROPERTY_H__
 #define NUMERICPROPERTY_H__
 
-#include "tbb/include/tbb/spin_mutex.h"
-#include "tgt/logmanager.h"
 #include "core/properties/genericproperty.h"
 
 namespace TUMVis {
-
+    /**
+     * Interface for numeric properties.
+     * Defines methods for incrementing and decrementing the property's value.
+     */
     class INumericProperty {
     public:
+        /// Increments the value of the property.
         virtual void increment() = 0;
+        /// Decrements the value of the property.
         virtual void decrement() = 0;
     };
 
@@ -78,9 +81,18 @@ namespace TUMVis {
          */
         virtual void setMaxValue(const T& value);
 
+        /**
+         * Increments the value of this property.
+         */
         virtual void increment();
+
+        /**
+         * Decrements the value of this property.
+         */
         virtual void decrement();
 
+        /// Signal emitted, when the property's minimum or maximum value changes.
+        sigslot::signal1<const AbstractProperty*> s_minMaxChanged;
 
     protected:
 
@@ -103,7 +115,8 @@ namespace TUMVis {
 
 // = Typedefs =====================================================================================
 
-    typedef NumericProperty<size_t> SizeTProperty;
+    typedef NumericProperty<int> IntProperty;
+    typedef NumericProperty<float> FloatProperty;
 
 // = Template Implementation ======================================================================
 
@@ -155,12 +168,14 @@ namespace TUMVis {
     void TUMVis::NumericProperty<T>::setMinValue(const T& value) {
         _minValue = value;
         setValue(validateValue(getValue()));
+        s_minMaxChanged(this);
     }
 
     template<typename T>
     void TUMVis::NumericProperty<T>::setMaxValue(const T& value) {
         _maxValue = value;
         setValue(validateValue(getValue()));
+        s_minMaxChanged(this);
     }
 
     template<typename T>

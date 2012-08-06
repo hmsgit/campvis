@@ -3,14 +3,14 @@
 
 #include "sigslot/sigslot.h"
 #include "tbb/include/tbb/spin_mutex.h"
-#include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datahandle.h"
-#include "core/tools/observer.h"
 
 #include <string>
 #include <map>
 
 namespace TUMVis {
+    class AbstractData;
+    
     /**
      * A DataContainer manages instances of AbstractData and offers access to them via string identifiers (names/keys).
      * Therefore, it stores them in DataHandles which take ownership of the AbstractData instance. Hence,
@@ -136,6 +136,12 @@ namespace TUMVis {
          */
         const DataHandle* getData(const std::string& name) const;
 
+        /**
+         * Removes the DataHandle with the given name from this container.
+         * If no such DataHandle exists, nothing happens.
+         * \param   name    Key of the DataHandle to remove.
+         */
+        void removeData(const std::string& name);
 
         sigslot::signal2<const std::string&, const DataHandle*> s_dataAdded;
 

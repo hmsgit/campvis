@@ -3,7 +3,6 @@
 
 #include "tgt/vector.h"
 #include "core/pipeline/abstractprocessor.h"
-#include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/genericproperty.h"
 
 namespace TUMVis {
