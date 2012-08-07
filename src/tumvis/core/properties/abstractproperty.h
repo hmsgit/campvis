@@ -2,6 +2,7 @@
 #define ABSTRACTPROPERTY_H__
 
 #include "sigslot/sigslot.h"
+#include "tbb/include/tbb/atomic.h"
 #include "tbb/include/tbb/spin_mutex.h"
 #include "tgt/logmanager.h"
 #include "core/tools/invalidationlevel.h"
@@ -116,7 +117,7 @@ namespace TUMVis {
         std::string _title;                     ///< Property title (e.g. used for GUI)
         InvalidationLevel _invalidationLevel;   ///< Invalidation level that this property triggers
 
-        bool _inUse;                            ///< flag whether property is currently in use and values are written to back buffer
+        tbb::atomic<bool> _inUse;               ///< flag whether property is currently in use and values are written to back buffer
         tbb::spin_mutex _localMutex;            ///< Mutex used when altering local members
 
         /**

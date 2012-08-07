@@ -128,7 +128,7 @@ IF(TUMVIS_DEBUG)
 ENDIF()
  
 # minimum Qt version
-SET(TUMVIS_REQUIRED_QT_VERSION "4.6")
+SET(TUMVIS_REQUIRED_QT_VERSION "4.8")
 
 
 # detect libraries

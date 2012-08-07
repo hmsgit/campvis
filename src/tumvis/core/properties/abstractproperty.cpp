@@ -8,8 +8,8 @@ namespace TUMVis {
         : _name(name)
         , _title(title)
         , _invalidationLevel(il)
-        , _inUse(false)
     {
+        _inUse = false;
     }
 
     AbstractProperty::~AbstractProperty() {
@@ -33,6 +33,8 @@ namespace TUMVis {
 
     void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
         tgtAssert(prop != 0, "Shared property must not be 0!");
+        tgtAssert(typeid(this) == typeid(prop), "Shared property must be of the same type as this property.");
+
         tbb::spin_mutex::scoped_lock lock(_localMutex);
         _sharedProperties.insert(prop);
     }

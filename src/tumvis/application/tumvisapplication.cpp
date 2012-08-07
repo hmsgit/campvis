@@ -111,6 +111,7 @@ namespace TUMVis {
         tgt::QtContextManager::deinit();
         tgt::deinit();
 
+        // MainWindow dtor needs a valid TumVisApplication, so we need to call it here instead of during destruction.
         delete _mainWindow;
 
         _initialized = false;

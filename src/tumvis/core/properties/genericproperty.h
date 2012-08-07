@@ -59,13 +59,6 @@ namespace TUMVis {
 
 
         /**
-         * Locks the property and marks it as "in use". All changes to its value will be written to
-         * the back buffer. The buffers will be swapped on unlocking the property.
-         * \sa  GenericProperty::unlock
-         */
-        virtual void lock();
-
-        /**
          * Unlocks the property. If the back buffer has changed, the changes will be written to the front
          * buffer and all observers will be notified.
          * \sa  GenericProperty::lock
@@ -150,12 +143,6 @@ namespace TUMVis {
             setFrontValue(vv);
             setBackValue(vv);
         }
-    }
-
-    template<typename T>
-    void TUMVis::GenericProperty<T>::lock() {
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
-        _inUse = true;
     }
 
     template<typename T>
