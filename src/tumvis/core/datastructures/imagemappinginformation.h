@@ -2,6 +2,7 @@
 #define imagemapping_h__
 
 #include "tgt/matrix.h"
+#include "tgt/vector.h"
 #include "core/tools/mapping.h"
 
 namespace TUMVis {
@@ -15,26 +16,46 @@ namespace TUMVis {
     class ImageMappingInformation {
     public:
         /**
-         * Creates a new default ImageMappingInformation. All mappings are identity.
+         * Creates a new default ImageMappingInformation.
+         * \param   offset                  Position of LLF corner in world coordinates (mm)
+         * \param   voxelSize               Voxel size in (mm)
+         * \param   realWorldValueMapping   Linear mapping for mapping element values to real world values, defaults to identity.
          */
-        ImageMappingInformation();
+        ImageMappingInformation(
+            const tgt::vec3& offset, 
+            const tgt::vec3& voxelSize, 
+            const LinearMapping<float>& realWorldValueMapping = LinearMapping<float>::identity);
 
+        /**
+         * Returns the position of LLF corner in world coordinates (mm).
+         * \return  _offset
+         */
+        const tgt::vec3& getOffset() const;
+
+        /**
+         * Returns the voxel size in mm.
+         * \return  _voxelSize
+         */
+        const tgt::vec3& getVoxelSize() const;
 
         /**
          * Get the real world value mapping.
          * \return  Linear mapping for mapping element values to real world values.
          */
-        const LinearMaping<float>& getRealWorldMapping() const;
+        const LinearMapping<float>& getRealWorldMapping() const;
 
         /**
          * Set the real world value mapping.
          * \param   rwvm    Linear mapping for mapping element values to real world values.
          */
-        void setRealWorldMapping(const LinearMaping<float>& rwvm);
+        void setRealWorldMapping(const LinearMapping<float>& rwvm);
 
     private:
-        LinearMaping<float> _realWorldValueMapping;     ///< Linear mapping for mapping element values to real world values
-        tgt::mat4 _voxelToWorldTransformation;          ///< Transformation matrix from voxel to world coordinates
+        tgt::vec3 _offset;                              ///< Position of LLF corner in world coordinates (mm)
+        tgt::vec3 _voxelSize;                           ///< Voxel size in (mm)
+
+        LinearMapping<float> _realWorldValueMapping;     ///< Linear mapping for mapping element values to real world values
+        //tgt::mat4 _voxelToWorldTransformation;          ///< Transformation matrix from voxel to world coordinates
 
         static const std::string loggerCat_;
     };

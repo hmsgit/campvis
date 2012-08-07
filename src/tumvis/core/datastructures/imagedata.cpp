@@ -8,6 +8,7 @@ namespace TUMVis {
         , _dimensionality(dimensionality)
         , _size(size)
         , _numElements(tgt::hmul(size))
+        , _mappingInformation(tgt::vec3(0.f), tgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
     {
     }
 
@@ -26,8 +27,8 @@ namespace TUMVis {
         return _mappingInformation;
     }
 
-    ImageMappingInformation& ImageData::getMappingInformation() {
-        return _mappingInformation;
+    tgt::Bounds ImageData::getWorldBounds() const {
+        return tgt::Bounds(_mappingInformation.getOffset(), _mappingInformation.getOffset() + (tgt::vec3(_size) * _mappingInformation.getVoxelSize()));
     }
 
     size_t ImageData::getNumElements() const {

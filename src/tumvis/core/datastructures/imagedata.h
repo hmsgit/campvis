@@ -1,9 +1,10 @@
 #ifndef IMAGEDATA_H__
 #define IMAGEDATA_H__
 
+#include "tgt/bounds.h"
+#include "tgt/vector.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/imagemappinginformation.h"
-#include "tgt/vector.h"
 
 namespace TUMVis {
 
@@ -45,10 +46,10 @@ namespace TUMVis {
         const ImageMappingInformation& getMappingInformation() const;
 
         /**
-         * Mapping information of this image
-         * \return _mappingInformation
+         * Returns the image extent in world coordinates.
+         * \return  The image extent in world coordinates.
          */
-        ImageMappingInformation& getMappingInformation();
+        tgt::Bounds getWorldBounds() const;
 
         /**
          * Returns the subimage of this image given by \a llf and \a urb.

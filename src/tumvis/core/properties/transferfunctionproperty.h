@@ -22,7 +22,7 @@ namespace TUMVis {
          **/
         virtual ~TransferFunctionProperty();
 
-        /// \overload
+        /// \see AbstractProperty::deinit()
         virtual void deinit();
 
         AbstractTransferFunction* getTF();

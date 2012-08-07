@@ -83,6 +83,12 @@ namespace TUMVis {
         virtual const std::string getName() const = 0;
 
         /**
+         * Gets a description of this processor. To be defined by every subclass.
+         * \return  A description what this processor does.
+         */
+        virtual const std::string getDescription() const = 0;
+
+        /**
          * Update the processor's invalidation level by \a nl.
          * If \a nl is VALID, the processor's invalidation level will be set to VALID.
          * If \a nl is one of the INVALID_X state, the processor's corresponding flag will be set.

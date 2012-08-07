@@ -1,4 +1,5 @@
 #include "application/tumvisapplication.h"
+#include "modules/pipelines/dvrvis.h"
 #include "modules/pipelines/slicevis.h"
 
 using namespace TUMVis;
@@ -13,6 +14,7 @@ using namespace TUMVis;
 int main(int argc, char** argv) {
     TumVisApplication app(argc, argv);
     app.addVisualizationPipeline("SliceVis", new SliceVis());
+    app.addVisualizationPipeline("DVRVis", new DVRVis());
 
     app.init();
     int toReturn = app.run();

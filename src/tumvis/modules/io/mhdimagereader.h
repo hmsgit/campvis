@@ -33,6 +33,8 @@ namespace TUMVis {
 
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "MhdImageReader"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
 
         GenericProperty<std::string> _url;              ///< URL for file to read
         GenericProperty<std::string> _targetImageID;    ///< image ID for read image

@@ -9,15 +9,15 @@ namespace TUMVis {
       * \tparam  T   Numeric type for mapping
       **/
     template<typename T>
-    struct LinearMaping {
+    struct LinearMapping {
     public:
         /**
-         * Creates a new LinearMaping object
+         * Creates a new LinearMapping object
          * \param shift Shifting coefficient of mapping
          * \param scale Scaling coefficient of mapping
          * \return 
          */
-        LinearMaping(T shift, T scale)
+        LinearMapping(T shift, T scale)
             : _shift(shift)
             , _scale(scale)
         {};
@@ -47,11 +47,11 @@ namespace TUMVis {
         /**
          * Identity mapping (shift = 0, scale = 1).
          */
-        static const LinearMaping<T> identity;
+        static const LinearMapping<T> identity;
     };
 
     template<typename T>
-    const LinearMaping<T> LinearMaping<T>::identity = LinearMaping<T>(T(0), T(1));
+    const LinearMapping<T> LinearMapping<T>::identity = LinearMapping<T>(T(0), T(1));
 }
 
 #endif // mapping_h__

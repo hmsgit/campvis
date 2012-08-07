@@ -73,6 +73,8 @@ namespace TUMVis {
             case Qt::DisplayRole:
                 if (column == 0)
                     return QVariant(QString::fromStdString(_processor->getName()));
+                if (column == 1)
+                    return QVariant(QString::fromStdString(_processor->getDescription()));
             case Qt::UserRole:
                 return qVariantFromValue(static_cast<void*>(_processor));
             default:
@@ -185,6 +187,9 @@ namespace TUMVis {
     }
 
     void PipelineTreeModel::setData(const std::vector<AbstractPipeline*>& pipelines) {
+        delete _rootItem;
+        _rootItem = new RootTreeItem();
+
         for (std::vector<AbstractPipeline*>::const_iterator pipe = pipelines.begin(); pipe != pipelines.end(); ++pipe) {
             PipelineTreeItem* pipeti = new PipelineTreeItem(*pipe, _rootItem);
 

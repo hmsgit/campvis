@@ -3,12 +3,14 @@
 
 #include <string>
 
-#include "tgt/shadermanager.h"
-#include "core/classification/abstracttransferfunction.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
+
+namespace tgt {
+    class Shader;
+}
 
 namespace TUMVis {
     class ImageData;
@@ -36,6 +38,8 @@ namespace TUMVis {
 
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "SliceExtractor"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
 
         virtual void process(DataContainer& data);
 
