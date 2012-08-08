@@ -61,10 +61,13 @@ class Trackball : public Navigation {
         ///                           tgt::Timer-object. As we need a toolkit-specific timer,
         ///                           trackball cannot create it itself, the user has to provide
         ///                           it to the constructor.
-        Trackball(GLCanvas* canvas, bool defaultEventHandling = true, Timer* continousSpinTimer = NULL);
+        Trackball(IHasCamera* hcam, const ivec2& viewportSize, bool defaultEventHandling = true, Timer* continousSpinTimer = NULL);
 
         /// Destructor
         virtual ~Trackball();
+
+        const ivec2& getViewportSize() const { return viewportSize_; };
+        void setViewprtSize(const ivec2& viewportSize) { viewportSize_ = viewportSize; };
 
         /// Resets the trackball to the initial configuration of the canvas' camera.
         void reset();
@@ -126,8 +129,8 @@ class Trackball : public Navigation {
         /// with respect to the camera's look vector.
         float getCenterDistance();
 
-        GLCanvas* getCanvas() const { return canvas_; }
-        void setCanvas(GLCanvas* canvas) { canvas_ = canvas; }
+//         GLCanvas* getCanvas() const { return hcav_; }
+//         void setCanvas(GLCanvas* canvas) { hcav_ = canvas; }
 
         Timer* getContinuousSpinTimer() const { return continuousSpinTimer_; }
 
@@ -248,6 +251,9 @@ class Trackball : public Navigation {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
     protected:
+        
+        /// viewport size for mouse coordinates translation
+        ivec2 viewportSize_;
 
         /// is this a continuously spinning Trackball?
         bool continuousSpin_;

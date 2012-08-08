@@ -30,8 +30,9 @@
 
 namespace tgt {
 
-Trackball::Trackball(GLCanvas* canvas, bool defaultEventHandling, Timer* continuousSpinTimer)
-    : Navigation(canvas),
+Trackball::Trackball(IHasCamera* hcam, const ivec2& viewportSize, bool defaultEventHandling, Timer* continuousSpinTimer)
+    : Navigation(hcam),
+      viewportSize_(viewportSize),
       continuousSpin_(false),
       continuousSpinTimer_(continuousSpinTimer),
       continuousSpinStopwatch_(0),
@@ -68,6 +69,7 @@ Trackball::~Trackball() {
 
 void Trackball::reset() {
     getCamera()->positionCamera(cameraPosition_, cameraFocus_, cameraUpVector_);
+    hcam_->update();
 }
 
 /*
@@ -182,7 +184,7 @@ void Trackball::rotate(Quaternion<float> quat) {
         continuousSpinStopwatch_->start();
     }
 
-    getCanvas()->update();
+    hcam_->update();
 }
 
 void Trackball::rotate(vec3 axis, float phi) {
@@ -244,7 +246,7 @@ void Trackball::move(float length, vec3 axis) {
 
     moveCamera(-axis);
     if (moveCenter_) { center_ -= axis; };
-    getCanvas()->update();
+    hcam_->update();
 }
 
 void Trackball::move(vec2 newMouse) {
@@ -262,7 +264,7 @@ void Trackball::zoom(float factor) {
     factor = 1.f / factor;
     getCamera()->setPosition( (1.f-factor) * getCamera()->getFocus()
                               + factor * getCamera()->getPosition());
-    getCanvas()->update();
+    hcam_->update();
 }
 
 void Trackball::zoom(vec2 newMouse) {
@@ -271,7 +273,7 @@ void Trackball::zoom(vec2 newMouse) {
 
 void Trackball::zoomAbsolute(float focallength) {
    getCamera()->setPosition( getCamera()->getFocus() - focallength * getCamera()->getLook());
-   getCanvas()->update();
+   hcam_->update();
 }
 
 void Trackball::initializeContinuousSpin() {
@@ -410,8 +412,8 @@ void Trackball::setKeyRoll(float acuteness, KeyEvent::KeyCode left, KeyEvent::Ke
 }
 
 vec2 Trackball::scaleMouse(const ivec2& mouse) const {
-    return vec2( static_cast<float>(mouse.x*2.f) / static_cast<float>(canvas_->getWidth()) - 1.f,
-                 1.f - static_cast<float>(mouse.y*2.f) / static_cast<float>(canvas_->getHeight()) );
+    return vec2( static_cast<float>(mouse.x*2.f) / static_cast<float>(viewportSize_.x) - 1.f,
+                 1.f - static_cast<float>(mouse.y*2.f) / static_cast<float>(viewportSize_.y) );
 }
 
 void Trackball::mousePressEvent(MouseEvent* e) {
@@ -445,7 +447,7 @@ void Trackball::mouseMoveEvent(MouseEvent* e) {
     if ( mouseRollButton_ & e->button() &&
          (mouseRollMod_ == e->modifiers() || mouseRollMod_ & e->modifiers()) ) {
         rollCameraHorz((newMouse.x-mouse_.x)/mouseRollAcuteness_);
-        getCanvas()->update();
+        hcam_->update();
     }
 
     mouse_ = newMouse;
@@ -466,7 +468,7 @@ void Trackball::wheelEvent(MouseEvent* e) {
                              ( mouseWheelUpRollLeft_ && (e->button()&MouseEvent::MOUSE_WHEEL_UP)) ||
                              (!mouseWheelUpRollLeft_ && (e->button()&MouseEvent::MOUSE_WHEEL_DOWN))
                   ) );
-        getCanvas()->update();
+        hcam_->update();
     }
     e->ignore();
 }
@@ -508,10 +510,10 @@ void Trackball::keyEvent(KeyEvent* e) {
         && e->pressed() == keyRollPressed_) {
         if (e->keyCode() == keyRollLeft_) {
             rollCameraHorz(getRollAngle(keyRollAcuteness_, true));
-            getCanvas()->update();
+            hcam_->update();
         } else if (e->keyCode() == keyRollRight_) {
             rollCameraHorz(getRollAngle(keyRollAcuteness_, false));
-            getCanvas()->update();
+            hcam_->update();
         }
     }
     e->ignore();
@@ -544,7 +546,6 @@ float Trackball::getRollAngle(const float& acuteness, const bool& left) const {
 void Trackball::timerEvent(TimeEvent* e) {
     if (continuousSpin_ && continuousSpinTimer_ == e->getTimer() ) {
         rotate(getLastOrientationChange());
-        canvas_->repaint();
     }
 }
 

@@ -46,26 +46,50 @@
 
 namespace tgt {
 
+/**
+ * Intermediate wrapper class for easier integration of tgt::Navigation into projects using
+ * separated cameras and canvases.
+ */
+class TGT_API IHasCamera {
+public:
+    /**
+     * Pure virtual destructor
+     */
+    virtual ~IHasCamera() = 0 {};
+
+    /**
+     * Returns the camera to modify by Navigation.
+     * Once a navigation is finished and the scene shall be rerendered, update() is called.
+     */
+    virtual Camera* getCamera() = 0;
+
+    /**
+     * Notifies the camera holding object, that the navigation is finished.
+     */
+    virtual void update() = 0;
+};
+
+
 class TGT_API Navigation : virtual public EventListener {
 
 protected:
 
     // navigation manipulates the camera of a certain canvas.
     // we only need a pointer to this canvas, not to the camera (see getCamera).
-    GLCanvas* canvas_;
+    IHasCamera* hcam_;
 
 public:
 
-    Navigation(GLCanvas* canv) {
-        canvas_ = canv;
+    Navigation(IHasCamera* hcam) {
+        hcam_ = hcam;
     }
 
     virtual ~Navigation() {}
 
-    void setCanvas(GLCanvas* canv) { canvas_ = canv; }
-    GLCanvas* getCanvas() const { return canvas_; }
+//     void setCanvas(GLCanvas* hcam) { hcam_ = hcam; }
+//     GLCanvas* getCanvas() const { return hcam_->; }
 
-    Camera* getCamera() const { return getCanvas()->getCamera(); }
+    Camera* getCamera() const { return hcam_->getCamera(); }
 
     /// The following functions may be used to rotate the Camera about
     /// an arbitrary axis.
