@@ -10,6 +10,7 @@ namespace TUMVis {
         : VisualizationPipeline()
         , _imageReader()
         , _eepGenerator(_renderTargetSize)
+        , _drrraycater(_renderTargetSize)
         , _trackballEH(0)
     {
         _trackballEH = new TrackballNavigationEventHandler(&_eepGenerator._camera, _renderTargetSize.getValue());
@@ -17,6 +18,7 @@ namespace TUMVis {
 
         _processors.push_back(&_imageReader);
         _processors.push_back(&_eepGenerator);
+        _processors.push_back(&_drrraycater);
     }
 
     DVRVis::~DVRVis() {
@@ -29,15 +31,21 @@ namespace TUMVis {
         _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader._targetImageID.setValue("reader.output");
 
+        _eepGenerator._entryImageID.addSharedProperty(&_drrraycater._entryImageID);
+        _eepGenerator._exitImageID.addSharedProperty(&_drrraycater._exitImageID);
+        _drrraycater._targetImageID.setValue("drr.output");
+        _drrraycater._sourceImageID.setValue("eep.input");
+
         _eepGenerator._sourceImageID.setValue("eep.input");
         _eepGenerator._entryImageID.setValue("eep.entry");
         _eepGenerator._exitImageID.setValue("eep.exit");
 
-        _renderTargetID.setValue("eep.entry");
+        _renderTargetID.setValue("drr.output");
         //_renderTargetID.addSharedProperty(&(_eepGenerator._entryImageID));
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+        _drrraycater.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
     }
 
     void DVRVis::execute() {
@@ -69,6 +77,9 @@ namespace TUMVis {
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_eepGenerator);
+        }
+        if (! _drrraycater.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(_drrraycater);
         }
     }
 

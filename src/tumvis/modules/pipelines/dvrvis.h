@@ -6,6 +6,7 @@
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/io/mhdimagereader.h"
 #include "modules/vis/eepgenerator.h"
+#include "modules/vis/drrraycaster.h"
 
 namespace TUMVis {
     class DVRVis : public VisualizationPipeline {
@@ -35,6 +36,7 @@ namespace TUMVis {
     protected:
         MhdImageReader _imageReader;
         EEPGenerator _eepGenerator;
+        DRRRaycaster _drrraycater;
         TrackballNavigationEventHandler* _trackballEH;
 
     };
