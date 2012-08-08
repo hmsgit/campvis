@@ -1,6 +1,7 @@
 #include "propertywidgetfactory.h"
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/boolpropertywidget.h"
 #include "application/gui/properties/intpropertywidget.h"
 #include "application/gui/properties/floatpropertywidget.h"
 #include "application/gui/properties/stringpropertywidget.h"
@@ -15,6 +16,10 @@ namespace TUMVis {
 
     AbstractPropertyWidget* PropertyWidgetFactory::createWidget(AbstractProperty* property) {
         tgtAssert(property != 0, "Property must not be 0.");
+
+        if (BoolProperty* tester = dynamic_cast<BoolProperty*>(property)) {
+            return new BoolPropertyWidget(tester);
+        }
 
         if (IntProperty* tester = dynamic_cast<IntProperty*>(property)) {
             return new IntPropertyWidget(tester);

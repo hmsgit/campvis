@@ -22,6 +22,7 @@ SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/qtcolortools.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
+    gui/properties/boolpropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h
     gui/properties/propertycollectionwidget.h
