@@ -45,7 +45,10 @@ namespace TUMVis {
 
     void DRRRaycaster::init() {
         VisualizationProcessor::init();
+//         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "", false);
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/drrraycaster.frag", "", false);
+        _shader->setHeaders(generateHeader());
+        _shader->rebuild();
     }
 
     void DRRRaycaster::deinit() {
@@ -66,28 +69,31 @@ namespace TUMVis {
                     _shader->rebuild();
                 }
 
-                ImageDataRenderTarget* output = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+                ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
 
                 _shader->activate();
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_samplingStepSize", _samplingStepSize.getValue());
                 _shader->setUniform("_shift", _shift.getValue());
                 _shader->setUniform("_scale", _scale.getValue());
 
                 tgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
                 img->bind(_shader, volumeUnit, "_volume");
-                entryPoints->bind(_shader, &entryUnit, 0, "_entryPoints", "", "_entryParameters");
-                exitPoints->bind(_shader, &exitUnit, 0, "_exitPoints", "", "_exitParameters");
+                entryPoints->bind(_shader, &entryUnit, 0, "_entryPoints");
+                exitPoints->bind(_shader, &exitUnit, 0, "_exitPoints");
                 _transferFunction.getTF()->bind(_shader, tfUnit);
 
-                output->activate();
+                rt->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                LGL_ERROR;
                 tgt::QuadRenderer::renderQuad();
-                output->deactivate();
+                LGL_ERROR;
+                rt->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
 
-                data.addData(_targetImageID.getValue(), output);
+                data.addData(_targetImageID.getValue(), rt);
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

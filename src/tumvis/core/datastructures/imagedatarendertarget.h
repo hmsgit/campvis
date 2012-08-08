@@ -90,17 +90,15 @@ namespace TUMVis {
          * \param shader                    Shader to set the uniforms to.
          * \param colorTexUnit              Pointer to color texture unit, may be 0.
          * \param depthTexUnit              Pointer to depth texture unit, may be 0.
-         * \param colorTexUniform           Name for color texture unit uniform.
-         * \param depthTexUniform           Name for depth texture unit uniform.
-         * \param textureParametersUniform  Name for texture parameters uniform.
+         * \param colorTexUniform           Name for color texture struct uniform.
+         * \param depthTexUniform           Name for depth texture struct uniform.
          */
         void bind(
             tgt::Shader* shader,
             const tgt::TextureUnit* colorTexUnit, 
             const tgt::TextureUnit* depthTexUnit, 
             const std::string& colorTexUniform = "_colorTexture",
-            const std::string& depthTexUniform = "_depthTexture",
-            const std::string& textureParametersUniform = "_textureParameters") const;
+            const std::string& depthTexUniform = "_depthTexture") const;
 
 
     protected:

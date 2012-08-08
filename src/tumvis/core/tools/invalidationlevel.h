@@ -44,11 +44,11 @@ namespace TUMVis {
         }
 
         bool isInvalidResult() const {
-            return _level == static_cast<int>(INVALID_RESULT);
+            return (_level & static_cast<int>(INVALID_RESULT)) != 0;
         }
 
         bool isInvalidShader() const {
-            return _level == static_cast<int>(INVALID_SHADER);
+            return (_level & static_cast<int>(INVALID_SHADER)) != 0;
         }
 
 

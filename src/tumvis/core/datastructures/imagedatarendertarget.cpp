@@ -127,20 +127,21 @@ namespace TUMVis {
         _depthTexture->bind();
     }
 
-    void ImageDataRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit* colorTexUnit, const tgt::TextureUnit* depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
-        if (colorTexUnit != 0)
-            bindColorTexture(*colorTexUnit);
-        if (depthTexUnit != 0)
-            bindDepthTexture(*depthTexUnit);
-
+    void ImageDataRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit* colorTexUnit, const tgt::TextureUnit* depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/) const {
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
-        if (colorTexUnit != 0)
-            shader->setUniform(colorTexUniform, colorTexUnit->getUnitNumber());
-        if (depthTexUnit != 0)
-            shader->setUniform(depthTexUniform, depthTexUnit->getUnitNumber());
-        shader->setUniform(textureParametersUniform + "._size", tgt::vec2(_size.xy()));
-        shader->setUniform(textureParametersUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+        if (colorTexUnit != 0) {
+            bindColorTexture(*colorTexUnit);
+            shader->setUniform(colorTexUniform + "._texture", colorTexUnit->getUnitNumber());
+            shader->setUniform(colorTexUniform + "._size", tgt::vec2(_size.xy()));
+            shader->setUniform(colorTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+        }
+        if (depthTexUnit != 0) {
+            bindDepthTexture(*depthTexUnit);
+            shader->setUniform(depthTexUniform + "._texture", colorTexUnit->getUnitNumber());
+            shader->setUniform(depthTexUniform + "._size", tgt::vec2(_size.xy()));
+            shader->setUniform(depthTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+        }
         shader->setIgnoreUniformLocationError(tmp);
     }
 

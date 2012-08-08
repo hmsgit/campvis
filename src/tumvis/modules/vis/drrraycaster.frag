@@ -2,7 +2,6 @@
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
-uniform vec2 _viewportSize;
 uniform vec2 _viewportSizeRCP;
 
 uniform Texture2D _entryPoints;          // ray entry points
@@ -99,8 +98,8 @@ vec4 raycastDRR(in vec3 first, in vec3 last, vec2 p) {
  ***/
 void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
-    vec3 frontPos = getElement2D(_entryPoints, p).rgb;
-    vec3 backPos = getElement2D(_exitPoints, p).rgb;
+    vec3 frontPos = getElement2DNormalized(_entryPoints, p).rgb;
+    vec3 backPos = getElement2DNormalized(_exitPoints, p).rgb;
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {

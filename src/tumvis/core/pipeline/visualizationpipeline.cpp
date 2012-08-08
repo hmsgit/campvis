@@ -1,4 +1,5 @@
 #include "visualizationpipeline.h"
+#include "tgt/tgt_gl.h"
 #include "tgt/glcanvas.h"
 #include "tgt/glcontext.h"
 #include "core/datastructures/imagedatarendertarget.h"
@@ -73,7 +74,8 @@ namespace TUMVis {
         tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         tgt::GLContextScopedLock lock(_canvas->getContext());
         executeProcessor(processor);
-        glFlush();  // TODO: is glFlush enough or do we need a glFinish here?
+        glFinish();  // TODO: is glFlush enough or do we need a glFinish here?
+        LGL_ERROR;
     }
 
     void VisualizationPipeline::setCanvas(tgt::GLCanvas* canvas) {

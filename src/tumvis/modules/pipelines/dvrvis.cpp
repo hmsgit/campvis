@@ -41,7 +41,6 @@ namespace TUMVis {
         _eepGenerator._exitImageID.setValue("eep.exit");
 
         _renderTargetID.setValue("drr.output");
-        //_renderTargetID.addSharedProperty(&(_eepGenerator._entryImageID));
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
@@ -70,15 +69,13 @@ namespace TUMVis {
                 tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
                 _trackballEH->setCenter(volumeExtent.center());
                 _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _eepGenerator._camera.getValue().getUpVector());
-/*                tgt::Camera cam(pos, volumeExtent.center());
-                cam.setFarDist(500.f);
-                _eepGenerator._camera.setValue(cam);*/
             }
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_eepGenerator);
+            lockGLContextAndExecuteProcessor(_drrraycater);
         }
-        if (! _drrraycater.getInvalidationLevel().isValid()) {
+        if (! _eepGenerator.getInvalidationLevel().isValid() || !_drrraycater.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_drrraycater);
         }
     }
