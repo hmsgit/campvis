@@ -37,6 +37,8 @@ namespace TUMVis {
          */
         void onPipelinesChanged();
 
+        QSize sizeHint() const;
+
     signals:
         /// Qt signal for updating the PipelineWidget.
         void updatePipelineWidget(const std::vector<AbstractPipeline*>&);

@@ -214,6 +214,7 @@ namespace TUMVis {
 
     void PipelineTreeWidget::update(const std::vector<AbstractPipeline*>& pipelines) {
         _treeModel->setData(pipelines);
+        expandAll();
     }
 
     void PipelineTreeWidget::setupWidget() {

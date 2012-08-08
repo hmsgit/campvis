@@ -50,7 +50,6 @@ namespace TUMVis {
         CameraProperty _camera;
 
     protected:
-        void renderProxyGeometry(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
 
         tgt::Shader* _shader;                           ///< Shader for EEP generation
 

@@ -62,4 +62,8 @@ namespace TUMVis {
         }
     }
 
+    QSize MainWindow::sizeHint() const {
+        return QSize(800, 450);
+    }
+
 }
