@@ -22,13 +22,15 @@ namespace TUMVis {
         , _entryImageID("entryImageID", "Output Entry Points Image", "")
         , _exitImageID("exitImageID", "Output Exit Points Image", "")
         , _camera("camera", "Camera")
-        , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
         , _shader(0)
     {
         addProperty(&_sourceImageID);
         addProperty(&_entryImageID);
         addProperty(&_exitImageID);
         addProperty(&_camera);
+        tgt::Camera c;
+        c.setFarDist(512.f);
+        _camera.setValue(c);
     }
 
     EEPGenerator::~EEPGenerator() {
@@ -52,35 +54,30 @@ namespace TUMVis {
             if (img->getDimensionality() == 3) {
                 // TODO: implement some kind of proxy geometry...
                 tgt::Bounds volumeExtent = img->getWorldBounds();
-                //tgt::Bounds volumeExtent(tgt::vec3(-1.f), tgt::vec3(1.f));
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
-
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-                tgt::Camera cam(pos, volumeExtent.center());
-                cam.setFarDist(500.f);
 
                 // set modelview and projection matrices
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
 
                 glMatrixMode(GL_PROJECTION);
                 glPushMatrix();
-                tgt::loadMatrix(cam.getProjectionMatrix());
+                tgt::loadMatrix(_camera.getValue().getProjectionMatrix());
 
                 glMatrixMode(GL_MODELVIEW);
                 glPushMatrix();
-                tgt::loadMatrix(cam.getViewMatrix());
+                tgt::loadMatrix(_camera.getValue().getViewMatrix());
 
                 _shader->activate();
+                glEnable(GL_CULL_FACE);
 
                 // create entry points texture
                 ImageDataRenderTarget* entrypoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
                 entrypoints->activate();
 
-                glDepthFunc(GL_LESS);
-                glClearDepth(1.0f);
+                glDepthFunc(GL_GREATER);
+                glClearDepth(0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glCullFace(GL_BACK);
-                _shader->setUniform("_jitterPoints", _jitterEntryPoints.getValue());
+                glCullFace(GL_FRONT);
                 renderProxyGeometry(volumeExtent, textureBounds);
 
                 entrypoints->deactivate();
@@ -89,11 +86,10 @@ namespace TUMVis {
                 ImageDataRenderTarget* exitpoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
                 exitpoints->activate();
 
-                glDepthFunc(GL_GREATER);
-                glClearDepth(0.0f);
+                glDepthFunc(GL_LESS);
+                glClearDepth(1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glCullFace(GL_FRONT);
-                _shader->setUniform("_jitterPoints", false);
+                glCullFace(GL_BACK);
                 renderProxyGeometry(volumeExtent, textureBounds);
 
                 exitpoints->deactivate();
@@ -132,13 +128,13 @@ namespace TUMVis {
         glBegin(GL_QUADS);
             // front
             glTexCoord3f(tLlf.x, tLlf.y, tLlf.z);
-            glVertex3fv(llf.elem);
+            glVertex3f(llf.x, llf.y, llf.z);
             glTexCoord3f(tUrb.x, tLlf.y, tLlf.z);
             glVertex3f(urb.x, llf.y, llf.z);
             glTexCoord3f(tUrb.x, tUrb.y, tLlf.z);
             glVertex3f(urb.x, urb.y, llf.z);
-            glTexCoord3f(tLlf.x, tLlf.y, tLlf.z);
-            glVertex3f(llf.x, llf.y, llf.z);
+            glTexCoord3f(tLlf.x, tUrb.y, tLlf.z);
+            glVertex3f(llf.x, urb.y, llf.z);
 
             // right
             glTexCoord3f(tUrb.x, tLlf.y, tLlf.z);
@@ -171,14 +167,14 @@ namespace TUMVis {
             glVertex3f(llf.x, urb.y, urb.z);
 
             // bottom
-            glTexCoord3f(tLlf.x, tLlf.y, tLlf.z);
-            glVertex3f(llf.x, llf.y, llf.z);
             glTexCoord3f(tLlf.x, tLlf.y, tUrb.z);
             glVertex3f(llf.x, llf.y, urb.z);
             glTexCoord3f(tUrb.x, tLlf.y, tUrb.z);
             glVertex3f(urb.x, llf.y, urb.z);
             glTexCoord3f(tUrb.x, tLlf.y, tLlf.z);
             glVertex3f(urb.x, llf.y, llf.z);
+            glTexCoord3f(tLlf.x, tLlf.y, tLlf.z);
+            glVertex3f(llf.x, llf.y, llf.z);
 
             // back
             glTexCoord3f(tUrb.x, tLlf.y, tUrb.z);

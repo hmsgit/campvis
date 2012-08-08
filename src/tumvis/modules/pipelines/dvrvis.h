@@ -2,7 +2,7 @@
 #define DVRVIS_H__
 
 #include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/io/mhdimagereader.h"
 #include "modules/vis/eepgenerator.h"
@@ -35,6 +35,7 @@ namespace TUMVis {
     protected:
         MhdImageReader _imageReader;
         EEPGenerator _eepGenerator;
+        TrackballNavigationEventHandler* _trackballEH;
 
     };
 }

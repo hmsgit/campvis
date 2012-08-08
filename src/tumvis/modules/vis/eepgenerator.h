@@ -48,7 +48,6 @@ namespace TUMVis {
         GenericProperty<std::string> _exitImageID;      ///< image ID for output exit points image
 
         CameraProperty _camera;
-        BoolProperty _jitterEntryPoints;
 
     protected:
         void renderProxyGeometry(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
