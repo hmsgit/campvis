@@ -2,6 +2,7 @@
 
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/intpropertywidget.h"
+#include "application/gui/properties/floatpropertywidget.h"
 #include "application/gui/properties/stringpropertywidget.h"
 #include "application/gui/properties/transferfunctionpropertywidget.h"
 
@@ -17,6 +18,10 @@ namespace TUMVis {
 
         if (IntProperty* tester = dynamic_cast<IntProperty*>(property)) {
             return new IntPropertyWidget(tester);
+        }
+
+        if (FloatProperty* tester = dynamic_cast<FloatProperty*>(property)) {
+            return new FloatPropertyWidget(tester);
         }
 
         if (StringProperty* tester = dynamic_cast<StringProperty*>(property)) {
