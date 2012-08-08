@@ -14,6 +14,8 @@ namespace TUMVis {
         , _canvas(0)
     {
         _data.s_dataAdded.connect(this, &VisualizationPipeline::onDataContainerDataAdded);
+        addProperty(&_renderTargetID);
+        _renderTargetID.s_changed.connect<VisualizationPipeline>(this, &VisualizationPipeline::onPropertyChanged);
     }
 
     VisualizationPipeline::~VisualizationPipeline() {
@@ -76,6 +78,13 @@ namespace TUMVis {
 
     void VisualizationPipeline::setCanvas(tgt::GLCanvas* canvas) {
         _canvas = canvas;
+    }
+
+    void VisualizationPipeline::onPropertyChanged(const AbstractProperty* prop) {
+        if (prop == &_renderTargetID)
+            s_renderTargetChanged();
+        else
+            AbstractPipeline::onPropertyChanged(prop);
     }
 
 }

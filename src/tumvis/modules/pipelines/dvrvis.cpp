@@ -17,7 +17,6 @@ namespace TUMVis {
 
         _processors.push_back(&_imageReader);
         _processors.push_back(&_eepGenerator);
-        addProperty(&_renderTargetID);
     }
 
     DVRVis::~DVRVis() {

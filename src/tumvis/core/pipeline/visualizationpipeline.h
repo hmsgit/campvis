@@ -97,6 +97,13 @@ namespace TUMVis {
          */
         void onDataContainerDataAdded(const std::string& name, const DataHandle* dh);
 
+        /**
+         * Slot getting called when one of the observed properties changed and notifies its observers.
+         * If \a prop equals _renderTargetID, the s_renderTargetChanged is emitted.
+         * \param   prop    Property that emitted the signal
+         */
+        virtual void onPropertyChanged(const AbstractProperty* prop);
+
         /// Signal emitted when the pipeline's render target has changed
         sigslot::signal0<> s_renderTargetChanged;
 
