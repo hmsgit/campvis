@@ -74,8 +74,7 @@ namespace TUMVis {
         void bind(
             tgt::Shader* shader,
             const tgt::TextureUnit& texUnit, 
-            const std::string& texUniform = "_texture",
-            const std::string& textureParametersUniform = "_textureParameters") const;
+            const std::string& texUniform = "_texture") const;
 
 
 

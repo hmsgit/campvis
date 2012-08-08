@@ -82,10 +82,22 @@ namespace TUMVis {
          */
         void bindDepthTexture(const tgt::TextureUnit& texUnit) const;
 
+        /**
+         * Binds the textures of this render target and sets the according shader uniforms.
+         * Of \a colorTexUnit or \a depthTexUnit is 0, the corresponding texture will not be bound
+         * and the corresponding uniforms will not be set.
+         * 
+         * \param shader                    Shader to set the uniforms to.
+         * \param colorTexUnit              Pointer to color texture unit, may be 0.
+         * \param depthTexUnit              Pointer to depth texture unit, may be 0.
+         * \param colorTexUniform           Name for color texture unit uniform.
+         * \param depthTexUniform           Name for depth texture unit uniform.
+         * \param textureParametersUniform  Name for texture parameters uniform.
+         */
         void bind(
             tgt::Shader* shader,
-            const tgt::TextureUnit& colorTexUnit, 
-            const tgt::TextureUnit& depthTexUnit, 
+            const tgt::TextureUnit* colorTexUnit, 
+            const tgt::TextureUnit* depthTexUnit, 
             const std::string& colorTexUniform = "_colorTexture",
             const std::string& depthTexUniform = "_depthTexture",
             const std::string& textureParametersUniform = "_textureParameters") const;

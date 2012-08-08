@@ -71,13 +71,32 @@ namespace TUMVis {
         _texture->bind();
     }
 
-    void ImageDataGL::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/, const std::string& textureParametersUniform /*= "_textureParameters"*/) const {
+    void ImageDataGL::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/) const {
         bind(texUnit);
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
-        shader->setUniform(texUniform, texUnit.getUnitNumber());
-        shader->setUniform(textureParametersUniform + "._size", tgt::vec2(_size.xy()));
-        shader->setUniform(textureParametersUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+
+        switch (_dimensionality) {
+        case 1:
+            LERROR("Setting um 1D texture uniforms currently not implemented - you probably wanna do that yourself...");
+            break;
+
+        case 2:
+            shader->setUniform(texUniform + "._texture", texUnit.getUnitNumber());
+            shader->setUniform(texUniform + "._size", tgt::vec2(_size.xy()));
+            shader->setUniform(texUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+            break;
+
+        case 3:
+            shader->setUniform(texUniform + "._texture", texUnit.getUnitNumber());
+            shader->setUniform(texUniform + "._size", tgt::vec3(_size));
+            shader->setUniform(texUniform + "._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_size));
+            break;
+
+        default:
+            tgtAssert(false, "Should not reach this!");
+            break;
+        }
         shader->setIgnoreUniformLocationError(tmp);
     }
 

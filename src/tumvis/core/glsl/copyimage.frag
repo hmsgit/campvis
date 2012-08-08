@@ -1,14 +1,13 @@
 
-#include "tools/sampler2d.frag"
+#include "tools/texture2d.frag"
 
 uniform vec2 _viewportSize;
 uniform vec2 _viewportSizeRCP;
-uniform sampler2D _colorTexture;
-uniform sampler2D _depthTexture;
-uniform TextureParameters _textureParameters;
+uniform Texture2D _colorTexture;
+uniform Texture2D _depthTexture;
 
 void main() {
     vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
-    gl_FragData[0] = getElement2DNormalized(_colorTexture, _textureParameters, fragCoord);
-    gl_FragDepth = getElement2DNormalized(_depthTexture, _textureParameters, fragCoord).z;
+    gl_FragData[0] = getElement2DNormalized(_colorTexture, fragCoord);
+    gl_FragDepth = getElement2DNormalized(_depthTexture, fragCoord).z;
 }

@@ -76,7 +76,7 @@ namespace TUMVis {
 
                 // bind input textures
                 tgt::TextureUnit colorUnit, depthUnit;
-                image->bind(_copyShader, colorUnit, depthUnit);
+                image->bind(_copyShader, &colorUnit, &depthUnit);
                 LGL_ERROR;
 
                 // execute the shader

@@ -6,12 +6,8 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
-
-#include "core/classification/simpletransferfunction.h"
 
 namespace TUMVis {
     const std::string EEPGenerator::loggerCat_ = "TUMVis.modules.vis.EEPGenerator";
@@ -28,6 +24,8 @@ namespace TUMVis {
         addProperty(&_entryImageID);
         addProperty(&_exitImageID);
         addProperty(&_camera);
+
+        // TODO: remove this ugly hack: automatically adapt near/far plane to volume extent.
         tgt::Camera c;
         c.setFarDist(512.f);
         _camera.setValue(c);
@@ -44,6 +42,7 @@ namespace TUMVis {
 
     void EEPGenerator::deinit() {
         ShdrMgr.dispose(_shader);
+        _shader = 0;
         VisualizationProcessor::deinit();
     }
 
