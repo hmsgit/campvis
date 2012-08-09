@@ -8,6 +8,8 @@ namespace TUMVis {
         _spinBox = new QDoubleSpinBox(this);
         _spinBox->setMinimum(property->getMinValue());
         _spinBox->setMaximum(property->getMaxValue());
+        _spinBox->setDecimals(3);
+        _spinBox->setSingleStep(0.01);
         _spinBox->setValue(property->getValue());
         
         addWidget(_spinBox);

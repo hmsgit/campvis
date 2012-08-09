@@ -10,7 +10,7 @@ struct Texture3D {
 };
 
 /**
- * Texture lookup function for 3D textures using pixel coordinates, i.e [(0,0) , textureSize].
+ * Texture lookup function for 3D textures using voxel coordinates, i.e [(0,0) , textureSize].
  * \param	tex			Texture3D struct with texture for lookup
  * \param	texCoords	Lookup coordinates in pixel coordinates
  * \return	The texel at the given coordinates.

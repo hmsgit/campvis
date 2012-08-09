@@ -22,10 +22,11 @@ namespace TUMVis {
         , _exitImageID("exitImageID", "Output Exit Points Image", "")
         , _targetImageID("targetImageID", "Output Image", "")
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .5f, 0.01f, 2.f)
+        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f)
         , _shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
         , _scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)
         , _invertMapping("invertMapping", "Invert Mapping", false, InvalidationLevel::INVALID_RESULT | InvalidationLevel::INVALID_SHADER)
+        , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
         , _shader(0)
     {
         addProperty(&_sourceImageID);
@@ -37,6 +38,7 @@ namespace TUMVis {
         addProperty(&_shift);
         addProperty(&_scale);
         addProperty(&_invertMapping);
+        addProperty(&_jitterEntryPoints);
     }
 
     DRRRaycaster::~DRRRaycaster() {
@@ -71,8 +73,10 @@ namespace TUMVis {
 
                 ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
 
+                glPushAttrib(GL_ALL_ATTRIB_BITS);
                 _shader->activate();
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                _shader->setUniform("_jitterEntryPoints", _jitterEntryPoints.getValue());
                 _shader->setUniform("_samplingStepSize", _samplingStepSize.getValue());
                 _shader->setUniform("_shift", _shift.getValue());
                 _shader->setUniform("_scale", _scale.getValue());
@@ -84,6 +88,11 @@ namespace TUMVis {
                 _transferFunction.getTF()->bind(_shader, tfUnit);
 
                 rt->activate();
+                if (_invertMapping.getValue())
+                    glClearColor(0.f, 0.f, 0.f, 1.f);
+                else
+                    glClearColor(1.f, 1.f, 1.f, 1.f);
+
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 LGL_ERROR;
                 tgt::QuadRenderer::renderQuad();
@@ -92,6 +101,7 @@ namespace TUMVis {
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
+                glPopAttrib();
 
                 data.addData(_targetImageID.getValue(), rt);
             }

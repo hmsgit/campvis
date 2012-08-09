@@ -1,8 +1,10 @@
+#include "tools/raycasting.frag"
 #include "tools/texture2d.frag"
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
 uniform vec2 _viewportSizeRCP;
+uniform bool _jitterEntryPoints;
 
 uniform Texture2D _entryPoints;          // ray entry points
 uniform Texture2D _exitPoints;           // ray exit points
@@ -18,60 +20,51 @@ uniform float _scale;
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
-/***
- * Performs direct volume rendering and
- * returns the final fragment color.
- ***/
-vec4 raycastDRR(in vec3 first, in vec3 last, vec2 p) {
-
+/**
+ * Computes the DRR by simple raycasting and returns the final fragment color.
+ */
+vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
     vec4 result = vec4(0.0);
-    bool finished = false;
 
     // calculate ray parameters
-    float stepIncr = _samplingStepSize;
-    float tend;
+    vec3 direction = exitPoint.rgb - entryPoint.rgb;
     float t = 0.0;
-    vec3 direction = last.rgb - first.rgb;
-
-    tend = length(direction);
+    float tend = length(direction);
     direction = normalize(direction);
 
-    // 2 nested loops allow for more than 255 iterations,
-    // but is slower than while (t < tend)
-    for (int loop0=0; !finished && loop0<255; loop0++) {
-        for (int loop1=0; !finished && loop1<255; loop1++) {
+    if (_jitterEntryPoints)
+        jitterEntryPoint(entryPoint, direction, _samplingStepSize);
 
-            vec3 samplePosition = first.rgb + t * direction;
-            vec4 voxel = getElement3D(_volume, samplePosition);
-            vec4 color = lookupTF(_tfTextureParameters, _tfTex, voxel.a);
+    while (t < tend) {
+        vec3 samplePosition = entryPoint.rgb + t * direction;
+        vec4 voxel = getElement3DNormalized(_volume, samplePosition);
+        vec4 color = lookupTF(_tfTextureParameters, _tfTex, voxel.a);
 
 #ifdef DEPTH_MAPPING
-            // use Bernstein Polynomials for depth-color mapping
-            float depth = t / tend;
+        // use Bernstein Polynomials for depth-color mapping
+        float depth = t / tend;
             
-            float b02 = (1-depth) * (1-depth);
-            float b12 = 2 * depth * (1-depth);
-            float b22 = depth * depth;
+        float b02 = (1-depth) * (1-depth);
+        float b12 = 2 * depth * (1-depth);
+        float b22 = depth * depth;
             
-            color = vec4(0.75*b02 + 0.25*b12, b12, 0.25*b12 + 0.75*b22, 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP));
+        color = vec4(0.75*b02 + 0.25*b12, b12, 0.25*b12 + 0.75*b22, 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP));
 /*            float t_sq = depth * depth;
-            float inv_t_sq = (1-depth) * (1-depth);
-            float b04 = inv_t_sq * inv_t_sq;
-            float b24 = 6 * t_sq * inv_t_sq;
-            float b44 = t_sq * t_sq;
-            color = vec4(0.5*b04 + 0.5*b24, b24, 0.5*b24 + 0.5*b44, 1.0 - pow(1.0 - color.a, samplingStepSize_ * SAMPLING_BASE_INTERVAL_RCP));*/
+        float inv_t_sq = (1-depth) * (1-depth);
+        float b04 = inv_t_sq * inv_t_sq;
+        float b24 = 6 * t_sq * inv_t_sq;
+        float b44 = t_sq * t_sq;
+        color = vec4(0.5*b04 + 0.5*b24, b24, 0.5*b24 + 0.5*b44, 1.0 - pow(1.0 - color.a, samplingStepSize_ * SAMPLING_BASE_INTERVAL_RCP));*/
 
-            result.rgb = result.rgb + (1.0 - result.a) * color.a * color.rgb;
-            result.a = result.a + color.a * _scale;
+        result.rgb = result.rgb + (1.0 - result.a) * color.a * color.rgb;
+        result.a = result.a + color.a * _scale;
 #else
-            // perform compositing (account for differen step size / sampling rate)
-            color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-            result.a = result.a + color.a * _scale;
+        // perform compositing (account for differen step size / sampling rate)
+        color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
+        result.a = result.a + color.a * _scale;
 #endif       
 
-            t += stepIncr;
-            finished = finished || (t > tend);
-        }
+        t += _samplingStepSize;
     }
 
     // DRR images don't have a meaningful depth value
@@ -107,6 +100,6 @@ void main() {
         discard;
     } else {
         //fragCoords are lying inside the boundingbox
-        gl_FragData[0] = raycastDRR(frontPos, backPos, p);
+        gl_FragData[0] = raycastDRR(frontPos, backPos);
     }
 }

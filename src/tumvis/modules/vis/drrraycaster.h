@@ -53,6 +53,7 @@ namespace TUMVis {
         FloatProperty _shift;
         FloatProperty _scale;
         BoolProperty _invertMapping;
+        BoolProperty _jitterEntryPoints;
 
     protected:
         std::string generateHeader() const;
