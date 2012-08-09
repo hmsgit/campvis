@@ -11,6 +11,7 @@ namespace TUMVis {
         , _imageReader()
         , _eepGenerator(_renderTargetSize)
         , _drrraycater(_renderTargetSize)
+        , _simpleRaycaster(_renderTargetSize)
         , _trackballEH(0)
     {
         _trackballEH = new TrackballNavigationEventHandler(&_eepGenerator._camera, _renderTargetSize.getValue());
@@ -19,6 +20,7 @@ namespace TUMVis {
         _processors.push_back(&_imageReader);
         _processors.push_back(&_eepGenerator);
         _processors.push_back(&_drrraycater);
+        _processors.push_back(&_simpleRaycaster);
     }
 
     DVRVis::~DVRVis() {
@@ -32,9 +34,15 @@ namespace TUMVis {
         _imageReader._targetImageID.setValue("reader.output");
 
         _eepGenerator._entryImageID.addSharedProperty(&_drrraycater._entryImageID);
+        _eepGenerator._entryImageID.addSharedProperty(&_simpleRaycaster._entryImageID);
         _eepGenerator._exitImageID.addSharedProperty(&_drrraycater._exitImageID);
+        _eepGenerator._exitImageID.addSharedProperty(&_simpleRaycaster._exitImageID);
+
         _drrraycater._targetImageID.setValue("drr.output");
         _drrraycater._sourceImageID.setValue("eep.input");
+
+        _simpleRaycaster._targetImageID.setValue("dvr.output");
+        _simpleRaycaster._sourceImageID.setValue("eep.input");
 
         _eepGenerator._sourceImageID.setValue("eep.input");
         _eepGenerator._entryImageID.setValue("eep.entry");
@@ -45,6 +53,7 @@ namespace TUMVis {
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _drrraycater.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+        _simpleRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
     }
 
     void DVRVis::execute() {
@@ -74,9 +83,13 @@ namespace TUMVis {
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_eepGenerator);
             lockGLContextAndExecuteProcessor(_drrraycater);
+            lockGLContextAndExecuteProcessor(_simpleRaycaster);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid() || !_drrraycater.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_drrraycater);
+        }
+        if (! _eepGenerator.getInvalidationLevel().isValid() || !_simpleRaycaster.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(_simpleRaycaster);
         }
     }
 

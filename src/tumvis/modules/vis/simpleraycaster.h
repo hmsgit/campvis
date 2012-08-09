@@ -1,5 +1,5 @@
-#ifndef DRRRAYCASTER_H__
-#define DRRRAYCASTER_H__
+#ifndef SIMPLERAYCASTER_H__
+#define SIMPLERAYCASTER_H__
 
 #include <string>
 
@@ -16,19 +16,22 @@ namespace TUMVis {
     class ImageData;
 
     /**
-     * Creates a Digitally Reconstructed Radiograph.
+     * Performs a simple volume ray casting.
+     * \todo    OpenGL supports up to 4 bound FBO. We can use them to generate multiple images
+     *          in a single pass, e.g. first hit point, normals, MIP, DVR.
+     * \todo    Create some kind of RaycastingProcessor class to inherit from.
      */
-    class DRRRaycaster : public VisualizationProcessor {
+    class SimpleRaycaster : public VisualizationProcessor {
     public:
         /**
-         * Constructs a new DRRRaycaster Processor
+         * Constructs a new SimpleRaycaster Processor
          **/
-        DRRRaycaster(GenericProperty<tgt::ivec2>& canvasSize);
+        SimpleRaycaster(GenericProperty<tgt::ivec2>& canvasSize);
 
         /**
          * Destructor
          **/
-        virtual ~DRRRaycaster();
+        virtual ~SimpleRaycaster();
 
         /// \see AbstractProcessor::init
         virtual void init();
@@ -37,9 +40,9 @@ namespace TUMVis {
         virtual void deinit();
 
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "DRRRaycaster"; };
+        virtual const std::string getName() const { return "SimpleRaycaster"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Creates a Digitally Reconstructed Radiograph."; };
+        virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
 
         virtual void process(DataContainer& data);
 
@@ -50,19 +53,16 @@ namespace TUMVis {
 
         TransferFunctionProperty _transferFunction;     ///< Transfer function
         FloatProperty _samplingStepSize;
-        FloatProperty _shift;
-        FloatProperty _scale;
-        BoolProperty _invertMapping;
         BoolProperty _jitterEntryPoints;
 
     protected:
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for DRR rendering
+        tgt::Shader* _shader;                           ///< Shader for raycasting
 
         static const std::string loggerCat_;
     };
 
 }
 
-#endif // DRRRAYCASTER_H__
+#endif // SIMPLERAYCASTER_H__
