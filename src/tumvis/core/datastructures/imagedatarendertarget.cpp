@@ -36,54 +36,60 @@ namespace TUMVis {
             LWARNING("Neither non-power-of-two textures nor texture rectangles seem to be supported!");
         }
 
-        switch(internalFormatColor) {
-            case GL_RGB:
-                _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA:
-                _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA8:
-                _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA16:
-                _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
-                break;
-            case GL_RGB16F_ARB:
-                _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA16F_ARB:
-                _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA32F_ARB:
-                _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA32F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            default:
-                LERROR("Unknown internal format!");
-        }
-        _colorTexture->uploadTexture();
-        _colorTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+        {
+            // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
+            tgt::TextureUnit rtUnit;
+            rtUnit.activate();
 
-        switch(internalFormatDepth) {
-        case GL_DEPTH_COMPONENT16:
-            _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, tgt::Texture::LINEAR);
-            break;
-        case GL_DEPTH_COMPONENT24:
-            _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
-            break;
-        case GL_DEPTH_COMPONENT32:
-            _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32, GL_FLOAT, tgt::Texture::LINEAR);
-            break;
-#ifdef GL_DEPTH_COMPONENT32F
-        case GL_DEPTH_COMPONENT32F:
-            _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
-            break;
-#endif
-        default:
-            LERROR("Unknown internal depth format!");
+            switch(internalFormatColor) {
+                case GL_RGB:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                    break;
+                case GL_RGBA:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                    break;
+                case GL_RGBA8:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                    break;
+                case GL_RGBA16:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
+                    break;
+                case GL_RGB16F_ARB:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                    break;
+                case GL_RGBA16F_ARB:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                    break;
+                case GL_RGBA32F_ARB:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA32F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                    break;
+                default:
+                    LERROR("Unknown internal format!");
+            }
+            _colorTexture->uploadTexture();
+            _colorTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+
+            switch(internalFormatDepth) {
+            case GL_DEPTH_COMPONENT16:
+                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, tgt::Texture::LINEAR);
+                break;
+            case GL_DEPTH_COMPONENT24:
+                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
+                break;
+            case GL_DEPTH_COMPONENT32:
+                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32, GL_FLOAT, tgt::Texture::LINEAR);
+                break;
+    #ifdef GL_DEPTH_COMPONENT32F
+            case GL_DEPTH_COMPONENT32F:
+                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
+                break;
+    #endif
+            default:
+                LERROR("Unknown internal depth format!");
+            }
+            _depthTexture->uploadTexture();
+            _depthTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
         }
-        _depthTexture->uploadTexture();
-        _depthTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
 
         _fbo = new tgt::FramebufferObject();
         if (!_fbo) {

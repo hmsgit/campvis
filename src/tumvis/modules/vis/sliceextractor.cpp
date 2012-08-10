@@ -64,6 +64,7 @@ namespace TUMVis {
                 rt->deactivate();
 
                 _shader->deactivate();
+                tgt::TextureUnit::setZeroUnit();
 
                 data.addData(_targetImageID.getValue(), rt);
                 delete slice;

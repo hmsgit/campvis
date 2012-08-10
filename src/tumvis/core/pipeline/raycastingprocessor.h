@@ -80,9 +80,6 @@ namespace TUMVis {
          * Put additional (processor specific) setup code here, create and activate your render target(s), render
          * your quad and store your results in \a data.
          *
-         * \note    When creating new render targets, pleas make sure to activate a new TextureUnit first or
-         *          one of the previous bound textures (volume, TF, entry-/exit points) will be destroyed!
-         *          
          * \sa      RaycastingProcessor::process()
          * \param   data    DataContainer to work on.
          */

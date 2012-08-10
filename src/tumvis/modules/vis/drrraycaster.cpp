@@ -27,8 +27,6 @@ namespace TUMVis {
         _shader->setUniform("_shift", _shift.getValue());
         _shader->setUniform("_scale", _scale.getValue());
 
-        tgt::TextureUnit rtUnit;
-        rtUnit.activate();
         ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
         rt->activate();
 
