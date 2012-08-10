@@ -36,13 +36,14 @@ namespace TUMVis {
 
         /**
          * Initializes the OpenGL context of the pipeline and its processors.
-         * Pipeline must have a valid canvas set before calling this method.
+         * Must be called with a valid and locked OpenGL context.
          * \note    When overwriting this method, make sure to call the base class version first.
          */
         virtual void init();
 
         /**
          * Deinitializes this pipeline and all of its processors.
+         * Must be called with a valid and locked OpenGL context.
          * \note    When overwriting this method, make sure to call the base class version first.
          */
         virtual void deinit();

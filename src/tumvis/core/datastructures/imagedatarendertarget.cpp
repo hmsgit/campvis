@@ -138,7 +138,7 @@ namespace TUMVis {
         }
         if (depthTexUnit != 0) {
             bindDepthTexture(*depthTexUnit);
-            shader->setUniform(depthTexUniform + "._texture", colorTexUnit->getUnitNumber());
+            shader->setUniform(depthTexUniform + "._texture", depthTexUnit->getUnitNumber());
             shader->setUniform(depthTexUniform + "._size", tgt::vec2(_size.xy()));
             shader->setUniform(depthTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
         }

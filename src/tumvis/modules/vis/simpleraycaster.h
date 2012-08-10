@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/raycastingprocessor.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
@@ -21,7 +21,7 @@ namespace TUMVis {
      *          in a single pass, e.g. first hit point, normals, MIP, DVR.
      * \todo    Create some kind of RaycastingProcessor class to inherit from.
      */
-    class SimpleRaycaster : public VisualizationProcessor {
+    class SimpleRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new SimpleRaycaster Processor
@@ -33,32 +33,16 @@ namespace TUMVis {
          **/
         virtual ~SimpleRaycaster();
 
-        /// \see AbstractProcessor::init
-        virtual void init();
-
-        /// \see AbstractProcessor::deinit
-        virtual void deinit();
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "SimpleRaycaster"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
 
-        virtual void process(DataContainer& data);
-
-        GenericProperty<std::string> _sourceImageID;    ///< image ID for input image
-        GenericProperty<std::string> _entryImageID;     ///< image ID for output entry points image
-        GenericProperty<std::string> _exitImageID;      ///< image ID for output exit points image
         GenericProperty<std::string> _targetImageID;    ///< image ID for output image
 
-        TransferFunctionProperty _transferFunction;     ///< Transfer function
-        FloatProperty _samplingStepSize;
-        BoolProperty _jitterEntryPoints;
-
     protected:
-        std::string generateHeader() const;
-
-        tgt::Shader* _shader;                           ///< Shader for raycasting
+        /// \see RaycastingProcessor::processImpl()
+        virtual void processImpl(DataContainer& data);
 
         static const std::string loggerCat_;
     };

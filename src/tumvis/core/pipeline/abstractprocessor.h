@@ -60,7 +60,7 @@ namespace TUMVis {
         
         /**
          * Deinitializes this processor.
-         * \note    When overwriting this method, make sure to call the base class version first.
+         * \note    When overwriting this method, make sure to call the base class version at the end.
          */
         virtual void deinit();
 

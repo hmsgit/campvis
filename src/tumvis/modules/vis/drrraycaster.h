@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/raycastingprocessor.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
@@ -18,7 +18,7 @@ namespace TUMVis {
     /**
      * Creates a Digitally Reconstructed Radiograph.
      */
-    class DRRRaycaster : public VisualizationProcessor {
+    class DRRRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new DRRRaycaster Processor
@@ -30,35 +30,26 @@ namespace TUMVis {
          **/
         virtual ~DRRRaycaster();
 
-        /// \see AbstractProcessor::init
-        virtual void init();
-
-        /// \see AbstractProcessor::deinit
-        virtual void deinit();
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "DRRRaycaster"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates a Digitally Reconstructed Radiograph."; };
 
-        virtual void process(DataContainer& data);
-
-        GenericProperty<std::string> _sourceImageID;    ///< image ID for input image
-        GenericProperty<std::string> _entryImageID;     ///< image ID for output entry points image
-        GenericProperty<std::string> _exitImageID;      ///< image ID for output exit points image
         GenericProperty<std::string> _targetImageID;    ///< image ID for output image
 
-        TransferFunctionProperty _transferFunction;     ///< Transfer function
-        FloatProperty _samplingStepSize;
         FloatProperty _shift;
         FloatProperty _scale;
         BoolProperty _invertMapping;
-        BoolProperty _jitterEntryPoints;
 
     protected:
-        std::string generateHeader() const;
+        /// \see RaycastingProcessor::processImpl()
+        virtual void processImpl(DataContainer& data);
 
-        tgt::Shader* _shader;                           ///< Shader for DRR rendering
+        /**
+         * \see RaycastingProcessor::generateHeader()
+         * \return  "#define DRR_INVERT 1" if \a _invertMapping is set to true.
+         */
+        virtual std::string generateHeader() const;
 
         static const std::string loggerCat_;
     };

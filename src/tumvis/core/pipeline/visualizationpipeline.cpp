@@ -41,14 +41,10 @@ namespace TUMVis {
     }
 
     void VisualizationPipeline::init() {
-        tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
-        tgt::GLContextScopedLock lock(_canvas->getContext());
         AbstractPipeline::init();
     }
 
     void VisualizationPipeline::deinit() {
-        tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
-        tgt::GLContextScopedLock lock(_canvas->getContext());
         AbstractPipeline::deinit();
     }
 

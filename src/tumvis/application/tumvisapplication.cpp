@@ -61,6 +61,9 @@ namespace TUMVis {
         // create a local OpenGL context and init GL
         _localContext = CtxtMgr.createContext("AppContext", "", tgt::ivec2(16, 16));
         tgtAssert(_localContext != 0, "Could not create local OpenGL context");
+
+        tgt::GLContextScopedLock lock(_localContext->getContext());
+
         tgt::initGL(featureset);
         LGL_ERROR;
 
@@ -96,18 +99,24 @@ namespace TUMVis {
     void TumVisApplication::deinit() {
         tgtAssert(_initialized, "Tried to deinitialize uninitialized TumVisApplication.");
 
-        // Deinit pipeline first
-        for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            (*it)->deinit();
+        {
+            // Deinit everything OpenGL related using the local context.
+            tgt::GLContextScopedLock lock(_localContext->getContext());
+
+            // Deinit pipeline first
+            for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+                (*it)->deinit();
+            }
+
+            // Now deinit painters:
+            for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+                it->second->deinit();
+            }
+
+            // deinit OpenGL and tgt
+            tgt::deinitGL();
         }
 
-        // Now deinit painters:
-        for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
-            it->second->deinit();
-        }
-
-        // deinit OpenGL and tgt
-        tgt::deinitGL();
         tgt::QtContextManager::deinit();
         tgt::deinit();
 
