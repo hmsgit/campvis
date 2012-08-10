@@ -26,7 +26,7 @@ namespace TUMVis {
          *
          * \param dimensionality    Dimensionality of data
          * \param size              Size of this image (number of elements per dimension)
-         * \param data              Pointer to the image data, must not be 0, ImageDataGL does not take ownership of that pointer.
+         * \param wtp               WeaklyTypedPointer to the image data, must not be 0, ImageDataGL does \b not take ownership of that pointer.
          */
         ImageDataGL(size_t dimensionality, const tgt::svec3& size, const WeaklyTypedPointer& wtp);
 

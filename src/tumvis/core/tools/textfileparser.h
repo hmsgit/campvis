@@ -45,7 +45,7 @@ namespace TUMVis {
         /**
          * Performs the parsing of the text file into key-value pairs.
          * The file will be read in text mode and split into single items using the template argument
-         * functor \ta T. Then, each item will be split into key-value pairs.
+         * functor \a T. Then, each item will be split into key-value pairs.
          * 
          * \sa TextFileParser::ItemSeparatorLines
          * \tparam  T   Functor for splitting the file into items, must implement std::unary_function<std::string, std::vector<std::string> >

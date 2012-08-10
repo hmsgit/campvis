@@ -22,12 +22,12 @@ namespace TUMVis {
      * care about correctly handling all those instances.
      * 
      * Intended usage is:
-     *  1) Create your TumVisApplication
-     *  2) Add Pipelines and Visualizations as needed
-     *  3) call init()
-     *  4) call run()
-     *  5) call deinit()
-     *  6) You can now safely destroy your TumVisApplication
+     *  1. Create your TumVisApplication
+     *  2. Add Pipelines and Visualizations as needed
+     *  3. call init()
+     *  4. call run()
+     *  5. call deinit()
+     *  6. You can now safely destroy your TumVisApplication
      */
     class TumVisApplication : QApplication {
     friend class MainWindow;
@@ -71,7 +71,7 @@ namespace TUMVis {
          * For each added pipeline, two OpenGL contexts will be created (one for the evaluation, 
          * one for the rendering).
          * 
-         * \note    You do \emph not need to call addPipeline.
+         * \note    You do \b not need to call addPipeline.
          * \param   name    Name of the OpenGL context to create for the pipeline.
          * \param   vp      VisualizationPipeline to add.
          */
@@ -84,6 +84,7 @@ namespace TUMVis {
          */
         int run();
 
+        /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
     private:

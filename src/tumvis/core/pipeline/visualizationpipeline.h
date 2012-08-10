@@ -91,10 +91,15 @@ namespace TUMVis {
          */
         const std::string& getRenderTargetID() const;
 
+        /// Signal emitted when the pipeline's render target has changed
+        sigslot::signal0<> s_renderTargetChanged;
+
+    protected:
         /**
          * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
-         * The default behaviour is to do nothing
-         * \param poa   DataContainerObserverArgs   ObserverArgument struct containing the emitting DataContainer and hints to its changes
+         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
+         * \param   name    Name of the added data.
+         * \param   dh      DataHandle to the newly added data.
          */
         void onDataContainerDataAdded(const std::string& name, const DataHandle* dh);
 
@@ -105,10 +110,6 @@ namespace TUMVis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
-        /// Signal emitted when the pipeline's render target has changed
-        sigslot::signal0<> s_renderTargetChanged;
-
-    protected:
         /**
          * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 
          * and locks its properties meanwhile.

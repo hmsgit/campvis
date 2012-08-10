@@ -91,7 +91,7 @@ namespace TUMVis {
                 c.look();  
                 glColor3f(1.f, 0.f, 0.f);  
                 tgt::Sphere sphere(.5f, 64, 32);  
-                sphere.render();  
+                //sphere.render();  
 
                 /*
                 // render error texture

@@ -35,7 +35,7 @@ namespace TUMVis {
      * (e.g. in order to setup data IDs or property sharing) and the properties in the PropertyCollection
      * are not strongly typed. Hence, we declare AbstractPipeline as our friend.
      */
-    friend class AbstractPipeline;
+    friend class AbstractPipeline;  // TODO: this does not work as intended...
 
     public:
 
@@ -89,10 +89,10 @@ namespace TUMVis {
         virtual const std::string getDescription() const = 0;
 
         /**
-         * Update the processor's invalidation level by \a nl.
-         * If \a nl is VALID, the processor's invalidation level will be set to VALID.
-         * If \a nl is one of the INVALID_X state, the processor's corresponding flag will be set.
-         * \param nl    Invalidation level to apply.
+         * Update the processor's invalidation level by \a il.
+         * If \a il is VALID, the processor's invalidation level will be set to VALID.
+         * If \a il is one of the INVALID_X state, the processor's corresponding flag will be set.
+         * \param il    Invalidation level to apply.
          */
         void applyInvalidationLevel(InvalidationLevel il);
         

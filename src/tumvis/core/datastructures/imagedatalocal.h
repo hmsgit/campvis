@@ -25,6 +25,8 @@ namespace TUMVis {
          *
          * \param   dimensionality  Dimensionality of data
          * \param   size            Size of this image (number of elements per dimension)
+         * \param   baseType        Base type of the image data.
+         * \param   numChannels     Number of channels per image element.
          */
         ImageDataLocal(size_t dimensionality, const tgt::svec3& size, WeaklyTypedPointer::BaseType baseType, size_t numChannels);
 
@@ -55,7 +57,7 @@ namespace TUMVis {
          * Simple algorithms on images might not always want to test for the actual base data type.
          * For them access to the normalized element values provided here might be enough.
          * 
-         * \note    This method is virtual => slow!
+         * \note    This method is virtual => know the costs!
          * \sa      ImageDataLocal::setElementNormalized
          * \param   position    Element position within the image
          * \param   channel     Image channel
@@ -72,7 +74,7 @@ namespace TUMVis {
          * Simple algorithms on images might not always want to test for the actual base data type.
          * For them access to the normalized element values provided here might be enough.
          * 
-         * \note    This method is virtual => slow!
+         * \note    This method is virtual => know the costs!
          * \sa      ImageDataLocal::getElementNormalized
          * \param   position    Element position within the image
          * \param   channel     Image channel
@@ -81,8 +83,8 @@ namespace TUMVis {
         virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value) = 0;
 
     protected:
-        WeaklyTypedPointer::BaseType _baseType;
-        size_t _numChannels;
+        WeaklyTypedPointer::BaseType _baseType;     ///< Base type of the image data
+        size_t _numChannels;                        ///< Number of channels per image element.
 
         static const std::string loggerCat_;
 

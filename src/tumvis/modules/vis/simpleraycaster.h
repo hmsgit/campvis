@@ -1,25 +1,22 @@
 #ifndef SIMPLERAYCASTER_H__
 #define SIMPLERAYCASTER_H__
 
-#include <string>
-
 #include "core/pipeline/raycastingprocessor.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
+
+#include <string>
 
 namespace tgt {
     class Shader;
 }
 
 namespace TUMVis {
-    class ImageData;
-
     /**
      * Performs a simple volume ray casting.
      * \todo    OpenGL supports up to 4 bound FBO. We can use them to generate multiple images
      *          in a single pass, e.g. first hit point, normals, MIP, DVR.
-     * \todo    Create some kind of RaycastingProcessor class to inherit from.
      */
     class SimpleRaycaster : public RaycastingProcessor {
     public:

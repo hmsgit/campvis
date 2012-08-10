@@ -143,6 +143,10 @@ namespace TUMVis {
          */
         void removeData(const std::string& name);
 
+        /**
+         * Signal emitted when data has been added to this DataContainer (this includes also data being replaced).
+         * First parameter is the name of the added data, second parameter contains a DataHandle to the new data.
+         */
         sigslot::signal2<const std::string&, const DataHandle*> s_dataAdded;
 
     private:

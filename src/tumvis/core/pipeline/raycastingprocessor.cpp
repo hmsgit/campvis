@@ -15,8 +15,8 @@
 namespace TUMVis {
     const std::string RaycastingProcessor::loggerCat_ = "TUMVis.modules.vis.RaycastingProcessor";
 
-    RaycastingProcessor::RaycastingProcessor(GenericProperty<tgt::ivec2>& canvasSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
-        : VisualizationProcessor(canvasSize)
+    RaycastingProcessor::RaycastingProcessor(GenericProperty<tgt::ivec2>& renderTargetSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
+        : VisualizationProcessor(renderTargetSize)
         , _sourceImageID("sourceImageID", "Input Image", "")
         , _entryImageID("entryImageID", "Output Entry Points Image", "")
         , _exitImageID("exitImageID", "Output Exit Points Image", "")

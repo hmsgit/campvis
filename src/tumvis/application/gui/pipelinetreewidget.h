@@ -34,6 +34,7 @@ namespace TUMVis {
          * Return the of this item at the column \a column.
          * To be overwritten by subclasses.
          * \param   column  Column
+         * \param   role    Access role (Use Qt::DisplayRole for string representation, Qt::UserRole for the internal data)
          * \return  The data of this item at \a column.
          */
         virtual QVariant getData(int column, int role) const = 0;

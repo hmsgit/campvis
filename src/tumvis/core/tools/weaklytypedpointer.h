@@ -33,8 +33,9 @@ namespace TUMVis {
          * 
          * \note    There is a compiletime version in WeaklyTypedPointerTraits.
          * \sa      WeaklyTypedPointerTraits::numBytes()
-         * \param   bt  Data type to check.
-         * \returns The number of bytes occupied by one element of the type \a bt.
+         * \param   bt          Image base type
+         * \param   numChannels Number of channels per element.
+         * \returns The number of bytes occupied by one image element with \a numChannels channels of the type \a bt.
          */
         static size_t numBytes(BaseType bt, size_t numChannels = 1);
 

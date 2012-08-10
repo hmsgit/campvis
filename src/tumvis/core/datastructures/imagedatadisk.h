@@ -27,6 +27,7 @@ namespace TUMVis {
          * \param dimensionality    Dimensionality of data
          * \param size              Size of this image (number of elements per dimension)
          * \param type              Base type of data
+         * \param numChannels       Number of channels per element
          * \param offset            Offset of first data element in file (in bytes)
          * \param endianness        Endianess of data
          * \param stride            Number of _elemments_ _between_ adjacent elements for each dimension (\see ImageDataDisk::_stride).

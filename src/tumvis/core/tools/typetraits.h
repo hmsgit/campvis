@@ -346,8 +346,8 @@ namespace {
 
         /**
          * Returns the i-th channel (0-based) of the given image element \a element.
-         * \param   Element Image element to access
-         * \param   Channel Channel to access, must be within [0, NUMCHANNELS).
+         * \param   element Image element to access
+         * \param   channel Channel to access, must be within [0, NUMCHANNELS).
          * \return  The i-th channel of \a element.
          */
         static inline BASETYPE getChannel(const typename TypeTraitsHelperOfBasetypePerChannel<BASETYPE, NUMCHANNELS>::ElementType& element, size_t channel) {

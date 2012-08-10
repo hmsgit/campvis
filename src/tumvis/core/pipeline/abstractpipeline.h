@@ -72,11 +72,16 @@ namespace TUMVis {
          */
         virtual const std::string getName() const = 0;
         
+        /**
+         * Gets the current InvalidationLevel of this pipeline.
+         * \return _invalidationLevel
+         */
         InvalidationLevel& getInvalidationLevel();
 
-
+        /// Signal being emitted when this pipeline has been invalidated.
         sigslot::signal0<> s_PipelineInvalidated;
 
+    protected:
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * The default behaviour is just to set the invalidation level to invalid.
@@ -91,7 +96,6 @@ namespace TUMVis {
          */
         virtual void onProcessorInvalidated(const AbstractProcessor* processor);
 
-    protected:
         /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
