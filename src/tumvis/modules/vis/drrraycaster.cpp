@@ -7,7 +7,7 @@ namespace TUMVis {
     const std::string DRRRaycaster::loggerCat_ = "TUMVis.modules.vis.DRRRaycaster";
 
     DRRRaycaster::DRRRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/vis/drrraycaster.frag", true) // FIXME: the last parameter should be false, but it results in a wrong rendering
+        : RaycastingProcessor(canvasSize, "modules/vis/drrraycaster.frag", false)
         , _targetImageID("targetImageID", "Output Image", "")
         , _shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
         , _scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)
@@ -27,6 +27,8 @@ namespace TUMVis {
         _shader->setUniform("_shift", _shift.getValue());
         _shader->setUniform("_scale", _scale.getValue());
 
+        tgt::TextureUnit rtUnit;
+        rtUnit.activate();
         ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
         rt->activate();
 

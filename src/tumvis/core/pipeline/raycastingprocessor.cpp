@@ -75,7 +75,6 @@ namespace TUMVis {
                 _transferFunction.getTF()->bind(_shader, tfUnit);
 
                 if (! _bindEntryExitDepthTextures) {
-                    // FIXME: something is somehow wrong here - see DRRRaycaster...
                     entryPoints->bind(_shader, &entryUnit, 0, "_entryPoints");
                     exitPoints->bind(_shader, &exitUnit, 0, "_exitPoints");
                     processImpl(data);

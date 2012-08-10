@@ -18,6 +18,8 @@ namespace TUMVis {
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data) {
+        tgt::TextureUnit rtUnit;
+        rtUnit.activate();
         ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
         rt->activate();
 
