@@ -71,7 +71,7 @@ namespace TUMVis {
         DataHandle& operator=(const DataHandle& rhs);
 
         /**
-         * Destructor, will delete the managed AbstractData.
+         * Destructor, decrease the reference count of the managed AbstractData.
          */
         virtual ~DataHandle();
 
