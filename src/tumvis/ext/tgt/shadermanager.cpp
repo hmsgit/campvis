@@ -130,6 +130,10 @@ void ShaderPreprocessor::parse() {
     lineTracker_.clear();
     result_.clear();
 
+    outputComment("BEGIN GLOBAL HEADER");
+    parsePart(ShdrMgr.getGlobalHeader(), "GLOBAL HEADER");
+    outputComment("END GLOBAL HEADER");
+
     if (!shd_->header_.empty()) {
         outputComment("BEGIN HEADER");
         parsePart(shd_->header_, "HEADER");

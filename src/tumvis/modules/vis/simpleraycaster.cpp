@@ -50,6 +50,7 @@ namespace TUMVis {
         rt->activate();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDepthFunc(GL_ALWAYS);
         tgt::QuadRenderer::renderQuad();
         LGL_ERROR;
 

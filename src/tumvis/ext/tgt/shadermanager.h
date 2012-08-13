@@ -469,7 +469,25 @@ public:
 
     bool rebuildAllShadersFromFile();
 
+    /**
+     * Sets the global header that will be added to all shaders to \a header.
+     * \param   header  The new global header that will be added to all shaders.
+     */
+    void setGlobalHeader(const std::string& header) {
+        globalHeader_ = header;
+    }
+
+    /**
+     * Gets the global header that will be added to all shaders.
+     * \return  globalHeader_
+     */
+    const std::string& getGlobalHeader() const {
+        return globalHeader_;
+    }
+
 protected:
+    std::string globalHeader_;      ///< Global header that will be added to all shaders.
+
     static const std::string loggerCat_;
 };
 

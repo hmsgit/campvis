@@ -26,11 +26,50 @@
 // 
 // ================================================================================================
 
-
 /**
  * Code adapted from: https://www.marcusbannerman.co.uk/index.php/component/content/article/42-articles/97-vol-render-optimizations.htm
  */
 void jitterEntryPoint(inout vec3 position, in vec3 direction, in float stepSize) {
     float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453);
     position = position + direction * (stepSize * random);
+}
+
+/**
+ * Converts a depth value in eye space to the corresponding depth value in viewport space.
+ * \param   depth   Depth value in eye space.
+ * \return  The given depth value transformed to viewport space.
+ */   
+float depthEyeToViewport(in float depth) {
+    float f = gl_DepthRange.far;
+    float n = gl_DepthRange.near;
+    float diff = gl_DepthRange.diff;
+    return (1.0/depth)*((f*n)/diff) + 0.5*((f+n)/diff) + 0.5;
+}
+
+/**
+ * Converts a depth value in viewport space to the corresponding depth value in eye space.
+ * \param   depth   Depth value in viewport space.
+ * \return  The given depth value transformed to eye space.
+ */   
+float depthViewportToEye(in float depth) {
+    float f = gl_DepthRange.far;
+    float n = gl_DepthRange.near;
+    float diff = gl_DepthRange.diff;
+    return 1.0/((depth - 0.5 - 0.5*((f+n)/diff)) * (diff/(f*n)));
+}
+
+/**
+ * Interpolates the depth \a ratio in viewport space between \a startDepth and \a endDepth.
+ * \note    Mind the costs: Because the depth in viewport space does not scale linearly, the interpolation
+ *          must be done in eye space. Hence, this method includes two coordinate transformations!
+ * 
+ * \param   ratio       Depth value to interpolate given as ratio of endDepth/startDepth.
+ * \param   startDepth  Start depth value in viewport space.
+ * \param   endDepth    End depth value in viewport space.
+ * \return  The interpolated depth value.
+ */     
+float interpolateDepthViewport(in float ratio, in float startDepth, in float endDepth) {
+    float startEye = depthViewportToEye(startDepth);
+    float endEye = depthViewportToEye(endDepth);
+    return depthEyeToViewport(startEye + ratio*(endEye - startEye));
 }

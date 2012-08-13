@@ -53,7 +53,7 @@ const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
  */
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
-    float depthT = -1.0;
+    float firstHitT = -1.0;
 
     // calculate ray parameters
     vec3 direction = exitPoint.rgb - entryPoint.rgb;
@@ -78,8 +78,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // save first hit ray parameter for depth value calculation
-        if (depthT < 0.0 && result.a > 0.0)
-            depthT = t;
+        if (firstHitT < 0.0 && result.a > 0.0)
+            firstHitT = t;
 
         // early ray termination
         if (result.a >= 1.0) {
@@ -92,10 +92,10 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
     // calculate depth value from ray parameter
     gl_FragDepth = 1.0;
-    //if (depthT >= 0.0) {
-    //    float depthEntry = getElement2DNormalized(_entryPointsDepth, texCoords).z;
-    //    float depthExit = getElement2DNormalized(_exitPointsDepth, texCoords).z;
-    //    gl_FragDepth = calculateDepthValue(depthT/tend, depthEntry, depthExit);
+    //if (firstHitT >= 0.0) {
+        //float depthEntry = getElement2DNormalized(_entryPointsDepth, texCoords).z;
+        //float depthExit = getElement2DNormalized(_exitPointsDepth, texCoords).z;
+        //gl_FragDepth = interpolateDepthViewport(firstHitT/tend, depthEntry, depthExit);
     //}
 
     return result;
