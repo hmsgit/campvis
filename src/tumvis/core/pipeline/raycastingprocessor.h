@@ -32,6 +32,7 @@
 #include <string>
 
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/cameraproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
@@ -98,6 +99,7 @@ namespace TUMVis {
         GenericProperty<std::string> _entryImageID;     ///< image ID for output entry points image
         GenericProperty<std::string> _exitImageID;      ///< image ID for output exit points image
 
+        CameraProperty _camera;                         ///< Camera used for ray casting
         TransferFunctionProperty _transferFunction;     ///< Transfer function
         FloatProperty _samplingStepSize;                ///< Ray casting step size
         BoolProperty _jitterEntryPoints;                ///< Flag whether to jitter the entry points

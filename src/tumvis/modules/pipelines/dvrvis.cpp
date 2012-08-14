@@ -36,13 +36,21 @@ namespace TUMVis {
 
     DVRVis::DVRVis()
         : VisualizationPipeline()
+        , _camera("camera", "Camera")
         , _imageReader()
         , _eepGenerator(_renderTargetSize)
         , _drrraycater(_renderTargetSize)
         , _simpleRaycaster(_renderTargetSize)
         , _trackballEH(0)
     {
-        _trackballEH = new TrackballNavigationEventHandler(&_eepGenerator._camera, _renderTargetSize.getValue());
+        addProperty(&_camera);
+
+        // TODO: remove this ugly hack: automatically adapt near/far plane to volume extent.
+        tgt::Camera c;
+        c.setFarDist(512.f);
+        _camera.setValue(c);
+
+        _trackballEH = new TrackballNavigationEventHandler(&_camera, _renderTargetSize.getValue());
         _eventHandlers.push_back(_trackballEH);
 
         _processors.push_back(&_imageReader);
@@ -57,6 +65,10 @@ namespace TUMVis {
 
     void DVRVis::init() {
         VisualizationPipeline::init();
+
+        _camera.addSharedProperty(&_eepGenerator._camera);
+        _camera.addSharedProperty(&_drrraycater._camera);
+        _camera.addSharedProperty(&_simpleRaycaster._camera);
 
         _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader._targetImageID.setValue("reader.output");
@@ -76,12 +88,13 @@ namespace TUMVis {
         _eepGenerator._entryImageID.setValue("eep.entry");
         _eepGenerator._exitImageID.setValue("eep.exit");
 
-        _renderTargetID.setValue("drr.output");
+        _renderTargetID.setValue("dvr.output");
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _drrraycater.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _simpleRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+
     }
 
     void DVRVis::execute() {
@@ -105,13 +118,11 @@ namespace TUMVis {
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
                 _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _eepGenerator._camera.getValue().getUpVector());
+                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
             }
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_eepGenerator);
-            lockGLContextAndExecuteProcessor(_drrraycater);
-            lockGLContextAndExecuteProcessor(_simpleRaycaster);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid() || !_drrraycater.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_drrraycater);

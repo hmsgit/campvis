@@ -32,6 +32,7 @@
 #include "core/datastructures/imagedatalocal.h"
 #include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
+#include "core/properties/cameraproperty.h"
 #include "modules/io/mhdimagereader.h"
 #include "modules/vis/eepgenerator.h"
 #include "modules/vis/drrraycaster.h"
@@ -62,6 +63,7 @@ namespace TUMVis {
         virtual void execute();
 
     protected:
+        CameraProperty _camera;
         MhdImageReader _imageReader;
         EEPGenerator _eepGenerator;
         DRRRaycaster _drrraycater;

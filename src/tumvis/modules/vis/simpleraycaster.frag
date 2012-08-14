@@ -92,11 +92,11 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
     // calculate depth value from ray parameter
     gl_FragDepth = 1.0;
-    //if (firstHitT >= 0.0) {
-        //float depthEntry = getElement2DNormalized(_entryPointsDepth, texCoords).z;
-        //float depthExit = getElement2DNormalized(_exitPointsDepth, texCoords).z;
-        //gl_FragDepth = interpolateDepthViewport(firstHitT/tend, depthEntry, depthExit);
-    //}
+    if (firstHitT >= 0.0) {
+        float depthEntry = getElement2DNormalized(_entryPointsDepth, texCoords).z;
+        float depthExit = getElement2DNormalized(_exitPointsDepth, texCoords).z;
+        gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
+    }
 
     return result;
 }

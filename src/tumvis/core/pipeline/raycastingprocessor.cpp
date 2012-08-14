@@ -48,6 +48,7 @@ namespace TUMVis {
         , _sourceImageID("sourceImageID", "Input Image", "")
         , _entryImageID("entryImageID", "Output Entry Points Image", "")
         , _exitImageID("exitImageID", "Output Exit Points Image", "")
+        , _camera("camera", "Camera")
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f)
         , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
@@ -58,6 +59,7 @@ namespace TUMVis {
         addProperty(&_sourceImageID);
         addProperty(&_entryImageID);
         addProperty(&_exitImageID);
+        addProperty(&_camera);  
         addProperty(&_transferFunction);
         addProperty(&_samplingStepSize);
         addProperty(&_jitterEntryPoints);
@@ -94,9 +96,21 @@ namespace TUMVis {
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
                 _shader->activate();
+
+                _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_jitterEntryPoints", _jitterEntryPoints.getValue());
                 _shader->setUniform("_samplingStepSize", _samplingStepSize.getValue());
+
+                const tgt::Camera& cam = _camera.getValue();
+                float n = cam.getNearDist();
+                float f = cam.getFarDist();
+                _shader->setUniform("const_to_z_e_1", 0.5f + 0.5f*((f+n)/(f-n)));
+                _shader->setUniform("const_to_z_e_2", ((f-n)/(f*n)));
+                _shader->setUniform("const_to_z_w_1", ((f*n)/(f-n)));
+                _shader->setUniform("const_to_z_w_2", 0.5f*((f+n)/(f-n))+0.5f);
+                _shader->setIgnoreUniformLocationError(false);
+
 
                 tgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
                 img->bind(_shader, volumeUnit, "_volume");

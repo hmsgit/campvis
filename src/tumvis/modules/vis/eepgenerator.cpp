@@ -52,11 +52,6 @@ namespace TUMVis {
         addProperty(&_entryImageID);
         addProperty(&_exitImageID);
         addProperty(&_camera);
-
-        // TODO: remove this ugly hack: automatically adapt near/far plane to volume extent.
-        tgt::Camera c;
-        c.setFarDist(512.f);
-        _camera.setValue(c);
     }
 
     EEPGenerator::~EEPGenerator() {
