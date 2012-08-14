@@ -17,6 +17,7 @@ OPTION(TUMVIS_BUILD_APPLICATION    "Build TUMVis Application"                   
 OPTION(TUMVIS_BUILD_CORE           "Build TUMVis Core"                                             ON )
 OPTION(TUMVIS_BUILD_MODULES        "Build TUMVis Modules"                                          ON )
 OPTION(TUMVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON )
+OPTION(TUMVIS_BUILD_LIB_CLLIB      "Build CLLib Library"                                           ON )
 
 IF(WIN32)
     OPTION(TUMVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON )
@@ -32,6 +33,10 @@ include(cmake/commonconf.cmake)
 
 IF(TUMVIS_BUILD_LIB_TGT)
     ADD_SUBDIRECTORY(ext/tgt)
+ENDIF()
+
+IF(TUMVIS_BUILD_LIB_CLLIB)
+    ADD_SUBDIRECTORY(ext/cllib)
 ENDIF()
 
 IF(TUMVIS_BUILD_CORE)

@@ -730,7 +730,11 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is 
 # run.
 
-EXCLUDE                = C:/Users/Christian/Documents/TUM/code/tumvis/ext
+EXCLUDE                = C:/Users/Christian/Documents/TUM/code/tumvis/ext/tbb \
+                         C:/Users/Christian/Documents/TUM/code/tumvis/ext/boost \
+                         C:/Users/Christian/Documents/TUM/code/tumvis/ext/glew \
+                         C:/Users/Christian/Documents/TUM/code/tumvis/ext/glut \
+                         C:/Users/Christian/Documents/TUM/code/tumvis/ext/sigslot
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or 
 # directories that are symbolic links (a Unix file system feature) are excluded 
