@@ -83,9 +83,6 @@ namespace cllib {
         bool supportsGlSharing() const;
 
     protected:
-        template<class T>
-        T getInfo(cl_device_info info) const;
-
         const Platform* _platform;          ///< Parent platform of the device.
 
         Profile _profile;                   ///< supported OpenCL profile
@@ -109,20 +106,7 @@ namespace cllib {
 
         static const std::string loggerCat_;
     };
-
-// ================================================================================================
-
-    template<class T>
-    T Device::getInfo(cl_device_info info) const {
-        T ret;
-        LCL_ERROR(clGetDeviceInfo(_id, info, sizeof(ret), &ret, 0));
-        return ret;
-    }
-
-    //template specialization for strings:
-    template<>
-    std::string Device::getInfo(cl_device_info info) const;
-    
+   
 }
 
 #endif // DEVICE_H__

@@ -15,7 +15,7 @@ namespace cllib {
         : CLWrapper<cl_platform_id>(id)
     {
         // parse platform profile
-        std::string profileString = getInfoString(CL_PLATFORM_PROFILE);
+        std::string profileString = getStringInfo(CL_PLATFORM_PROFILE);
         if (profileString == "FULL_PROFILE")
             _profile = FULL_PROFILE;
         else if (profileString == "EMBEDDED_PROFILE") {
@@ -27,12 +27,12 @@ namespace cllib {
         }
 
         // get other platform information strings
-        _name = getInfoString(CL_PLATFORM_NAME);
-        _vendor = getInfoString(CL_PLATFORM_VENDOR);
-        _version = ClVersion(getInfoString(CL_PLATFORM_VERSION));
+        _name = getStringInfo(CL_PLATFORM_NAME);
+        _vendor = getStringInfo(CL_PLATFORM_VENDOR);
+        _version = ClVersion(getStringInfo(CL_PLATFORM_VERSION));
 
         //explode extensions string with space as delimiter and insert them into set:
-        std::vector<std::string> exploded = TUMVis::StringUtils::split(getInfoString(CL_PLATFORM_EXTENSIONS), " ");
+        std::vector<std::string> exploded = TUMVis::StringUtils::split(getStringInfo(CL_PLATFORM_EXTENSIONS), " ");
         _extensions.insert(exploded.begin(), exploded.end());
 
         //Log infos:
@@ -66,16 +66,6 @@ namespace cllib {
     Platform::~Platform() {
         for (std::vector<Device*>::iterator it = _devices.begin(); it != _devices.end(); ++it)
             delete *it;
-    }
-
-    std::string Platform::getInfoString(cl_platform_info info) const {
-        size_t retSize;
-        LCL_ERROR(clGetPlatformInfo(_id, info, 0, 0, &retSize));
-        char* buffer = new char[retSize];
-        LCL_ERROR(clGetPlatformInfo(_id, info, retSize, buffer, 0));
-        std::string ret(buffer);
-        delete[] buffer;
-        return ret;
     }
 
     const std::vector<Device*>& Platform::getDevices() const {

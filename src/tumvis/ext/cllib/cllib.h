@@ -22,6 +22,8 @@ namespace cllib {
         template <>
         struct CLWrapperTraits<cl_device_id>
         {
+            typedef cl_device_info InfoType;
+
             /**
              * Retain the device.
              * \param device A valid device created using createSubDevices
@@ -46,11 +48,17 @@ namespace cllib {
             static cl_int release(cl_device_id device) {
                 return ::clReleaseDevice(device);
             }
+
+            static cl_int getInfo(cl_device_id id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetDeviceInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 #else // #if defined(CL_VERSION_1_2)
         // OpenCL 1.1 devices do not have retain/release.
         template <>
         struct CLWrapperTraits<cl_device_id> {
+            typedef cl_device_info InfoType;
+
             // cl_device_id does not have retain().
             static cl_int retain(cl_device_id) { 
                 return CL_SUCCESS;
@@ -59,11 +67,17 @@ namespace cllib {
             static cl_int release(cl_device_id) { 
                 return CL_SUCCESS;
             }
+
+            static cl_int getInfo(cl_device_id id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetDeviceInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 #endif // #if defined(CL_VERSION_1_2)
 
         template <>
         struct CLWrapperTraits<cl_platform_id> {
+            typedef cl_platform_info InfoType;
+
             // cl_platform_id does not have retain().
             static cl_int retain(cl_platform_id) { 
                 return CL_SUCCESS;
@@ -72,75 +86,121 @@ namespace cllib {
             static cl_int release(cl_platform_id) {
                 return CL_SUCCESS;
             }
+
+            static cl_int getInfo(cl_platform_id id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetPlatformInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 
         template <>
         struct CLWrapperTraits<cl_context> {
+            typedef cl_context_info InfoType;
+
             static cl_int retain(cl_context context) {
                 return ::clRetainContext(context);
             }
             static cl_int release(cl_context context) {
                 return ::clReleaseContext(context);
             }
+
+            static cl_int getInfo(cl_context id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetContextInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 
         template <>
         struct CLWrapperTraits<cl_command_queue> {
+            typedef cl_command_queue_info InfoType;
+
             static cl_int retain(cl_command_queue queue) {
                 return ::clRetainCommandQueue(queue);
             }
             static cl_int release(cl_command_queue queue) {
                 return ::clReleaseCommandQueue(queue);
             }
+
+            static cl_int getInfo(cl_command_queue id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetCommandQueueInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 
         template <>
         struct CLWrapperTraits<cl_mem> {
+            typedef cl_mem_info InfoType;
+
             static cl_int retain(cl_mem memory) {
                 return ::clRetainMemObject(memory);
             }
             static cl_int release(cl_mem memory) {
                 return ::clReleaseMemObject(memory);
             }
+
+            static cl_int getInfo(cl_mem id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetMemObjectInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 
         template <>
         struct CLWrapperTraits<cl_sampler> {
+            typedef cl_sampler_info InfoType;
+
             static cl_int retain(cl_sampler sampler) {
                 return ::clRetainSampler(sampler);
             }
             static cl_int release(cl_sampler sampler) {
                 return ::clReleaseSampler(sampler);
             }
+
+            static cl_int getInfo(cl_sampler id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetSamplerInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 
         template <>
         struct CLWrapperTraits<cl_program> {
+            typedef cl_program_info InfoType;
+
             static cl_int retain(cl_program program) {
                 return ::clRetainProgram(program);
             }
             static cl_int release(cl_program program) {
 
                 return ::clReleaseProgram(program);}
+
+            static cl_int getInfo(cl_program id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetProgramInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 
         template <>
         struct CLWrapperTraits<cl_kernel> {
+            typedef cl_kernel_info InfoType;
+
             static cl_int retain(cl_kernel kernel) {
                 return ::clRetainKernel(kernel);
             }
             static cl_int release(cl_kernel kernel) {
                 return ::clReleaseKernel(kernel);
             }
+
+            static cl_int getInfo(cl_kernel id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetKernelInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
+            }
         };
 
         template <>
         struct CLWrapperTraits<cl_event> {
+            typedef cl_event_info InfoType;
+
             static cl_int retain(cl_event event) {
                 return ::clRetainEvent(event);
             }
             static cl_int release(cl_event event) {
                 return ::clReleaseEvent(event);
+            }
+
+            static cl_int getInfo(cl_event id, InfoType info, size_t paramValueSize, void* paramValue, size_t* paramValueSizeRet) {
+                return clGetEventInfo(id, info, paramValueSize, paramValue, paramValueSizeRet);
             }
         };
     }
@@ -212,6 +272,8 @@ namespace cllib {
     public:
         /// Typedef for the type OpenCL id.
         typedef T cl_type;
+
+        typedef typename CLWrapperTraits<T>::InfoType InfoType;
 
         /**
          * Default constructor for an object without id.
@@ -292,9 +354,34 @@ namespace cllib {
             return CLWrapperTraits<cl_type>::release(_id);
         }
 
+        /**
+         * Get the information about this object from OpenCL.
+         * \note    Do \b use it with std::string, use getStringInfo() instead.
+         * \param   info    The information to query.
+         */
+        template<class R>
+        R getInfo(InfoType info) const {
+            R ret;
+            LCL_ERROR(CLWrapperTraits<cl_type>::getInfo(_id, info, sizeof(ret), &ret, 0));
+            return ret;
+        }
+
+        /**
+         * Get the information about this object from OpenCL as string representation.
+         * \param   info    The information to query.
+         */
+        std::string getStringInfo(InfoType info) const {
+            size_t retSize;
+            LCL_ERROR(CLWrapperTraits<T>::getInfo(_id, info, 0, 0, &retSize));
+            char* buffer = new char[retSize + 1];
+            LCL_ERROR(CLWrapperTraits<T>::getInfo(_id, info, retSize, buffer, 0));
+            std::string ret(buffer);
+            delete[] buffer;
+            return ret;
+        }
+
         cl_type _id;        ///< Handle to internal OpenCL object.
     };
-
 
 }
 

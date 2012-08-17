@@ -18,11 +18,6 @@ namespace cllib {
          */
         Event(cl_event id);
 
-        /**
-         * Destructor, decrements the reference count.
-         */
-        virtual ~Event();
-
     };
 
 // = EventList starts here ========================================================================

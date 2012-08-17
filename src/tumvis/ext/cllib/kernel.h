@@ -101,24 +101,9 @@ namespace cllib {
          */
         cl_uint getNumArgs() const;
 
-        /**
-         * Get information about the kernel from OpenCL.
-         * \param   info    Type of info to get.
-         */
-        template<class T>
-        T getInfo(cl_kernel_info info) const;
-
         static const std::string loggerCat_;
     };
 
-
-
-    template<class T>
-    T Kernel::getInfo(cl_kernel_info info) const {
-        T ret;
-        LCL_ERROR(clGetKernelInfo(_id, info, sizeof(ret), &ret, 0));
-        return ret;
-    }
 
     template<class T>
     void cllib::Kernel::setArgument(cl_uint index, const T& data) {

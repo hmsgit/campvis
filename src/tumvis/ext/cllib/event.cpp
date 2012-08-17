@@ -14,11 +14,6 @@ namespace cllib {
     }
 
 
-    Event::~Event() {
-    }
-
-
-
     EventList::EventList() {
         _events = 0;
         _size = 0;

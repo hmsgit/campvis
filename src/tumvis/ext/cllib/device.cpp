@@ -17,7 +17,7 @@ namespace cllib {
         tgtAssert(_id != 0, "OpenCL device id must not be 0.");
 
         // parse device profile
-        std::string profileString = getInfo<std::string>(CL_DEVICE_PROFILE);
+        std::string profileString = getStringInfo(CL_DEVICE_PROFILE);
         if (profileString == "FULL_PROFILE")
             _profile = FULL_PROFILE;
         else if (profileString == "EMBEDDED_PROFILE") {
@@ -29,13 +29,13 @@ namespace cllib {
         }
 
         // get other device information strings
-        _name = getInfo<std::string>(CL_DEVICE_NAME);
+        _name = getStringInfo(CL_DEVICE_NAME);
         LINFO("Name: " << _name);
-        _vendor = getInfo<std::string>(CL_DEVICE_VENDOR);
-        _version = ClVersion(getInfo<std::string>(CL_DEVICE_VERSION));
+        _vendor = getStringInfo(CL_DEVICE_VENDOR);
+        _version = ClVersion(getStringInfo(CL_DEVICE_VERSION));
 
         //explode extensions string with space as delimiter and insert them into set:
-        std::vector<std::string> exploded = TUMVis::StringUtils::split(getInfo<std::string>(CL_DEVICE_EXTENSIONS), " ");
+        std::vector<std::string> exploded = TUMVis::StringUtils::split(getStringInfo(CL_DEVICE_EXTENSIONS), " ");
         _extensions.insert(exploded.begin(), exploded.end());
 
         _deviceType = getInfo<cl_device_type>(CL_DEVICE_TYPE);
@@ -103,18 +103,6 @@ namespace cllib {
 
     const ClVersion& Device::getVersion() const {
         return _version;
-    }
-
-    //template specialization for strings:
-    template<>
-    std::string Device::getInfo(cl_device_info info) const {
-        size_t retSize;
-        LCL_ERROR(clGetDeviceInfo(_id, info, 0, 0, &retSize));
-        char* buffer = new char[retSize];
-        LCL_ERROR(clGetDeviceInfo(_id, info, retSize, buffer, 0));
-        std::string ret(buffer);
-        delete[] buffer;
-        return ret;
     }
 
     cl_device_type Device::getDeviceType() const {

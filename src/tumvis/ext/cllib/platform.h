@@ -77,12 +77,6 @@ namespace cllib {
         bool supportsGlSharing() const;
 
     protected:
-        /**
-         * 
-         * \param info 
-         * \return 
-         */
-        std::string getInfoString(cl_platform_info info) const;
 
         Profile _profile;                   ///< supported OpenCL profile
         std::string _name;                  ///< OpenCL platform name
