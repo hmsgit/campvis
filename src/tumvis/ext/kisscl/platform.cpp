@@ -1,12 +1,12 @@
 #include "platform.h"
 
 #include "tgt/logmanager.h"
-#include "cllib/device.h"
+#include "kisscl/device.h"
 #include "core/tools/stringutils.h"
 
-namespace cllib {
+namespace kisscl {
     
-    const std::string Platform::loggerCat_ = "cllib.Platform";
+    const std::string Platform::loggerCat_ = "kisscl.Platform";
 
 
 // ================================================================================================
@@ -72,7 +72,7 @@ namespace cllib {
         return _devices;
     }
 
-    cllib::Profile Platform::getProfile() const {
+    kisscl::Profile Platform::getProfile() const {
         return _profile;
     }
 

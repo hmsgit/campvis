@@ -2,9 +2,9 @@
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
-#include "cllib/context.h"
+#include "kisscl/context.h"
 
-namespace cllib {
+namespace kisscl {
     
     MemoryObject::MemoryObject(const Context* context)
         : CLWrapper<cl_mem>(0)

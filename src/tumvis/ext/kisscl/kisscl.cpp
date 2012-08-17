@@ -1,9 +1,9 @@
-#include "cllib.h"
+#include "kisscl.h"
 
 #include "tgt/logmanager.h"
-#include "cllib/stringutils.h"
+#include "kisscl/stringutils.h"
 
-namespace cllib {
+namespace kisscl {
     std::string clErrorToString(cl_int err) {
         std::string toReturn;
         switch(err) {
@@ -101,7 +101,7 @@ namespace cllib {
 
         // parse numbers
         if (exploded.size() < 2) {
-            LERRORC("cllib.ClVersion", "Version string too short to parse!");
+            LERRORC("kisscl.ClVersion", "Version string too short to parse!");
         }
         else {
             major_ = StringUtils::fromString<int>(exploded[0]);

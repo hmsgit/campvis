@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the cllib Visualization Framework.
+// This file is part of the kisscl Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -31,7 +31,7 @@
 #include <algorithm>
 
 
-namespace cllib {
+namespace kisscl {
 
     std::string StringUtils::lowercase(const std::string& str) {
         std::string toReturn(str);

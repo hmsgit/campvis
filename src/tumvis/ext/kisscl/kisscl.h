@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace cllib {
+namespace kisscl {
 
     namespace {
         // Code for CLWrapperTraits inspired by the OpenCL C++ binding shipped with the AMD APP SDK.

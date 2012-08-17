@@ -2,11 +2,11 @@
 #define KERNEL_H__
 
 #include "tgt/vector.h"
-#include "cllib/cllib.h"
+#include "kisscl/kisscl.h"
 
 
 
-namespace cllib {
+namespace kisscl {
 
     namespace {
         /**
@@ -106,7 +106,7 @@ namespace cllib {
 
 
     template<class T>
-    void cllib::Kernel::setArgument(cl_uint index, const T& data) {
+    void kisscl::Kernel::setArgument(cl_uint index, const T& data) {
         return LCL_ERROR(clSetKernelArg(id_, index, KernelArgumentTypeTraits<T>::size(), KernelArgumentTypeTraits<T>::pointer(data)));
     }
 

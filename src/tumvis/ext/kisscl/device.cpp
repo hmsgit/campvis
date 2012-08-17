@@ -2,12 +2,12 @@
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
-#include "cllib/platform.h"
+#include "kisscl/platform.h"
 #include "core/tools/stringutils.h"
 
-namespace cllib {
+namespace kisscl {
 
-    const std::string Device::loggerCat_ = "cllib.Device";
+    const std::string Device::loggerCat_ = "kisscl.Device";
     
     Device::Device(const Platform* platform, cl_device_id id)
         : CLWrapper<cl_device_id>(id)
@@ -77,7 +77,7 @@ namespace cllib {
     }
 
 
-    cllib::Profile Device::getProfile() const {
+    kisscl::Profile Device::getProfile() const {
         return _profile;
     }
 

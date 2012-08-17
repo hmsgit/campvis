@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-namespace cllib {
+namespace kisscl {
 
     /**
      * Collection of various helper methods for strings.

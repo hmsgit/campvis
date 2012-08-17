@@ -2,10 +2,10 @@
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
-#include "cllib/device.h"
-#include "cllib/platform.h"
+#include "kisscl/device.h"
+#include "kisscl/platform.h"
 
-namespace cllib {
+namespace kisscl {
 
     Kernel::Kernel(cl_kernel id)
         : CLWrapper<cl_kernel>(id)

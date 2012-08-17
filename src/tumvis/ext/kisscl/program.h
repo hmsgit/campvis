@@ -1,12 +1,12 @@
 #ifndef CLPROGRAM_H__
 #define CLPROGRAM_H__
 
-#include "cllib/cllib.h"
+#include "kisscl/kisscl.h"
 
 #include <map>
 #include <string>
 
-namespace cllib {
+namespace kisscl {
     class Context;
     class Device;
     class Kernel;

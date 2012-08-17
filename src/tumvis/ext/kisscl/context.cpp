@@ -2,17 +2,17 @@
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
-#include "cllib/device.h"
-#include "cllib/platform.h"
+#include "kisscl/device.h"
+#include "kisscl/platform.h"
 
-namespace cllib {
+namespace kisscl {
 
     void CL_API_CALL clContextCallback(const char* errinfo, const void* private_info, size_t cb, void* user_data) {
         tgtAssert (user_data == 0, "user_data expected to be 0 - check what happened!");
-        LINFOC("cllib.Context.clContextCallback", std::string(errinfo));
+        LINFOC("kisscl.Context.clContextCallback", std::string(errinfo));
     }
 
-    const std::string Context::loggerCat_ = "cllib.Context";
+    const std::string Context::loggerCat_ = "kisscl.Context";
 
 
     Context::Context(Device* device, const std::vector<ContextProperty>& properties /*= std::vector<ContextProperty>()*/)

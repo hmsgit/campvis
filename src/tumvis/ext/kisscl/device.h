@@ -1,14 +1,14 @@
 #ifndef DEVICE_H__
 #define DEVICE_H__
 
-#include "cllib/cllib.h"
+#include "kisscl/kisscl.h"
 #include "tgt/vector.h"
 
 #include <set>
 #include <vector>
 
 
-namespace cllib {
+namespace kisscl {
     class Platform;
 
     /**

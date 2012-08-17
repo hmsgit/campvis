@@ -5,15 +5,15 @@
 #include "tgt/manager.h"
 #include "tgt/singleton.h"
 
-#include "cllib/cllib.h"
-#include "cllib/context.h"
-#include "cllib/device.h"
-#include "cllib/platform.h"
+#include "kisscl/kisscl.h"
+#include "kisscl/context.h"
+#include "kisscl/device.h"
+#include "kisscl/platform.h"
 
 #include <string>
 
 
-namespace cllib {
+namespace kisscl {
     /**
      * Singleton class for managing the OpenCL runtime.
      * Gathers all available OpenCL platforms/devices and offers methods to create OpenCL contexts on them.

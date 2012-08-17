@@ -1,13 +1,13 @@
 #ifndef CONTEXT_H__
 #define CONTEXT_H__
 
-#include "cllib/cllib.h"
+#include "kisscl/kisscl.h"
 
 #include <set>
 #include <vector>
 
 
-namespace cllib {
+namespace kisscl {
     class Device;
 
     /**

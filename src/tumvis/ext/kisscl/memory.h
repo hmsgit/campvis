@@ -1,11 +1,11 @@
 #ifndef CLMEMORY_H__
 #define CLMEMORY_H__
 
-#include "cllib/cllib.h"
+#include "kisscl/kisscl.h"
 
 
 
-namespace cllib {
+namespace kisscl {
     class Context;
 
     /**

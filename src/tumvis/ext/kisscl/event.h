@@ -1,11 +1,11 @@
 #ifndef CLEVENT_H__
 #define CLEVENT_H__
 
-#include "cllib/cllib.h"
+#include "kisscl/kisscl.h"
 
 
 
-namespace cllib {
+namespace kisscl {
 
     /**
      * Wrapper for an OpenCL event.

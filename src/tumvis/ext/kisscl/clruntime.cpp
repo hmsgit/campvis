@@ -2,9 +2,9 @@
 
 #include "tgt/logmanager.h"
 
-namespace cllib {
+namespace kisscl {
 
-    const std::string CLRuntime::loggerCat_ = "cllib.CLRuntime";
+    const std::string CLRuntime::loggerCat_ = "kisscl.CLRuntime";
 
     CLRuntime::CLRuntime() {
         initPlatforms();

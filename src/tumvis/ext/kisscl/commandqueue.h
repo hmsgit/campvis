@@ -2,13 +2,13 @@
 #define COMMANDQUEUE_H__
 
 #include "tgt/vector.h"
-#include "cllib/cllib.h"
-#include "cllib/event.h"
+#include "kisscl/kisscl.h"
+#include "kisscl/event.h"
 
 #include <vector>
 
 
-namespace cllib {
+namespace kisscl {
     class Buffer;
     class Context;
     class Device;

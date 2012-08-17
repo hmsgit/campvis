@@ -2,16 +2,16 @@
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
-#include "cllib/context.h"
-#include "cllib/device.h"
-#include "cllib/event.h"
-#include "cllib/kernel.h"
-#include "cllib/memory.h"
-#include "cllib/platform.h"
+#include "kisscl/context.h"
+#include "kisscl/device.h"
+#include "kisscl/event.h"
+#include "kisscl/kernel.h"
+#include "kisscl/memory.h"
+#include "kisscl/platform.h"
 
-namespace cllib {
+namespace kisscl {
 
-    const std::string CommandQueue::loggerCat_ = "cllib.CommandQueue";
+    const std::string CommandQueue::loggerCat_ = "kisscl.CommandQueue";
 
     CommandQueue::CommandQueue(Context* context, cl_command_queue_properties properties /*= 0*/)
         : CLWrapper<cl_command_queue>(0)

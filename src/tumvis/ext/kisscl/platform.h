@@ -1,13 +1,13 @@
 #ifndef PLATFORM_H__
 #define PLATFORM_H__
 
-#include "cllib/cllib.h"
+#include "kisscl/kisscl.h"
 
 #include <set>
 #include <vector>
 
 
-namespace cllib {
+namespace kisscl {
     class Device;
     
     /**

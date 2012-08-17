@@ -3,14 +3,14 @@
 #include "tgt/assert.h"
 #include "tgt/filesystem.h"
 #include "tgt/logmanager.h"
-#include "cllib/context.h"
-#include "cllib/device.h"
-#include "cllib/kernel.h"
-#include "cllib/platform.h"
+#include "kisscl/context.h"
+#include "kisscl/device.h"
+#include "kisscl/kernel.h"
+#include "kisscl/platform.h"
 
 #include <utility>
 
-namespace cllib {
+namespace kisscl {
 
     Program::Program(Context* context)
         : CLWrapper<cl_program>(0)
