@@ -9,6 +9,7 @@
 
 
 namespace cllib {
+    class Buffer;
     class Context;
     class Device;
     class Kernel;
@@ -109,6 +110,56 @@ namespace cllib {
          */
         Event enqueueKernel(const Kernel* kernel, tgt::svec3 globalWorkSize, tgt::svec3 localWorkSize = tgt::svec3::zero, tgt::svec3 offset = tgt::svec3::zero, const EventList& eventsToWaitFor = EventList());
 
+
+        /**
+         * Enqueue a synchronization point that ensures that all queued commands in this command queue have 
+         * finished execution before the next batch of commands can begin execution. 
+         * 
+         * \todo    This method is deprecated in OpenCL 1.2
+         */
+        void enqueueBarrier();
+
+        /**
+         * Enqueues a marker to the command queue.
+         * You can use the returned event for waiting for the command queue reach the marker.
+         * 
+         * \todo    This method is deprecated in OpenCL 1.2
+         * \return  OpenCL event for waiting for the command queue reach the marker.
+         */
+        Event enqueueMarker();
+
+        /**
+         * Enqueues a wait for the given list of events to complete before any future commands of this command queue are executed.
+         * 
+         * \todo    This method is deprecated in OpenCL 1.2
+         * \param   eventsToWaitFor List of Events to wait for, default is empty.
+         */
+        void enqueueWaitForEvents(const EventList& eventsToWaitFor = EventList());
+
+
+        /**
+         * Enqueues to read from a buffer object to host memory. 
+         * \param   buffer          Buffer object to read from.
+         * \param   data            The pointer to host memory where data is to be read into.
+         * \param   blocking        Flag whether this operation shall be blocking or not. Defaults to true.
+         * \param   offset          The offset in bytes in the buffer object to read from.
+         * \param   numBytes        The number of bytes to be read. If 0, buffer->getSize() bytes will be read (default).
+         * \param   eventsToWaitFor List of Events to wait for, default is empty.
+         * \return  Event object that identifies this particular kernel execution instance.
+         */
+        Event enqueueRead(const Buffer* buffer, void* data, bool blocking = true, size_t offset = 0, size_t numBytes = 0, const EventList& eventsToWaitFor = EventList());
+
+        /**
+         * Enqueues to write into a buffer object from host memory. 
+         * \param   buffer          Buffer object to write into.
+         * \param   data            The pointer to host memory where data is read from.
+         * \param   blocking        Flag whether this operation shall be blocking or not. Defaults to true.
+         * \param   offset          The offset in bytes in the buffer object to start writing.
+         * \param   numBytes        The number of bytes to be written. If 0, buffer->getSize() bytes will be written (default).
+         * \param   eventsToWaitFor List of Events to wait for, default is empty.
+         * \return  Event object that identifies this particular kernel execution instance.
+         */
+        Event enqueueWrite(const Buffer* buffer, void* data, bool blocking = true, size_t offset = 0, size_t numBytes = 0, const EventList& eventsToWaitFor = EventList());
 
         // TODO: buffers, images, etc.
 

@@ -6,6 +6,7 @@
 #include "cllib/device.h"
 #include "cllib/event.h"
 #include "cllib/kernel.h"
+#include "cllib/memory.h"
 #include "cllib/platform.h"
 
 namespace cllib {
@@ -132,6 +133,43 @@ namespace cllib {
             &e));
         return Event(e);
     }
+
+    void CommandQueue::enqueueBarrier() {
+        LCL_ERROR(clEnqueueBarrier(_id));
+    }
+
+    Event CommandQueue::enqueueMarker() {
+        cl_event e;
+        LCL_ERROR(clEnqueueMarker(_id, &e));
+        return Event(e);
+    }
+
+    void CommandQueue::enqueueWaitForEvents(const EventList& eventsToWaitFor /*= EventList()*/) {
+        LCL_ERROR(clEnqueueWaitForEvents(_id, eventsToWaitFor._size, eventsToWaitFor._events));
+    }
+
+    Event CommandQueue::enqueueRead(const Buffer* buffer, void* data, bool blocking /*= true*/, size_t offset /*= 0*/, size_t numBytes /*= 0*/, const EventList& eventsToWaitFor /*= EventList()*/) {
+        cl_event e;
+        if (numBytes == 0) {
+            LCL_ERROR(clEnqueueReadBuffer(_id, buffer->getId(), blocking, offset, buffer->getSize(), data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        }
+        else {
+            LCL_ERROR(clEnqueueReadBuffer(_id, buffer->getId(), blocking, offset, numBytes, data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        }
+        return Event(e);
+    }
+
+    Event CommandQueue::enqueueWrite(const Buffer* buffer, void* data, bool blocking /*= true*/, size_t offset /*= 0*/, size_t numBytes /*= 0*/, const EventList& eventsToWaitFor /*= EventList()*/) {
+        cl_event e;
+        if (numBytes == 0) {
+            LCL_ERROR(clEnqueueWriteBuffer(_id, buffer->getId(), blocking, offset, buffer->getSize(), data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        }
+        else {
+            LCL_ERROR(clEnqueueWriteBuffer(_id, buffer->getId(), blocking, offset, numBytes, data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        }
+        return Event(e);
+    }
+
 
 
 }
