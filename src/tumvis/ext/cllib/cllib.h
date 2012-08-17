@@ -8,6 +8,143 @@
 
 namespace cllib {
 
+    namespace {
+        // Code for CLWrapperTraits inspired by the OpenCL C++ binding shipped with the AMD APP SDK.
+
+        /**
+         * Traits for retaining/releasing OpenCL handles.
+         */
+        template<typename T>
+        struct CLWrapperTraits {};
+        
+ #if defined(CL_VERSION_1_2)
+        // OpenCL 1.2 devices do have retain/release.
+        template <>
+        struct CLWrapperTraits<cl_device_id>
+        {
+            /**
+             * Retain the device.
+             * \param device A valid device created using createSubDevices
+             * \return 
+             *   CL_SUCCESS if the function executed successfully.
+             *   CL_INVALID_DEVICE if device was not a valid subdevice
+             *   CL_OUT_OF_RESOURCES
+             *   CL_OUT_OF_HOST_MEMORY
+             */
+            static cl_int retain(cl_device_id device) {
+                return ::clRetainDevice(device);
+            }
+            /**
+             * Retain the device.
+             * \param device A valid device created using createSubDevices
+             * \return 
+             *   CL_SUCCESS if the function executed successfully.
+             *   CL_INVALID_DEVICE if device was not a valid subdevice
+             *   CL_OUT_OF_RESOURCES
+             *   CL_OUT_OF_HOST_MEMORY
+             */
+            static cl_int release(cl_device_id device) {
+                return ::clReleaseDevice(device);
+            }
+        };
+#else // #if defined(CL_VERSION_1_2)
+        // OpenCL 1.1 devices do not have retain/release.
+        template <>
+        struct CLWrapperTraits<cl_device_id> {
+            // cl_device_id does not have retain().
+            static cl_int retain(cl_device_id) { 
+                return CL_SUCCESS;
+            }
+            // cl_device_id does not have release().
+            static cl_int release(cl_device_id) { 
+                return CL_SUCCESS;
+            }
+        };
+#endif // #if defined(CL_VERSION_1_2)
+
+        template <>
+        struct CLWrapperTraits<cl_platform_id> {
+            // cl_platform_id does not have retain().
+            static cl_int retain(cl_platform_id) { 
+                return CL_SUCCESS;
+            }
+            // cl_platform_id does not have release().
+            static cl_int release(cl_platform_id) {
+                return CL_SUCCESS;
+            }
+        };
+
+        template <>
+        struct CLWrapperTraits<cl_context> {
+            static cl_int retain(cl_context context) {
+                return ::clRetainContext(context);
+            }
+            static cl_int release(cl_context context) {
+                return ::clReleaseContext(context);
+            }
+        };
+
+        template <>
+        struct CLWrapperTraits<cl_command_queue> {
+            static cl_int retain(cl_command_queue queue) {
+                return ::clRetainCommandQueue(queue);
+            }
+            static cl_int release(cl_command_queue queue) {
+                return ::clReleaseCommandQueue(queue);
+            }
+        };
+
+        template <>
+        struct CLWrapperTraits<cl_mem> {
+            static cl_int retain(cl_mem memory) {
+                return ::clRetainMemObject(memory);
+            }
+            static cl_int release(cl_mem memory) {
+                return ::clReleaseMemObject(memory);
+            }
+        };
+
+        template <>
+        struct CLWrapperTraits<cl_sampler> {
+            static cl_int retain(cl_sampler sampler) {
+                return ::clRetainSampler(sampler);
+            }
+            static cl_int release(cl_sampler sampler) {
+                return ::clReleaseSampler(sampler);
+            }
+        };
+
+        template <>
+        struct CLWrapperTraits<cl_program> {
+            static cl_int retain(cl_program program) {
+                return ::clRetainProgram(program);
+            }
+            static cl_int release(cl_program program) {
+
+                return ::clReleaseProgram(program);}
+        };
+
+        template <>
+        struct CLWrapperTraits<cl_kernel> {
+            static cl_int retain(cl_kernel kernel) {
+                return ::clRetainKernel(kernel);
+            }
+            static cl_int release(cl_kernel kernel) {
+                return ::clReleaseKernel(kernel);
+            }
+        };
+
+        template <>
+        struct CLWrapperTraits<cl_event> {
+            static cl_int retain(cl_event event) {
+                return ::clRetainEvent(event);
+            }
+            static cl_int release(cl_event event) {
+                return ::clReleaseEvent(event);
+            }
+        };
+    }
+
     /**
      * Helper function to transform an OpenCL error code to a string.
      * \param   err OpenCL error code.
@@ -64,6 +201,98 @@ namespace cllib {
         friend bool operator>(const ClVersion& x, const ClVersion& y);
         friend bool operator>=(const ClVersion& x, const ClVersion& y);
         friend std::ostream& operator<<(std::ostream& s, const ClVersion& v);
+    };
+
+    /**
+     * Wrapper for OpenCL objects that maintain an internal OpenCL ID and regard the internal OpenCL reference counting.
+     * \sa  CLWrapperTraits
+     */
+    template <typename T>
+    class CLWrapper {
+    public:
+        /// Typedef for the type OpenCL id.
+        typedef T cl_type;
+
+        /**
+         * Default constructor for an object without id.
+         */
+        explicit CLWrapper() 
+            : _id(0)
+        { }
+
+        /**
+         * Constructor initializing the internal handle with \a id.
+         * \param   id  ID of the internal OpenCL handle.
+         */
+        explicit CLWrapper(const cl_type& id) 
+            : _id(id)
+        { }
+
+        /**
+         * Destructor, releases the internal handle.
+         */
+        virtual ~CLWrapper() {
+            if (_id != 0) 
+                LCL_ERROR(release());
+        }
+
+        /**
+         * Copy constructor, regards the internal reference counting.
+         * \param   rhs Source object
+         */
+        CLWrapper(const CLWrapper<cl_type>& rhs)
+        {
+            _id = rhs._id;
+            if (_id != 0)
+                LCL_ERROR(retain()); 
+        }
+
+        /**
+         * Assignment operator, regards the internal reference counting.
+         * \param   rhs Source object
+         * \return  *this
+         */
+        CLWrapper<cl_type>& operator=(const CLWrapper<cl_type>& rhs)
+        {
+            if (_id != rhs._id) {
+                if (_id != 0)
+                    LCL_ERROR(release()); 
+
+                _id = rhs._id;
+                if (_id != 0)
+                    LCL_ERROR(retain()); 
+            }
+            return *this;
+        }
+
+        /**
+         * Gets the handle to internal OpenCl object.
+         * \return  _id
+         */
+        cl_type getId() const {
+            return _id;
+        }
+
+
+    protected:
+        /**
+         * Internally retains this object by using CLWrapperTraits<cl_type>.
+         * \param   id  Object to retain.
+         * \return  The Error code of the retain function call.
+         */
+        cl_int retain() const {
+            return CLWrapperTraits<cl_type>::retain(_id);
+        }
+
+        /**
+         * Internally releases this object by using CLWrapperTraits<cl_type>.
+         * \return  The Error code of the release function call.
+         */
+        cl_int release() const {
+            return CLWrapperTraits<cl_type>::release(_id);
+        }
+
+        cl_type _id;        ///< Handle to internal OpenCL object.
     };
 
 

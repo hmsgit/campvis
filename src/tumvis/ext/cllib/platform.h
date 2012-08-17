@@ -14,7 +14,7 @@ namespace cllib {
      * Wrapper class for an OpenCL platform.
      * Provides information about the profile, version, supported extensions, etc.
      */
-    class Platform {
+    class Platform : public CLWrapper<cl_platform_id> {
     public:
         /**
          * Creates a new Platform object and initializes it by the given id.
@@ -25,7 +25,7 @@ namespace cllib {
         /**
          * Destructor, all devices will be deleted.
          */
-        ~Platform();
+        virtual ~Platform();
 
         /**
          * Gets the supported OpenCL profile.
@@ -83,8 +83,6 @@ namespace cllib {
          * \return 
          */
         std::string getInfoString(cl_platform_info info) const;
-
-        cl_platform_id _id;                 ///< OpenCL platform id
 
         Profile _profile;                   ///< supported OpenCL profile
         std::string _name;                  ///< OpenCL platform name

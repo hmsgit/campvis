@@ -9,12 +9,13 @@
 
 
 namespace cllib {
+    class Platform;
 
     /**
      * Wrapper class for an OpenCL device.
      * Provides information about the profile, version, supported extensions, etc.
      */
-    class Device {
+    class Device : public CLWrapper<cl_device_id> {
     public:
         enum DeviceType {
             DEVICE_GPU = CL_DEVICE_TYPE_GPU,
@@ -25,12 +26,13 @@ namespace cllib {
          * Creates a new Device object and initializes it by the given id.
          * \param   id  OpenCL device id to use for initialization
          */
-        Device(cl_device_id id);
+        Device(const Platform* platform, cl_device_id id);
 
         /**
-         * Destructor, nothing happens...
+         * Gets the parent platform of the device.
+         * \return _platform
          */
-        ~Device();
+        const Platform* getPlatform() const;
 
         /**
          * Gets the supported OpenCL profile.
@@ -57,6 +59,11 @@ namespace cllib {
         const ClVersion& getVersion() const;
 
         /**
+         * Gets the OpenCL device type.
+         * \return _deviceType
+         */
+        cl_device_type getDeviceType() const;
+        /**
          * Gets the set of all supported OpenCL extensions.
          * \return _extensions
          */
@@ -79,16 +86,16 @@ namespace cllib {
         template<class T>
         T getInfo(cl_device_info info) const;
 
-        cl_device_id _id;                   ///< OpenCL device id
+        const Platform* _platform;          ///< Parent platform of the device.
 
         Profile _profile;                   ///< supported OpenCL profile
         std::string _name;                  ///< OpenCL device name
         std::string _vendor;                ///< OpenCL device vendor
         std::set<std::string> _extensions;  ///< set of all supported OpenCL extensions
         ClVersion _version;                 ///< supported OpenCL version
+        cl_device_type _deviceType;         ///< OpenCL device type
 
         // TODO: too lazy to implement all the getters...
-        cl_device_type _deviceType;         ///< OpenCL device type
         cl_uint _maxClockFrequency;         ///< Maximum configured clock frequency of the device in MHz.
         cl_uint _maxComputeUnits;           ///< The number of parallel compute cores on the OpenCL device.
         tgt::svec3 _maxWorkItemSizes;       ///< Maximum number of work-items that can be specified in each dimension of the work-group to clEnqueueNDRangeKernel.

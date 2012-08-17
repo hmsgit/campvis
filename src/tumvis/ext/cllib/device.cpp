@@ -1,15 +1,21 @@
 #include "device.h"
 
+#include "tgt/assert.h"
 #include "tgt/logmanager.h"
+#include "cllib/platform.h"
 #include "core/tools/stringutils.h"
 
 namespace cllib {
 
     const std::string Device::loggerCat_ = "cllib.Device";
     
-    Device::Device(cl_device_id id)
-        : _id(id)
-    {
+    Device::Device(const Platform* platform, cl_device_id id)
+        : CLWrapper<cl_device_id>(id)
+        , _platform(platform)
+   {
+        tgtAssert(_platform != 0, "Platform must not be 0.");
+        tgtAssert(_id != 0, "OpenCL device id must not be 0.");
+
         // parse device profile
         std::string profileString = getInfo<std::string>(CL_DEVICE_PROFILE);
         if (profileString == "FULL_PROFILE")
@@ -71,11 +77,6 @@ namespace cllib {
     }
 
 
-    Device::~Device() {
-
-    }
-
-
     cllib::Profile Device::getProfile() const {
         return _profile;
     }
@@ -115,4 +116,13 @@ namespace cllib {
         delete[] buffer;
         return ret;
     }
+
+    cl_device_type Device::getDeviceType() const {
+        return _deviceType;
+    }
+
+    const Platform* Device::getPlatform() const {
+        return _platform;
+    }
+
 }

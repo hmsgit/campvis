@@ -12,7 +12,7 @@ namespace cllib {
 // ================================================================================================
 
     Platform::Platform(cl_platform_id id) 
-        : _id(id)
+        : CLWrapper<cl_platform_id>(id)
     {
         // parse platform profile
         std::string profileString = getInfoString(CL_PLATFORM_PROFILE);
@@ -57,7 +57,7 @@ namespace cllib {
         LCL_ERROR(clGetDeviceIDs(_id, CL_DEVICE_TYPE_ALL, numDevices, devices, 0));
 
         for(cl_uint i=0; i<numDevices; ++i) {
-            _devices.push_back(new Device(devices[i]));
+            _devices.push_back(new Device(this, devices[i]));
         }
 
         delete[] devices;
@@ -109,6 +109,5 @@ namespace cllib {
     const ClVersion& Platform::getVersion() const {
         return _version;
     }
-
-
+    
 }

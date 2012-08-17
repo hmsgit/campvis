@@ -30,7 +30,7 @@
 
 #include "tgt/event/keyevent.h"
 #include "tgt/glcontext.h"
-#include "cllib/cldevicemanager.h"
+#include "cllib/clruntime.h"
 #include "core/datastructures/imagedataconverter.h"
 
 namespace TUMVis {
@@ -67,7 +67,9 @@ namespace TUMVis {
     void DVRVis::init() {
         VisualizationPipeline::init();
 
-        cllib::DeviceManager dm;
+        cllib::CLRuntime clr;
+        cllib::Context* context = clr.createGlSharingContext();
+        delete context;
 
         _camera.addSharedProperty(&_eepGenerator._camera);
         _camera.addSharedProperty(&_drrraycater._camera);
