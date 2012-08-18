@@ -63,10 +63,11 @@ namespace TUMVis {
     public:
         /**
          * Creates a new TumVisApplication.
-         * \param   argc    number of passed arguments
-         * \param   argv    vector of arguments
+         * \param   argc        number of passed arguments
+         * \param   argv        vector of arguments
+         * \param   useOpenCL   Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
          */
-        TumVisApplication(int argc, char** argv);
+        TumVisApplication(int argc, char** argv, bool useOpenCL = true);
 
         /**
          * Destructor, make sure to call deinit() first.
@@ -130,6 +131,9 @@ namespace TUMVis {
 
         /// Flag, whether TumVisApplication was correctly initialized
         bool _initialized;
+
+        /// Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
+        bool _useOpenCL;
 
         int _argc;
         char** _argv;

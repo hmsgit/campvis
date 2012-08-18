@@ -38,6 +38,8 @@
 #include "tgt/qt/qtcontextmanager.h"
 #include "tbb/include/tbb/compat/thread"
 
+#include "kisscl/clruntime.h"
+
 #include "application/tumvispainter.h"
 #include "application/gui/mainwindow.h"
 #include "core/pipeline/abstractpipeline.h"
@@ -48,11 +50,12 @@ namespace TUMVis {
 
     const std::string TumVisApplication::loggerCat_ = "TUMVis.application.TumVisApplication";
 
-    TumVisApplication::TumVisApplication(int argc, char** argv) 
+    TumVisApplication::TumVisApplication(int argc, char** argv, bool useOpenCL) 
         : QApplication(argc, argv)
         , _localContext(0)
         , _mainWindow(0)
         , _initialized(false)
+        , _useOpenCL(useOpenCL)
         , _argc(argc)
         , _argv(argv)
     {
@@ -93,6 +96,7 @@ namespace TUMVis {
         tgt::GLContextScopedLock lock(_localContext->getContext());
 
         tgt::initGL(featureset);
+        ShdrMgr.setGlobalHeader("#version 130\n");
         LGL_ERROR;
 
         // ensure matching OpenGL specs
@@ -101,6 +105,10 @@ namespace TUMVis {
         }
         if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_130) {
             LERROR("Your system does not support GLSL Shader Version 1.30, which is mandatory. TUMVis will probably not work as intendet.");
+        }
+
+        if (_useOpenCL) {
+            kisscl::CLRuntime::init();
         }
 
         if (_argc > 0) {
@@ -130,6 +138,10 @@ namespace TUMVis {
         {
             // Deinit everything OpenGL related using the local context.
             tgt::GLContextScopedLock lock(_localContext->getContext());
+
+            if (_useOpenCL) {
+                kisscl::CLRuntime::deinit();
+            }
 
             // Deinit pipeline first
             for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {

@@ -67,8 +67,7 @@ namespace TUMVis {
     void DVRVis::init() {
         VisualizationPipeline::init();
 
-        kisscl::CLRuntime clr;
-        kisscl::Context* context = clr.createGlSharingContext();
+        kisscl::Context* context = CLMgr.createGlSharingContext();
         delete context;
 
         _camera.addSharedProperty(&_eepGenerator._camera);

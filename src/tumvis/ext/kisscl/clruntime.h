@@ -37,9 +37,13 @@ namespace kisscl {
      * Singleton class for managing the OpenCL runtime.
      * Gathers all available OpenCL platforms/devices and offers methods to create OpenCL contexts on them.
      */
-    class CLRuntime {
+    class CLRuntime : public tgt::Singleton<CLRuntime> {
+        friend class tgt::Singleton<CLRuntime>;
+
     public:
-        CLRuntime();
+        /**
+         * Destructor, cleaning up all platforms and devices.
+         */
         ~CLRuntime();
 
         /**
@@ -73,9 +77,15 @@ namespace kisscl {
         std::vector<Device*> _cpuDevices;       ///< List of all OpenCL CPU devices (just a shortcut to the corresponding devices in _platforms)
         std::vector<Device*> _gpuDevices;       ///< List of all OpenCL GPU devices (just a shortcut to the corresponding devices in _platforms)
 
+        /**
+         * Private constructor for singleton pattern.
+         */
+        CLRuntime();
 
         static const std::string loggerCat_;
     };
+
+#define CLMgr tgt::Singleton<kisscl::CLRuntime>::getRef()
 
 }
 
