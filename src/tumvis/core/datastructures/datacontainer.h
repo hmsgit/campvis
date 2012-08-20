@@ -105,6 +105,14 @@ namespace TUMVis {
                 return data;
             }
 
+            /**
+             * Gets the DataHandle.
+             * \return dh
+             */
+            const DataHandle* getDataHandle() const {
+                return dh;
+            }
+
         private:
             /// Not copy-constructable
             ScopedTypedData(const ScopedTypedData& rhs);

@@ -29,6 +29,8 @@
 #ifndef datahandle_h__
 #define datahandle_h__
 
+#include <ctime>
+
 namespace TUMVis {
     class AbstractData;
 
@@ -88,6 +90,12 @@ namespace TUMVis {
          */
         AbstractData* getData();
 
+        /**
+         * Gets the timestamp when this data has been created.
+         * \return _timestamp
+         */
+        clock_t getTimestamp() const;
+
 
     private:
         /**
@@ -95,7 +103,8 @@ namespace TUMVis {
          */
         void init();
 
-        AbstractData* _data;                          ///< managed data
+        AbstractData* _data;                    ///< managed data
+        clock_t _timestamp;                     ///< Timestamp when this data has been created
     };
 
 }

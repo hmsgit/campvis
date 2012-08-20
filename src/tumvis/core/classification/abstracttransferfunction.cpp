@@ -89,5 +89,16 @@ namespace TUMVis {
         return _intensityDomain;
     }
 
+    const tgt::Texture* AbstractTransferFunction::getTexture() {
+        // TODO:    lock here or in createTexture?
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            if (_texture == 0 || _dirty) {
+                createTexture();
+            }
+        }
+        return _texture;
+    }
+
 
 }

@@ -106,6 +106,13 @@ namespace TUMVis {
          */
         const tgt::vec2& getIntensityDomain() const;
 
+        /**
+         * Gets the OpenGL lookup texture storing the TF.
+         * \note    Calling thread must have a valid OpenGL context.
+         * \return  _texture
+         */
+        const tgt::Texture* getTexture();
+
         /// Signal emitted when transfer function has changed.
         sigslot::signal0<> s_changed;
 

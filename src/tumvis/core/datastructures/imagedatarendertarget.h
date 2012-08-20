@@ -79,6 +79,18 @@ namespace TUMVis {
 
 
         /**
+         * Gets the color texture of this render target
+         * \return _colorTexture
+         */
+        const tgt::Texture* getColorTexture() const;
+
+        /**
+         * Gets the depth texture of this render target
+         * \return _depthTexture
+         */
+        const tgt::Texture* getDepthTexture() const;
+
+        /**
          * Activates the render target (binds the FBO and sets the viewport).
          */
         void activate();

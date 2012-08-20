@@ -34,6 +34,7 @@
 namespace TUMVis {
     DataHandle::DataHandle(AbstractData* data) 
         : _data(data)
+        , _timestamp(clock())
     {
         init();
     }
@@ -80,8 +81,12 @@ namespace TUMVis {
             return;
 
         if (! _data->isShareable())
-            _data = _data->clone();
+            _data = _data->clone(); // TODO: update timestamp?
         _data->addReference();
+    }
+
+    clock_t DataHandle::getTimestamp() const {
+        return _timestamp;
     }
 
 }

@@ -189,4 +189,12 @@ namespace TUMVis {
         return 0;
     }
 
+    const tgt::Texture* ImageDataRenderTarget::getColorTexture() const {
+        return _colorTexture;
+    }
+
+    const tgt::Texture* ImageDataRenderTarget::getDepthTexture() const {
+        return _depthTexture;
+    }
+
 }
