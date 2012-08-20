@@ -24,6 +24,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace kisscl {
     class Context;

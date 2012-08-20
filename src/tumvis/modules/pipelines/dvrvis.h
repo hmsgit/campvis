@@ -37,6 +37,7 @@
 #include "modules/vis/eepgenerator.h"
 #include "modules/vis/drrraycaster.h"
 #include "modules/vis/simpleraycaster.h"
+#include "modules/vis/clraycaster.h"
 
 namespace TUMVis {
     class DVRVis : public VisualizationPipeline {
@@ -68,6 +69,7 @@ namespace TUMVis {
         EEPGenerator _eepGenerator;
         DRRRaycaster _drrraycater;
         SimpleRaycaster _simpleRaycaster;
+        CLRaycaster _clRaycaster;
         TrackballNavigationEventHandler* _trackballEH;
 
     };

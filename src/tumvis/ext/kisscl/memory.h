@@ -20,9 +20,12 @@
 #ifndef KISSCL_MEMORY_H__
 #define KISSCL_MEMORY_H__
 
+#include "tgt/vector.h"
 #include "kisscl/kisscl.h"
 
-
+namespace tgt {
+    class Texture;
+}
 
 namespace kisscl {
     class Context;
@@ -83,8 +86,25 @@ namespace kisscl {
 
 // ================================================================================================
 
-    class Image {
-        // TODO: implement
+    class Image : public MemoryObject {
+    public:
+        Image(const Context* context, cl_mem_flags flags, const tgt::Texture* texture);
+
+        Image(const Context* context, cl_mem_flags flags, const tgt::svec3& dimensions, cl_channel_order channelOrder, cl_channel_type channelType, void* hostPtr);
+
+        virtual ~Image();
+    };
+
+    // ================================================================================================
+
+    class SharedTexture : public MemoryObject {
+    public:
+        SharedTexture(const Context* context, cl_mem_flags flags, const tgt::Texture* texture);
+
+        virtual ~SharedTexture();
+
+    protected:
+        const tgt::Texture* _texture;
     };
 }
 

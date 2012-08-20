@@ -30,7 +30,6 @@
 
 #include "tgt/event/keyevent.h"
 #include "tgt/glcontext.h"
-#include "kisscl/clruntime.h"
 #include "core/datastructures/imagedataconverter.h"
 
 namespace TUMVis {
@@ -42,6 +41,7 @@ namespace TUMVis {
         , _eepGenerator(_renderTargetSize)
         , _drrraycater(_renderTargetSize)
         , _simpleRaycaster(_renderTargetSize)
+        , _clRaycaster(_renderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
@@ -58,6 +58,7 @@ namespace TUMVis {
         _processors.push_back(&_eepGenerator);
         _processors.push_back(&_drrraycater);
         _processors.push_back(&_simpleRaycaster);
+        _processors.push_back(&_clRaycaster);
     }
 
     DVRVis::~DVRVis() {
@@ -66,9 +67,6 @@ namespace TUMVis {
 
     void DVRVis::init() {
         VisualizationPipeline::init();
-
-        kisscl::Context* context = CLMgr.createGlSharingContext();
-        delete context;
 
         _camera.addSharedProperty(&_eepGenerator._camera);
         _camera.addSharedProperty(&_drrraycater._camera);
@@ -79,14 +77,20 @@ namespace TUMVis {
 
         _eepGenerator._entryImageID.addSharedProperty(&_drrraycater._entryImageID);
         _eepGenerator._entryImageID.addSharedProperty(&_simpleRaycaster._entryImageID);
+        _eepGenerator._entryImageID.addSharedProperty(&_clRaycaster._entryImageID);
+
         _eepGenerator._exitImageID.addSharedProperty(&_drrraycater._exitImageID);
         _eepGenerator._exitImageID.addSharedProperty(&_simpleRaycaster._exitImageID);
+        _eepGenerator._exitImageID.addSharedProperty(&_clRaycaster._exitImageID);
 
         _drrraycater._targetImageID.setValue("drr.output");
         _drrraycater._sourceImageID.setValue("eep.input");
 
         _simpleRaycaster._targetImageID.setValue("dvr.output");
         _simpleRaycaster._sourceImageID.setValue("eep.input");
+
+        _clRaycaster._targetImageID.setValue("clr.output");
+        _clRaycaster._sourceImageID.setValue("clr.input");
 
         _eepGenerator._sourceImageID.setValue("eep.input");
         _eepGenerator._entryImageID.setValue("eep.entry");
@@ -98,6 +102,7 @@ namespace TUMVis {
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _drrraycater.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _simpleRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+        _clRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
     }
 
     void DVRVis::execute() {
@@ -111,6 +116,10 @@ namespace TUMVis {
 
             // convert data
             DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
+            ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
+            if (local != 0) {
+                _data.addData("clr.input", local);
+            }
             {
                 tgt::GLContextScopedLock lock(_canvas->getContext());
                 ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(img);
@@ -132,6 +141,9 @@ namespace TUMVis {
         }
         if (! _eepGenerator.getInvalidationLevel().isValid() || !_simpleRaycaster.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(_simpleRaycaster);
+        }
+        if (! _eepGenerator.getInvalidationLevel().isValid() || !_clRaycaster.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(_clRaycaster);
         }
     }
 

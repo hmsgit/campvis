@@ -31,6 +31,8 @@
 
 namespace kisscl {
 
+    const std::string Program::loggerCat_ = "kisscl.Program";
+
     Program::Program(Context* context)
         : CLWrapper<cl_program>(0)
         , _context(context)
@@ -90,13 +92,22 @@ namespace kisscl {
         clearKernels();
 
         if (devices.empty()) {
-            LCL_ERROR(clBuildProgram(_id, 0, 0, _buildOptions.c_str(), 0, 0));
+            cl_int err = LCL_ERROR(clBuildProgram(_id, 0, 0, _buildOptions.c_str(), 0, 0));
+            if (err != CL_SUCCESS) {
+                for(size_t i = 0; i < _context->getDevices().size(); ++i)
+                    LERROR(getBuildLog(_context->getDevices()[i]));
+            }
         }
         else {
             cl_device_id* devIds = new cl_device_id[devices.size()];
             for(size_t i = 0; i < devices.size(); ++i)
                 devIds[i] = devices[i]->getId();
-            LCL_ERROR(clBuildProgram(_id, static_cast<cl_uint>(devices.size()), devIds, _buildOptions.c_str(), 0, 0));
+
+            cl_int err = LCL_ERROR(clBuildProgram(_id, static_cast<cl_uint>(devices.size()), devIds, _buildOptions.c_str(), 0, 0));
+            if (err != CL_SUCCESS) {
+                for(size_t i = 0; i < devices.size(); ++i)
+                    LERROR(getBuildLog(devices[i]));
+            }
             delete[] devIds;
         }
     }

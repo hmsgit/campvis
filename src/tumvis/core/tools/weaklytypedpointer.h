@@ -35,6 +35,8 @@
 #include "tgt/tgt_gl.h"
 #include "tgt/types.h"
 
+#include "kisscl/kisscl.h"
+
 namespace TUMVis {
 
     /**
@@ -114,6 +116,10 @@ namespace TUMVis {
         GLenum getGlDataType() const;
 
         GLint getGlInternalFormat() const;
+
+        cl_channel_type getClChannelType() const;
+
+        cl_channel_order getClChannelOrder() const;
 
         BaseType _baseType;         ///< Base data type of the pointer
         size_t _numChannels;        ///< Number of channels, must be in [1, 4]!

@@ -29,7 +29,6 @@ namespace kisscl {
     Event::Event(cl_event id)
         : CLWrapper<cl_event>(id)
     {
-        tgtAssert(_id != 0, "Event ID must not be 0.");
     }
 
 

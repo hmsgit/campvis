@@ -25,7 +25,9 @@ namespace kisscl {
 
     const std::string CLRuntime::loggerCat_ = "kisscl.CLRuntime";
 
-    CLRuntime::CLRuntime() {
+    CLRuntime::CLRuntime()
+        : tgt::ResourceManager<Program>(false)
+    {
         initPlatforms();
     }
 
@@ -86,6 +88,59 @@ namespace kisscl {
         }
 
         return 0;
+    }
+
+    Program* CLRuntime::loadProgram(Context* context, const std::string& filename) {
+        std::vector<std::string> v;
+        v.push_back(filename);
+        return loadProgram(context, v);
+    }
+
+    Program* CLRuntime::loadProgram(Context* context, const std::vector<std::string>& filenames) {
+        tgtAssert(context != 0, "Context must not be 0.");
+
+        // complete paths and build unique identifier for resource manager
+        std::string concatenatedFilenamens;
+        std::vector<std::string> completedFilenmaes;
+        completedFilenmaes.reserve(filenames.size());
+        for (std::vector<std::string>::const_iterator it = filenames.begin(); it != filenames.end(); ++it) {
+            completedFilenmaes.push_back(completePath(*it));
+            concatenatedFilenamens.append(*it + "#");
+        }
+
+        Program* toReturn = new Program(context);
+        toReturn->setHeader(_globalHeader);
+        toReturn->loadFromFiles(completedFilenmaes);
+
+        reg(toReturn, concatenatedFilenamens);
+
+        return toReturn;
+    }
+
+    const std::string& CLRuntime::getGlobalHeader() const {
+        return _globalHeader;
+    }
+
+    void CLRuntime::setGlobalHeader(const std::string& header) {
+        _globalHeader = header;
+    }
+
+    CommandQueue* CLRuntime::getCommandQueue(Context* context, cl_command_queue_properties properties /*= 0*/) {
+        return getCommandQueue(context, context->getDevices().front());
+    }
+
+    CommandQueue* CLRuntime::getCommandQueue(Context* context, Device* device, cl_command_queue_properties properties /*= 0*/) {
+        std::pair<Context*, Device*> p = std::make_pair(context, device);
+
+        auto lb = _commandQueues.lower_bound(p);
+        if (lb == _commandQueues.end() || lb ->first != p) {
+            CommandQueue* queue = new CommandQueue(context, device, properties);
+            _commandQueues.insert(lb, std::make_pair(p, queue));
+            return queue;
+        }
+        else {
+            return lb->second;
+        }
     }
 
 }

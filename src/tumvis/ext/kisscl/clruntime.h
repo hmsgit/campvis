@@ -26,18 +26,26 @@
 
 #include "kisscl/kisscl.h"
 #include "kisscl/context.h"
+#include "kisscl/commandqueue.h"
 #include "kisscl/device.h"
 #include "kisscl/platform.h"
+#include "kisscl/program.h"
 
+#include <map>
 #include <string>
+#include <utility>
 
 
 namespace kisscl {
     /**
      * Singleton class for managing the OpenCL runtime.
-     * Gathers all available OpenCL platforms/devices and offers methods to create OpenCL contexts on them.
+     * Gathers all available OpenCL platforms/devices, offers methods to create OpenCL contexts on them and
+     * manages the command queue for each context-device pair.Furthermore, CLRuntime acts as resource manager
+     * for OpenCL programs. Caching of them is currently disabled.
+     * 
+     * \see tgt::Singleton, tgt::ResourceManager
      */
-    class CLRuntime : public tgt::Singleton<CLRuntime> {
+    class CLRuntime : public tgt::Singleton<CLRuntime>, public tgt::ResourceManager<Program> {
         friend class tgt::Singleton<CLRuntime>;
 
     public:
@@ -66,6 +74,53 @@ namespace kisscl {
          */
         const std::vector<Device*> getGPUDevices() const;
 
+        /**
+         * Creates a new OpenCL program from the given context from the file specified by \a filename.
+         * \param   context     OpenCL context the program shall live in.
+         * \param   filename    Filename of the source file.
+         * \return 
+         */
+        Program* loadProgram(Context* context, const std::string& filename);
+
+        /**
+         * Creates a new OpenCL program from the given context from the files specified by \a filename.
+         * \param   context     OpenCL context the program shall live in.
+         * \param   filenames   List of the filenames of the source files.
+         * \return 
+         */
+        Program* loadProgram(Context* context, const std::vector<std::string>& filenames);
+
+        /**
+         * Gets the global header for OpenCL programs.
+         * \return _header
+         */
+        const std::string& getGlobalHeader() const;
+
+        /**
+         * Sets the global header for OpenCL programs to \a header.
+         * \param header The new global header for OpenCL programs.
+         */
+        void setGlobalHeader(const std::string& header);
+
+        /**
+         * Gets the command queue for the given OpenCL context and its first device.
+         * If no such command queue has yet been requested, a new one will be created.
+         * \param   context     OpenCL context to create the command queue for. 
+         * \param   properties  Command queue properties bitfield.
+         * \return  The command queue for the given context and its first device.
+         */
+        CommandQueue* getCommandQueue(Context* context, cl_command_queue_properties properties = 0);
+
+        /**
+         * Gets the command queue for the given OpenCL context-device pair.
+         * If no such command queue has yet been requested, a new one will be created.
+         * \param   context     OpenCL context to create the command queue for. 
+         * \param   device      OpenCL device to create the command queue for. 
+         * \param   properties  Command queue properties bitfield.
+         * \return  The command queue for the given context-device pair.
+         */
+        CommandQueue* getCommandQueue(Context* context, Device* device, cl_command_queue_properties properties = 0);
+
     private:
         /**
          * Gathers and inits all available platforms and their devices.
@@ -77,6 +132,10 @@ namespace kisscl {
         std::vector<Device*> _cpuDevices;       ///< List of all OpenCL CPU devices (just a shortcut to the corresponding devices in _platforms)
         std::vector<Device*> _gpuDevices;       ///< List of all OpenCL GPU devices (just a shortcut to the corresponding devices in _platforms)
 
+        std::map< std::pair<Context*, Device*>, CommandQueue*> _commandQueues;
+
+        std::string _globalHeader;              ///< The global header for OpenCL programs.
+
         /**
          * Private constructor for singleton pattern.
          */
@@ -85,7 +144,7 @@ namespace kisscl {
         static const std::string loggerCat_;
     };
 
-#define CLMgr tgt::Singleton<kisscl::CLRuntime>::getRef()
+#define CLRtm tgt::Singleton<kisscl::CLRuntime>::getRef()
 
 }
 

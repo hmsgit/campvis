@@ -32,6 +32,7 @@ namespace kisscl {
     class Context;
     class Device;
     class Kernel;
+    class SharedTexture;
     
     /**
      * Wrapper class for an OpenCL command queue.
@@ -181,6 +182,10 @@ namespace kisscl {
         Event enqueueWrite(const Buffer* buffer, void* data, bool blocking = true, size_t offset = 0, size_t numBytes = 0, const EventList& eventsToWaitFor = EventList());
 
         // TODO: buffers, images, etc.
+
+        Event enqueueAcquireGLObject(const SharedTexture* texture, const EventList& eventsToWaitFor = EventList());
+
+        Event enqueueReleaseGLObject(const SharedTexture* texture, const EventList& eventsToWaitFor = EventList());
 
     private:
 

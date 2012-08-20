@@ -22,7 +22,7 @@
 
 #include "tgt/vector.h"
 #include "kisscl/kisscl.h"
-
+#include "kisscl/memory.h"
 
 
 namespace kisscl {
@@ -112,6 +112,12 @@ namespace kisscl {
         void setArgument(cl_uint index, const T& data);
 
         // TODO: samplers, buffers, etc.
+        /**
+         * Sets the kernel argument with index \a index to the given MemoryObject
+         * \param   index           Argument index
+         * \param   memoryObject    Memory object to set as kernel argument
+         */
+        void setMemoryArgument(cl_uint index, const MemoryObject* memoryObject);
 
     private:
         /**
@@ -126,7 +132,7 @@ namespace kisscl {
 
     template<class T>
     void kisscl::Kernel::setArgument(cl_uint index, const T& data) {
-        return LCL_ERROR(clSetKernelArg(id_, index, KernelArgumentTypeTraits<T>::size(), KernelArgumentTypeTraits<T>::pointer(data)));
+        LCL_ERROR(clSetKernelArg(_id, index, KernelArgumentTypeTraits<T>::size(), KernelArgumentTypeTraits<T>::pointer(data)));
     }
 
 }

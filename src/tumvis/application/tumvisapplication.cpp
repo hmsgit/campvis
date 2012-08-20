@@ -96,7 +96,7 @@ namespace TUMVis {
         tgt::GLContextScopedLock lock(_localContext->getContext());
 
         tgt::initGL(featureset);
-        ShdrMgr.setGlobalHeader("#version 130\n");
+        //ShdrMgr.setGlobalHeader("#version 130\n");
         LGL_ERROR;
 
         // ensure matching OpenGL specs
@@ -113,10 +113,15 @@ namespace TUMVis {
 
         if (_argc > 0) {
             // ugly hack
-            std::string programPath(_argv[0]);
-            programPath = tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(programPath)));
-            ShdrMgr.addPath(programPath);
-            ShdrMgr.addPath(programPath + "/core/glsl");
+            std::string basePath(_argv[0]);
+            basePath = tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(basePath)));
+            ShdrMgr.addPath(basePath);
+            ShdrMgr.addPath(basePath + "/core/glsl");
+
+            if (_useOpenCL) {
+                CLRtm.addPath(basePath);
+                CLRtm.addPath(basePath + "/core/cl");
+            }
         }
 
         // init pipeline first

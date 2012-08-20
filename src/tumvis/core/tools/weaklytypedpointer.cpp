@@ -45,20 +45,20 @@ namespace TUMVis {
 
     size_t WeaklyTypedPointer::numBytes(BaseType pt, size_t numChannels) {
         switch (pt) {
-                case WeaklyTypedPointer::UINT8:
-                case WeaklyTypedPointer::INT8:
-                    return 1 * numChannels;
-                case WeaklyTypedPointer::UINT16:
-                case WeaklyTypedPointer::INT16:
-                    return 2 * numChannels;
-                case WeaklyTypedPointer::UINT32:
-                case WeaklyTypedPointer::INT32:
-                    return 4 * numChannels;
-                case WeaklyTypedPointer::FLOAT:
-                    return sizeof(float) * numChannels;
-                default:
-                    tgtAssert(false, "Should not reach this - called WeaklyTypedPointer::numBytes() with wrong argument!");
-                    return 1;
+        case WeaklyTypedPointer::UINT8:
+        case WeaklyTypedPointer::INT8:
+            return 1 * numChannels;
+        case WeaklyTypedPointer::UINT16:
+        case WeaklyTypedPointer::INT16:
+            return 2 * numChannels;
+        case WeaklyTypedPointer::UINT32:
+        case WeaklyTypedPointer::INT32:
+            return 4 * numChannels;
+        case WeaklyTypedPointer::FLOAT:
+            return sizeof(float) * numChannels;
+        default:
+            tgtAssert(false, "Should not reach this - called WeaklyTypedPointer::numBytes() with wrong argument!");
+            return 1;
         }
     };
 
@@ -225,6 +225,42 @@ namespace TUMVis {
 
     bool WeaklyTypedPointer::operator==(const WeaklyTypedPointer& rhs) const {
         return (_baseType == rhs._baseType) && (_numChannels == rhs._numChannels) && (_pointer == rhs._pointer);
+    }
+
+    cl_channel_type WeaklyTypedPointer::getClChannelType() const {
+        switch (_baseType) {
+            case WeaklyTypedPointer::UINT8:
+                return CL_UNSIGNED_INT8;
+            case WeaklyTypedPointer::INT8:
+                return CL_SIGNED_INT8;
+            case WeaklyTypedPointer::UINT16:
+                return CL_UNSIGNED_INT16;
+            case WeaklyTypedPointer::INT16:
+                return CL_SIGNED_INT16;
+            case WeaklyTypedPointer::UINT32:
+                return CL_UNSIGNED_INT32;
+            case WeaklyTypedPointer::INT32:
+                return CL_SIGNED_INT32;
+            case WeaklyTypedPointer::FLOAT:
+                return CL_FLOAT;
+            default:
+                tgtAssert(false, "Should not reach this - wrong base data type!");
+                return CL_SIGNED_INT8;
+        }
+    }
+
+    cl_channel_order WeaklyTypedPointer::getClChannelOrder() const {
+        switch (_numChannels) {
+            case 1: 
+                return CL_A;
+            case 2: 
+                return CL_RA;
+            case 4:
+                return CL_RGBA;
+            default:
+                LERROR("Unsupported number of channels.");
+                return CL_A;
+        }
     }
 
 }

@@ -15,6 +15,7 @@ FILE(GLOB TUMVIS_MODULES_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     pipelines/*.h
     vis/*.h
     vis/*.frag
+    vis/*.cl
 )
 
 #SET(TUMVIS_MODULES_SOURCES

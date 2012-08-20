@@ -24,6 +24,15 @@
 #include "kisscl/device.h"
 #include "kisscl/platform.h"
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
+#if !(defined(WIN32) || defined(__APPLE__))
+#include <GL/glx.h>
+#define CL_GLX_DISPLAY_KHR 0x200A
+#endif
+
 namespace kisscl {
 
     void CL_API_CALL clContextCallback(const char* errinfo, const void* private_info, size_t cb, void* user_data) {

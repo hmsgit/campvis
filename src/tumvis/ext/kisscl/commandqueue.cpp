@@ -95,8 +95,8 @@ namespace kisscl {
 
     Event CommandQueue::enqueueKernel(const Kernel* kernel, size_t globalWorkSize, size_t localWorkSize /*= 0*/, size_t offset /*= 0*/, const EventList& eventsToWaitFor /*= EventList()*/) {
         tgtAssert(kernel != 0, "Kernel must not be 0.");
-        tgtAssert(localWorkSize != 0 && localWorkSize > globalWorkSize, "Global work size must be greater than local work size.");
-        tgtAssert(localWorkSize != 0 && (globalWorkSize % localWorkSize != 0), "Global work size must be a multiple than local work size.");
+        tgtAssert(localWorkSize == 0 || localWorkSize < globalWorkSize, "Global work size must be greater than local work size.");
+        tgtAssert(localWorkSize == 0 || (globalWorkSize % localWorkSize == 0), "Global work size must be a multiple than local work size.");
 
         cl_event e;
         LCL_ERROR(clEnqueueNDRangeKernel(
@@ -114,9 +114,9 @@ namespace kisscl {
 
     Event CommandQueue::enqueueKernel(const Kernel* kernel, tgt::svec2 globalWorkSize, tgt::svec2 localWorkSize /*= tgt::svec2::zero*/, tgt::svec2 offset /*= tgt::svec2::zero*/, const EventList& eventsToWaitFor /*= EventList()*/) {
         tgtAssert(kernel != 0, "Kernel must not be 0.");
-        tgtAssert(localWorkSize != tgt::svec2::zero && tgt::hor(tgt::greaterThan(localWorkSize, globalWorkSize)), "Global work size must be greater than local work size.");
-        tgtAssert(localWorkSize != tgt::svec2::zero && (globalWorkSize.x % localWorkSize.x != 0), "Global work size must be a multiple than local work size.");
-        tgtAssert(localWorkSize != tgt::svec2::zero && (globalWorkSize.y % localWorkSize.y != 0), "Global work size must be a multiple than local work size.");
+        tgtAssert(localWorkSize == tgt::svec2::zero || tgt::hor(tgt::lessThan(localWorkSize, globalWorkSize)), "Global work size must be greater than local work size.");
+        tgtAssert(localWorkSize == tgt::svec2::zero || (globalWorkSize.x % localWorkSize.x == 0), "Global work size must be a multiple than local work size.");
+        tgtAssert(localWorkSize == tgt::svec2::zero || (globalWorkSize.y % localWorkSize.y == 0), "Global work size must be a multiple than local work size.");
 
         cl_event e;
         LCL_ERROR(clEnqueueNDRangeKernel(
@@ -134,10 +134,10 @@ namespace kisscl {
 
     Event CommandQueue::enqueueKernel(const Kernel* kernel, tgt::svec3 globalWorkSize, tgt::svec3 localWorkSize /*= tgt::svec3::zero*/, tgt::svec3 offset /*= tgt::svec3::zero*/, const EventList& eventsToWaitFor /*= EventList()*/) {
         tgtAssert(kernel != 0, "Kernel must not be 0.");
-        tgtAssert(localWorkSize != tgt::svec3::zero && tgt::hor(tgt::greaterThan(localWorkSize, globalWorkSize)), "Global work size must be greater than local work size.");
-        tgtAssert(localWorkSize != tgt::svec3::zero && (globalWorkSize.x % localWorkSize.x != 0), "Global work size must be a multiple than local work size.");
-        tgtAssert(localWorkSize != tgt::svec3::zero && (globalWorkSize.y % localWorkSize.y != 0), "Global work size must be a multiple than local work size.");
-        tgtAssert(localWorkSize != tgt::svec3::zero && (globalWorkSize.z % localWorkSize.z != 0), "Global work size must be a multiple than local work size.");
+        tgtAssert(localWorkSize == tgt::svec3::zero || tgt::hor(tgt::lessThan (localWorkSize, globalWorkSize)), "Global work size must be greater than local work size.");
+        tgtAssert(localWorkSize == tgt::svec3::zero || (globalWorkSize.x % localWorkSize.x == 0), "Global work size must be a multiple than local work size.");
+        tgtAssert(localWorkSize == tgt::svec3::zero || (globalWorkSize.y % localWorkSize.y == 0), "Global work size must be a multiple than local work size.");
+        tgtAssert(localWorkSize == tgt::svec3::zero || (globalWorkSize.z % localWorkSize.z == 0), "Global work size must be a multiple than local work size.");
 
         cl_event e;
         LCL_ERROR(clEnqueueNDRangeKernel(
@@ -186,6 +186,20 @@ namespace kisscl {
         else {
             LCL_ERROR(clEnqueueWriteBuffer(_id, buffer->getId(), blocking, offset, numBytes, data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
         }
+        return Event(e);
+    }
+
+    Event CommandQueue::enqueueAcquireGLObject(const SharedTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
+        cl_event e;
+        cl_mem mem = texture->getId();
+        LCL_ERROR(clEnqueueAcquireGLObjects(_id, 1, &mem, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        return Event(e);
+    }
+
+    Event CommandQueue::enqueueReleaseGLObject(const SharedTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
+        cl_event e;
+        cl_mem mem = texture->getId();
+        LCL_ERROR(clEnqueueReleaseGLObjects(_id, 1, &mem, eventsToWaitFor._size, eventsToWaitFor._events, &e));
         return Event(e);
     }
 
