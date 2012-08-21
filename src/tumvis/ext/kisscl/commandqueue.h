@@ -22,6 +22,7 @@
 
 #include "tgt/vector.h"
 #include "kisscl/kisscl.h"
+#include "kisscl/itemlist.h"
 #include "kisscl/event.h"
 
 #include <vector>
@@ -33,7 +34,10 @@ namespace kisscl {
     class Device;
     class Kernel;
     class GLTexture;
-    
+
+    typedef ItemList<Event> EventList;
+    typedef ItemList<GLTexture> GLTextureList;
+
     /**
      * Wrapper class for an OpenCL command queue.
      * 
@@ -95,7 +99,7 @@ namespace kisscl {
          * \param   eventsToWaitFor List of Events to wait for, default is empty.
          * \return  Event object that identifies this particular kernel execution instance.
          */
-        Event enqueueTask(const Kernel* kernel, const EventList& eventsToWaitFor = EventList());
+        Event enqueueTask(const Kernel* kernel, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
         /**
          * Enqueues an one-dimensional OpenCL kernel to this command queue.
@@ -106,7 +110,7 @@ namespace kisscl {
          * \param   eventsToWaitFor List of Events to wait for, default is empty.
          * \return  Event object that identifies this particular kernel execution instance.
          */
-        Event enqueueKernel(const Kernel* kernel, size_t globalWorkSize, size_t localWorkSize = 0, size_t offset = 0, const EventList& eventsToWaitFor = EventList());
+        Event enqueueKernel(const Kernel* kernel, size_t globalWorkSize, size_t localWorkSize = 0, size_t offset = 0, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
         /**
          * Enqueues a two-dimensional OpenCL kernel to this command queue.
@@ -117,7 +121,7 @@ namespace kisscl {
          * \param   eventsToWaitFor List of Events to wait for, default is empty.
          * \return  Event object that identifies this particular kernel execution instance.
          */
-        Event enqueueKernel(const Kernel* kernel, tgt::svec2 globalWorkSize, tgt::svec2 localWorkSize = tgt::svec2::zero, tgt::svec2 offset = tgt::svec2::zero, const EventList& eventsToWaitFor = EventList());
+        Event enqueueKernel(const Kernel* kernel, tgt::svec2 globalWorkSize, tgt::svec2 localWorkSize = tgt::svec2::zero, tgt::svec2 offset = tgt::svec2::zero, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
         /**
          * Enqueues a three-dimensional OpenCL kernel to this command queue.
@@ -128,7 +132,7 @@ namespace kisscl {
          * \param   eventsToWaitFor List of Events to wait for, default is empty.
          * \return  Event object that identifies this particular kernel execution instance.
          */
-        Event enqueueKernel(const Kernel* kernel, tgt::svec3 globalWorkSize, tgt::svec3 localWorkSize = tgt::svec3::zero, tgt::svec3 offset = tgt::svec3::zero, const EventList& eventsToWaitFor = EventList());
+        Event enqueueKernel(const Kernel* kernel, tgt::svec3 globalWorkSize, tgt::svec3 localWorkSize = tgt::svec3::zero, tgt::svec3 offset = tgt::svec3::zero, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
 
         /**
@@ -154,7 +158,7 @@ namespace kisscl {
          * \todo    This method is deprecated in OpenCL 1.2
          * \param   eventsToWaitFor List of Events to wait for, default is empty.
          */
-        void enqueueWaitForEvents(const EventList& eventsToWaitFor = EventList());
+        void enqueueWaitForEvents(const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
 
         /**
@@ -167,7 +171,7 @@ namespace kisscl {
          * \param   eventsToWaitFor List of Events to wait for, default is empty.
          * \return  Event object that identifies this particular kernel execution instance.
          */
-        Event enqueueRead(const Buffer* buffer, void* data, bool blocking = true, size_t offset = 0, size_t numBytes = 0, const EventList& eventsToWaitFor = EventList());
+        Event enqueueRead(const Buffer* buffer, void* data, bool blocking = true, size_t offset = 0, size_t numBytes = 0, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
         /**
          * Enqueues to write into a buffer object from host memory. 
@@ -179,13 +183,13 @@ namespace kisscl {
          * \param   eventsToWaitFor List of Events to wait for, default is empty.
          * \return  Event object that identifies this particular kernel execution instance.
          */
-        Event enqueueWrite(const Buffer* buffer, void* data, bool blocking = true, size_t offset = 0, size_t numBytes = 0, const EventList& eventsToWaitFor = EventList());
+        Event enqueueWrite(const Buffer* buffer, void* data, bool blocking = true, size_t offset = 0, size_t numBytes = 0, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
         // TODO: buffers, images, etc.
 
-        Event enqueueAcquireGLObject(const GLTexture* texture, const EventList& eventsToWaitFor = EventList());
+        Event enqueueAcquireGLObject(const ItemList<GLTexture>& textures, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
-        Event enqueueReleaseGLObject(const GLTexture* texture, const EventList& eventsToWaitFor = EventList());
+        Event enqueueReleaseGLObject(const ItemList<GLTexture>& textures, const ItemList<Event>& eventsToWaitFor = ItemList<Event>());
 
     private:
 

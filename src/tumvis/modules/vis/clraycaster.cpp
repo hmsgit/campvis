@@ -149,15 +149,9 @@ namespace TUMVis {
                         _transferFunction.getTF()->getIntensityDomain().x, 
                         _transferFunction.getTF()->getIntensityDomain().y);
 
-                    cq->enqueueAcquireGLObject(_texEntryPointsColor);
-                    cq->enqueueAcquireGLObject(_texExitPointsColor);
-                    cq->enqueueAcquireGLObject(_texOutColor);
-
+                    cq->enqueueAcquireGLObject(kisscl::GLTextureList(*_texEntryPointsColor, *_texExitPointsColor, *_texOutColor));
                     cq->enqueueKernel(kernel, entryPoints->getSize().xy());
-
-                    cq->enqueueReleaseGLObject(_texEntryPointsColor);
-                    cq->enqueueReleaseGLObject(_texExitPointsColor);
-                    cq->enqueueReleaseGLObject(_texOutColor);
+                    cq->enqueueReleaseGLObject(kisscl::GLTextureList(*_texEntryPointsColor, *_texExitPointsColor, *_texOutColor));
 
                     cq->finish();
                 }

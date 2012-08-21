@@ -85,15 +85,15 @@ namespace kisscl {
         LCL_ERROR(clFinish(_id));
     }
 
-    Event CommandQueue::enqueueTask(const Kernel* kernel, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueTask(const Kernel* kernel, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         tgtAssert(kernel != 0, "Kernel must not be 0.");
 
         cl_event e;
-        LCL_ERROR(clEnqueueTask(_id, kernel->getId(), eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        LCL_ERROR(clEnqueueTask(_id, kernel->getId(), eventsToWaitFor._size, eventsToWaitFor._items, &e));
         return Event(e);
     }
 
-    Event CommandQueue::enqueueKernel(const Kernel* kernel, size_t globalWorkSize, size_t localWorkSize /*= 0*/, size_t offset /*= 0*/, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueKernel(const Kernel* kernel, size_t globalWorkSize, size_t localWorkSize /*= 0*/, size_t offset /*= 0*/, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         tgtAssert(kernel != 0, "Kernel must not be 0.");
         tgtAssert(localWorkSize == 0 || localWorkSize < globalWorkSize, "Global work size must be greater than local work size.");
         tgtAssert(localWorkSize == 0 || (globalWorkSize % localWorkSize == 0), "Global work size must be a multiple than local work size.");
@@ -107,12 +107,12 @@ namespace kisscl {
             &globalWorkSize, 
             (localWorkSize == 0 ? 0 : &localWorkSize), 
             eventsToWaitFor._size, 
-            eventsToWaitFor._events, 
+            eventsToWaitFor._items, 
             &e));
         return Event(e);
     }
 
-    Event CommandQueue::enqueueKernel(const Kernel* kernel, tgt::svec2 globalWorkSize, tgt::svec2 localWorkSize /*= tgt::svec2::zero*/, tgt::svec2 offset /*= tgt::svec2::zero*/, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueKernel(const Kernel* kernel, tgt::svec2 globalWorkSize, tgt::svec2 localWorkSize /*= tgt::svec2::zero*/, tgt::svec2 offset /*= tgt::svec2::zero*/, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         tgtAssert(kernel != 0, "Kernel must not be 0.");
         tgtAssert(localWorkSize == tgt::svec2::zero || tgt::hor(tgt::lessThan(localWorkSize, globalWorkSize)), "Global work size must be greater than local work size.");
         tgtAssert(localWorkSize == tgt::svec2::zero || (globalWorkSize.x % localWorkSize.x == 0), "Global work size must be a multiple than local work size.");
@@ -127,12 +127,12 @@ namespace kisscl {
             globalWorkSize.elem,
             (localWorkSize == tgt::svec2::zero ? 0 : localWorkSize.elem),
             eventsToWaitFor._size, 
-            eventsToWaitFor._events, 
+            eventsToWaitFor._items, 
             &e));
         return Event(e);
     }
 
-    Event CommandQueue::enqueueKernel(const Kernel* kernel, tgt::svec3 globalWorkSize, tgt::svec3 localWorkSize /*= tgt::svec3::zero*/, tgt::svec3 offset /*= tgt::svec3::zero*/, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueKernel(const Kernel* kernel, tgt::svec3 globalWorkSize, tgt::svec3 localWorkSize /*= tgt::svec3::zero*/, tgt::svec3 offset /*= tgt::svec3::zero*/, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         tgtAssert(kernel != 0, "Kernel must not be 0.");
         tgtAssert(localWorkSize == tgt::svec3::zero || tgt::hor(tgt::lessThan (localWorkSize, globalWorkSize)), "Global work size must be greater than local work size.");
         tgtAssert(localWorkSize == tgt::svec3::zero || (globalWorkSize.x % localWorkSize.x == 0), "Global work size must be a multiple than local work size.");
@@ -148,7 +148,7 @@ namespace kisscl {
             globalWorkSize.elem,
             (localWorkSize == tgt::svec3::zero ? 0 : localWorkSize.elem),
             eventsToWaitFor._size, 
-            eventsToWaitFor._events, 
+            eventsToWaitFor._items, 
             &e));
         return Event(e);
     }
@@ -163,43 +163,41 @@ namespace kisscl {
         return Event(e);
     }
 
-    void CommandQueue::enqueueWaitForEvents(const EventList& eventsToWaitFor /*= EventList()*/) {
-        LCL_ERROR(clEnqueueWaitForEvents(_id, eventsToWaitFor._size, eventsToWaitFor._events));
+    void CommandQueue::enqueueWaitForEvents(const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
+        LCL_ERROR(clEnqueueWaitForEvents(_id, eventsToWaitFor._size, eventsToWaitFor._items));
     }
 
-    Event CommandQueue::enqueueRead(const Buffer* buffer, void* data, bool blocking /*= true*/, size_t offset /*= 0*/, size_t numBytes /*= 0*/, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueRead(const Buffer* buffer, void* data, bool blocking /*= true*/, size_t offset /*= 0*/, size_t numBytes /*= 0*/, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         cl_event e;
         if (numBytes == 0) {
-            LCL_ERROR(clEnqueueReadBuffer(_id, buffer->getId(), blocking, offset, buffer->getSize(), data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+            LCL_ERROR(clEnqueueReadBuffer(_id, buffer->getId(), blocking, offset, buffer->getSize(), data, eventsToWaitFor._size, eventsToWaitFor._items, &e));
         }
         else {
-            LCL_ERROR(clEnqueueReadBuffer(_id, buffer->getId(), blocking, offset, numBytes, data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+            LCL_ERROR(clEnqueueReadBuffer(_id, buffer->getId(), blocking, offset, numBytes, data, eventsToWaitFor._size, eventsToWaitFor._items, &e));
         }
         return Event(e);
     }
 
-    Event CommandQueue::enqueueWrite(const Buffer* buffer, void* data, bool blocking /*= true*/, size_t offset /*= 0*/, size_t numBytes /*= 0*/, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueWrite(const Buffer* buffer, void* data, bool blocking /*= true*/, size_t offset /*= 0*/, size_t numBytes /*= 0*/, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         cl_event e;
         if (numBytes == 0) {
-            LCL_ERROR(clEnqueueWriteBuffer(_id, buffer->getId(), blocking, offset, buffer->getSize(), data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+            LCL_ERROR(clEnqueueWriteBuffer(_id, buffer->getId(), blocking, offset, buffer->getSize(), data, eventsToWaitFor._size, eventsToWaitFor._items, &e));
         }
         else {
-            LCL_ERROR(clEnqueueWriteBuffer(_id, buffer->getId(), blocking, offset, numBytes, data, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+            LCL_ERROR(clEnqueueWriteBuffer(_id, buffer->getId(), blocking, offset, numBytes, data, eventsToWaitFor._size, eventsToWaitFor._items, &e));
         }
         return Event(e);
     }
 
-    Event CommandQueue::enqueueAcquireGLObject(const GLTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueAcquireGLObject(const ItemList<GLTexture>& textures, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         cl_event e;
-        cl_mem mem = texture->getId();
-        LCL_ERROR(clEnqueueAcquireGLObjects(_id, 1, &mem, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        LCL_ERROR(clEnqueueAcquireGLObjects(_id, textures._size, textures._items, eventsToWaitFor._size, eventsToWaitFor._items, &e));
         return Event(e);
     }
 
-    Event CommandQueue::enqueueReleaseGLObject(const GLTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueReleaseGLObject(const ItemList<GLTexture>& textures, const ItemList<Event>& eventsToWaitFor /*= ItemList<Event>()*/) {
         cl_event e;
-        cl_mem mem = texture->getId();
-        LCL_ERROR(clEnqueueReleaseGLObjects(_id, 1, &mem, eventsToWaitFor._size, eventsToWaitFor._events, &e));
+        LCL_ERROR(clEnqueueReleaseGLObjects(_id, textures._size, textures._items, eventsToWaitFor._size, eventsToWaitFor._items, &e));
         return Event(e);
     }
 

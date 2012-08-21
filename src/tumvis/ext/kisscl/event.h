@@ -39,19 +39,6 @@ namespace kisscl {
 
     };
 
-// = EventList starts here ========================================================================
-
-    struct EventList {
-        EventList();
-        EventList(const Event& e1);
-        EventList(const Event& e1, const Event& e2);
-        ~EventList();
-
-        cl_event* _events;
-        size_t _size;
-    };
-
-
 }
 
 #endif // KISSCL_EVENT_H__
