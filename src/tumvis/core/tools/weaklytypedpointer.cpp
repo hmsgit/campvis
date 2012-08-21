@@ -230,13 +230,13 @@ namespace TUMVis {
     cl_channel_type WeaklyTypedPointer::getClChannelType() const {
         switch (_baseType) {
             case WeaklyTypedPointer::UINT8:
-                return CL_UNSIGNED_INT8;
+                return CL_UNORM_INT8;
             case WeaklyTypedPointer::INT8:
-                return CL_SIGNED_INT8;
+                return CL_SNORM_INT8;
             case WeaklyTypedPointer::UINT16:
-                return CL_UNSIGNED_INT16;
+                return CL_UNORM_INT16;
             case WeaklyTypedPointer::INT16:
-                return CL_SIGNED_INT16;
+                return CL_SNORM_INT16;
             case WeaklyTypedPointer::UINT32:
                 return CL_UNSIGNED_INT32;
             case WeaklyTypedPointer::INT32:

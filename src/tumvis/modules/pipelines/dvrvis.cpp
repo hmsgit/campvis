@@ -71,6 +71,7 @@ namespace TUMVis {
         _camera.addSharedProperty(&_eepGenerator._camera);
         _camera.addSharedProperty(&_drrraycater._camera);
         _camera.addSharedProperty(&_simpleRaycaster._camera);
+        _camera.addSharedProperty(&_clRaycaster._camera);
 
         _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader._targetImageID.setValue("reader.output");

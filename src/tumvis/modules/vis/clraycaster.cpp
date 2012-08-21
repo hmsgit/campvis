@@ -93,9 +93,8 @@ namespace TUMVis {
 
         _clContext = CLRtm.createGlSharingContext();
         _clProgram = CLRtm.loadProgram(_clContext, "modules/vis/clraycaster.cl");
+        _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable");
         _clProgram->build();
-        std::string log = _clProgram->getBuildLog(_clContext->getDevices().front());
-        LDEBUG(log);
     }
 
     void CLRaycaster::deinit() {
@@ -132,20 +131,28 @@ namespace TUMVis {
                 _texExitPointsColor = new kisscl::SharedTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture());
                 delete _texOutColor;
                 ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-                _texOutColor = new kisscl::SharedTexture(_clContext, CL_MEM_READ_ONLY, rt->getColorTexture());
+                _texOutColor = new kisscl::SharedTexture(_clContext, CL_MEM_WRITE_ONLY, rt->getColorTexture());
 
 
                 // prepare kernel and stuff command queue
                 kisscl::CommandQueue* cq = CLRtm.getCommandQueue(_clContext);
-                kisscl::Kernel* kernel = _clProgram->getKernel("foobar");
+                kisscl::Kernel* kernel = _clProgram->getKernel("clraycaster");
 
                 if (kernel != 0) {
-                    //kernel->setMemoryArgument(0, _imgVolume);
-                    //kernel->setMemoryArgument(1, _imgTf);
-                    kernel->setMemoryArgument(0, _texEntryPointsColor);
-                    kernel->setMemoryArgument(1, _texExitPointsColor);
-                    kernel->setMemoryArgument(2, _texOutColor);
-                    //kernel->setArgument(5, _samplingStepSize.getValue());
+                    rt->activate();
+                    rt->deactivate();
+
+                    LGL_ERROR;
+                    glFinish();
+
+                    kernel->setMemoryArgument(0, _imgVolume);
+                    kernel->setMemoryArgument(1, _imgTf);
+                    kernel->setMemoryArgument(2, _texEntryPointsColor);
+                    kernel->setMemoryArgument(3, _texExitPointsColor);
+                    kernel->setMemoryArgument(4, _texOutColor);
+                    kernel->setArgument(5, _samplingStepSize.getValue());
+                    kernel->setArgument(6, _transferFunction.getTF()->getIntensityDomain().x);
+                    kernel->setArgument(7, _transferFunction.getTF()->getIntensityDomain().y);
 
                     cq->enqueueAcquireGLObject(_texEntryPointsColor);
                     cq->enqueueAcquireGLObject(_texExitPointsColor);
@@ -191,6 +198,7 @@ namespace TUMVis {
                 }*/
 
                 LGL_ERROR;
+                data.addData(_targetImageID.getValue(), rt);
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

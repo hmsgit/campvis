@@ -45,7 +45,7 @@ __constant float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 /**
  * Makes a simple raycast through the volume for entry to exit point with minimal diffuse shading.
  */
-float4 simpleRaycast(__global read_only image3d_t volumeTex, __global read_only image2d_t tfData, const float4 entryPoint, const float4 exitPoint, float* depth, const float stepSize) {
+float4 simpleRaycast(__global read_only image3d_t volumeTex, __global read_only image2d_t tfData, const float4 entryPoint, const float4 exitPoint, float* depth, const float stepSize, float tfLowerBound, float tfUpperBound) {
 
     // result color
     float4 result = (float4)(0.0, 0.0, 0.0, 0.0);
@@ -61,14 +61,19 @@ float4 simpleRaycast(__global read_only image3d_t volumeTex, __global read_only 
 
         //calculate sample position and get corresponding voxel
         float4 sample = entryPoint + t * direction;
-        float4 color = read_imagef(tfData, smpNorm, (float2)(read_imagef(volumeTex, smpNorm, sample).x, 0.0));
+        float intensity = read_imagef(volumeTex, smpNorm, sample).w;
+
+        // apply tf intensity domain mapping:
+        intensity = (intensity - tfLowerBound) / (tfUpperBound - tfLowerBound);
+
+        float4 color = read_imagef(tfData, smpNorm, (float2)(intensity, 0.0));
 
         // apply opacity correction to accomodate for variable sampling intervals
         color.w = 1.0 - pow(1.0 - color.w, stepSize * SAMPLING_BASE_INTERVAL_RCP);
 
         // Add a little shading.  calcGradient is declared in mod_gradients.cl
-        float4 norm = normalize(calcGradient(sample, volumeTex));
-        color *= fabs(dot(norm, direction));
+        //float4 norm = normalize(calcGradient(sample, volumeTex));
+        //color *= fabs(dot(norm, direction));
 
         //calculate ray integral
         result.xyz = result.xyz + (1.0 - result.w) * color.w * color.xyz;
@@ -98,7 +103,9 @@ __kernel void clraycaster(__global read_only image3d_t volumeTex,
                       __global read_only image2d_t entryTexCol,
                       __global read_only image2d_t exitTexCol,
                       __global write_only image2d_t outCol,
-                      float stepSize
+                      float stepSize,
+                      float tfLowerBound,
+                      float tfUpperBound
                       )
 {
     //output image pixel coordinates
@@ -113,7 +120,7 @@ __kernel void clraycaster(__global read_only image3d_t volumeTex,
     float4 exit  = read_imagef(exitTexCol,  smpNorm, targetNorm);
 
     if( entry.x != exit.x || entry.y != exit.y || entry.z != exit.z )
-        color = simpleRaycast(volumeTex, tfData, entry, exit, &depth, stepSize);
+        color = simpleRaycast(volumeTex, tfData, entry, exit, &depth, stepSize, tfLowerBound, tfUpperBound);
     else
         color = (float4)(0.0);
 

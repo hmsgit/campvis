@@ -355,7 +355,7 @@ namespace kisscl {
          * Gets the handle to internal OpenCl object.
          * \return  _id
          */
-        cl_type getId() const {
+        const cl_type& getId() const {
             return _id;
         }
 

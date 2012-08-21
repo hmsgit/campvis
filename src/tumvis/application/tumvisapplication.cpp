@@ -144,10 +144,6 @@ namespace TUMVis {
             // Deinit everything OpenGL related using the local context.
             tgt::GLContextScopedLock lock(_localContext->getContext());
 
-            if (_useOpenCL) {
-                kisscl::CLRuntime::deinit();
-            }
-
             // Deinit pipeline first
             for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
                 (*it)->deinit();
@@ -160,6 +156,10 @@ namespace TUMVis {
 
             // deinit OpenGL and tgt
             tgt::deinitGL();
+
+            if (_useOpenCL) {
+                kisscl::CLRuntime::deinit();
+            }
         }
 
         tgt::QtContextManager::deinit();

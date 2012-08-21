@@ -95,7 +95,7 @@ namespace kisscl {
             cl_int err = LCL_ERROR(clBuildProgram(_id, 0, 0, _buildOptions.c_str(), 0, 0));
             if (err != CL_SUCCESS) {
                 for(size_t i = 0; i < _context->getDevices().size(); ++i)
-                    LERROR(getBuildLog(_context->getDevices()[i]));
+                    LERROR("Build log: " << getBuildLog(_context->getDevices()[i]));
             }
         }
         else {
@@ -141,7 +141,7 @@ namespace kisscl {
     }
 
     std::string Program::getBuildLog(const Device* device) const {
-        return getBuildInfo<std::string>(device, CL_PROGRAM_BUILD_OPTIONS);
+        return getBuildInfo<std::string>(device, CL_PROGRAM_BUILD_LOG);
     }
 
     //template specialization for strings:

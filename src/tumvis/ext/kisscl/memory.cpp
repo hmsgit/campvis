@@ -106,7 +106,7 @@ namespace kisscl {
         switch(texFormat) {
             case GL_ALPHA:
             case GL_LUMINANCE:
-                imageFormat.image_channel_order = CL_A;
+                imageFormat.image_channel_order = CL_INTENSITY;
                 break;
             case GL_LUMINANCE_ALPHA:
                 imageFormat.image_channel_order = CL_RA;
