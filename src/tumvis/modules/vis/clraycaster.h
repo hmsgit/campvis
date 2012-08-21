@@ -42,7 +42,7 @@
 namespace kisscl {
     class Context;
     class Image;
-    class SharedTexture;
+    class GLTexture;
     class Program;
 }
 
@@ -126,9 +126,9 @@ namespace TUMVis {
         clock_t _volumeTimestamp;
         kisscl::Image* _imgTf;
         clock_t _tfTimestamp;
-        kisscl::SharedTexture* _texEntryPointsColor;
-        kisscl::SharedTexture* _texExitPointsColor;
-        kisscl::SharedTexture* _texOutColor;
+        kisscl::GLTexture* _texEntryPointsColor;
+        kisscl::GLTexture* _texExitPointsColor;
+        kisscl::GLTexture* _texOutColor;
 
 
 

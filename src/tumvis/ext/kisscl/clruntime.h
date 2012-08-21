@@ -66,13 +66,13 @@ namespace kisscl {
          * Gets the list of all available OpenCL CPU devices.
          * \return _cpuDevices
          */
-        const std::vector<Device*> getCPUDevices() const;
+        const std::vector<Device*>& getCPUDevices() const;
 
         /**
          * Gets the list of all available OpenCL GPU devices.
          * \return _gpuDevices
          */
-        const std::vector<Device*> getGPUDevices() const;
+        const std::vector<Device*>& getGPUDevices() const;
 
         /**
          * Creates a new OpenCL program from the given context from the file specified by \a filename.
@@ -103,23 +103,26 @@ namespace kisscl {
         void setGlobalHeader(const std::string& header);
 
         /**
-         * Gets the command queue for the given OpenCL context and its first device.
-         * If no such command queue has yet been requested, a new one will be created.
-         * \param   context     OpenCL context to create the command queue for. 
-         * \param   properties  Command queue properties bitfield.
-         * \return  The command queue for the given context and its first device.
+         * Gets the Command queue properties bitfield for all newly created command queues.
+         * \return _commandQueueProperties
          */
-        CommandQueue* getCommandQueue(Context* context, cl_command_queue_properties properties = 0);
+        cl_command_queue_properties getCommandQueueProperties() const;
+
+        /**
+         * Sets the Command queue properties bitfield for all newly created command queues.
+         * \param   cqp     The new Command queue properties bitfield for all newly created command queues.
+         */
+        void setCommandQueueProperties(cl_command_queue_properties cqp);
 
         /**
          * Gets the command queue for the given OpenCL context-device pair.
          * If no such command queue has yet been requested, a new one will be created.
          * \param   context     OpenCL context to create the command queue for. 
-         * \param   device      OpenCL device to create the command queue for. 
+         * \param   device      OpenCL device to create the command queue for, if 0 the first device of the given context will be taken (default).
          * \param   properties  Command queue properties bitfield.
          * \return  The command queue for the given context-device pair.
          */
-        CommandQueue* getCommandQueue(Context* context, Device* device, cl_command_queue_properties properties = 0);
+        CommandQueue* getCommandQueue(Context* context, Device* device = 0);
 
     private:
         /**
@@ -133,6 +136,7 @@ namespace kisscl {
         std::vector<Device*> _gpuDevices;       ///< List of all OpenCL GPU devices (just a shortcut to the corresponding devices in _platforms)
 
         std::map< std::pair<Context*, Device*>, CommandQueue*> _commandQueues;
+        cl_command_queue_properties _commandQueueProperties;        ///< Command queue properties bitfield for all newly created command queues.
 
         std::string _globalHeader;              ///< The global header for OpenCL programs.
 

@@ -22,6 +22,7 @@
 #include "tgt/assert.h"
 #include "tgt/filesystem.h"
 #include "tgt/logmanager.h"
+#include "kisscl/clruntime.h"
 #include "kisscl/context.h"
 #include "kisscl/device.h"
 #include "kisscl/kernel.h"
@@ -83,7 +84,7 @@ namespace kisscl {
             delete file;
         }
 
-        create();
+        createProgram();
     }
 
     void Program::build(const std::vector<Device*>& devices /*= std::vector<Device*>()*/) {
@@ -91,8 +92,15 @@ namespace kisscl {
 
         clearKernels();
 
+        // add additional include paths to build options
+        std::string bo(_buildOptions);
+        for (std::list<std::string>::const_iterator it = CLRtm.getPathList().begin(); it != CLRtm.getPathList().end(); ++it) {
+            bo.append(" -I" + tgt::FileSystem::cleanupPath(*it));
+        }
+
+        // build program
         if (devices.empty()) {
-            cl_int err = LCL_ERROR(clBuildProgram(_id, 0, 0, _buildOptions.c_str(), 0, 0));
+            cl_int err = LCL_ERROR(clBuildProgram(_id, 0, 0, bo.c_str(), 0, 0));
             if (err != CL_SUCCESS) {
                 for(size_t i = 0; i < _context->getDevices().size(); ++i)
                     LERROR("Build log: " << getBuildLog(_context->getDevices()[i]));
@@ -103,7 +111,7 @@ namespace kisscl {
             for(size_t i = 0; i < devices.size(); ++i)
                 devIds[i] = devices[i]->getId();
 
-            cl_int err = LCL_ERROR(clBuildProgram(_id, static_cast<cl_uint>(devices.size()), devIds, _buildOptions.c_str(), 0, 0));
+            cl_int err = LCL_ERROR(clBuildProgram(_id, static_cast<cl_uint>(devices.size()), devIds, bo.c_str(), 0, 0));
             if (err != CL_SUCCESS) {
                 for(size_t i = 0; i < devices.size(); ++i)
                     LERROR(getBuildLog(devices[i]));
@@ -118,7 +126,7 @@ namespace kisscl {
         // check, whether this kernel has already been created
         std::map<std::string, Kernel*>::iterator lb = _kernels.lower_bound(name);
         if (lb == _kernels.end() || lb->first != name) {
-            // no: create a new kernel and insert it into cache map
+            // no: createProgram a new kernel and insert it into cache map
             cl_int err;
             cl_kernel kernel = clCreateKernel(_id, name.c_str(), &err);
             LCL_ERROR(err);
@@ -164,8 +172,8 @@ namespace kisscl {
         _kernels.clear();
     }
 
-    void Program::create() {
-        tgtAssert(! _sources.empty(), "Cannot create an OpenCL program with empty sources.");
+    void Program::createProgram() {
+        tgtAssert(! _sources.empty(), "Cannot createProgram an OpenCL program with empty sources.");
 
         cl_uint numSources = _sources.size() + 1;
         const char** strings = new const char*[numSources];

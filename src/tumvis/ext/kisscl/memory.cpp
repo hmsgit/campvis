@@ -196,8 +196,9 @@ namespace kisscl {
 
     }
 
+// ================================================================================================
 
-    SharedTexture::SharedTexture(const Context* context, cl_mem_flags flags, const tgt::Texture* texture)
+    GLTexture::GLTexture(const Context* context, cl_mem_flags flags, const tgt::Texture* texture)
         : MemoryObject(context)
         , _texture(texture)
     {
@@ -225,13 +226,13 @@ namespace kisscl {
                 LCL_ERROR(err);
                 break;
             default:
-                LERRORC("kisscl.SharedTexture", "Unknown texture type!");
+                LERRORC("kisscl.GLTexture", "Unknown texture type!");
 #endif // defined(CL_VERSION_1_2)
 
         }
     }
 
-    SharedTexture::~SharedTexture() {
+    GLTexture::~GLTexture() {
 
     }
 

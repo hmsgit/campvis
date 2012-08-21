@@ -126,12 +126,12 @@ namespace TUMVis {
 
                 // bind shared textures
                 delete _texEntryPointsColor;
-                _texEntryPointsColor = new kisscl::SharedTexture(_clContext, CL_MEM_READ_ONLY, entryPoints->getColorTexture());
+                _texEntryPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, entryPoints->getColorTexture());
                 delete _texExitPointsColor;
-                _texExitPointsColor = new kisscl::SharedTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture());
+                _texExitPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture());
                 delete _texOutColor;
                 ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-                _texOutColor = new kisscl::SharedTexture(_clContext, CL_MEM_WRITE_ONLY, rt->getColorTexture());
+                _texOutColor = new kisscl::GLTexture(_clContext, CL_MEM_WRITE_ONLY, rt->getColorTexture());
 
 
                 // prepare kernel and stuff command queue
@@ -139,20 +139,15 @@ namespace TUMVis {
                 kisscl::Kernel* kernel = _clProgram->getKernel("clraycaster");
 
                 if (kernel != 0) {
-                    rt->activate();
-                    rt->deactivate();
-
-                    LGL_ERROR;
-                    glFinish();
-
-                    kernel->setMemoryArgument(0, _imgVolume);
-                    kernel->setMemoryArgument(1, _imgTf);
-                    kernel->setMemoryArgument(2, _texEntryPointsColor);
-                    kernel->setMemoryArgument(3, _texExitPointsColor);
-                    kernel->setMemoryArgument(4, _texOutColor);
-                    kernel->setArgument(5, _samplingStepSize.getValue());
-                    kernel->setArgument(6, _transferFunction.getTF()->getIntensityDomain().x);
-                    kernel->setArgument(7, _transferFunction.getTF()->getIntensityDomain().y);
+                    kernel->setArguments(
+                        *_imgVolume, 
+                        *_imgTf, 
+                        *_texEntryPointsColor, 
+                        *_texExitPointsColor, 
+                        *_texOutColor, 
+                        _samplingStepSize.getValue(), 
+                        _transferFunction.getTF()->getIntensityDomain().x, 
+                        _transferFunction.getTF()->getIntensityDomain().y);
 
                     cq->enqueueAcquireGLObject(_texEntryPointsColor);
                     cq->enqueueAcquireGLObject(_texExitPointsColor);
@@ -170,32 +165,6 @@ namespace TUMVis {
                     LERROR("Kernel 'clraycaster' not found");
                     return;
                 }
-                /*
-                const int size = 1048576;
-                const int mem_size = sizeof(float)*size;
-                float* src_a_h = new float[size];
-                float* src_b_h = new float[size];
-                float* res_h = new float[size];
-                // Initialize both vectors
-                for (int i = 0; i < size; i++) {
-                    src_a_h[i] = src_b_h[i] = (float) i;
-                }
-
-                kisscl::Buffer a(_clContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, mem_size, src_a_h);
-                kisscl::Buffer b(_clContext, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, mem_size, src_b_h);
-                kisscl::Buffer res(_clContext, CL_MEM_WRITE_ONLY, mem_size, res_h);
-
-                kisscl::Kernel* kernel = _clProgram->getKernel("vector_add_gpu");
-                if (kernel != 0) {
-                    kernel->setMemoryArgument(0, &a);
-                    kernel->setMemoryArgument(1, &b);
-                    kernel->setMemoryArgument(2, &res);
-                    kernel->setArgument(3, size);
-
-                    cq->enqueueKernel(kernel, size, 512);
-                    cq->enqueueRead(&res, res_h);
-                    cq->finish();
-                }*/
 
                 LGL_ERROR;
                 data.addData(_targetImageID.getValue(), rt);

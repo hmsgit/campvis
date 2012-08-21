@@ -189,14 +189,14 @@ namespace kisscl {
         return Event(e);
     }
 
-    Event CommandQueue::enqueueAcquireGLObject(const SharedTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueAcquireGLObject(const GLTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
         cl_event e;
         cl_mem mem = texture->getId();
         LCL_ERROR(clEnqueueAcquireGLObjects(_id, 1, &mem, eventsToWaitFor._size, eventsToWaitFor._events, &e));
         return Event(e);
     }
 
-    Event CommandQueue::enqueueReleaseGLObject(const SharedTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
+    Event CommandQueue::enqueueReleaseGLObject(const GLTexture* texture, const EventList& eventsToWaitFor /*= EventList()*/) {
         cl_event e;
         cl_mem mem = texture->getId();
         LCL_ERROR(clEnqueueReleaseGLObjects(_id, 1, &mem, eventsToWaitFor._size, eventsToWaitFor._events, &e));

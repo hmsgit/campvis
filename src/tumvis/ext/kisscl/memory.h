@@ -58,6 +58,9 @@ namespace kisscl {
 
 // ================================================================================================
 
+    /**
+     * Simple wrapper around an OpenCL buffer.
+     */
     class Buffer : public MemoryObject {
     public:
         /**
@@ -86,25 +89,55 @@ namespace kisscl {
 
 // ================================================================================================
 
+    /**
+     * Wrapper around an OpenCL image that can be accessed in kernels via read/write_image.
+     */
     class Image : public MemoryObject {
     public:
+        /**
+         * Creates an OpenCL image from a tgt::Texture.
+         * \param   context     Context where this image object resides.
+         * \param   flags       Flags specifying allocation and usage information for this buffer.
+         * \param   texture     Pointer to the texture used for initalization, must have valid pixel data in host memory.
+         */
         Image(const Context* context, cl_mem_flags flags, const tgt::Texture* texture);
 
+        /**
+         * Creates an OpenCL image from scratch.
+         * \param   context         Context where this image object resides.
+         * \param   flags           Flags specifying allocation and usage information for this buffer.
+         * \param   dimensions      Image dimensions.
+         * \param   channelOrder    OpenCL image channel order.
+         * \param   channelType     OpenCL image channel data type.
+         * \param   hostPtr         Pointer to the image data in the host memory.
+         * \return 
+         */
         Image(const Context* context, cl_mem_flags flags, const tgt::svec3& dimensions, cl_channel_order channelOrder, cl_channel_type channelType, void* hostPtr);
 
+        /// Just a virtual dtor.
         virtual ~Image();
     };
 
     // ================================================================================================
 
-    class SharedTexture : public MemoryObject {
+    /**
+     * Wrapper for an OpenCL image being shared with an OpenGL texture.
+     */
+    class GLTexture : public MemoryObject {
     public:
-        SharedTexture(const Context* context, cl_mem_flags flags, const tgt::Texture* texture);
+        /**
+         * Creates an OpenCL shared GL image from a tgt::Texture.
+         * \param   context     Context where this image object resides.
+         * \param   flags       Flags specifying allocation and usage information for this buffer.
+         * \param   texture     Pointer to the texture used for initalization, must refer to a valid and initialized OpenGL texture.
+         */
+        GLTexture(const Context* context, cl_mem_flags flags, const tgt::Texture* texture);
 
-        virtual ~SharedTexture();
+        /// Virtual dtor.
+        virtual ~GLTexture();
 
     protected:
-        const tgt::Texture* _texture;
+        const tgt::Texture* _texture;   ///< Pointer to the texture used for initalization, might be handy some time.
     };
 }
 

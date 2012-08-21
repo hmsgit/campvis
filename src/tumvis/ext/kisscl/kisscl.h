@@ -229,6 +229,7 @@ namespace kisscl {
         };
     }
 
+
     /**
      * Helper function to transform an OpenCL error code to a string.
      * \param   err OpenCL error code.

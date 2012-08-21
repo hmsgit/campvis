@@ -36,8 +36,25 @@ namespace kisscl {
         return getInfo<cl_uint>(CL_KERNEL_NUM_ARGS);
     }
 
-    void Kernel::setMemoryArgument(cl_uint index, const MemoryObject* memoryObject) {
-        cl_mem mem = memoryObject->getId();
+//     void Kernel::setMemoryArgument(cl_uint index, const MemoryObject* memoryObject) {
+//         cl_mem mem = memoryObject->getId();
+//         LCL_ERROR(clSetKernelArg(_id, index, sizeof(cl_mem), &mem));
+//     }
+
+    template<>
+    void Kernel::setArgument(cl_uint index, const Buffer& data) {
+        cl_mem mem = data.getId();
+        LCL_ERROR(clSetKernelArg(_id, index, sizeof(cl_mem), &mem));
+    }
+    template<>
+    void Kernel::setArgument(cl_uint index, const Image& data) {
+        cl_mem mem = data.getId();
+        LCL_ERROR(clSetKernelArg(_id, index, sizeof(cl_mem), &mem));
+    }
+
+    template<>
+    void Kernel::setArgument(cl_uint index, const GLTexture& data) {
+        cl_mem mem = data.getId();
         LCL_ERROR(clSetKernelArg(_id, index, sizeof(cl_mem), &mem));
     }
 

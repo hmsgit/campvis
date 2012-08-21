@@ -131,7 +131,7 @@ namespace kisscl {
          * Creates the actual OpenCL program.
          * \note    _sources should contain valid sources when calling this method.
          */
-        void create();
+        void createProgram();
 
         //TODO: get binaries
         template<class T>

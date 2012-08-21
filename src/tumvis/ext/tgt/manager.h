@@ -67,6 +67,8 @@ public:
 
     std::vector<std::string> getFilenames();
 
+    const std::list<std::string>& getPathList() const { return pathList_; };
+
 protected:
     struct Resource {
         T*          data_;

@@ -27,6 +27,7 @@ namespace kisscl {
 
     CLRuntime::CLRuntime()
         : tgt::ResourceManager<Program>(false)
+        , _commandQueueProperties(0)
     {
         initPlatforms();
     }
@@ -64,11 +65,11 @@ namespace kisscl {
         }
     }
 
-    const std::vector<Device*> CLRuntime::getCPUDevices() const {
+    const std::vector<Device*>& CLRuntime::getCPUDevices() const {
         return _cpuDevices;
     }
 
-    const std::vector<Device*> CLRuntime::getGPUDevices() const {
+    const std::vector<Device*>& CLRuntime::getGPUDevices() const {
         return _gpuDevices;
     }
 
@@ -125,22 +126,32 @@ namespace kisscl {
         _globalHeader = header;
     }
 
-    CommandQueue* CLRuntime::getCommandQueue(Context* context, cl_command_queue_properties properties /*= 0*/) {
-        return getCommandQueue(context, context->getDevices().front());
-    }
 
-    CommandQueue* CLRuntime::getCommandQueue(Context* context, Device* device, cl_command_queue_properties properties /*= 0*/) {
+    CommandQueue* CLRuntime::getCommandQueue(Context* context, Device* device /*= 0*/) {
+        tgtAssert(context != 0, "Context may not be 0.");
+
+        if (device == 0)
+            device = context->getDevices().front();
+
         std::pair<Context*, Device*> p = std::make_pair(context, device);
 
         auto lb = _commandQueues.lower_bound(p);
         if (lb == _commandQueues.end() || lb ->first != p) {
-            CommandQueue* queue = new CommandQueue(context, device, properties);
+            CommandQueue* queue = new CommandQueue(context, device, _commandQueueProperties);
             _commandQueues.insert(lb, std::make_pair(p, queue));
             return queue;
         }
         else {
             return lb->second;
         }
+    }
+
+    cl_command_queue_properties CLRuntime::getCommandQueueProperties() const {
+        return _commandQueueProperties;
+    }
+
+    void CLRuntime::setCommandQueueProperties(cl_command_queue_properties cqp) {
+        _commandQueueProperties = cqp;
     }
 
 }
