@@ -29,15 +29,17 @@
 #ifndef JOBPOOL_H__
 #define JOBPOOL_H__
 
-#include <list>
+#include "sigslot/sigslot.h"
+#include "tbb/include/tbb/concurrent_queue.h"
 
 namespace TUMVis {
 
-    class Job;
+    class AbstractJob;
 
     /**
      * A JobPool manages multible Jobs in queues with different priorities.
      * 
+     * \note    This class is to be considered as thread-safe.
      * \todo    Implement a suitable scheduling strategy to avoid starving of low priority jobs.
      *          This sounds like a good opportunity to take a look at the Betriebssysteme lecture slides. :)
      */
@@ -52,8 +54,14 @@ namespace TUMVis {
             Low = 2         ///< Low priority jobs are only considered if there are no jobs in the queue with higher priority
         };
 
+        /**
+         * Creates a new JobPool
+         */
         JobPool();
 
+        /**
+         * Destructor, deletes all jobs which are still enqueued.
+         */
         ~JobPool();
 
         /**
@@ -63,20 +71,22 @@ namespace TUMVis {
          * \param job       Job to enqueue, JobPool takes ownership of this Job!
          * \param priority  Priority of the job to enqueue
          */
-        void enqueueJob(Job* job, JobPriority priority);
+        void enqueueJob(AbstractJob* job, JobPriority priority);
 
         /**
          * Dequeues the next job according to the scheduling strategy.
+         * \note    The calling function takes the ownership of the returned job!
          * \todo    Develop a good scheduling strategy and describe it here.
-         * \return  The next job to execute, 0 if there is currently no job to execute.
+         * \return  The next job to execute, 0 if there is currently no job to execute. The caller takes ownership of the job!
          */
-        Job* dequeueJob();
+        AbstractJob* dequeueJob();
 
+        /// Signal being emitted, when a job has been enqueued.
+        sigslot::signal0<> s_enqueuedJob;
 
     protected:
-        static const size_t NUM_PRIORITIES;
-
-        std::list<Job*>* _queues;       ///< Array of job queues, one for each JobPriority
+        static const size_t NUM_PRIORITIES;             ///< total number of piorities, make sure that this matches the JobPriority enum.
+        tbb::concurrent_queue<AbstractJob*>* _queues;   ///< Array of job queues, one for each JobPriority
     };
 }
 
