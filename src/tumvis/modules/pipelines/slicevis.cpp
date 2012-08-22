@@ -72,7 +72,7 @@ namespace TUMVis {
             // TODO:    think whether we want to lock all processors already here.
         }
         if (! _imageReader.getInvalidationLevel().isValid()) {
-            executeProcessor(_imageReader);
+            executeProcessor(&_imageReader);
 
             // convert data
             DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
@@ -82,7 +82,7 @@ namespace TUMVis {
             }
         }
         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(_sliceExtractor);
+            lockGLContextAndExecuteProcessor(&_sliceExtractor);
         }
     }
 

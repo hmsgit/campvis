@@ -135,7 +135,7 @@ namespace kisscl {
 
         std::pair<Context*, Device*> p = std::make_pair(context, device);
 
-        auto lb = _commandQueues.lower_bound(p);
+        std::map< std::pair<Context*, Device*>, CommandQueue*>::iterator lb = _commandQueues.lower_bound(p);
         if (lb == _commandQueues.end() || lb ->first != p) {
             CommandQueue* queue = new CommandQueue(context, device, _commandQueueProperties);
             _commandQueues.insert(lb, std::make_pair(p, queue));

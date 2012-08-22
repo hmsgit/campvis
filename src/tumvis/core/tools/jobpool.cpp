@@ -28,50 +28,7 @@
 
 #include "jobpool.h"
 
-#include "tgt/assert.h"
-#include "core/tools/job.h"
-
 namespace TUMVis {
-
-    const size_t JobPool::NUM_PRIORITIES = 3;
-
-    JobPool::JobPool()
-        : _queues(0)
-    {
-        _queues = new tbb::concurrent_queue<AbstractJob*>[NUM_PRIORITIES];
-    }
-
-    JobPool::~JobPool() {
-        // delete jobs
-        AbstractJob* toDelete = 0;
-        for (size_t i = 0; i < NUM_PRIORITIES; ++i) {
-            while (_queues[i].try_pop(toDelete))
-                delete toDelete;
-        }
-
-        // delete queues
-        delete[] _queues;
-    }
-
-    void JobPool::enqueueJob(AbstractJob* job, JobPriority priority) {
-        size_t i = static_cast<size_t>(priority);
-        tgtAssert(i < NUM_PRIORITIES, "Job priority index must be lower than the total number or priorities.");
-        tgtAssert(job != 0, "Job must not be 0");
-
-        _queues[i].push(job);
-        s_enqueuedJob();
-    }
-
-    AbstractJob* JobPool::dequeueJob() {
-        // very simple scheduling algorithm. This should be made fairer and avoid starving!
-        AbstractJob* toReturn = 0;
-        for (size_t i = 0; i < NUM_PRIORITIES; ++i) {
-            if (_queues[i].try_pop(toReturn));
-            return toReturn;
-        }
-
-        return 0;
-    }
 
 }
 

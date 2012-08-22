@@ -113,7 +113,7 @@ namespace TUMVis {
             // TODO:    think whether we want to lock all processors already here.
         }
         if (! _imageReader.getInvalidationLevel().isValid()) {
-            executeProcessor(_imageReader);
+            executeProcessor(&_imageReader);
 
             // convert data
             DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
@@ -135,16 +135,16 @@ namespace TUMVis {
             }
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(_eepGenerator);
+            lockGLContextAndExecuteProcessor(&_eepGenerator);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid() || !_drrraycater.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(_drrraycater);
+            lockGLContextAndExecuteProcessor(&_drrraycater);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid() || !_simpleRaycaster.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(_simpleRaycaster);
+            lockGLContextAndExecuteProcessor(&_simpleRaycaster);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid() || !_clRaycaster.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(_clRaycaster);
+            lockGLContextAndExecuteProcessor(&_clRaycaster);
         }
     }
 

@@ -31,6 +31,8 @@
 #include "tgt/glcanvas.h"
 #include "tgt/glcontext.h"
 #include "core/datastructures/imagedatarendertarget.h"
+#include "core/tools/job.h"
+#include "core/tools/opengljobprocessor.h"
 
 namespace TUMVis {
     const std::string VisualizationPipeline::loggerCat_ = "TUMVis.core.datastructures.VisualizationPipeline";
@@ -94,12 +96,16 @@ namespace TUMVis {
         _renderTargetSize.setValue(size);
     }
 
-    void VisualizationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor& processor) {
+    void VisualizationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor* processor) {
         tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
-        tgt::GLContextScopedLock lock(_canvas->getContext());
+        GLJobProc.enqueueJob(
+            _canvas, 
+            new CallMemberFunc1ArgJob<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor),
+            Normal);
+        /*tgt::GLContextScopedLock lock(_canvas->getContext());
         executeProcessor(processor);
         glFinish();  // TODO: is glFlush enough or do we need a glFinish here?
-        LGL_ERROR;
+        LGL_ERROR;*/
     }
 
     void VisualizationPipeline::setCanvas(tgt::GLCanvas* canvas) {

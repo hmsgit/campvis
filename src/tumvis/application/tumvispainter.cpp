@@ -38,6 +38,8 @@
 
 #include "core/datastructures/imagedatarendertarget.h"
 #include "core/pipeline/visualizationpipeline.h"
+#include "core/tools/job.h"
+#include "core/tools/opengljobprocessor.h"
 
 namespace TUMVis {
     const std::string TumVisPainter::loggerCat_ = "TUMVis.core.TumVisPainter";
@@ -69,11 +71,14 @@ namespace TUMVis {
         std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
 
         while (! _stopExecution) {
-            getCanvas()->getContext()->acquire();
-            paint();
-            getCanvas()->swap();
+            if (_dirty)
+                GLJobProc.enqueueJob(getCanvas(), new CallMemberFuncJob<TumVisPainter>(this, &TumVisPainter::paint), Normal);
 
-            while (!_stopExecution && !_dirty)
+            /*getCanvas()->getContext()->acquire();
+            paint();
+            getCanvas()->swap();*/
+
+            //while (!_stopExecution)
                 _renderCondition.wait(lock);
         }
 
@@ -140,6 +145,8 @@ namespace TUMVis {
             }
             LGL_ERROR;
         }
+
+        getCanvas()->swap();
     }
 
     void TumVisPainter::sizeChanged(const tgt::ivec2& size) {

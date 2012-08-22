@@ -42,6 +42,7 @@
 
 #include "application/tumvispainter.h"
 #include "application/gui/mainwindow.h"
+#include "core/tools/opengljobprocessor.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/pipeline/pipelineevaluator.h"
@@ -64,6 +65,8 @@ namespace TUMVis {
 
         _mainWindow = new MainWindow(this);
         tgt::QtContextManager::init();
+
+        OpenGLJobProcessor::init();
     }
 
     TumVisApplication::~TumVisApplication() {
@@ -134,11 +137,14 @@ namespace TUMVis {
             it->second->init();
         }
 
+        GLJobProc.start();
         _initialized = true;
     }
 
     void TumVisApplication::deinit() {
         tgtAssert(_initialized, "Tried to deinitialize uninitialized TumVisApplication.");
+
+        GLJobProc.stop();
 
         {
             // Deinit everything OpenGL related using the local context.
@@ -161,6 +167,8 @@ namespace TUMVis {
                 kisscl::CLRuntime::deinit();
             }
         }
+
+        OpenGLJobProcessor::deinit();
 
         tgt::QtContextManager::deinit();
         tgt::deinit();

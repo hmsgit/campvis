@@ -56,7 +56,7 @@ namespace TUMVis {
      * Specific job, that is calling a member function pasing no argument.
      */
     template<class T>
-    class CallMemberFuncJob {
+    class CallMemberFuncJob : public AbstractJob {
     public:
         /**
          * Creates an new job, that is calling \a callee on \a target pasing no argument.
@@ -92,7 +92,7 @@ namespace TUMVis {
      * Specific job, that is calling a member function pasing a single argument.
      */
     template<class T, class A1>
-    class CallMemberFunc1ArgJob {
+    class CallMemberFunc1ArgJob : public AbstractJob {
     public:
         /**
          * Creates an new job, that is calling \a callee on \a target pasing \a arg1 as single argument.
@@ -100,7 +100,7 @@ namespace TUMVis {
          * \param   callee  Member function to call
          * \param   arg1    Argument to pass to \a callee
          */
-        CallMemberFunc1ArgJob(T* target, void (T::*callee)(A1), const A1& arg1)
+        CallMemberFunc1ArgJob(T* target, void (T::*callee)(A1), A1 arg1)
             : _target(target)
             , _callee(callee)
             , _arg1(arg1)
@@ -124,7 +124,7 @@ namespace TUMVis {
     protected:
         T* _target;                 ///< Target object
         void (T::*_callee)(A1);     /// <Member function to call
-        const A1& _arg1;            ///< Argument to pass to \a callee
+        A1 _arg1;            ///< Argument to pass to \a callee
     };
 
 }

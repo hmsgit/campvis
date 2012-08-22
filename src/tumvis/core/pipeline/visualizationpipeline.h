@@ -143,7 +143,7 @@ namespace TUMVis {
          * and locks its properties meanwhile.
          * \param   processor   Processor to execute.
          */
-        void lockGLContextAndExecuteProcessor(AbstractProcessor& processor);
+        void lockGLContextAndExecuteProcessor(AbstractProcessor* processor);
 
         GenericProperty<tgt::ivec2> _renderTargetSize;      ///< Viewport size of target canvas
         StringProperty _renderTargetID;                     ///< ID of the render target image to be rendered to the canvas

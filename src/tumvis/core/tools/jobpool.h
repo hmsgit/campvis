@@ -37,57 +37,106 @@ namespace TUMVis {
     class AbstractJob;
 
     /**
-     * A JobPool manages multible Jobs in queues with different priorities.
+     * Enumeration of the different priorities of items.
+     */
+    enum PriorityPoolPriority {
+        Realtime = 0,   ///< Realtime items are always considered first during dequeueing.
+        Normal = 1,     ///< Items with normal priorities are dequeued as soon as there are no realtime items left
+        Low = 2         ///< Low priority items are only considered if there are no items in the queue with higher priority
+    };
+
+    /**
+     * A PriorityPool manages multiple items of type T in queues with different priorities.
+     * Similar to a priority queue but different...
      * 
      * \note    This class is to be considered as thread-safe.
-     * \todo    Implement a suitable scheduling strategy to avoid starving of low priority jobs.
+     * \todo    Implement a suitable scheduling strategy to avoid starving of low priority items.
      *          This sounds like a good opportunity to take a look at the Betriebssysteme lecture slides. :)
      */
-    class JobPool {
+    template<class T>
+    class PriorityPool {
     public:
-        /**
-         * Enumeration of the different priorities of jobs.
-         */
-        enum JobPriority {
-            Realtime = 0,   ///< Realtime jobs are always considered first during dequeueing.
-            Normal = 1,     ///< Jobs with normal priorities are dequeued as soon as there are no realtime jobs left
-            Low = 2         ///< Low priority jobs are only considered if there are no jobs in the queue with higher priority
-        };
 
         /**
-         * Creates a new JobPool
+         * Creates a new PriorityPool
          */
-        JobPool();
+        PriorityPool();
 
         /**
-         * Destructor, deletes all jobs which are still enqueued.
+         * Destructor, deletes all items which are still enqueued.
          */
-        ~JobPool();
+        ~PriorityPool();
 
         /**
          * Enqueues the given Job with the given priority.
          * 
-         * \note    JobPool takes ownership of \a job.
-         * \param job       Job to enqueue, JobPool takes ownership of this Job!
-         * \param priority  Priority of the job to enqueue
+         * \note    PriorityPool takes ownership of \a item.
+         * \param   item        Item to enqueue, PriorityPool takes ownership of this Job!
+         * \param   priority    Priority of the item to enqueue
          */
-        void enqueueJob(AbstractJob* job, JobPriority priority);
+        void enqueueJob(T* item, PriorityPoolPriority priority);
 
         /**
-         * Dequeues the next job according to the scheduling strategy.
-         * \note    The calling function takes the ownership of the returned job!
+         * Dequeues the next item according to the scheduling strategy.
+         * \note    The calling function takes the ownership of the returned item!
          * \todo    Develop a good scheduling strategy and describe it here.
-         * \return  The next job to execute, 0 if there is currently no job to execute. The caller takes ownership of the job!
+         * \return  The next item to execute, 0 if there is currently no item to execute. The caller takes ownership of the item!
          */
-        AbstractJob* dequeueJob();
+        T* dequeueJob();
 
-        /// Signal being emitted, when a job has been enqueued.
+        /// Signal being emitted, when a item has been enqueued.
         sigslot::signal0<> s_enqueuedJob;
 
     protected:
-        static const size_t NUM_PRIORITIES;             ///< total number of piorities, make sure that this matches the JobPriority enum.
-        tbb::concurrent_queue<AbstractJob*>* _queues;   ///< Array of job queues, one for each JobPriority
+        static const size_t NUM_PRIORITIES;     ///< total number of piorities, make sure that this matches the Priority enum.
+        tbb::concurrent_queue<T*>* _queues;     ///< Array of item queues, one for each Priority
     };
+
+// ================================================================================================
+
+    template<class T>
+    const size_t TUMVis::PriorityPool<T>::NUM_PRIORITIES = 3;
+
+    template<class T>
+    TUMVis::PriorityPool<T>::PriorityPool()
+    {
+        _queues = new tbb::concurrent_queue<T*>[NUM_PRIORITIES];
+    }
+
+    template<class T>
+    TUMVis::PriorityPool<T>::~PriorityPool() {
+        // delete jobs
+        T* toDelete = 0;
+        for (size_t i = 0; i < NUM_PRIORITIES; ++i) {
+            while (_queues[i].try_pop(toDelete))
+                delete toDelete;
+        }
+
+        // delete queues
+        delete[] _queues;
+    }
+
+    template<class T>
+    void TUMVis::PriorityPool<T>::enqueueJob(T* item, PriorityPoolPriority priority) {
+        size_t i = static_cast<size_t>(priority);
+        tgtAssert(i < NUM_PRIORITIES, "Item priority index must be lower than the total number or priorities.");
+        tgtAssert(item != 0, "Item must not be 0");
+
+        _queues[i].push(item);
+        s_enqueuedJob();
+    }
+
+    template<class T>
+    T* TUMVis::PriorityPool<T>::dequeueJob() {
+        // very simple scheduling algorithm. This should be made fairer and avoid starving!
+        T* toReturn = 0;
+        for (size_t i = 0; i < NUM_PRIORITIES; ++i) {
+            if (_queues[i].try_pop(toReturn))
+                return toReturn;
+        }
+
+        return 0;
+    }
 }
 
 #endif // JOBPOOL_H__

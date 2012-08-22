@@ -128,7 +128,7 @@ namespace TUMVis {
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
          */
-        void executeProcessor(AbstractProcessor& processor);
+        void executeProcessor(AbstractProcessor* processor);
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline

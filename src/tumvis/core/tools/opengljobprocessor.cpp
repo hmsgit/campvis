@@ -26,48 +26,65 @@
 // 
 // ================================================================================================
 
-#include "referencecounted.h"
+#include "opengljobprocessor.h"
+
+#include "tgt/assert.h"
+#include "tgt/qt/qtcontextmanager.h"
+#include "core/tools/job.h"
 
 namespace TUMVis {
-    ReferenceCounted::ReferenceCounted()
-        : _shareable(true)
+
+    OpenGLJobProcessor::OpenGLJobProcessor()
+        : _currentContext(0)
     {
-        _refCount = 0;
+        _jobPool.s_enqueuedJob.connect(this, &OpenGLJobProcessor::OnEnqueuedJob);
     }
 
-    ReferenceCounted::ReferenceCounted(const ReferenceCounted& rhs)
-        : _shareable(true)
-    {
-        _refCount = 0;
+    OpenGLJobProcessor::~OpenGLJobProcessor() {
+        _jobPool.s_enqueuedJob.disconnect(this);
     }
 
-    ReferenceCounted& ReferenceCounted::operator=(const ReferenceCounted& rhs) {
-        return *this;
+    void OpenGLJobProcessor::stop() {
+        _stopExecution = true;
+        _evaluationCondition.notify_all();
+
+        Runnable::stop();
     }
 
-    ReferenceCounted::~ReferenceCounted() {
+    void OpenGLJobProcessor::run() {
+        std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
+
+        while (! _stopExecution) {
+            OpenGLJob* job = 0;
+            while (job = _jobPool.dequeueJob()) {
+                if (_currentContext != job->_canvas) {
+                    if (_currentContext != 0) {
+                        glFinish();
+                        LGL_ERROR;
+                    }
+                    job->_canvas->getContext()->acquire();
+                    _currentContext = job->_canvas;
+                }
+
+                job->_job->execute();
+                delete job->_job;
+                delete job;
+            }
+
+//            while (! _stopExecution && _jobPool.empty())
+                _evaluationCondition.wait(lock);
+        }
+
+        // release OpenGL context, so that other threads can access it
+        CtxtMgr.releaseCurrentContext();
     }
 
-    void ReferenceCounted::addReference() {
-        ++_refCount;
+    void OpenGLJobProcessor::enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, PriorityPoolPriority priority) {
+        _jobPool.enqueueJob(new OpenGLJob(job, canvas), priority);
     }
 
-    void ReferenceCounted::removeReference() {
-        if (--_refCount == 0)
-            delete this;
+    void OpenGLJobProcessor::OnEnqueuedJob() {
+        _evaluationCondition.notify_all();
     }
-
-    void ReferenceCounted::markUnsharable() {
-        _shareable = false;
-    }
-
-    bool ReferenceCounted::isShareable() const {
-        return _shareable;
-    }
-
-    bool ReferenceCounted::isShared() const {
-        return _refCount > 1;
-    }
-
 }
 
