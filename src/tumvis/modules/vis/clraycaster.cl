@@ -1,3 +1,5 @@
+#include "tools/raycasting.cl"
+
 __constant sampler_t smpNorm = CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR;
 __constant float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 

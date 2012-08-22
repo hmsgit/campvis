@@ -1,0 +1,83 @@
+// ================================================================================================
+// 
+// This file is part of the TUMVis Visualization Framework.
+// 
+// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+//      Christian Schulte zu Berge (christian.szb@in.tum.de)
+//      Chair for Computer Aided Medical Procedures
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
+// The licensing of this softare is not yet resolved. Until then, redistribution in source or
+// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
+// However, the names of the original authors and the above copyright notice must retain in its
+// original state in any case.
+// 
+// Legal disclaimer provided by the BSD license:
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+// 
+// ================================================================================================
+
+#ifndef JOBPOOL_H__
+#define JOBPOOL_H__
+
+#include <list>
+
+namespace TUMVis {
+
+    class Job;
+
+    /**
+     * A JobPool manages multible Jobs in queues with different priorities.
+     * 
+     * \todo    Implement a suitable scheduling strategy to avoid starving of low priority jobs.
+     *          This sounds like a good opportunity to take a look at the Betriebssysteme lecture slides. :)
+     */
+    class JobPool {
+    public:
+        /**
+         * Enumeration of the different priorities of jobs.
+         */
+        enum JobPriority {
+            Realtime = 0,   ///< Realtime jobs are always considered first during dequeueing.
+            Normal = 1,     ///< Jobs with normal priorities are dequeued as soon as there are no realtime jobs left
+            Low = 2         ///< Low priority jobs are only considered if there are no jobs in the queue with higher priority
+        };
+
+        JobPool();
+
+        ~JobPool();
+
+        /**
+         * Enqueues the given Job with the given priority.
+         * 
+         * \note    JobPool takes ownership of \a job.
+         * \param job       Job to enqueue, JobPool takes ownership of this Job!
+         * \param priority  Priority of the job to enqueue
+         */
+        void enqueueJob(Job* job, JobPriority priority);
+
+        /**
+         * Dequeues the next job according to the scheduling strategy.
+         * \todo    Develop a good scheduling strategy and describe it here.
+         * \return  The next job to execute, 0 if there is currently no job to execute.
+         */
+        Job* dequeueJob();
+
+
+    protected:
+        static const size_t NUM_PRIORITIES;
+
+        std::list<Job*>* _queues;       ///< Array of job queues, one for each JobPriority
+    };
+}
+
+#endif // JOBPOOL_H__
