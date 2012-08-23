@@ -63,17 +63,17 @@ namespace TUMVis {
                 _startTimeCurrentContext = clock() * 1000 / CLOCKS_PER_SEC;
                 tgt::GLCanvas* context = _contexts[i];
 
-//                 std::map<tgt::GLCanvas*, PerContextJobQueue*>::const_iterator a = _contextQueueMap.find(context);
-//                 if (a == _contextQueueMap.end()) {
                 tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
                 if (!_contextQueueMap.find(a, context)) {
                     tgtAssert(false, "Should not reach this: Did not find context in contextQueueMap!");
                     break;
                 }
 
+                // avoid expensive context-switches for contexts without oending jobs.
                 if (a->second->empty())
                     continue;
 
+                // perform context switch if necessary
                 if (_currentContext != context) {
                     if (_currentContext != 0) {
                         glFinish();
@@ -126,8 +126,6 @@ namespace TUMVis {
     }
 
     void OpenGLJobProcessor::enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, JobType priority) {
-        // find the corresponding JobQueue for the context and update it:
-        //std::map<tgt::GLCanvas*, PerContextJobQueue*>::const_iterator a = _contextQueueMap.find(canvas);
         tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
         if (_contextQueueMap.find(a, canvas)) {
             switch (priority) {
@@ -156,9 +154,6 @@ namespace TUMVis {
 
     void OpenGLJobProcessor::registerContext(tgt::GLCanvas* context) {
 #ifdef TUMVIS_DEBUG
-        //tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
-//         std::map<tgt::GLCanvas*, PerContextJobQueue*>::iterator a = _contextQueueMap.find(context);
-//         if (a != _contextQueueMap.end())
         tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
         if (_contextQueueMap.find(a, context))
             tgtAssert(false, "Contexts shall only be registered once!");

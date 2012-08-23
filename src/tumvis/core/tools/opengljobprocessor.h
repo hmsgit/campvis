@@ -48,8 +48,7 @@ namespace tgt {
 
 namespace TUMVis {
     /**
-     *
-     * \todo    Check if the inheritance of PriorityPool is a cool design or not...
+     * \todo    Explain scheduling technique.
      */
     class OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public Runnable, public sigslot::has_slots<> {
         friend class tgt::Singleton<OpenGLJobProcessor>;
@@ -59,7 +58,7 @@ namespace TUMVis {
          * Enumeration of the different priorities of items.
          */
         enum JobType {
-            PaintJob,           ///< PaintJobs have the highest priority
+            PaintJob,           ///< PaintJobs have the highest priority, there can only be one paint job per context at a time.
             SerialJob,          ///< SerialJobs have a lower priority than PaintJobs, but are guaranteed to be executed in order.
             LowPriorityJob      ///< Low priority jobs have the lowest priority, can be executed at any time. The only guarantee is that thay won't starve.
         };
@@ -67,13 +66,17 @@ namespace TUMVis {
         virtual ~OpenGLJobProcessor();
 
 
+        /**
+         * Registers the given OpenGL context, so that it gets its own job queue.
+         * \param   context     OpenGL context to register.
+         */
         void registerContext(tgt::GLCanvas* context);
 
         /// \see Runnable::stop
         void stop();
         
         /**
-         * Performs the pipeline evaluation using conditional wait.
+         * Performs the job processing using conditional wait.
          * \sa Runnable::run
          */
         void run();
@@ -82,6 +85,7 @@ namespace TUMVis {
          * Enqueues the given Job with the given priority.
          * 
          * \note    OpenGLJobProcessor takes ownership of \a job.
+         * \param   canvas      OpenGL context for which to enqueue the job, must be registered.
          * \param   job         Job to enqueue, PriorityPool takes ownership of this Job!
          * \param   priority    Priority of the job to enqueue
          */
@@ -89,16 +93,26 @@ namespace TUMVis {
 
 
     protected:
+        /**
+         * Struct encapsulating the job queue for a single OpenGL context.
+         */
         struct PerContextJobQueue {
+            /**
+             * Creates an empty PerContextJobQueue.
+             */
             PerContextJobQueue() 
                 : _paintJob(0)
             {
             }
 
-            AbstractJob* _paintJob;
-            tbb::concurrent_queue<AbstractJob*> _serialJobs;
-            tbb::concurrent_queue<AbstractJob*> _lowPriorityJobs;
+            AbstractJob* _paintJob;                                 ///< PaintJob of the context
+            tbb::concurrent_queue<AbstractJob*> _serialJobs;        ///< Queue of serial jobs for the context
+            tbb::concurrent_queue<AbstractJob*> _lowPriorityJobs;   ///< Queue of jow priority jobs for the context
 
+            /**
+             * Checks, whether there is any job to do for this context.
+             * \return (_serialJobs.empty() && _lowPriorityJobs.empty() && (_paintJob == 0))
+             */
             bool empty() const {
                 return (_serialJobs.empty() && _lowPriorityJobs.empty() && (_paintJob == 0));
             }
