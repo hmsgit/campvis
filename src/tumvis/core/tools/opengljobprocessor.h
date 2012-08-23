@@ -48,7 +48,23 @@ namespace tgt {
 
 namespace TUMVis {
     /**
-     * \todo    Explain scheduling technique.
+     * Singleton class for managing and executing work items (jobs) that need an active OpenGL context.
+     * After an OpenGL context has been registered you can enqueue jobs that are to be executed within that 
+     * context to the job queue. Enqueued jobs are executed asynchroniously using a specific scheduling 
+     * strategy, depending on the given JobType:
+     * 
+     * OpenGLJobProcessor implements a round-robin scheduling strategy for the registered OpenGL contexts, 
+     * meaning that each context gets roughly the same computing time. Thereby, it tries to maintain an update
+     * frequency of 30fps for each context.
+     * The jobs for each contexts are scheduled using the following technique: As mentioned above, each context
+     * has a time slot of \a n milliseconds. At first, as much serial jobs are executed as possible until their
+     * queue is empty or or the time is up. Then, one low priority job is executed. Finally, the PaintJob is
+     * executed (if existant) before switching to the next context.
+     * 
+     * This class implements the Runnable interface, hence, runs in its own thread. Furthermore, it uses 
+     * conditional wait, when there are currently no jobs to process.
+     * 
+     * This class is to be considered as thread-safe.
      */
     class OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public Runnable, public sigslot::has_slots<> {
         friend class tgt::Singleton<OpenGLJobProcessor>;
@@ -63,6 +79,9 @@ namespace TUMVis {
             LowPriorityJob      ///< Low priority jobs have the lowest priority, can be executed at any time. The only guarantee is that thay won't starve.
         };
 
+        /**
+         * Destructor, deletes all unfinished jobs.
+         */
         virtual ~OpenGLJobProcessor();
 
 
@@ -102,7 +121,20 @@ namespace TUMVis {
              */
             PerContextJobQueue() 
                 : _paintJob(0)
-            {
+            {}
+
+            /**
+             * Destructor, deletes all enqueued jobs.
+             */
+            ~PerContextJobQueue() {
+                if (_paintJob != 0)
+                    delete _paintJob;
+
+                AbstractJob* jobToDelete = 0;
+                while (_serialJobs.try_pop(jobToDelete))
+                    delete jobToDelete;
+                while (_lowPriorityJobs.try_pop(jobToDelete))
+                    delete jobToDelete;
             }
 
             AbstractJob* _paintJob;                                 ///< PaintJob of the context

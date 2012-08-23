@@ -29,6 +29,8 @@
 #ifndef TUMVISAPPLICATION_H__
 #define TUMVISAPPLICATION_H__
 
+//#include <vld.h> // Uncomment this for using Visual Leak Detector
+
 #include "sigslot/sigslot.h"
 #include <QApplication>
 #include <utility>

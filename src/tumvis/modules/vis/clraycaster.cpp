@@ -99,6 +99,7 @@ namespace TUMVis {
 
     void CLRaycaster::deinit() {
         CLRtm.dispose(_clProgram);
+        delete _clContext;
         VisualizationProcessor::deinit();
     }
 

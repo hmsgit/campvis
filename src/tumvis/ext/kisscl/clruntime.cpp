@@ -33,6 +33,11 @@ namespace kisscl {
     }
 
     CLRuntime::~CLRuntime() {
+        // delete all command queues
+         for (std::map< std::pair<Context*, Device*>, CommandQueue*>::iterator it = _commandQueues.begin(); it != _commandQueues.end(); ++it)
+             delete it->second;
+
+        // delete all platforms and with it all devices
         for (std::vector<Platform*>::iterator it = _platforms.begin(); it != _platforms.end(); ++it)
             delete *it;
     }

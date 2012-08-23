@@ -41,7 +41,16 @@ namespace TUMVis {
     }
 
     OpenGLJobProcessor::~OpenGLJobProcessor() {
+        // delete all per-context job queues and unfinished jobs
+        for (tbb::concurrent_vector<tgt::GLCanvas*>::const_iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
+            tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
+            if (_contextQueueMap.find(a, *it)) {
+                delete a->second;
+            }
+        }
 
+        _contextQueueMap.clear();
+        _contexts.clear();
     }
 
     void OpenGLJobProcessor::stop() {
@@ -57,6 +66,7 @@ namespace TUMVis {
         while (! _stopExecution) {
             // this is a simple round-robing scheduling between all contexts:
             bool hadWork = false;
+            // TODO: consider only non-empty context queues here
             clock_t maxTimePerContext = 30 / _contexts.size();
 
             for (size_t i = 0; i < _contexts.size(); ++i) {

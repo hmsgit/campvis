@@ -63,8 +63,7 @@ namespace kisscl {
 // = getters and setters ==========================================================================
 
     CommandQueue::~CommandQueue() {
-        if (_id != 0)
-            clReleaseCommandQueue(_id);
+
     }
 
     const Context* CommandQueue::getContext() const {
