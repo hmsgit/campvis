@@ -42,7 +42,7 @@ using namespace TUMVis;
 int main(int argc, char** argv) {
     TumVisApplication app(argc, argv);
     app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
+    app.addVisualizationPipeline("DVRVis", new DVRVis());
 
     app.init();
     int toReturn = app.run();

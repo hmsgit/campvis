@@ -67,6 +67,7 @@ namespace tgt {
     }
 
     void QtContextManager::unlock() {
+        releaseCurrentContext();
         _glMutex.unlock();
     }
 

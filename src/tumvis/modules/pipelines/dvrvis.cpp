@@ -30,6 +30,7 @@
 
 #include "tgt/event/keyevent.h"
 #include "tgt/glcontext.h"
+#include "tgt/qt/qtcontextmanager.h"
 #include "core/datastructures/imagedataconverter.h"
 
 namespace TUMVis {
@@ -97,7 +98,7 @@ namespace TUMVis {
         _eepGenerator._entryImageID.setValue("eep.entry");
         _eepGenerator._exitImageID.setValue("eep.exit");
 
-        _renderTargetID.setValue("dvr.output");
+        _renderTargetID.setValue("drr.output");
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
@@ -127,12 +128,13 @@ namespace TUMVis {
                 if (gl != 0) {
                     _data.addData("eep.input", gl);
                 }
-
-                tgt::Bounds volumeExtent = img->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
             }
+            CtxtMgr.releaseCurrentContext();
+
+            tgt::Bounds volumeExtent = img->getWorldBounds();
+            tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+            _trackballEH->setCenter(volumeExtent.center());
+            _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_eepGenerator);

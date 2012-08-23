@@ -101,7 +101,7 @@ namespace TUMVis {
         GLJobProc.enqueueJob(
             _canvas, 
             new CallMemberFunc1ArgJob<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor),
-            Normal);
+            OpenGLJobProcessor::SerialJob);
         /*tgt::GLContextScopedLock lock(_canvas->getContext());
         executeProcessor(processor);
         glFinish();  // TODO: is glFlush enough or do we need a glFinish here?

@@ -87,9 +87,11 @@ namespace TUMVis {
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
-        processor->lockProperties();
-        processor->process(_data);
-        processor->unlockProperties();
+        if (! processor->getInvalidationLevel().isValid()) {
+            processor->lockProperties();
+            processor->process(_data);
+            processor->unlockProperties();
+        }
     }
 
     InvalidationLevel& AbstractPipeline::getInvalidationLevel() {

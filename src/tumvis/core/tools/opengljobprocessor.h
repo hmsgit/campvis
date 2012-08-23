@@ -32,9 +32,15 @@
 #include "sigslot/sigslot.h"
 #include "tgt/singleton.h"
 #include "tbb/include/tbb/atomic.h"
+#include "tbb/include/tbb/concurrent_queue.h"
+#include "tbb/include/tbb/concurrent_hash_map.h"
+#include "tbb/include/tbb/concurrent_vector.h"
 #include "tbb/include/tbb/compat/condition_variable"
-#include "core/tools/jobpool.h"
+#include "core/tools/job.h"
 #include "core/tools/runnable.h"
+
+#include <ctime>
+
 
 namespace tgt {
     class GLCanvas;
@@ -49,18 +55,19 @@ namespace TUMVis {
         friend class tgt::Singleton<OpenGLJobProcessor>;
 
     public:
-        struct OpenGLJob {
-            OpenGLJob(AbstractJob* job, tgt::GLCanvas* canvas)
-                : _job(job)
-                , _canvas(canvas)
-            {}
-
-            AbstractJob* _job;                  ///< Job to execute
-            tgt::GLCanvas* _canvas;     ///< OpenGL context to execute job in
+        /**
+         * Enumeration of the different priorities of items.
+         */
+        enum JobType {
+            PaintJob,           ///< PaintJobs have the highest priority
+            SerialJob,          ///< SerialJobs have a lower priority than PaintJobs, but are guaranteed to be executed in order.
+            LowPriorityJob      ///< Low priority jobs have the lowest priority, can be executed at any time. The only guarantee is that thay won't starve.
         };
 
         virtual ~OpenGLJobProcessor();
 
+
+        void registerContext(tgt::GLCanvas* context);
 
         /// \see Runnable::stop
         void stop();
@@ -78,19 +85,34 @@ namespace TUMVis {
          * \param   job         Job to enqueue, PriorityPool takes ownership of this Job!
          * \param   priority    Priority of the job to enqueue
          */
-        void enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, PriorityPoolPriority priority);
+        void enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, JobType priority);
 
-        /**
-         * Slot to be called by _jobPool::s_enqueuedJob signal.
-         */
-        void OnEnqueuedJob();
 
     protected:
+        struct PerContextJobQueue {
+            PerContextJobQueue() 
+                : _paintJob(0)
+            {
+            }
+
+            AbstractJob* _paintJob;
+            tbb::concurrent_queue<AbstractJob*> _serialJobs;
+            tbb::concurrent_queue<AbstractJob*> _lowPriorityJobs;
+
+            bool empty() const {
+                return (_serialJobs.empty() && _lowPriorityJobs.empty() && (_paintJob == 0));
+            }
+        };
+
         OpenGLJobProcessor();
 
-        PriorityPool<OpenGLJob> _jobPool;               ///< PriorityPool to process
+        tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*> _contextQueueMap;
+        tbb::concurrent_vector<tgt::GLCanvas*> _contexts;
+
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
+
         tgt::GLCanvas* _currentContext;         ///< current active OpenGL context
+        clock_t _startTimeCurrentContext;       ///<
     };
 
 }

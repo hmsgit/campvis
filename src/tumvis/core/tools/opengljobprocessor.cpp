@@ -36,12 +36,12 @@ namespace TUMVis {
 
     OpenGLJobProcessor::OpenGLJobProcessor()
         : _currentContext(0)
+        , _startTimeCurrentContext(0)
     {
-        _jobPool.s_enqueuedJob.connect(this, &OpenGLJobProcessor::OnEnqueuedJob);
     }
 
     OpenGLJobProcessor::~OpenGLJobProcessor() {
-        _jobPool.s_enqueuedJob.disconnect(this);
+
     }
 
     void OpenGLJobProcessor::stop() {
@@ -55,36 +55,119 @@ namespace TUMVis {
         std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
 
         while (! _stopExecution) {
-            OpenGLJob* job = 0;
-            while (job = _jobPool.dequeueJob()) {
-                if (_currentContext != job->_canvas) {
+            // this is a simple round-robing scheduling between all contexts:
+            bool hadWork = false;
+            clock_t maxTimePerContext = 30 / _contexts.size();
+
+            for (size_t i = 0; i < _contexts.size(); ++i) {
+                _startTimeCurrentContext = clock() * 1000 / CLOCKS_PER_SEC;
+                tgt::GLCanvas* context = _contexts[i];
+
+//                 std::map<tgt::GLCanvas*, PerContextJobQueue*>::const_iterator a = _contextQueueMap.find(context);
+//                 if (a == _contextQueueMap.end()) {
+                tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
+                if (!_contextQueueMap.find(a, context)) {
+                    tgtAssert(false, "Should not reach this: Did not find context in contextQueueMap!");
+                    break;
+                }
+
+                if (a->second->empty())
+                    continue;
+
+                if (_currentContext != context) {
                     if (_currentContext != 0) {
                         glFinish();
                         LGL_ERROR;
                     }
-                    job->_canvas->getContext()->acquire();
-                    _currentContext = job->_canvas;
+                    context->getContext()->acquire();
+                    _currentContext = context;
                 }
 
-                job->_job->execute();
-                delete job->_job;
-                delete job;
+                // now comes the per-context scheduling strategy:
+                // first: perform as much serial jobs as possible:
+                AbstractJob* jobToDo = 0;
+                while ((clock() * 1000 / CLOCKS_PER_SEC) - _startTimeCurrentContext < maxTimePerContext) {
+                    // try fetch a job
+                    if (! a->second->_serialJobs.try_pop(jobToDo)) {
+                        // no job to do, exit the while loop
+                        break;
+                    }
+                    // execute and delete the job
+                    jobToDo->execute();
+                    delete jobToDo;
+                }
+
+                // second: execute one low-prio job if existant
+                if (a->second->_lowPriorityJobs.try_pop(jobToDo)) {
+                    jobToDo->execute();
+                    delete jobToDo;
+                }
+
+                // third: execute paint job
+                if ((jobToDo = a->second->_paintJob) != 0) {
+                    jobToDo->execute();
+                    delete jobToDo;
+                    a->second->_paintJob = 0;
+                }
+
+                // update hadWork flag
+                hadWork = (jobToDo != 0);
             }
 
-//            while (! _stopExecution && _jobPool.empty())
+            if (! hadWork) {
+                CtxtMgr.releaseCurrentContext();
                 _evaluationCondition.wait(lock);
+                _currentContext->getContext()->acquire();
+            }
         }
 
         // release OpenGL context, so that other threads can access it
         CtxtMgr.releaseCurrentContext();
     }
 
-    void OpenGLJobProcessor::enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, PriorityPoolPriority priority) {
-        _jobPool.enqueueJob(new OpenGLJob(job, canvas), priority);
-    }
+    void OpenGLJobProcessor::enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, JobType priority) {
+        // find the corresponding JobQueue for the context and update it:
+        //std::map<tgt::GLCanvas*, PerContextJobQueue*>::const_iterator a = _contextQueueMap.find(canvas);
+        tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
+        if (_contextQueueMap.find(a, canvas)) {
+            switch (priority) {
+            case PaintJob:
+                if (a->second->_paintJob != 0)
+                    delete a->second->_paintJob;
+                a->second->_paintJob = job;
+                break;
+            case SerialJob:
+                a->second->_serialJobs.push(job);
+                break;
+            case LowPriorityJob:
+                a->second->_lowPriorityJobs.push(job);
+                break;
+            default:
+                tgtAssert(false, "Should not reach this - wrong job type!");
+                break;
+            } 
+        }
+        else {
+            tgtAssert(false, "Specified context not found. Context must be registered before they can have jobs.");
+        }
 
-    void OpenGLJobProcessor::OnEnqueuedJob() {
         _evaluationCondition.notify_all();
     }
+
+    void OpenGLJobProcessor::registerContext(tgt::GLCanvas* context) {
+#ifdef TUMVIS_DEBUG
+        //tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
+//         std::map<tgt::GLCanvas*, PerContextJobQueue*>::iterator a = _contextQueueMap.find(context);
+//         if (a != _contextQueueMap.end())
+        tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
+        if (_contextQueueMap.find(a, context))
+            tgtAssert(false, "Contexts shall only be registered once!");
+#endif
+
+        PerContextJobQueue* newQueue = new PerContextJobQueue;
+        _contextQueueMap.insert(std::make_pair(context, newQueue));
+        _contexts.push_back(context);
+    }
+
 }
 

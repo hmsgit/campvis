@@ -191,9 +191,9 @@ namespace TUMVis {
         for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
             (*it)->start();
         }
-        for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
-            it->second->start();
-        }
+//         for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+//             it->second->start();
+//         }
 
         // Start QApplication
         int toReturn = QApplication::exec();
@@ -202,9 +202,9 @@ namespace TUMVis {
         for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
             (*it)->stop();
         }
-        for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
-            it->second->stop();
-        }
+//         for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+//             it->second->stop();
+//         }
 
         return toReturn;
     }
@@ -226,18 +226,18 @@ namespace TUMVis {
 
         // create canvas and painter for the VisPipeline and connect all together
         tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "TUMVis", tgt::ivec2(512, 512));
+        GLJobProc.registerContext(canvas);
         canvas->init();
 
         TumVisPainter* painter = new TumVisPainter(canvas, vp);
         canvas->setPainter(painter, false);
-        CtxtMgr.releaseCurrentContext();
 
         _visualizations.push_back(std::make_pair(vp, painter));
 
-        // TODO: is there a more leightweight method to create a context for the pipeline (just performing off-screen rendering)?
-        tgt::QtThreadedCanvas* evaluationContext = CtxtMgr.createContext(name + "_eval", "", tgt::ivec2(512, 512));
-        vp->setCanvas(evaluationContext);
+        vp->setCanvas(canvas);
         addPipeline(vp);
+
+        CtxtMgr.releaseCurrentContext();
     }
 
 }

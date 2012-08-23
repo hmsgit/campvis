@@ -71,8 +71,6 @@ namespace TUMVis {
         std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
 
         while (! _stopExecution) {
-            if (_dirty)
-                GLJobProc.enqueueJob(getCanvas(), new CallMemberFuncJob<TumVisPainter>(this, &TumVisPainter::paint), Normal);
 
             /*getCanvas()->getContext()->acquire();
             paint();
@@ -90,61 +88,57 @@ namespace TUMVis {
         if (getCanvas() == 0)
             return;
 
-        while (_dirty) {
-            _dirty = false;
+        const tgt::ivec2& size = getCanvas()->getSize();
+        glViewport(0, 0, size.x, size.y);
 
-            const tgt::ivec2& size = getCanvas()->getSize();
-            glViewport(0, 0, size.x, size.y);
+        // try get Data
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> image(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        if (image != 0) {
+            // activate shader
+            _copyShader->activate();
+            _copyShader->setIgnoreUniformLocationError(true);
+            _copyShader->setUniform("_viewportSize", size);
+            _copyShader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(size));
+            _copyShader->setIgnoreUniformLocationError(false);
 
-            // try get Data
-            DataContainer::ScopedTypedData<ImageDataRenderTarget> image(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            if (image != 0) {
-                // activate shader
-                _copyShader->activate();
-                _copyShader->setIgnoreUniformLocationError(true);
-                _copyShader->setUniform("_viewportSize", size);
-                _copyShader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(size));
-                _copyShader->setIgnoreUniformLocationError(false);
+            // bind input textures
+            tgt::TextureUnit colorUnit, depthUnit;
+            image->bind(_copyShader, &colorUnit, &depthUnit);
+            LGL_ERROR;
 
-                // bind input textures
-                tgt::TextureUnit colorUnit, depthUnit;
-                image->bind(_copyShader, &colorUnit, &depthUnit);
-                LGL_ERROR;
-
-                // execute the shader
-                tgt::QuadRenderer::renderQuad();
-                _copyShader->deactivate();
-                LGL_ERROR;
-            }
-            else {
-                // TODO: render some nifty error texture
-                //       so long, we do some dummy rendering
-                tgt::Camera c(tgt::vec3(0.f,0.f,2.f)); 
-                c.look();  
-                glColor3f(1.f, 0.f, 0.f);  
-                tgt::Sphere sphere(.5f, 64, 32);  
-                sphere.render();
-
-                /*
-                // render error texture
-                if (!errorTex_) {
-                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                    return;
-                }
-                glClear(GL_DEPTH_BUFFER_BIT);
-
-                glActiveTexture(GL_TEXTURE0);
-                errorTex_->bind();
-                errorTex_->enable();
-
-                glColor3f(1.f, 1.f, 1.f);
-                renderQuad();
-
-                errorTex_->disable();*/
-            }
+            // execute the shader
+            tgt::QuadRenderer::renderQuad();
+            _copyShader->deactivate();
             LGL_ERROR;
         }
+        else {
+            // TODO: render some nifty error texture
+            //       so long, we do some dummy rendering
+            tgt::Camera c(tgt::vec3(0.f,0.f,2.f)); 
+            c.look();  
+            glColor3f(1.f, 0.f, 0.f);  
+            tgt::Sphere sphere(.5f, 64, 32);  
+            sphere.render();
+
+            /*
+            // render error texture
+            if (!errorTex_) {
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                return;
+            }
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            glActiveTexture(GL_TEXTURE0);
+            errorTex_->bind();
+            errorTex_->enable();
+
+            glColor3f(1.f, 1.f, 1.f);
+            renderQuad();
+
+            errorTex_->disable();*/
+        }
+        LGL_ERROR;
 
         getCanvas()->swap();
     }
@@ -190,12 +184,7 @@ namespace TUMVis {
     }
 
     void TumVisPainter::onRenderTargetChanged() {
-        // TODO:    What happens, if the mutex is still acquired?
-        //          Will the render thread woken up as soon as it is released?
-        if (!_stopExecution) {
-            _dirty = true;
-            _renderCondition.notify_all();
-        }
+        GLJobProc.enqueueJob(getCanvas(), new CallMemberFuncJob<TumVisPainter>(this, &TumVisPainter::paint), OpenGLJobProcessor::PaintJob);
     }
 
     void TumVisPainter::setCanvas(tgt::GLCanvas* canvas) {
