@@ -110,59 +110,66 @@ namespace TUMVis {
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
-                if (_invalidationLevel.isInvalidShader()) {
-                    _clProgram->build();
-                }
+                if (entryPoints->getSize() == exitPoints->getSize()) {
+                    tgt::svec3 dims(entryPoints->getColorTexture()->getDimensions());
 
-                if (img.getDataHandle()->getTimestamp() != _volumeTimestamp) {
-                    WeaklyTypedPointer wtp = img->getWeaklyTypedPointer();
-                    _imgVolume = new kisscl::Image(_clContext, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, img->getSize(), wtp.getClChannelOrder(), wtp.getClChannelType(), wtp._pointer);
-                    _volumeTimestamp = img.getDataHandle()->getTimestamp();
-                }
-                
-                // upload TF
-                const tgt::Texture* tf = _transferFunction.getTF()->getTexture();
-                delete _imgTf;
-                _imgTf = new kisscl::Image(_clContext, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, tf);
+                    if (_invalidationLevel.isInvalidShader()) {
+                        _clProgram->build();
+                    }
 
-                // bind shared textures
-                delete _texEntryPointsColor;
-                _texEntryPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, entryPoints->getColorTexture());
-                delete _texExitPointsColor;
-                _texExitPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture());
-                delete _texOutColor;
-                ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-                _texOutColor = new kisscl::GLTexture(_clContext, CL_MEM_WRITE_ONLY, rt->getColorTexture());
+                    if (img.getDataHandle()->getTimestamp() != _volumeTimestamp) {
+                        WeaklyTypedPointer wtp = img->getWeaklyTypedPointer();
+                        _imgVolume = new kisscl::Image(_clContext, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, img->getSize(), wtp.getClChannelOrder(), wtp.getClChannelType(), wtp._pointer);
+                        _volumeTimestamp = img.getDataHandle()->getTimestamp();
+                    }
+
+                    // upload TF
+                    const tgt::Texture* tf = _transferFunction.getTF()->getTexture();
+                    delete _imgTf;
+                    _imgTf = new kisscl::Image(_clContext, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, tf);
+
+                    // bind shared textures
+                    delete _texEntryPointsColor;
+                    _texEntryPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, entryPoints->getColorTexture());
+                    delete _texExitPointsColor;
+                    _texExitPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture());
+                    delete _texOutColor;
+                    ImageDataRenderTarget* rt = new ImageDataRenderTarget(dims);
+                    _texOutColor = new kisscl::GLTexture(_clContext, CL_MEM_WRITE_ONLY, rt->getColorTexture());
 
 
-                // prepare kernel and stuff command queue
-                kisscl::CommandQueue* cq = CLRtm.getCommandQueue(_clContext);
-                kisscl::Kernel* kernel = _clProgram->getKernel("clraycaster");
+                    // prepare kernel and stuff command queue
+                    kisscl::CommandQueue* cq = CLRtm.getCommandQueue(_clContext);
+                    kisscl::Kernel* kernel = _clProgram->getKernel("clraycaster");
 
-                if (kernel != 0) {
-                    kernel->setArguments(
-                        *_imgVolume, 
-                        *_imgTf, 
-                        *_texEntryPointsColor, 
-                        *_texExitPointsColor, 
-                        *_texOutColor, 
-                        _samplingStepSize.getValue(), 
-                        _transferFunction.getTF()->getIntensityDomain().x, 
-                        _transferFunction.getTF()->getIntensityDomain().y);
+                    if (kernel != 0) {
+                        kernel->setArguments(
+                            *_imgVolume, 
+                            *_imgTf, 
+                            *_texEntryPointsColor, 
+                            *_texExitPointsColor, 
+                            *_texOutColor, 
+                            _samplingStepSize.getValue(), 
+                            _transferFunction.getTF()->getIntensityDomain().x, 
+                            _transferFunction.getTF()->getIntensityDomain().y);
 
-                    cq->enqueueAcquireGLObject(kisscl::GLTextureList(*_texEntryPointsColor, *_texExitPointsColor, *_texOutColor));
-                    cq->enqueueKernel(kernel, entryPoints->getSize().xy());
-                    cq->enqueueReleaseGLObject(kisscl::GLTextureList(*_texEntryPointsColor, *_texExitPointsColor, *_texOutColor));
+                        cq->enqueueAcquireGLObject(kisscl::GLTextureList(*_texEntryPointsColor, *_texExitPointsColor, *_texOutColor));
+                        cq->enqueueKernel(kernel, dims.xy());
+                        cq->enqueueReleaseGLObject(kisscl::GLTextureList(*_texEntryPointsColor, *_texExitPointsColor, *_texOutColor));
 
-                    cq->finish();
+                        cq->finish();
+                    }
+                    else {
+                        LERROR("Kernel 'clraycaster' not found");
+                        return;
+                    }
+
+                    LGL_ERROR;
+                    data.addData(_targetImageID.getValue(), rt);
                 }
                 else {
-                    LERROR("Kernel 'clraycaster' not found");
-                    return;
+                    LERROR("Entry-/Exitpoints texture size does not match.");
                 }
-
-                LGL_ERROR;
-                data.addData(_targetImageID.getValue(), rt);
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");
