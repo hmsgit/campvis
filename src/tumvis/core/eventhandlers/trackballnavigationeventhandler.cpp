@@ -119,4 +119,8 @@ namespace TUMVis {
         _trackball->setCenter(center);
     }
 
+    void TrackballNavigationEventHandler::setViewportSize(const tgt::ivec2& viewportSize) {
+        _trackball->setViewprtSize(viewportSize);
+    }
+
 }

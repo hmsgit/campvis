@@ -105,6 +105,9 @@ namespace TUMVis {
         _drrraycater.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _simpleRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _clRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+
+        _trackballEH->setViewportSize(_renderTargetSize.getValue());
+        _renderTargetSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
     }
 
     void DVRVis::execute() {
@@ -146,12 +149,16 @@ namespace TUMVis {
             lockGLContextAndExecuteProcessor(&_simpleRaycaster);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid() || !_clRaycaster.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_clRaycaster);
+            //lockGLContextAndExecuteProcessor(&_clRaycaster);
         }
     }
 
     const std::string DVRVis::getName() const {
         return "DVRVis";
+    }
+
+    void DVRVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
+        _trackballEH->setViewportSize(_renderTargetSize.getValue());
     }
 
 }

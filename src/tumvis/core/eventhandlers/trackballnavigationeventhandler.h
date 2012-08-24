@@ -36,6 +36,9 @@
 namespace TUMVis {
     class CameraProperty;
 
+    /**
+     * Wrapper to adapt a CameraProperty to the tgt::Trackball interface.
+     */
     class CamPropNavigationWrapper : public tgt::IHasCamera {
     public:
         CamPropNavigationWrapper(CameraProperty* camProp);
@@ -84,8 +87,24 @@ namespace TUMVis {
          */
         virtual void execute(tgt::Event* e);
 
+        /**
+         * Sets the viewport size to \a viewportSize.
+         * \param viewportSize  The new viewport size.
+         */
+        void setViewportSize(const tgt::ivec2& viewportSize);
+
+        /**
+         * Reinitalizes the camera by the given parameters.
+         * \param   position    New camera position
+         * \param   focus       New camera focus
+         * \param   upVector    New camera up vector
+         */
         void reinitializeCamera(const tgt::vec3& position, const tgt::vec3& focus, const tgt::vec3& upVector);
 
+        /**
+         * Sets the trackball's center.
+         * \param   center  The new trackball's center.
+         */
         void setCenter(const tgt::vec3& center);
 
     protected:

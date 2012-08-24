@@ -63,6 +63,8 @@ namespace TUMVis {
          **/
         virtual void execute();
 
+        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+
     protected:
         CameraProperty _camera;
         MhdImageReader _imageReader;
