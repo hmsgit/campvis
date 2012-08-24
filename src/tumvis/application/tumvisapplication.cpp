@@ -191,9 +191,6 @@ namespace TUMVis {
         for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
             (*it)->start();
         }
-//         for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
-//             it->second->start();
-//         }
 
         // Start QApplication
         int toReturn = QApplication::exec();
@@ -202,9 +199,6 @@ namespace TUMVis {
         for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
             (*it)->stop();
         }
-//         for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
-//             it->second->stop();
-//         }
 
         return toReturn;
     }

@@ -83,6 +83,9 @@ namespace TUMVis {
                 if (a->second->empty())
                     continue;
 
+                // we will have work, so update the flag
+                hadWork = true;
+
                 // perform context switch if necessary
                 if (_currentContext != context) {
                     if (_currentContext != 0) {
@@ -119,9 +122,6 @@ namespace TUMVis {
                     delete jobToDo;
                     a->second->_paintJob = 0;
                 }
-
-                // update hadWork flag
-                hadWork = (jobToDo != 0);
             }
 
             if (! hadWork) {

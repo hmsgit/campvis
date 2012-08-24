@@ -23,7 +23,7 @@
 #include "kisscl/stringutils.h"
 
 namespace kisscl {
-    std::string clErrorToString(cl_int err) {
+    std::string clErrorToString(cl_int err, const char* code) {
         std::string toReturn;
         switch(err) {
             case(CL_SUCCESS): toReturn = "CL_SUCCESS"; break;
@@ -78,17 +78,19 @@ namespace kisscl {
         }
         std::ostringstream tmp;
         tmp << toReturn << " (" << (int)err << ")";
+        if (code != 0)
+            tmp << ", caused by: " << code;
         return tmp.str();
     }
 
-    cl_int _lCLError(cl_int err, int line, const char* file) {
+    cl_int _lCLError(cl_int err, int line, const char* file, const char* code) {
         if (err != CL_SUCCESS) {
             std::ostringstream tmp2, loggerCat;
             if (file) {
                 tmp2 << " File: " << file << "@" << line;
                 loggerCat << "cl-error:" << file << ':' << line;
             }
-            LogMgr.log(loggerCat.str(), tgt::Error, clErrorToString(err), tmp2.str());
+            LogMgr.log(loggerCat.str(), tgt::Error, clErrorToString(err, code), tmp2.str());
         }
         return err;
     }

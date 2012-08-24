@@ -142,14 +142,14 @@ namespace TUMVis {
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_eepGenerator);
         }
-        if (! _eepGenerator.getInvalidationLevel().isValid() || !_drrraycater.getInvalidationLevel().isValid()) {
+        if (!_drrraycater.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_drrraycater);
         }
-        if (! _eepGenerator.getInvalidationLevel().isValid() || !_simpleRaycaster.getInvalidationLevel().isValid()) {
+        if (!_simpleRaycaster.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_simpleRaycaster);
         }
-        if (! _eepGenerator.getInvalidationLevel().isValid() || !_clRaycaster.getInvalidationLevel().isValid()) {
-            //lockGLContextAndExecuteProcessor(&_clRaycaster);
+        if (!_clRaycaster.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(&_clRaycaster);
         }
     }
 
@@ -159,6 +159,8 @@ namespace TUMVis {
 
     void DVRVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
         _trackballEH->setViewportSize(_renderTargetSize.getValue());
+        float ratio = static_cast<float>(_renderTargetSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().y);
+        _camera.setWindowRatio(ratio);
     }
 
 }

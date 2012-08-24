@@ -51,6 +51,12 @@ namespace TUMVis {
         virtual ~CameraProperty();
 
 
+        /**
+         * Sets the camera's window ratio.
+         * \param r     The new camera's window ratio (viewport.x / viewport.y)
+         */
+        void setWindowRatio(float r);
+
     protected:
 
         static const std::string loggerCat_;

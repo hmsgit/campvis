@@ -235,7 +235,7 @@ namespace kisscl {
      * \param   err OpenCL error code.
      * \return  String representation of the error code.
      */
-    std::string clErrorToString(cl_int err);
+    std::string clErrorToString(cl_int err, const char* code);
 
     /**
      * Helper function for debugging OpenCL errors.
@@ -244,9 +244,9 @@ namespace kisscl {
      * \param   file    code file
      * \return  err
      */
-    cl_int _lCLError(cl_int err, int line, const char* file);
+    cl_int _lCLError(cl_int err, int line, const char* file, const char* code);
 
-    #define LCL_ERROR(err) _lCLError(err, __LINE__, __FILE__)
+    #define LCL_ERROR(err) _lCLError(err, __LINE__, __FILE__, #err)
 
 
     /**

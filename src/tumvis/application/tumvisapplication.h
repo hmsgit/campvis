@@ -99,8 +99,8 @@ namespace TUMVis {
 
         /**
          * Adds a visualization pipeline (i.e. a pipeline that needs a OpenGL context).
-         * For each added pipeline, two OpenGL contexts will be created (one for the evaluation, 
-         * one for the rendering).
+         * For each added pipeline, an OpenGL context will be created (for the evaluation 
+         * and rendering).
          * 
          * \note    You do \b not need to call addPipeline.
          * \param   name    Name of the OpenGL context to create for the pipeline.
