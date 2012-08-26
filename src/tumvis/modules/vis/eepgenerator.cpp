@@ -93,7 +93,7 @@ namespace TUMVis {
                 glEnable(GL_CULL_FACE);
 
                 // create entry points texture
-                ImageDataRenderTarget* entrypoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16F);
+                ImageDataRenderTarget* entrypoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
                 entrypoints->activate();
 
                 glDepthFunc(GL_LESS);
@@ -105,7 +105,7 @@ namespace TUMVis {
                 entrypoints->deactivate();
 
                 // create exit points texture
-                ImageDataRenderTarget* exitpoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16F);
+                ImageDataRenderTarget* exitpoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
                 exitpoints->activate();
 
                 glDepthFunc(GL_GREATER);

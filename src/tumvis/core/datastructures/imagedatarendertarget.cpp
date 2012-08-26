@@ -73,6 +73,9 @@ namespace TUMVis {
                 case GL_RGB:
                     _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
                     break;
+                case GL_RGB16F_ARB:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                    break;
                 case GL_RGBA:
                     _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
                     break;
@@ -82,17 +85,14 @@ namespace TUMVis {
                 case GL_RGBA16:
                     _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
                     break;
-                case GL_RGB16F_ARB:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                case GL_RGBA16F:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16F, GL_FLOAT, tgt::Texture::LINEAR);
                     break;
-                case GL_RGBA16F_ARB:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
-                    break;
-                case GL_RGBA32F_ARB:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA32F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                case GL_RGBA32F:
+                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::LINEAR);
                     break;
                 default:
-                    LERROR("Unknown internal format!");
+                    tgtAssert(false, "Unknown internal format!");
             }
             _colorTexture->uploadTexture();
             _colorTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
@@ -113,7 +113,7 @@ namespace TUMVis {
                 break;
     #endif
             default:
-                LERROR("Unknown internal depth format!");
+                tgtAssert(false, "Unknown internal depth format!");
             }
             _depthTexture->uploadTexture();
             _depthTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
