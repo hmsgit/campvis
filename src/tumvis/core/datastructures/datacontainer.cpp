@@ -66,6 +66,7 @@ namespace TUMVis {
             }
         }
         s_dataAdded(name, dh);
+        s_changed();
     }
 
     bool DataContainer::hasData(const std::string& name) const {
@@ -90,4 +91,17 @@ namespace TUMVis {
             _handles.erase(it);
         }
     }
+
+    std::vector< std::pair< std::string, const DataHandle*> > DataContainer::getDataHandlesCopy() const {
+        std::vector< std::pair< std::string, const DataHandle*> > toReturn;
+        toReturn.reserve(_handles.size());
+
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
+        for (std::map<std::string, const DataHandle*>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
+            toReturn.push_back(std::make_pair(it->first, new DataHandle(*(it->second))));
+        }
+
+        return toReturn;
+    }
+
 }

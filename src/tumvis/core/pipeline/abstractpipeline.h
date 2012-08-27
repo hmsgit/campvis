@@ -82,10 +82,16 @@ namespace TUMVis {
         virtual void execute() = 0;
 
         /**
-         * Returns the DataContainer of this pipeline
+         * Returns the DataContainer of this pipeline, const version.
          * \return _data
          */
         const DataContainer& getDataContainer() const;
+
+        /**
+         * Returns the DataContainer of this pipeline, non-const version.
+         * \return _data
+         */
+        DataContainer& getDataContainer();
 
         /**
          * Returns the list of processors of this pipeline.

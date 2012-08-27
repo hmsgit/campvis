@@ -26,84 +26,73 @@
 // 
 // ================================================================================================
 
-#ifndef PIPELINETREEWIDGET_H__
-#define PIPELINETREEWIDGET_H__
+#ifndef DATACONTAINERTREEWIDGET_H__
+#define DATACONTAINERTREEWIDGET_H__
 
 #include <QAbstractItemModel>
 #include <QTreeWidget>
 #include <QList>
 #include <QVariant>
 
-#include "core/pipeline/abstractpipeline.h"
-#include "core/pipeline/abstractprocessor.h"
 #include "application/tools/treeitem.h"
-#include <vector>
 
 namespace TUMVis {
+    class DataContainer;
+    class DataHandle;
 
 // = TreeModel items ==============================================================================
     
     /**
      * Specialization for root TreeItems.
      */
-    class PipelineTreeRootItem : public TreeItem {
+    class DataContainerTreeRootItem : public TreeItem {
     public:
-        PipelineTreeRootItem(TreeItem* parent = 0);
-        virtual ~PipelineTreeRootItem();
+        DataContainerTreeRootItem(TreeItem* parent = 0);
+        virtual ~DataContainerTreeRootItem();
 
         /// \see TreeItem::getData()
         virtual QVariant getData(int column, int role) const;
-    };
-
-    /**
-     * Specialization for TreeItems hosting an AbstracPipeline.
-     */
-    class PipelineTreeItem : public TreeItem {
-    public:
-        PipelineTreeItem(AbstractPipeline* pipeline, TreeItem* parent);
-        virtual ~PipelineTreeItem();
-
-        /// \see TreeItem::getData()
-        virtual QVariant getData(int column, int role) const;
-
-        /// \see TreeItem::setData()
-        virtual bool setData(int column, int role, const QVariant& value) const;
-
-    private:
-        AbstractPipeline* _pipeline;        ///< Base pipeline
     };
 
     /**
      * Specialization for TreeItems hosting an AbstractProcessor.
      */
-    class ProcessorTreeItem : public TreeItem {
+    class DataHandleTreeItem : public TreeItem {
     public:
-        ProcessorTreeItem(AbstractProcessor* processor, TreeItem* parent);
-        virtual ~ProcessorTreeItem();
+        /**
+         * Creates a new TreeItem for a DataHandle
+         * \param   dataHandle  The DataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
+         * \param   name        Name of the DataHandle
+         * \param   parent      Parent TreeItem
+         */
+        DataHandleTreeItem(const DataHandle* dataHandle, const std::string& name, TreeItem* parent);
+
+        /**
+         * Destructor, deletes the DataHandle
+         */
+        virtual ~DataHandleTreeItem();
 
         /// \see TreeItem::getData()
         virtual QVariant getData(int column, int role) const;
 
-        /// \see TreeItem::setData()
-        virtual bool setData(int column, int role, const QVariant& value) const;
-
     private:
-        AbstractProcessor* _processor;      ///< Base processor
+        const DataHandle* _dataHandle;      ///< Base DataHandle
+        std::string _name;                  ///< Name of that DataHandle
     };
 
 // = TreeModel ====================================================================================
 
     /**
-     * QItemModel for displaying a list of pipelines and their processors in the PipelineTreeWidget.
+     * QItemModel for displaying a list of pipelines and their processors in the DataContainerTreeWidget.
      */
-    class PipelineTreeModel : public QAbstractItemModel {
+    class DataContainerTreeModel : public QAbstractItemModel {
         Q_OBJECT
 
     public:
-        PipelineTreeModel(QObject *parent = 0);
-        ~PipelineTreeModel();
+        DataContainerTreeModel(QObject *parent = 0);
+        ~DataContainerTreeModel();
 
-        void setData(const std::vector<AbstractPipeline*>& pipelines);
+        void setData(const DataContainer* dataContainer);
 
         QVariant data(const QModelIndex &index, int role) const;
 
@@ -132,20 +121,20 @@ namespace TUMVis {
     /**
      * Qt widget for showing a list of pipelines and their processors in a QTreeView.
      */
-    class PipelineTreeWidget : public QTreeView {
+    class DataContainerTreeWidget : public QTreeView {
         Q_OBJECT;
 
     public:
         /**
-         * Creates a new PipelineTreeWidget.
+         * Creates a new DataContainerTreeWidget.
          * \param   parent  Parent widget
          */
-        PipelineTreeWidget(QWidget* parent = 0);
+        DataContainerTreeWidget(QWidget* parent = 0);
 
         /**
          * Destructor
          */
-        virtual ~PipelineTreeWidget();
+        virtual ~DataContainerTreeWidget();
 
 
     public slots:
@@ -153,7 +142,7 @@ namespace TUMVis {
          * Updates the data in the tree view by the given collection of pipelines \a pipelines.
          * \param   pipelines   
          */
-        void update(const std::vector<AbstractPipeline*>& pipelines);
+        void update(const DataContainer* dataContainer);
 
 
     private:
@@ -162,9 +151,10 @@ namespace TUMVis {
          */
         void setupWidget();
 
-        PipelineTreeModel* _treeModel;      ///< Data model for the TreeView.
+        DataContainerTreeModel* _treeModel;      ///< Data model for the TreeView.
 
     };
+
 }
 
-#endif // PIPELINETREEWIDGET_H__
+#endif // DATACONTAINERTREEWIDGET_H__

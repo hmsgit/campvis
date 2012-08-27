@@ -35,6 +35,8 @@
 
 #include <string>
 #include <map>
+#include <utility>
+#include <vector>
 
 namespace TUMVis {
     class AbstractData;
@@ -180,10 +182,21 @@ namespace TUMVis {
         void removeData(const std::string& name);
 
         /**
+         * Returns a copy of the current list of DataHandles.
+         * \note    Use with caution, this method is to be considered as slow, as it includes several 
+         *          copies and locks the whole DataContainer during execution.
+         * \return  A list of pairs (name, DataHandle). The caller has to take ownership of the passed pointers!
+         */
+        std::vector< std::pair< std::string, const DataHandle*> > getDataHandlesCopy() const;
+
+        /**
          * Signal emitted when data has been added to this DataContainer (this includes also data being replaced).
          * First parameter is the name of the added data, second parameter contains a DataHandle to the new data.
          */
         sigslot::signal2<const std::string&, const DataHandle*> s_dataAdded;
+
+        /// Signal emitted when list of DataHandles has changed.
+        sigslot::signal0<> s_changed;
 
     private:
         std::map<std::string, const DataHandle*> _handles;

@@ -37,9 +37,12 @@
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QPushButton>
 #include <vector>
 
 namespace TUMVis {
+    class DataContainerInspectorWidget;
+
     /**
      * Main Window for the TUMVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
@@ -65,6 +68,10 @@ namespace TUMVis {
          */
         void onPipelinesChanged();
 
+        /**
+         * Size hint for the default window size
+         * \return QSize(800, 450)
+         */
         QSize sizeHint() const;
 
     signals:
@@ -80,6 +87,16 @@ namespace TUMVis {
          */
         void onPipelineWidgetItemClicked(const QModelIndex& index);
 
+        /**
+         * Slot to be called when _btnExecute was clicked.
+         */
+        void onBtnExecuteClicked();
+
+        /**
+         * Slot to be called when _btnShowDataContainerInspector was clicked.
+         */
+        void onBtnShowDataContainerInspectorClicked();
+
     private:
         /**
          * Setup Qt GUI stuff
@@ -91,6 +108,13 @@ namespace TUMVis {
         QWidget* _centralWidget;                            ///< Central widget of the MainWindow
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
+        DataContainerInspectorWidget* _dcInspectorWidget;   ///< Widget for inspecting the DataContainer of the selected pipeline.
+
+        QPushButton* _btnExecute;                           ///< Button to execute the selected pipeline/processor
+        QPushButton* _btnShowDataContainerInspector;        ///< Button to show the DataContainerInspector for the selected pipeline
+
+        AbstractPipeline* _selectedPipeline;                ///< currently selected pipeline
+        AbstractProcessor* _selectedProcessor;              ///< currently selected processor
     };
 }
 

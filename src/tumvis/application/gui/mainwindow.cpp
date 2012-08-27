@@ -30,6 +30,7 @@
 
 #include "tgt/assert.h"
 #include "application/tumvisapplication.h"
+#include "application/gui/datacontainerinspectorwidget.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 
@@ -38,7 +39,14 @@ namespace TUMVis {
     MainWindow::MainWindow(TumVisApplication* application)
         : QMainWindow()
         , _application(application)
+        , _centralWidget(0)
         , _pipelineWidget(0)
+        , _propCollectionWidget(0)
+        , _dcInspectorWidget(0)
+        , _btnExecute(0)
+        , _btnShowDataContainerInspector(0)
+        , _selectedPipeline(0)
+        , _selectedProcessor(0)
     {
         tgtAssert(_application != 0, "Application must not be 0.");
         setup();
@@ -50,16 +58,29 @@ namespace TUMVis {
 
     void MainWindow::setup() {
         _centralWidget = new QWidget(this);
-        QHBoxLayout* boxLayout = new QHBoxLayout();
-        boxLayout->setSpacing(4);
+        QHBoxLayout* mainLayout = new QHBoxLayout();
+        mainLayout->setSpacing(4);
 
         _pipelineWidget = new PipelineTreeWidget(_centralWidget);
-        boxLayout->addWidget(_pipelineWidget);
+        mainLayout->addWidget(_pipelineWidget);
+
+        QWidget* rightWidget = new QWidget(_centralWidget);
+        mainLayout->addWidget(rightWidget);
+
+        QVBoxLayout* rightLayout = new QVBoxLayout();
+        rightLayout->setSpacing(4);
+        rightWidget->setLayout(rightLayout);
+
+        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", rightWidget);
+        rightLayout->addWidget(_btnExecute);
+
+        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", rightWidget);
+        rightLayout->addWidget(_btnShowDataContainerInspector);
 
         _propCollectionWidget = new PropertyCollectionWidget(_centralWidget);
-        boxLayout->addWidget(_propCollectionWidget);
+        rightLayout->addWidget(_propCollectionWidget);
 
-        _centralWidget->setLayout(boxLayout);
+        _centralWidget->setLayout(mainLayout);
         setCentralWidget(_centralWidget);
 
         connect(
@@ -71,6 +92,12 @@ namespace TUMVis {
         connect(
             this, SIGNAL(updatePropCollectionWidget(HasPropertyCollection*)),
             _propCollectionWidget, SLOT(updatePropCollection(HasPropertyCollection*)));
+        connect(
+            _btnExecute, SIGNAL(clicked()), 
+            this, SLOT(onBtnExecuteClicked()));
+        connect(
+            _btnShowDataContainerInspector, SIGNAL(clicked()), 
+            this, SLOT(onBtnShowDataContainerInspectorClicked()));
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
     }
 
@@ -84,6 +111,13 @@ namespace TUMVis {
             QVariant item = index.data(Qt::UserRole);
             HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
             emit updatePropCollectionWidget(ptr);
+
+            if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
+            	_selectedPipeline = pipeline;
+                _selectedProcessor = 0;
+                if (_dcInspectorWidget != 0)
+                    onBtnShowDataContainerInspectorClicked();
+            }
         }
         else {
             emit updatePropCollectionWidget(0);
@@ -92,6 +126,26 @@ namespace TUMVis {
 
     QSize MainWindow::sizeHint() const {
         return QSize(800, 450);
+    }
+
+    void MainWindow::onBtnExecuteClicked() {
+        if (_selectedProcessor != 0 && _selectedPipeline != 0) {
+            // this is not as trivial as it seems:
+            // We need the pipeline, probably an OpenGL context...
+        }
+        else if (_selectedPipeline != 0) {
+            
+        }
+    }
+
+    void MainWindow::onBtnShowDataContainerInspectorClicked() {
+        if (_selectedPipeline != 0) {
+            if (_dcInspectorWidget == 0) {
+                _dcInspectorWidget = new DataContainerInspectorWidget();
+            }
+            _dcInspectorWidget->setDataContainer(&(_selectedPipeline->getDataContainer()));
+            _dcInspectorWidget->show();
+        }
     }
 
 }

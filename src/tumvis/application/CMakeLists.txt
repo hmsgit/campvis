@@ -8,16 +8,20 @@ FILE(GLOB TUMVIS_APPLICATION_SOURCES
     *.cpp
     gui/*.cpp
     gui/properties/*.cpp
+    tools/*.cpp
 )
 
 FILE(GLOB TUMVIS_APPLICATION_HEADERS
     *.h
     gui/*.h
     gui/properties/*.h
+    tools/*.h
 )
 
 SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/mainwindow.h
+    gui/datacontainerinspectorwidget.h
+    gui/datacontainertreewidget.h
     gui/pipelinetreewidget.h
     gui/qtcolortools.h
     gui/properties/abstractpropertywidget.h

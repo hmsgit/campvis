@@ -42,41 +42,6 @@ namespace TUMVis {
 
 // = TreeModel items ==============================================================================
 
-    TreeItem::TreeItem(TreeItem* parent /*= 0*/)
-        : _parent(parent)
-    {
-        if (_parent != 0)
-            _parent->_children.append(this);
-    }
-
-    TreeItem::~TreeItem() {
-        qDeleteAll(_children);
-    }
-
-    TreeItem* TreeItem::getParent() {
-        return _parent;
-    }
-
-    TreeItem* TreeItem::getChild(int row) {
-        return _children.value(row);
-    }
-
-    int TreeItem::getRow() {
-        if (_parent)
-            return _parent->_children.indexOf(const_cast<TreeItem*>(this));
-
-        return 0;
-    }
-
-    int TreeItem::getChildCount() {
-        return _children.count();
-    }
-
-    bool TreeItem::setData(int column, int role, const QVariant& value) const {
-        return false;
-    }
-
-
     PipelineTreeItem::PipelineTreeItem(AbstractPipeline* pipeline, TreeItem* parent)
         : TreeItem(parent)
         , _pipeline(pipeline)
@@ -158,11 +123,11 @@ namespace TUMVis {
         return false;
     }
 
-    RootTreeItem::RootTreeItem(TreeItem* parent /*= 0*/)
+    PipelineTreeRootItem::PipelineTreeRootItem(TreeItem* parent /*= 0*/)
         : TreeItem(parent)
     {}
 
-    QVariant RootTreeItem::getData(int column, int role) const {
+    QVariant PipelineTreeRootItem::getData(int column, int role) const {
         if (role == Qt::DisplayRole) {
             if (column == COLUMN_NAME)
                 return QVariant(QString("Pipeline/Processor"));
@@ -175,7 +140,7 @@ namespace TUMVis {
         return QVariant();
     }
 
-    RootTreeItem::~RootTreeItem() {
+    PipelineTreeRootItem::~PipelineTreeRootItem() {
 
     }
 
@@ -183,7 +148,7 @@ namespace TUMVis {
 
     PipelineTreeModel::PipelineTreeModel(QObject *parent /*= 0*/)
         : QAbstractItemModel(parent)
-        , _rootItem(new RootTreeItem(0))
+        , _rootItem(new PipelineTreeRootItem(0))
     {
     }
 
@@ -280,7 +245,7 @@ namespace TUMVis {
 
     void PipelineTreeModel::setData(const std::vector<AbstractPipeline*>& pipelines) {
         delete _rootItem;
-        _rootItem = new RootTreeItem();
+        _rootItem = new PipelineTreeRootItem();
 
         for (std::vector<AbstractPipeline*>::const_iterator pipe = pipelines.begin(); pipe != pipelines.end(); ++pipe) {
             PipelineTreeItem* pipeti = new PipelineTreeItem(*pipe, _rootItem);

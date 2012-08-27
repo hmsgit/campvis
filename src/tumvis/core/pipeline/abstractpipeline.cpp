@@ -84,6 +84,10 @@ namespace TUMVis {
         return _data;
     }
 
+    DataContainer& AbstractPipeline::getDataContainer() {
+        return _data;
+    }
+
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
