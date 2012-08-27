@@ -33,7 +33,6 @@
 #include "tgt/logmanager.h"
 #include "tbb/include/tbb/spin_mutex.h"
 #include "tbb/include/tbb/mutex.h"
-#include "tbb/include/tbb/compat/condition_variable"
 #include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"
@@ -106,6 +105,18 @@ namespace TUMVis {
          */
         InvalidationLevel& getInvalidationLevel();
 
+        /**
+         * Gets the flag whether this pipeline is currently enabled.
+         * \return _enabled
+         */
+        bool getEnabled() const;
+
+        /**
+         * Sets the flag whether this pipeline is currently enabled.
+         * \param   enabled     New flag whether this pipeline is currently enabled.
+         */
+        void setEnabled(bool enabled);
+
         /// Signal being emitted when this pipeline has been invalidated.
         sigslot::signal0<> s_PipelineInvalidated;
 
@@ -133,6 +144,7 @@ namespace TUMVis {
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
         InvalidationLevel _invalidationLevel;               ///< current invalidation level
+        bool _enabled;                                      ///< flag whether this pipeline is currently enabled
 
         tbb::spin_mutex _localMutex;                        ///< mutex for altering local members
         tbb::mutex _evaluationMutex;                        ///< mutex for the evaluation of this pipeline

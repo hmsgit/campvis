@@ -76,4 +76,12 @@ namespace TUMVis {
         applyInvalidationLevel(prop->getInvalidationLevel());
     }
 
+    bool AbstractProcessor::getEnabled() const {
+        return _enabled;
+    }
+
+    void AbstractProcessor::setEnabled(bool enabled) {
+        _enabled = enabled;
+    }
+
 }

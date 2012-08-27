@@ -34,6 +34,12 @@
 
 namespace TUMVis {
 
+    namespace {
+        const int COLUMN_NAME = 0;
+        const int COLUMN_ENABLED_STATE = 1;
+        const int COLUMN_DESCRIPTION = 2;
+    }
+
 // = TreeModel items ==============================================================================
 
     TreeItem::TreeItem(TreeItem* parent /*= 0*/)
@@ -65,7 +71,12 @@ namespace TUMVis {
     int TreeItem::getChildCount() {
         return _children.count();
     }
-    
+
+    bool TreeItem::setData(int column, int role, const QVariant& value) const {
+        return false;
+    }
+
+
     PipelineTreeItem::PipelineTreeItem(AbstractPipeline* pipeline, TreeItem* parent)
         : TreeItem(parent)
         , _pipeline(pipeline)
@@ -76,8 +87,15 @@ namespace TUMVis {
     QVariant PipelineTreeItem::getData(int column, int role) const {
         switch (role) {
             case Qt::DisplayRole:
-                if (column == 0)
+                if (column == COLUMN_NAME)
                     return QVariant(QString::fromStdString(_pipeline->getName()));
+                else
+                    return QVariant();
+            case Qt::CheckStateRole:
+                if (column == COLUMN_ENABLED_STATE)
+                    return _pipeline->getEnabled() ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
+                else
+                    return QVariant();
             case Qt::UserRole:
                 return qVariantFromValue(static_cast<void*>(_pipeline));
             default:
@@ -86,6 +104,16 @@ namespace TUMVis {
     }
 
     PipelineTreeItem::~PipelineTreeItem() {
+    }
+
+    bool PipelineTreeItem::setData(int column, int role, const QVariant& value) const {
+        if (column == COLUMN_ENABLED_STATE) {
+            if (role == Qt::CheckStateRole) {
+                _pipeline->setEnabled(value == Qt::Checked ? true : false);
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -99,10 +127,17 @@ namespace TUMVis {
     QVariant ProcessorTreeItem::getData(int column, int role) const {
         switch (role) {
             case Qt::DisplayRole:
-                if (column == 0)
+                if (column == COLUMN_NAME)
                     return QVariant(QString::fromStdString(_processor->getName()));
-                if (column == 1)
+                else if (column == COLUMN_DESCRIPTION)
                     return QVariant(QString::fromStdString(_processor->getDescription()));
+                else
+                    return QVariant();
+            case Qt::CheckStateRole:
+                if (column == COLUMN_ENABLED_STATE)
+                    return _processor->getEnabled() ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
+                else
+                    return QVariant();
             case Qt::UserRole:
                 return qVariantFromValue(static_cast<void*>(_processor));
             default:
@@ -113,16 +148,28 @@ namespace TUMVis {
     ProcessorTreeItem::~ProcessorTreeItem() {
     }
 
+    bool ProcessorTreeItem::setData(int column, int role, const QVariant& value) const {
+        if (column == COLUMN_ENABLED_STATE) {
+            if (role == Qt::CheckStateRole) {
+                _processor->setEnabled(value == Qt::Checked ? true : false);
+                return true;
+            }
+        }
+        return false;
+    }
+
     RootTreeItem::RootTreeItem(TreeItem* parent /*= 0*/)
         : TreeItem(parent)
     {}
 
     QVariant RootTreeItem::getData(int column, int role) const {
         if (role == Qt::DisplayRole) {
-            if (column == 0)
+            if (column == COLUMN_NAME)
                 return QVariant(QString("Pipeline/Processor"));
-            else if (column == 1)
+            else if (column == COLUMN_DESCRIPTION)
                 return QVariant(QString("Description"));
+            else if (column == COLUMN_ENABLED_STATE)
+                return QVariant(QString("Enabled"));
         }
 
         return QVariant();
@@ -152,11 +199,28 @@ namespace TUMVis {
         return item->getData(index.column(), role);
     }
 
+    bool PipelineTreeModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+        if (!index.isValid())
+            return false;
+
+        TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+        return item->setData(index.column(), role, value);
+    }
+
     Qt::ItemFlags PipelineTreeModel::flags(const QModelIndex &index) const {
         if (!index.isValid())
             return 0;
 
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+        switch (index.column()) {
+            case COLUMN_DESCRIPTION:
+                return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+            case COLUMN_NAME:
+                return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+            case COLUMN_ENABLED_STATE:
+                return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+        }
+
+        return 0;
     }
 
     QVariant PipelineTreeModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const {
@@ -211,7 +275,7 @@ namespace TUMVis {
     }
 
     int PipelineTreeModel::columnCount(const QModelIndex &parent /*= QModelIndex()*/) const {
-        return 2;
+        return 3;
     }
 
     void PipelineTreeModel::setData(const std::vector<AbstractPipeline*>& pipelines) {
@@ -226,7 +290,6 @@ namespace TUMVis {
             }
         }
     }
-
 
 // = PipelineTreeWidget ===========================================================================
 
@@ -243,6 +306,8 @@ namespace TUMVis {
     void PipelineTreeWidget::update(const std::vector<AbstractPipeline*>& pipelines) {
         _treeModel->setData(pipelines);
         expandAll();
+        resizeColumnToContents(0);
+        resizeColumnToContents(1);
     }
 
     void PipelineTreeWidget::setupWidget() {
@@ -250,7 +315,6 @@ namespace TUMVis {
         tgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
 
         setModel(_treeModel);
-        resizeColumnToContents(0);
    }
 
 }

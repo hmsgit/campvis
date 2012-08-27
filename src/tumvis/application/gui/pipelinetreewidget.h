@@ -68,6 +68,16 @@ namespace TUMVis {
         virtual QVariant getData(int column, int role) const = 0;
 
         /**
+         * Sets the data at the given column to \a value using the given role.
+         * Overwrite if needed, default implementation will only return false.
+         * \param   column  Column
+         * \param   role    Access role
+         * \param   value   Value to set
+         * \return  false
+         */
+        virtual bool setData(int column, int role, const QVariant& value) const;
+
+        /**
          * Returns the parent TreeItem
          * \return _parent
          */
@@ -120,6 +130,9 @@ namespace TUMVis {
         /// \see TreeItem::getData()
         virtual QVariant getData(int column, int role) const;
 
+        /// \see TreeItem::setData()
+        virtual bool setData(int column, int role, const QVariant& value) const;
+
     private:
         AbstractPipeline* _pipeline;        ///< Base pipeline
     };
@@ -134,6 +147,9 @@ namespace TUMVis {
 
         /// \see TreeItem::getData()
         virtual QVariant getData(int column, int role) const;
+
+        /// \see TreeItem::setData()
+        virtual bool setData(int column, int role, const QVariant& value) const;
 
     private:
         AbstractProcessor* _processor;      ///< Base processor
@@ -154,6 +170,15 @@ namespace TUMVis {
         void setData(const std::vector<AbstractPipeline*>& pipelines);
 
         QVariant data(const QModelIndex &index, int role) const;
+
+        /**
+         * Sets the data at index \a index to \a value.
+         * \param   index   position where to set data
+         * \param   value   new data
+         * \param   role    edit role
+         **/
+        bool setData(const QModelIndex& index, const QVariant& value, int role);
+
         Qt::ItemFlags flags(const QModelIndex &index) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
         QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;

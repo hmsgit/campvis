@@ -47,7 +47,8 @@ namespace TUMVis {
         std::unique_lock<tbb::mutex> lock(_pipeline->_evaluationMutex);
 
         while (! _stopExecution) {
-            _pipeline->execute();
+            if (_pipeline->getEnabled())
+                _pipeline->execute();
 
             while (!_stopExecution && _pipeline->getInvalidationLevel().isValid())
                 _evaluationCondition.wait(lock);

@@ -123,6 +123,18 @@ namespace TUMVis {
          * \param il    Invalidation level to apply.
          */
         void applyInvalidationLevel(InvalidationLevel il);
+
+        /**
+         * Gets the flag whether this processor is currently enabled.
+         * \return _enabled
+         */
+        bool getEnabled() const;
+
+        /**
+         * Sets the flag whether this processor is currently enabled.
+         * \param   enabled     New flag whether this processor is currently enabled.
+         */
+        void setEnabled(bool enabled);
         
         /**
          * Locks all properties in the processor's PropertyCollection and marks them as "in use".
@@ -149,7 +161,7 @@ namespace TUMVis {
 
     protected:
         InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
-
+        bool _enabled;                              ///< flag whether this processor is currently enabled
 
 
         static const std::string loggerCat_;

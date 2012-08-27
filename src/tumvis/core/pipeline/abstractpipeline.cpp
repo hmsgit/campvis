@@ -87,7 +87,7 @@ namespace TUMVis {
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
-        if (! processor->getInvalidationLevel().isValid()) {
+        if (processor->getEnabled() && !processor->getInvalidationLevel().isValid()) {
             processor->lockProperties();
             processor->process(_data);
             processor->unlockProperties();
@@ -100,6 +100,14 @@ namespace TUMVis {
 
     const std::vector<AbstractProcessor*>& AbstractPipeline::getProcessors() const {
         return _processors;
+    }
+
+    bool AbstractPipeline::getEnabled() const {
+        return _enabled;
+    }
+
+    void AbstractPipeline::setEnabled(bool enabled) {
+        _enabled = enabled;
     }
 
 }
