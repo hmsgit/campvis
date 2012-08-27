@@ -33,6 +33,7 @@
 
 uniform vec2 _viewportSizeRCP;
 uniform bool _jitterEntryPoints;
+uniform float _jitterStepSizeMultiplier;
 
 uniform Texture2D _entryPoints;         // ray entry points
 uniform Texture2D _entryPointsDepth;    // ray entry points depth
@@ -62,7 +63,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     direction = normalize(direction);
 
     if (_jitterEntryPoints)
-        jitterEntryPoint(entryPoint, direction, _samplingStepSize);
+        jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     while (t < tend) {
         vec3 samplePosition = entryPoint.rgb + t * direction;

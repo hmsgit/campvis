@@ -33,6 +33,7 @@
 
 uniform vec2 _viewportSizeRCP;
 uniform bool _jitterEntryPoints;
+uniform float _jitterStepSizeMultiplier;
 
 uniform Texture2D _entryPoints;          // ray entry points
 uniform Texture2D _exitPoints;           // ray exit points
@@ -61,7 +62,7 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
     direction = normalize(direction);
 
     if (_jitterEntryPoints)
-        jitterEntryPoint(entryPoint, direction, _samplingStepSize);
+        jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     while (t < tend) {
         vec3 samplePosition = entryPoint.rgb + t * direction;

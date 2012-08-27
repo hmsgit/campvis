@@ -52,6 +52,7 @@ namespace TUMVis {
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f)
         , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
+        , _jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
         , _fragmentShaderFilename(fragmentShaderFileName)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
@@ -63,6 +64,7 @@ namespace TUMVis {
         addProperty(&_transferFunction);
         addProperty(&_samplingStepSize);
         addProperty(&_jitterEntryPoints);
+        addProperty(&_jitterStepSizeMultiplier);
     }
 
     RaycastingProcessor::~RaycastingProcessor() {
@@ -100,6 +102,7 @@ namespace TUMVis {
                 _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_jitterEntryPoints", _jitterEntryPoints.getValue());
+                _shader->setUniform("_jitterStepSizeMultiplier", _jitterStepSizeMultiplier.getValue());
                 _shader->setUniform("_samplingStepSize", _samplingStepSize.getValue());
 
                 const tgt::Camera& cam = _camera.getValue();

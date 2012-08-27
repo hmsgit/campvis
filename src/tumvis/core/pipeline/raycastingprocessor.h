@@ -103,6 +103,7 @@ namespace TUMVis {
         TransferFunctionProperty _transferFunction;     ///< Transfer function
         FloatProperty _samplingStepSize;                ///< Ray casting step size
         BoolProperty _jitterEntryPoints;                ///< Flag whether to jitter the entry points
+        FloatProperty _jitterStepSizeMultiplier;        ///< Step size multiplier for entry points jitter
 
     protected:
         /**
