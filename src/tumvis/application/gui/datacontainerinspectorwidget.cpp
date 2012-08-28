@@ -66,7 +66,6 @@ namespace TUMVis {
     }
 
     void DataContainerInspectorWidget::onDataContainerChanged() {
-
     }
 
     QSize DataContainerInspectorWidget::sizeHint() const {
@@ -77,13 +76,20 @@ namespace TUMVis {
         if (index.isValid()) {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
-            DataHandle* ptr = static_cast<DataHandle*>(item.value<void*>());
-            _lblTimestamp->setText("Timestamp: " + QString::number(ptr->getTimestamp()));
 
-//             QModelIndex idxName(index.row(), 0, index.data(), index.model());
-//             QVariant name = idxName.data(Qt::DisplayRole);
-//             _lblName->setText("Name: " + name.toString());
+            delete _selectedDataHandle;
+            _selectedDataHandle = new DataHandle(*static_cast<DataHandle*>(item.value<void*>()));
+
+            QModelIndex idxName = index.sibling(index.row(), 0);
+            _selectedDataHandleName = idxName.data(Qt::DisplayRole).toString();
         }
+        else {
+            delete _selectedDataHandle;
+            _selectedDataHandle = 0;
+            _selectedDataHandleName = "";
+        }
+
+        updateInfoWidget();
     }
 
     void DataContainerInspectorWidget::setupGUI() {
@@ -106,9 +112,9 @@ namespace TUMVis {
         _infoWidgetLayout->addWidget(_lblTimestamp);
 
         _canvas = CtxtMgr.createContext("DataContainerInspector", "", tgt::ivec2(128, 128), tgt::GLCanvas::RGBA, _infoWidget);
-        _infoWidgetLayout->addWidget(_canvas);
+        _infoWidgetLayout->addWidget(_canvas, 1);
 
-        _mainLayout->addWidget(_infoWidget);
+        _mainLayout->addWidget(_infoWidget, 1);
 
         connect(
             _dctWidget, SIGNAL(clicked(const QModelIndex&)), 
@@ -116,7 +122,14 @@ namespace TUMVis {
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {
-
+        if (_selectedDataHandle != 0) {
+            _lblTimestamp->setText("Timestamp: " + QString::number(_selectedDataHandle->getTimestamp()));
+            _lblName->setText("Name: " + _selectedDataHandleName);
+        }
+        else {
+            _lblTimestamp->setText("Timestamp: ");
+            _lblName->setText("Name: ");
+        }
     }
 
 }

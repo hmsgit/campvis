@@ -269,6 +269,9 @@ namespace TUMVis {
     }
 
     void PipelineTreeWidget::update(const std::vector<AbstractPipeline*>& pipelines) {
+        // clear selection before setting the new data or we will encounter random crashes...
+        selectionModel()->clear();
+
         _treeModel->setData(pipelines);
         expandAll();
         resizeColumnToContents(0);

@@ -41,6 +41,7 @@ namespace TUMVis {
 
     DataHandle::DataHandle(const DataHandle& rhs) 
         : _data(rhs._data)
+        , _timestamp(rhs._timestamp)
     {
         init();
     }
@@ -49,6 +50,7 @@ namespace TUMVis {
         if (_data != rhs._data) {
             AbstractData* oldData = _data;
             _data = rhs._data;
+            _timestamp = rhs._timestamp;
             init();
             if (oldData) {
                 oldData->removeReference();

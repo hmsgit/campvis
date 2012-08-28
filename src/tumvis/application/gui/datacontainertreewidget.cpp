@@ -209,7 +209,13 @@ namespace TUMVis {
     }
 
     void DataContainerTreeWidget::update(const DataContainer* dataContainer) {
+        // clear selection before setting the new data or we will encounter random crashes...
+        selectionModel()->clear();
+
+        // set new data
         _treeModel->setData(dataContainer);
+
+        // adjust view
         expandAll();
         resizeColumnToContents(0);
         resizeColumnToContents(1);

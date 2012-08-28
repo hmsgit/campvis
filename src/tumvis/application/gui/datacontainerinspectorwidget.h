@@ -40,10 +40,16 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QString>
 
 class QModelIndex;
 
+namespace tgt {
+    class Texture;
+}
+
 namespace TUMVis {
+    class AbstractPipeline;
     class DataContainer;
     class DataContainerTreeWidget;
     class DataHandle;
@@ -98,8 +104,9 @@ namespace TUMVis {
          */
         void updateInfoWidget();
 
-        DataContainer* _dataContainer;            ///< The DataContainer this widget is inspecting
+        DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         const DataHandle* _selectedDataHandle;          ///< The currently selected DataHandle
+        QString _selectedDataHandleName;                ///< The name of the currently selected DataHandle
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
         tgt::QtThreadedCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents
