@@ -104,4 +104,17 @@ namespace TUMVis {
         return toReturn;
     }
 
+    std::map<std::string, const DataHandle*> DataContainer::getHandlesCopy() const {
+        std::map<std::string, const DataHandle*> toReturn;
+        std::map<std::string, const DataHandle*>::const_iterator hint = toReturn.begin();
+
+        // copy map while also deep copying the DataHandles
+        tbb::spin_mutex::scoped_lock lock(_localMutex);
+        for (std::map<std::string, const DataHandle*>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
+            hint = toReturn.insert(hint, std::make_pair(it->first, new DataHandle(*(it->second))));
+        }
+
+        return toReturn;
+    }
+
 }

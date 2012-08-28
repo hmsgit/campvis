@@ -104,6 +104,11 @@ namespace TUMVis {
             const tgt::TextureUnit& texUnit, 
             const std::string& texUniform = "_texture") const;
 
+        /**
+         * Gets the OpenGL texture.
+         * \return  _texture
+         */
+        const tgt::Texture* getTexture() const;
 
 
     protected:

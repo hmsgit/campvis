@@ -128,4 +128,8 @@ namespace TUMVis {
         shader->setIgnoreUniformLocationError(tmp);
     }
 
+    const tgt::Texture* ImageDataGL::getTexture() const {
+        return _texture;
+    }
+
 }

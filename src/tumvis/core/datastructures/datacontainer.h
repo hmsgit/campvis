@@ -190,6 +190,14 @@ namespace TUMVis {
         std::vector< std::pair< std::string, const DataHandle*> > getDataHandlesCopy() const;
 
         /**
+         * Returns a copy of the current map of DataHandles.
+         * \note    Use with caution, this method is to be considered as slow, as it includes several 
+         *          copies and locks the whole DataContainer during execution.
+         * \return  A copy of the current handles map. The caller has to take ownership of the passed pointers!
+         */
+        std::map<std::string, const DataHandle*> getHandlesCopy() const;
+
+        /**
          * Signal emitted when data has been added to this DataContainer (this includes also data being replaced).
          * First parameter is the name of the added data, second parameter contains a DataHandle to the new data.
          */
