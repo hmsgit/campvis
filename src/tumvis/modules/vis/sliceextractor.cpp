@@ -28,7 +28,6 @@
 
 #include "sliceextractor.h"
 #include "tgt/logmanager.h"
-#include "tgt/quadrenderer.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
@@ -38,6 +37,8 @@
 #include "core/datastructures/imagedataconverter.h"
 
 #include "core/classification/simpletransferfunction.h"
+
+#include "core/tools/quadrenderer.h"
 
 namespace TUMVis {
     const std::string SliceExtractor::loggerCat_ = "TUMVis.modules.vis.SliceExtractor";
@@ -88,7 +89,9 @@ namespace TUMVis {
 
                 rt->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                tgt::QuadRenderer::renderQuad();
+                _shader->setAttributeLocation(0, "in_Position");
+                _shader->setAttributeLocation(1, "in_TexCoords");
+                QuadRdr.renderQuad();
                 rt->deactivate();
 
                 _shader->deactivate();

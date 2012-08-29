@@ -28,7 +28,7 @@
 
 #include "simpleraycaster.h"
 
-#include "tgt/quadrenderer.h"
+#include "core/tools/quadrenderer.h"
 #include "core/datastructures/imagedatarendertarget.h"
 
 namespace TUMVis {
@@ -51,7 +51,7 @@ namespace TUMVis {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDepthFunc(GL_ALWAYS);
-        tgt::QuadRenderer::renderQuad();
+        QuadRdr.renderQuad();
         LGL_ERROR;
 
         rt->deactivate();

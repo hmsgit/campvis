@@ -43,7 +43,7 @@ struct Texture2D {
 vec4 getElement2D(in Texture2D tex, in vec2 texCoords) {
     vec2 texCoordsNormalized = texCoords * tex._sizeRCP;
     //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoordsNormalized, 0.0, 1.0)).xy;
-    return texture2D(tex._texture, texCoordsNormalized);
+    return texture(tex._texture, texCoordsNormalized);
 }
 
 /**
@@ -54,5 +54,5 @@ vec4 getElement2D(in Texture2D tex, in vec2 texCoords) {
  */
 vec4 getElement2DNormalized(in Texture2D tex, in vec2 texCoords) {
     //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoords, 0.0, 1.0)).xy;
-    return texture2D(tex._texture, texCoords);
+    return texture(tex._texture, texCoords);
 }

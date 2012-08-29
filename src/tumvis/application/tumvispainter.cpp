@@ -33,13 +33,14 @@
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/qt/qtglcontext.h"
 #include "tgt/qt/qtcontextmanager.h"
-#include "tgt/quadrenderer.h"
+
 #include "tgt/quadric.h"
 
 #include "core/datastructures/imagedatarendertarget.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
+#include "core/tools/quadrenderer.h"
 
 namespace TUMVis {
     const std::string TumVisPainter::loggerCat_ = "TUMVis.core.TumVisPainter";
@@ -108,7 +109,9 @@ namespace TUMVis {
             LGL_ERROR;
 
             // execute the shader
-            tgt::QuadRenderer::renderQuad();
+            _copyShader->setAttributeLocation(0, "in_Position");
+            _copyShader->setAttributeLocation(1, "in_TexCoords");
+            QuadRdr.renderQuad();
             _copyShader->deactivate();
             LGL_ERROR;
         }

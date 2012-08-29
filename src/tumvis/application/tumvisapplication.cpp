@@ -43,6 +43,7 @@
 #include "application/tumvispainter.h"
 #include "application/gui/mainwindow.h"
 #include "core/tools/opengljobprocessor.h"
+#include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/pipeline/pipelineevaluator.h"
@@ -110,6 +111,8 @@ namespace TUMVis {
             LERROR("Your system does not support GLSL Shader Version 1.30, which is mandatory. TUMVis will probably not work as intendet.");
         }
 
+        QuadRenderer::init();
+
         if (_useOpenCL) {
             kisscl::CLRuntime::init();
         }
@@ -162,6 +165,8 @@ namespace TUMVis {
 
             // deinit OpenGL and tgt
             tgt::deinitGL();
+
+            QuadRenderer::deinit();
 
             if (_useOpenCL) {
                 kisscl::CLRuntime::deinit();

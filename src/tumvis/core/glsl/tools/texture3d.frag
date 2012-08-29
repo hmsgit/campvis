@@ -46,7 +46,7 @@ struct Texture3D {
 vec4 getElement3D(in Texture3D tex, in vec3 texCoords) {
     vec3 texCoordsNormalized = texCoords * tex._sizeRCP;
     //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoordsNormalized, 0.0, 1.0)).xy;
-    return texture3D(tex._texture, texCoordsNormalized);
+    return texture(tex._texture, texCoordsNormalized);
 }
 
 /**
@@ -57,5 +57,5 @@ vec4 getElement3D(in Texture3D tex, in vec3 texCoords) {
  */
 vec4 getElement3DNormalized(in Texture3D tex, in vec3 texCoords) {
     //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoords, 0.0, 1.0)).xy;
-    return texture3D(tex._texture, texCoords);
+    return texture(tex._texture, texCoords);
 }

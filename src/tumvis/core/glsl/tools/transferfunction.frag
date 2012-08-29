@@ -55,7 +55,7 @@ float mapIntensityToTFDomain(in TFParameters p, in float intensity) {
  */
 vec4 lookupTF(in TFParameters p, in sampler1D tex, in float intensity) {
     intensity = mapIntensityToTFDomain(p, intensity);
-    return texture1D(tex, intensity);
+    return texture(tex, intensity);
 }
 
 /**
@@ -69,5 +69,5 @@ vec4 lookupTF(in TFParameters p, in sampler1D tex, in float intensity) {
  */
 vec4 lookupTF(in TFParameters p, in sampler2D tex, in float intensity, in float y) {
     intensity = mapIntensityToTFDomain(p, intensity);
-    return texture2D(tex, vec2(intensity, y));
+    return texture(tex, vec2(intensity, y));
 }

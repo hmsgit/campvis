@@ -26,14 +26,9 @@
 // 
 // ================================================================================================
 
-#version 330
-
-in vec3 in_Position;
-in vec3 in_TexCoords;
-
-out vec3 ex_TexCoords;
-
 void main() {
-    gl_Position = vec4(in_Position, 1.0);
-    ex_TexCoords = in_TexCoords;
+    // just pass everything through to fragment shader.
+    gl_TexCoord[0] = gl_MultiTexCoord0;
+    gl_Position = ftransform();
+    gl_FrontColor = gl_Color;
 }

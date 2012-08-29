@@ -60,7 +60,7 @@ namespace TUMVis {
 
     void EEPGenerator::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/eepgenerator.frag", "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough_deprecated.vert", "modules/vis/eepgenerator.frag", "", false);
     }
 
     void EEPGenerator::deinit() {

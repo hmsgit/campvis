@@ -26,6 +26,9 @@
 // 
 // ================================================================================================
 
+#version 330
+
+out vec4 out_Color;
 
 #include "tools/texture2d.frag"
 
@@ -36,6 +39,9 @@ uniform Texture2D _depthTexture;
 
 void main() {
     vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
-    gl_FragData[0] = getElement2DNormalized(_colorTexture, fragCoord);
+    out_Color = getElement2DNormalized(_colorTexture, fragCoord);
     gl_FragDepth = getElement2DNormalized(_depthTexture, fragCoord).z;
+
+//    gl_FragData[0] = getElement2DNormalized(_colorTexture, fragCoord);
+//    gl_FragDepth = getElement2DNormalized(_depthTexture, fragCoord).z;
 }

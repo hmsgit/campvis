@@ -71,9 +71,9 @@ namespace TUMVis {
 
         virtual void process(DataContainer& data);
 
-        GenericProperty<std::string> _sourceImageID;    ///< image ID for input image
-        GenericProperty<std::string> _entryImageID;     ///< image ID for output entry points image
-        GenericProperty<std::string> _exitImageID;      ///< image ID for output exit points image
+        StringProperty _sourceImageID;    ///< image ID for input image
+        StringProperty _entryImageID;     ///< image ID for output entry points image
+        StringProperty _exitImageID;      ///< image ID for output exit points image
 
         CameraProperty _camera;
 
