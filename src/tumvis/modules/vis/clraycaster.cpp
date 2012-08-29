@@ -29,7 +29,6 @@
 #include "clraycaster.h"
 
 #include "tgt/logmanager.h"
-#include "tgt/quadrenderer.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
