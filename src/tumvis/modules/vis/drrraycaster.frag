@@ -26,6 +26,10 @@
 // 
 // ================================================================================================
 
+#version 330
+
+out vec4 out_Color;         ///< outgoing fragment color
+
 #include "tools/raycasting.frag"
 #include "tools/texture2d.frag"
 #include "tools/texture3d.frag"
@@ -129,6 +133,6 @@ void main() {
         discard;
     } else {
         //fragCoords are lying inside the boundingbox
-        gl_FragData[0] = raycastDRR(frontPos, backPos);
+        out_Color = raycastDRR(frontPos, backPos);
     }
 }

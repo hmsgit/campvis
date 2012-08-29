@@ -72,7 +72,7 @@ namespace TUMVis {
 
     void RaycastingProcessor::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough_deprecated.vert", _fragmentShaderFilename, "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", _fragmentShaderFilename, "", false);
         _shader->setHeaders(generateHeader());
         _shader->rebuild();
     }
