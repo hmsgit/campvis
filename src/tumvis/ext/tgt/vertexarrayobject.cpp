@@ -1,4 +1,4 @@
-#include "vertexattribute.h"
+#include "vertexarrayobject.h"
 
 #include "tgt/assert.h"
 #include "tgt/buffer.h"
