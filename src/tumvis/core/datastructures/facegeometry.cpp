@@ -38,18 +38,12 @@ namespace TUMVis {
     const std::string FaceGeometry::loggerCat_ = "TUMVis.core.datastructures.FaceGeometry";
 
     FaceGeometry::FaceGeometry(const std::vector<tgt::vec3>& vertices, const std::vector<tgt::vec3>& textureCoordinates /*= std::vector<tgt::vec3>()*/, const std::vector<tgt::vec4>& colors /*= std::vector<tgt::vec4>()*/, const std::vector<tgt::vec3>& normals /*= std::vector<tgt::vec3>() */)
-        : AbstractData()
+        : GeometryData()
         , _vertices(vertices)
         , _textureCoordinates(textureCoordinates)
         , _colors(colors)
         , _normals(normals)
         , _faceNormal(0.f)
-        , _buffersInitialized(false)
-        , _verticesBuffer(0)
-        , _texCoordsBuffer(0)
-        , _colorsBuffer(0)
-        , _normalsBuffer(0)
-        , _vao(0)
     {
         tgtAssert(textureCoordinates.empty() || textureCoordinates.size() == vertices.size(), "Texture coordinates vector must be either empty or of the same size as the vertex vector.");
         tgtAssert(colors.empty() || colors.size() == vertices.size(), "Colors vector must be either empty or of the same size as the vertex vector.");
@@ -62,11 +56,7 @@ namespace TUMVis {
     }
 
     FaceGeometry::~FaceGeometry() {
-        delete _vao;
-        delete _verticesBuffer;
-        delete _texCoordsBuffer;
-        delete _colorsBuffer;
-        delete _normalsBuffer;
+
     }
 
     FaceGeometry* FaceGeometry::clone() const {
@@ -113,30 +103,32 @@ namespace TUMVis {
             vao.addVertexAttribute(tgt::VertexArrayObject::ColorsAttribute, _colorsBuffer);
         if (_normalsBuffer)
             vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _normalsBuffer);
+        LGL_ERROR;
 
         if (_vertices.size() > 2)
             glDrawArrays(GL_POLYGON, 0, _vertices.size());
         else
             glDrawArrays(GL_LINES, 0, _vertices.size());
+        LGL_ERROR;
     }
 
     void FaceGeometry::createGLBuffers() {
         if (! _buffersInitialized) {
             try {
-                _verticesBuffer = new tgt::BufferObject();
-                _verticesBuffer->data(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW, &_vertices.front(), _vertices.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                _verticesBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                _verticesBuffer->data(&_vertices.front(), _vertices.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
 
                 if (! _textureCoordinates.empty()) {
-                    _texCoordsBuffer = new tgt::BufferObject();
-                    _texCoordsBuffer->data(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW, &_textureCoordinates.front(), _textureCoordinates.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _texCoordsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                    _texCoordsBuffer->data(&_textureCoordinates.front(), _textureCoordinates.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
                 }
                 if (! _colors.empty()) {
-                    _colorsBuffer = new tgt::BufferObject();
-                    _colorsBuffer->data(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW, &_colors.front(), _colors.size() * sizeof(tgt::vec4), tgt::BufferObject::FLOAT, 4);
+                    _colorsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                    _colorsBuffer->data(&_colors.front(), _colors.size() * sizeof(tgt::vec4), tgt::BufferObject::FLOAT, 4);
                 }
                 if (! _normals.empty()) {
-                    _normalsBuffer = new tgt::BufferObject();
-                    _normalsBuffer->data(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW, &_normals.front(), _normals.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                    _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
                 }
             }
             catch (tgt::Exception& e) {
@@ -145,6 +137,7 @@ namespace TUMVis {
                 return;
             }
 
+            LGL_ERROR;
             _buffersInitialized = true;
         }
     }

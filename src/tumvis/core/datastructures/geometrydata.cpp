@@ -27,15 +27,76 @@
 // ================================================================================================
 
 #include "geometrydata.h"
+#include "tgt/buffer.h"
+#include "tgt/vertexarrayobject.h"
 
 namespace TUMVis {
 
     GeometryData::GeometryData() 
         : AbstractData()
+        , _buffersInitialized(false)
+        , _verticesBuffer(0)
+        , _texCoordsBuffer(0)
+        , _colorsBuffer(0)
+        , _normalsBuffer(0)
     {
     }
 
+    GeometryData::GeometryData(const GeometryData& rhs)
+        : AbstractData(rhs)
+        , _buffersInitialized(false)
+        , _verticesBuffer(0)
+        , _texCoordsBuffer(0)
+        , _colorsBuffer(0)
+        , _normalsBuffer(0)
+    {
+
+    }
+
     GeometryData::~GeometryData() {
+        delete _verticesBuffer;
+        delete _texCoordsBuffer;
+        delete _colorsBuffer;
+        delete _normalsBuffer;
+    }
+
+    GeometryData& GeometryData::operator=(const GeometryData& rhs) {
+        if (this == &rhs)
+            return *this;
+
+        AbstractData::operator=(rhs);
+
+        // delete old VBOs and null pointers
+        delete _verticesBuffer;
+        _verticesBuffer = 0;
+
+        delete _texCoordsBuffer;
+        _texCoordsBuffer = 0;
+
+        delete _colorsBuffer;
+        _colorsBuffer = 0;
+
+        delete _normalsBuffer;
+        _normalsBuffer = 0;
+
+        _buffersInitialized = false;
+        return *this;
+    }
+
+    const tgt::BufferObject* GeometryData::getVerticesBuffer() const {
+        return _verticesBuffer;
+    }
+
+    const tgt::BufferObject* GeometryData::getTextureCoordinatesBuffer() const {
+        return _texCoordsBuffer;
+    }
+
+    const tgt::BufferObject* GeometryData::getColorsBuffer() const {
+        return _colorsBuffer;
+    }
+
+    const tgt::BufferObject* GeometryData::getNormalsBuffer() const {
+        return _normalsBuffer;
     }
 
 }

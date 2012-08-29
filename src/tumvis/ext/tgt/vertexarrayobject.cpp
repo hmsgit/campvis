@@ -18,7 +18,7 @@ namespace tgt {
 
         _bufferObject->bindToVertexAttribute(this);
         // Todo: implement normalized flag if needed
-        _bufferObject->bind(BufferObject::ARRAY_BUFFER);
+        _bufferObject->bind();
         glVertexAttribPointer(_index, _bufferObject->getElementSize(), _bufferObject->getBaseType(), false, _stride, reinterpret_cast<void*>(_offset));
     }
 

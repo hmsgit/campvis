@@ -44,9 +44,11 @@ namespace tgt {
 
         /**
          * Creates a new OpenGL buffer object and generates an ID for it.
+         * \param   target      Target type of buffer object.
+         * \param   usage       Usage of data.
          * \throw   tgt::Exception when OpenGL buffer generation failed.
          */
-        BufferObject() throw (tgt::Exception);
+        BufferObject(TargetType target, UsageType usage) throw (tgt::Exception);
 
         /**
          * Disposes and deletes the OpenGL buffer object.
@@ -71,28 +73,24 @@ namespace tgt {
          * Binds the buffer object to the current OpenGL context.
          * \param target    Target type of buffer object
          */
-        void bind(TargetType target);
+        void bind();
 
         /**
          * Binds the buffer, reserves space on the OpenGL device and initializes it with the given data in \a data.
-         * \param target        Target type of buffer object.
-         * \param usage         Usage of data.
          * \param data          Pointer to host memory containing the data.
          * \param numBytes      Size of \a data in bytes.
          * \param baseType      Base data type
          * \param elementSize   Number of elements per element (must be 1, 2, 3 or 4)
          */
-        void data(TargetType target, UsageType usage, const void* data, size_t numBytes, BaseType baseType, size_t elementSize);
+        void data(const void* data, size_t numBytes, BaseType baseType, size_t elementSize);
 
         /**
          * Updates a subset of the buffer's data.
-         * \param target    Target type of buffer object.
-         * \param usage     Usage of data.
          * \param offset    Offset where to start writing in buffer's data in bytes.
          * \param data      Pointer to host memory containing the data.
          * \param numBytes  Size of \a data in bytes.
          */
-        void subdata(TargetType target, UsageType usage, size_t offset, const void* data, size_t numBytes);
+        void subdata(size_t offset, const void* data, size_t numBytes);
 
 
     protected:
@@ -110,6 +108,8 @@ namespace tgt {
 
         GLuint _id;                         ///< OpenGL ID of this buffer
 
+        TargetType _targetType;             ///< Target type of buffer object
+        UsageType _usageType;               ///< Usage type of data.
         BaseType _baseType;                 ///< Base data type
         size_t _elementSize;                ///< Number of elements per element *lol* (must be 1, 2, 3 or 4)
 

@@ -31,6 +31,10 @@
 
 #include "core/datastructures/abstractdata.h"
 
+namespace tgt {
+    class BufferObject;
+}
+
 namespace TUMVis {
     /**
      * Abstract base class for data handled by a DataHandle and stored in a DataContainer.
@@ -41,12 +45,44 @@ namespace TUMVis {
     public:
         GeometryData();
 
+        GeometryData(const GeometryData& rhs);
+
+        /**
+         * Destructor, deletes VBOs/VAO if necessary. Hence, needs a valid OpenGL context
+         */
         virtual ~GeometryData();
+
+        GeometryData& operator=(const GeometryData& rhs);
 
         virtual AbstractData* clone() const = 0;
 
+        /**
+         * Renders this GeometryData.
+         * Must be called from a valid OpenGL context.
+         */
+        virtual void render() = 0;
+
+        /**
+         * Creates the OpenGL VBOs and the VAO for this geometry.
+         * Must be called from a valid OpenGL context.
+         */
+        virtual void createGLBuffers() = 0;
+
+        const tgt::BufferObject* getVerticesBuffer() const;
+
+        const tgt::BufferObject* getTextureCoordinatesBuffer() const;
+
+        const tgt::BufferObject* getColorsBuffer() const;
+
+        const tgt::BufferObject* getNormalsBuffer() const;
+
     protected:
 
+        bool _buffersInitialized;
+        tgt::BufferObject* _verticesBuffer;
+        tgt::BufferObject* _texCoordsBuffer;
+        tgt::BufferObject* _colorsBuffer;
+        tgt::BufferObject* _normalsBuffer;
     };
 
 }

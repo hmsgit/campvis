@@ -27,15 +27,11 @@
 #ifndef FACEGEOMETRY_H__
 #define FACEGEOMETRY_H__
 
+#include "tgt/bounds.h"
 #include "tgt/vector.h"
-#include "core/datastructures/abstractdata.h"
+#include "core/datastructures/geometrydata.h"
 
 #include <vector>
-
-namespace tgt {
-    class BufferObject;
-    class VertexArrayObject;
-}
 
 namespace TUMVis {
 
@@ -52,7 +48,7 @@ namespace TUMVis {
      * \note    Like all Geometry classes FaceGeometry has value-sematics: Once created, the 
      *          vertices/colors/etc. cannot be altered anymore.
      */
-    class FaceGeometry : public AbstractData {
+    class FaceGeometry : public GeometryData {
     public:
         /**
          * Creates a new FaceGeometry.
@@ -116,18 +112,16 @@ namespace TUMVis {
          * Renders this FaceGeometry.
          * Must be called from a valid OpenGL context.
          */
-        void render();
+        virtual void render();
 
         /**
          * Creates the OpenGL VBOs and the VAO for this face's geometry.
          * Must be called from a valid OpenGL context.
          */
-        void createGLBuffers();
+        virtual void createGLBuffers();
+
 
     protected:
-        FaceGeometry(const FaceGeometry& rhs);
-        FaceGeometry& operator=(const FaceGeometry& rhs);
-
         std::vector<tgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
         std::vector<tgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
         std::vector<tgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
@@ -135,15 +129,9 @@ namespace TUMVis {
 
         tgt::vec3 _faceNormal;                          ///< The normal vector of this face.
 
-        bool _buffersInitialized;
-        tgt::BufferObject* _verticesBuffer;
-        tgt::BufferObject* _texCoordsBuffer;
-        tgt::BufferObject* _colorsBuffer;
-        tgt::BufferObject* _normalsBuffer;
-        tgt::VertexArrayObject* _vao;
-
         static const std::string loggerCat_;
     };
+
 
 }
 

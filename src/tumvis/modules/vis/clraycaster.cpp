@@ -92,9 +92,11 @@ namespace TUMVis {
         VisualizationProcessor::init();
 
         _clContext = CLRtm.createGlSharingContext();
-        _clProgram = CLRtm.loadProgram(_clContext, "modules/vis/clraycaster.cl");
-        _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable");
-        _clProgram->build();
+        if (_clContext != 0) {
+            _clProgram = CLRtm.loadProgram(_clContext, "modules/vis/clraycaster.cl");
+            _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable");
+            _clProgram->build();
+        }
     }
 
     void CLRaycaster::deinit() {
@@ -104,6 +106,9 @@ namespace TUMVis {
     }
 
     void CLRaycaster::process(DataContainer& data) {
+        if (_clContext == 0 || _clProgram == 0) 
+            return;
+
         DataContainer::ScopedTypedData<ImageDataLocal> img(data, _sourceImageID.getValue());
         DataContainer::ScopedTypedData<ImageDataRenderTarget> entryPoints(data, _entryImageID.getValue());
         DataContainer::ScopedTypedData<ImageDataRenderTarget> exitPoints(data, _exitImageID.getValue());

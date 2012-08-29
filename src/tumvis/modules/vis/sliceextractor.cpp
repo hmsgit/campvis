@@ -90,7 +90,7 @@ namespace TUMVis {
                 rt->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 _shader->setAttributeLocation(0, "in_Position");
-                _shader->setAttributeLocation(1, "in_TexCoords");
+                _shader->setAttributeLocation(1, "in_TexCoord");
                 QuadRdr.renderQuad();
                 rt->deactivate();
 

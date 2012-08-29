@@ -28,7 +28,7 @@
 
 #version 330
 
-in vec3 ex_TexCoords;
+in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #include "tools/texture2d.frag"
@@ -40,6 +40,6 @@ uniform sampler1D _tfTex;
 uniform TFParameters _tfTextureParameters;
 
 void main() {
-    float intensity = getElement2DNormalized(_texture, ex_TexCoords.xy).a;
+    float intensity = getElement2DNormalized(_texture, ex_TexCoord.xy).a;
     out_Color = lookupTF(_tfTextureParameters, _tfTex, intensity);
 }
