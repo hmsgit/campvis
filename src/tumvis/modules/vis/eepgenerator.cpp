@@ -36,6 +36,7 @@
 
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/imagedatarendertarget.h"
+#include "core/datastructures/meshgeometry.h"
 
 namespace TUMVis {
     const std::string EEPGenerator::loggerCat_ = "TUMVis.modules.vis.EEPGenerator";
@@ -60,7 +61,7 @@ namespace TUMVis {
 
     void EEPGenerator::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough_deprecated.vert", "modules/vis/eepgenerator.frag", "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/eepgenerator.frag", "", false);
     }
 
     void EEPGenerator::deinit() {
@@ -78,18 +79,16 @@ namespace TUMVis {
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
 
+                MeshGeometry cube = MeshGeometry::createCube(volumeExtent, textureBounds);
+
                 // set modelview and projection matrices
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-                glMatrixMode(GL_PROJECTION);
-                glPushMatrix();
-                tgt::loadMatrix(_camera.getValue().getProjectionMatrix());
-
-                glMatrixMode(GL_MODELVIEW);
-                glPushMatrix();
-                tgt::loadMatrix(_camera.getValue().getViewMatrix());
-
                 _shader->activate();
+                _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
+                _shader->setAttributeLocation(0, "in_Position");
+                _shader->setAttributeLocation(1, "in_TexCoord");
                 glEnable(GL_CULL_FACE);
 
                 // create entry points texture
@@ -100,7 +99,7 @@ namespace TUMVis {
                 glClearDepth(1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(GL_BACK);
-                tgt::QuadRenderer::renderCube(volumeExtent, textureBounds);
+                cube.render();
 
                 entrypoints->deactivate();
 
@@ -112,16 +111,13 @@ namespace TUMVis {
                 glClearDepth(0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(GL_FRONT);
-                tgt::QuadRenderer::renderCube(volumeExtent, textureBounds);
+                cube.render();
 
                 exitpoints->deactivate();
 
                 _shader->deactivate();
-                glMatrixMode(GL_MODELVIEW);
-                glPopMatrix();
-                glMatrixMode(GL_PROJECTION);
-                glPopMatrix();
                 glPopAttrib();
+                LGL_ERROR;
 
                 data.addData(_entryImageID.getValue(), entrypoints);
                 data.addData(_exitImageID.getValue(), exitpoints);

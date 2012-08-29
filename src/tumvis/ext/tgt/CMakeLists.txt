@@ -47,7 +47,6 @@ SET(TGT_SOURCES
 	logmanager.cpp
 	naturalcubicspline.cpp
 	painter.cpp
-	quadrenderer.cpp
 	shadermanager.cpp
 	spline.cpp
 	stopwatch.cpp

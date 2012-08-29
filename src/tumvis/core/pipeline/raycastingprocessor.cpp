@@ -29,7 +29,6 @@
 #include "raycastingprocessor.h"
 
 #include "tgt/logmanager.h"
-#include "tgt/quadrenderer.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
@@ -98,6 +97,9 @@ namespace TUMVis {
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
                 _shader->activate();
+
+                _shader->setAttributeLocation(0, "in_Position");
+                _shader->setAttributeLocation(1, "in_TexCoord");
 
                 _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));

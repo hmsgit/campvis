@@ -26,6 +26,11 @@
 // 
 // ================================================================================================
 
+#version 330
+
+in vec3 ex_TexCoord;        ///< incoming texture coordinate
+out vec4 out_Color;         ///< outgoing fragment color
+
 void main() {
-    gl_FragData[0] = gl_TexCoord[0];
+    out_Color = vec4(ex_TexCoord, 1.0);
 }
