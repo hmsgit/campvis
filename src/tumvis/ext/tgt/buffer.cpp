@@ -4,6 +4,8 @@
 namespace tgt {
     BufferObject::BufferObject()
         : _id(0)
+        , _baseType(BYTE)
+        , _elementSize(1)
         , _size(0)
         , _numElements(0)
     {
@@ -24,9 +26,11 @@ namespace tgt {
         glBindBuffer(target, _id);
     }
 
-    void BufferObject::data(TargetType target, UsageType usage, const void* data, size_t numBytes) {
+    void BufferObject::data(TargetType target, UsageType usage, const void* data, size_t numBytes, BaseType baseType, size_t elementSize) {
         bind(target);
         glBufferData(target, numBytes, data, usage);
+        _baseType = baseType;
+        _elementSize = elementSize;
     }
 
     void BufferObject::subdata(TargetType target, UsageType usage, size_t offset, const void* data, size_t numBytes) {
@@ -40,6 +44,14 @@ namespace tgt {
 
     void BufferObject::unbindFromVertexAttribute(const VertexAttribute* va) {
         _assignedAttributes.erase(va);
+    }
+
+    BufferObject::BaseType BufferObject::getBaseType() const {
+        return _baseType;
+    }
+
+    size_t BufferObject::getElementSize() const {
+        return _elementSize;
     }
 
 }

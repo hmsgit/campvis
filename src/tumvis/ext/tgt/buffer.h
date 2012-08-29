@@ -54,8 +54,16 @@ namespace tgt {
         virtual ~BufferObject();
 
 
+        /**
+         * Gets the base data type in the buffer.
+         * \return  _baseType
+         */
         BaseType getBaseType() const;
 
+        /**
+         * Gets the number of elements per element (1, 2, 3 or 4).
+         * \return  _elementSize
+         */
         size_t getElementSize() const;
 
 
@@ -67,12 +75,14 @@ namespace tgt {
 
         /**
          * Binds the buffer, reserves space on the OpenGL device and initializes it with the given data in \a data.
-         * \param target    Target type of buffer object.
-         * \param usage     Usage of data.
-         * \param data      Pointer to host memory containing the data.
-         * \param numBytes  Size of \a data in bytes.
+         * \param target        Target type of buffer object.
+         * \param usage         Usage of data.
+         * \param data          Pointer to host memory containing the data.
+         * \param numBytes      Size of \a data in bytes.
+         * \param baseType      Base data type
+         * \param elementSize   Number of elements per element (must be 1, 2, 3 or 4)
          */
-        void data(TargetType target, UsageType usage, const void* data, size_t numBytes);
+        void data(TargetType target, UsageType usage, const void* data, size_t numBytes, BaseType baseType, size_t elementSize);
 
         /**
          * Updates a subset of the buffer's data.
@@ -83,8 +93,6 @@ namespace tgt {
          * \param numBytes  Size of \a data in bytes.
          */
         void subdata(TargetType target, UsageType usage, size_t offset, const void* data, size_t numBytes);
-
-
 
 
     protected:
@@ -102,8 +110,8 @@ namespace tgt {
 
         GLuint _id;                         ///< OpenGL ID of this buffer
 
-        BaseType _baseType;
-        size_t _elementSize;
+        BaseType _baseType;                 ///< Base data type
+        size_t _elementSize;                ///< Number of elements per element *lol* (must be 1, 2, 3 or 4)
 
         size_t _size;                       ///< Buffer size in bytes
         size_t _numElements;                ///< Number of elements in this buffer

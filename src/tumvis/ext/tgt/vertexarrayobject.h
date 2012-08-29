@@ -118,10 +118,20 @@ namespace tgt {
         void enableVertexAttribute(size_t index);
 
         /**
+         * Enables all VertexAttributes of this VAO.
+         */
+        void enableAllVertexAttributes();
+
+        /**
          * Disables the VertexAttribute with the given index in the OpenGL client state.
          * \param   index   Index of the VertexAttribute to disable.
          */
         void disableVertexAttribute(size_t index);
+
+        /**
+         * Disables all VertexAttributes of this VAO.
+         */
+        void disableAllVertexAttributes();
 
         /**
          * Returns the index of the VertexAttribute which was previously created with the given type.
@@ -139,14 +149,14 @@ namespace tgt {
         /**
          * Initializes all static members.
          */
-        void initStaticMembers();
+        static void initStaticMembers();
 
         size_t _id;                                         ///< Id of the internal OpenGL handle to the VAO.
         std::vector<VertexAttribute> _attributes;           ///< List of all VertexAttributes of this VAO.
+        std::vector<bool> _enabledAttributes;               ///< List of the enabled VertexAttributes.
         std::map<AttributeType, size_t> _attributeTypeMap;  ///< Map of the AttributeTypes to their indices in the VertexAttributes list.
 
         static bool _initialized;                           ///< Flag whether the static members are initialized;
-        static std::vector<bool> _enabledAttributes;        ///< List of the enabled VertexAttributes. TODO: They are global in the OpenGL client side (hence, the static), right?
         static size_t _currentlyBoundVertexArray;           ///< Id of the VertexArrayObject which was bound most recently. 0 if the most recent bind call was unbind().
 
         static const std::string loggerCat_;

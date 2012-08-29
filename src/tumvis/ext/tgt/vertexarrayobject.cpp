@@ -18,6 +18,7 @@ namespace tgt {
 
         _bufferObject->bindToVertexAttribute(this);
         // Todo: implement normalized flag if needed
+        _bufferObject->bind(BufferObject::ARRAY_BUFFER);
         glVertexAttribPointer(_index, _bufferObject->getElementSize(), _bufferObject->getBaseType(), false, _stride, reinterpret_cast<void*>(_offset));
     }
 
@@ -27,10 +28,14 @@ namespace tgt {
 
 // ================================================================================================
 
+    size_t VertexArrayObject::_currentlyBoundVertexArray = 0;
+    bool VertexArrayObject::_initialized = true;
+
     const std::string VertexArrayObject::loggerCat_ = "tgt.VertexArrayObject";
 
     VertexArrayObject::VertexArrayObject(bool autoBind) 
         : _id(0)
+        , _enabledAttributes(16, false)
     {
         glGenVertexArrays(1, &_id);
         if (_id == 0) {
@@ -49,20 +54,20 @@ namespace tgt {
         if (!_initialized)
             initStaticMembers();
 
-        if (_currentlyBoundVertexArray != _id) {
+        //if (_currentlyBoundVertexArray != _id) {
             glBindVertexArray(_id);
-            _currentlyBoundVertexArray = _id;
-        }
+//             _currentlyBoundVertexArray = _id;
+//         }
     }
 
     void VertexArrayObject::unbind() {
         if (!_initialized)
             initStaticMembers();
 
-        if (_currentlyBoundVertexArray != 0) {
+//        if (_currentlyBoundVertexArray != 0) {
             glBindVertexArray(0);
-            _currentlyBoundVertexArray = 0;
-        }
+//             _currentlyBoundVertexArray = 0;
+//         }
     }
 
     size_t VertexArrayObject::addVertexAttribute(AttributeType attributeType, BufferObject* bufferObject, size_t stride /*= 0*/, size_t offset /*= 0*/, bool enableNow /*= true*/) {
@@ -75,7 +80,7 @@ namespace tgt {
         }
 
         tgtAssert(
-            attributeType != UnspecifiedAttribute && _attributeTypeMap.find(attributeType) != _attributeTypeMap.end(), 
+            attributeType != UnspecifiedAttribute || _attributeTypeMap.find(attributeType) != _attributeTypeMap.end(), 
             "Tried to add two VertexAttributes with the same type. This is currently not supported.");
 
         // bind and create VertexAttribute
@@ -104,28 +109,33 @@ namespace tgt {
     void VertexArrayObject::enableVertexAttribute(size_t index) {
         tgtAssert(index < _enabledAttributes.size(), "Index out of bounds.");
 
-        if (!_initialized)
-            initStaticMembers();
-
+        bind();
         glEnableVertexAttribArray(index);
         _enabledAttributes[index] = true;
+    }
+
+    void VertexArrayObject::enableAllVertexAttributes() {
+        for (size_t i = 0; i < _attributes.size(); ++i)
+            enableVertexAttribute(i);
     }
 
     void VertexArrayObject::disableVertexAttribute(size_t index) {
         tgtAssert(index < _enabledAttributes.size(), "Index out of bounds.");
 
-        if (!_initialized)
-            initStaticMembers();
-
+        bind();
         glDisableVertexAttribArray(index);
         _enabledAttributes[index] = false;
+    }
+
+    void VertexArrayObject::disableAllVertexAttributes() {
+        for (size_t i = 0; i < _attributes.size(); ++i)
+            disableVertexAttribute(i);
     }
 
     void VertexArrayObject::initStaticMembers() {
         // TODO:    The better way would be to us glGet(GL_MAX_VERTEX_ATTRIBS) as dimension, but the standard says 16 
         //          is the minimum number to be supported and that should be enough and I currently feel lazy. If 
         //          you're reading this, feel free to improve this allocation...
-        _enabledAttributes = std::vector<bool>(16, false);
         _currentlyBoundVertexArray = 0;
         _initialized = true;
     }
@@ -141,6 +151,7 @@ namespace tgt {
         }
         return it->second;
     }
+
 
 
 }
