@@ -28,7 +28,7 @@ SET(TGT_SOURCES
 	assert.cpp
 	bounds.cpp
 	bspline.cpp
-#	buffer.cpp
+	buffer.cpp
 	camera.cpp
 	catmullromspline.cpp
 	curve.cpp
@@ -60,6 +60,7 @@ SET(TGT_SOURCES
 	textureunit.cpp
 	tgt_gl.cpp
 	timer.cpp
+	vertexarrayobject.cpp
 #event
 	event/eventhandler.cpp
 	event/eventlistener.cpp
