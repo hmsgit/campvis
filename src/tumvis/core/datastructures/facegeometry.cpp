@@ -32,6 +32,7 @@
 #include "tgt/logmanager.h"
 #include "tgt/buffer.h"
 #include "tgt/vertexarrayobject.h"
+#include "tgt/vertex.h"
 
 namespace TUMVis {
 
@@ -140,6 +141,71 @@ namespace TUMVis {
             LGL_ERROR;
             _buffersInitialized = true;
         }
+    }
+
+    namespace {
+        float distanceToPlane(const tgt::vec3& vertex, float p, const tgt::vec3& pNormal, float epsilon) {
+            float distance = tgt::dot(pNormal, vertex) - p;
+            if (std::abs(distance) <= epsilon)
+                return 0;
+            else
+                return distance;
+        }
+    }
+
+    TUMVis::FaceGeometry FaceGeometry::clipAgainstPlane(float p, const tgt::vec3& pNormal, float epsilon /*= 1e-8f*/) const {
+        tgtAssert(epsilon >= 0, "Epsilon must be positive.");
+
+        std::vector<tgt::vec3> verts, texCoords, norms;
+        std::vector<tgt::vec4> cols;
+        size_t lastIndex = _vertices.size() - 1;
+        float lastDistance = distanceToPlane(_vertices.back(), p, pNormal, epsilon);
+
+        // Implementation of Sutherland-Hodgman polygon clipping:
+        for (size_t i = 0; i < _vertices.size(); ++i) {
+            float currrentDistance = distanceToPlane(_vertices[i], p, pNormal, epsilon);
+
+            // case 1: last vertex outside, this vertex inside clip region => clip
+            if (lastDistance > 0 && currrentDistance <= 0) {
+                float t = lastDistance / (lastDistance - currrentDistance);
+                
+                verts.push_back(tgt::mix(_vertices[lastIndex], _vertices[i], t));
+                if (!_textureCoordinates.empty())
+                    texCoords.push_back(tgt::mix(_textureCoordinates[lastIndex], _textureCoordinates[i], t));
+                if (!_colors.empty())
+                    cols.push_back(tgt::mix(_colors[lastIndex], _colors[i], t));
+                if (!_normals.empty())
+                    norms.push_back(tgt::mix(_normals[lastIndex], _normals[i], t));
+            }
+            // case 2: last vertex inside, this vertex outside clip region => clip
+            else if (lastDistance <= 0 && currrentDistance > 0) {
+                float t = lastDistance / (lastDistance - currrentDistance);
+
+                verts.push_back(tgt::mix(_vertices[lastIndex], _vertices[i], t));
+                if (!_textureCoordinates.empty())
+                    texCoords.push_back(tgt::mix(_textureCoordinates[lastIndex], _textureCoordinates[i], t));
+                if (!_colors.empty())
+                    cols.push_back(tgt::mix(_colors[lastIndex], _colors[i], t));
+                if (!_normals.empty())
+                    norms.push_back(tgt::mix(_normals[lastIndex], _normals[i], t));
+            }
+
+            // case 1.2 + case 3: current vertix in front of plane => keep
+            if (currrentDistance <= 0) {
+                verts.push_back(_vertices[i]);
+                if (!_textureCoordinates.empty())
+                    texCoords.push_back(_textureCoordinates[i]);
+                if (!_colors.empty())
+                    cols.push_back(_colors[i]);
+                if (!_normals.empty())
+                    norms.push_back(_normals[i]);
+            }
+
+            lastIndex = i;
+            lastDistance = currrentDistance;
+        }
+
+        return FaceGeometry(verts, texCoords, cols, norms);
     }
 
 }

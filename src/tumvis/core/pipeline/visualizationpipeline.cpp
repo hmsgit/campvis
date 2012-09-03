@@ -102,10 +102,6 @@ namespace TUMVis {
             _canvas, 
             new CallMemberFunc1ArgJob<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor),
             OpenGLJobProcessor::SerialJob);
-        /*tgt::GLContextScopedLock lock(_canvas->getContext());
-        executeProcessor(processor);
-        glFinish();  // TODO: is glFlush enough or do we need a glFinish here?
-        LGL_ERROR;*/
     }
 
     void VisualizationPipeline::setCanvas(tgt::GLCanvas* canvas) {

@@ -82,7 +82,7 @@ namespace TUMVis {
                 tgt::vec3 texURB(static_cast<float>(_clipX.getValue().y), static_cast<float>(_clipY.getValue().y), static_cast<float>(_clipZ.getValue().y));
                 texURB /= numSlices;
 
-                MeshGeometry* cube = MeshGeometry::createCube(volumeExtent, tgt::Bounds(texLLF, texURB));
+                MeshGeometry* cube = MeshGeometry::createCube(volumeExtent, tgt::Bounds(texLLF, texURB)).clone();
                 data.addData(_geometryID.getValue(), cube);
             }
             else {

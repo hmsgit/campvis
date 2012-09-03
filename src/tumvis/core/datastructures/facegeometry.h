@@ -109,6 +109,16 @@ namespace TUMVis {
         const tgt::vec3& getFaceNormal() const;
 
         /**
+         * Clips this FaceGeometry against an aribtrary clip plane.
+         * The clipped FaceGeometry is returned.
+         * \param   p       Point on clip plane
+         * \param   normal  Clip plane normal
+         * \param   epsilon Clipping precision
+         * \return  The clipped FaceGeometry
+         */
+        FaceGeometry clipAgainstPlane(float p, const tgt::vec3& normal, float epsilon = 1e-4f) const;
+
+        /**
          * Renders this FaceGeometry.
          * Must be called from a valid OpenGL context.
          */

@@ -35,7 +35,7 @@
 
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/geometrydata.h"
+#include "core/datastructures/meshgeometry.h"
 
 namespace TUMVis {
     const std::string EEPGenerator::loggerCat_ = "TUMVis.modules.vis.EEPGenerator";
@@ -72,13 +72,15 @@ namespace TUMVis {
 
     void EEPGenerator::process(DataContainer& data) {
         DataContainer::ScopedTypedData<ImageDataGL> img(data, _sourceImageID.getValue());
-        DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, _geometryID.getValue());
+        DataContainer::ScopedTypedData<MeshGeometry> proxyGeometry(data, _geometryID.getValue());
 
         if (img != 0 && proxyGeometry != 0) {
             if (img->getDimensionality() == 3) {
                 // TODO: implement some kind of cool proxy geometry supporting clipping (camera in volume)...
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
+
+                //MeshGeometry clipped = proxyGeometry->clipAgainstPlane(100, tgt::vec3(1.f), true);
 
                 // set modelview and projection matrices
                 glPushAttrib(GL_ALL_ATTRIB_BITS);

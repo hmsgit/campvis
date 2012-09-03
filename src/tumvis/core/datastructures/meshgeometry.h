@@ -73,6 +73,16 @@ namespace TUMVis {
         const std::vector<FaceGeometry>& getFaces() const;
 
         /**
+         * Clips this MeshGeometry against an aribtrary clip plane.
+         * The clipped MeshGeometry is returned.
+         * \param   p       Point on clip plane
+         * \param   normal  Clip plane normal
+         * \param   epsilon Clipping precision
+         * \return  The clipped MeshGeometry
+         */
+        MeshGeometry clipAgainstPlane(float p, const tgt::vec3& normal, bool close = true, float epsilon = 1e-8f) const;
+
+        /**
          * Renders this MeshGeometry.
          * Must be called from a valid OpenGL context.
          */
@@ -91,7 +101,7 @@ namespace TUMVis {
          * \param   texBounds   texture coordinates at the cube bounds
          * \return  A MeshGeometry building a cube with the given bounds and texture coordinates
          */
-        static MeshGeometry* createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
+        static MeshGeometry createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
 
     protected:
 
