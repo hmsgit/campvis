@@ -39,6 +39,7 @@ namespace TUMVis {
         : VisualizationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
+        , _pgGenerator()
         , _eepGenerator(_renderTargetSize)
         , _drrraycater(_renderTargetSize)
         , _simpleRaycaster(_renderTargetSize)
@@ -56,6 +57,7 @@ namespace TUMVis {
         _eventHandlers.push_back(_trackballEH);
 
         _processors.push_back(&_imageReader);
+        _processors.push_back(&_pgGenerator);
         _processors.push_back(&_eepGenerator);
         _processors.push_back(&_drrraycater);
         _processors.push_back(&_simpleRaycaster);
@@ -98,6 +100,9 @@ namespace TUMVis {
         _eepGenerator._entryImageID.setValue("eep.entry");
         _eepGenerator._exitImageID.setValue("eep.exit");
 
+        _pgGenerator._sourceImageID.setValue("eep.input");
+        _pgGenerator._geometryID.setValue("pg.input");
+
         _renderTargetID.setValue("drr.output");
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
@@ -138,6 +143,9 @@ namespace TUMVis {
             tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
             _trackballEH->setCenter(volumeExtent.center());
             _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+        }
+        if (! _pgGenerator.getInvalidationLevel().isValid()) {
+            executeProcessor(&_pgGenerator);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_eepGenerator);

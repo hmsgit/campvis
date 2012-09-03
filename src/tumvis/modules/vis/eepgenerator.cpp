@@ -35,7 +35,7 @@
 
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/meshgeometry.h"
+#include "core/datastructures/geometrydata.h"
 
 namespace TUMVis {
     const std::string EEPGenerator::loggerCat_ = "TUMVis.modules.vis.EEPGenerator";
@@ -43,6 +43,7 @@ namespace TUMVis {
     EEPGenerator::EEPGenerator(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
         , _sourceImageID("sourceImageID", "Input Image", "")
+        , _geometryID("geometryID", "Input Geometry ID", "pg.input")
         , _entryImageID("entryImageID", "Output Entry Points Image", "")
         , _exitImageID("exitImageID", "Output Exit Points Image", "")
         , _camera("camera", "Camera")
@@ -71,14 +72,13 @@ namespace TUMVis {
 
     void EEPGenerator::process(DataContainer& data) {
         DataContainer::ScopedTypedData<ImageDataGL> img(data, _sourceImageID.getValue());
+        DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, _geometryID.getValue());
 
-        if (img != 0) {
+        if (img != 0 && proxyGeometry != 0) {
             if (img->getDimensionality() == 3) {
                 // TODO: implement some kind of cool proxy geometry supporting clipping (camera in volume)...
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
-
-                MeshGeometry cube = MeshGeometry::createCube(volumeExtent, textureBounds);
 
                 // set modelview and projection matrices
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -98,7 +98,7 @@ namespace TUMVis {
                 glClearDepth(1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(GL_BACK);
-                cube.render();
+                proxyGeometry->render();
 
                 entrypoints->deactivate();
 
@@ -110,7 +110,7 @@ namespace TUMVis {
                 glClearDepth(0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(GL_FRONT);
-                cube.render();
+                proxyGeometry->render();
 
                 exitpoints->deactivate();
 
@@ -126,7 +126,7 @@ namespace TUMVis {
             }
         }
         else {
-            LERROR("No suitable input image found.");
+            LERROR("No suitable input image or proxy geometry found.");
         }
 
         _invalidationLevel.setValid();

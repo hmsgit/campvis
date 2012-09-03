@@ -26,57 +26,54 @@
 // 
 // ================================================================================================
 
-#ifndef DVRVIS_H__
-#define DVRVIS_H__
+#ifndef PROXYGEOMETRYGENERATOR_H__
+#define PROXYGEOMETRYGENERATOR_H__
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/proxygeometrygenerator.h"
-#include "modules/vis/eepgenerator.h"
-#include "modules/vis/drrraycaster.h"
-#include "modules/vis/simpleraycaster.h"
-#include "modules/vis/clraycaster.h"
+#include <string>
+
+#include "core/classification/abstracttransferfunction.h"
+#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
 
 namespace TUMVis {
-    class DVRVis : public VisualizationPipeline {
+    /**
+     * Genereates entry-/exit point textures for the given image and camera.
+     */
+    class ProxyGeometryGenerator : public AbstractProcessor {
     public:
         /**
-         * Creates a VisualizationPipeline.
-         */
-        DVRVis();
+         * Constructs a new ProxyGeometryGenerator Processor
+         **/
+        ProxyGeometryGenerator();
 
         /**
-         * Virtual Destructor
+         * Destructor
          **/
-        virtual ~DVRVis();
+        virtual ~ProxyGeometryGenerator();
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "ProxyGeometryGenerator"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Genereates entry-/exit point textures for the given image and camera."; };
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual void process(DataContainer& data);
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
+        StringProperty _sourceImageID;      ///< image ID for input image
+        StringProperty _geometryID;         ///< ID for output geometry
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+        IVec2Property _clipX;               ///< clip coordinates for x axis
+        IVec2Property _clipY;               ///< clip coordinates for y axis
+        IVec2Property _clipZ;               ///< clip coordinates for z axis
 
     protected:
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        ProxyGeometryGenerator _pgGenerator;
-        EEPGenerator _eepGenerator;
-        DRRRaycaster _drrraycater;
-        SimpleRaycaster _simpleRaycaster;
-        CLRaycaster _clRaycaster;
-        TrackballNavigationEventHandler* _trackballEH;
+        void updateClipProperties();
 
+        clock_t _sourceTimestamp;
+
+        static const std::string loggerCat_;
     };
+
 }
 
-#endif // DVRVIS_H__
+#endif // PROXYGEOMETRYGENERATOR_H__

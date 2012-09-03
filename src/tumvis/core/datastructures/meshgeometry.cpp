@@ -60,7 +60,7 @@ namespace TUMVis {
     }
 
 
-    void MeshGeometry::render() {
+    void MeshGeometry::render() const {
         createGLBuffers();
         if (! _buffersInitialized) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -90,7 +90,7 @@ namespace TUMVis {
         LGL_ERROR;
     }
 
-    void MeshGeometry::createGLBuffers() {
+    void MeshGeometry::createGLBuffers() const {
         if (! _buffersInitialized) {
             bool createTexCoordsBuffer = true;
             bool createColorsBuffer = true;
@@ -162,7 +162,7 @@ namespace TUMVis {
         }
     }
 
-    TUMVis::MeshGeometry MeshGeometry::createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds) {
+    TUMVis::MeshGeometry* MeshGeometry::createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds) {
         const tgt::vec3& llf = bounds.getLLF();
         const tgt::vec3& urb = bounds.getURB();
         const tgt::vec3& tLlf = texBounds.getLLF();
@@ -250,7 +250,7 @@ namespace TUMVis {
         vertices.clear();
         texCoords.clear();
 
-        return MeshGeometry(faces);
+        return new MeshGeometry(faces);
     }
 
 }

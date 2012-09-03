@@ -100,15 +100,14 @@ namespace TUMVis {
         tgt::GLContextScopedLock lock(_localContext->getContext());
 
         tgt::initGL(featureset);
-        //ShdrMgr.setGlobalHeader("#version 130\n");
         LGL_ERROR;
 
         // ensure matching OpenGL specs
-        if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_0) {
-            LERROR("Your system does not support OpenGL 3.0, which is mandatory. TUMVis will probably not work as intendet.");
+        if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3) {
+            LERROR("Your system does not support OpenGL 3.3, which is mandatory. TUMVis will probably not work as intendet.");
         }
-        if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_130) {
-            LERROR("Your system does not support GLSL Shader Version 1.30, which is mandatory. TUMVis will probably not work as intendet.");
+        if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
+            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. TUMVis will probably not work as intendet.");
         }
 
         QuadRenderer::init();

@@ -72,6 +72,7 @@ namespace TUMVis {
         virtual void process(DataContainer& data);
 
         StringProperty _sourceImageID;    ///< image ID for input image
+        StringProperty _geometryID;       ///< ID for input geometry
         StringProperty _entryImageID;     ///< image ID for output entry points image
         StringProperty _exitImageID;      ///< image ID for output exit points image
 

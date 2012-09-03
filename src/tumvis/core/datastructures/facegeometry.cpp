@@ -87,7 +87,7 @@ namespace TUMVis {
         return _faceNormal;
     }
 
-    void FaceGeometry::render() {
+    void FaceGeometry::render() const {
         createGLBuffers();
         if (! _buffersInitialized) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -112,7 +112,7 @@ namespace TUMVis {
         LGL_ERROR;
     }
 
-    void FaceGeometry::createGLBuffers() {
+    void FaceGeometry::createGLBuffers() const {
         if (! _buffersInitialized) {
             try {
                 _verticesBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);

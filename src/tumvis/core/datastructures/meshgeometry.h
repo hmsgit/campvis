@@ -76,21 +76,22 @@ namespace TUMVis {
          * Renders this MeshGeometry.
          * Must be called from a valid OpenGL context.
          */
-        virtual void render();
+        virtual void render() const;
 
         /**
          * Creates the OpenGL VBOs and the VAO for this face's geometry.
          * Must be called from a valid OpenGL context.
          */
-        virtual void createGLBuffers();
+        virtual void createGLBuffers() const;
 
         /**
-         * Creates a MeshGeometry building a cube with the given bounds and texture coordinates
+         * Creates a MeshGeometry building a cube with the given bounds and texture coordinates.
+         * \note    The caller owns the returned pointer.
          * \param   bounds      coordinates of the cube bounds
          * \param   texBounds   texture coordinates at the cube bounds
          * \return  A MeshGeometry building a cube with the given bounds and texture coordinates
          */
-        static MeshGeometry createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
+        static MeshGeometry* createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
 
     protected:
 

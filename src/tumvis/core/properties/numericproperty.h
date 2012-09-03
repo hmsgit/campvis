@@ -29,7 +29,53 @@
 #ifndef NUMERICPROPERTY_H__
 #define NUMERICPROPERTY_H__
 
+#include "tgt/vector.h"
+#include "core/tools/interval.h"
 #include "core/properties/genericproperty.h"
+
+#include <limits>
+
+namespace {
+    /**
+     * Helper struct for template specialization regarding scalar/vector types.
+     */
+    template<typename T, bool IsScalar>
+    struct NumericPropertyTraits {
+    };
+
+    /**
+     * Specialized traits for scalar NumericProperties.
+     */
+    template<typename T>
+    struct NumericPropertyTraits<T, true> {
+        static T validateValue(const T& value, const T& minValue, const T& maxValue) {
+            if (value >= minValue && value <= maxValue)
+                return value;
+            else {
+                return (value < minValue) ? minValue : maxValue;
+            }
+        }
+    };
+
+    /**
+     * Specialized traits for vector NumericProperties.
+     */
+    template<typename T>
+    struct NumericPropertyTraits<T, false> {
+        static T validateValue(const T& value, const T& minValue, const T& maxValue) {
+            T toReturn(value);
+
+            for (size_t i = 0; i < value.size; ++i) {
+                if (toReturn[i] < minValue[i])
+                    toReturn[i] = minValue[i];
+                else if (toReturn[i] > maxValue[i])
+                    toReturn[i] = maxValue[i];
+            }
+            return toReturn;
+        }
+    };
+
+}
 
 namespace TUMVis {
     /**
@@ -146,6 +192,13 @@ namespace TUMVis {
     typedef NumericProperty<int> IntProperty;
     typedef NumericProperty<float> FloatProperty;
 
+    typedef NumericProperty<tgt::ivec2> IVec2Property;
+    typedef NumericProperty<tgt::vec2> Vec2Property;
+    typedef NumericProperty<tgt::ivec3> IVec3Property;
+    typedef NumericProperty<tgt::vec3> Vec3Property;
+    typedef NumericProperty<tgt::ivec4> IVec4Property;
+    typedef NumericProperty<tgt::vec4> Vec4Property;
+
 // = Template Implementation ======================================================================
 
     template<typename T>
@@ -175,11 +228,7 @@ namespace TUMVis {
 
     template<typename T>
     T TUMVis::NumericProperty<T>::validateValue(const T& value) {
-        if (value >= _minValue && value <= _maxValue)
-            return value;
-        else {
-            return (value < _minValue) ? _minValue : _maxValue;
-        }
+        return NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::validateValue(value, _minValue, _maxValue);
     }
 
     template<typename T>

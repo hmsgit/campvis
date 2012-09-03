@@ -60,13 +60,13 @@ namespace TUMVis {
          * Renders this GeometryData.
          * Must be called from a valid OpenGL context.
          */
-        virtual void render() = 0;
+        virtual void render() const = 0;
 
         /**
          * Creates the OpenGL VBOs and the VAO for this geometry.
          * Must be called from a valid OpenGL context.
          */
-        virtual void createGLBuffers() = 0;
+        virtual void createGLBuffers() const = 0;
 
         const tgt::BufferObject* getVerticesBuffer() const;
 
@@ -77,12 +77,12 @@ namespace TUMVis {
         const tgt::BufferObject* getNormalsBuffer() const;
 
     protected:
-
-        bool _buffersInitialized;
-        tgt::BufferObject* _verticesBuffer;
-        tgt::BufferObject* _texCoordsBuffer;
-        tgt::BufferObject* _colorsBuffer;
-        tgt::BufferObject* _normalsBuffer;
+        // mutable to support const lazy initialization
+        mutable bool _buffersInitialized;
+        mutable tgt::BufferObject* _verticesBuffer;
+        mutable tgt::BufferObject* _texCoordsBuffer;
+        mutable tgt::BufferObject* _colorsBuffer;
+        mutable tgt::BufferObject* _normalsBuffer;
     };
 
 }

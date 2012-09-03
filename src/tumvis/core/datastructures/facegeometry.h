@@ -112,13 +112,13 @@ namespace TUMVis {
          * Renders this FaceGeometry.
          * Must be called from a valid OpenGL context.
          */
-        virtual void render();
+        virtual void render() const;
 
         /**
          * Creates the OpenGL VBOs and the VAO for this face's geometry.
          * Must be called from a valid OpenGL context.
          */
-        virtual void createGLBuffers();
+        virtual void createGLBuffers() const;
 
 
     protected:
