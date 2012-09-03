@@ -70,5 +70,44 @@ namespace TUMVis {
         QSpinBox* _spinBox;
 
     };
+
+// = TODO: Using templates would make this much more elegant... ===================================
+
+    /**
+     * Widget for a IVec2Property
+     */
+    class IVec2PropertyWidget : public AbstractPropertyWidget {
+        enum { size = 2 };
+
+        Q_OBJECT;
+
+    public:
+        /**
+         * Creates a new IVec2PropertyWidget for the property \a property.
+         * \param   property    The property the widget shall handle
+         * \param   parent      Parent Qt widget
+         */
+        IVec2PropertyWidget(IVec2Property* property, QWidget* parent = 0);
+
+        /**
+         * Destructor
+         */
+        virtual ~IVec2PropertyWidget();
+
+    protected:
+        /**
+         * Gets called when the property has changed, so that widget can update its state.
+         */
+        virtual void updateWidgetFromProperty();
+
+    private slots:
+        void onValueChanged(int value);
+
+    private:
+        /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
+        virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
+
+        QSpinBox* _spinBox[2];
+    };
 }
 #endif // INTPROPERTYWIDGET_H__

@@ -80,6 +80,14 @@ namespace TUMVis {
         tgt::Bounds getWorldBounds() const;
 
         /**
+         * Returns the image extent in world coordinates for the given voxel coordinates.
+         * \param   llf     Lower-left-front in voxel coordinates.
+         * \param   urb     Upper-right-back in voxel coordinates.
+         * \return  The image extent in world coordinates for the given voxel coordinates.
+         */
+        tgt::Bounds getWorldBounds(const tgt::svec3& llf, const tgt::svec3& urb) const;
+
+        /**
          * Returns the subimage of this image given by \a llf and \a urb.
          * TODO: Check whether it is necessary to adjust image mapping!
          *

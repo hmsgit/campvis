@@ -53,6 +53,10 @@ namespace TUMVis {
             return new IntPropertyWidget(tester);
         }
 
+        if (IVec2Property* tester = dynamic_cast<IVec2Property*>(property)) {
+            return new IVec2PropertyWidget(tester);
+        }
+
         if (FloatProperty* tester = dynamic_cast<FloatProperty*>(property)) {
             return new FloatPropertyWidget(tester);
         }

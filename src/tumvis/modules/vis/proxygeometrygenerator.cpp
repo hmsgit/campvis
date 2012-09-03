@@ -73,9 +73,9 @@ namespace TUMVis {
                     _clipZ.setValue(tgt::ivec2(0, img->getSize().z));
                     _sourceTimestamp = img.getDataHandle()->getTimestamp();
                 }
-                // TODO: implement some kind of cool proxy geometry supporting clipping (camera in volume)...
-                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::Bounds volumeExtent = img->getWorldBounds(tgt::svec3(_clipX.getValue().x, _clipY.getValue().x, _clipZ.getValue().x), tgt::svec3(_clipX.getValue().y, _clipY.getValue().y, _clipZ.getValue().y));
                 tgt::vec3 numSlices = tgt::vec3(img->getSize());
+
 
                 tgt::vec3 texLLF(static_cast<float>(_clipX.getValue().x), static_cast<float>(_clipY.getValue().x), static_cast<float>(_clipZ.getValue().x));
                 texLLF /= numSlices;

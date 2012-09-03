@@ -59,6 +59,12 @@ namespace TUMVis {
         return tgt::Bounds(_mappingInformation.getOffset(), _mappingInformation.getOffset() + (tgt::vec3(_size) * _mappingInformation.getVoxelSize()));
     }
 
+    tgt::Bounds ImageData::getWorldBounds(const tgt::svec3& llf, const tgt::svec3& urb) const {
+        return tgt::Bounds(
+            _mappingInformation.getOffset() + (tgt::vec3(llf) * _mappingInformation.getVoxelSize()),
+            _mappingInformation.getOffset() + (tgt::vec3(urb) * _mappingInformation.getVoxelSize()));
+    }
+
     size_t ImageData::getNumElements() const {
         return _numElements;
     }
