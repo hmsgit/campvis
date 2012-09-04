@@ -73,10 +73,15 @@ namespace TUMVis {
 
         StringProperty _sourceImageID;    ///< image ID for input image
         StringProperty _geometryID;       ///< ID for input geometry
+        StringProperty _mirrorID;           ///< ID for input mirror geometry
         StringProperty _entryImageID;     ///< image ID for output entry points image
         StringProperty _exitImageID;      ///< image ID for output exit points image
 
         CameraProperty _camera;
+
+        BoolProperty _enableMirror;         ///< Enable Virtual Mirror Feature
+        FloatProperty _mirrorPoint;         ///< Point on mirror plane
+        Vec3Property _mirrorNormal;         ///< Normal of mirror plane
 
     protected:
 

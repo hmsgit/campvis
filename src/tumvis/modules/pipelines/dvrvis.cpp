@@ -101,9 +101,8 @@ namespace TUMVis {
         _eepGenerator._exitImageID.setValue("eep.exit");
 
         _pgGenerator._sourceImageID.setValue("eep.input");
-        _pgGenerator._geometryID.setValue("pg.input");
 
-        _renderTargetID.setValue("drr.output");
+        _renderTargetID.setValue("eep.entry");
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _pgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);

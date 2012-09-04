@@ -42,7 +42,7 @@ namespace TUMVis {
     ProxyGeometryGenerator::ProxyGeometryGenerator()
         : AbstractProcessor()
         , _sourceImageID("sourceImageID", "Input Image", "")
-        , _geometryID("geometryID", "Output Geometry ID", "pg.output")
+        , _geometryID("geometryID", "Output Geometry ID", "proxygeometry")
         , _clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , _clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , _clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))

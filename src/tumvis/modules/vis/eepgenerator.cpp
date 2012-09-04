@@ -43,16 +43,24 @@ namespace TUMVis {
     EEPGenerator::EEPGenerator(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
         , _sourceImageID("sourceImageID", "Input Image", "")
-        , _geometryID("geometryID", "Input Geometry ID", "pg.input")
+        , _geometryID("geometryID", "Input Geometry ID", "proxygeometry")
+        , _mirrorID("mirrorID", "Input Mirror ID", "mirror")
         , _entryImageID("entryImageID", "Output Entry Points Image", "")
         , _exitImageID("exitImageID", "Output Exit Points Image", "")
         , _camera("camera", "Camera")
+        , _enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
+        , _mirrorPoint("mirrorPoint", "Point on Mirror Plane", 0.f, -1000.f, 1000.f)
+        , _mirrorNormal("mirrorNormal", "Normal of Mirror Plane", tgt::vec3(1.f), tgt::vec3(-1.f), tgt::vec3(1.f))
         , _shader(0)
     {
         addProperty(&_sourceImageID);
+        addProperty(&_mirrorID);
         addProperty(&_entryImageID);
         addProperty(&_exitImageID);
         addProperty(&_camera);
+        addProperty(&_enableMirror);
+        addProperty(&_mirrorPoint);
+        addProperty(&_mirrorNormal);
     }
 
     EEPGenerator::~EEPGenerator() {
@@ -62,6 +70,10 @@ namespace TUMVis {
     void EEPGenerator::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/eepgenerator.frag", "", false);
+        if (_shader != 0) {
+            _shader->setAttributeLocation(0, "in_Position");
+            _shader->setAttributeLocation(1, "in_TexCoord");
+        }
     }
 
     void EEPGenerator::deinit() {
@@ -74,7 +86,7 @@ namespace TUMVis {
         DataContainer::ScopedTypedData<ImageDataGL> img(data, _sourceImageID.getValue());
         DataContainer::ScopedTypedData<MeshGeometry> proxyGeometry(data, _geometryID.getValue());
 
-        if (img != 0 && proxyGeometry != 0) {
+        if (img != 0 && proxyGeometry != 0 && _shader != 0) {
             if (img->getDimensionality() == 3) {
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
@@ -83,15 +95,36 @@ namespace TUMVis {
                 // FIXME:   In some cases, the near plane is not rendered correctly...
                 float nearPlaneDistToOrigin = tgt::dot(_camera.getValue().getPosition(), -_camera.getValue().getLook()) - _camera.getValue().getNearDist() - .001f;
                 MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -_camera.getValue().getLook(), true, 0.02f);
-                
+
                 // set modelview and projection matrices
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
 
                 _shader->activate();
                 _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
+
+                if (_enableMirror.getValue()) {
+                    // TODO: make use of mirror geometry
+                    tgt::vec3 n = tgt::normalize(_mirrorNormal.getValue());
+                    tgt::vec3 p = n * _mirrorPoint.getValue();
+                    float k = tgt::dot(p, n);
+
+                    // mirror matrix sponsored by:
+                    // Jiang 
+                    tgt::mat4 mirrorMatrix = tgt::mat4(
+                        1 - 2*n.x*n.x, -2*n.y*n.x   , -2*n.z*n.x   , 0, 
+                        -2*n.x*n.y   , 1 - 2*n.y*n.y, -2*n.z*n.y   , 0, 
+                        -2*n.x*n.z   , -2*n.y*n.z   , 1 - 2*n.z*n.z, 0, 
+                        2*n.x*k      , 2*n.y*k      , 2*n.z*k      , 1);
+
+                    // TODO: double check, whether matrix transpose is necessary
+                    _shader->setUniform("_modelMatrix", mirrorMatrix);
+                }
+                else {
+                    _shader->setUniform("_modelMatrix", tgt::mat4::identity);
+                }
+
+                _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
-                _shader->setAttributeLocation(0, "in_Position");
-                _shader->setAttributeLocation(1, "in_TexCoord");
                 glEnable(GL_CULL_FACE);
 
                 // create entry points texture
@@ -101,7 +134,7 @@ namespace TUMVis {
                 glDepthFunc(GL_LESS);
                 glClearDepth(1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glCullFace(GL_BACK);
+                glCullFace(_enableMirror.getValue() ? GL_FRONT : GL_BACK);
                 clipped.render();
 
                 entrypoints->deactivate();
@@ -113,7 +146,7 @@ namespace TUMVis {
                 glDepthFunc(GL_GREATER);
                 glClearDepth(0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glCullFace(GL_FRONT);
+                glCullFace(_enableMirror.getValue() ? GL_BACK : GL_FRONT);
                 clipped.render();
 
                 exitpoints->deactivate();
