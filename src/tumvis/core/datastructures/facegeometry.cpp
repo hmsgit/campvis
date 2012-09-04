@@ -32,7 +32,7 @@
 #include "tgt/logmanager.h"
 #include "tgt/buffer.h"
 #include "tgt/vertexarrayobject.h"
-#include "tgt/vertex.h"
+#include "tgt/vector.h"
 
 namespace TUMVis {
 

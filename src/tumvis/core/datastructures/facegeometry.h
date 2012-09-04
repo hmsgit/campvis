@@ -111,6 +111,7 @@ namespace TUMVis {
         /**
          * Clips this FaceGeometry against an aribtrary clip plane.
          * The clipped FaceGeometry is returned.
+         * \note    Because of using only float internally, the precision is somewhat poor.
          * \param   p       Point on clip plane
          * \param   normal  Clip plane normal
          * \param   epsilon Clipping precision

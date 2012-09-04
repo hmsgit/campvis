@@ -76,12 +76,14 @@ namespace TUMVis {
 
         if (img != 0 && proxyGeometry != 0) {
             if (img->getDimensionality() == 3) {
-                // TODO: implement some kind of cool proxy geometry supporting clipping (camera in volume)...
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
 
-                //MeshGeometry clipped = proxyGeometry->clipAgainstPlane(100, tgt::vec3(1.f), true);
-
+                // clip proxy geometry against near-plane to support camera in volume
+                // FIXME:   In some cases, the near plane is not rendered correctly...
+                float nearPlaneDistToOrigin = tgt::dot(_camera.getValue().getPosition(), -_camera.getValue().getLook()) - _camera.getValue().getNearDist() - .001f;
+                MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -_camera.getValue().getLook(), true, 0.02f);
+                
                 // set modelview and projection matrices
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
 
@@ -100,7 +102,7 @@ namespace TUMVis {
                 glClearDepth(1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(GL_BACK);
-                proxyGeometry->render();
+                clipped.render();
 
                 entrypoints->deactivate();
 
@@ -112,7 +114,7 @@ namespace TUMVis {
                 glClearDepth(0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(GL_FRONT);
-                proxyGeometry->render();
+                clipped.render();
 
                 exitpoints->deactivate();
 
