@@ -52,13 +52,27 @@ namespace TUMVis {
         if (IntProperty* tester = dynamic_cast<IntProperty*>(property)) {
             return new IntPropertyWidget(tester);
         }
-
         if (IVec2Property* tester = dynamic_cast<IVec2Property*>(property)) {
             return new IVec2PropertyWidget(tester);
+        }
+        if (IVec3Property* tester = dynamic_cast<IVec3Property*>(property)) {
+            return new IVec3PropertyWidget(tester);
+        }
+        if (IVec4Property* tester = dynamic_cast<IVec4Property*>(property)) {
+            return new IVec4PropertyWidget(tester);
         }
 
         if (FloatProperty* tester = dynamic_cast<FloatProperty*>(property)) {
             return new FloatPropertyWidget(tester);
+        }
+        if (Vec2Property* tester = dynamic_cast<Vec2Property*>(property)) {
+            return new Vec2PropertyWidget(tester);
+        }
+        if (Vec3Property* tester = dynamic_cast<Vec3Property*>(property)) {
+            return new Vec3PropertyWidget(tester);
+        }
+        if (Vec4Property* tester = dynamic_cast<Vec4Property*>(property)) {
+            return new Vec4PropertyWidget(tester);
         }
 
         if (StringProperty* tester = dynamic_cast<StringProperty*>(property)) {

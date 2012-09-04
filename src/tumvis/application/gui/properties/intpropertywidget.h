@@ -71,28 +71,55 @@ namespace TUMVis {
 
     };
 
-// = TODO: Using templates would make this much more elegant... ===================================
+// ================================================================================================
+
+    namespace {
+        template<size_t SIZE>
+        struct IVecPropertyWidgetTraits {};
+
+        template<>
+        struct IVecPropertyWidgetTraits<2> {
+            typedef IVec2Property PropertyType;
+            typedef tgt::ivec2 BaseType;
+        };
+
+        template<>
+        struct IVecPropertyWidgetTraits<3> {
+            typedef IVec3Property PropertyType;
+            typedef tgt::ivec3 BaseType;
+        };
+
+        template<>
+        struct IVecPropertyWidgetTraits<4> {
+            typedef IVec4Property PropertyType;
+            typedef tgt::ivec4 BaseType;
+        };
+    }
+
+// ================================================================================================
 
     /**
-     * Widget for a IVec2Property
+     * Generic base class for IVec property widgets.
+     * Unfortunately Q_OBJECT and templates do not fit together, so we an additional level of 
+     * indirection helps as usual...
      */
-    class IVec2PropertyWidget : public AbstractPropertyWidget {
-        enum { size = 2 };
-
-        Q_OBJECT;
-
+    template<size_t SIZE>
+    class IVecPropertyWidget : public AbstractPropertyWidget {
     public:
+        enum { size = SIZE };
+        typedef typename IVecPropertyWidgetTraits<SIZE>::PropertyType PropertyType;
+
         /**
-         * Creates a new IVec2PropertyWidget for the property \a property.
+         * Creates a new IVecPropertyWidget for the property \a property.
          * \param   property    The property the widget shall handle
          * \param   parent      Parent Qt widget
          */
-        IVec2PropertyWidget(IVec2Property* property, QWidget* parent = 0);
+        IVecPropertyWidget(PropertyType* property, QWidget* parent = 0);
 
         /**
          * Destructor
          */
-        virtual ~IVec2PropertyWidget();
+        virtual ~IVecPropertyWidget();
 
     protected:
         /**
@@ -100,14 +127,119 @@ namespace TUMVis {
          */
         virtual void updateWidgetFromProperty();
 
-    private slots:
-        void onValueChanged(int value);
+        void onValueChangedImpl();
 
-    private:
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        QSpinBox* _spinBox[2];
+        QSpinBox* _spinBox[size];
     };
+
+// ================================================================================================
+
+    template<size_t SIZE>
+    TUMVis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, parent)
+    {
+        for (size_t i = 0; i < size; ++i) {
+            _spinBox[i] = new QSpinBox(this);
+            _spinBox[i]->setMinimum(property->getMinValue()[i]);
+            _spinBox[i]->setMaximum(property->getMaxValue()[i]);
+            _spinBox[i]->setValue(property->getValue()[i]);
+            addWidget(_spinBox[i]);
+        }
+
+        property->s_minMaxChanged.connect(this, &IVecPropertyWidget::onPropertyMinMaxChanged);
+
+    }
+
+    template<size_t SIZE>
+    TUMVis::IVecPropertyWidget<SIZE>::~IVecPropertyWidget() {
+        static_cast<PropertyType*>(_property)->s_minMaxChanged.disconnect(this);
+    }
+
+    template<size_t SIZE>
+    void TUMVis::IVecPropertyWidget<SIZE>::updateWidgetFromProperty() {
+        PropertyType* prop = static_cast<PropertyType*>(_property);
+        for (size_t i = 0; i < size; ++i) {
+            _spinBox[i]->blockSignals(true);
+            _spinBox[i]->setValue(prop->getValue()[i]);
+            _spinBox[i]->blockSignals(false);
+        }
+    }
+
+    template<size_t SIZE>
+    void TUMVis::IVecPropertyWidget<SIZE>::onValueChangedImpl() {
+        _ignorePropertyUpdates = true;
+        PropertyType* prop = static_cast<PropertyType*>(_property);
+        typename IVecPropertyWidgetTraits<SIZE>::BaseType newValue;
+        for (size_t i = 0; i < size; ++i)
+            newValue[i] = _spinBox[i]->value();
+        prop->setValue(newValue);
+        _ignorePropertyUpdates = false;
+    }
+
+    template<size_t SIZE>
+    void TUMVis::IVecPropertyWidget<SIZE>::onPropertyMinMaxChanged(const AbstractProperty* property) {
+        if (!_ignorePropertyUpdates) {
+            PropertyType* prop = static_cast<PropertyType*>(_property);
+            for (size_t i = 0; i < size; ++i) {
+                _spinBox[i]->setMinimum(prop->getMinValue()[i]);
+                _spinBox[i]->setMaximum(prop->getMaxValue()[i]);
+            }
+        }
+    }
+
+// ================================================================================================
+
+    class IVec2PropertyWidget : public IVecPropertyWidget<2> {
+        Q_OBJECT
+    public:
+        IVec2PropertyWidget(PropertyType* property, QWidget* parent = 0)
+            : IVecPropertyWidget<2>(property, parent)
+        {
+            for (size_t i = 0; i < size; ++i) {
+                connect(_spinBox[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+            }
+        }
+
+    private slots:
+        void onValueChanged(int value) { onValueChangedImpl(); };
+    }; 
+
+// ================================================================================================
+    
+    class IVec3PropertyWidget : public IVecPropertyWidget<3> {
+        Q_OBJECT
+    public:
+        IVec3PropertyWidget(PropertyType* property, QWidget* parent = 0)
+            : IVecPropertyWidget<3>(property, parent)
+        {
+            for (size_t i = 0; i < size; ++i) {
+                connect(_spinBox[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+            }
+        }
+
+        private slots:
+            void onValueChanged(int value) { onValueChangedImpl(); };
+    }; 
+
+// ================================================================================================
+
+    class IVec4PropertyWidget : public IVecPropertyWidget<4> {
+        Q_OBJECT
+    public:
+        IVec4PropertyWidget(PropertyType* property, QWidget* parent = 0)
+            : IVecPropertyWidget<4>(property, parent)
+        {
+            for (size_t i = 0; i < size; ++i) {
+                connect(_spinBox[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+            }
+        }
+
+        private slots:
+            void onValueChanged(int value) { onValueChangedImpl(); };
+    }; 
+
 }
 #endif // INTPROPERTYWIDGET_H__

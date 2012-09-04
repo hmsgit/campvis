@@ -36,7 +36,7 @@
 
 namespace TUMVis {
     /**
-     * Widget for a IntProperty
+     * Widget for a FloatProperty
      */
     class FloatPropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
@@ -70,6 +70,179 @@ namespace TUMVis {
         QDoubleSpinBox* _spinBox;
 
     };
+
+// ================================================================================================
+
+    namespace {
+        template<size_t SIZE>
+        struct VecPropertyWidgetTraits {};
+
+        template<>
+        struct VecPropertyWidgetTraits<2> {
+            typedef Vec2Property PropertyType;
+            typedef tgt::vec2 BaseType;
+        };
+
+        template<>
+        struct VecPropertyWidgetTraits<3> {
+            typedef Vec3Property PropertyType;
+            typedef tgt::vec3 BaseType;
+        };
+
+        template<>
+        struct VecPropertyWidgetTraits<4> {
+            typedef Vec4Property PropertyType;
+            typedef tgt::vec4 BaseType;
+        };
+    }
+
+// ================================================================================================
+
+    /**
+     * Generic base class for Vec property widgets.
+     * Unfortunately Q_OBJECT and templates do not fit together, so we an additional level of 
+     * indirection helps as usual...
+     */
+    template<size_t SIZE>
+    class VecPropertyWidget : public AbstractPropertyWidget {
+    public:
+        enum { size = SIZE };
+        typedef typename VecPropertyWidgetTraits<SIZE>::PropertyType PropertyType;
+
+        /**
+         * Creates a new VecPropertyWidget for the property \a property.
+         * \param   property    The property the widget shall handle
+         * \param   parent      Parent Qt widget
+         */
+        VecPropertyWidget(PropertyType* property, QWidget* parent = 0);
+
+        /**
+         * Destructor
+         */
+        virtual ~VecPropertyWidget();
+
+    protected:
+        /**
+         * Gets called when the property has changed, so that widget can update its state.
+         */
+        virtual void updateWidgetFromProperty();
+
+        void onValueChangedImpl();
+
+        /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
+        virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
+
+        QDoubleSpinBox* _spinBox[size];
+    };
+
+// ================================================================================================
+
+    template<size_t SIZE>
+    TUMVis::VecPropertyWidget<SIZE>::VecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, parent)
+    {
+        for (size_t i = 0; i < size; ++i) {
+            _spinBox[i] = new QDoubleSpinBox(this);
+            _spinBox[i]->setMinimum(property->getMinValue()[i]);
+            _spinBox[i]->setMaximum(property->getMaxValue()[i]);
+            _spinBox[i]->setDecimals(3);
+            _spinBox[i]->setSingleStep(0.01);
+            _spinBox[i]->setValue(property->getValue()[i]);
+            addWidget(_spinBox[i]);
+        }
+
+        property->s_minMaxChanged.connect(this, &VecPropertyWidget::onPropertyMinMaxChanged);
+
+    }
+
+    template<size_t SIZE>
+    TUMVis::VecPropertyWidget<SIZE>::~VecPropertyWidget() {
+        static_cast<PropertyType*>(_property)->s_minMaxChanged.disconnect(this);
+    }
+
+    template<size_t SIZE>
+    void TUMVis::VecPropertyWidget<SIZE>::updateWidgetFromProperty() {
+        PropertyType* prop = static_cast<PropertyType*>(_property);
+        for (size_t i = 0; i < size; ++i) {
+            _spinBox[i]->blockSignals(true);
+            _spinBox[i]->setValue(prop->getValue()[i]);
+            _spinBox[i]->blockSignals(false);
+        }
+    }
+
+    template<size_t SIZE>
+    void TUMVis::VecPropertyWidget<SIZE>::onValueChangedImpl() {
+        _ignorePropertyUpdates = true;
+        PropertyType* prop = static_cast<PropertyType*>(_property);
+        typename VecPropertyWidgetTraits<SIZE>::BaseType newValue;
+        for (size_t i = 0; i < size; ++i)
+            newValue[i] = _spinBox[i]->value();
+        prop->setValue(newValue);
+        _ignorePropertyUpdates = false;
+    }
+
+    template<size_t SIZE>
+    void TUMVis::VecPropertyWidget<SIZE>::onPropertyMinMaxChanged(const AbstractProperty* property) {
+        if (!_ignorePropertyUpdates) {
+            PropertyType* prop = static_cast<PropertyType*>(_property);
+            for (size_t i = 0; i < size; ++i) {
+                _spinBox[i]->setMinimum(prop->getMinValue()[i]);
+                _spinBox[i]->setMaximum(prop->getMaxValue()[i]);
+            }
+        }
+    }
+
+// ================================================================================================
+
+    class Vec2PropertyWidget : public VecPropertyWidget<2> {
+        Q_OBJECT
+    public:
+        Vec2PropertyWidget(PropertyType* property, QWidget* parent = 0)
+            : VecPropertyWidget<2>(property, parent)
+        {
+            for (size_t i = 0; i < size; ++i) {
+                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+            }
+        }
+
+    private slots:
+        void onValueChanged(double value) { onValueChangedImpl(); };
+    }; 
+
+// ================================================================================================
+    
+    class Vec3PropertyWidget : public VecPropertyWidget<3> {
+        Q_OBJECT
+    public:
+        Vec3PropertyWidget(PropertyType* property, QWidget* parent = 0)
+            : VecPropertyWidget<3>(property, parent)
+        {
+            for (size_t i = 0; i < size; ++i) {
+                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+            }
+        }
+
+        private slots:
+            void onValueChanged(double value) { onValueChangedImpl(); };
+    }; 
+
+// ================================================================================================
+
+    class Vec4PropertyWidget : public VecPropertyWidget<4> {
+        Q_OBJECT
+    public:
+        Vec4PropertyWidget(PropertyType* property, QWidget* parent = 0)
+            : VecPropertyWidget<4>(property, parent)
+        {
+            for (size_t i = 0; i < size; ++i) {
+                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+            }
+        }
+
+        private slots:
+            void onValueChanged(double value) { onValueChangedImpl(); };
+    }; 
+
 }
 
 #endif // FLOATPROPERTYWIDGET_H__
