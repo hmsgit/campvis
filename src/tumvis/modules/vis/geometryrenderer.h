@@ -26,61 +26,61 @@
 // 
 // ================================================================================================
 
-#ifndef DVRVIS_H__
-#define DVRVIS_H__
+#ifndef GEOMETRYRENDERER_H__
+#define GEOMETRYRENDERER_H__
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include <string>
+
+#include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/cameraproperty.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/virtualmirrorgeometrygenerator.h"
-#include "modules/vis/proxygeometrygenerator.h"
-#include "modules/vis/geometryrenderer.h"
-#include "modules/vis/eepgenerator.h"
-#include "modules/vis/drrraycaster.h"
-#include "modules/vis/simpleraycaster.h"
-#include "modules/vis/clraycaster.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
 
-namespace TUMVis {
-    class DVRVis : public VisualizationPipeline {
-    public:
-        /**
-         * Creates a VisualizationPipeline.
-         */
-        DVRVis();
-
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~DVRVis();
-
-        /// \see VisualizationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
-
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
-    protected:
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        ProxyGeometryGenerator _pgGenerator;
-        VirtualMirrorGeometryGenerator _vmgGenerator;
-        GeometryRenderer _vmRenderer;
-        EEPGenerator _eepGenerator;
-        DRRRaycaster _drrraycater;
-        SimpleRaycaster _simpleRaycaster;
-        CLRaycaster _clRaycaster;
-        TrackballNavigationEventHandler* _trackballEH;
-
-    };
+namespace tgt {
+    class Shader;
 }
 
-#endif // DVRVIS_H__
+namespace TUMVis {
+    /**
+     * Genereates entry-/exit point textures for the given image and camera.
+     */
+    class GeometryRenderer : public VisualizationProcessor {
+    public:
+        /**
+         * Constructs a new GeometryRenderer Processor
+         **/
+        GeometryRenderer(GenericProperty<tgt::ivec2>& canvasSize);
+
+        /**
+         * Destructor
+         **/
+        virtual ~GeometryRenderer();
+
+        /// \see AbstractProcessor::init
+        virtual void init();
+
+        /// \see AbstractProcessor::deinit
+        virtual void deinit();
+
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "GeometryRenderer"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Renders Geometry."; };
+
+        virtual void process(DataContainer& data);
+
+        DataNameProperty _geometryID;       ///< ID for input geometry
+        DataNameProperty _renderTargetID;   ///< image ID for output image
+        CameraProperty _camera;
+
+    protected:
+
+        tgt::Shader* _shader;                           ///< Shader for EEP generation
+
+        static const std::string loggerCat_;
+    };
+
+}
+
+#endif // GEOMETRYRENDERER_H__

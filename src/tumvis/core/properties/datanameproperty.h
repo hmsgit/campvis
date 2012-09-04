@@ -26,61 +26,67 @@
 // 
 // ================================================================================================
 
-#ifndef DVRVIS_H__
-#define DVRVIS_H__
+#ifndef DATANAMEPROPERTY_H__
+#define DATANAMEPROPERTY_H__
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/virtualmirrorgeometrygenerator.h"
-#include "modules/vis/proxygeometrygenerator.h"
-#include "modules/vis/geometryrenderer.h"
-#include "modules/vis/eepgenerator.h"
-#include "modules/vis/drrraycaster.h"
-#include "modules/vis/simpleraycaster.h"
-#include "modules/vis/clraycaster.h"
+#include "core/properties/genericproperty.h"
+
+#include <ctime>
+#include <set>
+#include <string>
 
 namespace TUMVis {
-    class DVRVis : public VisualizationPipeline {
+
+    class DataNameProperty : public GenericProperty<std::string> {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * DataAccessInfo flag defining whether processor will read or write from/to the corresponding DataHandle.
          */
-        DVRVis();
+        enum DataAccessInfo {
+            READ,
+            WRITE
+        };
+
+        /**
+         * Creates a new DataNameProperty
+         * \param name      Property name (unchangable!)
+         * \param title     Property title (e.g. used for GUI)
+         * \param value     Initial value
+         * \param access    DataAccessInfo flag defining whether processor will read or write from/to the DataHandle with the given ID.
+         * \param il        Invalidation level that this property triggers
+         */
+        DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access, InvalidationLevel il = InvalidationLevel::INVALID_RESULT);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~DVRVis();
+        virtual ~DataNameProperty();
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
 
         /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
+         * Connects this property with the given DataNameProperty \a reader.
+         * \param   reader  DataNameProperty to connect to, must be have read access.
+         */
+        void connect(DataNameProperty* reader);
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+        /**
+         * Disconnects this property from the given DataNameProperty \a reader.
+         * \param   reader  DataNameProperty to disconnect from, must be have read access.
+         */
+        void disconnect(DataNameProperty* reader);
+
+        void issueWrite();
 
     protected:
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        ProxyGeometryGenerator _pgGenerator;
-        VirtualMirrorGeometryGenerator _vmgGenerator;
-        GeometryRenderer _vmRenderer;
-        EEPGenerator _eepGenerator;
-        DRRRaycaster _drrraycater;
-        SimpleRaycaster _simpleRaycaster;
-        CLRaycaster _clRaycaster;
-        TrackballNavigationEventHandler* _trackballEH;
 
+        void notifyReaders();
+
+        DataAccessInfo _accessInfo;
+        std::set<DataNameProperty*> _connectedReaders;
+
+        static const std::string loggerCat_;
     };
+
 }
 
-#endif // DVRVIS_H__
+#endif // DATANAMEPROPERTY_H__

@@ -40,6 +40,8 @@ namespace TUMVis {
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
+        , _vmgGenerator()
+        , _vmRenderer(_renderTargetSize)
         , _eepGenerator(_renderTargetSize)
         , _drrraycater(_renderTargetSize)
         , _simpleRaycaster(_renderTargetSize)
@@ -58,6 +60,8 @@ namespace TUMVis {
 
         _processors.push_back(&_imageReader);
         _processors.push_back(&_pgGenerator);
+        _processors.push_back(&_vmgGenerator);
+        _processors.push_back(&_vmRenderer);
         _processors.push_back(&_eepGenerator);
         _processors.push_back(&_drrraycater);
         _processors.push_back(&_simpleRaycaster);
@@ -71,6 +75,8 @@ namespace TUMVis {
     void DVRVis::init() {
         VisualizationPipeline::init();
 
+        _camera.addSharedProperty(&_vmgGenerator._camera);
+        _camera.addSharedProperty(&_vmRenderer._camera);
         _camera.addSharedProperty(&_eepGenerator._camera);
         _camera.addSharedProperty(&_drrraycater._camera);
         _camera.addSharedProperty(&_simpleRaycaster._camera);
@@ -78,14 +84,6 @@ namespace TUMVis {
 
         _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader._targetImageID.setValue("reader.output");
-
-        _eepGenerator._entryImageID.addSharedProperty(&_drrraycater._entryImageID);
-        _eepGenerator._entryImageID.addSharedProperty(&_simpleRaycaster._entryImageID);
-        _eepGenerator._entryImageID.addSharedProperty(&_clRaycaster._entryImageID);
-
-        _eepGenerator._exitImageID.addSharedProperty(&_drrraycater._exitImageID);
-        _eepGenerator._exitImageID.addSharedProperty(&_simpleRaycaster._exitImageID);
-        _eepGenerator._exitImageID.addSharedProperty(&_clRaycaster._exitImageID);
 
         _drrraycater._targetImageID.setValue("drr.output");
         _drrraycater._sourceImageID.setValue("eep.input");
@@ -97,14 +95,25 @@ namespace TUMVis {
         _clRaycaster._sourceImageID.setValue("clr.input");
 
         _eepGenerator._sourceImageID.setValue("eep.input");
-        _eepGenerator._entryImageID.setValue("eep.entry");
-        _eepGenerator._exitImageID.setValue("eep.exit");
-
         _pgGenerator._sourceImageID.setValue("eep.input");
 
         _renderTargetID.setValue("eep.entry");
 
+        _pgGenerator._geometryID.connect(&_eepGenerator._geometryID);
+        _vmgGenerator._mirrorID.connect(&_eepGenerator._mirrorID);
+        _vmgGenerator._mirrorID.connect(&_vmRenderer._geometryID);
+
+        _eepGenerator._entryImageID.connect(&_drrraycater._entryImageID);
+        _eepGenerator._entryImageID.connect(&_simpleRaycaster._entryImageID);
+        _eepGenerator._entryImageID.connect(&_clRaycaster._entryImageID);
+
+        _eepGenerator._exitImageID.connect(&_drrraycater._exitImageID);
+        _eepGenerator._exitImageID.connect(&_simpleRaycaster._exitImageID);
+        _eepGenerator._exitImageID.connect(&_clRaycaster._exitImageID);
+
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+        _vmgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+        _vmRenderer.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _pgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _drrraycater.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
@@ -146,6 +155,12 @@ namespace TUMVis {
         }
         if (! _pgGenerator.getInvalidationLevel().isValid()) {
             executeProcessor(&_pgGenerator);
+        }
+        if (! _vmgGenerator.getInvalidationLevel().isValid()) {
+            executeProcessor(&_vmgGenerator);
+        }
+        if (! _vmRenderer.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(&_vmRenderer);
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_eepGenerator);

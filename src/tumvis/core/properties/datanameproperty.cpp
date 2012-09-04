@@ -26,61 +26,48 @@
 // 
 // ================================================================================================
 
-#ifndef DVRVIS_H__
-#define DVRVIS_H__
-
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/virtualmirrorgeometrygenerator.h"
-#include "modules/vis/proxygeometrygenerator.h"
-#include "modules/vis/geometryrenderer.h"
-#include "modules/vis/eepgenerator.h"
-#include "modules/vis/drrraycaster.h"
-#include "modules/vis/simpleraycaster.h"
-#include "modules/vis/clraycaster.h"
+#include "datanameproperty.h"
 
 namespace TUMVis {
-    class DVRVis : public VisualizationPipeline {
-    public:
-        /**
-         * Creates a VisualizationPipeline.
-         */
-        DVRVis();
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~DVRVis();
+    const std::string DataNameProperty::loggerCat_ = "TUMVis.core.datastructures.DataNameProperty";
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
+    DataNameProperty::DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
+        : GenericProperty<std::string>(name, title, value, il)
+        , _accessInfo(access)
+    {
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+    }
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
+    DataNameProperty::~DataNameProperty() {
+    }
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+    void DataNameProperty::connect(DataNameProperty* reader) {
+        tgtAssert(reader != 0, "Reader must not be 0");
+        tgtAssert(_accessInfo == WRITE, "Can only connect writing properties to reading properties.");
+        tgtAssert(reader->_accessInfo == READ, "Can only connect writing properties to reading properties.");
 
-    protected:
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        ProxyGeometryGenerator _pgGenerator;
-        VirtualMirrorGeometryGenerator _vmgGenerator;
-        GeometryRenderer _vmRenderer;
-        EEPGenerator _eepGenerator;
-        DRRRaycaster _drrraycater;
-        SimpleRaycaster _simpleRaycaster;
-        CLRaycaster _clRaycaster;
-        TrackballNavigationEventHandler* _trackballEH;
+        if (_connectedReaders.insert(reader).second)
+            addSharedProperty(reader);
+    }
 
-    };
+    void DataNameProperty::disconnect(DataNameProperty* reader) {
+        tgtAssert(reader != 0, "Reader must not be 0");
+
+        if (_connectedReaders.erase(reader) > 0)
+            removeSharedProperty(reader);
+    }
+
+    void DataNameProperty::issueWrite() {
+        tgtAssert(_accessInfo == WRITE, "Write access not specified.");
+
+        for (std::set<DataNameProperty*>::iterator it = _connectedReaders.begin(); it != _connectedReaders.end(); ++it) {
+            (*it)->notifyReaders();
+        }
+    }
+
+    void DataNameProperty::notifyReaders() {
+        s_changed(this);
+    }
+
 }
-
-#endif // DVRVIS_H__

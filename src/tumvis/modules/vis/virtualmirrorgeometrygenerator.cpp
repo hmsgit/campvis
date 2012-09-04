@@ -41,7 +41,7 @@ namespace TUMVis {
 
     VirtualMirrorGeometryGenerator::VirtualMirrorGeometryGenerator()
         : AbstractProcessor()
-        , _mirrorID("geometryID", "Output Geometry ID", "mirror")
+        , _mirrorID("geometryID", "Output Geometry ID", "mirror", DataNameProperty::WRITE)
         , _mirrorCenter("mirrorCenter", "Mirror Center", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
         , _mirrorNormal("mirrorNormal", "Mirror Normal", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f), InvalidationLevel::VALID)
         , _size("mirrorSize", "Mirror Size", 4.0f, 0.1f, 1000.0f)
@@ -72,7 +72,7 @@ namespace TUMVis {
         // assure that mirror is faced to camera
         if (tgt::sign(tgt::dot(cam.getLook(), n)) == 1)
             n *= -1.f;
-        _mirrorNormal.setValue(n);
+        //_mirrorNormal.setValue(n);
 
         std::vector<tgt::vec3> vertices;
 
@@ -93,6 +93,7 @@ namespace TUMVis {
 
         FaceGeometry* mirror = new FaceGeometry(vertices);
         data.addData(_mirrorID.getValue(), mirror);
+        _mirrorID.issueWrite();
 
         _invalidationLevel.setValid();
     }

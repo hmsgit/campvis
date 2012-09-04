@@ -34,6 +34,7 @@
 #include "core/classification/abstracttransferfunction.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/cameraproperty.h"
+#include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
@@ -71,17 +72,15 @@ namespace TUMVis {
 
         virtual void process(DataContainer& data);
 
-        StringProperty _sourceImageID;    ///< image ID for input image
-        StringProperty _geometryID;       ///< ID for input geometry
-        StringProperty _mirrorID;           ///< ID for input mirror geometry
-        StringProperty _entryImageID;     ///< image ID for output entry points image
-        StringProperty _exitImageID;      ///< image ID for output exit points image
+        DataNameProperty _sourceImageID;    ///< image ID for input image
+        DataNameProperty _geometryID;       ///< ID for input geometry
+        DataNameProperty _mirrorID;           ///< ID for input mirror geometry
+        DataNameProperty _entryImageID;     ///< image ID for output entry points image
+        DataNameProperty _exitImageID;      ///< image ID for output exit points image
 
         CameraProperty _camera;
 
         BoolProperty _enableMirror;         ///< Enable Virtual Mirror Feature
-        FloatProperty _mirrorPoint;         ///< Point on mirror plane
-        Vec3Property _mirrorNormal;         ///< Normal of mirror plane
 
     protected:
 

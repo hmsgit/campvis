@@ -26,61 +26,13 @@
 // 
 // ================================================================================================
 
-#ifndef DVRVIS_H__
-#define DVRVIS_H__
+#version 330
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/virtualmirrorgeometrygenerator.h"
-#include "modules/vis/proxygeometrygenerator.h"
-#include "modules/vis/geometryrenderer.h"
-#include "modules/vis/eepgenerator.h"
-#include "modules/vis/drrraycaster.h"
-#include "modules/vis/simpleraycaster.h"
-#include "modules/vis/clraycaster.h"
+in vec3 ex_TexCoord;        ///< incoming texture coordinate
+out vec4 out_Color;         ///< outgoing fragment color
 
-namespace TUMVis {
-    class DVRVis : public VisualizationPipeline {
-    public:
-        /**
-         * Creates a VisualizationPipeline.
-         */
-        DVRVis();
+uniform vec4 _color;
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~DVRVis();
-
-        /// \see VisualizationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
-
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
-    protected:
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        ProxyGeometryGenerator _pgGenerator;
-        VirtualMirrorGeometryGenerator _vmgGenerator;
-        GeometryRenderer _vmRenderer;
-        EEPGenerator _eepGenerator;
-        DRRRaycaster _drrraycater;
-        SimpleRaycaster _simpleRaycaster;
-        CLRaycaster _clRaycaster;
-        TrackballNavigationEventHandler* _trackballEH;
-
-    };
+void main() {
+    out_Color = _color;
 }
-
-#endif // DVRVIS_H__

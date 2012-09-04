@@ -218,8 +218,10 @@ std::string ResourceManager<T>::completePath(std::string filename) {
 
     if (foundFile)
         return cplFileName;
-    else
+    else {
+        LERROR("Could not complete path for file " << filename);
         return "";
+    }
 }
 
 template <class T>

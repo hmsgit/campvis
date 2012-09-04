@@ -42,25 +42,22 @@ namespace TUMVis {
 
     EEPGenerator::EEPGenerator(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , _sourceImageID("sourceImageID", "Input Image", "")
-        , _geometryID("geometryID", "Input Geometry ID", "proxygeometry")
-        , _mirrorID("mirrorID", "Input Mirror ID", "mirror")
-        , _entryImageID("entryImageID", "Output Entry Points Image", "")
-        , _exitImageID("exitImageID", "Output Exit Points Image", "")
+        , _sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , _geometryID("geometryID", "Input Geometry ID", "proxygeometry", DataNameProperty::READ)
+        , _mirrorID("mirrorID", "Input Mirror ID", "mirror", DataNameProperty::READ)
+        , _entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
+        , _exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
         , _camera("camera", "Camera")
         , _enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
-        , _mirrorPoint("mirrorPoint", "Point on Mirror Plane", 0.f, -1000.f, 1000.f)
-        , _mirrorNormal("mirrorNormal", "Normal of Mirror Plane", tgt::vec3(1.f), tgt::vec3(-1.f), tgt::vec3(1.f))
         , _shader(0)
     {
         addProperty(&_sourceImageID);
+        addProperty(&_geometryID);
         addProperty(&_mirrorID);
         addProperty(&_entryImageID);
         addProperty(&_exitImageID);
         addProperty(&_camera);
         addProperty(&_enableMirror);
-        addProperty(&_mirrorPoint);
-        addProperty(&_mirrorNormal);
     }
 
     EEPGenerator::~EEPGenerator() {
@@ -100,29 +97,31 @@ namespace TUMVis {
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
 
                 _shader->activate();
-                _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
 
+                tgt::mat4 mirrorMatrix = tgt::mat4::identity;
                 if (_enableMirror.getValue()) {
-                    // TODO: make use of mirror geometry
-                    tgt::vec3 n = tgt::normalize(_mirrorNormal.getValue());
-                    tgt::vec3 p = n * _mirrorPoint.getValue();
-                    float k = tgt::dot(p, n);
+                    DataContainer::ScopedTypedData<FaceGeometry> mirrorGeometry(data, _mirrorID.getValue());
+                    if (mirrorGeometry && mirrorGeometry->size() > 0) {
+                        const tgt::vec3& p = mirrorGeometry->getVertices()[0];
+                        tgt::vec3 n = tgt::normalize(tgt::cross(mirrorGeometry->getVertices()[1] - mirrorGeometry->getVertices()[0], mirrorGeometry->getVertices()[2] - mirrorGeometry->getVertices()[0]));
+                        float k = tgt::dot(p, n);
 
-                    // mirror matrix sponsored by:
-                    // Jiang 
-                    tgt::mat4 mirrorMatrix = tgt::mat4(
-                        1 - 2*n.x*n.x, -2*n.y*n.x   , -2*n.z*n.x   , 0, 
-                        -2*n.x*n.y   , 1 - 2*n.y*n.y, -2*n.z*n.y   , 0, 
-                        -2*n.x*n.z   , -2*n.y*n.z   , 1 - 2*n.z*n.z, 0, 
-                        2*n.x*k      , 2*n.y*k      , 2*n.z*k      , 1);
+                        // mirror matrix sponsored by:
+                        // Jiang 
+                        mirrorMatrix = tgt::mat4(
+                            1 - 2*n.x*n.x, -2*n.y*n.x   , -2*n.z*n.x   , 0, 
+                            -2*n.x*n.y   , 1 - 2*n.y*n.y, -2*n.z*n.y   , 0, 
+                            -2*n.x*n.z   , -2*n.y*n.z   , 1 - 2*n.z*n.z, 0, 
+                            2*n.x*k      , 2*n.y*k      , 2*n.z*k      , 1);
 
-                    // TODO: double check, whether matrix transpose is necessary
-                    _shader->setUniform("_modelMatrix", mirrorMatrix);
+                        // TODO: double check, whether matrix transpose is necessary
+                    }
+                    else {
+                        LERROR("No suitable virtual mirror geometry found.");
+                    }
                 }
-                else {
-                    _shader->setUniform("_modelMatrix", tgt::mat4::identity);
-                }
-
+                
+                _shader->setUniform("_modelMatrix", mirrorMatrix);
                 _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
                 glEnable(GL_CULL_FACE);

@@ -44,9 +44,9 @@ namespace TUMVis {
 
     RaycastingProcessor::RaycastingProcessor(GenericProperty<tgt::ivec2>& renderTargetSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
         : VisualizationProcessor(renderTargetSize)
-        , _sourceImageID("sourceImageID", "Input Image", "")
-        , _entryImageID("entryImageID", "Input Entry Points Image", "")
-        , _exitImageID("exitImageID", "Input Exit Points Image", "")
+        , _sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , _entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
+        , _exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , _camera("camera", "Camera")
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f)

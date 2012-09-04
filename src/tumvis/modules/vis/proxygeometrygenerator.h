@@ -33,6 +33,7 @@
 
 #include "core/classification/abstracttransferfunction.h"
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 
@@ -59,8 +60,8 @@ namespace TUMVis {
 
         virtual void process(DataContainer& data);
 
-        StringProperty _sourceImageID;      ///< image ID for input image
-        StringProperty _geometryID;         ///< ID for output geometry
+        DataNameProperty _sourceImageID;      ///< image ID for input image
+        DataNameProperty _geometryID;         ///< ID for output geometry
 
         IVec2Property _clipX;               ///< clip coordinates for x axis
         IVec2Property _clipY;               ///< clip coordinates for y axis
