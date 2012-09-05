@@ -104,11 +104,11 @@ namespace TUMVis {
                 float nearPlaneDistToOrigin = tgt::dot(_camera.getValue().getPosition(), -_camera.getValue().getLook()) - _camera.getValue().getNearDist() - .001f;
                 MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -_camera.getValue().getLook(), true, 0.02f);
 
-                // set modelview and projection matrices
+                // start render setup
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
-
                 _shader->activate();
 
+                // setup virtual mirror if necessary
                 tgt::mat4 mirrorMatrix = tgt::mat4::identity;
                 if (_enableMirror.getValue()) {
                     DataContainer::ScopedTypedData<FaceGeometry> mirrorGeometry(data, _mirrorID.getValue());
@@ -131,11 +131,8 @@ namespace TUMVis {
                         LERROR("No suitable virtual mirror geometry found.");
                     }
                 }
-                
-                _shader->setUniform("_modelMatrix", mirrorMatrix);
-                _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
 
+                // setup masking if necessary
                 tgt::TextureUnit maskUnit;
                 if (_applyMask.getValue()) {
                     _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
@@ -146,6 +143,11 @@ namespace TUMVis {
                         mask->bind(_shader, &maskUnit, 0, "_maskImage");
                     }
                 }
+                
+                _shader->setUniform("_modelMatrix", mirrorMatrix);
+                _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
+
                 glEnable(GL_CULL_FACE);
 
                 // create entry points texture
@@ -178,6 +180,8 @@ namespace TUMVis {
 
                 data.addData(_entryImageID.getValue(), entrypoints);
                 data.addData(_exitImageID.getValue(), exitpoints);
+                _entryImageID.issueWrite();
+                _exitImageID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

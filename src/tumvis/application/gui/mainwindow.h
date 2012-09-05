@@ -42,6 +42,7 @@
 
 namespace TUMVis {
     class DataContainerInspectorWidget;
+    class DataContainerInspectorCanvas;
 
     /**
      * Main Window for the TUMVis application.
@@ -62,6 +63,16 @@ namespace TUMVis {
          */
         ~MainWindow();
 
+        
+        /**
+         * Initializes all OpenGL related stuff
+         */
+        void init();
+
+        /**
+         * Deinitializes all OpenGL related stuff
+         */
+        void deinit();
 
         /**
          * Slot to be called by the application when its collection of pipelines has changed.
@@ -109,6 +120,8 @@ namespace TUMVis {
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
         DataContainerInspectorWidget* _dcInspectorWidget;   ///< Widget for inspecting the DataContainer of the selected pipeline.
+
+        DataContainerInspectorCanvas* _dcInspectorCanvas;
 
         QPushButton* _btnExecute;                           ///< Button to execute the selected pipeline/processor
         QPushButton* _btnShowDataContainerInspector;        ///< Button to show the DataContainerInspector for the selected pipeline

@@ -28,17 +28,13 @@
 
 #version 330
 
+in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #include "tools/texture2d.frag"
-
-uniform vec2 _viewportSize;
-uniform vec2 _viewportSizeRCP;
-uniform Texture2D _colorTexture;
-uniform Texture2D _depthTexture;
+uniform Texture2D _texture;
+uniform vec4 _color;
 
 void main() {
-    vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
-    out_Color = getElement2DNormalized(_colorTexture, fragCoord);
-    gl_FragDepth = getElement2DNormalized(_depthTexture, fragCoord).z;
+    out_Color = getElement2DNormalized(_texture, ex_TexCoord.xy);
 }

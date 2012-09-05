@@ -40,6 +40,7 @@
 namespace tgt {
     class Shader;
     class Texture;
+    class TextureUnit;
 }
 
 namespace TUMVis {
@@ -47,6 +48,7 @@ namespace TUMVis {
     class DataContainer;
     class DataContainerTreeWidget;
     class DataHandle;
+    class FaceGeometry;
 
     class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -110,11 +112,14 @@ namespace TUMVis {
 
         void paintTexture(const tgt::Texture* texture);
 
+        void createQuad(float width, float height);
+
         DataContainer* _dataContainer;                      ///< The DataContainer this widget is inspecting
         std::map<std::string, const DataHandle*> _handles;  ///< Local copy of the DataHandles to inspect
         tbb::mutex _localMutex;
 
         tgt::Shader* _paintShader;
+        FaceGeometry* _quad;
 
         int dimX_;
         int dimY_;

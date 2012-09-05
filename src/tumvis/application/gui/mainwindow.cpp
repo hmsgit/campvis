@@ -31,6 +31,7 @@
 #include "tgt/assert.h"
 #include "application/tumvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
+#include "application/gui/datacontainerinspectorcanvas.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 
@@ -43,6 +44,7 @@ namespace TUMVis {
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
+        , _dcInspectorCanvas(0)
         , _btnExecute(0)
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
@@ -57,6 +59,9 @@ namespace TUMVis {
     }
 
     void MainWindow::setup() {
+        _dcInspectorCanvas = new DataContainerInspectorCanvas();
+        _dcInspectorCanvas->show();
+
         _centralWidget = new QWidget(this);
         QHBoxLayout* mainLayout = new QHBoxLayout();
         mainLayout->setSpacing(4);
@@ -115,6 +120,8 @@ namespace TUMVis {
             if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
             	_selectedPipeline = pipeline;
                 _selectedProcessor = 0;
+                _dcInspectorCanvas->setDataContainer(&_selectedPipeline->getDataContainer());
+
                 if (_dcInspectorWidget != 0)
                     onBtnShowDataContainerInspectorClicked();
             }
@@ -146,6 +153,16 @@ namespace TUMVis {
             _dcInspectorWidget->setDataContainer(&(_selectedPipeline->getDataContainer()));
             _dcInspectorWidget->show();
         }
+    }
+
+    void MainWindow::init() {
+        if (_dcInspectorCanvas != 0)
+            _dcInspectorCanvas->init();
+    }
+
+    void MainWindow::deinit() {
+        if (_dcInspectorCanvas != 0)
+            _dcInspectorCanvas->deinit();
     }
 
 }

@@ -129,6 +129,8 @@ namespace TUMVis {
             }
         }
 
+        _mainWindow->init();
+
         // init pipeline first
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
             (*it)->init();
@@ -161,6 +163,8 @@ namespace TUMVis {
             for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
                 it->second->deinit();
             }
+
+            _mainWindow->deinit();
 
             // deinit OpenGL and tgt
             tgt::deinitGL();
