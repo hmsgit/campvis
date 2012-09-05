@@ -45,11 +45,13 @@ namespace TUMVis {
         , _geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
         , _renderTargetID("_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , _camera("camera", "Camera")
+        , _color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
         addProperty(&_geometryID);
         addProperty(&_renderTargetID);
         addProperty(&_camera);
+        addProperty(&_color);
     }
 
     GeometryRenderer::~GeometryRenderer() {
@@ -80,7 +82,7 @@ namespace TUMVis {
             _shader->activate();
             _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
             _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
-            _shader->setUniform("_color", tgt::vec4(1.f));
+            _shader->setUniform("_color", _color.getValue());
 
             // create entry points texture
             ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);

@@ -49,6 +49,9 @@ namespace TUMVis {
         , _exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
         , _camera("camera", "Camera")
         , _enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
+        , _applyMask("applyMask", "Apply Mask to image", false, InvalidationLevel::INVALID_SHADER)
+        , _maskID("maskID", "Mask Image ID", "mask", DataNameProperty::READ)
+        , _maskColor("maskColor", "Mask Color", tgt::vec4(0.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
         addProperty(&_sourceImageID);
@@ -58,6 +61,9 @@ namespace TUMVis {
         addProperty(&_exitImageID);
         addProperty(&_camera);
         addProperty(&_enableMirror);
+        addProperty(&_applyMask);
+        addProperty(&_maskID);
+        addProperty(&_maskColor);
     }
 
     EEPGenerator::~EEPGenerator() {
@@ -85,6 +91,11 @@ namespace TUMVis {
 
         if (img != 0 && proxyGeometry != 0 && _shader != 0) {
             if (img->getDimensionality() == 3) {
+                if (_invalidationLevel.isInvalidShader()) {
+                    _shader->setHeaders(generateHeader());
+                    _shader->rebuild();
+                }
+
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
 
@@ -124,6 +135,17 @@ namespace TUMVis {
                 _shader->setUniform("_modelMatrix", mirrorMatrix);
                 _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
+
+                tgt::TextureUnit maskUnit;
+                if (_applyMask.getValue()) {
+                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                    _shader->setUniform("_maskColor", _maskColor.getValue());
+
+                    DataContainer::ScopedTypedData<ImageDataRenderTarget> mask(data, _maskID.getValue());
+                    if (mask != 0) {
+                        mask->bind(_shader, &maskUnit, 0, "_maskImage");
+                    }
+                }
                 glEnable(GL_CULL_FACE);
 
                 // create entry points texture
@@ -166,6 +188,15 @@ namespace TUMVis {
         }
 
         _invalidationLevel.setValid();
+    }
+
+    std::string EEPGenerator::generateHeader() const {
+        std::string toReturn;
+
+        if (_applyMask.getValue())
+            toReturn += "#define APPLY_MASK 1\n";
+
+        return toReturn;
     }
 
 }

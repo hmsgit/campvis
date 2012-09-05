@@ -28,9 +28,28 @@
 
 #version 330
 
-in vec3 ex_TexCoord;        ///< incoming texture coordinate
-out vec4 out_Color;         ///< outgoing fragment color
+in vec3 ex_TexCoord;            ///< incoming texture coordinate
+out vec4 out_Color;             ///< outgoing fragment color
+
+#ifdef APPLY_MASK
+#include "tools/texture2d.frag"
+uniform vec2 _viewportSizeRCP;
+uniform Texture2D _maskImage;   ///< mask image
+uniform vec4 _maskColor;        ///< mask color
+#endif
 
 void main() {
+#ifdef APPLY_MASK
+    vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
+    vec4 maskValue = getElement2DNormalized(_maskImage, fragCoord);
+    if (distance(maskValue, _maskColor) > 0.01) {
+        out_Color = vec4(ex_TexCoord, 1.0);
+    }
+    else {
+        discard;
+    }
+#else
     out_Color = vec4(ex_TexCoord, 1.0);
+#endif
+    
 }

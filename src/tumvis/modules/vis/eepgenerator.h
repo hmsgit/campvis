@@ -74,7 +74,7 @@ namespace TUMVis {
 
         DataNameProperty _sourceImageID;    ///< image ID for input image
         DataNameProperty _geometryID;       ///< ID for input geometry
-        DataNameProperty _mirrorID;           ///< ID for input mirror geometry
+        DataNameProperty _mirrorID;         ///< ID for input mirror geometry
         DataNameProperty _entryImageID;     ///< image ID for output entry points image
         DataNameProperty _exitImageID;      ///< image ID for output exit points image
 
@@ -82,7 +82,17 @@ namespace TUMVis {
 
         BoolProperty _enableMirror;         ///< Enable Virtual Mirror Feature
 
+        BoolProperty _applyMask;            ///< Flag whether to apply mask
+        DataNameProperty _maskID;           ///< ID for mask image (optional)
+        Vec4Property _maskColor;            ///< Mask color
+
     protected:
+
+        /**
+         * \see RaycastingProcessor::generateHeader()
+         * \return  "#define APPLY_MASK 1" if \a _applyMask is set to true.
+         */
+        virtual std::string generateHeader() const;
 
         tgt::Shader* _shader;                           ///< Shader for EEP generation
 

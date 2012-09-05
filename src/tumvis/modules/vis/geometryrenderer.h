@@ -74,6 +74,8 @@ namespace TUMVis {
         DataNameProperty _renderTargetID;   ///< image ID for output image
         CameraProperty _camera;
 
+        Vec4Property _color;                ///< rendering color
+
     protected:
 
         tgt::Shader* _shader;                           ///< Shader for EEP generation
