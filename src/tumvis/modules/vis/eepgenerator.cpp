@@ -149,6 +149,7 @@ namespace TUMVis {
                 _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
 
                 glEnable(GL_CULL_FACE);
+                glEnable(GL_DEPTH_TEST);
 
                 // create entry points texture
                 ImageDataRenderTarget* entrypoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);

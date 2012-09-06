@@ -69,6 +69,7 @@ Trackball::~Trackball() {
 
 void Trackball::reset() {
     getCamera()->positionCamera(cameraPosition_, cameraFocus_, cameraUpVector_);
+    updateClippingPlanes();
     hcam_->update();
 }
 
@@ -264,6 +265,7 @@ void Trackball::zoom(float factor) {
     factor = 1.f / factor;
     getCamera()->setPosition( (1.f-factor) * getCamera()->getFocus()
                               + factor * getCamera()->getPosition());
+    updateClippingPlanes();
     hcam_->update();
 }
 
@@ -273,6 +275,7 @@ void Trackball::zoom(vec2 newMouse) {
 
 void Trackball::zoomAbsolute(float focallength) {
    getCamera()->setPosition( getCamera()->getFocus() - focallength * getCamera()->getLook());
+   updateClippingPlanes();
    hcam_->update();
 }
 
@@ -548,6 +551,7 @@ void Trackball::timerEvent(TimeEvent* e) {
         rotate(getLastOrientationChange());
     }
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 

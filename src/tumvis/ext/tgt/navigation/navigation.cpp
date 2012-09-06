@@ -48,6 +48,7 @@ void Navigation::rotateView(float angle, const vec3& axis) {
 
     // Set the new focus-point
     getCamera()->setFocus(getCamera()->getPosition() + getCamera()->getFocalLength()*look);
+    updateClippingPlanes();
 }
 
 // Rotate the Camera about horizontal and vertical angles given by the user
@@ -71,6 +72,7 @@ void Navigation::rotateViewHV(float anglehorz, float anglevert) {
 
     // Set the new focus-point
     getCamera()->setFocus(getCamera()->getPosition() + getCamera()->getFocalLength()*look);
+    updateClippingPlanes();
 }
 
 // FIXME: the following few functions should be inline
@@ -93,6 +95,7 @@ void Navigation::rotateViewHorz(float angle) {
 void Navigation::rollCameraHorz(float angle) {
     vec3 up = normalize( quat::rotate(getCamera()->getUpVector(), angle, getCamera()->getLook()) );
     getCamera()->setUpVector(up);
+    updateClippingPlanes();
 }
 
 // This can be used to rotate (or "roll") the camera forwards and backwards, angle in radian measure
@@ -101,12 +104,14 @@ void Navigation::rollCameraVert(float angle) {
     getCamera()->setUpVector(up);
     vec3 look = cross(up, getCamera()->getStrafe());
     getCamera()->setFocus(getCamera()->getPosition() + look);
+    updateClippingPlanes();
 }
 
 void Navigation::moveCameraForward(float length) {
     vec3 motionvector = length*getCamera()->getLook();
     getCamera()->setPosition( getCamera()->getPosition() + motionvector );
     getCamera()->setFocus( getCamera()->getFocus() + motionvector );
+    updateClippingPlanes();
 }
 
 void Navigation::moveCameraBackward(float length) {
@@ -117,6 +122,7 @@ void Navigation::moveCameraUp(float length) {
     vec3 motionvector = length*getCamera()->getUpVector();
     getCamera()->setPosition( getCamera()->getPosition() + motionvector );
     getCamera()->setFocus( getCamera()->getFocus() + motionvector );
+    updateClippingPlanes();
 }
 
 void Navigation::moveCameraDown(float length) {
@@ -127,6 +133,7 @@ void Navigation::moveCameraRight(float length) {
     vec3 motionvector = length*getCamera()->getStrafe();
     getCamera()->setPosition( getCamera()->getPosition() + motionvector );
     getCamera()->setFocus( getCamera()->getFocus() + motionvector );
+    updateClippingPlanes();
 }
 
 void Navigation::moveCameraLeft(float length) {
@@ -145,6 +152,13 @@ void Navigation::moveCamera(float length, const vec3& axis) {
 void Navigation::moveCamera(const vec3& motionvector) {
     getCamera()->setPosition( getCamera()->getPosition() + motionvector );
     getCamera()->setFocus( getCamera()->getFocus() + motionvector );
+    updateClippingPlanes();
+}
+
+void Navigation::setSceneBounds(const tgt::Bounds& bounds) {
+    _sceneBounds = bounds;
+    updateClippingPlanes();
+    hcam_->update();
 }
 
 /***********************************************************************

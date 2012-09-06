@@ -29,6 +29,7 @@
 #ifndef TRACKBALLNAVIGATIONEVENTHANDLER_H__
 #define TRACKBALLNAVIGATIONEVENTHANDLER_H__
 
+#include "tgt/bounds.h"
 #include "tgt/logmanager.h"
 #include "tgt/navigation/trackball.h"
 #include "core/eventhandlers/abstracteventhandler.h"
@@ -107,10 +108,17 @@ namespace TUMVis {
          */
         void setCenter(const tgt::vec3& center);
 
+        /**
+         * Sets the scene bounds for automatic near/far clipping plane adjustment.
+         * \param   bounds  New bounds for the rendered scene.
+         */
+        void setSceneBounds(const tgt::Bounds& bounds);
+
     protected:
         CameraProperty* _cameraProperty;
         CamPropNavigationWrapper _cpnw;
         tgt::Trackball* _trackball;
+        tgt::Bounds _sceneBounds;
 
         static const std::string loggerCat_;
     };

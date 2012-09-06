@@ -27,6 +27,7 @@
 
 #include "tgt/tgt_gl.h"
 
+#include "tgt/bounds.h"
 #include "tgt/camera.h"
 #include "tgt/glcanvas.h"
 #include "tgt/types.h"
@@ -74,9 +75,23 @@ class TGT_API Navigation : virtual public EventListener {
 
 protected:
 
+    /**
+        * Updates the near-/far clipping planes. 
+        * Does not issue an update command to the camera.
+        */
+    void updateClippingPlanes() {
+        float diag = tgt::length(_sceneBounds.diagonal()) * 0.75f;
+        float dist = tgt::distance(getCamera()->getPosition(), _sceneBounds.center());
+        getCamera()->setNearDist(std::max(dist - diag, 0.1f));
+        getCamera()->setFarDist(diag + dist);
+    };
+        
+    Bounds _sceneBounds;
+
     // navigation manipulates the camera of a certain canvas.
     // we only need a pointer to this canvas, not to the camera (see getCamera).
     IHasCamera* hcam_;
+
 
 public:
 
@@ -86,7 +101,14 @@ public:
 
     virtual ~Navigation() {}
 
-//     void setCanvas(GLCanvas* hcam) { hcam_ = hcam; }
+
+    /**
+     * Sets the scene bounds for automatic near/far clipping plane adjustment.
+     * \param   bounds  New bounds for the rendered scene.
+     */
+    void setSceneBounds(const tgt::Bounds& bounds);
+
+    //     void setCanvas(GLCanvas* hcam) { hcam_ = hcam; }
 //     GLCanvas* getCanvas() const { return hcam_->; }
 
     Camera* getCamera() const { return hcam_->getCamera(); }

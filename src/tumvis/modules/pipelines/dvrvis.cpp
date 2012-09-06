@@ -50,11 +50,6 @@ namespace TUMVis {
     {
         addProperty(&_camera);
 
-        // TODO: remove this ugly hack: automatically adapt near/far plane to volume extent.
-        tgt::Camera c;
-        c.setFarDist(512.f);
-        _camera.setValue(c);
-
         _trackballEH = new TrackballNavigationEventHandler(&_camera, _renderTargetSize.getValue());
         _eventHandlers.push_back(_trackballEH);
 
@@ -150,8 +145,11 @@ namespace TUMVis {
 
             tgt::Bounds volumeExtent = img->getWorldBounds();
             tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+            
+            _trackballEH->setSceneBounds(volumeExtent);
             _trackballEH->setCenter(volumeExtent.center());
             _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+
         }
         if (! _pgGenerator.getInvalidationLevel().isValid()) {
             executeProcessor(&_pgGenerator);

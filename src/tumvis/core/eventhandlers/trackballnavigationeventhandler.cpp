@@ -123,4 +123,8 @@ namespace TUMVis {
         _trackball->setViewprtSize(viewportSize);
     }
 
+    void TrackballNavigationEventHandler::setSceneBounds(const tgt::Bounds& bounds) {
+        _trackball->setSceneBounds(bounds);
+    }
+
 }
