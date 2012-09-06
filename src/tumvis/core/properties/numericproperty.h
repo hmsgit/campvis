@@ -30,7 +30,6 @@
 #define NUMERICPROPERTY_H__
 
 #include "tgt/vector.h"
-#include "core/tools/interval.h"
 #include "core/properties/genericproperty.h"
 
 #include <limits>
