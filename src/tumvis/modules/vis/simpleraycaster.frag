@@ -78,7 +78,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (color.a > 0.0) {
             // accomodate for variable sampling rates (base interval defined by mod_compositing.frag)
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-            result.rgb = result.rgb + (1.0 - result.a) * color.a * color.rgb;
+            result.rgb = mix(color.rgb, result.rgb, result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
         }
 

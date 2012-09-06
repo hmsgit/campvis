@@ -26,65 +26,63 @@
 // 
 // ================================================================================================
 
-#ifndef DVRVIS_H__
-#define DVRVIS_H__
+#ifndef VIRTUALMIRRORCOMBINE_H__
+#define VIRTUALMIRRORCOMBINE_H__
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/virtualmirrorgeometrygenerator.h"
-#include "modules/vis/proxygeometrygenerator.h"
-#include "modules/vis/geometryrenderer.h"
-#include "modules/vis/eepgenerator.h"
-#include "modules/vis/drrraycaster.h"
-#include "modules/vis/simpleraycaster.h"
-#include "modules/vis/clraycaster.h"
-#include "modules/vis/virtualmirrorcombine.h"
+#include <string>
 
-namespace TUMVis {
-    class DVRVis : public VisualizationPipeline {
-    public:
-        /**
-         * Creates a VisualizationPipeline.
-         */
-        DVRVis();
+#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
+#include "core/properties/transferfunctionproperty.h"
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~DVRVis();
-
-        /// \see VisualizationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
-
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
-    protected:
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        ProxyGeometryGenerator _pgGenerator;
-        VirtualMirrorGeometryGenerator _vmgGenerator;
-        GeometryRenderer _vmRenderer;
-        EEPGenerator _eepGenerator;
-        EEPGenerator _vmEepGenerator;
-        SimpleRaycaster _dvrNormal;
-        SimpleRaycaster _dvrVM;
-        CLRaycaster _clRaycaster;
-        VirtualMirrorCombine _combine;
-
-        TrackballNavigationEventHandler* _trackballEH;
-
-    };
+namespace tgt {
+    class Shader;
 }
 
-#endif // DVRVIS_H__
+namespace TUMVis {
+    class ImageData;
+
+    /**
+     * Extracts a slice from a 3D image and renders it into a rendertarget.
+     */
+    class VirtualMirrorCombine : public VisualizationProcessor {
+    public:
+        /**
+         * Constructs a new VirtualMirrorCombine Processor
+         **/
+        VirtualMirrorCombine(GenericProperty<tgt::ivec2>& canvasSize);
+
+        /**
+         * Destructor
+         **/
+        virtual ~VirtualMirrorCombine();
+
+        /// \see AbstractProcessor::init
+        virtual void init();
+
+        /// \see AbstractProcessor::deinit
+        virtual void deinit();
+
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "VirtualMirrorCombine"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Combines Normal DVR and Virtual Mirror DVR images."; };
+
+        virtual void process(DataContainer& data);
+
+        DataNameProperty _normalImageID;            ///< image ID for normal DVR input image
+        DataNameProperty _mirrorImageID;            ///< image ID for mirror DVR input image
+        DataNameProperty _targetImageID;            ///< image ID for output image
+
+
+    protected:
+        tgt::Shader* _shader;                           ///< Shader for slice rendering
+
+        static const std::string loggerCat_;
+    };
+
+}
+
+#endif // VIRTUALMIRRORCOMBINE_H__

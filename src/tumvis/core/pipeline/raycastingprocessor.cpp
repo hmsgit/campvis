@@ -49,7 +49,7 @@ namespace TUMVis {
         , _exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , _camera("camera", "Camera")
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f)
+        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .02f, 0.001f, 1.f)
         , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
         , _jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
         , _fragmentShaderFilename(fragmentShaderFileName)
@@ -96,6 +96,7 @@ namespace TUMVis {
                 }
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
+                glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
                 _shader->setAttributeLocation(0, "in_Position");

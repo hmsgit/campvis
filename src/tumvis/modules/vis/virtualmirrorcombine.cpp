@@ -26,87 +26,87 @@
 // 
 // ================================================================================================
 
-#include "geometryrenderer.h"
-
-#include "tgt/glmath.h"
+#include "virtualmirrorcombine.h"
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
+#include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/meshgeometry.h"
+#include "core/datastructures/imagedataconverter.h"
+
+#include "core/classification/simpletransferfunction.h"
+
+#include "core/tools/quadrenderer.h"
 
 namespace TUMVis {
-    const std::string GeometryRenderer::loggerCat_ = "TUMVis.modules.vis.GeometryRenderer";
+    const std::string VirtualMirrorCombine::loggerCat_ = "TUMVis.modules.vis.VirtualMirrorCombine";
 
-    GeometryRenderer::GeometryRenderer(GenericProperty<tgt::ivec2>& canvasSize)
+    VirtualMirrorCombine::VirtualMirrorCombine(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , _geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
-        , _renderTargetID("_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
-        , _camera("camera", "Camera")
-        , _color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , _normalImageID("normalImageID", "Normal DVR Input Image", "", DataNameProperty::READ)
+        , _mirrorImageID("mirrorImageIde", "Mirror DVR Input Image", "", DataNameProperty::READ)
+        , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&_geometryID);
-        addProperty(&_renderTargetID);
-        addProperty(&_camera);
-        addProperty(&_color);
+        addProperty(&_normalImageID);
+        addProperty(&_mirrorImageID);
+        addProperty(&_targetImageID);
     }
 
-    GeometryRenderer::~GeometryRenderer() {
+    VirtualMirrorCombine::~VirtualMirrorCombine() {
 
     }
 
-    void GeometryRenderer::init() {
+    void VirtualMirrorCombine::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/geometryrenderer.frag", "", false);
-        if (_shader != 0) {
-            _shader->setAttributeLocation(0, "in_Position");
-        }
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/virtualmirrorcombine.frag", "", false);
+        _shader->setAttributeLocation(0, "in_Position");
+        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
-    void GeometryRenderer::deinit() {
-        ShdrMgr.dispose(_shader);
-        _shader = 0;
+    void VirtualMirrorCombine::deinit() {
         VisualizationProcessor::deinit();
+        ShdrMgr.dispose(_shader);
     }
 
-    void GeometryRenderer::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, _geometryID.getValue());
+    void VirtualMirrorCombine::process(DataContainer& data) {
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> normalImage(data, _normalImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> mirrorImage(data, _mirrorImageID.getValue());
 
-        if (proxyGeometry != 0 && _shader != 0) {
-            // set modelview and projection matrices
+        if (normalImage != 0 && mirrorImage != 0) {
+            ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
             glPushAttrib(GL_ALL_ATTRIB_BITS);
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_ALWAYS);
 
             _shader->activate();
-            _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
-            _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
-            _shader->setUniform("_color", _color.getValue());
+            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit;
 
-            // create entry points texture
-            ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
+            normalImage->bind(_shader, &normalColorUnit, &normalDepthUnit, "_normalColor", "_normalDepth");
+            mirrorImage->bind(_shader, &mirrorColorUnit, &mirrorDepthUnit, "_mirrorColor", "_mirrorDepth");
+
             rt->activate();
-
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LESS);
-            glClearDepth(1.0f);
+            LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            proxyGeometry->render();
-
+            QuadRdr.renderQuad();
             rt->deactivate();
+
             _shader->deactivate();
+            tgt::TextureUnit::setZeroUnit();
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(_renderTargetID.getValue(), rt);
-            _renderTargetID.issueWrite();
+            data.addData(_targetImageID.getValue(), rt);
+            _targetImageID.issueWrite();
         }
         else {
-            LERROR("No suitable input geometry found.");
+            LERROR("No suitable input images found.");
         }
 
         _invalidationLevel.setValid();
     }
 
 }
+

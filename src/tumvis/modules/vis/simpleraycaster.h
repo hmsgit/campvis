@@ -63,7 +63,7 @@ namespace TUMVis {
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
 
-        GenericProperty<std::string> _targetImageID;    ///< image ID for output image
+        DataNameProperty _targetImageID;    ///< image ID for output image
 
     protected:
         /// \see RaycastingProcessor::processImpl()

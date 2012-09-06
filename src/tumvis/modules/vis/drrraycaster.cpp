@@ -36,7 +36,7 @@ namespace TUMVis {
 
     DRRRaycaster::DRRRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
         : RaycastingProcessor(canvasSize, "modules/vis/drrraycaster.frag", false)
-        , _targetImageID("targetImageID", "Output Image", "")
+        , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , _shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
         , _scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)
         , _invertMapping("invertMapping", "Invert Mapping", false, InvalidationLevel::INVALID_RESULT | InvalidationLevel::INVALID_SHADER)
@@ -68,6 +68,7 @@ namespace TUMVis {
 
         rt->deactivate();
         data.addData(_targetImageID.getValue(), rt);
+        _targetImageID.issueWrite();
     }
 
     std::string DRRRaycaster::generateHeader() const {

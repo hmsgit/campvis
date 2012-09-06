@@ -125,7 +125,7 @@ namespace TUMVis {
                             -2*n.x*n.z   , -2*n.y*n.z   , 1 - 2*n.z*n.z, 0, 
                             2*n.x*k      , 2*n.y*k      , 2*n.z*k      , 1));
 
-                        // TODO: double check, whether matrix transpose is necessary, and if so, hardcode it
+                        // TODO: double check, whether matrix transpose is necessary
                     }
                     else {
                         LERROR("No suitable virtual mirror geometry found.");

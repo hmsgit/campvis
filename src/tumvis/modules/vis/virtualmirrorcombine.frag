@@ -26,39 +26,28 @@
 // 
 // ================================================================================================
 
-#include "simpleraycaster.h"
+#version 330
 
-#include "core/tools/quadrenderer.h"
-#include "core/datastructures/imagedatarendertarget.h"
+in vec3 ex_TexCoord;
+out vec4 out_Color;
 
-namespace TUMVis {
-    const std::string SimpleRaycaster::loggerCat_ = "TUMVis.modules.vis.SimpleRaycaster";
+#include "tools/texture2d.frag"
 
-    SimpleRaycaster::SimpleRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/vis/simpleraycaster.frag", true)
-        , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-    {
-        addProperty(&_targetImageID);
+uniform Texture2D _normalColor;
+uniform Texture2D _normalDepth;
+uniform Texture2D _mirrorColor;
+uniform Texture2D _mirrorDepth;
 
-        // TODO: remove hack
-        _transferFunction.getTF()->setIntensityDomain(tgt::vec2(0.01f, 0.05f));
+void main() {
+    float normalDepth = getElement2DNormalized(_normalDepth, ex_TexCoord.xy).z;
+    float mirrorDepth = getElement2DNormalized(_mirrorDepth, ex_TexCoord.xy).z;
+
+    if (normalDepth <= mirrorDepth) {
+        out_Color = getElement2DNormalized(_normalColor, ex_TexCoord.xy);
+        gl_FragDepth = normalDepth;
     }
-
-    SimpleRaycaster::~SimpleRaycaster() {
-
-    }
-
-    void SimpleRaycaster::processImpl(DataContainer& data) {
-        ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-        rt->activate();
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDepthFunc(GL_ALWAYS);
-        QuadRdr.renderQuad();
-        LGL_ERROR;
-
-        rt->deactivate();
-        data.addData(_targetImageID.getValue(), rt);
-        _targetImageID.issueWrite();
+    else {
+        out_Color = getElement2DNormalized(_mirrorColor, ex_TexCoord.xy);
+        gl_FragDepth = mirrorDepth;
     }
 }

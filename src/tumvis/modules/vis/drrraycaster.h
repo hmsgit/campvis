@@ -63,7 +63,7 @@ namespace TUMVis {
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates a Digitally Reconstructed Radiograph."; };
 
-        GenericProperty<std::string> _targetImageID;    ///< image ID for output image
+        DataNameProperty _targetImageID;    ///< image ID for output image
 
         FloatProperty _shift;
         FloatProperty _scale;
