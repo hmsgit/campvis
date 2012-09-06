@@ -43,6 +43,7 @@ namespace TUMVis {
         , _vmgGenerator()
         , _vmRenderer(_renderTargetSize)
         , _eepGenerator(_renderTargetSize)
+        , _vmEepGenerator(_renderTargetSize)
         , _drrraycater(_renderTargetSize)
         , _simpleRaycaster(_renderTargetSize)
         , _clRaycaster(_renderTargetSize)
@@ -58,6 +59,7 @@ namespace TUMVis {
         _processors.push_back(&_vmgGenerator);
         _processors.push_back(&_vmRenderer);
         _processors.push_back(&_eepGenerator);
+        _processors.push_back(&_vmEepGenerator);
         _processors.push_back(&_drrraycater);
         _processors.push_back(&_simpleRaycaster);
         _processors.push_back(&_clRaycaster);
@@ -73,6 +75,7 @@ namespace TUMVis {
         _camera.addSharedProperty(&_vmgGenerator._camera);
         _camera.addSharedProperty(&_vmRenderer._camera);
         _camera.addSharedProperty(&_eepGenerator._camera);
+        _camera.addSharedProperty(&_vmEepGenerator._camera);
         _camera.addSharedProperty(&_drrraycater._camera);
         _camera.addSharedProperty(&_simpleRaycaster._camera);
         _camera.addSharedProperty(&_clRaycaster._camera);
@@ -90,13 +93,23 @@ namespace TUMVis {
         _clRaycaster._sourceImageID.setValue("clr.input");
 
         _eepGenerator._sourceImageID.setValue("eep.input");
+        _vmEepGenerator._sourceImageID.setValue("eep.input");
         _pgGenerator._sourceImageID.setValue("eep.input");
+
+        _vmRenderer._renderTargetID.connect(&_vmEepGenerator._maskID);
+        _vmEepGenerator._entryImageID.setValue("vm.eep.entry");
+        _vmEepGenerator._exitImageID.setValue("vm.eep.exit");
+        _vmEepGenerator._applyMask.setValue(true);
+        _vmEepGenerator._enableMirror.setValue(true);
 
         _renderTargetID.setValue("eep.entry");
 
-        _pgGenerator._geometryID.connect(&_eepGenerator._geometryID);
-        _vmgGenerator._mirrorID.connect(&_eepGenerator._mirrorID);
+        _pgGenerator._geometryID.connect(&_vmEepGenerator._geometryID);
+        _vmgGenerator._mirrorID.connect(&_vmEepGenerator._mirrorID);
         _vmgGenerator._mirrorID.connect(&_vmRenderer._geometryID);
+        _vmgGenerator._mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));
+        _vmgGenerator._poi.setValue(tgt::vec3(40.f, 40.f, 40.f));
+        _vmgGenerator._size.setValue(60.f);
 
         _eepGenerator._entryImageID.connect(&_drrraycater._entryImageID);
         _eepGenerator._entryImageID.connect(&_simpleRaycaster._entryImageID);
@@ -111,6 +124,7 @@ namespace TUMVis {
         _vmRenderer.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _pgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+        _vmEepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _drrraycater.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _simpleRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _clRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
@@ -162,6 +176,9 @@ namespace TUMVis {
         }
         if (! _eepGenerator.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_eepGenerator);
+        }
+        if (! _vmEepGenerator.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(&_vmEepGenerator);
         }
         if (!_drrraycater.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_drrraycater);

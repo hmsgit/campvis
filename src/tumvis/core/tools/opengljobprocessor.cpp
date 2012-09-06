@@ -158,7 +158,7 @@ namespace TUMVis {
             } 
         }
         else {
-            tgtAssert(false, "Specified context not found. Context must be registered before they can have jobs.");
+            tgtAssert(false, "Specified context not found. Contexts must be registered before they can have jobs.");
         }
 
         _evaluationCondition.notify_all();

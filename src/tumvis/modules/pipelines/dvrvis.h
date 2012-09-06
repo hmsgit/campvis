@@ -75,6 +75,7 @@ namespace TUMVis {
         VirtualMirrorGeometryGenerator _vmgGenerator;
         GeometryRenderer _vmRenderer;
         EEPGenerator _eepGenerator;
+        EEPGenerator _vmEepGenerator;
         DRRRaycaster _drrraycater;
         SimpleRaycaster _simpleRaycaster;
         CLRaycaster _clRaycaster;

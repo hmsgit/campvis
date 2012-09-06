@@ -50,7 +50,7 @@ namespace TUMVis {
     class DataHandle;
     class FaceGeometry;
 
-    class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, public sigslot::has_slots<> {
+    class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public sigslot::has_slots<> {
         Q_OBJECT;
 
     public:
@@ -93,6 +93,9 @@ namespace TUMVis {
          * Performs the painting.
          */
         void paint();
+
+        /// This is meant be overridden to adjust camera settings to new canvas dimensions
+        virtual void sizeChanged(const tgt::ivec2&);
 
     private slots:
 

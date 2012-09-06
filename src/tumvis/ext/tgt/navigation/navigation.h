@@ -79,12 +79,7 @@ protected:
         * Updates the near-/far clipping planes. 
         * Does not issue an update command to the camera.
         */
-    void updateClippingPlanes() {
-        float diag = tgt::length(_sceneBounds.diagonal()) * 0.75f;
-        float dist = tgt::distance(getCamera()->getPosition(), _sceneBounds.center());
-        getCamera()->setNearDist(std::max(dist - diag, 0.1f));
-        getCamera()->setFarDist(diag + dist);
-    };
+    void updateClippingPlanes();;
         
     Bounds _sceneBounds;
 

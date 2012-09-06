@@ -161,6 +161,14 @@ void Navigation::setSceneBounds(const tgt::Bounds& bounds) {
     hcam_->update();
 }
 
+void Navigation::updateClippingPlanes() {
+    float diag = tgt::length(_sceneBounds.diagonal()) * 0.75f;
+    float dist = tgt::distance(getCamera()->getPosition(), _sceneBounds.center());
+    getCamera()->setNearDist(std::max(dist - diag, 0.1f));
+    getCamera()->setFarDist(diag + 2 * dist);
+}
+
+
 /***********************************************************************
 
     /// This can be used to look around the scene with the help of a mouse.  Middle is used

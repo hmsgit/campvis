@@ -77,6 +77,8 @@ namespace TUMVis {
         _paintShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "", false);
         _paintShader->setAttributeLocation(0, "in_Position");
         _paintShader->setAttributeLocation(1, "in_TexCoords");
+
+        setPainter(this, false);
     }
 
     void DataContainerInspectorCanvas::deinit() {
@@ -115,10 +117,11 @@ namespace TUMVis {
             // check whether DataHandle is already existing
             std::map<std::string, const DataHandle*>::iterator lb = _handles.lower_bound(name);
             if (lb == _handles.end() || lb->first != name) {
-                // not existant
+                // not existant -> insert
                 _handles.insert(std::make_pair(name, new DataHandle(*dh)));
             }
             else {
+                // existant -> replace
                 delete lb->second;
                 lb->second = new DataHandle(*dh);
             }
@@ -167,16 +170,6 @@ namespace TUMVis {
             parentWidget()->parentWidget()->setWindowTitle(title);
         else
             setWindowTitle(title);*/
-
-        // render port contents
-//         glMatrixMode(GL_PROJECTION);
-//         glPushMatrix();
-//         glOrtho(0, size_.x, 0, size_.y, -1, 1);
-// 
-//         glMatrixMode(GL_MODELVIEW);
-//         glPushMatrix();
-//         glLoadIdentity();
-        LGL_ERROR;
 
         // update layout dimensions
         dimX_ = (int)ceil(sqrt((float)textures.size()));
@@ -249,6 +242,10 @@ namespace TUMVis {
         delete _quad;
         _quad = new FaceGeometry(vertices, texCorods);
         _quad->createGLBuffers();
+    }
+
+    void DataContainerInspectorCanvas::sizeChanged(const tgt::ivec2&) {
+        invalidate();
     }
 
 }

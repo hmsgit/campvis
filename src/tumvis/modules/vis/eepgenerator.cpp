@@ -119,13 +119,13 @@ namespace TUMVis {
 
                         // mirror matrix sponsored by:
                         // Jiang 
-                        mirrorMatrix = tgt::mat4(
+                        mirrorMatrix = tgt::transpose(tgt::mat4(
                             1 - 2*n.x*n.x, -2*n.y*n.x   , -2*n.z*n.x   , 0, 
                             -2*n.x*n.y   , 1 - 2*n.y*n.y, -2*n.z*n.y   , 0, 
                             -2*n.x*n.z   , -2*n.y*n.z   , 1 - 2*n.z*n.z, 0, 
-                            2*n.x*k      , 2*n.y*k      , 2*n.z*k      , 1);
+                            2*n.x*k      , 2*n.y*k      , 2*n.z*k      , 1));
 
-                        // TODO: double check, whether matrix transpose is necessary
+                        // TODO: double check, whether matrix transpose is necessary, and if so, hardcode it
                     }
                     else {
                         LERROR("No suitable virtual mirror geometry found.");
