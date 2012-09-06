@@ -119,9 +119,9 @@ namespace TUMVis {
             /**
              * Creates an empty PerContextJobQueue.
              */
-            PerContextJobQueue() 
-                : _paintJob(0)
-            {}
+            PerContextJobQueue() {
+                _paintJob = 0;
+            }
 
             /**
              * Destructor, deletes all enqueued jobs.
@@ -137,7 +137,7 @@ namespace TUMVis {
                     delete jobToDelete;
             }
 
-            AbstractJob* _paintJob;                                 ///< PaintJob of the context
+            tbb::atomic<AbstractJob*> _paintJob;                    ///< PaintJob of the context
             tbb::concurrent_queue<AbstractJob*> _serialJobs;        ///< Queue of serial jobs for the context
             tbb::concurrent_queue<AbstractJob*> _lowPriorityJobs;   ///< Queue of jow priority jobs for the context
 

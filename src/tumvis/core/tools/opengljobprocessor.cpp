@@ -117,10 +117,10 @@ namespace TUMVis {
                 }
 
                 // third: execute paint job
-                if ((jobToDo = a->second->_paintJob) != 0) {
+                jobToDo = a->second->_paintJob.fetch_and_store(0);
+                if (jobToDo != 0) {
                     jobToDo->execute();
                     delete jobToDo;
-                    a->second->_paintJob = 0;
                 }
             }
 
@@ -140,10 +140,12 @@ namespace TUMVis {
         if (_contextQueueMap.find(a, canvas)) {
             switch (priority) {
             case PaintJob:
-                if (a->second->_paintJob != 0)
-                    delete a->second->_paintJob;
-                a->second->_paintJob = job;
-                break;
+                {
+                    AbstractJob* oldJob = a->second->_paintJob.fetch_and_store(job);
+                    if (oldJob != 0)
+                        delete oldJob;
+                    break;
+                }
             case SerialJob:
                 a->second->_serialJobs.push(job);
                 break;
