@@ -26,16 +26,10 @@
 // 
 // ================================================================================================
 
-#version 330
+uniform vec4 _backgroundColor1;
+uniform vec4 _backgroundColor2;
 
-in vec3 ex_TexCoord;            ///< incoming texture coordinate
-out vec4 out_Color;             ///< outgoing fragment color
-
-#include "tools/masking.frag"
-uniform vec2 _viewportSizeRCP;
-
-void main() {
-    MASKING_PROLOG(gl_FragCoord.xy * _viewportSizeRCP);
-    out_Color = vec4(ex_TexCoord, 1.0);
-    MASKING_EPILOG;
+void renderBackground(in vec2 texCoords, out vec4 outColor) {
+        outColor = mix(_backgroundColor1, _backgroundColor2, texCoords.x * texCoords.y);
+        gl_FragDepth = 1.0;
 }

@@ -36,6 +36,7 @@
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/imagedatarendertarget.h"
 #include "core/datastructures/meshgeometry.h"
+#include "core/pipeline/processordecoratormasking.h"
 
 namespace TUMVis {
     const std::string EEPGenerator::loggerCat_ = "TUMVis.modules.vis.EEPGenerator";
@@ -49,11 +50,10 @@ namespace TUMVis {
         , _exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
         , _camera("camera", "Camera")
         , _enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
-        , _applyMask("applyMask", "Apply Mask to image", false, InvalidationLevel::INVALID_SHADER)
-        , _maskID("maskID", "Mask Image ID", "mask", DataNameProperty::READ)
-        , _maskColor("maskColor", "Mask Color", tgt::vec4(0.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
+        addDecorator(new ProcessorDecoratorMasking());
+
         addProperty(&_sourceImageID);
         addProperty(&_geometryID);
         addProperty(&_mirrorID);
@@ -61,9 +61,8 @@ namespace TUMVis {
         addProperty(&_exitImageID);
         addProperty(&_camera);
         addProperty(&_enableMirror);
-        addProperty(&_applyMask);
-        addProperty(&_maskID);
-        addProperty(&_maskColor);
+
+        decoratePropertyCollection(this);
     }
 
     EEPGenerator::~EEPGenerator() {
@@ -132,21 +131,14 @@ namespace TUMVis {
                     }
                 }
 
-                // setup masking if necessary
-                tgt::TextureUnit maskUnit;
-                if (_applyMask.getValue()) {
-                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
-                    _shader->setUniform("_maskColor", _maskColor.getValue());
-
-                    DataContainer::ScopedTypedData<ImageDataRenderTarget> mask(data, _maskID.getValue());
-                    if (mask != 0) {
-                        mask->bind(_shader, &maskUnit, 0, "_maskImage");
-                    }
-                }
+                decorateRenderProlog(data, _shader);
                 
+                _shader->setIgnoreUniformLocationError(true);
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_modelMatrix", mirrorMatrix);
                 _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
+                _shader->setIgnoreUniformLocationError(false);
 
                 glEnable(GL_CULL_FACE);
                 glEnable(GL_DEPTH_TEST);
@@ -175,6 +167,7 @@ namespace TUMVis {
 
                 exitpoints->deactivate();
 
+                decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 glPopAttrib();
                 LGL_ERROR;
@@ -196,12 +189,7 @@ namespace TUMVis {
     }
 
     std::string EEPGenerator::generateHeader() const {
-        std::string toReturn;
-
-        if (_applyMask.getValue())
-            toReturn += "#define APPLY_MASK 1\n";
-
-        return toReturn;
+        return getDecoratedHeader();
     }
 
 }

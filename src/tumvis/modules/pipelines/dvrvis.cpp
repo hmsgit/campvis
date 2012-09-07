@@ -98,11 +98,15 @@ namespace TUMVis {
         _vmEepGenerator._sourceImageID.setValue("eep.input");
         _pgGenerator._sourceImageID.setValue("eep.input");
 
-        _vmRenderer._renderTargetID.connect(&_vmEepGenerator._maskID);
+        _vmRenderer._renderTargetID.connect(&_combine._mirrorRenderID);
         _vmEepGenerator._entryImageID.setValue("vm.eep.entry");
         _vmEepGenerator._exitImageID.setValue("vm.eep.exit");
-        _vmEepGenerator._applyMask.setValue(true);
         _vmEepGenerator._enableMirror.setValue(true);
+
+        // not the most beautiful way... *g*
+        // this will all get better with scripting support.
+        static_cast<BoolProperty*>(_vmEepGenerator.getProperty("applyMask"))->setValue(true);
+        _vmRenderer._renderTargetID.connect(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
 
         _renderTargetID.setValue("combine");
 

@@ -32,22 +32,29 @@ in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #include "tools/texture2d.frag"
+#include "tools/background.frag"
 
 uniform Texture2D _normalColor;
 uniform Texture2D _normalDepth;
 uniform Texture2D _mirrorColor;
 uniform Texture2D _mirrorDepth;
+uniform Texture2D _mirrorRenderedDepth;
 
 void main() {
     float normalDepth = getElement2DNormalized(_normalDepth, ex_TexCoord.xy).z;
-    float mirrorDepth = getElement2DNormalized(_mirrorDepth, ex_TexCoord.xy).z;
+    float mirrorRenderedDepth = getElement2DNormalized(_mirrorRenderedDepth, ex_TexCoord.xy).z;
 
-    if (normalDepth <= mirrorDepth) {
+    if (normalDepth <= mirrorRenderedDepth) {
         out_Color = getElement2DNormalized(_normalColor, ex_TexCoord.xy);
         gl_FragDepth = normalDepth;
     }
     else {
         out_Color = getElement2DNormalized(_mirrorColor, ex_TexCoord.xy);
-        gl_FragDepth = mirrorDepth;
+        gl_FragDepth = getElement2DNormalized(_mirrorDepth, ex_TexCoord.xy).z;
+    }
+
+    if (out_Color.a == 0) {
+        renderBackground(ex_TexCoord.xy, out_Color);
     }
 }
+

@@ -31,11 +31,10 @@
 
 #include <string>
 
+#include "core/pipeline/abstractprocessordecorator.h"
+#include "core/pipeline/processordecoratorbackground.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/transferfunctionproperty.h"
 
 namespace tgt {
     class Shader;
@@ -47,7 +46,7 @@ namespace TUMVis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class VirtualMirrorCombine : public VisualizationProcessor {
+    class VirtualMirrorCombine : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new VirtualMirrorCombine Processor
@@ -74,8 +73,8 @@ namespace TUMVis {
 
         DataNameProperty _normalImageID;            ///< image ID for normal DVR input image
         DataNameProperty _mirrorImageID;            ///< image ID for mirror DVR input image
+        DataNameProperty _mirrorRenderID;           ///< image ID for rendered mirror input image
         DataNameProperty _targetImageID;            ///< image ID for output image
-
 
     protected:
         tgt::Shader* _shader;                           ///< Shader for slice rendering

@@ -46,13 +46,19 @@ namespace TUMVis {
     VirtualMirrorCombine::VirtualMirrorCombine(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
         , _normalImageID("normalImageID", "Normal DVR Input Image", "", DataNameProperty::READ)
-        , _mirrorImageID("mirrorImageIde", "Mirror DVR Input Image", "", DataNameProperty::READ)
+        , _mirrorImageID("mirrorImageID", "Mirror DVR Input Image", "", DataNameProperty::READ)
+        , _mirrorRenderID("mirrorRenderID", "Rendered Mirror Input Image", "", DataNameProperty::READ)
         , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , _shader(0)
     {
         addProperty(&_normalImageID);
         addProperty(&_mirrorImageID);
+        addProperty(&_mirrorRenderID);
         addProperty(&_targetImageID);
+
+        addDecorator(new ProcessorDecoratorBackground());
+        
+        decoratePropertyCollection(this);
     }
 
     VirtualMirrorCombine::~VirtualMirrorCombine() {
@@ -74,18 +80,22 @@ namespace TUMVis {
     void VirtualMirrorCombine::process(DataContainer& data) {
         DataContainer::ScopedTypedData<ImageDataRenderTarget> normalImage(data, _normalImageID.getValue());
         DataContainer::ScopedTypedData<ImageDataRenderTarget> mirrorImage(data, _mirrorImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> mirrorRendered(data, _mirrorRenderID.getValue());
 
-        if (normalImage != 0 && mirrorImage != 0) {
+        if (normalImage != 0 && mirrorImage != 0 && mirrorRendered != 0) {
             ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
             glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
 
             _shader->activate();
-            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit;
+            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
 
             normalImage->bind(_shader, &normalColorUnit, &normalDepthUnit, "_normalColor", "_normalDepth");
             mirrorImage->bind(_shader, &mirrorColorUnit, &mirrorDepthUnit, "_mirrorColor", "_mirrorDepth");
+            mirrorRendered->bind(_shader, 0, &mirrorRenderedDepthUnit, "", "_mirrorRenderedDepth");
+
+            decorateRenderProlog(data, _shader);
 
             rt->activate();
             LGL_ERROR;

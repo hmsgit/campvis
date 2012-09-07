@@ -26,16 +26,23 @@
 // 
 // ================================================================================================
 
-#version 330
 
-in vec3 ex_TexCoord;            ///< incoming texture coordinate
-out vec4 out_Color;             ///< outgoing fragment color
+#ifdef APPLY_MASK
+#include "tools/texture2d.frag"
+uniform Texture2D _maskImage;   ///< mask image \
+uniform vec4 _maskColor;        ///< mask color
 
-#include "tools/masking.frag"
-uniform vec2 _viewportSizeRCP;
+#define MASKING_PROLOG(COORDS) \
+    vec4 maskValue = getElement2DNormalized(_maskImage, (COORDS) ); \
+    if (distance(maskValue, _maskColor) > 0.01) {
 
-void main() {
-    MASKING_PROLOG(gl_FragCoord.xy * _viewportSizeRCP);
-    out_Color = vec4(ex_TexCoord, 1.0);
-    MASKING_EPILOG;
-}
+#define MASKING_EPILOG \
+    } \
+    else { \
+        discard; \
+    }    
+
+#else
+#define MASKING_PROLOG
+#define MASKING_EPILOG
+#endif

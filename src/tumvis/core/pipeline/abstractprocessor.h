@@ -163,7 +163,6 @@ namespace TUMVis {
         InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
         bool _enabled;                              ///< flag whether this processor is currently enabled
 
-
         static const std::string loggerCat_;
     };
 

@@ -26,16 +26,41 @@
 // 
 // ================================================================================================
 
-#version 330
+#ifndef PROCESSORDECORATORMASKING_H__
+#define PROCESSORDECORATORMASKING_H__
 
-in vec3 ex_TexCoord;            ///< incoming texture coordinate
-out vec4 out_Color;             ///< outgoing fragment color
+#include "tgt/textureunit.h"
+#include "core/datastructures/datacontainer.h"
+#include "core/datastructures/imagedatarendertarget.h"
+#include "core/pipeline/abstractprocessordecorator.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
 
-#include "tools/masking.frag"
-uniform vec2 _viewportSizeRCP;
+namespace TUMVis {
 
-void main() {
-    MASKING_PROLOG(gl_FragCoord.xy * _viewportSizeRCP);
-    out_Color = vec4(ex_TexCoord, 1.0);
-    MASKING_EPILOG;
+    class ProcessorDecoratorMasking : public AbstractProcessorDecorator {
+    public:
+        ProcessorDecoratorMasking();
+        virtual ~ProcessorDecoratorMasking();
+
+    protected:
+        void addProperties(HasPropertyCollection* propCollection);
+
+        void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
+
+        void renderEpilog(tgt::Shader* shader);
+
+        std::string generateHeader() const;
+
+        BoolProperty _applyMask;            ///< Flag whether to apply mask
+        DataNameProperty _maskID;           ///< ID for mask image (optional)
+        Vec4Property _maskColor;            ///< Mask color
+
+        tgt::TextureUnit* _texUnit;
+        DataContainer::ScopedTypedData<ImageDataRenderTarget>* _maskImage;
+    };
+
 }
+
+#endif // PROCESSORDECORATORMASKING_H__

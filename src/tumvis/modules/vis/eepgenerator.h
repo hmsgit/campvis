@@ -33,6 +33,7 @@
 
 #include "core/classification/abstracttransferfunction.h"
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
@@ -47,7 +48,7 @@ namespace TUMVis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class EEPGenerator : public VisualizationProcessor {
+    class EEPGenerator : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new EEPGenerator Processor
@@ -82,9 +83,6 @@ namespace TUMVis {
 
         BoolProperty _enableMirror;         ///< Enable Virtual Mirror Feature
 
-        BoolProperty _applyMask;            ///< Flag whether to apply mask
-        DataNameProperty _maskID;           ///< ID for mask image (optional)
-        Vec4Property _maskColor;            ///< Mask color
 
     protected:
 

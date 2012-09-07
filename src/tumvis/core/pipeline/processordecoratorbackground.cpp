@@ -26,16 +26,32 @@
 // 
 // ================================================================================================
 
-#version 330
+#include "processordecoratorbackground.h"
 
-in vec3 ex_TexCoord;            ///< incoming texture coordinate
-out vec4 out_Color;             ///< outgoing fragment color
+#include "tgt/shadermanager.h"
+#include "core/properties/propertycollection.h"
 
-#include "tools/masking.frag"
-uniform vec2 _viewportSizeRCP;
+namespace TUMVis {
 
-void main() {
-    MASKING_PROLOG(gl_FragCoord.xy * _viewportSizeRCP);
-    out_Color = vec4(ex_TexCoord, 1.0);
-    MASKING_EPILOG;
+    ProcessorDecoratorBackground::ProcessorDecoratorBackground()
+        : AbstractProcessorDecorator()
+        , _backgroundColor1("backgroundColor1", "Background Color 1", tgt::vec4(.9f, .9f, .9f, 1), tgt::vec4(0.f), tgt::vec4(1.f))
+        , _backgroundColor2("backgroundColor2", "Background Color 2", tgt::vec4(.7f, .7f, .7f, 1), tgt::vec4(0.f), tgt::vec4(1.f))
+    {
+    }
+
+    ProcessorDecoratorBackground::~ProcessorDecoratorBackground() {
+
+    }
+
+    void ProcessorDecoratorBackground::addProperties(HasPropertyCollection* propCollection) {
+        propCollection->addProperty(&_backgroundColor1);
+        propCollection->addProperty(&_backgroundColor2);
+    }
+
+    void ProcessorDecoratorBackground::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
+        shader->setUniform("_backgroundColor1", _backgroundColor1.getValue());
+        shader->setUniform("_backgroundColor2", _backgroundColor2.getValue());
+    }
+
 }

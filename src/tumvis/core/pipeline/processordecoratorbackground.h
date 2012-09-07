@@ -26,16 +26,29 @@
 // 
 // ================================================================================================
 
-#version 330
+#ifndef PROCESSORDECORATORBACKGROUND_H__
+#define PROCESSORDECORATORBACKGROUND_H__
 
-in vec3 ex_TexCoord;            ///< incoming texture coordinate
-out vec4 out_Color;             ///< outgoing fragment color
+#include "core/pipeline/abstractprocessordecorator.h"
+#include "core/properties/numericproperty.h"
 
-#include "tools/masking.frag"
-uniform vec2 _viewportSizeRCP;
+namespace TUMVis {
 
-void main() {
-    MASKING_PROLOG(gl_FragCoord.xy * _viewportSizeRCP);
-    out_Color = vec4(ex_TexCoord, 1.0);
-    MASKING_EPILOG;
+    class ProcessorDecoratorBackground : public AbstractProcessorDecorator {
+    public:
+        ProcessorDecoratorBackground();
+        virtual ~ProcessorDecoratorBackground();
+
+    protected:
+        void addProperties(HasPropertyCollection* propCollection);
+
+        virtual void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
+
+        Vec4Property _backgroundColor1;
+        Vec4Property _backgroundColor2;
+
+    };
+
 }
+
+#endif // PROCESSORDECORATORBACKGROUND_H__
