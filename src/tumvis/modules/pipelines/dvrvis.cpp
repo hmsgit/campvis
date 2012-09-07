@@ -192,12 +192,13 @@ namespace TUMVis {
         }
         if (!_dvrVM.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_dvrVM);
-        }
-        if (!_clRaycaster.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_clRaycaster);
+            lockGLContextAndExecuteProcessor(&_combine);
         }
         if (!_combine.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_combine);
+        }
+        if (!_clRaycaster.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(&_clRaycaster);
         }
     }
 

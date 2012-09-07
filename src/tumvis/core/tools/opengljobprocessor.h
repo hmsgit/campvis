@@ -158,7 +158,6 @@ namespace TUMVis {
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
 
         tgt::GLCanvas* _currentContext;         ///< current active OpenGL context
-        clock_t _startTimeCurrentContext;       ///<
     };
 
 }

@@ -170,6 +170,7 @@ namespace TUMVis {
 
                     LGL_ERROR;
                     data.addData(_targetImageID.getValue(), rt);
+                    _targetImageID.issueWrite();
                 }
                 else {
                     LERROR("Entry-/Exitpoints texture size does not match.");

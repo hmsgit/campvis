@@ -36,7 +36,6 @@ namespace TUMVis {
 
     OpenGLJobProcessor::OpenGLJobProcessor()
         : _currentContext(0)
-        , _startTimeCurrentContext(0)
     {
     }
 
@@ -70,7 +69,7 @@ namespace TUMVis {
             clock_t maxTimePerContext = 30 / _contexts.size();
 
             for (size_t i = 0; i < _contexts.size(); ++i) {
-                _startTimeCurrentContext = clock() * 1000 / CLOCKS_PER_SEC;
+                clock_t startTimeCurrentContext = clock() * 1000 / CLOCKS_PER_SEC;
                 tgt::GLCanvas* context = _contexts[i];
 
                 tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
@@ -99,7 +98,7 @@ namespace TUMVis {
                 // now comes the per-context scheduling strategy:
                 // first: perform as much serial jobs as possible:
                 AbstractJob* jobToDo = 0;
-                while ((clock() * 1000 / CLOCKS_PER_SEC) - _startTimeCurrentContext < maxTimePerContext) {
+                while ((clock() * 1000 / CLOCKS_PER_SEC) - startTimeCurrentContext < maxTimePerContext) {
                     // try fetch a job
                     if (! a->second->_serialJobs.try_pop(jobToDo)) {
                         // no job to do, exit the while loop

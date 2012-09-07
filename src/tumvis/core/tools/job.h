@@ -85,7 +85,7 @@ namespace TUMVis {
 
     protected:
         T* _target;                 ///< Target object
-        void (T::*_callee)();     /// <Member function to call
+        void (T::*_callee)();       /// <Member function to call
     };
 
     /**
@@ -124,7 +124,7 @@ namespace TUMVis {
     protected:
         T* _target;                 ///< Target object
         void (T::*_callee)(A1);     /// <Member function to call
-        A1 _arg1;            ///< Argument to pass to \a callee
+        A1 _arg1;                   ///< Argument to pass to \a callee
     };
 
 }
