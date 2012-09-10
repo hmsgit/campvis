@@ -72,7 +72,7 @@ namespace TUMVis {
          * Gets the transformation matrix from texture to world coordinates.
          * \return  _textureToWolrdTransformation
          */
-        const tgt::mat4 getTextureToWorldMatrix() const;
+        const tgt::mat4& getTextureToWorldMatrix() const;
 
         /**
          * Get the real world value mapping.

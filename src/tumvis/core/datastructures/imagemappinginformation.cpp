@@ -59,7 +59,7 @@ namespace TUMVis {
         _textureToWolrdTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
     }
 
-    const tgt::mat4 ImageMappingInformation::getTextureToWorldMatrix() const {
+    const tgt::mat4& ImageMappingInformation::getTextureToWorldMatrix() const {
         return _textureToWolrdTransformation;
     }
 
