@@ -35,6 +35,10 @@ struct Texture3D {
     // Texture size
     vec3 _size;
     vec3 _sizeRCP;
+
+    // Voxel spacing
+    vec3 _voxelSize;
+    vec3 _voxelSizeRCP;
 };
 
 /**

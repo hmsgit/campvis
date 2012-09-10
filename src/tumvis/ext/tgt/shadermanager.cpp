@@ -92,32 +92,36 @@ void ShaderPreprocessor::parsePart(const std::string& input, const std::string& 
             string filename(line, pos + 1, end - pos - 1);
             filename = ShdrMgr.completePath(filename);
 
-            File* file = FileSys.open(filename);
-            string content;
-            if ((!file) || (!file->isOpen())) {
-                LERROR("Cannot open shader include '" << filename << "' in " << resolveLineNumber(activeLine_, lineTracker_));
+            if (includedFilenames_.find(filename) == includedFilenames_.end()) {
+                File* file = FileSys.open(filename);
+                string content;
+                if ((!file) || (!file->isOpen())) {
+                    LERROR("Cannot open shader include '" << filename << "' in " << resolveLineNumber(activeLine_, lineTracker_));
+                }
+                else {
+                    size_t len = file->size();
+                    // check if file is empty
+                    if (len == 0)
+                        content = "";
+                    else
+                        content = file->getAsString();
+                    file->close();
+
+                    outputComment("BEGIN INCLUDE " + filename, "BEGIN");
+
+                    if (!content.empty() && content[content.size() - 1] != '\n')
+                        content += "\n";
+
+                    parsePart(content, filename);
+
+                    outputComment("END INCLUDE " + filename, "END");
+
+                    lineTracker_.push_back(ShaderObject::LineInfo(activeLine_, name, locallinenumber + 1));
+                }
+                delete file;
+
+                includedFilenames_.insert(filename);
             }
-            else {
-                size_t len = file->size();
-                // check if file is empty
-                if (len == 0)
-                    content = "";
-                else
-                    content = file->getAsString();
-                file->close();
-
-                outputComment("BEGIN INCLUDE " + filename, "BEGIN");
-
-                if (!content.empty() && content[content.size() - 1] != '\n')
-                    content += "\n";
-
-                parsePart(content, filename);
-
-                outputComment("END INCLUDE " + filename, "END");
-
-                lineTracker_.push_back(ShaderObject::LineInfo(activeLine_, name, locallinenumber + 1));
-            }
-            delete file;
         } else {
             result_ << line << "\n";
             activeLine_++;
@@ -129,6 +133,7 @@ void ShaderPreprocessor::parse() {
     activeLine_ = 1;
     lineTracker_.clear();
     result_.clear();
+    includedFilenames_.clear();
 
     outputComment("BEGIN GLOBAL HEADER");
     parsePart(ShdrMgr.getGlobalHeader(), "GLOBAL HEADER");

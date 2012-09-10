@@ -26,6 +26,7 @@
 #define TGT_SHADERMANAGER_H
 
 #include <list>
+#include <set>
 #include <string>
 
 #include "tgt/exception.h"
@@ -542,6 +543,7 @@ protected:
 
     ShaderObject* shd_;
     std::vector<ShaderObject::LineInfo>& lineTracker_; ///< keeps track of line numbers when includes are used
+    std::set<std::string> includedFilenames_;           ///< list of all filenames that have already been included (to avoid double inclusion)
     int activeLine_;
     std::ostringstream result_;
 
