@@ -73,6 +73,8 @@ namespace TUMVis {
     void RaycastingProcessor::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", _fragmentShaderFilename, "", false);
+        _shader->setAttributeLocation(0, "in_Position");
+        _shader->setAttributeLocation(1, "in_TexCoord");
         _shader->setHeaders(generateHeader());
         _shader->rebuild();
     }
@@ -99,10 +101,8 @@ namespace TUMVis {
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
-                _shader->setAttributeLocation(0, "in_Position");
-                _shader->setAttributeLocation(1, "in_TexCoord");
-
                 _shader->setIgnoreUniformLocationError(true);
+                decorateRenderProlog(data, _shader);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_jitterEntryPoints", _jitterEntryPoints.getValue());
                 _shader->setUniform("_jitterStepSizeMultiplier", _jitterStepSizeMultiplier.getValue());
@@ -111,6 +111,7 @@ namespace TUMVis {
                 const tgt::Camera& cam = _camera.getValue();
                 float n = cam.getNearDist();
                 float f = cam.getFarDist();
+                _shader->setUniform("_cameraPosition", _camera.getValue().getPosition());
                 _shader->setUniform("const_to_z_e_1", 0.5f + 0.5f*((f+n)/(f-n)));
                 _shader->setUniform("const_to_z_e_2", ((f-n)/(f*n)));
                 _shader->setUniform("const_to_z_w_1", ((f*n)/(f-n)));
@@ -134,6 +135,7 @@ namespace TUMVis {
                     processImpl(data);
                 }
 
+                decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
                 glPopAttrib();
@@ -151,7 +153,7 @@ namespace TUMVis {
     }
 
     std::string RaycastingProcessor::generateHeader() const {
-        std::string toReturn;
+        std::string toReturn = getDecoratedHeader();
         return toReturn;
     }
 

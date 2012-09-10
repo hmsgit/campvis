@@ -39,6 +39,9 @@ struct Texture3D {
     // Voxel spacing
     vec3 _voxelSize;
     vec3 _voxelSizeRCP;
+
+    // Transformation matrices
+    mat4 _textureToWorldMatrix;
 };
 
 /**
@@ -62,4 +65,15 @@ vec4 getElement3D(in Texture3D tex, in vec3 texCoords) {
 vec4 getElement3DNormalized(in Texture3D tex, in vec3 texCoords) {
     //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoords, 0.0, 1.0)).xy;
     return texture(tex._texture, texCoords);
+}
+
+/**
+ * Transforms texture coordinates for texture \a tex to world coordinates using the texture's
+ * texture-to-world matrix.
+ * \param   tex         texture
+ * \param   texCoords   texture coordinates
+ * \return  \a texCoords transformes to woorld coordinates.
+ */
+vec4 textureToWorld(in Texture3D tex, in vec3 texCoords) {
+    return tex._textureToWorldMatrix * vec4(texCoords, 1.0);
 }

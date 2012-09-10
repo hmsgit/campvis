@@ -26,50 +26,41 @@
 // 
 // ================================================================================================
 
-#include "imagedata.h"
+#ifndef PROCESSORDECORATORSHADING_H__
+#define PROCESSORDECORATORSHADING_H__
+
+#include "tgt/textureunit.h"
+#include "core/datastructures/datacontainer.h"
+#include "core/datastructures/imagedatarendertarget.h"
+#include "core/pipeline/abstractprocessordecorator.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
 
 namespace TUMVis {
-    const std::string ImageData::loggerCat_ = "TUMVis.core.datastructures.ImageData";
 
-    ImageData::ImageData(size_t dimensionality, const tgt::svec3& size) 
-        : AbstractData()
-        , _dimensionality(dimensionality)
-        , _size(size)
-        , _numElements(tgt::hmul(size))
-        , _mappingInformation(size, tgt::vec3(0.f), tgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
-    {
-    }
+    class ProcessorDecoratorShading : public AbstractProcessorDecorator {
+    public:
+        ProcessorDecoratorShading(const std::string& lightUniformName = "_lightSource");
+        virtual ~ProcessorDecoratorShading();
 
-    ImageData::~ImageData() {
-    }
+    protected:
+        void addProperties(HasPropertyCollection* propCollection);
 
-    size_t ImageData::getDimensionality() const {
-        return _dimensionality;
-    }
+        void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
 
-    const tgt::svec3& ImageData::getSize() const {
-        return _size;
-    }
+        std::string generateHeader() const;
 
-    const ImageMappingInformation& ImageData::getMappingInformation() const {
-        return _mappingInformation;
-    }
+        Vec3Property _lightPosition;        ///< Light position
+        Vec3Property _ambientColor;         ///< Ambient light color
+        Vec3Property _diffuseColor;         ///< Diffuse light color
+        Vec3Property _specularColor;        ///< Specular light color
+        FloatProperty _shininess;           ///< Specular shininess
+        Vec3Property _attenuation;          ///< Attenuation factors
 
-    tgt::Bounds ImageData::getWorldBounds() const {
-        return tgt::Bounds(_mappingInformation.getOffset(), _mappingInformation.getOffset() + (tgt::vec3(_size) * _mappingInformation.getVoxelSize()));
-    }
+        const std::string _lightUniformName;    ///< Uniform name for light
+    };
 
-    tgt::Bounds ImageData::getWorldBounds(const tgt::svec3& llf, const tgt::svec3& urb) const {
-        return tgt::Bounds(
-            _mappingInformation.getOffset() + (tgt::vec3(llf) * _mappingInformation.getVoxelSize()),
-            _mappingInformation.getOffset() + (tgt::vec3(urb) * _mappingInformation.getVoxelSize()));
-    }
-
-    size_t ImageData::getNumElements() const {
-        return _numElements;
-    }
-
-    size_t ImageData::positionToIndex(const tgt::svec3& position) const {
-        return position.x + (position.y * _size.x) + (position.z * _size.x * _size.y);
-    }
 }
+
+#endif // PROCESSORDECORATORSHADING_H__

@@ -32,6 +32,7 @@
 #include <string>
 
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
@@ -53,7 +54,7 @@ namespace TUMVis {
      *          Of course you can also directly overwrite process() yourself, but then you will need to to the
      *          sanity checks yourself.
      */
-    class RaycastingProcessor : public VisualizationProcessor {
+    class RaycastingProcessor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Creates a RaycastingProcessor.

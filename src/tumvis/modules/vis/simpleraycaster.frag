@@ -34,6 +34,7 @@ layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit no
 
 #include "tools/gradient.frag"
 #include "tools/raycasting.frag"
+#include "tools/shading.frag"
 #include "tools/texture2d.frag"
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
@@ -50,6 +51,9 @@ uniform Texture3D _volume;              // texture lookup parameters for volume_
 
 uniform sampler1D _tfTex;
 uniform TFParameters _tfTextureParameters;
+
+uniform LightSource _lightSource;
+uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
 
@@ -75,7 +79,10 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     while (t < tend) {
         vec3 samplePosition = entryPoint.rgb + t * direction;
         float intensity = getElement3DNormalized(_volume, samplePosition).a;
+        vec3 gradient = computeGradientCentralDifferences(_volume, samplePosition);
         vec4 color = lookupTF(_tfTextureParameters, _tfTex, intensity);
+
+        color.rgb = calculatePhongShading(textureToWorld(_volume, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.xyz, color.xyz, vec3(1.0, 1.0, 1.0));
 
         // perform compositing
         if (color.a > 0.0) {
@@ -89,7 +96,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (firstHitT < 0.0 && result.a > 0.0) {
             firstHitT = t;
             out_FHP = vec4(samplePosition, 1.0);
-            out_FHN = vec4(normalize(computeGradientCentralDifferences(_volume, samplePosition)), 1.0);
+            out_FHN = vec4(normalize(gradient), 1.0);
         }
 
         // early ray termination

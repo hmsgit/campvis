@@ -30,6 +30,7 @@
 
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/imagedatarendertarget.h"
+#include "core/pipeline/processordecoratorshading.h"
 
 namespace TUMVis {
     const std::string SimpleRaycaster::loggerCat_ = "TUMVis.modules.vis.SimpleRaycaster";
@@ -38,7 +39,10 @@ namespace TUMVis {
         : RaycastingProcessor(canvasSize, "modules/vis/simpleraycaster.frag", true)
         , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
     {
+        addDecorator(new ProcessorDecoratorShading());
+
         addProperty(&_targetImageID);
+        decoratePropertyCollection(this);
 
         // TODO: remove hack
         _transferFunction.getTF()->setIntensityDomain(tgt::vec2(0.01f, 0.05f));

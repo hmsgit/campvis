@@ -121,6 +121,7 @@ namespace TUMVis {
             shader->setUniform(texUniform + "._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_size));
             shader->setUniform(texUniform + "._voxelSize", _mappingInformation.getVoxelSize());
             shader->setUniform(texUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _mappingInformation.getVoxelSize());
+            shader->setUniform(texUniform + "._textureToWorldMatrix", _mappingInformation.getTextureToWorldMatrix());
             break;
 
         default:

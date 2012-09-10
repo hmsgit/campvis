@@ -45,11 +45,13 @@ namespace TUMVis {
     public:
         /**
          * Creates a new default ImageMappingInformation.
+         * \param   size                    Image size (number of elements, redundant...)
          * \param   offset                  Position of LLF corner in world coordinates (mm)
          * \param   voxelSize               Voxel size in (mm)
          * \param   realWorldValueMapping   Linear mapping for mapping element values to real world values, defaults to identity.
          */
         ImageMappingInformation(
+            const tgt::vec3& size, 
             const tgt::vec3& offset, 
             const tgt::vec3& voxelSize, 
             const LinearMapping<float>& realWorldValueMapping = LinearMapping<float>::identity);
@@ -67,6 +69,12 @@ namespace TUMVis {
         const tgt::vec3& getVoxelSize() const;
 
         /**
+         * Gets the transformation matrix from texture to world coordinates.
+         * \return  _textureToWolrdTransformation
+         */
+        const tgt::mat4 getTextureToWorldMatrix() const;
+
+        /**
          * Get the real world value mapping.
          * \return  Linear mapping for mapping element values to real world values.
          */
@@ -79,11 +87,17 @@ namespace TUMVis {
         void setRealWorldMapping(const LinearMapping<float>& rwvm);
 
     private:
+        /**
+         * Updates the X-to-Y matrices.
+         */
+        void updateMatrixes();
+
+        tgt::vec3 _size;                                ///< Image size (number of elements, redundant...)
         tgt::vec3 _offset;                              ///< Position of LLF corner in world coordinates (mm)
         tgt::vec3 _voxelSize;                           ///< Voxel size in (mm)
 
         LinearMapping<float> _realWorldValueMapping;     ///< Linear mapping for mapping element values to real world values
-        //tgt::mat4 _voxelToWorldTransformation;          ///< Transformation matrix from voxel to world coordinates
+        tgt::mat4 _textureToWolrdTransformation;        ///< Transformation matrix from texture to world coordinates
 
         static const std::string loggerCat_;
     };

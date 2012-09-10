@@ -30,15 +30,14 @@
 
 namespace TUMVis {
 
-
-    ImageMappingInformation::ImageMappingInformation(const tgt::vec3& offset, const tgt::vec3& voxelSize, const LinearMapping<float>& realWorldValueMapping /*= LinearMapping<float>::identity*/)
-        : _offset(offset)
+    ImageMappingInformation::ImageMappingInformation(const tgt::vec3& size, const tgt::vec3& offset, const tgt::vec3& voxelSize, const LinearMapping<float>& realWorldValueMapping /*= LinearMapping<float>::identity*/)
+        : _size(size)
+        , _offset(offset)
         , _voxelSize(voxelSize)
         , _realWorldValueMapping(realWorldValueMapping)
     {
-
+        updateMatrixes();
     }
-
 
     const tgt::vec3& ImageMappingInformation::getOffset() const {
         return _offset;
@@ -54,6 +53,14 @@ namespace TUMVis {
 
     void ImageMappingInformation::setRealWorldMapping(const LinearMapping<float>& rwvm) {
         _realWorldValueMapping = rwvm;
+    }
+
+    void ImageMappingInformation::updateMatrixes() {
+        _textureToWolrdTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
+    }
+
+    const tgt::mat4 ImageMappingInformation::getTextureToWorldMatrix() const {
+        return _textureToWolrdTransformation;
     }
 
 }

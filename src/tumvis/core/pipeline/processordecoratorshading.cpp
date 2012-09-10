@@ -1,0 +1,74 @@
+// ================================================================================================
+// 
+// This file is part of the TUMVis Visualization Framework.
+// 
+// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+//      Christian Schulte zu Berge (christian.szb@in.tum.de)
+//      Chair for Computer Aided Medical Procedures
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
+// The licensing of this softare is not yet resolved. Until then, redistribution in source or
+// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
+// However, the names of the original authors and the above copyright notice must retain in its
+// original state in any case.
+// 
+// Legal disclaimer provided by the BSD license:
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+// 
+// ================================================================================================
+
+#include "processordecoratorshading.h"
+
+#include "tgt/shadermanager.h"
+#include "core/properties/propertycollection.h"
+
+namespace TUMVis {
+
+    ProcessorDecoratorShading::ProcessorDecoratorShading(const std::string& lightUniformName /*= "_lightSource"*/)
+        : AbstractProcessorDecorator()
+        , _lightPosition("LightPosition", "Light Position", tgt::vec3(-8.f), tgt::vec3(-500.f), tgt::vec3(500.f))
+        , _ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.5f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , _diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , _specularColor("SpecularColor", "Specular Light Color", tgt::vec3(0.5f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , _shininess("Shininess", "Specular Shininess", 4.f, 0.f, 64.f)
+        , _attenuation("Attenuation", "Attenuation Factors", tgt::vec3(0.f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , _lightUniformName(lightUniformName)
+    {
+    }
+
+    ProcessorDecoratorShading::~ProcessorDecoratorShading() {
+    }
+
+    void ProcessorDecoratorShading::addProperties(HasPropertyCollection* propCollection) {
+        propCollection->addProperty(&_lightPosition);
+        propCollection->addProperty(&_ambientColor);
+        propCollection->addProperty(&_diffuseColor);
+        propCollection->addProperty(&_specularColor);
+        propCollection->addProperty(&_shininess);
+        propCollection->addProperty(&_attenuation);
+    }
+
+    void ProcessorDecoratorShading::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
+        shader->setUniform(_lightUniformName + "._position", _lightPosition.getValue());
+        shader->setUniform(_lightUniformName + "._ambientColor", _ambientColor.getValue());
+        shader->setUniform(_lightUniformName + "._diffuseColor", _diffuseColor.getValue());
+        shader->setUniform(_lightUniformName + "._specularColor", _specularColor.getValue());
+        shader->setUniform(_lightUniformName + "._shininess", _shininess.getValue());
+        shader->setUniform(_lightUniformName + "._attenuation", _attenuation.getValue());
+    }
+
+
+    std::string ProcessorDecoratorShading::generateHeader() const {
+        return "";
+    }
+
+}
