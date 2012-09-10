@@ -36,6 +36,7 @@ namespace TUMVis {
 
     AbstractPipeline::AbstractPipeline() 
         : HasPropertyCollection()
+        , _enabled(true)
     {
     }
 

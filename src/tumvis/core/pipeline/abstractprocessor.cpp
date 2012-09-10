@@ -35,6 +35,7 @@ namespace TUMVis {
 
     AbstractProcessor::AbstractProcessor()
         : HasPropertyCollection()
+        , _enabled(true)
     {
     }
 
