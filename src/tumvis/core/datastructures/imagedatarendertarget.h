@@ -35,6 +35,8 @@
 #include "tgt/vector.h"
 #include "core/datastructures/imagedata.h"
 
+#include <vector>
+
 namespace tgt {
     class Shader;
 }
@@ -43,7 +45,8 @@ namespace TUMVis {
 
     /**
      * Stores render target data.
-     * This is basically a wrapper for two OpenGL textures (color + depth) and their attachment to the framebuffer.
+     * This is basically a wrapper for multiple OpenGL textures (color + depth) and their attachment to the framebuffer.
+     * Each ImageDataRenderTarget has at least one color texture and exactly one depth texture attachment.
      * 
      * \note    Its dimensionality must be 2.
      * 
@@ -54,7 +57,7 @@ namespace TUMVis {
     class ImageDataRenderTarget : public ImageData {
     public:
         /**
-         * Creates a new ImageDataRenderTarget representation.
+         * Creates a new ImageDataRenderTarget representation with one color and one depth attachment.
          *
          * \param size                  Size of this image (number of elements per dimension)
          * \param internalFormatColor   Internal OpenGL format for the color texture.
@@ -77,12 +80,20 @@ namespace TUMVis {
          */
         virtual ImageDataRenderTarget* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
 
+        /**
+         * Creates and initializes a new OpenGL texture according to \a internalFormat and attaches it to the FBO.
+         * \note    The amout of attachable color textures is limited by the driver/hardware - check 
+         *          GpuCaps.getMaxColorAttachments(). You can only attach one depth texture.
+         * \param   internalFormat  Internal OpenGL format for the texture to create.
+         */
+        void createAndAttachTexture(GLint internalFormat);
 
         /**
          * Gets the color texture of this render target
-         * \return _colorTexture
+         * \param   index   Index of the color texture attachment to return.
+         * \return  _colorTextures[index]
          */
-        const tgt::Texture* getColorTexture() const;
+        const tgt::Texture* getColorTexture(size_t index = 0) const;
 
         /**
          * Gets the depth texture of this render target
@@ -103,7 +114,7 @@ namespace TUMVis {
         /**
          * Binds the color texture without activating a texture unit.
          */
-        void bindColorTexture() const;
+        void bindColorTexture(size_t index = 0) const;
 
         /**
          * Binds the depth texture without activating a texture unit.
@@ -114,13 +125,19 @@ namespace TUMVis {
          * Activates the texture unit \a texUnit and binds the color texture.
          * \param   texUnit     Texture unit to activate
          */
-        void bindColorTexture(const tgt::TextureUnit& texUnit) const;
+        void bindColorTexture(const tgt::TextureUnit& texUnit, size_t index = 0) const;
 
         /**
          * Activates the texture unit \a texUnit and binds the depth texture.
          * \param   texUnit     Texture unit to activate
          */
         void bindDepthTexture(const tgt::TextureUnit& texUnit) const;
+
+        /**
+         * Gets the number of color textures/attachments of this render target.
+         * \return  _colorTextures.size()
+         */
+        size_t getNumColorTextures() const;
 
         /**
          * Binds the textures of this render target and sets the according shader uniforms.
@@ -137,21 +154,16 @@ namespace TUMVis {
             tgt::Shader* shader,
             const tgt::TextureUnit* colorTexUnit, 
             const tgt::TextureUnit* depthTexUnit, 
-            const std::string& colorTexUniform = "_colorTexture",
-            const std::string& depthTexUniform = "_depthTexture") const;
+            const std::string& colorTexUniform = "_colorTextures",
+            const std::string& depthTexUniform = "_depthTexture",
+            size_t index = 0) const;
 
 
     protected:
-        /**
-         * Initializes the textures as well as the FBO.
-         * \param   internalFormatColor Internal OpenGL format for the color texture.
-         * \param   internalFormatDepth Internal OpenGL format for the depth texture.
-         */
-        void initRenderTarget(GLint internalFormatColor, GLint internalFormatDepth);
 
-        tgt::Texture* _colorTexture;            ///< color texture
-        tgt::Texture* _depthTexture;            ///< depth texture
-        tgt::FramebufferObject* _fbo;           ///< Framebuffer object coordinating color and depth texture
+        std::vector<tgt::Texture*> _colorTextures;      ///< color textures
+        tgt::Texture* _depthTexture;                    ///< depth texture
+        tgt::FramebufferObject* _fbo;                   ///< Framebuffer object color and depth textures are attached to
 
 
         static const std::string loggerCat_;

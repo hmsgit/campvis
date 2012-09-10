@@ -141,7 +141,8 @@ namespace TUMVis {
             }
             else if (const ImageDataRenderTarget* imgRT = dynamic_cast<const ImageDataRenderTarget*>(it->second->getData())) {
                 if (imgRT->getDimensionality() == 2) {
-            	    textures.push_back(imgRT->getColorTexture());
+                    for (size_t i = 0; i < imgRT->getNumColorTextures(); ++i)
+            	        textures.push_back(imgRT->getColorTexture(i));
                     textures.push_back(imgRT->getDepthTexture());
                 }
             }

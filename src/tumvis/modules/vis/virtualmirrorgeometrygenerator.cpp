@@ -72,7 +72,7 @@ namespace TUMVis {
         // assure that mirror is faced to camera
         if (tgt::sign(tgt::dot(cam.getLook(), n)) == 1)
             n *= -1.f;
-        //_mirrorNormal.setValue(n);
+        _mirrorNormal.setValue(n);
 
         std::vector<tgt::vec3> vertices;
 

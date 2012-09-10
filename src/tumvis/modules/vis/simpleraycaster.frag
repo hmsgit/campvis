@@ -28,7 +28,8 @@
 
 #version 330
 
-out vec4 out_Color;         ///< outgoing fragment color
+layout(location = 0) out vec4 out_Color;         ///< outgoing fragment color
+layout(location = 1) out vec4 out_FHP;           ///< outgoing fragment first hitpoint
 
 #include "tools/raycasting.frag"
 #include "tools/texture2d.frag"
@@ -83,8 +84,10 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // save first hit ray parameter for depth value calculation
-        if (firstHitT < 0.0 && result.a > 0.0)
+        if (firstHitT < 0.0 && result.a > 0.0) {
             firstHitT = t;
+            out_FHP = vec4(samplePosition, 1.0);
+        }
 
         // early ray termination
         if (result.a >= 1.0) {

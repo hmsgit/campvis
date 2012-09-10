@@ -49,16 +49,20 @@ namespace TUMVis {
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data) {
-        ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-        rt->activate();
+        ImageDataRenderTarget* output = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+        output->createAndAttachTexture(GL_RGBA32F);
+        output->activate();
+
+        GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, buffers);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDepthFunc(GL_ALWAYS);
         QuadRdr.renderQuad();
         LGL_ERROR;
 
-        rt->deactivate();
-        data.addData(_targetImageID.getValue(), rt);
+        output->deactivate();
+        data.addData(_targetImageID.getValue(), output);
         _targetImageID.issueWrite();
     }
 }

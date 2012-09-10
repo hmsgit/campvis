@@ -40,83 +40,14 @@ namespace TUMVis {
 
     ImageDataRenderTarget::ImageDataRenderTarget(const tgt::svec3& size, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/)
         : ImageData(2, size)
-        , _colorTexture(0)
+        , _colorTextures(0)
         , _depthTexture(0)
         , _fbo(0)
     {
         tgtAssert(size.z == 1, "RenderTargets are only two-dimensional, expected size.z == 1.");
 
-        initRenderTarget(internalFormatColor, internalFormatDepth);
-
-        tgtAssert(_colorTexture != 0, "Color texture is 0, something went terribly wrong...");
-        tgtAssert(_depthTexture != 0, "Depth texture is 0, something went terribly wrong...");
-        tgtAssert(_fbo != 0, "Framebuffer object is 0, something went terribly wrong...");
-    }
-
-    ImageDataRenderTarget::~ImageDataRenderTarget() {
-        delete _fbo;
-        delete _colorTexture;
-        delete _depthTexture;
-    }
-
-    void ImageDataRenderTarget::initRenderTarget(GLint internalFormatColor, GLint internalFormatDepth) {
         if (!GpuCaps.isNpotSupported() && !GpuCaps.areTextureRectanglesSupported()) {
             LWARNING("Neither non-power-of-two textures nor texture rectangles seem to be supported!");
-        }
-
-        {
-            // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
-            tgt::TextureUnit rtUnit;
-            rtUnit.activate();
-
-            switch(internalFormatColor) {
-                case GL_RGB:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                    break;
-                case GL_RGB16F_ARB:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
-                    break;
-                case GL_RGBA:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                    break;
-                case GL_RGBA8:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                    break;
-                case GL_RGBA16:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
-                    break;
-                case GL_RGBA16F:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16F, GL_FLOAT, tgt::Texture::LINEAR);
-                    break;
-                case GL_RGBA32F:
-                    _colorTexture = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::LINEAR);
-                    break;
-                default:
-                    tgtAssert(false, "Unknown internal format!");
-            }
-            _colorTexture->uploadTexture();
-            _colorTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
-
-            switch(internalFormatDepth) {
-            case GL_DEPTH_COMPONENT16:
-                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            case GL_DEPTH_COMPONENT24:
-                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            case GL_DEPTH_COMPONENT32:
-                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-    #ifdef GL_DEPTH_COMPONENT32F
-            case GL_DEPTH_COMPONENT32F:
-                _depthTexture = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-    #endif
-            default:
-                tgtAssert(false, "Unknown internal depth format!");
-            }
-            _depthTexture->uploadTexture();
-            _depthTexture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
         }
 
         _fbo = new tgt::FramebufferObject();
@@ -124,16 +55,22 @@ namespace TUMVis {
             LERROR("Failed to initialize framebuffer object!");
             return;
         }
-        _fbo->activate();
 
-        _fbo->attachTexture(_colorTexture);
-        _fbo->isComplete();
-        _fbo->attachTexture(_depthTexture, GL_DEPTH_ATTACHMENT_EXT);
-        _fbo->isComplete();
+        createAndAttachTexture(internalFormatColor);
+        createAndAttachTexture(internalFormatDepth);
 
-        _fbo->deactivate();
+        tgtAssert(_colorTextures.front() != 0, "Color texture is 0, something went terribly wrong...");
+        tgtAssert(_depthTexture != 0, "Depth texture is 0, something went terribly wrong...");
+        tgtAssert(_fbo != 0, "Framebuffer object is 0, something went terribly wrong...");
     }
 
+    ImageDataRenderTarget::~ImageDataRenderTarget() {
+        delete _fbo;
+        for (std::vector<tgt::Texture*>::iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it)
+            delete *it;
+        delete _depthTexture;
+    }
+    
     void ImageDataRenderTarget::activate() {
         _fbo->activate();
         glViewport(0, 0, _size.x, _size.y);
@@ -143,13 +80,15 @@ namespace TUMVis {
         _fbo->deactivate();
     }
 
-    void ImageDataRenderTarget::bindColorTexture() const {
-        _colorTexture->bind();
+    void ImageDataRenderTarget::bindColorTexture(size_t index /*= 0*/) const {
+        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
+        _colorTextures[index]->bind();
     }
 
-    void ImageDataRenderTarget::bindColorTexture(const tgt::TextureUnit& texUnit) const {
+    void ImageDataRenderTarget::bindColorTexture(const tgt::TextureUnit& texUnit, size_t index /*= 0*/) const {
+        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
         texUnit.activate();
-        _colorTexture->bind();
+        _colorTextures[index]->bind();
     }
 
     void ImageDataRenderTarget::bindDepthTexture() const {
@@ -161,11 +100,12 @@ namespace TUMVis {
         _depthTexture->bind();
     }
 
-    void ImageDataRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit* colorTexUnit, const tgt::TextureUnit* depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/) const {
+    void ImageDataRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit* colorTexUnit, const tgt::TextureUnit* depthTexUnit, const std::string& colorTexUniform /*= "_colorTextures"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, size_t index /*= 0*/) const {
+        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
         if (colorTexUnit != 0) {
-            bindColorTexture(*colorTexUnit);
+            bindColorTexture(*colorTexUnit, index);
             shader->setUniform(colorTexUniform + "._texture", colorTexUnit->getUnitNumber());
             shader->setUniform(colorTexUniform + "._size", tgt::vec2(_size.xy()));
             shader->setUniform(colorTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
@@ -189,12 +129,112 @@ namespace TUMVis {
         return 0;
     }
 
-    const tgt::Texture* ImageDataRenderTarget::getColorTexture() const {
-        return _colorTexture;
+    const tgt::Texture* ImageDataRenderTarget::getColorTexture(size_t index /*= 0*/) const {
+        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
+       return _colorTextures[index];
     }
 
     const tgt::Texture* ImageDataRenderTarget::getDepthTexture() const {
         return _depthTexture;
+    }
+
+    size_t ImageDataRenderTarget::getNumColorTextures() const {
+        return _colorTextures.size();
+    }
+
+    void ImageDataRenderTarget::createAndAttachTexture(GLint internalFormat) {
+        // do sanity tests:
+        GLenum attachment = 0;
+        switch(internalFormat) {
+            case GL_RGB:
+            case GL_RGB16F_ARB:
+            case GL_RGBA:
+            case GL_RGBA8:
+            case GL_RGBA16:
+            case GL_RGBA16F:
+            case GL_RGBA32F:
+                if (_colorTextures.size() >= static_cast<size_t>(GpuCaps.getMaxColorAttachments())) {
+                    tgtAssert(false, "Tried to attach more color textures to FBO than supported!");
+                    LWARNING("Tried to attach more color textures to FBO than supported, aborted.");
+                    return;
+                }
+                attachment = GL_COLOR_ATTACHMENT0 + _colorTextures.size();
+                break;
+
+            case GL_DEPTH_COMPONENT16:
+            case GL_DEPTH_COMPONENT24:
+#ifdef GL_DEPTH_COMPONENT32F
+            case GL_DEPTH_COMPONENT32F:
+#endif
+                tgtAssert(_depthTexture == 0, "Tried to attach more than one depth texture.");
+                attachment = GL_DEPTH_ATTACHMENT;
+                break;
+
+            default:
+                tgtAssert(false, "Unknown internal format!");
+        }
+
+        // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
+        tgt::TextureUnit rtUnit;
+        rtUnit.activate();
+
+        // create texture
+        tgt::Texture* tex = 0;
+        switch(internalFormat) {
+            case GL_RGB:
+                tex = new tgt::Texture(0, _size, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                _colorTextures.push_back(tex);
+                break;
+            case GL_RGB16F_ARB:
+                tex = new tgt::Texture(0, _size, GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                _colorTextures.push_back(tex);
+                break;
+            case GL_RGBA:
+                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                _colorTextures.push_back(tex);
+                break;
+            case GL_RGBA8:
+                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                _colorTextures.push_back(tex);
+                break;
+            case GL_RGBA16:
+                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
+                _colorTextures.push_back(tex);
+                break;
+            case GL_RGBA16F:
+                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16F, GL_FLOAT, tgt::Texture::LINEAR);
+                _colorTextures.push_back(tex);
+                break;
+            case GL_RGBA32F:
+                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::LINEAR);
+                _colorTextures.push_back(tex);
+                break;
+
+            case GL_DEPTH_COMPONENT16:
+                tex = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, tgt::Texture::LINEAR);
+                _depthTexture = tex;
+                break;
+            case GL_DEPTH_COMPONENT24:
+                tex = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
+                _depthTexture = tex;
+                break;
+#ifdef GL_DEPTH_COMPONENT32F
+            case GL_DEPTH_COMPONENT32F:
+                tex = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
+                break;
+#endif
+
+            default:
+                tgtAssert(false, "Unknown internal format!");
+        }
+        tex->uploadTexture();
+        tex->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+
+        // attach texture to FBO
+        _fbo->activate();
+        _fbo->attachTexture(tex, attachment);
+        _fbo->isComplete();
+        _fbo->deactivate();
     }
 
 }
