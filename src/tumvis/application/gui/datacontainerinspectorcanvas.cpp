@@ -78,6 +78,7 @@ namespace TUMVis {
         _paintShader->setAttributeLocation(0, "in_Position");
         _paintShader->setAttributeLocation(1, "in_TexCoords");
 
+        // set this as painter to get notified when window size changes
         setPainter(this, false);
     }
 

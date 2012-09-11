@@ -35,6 +35,15 @@ out vec4 out_Color;
 uniform Texture2D _texture;
 uniform vec4 _color;
 
+const vec4 checkerboardColor1 = vec4(0.75, 0.75, 0.75, 1.0);
+const vec4 checkerboardColor2 = vec4(0.50, 0.50, 0.50, 1.0);
+
 void main() {
     out_Color = getElement2DNormalized(_texture, ex_TexCoord.xy);
+
+    // mix with fancy checkerboard pattern:
+    if ((mod(ex_TexCoord.x * 10.0, 2.0) > 1.0) ^^ (mod(ex_TexCoord.y * 10.0, 2.0) > 1.0))
+        out_Color = mix(checkerboardColor1, out_Color, out_Color.a);
+    else
+        out_Color = mix(checkerboardColor2, out_Color, out_Color.a);
 }
