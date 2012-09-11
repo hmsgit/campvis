@@ -75,6 +75,24 @@ namespace TUMVis {
         const tgt::mat4& getTextureToWorldMatrix() const;
 
         /**
+         * Gets the transformation matrix from world to texture coordinates.
+         * \return  _worldToTextureTransformation
+         */
+        const tgt::mat4& getWorldToTextureMatrix() const;
+
+        /**
+         * Gets the transformation matrix from voxel to world coordinates.
+         * \return  _voxelToWorldTransformation
+         */
+        const tgt::mat4& getVoxelToWorldMatrix() const;
+
+        /**
+         * Gets the transformation matrix from world to voxel coordinates.
+         * \return  _worldToVoxelTransformation
+         */
+        const tgt::mat4& getWorldToVoxelMatrix() const;
+
+        /**
          * Get the real world value mapping.
          * \return  Linear mapping for mapping element values to real world values.
          */
@@ -97,9 +115,12 @@ namespace TUMVis {
         tgt::vec3 _voxelSize;                           ///< Voxel size in (mm)
 
         LinearMapping<float> _realWorldValueMapping;     ///< Linear mapping for mapping element values to real world values
-        tgt::mat4 _textureToWolrdTransformation;        ///< Transformation matrix from texture to world coordinates
 
-        static const std::string loggerCat_;
+        tgt::mat4 _textureToWolrdTransformation;        ///< Transformation matrix from texture to world coordinates
+        tgt::mat4 _worldToTextureTransformation;        ///< Transformation matrix from world to texture coordinates
+
+        tgt::mat4 _voxelToWorldTransformation;        ///< Transformation matrix from voxel to world coordinates
+        tgt::mat4 _worldToVoxelTransformation;        ///< Transformation matrix from world to voxel coordinates
     };
 
 }

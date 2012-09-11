@@ -28,6 +28,8 @@
 
 #include "imagemappinginformation.h"
 
+#include "tgt/assert.h"
+
 namespace TUMVis {
 
     ImageMappingInformation::ImageMappingInformation(const tgt::vec3& size, const tgt::vec3& offset, const tgt::vec3& voxelSize, const LinearMapping<float>& realWorldValueMapping /*= LinearMapping<float>::identity*/)
@@ -57,10 +59,28 @@ namespace TUMVis {
 
     void ImageMappingInformation::updateMatrixes() {
         _textureToWolrdTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
+        if (! _textureToWolrdTransformation.invert(_worldToTextureTransformation))
+            tgtAssert(false, "Could not invert texture-to-world matrix. That should not happen!");
+
+        _voxelToWorldTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize);
+        if (! _voxelToWorldTransformation.invert(_worldToVoxelTransformation))
+            tgtAssert(false, "Could not invert voxel-to-world matrix. That should not happen!");
     }
 
     const tgt::mat4& ImageMappingInformation::getTextureToWorldMatrix() const {
         return _textureToWolrdTransformation;
+    }
+
+    const tgt::mat4& ImageMappingInformation::getWorldToTextureMatrix() const {
+        return _worldToTextureTransformation;
+    }
+
+    const tgt::mat4& ImageMappingInformation::getVoxelToWorldMatrix() const {
+        return _voxelToWorldTransformation;
+    }
+
+    const tgt::mat4& ImageMappingInformation::getWorldToVoxelMatrix() const {
+        return _worldToVoxelTransformation;
     }
 
 }
