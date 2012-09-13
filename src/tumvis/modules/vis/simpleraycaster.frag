@@ -79,7 +79,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     while (t < tend) {
         vec3 samplePosition = entryPoint.rgb + t * direction;
         float intensity = getElement3DNormalized(_volume, samplePosition).a;
-        vec3 gradient = computeGradientCentralDifferences(_volume, samplePosition);
+        vec3 gradient = computeGradient(_volume, samplePosition);
         vec4 color = lookupTF(_tfTextureParameters, _tfTex, intensity);
 
 #ifdef ENABLE_SHADING

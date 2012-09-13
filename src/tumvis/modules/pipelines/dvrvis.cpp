@@ -46,7 +46,7 @@ namespace TUMVis {
         , _vmEepGenerator(_renderTargetSize)
         , _dvrNormal(_renderTargetSize)
         , _dvrVM(_renderTargetSize)
-        , _clRaycaster(_renderTargetSize)
+        , _depthDarkening(_renderTargetSize)
         , _combine(_renderTargetSize)
         , _trackballEH(0)
     {
@@ -63,7 +63,7 @@ namespace TUMVis {
         _processors.push_back(&_vmEepGenerator);
         _processors.push_back(&_dvrNormal);
         _processors.push_back(&_dvrVM);
-        _processors.push_back(&_clRaycaster);
+        _processors.push_back(&_depthDarkening);
         _processors.push_back(&_combine);
     }
 
@@ -80,7 +80,6 @@ namespace TUMVis {
         _camera.addSharedProperty(&_vmEepGenerator._camera);
         _camera.addSharedProperty(&_dvrNormal._camera);
         _camera.addSharedProperty(&_dvrVM._camera);
-        _camera.addSharedProperty(&_clRaycaster._camera);
 
         _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader._targetImageID.setValue("reader.output");
@@ -90,9 +89,6 @@ namespace TUMVis {
 
         _dvrVM._targetImageID.setValue("dvr.output");
         _dvrVM._sourceImageID.setValue("eep.input");
-
-        _clRaycaster._targetImageID.setValue("clr.output");
-        _clRaycaster._sourceImageID.setValue("clr.input");
 
         _eepGenerator._sourceImageID.setValue("eep.input");
         _vmEepGenerator._sourceImageID.setValue("eep.input");
@@ -119,15 +115,15 @@ namespace TUMVis {
 
         _eepGenerator._entryImageID.connect(&_dvrNormal._entryImageID);
         _vmEepGenerator._entryImageID.connect(&_dvrVM._entryImageID);
-        _eepGenerator._entryImageID.connect(&_clRaycaster._entryImageID);
 
         _eepGenerator._exitImageID.connect(&_dvrNormal._exitImageID);
         _vmEepGenerator._exitImageID.connect(&_dvrVM._exitImageID);
-        _eepGenerator._exitImageID.connect(&_clRaycaster._exitImageID);
 
-        _dvrNormal._targetImageID.connect(&_combine._normalImageID);
         _dvrVM._targetImageID.connect(&_combine._mirrorImageID);
         _combine._targetImageID.setValue("combine");
+
+        _dvrNormal._targetImageID.connect(&_depthDarkening._inputImage);
+        _depthDarkening._outputImage.connect(&_combine._normalImageID);
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _vmgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
@@ -137,7 +133,7 @@ namespace TUMVis {
         _vmEepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _dvrNormal.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _dvrVM.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _clRaycaster.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
+        _depthDarkening.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _combine.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
 
         _trackballEH->setViewportSize(_renderTargetSize.getValue());
@@ -193,16 +189,17 @@ namespace TUMVis {
         }
         if (!_dvrNormal.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_dvrNormal);
+            lockGLContextAndExecuteProcessor(&_depthDarkening);
         }
         if (!_dvrVM.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_dvrVM);
             lockGLContextAndExecuteProcessor(&_combine);
         }
+        if (!_depthDarkening.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(&_depthDarkening);
+        }
         if (!_combine.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_combine);
-        }
-        if (!_clRaycaster.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_clRaycaster);
         }
     }
 

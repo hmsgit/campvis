@@ -52,6 +52,7 @@ namespace TUMVis {
         std::string generateHeader() const;
 
         BoolProperty _enableShading;        ///< Flag whether to enable shading;
+        BoolProperty _centralDifferences;   ///< Use central instead of forward-differences for gradient calculation
         Vec3Property _lightPosition;        ///< Light position
         Vec3Property _ambientColor;         ///< Ambient light color
         Vec3Property _diffuseColor;         ///< Diffuse light color

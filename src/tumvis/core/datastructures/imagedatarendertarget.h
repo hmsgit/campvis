@@ -154,7 +154,7 @@ namespace TUMVis {
             tgt::Shader* shader,
             const tgt::TextureUnit* colorTexUnit, 
             const tgt::TextureUnit* depthTexUnit, 
-            const std::string& colorTexUniform = "_colorTextures",
+            const std::string& colorTexUniform = "_colorTexture",
             const std::string& depthTexUniform = "_depthTexture",
             size_t index = 0) const;
 
