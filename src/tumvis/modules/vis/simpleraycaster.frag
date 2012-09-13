@@ -82,7 +82,9 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 gradient = computeGradientCentralDifferences(_volume, samplePosition);
         vec4 color = lookupTF(_tfTextureParameters, _tfTex, intensity);
 
+#ifdef ENABLE_SHADING
         color.rgb = calculatePhongShading(textureToWorld(_volume, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.xyz, color.xyz, vec3(1.0, 1.0, 1.0));
+#endif
 
         // perform compositing
         if (color.a > 0.0) {

@@ -51,6 +51,7 @@ namespace TUMVis {
 
         std::string generateHeader() const;
 
+        BoolProperty _enableShading;        ///< Flag whether to enable shading;
         Vec3Property _lightPosition;        ///< Light position
         Vec3Property _ambientColor;         ///< Ambient light color
         Vec3Property _diffuseColor;         ///< Diffuse light color

@@ -35,6 +35,7 @@ namespace TUMVis {
 
     ProcessorDecoratorShading::ProcessorDecoratorShading(const std::string& lightUniformName /*= "_lightSource"*/)
         : AbstractProcessorDecorator()
+        , _enableShading("EnableShading", "Enable Shading", true, InvalidationLevel::INVALID_SHADER)
         , _lightPosition("LightPosition", "Light Position", tgt::vec3(-8.f), tgt::vec3(-500.f), tgt::vec3(500.f))
         , _ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.5f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
@@ -49,6 +50,7 @@ namespace TUMVis {
     }
 
     void ProcessorDecoratorShading::addProperties(HasPropertyCollection* propCollection) {
+        propCollection->addProperty(&_enableShading);
         propCollection->addProperty(&_lightPosition);
         propCollection->addProperty(&_ambientColor);
         propCollection->addProperty(&_diffuseColor);
@@ -68,7 +70,12 @@ namespace TUMVis {
 
 
     std::string ProcessorDecoratorShading::generateHeader() const {
-        return "";
+        if (_enableShading.getValue()) {
+            return "#define ENABLE_SHADING\n";
+        }
+        else {
+            return "";
+        }
     }
 
 }
