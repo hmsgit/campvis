@@ -64,10 +64,14 @@ namespace TUMVis {
         virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
 
         DataNameProperty _targetImageID;    ///< image ID for output image
+        BoolProperty _enableShadowing;
     
     protected:
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data);
+
+        /// \see RaycastingProcessor::generateHeader()
+        virtual std::string generateHeader() const;
 
         static const std::string loggerCat_;
     };

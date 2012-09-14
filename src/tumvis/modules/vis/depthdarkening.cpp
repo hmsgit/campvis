@@ -49,12 +49,18 @@ namespace TUMVis {
         , _outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , _sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f)
         , _lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f)
+        , _useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, InvalidationLevel::INVALID_SHADER)
+        , _coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , _warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _shader(0)
     {
         addProperty(&_inputImage);
         addProperty(&_outputImage);
         addProperty(&_sigma);
         addProperty(&_lambda);
+        addProperty(&_useColorCoding);
+        addProperty(&_coldColor);
+        addProperty(&_warmColor);
     }
 
     DepthDarkening::~DepthDarkening() {
@@ -63,7 +69,7 @@ namespace TUMVis {
 
     void DepthDarkening::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/depthdarkening.frag", "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/depthdarkening.frag", generateHeader(), false);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -77,6 +83,11 @@ namespace TUMVis {
         DataContainer::ScopedTypedData<ImageDataRenderTarget> inputImage(data, _inputImage.getValue());
 
         if (inputImage != 0) {
+            if (_invalidationLevel.isInvalidShader()) {
+                _shader->setHeaders(generateHeader());
+                _shader->rebuild();
+            }
+
             // TODO: const cast is ugly...
             const_cast<tgt::Texture*>(inputImage->getDepthTexture())->downloadTexture();
             float* pixels = (float*)inputImage->getDepthTexture()->getPixelData();
@@ -107,6 +118,10 @@ namespace TUMVis {
             _shader->setUniform("_lambda", _lambda.getValue());
             _shader->setUniform("_minDepth", minDepth);
             _shader->setUniform("_maxDepth", maxDepth);
+            if (_useColorCoding.getValue()) {
+                _shader->setUniform("_coldColor", _coldColor.getValue());
+                _shader->setUniform("_warmColor", _warmColor.getValue());
+            }
 
             tempTarget->activate();
             LGL_ERROR;
@@ -138,6 +153,13 @@ namespace TUMVis {
         }
 
         _invalidationLevel.setValid();
+    }
+
+    std::string DepthDarkening::generateHeader() const {
+        if (_useColorCoding.getValue())
+            return "#define USE_COLORCODING\n";
+        else
+            return "";
     }
 
 }

@@ -44,6 +44,9 @@ uniform float _lambda;
 uniform float _minDepth;
 uniform float _maxDepth;
 
+uniform vec3 _coldColor;
+uniform vec3 _warmColor;
+
 int _halfKernelDimension;
 float[25] _gaussKernel;
 float _norm;
@@ -113,9 +116,15 @@ void main() {
         if (curColor.a == 0)
             discard;
 
+#ifdef USE_COLORCODING
+        float deltaDPlus = (deltaD > 0 ? deltaD : 0.0);
+        float deltaDMinus = (deltaD < 0 ? -deltaD : 0.0);
+        curColor.rgb += (_coldColor * deltaDMinus + _warmColor * deltaDPlus) * _lambda;
+#else
         if (deltaD < 0.0) {
             curColor.rgb += deltaD * _lambda;
         }
+#endif
 
         // write out modulated color and original depth value
         out_Color = curColor;

@@ -76,7 +76,17 @@ namespace TUMVis {
         FloatProperty _sigma;                       ///< sigma, standard deviation of the gaussian filter
         FloatProperty _lambda;                      ///< strength of depth effect
 
+        BoolProperty _useColorCoding;               ///< Flag whether to use depth color coding
+        Vec3Property _coldColor;                    ///< Cold color (color for far objects)
+        Vec3Property _warmColor;                    ///< Warm color (color for near objects)
+
     protected:
+        /**
+         * Generates the GLSL Header
+         * \return  #define uSE_COLORCODING if _useColorCoding is set
+         */
+        std::string generateHeader() const;
+
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;

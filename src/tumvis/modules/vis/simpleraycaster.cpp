@@ -38,9 +38,11 @@ namespace TUMVis {
     SimpleRaycaster::SimpleRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
         : RaycastingProcessor(canvasSize, "modules/vis/simpleraycaster.frag", true)
         , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
+        , _enableShadowing("EnableShadowing", "Enable Hard Shadows", false, InvalidationLevel::INVALID_SHADER)
     {
         addDecorator(new ProcessorDecoratorShading());
 
+        addProperty(&_enableShadowing);
         addProperty(&_targetImageID);
         decoratePropertyCollection(this);
 
@@ -70,4 +72,12 @@ namespace TUMVis {
         data.addData(_targetImageID.getValue(), output);
         _targetImageID.issueWrite();
     }
+
+    std::string SimpleRaycaster::generateHeader() const {
+        std::string toReturn = RaycastingProcessor::generateHeader();
+        if (_enableShadowing.getValue())
+            toReturn += "#define ENABLE_SHADOWING\n";
+        return toReturn;
+    }
+
 }

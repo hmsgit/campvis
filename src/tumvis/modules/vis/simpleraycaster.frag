@@ -82,8 +82,34 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 gradient = computeGradient(_volume, samplePosition);
         vec4 color = lookupTF(_tfTextureParameters, _tfTex, intensity);
 
+#ifdef ENABLE_SHADOWING
+        // simple and expensive implementation of hard shadows
+        if (color.a > 0.1) {
+            // compute direction from sample to light
+            vec3 L = normalize(_lightSource._position - textureToWorld(_volume, samplePosition).xyz) * _samplingStepSize;
+
+            bool finished = false;
+            vec3 position = samplePosition + L;
+            float shadowFactor = 0.0;
+
+            // traverse ray from sample to light
+            while (! finished) {
+                // grab intensity and TF opacity
+                intensity = getElement3DNormalized(_volume, position).a;
+                shadowFactor += lookupTF(_tfTextureParameters, _tfTex, intensity).a;
+
+                position += L;
+                finished = (shadowFactor > 0.95)
+                         || any(lessThan(position, vec3(0.0, 0.0, 0.0)))
+                         || any(greaterThan(position, vec3(1.0, 1.0, 1.0)));
+            }
+            // apply shadow to color
+            color.rgb *= (1.0 - shadowFactor);
+        }
+#endif
+
 #ifdef ENABLE_SHADING
-        color.rgb = calculatePhongShading(textureToWorld(_volume, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.xyz, color.xyz, vec3(1.0, 1.0, 1.0));
+        color.rgb = calculatePhongShading(textureToWorld(_volume, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
 #endif
 
         // perform compositing
