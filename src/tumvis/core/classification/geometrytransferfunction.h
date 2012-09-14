@@ -26,67 +26,65 @@
 // 
 // ================================================================================================
 
-#ifndef TRANSFERFUNCTIONPROPERTY_H__
-#define TRANSFERFUNCTIONPROPERTY_H__
+#ifndef GEOMETRYTRANSFERFUNCTION_H__
+#define GEOMETRYTRANSFERFUNCTION_H__
 
-#include "sigslot/sigslot.h"
-#include "core/properties/abstractproperty.h"
 #include "core/classification/abstracttransferfunction.h"
+
+#include <vector>
 
 namespace TUMVis {
 
+    class TFGeometry;
+
     /**
-     * \todo    Implement correct behavior if the TF changes during locked property state.
+     * A 1D transfer function built from multiple geometries.
      */
-    class TransferFunctionProperty : public AbstractProperty, public sigslot::has_slots<> {
+    class GeometryTransferFunction : public AbstractTransferFunction {
     public:
         /**
-         * Creates a new TransferFunctionProperty
-         * \param name      Property name (unchangable!)
-         * \param title     Property title (e.g. used for GUI)
-         * \param tf        Transfer function to initialize the property with.
-         * \param il        Invalidation level that this property triggers
+         * Creates a new GeometryTransferFunction.
+         * \param   size            Size of the transfer function texture
+         * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
          */
-        TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, InvalidationLevel il = InvalidationLevel::INVALID_RESULT);
+        GeometryTransferFunction(size_t size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
 
         /**
-         * Virtual Destructor
-         **/
-        virtual ~TransferFunctionProperty();
-
-        /// \see AbstractProperty::deinit()
-        virtual void deinit();
+         * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
+         */
+        virtual ~GeometryTransferFunction();
 
         /**
-         * Gets the TransferFunction of this property.
-         * \note    This is a non-const pointer, if you mess with it be sure you know what you're doing!
-         * \return  _transferFunction
+         * Returns the dimensionality of the transfer function.
+         * \return  The dimensionality of the transfer function.
          */
-        AbstractTransferFunction* getTF();
+        virtual size_t getDimensionality() const;
 
         /**
-         * Replaces the transfer function with \a tf.
-         * \note    First triggers s_BeforeTFReplace, then deletes the current TF, replaces it with
-         *          \a tf and finally triffers s_AfterTFReplace.
-         * \param   tf  The new transfer function for this property.
+         * Gets the list of transfer function geometries.
+         * \return  _geometries
          */
-        void replaceTF(AbstractTransferFunction* tf);
+        const std::vector<TFGeometry*>& getGeometries() const;
 
         /**
-         * Slot being called when \a _transferFunction has changed.
+         * Adds the given TF geometry to this transfer function.
+         * \param   geometry    TF geometry to add
          */
-        void onTFChanged();
-
-
-        sigslot::signal1<AbstractTransferFunction*> s_BeforeTFReplace;
-        sigslot::signal1<AbstractTransferFunction*> s_AfterTFReplace;
+        void addGeometry(TFGeometry* geometry);
 
     protected:
-        AbstractTransferFunction* _transferFunction;    ///< Transfer function of this property
+        /**
+         * Creates the texture and uploads it to OpenGL.
+         * Gets called by bind() with the local mutex already acquired.
+         */
+        virtual void createTexture();
+
+        std::vector<TFGeometry*> _geometries;       ///< The list of transfer function geometries.
 
         static const std::string loggerCat_;
+
     };
 
 }
 
-#endif // TRANSFERFUNCTIONPROPERTY_H__
+#endif // GEOMETRYTRANSFERFUNCTION_H__

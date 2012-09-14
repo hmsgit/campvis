@@ -26,43 +26,63 @@
 // 
 // ================================================================================================
 
-#include "TransferFunctionProperty.h"
+#include "geometrytransferfunction.h"
+
+#include "tgt/assert.h"
+#include "tgt/logmanager.h"
+#include "tgt/shadermanager.h"
+#include "tgt/texture.h"
+#include "tgt/textureunit.h"
+
+#include "core/classification/tfgeometry.h"
 
 namespace TUMVis {
 
-    const std::string TransferFunctionProperty::loggerCat_ = "TUMVis.core.datastructures.TransferFunctionProperty";
+    const std::string GeometryTransferFunction::loggerCat_ = "TUMVis.core.classification.GeometryTransferFunction";
 
-    TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
-        : AbstractProperty(name, title, il)
-        , _transferFunction(tf)
+    GeometryTransferFunction::GeometryTransferFunction(size_t size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
+        : AbstractTransferFunction(tgt::svec3(size, 1, 1), intensityDomain)
     {
-        tgtAssert(tf != 0, "Assigned transfer function must not be 0.");
-        tf->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
     }
 
-    TransferFunctionProperty::~TransferFunctionProperty() {
-        _transferFunction->s_changed.disconnect(this);
-        delete _transferFunction;
+    GeometryTransferFunction::~GeometryTransferFunction() {
+
     }
 
-    AbstractTransferFunction* TransferFunctionProperty::getTF() {
-        return _transferFunction;
+    size_t GeometryTransferFunction::getDimensionality() const {
+        return 1;
     }
 
-    void TransferFunctionProperty::onTFChanged() {
-        s_changed(this);
+    void GeometryTransferFunction::createTexture() {
+        delete _texture;
+
+        GLenum dataType = GL_UNSIGNED_BYTE;
+        _texture = new tgt::Texture(_size, GL_RGBA, dataType, tgt::Texture::LINEAR);
+        _texture->setWrapping(tgt::Texture::CLAMP);
+
+        GLubyte* ptr = _texture->getPixelData();
+        memset(ptr, 0, _texture->getArraySize());
+
+        for (std::vector<TFGeometry*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+            (*it)->rasterize(*_texture);
+        }
+
+        _texture->uploadTexture();
+        _dirty = false;
     }
 
-    void TransferFunctionProperty::deinit() {
-        _transferFunction->deinit();
+    const std::vector<TFGeometry*>& GeometryTransferFunction::getGeometries() const {
+        return _geometries;
     }
 
-    void TransferFunctionProperty::replaceTF(AbstractTransferFunction* tf) {
-        tgtAssert(tf != 0, "Transfer function must not be 0.");
-        s_BeforeTFReplace(_transferFunction);
-        delete _transferFunction;
-        _transferFunction = tf;
-        s_AfterTFReplace(_transferFunction);
+    void GeometryTransferFunction::addGeometry(TFGeometry* geometry) {
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            _geometries.push_back(geometry);
+        }
+        _dirty = true;
+        s_changed();
     }
+
 
 }
