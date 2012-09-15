@@ -57,6 +57,10 @@ uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
 
+#ifdef ENABLE_SHADOWING
+uniform float _shadowIntensity;
+#endif
+
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
@@ -104,7 +108,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                          || any(greaterThan(position, vec3(1.0, 1.0, 1.0)));
             }
             // apply shadow to color
-            color.rgb *= (1.0 - shadowFactor);
+            color.rgb *= (1.0 - shadowFactor * _shadowIntensity);
         }
 #endif
 

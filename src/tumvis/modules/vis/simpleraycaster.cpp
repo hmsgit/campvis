@@ -39,11 +39,13 @@ namespace TUMVis {
         : RaycastingProcessor(canvasSize, "modules/vis/simpleraycaster.frag", true)
         , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , _enableShadowing("EnableShadowing", "Enable Hard Shadows", false, InvalidationLevel::INVALID_SHADER)
+        , _shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&_enableShadowing);
         addProperty(&_targetImageID);
+        addProperty(&_enableShadowing);
+        addProperty(&_shadowIntensity);
         decoratePropertyCollection(this);
 
         // TODO: remove hack
@@ -62,6 +64,9 @@ namespace TUMVis {
 
         GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3, buffers);
+
+        if (_enableShadowing.getValue())
+            _shader->setUniform("_shadowIntensity", _shadowIntensity.getValue());
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDepthFunc(GL_ALWAYS);

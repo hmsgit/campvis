@@ -65,6 +65,7 @@ namespace TUMVis {
 
         DataNameProperty _targetImageID;    ///< image ID for output image
         BoolProperty _enableShadowing;
+        FloatProperty _shadowIntensity;
     
     protected:
         /// \see RaycastingProcessor::processImpl()

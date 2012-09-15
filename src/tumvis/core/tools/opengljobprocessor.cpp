@@ -78,7 +78,7 @@ namespace TUMVis {
                     break;
                 }
 
-                // avoid expensive context-switches for contexts without oending jobs.
+                // avoid expensive context-switches for contexts without pending jobs.
                 if (a->second->empty())
                     continue;
 
