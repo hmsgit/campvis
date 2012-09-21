@@ -54,7 +54,7 @@ namespace TUMVis {
     void SliceVis::init() {
         VisualizationPipeline::init();
 
-        _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
+        _imageReader._url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader._targetImageID.setValue("reader.output");
 
         _gvg._inputVolume.setValue("se.input");
@@ -95,7 +95,7 @@ namespace TUMVis {
             executeProcessor(&_gvg);
         }
         if (! _lhh.getInvalidationLevel().isValid()) {
-            executeProcessor(&_lhh);
+            lockGLContextAndExecuteProcessor(&_lhh);
         }
         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_sliceExtractor);

@@ -147,6 +147,7 @@ int Texture::calcBpp(GLint internalformat) {
         case GL_GREEN:
         case GL_BLUE:
         case GL_ALPHA:
+        case GL_ALPHA8:
         case GL_INTENSITY:
         case GL_LUMINANCE:
         case GL_DEPTH_COMPONENT:

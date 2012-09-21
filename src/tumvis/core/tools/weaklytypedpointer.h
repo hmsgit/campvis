@@ -93,7 +93,7 @@ namespace TUMVis {
          * Constructs a new weakly typed pointer.
          * \param pt            Base data type of the pointer.
          * \param numChannels   Number of channels, must be in [1, 4]!
-         * \param ptr           Pointer to the data, WeaklyTypedPointer will take ownership of it.
+         * \param ptr           Pointer to the data, WeaklyTypedPointer will _not_ take ownership of it.
          */
         WeaklyTypedPointer(BaseType pt, size_t numChannels, void* ptr);
 

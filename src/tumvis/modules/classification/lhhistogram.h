@@ -64,8 +64,8 @@ namespace TUMVis {
         DataNameProperty _inputVolume;      ///< ID for input volume
         DataNameProperty _inputGradients;   ///< ID for input gradient volume
 
-        DataNameProperty _outputFH;         ///< ID for output FH volume
         DataNameProperty _outputFL;         ///< ID for output FL volume
+        DataNameProperty _outputFH;         ///< ID for output FH volume
 
     protected:
 
