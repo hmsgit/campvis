@@ -45,7 +45,7 @@ namespace TUMVis {
     MhdImageReader::MhdImageReader() 
         : AbstractProcessor()
         , _url("url", "Image URL", "")
-        , _targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output")
+        , _targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output", DataNameProperty::WRITE)
     {
         addProperty(&_url);
         addProperty(&_targetImageID);

@@ -47,9 +47,6 @@ namespace TUMVis {
         addProperty(&_enableShadowing);
         addProperty(&_shadowIntensity);
         decoratePropertyCollection(this);
-
-        // TODO: remove hack
-        _transferFunction.getTF()->setIntensityDomain(tgt::vec2(0.01f, 0.05f));
     }
 
     SimpleRaycaster::~SimpleRaycaster() {

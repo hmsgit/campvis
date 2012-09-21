@@ -125,7 +125,7 @@ namespace TUMVis {
         fatherNode->second->addDependency(childNode->second);
     }
 
-    void DigraphVisualizationPipeline::onProcessorInvalidated(const AbstractProcessor* processor) {
+    void DigraphVisualizationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
         // TODO: implement
     }
 

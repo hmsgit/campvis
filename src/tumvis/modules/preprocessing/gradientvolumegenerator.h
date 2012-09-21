@@ -26,53 +26,50 @@
 // 
 // ================================================================================================
 
-#ifndef SLICEVIS_H__
-#define SLICEVIS_H__
+#ifndef GRADIENTVOLUMEGENERATOR_H__
+#define GRADIENTVOLUMEGENERATOR_H__
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/sliceextractor.h"
-#include "modules/preprocessing/gradientvolumegenerator.h"
-#include "modules/classification/lhhistogram.h"
+#include <string>
+
+#include "core/classification/abstracttransferfunction.h"
+#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
+#include "core/properties/cameraproperty.h"
 
 namespace TUMVis {
-    class SliceVis : public VisualizationPipeline {
+    /**
+     * Creates the gradient volume for the given intensity volume.
+     */
+    class GradientVolumeGenerator : public AbstractProcessor {
     public:
         /**
-         * Creates a VisualizationPipeline.
-         */
-        SliceVis();
+         * Constructs a new GradientVolumeGenerator Processor
+         **/
+        GradientVolumeGenerator();
 
         /**
-         * Virtual Destructor
+         * Destructor
          **/
-        virtual ~SliceVis();
+        virtual ~GradientVolumeGenerator();
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "GradientVolumeGenerator"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Creates the gradient volume for the given intensity volume."; };
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual void process(DataContainer& data);
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
+        DataNameProperty _inputVolume;      ///< ID for input volume
+        DataNameProperty _outputGradients;  //< ID for output gradient volume
 
-        virtual void keyEvent(tgt::KeyEvent* e);
 
     protected:
-        MhdImageReader _imageReader;
-        GradientVolumeGenerator _gvg;
-        LHHistogram _lhh;
-        SliceExtractor _sliceExtractor;
 
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-
+        static const std::string loggerCat_;
     };
+
 }
 
-#endif // SLICEVIS_H__
-
+#endif // GRADIENTVOLUMEGENERATOR_H__

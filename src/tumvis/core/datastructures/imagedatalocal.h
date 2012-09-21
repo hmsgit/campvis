@@ -94,6 +94,23 @@ namespace TUMVis {
         virtual float getElementNormalized(const tgt::svec3& position, size_t channel) const = 0;
 
         /**
+         * Returns the normalized value of the element at the given position and channel using linear interpolation.
+         *  - for \em unsigned integer types, the value range is mapped linearly to [0.0;1.0]
+         *  - for \em signed integer types, the value range is mapped linearly to [-1.0;1.0]
+         *  - floating point types are not mapped
+         * 
+         * Simple algorithms on images might not always want to test for the actual base data type.
+         * For them access to the normalized element values provided here might be enough.
+         * 
+         * \note    This method is virtual => know the costs!
+         * \sa      ImageDataLocal::getElementNormalized
+         * \param   position    Element position within the image
+         * \param   channel     Image channel
+         * \return  A normalized float representation of the element at the given position and channel.
+         */
+        virtual float getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const = 0;
+
+        /**
          * Sets the element at the given position and channel denormalized from the given value \a value.
          *  - for \em unsigned integer types, the value range is mapped linearly to [0.0;1.0]
          *  - for \em signed integer types, the value range is mapped linearly to [-1.0;1.0]

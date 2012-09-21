@@ -49,7 +49,7 @@ namespace TUMVis {
         , _exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , _camera("camera", "Camera")
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .02f, 0.001f, 1.f)
+        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .05f, 0.001f, 1.f)
         , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
         , _jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
         , _fragmentShaderFilename(fragmentShaderFileName)
@@ -104,7 +104,7 @@ namespace TUMVis {
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_jitterEntryPoints", _jitterEntryPoints.getValue());
                 _shader->setUniform("_jitterStepSizeMultiplier", _jitterStepSizeMultiplier.getValue());
-                _shader->setUniform("_samplingStepSize", _samplingStepSize.getValue());
+                _shader->setUniform("_samplingStepSize", _samplingStepSize.getValue() * .1f);
 
                 const tgt::Camera& cam = _camera.getValue();
                 float n = cam.getNearDist();

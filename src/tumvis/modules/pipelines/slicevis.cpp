@@ -36,10 +36,14 @@ namespace TUMVis {
     SliceVis::SliceVis()
         : VisualizationPipeline()
         , _imageReader()
+        , _gvg()
+        , _lhh()
         , _sliceExtractor(_renderTargetSize)
         , _wheelHandler(&_sliceExtractor._sliceNumber)
     {
         _processors.push_back(&_imageReader);
+        _processors.push_back(&_gvg);
+        _processors.push_back(&_lhh);
         _processors.push_back(&_sliceExtractor);
         _eventHandlers.push_back(&_wheelHandler);
     }
@@ -53,6 +57,11 @@ namespace TUMVis {
         _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader._targetImageID.setValue("reader.output");
 
+        _gvg._inputVolume.setValue("se.input");
+
+        _lhh._inputVolume.setValue("se.input");
+        _gvg._outputGradients.connect(&_lhh._inputGradients);
+
         _sliceExtractor._sourceImageID.setValue("se.input");
         _sliceExtractor._sliceNumber.setValue(0);
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
@@ -62,6 +71,7 @@ namespace TUMVis {
         _renderTargetID.addSharedProperty(&(_sliceExtractor._targetImageID));
 
         _imageReader.s_invalidated.connect<SliceVis>(this, &SliceVis::onProcessorInvalidated);
+        _gvg.s_invalidated.connect<SliceVis>(this, &SliceVis::onProcessorInvalidated);
         _sliceExtractor.s_invalidated.connect<SliceVis>(this, &SliceVis::onProcessorInvalidated);
     }
 
@@ -80,6 +90,12 @@ namespace TUMVis {
             if (local != 0) {
                 _data.addData("se.input", local);
             }
+        }
+        if (! _gvg.getInvalidationLevel().isValid()) {
+            executeProcessor(&_gvg);
+        }
+        if (! _lhh.getInvalidationLevel().isValid()) {
+            executeProcessor(&_lhh);
         }
         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_sliceExtractor);

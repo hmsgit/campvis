@@ -38,9 +38,9 @@ struct TFParameters {
  */
 float mapIntensityToTFDomain(in TFParameters p, in float intensity) {
     if(intensity <= p._intensityDomain.x)
-       return 0.0;
+       return -1.0;
     else if(intensity >= p._intensityDomain.y)
-       return 1.0;
+       return -1.0;
     else
         return (intensity - p._intensityDomain.x) / (p._intensityDomain.y - p._intensityDomain.x);
 }
@@ -55,7 +55,7 @@ float mapIntensityToTFDomain(in TFParameters p, in float intensity) {
  */
 vec4 lookupTF(in TFParameters p, in sampler1D tex, in float intensity) {
     intensity = mapIntensityToTFDomain(p, intensity);
-    return texture(tex, intensity);
+    return (intensity >= 0.0 ? texture(tex, intensity) : vec4(0.0, 0.0, 0.0, 0.0));
 }
 
 /**
@@ -69,5 +69,5 @@ vec4 lookupTF(in TFParameters p, in sampler1D tex, in float intensity) {
  */
 vec4 lookupTF(in TFParameters p, in sampler2D tex, in float intensity, in float y) {
     intensity = mapIntensityToTFDomain(p, intensity);
-    return texture(tex, vec2(intensity, y));
+    return (intensity >= 0.0 ? texture(tex, vec2(intensity, y)) : vec4(0.0, 0.0, 0.0, 0.0));
 }

@@ -117,7 +117,7 @@ namespace TUMVis {
          * The default behaviour is just to set the invalidation level to invalid.
          * \param   processor   The processor that emitted the signal
          */
-        virtual void onProcessorInvalidated(const AbstractProcessor* processor);
+        virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
 
         static const std::string loggerCat_;

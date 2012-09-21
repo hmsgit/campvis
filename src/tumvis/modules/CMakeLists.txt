@@ -5,14 +5,18 @@ INCLUDE(../cmake/commonconf.cmake)
 MESSAGE(STATUS "Configuring TUMVis Modules")
 
 FILE(GLOB TUMVIS_MODULES_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    classification/*.cpp
     io/*.cpp
     pipelines/*.cpp
+    preprocessing/*.cpp
     vis/*.cpp
 )
 
 FILE(GLOB TUMVIS_MODULES_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    classification/*.h
     io/*.h
     pipelines/*.h
+    preprocessing/*.h
     vis/*.h
     vis/*.frag
     vis/*.cl

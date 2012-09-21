@@ -32,6 +32,7 @@
 #include <string>
 
 #include "core/pipeline/abstractprocessor.h"
+#include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 
 namespace TUMVis {
@@ -65,7 +66,7 @@ namespace TUMVis {
         virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
 
         GenericProperty<std::string> _url;              ///< URL for file to read
-        GenericProperty<std::string> _targetImageID;    ///< image ID for read image
+        DataNameProperty _targetImageID;                ///< image ID for read image
 
     protected:
 

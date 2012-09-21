@@ -150,7 +150,7 @@ namespace TUMVis {
 
 
         /// Signal emitted when the processor has been invalidated.
-        sigslot::signal1<const AbstractProcessor*> s_invalidated;
+        sigslot::signal1<AbstractProcessor*> s_invalidated;
 
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.

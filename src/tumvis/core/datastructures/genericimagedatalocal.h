@@ -78,6 +78,9 @@ namespace TUMVis {
         /// \see ImageDataLocal::getElementNormalized
         virtual float getElementNormalized(const tgt::svec3& position, size_t channel) const;
 
+        /// \see ImageDataLocal::getElementNormalizedLinear
+        virtual float getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const;
+
         /// \see ImageDataLocal::setElementNormalized
         virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value);
 
@@ -157,7 +160,11 @@ namespace TUMVis {
         : ImageDataLocal(dimensionality, size, TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType, NUMCHANNELS)
         , _data(data)
     {
-        tgtAssert(data != 0, "Pointer to image data must not be 0!");
+        if (_data == 0) {
+            size_t numElements = tgt::hmul(_size);
+            _data = new ElementType[numElements];
+            memset(_data, 0, numElements * TypeTraits<BASETYPE, NUMCHANNELS>::elementSize);
+        }
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
@@ -276,6 +283,30 @@ namespace TUMVis {
         tgtAssert(false, "Yet to be implemented!");
         return ElementType(0);
     }
+
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    float TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const {
+        tgt::vec3 posAbs = tgt::max(position - 0.5f, tgt::vec3::zero);
+        tgt::vec3 p = posAbs - floor(posAbs); // get decimal part
+        tgt::svec3 llb = tgt::svec3(posAbs);
+        tgt::svec3 urf = tgt::svec3(ceil(posAbs));
+        urf = min(urf, _size - tgt::svec3(1)); // clamp so the lookups do not exceed the dimensions
+        llb = min(llb, _size - tgt::svec3(1)); // dito
+
+        /*
+            interpolate linearly
+        */
+        return  getElementNormalized(tgt::svec3(llb.x, llb.y, llb.z), channel) * (1.f-p.x)*(1.f-p.y)*(1.f-p.z) // llB
+              + getElementNormalized(tgt::svec3(urf.x, llb.y, llb.z), channel) * (    p.x)*(1.f-p.y)*(1.f-p.z) // lrB
+              + getElementNormalized(tgt::svec3(urf.x, urf.y, llb.z), channel) * (    p.x)*(    p.y)*(1.f-p.z) // urB
+              + getElementNormalized(tgt::svec3(llb.x, urf.y, llb.z), channel) * (1.f-p.x)*(    p.y)*(1.f-p.z) // ulB
+              + getElementNormalized(tgt::svec3(llb.x, llb.y, urf.z), channel) * (1.f-p.x)*(1.f-p.y)*(    p.z) // llF
+              + getElementNormalized(tgt::svec3(urf.x, llb.y, urf.z), channel) * (    p.x)*(1.f-p.y)*(    p.z) // lrF
+              + getElementNormalized(tgt::svec3(urf.x, urf.y, urf.z), channel) * (    p.x)*(    p.y)*(    p.z) // urF
+              + getElementNormalized(tgt::svec3(llb.x, urf.y, urf.z), channel) * (1.f-p.x)*(    p.y)*(    p.z);// ulF
+    }
+
 }
 
 #endif // GENERICIMAGEDATALOCAL_H__

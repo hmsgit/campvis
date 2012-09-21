@@ -30,6 +30,8 @@
 
 #include "tgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
+#include <ctime>
+
 
 namespace TUMVis {
     const std::string AbstractPipeline::loggerCat_ = "TUMVis.core.datastructures.AbstractPipeline";
@@ -76,7 +78,7 @@ namespace TUMVis {
         s_PipelineInvalidated();
     }
 
-    void AbstractPipeline::onProcessorInvalidated(const AbstractProcessor* processor) {
+    void AbstractPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
         _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
         s_PipelineInvalidated();
     }
@@ -94,8 +96,18 @@ namespace TUMVis {
 
         if (processor->getEnabled() && !processor->getInvalidationLevel().isValid()) {
             processor->lockProperties();
+#ifdef TUMVIS_DEBUG
+            clock_t startTime = clock();
+#endif
             processor->process(_data);
+#ifdef TUMVIS_DEBUG
+            clock_t endTime = clock();
+#endif
             processor->unlockProperties();
+
+#ifdef TUMVIS_DEBUG
+            LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+#endif
         }
     }
 

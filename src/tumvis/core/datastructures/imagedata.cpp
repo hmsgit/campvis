@@ -72,4 +72,12 @@ namespace TUMVis {
     size_t ImageData::positionToIndex(const tgt::svec3& position) const {
         return position.x + (position.y * _size.x) + (position.z * _size.x * _size.y);
     }
+
+    tgt::svec3 ImageData::indexToPosition(size_t index) const {
+        size_t z = index / (_size.x * _size.y);
+        size_t y = (index % (_size.x * _size.y)) / _size.x;
+        size_t x = index % _size.x;
+        return tgt::svec3(x, y, z);
+    }
+
 }

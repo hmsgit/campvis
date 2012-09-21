@@ -71,7 +71,7 @@ namespace TUMVis {
 
     void EEPGenerator::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/eepgenerator.frag", "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/eepgenerator.frag", generateHeader(), false);
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
             _shader->setAttributeLocation(1, "in_TexCoord");

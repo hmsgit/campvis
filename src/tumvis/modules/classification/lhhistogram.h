@@ -26,53 +26,52 @@
 // 
 // ================================================================================================
 
-#ifndef SLICEVIS_H__
-#define SLICEVIS_H__
+#ifndef LHHISTOGRAM_H__
+#define LHHISTOGRAM_H__
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/sliceextractor.h"
-#include "modules/preprocessing/gradientvolumegenerator.h"
-#include "modules/classification/lhhistogram.h"
+#include <string>
+
+#include "core/classification/abstracttransferfunction.h"
+#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
+#include "core/properties/cameraproperty.h"
 
 namespace TUMVis {
-    class SliceVis : public VisualizationPipeline {
+    /**
+     * Creates Lookup volumes vor generation LH-Histograms of volumes as well as the LH histogram.
+     */
+    class LHHistogram : public AbstractProcessor {
     public:
         /**
-         * Creates a VisualizationPipeline.
-         */
-        SliceVis();
+         * Constructs a new LHHistogram Processor
+         **/
+        LHHistogram();
 
         /**
-         * Virtual Destructor
+         * Destructor
          **/
-        virtual ~SliceVis();
+        virtual ~LHHistogram();
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "LHHistogram"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Creates Lookup volumes vor generation LH-Histograms of volumes as well as the LH histogram."; };
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual void process(DataContainer& data);
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
+        DataNameProperty _inputVolume;      ///< ID for input volume
+        DataNameProperty _inputGradients;   ///< ID for input gradient volume
 
-        virtual void keyEvent(tgt::KeyEvent* e);
+        DataNameProperty _outputFH;         ///< ID for output FH volume
+        DataNameProperty _outputFL;         ///< ID for output FL volume
 
     protected:
-        MhdImageReader _imageReader;
-        GradientVolumeGenerator _gvg;
-        LHHistogram _lhh;
-        SliceExtractor _sliceExtractor;
 
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-
+        static const std::string loggerCat_;
     };
+
 }
 
-#endif // SLICEVIS_H__
-
+#endif // LHHISTOGRAM_H__

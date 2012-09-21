@@ -67,7 +67,7 @@ namespace TUMVis {
          * \param delimiters        Set of delimiters for separating key-value pair
          * \param whitespace        Set of characters identifying whitespace
          */
-        TextFileParser(const std::string& url, bool caseSensitiveKeys, const std::string& delimiters, const std::string& whitespace = " \t");
+        TextFileParser(const std::string& url, bool caseSensitiveKeys, const std::string& delimiters, const std::string& whitespace = " \t\n\r");
 
 
         /**

@@ -97,7 +97,6 @@ namespace TUMVis {
          */
         virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
-    protected:
         /**
          * Transforms a vector based position to the corresponding array index.
          * \note    Caution, this method might return wrong results for non-continuous storage.
@@ -106,6 +105,16 @@ namespace TUMVis {
          * \return  Array index when image is stored continuously.
          */
         size_t positionToIndex(const tgt::svec3& position) const;
+
+        /**
+         * Transforms an array index to the corresponding vector based position.
+         * \note    Caution, this method might return wrong results for non-continuous storage.
+         *          In this case you should provide an appropriate overload.
+         * \param   index   Array index when image is stored continuously.
+         * \return  Vector based image coordinates.
+         */
+        tgt::svec3 indexToPosition(size_t index) const;
+    protected:
 
         size_t _dimensionality;                         ///< Dimensionality of this image
         tgt::svec3 _size;                               ///< Size of this image (number of elements per dimension)
