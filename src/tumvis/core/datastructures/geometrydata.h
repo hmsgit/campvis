@@ -56,6 +56,9 @@ namespace TUMVis {
 
         virtual AbstractData* clone() const = 0;
 
+        /// \see AbstractData::getVideoMemoryFootprint()
+        virtual size_t getVideoMemoryFootprint() const;
+
         /**
          * Renders this GeometryData.
          * Must be called from a valid OpenGL context.

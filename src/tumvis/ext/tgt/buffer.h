@@ -68,6 +68,11 @@ namespace tgt {
          */
         size_t getElementSize() const;
 
+        /**
+         * Gets the buffer size in bytes on the GPU.
+         * \return  _size
+         */
+        size_t getBufferSize() const;
 
         /**
          * Binds the buffer object to the current OpenGL context.

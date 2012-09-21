@@ -63,17 +63,17 @@ namespace TUMVis {
          */
         virtual ~ImageDataLocal();
 
-
-        /**
-         * \see AbstractData::clone()
-         **/
+        /// \see AbstractData::clone()
         virtual ImageDataLocal* clone() const = 0;
 
-        /**
-         * \see ImageData::getSubImage
-         */
+        /// \see ImageData::getSubImage()
         virtual ImageDataLocal* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
+        /**
+         * Returns a WeaklyTypedPointer to the image data.
+         * \note    The pointer is still owned by this ImageDataLocal. If you want a copy, use clone().
+         * \return  A WeaklyTypedPointer to the image data.
+         */
         virtual const WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
 
         /**

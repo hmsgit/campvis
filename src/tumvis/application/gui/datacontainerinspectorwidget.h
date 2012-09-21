@@ -104,6 +104,13 @@ namespace TUMVis {
          */
         void updateInfoWidget();
 
+        /**
+         * Returns a string with \a numBytes humanized (i.e. "numBytes/1024^n [KMG]Byte")
+         * \param   numBytes    Number of bytes to be converted.
+         * \return  "numBytes/1024^n [KMG]Bytes
+         */
+        QString humanizeBytes(size_t numBytes) const;
+
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         const DataHandle* _selectedDataHandle;          ///< The currently selected DataHandle
         QString _selectedDataHandleName;                ///< The name of the currently selected DataHandle
@@ -116,6 +123,8 @@ namespace TUMVis {
         QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
 
         QLabel* _lblName;
+        QLabel* _lblLocalMemoryFootprint;
+        QLabel* _lblVideoMemoryFootprint;
         QLabel* _lblTimestamp;
     };
 }

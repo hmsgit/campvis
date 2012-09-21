@@ -60,6 +60,9 @@ namespace TUMVis {
         /// \see AbstractData::clone()
         virtual MeshGeometry* clone() const;
 
+        /// \see AbstractData::getLocalMemoryFootprint()
+        virtual size_t getLocalMemoryFootprint() const;
+
         /**
          * Returns the number of faces of this mesh.
          * \return _faces.size()

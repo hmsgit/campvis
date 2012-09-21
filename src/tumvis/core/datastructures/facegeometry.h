@@ -72,6 +72,9 @@ namespace TUMVis {
         /// \see AbstractData::clone()
         virtual FaceGeometry* clone() const;
 
+        /// \see AbstractData::getLocalMemoryFootprint()
+        virtual size_t getLocalMemoryFootprint() const;
+
         /**
          * Returns the number of vertices of this face.
          * \return _vertices.size()

@@ -237,4 +237,31 @@ namespace TUMVis {
         _fbo->deactivate();
     }
 
+    size_t ImageDataRenderTarget::getLocalMemoryFootprint() const {
+        size_t sum = 0;
+        sum += sizeof(tgt::FramebufferObject);
+
+        sum += sizeof(tgt::Texture) * _colorTextures.size();
+        for (std::vector<tgt::Texture*>::const_iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it)
+            sum += (*it)->getBpp() * (*it)->getArraySize();
+
+        if (_depthTexture != 0) {
+            sum += sizeof(tgt::Texture);
+            sum += _depthTexture->getBpp() * _depthTexture->getArraySize();
+        }
+
+        return sizeof(*this) + sum;
+    }
+
+    size_t ImageDataRenderTarget::getVideoMemoryFootprint() const {
+        size_t sum = 0;
+        for (std::vector<tgt::Texture*>::const_iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it)
+            sum += (*it)->getSizeOnGPU();
+       
+        if (_depthTexture != 0)
+            sum += _depthTexture->getSizeOnGPU();
+
+        return sum;
+    }
+
 }

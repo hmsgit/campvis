@@ -75,6 +75,12 @@ namespace TUMVis {
          **/
         virtual ImageDataRenderTarget* clone() const;
 
+        /// \see AbstractData::getLocalMemoryFootprint()
+        virtual size_t getLocalMemoryFootprint() const;
+
+        /// \see AbstractData::getVideoMemoryFootprint()
+        virtual size_t getVideoMemoryFootprint() const;
+
         /**
          * \see ImageData::getSubImage
          */

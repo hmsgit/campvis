@@ -64,6 +64,20 @@ namespace TUMVis {
         return new FaceGeometry(_vertices, _textureCoordinates, _colors, _normals);
     }
 
+    size_t FaceGeometry::getLocalMemoryFootprint() const {
+        size_t sum = 0;
+        if (_verticesBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+        if (_texCoordsBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+        if (_colorsBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+        if (_normalsBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+
+        return sizeof(*this) + sum + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * _colors.size());
+    }
+
     size_t FaceGeometry::size() const {
         return _vertices.size();
     }

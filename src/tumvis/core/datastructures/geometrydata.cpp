@@ -83,6 +83,21 @@ namespace TUMVis {
         return *this;
     }
 
+    size_t GeometryData::getVideoMemoryFootprint() const {
+        size_t sum = 0;
+
+        if (_verticesBuffer != 0)
+            sum += _verticesBuffer->getBufferSize();
+        if (_texCoordsBuffer != 0)
+            sum += _texCoordsBuffer->getBufferSize();
+        if (_colorsBuffer != 0)
+            sum += _colorsBuffer->getBufferSize();
+        if (_normalsBuffer != 0)
+            sum += _normalsBuffer->getBufferSize();
+
+        return sum;
+    }
+
     const tgt::BufferObject* GeometryData::getVerticesBuffer() const {
         return _verticesBuffer;
     }

@@ -29,6 +29,7 @@
 #include "datacontainerinspectorwidget.h"
 
 #include "tgt/assert.h"
+#include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/datahandle.h"
 #include "application/gui/datacontainertreewidget.h"
@@ -108,6 +109,12 @@ namespace TUMVis {
         _lblName = new QLabel(QString("Name: "), _infoWidget);
         _infoWidgetLayout->addWidget(_lblName);
 
+        _lblLocalMemoryFootprint = new QLabel(QString("Local Memory Footprint: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblLocalMemoryFootprint);
+
+        _lblVideoMemoryFootprint = new QLabel(QString("Video Memory Footprint: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblVideoMemoryFootprint);
+
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
         _infoWidgetLayout->addWidget(_lblTimestamp);
 
@@ -125,11 +132,30 @@ namespace TUMVis {
         if (_selectedDataHandle != 0) {
             _lblTimestamp->setText("Timestamp: " + QString::number(_selectedDataHandle->getTimestamp()));
             _lblName->setText("Name: " + _selectedDataHandleName);
+            _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_selectedDataHandle->getData()->getLocalMemoryFootprint()));
+            _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_selectedDataHandle->getData()->getVideoMemoryFootprint()));
         }
         else {
             _lblTimestamp->setText("Timestamp: ");
             _lblName->setText("Name: ");
         }
+    }
+
+    QString DataContainerInspectorWidget::humanizeBytes(size_t numBytes) const {
+        QString units[5] = { tr(" Bytes"), tr(" KB"), tr(" MB"), tr(" GB"), tr(" TB") };
+        size_t index = 0;
+        size_t remainder = 0;
+
+        while (numBytes > 1024 && index < 5) {
+            remainder = numBytes % 1024;
+            numBytes /= 1024;
+            ++index;
+        }
+
+        if (remainder != 0)
+            return QString::number(numBytes) + "." + QString::number(remainder) + units[index];
+        else
+            return QString::number(numBytes) + units[index];
     }
 
 }

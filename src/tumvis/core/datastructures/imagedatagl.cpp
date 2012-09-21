@@ -135,4 +135,20 @@ namespace TUMVis {
         return _texture;
     }
 
+    size_t ImageDataGL::getLocalMemoryFootprint() const {
+        size_t sum = 0;
+        if (_texture != 0) {
+            sum += sizeof(tgt::Texture);
+            if (_texture->getPixelData() != 0) {
+                sum += _texture->getBpp() + _texture->getArraySize();
+            }
+        }
+
+        return sizeof(*this) + sum;
+    }
+
+    size_t ImageDataGL::getVideoMemoryFootprint() const {
+        return _texture->getSizeOnGPU();
+    }
+
 }

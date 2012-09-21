@@ -70,9 +70,20 @@ namespace TUMVis {
         /// \see AbstractData::clone()
         virtual ThisType* clone() const;
 
+        /// \see AbstractData::getLocalMemoryFootprint()
+        virtual size_t getLocalMemoryFootprint() const;
+
+        /// \see AbstractData::getVideoMemoryFootprint()
+        virtual size_t getVideoMemoryFootprint() const;
+
         /// \see ImageData::getSubImage
         virtual ThisType* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
 
+        /**
+         * Returns a WeaklyTypedPointer to the image data.
+         * \note    The pointer is still owned by this ImageDataLocal. If you want a copy, use clone().
+         * \return  A WeaklyTypedPointer to the image data.
+         */
         virtual const WeaklyTypedPointer getWeaklyTypedPointer() const;
 
         /// \see ImageDataLocal::getElementNormalized
@@ -179,6 +190,16 @@ namespace TUMVis {
         memcpy(newData, _data, numElements * sizeof(ElementType));
 
         return new ThisType(_dimensionality, _size, newData);
+    }
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    size_t TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getLocalMemoryFootprint() const {
+        return sizeof(*this) + _numElements * sizeof(ElementType);
+    }
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    size_t TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getVideoMemoryFootprint() const {
+        return 0;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>

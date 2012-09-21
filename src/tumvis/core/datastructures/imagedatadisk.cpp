@@ -194,6 +194,14 @@ namespace TUMVis {
         return new ImageDataDisk(_url, _dimensionality, _size, _type, _numChannels, _offset, _endianess, _stride);
     }
 
+    size_t ImageDataDisk::getLocalMemoryFootprint() const {
+        return sizeof(*this);
+    }
+
+    size_t ImageDataDisk::getVideoMemoryFootprint() const {
+        return 0;
+    }
+
     WeaklyTypedPointer::BaseType ImageDataDisk::getBaseType() const {
         return _type;
     }

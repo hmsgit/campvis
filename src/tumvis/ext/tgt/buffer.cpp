@@ -56,4 +56,8 @@ namespace tgt {
         return _elementSize;
     }
 
+    size_t BufferObject::getBufferSize() const {
+        return _size;
+    }
+
 }

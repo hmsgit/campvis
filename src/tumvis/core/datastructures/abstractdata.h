@@ -39,11 +39,34 @@ namespace TUMVis {
      */
     class AbstractData : public ReferenceCounted {
     public:
+        /**
+         * Constructor, simply calles ReferenceCounted ctor.
+         */
         AbstractData();
 
+        /**
+         * Virtual destructor
+         */
         virtual ~AbstractData();
 
+
+        /**
+         * Prototype - clone method, some people call this virtual constructor...
+         * \return  A copy of this object.
+         */
         virtual AbstractData* clone() const = 0;
+
+        /**
+         * Returns the local memory footprint of the data in bytes.
+         * \return  Number of bytes occupied in local memory by the data.
+         */
+        virtual size_t getLocalMemoryFootprint() const = 0;
+
+        /**
+         * Returns the video memory footprint of the data in bytes.
+         * \return  Number of bytes occupied in video memory by the data.
+         */
+        virtual size_t getVideoMemoryFootprint() const = 0;
 
     protected:
 

@@ -55,6 +55,23 @@ namespace TUMVis {
         return new MeshGeometry(_faces);
     }
 
+    size_t MeshGeometry::getLocalMemoryFootprint() const {
+        size_t sum = 0;
+        for (std::vector<FaceGeometry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
+            sum += it->getLocalMemoryFootprint();
+
+        if (_verticesBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+        if (_texCoordsBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+        if (_colorsBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+        if (_normalsBuffer != 0)
+            sum += sizeof(tgt::BufferObject);
+
+        return sizeof(*this) + sum;
+    }
+
     size_t MeshGeometry::size() const {
         return _faces.size();
     }
