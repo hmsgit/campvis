@@ -75,6 +75,23 @@ namespace TUMVis {
          * \return  A WeaklyTypedPointer to the image data.
          */
         virtual const WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
+        
+        /**
+         * Returns the normalized value of the element at the given index and channel.
+         *  - for \em unsigned integer types, the value range is mapped linearly to [0.0;1.0]
+         *  - for \em signed integer types, the value range is mapped linearly to [-1.0;1.0]
+         *  - floating point types are not mapped
+         * 
+         * Simple algorithms on images might not always want to test for the actual base data type.
+         * For them access to the normalized element values provided here might be enough.
+         * 
+         * \note    This method is virtual => know the costs!
+         * \sa      ImageDataLocal::setElementNormalized
+         * \param   index       Element index
+         * \param   channel     Image channel
+         * \return  A normalized float representation of the element at the given position and channel.
+         */
+        virtual float getElementNormalized(size_t index, size_t channel) const = 0;
 
         /**
          * Returns the normalized value of the element at the given position and channel.
@@ -85,6 +102,7 @@ namespace TUMVis {
          * Simple algorithms on images might not always want to test for the actual base data type.
          * For them access to the normalized element values provided here might be enough.
          * 
+         * \note    This method is more expensive than the version directly using the element index.
          * \note    This method is virtual => know the costs!
          * \sa      ImageDataLocal::setElementNormalized
          * \param   position    Element position within the image
@@ -111,6 +129,23 @@ namespace TUMVis {
         virtual float getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const = 0;
 
         /**
+         * Sets the element at the given index and channel denormalized from the given value \a value.
+         *  - for \em unsigned integer types, the value range is mapped linearly to [0.0;1.0]
+         *  - for \em signed integer types, the value range is mapped linearly to [-1.0;1.0]
+         *  - floating point types are not mapped
+         * 
+         * Simple algorithms on images might not always want to test for the actual base data type.
+         * For them access to the normalized element values provided here might be enough.
+         * 
+         * \note    This method is virtual => know the costs!
+         * \sa      ImageDataLocal::getElementNormalized
+         * \param   index       Element index
+         * \param   channel     Image channel
+         * \param   value       Normalized Value to set
+         */
+        virtual void setElementNormalized(size_t index, size_t channel, float value) = 0;
+
+        /**
          * Sets the element at the given position and channel denormalized from the given value \a value.
          *  - for \em unsigned integer types, the value range is mapped linearly to [0.0;1.0]
          *  - for \em signed integer types, the value range is mapped linearly to [-1.0;1.0]
@@ -119,6 +154,7 @@ namespace TUMVis {
          * Simple algorithms on images might not always want to test for the actual base data type.
          * For them access to the normalized element values provided here might be enough.
          * 
+         * \note    This method is more expensive than the version directly using the element index.
          * \note    This method is virtual => know the costs!
          * \sa      ImageDataLocal::getElementNormalized
          * \param   position    Element position within the image

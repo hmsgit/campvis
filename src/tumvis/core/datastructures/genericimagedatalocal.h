@@ -87,10 +87,16 @@ namespace TUMVis {
         virtual const WeaklyTypedPointer getWeaklyTypedPointer() const;
 
         /// \see ImageDataLocal::getElementNormalized
+        virtual float getElementNormalized(size_t index, size_t channel) const;
+
+        /// \see ImageDataLocal::getElementNormalized
         virtual float getElementNormalized(const tgt::svec3& position, size_t channel) const;
 
         /// \see ImageDataLocal::getElementNormalizedLinear
         virtual float getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const;
+
+        /// \see ImageDataLocal::setElementNormalized
+        virtual void setElementNormalized(size_t index, size_t channel, float value);
 
         /// \see ImageDataLocal::setElementNormalized
         virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value);
@@ -242,15 +248,25 @@ namespace TUMVis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    float TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(const tgt::svec3& position, size_t channel) const {
+    float TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(size_t index, size_t channel) const {
         tgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
-        return TypeNormalizer::normalizeToFloat(TypeTraits<BASETYPE, NUMCHANNELS>::getChannel(getElement(position), channel));
+        return TypeNormalizer::normalizeToFloat(TypeTraits<BASETYPE, NUMCHANNELS>::getChannel(getElement(index), channel));
+    }
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    float TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(const tgt::svec3& position, size_t channel) const {
+        return getElementNormalized(positionToIndex(position), channel);
+    }
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    void TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(size_t index, size_t channel, float value) {
+        tgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
+        TypeTraits<BASETYPE, NUMCHANNELS>::setChannel(getElement(index), channel, TypeNormalizer::denormalizeFromFloat<BASETYPE>(value));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     void TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(const tgt::svec3& position, size_t channel, float value) {
-        tgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
-        TypeTraits<BASETYPE, NUMCHANNELS>::setChannel(getElement(position), channel, TypeNormalizer::denormalizeFromFloat<BASETYPE>(value));
+        setElementNormalized(positionToIndex(position), channel, value);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>

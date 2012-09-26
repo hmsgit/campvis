@@ -59,7 +59,7 @@ namespace TUMVis {
                 const tgt::svec3& size = _intensities->getSize();
 
                 const tgt::vec4& gradient = _gradients->getElement(i);
-                float fl = _intensities->getElementNormalized(pos, 0);
+                float fl = _intensities->getElementNormalized(i, 0);
                 float fh = fl;
 
                 float forwardIntensity = integrateHeun(tgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient);
@@ -68,8 +68,8 @@ namespace TUMVis {
                 fh = std::max(forwardIntensity, backwardIntensity);
                 fl = std::min(forwardIntensity, backwardIntensity);
 
-                _fl->setElementNormalized(pos, 0, fl);
-                _fh->setElementNormalized(pos, 0, fh);
+                _fl->setElementNormalized(i, 0, fl);
+                _fh->setElementNormalized(i, 0, fh);
             }
         }
 
@@ -85,12 +85,12 @@ namespace TUMVis {
 
         float integrateHeun(tgt::vec3 position, const tgt::vec4& direction) const {
             tgt::vec4 gradient1 = direction;
-            tgt::vec3 stepSize(1.f);
+            tgt::vec3 stepSize(.5f);
             tgt::vec3 size(_intensities->getSize());
             size_t numSteps = 0;
 
             while (gradient1.w > _epsilon) {
-                tgt::vec4 gradient2 = getGradientLinear(position + tgt::normalize(gradient1.xyz()) * stepSize);
+                tgt::vec4 gradient2 = getGradientLinear(position + tgt::normalize(gradient1.xyz()) * stepSize/2.f);
                 position += tgt::normalize((gradient1 + gradient2).xyz()) * stepSize;
                 gradient1 = getGradientLinear(position);
                 ++numSteps;
@@ -125,8 +125,7 @@ namespace TUMVis {
 
     void operator() (const tbb::blocked_range<size_t>& range) const {
         for (size_t i = range.begin(); i != range.end(); ++i) {
-            tgt::svec3 pos = _fl->indexToPosition(i);
-            float values[2] = { _fl->getElementNormalized(pos, 0), _fh->getElementNormalized(pos, 0) };
+            float values[2] = { _fl->getElementNormalized(i, 0), _fh->getElementNormalized(i, 0) };
             _histogram->addSample(values);
         }
     }
@@ -164,10 +163,10 @@ namespace TUMVis {
         if (intensities != 0 && gradients != 0) {
             ImageDataLocal* fl = intensities->clone();
             ImageDataLocal* fh = intensities->clone();
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHGenerator(intensities, gradients, fl, fh, .005f));
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHGenerator(intensities, gradients, fl, fh, .006f));
 
             float mins[2] = { 0.f, 0.f };
-            float maxs[2] = { .01f, .01f };
+            float maxs[2] = { .1f, .1f };
             size_t numBuckets[2] = { 256, 256 };
             ConcurrentGenericHistogramND<float, 2> lhHistogram(mins, maxs, numBuckets);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHHistogramGenerator(fl, fh, &lhHistogram));

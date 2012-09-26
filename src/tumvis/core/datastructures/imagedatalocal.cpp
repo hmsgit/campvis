@@ -43,5 +43,4 @@ namespace TUMVis {
     ImageDataLocal::~ImageDataLocal() {
     }
 
-
 }
