@@ -83,16 +83,17 @@ namespace TUMVis {
         _camera.addSharedProperty(&_dvrNormal._camera);
         _camera.addSharedProperty(&_dvrVM._camera);
 
+        //_imageReader._url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader._targetImageID.setValue("reader.output");
 
         _dvrNormal._targetImageID.setValue("drr.output");
         _dvrNormal._sourceImageID.setValue("eep.input");
 
-        GeometryTransferFunction* dvrTF = new GeometryTransferFunction(128, tgt::vec2(0.f, .05f));
-        dvrTF->addGeometry(TFGeometry::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-        dvrTF->addGeometry(TFGeometry::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-        _dvrNormal._transferFunction.replaceTF(dvrTF);
+         GeometryTransferFunction* dvrTF = new GeometryTransferFunction(128, tgt::vec2(0.f, .05f));
+         dvrTF->addGeometry(TFGeometry::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
+         dvrTF->addGeometry(TFGeometry::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
+         _dvrNormal._transferFunction.replaceTF(dvrTF);
 
         _dvrVM._targetImageID.setValue("dvr.output");
         _dvrVM._sourceImageID.setValue("eep.input");
@@ -158,32 +159,35 @@ namespace TUMVis {
 
             // convert data
             DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
-            ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
-            if (local != 0) {
-                _data.addData("clr.input", local);
-            }
-            {
-                tgt::GLContextScopedLock lock(_canvas->getContext());
-                ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(img);
-                if (gl != 0) {
-                    _data.addData("eep.input", gl);
+            if (img != 0) {
+                ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
+                if (local != 0) {
+                    const DataHandle* dh = _data.addData("clr.input", local);
+                    _dvrNormal._transferFunction.getTF()->setImageHandle(dh);
                 }
-            }
-            CtxtMgr.releaseCurrentContext();
+                {
+                    tgt::GLContextScopedLock lock(_canvas->getContext());
+                    ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(img);
+                    if (gl != 0) {
+                        _data.addData("eep.input", gl);
+                    }
+                }
+                CtxtMgr.releaseCurrentContext();
 
-            tgt::Bounds volumeExtent = img->getWorldBounds();
-            tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-            
-            _trackballEH->setSceneBounds(volumeExtent);
-            _trackballEH->setCenter(volumeExtent.center());
-            _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+
+                _trackballEH->setSceneBounds(volumeExtent);
+                _trackballEH->setCenter(volumeExtent.center());
+                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+            }
 
         }
         if (! _pgGenerator.getInvalidationLevel().isValid()) {
-            executeProcessor(&_pgGenerator);
+            lockGLContextAndExecuteProcessor(&_pgGenerator);
         }
         if (! _vmgGenerator.getInvalidationLevel().isValid()) {
-            executeProcessor(&_vmgGenerator);
+            lockGLContextAndExecuteProcessor(&_vmgGenerator);
         }
         if (! _vmRenderer.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_vmRenderer);
@@ -219,5 +223,6 @@ namespace TUMVis {
         float ratio = static_cast<float>(_renderTargetSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
+
 
 }

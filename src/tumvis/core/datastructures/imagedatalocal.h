@@ -32,6 +32,7 @@
 #include "tgt/vector.h"
 #include "core/datastructures/imagedata.h"
 
+#include "core/tools/concurrenthistogram.h"
 #include "core/tools/endianhelper.h"
 #include "core/tools/weaklytypedpointer.h"
 
@@ -48,6 +49,8 @@ namespace TUMVis {
      */
     class ImageDataLocal : public ImageData {
     public:
+        typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
+
         /**
          * Creates a new ImageData representation in local memory.
          *
@@ -163,9 +166,24 @@ namespace TUMVis {
          */
         virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value) = 0;
 
+        /**
+         * Returns the intensity distribution normalized to float as 1D histogram.
+         * \note    The intensity histogram is computed using lazy evaluation, hence, computation
+         *          may take some time.
+         * \return  _intensityHistogram
+         */
+        const IntensityHistogramType& getIntensityHistogram() const;
+
     protected:
+        /**
+         * Computes the intensity histogram;
+         */
+        void computeIntensityHistogram() const;
+
         WeaklyTypedPointer::BaseType _baseType;     ///< Base type of the image data
         size_t _numChannels;                        ///< Number of channels per image element.
+
+        mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram, mutable to allow lazy instantiation
 
         static const std::string loggerCat_;
 

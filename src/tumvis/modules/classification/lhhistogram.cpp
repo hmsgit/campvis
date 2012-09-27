@@ -85,7 +85,7 @@ namespace TUMVis {
 
         float integrateHeun(tgt::vec3 position, const tgt::vec4& direction) const {
             tgt::vec4 gradient1 = direction;
-            tgt::vec3 stepSize(.5f);
+            tgt::vec3 stepSize(.25f);
             tgt::vec3 size(_intensities->getSize());
             size_t numSteps = 0;
 
@@ -172,10 +172,11 @@ namespace TUMVis {
             tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHHistogramGenerator(fl, fh, &lhHistogram));
 
             // TODO: ugly hack...
-            int16_t* tmp = new int16_t[256*256];
+            float* tmp = new float[256*256];
             for (size_t i = 0; i < 256*256; ++i)
-                tmp[i] = static_cast<int16_t>(lhHistogram.getBuckets()[i]);
-            WeaklyTypedPointer wtp(WeaklyTypedPointer::INT16, 1, tmp);
+                tmp[i] = static_cast<float>(lhHistogram.getBuckets()[i]) / static_cast<float>(lhHistogram.getMaxFilling());
+
+            WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
             ImageDataGL* tex = new ImageDataGL(2, tgt::svec3(256, 256, 1), wtp);
             delete [] tmp;
 

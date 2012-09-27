@@ -28,8 +28,30 @@
 
 #include "imagedatalocal.h"
 
+#include "tbb/include/tbb/tbb.h"
 
 namespace TUMVis {
+    
+    class IntensityHistogramGenerator {
+    public:
+        IntensityHistogramGenerator(const ImageDataLocal* intensityData, ImageDataLocal::IntensityHistogramType* histogram)
+            : _intensityData(intensityData)
+            , _histogram(histogram)
+        {}
+
+        void operator() (const tbb::blocked_range<size_t>& range) const {
+            for (size_t i = range.begin(); i != range.end(); ++i) {
+                float value = _intensityData->getElementNormalized(i, 0);
+                _histogram->addSample(&value);
+            }
+        }
+
+    protected:
+        const ImageDataLocal* _intensityData;
+        ImageDataLocal::IntensityHistogramType* _histogram;
+    };
+
+// ================================================================================================
 
     const std::string ImageDataLocal::loggerCat_ = "TUMVis.core.datastructures.ImageDataLocal";
 
@@ -37,10 +59,29 @@ namespace TUMVis {
         : ImageData(dimensionality, size)
         , _baseType(baseType)
         , _numChannels(numChannels)
+        , _intensityHistogram(0)
     {
     }
 
     ImageDataLocal::~ImageDataLocal() {
+        delete _intensityHistogram;
+    }
+
+    const ConcurrentGenericHistogramND<float, 1>& ImageDataLocal::getIntensityHistogram() const {
+        if (_intensityHistogram == 0)
+            computeIntensityHistogram();
+
+        return *_intensityHistogram;
+    }
+
+    void ImageDataLocal::computeIntensityHistogram() const {
+        delete _intensityHistogram;
+
+        float mins = 0.f;
+        float maxs = 1.f;
+        size_t numBuckets = 1024;
+        _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), IntensityHistogramGenerator(this, _intensityHistogram));
     }
 
 }

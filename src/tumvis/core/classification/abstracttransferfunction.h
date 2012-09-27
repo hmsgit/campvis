@@ -34,6 +34,9 @@
 #include "tbb/include/tbb/atomic.h"
 #include "tbb/include/tbb/mutex.h"
 
+#include "core/datastructures/datahandle.h"
+#include "core/tools/concurrenthistogram.h"
+
 #include <string>
 
 namespace tgt {
@@ -61,6 +64,8 @@ namespace TUMVis {
      */
     class AbstractTransferFunction {
     public:
+        typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
+
         /**
          * Creates a new AbstractTransferFunction.
          * \param   size            Size of the transfer function texture
@@ -113,20 +118,49 @@ namespace TUMVis {
          */
         const tgt::Texture* getTexture();
 
+        /**
+         * Returns a DataHandle to the image for this transfer function, may be 0.
+         * \return  _imageHandle, may be 0!
+         */
+        const DataHandle* getImageHandle() const;
+
+        /**
+         * Sets the DataHandle for this transfer function, may be 0.
+         * \note    This method makes a copy of \a imageHandle, hence does not take ownership.
+         * \param   imageHandle     The new DataHandle for this transfer function, may be 0, will be copied.
+         */
+        void setImageHandle(const DataHandle* imageHandle);
+
+        /**
+         * Returns the intensity histogram
+         * \todo    This is NOT thread-safe!
+         * \return  _intensityHistogram
+         */
+        const IntensityHistogramType* getIntensityHistogram() const;
+
         /// Signal emitted when transfer function has changed.
         sigslot::signal0<> s_changed;
 
     protected:
+        /**
+         * Computes the intensity histogram;
+         */
+        void computeIntensityHistogram() const;
+
         /**
          * Creates the texture and uploads it to OpenGL.
          * Gets called by bind() with the local mutex already acquired.
          */
         virtual void createTexture() = 0;
 
-        tgt::svec3 _size;               ///< Size of the transfer function texture
-        tgt::vec2 _intensityDomain;     ///< Intensity Domain where the transfer function is mapped to during classification
-        tgt::Texture* _texture;         ///< OpenGL lookup texture storing the TF
-        tbb::atomic<bool> _dirty;       ///< Flag whether the OpenGL texture has to be updated
+        tgt::svec3 _size;                   ///< Size of the transfer function texture
+        tgt::vec2 _intensityDomain;         ///< Intensity Domain where the transfer function is mapped to during classification
+        tgt::Texture* _texture;             ///< OpenGL lookup texture storing the TF
+        tbb::atomic<bool> _dirtyTexture;    ///< Flag whether the OpenGL texture has to be updated
+
+        const DataHandle* _imageHandle;                         ///< DataHandle to the image for this transfer function. May be 0.
+        mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram of the intensity in _imageHandle for the current _intensityDomain
+        tbb::atomic<bool> _dirtyHistogram;                      ///< Flag whether the intensity histogram has to be updated.
 
         mutable tbb::mutex _localMutex; ///< mutex protecting the local members
 

@@ -70,7 +70,7 @@ namespace TUMVis {
         }
 
         _texture->uploadTexture();
-        _dirty = false;
+        _dirtyTexture = false;
     }
 
     void SimpleTransferFunction::setLeftColor(const tgt::col4& color) {
@@ -78,7 +78,7 @@ namespace TUMVis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _leftColor = color;
         }
-        _dirty = true;
+        _dirtyTexture = true;
         s_changed();
     }
 
@@ -87,7 +87,7 @@ namespace TUMVis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _rightColor = color;
         }
-        _dirty = true;
+        _dirtyTexture = true;
         s_changed();
     }
 

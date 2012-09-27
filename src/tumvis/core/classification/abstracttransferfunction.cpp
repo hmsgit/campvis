@@ -28,13 +28,37 @@
 
 #include "abstracttransferfunction.h"
 
+#include "tbb/include/tbb/tbb.h"
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
 #include "tgt/texture.h"
 #include "tgt/textureunit.h"
 
+#include "core/datastructures/imagedatalocal.h"
+
 namespace TUMVis {
+    
+    class IntensityHistogramGenerator {
+    public:
+        IntensityHistogramGenerator(const ImageDataLocal* intensityData, AbstractTransferFunction::IntensityHistogramType* histogram)
+            : _intensityData(intensityData)
+            , _histogram(histogram)
+        {}
+
+        void operator() (const tbb::blocked_range<size_t>& range) const {
+            for (size_t i = range.begin(); i != range.end(); ++i) {
+                float value = _intensityData->getElementNormalized(i, 0);
+                _histogram->addSample(&value);
+            }
+        }
+
+    protected:
+        const ImageDataLocal* _intensityData;
+        AbstractTransferFunction::IntensityHistogramType* _histogram;
+    };
+
+// ================================================================================================
 
     const std::string AbstractTransferFunction::loggerCat_ = "TUMVis.core.classification.AbstractTransferFunction";
 
@@ -42,8 +66,11 @@ namespace TUMVis {
         : _size(size)
         , _intensityDomain(intensityDomain)
         , _texture(0)
+        , _imageHandle(0)
+        , _intensityHistogram(0)
     {
-        _dirty = false;
+        _dirtyTexture = false;
+        _dirtyHistogram = false;
     }
 
     AbstractTransferFunction::~AbstractTransferFunction() {
@@ -60,7 +87,7 @@ namespace TUMVis {
         // TODO:    lock here or in createTexture?
         {
             tbb::mutex::scoped_lock lock(_localMutex);
-            if (_texture == 0 || _dirty) {
+            if (_texture == 0 || _dirtyTexture) {
                 createTexture();
             }
         }
@@ -82,6 +109,7 @@ namespace TUMVis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _intensityDomain = newDomain;
         }
+        _dirtyHistogram = true;
         s_changed();
     }
 
@@ -93,11 +121,50 @@ namespace TUMVis {
         // TODO:    lock here or in createTexture?
         {
             tbb::mutex::scoped_lock lock(_localMutex);
-            if (_texture == 0 || _dirty) {
+            if (_texture == 0 || _dirtyTexture) {
                 createTexture();
             }
         }
         return _texture;
+    }
+
+    const DataHandle* AbstractTransferFunction::getImageHandle() const {
+        return _imageHandle;
+    }
+
+    void AbstractTransferFunction::setImageHandle(const DataHandle* imageHandle) {
+        delete _imageHandle;
+
+        if (imageHandle == 0)
+            _imageHandle = 0;
+        else
+            _imageHandle = new DataHandle(*imageHandle);
+
+        _dirtyHistogram = true;
+    }
+
+    void AbstractTransferFunction::computeIntensityHistogram() const {
+        delete _intensityHistogram;
+        _intensityHistogram = 0;
+
+        if (_imageHandle != 0) {
+            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(_imageHandle->getData());
+            if (idl != 0) {
+                float mins = _intensityDomain.x;
+                float maxs = _intensityDomain.y;
+                size_t numBuckets = 512;
+                _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
+                tbb::parallel_for(tbb::blocked_range<size_t>(0, idl->getNumElements()), IntensityHistogramGenerator(idl, _intensityHistogram));
+            }
+        }
+    }
+
+    const AbstractTransferFunction::IntensityHistogramType* AbstractTransferFunction::getIntensityHistogram() const {
+        if (_dirtyHistogram) {
+            computeIntensityHistogram();
+        }
+
+        return _intensityHistogram;
     }
 
 

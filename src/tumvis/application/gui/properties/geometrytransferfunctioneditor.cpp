@@ -36,6 +36,7 @@
 #include "application/gui/qtcolortools.h"
 #include "core/classification/geometrytransferfunction.h"
 #include "core/classification/tfgeometry.h"
+#include "core/datastructures/imagedatalocal.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"
 
@@ -64,11 +65,14 @@ namespace TUMVis {
     }
 
     GeometryTransferFunctionEditor::~GeometryTransferFunctionEditor() {
+        // TODO: this needs to be done, but we can not ensure that GLJobProc is still existant during deconstruction...
         //GLJobProc.deregisterContext(_canvas);
     }
 
     void GeometryTransferFunctionEditor::updateWidgetFromProperty() {
         GeometryTransferFunction* gtf = static_cast<GeometryTransferFunction*>(_transferFunction);
+
+        invalidate();
     }
 
     void GeometryTransferFunctionEditor::init() {
@@ -85,10 +89,47 @@ namespace TUMVis {
         glPushMatrix();
 
         glViewport(0, 0, _canvas->width(), _canvas->height());
-        glOrtho(0, 1, 0, 1, -1, 1);
         glClearColor(1.f, 1.f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         LGL_ERROR;
+
+//         const DataHandle* dh = gtf->getImageHandle();
+//         if (dh != 0) {
+//             const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(dh->getData());
+//             if (idl != 0) {
+//                 const ImageDataLocal::IntensityHistogramType& ih = idl->getIntensityHistogram();
+            const AbstractTransferFunction::IntensityHistogramType* ih = gtf->getIntensityHistogram();
+            if (ih != 0) {
+                size_t numBuckets = ih->getNumBuckets(0);
+                if (numBuckets > 0) {
+                    float maxFilling = static_cast<float>(ih->getMaxFilling());
+
+                    float xl = static_cast<float>(0.f) / static_cast<float>(numBuckets);
+                    float xr = 0.f;
+                    float yl = static_cast<float>(ih->getNumElements(0)) / maxFilling;
+                    float yr = 0.f;
+
+                    glPushMatrix();
+                    glOrtho(0,1 , 0, 1, -1, 1);
+                    glBegin(GL_QUADS);
+                    glColor4f(1.f, .75f, 0.f, .25f);
+                    for (size_t i = 1; i < numBuckets; ++i) {
+                        xr = static_cast<float>(i) / static_cast<float>(numBuckets);
+                        yr = static_cast<float>(ih->getNumElements(i)) / maxFilling;
+
+                        glVertex2f(xl, 0.f);
+                        glVertex2f(xl, yl);
+                        glVertex2f(xr, yr);
+                        glVertex2f(xr, 0.f);
+
+                        xl = xr;
+                        yl = yr;
+                    }
+                    glEnd();
+                    glPopMatrix();
+                }
+            }
+//         }
 
 //         glBegin(GL_QUADS);
 //             glColor3f(1.f, 0.f, 0.f);
@@ -101,6 +142,7 @@ namespace TUMVis {
 //             glVertex2f(0.f, 1.f);
 //         glEnd();
 
+        glOrtho(0, 1, 0, 1, -1, 1);
         for (std::vector<TFGeometry*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
             (*it)->render();
         }

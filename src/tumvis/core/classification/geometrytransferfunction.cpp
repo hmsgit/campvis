@@ -68,7 +68,7 @@ namespace TUMVis {
         }
 
         _texture->uploadTexture();
-        _dirty = false;
+        _dirtyTexture = false;
     }
 
     const std::vector<TFGeometry*>& GeometryTransferFunction::getGeometries() const {
@@ -80,7 +80,7 @@ namespace TUMVis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _geometries.push_back(geometry);
         }
-        _dirty = true;
+        _dirtyTexture = true;
         s_changed();
     }
 

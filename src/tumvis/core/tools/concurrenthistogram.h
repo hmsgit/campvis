@@ -1,3 +1,6 @@
+#ifndef CONCURRENTHISTOGRAM_H__
+#define CONCURRENTHISTOGRAM_H__
+
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
@@ -29,6 +32,13 @@ namespace TUMVis {
          * Destructor
          */
         virtual ~ConcurrentGenericHistogramND();
+
+        /**
+         * Returns the number of buckets for the given dimension.
+         * \param   dimension   Dimension, must be smaller than ND.
+         * \return  _numBuckets[dimension]
+         */
+        size_t getNumBuckets(size_t dimension) const;
 
         /**
          * Adds the given sample to the histogram.
@@ -63,6 +73,12 @@ namespace TUMVis {
          */
         size_t getNumSamples() const { return _numSamples; };
 
+        /**
+         * Returns the number of elements in the bucket with the most samples.
+         * \return  _maxFilling
+         */
+        size_t getMaxFilling() const { return _maxFilling; };
+
     protected:
         /**
          * Transforms the sample value for the given dimension into the corresponding bucket number.
@@ -85,6 +101,7 @@ namespace TUMVis {
         size_t _arraySize;                  ///< size of _buckets (total number of buckets)
         tbb::atomic<size_t>* _buckets;      ///< array of the buckets storing the histogram
         tbb::atomic<size_t> _numSamples;    ///< total number of sampled elements
+        tbb::atomic<size_t> _maxFilling;    ///< number of elements in the bucket with the most samples
     };
 
 // ================================================================================================
@@ -105,11 +122,19 @@ namespace TUMVis {
         _buckets = new tbb::atomic<size_t>[_arraySize];
         for (size_t i = 0; i < _arraySize; ++i)
             _buckets[i] = 0;
+        _numSamples = 0;
+        _maxFilling = 0;
     }
 
     template<typename T, size_t ND>
     TUMVis::ConcurrentGenericHistogramND<T, ND>::~ConcurrentGenericHistogramND() {
         delete [] _buckets;
+    }
+
+    template<typename T, size_t ND>
+    size_t TUMVis::ConcurrentGenericHistogramND<T, ND>::getNumBuckets(size_t dimension) const {
+        tgtAssert(dimension < ND, "Dimension out of bounds.");
+        return _numBuckets[dimension];
     }
 
     template<typename T, size_t ND>
@@ -121,8 +146,15 @@ namespace TUMVis {
         size_t index = getArrayIndex(bucketNumbers);
         ++(_buckets[index]);
         ++_numSamples;
-    }
 
+        // thread-safe update of _maxFilling 
+        size_t old = 0;
+        do {
+            old = _maxFilling;
+            if (old >= _buckets[index])
+                break;
+        } while (_maxFilling.compare_and_swap(_buckets[index], old) != old);
+    }
 
     template<typename T, size_t ND>
     size_t TUMVis::ConcurrentGenericHistogramND<T, ND>::getBucketNumber(size_t dimension, T sample) const {
@@ -148,3 +180,5 @@ namespace TUMVis {
 
 
 }
+
+#endif // CONCURRENTHISTOGRAM_H__
