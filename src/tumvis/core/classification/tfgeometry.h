@@ -72,6 +72,12 @@ namespace TUMVis {
         void rasterize(tgt::Texture& texture) const;
 
         /**
+         * Renders this transfer function geometry to the current active OpenGL context.
+         * \note    Must be called from an active and valid OpenGL context.
+         */
+        void render() const;
+
+        /**
          * Creates a simple quad geometry for the given interval.
          * A quad geometry consists of two KeyPoints.
          * \param   interval    Interval the geometry resides in

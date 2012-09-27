@@ -30,6 +30,7 @@ SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/properties/boolpropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h
+    gui/properties/geometrytransferfunctioneditor.h
     gui/properties/propertycollectionwidget.h
     gui/properties/simpletransferfunctioneditor.h
     gui/properties/stringpropertywidget.h

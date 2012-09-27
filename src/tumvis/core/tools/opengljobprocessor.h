@@ -91,6 +91,12 @@ namespace TUMVis {
          */
         void registerContext(tgt::GLCanvas* context);
 
+        /**
+         * Deregisters the given OpenGL context, so that it has no longer its own job queue.
+         * \param   context     OpenGL context to deregister.
+         */
+        void deregisterContext(tgt::GLCanvas* context);
+
         /// \see Runnable::stop
         void stop();
         

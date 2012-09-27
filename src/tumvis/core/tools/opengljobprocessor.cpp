@@ -175,5 +175,13 @@ namespace TUMVis {
         _contexts.push_back(context);
     }
 
+    void OpenGLJobProcessor::deregisterContext(tgt::GLCanvas* context) {
+        tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
+        if (_contextQueueMap.find(a, context)) {
+            delete a->second;
+            _contextQueueMap.erase(a);
+        }
+    }
+
 }
 

@@ -96,6 +96,29 @@ namespace TUMVis {
         }
     }
 
+    void TFGeometry::render() const {
+        // TODO: get rid of intermediade mode?
+        glBegin(GL_POLYGON);
+
+        if (_keyPoints.front()._color.w > 0) {
+            glColor3ubv(_keyPoints.front()._color.elem);
+            glVertex2f(_keyPoints.front()._position, 0.f);
+        }
+
+        for (std::vector<KeyPoint>::const_iterator it = _keyPoints.begin(); it != _keyPoints.end(); ++it) {
+            glColor3ubv(it->_color.elem);
+            float y = 255.f / static_cast<float>(it->_color.a);
+            glVertex2f(it->_position, y);
+        }
+
+        if (_keyPoints.back()._color.w > 0) {
+            glColor3ubv(_keyPoints.back()._color.elem);
+            glVertex2f(_keyPoints.back()._position, 0.f);
+        }
+
+        glEnd();
+    }
+
     TFGeometry* TFGeometry::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4 rightColor) {
         tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
 
