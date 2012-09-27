@@ -160,7 +160,7 @@ namespace TUMVis {
 
         const DataHandle* _imageHandle;                         ///< DataHandle to the image for this transfer function. May be 0.
         mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram of the intensity in _imageHandle for the current _intensityDomain
-        tbb::atomic<bool> _dirtyHistogram;                      ///< Flag whether the intensity histogram has to be updated.
+        mutable tbb::atomic<bool> _dirtyHistogram;              ///< Flag whether the intensity histogram has to be updated.
 
         mutable tbb::mutex _localMutex; ///< mutex protecting the local members
 

@@ -157,6 +157,8 @@ namespace TUMVis {
                 tbb::parallel_for(tbb::blocked_range<size_t>(0, idl->getNumElements()), IntensityHistogramGenerator(idl, _intensityHistogram));
             }
         }
+
+        _dirtyHistogram = false;
     }
 
     const AbstractTransferFunction::IntensityHistogramType* AbstractTransferFunction::getIntensityHistogram() const {

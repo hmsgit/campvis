@@ -209,13 +209,13 @@ namespace TUMVis {
 
         std::map<QString, DataHandleTreeItem*>::const_iterator it = _itemMap.lower_bound(key);
         if (it == _itemMap.end() || it->first != key) {
-            DataHandleTreeItem* dhti = new DataHandleTreeItem(new DataHandle(*dh), key.toStdString(), _rootItem);
+            DataHandleTreeItem* dhti = new DataHandleTreeItem(dh, key.toStdString(), _rootItem);
             _itemMap.insert(std::make_pair(key, dhti));
-            //emit reset();//dataChanged(createIndex(dhti->getRow(), 0, dhti), createIndex(dhti->getRow(), columnCount(), dhti));
+            emit dataChanged(createIndex(dhti->getRow(), 0, dhti), createIndex(dhti->getRow(), columnCount(), dhti));
         }
         else {
             it->second->setDataHandle(dh);
-            //emit reset();//dataChanged(createIndex(it->second->getRow(), 0, it->second), createIndex(it->second->getRow(), columnCount(), it->second));
+            emit dataChanged(createIndex(it->second->getRow(), 0, it->second), createIndex(it->second->getRow(), columnCount(), it->second));
         }
     }
 
