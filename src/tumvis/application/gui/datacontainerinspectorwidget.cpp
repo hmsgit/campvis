@@ -55,18 +55,19 @@ namespace TUMVis {
 
     void DataContainerInspectorWidget::setDataContainer(DataContainer* dataContainer) {
         if (_dataContainer != 0) {
-            _dataContainer->s_changed.disconnect(this);
+            _dataContainer->s_dataAdded.disconnect(this);
         }
 
         _dataContainer = dataContainer;
         _dctWidget->update(dataContainer);
         
         if (_dataContainer != 0) {
-            _dataContainer->s_changed.connect(this, &DataContainerInspectorWidget::onDataContainerChanged);
+            _dataContainer->s_dataAdded.connect(this, &DataContainerInspectorWidget::onDataContainerDataAdded);
         }
     }
 
-    void DataContainerInspectorWidget::onDataContainerChanged() {
+    void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle* dh) {
+        emit dataContainerChanged(QString::fromStdString(key), dh);
     }
 
     QSize DataContainerInspectorWidget::sizeHint() const {
@@ -126,6 +127,9 @@ namespace TUMVis {
         connect(
             _dctWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onDCTWidgetItemClicked(const QModelIndex&)));
+        connect(
+            this, SIGNAL(dataContainerChanged(const QString&, const DataHandle*)),
+            _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, const DataHandle*)));
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {

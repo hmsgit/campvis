@@ -47,6 +47,7 @@ namespace TUMVis {
     }
 
     const DataHandle* DataContainer::addData(const std::string& name, AbstractData* data) {
+        tgtAssert(data != 0, "The Data must not be 0.");
         DataHandle* dh = new DataHandle(data);
         addDataHandle(name, dh);
         return dh;

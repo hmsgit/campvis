@@ -52,6 +52,7 @@ namespace TUMVis {
         , _name(name)
     {
         tgtAssert(_dataHandle != 0, "DataHandle must not be 0.");
+        tgtAssert(_dataHandle->getData() != 0, "WTF - DataHandle with empty data?");
     }
 
     QVariant DataHandleTreeItem::getData(int column, int role) const {
@@ -87,6 +88,11 @@ namespace TUMVis {
 
     DataHandleTreeItem::~DataHandleTreeItem() {
         delete _dataHandle;
+    }
+
+    void DataHandleTreeItem::setDataHandle(const DataHandle* dataHandle) {
+        delete _dataHandle;
+        _dataHandle = dataHandle;
     }
 
 // = DataContainerTreeModel ============================================================================
@@ -187,12 +193,29 @@ namespace TUMVis {
     }
 
     void DataContainerTreeModel::setData(const DataContainer* dataContainer) {
+        _itemMap.clear();
         delete _rootItem;
         _rootItem = new DataContainerTreeRootItem();
 
         std::vector< std::pair< std::string, const DataHandle*> > handlesCopy = dataContainer->getDataHandlesCopy();
         for (std::vector< std::pair< std::string, const DataHandle*> >::iterator it = handlesCopy.begin(); it != handlesCopy.end(); ++it) {
             DataHandleTreeItem* dhti = new DataHandleTreeItem(it->second, it->first, _rootItem);
+            _itemMap.insert(std::make_pair(QString::fromStdString(it->first), dhti));
+        }
+    }
+
+    void DataContainerTreeModel::onDataContainerChanged(const QString& key, const DataHandle* dh) {
+        tgtAssert(dh->getData() != 0, "WTF - DataHandle with empty data?");
+
+        std::map<QString, DataHandleTreeItem*>::const_iterator it = _itemMap.lower_bound(key);
+        if (it == _itemMap.end() || it->first != key) {
+            DataHandleTreeItem* dhti = new DataHandleTreeItem(new DataHandle(*dh), key.toStdString(), _rootItem);
+            _itemMap.insert(std::make_pair(key, dhti));
+            //emit reset();//dataChanged(createIndex(dhti->getRow(), 0, dhti), createIndex(dhti->getRow(), columnCount(), dhti));
+        }
+        else {
+            it->second->setDataHandle(dh);
+            //emit reset();//dataChanged(createIndex(it->second->getRow(), 0, it->second), createIndex(it->second->getRow(), columnCount(), it->second));
         }
     }
 
@@ -226,6 +249,11 @@ namespace TUMVis {
         tgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
 
         setModel(_treeModel);
-   }
+    }
+
+    DataContainerTreeModel* DataContainerTreeWidget::getTreeModel() {
+        return _treeModel;
+    }
+
 
 }

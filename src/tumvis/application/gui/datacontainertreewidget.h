@@ -33,6 +33,7 @@
 #include <QTreeWidget>
 #include <QList>
 #include <QVariant>
+#include <map>
 
 #include "application/tools/treeitem.h"
 
@@ -75,6 +76,13 @@ namespace TUMVis {
         /// \see TreeItem::getData()
         virtual QVariant getData(int column, int role) const;
 
+        /**
+         * Sets the DataHandle for this tree item.
+         * \note    DataHandleTreeItem takes ownership of this pointer.
+         * \param   dataHandle  The DataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
+         */
+        void setDataHandle(const DataHandle* dataHandle);
+
     private:
         const DataHandle* _dataHandle;      ///< Base DataHandle
         std::string _name;                  ///< Name of that DataHandle
@@ -112,8 +120,17 @@ namespace TUMVis {
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+    public slots:
+        /**
+         * Slot being called when a DataHandle has been added to the DataContainer.
+         * \param   key     Name of the DataHandle
+         * \param   dh      The added DataHandle
+         */
+        void onDataContainerChanged(const QString& key, const DataHandle* dh);
+
     private:
         TreeItem* _rootItem;
+        std::map<QString, DataHandleTreeItem*> _itemMap;  ///< Mapping the DataHandle Keys to the TreeItems
     };
 
 // = Widget =======================================================================================
@@ -136,6 +153,12 @@ namespace TUMVis {
          */
         virtual ~DataContainerTreeWidget();
 
+        /**
+         * Returns the data model for the TreeView.
+         * \return  _treeModel
+         */
+        DataContainerTreeModel* getTreeModel();
+
 
     public slots:
         /**
@@ -145,13 +168,14 @@ namespace TUMVis {
         void update(const DataContainer* dataContainer);
 
 
+
     private:
         /**
          * Sets up the widget.
          */
         void setupWidget();
 
-        DataContainerTreeModel* _treeModel;      ///< Data model for the TreeView.
+        DataContainerTreeModel* _treeModel;     ///< Data model for the TreeView.
 
     };
 

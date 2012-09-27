@@ -76,15 +76,18 @@ namespace TUMVis {
         void setDataContainer(DataContainer* dataContainer);
 
         /**
-         * Slot called when _dataContainer has changed and emitted the s_changed signal.
+         * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
          */
-        void onDataContainerChanged();
+        void onDataContainerDataAdded(const std::string&, const DataHandle*);
 
         /**
          * Size hint for the default window size
          * \return QSize(640, 480)
          */
         QSize sizeHint() const;
+
+    signals:
+        void dataContainerChanged(const QString&, const DataHandle*);
 
     private slots:
         /**
