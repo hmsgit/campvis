@@ -46,7 +46,10 @@ namespace TUMVis {
     }
 
     GeometryTransferFunction::~GeometryTransferFunction() {
-
+        for (std::vector<TFGeometry*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+            (*it)->s_changed.disconnect(this);
+            delete *it;
+        }
     }
 
     size_t GeometryTransferFunction::getDimensionality() const {
@@ -80,6 +83,13 @@ namespace TUMVis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _geometries.push_back(geometry);
         }
+        geometry->s_changed.connect(this, &GeometryTransferFunction::onGeometryChanged);
+        _dirtyTexture = true;
+        s_geometryCollectionChanged();
+        s_changed();
+    }
+
+    void GeometryTransferFunction::onGeometryChanged() {
         _dirtyTexture = true;
         s_changed();
     }

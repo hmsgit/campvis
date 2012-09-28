@@ -29,6 +29,7 @@
 #ifndef TFGEOMETRY_H__
 #define TFGEOMETRY_H__
 
+#include "sigslot/sigslot.h"
 #include "tgt/vector.h"
 #include <vector>
 
@@ -66,6 +67,12 @@ namespace TUMVis {
         virtual ~TFGeometry();
 
         /**
+         * Returns the vector of KeyPoints.
+         * \return 
+         */
+        std::vector<KeyPoint>& getKeyPoints();
+
+        /**
          * Rasterizes this transfer function geometry into the given texture
          * \param   texture     Texture to rasterize this geometry into.
          */
@@ -74,8 +81,13 @@ namespace TUMVis {
         /**
          * Renders this transfer function geometry to the current active OpenGL context.
          * \note    Must be called from an active and valid OpenGL context.
+         * \todo    Check, whether this method really belongs here (core) or better fits into
+         *          an other class in the application (GUI) module.
          */
         void render() const;
+
+        /// Signal to be emitted when this TF geometry has changed.
+        sigslot::signal0<> s_changed;
 
         /**
          * Creates a simple quad geometry for the given interval.
@@ -85,7 +97,7 @@ namespace TUMVis {
          * \param   rightColor  Color for right KeyPoint
          * \return  A TFGeometry modelling a quad with two KeyPoints.
          */
-        static TFGeometry* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4 rightColor);
+        static TFGeometry* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor);
     protected:
 
         std::vector<KeyPoint> _keyPoints;       ///< vector of KeyPoints, KeyPoints are sorted by x-coordinate of the position

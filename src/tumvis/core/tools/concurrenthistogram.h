@@ -161,7 +161,7 @@ namespace TUMVis {
         tgtAssert(dimension < ND, "Dimension out of bounds.");
 #ifdef TUMVIS_DEBUG
         if (sample < _min[dimension] || sample > _max[dimension])
-            LWARNINGC("TUMVis.core.tools.ConcurrentGenericHistogramND", "Added sample " << sample << " out of bounds for dimension" << dimension << ".");
+            LWARNINGC("TUMVis.core.tools.ConcurrentGenericHistogramND", "Added sample " << sample << " out of bounds for dimension " << dimension << ".");
 #endif
         double ratio = static_cast<double>(sample - _min[dimension]) / static_cast<double>(_max[dimension] - _min[dimension]);
         return static_cast<size_t>(tgt::clamp(static_cast<int>(ratio * _numBuckets[dimension]), static_cast<int>(0), static_cast<int>(_numBuckets[dimension] - 1)));

@@ -31,6 +31,7 @@
 
 #include "tgt/painter.h"
 #include "tgt/event/eventlistener.h"
+#include "core/classification/tfgeometry.h"
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 
 class QGridLayout;
@@ -44,11 +45,12 @@ namespace tgt {
 namespace TUMVis {
     class ColorPickerWidget;
     class GeometryTransferFunction;
+    class AbstractTFGeometryManipulator;
 
     /**
      * Editor widget for a GeometryTransferFunction.
      */
-    class GeometryTransferFunctionEditor : public AbstractTransferFunctionEditor, public tgt::EventListener, public tgt::Painter {
+    class GeometryTransferFunctionEditor : public AbstractTransferFunctionEditor, public tgt::Painter {
         Q_OBJECT;
 
     public:
@@ -64,11 +66,6 @@ namespace TUMVis {
          */
         virtual ~GeometryTransferFunctionEditor();
 
-
-        /**
-         * Initializes the shader for the OpenGL canvas.
-         */
-        void init();
         
         /**
          * Performs the painting.
@@ -78,26 +75,41 @@ namespace TUMVis {
         /// \see tgt::Painter::sizeChanged
         virtual void sizeChanged(const tgt::ivec2&);
 
+        /**
+         * Slot to be called when the geometry vector of the transfer function has changed.
+         */
+        void onGeometryCollectionChanged();
+
     protected:
+
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */
         virtual void updateWidgetFromProperty();
 
         /**
+         * Updates the GeometryManipulator vector. 
+         * Invalidates all of its iterators.
+         */
+        void updateManipulators();
+
+        /**
          * To be called when the canvas is invalidated, issues new paint job.
          */
         void invalidate();
 
+        /**
+         * Sets up the GUI stuff.
+         */
+        void setupGUI();
 
-    private slots:
+        std::vector<AbstractTFGeometryManipulator*> _manipulators;
 
-    private:
         QGridLayout* _layout;
 
         tgt::QtThreadedCanvas* _canvas;
-        tgt::Shader* _shader;
-
+        QLabel* _lblIntensityLeft;
+        QLabel* _lblIntensityRight;
     };
 }
 

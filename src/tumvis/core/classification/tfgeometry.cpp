@@ -68,6 +68,10 @@ namespace TUMVis {
 
     }
 
+    std::vector<TFGeometry::KeyPoint>& TFGeometry::getKeyPoints() {
+        return _keyPoints;
+    }
+
     void TFGeometry::rasterize(tgt::Texture& texture) const {
         if (_keyPoints.size() < 2)
             return;
@@ -83,7 +87,7 @@ namespace TUMVis {
             size_t startIndex = static_cast<size_t>(tgt::round(start->_position * width));
             size_t endIndex = static_cast<size_t>(tgt::round(end->_position * width));
             float dist = end->_position - start->_position;
-            tgt::vec4 startColor = toVec(start->_color);
+            tgt::vec4 startColor = toVec (start->_color);
             tgt::vec4 endColor = toVec(end->_color);
 
             for (size_t i = startIndex; i < endIndex; ++i) {
@@ -107,7 +111,7 @@ namespace TUMVis {
 
         for (std::vector<KeyPoint>::const_iterator it = _keyPoints.begin(); it != _keyPoints.end(); ++it) {
             glColor3ubv(it->_color.elem);
-            float y = 255.f / static_cast<float>(it->_color.a);
+            float y = static_cast<float>(it->_color.a) / 255.f;
             glVertex2f(it->_position, y);
         }
 
@@ -119,7 +123,7 @@ namespace TUMVis {
         glEnd();
     }
 
-    TFGeometry* TFGeometry::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4 rightColor) {
+    TFGeometry* TFGeometry::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor) {
         tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
 
         std::vector<KeyPoint> keyPoints;

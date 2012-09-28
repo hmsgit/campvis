@@ -40,7 +40,7 @@ namespace TUMVis {
     /**
      * A 1D transfer function built from multiple geometries.
      */
-    class GeometryTransferFunction : public AbstractTransferFunction {
+    class GeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
     public:
         /**
          * Creates a new GeometryTransferFunction.
@@ -68,9 +68,18 @@ namespace TUMVis {
 
         /**
          * Adds the given TF geometry to this transfer function.
-         * \param   geometry    TF geometry to add
+         * \note    GeometryTransferFunction takes ownership \a geometry.
+         * \param   geometry    TF geometry to add, GeometryTransferFunction takes the ownership.
          */
         void addGeometry(TFGeometry* geometry);
+
+        /**
+         * Slot to be called by TFGeometry's s_changed signal.
+         */
+        void onGeometryChanged();
+
+        /// Signal to be emitted when the vector of TFGeometry objects (_geometries) changed (The collection, not the actual geometry).
+        sigslot::signal0<> s_geometryCollectionChanged;
 
     protected:
         /**
