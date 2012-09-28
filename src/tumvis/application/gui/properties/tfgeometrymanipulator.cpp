@@ -35,6 +35,7 @@
 #include "application/gui/qtcolortools.h"
 #include "core/classification/geometrytransferfunction.h"
 #include "core/classification/tfgeometry.h"
+#include "core/tools/algorithmicgeometry.h"
 
 #include <QColorDialog>
 
@@ -91,25 +92,28 @@ namespace TUMVis {
             _mousePressed = true;
             e->accept();
         }
-
+        else {
+            e->ignore();
+        }
     }
 
     void KeyPointManipulator::mouseReleaseEvent(tgt::MouseEvent* e) {
         _mousePressed = false;
-        // no accept here, because other listeners probably need this signal as well
+        // ignore here, because other listeners probably need this signal as well
+        e->ignore();
     }
 
     void KeyPointManipulator::mouseMoveEvent(tgt::MouseEvent* e) {
         if (_mousePressed) {
             tgt::ivec2 currentPosition = tgt::clamp(tgt::ivec2(e->coord().x, _viewportSize.y - e->coord().y), tgt::ivec2(0, 0), _viewportSize);
-            //tgt::vec2 displacement = viewportToTF(currentPosition - _pressedPosition);
             tgt::vec2 tfCoords = viewportToTF(currentPosition);
 
             _keyPoint->_position = tfCoords.x;
             _keyPoint->_color.a = static_cast<uint8_t>(tfCoords.y * 255.f);
             _geometry->s_changed();
-            // no accept here, because other listeners probably need this signal as well
         }
+        // ignore here, because other listeners probably need this signal as well
+        e->ignore();
     }
 
     void KeyPointManipulator::mouseDoubleClickEvent(tgt::MouseEvent* e) {
@@ -124,6 +128,9 @@ namespace TUMVis {
             }
             e->accept();
         }
+        else {
+            e->ignore();
+        }
     }
 
 
@@ -136,10 +143,104 @@ namespace TUMVis {
         , _geometry(geometry)
     {
         tgtAssert(geometry != 0, "Geometry must not be 0.");
+        _geometry->s_changed.connect(this, &WholeTFGeometryManipulator::onGeometryChanged);
+        updateHelperPoints();
+    }
+
+    WholeTFGeometryManipulator::~WholeTFGeometryManipulator() {
+        _geometry->s_changed.disconnect(this);
     }
 
     void WholeTFGeometryManipulator::render() {
 
+    }
+
+    void WholeTFGeometryManipulator::mousePressEvent(tgt::MouseEvent* e) {
+        _pressedPosition = viewportToTF(tgt::ivec2(e->coord().x, _viewportSize.y - e->coord().y));
+        if (insideGeometry(_pressedPosition)) {
+            _mousePressed = true;
+            _valuesWhenPressed = _geometry->getKeyPoints();
+            e->accept();
+        }
+        else { 
+            e->ignore();
+        }
+    }
+
+    void WholeTFGeometryManipulator::mouseReleaseEvent(tgt::MouseEvent* e) {
+        _mousePressed = false;
+        // ignore here, because other listeners probably need this signal as well
+        e->ignore();
+    }
+
+    void WholeTFGeometryManipulator::mouseMoveEvent(tgt::MouseEvent* e) {
+        if (_mousePressed) {
+            tgt::vec2 currentPosition = viewportToTF(tgt::clamp(tgt::ivec2(e->coord().x, _viewportSize.y - e->coord().y), tgt::ivec2(0, 0), _viewportSize));
+            tgt::vec2 displacement = currentPosition - _pressedPosition;
+
+            for (size_t i = 0; i < _valuesWhenPressed.size(); ++i) {
+                _geometry->getKeyPoints()[i]._position = _valuesWhenPressed[i]._position + displacement.x;
+            }
+
+            _geometry->s_changed();
+        }
+        // ignore here, because other listeners probably need this signal as well
+        e->ignore();
+    }
+
+    void WholeTFGeometryManipulator::mouseDoubleClickEvent(tgt::MouseEvent* e) {
+        tgt::vec2 pos = viewportToTF(tgt::ivec2(e->coord().x, _viewportSize.y - e->coord().y));
+        if (insideGeometry(pos)) {
+            // launch a color picker dialog and set new color on success
+            QColor newColor = QColorDialog::getColor(QtColorTools::toQColor(_geometry->getKeyPoints().front()._color), 0, "Select New Color");
+            if(newColor.isValid()) {
+                tgt::col4 tmp = QtColorTools::toTgtColor(newColor);
+
+                for (std::vector<TFGeometry::KeyPoint>::iterator it = _geometry->getKeyPoints().begin(); it != _geometry->getKeyPoints().end(); ++it) {
+                    it->_color = tgt::col4(tmp.xyz(), it->_color.a);
+                }
+                _geometry->s_changed();
+            }
+            e->accept();
+        }
+        else {
+            e->ignore();
+        }
+    }
+
+    void WholeTFGeometryManipulator::onGeometryChanged() {
+        updateHelperPoints();
+    }
+
+    bool WholeTFGeometryManipulator::insideGeometry(const tgt::vec2& position) const {
+        if (_helperPoints.size() < 3)
+            return false;
+
+        // simple approach: check for left turn for every triple of points
+        for (std::vector<tgt::vec2>::const_iterator it = _helperPoints.begin()+1; it != _helperPoints.end(); ++it) {
+            if (! AlgorithmicGeometry::rightTurn2D(*(it-1), *it, position))
+                return false;
+        }
+
+        return true;
+    }
+
+    void WholeTFGeometryManipulator::updateHelperPoints() {
+        _helperPoints.clear();
+        const std::vector<TFGeometry::KeyPoint>& keyPoints = _geometry->getKeyPoints();
+
+        if (keyPoints.front()._color.w > 0) {
+            _helperPoints.push_back(tgt::vec2(keyPoints.front()._position, 0.f));
+        }
+
+        for (std::vector<TFGeometry::KeyPoint>::const_iterator it = keyPoints.begin(); it != keyPoints.end(); ++it) {
+            float y = static_cast<float>(it->_color.a) / 255.f;
+            _helperPoints.push_back(tgt::vec2(it->_position, y));
+        }
+
+        if (keyPoints.back()._color.w > 0) {
+            _helperPoints.push_back(tgt::vec2(keyPoints.back()._position, 0.f));
+        }
     }
 
 }

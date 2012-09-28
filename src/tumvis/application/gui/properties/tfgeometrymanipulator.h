@@ -131,7 +131,7 @@ namespace TUMVis {
     /**
      * Class for manipulating the whole TFGeometry at once.
      */
-    class WholeTFGeometryManipulator : public AbstractTFGeometryManipulator {
+    class WholeTFGeometryManipulator : public AbstractTFGeometryManipulator, public sigslot::has_slots<> {
     public:
         /**
          * Creates a new KeyPointManipulator
@@ -141,11 +141,48 @@ namespace TUMVis {
          */
         WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf, TFGeometry* geometry);
 
+        /**
+         * Destructor
+         */
+        virtual ~WholeTFGeometryManipulator();
+
         /// \see AbstractTFGeometryManipulator::render
         void render();
 
+        /// \see tgt::EventListener::mousePressEvent
+        virtual void mousePressEvent(tgt::MouseEvent* e);
+        /// \see tgt::EventListener::mouseReleaseEvent
+        virtual void mouseReleaseEvent(tgt::MouseEvent* e);
+        /// \see tgt::EventListener::mouseMoveEvent
+        virtual void mouseMoveEvent(tgt::MouseEvent* e);
+        /// \see tgt::EventListener::mouseDoubleClickEvent
+        virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
+
+        /**
+         * Slot to be called when the geometry has changed.
+         */
+        void onGeometryChanged();
+
     protected:
+        /**
+         * Checks whether \a position is within the geometry.
+         * \param   position    Position to check in TF coordinate system
+         * \return  true if \a position is within the bounds of this geometry.
+         */
+        bool insideGeometry(const tgt::vec2& position) const;
+
+        /**
+         * Updates the helper points.
+         */
+        void updateHelperPoints();
+
         TFGeometry* _geometry;          ///< Parent geometry of the KeyPoint to manipulate
+        std::vector<tgt::vec2> _helperPoints;
+
+        // event handling stuff:
+        bool _mousePressed;                                     ///< Flag whether the mouse button is currently pressed
+        tgt::vec2 _pressedPosition;                             ///< Position where mousedown occured, in TF coordinates
+        std::vector<TFGeometry::KeyPoint> _valuesWhenPressed;   ///< KeyPoints when pressed
     };
 
 }
