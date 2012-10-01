@@ -76,6 +76,8 @@ namespace TUMVis {
     AbstractTransferFunction::~AbstractTransferFunction() {
         if (_texture != 0)
             LWARNING("Called AbstractTransferFunction dtor without proper deinitialization - you just wasted resources!");
+        delete _intensityHistogram;
+        delete _imageHandle;
     }
 
     void AbstractTransferFunction::deinit() {

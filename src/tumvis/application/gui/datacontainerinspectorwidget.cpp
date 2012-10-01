@@ -50,6 +50,9 @@ namespace TUMVis {
     }
 
     DataContainerInspectorWidget::~DataContainerInspectorWidget() {
+        if (_dataContainer != 0) {
+            _dataContainer->s_dataAdded.disconnect(this);
+        }
         delete _selectedDataHandle;
     }
 

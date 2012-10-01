@@ -161,6 +161,10 @@ namespace TUMVis {
         return _geometry;
     }
 
+    const std::vector<tgt::vec2>& WholeTFGeometryManipulator::getHelperPoints() const {
+        return _helperPoints;
+    }
+
     void WholeTFGeometryManipulator::mousePressEvent(tgt::MouseEvent* e) {
         _pressedPosition = viewportToTF(tgt::ivec2(e->coord().x, _viewportSize.y - e->coord().y));
         if (insideGeometry(_pressedPosition)) {
@@ -242,9 +246,17 @@ namespace TUMVis {
         _helperPoints.clear();
         const std::vector<TFGeometry::KeyPoint>& keyPoints = _geometry->getKeyPoints();
 
+        if (keyPoints.front()._color.w > 0) {
+            _helperPoints.push_back(tgt::vec2(keyPoints.front()._position, 0.f));
+        }
+
         for (std::vector<TFGeometry::KeyPoint>::const_iterator it = keyPoints.begin(); it != keyPoints.end(); ++it) {
             float y = static_cast<float>(it->_color.a) / 255.f;
             _helperPoints.push_back(tgt::vec2(it->_position, y));
+        }
+
+        if (keyPoints.back()._color.w > 0) {
+            _helperPoints.push_back(tgt::vec2(keyPoints.back()._position, 0.f));
         }
     }
 

@@ -152,6 +152,12 @@ namespace TUMVis {
          */
         TFGeometry* getGeometry() const;
 
+        /**
+         * Returns the vector caching the 2D coordinates of the TF key points.
+         * \return  _helperPoints
+         */
+        const std::vector<tgt::vec2>& getHelperPoints() const;
+
         /// \see AbstractTFGeometryManipulator::render
         void render();
 
@@ -186,7 +192,7 @@ namespace TUMVis {
         void updateHelperPoints();
 
         TFGeometry* _geometry;                                  ///< Parent geometry of the KeyPoint to manipulate
-        std::vector<tgt::vec2> _helperPoints;                   ///< vector chaching the 2D coordinates of the TF key points
+        std::vector<tgt::vec2> _helperPoints;                   ///< vector caching the 2D coordinates of the TF key points
 
         // event handling stuff:
         bool _mousePressed;                                     ///< Flag whether the mouse button is currently pressed

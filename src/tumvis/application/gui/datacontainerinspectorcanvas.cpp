@@ -83,7 +83,20 @@ namespace TUMVis {
     }
 
     void DataContainerInspectorCanvas::deinit() {
+        if (_dataContainer != 0) {
+            _dataContainer->s_dataAdded.disconnect(this);
+        }
+
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            for (std::map<std::string, const DataHandle*>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
+                delete it->second;
+            }
+        }
+
+        GLJobProc.deregisterContext(this);
         ShdrMgr.dispose(_paintShader);
+        delete _quad;
     }
 
     void DataContainerInspectorCanvas::setDataContainer(DataContainer* dataContainer) {

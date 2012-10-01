@@ -51,13 +51,13 @@ namespace TUMVis {
 
     GeometryTransferFunctionEditor::GeometryTransferFunctionEditor(GeometryTransferFunction* tf, QWidget* parent /*= 0*/)
         : AbstractTransferFunctionEditor(tf, parent)
-        , _selectedGeometry(0)
         , _layout(0)
         , _canvas(0)
         , _lblIntensityLeft(0)
         , _lblIntensityRight(0)
         , _btnAddGeometry(0)
     {
+        _selectedGeometry = 0;
         setupGUI();
         tf->s_geometryCollectionChanged.connect(this, &GeometryTransferFunctionEditor::onGeometryCollectionChanged);
         updateManipulators();
@@ -65,6 +65,17 @@ namespace TUMVis {
     }
 
     GeometryTransferFunctionEditor::~GeometryTransferFunctionEditor() {
+        tbb::mutex::scoped_lock lock(_localMutex);
+
+        // clear and delete former stuff
+        _selectedGeometry = 0;
+        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+            if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
+                tester->s_selected.disconnect(this);
+            }
+            delete *it;
+        }
+
         GeometryTransferFunction* gtf = static_cast<GeometryTransferFunction*>(_transferFunction);
         gtf->s_geometryCollectionChanged.disconnect(this);
         // TODO: this needs to be done, but we can not ensure that GLJobProc is still existant during deconstruction...
@@ -80,6 +91,7 @@ namespace TUMVis {
 
     void GeometryTransferFunctionEditor::paint() {
         GeometryTransferFunction* gtf = static_cast<GeometryTransferFunction*>(_transferFunction);
+        gtf->lock();
         const std::vector<TFGeometry*>& geometries = gtf->getGeometries();
         const tgt::vec2& intensityDomain = gtf->getIntensityDomain();
 
@@ -130,21 +142,42 @@ namespace TUMVis {
                 glEnd();
             }
         }
-        glPopMatrix();
 
-        glPushMatrix();
-        glOrtho(0, _canvas->width(), 0, _canvas->height(), -1, 1);
-        // render manipulators
-        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
-            (*it)->render();
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+
+            // render selected geometry
+            if (_selectedGeometry != 0) {
+                const std::vector<tgt::vec2>& helperPoints = _selectedGeometry->getHelperPoints();
+                glColor4ub(0, 0, 0, 196);
+                glEnable(GL_LINE_STIPPLE);
+                glLineStipple(1, 0xFAFA);
+                glBegin(GL_LINE_LOOP);
+                for (std::vector<tgt::vec2>::const_iterator it = helperPoints.begin(); it != helperPoints.end(); ++it)
+                    glVertex2fv(it->elem);
+                glEnd();
+                glDisable(GL_LINE_STIPPLE);
+            }
+
+            glPopMatrix();
+
+            glPushMatrix();
+            glOrtho(0, _canvas->width(), 0, _canvas->height(), -1, 1);
+            // render manipulators
+            for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+                (*it)->render();
+            }
+            glPopMatrix();
         }
-        glPopMatrix();
 
         LGL_ERROR;
         glPopAttrib();
+
+        gtf->unlock();
     }
 
     void GeometryTransferFunctionEditor::sizeChanged(const tgt::ivec2& size) {
+        tbb::mutex::scoped_lock lock(_localMutex);
         for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
             (*it)->setViewportSize(size);
         }
@@ -171,6 +204,7 @@ namespace TUMVis {
         }
         else {
             _selectedGeometry = 0;
+            invalidate();
             e->ignore();
         }
     }
@@ -220,6 +254,8 @@ namespace TUMVis {
     }
 
     void GeometryTransferFunctionEditor::updateManipulators() {
+        tbb::mutex::scoped_lock lock(_localMutex);
+
         // clear and delete former stuff
         _selectedGeometry = 0;
         _canvas->getEventHandler()->clear();
@@ -256,6 +292,7 @@ namespace TUMVis {
 
     void GeometryTransferFunctionEditor::onWholeTFGeometryManipulatorSelected(WholeTFGeometryManipulator* wtf /* :) */) {
         _selectedGeometry = wtf;
+        invalidate();
     }
 
     void GeometryTransferFunctionEditor::onBtnAddGeometryClicked() {
@@ -265,18 +302,24 @@ namespace TUMVis {
 
     void GeometryTransferFunctionEditor::onBtnRemoveGeometryClicked() {
         if (_selectedGeometry != 0) {
-            GeometryTransferFunction* gtf = static_cast<GeometryTransferFunction*>(_transferFunction);
             // to get the signal-slots disconnected in the correct order and avoid double deletion,
             // this is getting a little messy and cumbersome:
+            GeometryTransferFunction* gtf = static_cast<GeometryTransferFunction*>(_transferFunction);
             TFGeometry* geometryToRemove = _selectedGeometry->getGeometry();
-            for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
-                if (*it == _selectedGeometry) {
-                    _manipulators.erase(it);
-                    break;
+
+            {
+                tbb::mutex::scoped_lock lock(_localMutex);
+
+                for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+                    if (*it == _selectedGeometry) {
+                        _manipulators.erase(it);
+                        break;
+                    }
                 }
+                delete _selectedGeometry;
+                _selectedGeometry = 0;
             }
-            delete _selectedGeometry;
-            _selectedGeometry = 0;
+
             gtf->removeGeometry(geometryToRemove);
         }
     }

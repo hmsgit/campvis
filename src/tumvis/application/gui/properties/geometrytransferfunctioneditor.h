@@ -29,6 +29,7 @@
 #ifndef GEOMETRYTRANSFERFUNCTIONEDITOR_H__
 #define GEOMETRYTRANSFERFUNCTIONEDITOR_H__
 
+#include "tbb/include/tbb/mutex.h"
 #include "tgt/painter.h"
 #include "tgt/event/eventlistener.h"
 #include "core/classification/tfgeometry.h"
@@ -125,7 +126,8 @@ namespace TUMVis {
         void setupGUI();
 
         std::vector<AbstractTFGeometryManipulator*> _manipulators;
-        WholeTFGeometryManipulator* _selectedGeometry;
+        tbb::atomic<WholeTFGeometryManipulator*> _selectedGeometry;
+        tbb::mutex _localMutex;
 
         QGridLayout* _layout;
 

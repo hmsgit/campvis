@@ -56,6 +56,8 @@ namespace TUMVis {
 
     MainWindow::~MainWindow() {
         _application->s_PipelinesChanged.disconnect(this);
+        delete _dcInspectorCanvas;
+        delete _dcInspectorWidget;
     }
 
     void MainWindow::setup() {
