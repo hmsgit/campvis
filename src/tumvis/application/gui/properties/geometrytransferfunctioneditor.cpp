@@ -156,7 +156,7 @@ namespace TUMVis {
             TFGeometry* g = _selectedGeometry->getGeometry();
             std::vector<TFGeometry::KeyPoint>& kpts = g->getKeyPoints();
             TFGeometry::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
-            std::vector<TFGeometry::KeyPoint>::const_iterator lb = std::lower_bound(kpts.begin(), kpts.end(), kp);
+            std::vector<TFGeometry::KeyPoint>::const_iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
             if (lb != kpts.end()) {
                 kp._color = lb->_color;
             }

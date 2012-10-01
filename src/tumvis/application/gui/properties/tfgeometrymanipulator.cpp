@@ -219,34 +219,32 @@ namespace TUMVis {
         updateHelperPoints();
     }
 
+    namespace {
+        struct XComparer {
+            bool operator() (const tgt::vec2& left, const tgt::vec2& right) {
+                return left.x < right.x;
+            };
+        };
+    }
+
     bool WholeTFGeometryManipulator::insideGeometry(const tgt::vec2& position) const {
-        if (_helperPoints.size() < 3)
+        if (_helperPoints.size() < 2)
             return false;
 
-        // simple approach: check for left turn for every triple of points
-        for (std::vector<tgt::vec2>::const_iterator it = _helperPoints.begin()+1; it != _helperPoints.end(); ++it) {
-            if (! AlgorithmicGeometry::rightTurn2D(*(it-1), *it, position))
-                return false;
-        }
+        std::vector<tgt::vec2>::const_iterator lb = std::upper_bound(_helperPoints.begin(), _helperPoints.end(), position, XComparer());
+        if (lb == _helperPoints.begin() || lb == _helperPoints.end())
+            return false;
 
-        return true;
+        return AlgorithmicGeometry::rightTurn2D(*(lb-1), *lb, position);
     }
 
     void WholeTFGeometryManipulator::updateHelperPoints() {
         _helperPoints.clear();
         const std::vector<TFGeometry::KeyPoint>& keyPoints = _geometry->getKeyPoints();
 
-        if (keyPoints.front()._color.w > 0) {
-            _helperPoints.push_back(tgt::vec2(keyPoints.front()._position, 0.f));
-        }
-
         for (std::vector<TFGeometry::KeyPoint>::const_iterator it = keyPoints.begin(); it != keyPoints.end(); ++it) {
             float y = static_cast<float>(it->_color.a) / 255.f;
             _helperPoints.push_back(tgt::vec2(it->_position, y));
-        }
-
-        if (keyPoints.back()._color.w > 0) {
-            _helperPoints.push_back(tgt::vec2(keyPoints.back()._position, 0.f));
         }
     }
 
