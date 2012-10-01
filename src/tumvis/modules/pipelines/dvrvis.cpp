@@ -162,7 +162,7 @@ namespace TUMVis {
             if (img != 0) {
                 ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
                 if (local != 0) {
-                    const DataHandle* dh = _data.addData("clr.input", local);
+                    DataHandle dh = _data.addData("clr.input", local);
                     _dvrNormal._transferFunction.getTF()->setImageHandle(dh);
                 }
                 {

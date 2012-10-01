@@ -36,10 +36,10 @@
 #include <map>
 
 #include "application/tools/treeitem.h"
+#include "core/datastructures/datahandle.h"
 
 namespace TUMVis {
     class DataContainer;
-    class DataHandle;
 
 // = TreeModel items ==============================================================================
     
@@ -66,7 +66,7 @@ namespace TUMVis {
          * \param   name        Name of the DataHandle
          * \param   parent      Parent TreeItem
          */
-        DataHandleTreeItem(const DataHandle* dataHandle, const std::string& name, TreeItem* parent);
+        DataHandleTreeItem(const DataHandle& dataHandle, const std::string& name, TreeItem* parent);
 
         /**
          * Destructor, deletes the DataHandle
@@ -81,11 +81,11 @@ namespace TUMVis {
          * \note    DataHandleTreeItem takes ownership of this pointer.
          * \param   dataHandle  The DataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
          */
-        void setDataHandle(const DataHandle* dataHandle);
+        void setDataHandle(const DataHandle& dataHandle);
 
     private:
-        const DataHandle* _dataHandle;      ///< Base DataHandle
-        std::string _name;                  ///< Name of that DataHandle
+        DataHandle _dataHandle;         ///< Base DataHandle
+        std::string _name;              ///< Name of that DataHandle
     };
 
 // = TreeModel ====================================================================================
@@ -126,7 +126,7 @@ namespace TUMVis {
          * \param   key     Name of the DataHandle
          * \param   dh      The added DataHandle
          */
-        void onDataContainerChanged(const QString& key, const DataHandle* dh);
+        void onDataContainerChanged(const QString& key, const DataHandle& dh);
 
     private:
         TreeItem* _rootItem;

@@ -122,14 +122,14 @@ namespace TUMVis {
          * Returns a DataHandle to the image for this transfer function, may be 0.
          * \return  _imageHandle, may be 0!
          */
-        const DataHandle* getImageHandle() const;
+        DataHandle getImageHandle() const;
 
         /**
          * Sets the DataHandle for this transfer function, may be 0.
          * \note    This method makes a copy of \a imageHandle, hence does not take ownership.
-         * \param   imageHandle     The new DataHandle for this transfer function, may be 0, will be copied.
+         * \param   imageHandle     The new DataHandle for this transfer function
          */
-        void setImageHandle(const DataHandle* imageHandle);
+        void setImageHandle(const DataHandle& imageHandle);
 
         /**
          * Returns the intensity histogram
@@ -158,7 +158,7 @@ namespace TUMVis {
         tgt::Texture* _texture;             ///< OpenGL lookup texture storing the TF
         tbb::atomic<bool> _dirtyTexture;    ///< Flag whether the OpenGL texture has to be updated
 
-        const DataHandle* _imageHandle;                         ///< DataHandle to the image for this transfer function. May be 0.
+        DataHandle _imageHandle;                                ///< DataHandle to the image for this transfer function. May be 0.
         mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram of the intensity in _imageHandle for the current _intensityDomain
         mutable tbb::atomic<bool> _dirtyHistogram;              ///< Flag whether the intensity histogram has to be updated.
 

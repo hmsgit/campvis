@@ -84,13 +84,6 @@ namespace TUMVis {
         const AbstractData* getData() const;
 
         /**
-         * Grants access to the managed AbstractData instance.
-         * \note    If the data is referenced by more than one object, this implies a copy of the data!
-         * \return  A modifyable version of the held data.
-         */
-        AbstractData* getData();
-
-        /**
          * Gets the timestamp when this data has been created.
          * \return _timestamp
          */

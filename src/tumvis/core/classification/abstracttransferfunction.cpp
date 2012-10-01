@@ -77,7 +77,6 @@ namespace TUMVis {
         if (_texture != 0)
             LWARNING("Called AbstractTransferFunction dtor without proper deinitialization - you just wasted resources!");
         delete _intensityHistogram;
-        delete _imageHandle;
     }
 
     void AbstractTransferFunction::deinit() {
@@ -130,18 +129,12 @@ namespace TUMVis {
         return _texture;
     }
 
-    const DataHandle* AbstractTransferFunction::getImageHandle() const {
+    DataHandle AbstractTransferFunction::getImageHandle() const {
         return _imageHandle;
     }
 
-    void AbstractTransferFunction::setImageHandle(const DataHandle* imageHandle) {
-        delete _imageHandle;
-
-        if (imageHandle == 0)
-            _imageHandle = 0;
-        else
-            _imageHandle = new DataHandle(*imageHandle);
-
+    void AbstractTransferFunction::setImageHandle(const DataHandle& imageHandle) {
+        _imageHandle = imageHandle;
         _dirtyHistogram = true;
     }
 
@@ -149,8 +142,8 @@ namespace TUMVis {
         delete _intensityHistogram;
         _intensityHistogram = 0;
 
-        if (_imageHandle != 0) {
-            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(_imageHandle->getData());
+        if (_imageHandle.getData() != 0) {
+            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(_imageHandle.getData());
             if (idl != 0) {
                 float mins = _intensityDomain.x;
                 float maxs = _intensityDomain.y;

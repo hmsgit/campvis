@@ -87,13 +87,6 @@ namespace TUMVis {
             _dataContainer->s_dataAdded.disconnect(this);
         }
 
-        {
-            tbb::mutex::scoped_lock lock(_localMutex);
-            for (std::map<std::string, const DataHandle*>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
-                delete it->second;
-            }
-        }
-
         GLJobProc.deregisterContext(this);
         ShdrMgr.dispose(_paintShader);
         delete _quad;
@@ -106,10 +99,6 @@ namespace TUMVis {
 
         {
             tbb::mutex::scoped_lock lock(_localMutex);
-            _dataContainer = dataContainer;
-            for (std::map<std::string, const DataHandle*>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
-                delete it->second;
-            }
             _handles = _dataContainer->getHandlesCopy();
         }
 
@@ -124,20 +113,19 @@ namespace TUMVis {
         return QSize(640, 480);
     }
 
-    void DataContainerInspectorCanvas::onDataContainerDataAdded(const std::string& name, const DataHandle* dh) {
+    void DataContainerInspectorCanvas::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
 
             // check whether DataHandle is already existing
-            std::map<std::string, const DataHandle*>::iterator lb = _handles.lower_bound(name);
+            std::map<std::string, DataHandle>::iterator lb = _handles.lower_bound(name);
             if (lb == _handles.end() || lb->first != name) {
                 // not existant -> insert
-                _handles.insert(std::make_pair(name, new DataHandle(*dh)));
+                _handles.insert(std::make_pair(name, dh));
             }
             else {
                 // existant -> replace
-                delete lb->second;
-                lb->second = new DataHandle(*dh);
+                lb->second = dh;
             }
         }
 
@@ -148,12 +136,12 @@ namespace TUMVis {
         tbb::mutex::scoped_lock lock(_localMutex);
 
         std::vector<const tgt::Texture*> textures;
-        for (std::map<std::string, const DataHandle*>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
-            if (const ImageDataGL* imgGL = dynamic_cast<const ImageDataGL*>(it->second->getData())) {
+        for (std::map<std::string, DataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
+            if (const ImageDataGL* imgGL = dynamic_cast<const ImageDataGL*>(it->second.getData())) {
                 if (imgGL->getDimensionality() == 2)
             	    textures.push_back(imgGL->getTexture());
             }
-            else if (const ImageDataRenderTarget* imgRT = dynamic_cast<const ImageDataRenderTarget*>(it->second->getData())) {
+            else if (const ImageDataRenderTarget* imgRT = dynamic_cast<const ImageDataRenderTarget*>(it->second.getData())) {
                 if (imgRT->getDimensionality() == 2) {
                     for (size_t i = 0; i < imgRT->getNumColorTextures(); ++i)
             	        textures.push_back(imgRT->getColorTexture(i));

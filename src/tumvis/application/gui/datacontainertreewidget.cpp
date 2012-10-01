@@ -46,13 +46,12 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    DataHandleTreeItem::DataHandleTreeItem(const DataHandle* dataHandle, const std::string& name, TreeItem* parent)
+    DataHandleTreeItem::DataHandleTreeItem(const DataHandle& dataHandle, const std::string& name, TreeItem* parent)
         : TreeItem(parent)
         , _dataHandle(dataHandle)
         , _name(name)
     {
-        tgtAssert(_dataHandle != 0, "DataHandle must not be 0.");
-        tgtAssert(_dataHandle->getData() != 0, "WTF - DataHandle with empty data?");
+        tgtAssert(_dataHandle.getData() != 0, "WTF - DataHandle with empty data?");
     }
 
     QVariant DataHandleTreeItem::getData(int column, int role) const {
@@ -61,7 +60,7 @@ namespace TUMVis {
             if (column == COLUMN_NAME)
                 return QVariant(QString::fromStdString(_name));
             else if (column == COLUMN_TYPE) {
-                const AbstractData* data = _dataHandle->getData();
+                const AbstractData* data = _dataHandle.getData();
                 tgtAssert(data != 0, "WTF - DataHandle with empty data?");
                 if (const ImageDataDisk* tester = dynamic_cast<const ImageDataDisk*>(data)) {
                 	return QVariant(QString("ImageData on disk"));
@@ -80,18 +79,16 @@ namespace TUMVis {
                 return QVariant();
         case Qt::UserRole:
             // const cast ist ugly, same as GUI programming...
-            return qVariantFromValue(const_cast<void*>(static_cast<const void*>(_dataHandle)));
+            return qVariantFromValue(const_cast<void*>(static_cast<const void*>(&_dataHandle)));
         default:
             return QVariant();
         }
     }
 
     DataHandleTreeItem::~DataHandleTreeItem() {
-        delete _dataHandle;
     }
 
-    void DataHandleTreeItem::setDataHandle(const DataHandle* dataHandle) {
-        delete _dataHandle;
+    void DataHandleTreeItem::setDataHandle(const DataHandle& dataHandle) {
         _dataHandle = dataHandle;
     }
 
@@ -197,15 +194,15 @@ namespace TUMVis {
         delete _rootItem;
         _rootItem = new DataContainerTreeRootItem();
 
-        std::vector< std::pair< std::string, const DataHandle*> > handlesCopy = dataContainer->getDataHandlesCopy();
-        for (std::vector< std::pair< std::string, const DataHandle*> >::iterator it = handlesCopy.begin(); it != handlesCopy.end(); ++it) {
+        std::vector< std::pair< std::string, DataHandle> > handlesCopy = dataContainer->getDataHandlesCopy();
+        for (std::vector< std::pair< std::string, DataHandle> >::iterator it = handlesCopy.begin(); it != handlesCopy.end(); ++it) {
             DataHandleTreeItem* dhti = new DataHandleTreeItem(it->second, it->first, _rootItem);
             _itemMap.insert(std::make_pair(QString::fromStdString(it->first), dhti));
         }
     }
 
-    void DataContainerTreeModel::onDataContainerChanged(const QString& key, const DataHandle* dh) {
-        tgtAssert(dh->getData() != 0, "WTF - DataHandle with empty data?");
+    void DataContainerTreeModel::onDataContainerChanged(const QString& key, const DataHandle& dh) {
+        tgtAssert(dh.getData() != 0, "WTF - DataHandle with empty data?");
 
         std::map<QString, DataHandleTreeItem*>::const_iterator it = _itemMap.lower_bound(key);
         if (it == _itemMap.end() || it->first != key) {

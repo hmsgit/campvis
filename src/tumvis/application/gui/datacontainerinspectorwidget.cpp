@@ -69,9 +69,9 @@ namespace TUMVis {
         }
     }
 
-    void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle* dh) {
+    void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
         // copy DataHandle because signal will be handled by a different thread an indefinite amount of time later:
-        emit dataContainerChanged(QString::fromStdString(key), new DataHandle(*dh));
+        emit dataContainerChanged(QString::fromStdString(key), dh);
     }
 
     QSize DataContainerInspectorWidget::sizeHint() const {

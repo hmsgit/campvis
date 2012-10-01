@@ -121,10 +121,10 @@ namespace TUMVis {
                         _clProgram->build();
                     }
 
-                    if (img.getDataHandle()->getTimestamp() != _volumeTimestamp) {
+                    if (img.getDataHandle().getTimestamp() != _volumeTimestamp) {
                         WeaklyTypedPointer wtp = img->getWeaklyTypedPointer();
                         _imgVolume = new kisscl::Image(_clContext, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, img->getSize(), wtp.getClChannelOrder(), wtp.getClChannelType(), wtp._pointer);
-                        _volumeTimestamp = img.getDataHandle()->getTimestamp();
+                        _volumeTimestamp = img.getDataHandle().getTimestamp();
                     }
 
                     // upload TF

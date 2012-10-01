@@ -77,17 +77,8 @@ namespace TUMVis {
                 : dh(dc.getData(name))
                 , data(0)
             {
-                if (dh != 0 && dh->getData() != 0) {
-                    data = dynamic_cast<const T*>(dh->getData());
-                }
-            };
-
-            /**
-             * Destructor, deletes the internal DataHandle.
-             */
-            ~ScopedTypedData() {
-                if (dh) {
-                    delete dh;
+                if (dh.getData() != 0) {
+                    data = dynamic_cast<const T*>(dh.getData());
                 }
             };
 
@@ -111,7 +102,7 @@ namespace TUMVis {
              * Gets the DataHandle.
              * \return dh
              */
-            const DataHandle* getDataHandle() const {
+            const DataHandle& getDataHandle() const {
                 return dh;
             }
 
@@ -121,8 +112,8 @@ namespace TUMVis {
             /// Not assignable
             ScopedTypedData& operator=(const ScopedTypedData& rhs);
 
-            const DataHandle* dh;   ///< DataHandle, may be 0
-            const T* data;          ///< strongly-typed pointer to data, may be 0
+            DataHandle dh;      ///< DataHandle
+            const T* data;      ///< strongly-typed pointer to data, may be 0
         };
 
 
@@ -146,7 +137,7 @@ namespace TUMVis {
          * \param   data    DataHandle to add.
          * \return  The DataHandle which was created for \a data.
          */
-        const DataHandle* addData(const std::string& name, AbstractData* data);
+        DataHandle addData(const std::string& name, AbstractData* data);
 
         /**
          * Adds the given DataHandle \a data, accessible by the key \name, to this DataContainer.
@@ -155,7 +146,7 @@ namespace TUMVis {
          * \param   name    Key for accessing the DataHandle within this DataContainer
          * \param   data    DataHandle to add.
          */
-        void addDataHandle(const std::string& name, const DataHandle* dh);
+        void addDataHandle(const std::string& name, const DataHandle& dh);
 
         /**
          * Checks whether this DataContainer contains a DataHandle with the given name.
@@ -172,7 +163,7 @@ namespace TUMVis {
          * \param   name    Key of the DataHandle to search for
          * \return  The stored DataHandle with the given name, 0 if no such DataHandle exists.
          */
-        const DataHandle* getData(const std::string& name) const;
+        DataHandle getData(const std::string& name) const;
 
         /**
          * Removes the DataHandle with the given name from this container.
@@ -187,7 +178,7 @@ namespace TUMVis {
          *          copies and locks the whole DataContainer during execution.
          * \return  A list of pairs (name, DataHandle). The caller has to take ownership of the passed pointers!
          */
-        std::vector< std::pair< std::string, const DataHandle*> > getDataHandlesCopy() const;
+        std::vector< std::pair< std::string, DataHandle> > getDataHandlesCopy() const;
 
         /**
          * Returns a copy of the current map of DataHandles.
@@ -195,19 +186,19 @@ namespace TUMVis {
          *          copies and locks the whole DataContainer during execution.
          * \return  A copy of the current handles map. The caller has to take ownership of the passed pointers!
          */
-        std::map<std::string, const DataHandle*> getHandlesCopy() const;
+        std::map<std::string, DataHandle> getHandlesCopy() const;
 
         /**
          * Signal emitted when data has been added to this DataContainer (this includes also data being replaced).
          * First parameter is the name of the added data, second parameter contains a DataHandle to the new data.
          */
-        sigslot::signal2<const std::string&, const DataHandle*> s_dataAdded;
+        sigslot::signal2<const std::string&, const DataHandle&> s_dataAdded;
 
         /// Signal emitted when list of DataHandles has changed.
         sigslot::signal0<> s_changed;
 
     private:
-        std::map<std::string, const DataHandle*> _handles;
+        std::map<std::string, DataHandle> _handles;
         mutable tbb::spin_mutex _localMutex;
 
         static const std::string loggerCat_;

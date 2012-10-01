@@ -82,7 +82,7 @@ namespace TUMVis {
         return _renderTargetSize.getValue();
     }
 
-    void VisualizationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle* dh) {
+    void VisualizationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
         if (name == _renderTargetID.getValue()) {
             s_renderTargetChanged();
         }

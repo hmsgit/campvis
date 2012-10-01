@@ -63,7 +63,7 @@ namespace TUMVis {
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                if (img.getDataHandle()->getTimestamp() != _sourceTimestamp) {
+                if (img.getDataHandle().getTimestamp() != _sourceTimestamp) {
                     _clipX.setMaxValue(tgt::ivec2(img->getSize().x, img->getSize().x));
                     _clipY.setMaxValue(tgt::ivec2(img->getSize().y, img->getSize().y));
                     _clipZ.setMaxValue(tgt::ivec2(img->getSize().z, img->getSize().z));
@@ -71,7 +71,7 @@ namespace TUMVis {
                     _clipX.setValue(tgt::ivec2(0, img->getSize().x));
                     _clipY.setValue(tgt::ivec2(0, img->getSize().y));
                     _clipZ.setValue(tgt::ivec2(0, img->getSize().z));
-                    _sourceTimestamp = img.getDataHandle()->getTimestamp();
+                    _sourceTimestamp = img.getDataHandle().getTimestamp();
                 }
                 tgt::Bounds volumeExtent = img->getWorldBounds(tgt::svec3(_clipX.getValue().x, _clipY.getValue().x, _clipZ.getValue().x), tgt::svec3(_clipX.getValue().y, _clipY.getValue().y, _clipZ.getValue().y));
                 tgt::vec3 numSlices = tgt::vec3(img->getSize());

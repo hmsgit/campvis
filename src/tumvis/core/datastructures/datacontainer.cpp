@@ -39,27 +39,21 @@ namespace TUMVis {
     }
 
     DataContainer::~DataContainer() {
-        // remove ownership op all owned DataHandles
-        for (std::map<std::string, const DataHandle*>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
-            delete it->second;
-        }
         _handles.clear();
     }
 
-    const DataHandle* DataContainer::addData(const std::string& name, AbstractData* data) {
+    DataHandle DataContainer::addData(const std::string& name, AbstractData* data) {
         tgtAssert(data != 0, "The Data must not be 0.");
-        DataHandle* dh = new DataHandle(data);
+        DataHandle dh(data);
         addDataHandle(name, dh);
         return dh;
     }
 
-    void DataContainer::addDataHandle(const std::string& name, const DataHandle* dh) {
-        tgtAssert(dh != 0, "DataHandle must not be 0.");
+    void DataContainer::addDataHandle(const std::string& name, const DataHandle& dh) {
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
-            std::map<std::string, const DataHandle*>::iterator it = _handles.lower_bound(name);
+            std::map<std::string, DataHandle>::iterator it = _handles.lower_bound(name);
             if (it != _handles.end() && it->first == name) {
-                delete it->second;
                 it->second = dh;
             }
             else {
@@ -75,47 +69,38 @@ namespace TUMVis {
         return (_handles.find(name) != _handles.end());
     }
 
-    const DataHandle* DataContainer::getData(const std::string& name) const {
+    DataHandle DataContainer::getData(const std::string& name) const {
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        std::map<std::string, const DataHandle*>::const_iterator it = _handles.find(name);
+        std::map<std::string, DataHandle>::const_iterator it = _handles.find(name);
         if (it == _handles.end())
-            return 0;
+            return DataHandle(0);
         else
-            return new DataHandle(*it->second);
+            return it->second;
     }
 
     void DataContainer::removeData(const std::string& name) {
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        std::map<std::string, const DataHandle*>::const_iterator it = _handles.find(name);
+        std::map<std::string, DataHandle>::const_iterator it = _handles.find(name);
         if (it != _handles.end()) {
-            delete it->second;
             _handles.erase(it);
         }
     }
 
-    std::vector< std::pair< std::string, const DataHandle*> > DataContainer::getDataHandlesCopy() const {
-        std::vector< std::pair< std::string, const DataHandle*> > toReturn;
+    std::vector< std::pair< std::string, DataHandle> > DataContainer::getDataHandlesCopy() const {
+        std::vector< std::pair< std::string, DataHandle> > toReturn;
         toReturn.reserve(_handles.size());
 
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        for (std::map<std::string, const DataHandle*>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
-            toReturn.push_back(std::make_pair(it->first, new DataHandle(*(it->second))));
+        for (std::map<std::string, DataHandle>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
+            toReturn.push_back(std::make_pair(it->first, it->second));
         }
 
         return toReturn;
     }
 
-    std::map<std::string, const DataHandle*> DataContainer::getHandlesCopy() const {
-        std::map<std::string, const DataHandle*> toReturn;
-        std::map<std::string, const DataHandle*>::const_iterator hint = toReturn.begin();
-
-        // copy map while also deep copying the DataHandles
+    std::map<std::string, DataHandle> DataContainer::getHandlesCopy() const {
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        for (std::map<std::string, const DataHandle*>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
-            hint = toReturn.insert(hint, std::make_pair(it->first, new DataHandle(*(it->second))));
-        }
-
-        return toReturn;
+        return _handles;
     }
 
 }

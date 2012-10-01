@@ -106,7 +106,7 @@ namespace TUMVis {
          * \param   name    Name of the added data.
          * \param   dh      DataHandle to the newly added data.
          */
-        void onDataContainerDataAdded(const std::string& name, const DataHandle* dh);
+        void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
 
         /**
          * To be called when the canvas is invalidated, issues new paint job.
@@ -117,8 +117,8 @@ namespace TUMVis {
 
         void createQuad(float width, float height);
 
-        DataContainer* _dataContainer;                      ///< The DataContainer this widget is inspecting
-        std::map<std::string, const DataHandle*> _handles;  ///< Local copy of the DataHandles to inspect
+        DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
+        std::map<std::string, DataHandle> _handles;     ///< Local copy of the DataHandles to inspect
         tbb::mutex _localMutex;
 
         tgt::Shader* _paintShader;

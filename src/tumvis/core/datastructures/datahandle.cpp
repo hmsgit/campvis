@@ -70,14 +70,6 @@ namespace TUMVis {
         return _data;
     }
 
-    AbstractData* DataHandle::getData() {
-        if (_data->isShared())
-            _data = _data->clone();
-
-        _data->markUnsharable();
-        return _data;
-    }
-
     void DataHandle::init() {
         if (_data == 0)
             return;
