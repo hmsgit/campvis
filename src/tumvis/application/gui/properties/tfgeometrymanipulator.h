@@ -146,6 +146,12 @@ namespace TUMVis {
          */
         virtual ~WholeTFGeometryManipulator();
 
+        /**
+         * Returns the Parent geometry of the KeyPoint to manipulate.
+         * \return  _geometry
+         */
+        TFGeometry* getGeometry() const;
+
         /// \see AbstractTFGeometryManipulator::render
         void render();
 
@@ -163,6 +169,9 @@ namespace TUMVis {
          */
         void onGeometryChanged();
 
+        /// Signal to be emitted when the mouse was pressed and has hit this manipulator
+        sigslot::signal1<WholeTFGeometryManipulator*> s_selected;
+
     protected:
         /**
          * Checks whether \a position is within the geometry.
@@ -176,8 +185,8 @@ namespace TUMVis {
          */
         void updateHelperPoints();
 
-        TFGeometry* _geometry;          ///< Parent geometry of the KeyPoint to manipulate
-        std::vector<tgt::vec2> _helperPoints;
+        TFGeometry* _geometry;                                  ///< Parent geometry of the KeyPoint to manipulate
+        std::vector<tgt::vec2> _helperPoints;                   ///< vector chaching the 2D coordinates of the TF key points
 
         // event handling stuff:
         bool _mousePressed;                                     ///< Flag whether the mouse button is currently pressed

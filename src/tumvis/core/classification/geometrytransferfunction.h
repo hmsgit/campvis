@@ -74,6 +74,13 @@ namespace TUMVis {
         void addGeometry(TFGeometry* geometry);
 
         /**
+         * Removes the given TF geometry from this transfer function.
+         * \note    After the call \a geometry will no longer be valid as GeometryTransferFunction deletes the given TFGeometry.
+         * \param   geometry    TF geometry to remove, GeometryTransferFunction will delete it
+         */
+        void removeGeometry(TFGeometry* geometry);
+
+        /**
          * Slot to be called by TFGeometry's s_changed signal.
          */
         void onGeometryChanged();

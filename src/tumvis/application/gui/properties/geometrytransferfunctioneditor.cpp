@@ -44,19 +44,24 @@
 
 #include <QGridLayout>
 #include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 namespace TUMVis {
 
     GeometryTransferFunctionEditor::GeometryTransferFunctionEditor(GeometryTransferFunction* tf, QWidget* parent /*= 0*/)
         : AbstractTransferFunctionEditor(tf, parent)
+        , _selectedGeometry(0)
         , _layout(0)
         , _canvas(0)
         , _lblIntensityLeft(0)
         , _lblIntensityRight(0)
+        , _btnAddGeometry(0)
     {
         setupGUI();
         tf->s_geometryCollectionChanged.connect(this, &GeometryTransferFunctionEditor::onGeometryCollectionChanged);
         updateManipulators();
+        setEventTypes(tgt::Event::MOUSEPRESSEVENT);
     }
 
     GeometryTransferFunctionEditor::~GeometryTransferFunctionEditor() {
@@ -80,6 +85,8 @@ namespace TUMVis {
 
         // TODO: get rid of intermediate mode?
         glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glViewport(0, 0, _canvas->width(), _canvas->height());
 
         glMatrixMode(GL_PROJECTION);
@@ -106,8 +113,6 @@ namespace TUMVis {
                 float yl = static_cast<float>(ih->getNumElements(0)) / maxFilling;
                 float yr = 0.f;
 
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glBegin(GL_QUADS);
                 glColor4f(1.f, .75f, 0.f, .5f);
                 for (size_t i = 1; i < numBuckets; ++i) {
@@ -123,7 +128,6 @@ namespace TUMVis {
                     yl = yr;
                 }
                 glEnd();
-                glDisable(GL_BLEND);
             }
         }
         glPopMatrix();
@@ -145,6 +149,30 @@ namespace TUMVis {
             (*it)->setViewportSize(size);
         }
         invalidate();
+    }
+
+    void GeometryTransferFunctionEditor::mousePressEvent(tgt::MouseEvent* e) {
+        if (_selectedGeometry != 0 && e->modifiers() & tgt::Event::CTRL) {
+            TFGeometry* g = _selectedGeometry->getGeometry();
+            std::vector<TFGeometry::KeyPoint>& kpts = g->getKeyPoints();
+            TFGeometry::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
+            std::vector<TFGeometry::KeyPoint>::const_iterator lb = std::lower_bound(kpts.begin(), kpts.end(), kp);
+            if (lb != kpts.end()) {
+                kp._color = lb->_color;
+            }
+            else {
+                kp._color = kpts.back()._color;
+            }
+            float alpha = tgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
+            kp._color.a = static_cast<uint8_t>(alpha * 255.f);
+            kpts.insert(lb, kp);
+            updateManipulators();
+            g->s_changed();
+        }
+        else {
+            _selectedGeometry = 0;
+            e->ignore();
+        }
     }
 
     void GeometryTransferFunctionEditor::invalidate() {
@@ -177,14 +205,28 @@ namespace TUMVis {
         _lblIntensityRight = new QLabel(QString::number(gtf->getIntensityDomain().y), this);
         _layout->addWidget(_lblIntensityRight, 4, 3, 1, 1, Qt::AlignRight);
 
+        QVBoxLayout* buttonLayout = new QVBoxLayout(); // TODO: check whether buttonLayout will be deleted by Qt's GC!
+        _layout->addLayout(buttonLayout, 1, 4, 1, 3, Qt::AlignTop);
+
+        _btnAddGeometry = new QPushButton(tr("Add Geometry"), this);
+        buttonLayout->addWidget(_btnAddGeometry);
+        connect(_btnAddGeometry, SIGNAL(clicked()), this, SLOT(onBtnAddGeometryClicked()));
+        _btnRemoveGeometry = new QPushButton(tr("Remove Geometry"), this);
+        buttonLayout->addWidget(_btnRemoveGeometry);
+        connect(_btnRemoveGeometry, SIGNAL(clicked()), this, SLOT(onBtnRemoveGeometryClicked()));
+
         _layout->setColumnStretch(2, 1);
         _layout->setRowStretch(2, 1);
     }
 
     void GeometryTransferFunctionEditor::updateManipulators() {
         // clear and delete former stuff
+        _selectedGeometry = 0;
         _canvas->getEventHandler()->clear();
         for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+            if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
+            	tester->s_selected.disconnect(this);
+            }
             delete *it;
         }
         _manipulators.clear();
@@ -193,20 +235,50 @@ namespace TUMVis {
         const std::vector<TFGeometry*>& geometries = gtf->getGeometries();
         for (std::vector<TFGeometry*>::const_iterator git = geometries.begin(); git != geometries.end(); ++git) {
             // Add manipulator for the whole geometry and register it as event handler:
-            _manipulators.push_back(new WholeTFGeometryManipulator(_canvas->getSize(), gtf, *git));
-            _canvas->getEventHandler()->addListenerToBack(_manipulators.back());
+            WholeTFGeometryManipulator* wtf = new WholeTFGeometryManipulator(_canvas->getSize(), gtf, *git);
+            _manipulators.push_back(wtf);
+            _canvas->getEventHandler()->addListenerToFront(wtf);
+            wtf->s_selected.connect(this, &GeometryTransferFunctionEditor::onWholeTFGeometryManipulatorSelected);
 
             // Add a manipulator for each KeyPoint and register it as event handler:
             for (std::vector<TFGeometry::KeyPoint>::iterator kpit = (*git)->getKeyPoints().begin(); kpit != (*git)->getKeyPoints().end(); ++kpit) {
                 _manipulators.push_back(new KeyPointManipulator(_canvas->getSize(), gtf, *git, kpit));
-                _canvas->getEventHandler()->addListenerToBack(_manipulators.back());
+                _canvas->getEventHandler()->addListenerToFront(_manipulators.back());
             }
         }
 
+        _canvas->getEventHandler()->addListenerToFront(this);
     }
 
     void GeometryTransferFunctionEditor::onGeometryCollectionChanged() {
         updateManipulators();
+    }
+
+    void GeometryTransferFunctionEditor::onWholeTFGeometryManipulatorSelected(WholeTFGeometryManipulator* wtf /* :) */) {
+        _selectedGeometry = wtf;
+    }
+
+    void GeometryTransferFunctionEditor::onBtnAddGeometryClicked() {
+        GeometryTransferFunction* gtf = static_cast<GeometryTransferFunction*>(_transferFunction);
+        gtf->addGeometry(TFGeometry::createQuad(tgt::vec2(.4f, .6f), tgt::col4(196), tgt::col4(196)));
+    }
+
+    void GeometryTransferFunctionEditor::onBtnRemoveGeometryClicked() {
+        if (_selectedGeometry != 0) {
+            GeometryTransferFunction* gtf = static_cast<GeometryTransferFunction*>(_transferFunction);
+            // to get the signal-slots disconnected in the correct order and avoid double deletion,
+            // this is getting a little messy and cumbersome:
+            TFGeometry* geometryToRemove = _selectedGeometry->getGeometry();
+            for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+                if (*it == _selectedGeometry) {
+                    _manipulators.erase(it);
+                    break;
+                }
+            }
+            delete _selectedGeometry;
+            _selectedGeometry = 0;
+            gtf->removeGeometry(geometryToRemove);
+        }
     }
 
 

@@ -38,6 +38,7 @@
 #include "core/tools/algorithmicgeometry.h"
 
 #include <QColorDialog>
+#include <algorithm>
 
 namespace TUMVis {
 
@@ -110,6 +111,7 @@ namespace TUMVis {
 
             _keyPoint->_position = tfCoords.x;
             _keyPoint->_color.a = static_cast<uint8_t>(tfCoords.y * 255.f);
+            std::sort(_geometry->getKeyPoints().begin(), _geometry->getKeyPoints().end());
             _geometry->s_changed();
         }
         // ignore here, because other listeners probably need this signal as well
@@ -133,14 +135,14 @@ namespace TUMVis {
         }
     }
 
-
-    const int KeyPointManipulator::MANIPULATOR_SIZE = 6;
+    const int KeyPointManipulator::MANIPULATOR_SIZE = 5;
 
 // ================================================================================================
 
     WholeTFGeometryManipulator::WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf, TFGeometry* geometry)
         : AbstractTFGeometryManipulator(viewportSize, tf)
         , _geometry(geometry)
+        , _mousePressed(false)
     {
         tgtAssert(geometry != 0, "Geometry must not be 0.");
         _geometry->s_changed.connect(this, &WholeTFGeometryManipulator::onGeometryChanged);
@@ -155,11 +157,16 @@ namespace TUMVis {
 
     }
 
+    TFGeometry* WholeTFGeometryManipulator::getGeometry() const {
+        return _geometry;
+    }
+
     void WholeTFGeometryManipulator::mousePressEvent(tgt::MouseEvent* e) {
         _pressedPosition = viewportToTF(tgt::ivec2(e->coord().x, _viewportSize.y - e->coord().y));
         if (insideGeometry(_pressedPosition)) {
             _mousePressed = true;
             _valuesWhenPressed = _geometry->getKeyPoints();
+            s_selected(this);
             e->accept();
         }
         else { 

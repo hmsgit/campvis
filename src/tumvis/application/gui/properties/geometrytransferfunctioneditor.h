@@ -36,6 +36,7 @@
 
 class QGridLayout;
 class QLabel;
+class QPushButton;
 
 namespace tgt {
     class QtThreadedCanvas;
@@ -46,11 +47,12 @@ namespace TUMVis {
     class ColorPickerWidget;
     class GeometryTransferFunction;
     class AbstractTFGeometryManipulator;
+    class WholeTFGeometryManipulator;
 
     /**
      * Editor widget for a GeometryTransferFunction.
      */
-    class GeometryTransferFunctionEditor : public AbstractTransferFunctionEditor, public tgt::Painter {
+    class GeometryTransferFunctionEditor : public AbstractTransferFunctionEditor, public tgt::EventListener, public tgt::Painter {
         Q_OBJECT;
 
     public:
@@ -75,13 +77,32 @@ namespace TUMVis {
         /// \see tgt::Painter::sizeChanged
         virtual void sizeChanged(const tgt::ivec2&);
 
+        /// \see tgt::EventListener::mousePressEvent
+        virtual void mousePressEvent(tgt::MouseEvent* e);
+
         /**
          * Slot to be called when the geometry vector of the transfer function has changed.
          */
         void onGeometryCollectionChanged();
 
-    protected:
+        /**
+         * Slot tp be called when a WholeTFGeometryManipulator was selected.
+         * \param   the selected WholeTFGeometryManipulator
+         */
+        void onWholeTFGeometryManipulatorSelected(WholeTFGeometryManipulator* wtf /* :) */);
 
+    protected slots:
+        /**
+         * Slot to be called when _btnAddGeometry was clicked.
+         */
+        void onBtnAddGeometryClicked();
+
+        /**
+         * Slot to be called when _btnRemoveGeometry was clicked.
+         */
+        void onBtnRemoveGeometryClicked();
+
+    protected:
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */
@@ -104,12 +125,15 @@ namespace TUMVis {
         void setupGUI();
 
         std::vector<AbstractTFGeometryManipulator*> _manipulators;
+        WholeTFGeometryManipulator* _selectedGeometry;
 
         QGridLayout* _layout;
 
         tgt::QtThreadedCanvas* _canvas;
         QLabel* _lblIntensityLeft;
         QLabel* _lblIntensityRight;
+        QPushButton* _btnAddGeometry;
+        QPushButton* _btnRemoveGeometry;
     };
 }
 

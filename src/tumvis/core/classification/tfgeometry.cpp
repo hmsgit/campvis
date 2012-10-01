@@ -102,24 +102,23 @@ namespace TUMVis {
 
     void TFGeometry::render() const {
         // TODO: get rid of intermediade mode?
-        glBegin(GL_POLYGON);
+        if (_keyPoints.size() < 2)
+            return;
 
-        if (_keyPoints.front()._color.w > 0) {
-            glColor3ubv(_keyPoints.front()._color.elem);
-            glVertex2f(_keyPoints.front()._position, 0.f);
+        glBegin(GL_QUADS);
+        std::vector<KeyPoint>::const_iterator a = _keyPoints.begin();
+        std::vector<KeyPoint>::const_iterator b = _keyPoints.begin()+1;
+        for (/* already inited */; b != _keyPoints.end(); ++a, ++b) {
+            glColor4ubv(a->_color.elem);
+            float y = static_cast<float>(a->_color.a) / 255.f;
+            glVertex2f(a->_position, 0.f);
+            glVertex2f(a->_position, y);
+
+            glColor4ubv(b->_color.elem);
+            y = static_cast<float>(b->_color.a) / 255.f;
+            glVertex2f(b->_position, y);
+            glVertex2f(b->_position, 0.f);
         }
-
-        for (std::vector<KeyPoint>::const_iterator it = _keyPoints.begin(); it != _keyPoints.end(); ++it) {
-            glColor3ubv(it->_color.elem);
-            float y = static_cast<float>(it->_color.a) / 255.f;
-            glVertex2f(it->_position, y);
-        }
-
-        if (_keyPoints.back()._color.w > 0) {
-            glColor3ubv(_keyPoints.back()._color.elem);
-            glVertex2f(_keyPoints.back()._position, 0.f);
-        }
-
         glEnd();
     }
 

@@ -89,6 +89,23 @@ namespace TUMVis {
         s_changed();
     }
 
+    void GeometryTransferFunction::removeGeometry(TFGeometry* geometry) {
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            for (std::vector<TFGeometry*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+                if (*it == geometry) {
+                    _geometries.erase(it);
+                    break;
+                }
+            }
+        }
+        geometry->s_changed.disconnect(this);
+        delete geometry;
+        _dirtyTexture = true;
+        s_geometryCollectionChanged();
+        s_changed();
+    }
+
     void GeometryTransferFunction::onGeometryChanged() {
         _dirtyTexture = true;
         s_changed();
