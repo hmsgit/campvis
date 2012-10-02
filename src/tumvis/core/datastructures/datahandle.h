@@ -37,15 +37,17 @@ namespace TUMVis {
     /**
      * A DataHandle is responsible to manage the lifetime of an AbstractData instance.
      * Therefore, it implements a reference counting technique in cooperation with AbstractData.
-     *
+     * 
+     * This class can be considered as thread safe under the following conditions:
+     *  * A single DataHandle instance must not be accessed from different threads.
+     *  * Concurrent access to the same AbstractData instance via different DataHandles is safe.
+     * 
      * \note    For clarity: An AbstractData instance can be referenced by multiple DataHandles. As soon 
-     *          as it is afterwards reference by 0 DataHandles the AbstractData instance will be destroyed.
+     *          as it is afterwards reference by 0 DataHandles, the AbstractData instance will be destroyed.
      *          Also remember that a DataHandle takes ownership of the given AbstractData instance. So do
      *          not delete it once it has been assigned to a DataHandle (respectively DataContainer) or mess
      *          with its reference counting!
      * \note    Reference counting implementation inspired from Scott Meyers: More Effective C++, Item 29
-     *
-     * \todo    Check for thread-safety
      */
     class DataHandle {
     public:

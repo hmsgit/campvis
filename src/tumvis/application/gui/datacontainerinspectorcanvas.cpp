@@ -99,7 +99,9 @@ namespace TUMVis {
 
         {
             tbb::mutex::scoped_lock lock(_localMutex);
-            _handles = _dataContainer->getHandlesCopy();
+            _dataContainer = dataContainer;
+            if (_dataContainer != 0)
+                _handles = _dataContainer->getHandlesCopy();
         }
 
         if (_dataContainer != 0) {

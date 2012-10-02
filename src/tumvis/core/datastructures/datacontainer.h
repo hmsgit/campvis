@@ -52,9 +52,6 @@ namespace TUMVis {
      * some brain fuck.
      * 
      * \todo    Check thread-safety
-     * 
-     * \todo    If the original data changes, the other objects accessing that very DataHandle might want to 
-     *          get notified of the change. Hence, some observer pattern might be useful.
      */
     class DataContainer {
     public:
@@ -135,7 +132,7 @@ namespace TUMVis {
          *
          * \param   name    Key for accessing the DataHandle within this DataContainer
          * \param   data    DataHandle to add.
-         * \return  The DataHandle which was created for \a data.
+         * \return  A DataHandle containing \a data.
          */
         DataHandle addData(const std::string& name, AbstractData* data);
 
@@ -158,10 +155,10 @@ namespace TUMVis {
 
         /**
          * Returns the DataHandle with the given name from this container.
-         * If no such DataHandle exists, this method returns 0.
+         * If no such DataHandle exists, this method returns an empty DataHandle.
          *
          * \param   name    Key of the DataHandle to search for
-         * \return  The stored DataHandle with the given name, 0 if no such DataHandle exists.
+         * \return  The stored DataHandle with the given name, an empty DataHandle if no such DataHandle exists.
          */
         DataHandle getData(const std::string& name) const;
 
