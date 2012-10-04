@@ -78,7 +78,6 @@ namespace TUMVis {
             else
                 return QVariant();
         case Qt::UserRole:
-            // const cast ist ugly, same as GUI programming...
             return qVariantFromValue(_dataHandle);
         default:
             return QVariant();

@@ -86,13 +86,22 @@ namespace TUMVis {
 
             QModelIndex idxName = index.sibling(index.row(), 0);
             _selectedDataHandleName = idxName.data(Qt::DisplayRole).toString();
+
+            _selectedIndex = tgt::ivec2(index.row(), index.column());
         }
         else {
             _selectedDataHandle = QtDataHandle(0);
             _selectedDataHandleName = "";
+            _selectedIndex = tgt::ivec2(-1, -1);
         }
 
         updateInfoWidget();
+    }
+
+    void DataContainerInspectorWidget::onDCTWidgetDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
+        if (topLeft.row() <= _selectedIndex.x && topLeft.column() <= _selectedIndex.y && bottomRight.row() >= _selectedIndex.x && bottomRight.column() >= _selectedIndex.y) {
+            onDCTWidgetItemClicked(topLeft.sibling(_selectedIndex.x, _selectedIndex.y));
+        }
     }
 
     void DataContainerInspectorWidget::setupGUI() {
@@ -120,8 +129,9 @@ namespace TUMVis {
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
         _infoWidgetLayout->addWidget(_lblTimestamp);
 
-        _canvas = CtxtMgr.createContext("DataContainerInspector", "", tgt::ivec2(128, 128), tgt::GLCanvas::RGBA, _infoWidget);
-        _infoWidgetLayout->addWidget(_canvas, 1);
+//         _canvas = CtxtMgr.createContext("DataContainerInspector", "", tgt::ivec2(128, 128), tgt::GLCanvas::RGBA, _infoWidget);
+//         _infoWidgetLayout->addWidget(_canvas, 1);
+        _infoWidgetLayout->addWidget(new QWidget(_infoWidget), 1);
 
         _mainLayout->addWidget(_infoWidget, 1);
 
@@ -129,6 +139,9 @@ namespace TUMVis {
         connect(
             _dctWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onDCTWidgetItemClicked(const QModelIndex&)));
+        connect(
+            _dctWidget->getTreeModel(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
+            this, SLOT(onDCTWidgetDataChanged(const QModelIndex&, const QModelIndex&)));
         connect(
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));

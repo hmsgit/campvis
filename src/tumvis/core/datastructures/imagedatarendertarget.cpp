@@ -242,10 +242,12 @@ namespace TUMVis {
         sum += sizeof(tgt::FramebufferObject);
 
         sum += sizeof(tgt::Texture) * _colorTextures.size();
-        for (std::vector<tgt::Texture*>::const_iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it)
-            sum += (*it)->getBpp() * (*it)->getArraySize();
+        for (std::vector<tgt::Texture*>::const_iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it) {
+            if ((*it)->getPixelData() != 0)
+                sum += (*it)->getBpp() * (*it)->getArraySize();
+        }
 
-        if (_depthTexture != 0) {
+        if (_depthTexture != 0 && _depthTexture->getPixelData() != 0) {
             sum += sizeof(tgt::Texture);
             sum += _depthTexture->getBpp() * _depthTexture->getArraySize();
         }

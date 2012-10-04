@@ -96,6 +96,13 @@ namespace TUMVis {
          */
         void onDCTWidgetItemClicked(const QModelIndex& index);
 
+        /**
+         * Slot to be called by the DataContainerTreeWidget when the data has changed.
+         * \param   topLeft     
+         * \param   bottomRight 
+         */
+        void onDCTWidgetDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
     protected:
         /**
          * Setup the GUI stuff
@@ -117,6 +124,7 @@ namespace TUMVis {
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         QtDataHandle _selectedDataHandle;               ///< The currently selected QtDataHandle
         QString _selectedDataHandleName;                ///< The name of the currently selected QtDataHandle
+        tgt::ivec2 _selectedIndex;                      ///< row/column of selected item
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
         tgt::QtThreadedCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents
