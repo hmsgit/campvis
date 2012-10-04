@@ -100,8 +100,9 @@ namespace TUMVis {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             _dataContainer = dataContainer;
-            if (_dataContainer != 0)
+            if (_dataContainer != 0) {
                 _handles = _dataContainer->getHandlesCopy();
+            }
         }
 
         if (_dataContainer != 0) {
@@ -123,11 +124,11 @@ namespace TUMVis {
             std::map<std::string, DataHandle>::iterator lb = _handles.lower_bound(name);
             if (lb == _handles.end() || lb->first != name) {
                 // not existant -> insert
-                _handles.insert(std::make_pair(name, dh));
+                _handles.insert(std::make_pair(name, DataHandle(dh)));
             }
             else {
                 // existant -> replace
-                lb->second = dh;
+                lb->second = DataHandle(dh);
             }
         }
 

@@ -36,7 +36,7 @@
 #include <map>
 
 #include "application/tools/treeitem.h"
-#include "core/datastructures/datahandle.h"
+#include "application/gui/qtdatahandle.h"
 
 namespace TUMVis {
     class DataContainer;
@@ -61,15 +61,15 @@ namespace TUMVis {
     class DataHandleTreeItem : public TreeItem {
     public:
         /**
-         * Creates a new TreeItem for a DataHandle
-         * \param   dataHandle  The DataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
-         * \param   name        Name of the DataHandle
+         * Creates a new TreeItem for a QtDataHandle
+         * \param   dataHandle  The QtDataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
+         * \param   name        Name of the QtDataHandle
          * \param   parent      Parent TreeItem
          */
-        DataHandleTreeItem(const DataHandle& dataHandle, const std::string& name, TreeItem* parent);
+        DataHandleTreeItem(const QtDataHandle& dataHandle, const std::string& name, TreeItem* parent);
 
         /**
-         * Destructor, deletes the DataHandle
+         * Destructor, deletes the QtDataHandle
          */
         virtual ~DataHandleTreeItem();
 
@@ -77,15 +77,15 @@ namespace TUMVis {
         virtual QVariant getData(int column, int role) const;
 
         /**
-         * Sets the DataHandle for this tree item.
+         * Sets the QtDataHandle for this tree item.
          * \note    DataHandleTreeItem takes ownership of this pointer.
-         * \param   dataHandle  The DataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
+         * \param   dataHandle  The QtDataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
          */
-        void setDataHandle(const DataHandle& dataHandle);
+        void setDataHandle(const QtDataHandle& dataHandle);
 
     private:
-        DataHandle _dataHandle;         ///< Base DataHandle
-        std::string _name;              ///< Name of that DataHandle
+        QtDataHandle _dataHandle;         ///< Base QtDataHandle
+        std::string _name;              ///< Name of that QtDataHandle
     };
 
 // = TreeModel ====================================================================================
@@ -122,15 +122,15 @@ namespace TUMVis {
 
     public slots:
         /**
-         * Slot being called when a DataHandle has been added to the DataContainer.
-         * \param   key     Name of the DataHandle
-         * \param   dh      The added DataHandle
+         * Slot being called when a QtDataHandle has been added to the DataContainer.
+         * \param   key     Name of the QtDataHandle
+         * \param   dh      The added QtDataHandle
          */
-        void onDataContainerChanged(const QString& key, const DataHandle& dh);
+        void onDataContainerChanged(const QString& key, QtDataHandle dh);
 
     private:
         TreeItem* _rootItem;
-        std::map<QString, DataHandleTreeItem*> _itemMap;  ///< Mapping the DataHandle Keys to the TreeItems
+        std::map<QString, DataHandleTreeItem*> _itemMap;  ///< Mapping the QtDataHandle Keys to the TreeItems
     };
 
 // = Widget =======================================================================================

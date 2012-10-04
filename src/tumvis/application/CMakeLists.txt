@@ -25,6 +25,7 @@ SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/datacontainertreewidget.h
     gui/pipelinetreewidget.h
     gui/qtcolortools.h
+    gui/qtdatahandle.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h

@@ -32,6 +32,7 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
 #include "application/gui/datacontainertreewidget.h"
+#include "application/gui/qtdatahandle.h"
 
 namespace TUMVis {
 
@@ -68,8 +69,8 @@ namespace TUMVis {
     }
 
     void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
-        // copy DataHandle because signal will be handled by a different thread an indefinite amount of time later:
-        emit dataContainerChanged(QString::fromStdString(key), dh);
+        // copy QtDataHandle because signal will be handled by a different thread an indefinite amount of time later:
+        emit dataContainerChanged(QString::fromStdString(key), QtDataHandle(dh));
     }
 
     QSize DataContainerInspectorWidget::sizeHint() const {
@@ -81,13 +82,13 @@ namespace TUMVis {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
 
-            _selectedDataHandle = DataHandle(*static_cast<DataHandle*>(item.value<void*>()));
+            _selectedDataHandle = item.value<QtDataHandle>();
 
             QModelIndex idxName = index.sibling(index.row(), 0);
             _selectedDataHandleName = idxName.data(Qt::DisplayRole).toString();
         }
         else {
-            _selectedDataHandle = DataHandle(0);
+            _selectedDataHandle = QtDataHandle(0);
             _selectedDataHandleName = "";
         }
 
@@ -124,12 +125,13 @@ namespace TUMVis {
 
         _mainLayout->addWidget(_infoWidget, 1);
 
+        qRegisterMetaType<QtDataHandle>("QtDataHandle");
         connect(
             _dctWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onDCTWidgetItemClicked(const QModelIndex&)));
         connect(
-            this, SIGNAL(dataContainerChanged(const QString&, const DataHandle&)),
-            _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, const DataHandle&)));
+            this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
+            _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {

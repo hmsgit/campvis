@@ -32,6 +32,7 @@
 #include "application/tumvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
+#include "application/gui/qtdatahandle.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 
@@ -61,6 +62,8 @@ namespace TUMVis {
     }
 
     void MainWindow::setup() {
+        qRegisterMetaType<QtDataHandle>("QtDataHandle");
+
         _dcInspectorCanvas = new DataContainerInspectorCanvas();
         _dcInspectorCanvas->show();
 

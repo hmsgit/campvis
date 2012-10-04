@@ -34,7 +34,7 @@
 #include "tgt/qt/qtcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 
-#include "core/datastructures/datahandle.h"
+#include "application/gui/qtdatahandle.h"
 #include "core/tools/opengljobprocessor.h"
 
 #include <QLabel>
@@ -87,7 +87,7 @@ namespace TUMVis {
         QSize sizeHint() const;
 
     signals:
-        void dataContainerChanged(const QString&, const DataHandle&);
+        void dataContainerChanged(const QString&, QtDataHandle);
 
     private slots:
         /**
@@ -115,14 +115,14 @@ namespace TUMVis {
         QString humanizeBytes(size_t numBytes) const;
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
-        DataHandle _selectedDataHandle;                 ///< The currently selected DataHandle
-        QString _selectedDataHandleName;                ///< The name of the currently selected DataHandle
+        QtDataHandle _selectedDataHandle;               ///< The currently selected QtDataHandle
+        QString _selectedDataHandleName;                ///< The name of the currently selected QtDataHandle
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
         tgt::QtThreadedCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents
 
         QHBoxLayout* _mainLayout;                       ///< Layout for this widget
-        QWidget* _infoWidget;                           ///< Widget showing the information about the selected DataHandle
+        QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
         QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
 
         QLabel* _lblName;
