@@ -31,7 +31,6 @@
 #include "tgt/assert.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
-#include "core/datastructures/datahandle.h"
 #include "application/gui/datacontainertreewidget.h"
 
 namespace TUMVis {
@@ -53,7 +52,6 @@ namespace TUMVis {
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);
         }
-        delete _selectedDataHandle;
     }
 
     void DataContainerInspectorWidget::setDataContainer(DataContainer* dataContainer) {
@@ -83,15 +81,13 @@ namespace TUMVis {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
 
-            delete _selectedDataHandle;
-            _selectedDataHandle = new DataHandle(*static_cast<DataHandle*>(item.value<void*>()));
+            _selectedDataHandle = DataHandle(*static_cast<DataHandle*>(item.value<void*>()));
 
             QModelIndex idxName = index.sibling(index.row(), 0);
             _selectedDataHandleName = idxName.data(Qt::DisplayRole).toString();
         }
         else {
-            delete _selectedDataHandle;
-            _selectedDataHandle = 0;
+            _selectedDataHandle = DataHandle(0);
             _selectedDataHandleName = "";
         }
 
@@ -132,16 +128,16 @@ namespace TUMVis {
             _dctWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onDCTWidgetItemClicked(const QModelIndex&)));
         connect(
-            this, SIGNAL(dataContainerChanged(const QString&, const DataHandle*)),
-            _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, const DataHandle*)));
+            this, SIGNAL(dataContainerChanged(const QString&, const DataHandle&)),
+            _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, const DataHandle&)));
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {
-        if (_selectedDataHandle != 0) {
-            _lblTimestamp->setText("Timestamp: " + QString::number(_selectedDataHandle->getTimestamp()));
+        if (_selectedDataHandle.getData() != 0) {
+            _lblTimestamp->setText("Timestamp: " + QString::number(_selectedDataHandle.getTimestamp()));
             _lblName->setText("Name: " + _selectedDataHandleName);
-            _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_selectedDataHandle->getData()->getLocalMemoryFootprint()));
-            _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_selectedDataHandle->getData()->getVideoMemoryFootprint()));
+            _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_selectedDataHandle.getData()->getLocalMemoryFootprint()));
+            _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_selectedDataHandle.getData()->getVideoMemoryFootprint()));
         }
         else {
             _lblTimestamp->setText("Timestamp: ");

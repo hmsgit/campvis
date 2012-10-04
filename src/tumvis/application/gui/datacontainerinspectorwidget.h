@@ -34,6 +34,7 @@
 #include "tgt/qt/qtcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 
+#include "core/datastructures/datahandle.h"
 #include "core/tools/opengljobprocessor.h"
 
 #include <QLabel>
@@ -52,7 +53,6 @@ namespace TUMVis {
     class AbstractPipeline;
     class DataContainer;
     class DataContainerTreeWidget;
-    class DataHandle;
 
     class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -115,7 +115,7 @@ namespace TUMVis {
         QString humanizeBytes(size_t numBytes) const;
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
-        const DataHandle* _selectedDataHandle;          ///< The currently selected DataHandle
+        DataHandle _selectedDataHandle;                 ///< The currently selected DataHandle
         QString _selectedDataHandleName;                ///< The name of the currently selected DataHandle
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
