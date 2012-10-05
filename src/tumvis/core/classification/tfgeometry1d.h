@@ -26,8 +26,8 @@
 // 
 // ================================================================================================
 
-#ifndef TFGEOMETRY_H__
-#define TFGEOMETRY_H__
+#ifndef TFGEOMETRY1D_H__
+#define TFGEOMETRY1D_H__
 
 #include "sigslot/sigslot.h"
 #include "tgt/vector.h"
@@ -41,9 +41,9 @@ namespace TUMVis {
 
     /**
      * Defines a single shape for the GeometryTransferFunction class.
-     * TFGeometry is defined by a sorted list of KeyPoints, each having a position and a color.
+     * TFGeometry1D is defined by a sorted list of KeyPoints, each having a position and a color.
      */
-    class TFGeometry {
+    class TFGeometry1D {
     public:
         struct KeyPoint {
             KeyPoint(float position, const tgt::col4& color)
@@ -56,15 +56,15 @@ namespace TUMVis {
         };
 
         /**
-         * Creates a new TFGeometry
+         * Creates a new TFGeometry1D
          * \param   Bounds  Bounds of the position of the geometry in texture coordinates.
          */
-        TFGeometry(const std::vector<KeyPoint>& keyPoints);
+        TFGeometry1D(const std::vector<KeyPoint>& keyPoints);
 
         /**
          * Virtual destructor
          */
-        virtual ~TFGeometry();
+        virtual ~TFGeometry1D();
 
         /**
          * Returns the vector of KeyPoints.
@@ -95,9 +95,9 @@ namespace TUMVis {
          * \param   interval    Interval the geometry resides in
          * \param   leftColor   Color for left KeyPoint
          * \param   rightColor  Color for right KeyPoint
-         * \return  A TFGeometry modelling a quad with two KeyPoints.
+         * \return  A TFGeometry1D modelling a quad with two KeyPoints.
          */
-        static TFGeometry* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor);
+        static TFGeometry1D* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor);
     protected:
 
         std::vector<KeyPoint> _keyPoints;       ///< vector of KeyPoints, KeyPoints are sorted by x-coordinate of the position
@@ -111,8 +111,8 @@ namespace TUMVis {
      * \param   right   RightKeyPoint to compare
      * \return  left._position < right._position
      */
-    bool operator< (const TFGeometry::KeyPoint& left, const TFGeometry::KeyPoint& right);
+    bool operator< (const TFGeometry1D::KeyPoint& left, const TFGeometry1D::KeyPoint& right);
 
 }
 
-#endif // TFGEOMETRY_H__
+#endif // TFGEOMETRY1D_H__

@@ -26,8 +26,8 @@
 // 
 // ================================================================================================
 
-#ifndef GEOMETRYTRANSFERFUNCTION_H__
-#define GEOMETRYTRANSFERFUNCTION_H__
+#ifndef GEOMETRY1DTRANSFERFUNCTION_H__
+#define GEOMETRY1DTRANSFERFUNCTION_H__
 
 #include "core/classification/abstracttransferfunction.h"
 
@@ -35,24 +35,24 @@
 
 namespace TUMVis {
 
-    class TFGeometry;
+    class TFGeometry1D;
 
     /**
      * A 1D transfer function built from multiple geometries.
      */
-    class GeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
+    class Geometry1DTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
     public:
         /**
-         * Creates a new GeometryTransferFunction.
+         * Creates a new Geometry1DTransferFunction.
          * \param   size            Size of the transfer function texture
          * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
          */
-        GeometryTransferFunction(size_t size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        Geometry1DTransferFunction(size_t size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
 
         /**
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
          */
-        virtual ~GeometryTransferFunction();
+        virtual ~Geometry1DTransferFunction();
 
         /**
          * Returns the dimensionality of the transfer function.
@@ -64,28 +64,28 @@ namespace TUMVis {
          * Gets the list of transfer function geometries.
          * \return  _geometries
          */
-        const std::vector<TFGeometry*>& getGeometries() const;
+        const std::vector<TFGeometry1D*>& getGeometries() const;
 
         /**
          * Adds the given TF geometry to this transfer function.
-         * \note    GeometryTransferFunction takes ownership \a geometry.
-         * \param   geometry    TF geometry to add, GeometryTransferFunction takes the ownership.
+         * \note    Geometry1DTransferFunction takes ownership \a geometry.
+         * \param   geometry    TF geometry to add, Geometry1DTransferFunction takes the ownership.
          */
-        void addGeometry(TFGeometry* geometry);
+        void addGeometry(TFGeometry1D* geometry);
 
         /**
          * Removes the given TF geometry from this transfer function.
-         * \note    After the call \a geometry will no longer be valid as GeometryTransferFunction deletes the given TFGeometry.
-         * \param   geometry    TF geometry to remove, GeometryTransferFunction will delete it
+         * \note    After the call \a geometry will no longer be valid as Geometry1DTransferFunction deletes the given TFGeometry1D.
+         * \param   geometry    TF geometry to remove, Geometry1DTransferFunction will delete it
          */
-        void removeGeometry(TFGeometry* geometry);
+        void removeGeometry(TFGeometry1D* geometry);
 
         /**
-         * Slot to be called by TFGeometry's s_changed signal.
+         * Slot to be called by TFGeometry1D's s_changed signal.
          */
         void onGeometryChanged();
 
-        /// Signal to be emitted when the vector of TFGeometry objects (_geometries) changed (The collection, not the actual geometry).
+        /// Signal to be emitted when the vector of TFGeometry1D objects (_geometries) changed (The collection, not the actual geometry).
         sigslot::signal0<> s_geometryCollectionChanged;
 
     protected:
@@ -95,7 +95,7 @@ namespace TUMVis {
          */
         virtual void createTexture();
 
-        std::vector<TFGeometry*> _geometries;       ///< The list of transfer function geometries.
+        std::vector<TFGeometry1D*> _geometries;       ///< The list of transfer function geometries.
 
         static const std::string loggerCat_;
 
@@ -103,4 +103,4 @@ namespace TUMVis {
 
 }
 
-#endif // GEOMETRYTRANSFERFUNCTION_H__
+#endif // GEOMETRY1DTRANSFERFUNCTION_H__

@@ -157,6 +157,8 @@ namespace TUMVis {
         else {
             _lblTimestamp->setText("Timestamp: ");
             _lblName->setText("Name: ");
+            _lblLocalMemoryFootprint->setText("Local Memory Footprint: ");
+            _lblVideoMemoryFootprint->setText("Video Memory Footprint: ");
         }
     }
 

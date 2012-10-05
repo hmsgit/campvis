@@ -33,8 +33,8 @@
 #include "tgt/event/mouseevent.h"
 
 #include "application/gui/qtcolortools.h"
-#include "core/classification/geometrytransferfunction.h"
-#include "core/classification/tfgeometry.h"
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
 #include "core/tools/algorithmicgeometry.h"
 
 #include <QColorDialog>
@@ -42,7 +42,7 @@
 
 namespace TUMVis {
 
-    AbstractTFGeometryManipulator::AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf)
+    AbstractTFGeometryManipulator::AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf)
         : _viewportSize(viewportSize)
         , _tf(tf)
     {
@@ -65,7 +65,7 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    KeyPointManipulator::KeyPointManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf, TFGeometry* geometry, const std::vector<TFGeometry::KeyPoint>::iterator& keyPoint)
+    KeyPointManipulator::KeyPointManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint)
         : AbstractTFGeometryManipulator(viewportSize, tf)
         , _geometry(geometry)
         , _keyPoint(keyPoint)
@@ -139,7 +139,7 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    WholeTFGeometryManipulator::WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf, TFGeometry* geometry)
+    WholeTFGeometryManipulator::WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry)
         : AbstractTFGeometryManipulator(viewportSize, tf)
         , _geometry(geometry)
         , _mousePressed(false)
@@ -157,7 +157,7 @@ namespace TUMVis {
 
     }
 
-    TFGeometry* WholeTFGeometryManipulator::getGeometry() const {
+    TFGeometry1D* WholeTFGeometryManipulator::getGeometry() const {
         return _geometry;
     }
 
@@ -207,7 +207,7 @@ namespace TUMVis {
             if(newColor.isValid()) {
                 tgt::col4 tmp = QtColorTools::toTgtColor(newColor);
 
-                for (std::vector<TFGeometry::KeyPoint>::iterator it = _geometry->getKeyPoints().begin(); it != _geometry->getKeyPoints().end(); ++it) {
+                for (std::vector<TFGeometry1D::KeyPoint>::iterator it = _geometry->getKeyPoints().begin(); it != _geometry->getKeyPoints().end(); ++it) {
                     it->_color = tgt::col4(tmp.xyz(), it->_color.a);
                 }
                 _geometry->s_changed();
@@ -244,13 +244,13 @@ namespace TUMVis {
 
     void WholeTFGeometryManipulator::updateHelperPoints() {
         _helperPoints.clear();
-        const std::vector<TFGeometry::KeyPoint>& keyPoints = _geometry->getKeyPoints();
+        const std::vector<TFGeometry1D::KeyPoint>& keyPoints = _geometry->getKeyPoints();
 
         if (keyPoints.front()._color.w > 0) {
             _helperPoints.push_back(tgt::vec2(keyPoints.front()._position, 0.f));
         }
 
-        for (std::vector<TFGeometry::KeyPoint>::const_iterator it = keyPoints.begin(); it != keyPoints.end(); ++it) {
+        for (std::vector<TFGeometry1D::KeyPoint>::const_iterator it = keyPoints.begin(); it != keyPoints.end(); ++it) {
             float y = static_cast<float>(it->_color.a) / 255.f;
             _helperPoints.push_back(tgt::vec2(it->_position, y));
         }

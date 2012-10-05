@@ -26,13 +26,13 @@
 // 
 // ================================================================================================
 
-#ifndef GEOMETRYTRANSFERFUNCTIONEDITOR_H__
-#define GEOMETRYTRANSFERFUNCTIONEDITOR_H__
+#ifndef GEOMETRY1DTRANSFERFUNCTIONEDITOR_H__
+#define GEOMETRY1DTRANSFERFUNCTIONEDITOR_H__
 
 #include "tbb/include/tbb/mutex.h"
 #include "tgt/painter.h"
 #include "tgt/event/eventlistener.h"
-#include "core/classification/tfgeometry.h"
+#include "core/classification/tfgeometry1d.h"
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 
 class QGridLayout;
@@ -46,14 +46,14 @@ namespace tgt {
 
 namespace TUMVis {
     class ColorPickerWidget;
-    class GeometryTransferFunction;
+    class Geometry1DTransferFunction;
     class AbstractTFGeometryManipulator;
     class WholeTFGeometryManipulator;
 
     /**
-     * Editor widget for a GeometryTransferFunction.
+     * Editor widget for a Geometry1DTransferFunction.
      */
-    class GeometryTransferFunctionEditor : public AbstractTransferFunctionEditor, public tgt::EventListener, public tgt::Painter {
+    class Geometry1DTransferFunctionEditor : public AbstractTransferFunctionEditor, public tgt::EventListener, public tgt::Painter {
         Q_OBJECT;
 
     public:
@@ -62,12 +62,12 @@ namespace TUMVis {
          * \param   tf          The transfer function the editor shall handle.
          * \param   parent      Parent Qt widget
          */
-        GeometryTransferFunctionEditor(GeometryTransferFunction* tf, QWidget* parent = 0);
+        Geometry1DTransferFunctionEditor(Geometry1DTransferFunction* tf, QWidget* parent = 0);
 
         /**
          * Destructor
          */
-        virtual ~GeometryTransferFunctionEditor();
+        virtual ~Geometry1DTransferFunctionEditor();
 
         
         /**
@@ -139,4 +139,4 @@ namespace TUMVis {
     };
 }
 
-#endif // GEOMETRYTRANSFERFUNCTIONEDITOR_H__
+#endif // GEOMETRY1DTRANSFERFUNCTIONEDITOR_H__

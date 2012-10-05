@@ -32,8 +32,8 @@
 #include "tgt/glcontext.h"
 #include "tgt/qt/qtcontextmanager.h"
 #include "core/datastructures/imagedataconverter.h"
-#include "core/classification/geometrytransferfunction.h"
-#include "core/classification/tfgeometry.h"
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
 
 namespace TUMVis {
 
@@ -90,9 +90,9 @@ namespace TUMVis {
         _dvrNormal._targetImageID.setValue("drr.output");
         _dvrNormal._sourceImageID.setValue("eep.input");
 
-         GeometryTransferFunction* dvrTF = new GeometryTransferFunction(128, tgt::vec2(0.f, .05f));
-         dvrTF->addGeometry(TFGeometry::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-         dvrTF->addGeometry(TFGeometry::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
+         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
+         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
+         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
          _dvrNormal._transferFunction.replaceTF(dvrTF);
 
         _dvrVM._targetImageID.setValue("dvr.output");

@@ -29,11 +29,11 @@
 #include "transferfunctioneditorfactory.h"
 
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
-#include "application/gui/properties/geometrytransferfunctioneditor.h"
+#include "application/gui/properties/geometry1dtransferfunctioneditor.h"
 #include "application/gui/properties/simpletransferfunctioneditor.h"
 
 #include "core/classification/abstracttransferfunction.h"
-#include "core/classification/geometrytransferfunction.h"
+#include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/simpletransferfunction.h"
 
 namespace TUMVis {
@@ -45,8 +45,8 @@ namespace TUMVis {
             return new SimpleTransferFunctionEditor(tester);
         }
 
-        if (GeometryTransferFunction* tester = dynamic_cast<GeometryTransferFunction*>(tf)) {
-            return new GeometryTransferFunctionEditor(tester);
+        if (Geometry1DTransferFunction* tester = dynamic_cast<Geometry1DTransferFunction*>(tf)) {
+            return new Geometry1DTransferFunctionEditor(tester);
         }
 
         return 0;

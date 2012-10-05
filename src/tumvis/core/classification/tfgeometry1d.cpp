@@ -26,7 +26,7 @@
 // 
 // ================================================================================================
 
-#include "tfgeometry.h"
+#include "tfgeometry1d.h"
 
 #include "tgt/assert.h"
 #include "tgt/texture.h"
@@ -54,25 +54,25 @@ namespace {
 
 namespace TUMVis {
 
-    bool operator< (const TFGeometry::KeyPoint& left, const TFGeometry::KeyPoint& right) {
+    bool operator< (const TFGeometry1D::KeyPoint& left, const TFGeometry1D::KeyPoint& right) {
         return left._position < right._position;
     }
     
-    TFGeometry::TFGeometry(const std::vector<KeyPoint>& keyPoints)
+    TFGeometry1D::TFGeometry1D(const std::vector<KeyPoint>& keyPoints)
         : _keyPoints(keyPoints)
     {
         std::sort(_keyPoints.begin(), _keyPoints.end());
     }
 
-    TFGeometry::~TFGeometry() {
+    TFGeometry1D::~TFGeometry1D() {
 
     }
 
-    std::vector<TFGeometry::KeyPoint>& TFGeometry::getKeyPoints() {
+    std::vector<TFGeometry1D::KeyPoint>& TFGeometry1D::getKeyPoints() {
         return _keyPoints;
     }
 
-    void TFGeometry::rasterize(tgt::Texture& texture) const {
+    void TFGeometry1D::rasterize(tgt::Texture& texture) const {
         if (_keyPoints.size() < 2)
             return;
 
@@ -100,7 +100,7 @@ namespace TUMVis {
         }
     }
 
-    void TFGeometry::render() const {
+    void TFGeometry1D::render() const {
         // TODO: get rid of intermediade mode?
         if (_keyPoints.size() < 2)
             return;
@@ -122,13 +122,13 @@ namespace TUMVis {
         glEnd();
     }
 
-    TFGeometry* TFGeometry::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor) {
+    TFGeometry1D* TFGeometry1D::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor) {
         tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
 
         std::vector<KeyPoint> keyPoints;
         keyPoints.push_back(KeyPoint(interval.x, leftColor));
         keyPoints.push_back(KeyPoint(interval.y, rightColor));
-        return new TFGeometry(keyPoints);
+        return new TFGeometry1D(keyPoints);
     }
 
 

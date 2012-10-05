@@ -32,25 +32,25 @@
 #include "tgt/vector.h"
 #include "tgt/matrix.h"
 #include "tgt/event/eventlistener.h"
-#include "core/classification/tfgeometry.h"
+#include "core/classification/tfgeometry1d.h"
 
 namespace TUMVis {
-    class GeometryTransferFunction;
+    class Geometry1DTransferFunction;
 
     /**
-     * Abstract base class for TFGeometry manipulators.
-     * TFGeometry manipulators encapsulate a TF Geometry (or a part of it) and offer methods
-     * for manipulating the TFGeometry (which is handy e.g. for TF editors...). Therefore, it
+     * Abstract base class for TFGeometry1D manipulators.
+     * TFGeometry1D manipulators encapsulate a TF Geometry (or a part of it) and offer methods
+     * for manipulating the TFGeometry1D (which is handy e.g. for TF editors...). Therefore, it
      * extends the tgt::EventListener class and should implement its methods as necessary.
      */
     class AbstractTFGeometryManipulator : public tgt::EventListener {
     public:
         /**
-         * Creates a new AbstractTFGeometryManipulator for the given GeometryTransferFunction.
+         * Creates a new AbstractTFGeometryManipulator for the given Geometry1DTransferFunction.
          * \param   viewportSize    Viewport size (extent of the OpenGL rendering canvas)
          * \param   tf              Parent TF of the geometries to manipulate
          */
-        AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf);
+        AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf);
 
         /**
          * Pure virtual Destructor
@@ -84,14 +84,14 @@ namespace TUMVis {
          */
         tgt::vec2 viewportToTF(const tgt::ivec2& pos) const;
 
-        tgt::ivec2 _viewportSize;           ///< Viewport size (extent of the OpenGL rendering canvas)
-        GeometryTransferFunction* _tf;      ///< Parent TF of the geometries to manipulate (might be handy somewhere later...)
+        tgt::ivec2 _viewportSize;               ///< Viewport size (extent of the OpenGL rendering canvas)
+        Geometry1DTransferFunction* _tf;        ///< Parent TF of the geometries to manipulate (might be handy somewhere later...)
     };
 
 // ================================================================================================
 
     /**
-     * Class for manipulating the KeyPoints of a TFGeometry.
+     * Class for manipulating the KeyPoints of a TFGeometry1D.
      */
     class KeyPointManipulator : public AbstractTFGeometryManipulator {
     public:
@@ -102,7 +102,7 @@ namespace TUMVis {
          * \param   geometry        Parent geometry of the KeyPoint to manipulate
          * \param   keyPoint        Iterator to the KeyPoint to manipulate
          */
-        KeyPointManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf, TFGeometry* geometry, const std::vector<TFGeometry::KeyPoint>::iterator& keyPoint);
+        KeyPointManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint);
 
         /// \see AbstractTFGeometryManipulator::render
         void render();
@@ -117,19 +117,19 @@ namespace TUMVis {
         virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
 
     protected:
-        static const int MANIPULATOR_SIZE;                      ///< Size of the manipulator
-        TFGeometry* _geometry;                                  ///< Parent geometry of the KeyPoint to manipulate
-        std::vector<TFGeometry::KeyPoint>::iterator _keyPoint;  ///< Iterator to the KeyPoint to manipulate
+        static const int MANIPULATOR_SIZE;                          ///< Size of the manipulator
+        TFGeometry1D* _geometry;                                    ///< Parent geometry of the KeyPoint to manipulate
+        std::vector<TFGeometry1D::KeyPoint>::iterator _keyPoint;    ///< Iterator to the KeyPoint to manipulate
 
         // event handling stuff:
         bool _mousePressed;                     ///< Flag whether the mouse button is currently pressed
-        //TFGeometry::KeyPoint _valueWhenPressed; ///< KeyPointValue when pressed
+        //TFGeometry1D::KeyPoint _valueWhenPressed; ///< KeyPointValue when pressed
     };
 
 // ================================================================================================
 
     /**
-     * Class for manipulating the whole TFGeometry at once.
+     * Class for manipulating the whole TFGeometry1D at once.
      */
     class WholeTFGeometryManipulator : public AbstractTFGeometryManipulator, public sigslot::has_slots<> {
     public:
@@ -139,7 +139,7 @@ namespace TUMVis {
          * \param   tf              Parent TF of the geometries to manipulate
          * \param   geometry        Parent geometry of the KeyPoint to manipulate
          */
-        WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, GeometryTransferFunction* tf, TFGeometry* geometry);
+        WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry);
 
         /**
          * Destructor
@@ -150,7 +150,7 @@ namespace TUMVis {
          * Returns the Parent geometry of the KeyPoint to manipulate.
          * \return  _geometry
          */
-        TFGeometry* getGeometry() const;
+        TFGeometry1D* getGeometry() const;
 
         /**
          * Returns the vector caching the 2D coordinates of the TF key points.
@@ -191,13 +191,13 @@ namespace TUMVis {
          */
         void updateHelperPoints();
 
-        TFGeometry* _geometry;                                  ///< Parent geometry of the KeyPoint to manipulate
+        TFGeometry1D* _geometry;                                ///< Parent geometry of the KeyPoint to manipulate
         std::vector<tgt::vec2> _helperPoints;                   ///< vector caching the 2D coordinates of the TF key points
 
         // event handling stuff:
         bool _mousePressed;                                     ///< Flag whether the mouse button is currently pressed
         tgt::vec2 _pressedPosition;                             ///< Position where mousedown occured, in TF coordinates
-        std::vector<TFGeometry::KeyPoint> _valuesWhenPressed;   ///< KeyPoints when pressed
+        std::vector<TFGeometry1D::KeyPoint> _valuesWhenPressed; ///< KeyPoints when pressed
     };
 
 }
