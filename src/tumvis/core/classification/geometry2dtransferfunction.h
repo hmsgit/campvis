@@ -26,30 +26,47 @@
 // 
 // ================================================================================================
 
-#include "geometry1dtransferfunction.h"
+#ifndef GEOMETRY2DTRANSFERFUNCTION_H__
+#define GEOMETRY2DTRANSFERFUNCTION_H__
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "core/classification/genericgeometrytransferfunction.h"
 
-#include "core/classification/tfgeometry1d.h"
+#include <vector>
 
 namespace TUMVis {
 
-    const std::string Geometry1DTransferFunction::loggerCat_ = "TUMVis.core.classification.Geometry1DTransferFunction";
+    class TFGeometry2D;
 
-    Geometry1DTransferFunction::Geometry1DTransferFunction(size_t size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
-        : GenericGeometryTransferFunction<TFGeometry1D>(tgt::svec3(size, 1, 1), intensityDomain)
-    {
-    }
+    /**
+     * A 2D transfer function built from multiple geometries.
+     */
+    class Geometry2DTransferFunction : public GenericGeometryTransferFunction<TFGeometry2D> {
+    public:
+        /**
+         * Creates a new Geometry2DTransferFunction.
+         * \param   size            Size of the transfer function texture
+         * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
+         */
+        Geometry2DTransferFunction(const tgt::svec2& size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
 
-    Geometry1DTransferFunction::~Geometry1DTransferFunction() {
-    }
+        /**
+         * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
+         */
+        virtual ~Geometry2DTransferFunction();
 
-    size_t Geometry1DTransferFunction::getDimensionality() const {
-        return 1;
-    }
+        /**
+         * Returns the dimensionality of the transfer function.
+         * \return  The dimensionality of the transfer function.
+         */
+        virtual size_t getDimensionality() const;
+
+
+    protected:
+
+        static const std::string loggerCat_;
+
+    };
 
 }
+
+#endif // GEOMETRY2DTRANSFERFUNCTION_H__

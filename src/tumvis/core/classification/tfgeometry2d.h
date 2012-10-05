@@ -26,8 +26,8 @@
 // 
 // ================================================================================================
 
-#ifndef TFGEOMETRY1D_H__
-#define TFGEOMETRY1D_H__
+#ifndef TFGEOMETRY2D_H__
+#define TFGEOMETRY2D_H__
 
 #include "sigslot/sigslot.h"
 #include "tgt/vector.h"
@@ -41,45 +41,36 @@ namespace TUMVis {
 
     /**
      * Defines a single shape for the GeometryTransferFunction class.
-     * TFGeometry1D is defined by a sorted list of KeyPoints, each having a position and a color.
+     * TFGeometry2D is defined by a sorted list of KeyPoints, each having a position and a color.
      */
-    class TFGeometry1D {
+    class TFGeometry2D {
     public:
         struct KeyPoint {
-            KeyPoint(float position, const tgt::col4& color)
+            KeyPoint(const tgt::vec2& position, const tgt::col4& color)
                 : _position(position)
                 , _color(color)
             {};
 
-            float _position;
+            tgt::vec2 _position;
             tgt::col4 _color;
         };
 
         /**
-         * Creates a new TFGeometry1D
+         * Creates a new TFGeometry2D
          * \param   Bounds  Bounds of the position of the geometry in texture coordinates.
          */
-        TFGeometry1D(const std::vector<KeyPoint>& keyPoints);
+        TFGeometry2D(const std::vector<KeyPoint>& keyPoints);
 
         /**
          * Virtual destructor
          */
-        virtual ~TFGeometry1D();
+        virtual ~TFGeometry2D();
 
         /**
          * Returns the vector of KeyPoints.
          * \return 
          */
         std::vector<KeyPoint>& getKeyPoints();
-
-
-        /**
-         * Renders this transfer function geometry to the current active OpenGL context for usage in editor.
-         * \note    Must be called from an active and valid OpenGL context.
-         * \todo    Check, whether this method really belongs here (core) or better fits into
-         *          an other class in the application (GUI) module.
-         */
-        void renderIntoEditor() const;
 
         /**
          * Renders this transfer function geometry to the current active OpenGL context.
@@ -95,27 +86,23 @@ namespace TUMVis {
         /**
          * Creates a simple quad geometry for the given interval.
          * A quad geometry consists of two KeyPoints.
-         * \param   interval    Interval the geometry resides in
-         * \param   leftColor   Color for left KeyPoint
-         * \param   rightColor  Color for right KeyPoint
-         * \return  A TFGeometry1D modelling a quad with two KeyPoints.
+         * \param   ll          Lower left corner of the interval
+         * \param   ur          Upper right corner of the interval
+         * \param   color       Color for geometry
+         * \return  A TFGeometry2D modelling a quad with four KeyPoints.
          */
-        static TFGeometry1D* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor);
+        static TFGeometry2D* createQuad(const tgt::vec2& ll, const tgt::vec2& ur, const tgt::col4& color);
     protected:
+        /**
+         * Sorts the key points of this TF counter-clockwise.
+         * To be called every time the position of one or more KeyPoints changes.
+         */
+        void computeCenterAndSortKeyPoints();
 
         std::vector<KeyPoint> _keyPoints;       ///< vector of KeyPoints, KeyPoints are sorted by x-coordinate of the position
+        KeyPoint _center;                       ///< the center (position & color) of this geometry
     };
-
-// ================================================================================================
-
-    /**
-     * Less operator for sorting KeyPoints by their position.
-     * \param   left    Left KeyPoint to compare
-     * \param   right   RightKeyPoint to compare
-     * \return  left._position < right._position
-     */
-    bool operator< (const TFGeometry1D::KeyPoint& left, const TFGeometry1D::KeyPoint& right);
 
 }
 
-#endif // TFGEOMETRY1D_H__
+#endif // TFGEOMETRY2D_H__

@@ -26,7 +26,7 @@
 // 
 // ================================================================================================
 
-#include "geometry1dtransferfunction.h"
+#include "geometry2dtransferfunction.h"
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
@@ -34,22 +34,22 @@
 #include "tgt/texture.h"
 #include "tgt/textureunit.h"
 
-#include "core/classification/tfgeometry1d.h"
+#include "core/classification/tfgeometry2d.h"
 
 namespace TUMVis {
 
-    const std::string Geometry1DTransferFunction::loggerCat_ = "TUMVis.core.classification.Geometry1DTransferFunction";
+    const std::string Geometry2DTransferFunction::loggerCat_ = "TUMVis.core.classification.Geometry2DTransferFunction";
 
-    Geometry1DTransferFunction::Geometry1DTransferFunction(size_t size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
-        : GenericGeometryTransferFunction<TFGeometry1D>(tgt::svec3(size, 1, 1), intensityDomain)
+    Geometry2DTransferFunction::Geometry2DTransferFunction(const tgt::svec2& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
+        : GenericGeometryTransferFunction<TFGeometry2D>(tgt::svec3(size, 1), intensityDomain)
     {
     }
 
-    Geometry1DTransferFunction::~Geometry1DTransferFunction() {
+    Geometry2DTransferFunction::~Geometry2DTransferFunction() {
     }
 
-    size_t Geometry1DTransferFunction::getDimensionality() const {
-        return 1;
+    size_t Geometry2DTransferFunction::getDimensionality() const {
+        return 2;
     }
 
 }

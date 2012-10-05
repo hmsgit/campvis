@@ -65,6 +65,12 @@ namespace TUMVis {
     }
 
     ImageDataRenderTarget::~ImageDataRenderTarget() {
+        if (_fbo != 0) {
+            _fbo->activate();
+            _fbo->detachAll();
+            _fbo->deactivate();
+        }
+
         delete _fbo;
         for (std::vector<tgt::Texture*>::iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it)
             delete *it;

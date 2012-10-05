@@ -96,6 +96,8 @@ namespace TUMVis {
                 }
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
+                _transferFunction.getTF()->uploadTexture();
+
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 

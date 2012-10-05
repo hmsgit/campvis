@@ -34,24 +34,6 @@
 
 #include <algorithm>
 
-namespace {
-    tgt::col4 toCol(const tgt::vec4& c) {
-        return tgt::col4(
-            static_cast<uint8_t>(255 * c.r), 
-            static_cast<uint8_t>(255 * c.g), 
-            static_cast<uint8_t>(255 * c.b), 
-            static_cast<uint8_t>(255 * c.a));
-    }
-
-    tgt::vec4 toVec(const tgt::col4& c) {
-        return tgt::vec4(
-            static_cast<float>(c.r) / 255.f, 
-            static_cast<float>(c.g) / 255.f, 
-            static_cast<float>(c.b) / 255.f, 
-            static_cast<float>(c.a) / 255.f);
-    }
-}
-
 namespace TUMVis {
 
     bool operator< (const TFGeometry1D::KeyPoint& left, const TFGeometry1D::KeyPoint& right) {
@@ -72,35 +54,7 @@ namespace TUMVis {
         return _keyPoints;
     }
 
-    void TFGeometry1D::rasterize(tgt::Texture& texture) const {
-        if (_keyPoints.size() < 2)
-            return;
-
-        int width = texture.getWidth();
-        float rcpWidth = 1.f / static_cast<float>(width);
-
-        // _keyPoints has at least 2 items
-        std::vector<KeyPoint>::const_iterator start = _keyPoints.begin();
-        std::vector<KeyPoint>::const_iterator end = _keyPoints.begin()+1;
-
-        for (/* already inited */; end != _keyPoints.end(); ++start, ++end) {
-            size_t startIndex = static_cast<size_t>(tgt::round(start->_position * width));
-            size_t endIndex = static_cast<size_t>(tgt::round(end->_position * width));
-            float dist = end->_position - start->_position;
-            tgt::vec4 startColor = toVec (start->_color);
-            tgt::vec4 endColor = toVec(end->_color);
-
-            for (size_t i = startIndex; i < endIndex; ++i) {
-                tgt::vec4 result = toVec(texture.texel<tgt::col4>(i));
-                tgt::vec4 color = tgt::mix(startColor, endColor, tgt::clamp((static_cast<float>(i) * rcpWidth - start->_position) / dist, 0.f, 1.f));
-                result = tgt::vec4(tgt::mix(color.xyz(), result.xyz(), result.a), result.a + (1.f - result.a) * color.a);
-                texture.texel<tgt::col4>(i) = toCol(result);
-            }
-
-        }
-    }
-
-    void TFGeometry1D::render() const {
+    void TFGeometry1D::renderIntoEditor() const {
         // TODO: get rid of intermediade mode?
         if (_keyPoints.size() < 2)
             return;
@@ -122,6 +76,25 @@ namespace TUMVis {
         glEnd();
     }
 
+    void TFGeometry1D::render() const {
+        // TODO: get rid of intermediade mode?
+        if (_keyPoints.size() < 2)
+            return;
+
+        glBegin(GL_QUADS);
+        std::vector<KeyPoint>::const_iterator a = _keyPoints.begin();
+        std::vector<KeyPoint>::const_iterator b = _keyPoints.begin()+1;
+        for (/* already inited */; b != _keyPoints.end(); ++a, ++b) {
+            glColor4ubv(a->_color.elem);
+            glVertex2f(a->_position, 0.f);
+            glVertex2f(a->_position, 1.f);
+
+            glColor4ubv(b->_color.elem);
+            glVertex2f(b->_position, 1.f);
+            glVertex2f(b->_position, 0.f);
+        }
+        glEnd();
+    }
     TFGeometry1D* TFGeometry1D::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor) {
         tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
 

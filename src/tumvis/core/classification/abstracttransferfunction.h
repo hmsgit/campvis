@@ -98,6 +98,12 @@ namespace TUMVis {
          * \param   textureParametersUniform    Uniform name to store texture parameters
          */
         void bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& textureUniform = "_tfTex", const std::string& textureParametersUniform = "_tfTextureParameters");
+        
+        /**
+         * Creates the OpenGL texture.
+         * \note    Calling thread must have a valid OpenGL context.
+         */
+        void uploadTexture();
 
         /**
          * Sets the intensity domain where the transfer function is mapped to during classification.

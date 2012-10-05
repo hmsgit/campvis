@@ -108,9 +108,9 @@ namespace TUMVis {
         glClear(GL_COLOR_BUFFER_BIT);
         LGL_ERROR;
 
-        // render TF geometries
+        // renderIntoEditor TF geometries
         for (std::vector<TFGeometry1D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
-            (*it)->render();
+            (*it)->renderIntoEditor();
         }
 
         // render histogram if existent

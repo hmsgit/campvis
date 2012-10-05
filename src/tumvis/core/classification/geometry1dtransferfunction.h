@@ -29,7 +29,7 @@
 #ifndef GEOMETRY1DTRANSFERFUNCTION_H__
 #define GEOMETRY1DTRANSFERFUNCTION_H__
 
-#include "core/classification/abstracttransferfunction.h"
+#include "core/classification/genericgeometrytransferfunction.h"
 
 #include <vector>
 
@@ -40,7 +40,7 @@ namespace TUMVis {
     /**
      * A 1D transfer function built from multiple geometries.
      */
-    class Geometry1DTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
+    class Geometry1DTransferFunction : public GenericGeometryTransferFunction<TFGeometry1D> {
     public:
         /**
          * Creates a new Geometry1DTransferFunction.
@@ -60,42 +60,7 @@ namespace TUMVis {
          */
         virtual size_t getDimensionality() const;
 
-        /**
-         * Gets the list of transfer function geometries.
-         * \return  _geometries
-         */
-        const std::vector<TFGeometry1D*>& getGeometries() const;
-
-        /**
-         * Adds the given TF geometry to this transfer function.
-         * \note    Geometry1DTransferFunction takes ownership \a geometry.
-         * \param   geometry    TF geometry to add, Geometry1DTransferFunction takes the ownership.
-         */
-        void addGeometry(TFGeometry1D* geometry);
-
-        /**
-         * Removes the given TF geometry from this transfer function.
-         * \note    After the call \a geometry will no longer be valid as Geometry1DTransferFunction deletes the given TFGeometry1D.
-         * \param   geometry    TF geometry to remove, Geometry1DTransferFunction will delete it
-         */
-        void removeGeometry(TFGeometry1D* geometry);
-
-        /**
-         * Slot to be called by TFGeometry1D's s_changed signal.
-         */
-        void onGeometryChanged();
-
-        /// Signal to be emitted when the vector of TFGeometry1D objects (_geometries) changed (The collection, not the actual geometry).
-        sigslot::signal0<> s_geometryCollectionChanged;
-
     protected:
-        /**
-         * Creates the texture and uploads it to OpenGL.
-         * Gets called by bind() with the local mutex already acquired.
-         */
-        virtual void createTexture();
-
-        std::vector<TFGeometry1D*> _geometries;       ///< The list of transfer function geometries.
 
         static const std::string loggerCat_;
 

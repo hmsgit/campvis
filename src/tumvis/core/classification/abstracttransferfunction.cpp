@@ -104,6 +104,15 @@ namespace TUMVis {
         shader->setIgnoreUniformLocationError(tmp);
     }
 
+    void AbstractTransferFunction::uploadTexture() {
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            if (_texture == 0 || _dirtyTexture) {
+                createTexture();
+            }
+        }
+    }
+
     void AbstractTransferFunction::setIntensityDomain(const tgt::vec2& newDomain) {
         tgtAssert(newDomain.x <= newDomain.y, "Intensity domain is not a valid interval.");
         {
