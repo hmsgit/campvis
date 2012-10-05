@@ -26,7 +26,7 @@
 // 
 // ================================================================================================
 
-#include "geometry1dtransferfunctioneditor.h"
+#include "geometry2dtransferfunctioneditor.h"
 
 #include "tgt/assert.h"
 #include "tgt/shadermanager.h"
@@ -36,8 +36,8 @@
 #include "application/gui/qtcolortools.h"
 #include "application/gui/properties/tfgeometrymanipulator.h"
 
-#include "core/classification/geometry1dtransferfunction.h"
-#include "core/classification/tfgeometry1d.h"
+#include "core/classification/geometry2dtransferfunction.h"
+#include "core/classification/TFGeometry2D.h"
 #include "core/datastructures/imagedatalocal.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"
@@ -49,7 +49,7 @@
 
 namespace TUMVis {
 
-    Geometry1DTransferFunctionEditor::Geometry1DTransferFunctionEditor(Geometry1DTransferFunction* tf, QWidget* parent /*= 0*/)
+    Geometry2DTransferFunctionEditor::Geometry2DTransferFunctionEditor(Geometry2DTransferFunction* tf, QWidget* parent /*= 0*/)
         : AbstractTransferFunctionEditor(tf, parent)
         , _layout(0)
         , _canvas(0)
@@ -59,12 +59,12 @@ namespace TUMVis {
     {
         _selectedGeometry = 0;
         setupGUI();
-        tf->s_geometryCollectionChanged.connect(this, &Geometry1DTransferFunctionEditor::onGeometryCollectionChanged);
+        tf->s_geometryCollectionChanged.connect(this, &Geometry2DTransferFunctionEditor::onGeometryCollectionChanged);
         updateManipulators();
         setEventTypes(tgt::Event::MOUSEPRESSEVENT);
     }
 
-    Geometry1DTransferFunctionEditor::~Geometry1DTransferFunctionEditor() {
+    Geometry2DTransferFunctionEditor::~Geometry2DTransferFunctionEditor() {
         tbb::mutex::scoped_lock lock(_localMutex);
 
         // clear and delete former stuff
@@ -76,23 +76,23 @@ namespace TUMVis {
             delete *it;
         }
 
-        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
+        Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
         gtf->s_geometryCollectionChanged.disconnect(this);
         // TODO: this needs to be done, but we can not ensure that GLJobProc is still existant during deconstruction...
         //GLJobProc.deregisterContext(_canvas);
     }
 
-    void Geometry1DTransferFunctionEditor::updateWidgetFromProperty() {
-        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
+    void Geometry2DTransferFunctionEditor::updateWidgetFromProperty() {
+        Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
         _lblIntensityLeft->setText(QString::number(gtf->getIntensityDomain().x));
         _lblIntensityRight->setText(QString::number(gtf->getIntensityDomain().y));
         invalidate();
     }
 
-    void Geometry1DTransferFunctionEditor::paint() {
-        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
+    void Geometry2DTransferFunctionEditor::paint() {
+        Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
         gtf->lock();
-        const std::vector<TFGeometry1D*>& geometries = gtf->getGeometries();
+        const std::vector<TFGeometry2D*>& geometries = gtf->getGeometries();
         const tgt::vec2& intensityDomain = gtf->getIntensityDomain();
 
         // TODO: get rid of intermediate mode?
@@ -109,8 +109,8 @@ namespace TUMVis {
         LGL_ERROR;
 
         // renderIntoEditor TF geometries
-        for (std::vector<TFGeometry1D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
-            (*it)->renderIntoEditor();
+        for (std::vector<TFGeometry2D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
+            (*it)->render();
         }
 
         // render histogram if existent
@@ -176,7 +176,7 @@ namespace TUMVis {
         gtf->unlock();
     }
 
-    void Geometry1DTransferFunctionEditor::sizeChanged(const tgt::ivec2& size) {
+    void Geometry2DTransferFunctionEditor::sizeChanged(const tgt::ivec2& size) {
         tbb::mutex::scoped_lock lock(_localMutex);
         for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
             (*it)->setViewportSize(size);
@@ -184,23 +184,23 @@ namespace TUMVis {
         invalidate();
     }
 
-    void Geometry1DTransferFunctionEditor::mousePressEvent(tgt::MouseEvent* e) {
+    void Geometry2DTransferFunctionEditor::mousePressEvent(tgt::MouseEvent* e) {
         if (_selectedGeometry != 0 && e->modifiers() & tgt::Event::CTRL) {
-            TFGeometry1D* g = _selectedGeometry->getGeometry();
-            std::vector<TFGeometry1D::KeyPoint>& kpts = g->getKeyPoints();
-            TFGeometry1D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
-            std::vector<TFGeometry1D::KeyPoint>::const_iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
-            if (lb != kpts.end()) {
-                kp._color = lb->_color;
-            }
-            else {
-                kp._color = kpts.back()._color;
-            }
-            float alpha = tgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
-            kp._color.a = static_cast<uint8_t>(alpha * 255.f);
-            kpts.insert(lb, kp);
-            updateManipulators();
-            g->s_changed();
+//             TFGeometry2D* g = _selectedGeometry->getGeometry();
+//             std::vector<TFGeometry2D::KeyPoint>& kpts = g->getKeyPoints();
+//             TFGeometry2D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
+//             std::vector<TFGeometry2D::KeyPoint>::const_iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
+//             if (lb != kpts.end()) {
+//                 kp._color = lb->_color;
+//             }
+//             else {
+//                 kp._color = kpts.back()._color;
+//             }
+//             float alpha = tgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
+//             kp._color.a = static_cast<uint8_t>(alpha * 255.f);
+//             kpts.insert(lb, kp);
+//             updateManipulators();
+//             g->s_changed();
         }
         else {
             _selectedGeometry = 0;
@@ -209,12 +209,12 @@ namespace TUMVis {
         }
     }
 
-    void Geometry1DTransferFunctionEditor::invalidate() {
-        GLJobProc.enqueueJob(_canvas, new CallMemberFuncJob<Geometry1DTransferFunctionEditor>(this, &Geometry1DTransferFunctionEditor::paint), OpenGLJobProcessor::PaintJob);
+    void Geometry2DTransferFunctionEditor::invalidate() {
+        GLJobProc.enqueueJob(_canvas, new CallMemberFuncJob<Geometry2DTransferFunctionEditor>(this, &Geometry2DTransferFunctionEditor::paint), OpenGLJobProcessor::PaintJob);
     }
 
-    void Geometry1DTransferFunctionEditor::setupGUI() {
-        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
+    void Geometry2DTransferFunctionEditor::setupGUI() {
+        Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
 
         _layout = new QGridLayout(this);
         setLayout(_layout);
@@ -253,74 +253,47 @@ namespace TUMVis {
         _layout->setRowStretch(2, 1);
     }
 
-    void Geometry1DTransferFunctionEditor::updateManipulators() {
+    void Geometry2DTransferFunctionEditor::updateManipulators() {
         tbb::mutex::scoped_lock lock(_localMutex);
-
-        // clear and delete former stuff
-        _selectedGeometry = 0;
-        _canvas->getEventHandler()->clear();
-        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
-            if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
-            	tester->s_selected.disconnect(this);
-            }
-            delete *it;
-        }
-        _manipulators.clear();
-
-        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
-        const std::vector<TFGeometry1D*>& geometries = gtf->getGeometries();
-        for (std::vector<TFGeometry1D*>::const_iterator git = geometries.begin(); git != geometries.end(); ++git) {
-            // Add manipulator for the whole geometry and register it as event handler:
-            WholeTFGeometryManipulator* wtf = new WholeTFGeometryManipulator(_canvas->getSize(), *git);
-            _manipulators.push_back(wtf);
-            _canvas->getEventHandler()->addListenerToFront(wtf);
-            wtf->s_selected.connect(this, &Geometry1DTransferFunctionEditor::onWholeTFGeometryManipulatorSelected);
-
-            // Add a manipulator for each KeyPoint and register it as event handler:
-            for (std::vector<TFGeometry1D::KeyPoint>::iterator kpit = (*git)->getKeyPoints().begin(); kpit != (*git)->getKeyPoints().end(); ++kpit) {
-                _manipulators.push_back(new KeyPointManipulator(_canvas->getSize(), *git, kpit));
-                _canvas->getEventHandler()->addListenerToFront(_manipulators.back());
-            }
-        }
 
         _canvas->getEventHandler()->addListenerToFront(this);
     }
 
-    void Geometry1DTransferFunctionEditor::onGeometryCollectionChanged() {
+    void Geometry2DTransferFunctionEditor::onGeometryCollectionChanged() {
         updateManipulators();
     }
 
-    void Geometry1DTransferFunctionEditor::onWholeTFGeometryManipulatorSelected(WholeTFGeometryManipulator* wtf /* :) */) {
+    void Geometry2DTransferFunctionEditor::onWholeTFGeometryManipulatorSelected(WholeTFGeometryManipulator* wtf /* :) */) {
         _selectedGeometry = wtf;
         invalidate();
     }
 
-    void Geometry1DTransferFunctionEditor::onBtnAddGeometryClicked() {
-        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
-        gtf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .6f), tgt::col4(196), tgt::col4(196)));
+    void Geometry2DTransferFunctionEditor::onBtnAddGeometryClicked() {
+        Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
+        gtf->addGeometry(TFGeometry2D::createQuad(tgt::vec2(.4f, .6f), tgt::vec2(0.f, .4f), tgt::col4(196)));
     }
 
-    void Geometry1DTransferFunctionEditor::onBtnRemoveGeometryClicked() {
+    void Geometry2DTransferFunctionEditor::onBtnRemoveGeometryClicked() {
         if (_selectedGeometry != 0) {
             // to get the signal-slots disconnected in the correct order and avoid double deletion,
             // this is getting a little messy and cumbersome:
-            Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
-            TFGeometry1D* geometryToRemove = _selectedGeometry->getGeometry();
-
-            {
-                tbb::mutex::scoped_lock lock(_localMutex);
-
-                for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
-                    if (*it == _selectedGeometry) {
-                        _manipulators.erase(it);
-                        break;
-                    }
-                }
-                delete _selectedGeometry;
-                _selectedGeometry = 0;
-            }
-
-            gtf->removeGeometry(geometryToRemove);
+//             Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
+//             TFGeometry2D* geometryToRemove = _selectedGeometry->getGeometry();
+// 
+//             {
+//                 tbb::mutex::scoped_lock lock(_localMutex);
+// 
+//                 for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+//                     if (*it == _selectedGeometry) {
+//                         _manipulators.erase(it);
+//                         break;
+//                     }
+//                 }
+//                 delete _selectedGeometry;
+//                 _selectedGeometry = 0;
+//             }
+// 
+//             gtf->removeGeometry(geometryToRemove);
         }
     }
 

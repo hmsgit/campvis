@@ -32,6 +32,7 @@ SET(TUMVIS_APPLICATION_TO_BE_MOCCED
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h
     gui/properties/geometry1dtransferfunctioneditor.h
+    gui/properties/geometry2dtransferfunctioneditor.h
     gui/properties/propertycollectionwidget.h
     gui/properties/simpletransferfunctioneditor.h
     gui/properties/stringpropertywidget.h

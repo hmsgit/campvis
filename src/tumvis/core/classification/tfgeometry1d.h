@@ -71,8 +71,7 @@ namespace TUMVis {
          * \return 
          */
         std::vector<KeyPoint>& getKeyPoints();
-
-
+        
         /**
          * Renders this transfer function geometry to the current active OpenGL context for usage in editor.
          * \note    Must be called from an active and valid OpenGL context.

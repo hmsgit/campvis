@@ -42,11 +42,9 @@
 
 namespace TUMVis {
 
-    AbstractTFGeometryManipulator::AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf)
+    AbstractTFGeometryManipulator::AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize)
         : _viewportSize(viewportSize)
-        , _tf(tf)
     {
-        tgtAssert(tf != 0, "Transfer Function must not be 0.");
     }
 
     void AbstractTFGeometryManipulator::setViewportSize(const tgt::ivec2& viewportSize) {
@@ -65,12 +63,11 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    KeyPointManipulator::KeyPointManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint)
-        : AbstractTFGeometryManipulator(viewportSize, tf)
+    KeyPointManipulator::KeyPointManipulator(const tgt::ivec2& viewportSize, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint)
+        : AbstractTFGeometryManipulator(viewportSize)
         , _geometry(geometry)
         , _keyPoint(keyPoint)
         , _mousePressed(false)
-        //, _pressedPosition(0, 0)
     {
         tgtAssert(geometry != 0, "Geometry must not be 0.");
     }
@@ -139,8 +136,8 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    WholeTFGeometryManipulator::WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry)
-        : AbstractTFGeometryManipulator(viewportSize, tf)
+    WholeTFGeometryManipulator::WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, TFGeometry1D* geometry)
+        : AbstractTFGeometryManipulator(viewportSize)
         , _geometry(geometry)
         , _mousePressed(false)
     {

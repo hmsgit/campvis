@@ -33,6 +33,7 @@
 #include "tgt/matrix.h"
 #include "tgt/event/eventlistener.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/classification/tfgeometry2d.h"
 
 namespace TUMVis {
     class Geometry1DTransferFunction;
@@ -48,9 +49,8 @@ namespace TUMVis {
         /**
          * Creates a new AbstractTFGeometryManipulator for the given Geometry1DTransferFunction.
          * \param   viewportSize    Viewport size (extent of the OpenGL rendering canvas)
-         * \param   tf              Parent TF of the geometries to manipulate
          */
-        AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf);
+        AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize);
 
         /**
          * Pure virtual Destructor
@@ -85,7 +85,6 @@ namespace TUMVis {
         tgt::vec2 viewportToTF(const tgt::ivec2& pos) const;
 
         tgt::ivec2 _viewportSize;               ///< Viewport size (extent of the OpenGL rendering canvas)
-        Geometry1DTransferFunction* _tf;        ///< Parent TF of the geometries to manipulate (might be handy somewhere later...)
     };
 
 // ================================================================================================
@@ -98,11 +97,10 @@ namespace TUMVis {
         /**
          * Creates a new KeyPointManipulator
          * \param   viewportSize    Viewport size (extent of the OpenGL rendering canvas)
-         * \param   tf              Parent TF of the geometries to manipulate
          * \param   geometry        Parent geometry of the KeyPoint to manipulate
          * \param   keyPoint        Iterator to the KeyPoint to manipulate
          */
-        KeyPointManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint);
+        KeyPointManipulator(const tgt::ivec2& viewportSize, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint);
 
         /// \see AbstractTFGeometryManipulator::render
         void render();
@@ -136,10 +134,9 @@ namespace TUMVis {
         /**
          * Creates a new KeyPointManipulator
          * \param   viewportSize    Viewport size (extent of the OpenGL rendering canvas)
-         * \param   tf              Parent TF of the geometries to manipulate
          * \param   geometry        Parent geometry of the KeyPoint to manipulate
          */
-        WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, Geometry1DTransferFunction* tf, TFGeometry1D* geometry);
+        WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, TFGeometry1D* geometry);
 
         /**
          * Destructor
