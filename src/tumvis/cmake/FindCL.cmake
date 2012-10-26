@@ -16,14 +16,14 @@ IF(WIN32)
         PATH_SUFFIXES include OpenCL/common/inc
     )
     
-    IF(TUMVIS_WIN32)
+    IF(CAMPVIS_WIN32)
         FIND_LIBRARY(
             OPENCL_LIBRARY
             NAMES OpenCL.lib
             PATHS ${OPENCL_SDK}
             PATH_SUFFIXES lib/Win32 OpenCL/common/lib/Win32
         )
-    ELSEIF(TUMVIS_WIN64)
+    ELSEIF(CAMPVIS_WIN64)
         FIND_LIBRARY(
             OPENCL_LIBRARY
             NAMES OpenCL.lib

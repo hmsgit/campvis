@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -29,14 +29,14 @@
 #include "mainwindow.h"
 
 #include "tgt/assert.h"
-#include "application/tumvisapplication.h"
+#include "application/campvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/qtdatahandle.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 
-namespace TUMVis {
+namespace campvis {
 
     MainWindow::MainWindow(TumVisApplication* application)
         : QMainWindow()

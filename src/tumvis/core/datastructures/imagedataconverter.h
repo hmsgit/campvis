@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -36,7 +36,7 @@
 
 #include <string>
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Static class offering conversion between differen ImageData types
@@ -56,13 +56,13 @@ namespace TUMVis {
     };
 
     template<class FROM, class TO>
-    TO* TUMVis::ImageDataConverter::convert(const FROM* source) {
+    TO* campvis::ImageDataConverter::convert(const FROM* source) {
         tgtAssert(false, "Conversion not implemented.");
         return 0;
     }
 
     template<class TO>
-    TO* TUMVis::ImageDataConverter::tryConvert(const ImageData* source) {
+    TO* campvis::ImageDataConverter::tryConvert(const ImageData* source) {
         if (source == 0)
             return 0;
 
@@ -77,17 +77,17 @@ namespace TUMVis {
     }
 
     template<>
-    TUMVis::ImageDataLocal* ImageDataConverter::convert(const ImageDataDisk* source);
+    campvis::ImageDataLocal* ImageDataConverter::convert(const ImageDataDisk* source);
 
     template<>
-    TUMVis::ImageDataGL* ImageDataConverter::convert(const ImageDataDisk* source);
+    campvis::ImageDataGL* ImageDataConverter::convert(const ImageDataDisk* source);
 
     template<>
-    TUMVis::ImageDataGL* ImageDataConverter::convert(const ImageDataLocal* source);
+    campvis::ImageDataGL* ImageDataConverter::convert(const ImageDataLocal* source);
 
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>* TUMVis::ImageDataConverter::convertToGenericLocal(const ImageDataDisk* source) {
+    campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>* campvis::ImageDataConverter::convertToGenericLocal(const ImageDataDisk* source) {
         if (TypeTraits<BASETYPE, NUMCHANNELS>::basetypeSize != WeaklyTypedPointer::numBytes(source->getBaseType())) {
             LERROR("Basetype size does not match.");
             return 0;

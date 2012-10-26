@@ -65,7 +65,7 @@ namespace kisscl {
         _version = ClVersion(getStringInfo(CL_DEVICE_VERSION));
 
         //explode extensions string with space as delimiter and insert them into set:
-        std::vector<std::string> exploded = TUMVis::StringUtils::split(getStringInfo(CL_DEVICE_EXTENSIONS), " ");
+        std::vector<std::string> exploded = campvis::StringUtils::split(getStringInfo(CL_DEVICE_EXTENSIONS), " ");
         _extensions.insert(exploded.begin(), exploded.end());
 
         _deviceType = getInfo<cl_device_type>(CL_DEVICE_TYPE);

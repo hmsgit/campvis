@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -31,8 +31,8 @@
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/imagedatarendertarget.h"
 
-namespace TUMVis {
-    const std::string DRRRaycaster::loggerCat_ = "TUMVis.modules.vis.DRRRaycaster";
+namespace campvis {
+    const std::string DRRRaycaster::loggerCat_ = "CAMPVis.modules.vis.DRRRaycaster";
 
     DRRRaycaster::DRRRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
         : RaycastingProcessor(canvasSize, "modules/vis/drrraycaster.frag", false)

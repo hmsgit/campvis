@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -40,7 +40,7 @@
 
 #include <vector>
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Generic base class for transfer functions built from multiple geometries.
@@ -111,7 +111,7 @@ namespace TUMVis {
 // ================================================================================================
 
     template<class T>
-    TUMVis::GenericGeometryTransferFunction<T>::GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
+    campvis::GenericGeometryTransferFunction<T>::GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
         : AbstractTransferFunction(size, intensityDomain)
         , _fbo(0)
     {
@@ -119,7 +119,7 @@ namespace TUMVis {
     }
 
     template<class T>
-    TUMVis::GenericGeometryTransferFunction<T>::~GenericGeometryTransferFunction() {
+    campvis::GenericGeometryTransferFunction<T>::~GenericGeometryTransferFunction() {
         for (std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
             (*it)->s_changed.disconnect(this);
             delete *it;
@@ -127,7 +127,7 @@ namespace TUMVis {
     }
 
     template<class T>
-    void TUMVis::GenericGeometryTransferFunction<T>::deinit() {
+    void campvis::GenericGeometryTransferFunction<T>::deinit() {
         if (_fbo != 0) {
             _fbo->activate();
             _fbo->detachAll();
@@ -140,12 +140,12 @@ namespace TUMVis {
     }
 
     template<class T>
-    const std::vector<T*>& TUMVis::GenericGeometryTransferFunction<T>::getGeometries() const {
+    const std::vector<T*>& campvis::GenericGeometryTransferFunction<T>::getGeometries() const {
         return  _geometries;
     }
 
     template<class T>
-    void TUMVis::GenericGeometryTransferFunction<T>::addGeometry(T* geometry) {
+    void campvis::GenericGeometryTransferFunction<T>::addGeometry(T* geometry) {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             _geometries.push_back(geometry);
@@ -157,7 +157,7 @@ namespace TUMVis {
     }
 
     template<class T>
-    void TUMVis::GenericGeometryTransferFunction<T>::removeGeometry(T* geometry) {
+    void campvis::GenericGeometryTransferFunction<T>::removeGeometry(T* geometry) {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             for (std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
@@ -175,13 +175,13 @@ namespace TUMVis {
     }
 
     template<class T>
-    void TUMVis::GenericGeometryTransferFunction<T>::onGeometryChanged() {
+    void campvis::GenericGeometryTransferFunction<T>::onGeometryChanged() {
         _dirtyTexture = true;
         s_changed();
     }
 
     template<class T>
-    void TUMVis::GenericGeometryTransferFunction<T>::createTexture() {
+    void campvis::GenericGeometryTransferFunction<T>::createTexture() {
         // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
         tgt::TextureUnit tfUnit;
         tfUnit.activate();

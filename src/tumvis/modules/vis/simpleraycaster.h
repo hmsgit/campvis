@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -40,7 +40,7 @@ namespace tgt {
     class Shader;
 }
 
-namespace TUMVis {
+namespace campvis {
     /**
      * Performs a simple volume ray casting.
      * \todo    OpenGL supports up to 4 bound FBO. We can use them to generate multiple images

@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -28,9 +28,9 @@
 
 #include "abstractproperty.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string AbstractProperty::loggerCat_ = "TUMVis.core.datastructures.AbstractProperty";
+    const std::string AbstractProperty::loggerCat_ = "CAMPVis.core.datastructures.AbstractProperty";
 
     AbstractProperty::AbstractProperty(const std::string& name, const std::string& title, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
         : _name(name)

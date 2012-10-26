@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -31,8 +31,8 @@
 #include "tgt/assert.h"
 #include "core/datastructures/abstractdata.h"
 
-namespace TUMVis {
-    const std::string DataContainer::loggerCat_ = "TUMVis.core.datastructures.DataContainer";
+namespace campvis {
+    const std::string DataContainer::loggerCat_ = "CAMPVis.core.datastructures.DataContainer";
 
     DataContainer::DataContainer() {
 

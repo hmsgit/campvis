@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -33,7 +33,7 @@
 #include "tgt/logmanager.h"
 #include "core/properties/abstractproperty.h"
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Generic class for value-based properties.
@@ -132,7 +132,7 @@ namespace TUMVis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    TUMVis::GenericProperty<T>::GenericProperty(const std::string& name, const std::string& title, const T& value, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/) 
+    campvis::GenericProperty<T>::GenericProperty(const std::string& name, const std::string& title, const T& value, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/) 
         : AbstractProperty(name, title, il)
         , _value(value)
         , _backBuffer(value)
@@ -140,12 +140,12 @@ namespace TUMVis {
     }
 
     template<typename T>
-    TUMVis::GenericProperty<T>::~GenericProperty() {
+    campvis::GenericProperty<T>::~GenericProperty() {
 
     }
 
     template<typename T>
-    void TUMVis::GenericProperty<T>::addSharedProperty(AbstractProperty* prop) {
+    void campvis::GenericProperty<T>::addSharedProperty(AbstractProperty* prop) {
         // make type check first, then call base method.
         tgtAssert(prop != 0, "Shared property must not be 0!");
         if (GenericProperty<T>* tmp = dynamic_cast< GenericProperty<T>* >(prop)) {
@@ -157,12 +157,12 @@ namespace TUMVis {
     }
 
     template<typename T>
-    const T& TUMVis::GenericProperty<T>::getValue() const {
+    const T& campvis::GenericProperty<T>::getValue() const {
         return _value;
     }
 
     template<typename T>
-    void TUMVis::GenericProperty<T>::setValue(const T& value) {
+    void campvis::GenericProperty<T>::setValue(const T& value) {
         T vv = validateValue(value);
         tbb::spin_mutex::scoped_lock lock(_localMutex);
 
@@ -175,7 +175,7 @@ namespace TUMVis {
     }
 
     template<typename T>
-    void TUMVis::GenericProperty<T>::unlock() {
+    void campvis::GenericProperty<T>::unlock() {
         tbb::spin_mutex::scoped_lock lock(_localMutex);
 
         if (_backBuffer != _value)
@@ -184,7 +184,7 @@ namespace TUMVis {
     }
 
     template<typename T>
-    void TUMVis::GenericProperty<T>::setFrontValue(const T& value) {
+    void campvis::GenericProperty<T>::setFrontValue(const T& value) {
         _value = value;
         // TODO:    think about the correct/reasonable order of observer notification
         //          thread-safety might play a role thereby...
@@ -198,17 +198,17 @@ namespace TUMVis {
     }
 
     template<typename T>
-    void TUMVis::GenericProperty<T>::setBackValue(const T& value) {
+    void campvis::GenericProperty<T>::setBackValue(const T& value) {
         _backBuffer = value;
     }
 
     template<typename T>
-    T TUMVis::GenericProperty<T>::validateValue(const T& value) {
+    T campvis::GenericProperty<T>::validateValue(const T& value) {
         return value;
     }
 
     template<typename T>
-    const std::string TUMVis::GenericProperty<T>::loggerCat_ = "TUMVis.core.datastructures.GenericProperty";
+    const std::string campvis::GenericProperty<T>::loggerCat_ = "CAMPVis.core.datastructures.GenericProperty";
 }
 
 #endif // GENERICPROPERTY_H__

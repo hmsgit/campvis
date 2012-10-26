@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -28,8 +28,8 @@
 
 #include "weaklytypedpointer.h"
 
-namespace TUMVis {
-    const std::string WeaklyTypedPointer::loggerCat_ = "TUMVis.core.tools.WeaklyTypedPointer";
+namespace campvis {
+    const std::string WeaklyTypedPointer::loggerCat_ = "CAMPVis.core.tools.WeaklyTypedPointer";
 
     WeaklyTypedPointer::WeaklyTypedPointer(BaseType pt, size_t numChannels, void* ptr)
         : _baseType(pt)

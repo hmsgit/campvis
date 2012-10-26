@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -31,7 +31,7 @@
 #include "tgt/event/mouseevent.h"
 #include "core/properties/cameraproperty.h"
 
-namespace TUMVis {
+namespace campvis {
 
     CamPropNavigationWrapper::CamPropNavigationWrapper(CameraProperty* camProp)
         : _cameraProperty(camProp)
@@ -60,7 +60,7 @@ namespace TUMVis {
 
 // = TrackballNavigationEventHandler ==============================================================
 
-    const std::string TrackballNavigationEventHandler::loggerCat_ = "TUMVis.core.eventhandler.TrackballNavigationEventHandler";
+    const std::string TrackballNavigationEventHandler::loggerCat_ = "CAMPVis.core.eventhandler.TrackballNavigationEventHandler";
 
     TrackballNavigationEventHandler::TrackballNavigationEventHandler(CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
         : AbstractEventHandler()

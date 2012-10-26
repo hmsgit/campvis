@@ -1,6 +1,6 @@
 #include "treeitem.h"
 
-namespace TUMVis {
+namespace campvis {
 
     TreeItem::TreeItem(TreeItem* parent /*= 0*/)
         : _parent(parent)

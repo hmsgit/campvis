@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -34,9 +34,9 @@
 #include "tgt/shadermanager.h"
 #include "tgt/tgt_gl.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string ImageDataRenderTarget::loggerCat_ = "TUMVis.core.datastructures.ImageDataRenderTarget";
+    const std::string ImageDataRenderTarget::loggerCat_ = "CAMPVis.core.datastructures.ImageDataRenderTarget";
 
     ImageDataRenderTarget::ImageDataRenderTarget(const tgt::svec3& size, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/)
         : ImageData(2, size)

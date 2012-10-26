@@ -7,7 +7,7 @@
 #include "tgt/tgt_math.h"
 #include "tbb/include/tbb/atomic.h"
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Generic implementation of thread-safe n-D histograms.
@@ -107,7 +107,7 @@ namespace TUMVis {
 // ================================================================================================
 
     template<typename T, size_t ND>
-    TUMVis::ConcurrentGenericHistogramND<T, ND>::ConcurrentGenericHistogramND(T mins[ND], T maxs[ND], size_t numBuckets[ND]) 
+    campvis::ConcurrentGenericHistogramND<T, ND>::ConcurrentGenericHistogramND(T mins[ND], T maxs[ND], size_t numBuckets[ND]) 
         : _arraySize(1)
         , _buckets(0)
     {
@@ -127,18 +127,18 @@ namespace TUMVis {
     }
 
     template<typename T, size_t ND>
-    TUMVis::ConcurrentGenericHistogramND<T, ND>::~ConcurrentGenericHistogramND() {
+    campvis::ConcurrentGenericHistogramND<T, ND>::~ConcurrentGenericHistogramND() {
         delete [] _buckets;
     }
 
     template<typename T, size_t ND>
-    size_t TUMVis::ConcurrentGenericHistogramND<T, ND>::getNumBuckets(size_t dimension) const {
+    size_t campvis::ConcurrentGenericHistogramND<T, ND>::getNumBuckets(size_t dimension) const {
         tgtAssert(dimension < ND, "Dimension out of bounds.");
         return _numBuckets[dimension];
     }
 
     template<typename T, size_t ND>
-    void TUMVis::ConcurrentGenericHistogramND<T, ND>::addSample(T sample[ND]) {
+    void campvis::ConcurrentGenericHistogramND<T, ND>::addSample(T sample[ND]) {
         size_t bucketNumbers[ND];
         for(int i = 0; i < ND; ++i)
             bucketNumbers[i] = getBucketNumber(i, sample[i]);
@@ -157,18 +157,18 @@ namespace TUMVis {
     }
 
     template<typename T, size_t ND>
-    size_t TUMVis::ConcurrentGenericHistogramND<T, ND>::getBucketNumber(size_t dimension, T sample) const {
+    size_t campvis::ConcurrentGenericHistogramND<T, ND>::getBucketNumber(size_t dimension, T sample) const {
         tgtAssert(dimension < ND, "Dimension out of bounds.");
-#ifdef TUMVIS_DEBUG
+#ifdef CAMPVIS_DEBUG
         if (sample < _min[dimension] || sample > _max[dimension])
-            LWARNINGC("TUMVis.core.tools.ConcurrentGenericHistogramND", "Added sample " << sample << " out of bounds for dimension " << dimension << ".");
+            LWARNINGC("CAMPVis.core.tools.ConcurrentGenericHistogramND", "Added sample " << sample << " out of bounds for dimension " << dimension << ".");
 #endif
         double ratio = static_cast<double>(sample - _min[dimension]) / static_cast<double>(_max[dimension] - _min[dimension]);
         return static_cast<size_t>(tgt::clamp(static_cast<int>(ratio * _numBuckets[dimension]), static_cast<int>(0), static_cast<int>(_numBuckets[dimension] - 1)));
     }
 
     template<typename T, size_t ND>
-    size_t TUMVis::ConcurrentGenericHistogramND<T, ND>::getArrayIndex(size_t* bucketNumbers) const {
+    size_t campvis::ConcurrentGenericHistogramND<T, ND>::getArrayIndex(size_t* bucketNumbers) const {
         size_t index = 0;
         size_t multiplier = 1;
         for (size_t i = 0; i < ND; ++i) {

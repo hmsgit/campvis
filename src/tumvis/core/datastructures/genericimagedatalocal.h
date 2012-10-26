@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -35,7 +35,7 @@
 
 #include <cstring>  // needed for memcpy
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Templated version of ImageDataLocal, storing image data in the local memory.
@@ -173,7 +173,7 @@ namespace TUMVis {
 // = Template implementation ======================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::GenericImageDataLocal(size_t dimensionality, const tgt::svec3& size, ElementType* data)
+    campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::GenericImageDataLocal(size_t dimensionality, const tgt::svec3& size, ElementType* data)
         : ImageDataLocal(dimensionality, size, TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType, NUMCHANNELS)
         , _data(data)
     {
@@ -185,12 +185,12 @@ namespace TUMVis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::~GenericImageDataLocal() {
+    campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::~GenericImageDataLocal() {
         delete _data;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    GenericImageDataLocal<BASETYPE, NUMCHANNELS>* TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::clone() const {
+    GenericImageDataLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::clone() const {
         size_t numElements = tgt::hmul(_size);
         ElementType* newData = new ElementType[numElements];
         memcpy(newData, _data, numElements * sizeof(ElementType));
@@ -199,17 +199,17 @@ namespace TUMVis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    size_t TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getLocalMemoryFootprint() const {
+    size_t campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getLocalMemoryFootprint() const {
         return sizeof(*this) + _numElements * sizeof(ElementType);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    size_t TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getVideoMemoryFootprint() const {
+    size_t campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getVideoMemoryFootprint() const {
         return 0;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    GenericImageDataLocal<BASETYPE, NUMCHANNELS>* TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
+    GenericImageDataLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
         tgtAssert(tgt::hor(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
         tgt::svec3 newSize = urb - llf + tgt::svec3(1);
@@ -243,78 +243,78 @@ namespace TUMVis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    const WeaklyTypedPointer TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getWeaklyTypedPointer() const {
+    const WeaklyTypedPointer campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getWeaklyTypedPointer() const {
         return WeaklyTypedPointer(TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType, NUMCHANNELS, _data);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    float TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(size_t index, size_t channel) const {
+    float campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(size_t index, size_t channel) const {
         tgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
         return TypeNormalizer::normalizeToFloat(TypeTraits<BASETYPE, NUMCHANNELS>::getChannel(getElement(index), channel));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    float TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(const tgt::svec3& position, size_t channel) const {
+    float campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(const tgt::svec3& position, size_t channel) const {
         return getElementNormalized(positionToIndex(position), channel);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(size_t index, size_t channel, float value) {
+    void campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(size_t index, size_t channel, float value) {
         tgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
         TypeTraits<BASETYPE, NUMCHANNELS>::setChannel(getElement(index), channel, TypeNormalizer::denormalizeFromFloat<BASETYPE>(value));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(const tgt::svec3& position, size_t channel, float value) {
+    void campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(const tgt::svec3& position, size_t channel, float value) {
         setElementNormalized(positionToIndex(position), channel, value);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    typename TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(size_t position) {
+    typename campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(size_t position) {
         tgtAssert(position >= 0 && position < _numElements, "Position out of bounds!");
         return _data[position];
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    typename TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(const tgt::svec3& position) {
+    typename campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(const tgt::svec3& position) {
         return getElement(positionToIndex(position));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    const typename TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(size_t position) const {
+    const typename campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(size_t position) const {
         tgtAssert(position >= 0 && position < _numElements, "Position out of bounds!");
         return _data[position];
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    const typename TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(const tgt::svec3& position) const {
+    const typename campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElement(const tgt::svec3& position) const {
         return getElement(positionToIndex(position));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElement(size_t position, const ElementType& value) {
+    void campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElement(size_t position, const ElementType& value) {
         tgtAssert(position >= 0 && position < _numElements, "Position out of bounds!");
         _data[position] = value;
 
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElement(const tgt::svec3& position, const ElementType& value) {
+    void campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::setElement(const tgt::svec3& position, const ElementType& value) {
         _data[positionToIndex(position)] = value;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    typename TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType* TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getImageData() {
+    typename campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType* campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getImageData() {
         return _data;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    const typename TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType* TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getImageData() const {
+    const typename campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType* campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getImageData() const {
         return _data;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    typename TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementLinear(const tgt::vec3 position) const {
+    typename campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::ElementType campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementLinear(const tgt::vec3 position) const {
         // yet to be implemented
         // TODO: Check wether pixel/voxel coordinates lie on the edges or on the center of the pixels/voxels
         tgtAssert(false, "Yet to be implemented!");
@@ -323,7 +323,7 @@ namespace TUMVis {
 
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    float TUMVis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const {
+    float campvis::GenericImageDataLocal<BASETYPE, NUMCHANNELS>::getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const {
         tgt::vec3 posAbs = tgt::max(position - 0.5f, tgt::vec3::zero);
         tgt::vec3 p = posAbs - floor(posAbs); // get decimal part
         tgt::svec3 llb = tgt::svec3(posAbs);

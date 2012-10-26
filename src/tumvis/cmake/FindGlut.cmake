@@ -6,28 +6,28 @@
 # win32: GLUT_DEBUG_LIBRARY, GLUT_RELEASE_LIBRARY, GLUT_DEBUG_DLLS, GLUT_RELEASE_DLLS
 
 IF(WIN32)
-    SET(GLUT_DIR "${TUMVIS_HOME}/ext/glut" CACHE PATH "If glut is not found, set this path")
+    SET(GLUT_DIR "${CAMPVIS_HOME}/ext/glut" CACHE PATH "If glut is not found, set this path")
    
     SET(GLUT_DEFINITIONS "-DGLUT_NO_LIB_PRAGMA")
        
     SET(GLUT_INCLUDE_DIR "${GLUT_DIR}")
 
     # set debug and release library
-    IF(TUMVIS_WIN32)
+    IF(CAMPVIS_WIN32)
         SET(GLUT_DEBUG_LIBRARY      "${GLUT_DIR}/lib/win32/glut32.lib")
         SET(GLUT_RELEASE_LIBRARY    "${GLUT_DIR}/lib/win32/glut32.lib")
 
         SET(GLUT_DEBUG_DLL          "${GLUT_DIR}/lib/win32/glut32.dll")
         SET(GLUT_RELEASE_DLL        "${GLUT_DIR}/lib/win32/glut32.dll")
-    ELSEIF(TUMVIS_WIN64)
+    ELSEIF(CAMPVIS_WIN64)
         SET(GLUT_DEBUG_LIBRARY      "${GLUT_DIR}/lib/win64/glut64.lib")
         SET(GLUT_RELEASE_LIBRARY    "${GLUT_DIR}/lib/win64/glut64.lib")
         
         SET(GLUT_DEBUG_DLL          "${GLUT_DIR}/lib/win64/glut64.dll")
         SET(GLUT_RELEASE_DLL        "${GLUT_DIR}/lib/win64/glut64.dll")
     ELSE()
-        MESSAGE(FATAL_ERROR "Neither TUMVIS_WIN32 nor TUMVIS_WIN64 defined!")
-    ENDIF(TUMVIS_WIN32)
+        MESSAGE(FATAL_ERROR "Neither CAMPVIS_WIN32 nor CAMPVIS_WIN64 defined!")
+    ENDIF(CAMPVIS_WIN32)
 
     IF (GLUT_DEBUG_LIBRARY AND GLUT_RELEASE_LIBRARY)
         SET(GLUT_LIBRARIES debug ${GLUT_DEBUG_LIBRARY} optimized ${GLUT_RELEASE_LIBRARY})
@@ -45,5 +45,5 @@ ELSE(WIN32)
     SET(GLUT_LIBRARIES ${GLUT_glut_LIBRARY})
 ENDIF(WIN32)
 
-UNSET(GlutTUMVIS_DIR)
+UNSET(GlutCAMPVIS_DIR)
 MARK_AS_ADVANCED(GLUT_DIR GLUT_INCLUDE_DIR GLUT_LIBRARIES GLUT_DEBUG_LIBRARY GLUT_RELEASE_LIBRARY GLUT_DEBUG_DLL GLUT_RELEASE_DLL)

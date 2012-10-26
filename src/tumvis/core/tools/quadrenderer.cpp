@@ -1,7 +1,7 @@
 #include "quadrenderer.h"
 #include "core/datastructures/facegeometry.h"
 
-namespace TUMVis {
+namespace campvis {
 
 
     QuadRenderer::QuadRenderer()

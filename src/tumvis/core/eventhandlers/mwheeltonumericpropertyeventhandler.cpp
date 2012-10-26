@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -31,8 +31,8 @@
 #include "tgt/event/mouseevent.h"
 #include "core/properties/numericproperty.h"
 
-namespace TUMVis {
-    const std::string MWheelToNumericPropertyEventHandler::loggerCat_ = "TUMVis.core.eventhandler.MWheelToNumericPropertyEventHandler";
+namespace campvis {
+    const std::string MWheelToNumericPropertyEventHandler::loggerCat_ = "CAMPVis.core.eventhandler.MWheelToNumericPropertyEventHandler";
 
     MWheelToNumericPropertyEventHandler::MWheelToNumericPropertyEventHandler(INumericProperty* property)
         : AbstractEventHandler()

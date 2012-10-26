@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -40,7 +40,7 @@
 #include "core/properties/transferfunctionproperty.h"
 
 
-namespace TUMVis {
+namespace campvis {
 
     AbstractPropertyWidget* PropertyWidgetFactory::createWidget(AbstractProperty* property) {
         tgtAssert(property != 0, "Property must not be 0.");

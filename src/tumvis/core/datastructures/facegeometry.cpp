@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -34,9 +34,9 @@
 #include "tgt/vertexarrayobject.h"
 #include "tgt/vector.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string FaceGeometry::loggerCat_ = "TUMVis.core.datastructures.FaceGeometry";
+    const std::string FaceGeometry::loggerCat_ = "CAMPVis.core.datastructures.FaceGeometry";
 
     FaceGeometry::FaceGeometry(const std::vector<tgt::vec3>& vertices, const std::vector<tgt::vec3>& textureCoordinates /*= std::vector<tgt::vec3>()*/, const std::vector<tgt::vec4>& colors /*= std::vector<tgt::vec4>()*/, const std::vector<tgt::vec3>& normals /*= std::vector<tgt::vec3>() */)
         : GeometryData()
@@ -167,7 +167,7 @@ namespace TUMVis {
         }
     }
 
-    TUMVis::FaceGeometry FaceGeometry::clipAgainstPlane(float p, const tgt::vec3& pNormal, float epsilon /*= 1e-8f*/) const {
+    campvis::FaceGeometry FaceGeometry::clipAgainstPlane(float p, const tgt::vec3& pNormal, float epsilon /*= 1e-8f*/) const {
         tgtAssert(epsilon >= 0, "Epsilon must be positive.");
 
         std::vector<tgt::vec3> verts, texCoords, norms;

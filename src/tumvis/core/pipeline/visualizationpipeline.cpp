@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -34,8 +34,8 @@
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
 
-namespace TUMVis {
-    const std::string VisualizationPipeline::loggerCat_ = "TUMVis.core.datastructures.VisualizationPipeline";
+namespace campvis {
+    const std::string VisualizationPipeline::loggerCat_ = "CAMPVis.core.datastructures.VisualizationPipeline";
 
     VisualizationPipeline::VisualizationPipeline() 
         : AbstractPipeline()

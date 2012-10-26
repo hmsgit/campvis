@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -32,10 +32,10 @@
 #include "tgt/logmanager.h"
 #include "tgt/event/event.h"
 
-namespace TUMVis {
+namespace campvis {
 
     /**
-     * Abstract base class for TUMVis EventHandlers.
+     * Abstract base class for CAMPVis EventHandlers.
      * 
      */
     class AbstractEventHandler {

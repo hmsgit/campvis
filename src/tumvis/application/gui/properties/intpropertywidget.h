@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -34,7 +34,7 @@
 
 #include <QSpinBox>
 
-namespace TUMVis {
+namespace campvis {
     /**
      * Widget for a IntProperty
      */
@@ -138,7 +138,7 @@ namespace TUMVis {
 // ================================================================================================
 
     template<size_t SIZE>
-    TUMVis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
+    campvis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
         : AbstractPropertyWidget(property, parent)
     {
         for (size_t i = 0; i < size; ++i) {
@@ -154,12 +154,12 @@ namespace TUMVis {
     }
 
     template<size_t SIZE>
-    TUMVis::IVecPropertyWidget<SIZE>::~IVecPropertyWidget() {
+    campvis::IVecPropertyWidget<SIZE>::~IVecPropertyWidget() {
         static_cast<PropertyType*>(_property)->s_minMaxChanged.disconnect(this);
     }
 
     template<size_t SIZE>
-    void TUMVis::IVecPropertyWidget<SIZE>::updateWidgetFromProperty() {
+    void campvis::IVecPropertyWidget<SIZE>::updateWidgetFromProperty() {
         PropertyType* prop = static_cast<PropertyType*>(_property);
         for (size_t i = 0; i < size; ++i) {
             _spinBox[i]->blockSignals(true);
@@ -169,7 +169,7 @@ namespace TUMVis {
     }
 
     template<size_t SIZE>
-    void TUMVis::IVecPropertyWidget<SIZE>::onValueChangedImpl() {
+    void campvis::IVecPropertyWidget<SIZE>::onValueChangedImpl() {
         _ignorePropertyUpdates = true;
         PropertyType* prop = static_cast<PropertyType*>(_property);
         typename IVecPropertyWidgetTraits<SIZE>::BaseType newValue;
@@ -180,7 +180,7 @@ namespace TUMVis {
     }
 
     template<size_t SIZE>
-    void TUMVis::IVecPropertyWidget<SIZE>::onPropertyMinMaxChanged(const AbstractProperty* property) {
+    void campvis::IVecPropertyWidget<SIZE>::onPropertyMinMaxChanged(const AbstractProperty* property) {
         if (!_ignorePropertyUpdates) {
             PropertyType* prop = static_cast<PropertyType*>(_property);
             for (size_t i = 0; i < size; ++i) {

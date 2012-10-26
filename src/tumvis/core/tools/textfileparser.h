@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Helper class for parsing simple text files containing key-value pairs.
@@ -246,7 +246,7 @@ namespace TUMVis {
     }
 
     template<typename T>
-    inline std::vector<std::string> TUMVis::TextFileParser::readAndParseItems() const throw (tgt::FileException, tgt::CorruptedFileException) {
+    inline std::vector<std::string> campvis::TextFileParser::readAndParseItems() const throw (tgt::FileException, tgt::CorruptedFileException) {
         tgt::File* file = FileSys.open(_url);
         if (!file || !file->isOpen())
             throw tgt::FileException("Could not open file " + _url + " for reading.", _url);
@@ -269,7 +269,7 @@ namespace TUMVis {
 
     /// Template specialization for avoiding redundant split-join-split of lines.
     template<>
-    inline std::vector<std::string> TUMVis::TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (tgt::FileException, tgt::CorruptedFileException) {
+    inline std::vector<std::string> campvis::TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (tgt::FileException, tgt::CorruptedFileException) {
         tgt::File* file = FileSys.open(_url);
         if (!file || !file->isOpen())
             throw tgt::FileException("Could not open file " + _url + " for reading.", _url);

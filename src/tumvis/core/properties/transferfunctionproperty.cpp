@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -28,9 +28,9 @@
 
 #include "TransferFunctionProperty.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string TransferFunctionProperty::loggerCat_ = "TUMVis.core.datastructures.TransferFunctionProperty";
+    const std::string TransferFunctionProperty::loggerCat_ = "CAMPVis.core.datastructures.TransferFunctionProperty";
 
     TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
         : AbstractProperty(name, title, il)

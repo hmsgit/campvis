@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -38,8 +38,8 @@
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratormasking.h"
 
-namespace TUMVis {
-    const std::string EEPGenerator::loggerCat_ = "TUMVis.modules.vis.EEPGenerator";
+namespace campvis {
+    const std::string EEPGenerator::loggerCat_ = "CAMPVis.modules.vis.EEPGenerator";
 
     EEPGenerator::EEPGenerator(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)

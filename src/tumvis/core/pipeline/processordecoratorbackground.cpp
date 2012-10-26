@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -31,7 +31,7 @@
 #include "tgt/shadermanager.h"
 #include "core/properties/propertycollection.h"
 
-namespace TUMVis {
+namespace campvis {
 
     ProcessorDecoratorBackground::ProcessorDecoratorBackground()
         : AbstractProcessorDecorator()

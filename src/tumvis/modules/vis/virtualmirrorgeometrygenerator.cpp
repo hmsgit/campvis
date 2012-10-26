@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -36,8 +36,8 @@
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/meshgeometry.h"
 
-namespace TUMVis {
-    const std::string VirtualMirrorGeometryGenerator::loggerCat_ = "TUMVis.modules.vis.VirtualMirrorGeometryGenerator";
+namespace campvis {
+    const std::string VirtualMirrorGeometryGenerator::loggerCat_ = "CAMPVis.modules.vis.VirtualMirrorGeometryGenerator";
 
     VirtualMirrorGeometryGenerator::VirtualMirrorGeometryGenerator()
         : AbstractProcessor()

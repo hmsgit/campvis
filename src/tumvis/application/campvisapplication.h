@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -26,8 +26,8 @@
 // 
 // ================================================================================================
 
-#ifndef TUMVISAPPLICATION_H__
-#define TUMVISAPPLICATION_H__
+#ifndef CAMPVISAPPLICATION_H__
+#define CAMPVISAPPLICATION_H__
 
 //#include <vld.h> // Uncomment this for using Visual Leak Detector
 
@@ -40,7 +40,7 @@ namespace tgt {
     class QtThreadedCanvas;
 }
 
-namespace TUMVis {
+namespace campvis {
     class AbstractPipeline;
     class MainWindow;
     class PipelineEvaluator;
@@ -144,4 +144,4 @@ namespace TUMVis {
     };
 }
 
-#endif // TUMVISAPPLICATION_H__
+#endif // CAMPVISAPPLICATION_H__

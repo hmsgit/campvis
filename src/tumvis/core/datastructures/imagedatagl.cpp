@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -31,9 +31,9 @@
 #include "tgt/shadermanager.h"
 #include "tgt/tgt_gl.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string ImageDataGL::loggerCat_ = "TUMVis.core.datastructures.ImageDataGL";
+    const std::string ImageDataGL::loggerCat_ = "CAMPVis.core.datastructures.ImageDataGL";
 
     ImageDataGL::ImageDataGL(size_t dimensionality, const tgt::svec3& size, const WeaklyTypedPointer& wtp) 
         : ImageData(dimensionality, size)

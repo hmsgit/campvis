@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -26,7 +26,7 @@
 // 
 // ================================================================================================
 
-#include "tumvispainter.h"
+#include "campvispainter.h"
 
 #include "tgt/assert.h"
 #include "tgt/camera.h"
@@ -42,8 +42,8 @@
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
-namespace TUMVis {
-    const std::string TumVisPainter::loggerCat_ = "TUMVis.core.TumVisPainter";
+namespace campvis {
+    const std::string TumVisPainter::loggerCat_ = "CAMPVis.core.TumVisPainter";
 
     TumVisPainter::TumVisPainter(tgt::QtThreadedCanvas* canvas, VisualizationPipeline* pipeline)
         : Runnable()

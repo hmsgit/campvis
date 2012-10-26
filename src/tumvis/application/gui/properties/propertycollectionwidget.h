@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -33,11 +33,11 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-namespace TUMVis {
+namespace campvis {
     class HasPropertyCollection;
 
     /**
-     * Main Window for the TUMVis application.
+     * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
     class PropertyCollectionWidget : public QWidget {

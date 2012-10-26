@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -33,8 +33,8 @@
 #include <ctime>
 
 
-namespace TUMVis {
-    const std::string AbstractPipeline::loggerCat_ = "TUMVis.core.datastructures.AbstractPipeline";
+namespace campvis {
+    const std::string AbstractPipeline::loggerCat_ = "CAMPVis.core.datastructures.AbstractPipeline";
 
     AbstractPipeline::AbstractPipeline() 
         : HasPropertyCollection()
@@ -96,16 +96,16 @@ namespace TUMVis {
 
         if (processor->getEnabled() && !processor->getInvalidationLevel().isValid()) {
             processor->lockProperties();
-#ifdef TUMVIS_DEBUG
+#ifdef CAMPVIS_DEBUG
             clock_t startTime = clock();
 #endif
             processor->process(_data);
-#ifdef TUMVIS_DEBUG
+#ifdef CAMPVIS_DEBUG
             clock_t endTime = clock();
 #endif
             processor->unlockProperties();
 
-#ifdef TUMVIS_DEBUG
+#ifdef CAMPVIS_DEBUG
             LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
 #endif
         }

@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -32,7 +32,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-namespace TUMVis {
+namespace campvis {
 
     tgt::col4 QtColorTools::toTgtColor(const QColor& color) {
         return tgt::col4(color.red(),color.green(),color.blue(), color.alpha());

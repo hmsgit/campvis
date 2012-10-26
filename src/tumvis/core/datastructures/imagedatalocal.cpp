@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -30,7 +30,7 @@
 
 #include "tbb/include/tbb/tbb.h"
 
-namespace TUMVis {
+namespace campvis {
     
     class IntensityHistogramGenerator {
     public:
@@ -53,7 +53,7 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    const std::string ImageDataLocal::loggerCat_ = "TUMVis.core.datastructures.ImageDataLocal";
+    const std::string ImageDataLocal::loggerCat_ = "CAMPVis.core.datastructures.ImageDataLocal";
 
     ImageDataLocal::ImageDataLocal(size_t dimensionality, const tgt::svec3& size, WeaklyTypedPointer::BaseType baseType, size_t numChannels)
         : ImageData(dimensionality, size)

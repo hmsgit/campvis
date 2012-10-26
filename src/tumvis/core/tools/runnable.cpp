@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -28,7 +28,7 @@
 
 #include "runnable.h"
 
-namespace TUMVis {
+namespace campvis {
     namespace {
         void invokeThread(Runnable* r) {
             r->run();
@@ -53,7 +53,7 @@ namespace TUMVis {
                 _thread.join(); 
         } 
         catch(std::exception& e) { 
-            LERRORC("TUMVis.core.tools.Runnable", "Caught exception during _thread.join: " << e.what());
+            LERRORC("CAMPVis.core.tools.Runnable", "Caught exception during _thread.join: " << e.what());
         } 
     }
 

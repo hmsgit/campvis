@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -34,7 +34,7 @@
 
 #include <algorithm>
 
-namespace TUMVis {
+namespace campvis {
 
     bool operator< (const TFGeometry1D::KeyPoint& left, const TFGeometry1D::KeyPoint& right) {
         return left._position < right._position;

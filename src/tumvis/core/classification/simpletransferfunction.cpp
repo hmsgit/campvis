@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -34,9 +34,9 @@
 #include "tgt/texture.h"
 #include "tgt/textureunit.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string SimpleTransferFunction::loggerCat_ = "TUMVis.core.classification.SimpleTransferFunction";
+    const std::string SimpleTransferFunction::loggerCat_ = "CAMPVis.core.classification.SimpleTransferFunction";
 
     SimpleTransferFunction::SimpleTransferFunction(size_t size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
         : AbstractTransferFunction(tgt::svec3(size, 1, 1), intensityDomain)

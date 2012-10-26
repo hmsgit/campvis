@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -37,8 +37,8 @@
 #include "core/datastructures/imagedatarendertarget.h"
 #include "core/datastructures/meshgeometry.h"
 
-namespace TUMVis {
-    const std::string GeometryRenderer::loggerCat_ = "TUMVis.modules.vis.GeometryRenderer";
+namespace campvis {
+    const std::string GeometryRenderer::loggerCat_ = "CAMPVis.modules.vis.GeometryRenderer";
 
     GeometryRenderer::GeometryRenderer(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)

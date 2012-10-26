@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -29,7 +29,7 @@
 #ifndef mapping_h__
 #define mapping_h__
 
-namespace TUMVis {
+namespace campvis {
      /**
       * Struct for storing and handling linear mapping coefficients. 
       * Offers methods for applying the mapping and the inverse mapping.

@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -35,7 +35,7 @@
 #include <set>
 #include <string>
 
-namespace TUMVis {
+namespace campvis {
 
     class DataNameProperty : public GenericProperty<std::string> {
     public:

@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -40,8 +40,8 @@
 
 #include "core/tools/quadrenderer.h"
 
-namespace TUMVis {
-    const std::string DepthDarkening::loggerCat_ = "TUMVis.modules.vis.DepthDarkening";
+namespace campvis {
+    const std::string DepthDarkening::loggerCat_ = "CAMPVis.modules.vis.DepthDarkening";
 
     DepthDarkening::DepthDarkening(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)

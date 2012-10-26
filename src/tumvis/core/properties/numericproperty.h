@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -76,7 +76,7 @@ namespace {
 
 }
 
-namespace TUMVis {
+namespace campvis {
     /**
      * Interface for numeric properties.
      * Defines methods for incrementing and decrementing the property's value.
@@ -201,7 +201,7 @@ namespace TUMVis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    TUMVis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value, const T& minValue, const T& maxValue, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
+    campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value, const T& minValue, const T& maxValue, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
         : GenericProperty<T>(name, title, value, il)
         , _minValue(minValue)
         , _maxValue(maxValue)
@@ -210,11 +210,11 @@ namespace TUMVis {
     }
 
     template<typename T>
-    TUMVis::NumericProperty<T>::~NumericProperty() {
+    campvis::NumericProperty<T>::~NumericProperty() {
     }
 
     template<typename T>
-    void TUMVis::NumericProperty<T>::addSharedProperty(AbstractProperty* prop) {
+    void campvis::NumericProperty<T>::addSharedProperty(AbstractProperty* prop) {
         // make type check first, then call base method.
         tgtAssert(prop != 0, "Shared property must not be 0!");
         if (NumericProperty<T>* tmp = dynamic_cast< NumericProperty<T>* >(prop)) {
@@ -226,41 +226,41 @@ namespace TUMVis {
     }
 
     template<typename T>
-    T TUMVis::NumericProperty<T>::validateValue(const T& value) {
+    T campvis::NumericProperty<T>::validateValue(const T& value) {
         return NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::validateValue(value, _minValue, _maxValue);
     }
 
     template<typename T>
-    const T& TUMVis::NumericProperty<T>::getMinValue() const {
+    const T& campvis::NumericProperty<T>::getMinValue() const {
         return _minValue;
     }
 
     template<typename T>
-    const T& TUMVis::NumericProperty<T>::getMaxValue() const {
+    const T& campvis::NumericProperty<T>::getMaxValue() const {
         return _maxValue;
     }
 
     template<typename T>
-    void TUMVis::NumericProperty<T>::setMinValue(const T& value) {
+    void campvis::NumericProperty<T>::setMinValue(const T& value) {
         _minValue = value;
         setValue(validateValue(getValue()));
         s_minMaxChanged(this);
     }
 
     template<typename T>
-    void TUMVis::NumericProperty<T>::setMaxValue(const T& value) {
+    void campvis::NumericProperty<T>::setMaxValue(const T& value) {
         _maxValue = value;
         setValue(validateValue(getValue()));
         s_minMaxChanged(this);
     }
 
     template<typename T>
-    void TUMVis::NumericProperty<T>::increment() {
+    void campvis::NumericProperty<T>::increment() {
         setValue(getValue() + T(1));
     }
 
     template<typename T>
-    void TUMVis::NumericProperty<T>::decrement() {
+    void campvis::NumericProperty<T>::decrement() {
         setValue(getValue() - T(1));
     }
 }

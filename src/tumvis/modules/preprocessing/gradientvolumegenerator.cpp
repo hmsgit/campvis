@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -35,7 +35,7 @@
 
 #include "core/datastructures/genericimagedatalocal.h"
 
-namespace TUMVis {
+namespace campvis {
 
     class ApplyCentralDifferences {
     public:
@@ -82,7 +82,7 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    const std::string GradientVolumeGenerator::loggerCat_ = "TUMVis.modules.classification.GradientVolumeGenerator";
+    const std::string GradientVolumeGenerator::loggerCat_ = "CAMPVis.modules.classification.GradientVolumeGenerator";
 
     GradientVolumeGenerator::GradientVolumeGenerator()
         : AbstractProcessor()

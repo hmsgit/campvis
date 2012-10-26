@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -28,13 +28,13 @@
 
 #include "imagedataconverter.h"
 
-namespace TUMVis {
-    const std::string ImageDataConverter::loggerCat_ = "TUMVis.core.datastructures.ImageDataConverter";
+namespace campvis {
+    const std::string ImageDataConverter::loggerCat_ = "CAMPVis.core.datastructures.ImageDataConverter";
 
 
 
     template<>
-    TUMVis::ImageDataLocal* ImageDataConverter::convert(const ImageDataDisk* source) {
+    campvis::ImageDataLocal* ImageDataConverter::convert(const ImageDataDisk* source) {
 #define DISPATCH_CONVERSION(numChannels) \
         if (source->getNumChannels() == (numChannels)) { \
             switch (source->getBaseType()) { \
@@ -69,7 +69,7 @@ namespace TUMVis {
     }
 
     template<>
-    TUMVis::ImageDataGL* ImageDataConverter::convert(const ImageDataDisk* source) {
+    campvis::ImageDataGL* ImageDataConverter::convert(const ImageDataDisk* source) {
         WeaklyTypedPointer wtp = source->getImageData();
         ImageDataGL* toReturn = new ImageDataGL(source->getDimensionality(), source->getSize(), wtp);
         delete wtp._pointer;
@@ -77,7 +77,7 @@ namespace TUMVis {
     }
 
     template<>
-    TUMVis::ImageDataGL* ImageDataConverter::convert(const ImageDataLocal* source) {
+    campvis::ImageDataGL* ImageDataConverter::convert(const ImageDataLocal* source) {
         return new ImageDataGL(source->getDimensionality(), source->getSize(), source->getWeaklyTypedPointer());
     }
 

@@ -4,7 +4,7 @@
 #include <QList>
 #include <QVariant>
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Abstract base class for TreeView items of the PipelineTreeWidget.

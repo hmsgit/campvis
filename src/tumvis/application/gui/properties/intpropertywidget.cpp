@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -28,7 +28,7 @@
 
 #include "intpropertywidget.h"
 
-namespace TUMVis {
+namespace campvis {
     IntPropertyWidget::IntPropertyWidget(IntProperty* property, QWidget* parent /*= 0*/)
         : AbstractPropertyWidget(property, parent)
         , _spinBox(0)

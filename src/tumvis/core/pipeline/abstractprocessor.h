@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -38,11 +38,11 @@
 #include <string>
 #include <vector>
 
-namespace TUMVis {
+namespace campvis {
     class AbstractProperty;
 
     /**
-     * Abstract base class for TUMVis Processors.
+     * Abstract base class for CAMPVis Processors.
      * A processor implements a specific task, which it performs on the DataCollection passed
      * during process(). Properties provide a transparent layer for adjusting the processor's 
      * behaviour.

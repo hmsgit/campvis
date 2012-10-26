@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -29,8 +29,8 @@
 #include "imagedatadisk.h"
 #include "tgt/filesystem.h"
 
-namespace TUMVis {
-    const std::string ImageDataDisk::loggerCat_ = "TUMVis.core.datastructures.ImageDataDisk";
+namespace campvis {
+    const std::string ImageDataDisk::loggerCat_ = "CAMPVis.core.datastructures.ImageDataDisk";
 
     ImageDataDisk::ImageDataDisk(const std::string& url, size_t dimensionality, const tgt::svec3& size, WeaklyTypedPointer::BaseType type, size_t numChannels, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
         : ImageData(dimensionality, size)
@@ -61,7 +61,7 @@ namespace TUMVis {
         return new ImageDataDisk(_url, _dimensionality, newSize, _type, _numChannels, newOffset, _endianess, newStride);
     }
 
-    TUMVis::WeaklyTypedPointer ImageDataDisk::getImageData() const {
+    campvis::WeaklyTypedPointer ImageDataDisk::getImageData() const {
         size_t numElements = tgt::hmul(_size);
         size_t numBytesPerElement = WeaklyTypedPointer::numBytes(_type, _numChannels);
         size_t numBytes = numElements * numBytesPerElement;

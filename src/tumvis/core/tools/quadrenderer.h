@@ -6,7 +6,7 @@
 #include "tgt/tgt_gl.h"
 
 
-namespace TUMVis {
+namespace campvis {
     class FaceGeometry;
 
     /**
@@ -29,7 +29,7 @@ namespace TUMVis {
         FaceGeometry* _quad;
     };
 
-#define QuadRdr tgt::Singleton<TUMVis::QuadRenderer>::getRef()
+#define QuadRdr tgt::Singleton<campvis::QuadRenderer>::getRef()
 
 }
 

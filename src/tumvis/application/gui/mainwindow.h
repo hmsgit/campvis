@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -26,11 +26,11 @@
 // 
 // ================================================================================================
 
-#ifndef TUMVISMAINWINDOW_H__
-#define TUMVISMAINWINDOW_H__
+#ifndef CAMPVISMAINWINDOW_H__
+#define CAMPVISMAINWINDOW_H__
 
 #include "sigslot/sigslot.h"
-#include "application/tumvisapplication.h"
+#include "application/campvisapplication.h"
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 
@@ -40,12 +40,12 @@
 #include <QPushButton>
 #include <vector>
 
-namespace TUMVis {
+namespace campvis {
     class DataContainerInspectorWidget;
     class DataContainerInspectorCanvas;
 
     /**
-     * Main Window for the TUMVis application.
+     * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
     class MainWindow : public QMainWindow, public sigslot::has_slots<> {
@@ -131,4 +131,4 @@ namespace TUMVis {
     };
 }
 
-#endif // TUMVISMAINWINDOW_H__
+#endif // CAMPVISMAINWINDOW_H__

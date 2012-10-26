@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -32,7 +32,7 @@
 #include "core/datastructures/datahandle.h"
 #include <QMetaType>
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Wraps around a DataHandle to make it suitable for QVariant and queued connections.
@@ -86,6 +86,6 @@ namespace TUMVis {
     };
 }
 
-Q_DECLARE_METATYPE(TUMVis::QtDataHandle);
+Q_DECLARE_METATYPE(campvis::QtDataHandle);
 
 #endif // QTQtDataHandle_H__

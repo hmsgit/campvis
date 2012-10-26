@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -26,14 +26,14 @@
 // 
 // ================================================================================================
 
-#include "application/tumvisapplication.h"
+#include "application/campvisapplication.h"
 #include "modules/pipelines/dvrvis.h"
 #include "modules/pipelines/slicevis.h"
 
-using namespace TUMVis;
+using namespace campvis;
 
 /**
- * TUMVis main function, application entry point
+ * CAMPVis main function, application entry point
  *
  * \param   argc    number of passed arguments
  * \param   argv    vector of arguments
@@ -41,7 +41,7 @@ using namespace TUMVis;
  **/
 int main(int argc, char** argv) {
     TumVisApplication app(argc, argv);
-    app.addVisualizationPipeline("SliceVis", new SliceVis());
+    //app.addVisualizationPipeline("SliceVis", new SliceVis());
     app.addVisualizationPipeline("DVRVis", new DVRVis());
 
     app.init();

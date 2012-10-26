@@ -6,26 +6,26 @@
 # win32: GLEW_LIBRARY_DEBUG, GLEW_LIBRARY_RELEASE, GLEW_DLL_DEBUG, GLEW_DLL_RELEASE, GLEW_LICENSE_FILE
 
 IF (WIN32)
-    SET(GLEW_DIR "${TUMVIS_HOME}/ext/glew" CACHE PATH "If glew is not found, set this path")
+    SET(GLEW_DIR "${CAMPVIS_HOME}/ext/glew" CACHE PATH "If glew is not found, set this path")
    
     # SET(GLEW_DEFINITIONS "-DGLEW_STATIC")
        
     SET(GLEW_INCLUDE_DIR "${GLEW_DIR}/include")
 
     # set debug and release library
-    IF(TUMVIS_WIN32)
+    IF(CAMPVIS_WIN32)
         SET(GLEW_LIBRARY_DEBUG      "${GLEW_DIR}/lib/win32/glew32.lib")
         SET(GLEW_DLL_DEBUG          "${GLEW_DIR}/lib/win32/glew32.dll")
         SET(GLEW_LIBRARY_RELEASE    "${GLEW_DIR}/lib/win32/glew32.lib")
         SET(GLEW_DLL_RELEASE        "${GLEW_DIR}/lib/win32/glew32.dll")
-    ELSEIF(TUMVIS_WIN64)
+    ELSEIF(CAMPVIS_WIN64)
         SET(GLEW_LIBRARY_DEBUG      "${GLEW_DIR}/lib/win64/glew32.lib")
         SET(GLEW_DLL_DEBUG          "${GLEW_DIR}/lib/win64/glew32.dll")
         SET(GLEW_LIBRARY_RELEASE    "${GLEW_DIR}/lib/win64/glew32.lib")
         SET(GLEW_DLL_RELEASE        "${GLEW_DIR}/lib/win64/glew32.dll")
     ELSE()
-        MESSAGE(FATAL_ERROR "Neither TUMVIS_WIN32 nor TUMVIS_WIN64 defined!")
-    ENDIF(TUMVIS_WIN32)
+        MESSAGE(FATAL_ERROR "Neither CAMPVIS_WIN32 nor CAMPVIS_WIN64 defined!")
+    ENDIF(CAMPVIS_WIN32)
 
     IF (GLEW_LIBRARY_DEBUG AND GLEW_LIBRARY_RELEASE)
         SET(GLEW_LIBRARY debug ${GLEW_LIBRARY_DEBUG} optimized ${GLEW_LIBRARY_RELEASE})

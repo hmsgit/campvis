@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -26,8 +26,8 @@
 // 
 // ================================================================================================
 
-#ifndef TUMVISPAINTER_H__
-#define TUMVISPAINTER_H__
+#ifndef CAMPVISPAINTER_H__
+#define CAMPVISPAINTER_H__
 
 #include "sigslot/sigslot.h"
 #include "tbb/include/tbb/atomic.h"
@@ -42,11 +42,11 @@ namespace tgt {
     class QtThreadedCanvas;
 }
 
-namespace TUMVis {
+namespace campvis {
     class VisualizationPipeline;
 
     /**
-     * Painter class for TUMVis, rendering the render target of a VisualizationPipeline.
+     * Painter class for CAMPVis, rendering the render target of a VisualizationPipeline.
      * This painter implements Runnable, hence, it runs in its own thread and the associated canvas
      * must be of type QtThreadedCanvas.
      * Rendering is implemented using condidional wait - hence the canvas is only updated when
@@ -123,4 +123,4 @@ namespace TUMVis {
 
 }
 
-#endif // TUMVISPAINTER_H__
+#endif // CAMPVISPAINTER_H__

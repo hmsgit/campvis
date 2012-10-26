@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -39,7 +39,7 @@
 #include "core/datastructures/imagedatagl.h"
 #include "core/tools/concurrenthistogram.h"
 
-namespace TUMVis {
+namespace campvis {
     class LHGenerator {
     public:
         LHGenerator(const ImageDataLocal* intensities, const GenericImageDataLocal<float, 4>* gradients, ImageDataLocal* fl, ImageDataLocal* fh, float epsilon)
@@ -137,7 +137,7 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    const std::string LHHistogram::loggerCat_ = "TUMVis.modules.classification.LHHistogram";
+    const std::string LHHistogram::loggerCat_ = "CAMPVis.modules.classification.LHHistogram";
 
     LHHistogram::LHHistogram()
         : AbstractProcessor()

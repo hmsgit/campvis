@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -38,7 +38,7 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/cameraproperty.h"
 
-namespace TUMVis {
+namespace campvis {
     /**
      * Creates Lookup volumes vor generation LH-Histograms of volumes as well as the LH histogram.
      */

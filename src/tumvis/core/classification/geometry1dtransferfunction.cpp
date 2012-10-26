@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -36,9 +36,9 @@
 
 #include "core/classification/tfgeometry1d.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string Geometry1DTransferFunction::loggerCat_ = "TUMVis.core.classification.Geometry1DTransferFunction";
+    const std::string Geometry1DTransferFunction::loggerCat_ = "CAMPVis.core.classification.Geometry1DTransferFunction";
 
     Geometry1DTransferFunction::Geometry1DTransferFunction(size_t size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
         : GenericGeometryTransferFunction<TFGeometry1D>(tgt::svec3(size, 1, 1), intensityDomain)

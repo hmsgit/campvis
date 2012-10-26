@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -34,7 +34,7 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/imagemappinginformation.h"
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.

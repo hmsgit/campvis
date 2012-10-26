@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -29,7 +29,7 @@
 #include "abstractpropertywidget.h"
 #include "core/properties/abstractproperty.h"
 
-namespace TUMVis {
+namespace campvis {
 
     AbstractPropertyWidget::AbstractPropertyWidget(AbstractProperty* property, QWidget* parent /*= 0*/)
         : QWidget(parent)

@@ -15,7 +15,7 @@
 #include <QHeaderView>
 #include <QStringList>
 
-namespace TUMVis {
+namespace campvis {
 
     namespace {
         const int COLUMN_NAME = 0;

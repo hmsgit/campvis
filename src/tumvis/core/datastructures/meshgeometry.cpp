@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -37,9 +37,9 @@
 #include <list>
 #include <utility>
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string MeshGeometry::loggerCat_ = "TUMVis.core.datastructures.MeshGeometry";
+    const std::string MeshGeometry::loggerCat_ = "CAMPVis.core.datastructures.MeshGeometry";
 
     MeshGeometry::MeshGeometry(const std::vector<FaceGeometry>& faces)
         : GeometryData()
@@ -126,7 +126,7 @@ namespace TUMVis {
                 createColorsBuffer &= !(it->getColors().empty());
                 createNormalsBuffer &= !(it->getNormals().empty());
 
-#ifdef TUMVIS_DEBUG
+#ifdef CAMPVIS_DEBUG
                 if (!createTexCoordsBuffer && !(it->getTextureCoordinates().empty()))
                     LDEBUG("Presence of texture coordinates in faces not consistend, not generating texture coordinates VBO!");
                 if (!createColorsBuffer && !(it->getColors().empty()))
@@ -185,7 +185,7 @@ namespace TUMVis {
         }
     }
 
-    TUMVis::MeshGeometry MeshGeometry::createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds) {
+    campvis::MeshGeometry MeshGeometry::createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds) {
         const tgt::vec3& llf = bounds.getLLF();
         const tgt::vec3& urb = bounds.getURB();
         const tgt::vec3& tLlf = texBounds.getLLF();

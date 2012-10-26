@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -33,7 +33,7 @@
 #include "tbb/include/tbb/compat/thread"
 #include "tbb/include/tbb/atomic.h"
 
-namespace TUMVis {
+namespace campvis {
     /**
      * Abstract base class for objects that shall run in a separate thread.
      * Runnable object manage their own thread, which is created when calling start(). The new Thread starts

@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -38,7 +38,7 @@ namespace {
     template<typename T, size_t N>
     struct SwapHelper {
         static inline T swap(T value) {
-            LERRORC("TUMVis.Tools.EndianHelper", "Tried to call SwapHelper<T,N>::swap() with unsupported template arguments.");
+            LERRORC("CAMPVis.Tools.EndianHelper", "Tried to call SwapHelper<T,N>::swap() with unsupported template arguments.");
             return value;
         }
     };
@@ -91,7 +91,7 @@ namespace {
     };
 }
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Helper struct for handling endianess.

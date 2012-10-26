@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -28,9 +28,9 @@
 
 #include "datanameproperty.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string DataNameProperty::loggerCat_ = "TUMVis.core.datastructures.DataNameProperty";
+    const std::string DataNameProperty::loggerCat_ = "CAMPVis.core.datastructures.DataNameProperty";
 
     DataNameProperty::DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
         : GenericProperty<std::string>(name, title, value, il)

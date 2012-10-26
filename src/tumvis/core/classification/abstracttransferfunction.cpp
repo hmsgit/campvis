@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -37,7 +37,7 @@
 
 #include "core/datastructures/imagedatalocal.h"
 
-namespace TUMVis {
+namespace campvis {
     
     class IntensityHistogramGenerator {
     public:
@@ -60,7 +60,7 @@ namespace TUMVis {
 
 // ================================================================================================
 
-    const std::string AbstractTransferFunction::loggerCat_ = "TUMVis.core.classification.AbstractTransferFunction";
+    const std::string AbstractTransferFunction::loggerCat_ = "CAMPVis.core.classification.AbstractTransferFunction";
 
     AbstractTransferFunction::AbstractTransferFunction(const tgt::svec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
         : _size(size)

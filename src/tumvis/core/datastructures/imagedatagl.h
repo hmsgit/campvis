@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -41,7 +41,7 @@ namespace tgt {
     class Shader;
 }
 
-namespace TUMVis {
+namespace campvis {
 
     /**
      * Stores image data as OpenGL texture.
@@ -141,14 +141,14 @@ namespace TUMVis {
 // = Template definition ==========================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    TUMVis::ImageDataGL::ImageDataGL(size_t dimensionality, const tgt::svec3& size, const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data) 
+    campvis::ImageDataGL::ImageDataGL(size_t dimensionality, const tgt::svec3& size, const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data) 
         : ImageData(dimensionality, size)
     {
         createTexture<BASETYPE, NUMCHANNELS>(data);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void TUMVis::ImageDataGL::createTexture(const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data) {
+    void campvis::ImageDataGL::createTexture(const GenericImageDataLocal<BASETYPE, NUMCHANNELS>* data) {
         tgtAssert(data != 0, "Pointer to image must not be 0!");
 
         _texture = new tgt::Texture(

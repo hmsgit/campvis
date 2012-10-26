@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -26,7 +26,7 @@
 // 
 // ================================================================================================
 
-#include "tumvisapplication.h"
+#include "campvisapplication.h"
 
 #include "tgt/assert.h"
 #include "tgt/exception.h"
@@ -40,7 +40,7 @@
 
 #include "kisscl/clruntime.h"
 
-#include "application/tumvispainter.h"
+#include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
@@ -48,9 +48,9 @@
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/pipeline/pipelineevaluator.h"
 
-namespace TUMVis {
+namespace campvis {
 
-    const std::string TumVisApplication::loggerCat_ = "TUMVis.application.TumVisApplication";
+    const std::string TumVisApplication::loggerCat_ = "CAMPVis.application.TumVisApplication";
 
     TumVisApplication::TumVisApplication(int argc, char** argv, bool useOpenCL) 
         : QApplication(argc, argv)
@@ -104,10 +104,10 @@ namespace TUMVis {
 
         // ensure matching OpenGL specs
         if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3) {
-            LERROR("Your system does not support OpenGL 3.3, which is mandatory. TUMVis will probably not work as intendet.");
+            LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intendet.");
         }
         if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
-            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. TUMVis will probably not work as intendet.");
+            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intendet.");
         }
 
         QuadRenderer::init();
@@ -227,7 +227,7 @@ namespace TUMVis {
         tgtAssert(vp != 0, "Pipeline must not be 0.");
 
         // create canvas and painter for the VisPipeline and connect all together
-        tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "TUMVis", tgt::ivec2(512, 512));
+        tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
         GLJobProc.registerContext(canvas);
         canvas->init();
 

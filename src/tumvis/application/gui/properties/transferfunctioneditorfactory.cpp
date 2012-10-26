@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
+// This file is part of the CAMPVis Visualization Framework.
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge (christian.szb@in.tum.de)
@@ -38,7 +38,7 @@
 #include "core/classification/geometry2dtransferfunction.h"
 #include "core/classification/simpletransferfunction.h"
 
-namespace TUMVis {
+namespace campvis {
 
     AbstractTransferFunctionEditor* TransferFunctionEditorFactory::createEditor(AbstractTransferFunction* tf) {
         tgtAssert(tf != 0, "Transfer function must not be 0.");

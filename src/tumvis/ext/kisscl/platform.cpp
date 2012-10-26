@@ -62,7 +62,7 @@ namespace kisscl {
         _version = ClVersion(getStringInfo(CL_PLATFORM_VERSION));
 
         //explode extensions string with space as delimiter and insert them into set:
-        std::vector<std::string> exploded = TUMVis::StringUtils::split(getStringInfo(CL_PLATFORM_EXTENSIONS), " ");
+        std::vector<std::string> exploded = campvis::StringUtils::split(getStringInfo(CL_PLATFORM_EXTENSIONS), " ");
         _extensions.insert(exploded.begin(), exploded.end());
 
         //Log infos:
