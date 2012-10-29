@@ -50,9 +50,9 @@
 
 namespace campvis {
 
-    const std::string TumVisApplication::loggerCat_ = "CAMPVis.application.TumVisApplication";
+    const std::string CampVisApplication::loggerCat_ = "CAMPVis.application.CampVisApplication";
 
-    TumVisApplication::TumVisApplication(int argc, char** argv, bool useOpenCL) 
+    CampVisApplication::CampVisApplication(int argc, char** argv, bool useOpenCL) 
         : QApplication(argc, argv)
         , _localContext(0)
         , _mainWindow(0)
@@ -70,8 +70,8 @@ namespace campvis {
         OpenGLJobProcessor::init();
     }
 
-    TumVisApplication::~TumVisApplication() {
-        tgtAssert(_initialized == false, "Destructing initialized TumVisApplication, deinitialize first!");
+    CampVisApplication::~CampVisApplication() {
+        tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
         // delete everything in the right order:
         for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
@@ -85,8 +85,8 @@ namespace campvis {
         }
     }
 
-    void TumVisApplication::init() {
-        tgtAssert(_initialized == false, "Tried to initialize TumVisApplication twice.");
+    void CampVisApplication::init() {
+        tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
 
         // Init TGT
         tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
@@ -145,8 +145,8 @@ namespace campvis {
         _initialized = true;
     }
 
-    void TumVisApplication::deinit() {
-        tgtAssert(_initialized, "Tried to deinitialize uninitialized TumVisApplication.");
+    void CampVisApplication::deinit() {
+        tgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
         GLJobProc.stop();
 
@@ -181,14 +181,14 @@ namespace campvis {
         tgt::QtContextManager::deinit();
         tgt::deinit();
 
-        // MainWindow dtor needs a valid TumVisApplication, so we need to call it here instead of during destruction.
+        // MainWindow dtor needs a valid CampVisApplication, so we need to call it here instead of during destruction.
         delete _mainWindow;
 
         _initialized = false;
     }
 
-    int TumVisApplication::run() {
-        tgtAssert(_initialized, "Tried to run uninitialized TumVisApplication.");
+    int CampVisApplication::run() {
+        tgtAssert(_initialized, "Tried to run uninitialized CampVisApplication.");
 
         // disconnect OpenGL context from this thread so that the other threads can acquire an OpenGL context.
         CtxtMgr.releaseCurrentContext();
@@ -211,7 +211,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void TumVisApplication::addPipeline(AbstractPipeline* pipeline) {
+    void CampVisApplication::addPipeline(AbstractPipeline* pipeline) {
         tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(pipeline != 0, "Pipeline must not be 0.");
         _pipelines.push_back(pipeline);
@@ -222,7 +222,7 @@ namespace campvis {
         s_PipelinesChanged();
     }
 
-    void TumVisApplication::addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp) {
+    void CampVisApplication::addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp) {
         tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(vp != 0, "Pipeline must not be 0.");
 

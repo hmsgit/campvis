@@ -40,7 +40,7 @@ using namespace campvis;
  * \return  0 if program exited successfully
  **/
 int main(int argc, char** argv) {
-    TumVisApplication app(argc, argv);
+    CampVisApplication app(argc, argv);
     //app.addVisualizationPipeline("SliceVis", new SliceVis());
     app.addVisualizationPipeline("DVRVis", new DVRVis());
 

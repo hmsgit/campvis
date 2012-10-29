@@ -46,7 +46,7 @@ namespace campvis {
 
     /**
      * Main Window for the CAMPVis application.
-     * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
+     * Wraps a nice Qt GUI around the CampVisApplication instance given during creation.
      */
     class MainWindow : public QMainWindow, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -54,9 +54,9 @@ namespace campvis {
     public:
         /**
          * Creates a new TumVis Main window for \a application.
-         * \param   application     TumVisApplication to create a GUI for.
+         * \param   application     CampVisApplication to create a GUI for.
          */
-        MainWindow(TumVisApplication* application);
+        MainWindow(CampVisApplication* application);
 
         /**
          * Destructor, make sure to call before destroying the application
@@ -114,7 +114,7 @@ namespace campvis {
          */
         void setup();
 
-        TumVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
+        CampVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
 
         QWidget* _centralWidget;                            ///< Central widget of the MainWindow
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines

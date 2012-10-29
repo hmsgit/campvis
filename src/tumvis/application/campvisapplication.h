@@ -48,33 +48,33 @@ namespace campvis {
     class VisualizationPipeline;
 
     /**
-     * The TumVisApplication class wraps Pipelines, Evaluators and Painters all together and takes
+     * The CampVisApplication class wraps Pipelines, Evaluators and Painters all together and takes
      * care about correctly handling all those instances.
      * 
      * Intended usage is:
-     *  1. Create your TumVisApplication
+     *  1. Create your CampVisApplication
      *  2. Add Pipelines and Visualizations as needed
      *  3. call init()
      *  4. call run()
      *  5. call deinit()
-     *  6. You can now safely destroy your TumVisApplication
+     *  6. You can now safely destroy your CampVisApplication
      */
-    class TumVisApplication : QApplication {
+    class CampVisApplication : QApplication {
     friend class MainWindow;
 
     public:
         /**
-         * Creates a new TumVisApplication.
+         * Creates a new CampVisApplication.
          * \param   argc        number of passed arguments
          * \param   argv        vector of arguments
          * \param   useOpenCL   Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
          */
-        TumVisApplication(int argc, char** argv, bool useOpenCL = true);
+        CampVisApplication(int argc, char** argv, bool useOpenCL = true);
 
         /**
          * Destructor, make sure to call deinit() first.
          */
-        ~TumVisApplication();
+        ~CampVisApplication();
 
         /**
          * Initializes tgt, OpenGL, and all pipelines, evaluators and painters.
@@ -131,7 +131,7 @@ namespace campvis {
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
 
-        /// Flag, whether TumVisApplication was correctly initialized
+        /// Flag, whether CampVisApplication was correctly initialized
         bool _initialized;
 
         /// Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).

@@ -38,7 +38,7 @@
 
 namespace campvis {
 
-    MainWindow::MainWindow(TumVisApplication* application)
+    MainWindow::MainWindow(CampVisApplication* application)
         : QMainWindow()
         , _application(application)
         , _centralWidget(0)
