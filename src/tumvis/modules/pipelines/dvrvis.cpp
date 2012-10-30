@@ -95,6 +95,11 @@ namespace campvis {
          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
          _dvrNormal._transferFunction.replaceTF(dvrTF);
 
+         Geometry1DTransferFunction* vmTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
+         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
+         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
+         _dvrVM._transferFunction.replaceTF(vmTF);
+
         _dvrVM._targetImageID.setValue("dvr.output");
         _dvrVM._sourceImageID.setValue("eep.input");
 
