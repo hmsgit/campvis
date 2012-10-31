@@ -151,6 +151,7 @@ namespace campvis {
             // all parsing done - lets create the image:
             ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, 1, offset, e);
             data.addData(_targetImageID.getValue(), image);
+            _targetImageID.issueWrite();
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());

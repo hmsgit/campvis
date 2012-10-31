@@ -49,8 +49,7 @@ uniform Texture2D _exitPoints;          // ray exit points
 uniform Texture2D _exitPointsDepth;     // ray exit points depth
 uniform Texture3D _volume;              // texture lookup parameters for volume_
 
-uniform sampler1D _tfTex;
-uniform TFParameters _tfTextureParameters;
+uniform TransferFunction1D _transferFunction;
 
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
@@ -84,7 +83,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 samplePosition = entryPoint.rgb + t * direction;
         float intensity = getElement3DNormalized(_volume, samplePosition).a;
         vec3 gradient = computeGradient(_volume, samplePosition);
-        vec4 color = lookupTF(_tfTextureParameters, _tfTex, intensity);
+        vec4 color = lookupTF(_transferFunction, intensity);
 
 #ifdef ENABLE_SHADOWING
         // simple and expensive implementation of hard shadows
@@ -100,7 +99,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             while (! finished) {
                 // grab intensity and TF opacity
                 intensity = getElement3DNormalized(_volume, position).a;
-                shadowFactor += lookupTF(_tfTextureParameters, _tfTex, intensity).a;
+                shadowFactor += lookupTF(_transferFunction, intensity).a;
 
                 position += L;
                 finished = (shadowFactor > 0.95)

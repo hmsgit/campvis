@@ -35,11 +35,9 @@ out vec4 out_Color;
 #include "tools/transferfunction.frag"
 
 uniform Texture2D _texture;
-
-uniform sampler1D _tfTex;
-uniform TFParameters _tfTextureParameters;
+uniform TransferFunction1D _transferFunction;
 
 void main() {
     float intensity = getElement2DNormalized(_texture, ex_TexCoord.xy).a;
-    out_Color = lookupTF(_tfTextureParameters, _tfTex, intensity);
+    out_Color = lookupTF(_transferFunction, intensity);
 }

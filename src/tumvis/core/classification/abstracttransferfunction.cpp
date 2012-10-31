@@ -84,7 +84,7 @@ namespace campvis {
         _texture = 0;
     }
 
-    void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& textureUniform /*= "_tfTex"*/, const std::string& textureParametersUniform /*= "_tgTextureParameters"*/) {
+    void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/) {
         // TODO:    lock here or in createTexture?
         {
             tbb::mutex::scoped_lock lock(_localMutex);
@@ -99,8 +99,19 @@ namespace campvis {
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
         // TODO:    set domain mapping uniforms
-        shader->setUniform(textureUniform, texUnit.getUnitNumber());
-        shader->setUniform(textureParametersUniform + "._intensityDomain", tgt::vec2(_intensityDomain));
+        shader->setUniform(transFuncUniform + "._texture", texUnit.getUnitNumber());
+        switch (getDimensionality()) {
+            case 1:
+                shader->setUniform(transFuncUniform + "._intensityDomain", tgt::vec2(_intensityDomain));
+                break;
+            case 2:
+                shader->setUniform(transFuncUniform + "._intensityDomainX", tgt::vec2(_intensityDomain));
+                break;
+            default:
+                tgtAssert(false, "Unsupported TF dimensionality!");
+                break;
+        }
+        
         shader->setIgnoreUniformLocationError(tmp);
     }
 

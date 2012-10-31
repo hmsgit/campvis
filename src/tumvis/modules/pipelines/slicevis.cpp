@@ -42,8 +42,8 @@ namespace campvis {
         , _wheelHandler(&_sliceExtractor._sliceNumber)
     {
         _processors.push_back(&_imageReader);
-        _processors.push_back(&_gvg);
-        _processors.push_back(&_lhh);
+//         _processors.push_back(&_gvg);
+//         _processors.push_back(&_lhh);
         _processors.push_back(&_sliceExtractor);
         _eventHandlers.push_back(&_wheelHandler);
     }
@@ -59,8 +59,8 @@ namespace campvis {
 
         _gvg._inputVolume.setValue("se.input");
 
-        _lhh._inputVolume.setValue("se.input");
-        _gvg._outputGradients.connect(&_lhh._inputGradients);
+//         _lhh._inputVolume.setValue("se.input");
+//         _gvg._outputGradients.connect(&_lhh._inputGradients);
 
         _sliceExtractor._sourceImageID.setValue("se.input");
         _sliceExtractor._sliceNumber.setValue(0);
@@ -91,12 +91,12 @@ namespace campvis {
                 _data.addData("se.input", local);
             }
         }
-        if (! _gvg.getInvalidationLevel().isValid()) {
-            executeProcessor(&_gvg);
-        }
-        if (! _lhh.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_lhh);
-        }
+//         if (! _gvg.getInvalidationLevel().isValid()) {
+//             executeProcessor(&_gvg);
+//         }
+//         if (! _lhh.getInvalidationLevel().isValid()) {
+//             lockGLContextAndExecuteProcessor(&_lhh);
+//         }
         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
             lockGLContextAndExecuteProcessor(&_sliceExtractor);
         }

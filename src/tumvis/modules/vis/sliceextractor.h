@@ -69,15 +69,17 @@ namespace campvis {
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
 
+        /// \see AbstractProcessor::process()
         virtual void process(DataContainer& data);
 
-        GenericProperty<std::string> _sourceImageID;    ///< image ID for input image
-        GenericProperty<std::string> _targetImageID;    ///< image ID for output image
+        StringProperty _sourceImageID;                  ///< image ID for input image
+        StringProperty _targetImageID;                  ///< image ID for output image
 
         IntProperty _sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty _transferFunction;     ///< Transfer function
 
     protected:
+        /// adapts the range of the _sliceNumber property to the image
         void updateProperties(const ImageData* img);
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
