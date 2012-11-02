@@ -28,8 +28,8 @@
 // ================================================================================================
 
 #include "application/campvisapplication.h"
-#include "modules/pipelines/dvrvis.h"
-#include "modules/pipelines/slicevis.h"
+#include "modules/vis/pipelines/dvrvis.h"
+#include "modules/vis/pipelines/slicevis.h"
 
 using namespace campvis;
 

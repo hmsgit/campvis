@@ -70,7 +70,7 @@ namespace campvis {
 
     void DepthDarkening::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/depthdarkening.frag", generateHeader(), false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/depthdarkening.frag", generateHeader(), false);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }

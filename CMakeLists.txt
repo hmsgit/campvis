@@ -31,6 +31,8 @@ ENDIF()
 
 include(cmake/commonconf.cmake)
 
+MESSAGE(STATUS "--------------------------------------------------------------------------------")
+
 IF(CAMPVIS_BUILD_LIB_TGT)
     ADD_SUBDIRECTORY(ext/tgt)
 ENDIF()

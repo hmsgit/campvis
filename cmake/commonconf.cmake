@@ -185,5 +185,59 @@ ELSE(OPENCL_FOUND)
     MESSAGE(FATAL_ERROR "OpenCL not found!")
 ENDIF(OPENCL_FOUND)
 
+
+# detect modules
+MESSAGE(STATUS "--------------------------------------------------------------------------------")
+MESSAGE(STATUS "Detecting installed modules:")
+
+# collect list of directories in modules directories
+SET(ModulesDir ${CAMPVIS_HOME}/modules)
+LIST_SUBDIRECTORIES(ModDirs ${ModulesDir} false)
+
+# remove CMake realted directories
+LIST(REMOVE_ITEM ModDirs CMakeFiles)
+LIST(REMOVE_ITEM ModDirs campvis-modules.dir)
+
+# go through each subdirectory
+FOREACH(ModDir ${ModDirs})
+    # check whether  module.cmake file exists
+    SET(ModFile ${ModulesDir}/${ModDir}/${ModDir}.cmake)
+    IF(EXISTS ${ModFile})
+        MESSAGE(STATUS "* Found Module ${ModDir}")
+        STRING(TOLOWER ${ModDir} ModDirLower)
+        STRING(TOUPPER ${ModDir} ModDirUpper)
+
+        # check whether the option to build this very module exists and is checked
+        IF(CAMPVIS_BUILD_MODULE_${ModDirUpper})
+            SET(ThisModDir ${ModulesDir}/${ModDir})
+            
+            # load .cmake file
+            INCLUDE(${ModFile})
+            
+            # merge module settings into global settings
+            LIST(APPEND CAMPVisModulesDefinitions ${ThisModDefinitions})
+            LIST(APPEND CAMPVisModulesIncludeDirs ${ThisModIncludeDirs})
+            LIST(APPEND CAMPVisModulesExternalLibs ${ThisModExternalLibs})
+            LIST(APPEND CAMPVisModulesSources ${ThisModSources})
+            LIST(APPEND CAMPVisModulesHeaders ${ThisModHeaders})
+            
+            # unset module settings to avoid duplicates if module cmake file misses sth.
+            UNSET(ThisModDefinitions)
+            UNSET(ThisModIncludeDirs)
+            UNSET(ThisModExternalLibs)
+            UNSET(ThisModSources)
+            UNSET(ThisModHeaders)
+            
+        ELSEIF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
+            # add a CMake option for building this module
+            OPTION(CAMPVIS_BUILD_MODULE_${ModDirUpper}  "Build Module ${ModDir}" OFF)
+        ENDIF(CAMPVIS_BUILD_MODULE_${ModDirUpper})
+        
+    ELSE(EXISTS ${ModFile})
+        MESSAGE(STATUS "* WARNING: Found Directory ${ModDir} Without CMake file - ignored")
+    ENDIF(EXISTS ${ModFile})
+    
+ENDFOREACH(ModDir ${ModDirs})
+
 SET(COMMONCONF_PROCESSED TRUE)
 ENDIF(NOT COMMONCONF_PROCESSED)

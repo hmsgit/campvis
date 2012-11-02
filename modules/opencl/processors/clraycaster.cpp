@@ -93,7 +93,7 @@ namespace campvis {
 
         _clContext = CLRtm.createGlSharingContext();
         if (_clContext != 0) {
-            _clProgram = CLRtm.loadProgram(_clContext, "modules/vis/clraycaster.cl");
+            _clProgram = CLRtm.loadProgram(_clContext, "modules/vis/cl/clraycaster.cl");
             _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable");
             _clProgram->build();
         }

@@ -27,59 +27,60 @@
 // 
 // ================================================================================================
 
-#include "drrraycaster.h"
+#include "simpleraycaster.h"
 
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/imagedatarendertarget.h"
+#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
-    const std::string DRRRaycaster::loggerCat_ = "CAMPVis.modules.vis.DRRRaycaster";
+    const std::string SimpleRaycaster::loggerCat_ = "CAMPVis.modules.vis.SimpleRaycaster";
 
-    DRRRaycaster::DRRRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/vis/drrraycaster.frag", false)
+    SimpleRaycaster::SimpleRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
+        : RaycastingProcessor(canvasSize, "modules/vis/glsl/simpleraycaster.frag", true)
         , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , _shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
-        , _scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)
-        , _invertMapping("invertMapping", "Invert Mapping", false, InvalidationLevel::INVALID_RESULT | InvalidationLevel::INVALID_SHADER)
+        , _enableShadowing("EnableShadowing", "Enable Hard Shadows", false, InvalidationLevel::INVALID_SHADER)
+        , _shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
     {
+        addDecorator(new ProcessorDecoratorShading());
+
         addProperty(&_targetImageID);
-        addProperty(&_shift);
-        addProperty(&_scale);
-        addProperty(&_invertMapping);
+        addProperty(&_enableShadowing);
+        addProperty(&_shadowIntensity);
+        decoratePropertyCollection(this);
     }
 
-    DRRRaycaster::~DRRRaycaster() {
+    SimpleRaycaster::~SimpleRaycaster() {
 
     }
 
-    void DRRRaycaster::processImpl(DataContainer& data) {
-        _shader->setUniform("_shift", _shift.getValue());
-        _shader->setUniform("_scale", _scale.getValue());
+    void SimpleRaycaster::processImpl(DataContainer& data) {
+        ImageDataRenderTarget* output = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+        output->createAndAttachTexture(GL_RGBA32F);
+        output->createAndAttachTexture(GL_RGBA32F);
+        output->activate();
 
-        ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-        rt->activate();
+        GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+        glDrawBuffers(3, buffers);
 
-        if (_invertMapping.getValue())
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-        else
-            glClearColor(1.f, 1.f, 1.f, 1.f);
+        if (_enableShadowing.getValue())
+            _shader->setUniform("_shadowIntensity", _shadowIntensity.getValue());
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDepthFunc(GL_ALWAYS);
         QuadRdr.renderQuad();
         LGL_ERROR;
 
-        rt->deactivate();
-        data.addData(_targetImageID.getValue(), rt);
+        output->deactivate();
+        data.addData(_targetImageID.getValue(), output);
         _targetImageID.issueWrite();
     }
 
-    std::string DRRRaycaster::generateHeader() const {
-        std::string toReturn;
-
-        if (_invertMapping.getValue())
-            toReturn += "#define DRR_INVERT 1\n";
-        //         if (depthMapping_.get())
-        //             header +="#define DEPTH_MAPPING 1\n";
-
+    std::string SimpleRaycaster::generateHeader() const {
+        std::string toReturn = RaycastingProcessor::generateHeader();
+        if (_enableShadowing.getValue())
+            toReturn += "#define ENABLE_SHADOWING\n";
         return toReturn;
     }
+
 }

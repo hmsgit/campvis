@@ -33,10 +33,10 @@
 #include "core/datastructures/imagedatalocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
-#include "modules/io/mhdimagereader.h"
-#include "modules/vis/sliceextractor.h"
-#include "modules/preprocessing/gradientvolumegenerator.h"
-#include "modules/classification/lhhistogram.h"
+#include "modules/io/processors/mhdimagereader.h"
+#include "modules/vis/processors/sliceextractor.h"
+#include "modules/preprocessing/processors/gradientvolumegenerator.h"
+#include "modules/preprocessing/processors/lhhistogram.h"
 
 namespace campvis {
     class SliceVis : public VisualizationPipeline {
