@@ -228,6 +228,7 @@ namespace campvis {
         return (_baseType == rhs._baseType) && (_numChannels == rhs._numChannels) && (_pointer == rhs._pointer);
     }
 
+#ifdef HAS_KISSCL
     cl_channel_type WeaklyTypedPointer::getClChannelType() const {
         switch (_baseType) {
             case WeaklyTypedPointer::UINT8:
@@ -263,5 +264,6 @@ namespace campvis {
                 return CL_A;
         }
     }
+#endif
 
 }

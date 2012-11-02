@@ -6,7 +6,7 @@ IF(WIN32)
         DOC "Path to the OpenCL SDK (Nvidia GPU Computing / AMD APP SDK)"
     )
     IF(NOT EXISTS ${OPENCL_SDK})
-        MESSAGE(FATAL_ERROR "OpenCL SDK (Nvidia GPU Computing / AMD APP SDK) not found! Please set Option 'OPENCL_SDK'!")
+        MESSAGE(STATUS "OpenCL SDK (Nvidia GPU Computing / AMD APP SDK) not found! Please set Option 'OPENCL_SDK' if you need OpenCL!")
     ENDIF()
     
     FIND_PATH(
@@ -69,6 +69,7 @@ IF(OPENCL_INCLUDE_DIR AND OPENCL_LIBRARY)
     SET(OPENCL_FOUND TRUE)
     MARK_AS_ADVANCED(OPENCL_INCLUDE_DIR OPENCL_LIBRARY)
 ELSE()
-    MESSAGE(FATAL_ERROR "OpenCL library not found (OPENCL_INCLUDE_DIR and/or OPENCL_LIBRARY missing)!")
+    SET(OPENCL_FOUND FALSE)
+    MESSAGE(STATUS "OpenCL library not found (OPENCL_INCLUDE_DIR and/or OPENCL_LIBRARY missing)!")
     MARK_AS_ADVANCED(CLEAR OPENCL_INCLUDE_DIR OPENCL_LIBRARY)
 ENDIF()

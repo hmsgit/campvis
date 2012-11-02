@@ -39,7 +39,9 @@
 #include "tgt/qt/qtcontextmanager.h"
 #include "tbb/include/tbb/compat/thread"
 
+#ifdef HAS_KISSCL
 #include "kisscl/clruntime.h"
+#endif
 
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
@@ -113,9 +115,11 @@ namespace campvis {
 
         QuadRenderer::init();
 
+#ifdef HAS_KISSCL
         if (_useOpenCL) {
             kisscl::CLRuntime::init();
         }
+#endif
 
         if (_argc > 0) {
             // ugly hack
@@ -124,10 +128,12 @@ namespace campvis {
             ShdrMgr.addPath(basePath);
             ShdrMgr.addPath(basePath + "/core/glsl");
 
+#ifdef HAS_KISSCL
             if (_useOpenCL) {
                 CLRtm.addPath(basePath);
                 CLRtm.addPath(basePath + "/core/cl");
             }
+#endif
         }
 
         _mainWindow->init();
@@ -172,9 +178,11 @@ namespace campvis {
 
             QuadRenderer::deinit();
 
+#ifdef HAS_KISSCL
             if (_useOpenCL) {
                 kisscl::CLRuntime::deinit();
             }
+#endif
         }
 
         OpenGLJobProcessor::deinit();

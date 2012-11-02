@@ -133,7 +133,7 @@ SET(CAMPVIS_REQUIRED_QT_VERSION "4.8")
 
 # detect libraries
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
-MESSAGE(STATUS "Detecting Common Mandatory Libraries:")
+MESSAGE(STATUS "Detecting Mandatory External Libraries:")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CAMPVIS_HOME}/cmake")
 
@@ -175,14 +175,18 @@ ELSE(TBB_FOUND)
     MESSAGE(FATAL_ERROR "TBB not found!")
 ENDIF(TBB_FOUND)
 
+# detect libraries
+MESSAGE(STATUS "--------------------------------------------------------------------------------")
+MESSAGE(STATUS "Detecting Optional External Libraries:")
+
 # OpenCL
-FIND_PACKAGE(CL REQUIRED)
+FIND_PACKAGE(CL)
+IF (OPENCL_FOUND)
     MESSAGE(STATUS "* Found OpenCL")
     LIST(APPEND CAMPVIS_INCLUDE_DIRECTORIES ${OPENCL_INCLUDE_DIR})
     LIST(APPEND CAMPVIS_EXTERNAL_LIBRARIES ${OPENCL_LIBRARY})
-IF (OPENCL_FOUND)
 ELSE(OPENCL_FOUND)
-    MESSAGE(FATAL_ERROR "OpenCL not found!")
+    MESSAGE(STATUS "* Did NOT find OpenCL!")
 ENDIF(OPENCL_FOUND)
 
 
