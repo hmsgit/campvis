@@ -7,14 +7,15 @@ dirsToIgnore = ['.svn', 'debug', 'release', 'Debug', 'Release', 'ext']
 
 legal_notice_begin = """// ================================================================================================
 // 
-// This file is part of the TUMVis Visualization Framework.
 """
-legal_notice = """// 
+legal_notice = """// This file is part of the CAMPVis Software Framework.
+// 
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
-//      Christian Schulte zu Berge (christian.szb@in.tum.de)
+//      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische UniversitÃ¤t MÃ¼nchen
-//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
 // The licensing of this softare is not yet resolved. Until then, redistribution in source or
 // binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
