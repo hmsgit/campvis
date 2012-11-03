@@ -1,11 +1,10 @@
+IF(NOT CommonconfProcessed)
 
-IF(NOT COMMONCONF_PROCESSED)
-
-SET(CAMPVIS_HOME ${CMAKE_CURRENT_SOURCE_DIR})
-MESSAGE(STATUS "TUMVis Home: ${CAMPVIS_HOME}")
+SET(CampvisHome ${CMAKE_CURRENT_SOURCE_DIR})
+MESSAGE(STATUS "TUMVis Home: ${CampvisHome}")
 
 # include macros
-INCLUDE(${CAMPVIS_HOME}/cmake/macros.cmake)
+INCLUDE(${CampvisHome}/cmake/macros.cmake)
 
 # detect compiler and architecture
 IF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 9 2008")
@@ -54,17 +53,17 @@ ENDIF()
 
 
 # set binary output path
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CAMPVIS_HOME}/bin")
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CAMPVIS_HOME}/bin")
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CAMPVIS_HOME}/bin")
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CampvisHome}/bin")
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CampvisHome}/bin")
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CampvisHome}/bin")
 
 # common include directories
-LIST(APPEND CAMPVIS_INCLUDE_DIRECTORIES "${CAMPVIS_HOME}/ext")
-LIST(APPEND CAMPVIS_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}) 
+LIST(APPEND CampvisGlobalIncludeDirs "${CampvisHome}/ext")
+LIST(APPEND CampvisGlobalIncludeDirs ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}) 
 
 # platform-dependent configuration
 IF(WIN32)
-    LIST(APPEND CAMPVIS_DEFINITIONS "-DNOMINMAX" "-D_CRT_SECURE_NO_DEPRECATE")
+    LIST(APPEND CampvisGlobalDefinitions "-DNOMINMAX" "-D_CRT_SECURE_NO_DEPRECATE")
 
     # Disable warnings for Microsoft compiler:
     # C4305: 'identifier' : truncation from 'type1' to 'type2'
@@ -78,14 +77,14 @@ IF(WIN32)
     #        but is safe there, since the 'this' pointer is only stored and not accessed.
     # C4390: ';' : empty controlled statement found; is this the intent?
     #        occurs when OpenGL error logging macros are disabled
-    #LIST(APPEND CAMPVIS_DEFINITIONS /wd4305 /wd4800 /wd4290 /wd4068 /wd4251 /wd4355 /wd4390)
-    LIST(APPEND CAMPVIS_DEFINITIONS /wd4290 /wd4390)
+    #LIST(APPEND CampvisGlobalDefinitions /wd4305 /wd4800 /wd4290 /wd4068 /wd4251 /wd4355 /wd4390)
+    LIST(APPEND CampvisGlobalDefinitions /wd4290 /wd4390)
     
     # enable parallel builds in Visual Studio
-    LIST(APPEND CAMPVIS_DEFINITIONS /MP)
+    LIST(APPEND CampvisGlobalDefinitions /MP)
 
     # prevent error: number of sections exceeded object file format limit
-    LIST(APPEND CAMPVIS_DEFINITIONS /bigobj)
+    LIST(APPEND CampvisGlobalDefinitions /bigobj)
     
     # allows 32 Bit builds to use more than 2GB RAM (VC++ only)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
@@ -93,7 +92,7 @@ IF(WIN32)
 
     IF(CAMPVIS_SHARED_LIBS)
         # Linking against Windows DLLs requires explicit instantiation of templates
-        LIST(APPEND CAMPVIS_DEFINITIONS "-DDLL_TEMPLATE_INST")
+        LIST(APPEND CampvisGlobalDefinitions "-DDLL_TEMPLATE_INST")
 
         IF(NOT CAMPVIS_GENERATE_MANIFEST)
             # Do not embed manifest into binaries in debug mode (slows down incremental linking)
@@ -111,38 +110,38 @@ IF(WIN32)
         SET(CMAKE_EXE_LINKER_FLAGS_DEBUG    "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /INCREMENTAL:NO")
     ENDIF()
     
-    LIST(APPEND CAMPVIS_EXTERNAL_LIBRARIES netapi32 version)
+    LIST(APPEND CampvisGlobalExternalLibs netapi32 version)
     
 ELSEIF(UNIX)
-    LIST(APPEND CAMPVIS_DEFINITIONS "-DUNIX")  
-    LIST(APPEND CAMPVIS_DEFINITIONS "-D__STDC_CONSTANT_MACROS")  
+    LIST(APPEND CampvisGlobalDefinitions "-DUNIX")  
+    LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")  
 ENDIF(WIN32)
 
 # tgt configuration
-LIST(APPEND CAMPVIS_DEFINITIONS "-DTGT_WITHOUT_DEFINES") # don't use tgt's build system
+LIST(APPEND CampvisGlobalDefinitions "-DTGT_WITHOUT_DEFINES") # don't use tgt's build system
 IF(WIN32)
     SET(TGT_WITH_WMI TRUE)  #< enable Windows Management Instrumentation for hardware detection
 ENDIF()
 IF(CAMPVIS_DEBUG)
-    LIST(APPEND CAMPVIS_DEFINITIONS -DTGT_DEBUG -DCAMPVIS_DEBUG)
+    LIST(APPEND CampvisGlobalDefinitions -DTGT_DEBUG -DCAMPVIS_DEBUG)
 ENDIF()
  
 # minimum Qt version
-SET(CAMPVIS_REQUIRED_QT_VERSION "4.8")
+SET(CampvisRequiredQtVersion "4.8")
 
 
 # detect libraries
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 MESSAGE(STATUS "Detecting Mandatory External Libraries:")
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CAMPVIS_HOME}/cmake")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CampvisHome}/cmake")
 
 # OpenGL
 FIND_PACKAGE(OpenGL REQUIRED)
 IF(OPENGL_FOUND)
     MESSAGE(STATUS "* Found OpenGL")
-    LIST(APPEND CAMPVIS_INCLUDE_DIRECTORIES ${OPENGL_INCLUDE_DIR})
-    LIST(APPEND CAMPVIS_EXTERNAL_LIBRARIES ${OPENGL_LIBRARIES})
+    LIST(APPEND CampvisGlobalIncludeDirs ${OPENGL_INCLUDE_DIR})
+    LIST(APPEND CampvisGlobalExternalLibs ${OPENGL_LIBRARIES})
 ELSE(OPENGL_FOUND)
     MESSAGE(FATAL_ERROR "OpenGL not found!")
 ENDIF(OPENGL_FOUND)
@@ -151,12 +150,12 @@ ENDIF(OPENGL_FOUND)
 FIND_PACKAGE(Glew REQUIRED)
 IF(GLEW_FOUND)
     MESSAGE(STATUS "* Found GLEW")
-    LIST(APPEND CAMPVIS_DEFINITIONS ${GLEW_DEFINITIONS})
-    LIST(APPEND CAMPVIS_INCLUDE_DIRECTORIES ${GLEW_INCLUDE_DIR})
-    LIST(APPEND CAMPVIS_EXTERNAL_LIBRARIES ${GLEW_LIBRARY})
-    LIST(APPEND CAMPVIS_EXTERNAL_DEBUG_DLLS ${GLEW_DLL_DEBUG})
-    LIST(APPEND CAMPVIS_EXTERNAL_RELEASE_DLLS ${GLEW_DLL_RELEASE})
-    LIST(APPEND CAMPVIS_EXTERNAL_LICENSE_FILES ${GLEW_LICENSE_FILE})
+    LIST(APPEND CampvisGlobalDefinitions ${GLEW_DEFINITIONS})
+    LIST(APPEND CampvisGlobalIncludeDirs ${GLEW_INCLUDE_DIR})
+    LIST(APPEND CampvisGlobalExternalLibs ${GLEW_LIBRARY})
+    LIST(APPEND CampvisExternalDllsDebug ${GLEW_DLL_DEBUG})
+    LIST(APPEND CampvisExternalDllsRelease ${GLEW_DLL_RELEASE})
+    LIST(APPEND CampvisExternalLicenseFiles ${GLEW_LICENSE_FILE})
 ELSE(GLEW_FOUND)
     MESSAGE(FATAL_ERROR "GLEW not found!")
 ENDIF(GLEW_FOUND)
@@ -165,12 +164,12 @@ ENDIF(GLEW_FOUND)
 FIND_PACKAGE(TBB REQUIRED)
 IF(TBB_FOUND)
     MESSAGE(STATUS "* Found TBB")
-    LIST(APPEND CAMPVIS_DEFINITIONS ${TBB_DEFINITIONS})
-    LIST(APPEND CAMPVIS_INCLUDE_DIRECTORIES ${TBB_INCLUDE_DIR})
-    LIST(APPEND CAMPVIS_EXTERNAL_LIBRARIES ${TBB_LIBRARY})
-    LIST(APPEND CAMPVIS_EXTERNAL_DEBUG_DLLS ${TBB_DLL_DEBUG})
-    LIST(APPEND CAMPVIS_EXTERNAL_RELEASE_DLLS ${TBB_DLL_RELEASE})
-    LIST(APPEND CAMPVIS_EXTERNAL_LICENSE_FILES ${TBB_LICENSE_FILE})
+    LIST(APPEND CampvisGlobalDefinitions ${TBB_DEFINITIONS})
+    LIST(APPEND CampvisGlobalIncludeDirs ${TBB_INCLUDE_DIR})
+    LIST(APPEND CampvisGlobalExternalLibs ${TBB_LIBRARY})
+    LIST(APPEND CampvisExternalDllsDebug ${TBB_DLL_DEBUG})
+    LIST(APPEND CampvisExternalDllsRelease ${TBB_DLL_RELEASE})
+    LIST(APPEND CampvisExternalLicenseFiles ${TBB_LICENSE_FILE})
 ELSE(TBB_FOUND)
     MESSAGE(FATAL_ERROR "TBB not found!")
 ENDIF(TBB_FOUND)
@@ -183,8 +182,8 @@ MESSAGE(STATUS "Detecting Optional External Libraries:")
 FIND_PACKAGE(CL)
 IF (OPENCL_FOUND)
     MESSAGE(STATUS "* Found OpenCL")
-    LIST(APPEND CAMPVIS_INCLUDE_DIRECTORIES ${OPENCL_INCLUDE_DIR})
-    LIST(APPEND CAMPVIS_EXTERNAL_LIBRARIES ${OPENCL_LIBRARY})
+    LIST(APPEND CampvisGlobalIncludeDirs ${OPENCL_INCLUDE_DIR})
+    LIST(APPEND CampvisGlobalExternalLibs ${OPENCL_LIBRARY})
 ELSE(OPENCL_FOUND)
     MESSAGE(STATUS "* Did NOT find OpenCL!")
 ENDIF(OPENCL_FOUND)
@@ -195,12 +194,11 @@ MESSAGE(STATUS "----------------------------------------------------------------
 MESSAGE(STATUS "Detecting installed modules:")
 
 # collect list of directories in modules directories
-SET(ModulesDir ${CAMPVIS_HOME}/modules)
+SET(ModulesDir ${CampvisHome}/modules)
 LIST_SUBDIRECTORIES(ModDirs ${ModulesDir} false)
 
-# remove CMake realted directories
-LIST(REMOVE_ITEM ModDirs CMakeFiles)
-LIST(REMOVE_ITEM ModDirs campvis-modules.dir)
+# remove CMake and SVN realated directories from list
+LIST(REMOVE_ITEM ModDirs CMakeFiles campvis-modules.dir .svn)
 
 # go through each subdirectory
 FOREACH(ModDir ${ModDirs})
@@ -219,11 +217,11 @@ FOREACH(ModDir ${ModDirs})
             INCLUDE(${ModFile})
             
             # merge module settings into global settings
-            LIST(APPEND CAMPVisModulesDefinitions ${ThisModDefinitions})
-            LIST(APPEND CAMPVisModulesIncludeDirs ${ThisModIncludeDirs})
-            LIST(APPEND CAMPVisModulesExternalLibs ${ThisModExternalLibs})
-            LIST(APPEND CAMPVisModulesSources ${ThisModSources})
-            LIST(APPEND CAMPVisModulesHeaders ${ThisModHeaders})
+            LIST(APPEND CampvisModulesDefinitions ${ThisModDefinitions})
+            LIST(APPEND CampvisModulesIncludeDirs ${ThisModIncludeDirs})
+            LIST(APPEND CampvisModulesExternalLibs ${ThisModExternalLibs})
+            LIST(APPEND CampvisModulesSources ${ThisModSources})
+            LIST(APPEND CampvisModulesHeaders ${ThisModHeaders})
             
             # unset module settings to avoid duplicates if module cmake file misses sth.
             UNSET(ThisModDefinitions)
@@ -243,5 +241,6 @@ FOREACH(ModDir ${ModDirs})
     
 ENDFOREACH(ModDir ${ModDirs})
 
-SET(COMMONCONF_PROCESSED TRUE)
-ENDIF(NOT COMMONCONF_PROCESSED)
+SET(CommonconfProcessed TRUE)
+ENDIF(NOT CommonconfProcessed)
+ 

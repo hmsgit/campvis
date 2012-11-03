@@ -4,21 +4,21 @@ INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring CAMPVis Application")
 
-FILE(GLOB CAMPVIS_APPLICATION_SOURCES
+FILE(GLOB CampvisApplicationSources
     *.cpp
     gui/*.cpp
     gui/properties/*.cpp
     tools/*.cpp
 )
 
-FILE(GLOB CAMPVIS_APPLICATION_HEADERS
+FILE(GLOB CampvisApplicationHeaders
     *.h
     gui/*.h
     gui/properties/*.h
     tools/*.h
 )
 
-SET(CAMPVIS_APPLICATION_TO_BE_MOCCED
+SET(CampvisApplicationToBeMocced
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
@@ -42,15 +42,15 @@ SET(CAMPVIS_APPLICATION_TO_BE_MOCCED
 #
 # Qt related stuff:
 #
-FIND_PACKAGE(Qt4 ${CAMPVIS_REQUIRED_QT_VERSION} REQUIRED QtCore QtGui QtOpenGL)
-QT4_WRAP_CPP(CAMPVIS_APPLICATION_MOC ${CAMPVIS_APPLICATION_TO_BE_MOCCED})
-LIST(APPEND CAMPVIS_APPLICATION_SOURCES ${CAMPVIS_APPLICATION_MOC})
+FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
+QT4_WRAP_CPP(CampvisApplicationMoc ${CampvisApplicationToBeMocced})
+LIST(APPEND CampvisApplicationSources ${CampvisApplicationMoc})
 
 INCLUDE(${QT_USE_FILE})
 ADD_EXECUTABLE(campvis-application 
-    ${CAMPVIS_APPLICATION_SOURCES} ${CAMPVIS_APPLICATION_HEADERS} 
-    ${CAMPVIS_APPLICATION_MOC}
+    ${CampvisApplicationSources} ${CampvisApplicationHeaders} 
+    ${CampvisApplicationMoc}
 ) 
-ADD_DEFINITIONS(${CAMPVIS_DEFINITIONS} ${QT_DEFINITIONS})
-INCLUDE_DIRECTORIES(${CAMPVIS_INCLUDE_DIRECTORIES})
-TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CAMPVIS_EXTERNAL_LIBRARIES} ${QT_LIBRARIES})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${QT_DEFINITIONS})
+INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
+TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})

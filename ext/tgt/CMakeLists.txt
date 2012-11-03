@@ -10,14 +10,14 @@ MESSAGE(STATUS "Configuring tgt Library")
 #
 # Qt related stuff:
 #
-FIND_PACKAGE(Qt4 ${CAMPVIS_REQUIRED_QT_VERSION} REQUIRED QtCore QtGui QtOpenGL)
+FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
 INCLUDE(${QT_USE_FILE})
 
 # configuration
 IF(TGT_WITH_WMI)
 	ADD_DEFINITIONS("-DTGT_WITH_WMI")
 	ADD_DEFINITIONS("-D_WIN32_DCOM") #< for CoInitializeSecurity() to be defined
-	LIST(APPEND CAMPVIS_EXTERNAL_LIBRARIES "WbemUuid")
+	LIST(APPEND CampvisGlobalExternalLibs "WbemUuid")
 ENDIF(TGT_WITH_WMI)    
 
 # headers
@@ -82,12 +82,12 @@ SET(TGT_SOURCES
 # define library target
 ################################################################################
 ADD_LIBRARY(tgt ${TGT_SOURCES} ${TGT_HEADERS})
-ADD_DEFINITIONS(${CAMPVIS_DEFINITIONS} ${CAMPVIS_MODULE_DEFINITIONS} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CAMPVIS_MODULE_DEFINITIONS} ${QT_DEFINITIONS})
 IF(CAMPVIS_SHARED_LIBS AND MSVC)
 	ADD_DEFINITIONS("-DTGT_BUILD_DLL")
 ENDIF()
-INCLUDE_DIRECTORIES(${CAMPVIS_INCLUDE_DIRECTORIES} ${CAMPVIS_MODULE_INCLUDE_DIRECTORIES})
-TARGET_LINK_LIBRARIES(tgt ${CAMPVIS_EXTERNAL_LIBRARIES} ${QT_LIBRARIES})
+INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CAMPVIS_MODULE_INCLUDE_DIRECTORIES})
+TARGET_LINK_LIBRARIES(tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
 
 ################################################################################
 # deployment
