@@ -46,16 +46,16 @@ namespace campvis {
 
     VirtualMirrorCombine::VirtualMirrorCombine(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , _normalImageID("normalImageID", "Normal DVR Input Image", "", DataNameProperty::READ)
-        , _mirrorImageID("mirrorImageID", "Mirror DVR Input Image", "", DataNameProperty::READ)
-        , _mirrorRenderID("mirrorRenderID", "Rendered Mirror Input Image", "", DataNameProperty::READ)
-        , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
+        , p_normalImageID("normalImageID", "Normal DVR Input Image", "", DataNameProperty::READ)
+        , p_mirrorImageID("mirrorImageID", "Mirror DVR Input Image", "", DataNameProperty::READ)
+        , p_mirrorRenderID("mirrorRenderID", "Rendered Mirror Input Image", "", DataNameProperty::READ)
+        , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&_normalImageID);
-        addProperty(&_mirrorImageID);
-        addProperty(&_mirrorRenderID);
-        addProperty(&_targetImageID);
+        addProperty(&p_normalImageID);
+        addProperty(&p_mirrorImageID);
+        addProperty(&p_mirrorRenderID);
+        addProperty(&p_targetImageID);
 
         addDecorator(new ProcessorDecoratorBackground());
         
@@ -79,9 +79,9 @@ namespace campvis {
     }
 
     void VirtualMirrorCombine::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> normalImage(data, _normalImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> mirrorImage(data, _mirrorImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> mirrorRendered(data, _mirrorRenderID.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> normalImage(data, p_normalImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> mirrorImage(data, p_mirrorImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> mirrorRendered(data, p_mirrorRenderID.getValue());
 
         if (normalImage != 0 && mirrorImage != 0 && mirrorRendered != 0) {
             ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
@@ -109,8 +109,8 @@ namespace campvis {
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(_targetImageID.getValue(), rt);
-            _targetImageID.issueWrite();
+            data.addData(p_targetImageID.getValue(), rt);
+            p_targetImageID.issueWrite();
         }
         else {
             LERROR("No suitable input images found.");

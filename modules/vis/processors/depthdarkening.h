@@ -71,20 +71,20 @@ namespace campvis {
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty _inputImage;               ///< image ID for input image
-        DataNameProperty _outputImage;              ///< image ID for output image
+        DataNameProperty p_inputImage;               ///< image ID for input image
+        DataNameProperty p_outputImage;              ///< image ID for output image
 
-        FloatProperty _sigma;                       ///< sigma, standard deviation of the gaussian filter
-        FloatProperty _lambda;                      ///< strength of depth effect
+        FloatProperty p_sigma;                       ///< sigma, standard deviation of the gaussian filter
+        FloatProperty p_lambda;                      ///< strength of depth effect
 
-        BoolProperty _useColorCoding;               ///< Flag whether to use depth color coding
-        Vec3Property _coldColor;                    ///< Cold color (color for far objects)
-        Vec3Property _warmColor;                    ///< Warm color (color for near objects)
+        BoolProperty p_useColorCoding;               ///< Flag whether to use depth color coding
+        Vec3Property p_coldColor;                    ///< Cold color (color for far objects)
+        Vec3Property p_warmColor;                    ///< Warm color (color for near objects)
 
     protected:
         /**
          * Generates the GLSL Header
-         * \return  #define uSE_COLORCODING if _useColorCoding is set
+         * \return  #define uSE_COLORCODING if p_useColorCoding is set
          */
         std::string generateHeader() const;
 

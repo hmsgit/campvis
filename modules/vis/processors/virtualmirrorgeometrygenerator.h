@@ -62,20 +62,18 @@ namespace campvis {
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty _mirrorID;         ///< ID for output geometry
+        DataNameProperty p_mirrorID;         ///< ID for output geometry
 
-        Vec3Property _mirrorCenter;         ///< position of mirror center
-        Vec3Property _mirrorNormal;         ///< normal of mirror
-        FloatProperty _size;                ///< Mirror size
-        IntProperty _numVertices;           ///< Number of vertices of mirror
+        Vec3Property p_mirrorCenter;         ///< position of mirror center
+        Vec3Property p_mirrorNormal;         ///< normal of mirror
+        FloatProperty p_size;                ///< Mirror size
+        IntProperty p_numVertices;           ///< Number of vertices of mirror
 
-        Vec3Property _poi;                  ///< Point of intereset
-        CameraProperty _camera;
+        Vec3Property p_poi;                  ///< Point of intereset
+        CameraProperty p_camera;
 
     protected:
         void updateClipProperties();
-
-        clock_t _sourceTimestamp;
 
         static const std::string loggerCat_;
     };

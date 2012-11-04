@@ -33,6 +33,7 @@
 #include <string>
 
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
@@ -73,14 +74,14 @@ namespace campvis {
         /// \see AbstractProcessor::process()
         virtual void process(DataContainer& data);
 
-        StringProperty _sourceImageID;                  ///< image ID for input image
-        StringProperty _targetImageID;                  ///< image ID for output image
+        DataNameProperty p_sourceImageID;                  ///< image ID for input image
+        DataNameProperty p_targetImageID;                  ///< image ID for output image
 
-        IntProperty _sliceNumber;                       ///< number of the slice to extract
-        TransferFunctionProperty _transferFunction;     ///< Transfer function
+        IntProperty p_sliceNumber;                       ///< number of the slice to extract
+        TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
     protected:
-        /// adapts the range of the _sliceNumber property to the image
+        /// adapts the range of the p_sliceNumber property to the image
         void updateProperties(const ImageData* img);
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering

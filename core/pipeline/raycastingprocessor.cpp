@@ -45,26 +45,26 @@ namespace campvis {
 
     RaycastingProcessor::RaycastingProcessor(GenericProperty<tgt::ivec2>& renderTargetSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
         : VisualizationProcessor(renderTargetSize)
-        , _sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
-        , _entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
-        , _exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
-        , _camera("camera", "Camera")
-        , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .05f, 0.001f, 1.f)
-        , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
-        , _jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
+        , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
+        , p_camera("camera", "Camera")
+        , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
+        , p_samplingStepSize("samplingStepSize", "Sampling Step Size", .05f, 0.001f, 1.f)
+        , p_jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
+        , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
         , _fragmentShaderFilename(fragmentShaderFileName)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
     {
-        addProperty(&_sourceImageID);
-        addProperty(&_entryImageID);
-        addProperty(&_exitImageID);
-        addProperty(&_camera);  
-        addProperty(&_transferFunction);
-        addProperty(&_samplingStepSize);
-        addProperty(&_jitterEntryPoints);
-        addProperty(&_jitterStepSizeMultiplier);
+        addProperty(&p_sourceImageID);
+        addProperty(&p_entryImageID);
+        addProperty(&p_exitImageID);
+        addProperty(&p_camera);  
+        addProperty(&p_transferFunction);
+        addProperty(&p_samplingStepSize);
+        addProperty(&p_jitterEntryPoints);
+        addProperty(&p_jitterStepSizeMultiplier);
     }
 
     RaycastingProcessor::~RaycastingProcessor() {
@@ -85,9 +85,9 @@ namespace campvis {
     }
 
     void RaycastingProcessor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataGL> img(data, _sourceImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> entryPoints(data, _entryImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> exitPoints(data, _exitImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataGL> img(data, p_sourceImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> entryPoints(data, p_entryImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> exitPoints(data, p_exitImageID.getValue());
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
@@ -97,7 +97,7 @@ namespace campvis {
                 }
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
-                _transferFunction.getTF()->uploadTexture();
+                p_transferFunction.getTF()->uploadTexture();
 
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
@@ -105,14 +105,14 @@ namespace campvis {
                 _shader->setIgnoreUniformLocationError(true);
                 decorateRenderProlog(data, _shader);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
-                _shader->setUniform("_jitterEntryPoints", _jitterEntryPoints.getValue());
-                _shader->setUniform("_jitterStepSizeMultiplier", _jitterStepSizeMultiplier.getValue());
-                _shader->setUniform("_samplingStepSize", _samplingStepSize.getValue() * .1f);
+                _shader->setUniform("_jitterEntryPoints", p_jitterEntryPoints.getValue());
+                _shader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
+                _shader->setUniform("_samplingStepSize", p_samplingStepSize.getValue() * .1f);
 
-                const tgt::Camera& cam = _camera.getValue();
+                const tgt::Camera& cam = p_camera.getValue();
                 float n = cam.getNearDist();
                 float f = cam.getFarDist();
-                _shader->setUniform("_cameraPosition", _camera.getValue().getPosition());
+                _shader->setUniform("_cameraPosition", p_camera.getValue().getPosition());
                 _shader->setUniform("const_to_z_e_1", 0.5f + 0.5f*((f+n)/(f-n)));
                 _shader->setUniform("const_to_z_e_2", ((f-n)/(f*n)));
                 _shader->setUniform("const_to_z_w_1", ((f*n)/(f-n)));
@@ -122,7 +122,7 @@ namespace campvis {
 
                 tgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
                 img->bind(_shader, volumeUnit, "_volume");
-                _transferFunction.getTF()->bind(_shader, tfUnit);
+                p_transferFunction.getTF()->bind(_shader, tfUnit);
 
                 if (! _bindEntryExitDepthTextures) {
                     entryPoints->bind(_shader, &entryUnit, 0, "_entryPoints");

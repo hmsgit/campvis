@@ -98,15 +98,15 @@ namespace campvis {
          */
         virtual void process(DataContainer& data);
 
-        DataNameProperty _sourceImageID;                ///< image ID for input image
-        DataNameProperty _entryImageID;                 ///< image ID for output entry points image
-        DataNameProperty _exitImageID;                  ///< image ID for output exit points image
+        DataNameProperty p_sourceImageID;                ///< image ID for input image
+        DataNameProperty p_entryImageID;                 ///< image ID for output entry points image
+        DataNameProperty p_exitImageID;                  ///< image ID for output exit points image
 
-        CameraProperty _camera;                         ///< Camera used for ray casting
-        TransferFunctionProperty _transferFunction;     ///< Transfer function
-        FloatProperty _samplingStepSize;                ///< Ray casting step size
-        BoolProperty _jitterEntryPoints;                ///< Flag whether to jitter the entry points
-        FloatProperty _jitterStepSizeMultiplier;        ///< Step size multiplier for entry points jitter
+        CameraProperty p_camera;                         ///< Camera used for ray casting
+        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+        FloatProperty p_samplingStepSize;                ///< Ray casting step size
+        BoolProperty p_jitterEntryPoints;                ///< Flag whether to jitter the entry points
+        FloatProperty p_jitterStepSizeMultiplier;        ///< Step size multiplier for entry points jitter
 
     protected:
         /**

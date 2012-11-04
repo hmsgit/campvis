@@ -66,8 +66,8 @@ namespace campvis {
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
 
-        StringProperty _url;              ///< URL for file to read
-        DataNameProperty _targetImageID;                ///< image ID for read image
+        StringProperty p_url;               ///< URL for file to read
+        DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:
 

@@ -61,12 +61,12 @@ namespace campvis {
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty _sourceImageID;      ///< image ID for input image
-        DataNameProperty _geometryID;         ///< ID for output geometry
+        DataNameProperty p_sourceImageID;      ///< image ID for input image
+        DataNameProperty p_geometryID;         ///< ID for output geometry
 
-        IVec2Property _clipX;               ///< clip coordinates for x axis
-        IVec2Property _clipY;               ///< clip coordinates for y axis
-        IVec2Property _clipZ;               ///< clip coordinates for z axis
+        IVec2Property p_clipX;               ///< clip coordinates for x axis
+        IVec2Property p_clipY;               ///< clip coordinates for y axis
+        IVec2Property p_clipZ;               ///< clip coordinates for z axis
 
     protected:
         void updateClipProperties();

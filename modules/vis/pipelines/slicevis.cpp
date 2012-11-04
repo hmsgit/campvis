@@ -40,13 +40,13 @@ namespace campvis {
         , _gvg()
         , _lhh()
         , _sliceExtractor(_renderTargetSize)
-        , _wheelHandler(&_sliceExtractor._sliceNumber)
+        , _wheelHandler(&_sliceExtractor.p_sliceNumber)
     {
-        _processors.push_back(&_imageReader);
-//         _processors.push_back(&_gvg);
-//         _processors.push_back(&_lhh);
-        _processors.push_back(&_sliceExtractor);
-        _eventHandlers.push_back(&_wheelHandler);
+        addProcessor(&_imageReader);
+//         addProcessor(&_gvg);
+//         addProcessor(&_lhh);
+        addProcessor(&_sliceExtractor);
+        addEventHandler(&_wheelHandler);
     }
 
     SliceVis::~SliceVis() {
@@ -55,21 +55,21 @@ namespace campvis {
     void SliceVis::init() {
         VisualizationPipeline::init();
 
-        _imageReader._url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
-        _imageReader._targetImageID.setValue("reader.output");
+        _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
+        _imageReader.p_targetImageID.setValue("reader.output");
 
-        _gvg._inputVolume.setValue("se.input");
+        _gvg.p_inputVolume.setValue("se.input");
 
-//         _lhh._inputVolume.setValue("se.input");
+//         _lhh.p_inputVolume.setValue("se.input");
 //         _gvg._outputGradients.connect(&_lhh._inputGradients);
 
-        _sliceExtractor._sourceImageID.setValue("se.input");
-        _sliceExtractor._sliceNumber.setValue(0);
+        _sliceExtractor.p_sourceImageID.setValue("se.input");
+        _sliceExtractor.p_sliceNumber.setValue(0);
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
-        _sliceExtractor._transferFunction.getTF()->setIntensityDomain(tgt::vec2(0, 0.05f));
+        _sliceExtractor.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(0, 0.05f));
 
         _renderTargetID.setValue("renderTarget");
-        _renderTargetID.addSharedProperty(&(_sliceExtractor._targetImageID));
+        _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
 
         _imageReader.s_invalidated.connect<SliceVis>(this, &SliceVis::onProcessorInvalidated);
         _gvg.s_invalidated.connect<SliceVis>(this, &SliceVis::onProcessorInvalidated);
@@ -107,10 +107,10 @@ namespace campvis {
         if (e->pressed()) {
             switch (e->keyCode()) {
                 case tgt::KeyEvent::K_UP:
-                    _sliceExtractor._sliceNumber.increment();
+                    _sliceExtractor.p_sliceNumber.increment();
                     break;
                 case tgt::KeyEvent::K_DOWN:
-                    _sliceExtractor._sliceNumber.decrement();
+                    _sliceExtractor.p_sliceNumber.decrement();
                     break;
             }
         }

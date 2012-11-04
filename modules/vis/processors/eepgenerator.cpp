@@ -44,24 +44,24 @@ namespace campvis {
 
     EEPGenerator::EEPGenerator(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , _sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
-        , _geometryID("geometryID", "Input Geometry ID", "proxygeometry", DataNameProperty::READ)
-        , _mirrorID("mirrorID", "Input Mirror ID", "mirror", DataNameProperty::READ)
-        , _entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
-        , _exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
-        , _camera("camera", "Camera")
-        , _enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_geometryID("geometryID", "Input Geometry ID", "proxygeometry", DataNameProperty::READ)
+        , p_mirrorID("mirrorID", "Input Mirror ID", "mirror", DataNameProperty::READ)
+        , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
+        , p_exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
+        , p_camera("camera", "Camera")
+        , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorMasking());
 
-        addProperty(&_sourceImageID);
-        addProperty(&_geometryID);
-        addProperty(&_mirrorID);
-        addProperty(&_entryImageID);
-        addProperty(&_exitImageID);
-        addProperty(&_camera);
-        addProperty(&_enableMirror);
+        addProperty(&p_sourceImageID);
+        addProperty(&p_geometryID);
+        addProperty(&p_mirrorID);
+        addProperty(&p_entryImageID);
+        addProperty(&p_exitImageID);
+        addProperty(&p_camera);
+        addProperty(&p_enableMirror);
 
         decoratePropertyCollection(this);
     }
@@ -86,8 +86,8 @@ namespace campvis {
     }
 
     void EEPGenerator::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataGL> img(data, _sourceImageID.getValue());
-        DataContainer::ScopedTypedData<MeshGeometry> proxyGeometry(data, _geometryID.getValue());
+        DataContainer::ScopedTypedData<ImageDataGL> img(data, p_sourceImageID.getValue());
+        DataContainer::ScopedTypedData<MeshGeometry> proxyGeometry(data, p_geometryID.getValue());
 
         if (img != 0 && proxyGeometry != 0 && _shader != 0) {
             if (img->getDimensionality() == 3) {
@@ -101,8 +101,8 @@ namespace campvis {
 
                 // clip proxy geometry against near-plane to support camera in volume
                 // FIXME:   In some cases, the near plane is not rendered correctly...
-                float nearPlaneDistToOrigin = tgt::dot(_camera.getValue().getPosition(), -_camera.getValue().getLook()) - _camera.getValue().getNearDist() - .001f;
-                MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -_camera.getValue().getLook(), true, 0.02f);
+                float nearPlaneDistToOrigin = tgt::dot(p_camera.getValue().getPosition(), -p_camera.getValue().getLook()) - p_camera.getValue().getNearDist() - .001f;
+                MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -p_camera.getValue().getLook(), true, 0.02f);
 
                 // start render setup
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -110,8 +110,8 @@ namespace campvis {
 
                 // setup virtual mirror if necessary
                 tgt::mat4 mirrorMatrix = tgt::mat4::identity;
-                if (_enableMirror.getValue()) {
-                    DataContainer::ScopedTypedData<FaceGeometry> mirrorGeometry(data, _mirrorID.getValue());
+                if (p_enableMirror.getValue()) {
+                    DataContainer::ScopedTypedData<FaceGeometry> mirrorGeometry(data, p_mirrorID.getValue());
                     if (mirrorGeometry && mirrorGeometry->size() > 0) {
                         const tgt::vec3& p = mirrorGeometry->getVertices()[0];
                         tgt::vec3 n = tgt::normalize(tgt::cross(mirrorGeometry->getVertices()[1] - mirrorGeometry->getVertices()[0], mirrorGeometry->getVertices()[2] - mirrorGeometry->getVertices()[0]));
@@ -137,8 +137,8 @@ namespace campvis {
                 _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_modelMatrix", mirrorMatrix);
-                _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
+                _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
                 _shader->setIgnoreUniformLocationError(false);
 
                 glEnable(GL_CULL_FACE);
@@ -151,7 +151,7 @@ namespace campvis {
                 glDepthFunc(GL_LESS);
                 glClearDepth(1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glCullFace(_enableMirror.getValue() ? GL_FRONT : GL_BACK);
+                glCullFace(p_enableMirror.getValue() ? GL_FRONT : GL_BACK);
                 clipped.render();
 
                 entrypoints->deactivate();
@@ -163,7 +163,7 @@ namespace campvis {
                 glDepthFunc(GL_GREATER);
                 glClearDepth(0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glCullFace(_enableMirror.getValue() ? GL_BACK : GL_FRONT);
+                glCullFace(p_enableMirror.getValue() ? GL_BACK : GL_FRONT);
                 clipped.render();
 
                 exitpoints->deactivate();
@@ -173,10 +173,10 @@ namespace campvis {
                 glPopAttrib();
                 LGL_ERROR;
 
-                data.addData(_entryImageID.getValue(), entrypoints);
-                data.addData(_exitImageID.getValue(), exitpoints);
-                _entryImageID.issueWrite();
-                _exitImageID.issueWrite();
+                data.addData(p_entryImageID.getValue(), entrypoints);
+                data.addData(p_exitImageID.getValue(), exitpoints);
+                p_entryImageID.issueWrite();
+                p_exitImageID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

@@ -142,15 +142,15 @@ namespace campvis {
 
     LHHistogram::LHHistogram()
         : AbstractProcessor()
-        , _inputVolume("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
-        , _inputGradients("InputGradients", "Input Gradient Volume ID", "gradients", DataNameProperty::READ)
-        , _outputFL("OutputFL", "FL Output Volume", "fl", DataNameProperty::WRITE)
-        , _outputFH("OutputFH", "FH Output Volume", "fh", DataNameProperty::WRITE)
+        , p_inputVolume("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
+        , p_inputGradients("InputGradients", "Input Gradient Volume ID", "gradients", DataNameProperty::READ)
+        , p_outputFL("OutputFL", "FL Output Volume", "fl", DataNameProperty::WRITE)
+        , p_outputFH("OutputFH", "FH Output Volume", "fh", DataNameProperty::WRITE)
     {
-        addProperty(&_inputVolume);
-        addProperty(&_inputGradients);
-        addProperty(&_outputFL);
-        addProperty(&_outputFH);
+        addProperty(&p_inputVolume);
+        addProperty(&p_inputGradients);
+        addProperty(&p_outputFL);
+        addProperty(&p_outputFH);
     }
 
     LHHistogram::~LHHistogram() {
@@ -158,8 +158,8 @@ namespace campvis {
     }
 
     void LHHistogram::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataLocal> intensities(data, _inputVolume.getValue());
-        DataContainer::ScopedTypedData< GenericImageDataLocal<float, 4> > gradients(data, _inputGradients.getValue());
+        DataContainer::ScopedTypedData<ImageDataLocal> intensities(data, p_inputVolume.getValue());
+        DataContainer::ScopedTypedData< GenericImageDataLocal<float, 4> > gradients(data, p_inputGradients.getValue());
 
         if (intensities != 0 && gradients != 0) {
             ImageDataLocal* fl = intensities->clone();
@@ -182,10 +182,10 @@ namespace campvis {
             delete [] tmp;
 
             data.addData("foo", tex);
-            data.addData(_outputFH.getValue(), fh);
-            data.addData(_outputFL.getValue(), fl);
-            _outputFH.issueWrite();
-            _outputFL.issueWrite();
+            data.addData(p_outputFH.getValue(), fh);
+            data.addData(p_outputFL.getValue(), fl);
+            p_outputFH.issueWrite();
+            p_outputFL.issueWrite();
         }
         else {
             LDEBUG("No suitable intensities image found.");

@@ -91,12 +91,6 @@ namespace campvis {
         virtual void onEvent(tgt::Event* e);
 
         /**
-         * Returns the PropertyCollection of this processor.
-         * \return _properties
-         */
-        PropertyCollection& getPropertyCollection();
-
-        /**
          * Sets the Canvas hosting the OpenGL context for this pipeline.
          * \param   canvas  Canvas hosting the OpenGL context for this pipeline
          */
@@ -119,6 +113,12 @@ namespace campvis {
          * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
          */
         const std::string& getRenderTargetID() const;
+
+        /**
+         * Adds the event handler \a eventHandler to this pipeline's list of event handlers.
+         * \param   eventHandler    The event handler to add.
+         */
+        void addEventHandler(AbstractEventHandler* eventHandler);
 
         /// Signal emitted when the pipeline's render target has changed
         sigslot::signal0<> s_renderTargetChanged;

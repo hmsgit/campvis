@@ -72,10 +72,10 @@ namespace campvis {
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty _normalImageID;            ///< image ID for normal DVR input image
-        DataNameProperty _mirrorImageID;            ///< image ID for mirror DVR input image
-        DataNameProperty _mirrorRenderID;           ///< image ID for rendered mirror input image
-        DataNameProperty _targetImageID;            ///< image ID for output image
+        DataNameProperty p_normalImageID;            ///< image ID for normal DVR input image
+        DataNameProperty p_mirrorImageID;            ///< image ID for mirror DVR input image
+        DataNameProperty p_mirrorRenderID;           ///< image ID for rendered mirror input image
+        DataNameProperty p_targetImageID;            ///< image ID for output image
 
     protected:
         tgt::Shader* _shader;                           ///< Shader for slice rendering

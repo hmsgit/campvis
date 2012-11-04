@@ -87,11 +87,11 @@ namespace campvis {
 
     GradientVolumeGenerator::GradientVolumeGenerator()
         : AbstractProcessor()
-        , _inputVolume("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
-        , _outputGradients("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
+        , p_inputVolume("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
+        , p_outputGradients("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
     {
-        addProperty(&_inputVolume);
-        addProperty(&_outputGradients);
+        addProperty(&p_inputVolume);
+        addProperty(&p_outputGradients);
     }
 
     GradientVolumeGenerator::~GradientVolumeGenerator() {
@@ -99,14 +99,14 @@ namespace campvis {
     }
 
     void GradientVolumeGenerator::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataLocal> input(data, _inputVolume.getValue());
+        DataContainer::ScopedTypedData<ImageDataLocal> input(data, p_inputVolume.getValue());
 
         if (input != 0) {
             GenericImageDataLocal<float, 4>* output = new GenericImageDataLocal<float, 4>(input->getDimensionality(), input->getSize(), 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), ApplyCentralDifferences(input, output));
 
-            data.addData(_outputGradients.getValue(), output);
-            _outputGradients.issueWrite();
+            data.addData(p_outputGradients.getValue(), output);
+            p_outputGradients.issueWrite();
         }
         else {
             LDEBUG("No suitable input image found.");

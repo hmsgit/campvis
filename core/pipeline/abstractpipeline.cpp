@@ -128,4 +128,7 @@ namespace campvis {
         _enabled = enabled;
     }
 
+    void AbstractPipeline::addProcessor(AbstractProcessor* processor) {
+        _processors.push_back(processor);
+    }
 }

@@ -42,21 +42,21 @@ namespace campvis {
 
     VirtualMirrorGeometryGenerator::VirtualMirrorGeometryGenerator()
         : AbstractProcessor()
-        , _mirrorID("geometryID", "Output Geometry ID", "mirror", DataNameProperty::WRITE)
-        , _mirrorCenter("mirrorCenter", "Mirror Center", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
-        , _mirrorNormal("mirrorNormal", "Mirror Normal", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f), InvalidationLevel::VALID)
-        , _size("mirrorSize", "Mirror Size", 4.0f, 0.1f, 1000.0f)
-        , _numVertices("Roundness", "Roundness", 16, 4, 128)
-        , _poi("poi", "Point of Interest", tgt::vec3::zero, tgt::vec3(-100.f), tgt::vec3(1000.f))
-        , _camera("camera", "Camera")
+        , p_mirrorID("geometryID", "Output Geometry ID", "mirror", DataNameProperty::WRITE)
+        , p_mirrorCenter("mirrorCenter", "Mirror Center", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
+        , p_mirrorNormal("mirrorNormal", "Mirror Normal", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f), InvalidationLevel::VALID)
+        , p_size("mirrorSize", "Mirror Size", 4.0f, 0.1f, 1000.0f)
+        , p_numVertices("Roundness", "Roundness", 16, 4, 128)
+        , p_poi("poi", "Point of Interest", tgt::vec3::zero, tgt::vec3(-100.f), tgt::vec3(1000.f))
+        , p_camera("camera", "Camera")
     {
-        addProperty(&_mirrorID);
-        addProperty(&_mirrorCenter);
-        addProperty(&_mirrorNormal);
-        addProperty(&_size);
-        addProperty(&_numVertices);
-        addProperty(&_poi);
-        addProperty(&_camera);
+        addProperty(&p_mirrorID);
+        addProperty(&p_mirrorCenter);
+        addProperty(&p_mirrorNormal);
+        addProperty(&p_size);
+        addProperty(&p_numVertices);
+        addProperty(&p_poi);
+        addProperty(&p_camera);
     }
 
     VirtualMirrorGeometryGenerator::~VirtualMirrorGeometryGenerator() {
@@ -65,9 +65,9 @@ namespace campvis {
 
     void VirtualMirrorGeometryGenerator::process(DataContainer& data) {
         // mirror normal is given by halfway vector between Camera-Mirror and POI-Mirror:
-        const tgt::Camera& cam = _camera.getValue();
-        tgt::vec3 v1 = tgt::normalize(_poi.getValue() - _mirrorCenter.getValue());
-        tgt::vec3 v2 = tgt::normalize(cam.getPosition() - _mirrorCenter.getValue());
+        const tgt::Camera& cam = p_camera.getValue();
+        tgt::vec3 v1 = tgt::normalize(p_poi.getValue() - p_mirrorCenter.getValue());
+        tgt::vec3 v2 = tgt::normalize(cam.getPosition() - p_mirrorCenter.getValue());
         tgt::vec3 n = tgt::normalize(v1 + v2);
 
         // assure that mirror is faced to camera
@@ -83,20 +83,20 @@ namespace campvis {
         if(abs(tgt::dot(temp, n) > 0.9f))
             temp = tgt::vec3(0.f, 1.f, 0.f);
 
-        tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * _size.getValue();
-        tgt::vec3 inPlaneB = tgt::normalize(tgt::cross(n, inPlaneA)) * 0.5f * _size.getValue();
+        tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_size.getValue();
+        tgt::vec3 inPlaneB = tgt::normalize(tgt::cross(n, inPlaneA)) * 0.5f * p_size.getValue();
 
-        const tgt::vec3& base = _mirrorCenter.getValue();
+        const tgt::vec3& base = p_mirrorCenter.getValue();
 
-        float angle = 2.f * tgt::PIf / static_cast<float>(_numVertices.getValue());
-        for (int i = 0; i < _numVertices.getValue(); ++i) {
+        float angle = 2.f * tgt::PIf / static_cast<float>(p_numVertices.getValue());
+        for (int i = 0; i < p_numVertices.getValue(); ++i) {
             tgt::vec3 dir = tgt::quat::rotate(inPlaneA, angle * static_cast<float>(i), n);
             vertices.push_back(tgt::vec3(base + dir));
         }
 
         FaceGeometry* mirror = new FaceGeometry(vertices);
-        data.addData(_mirrorID.getValue(), mirror);
-        _mirrorID.issueWrite();
+        data.addData(p_mirrorID.getValue(), mirror);
+        p_mirrorID.issueWrite();
 
         _invalidationLevel.setValid();
     }

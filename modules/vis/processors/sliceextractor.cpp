@@ -46,16 +46,16 @@ namespace campvis {
 
     SliceExtractor::SliceExtractor(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , _sourceImageID("sourceImageID", "Input Image", "")
-        , _targetImageID("targetImageID", "Output Image", "")
-        , _sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
-        , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
+        , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
+        , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
-        addProperty(&_sourceImageID);
-        addProperty(&_targetImageID);
-        addProperty(&_sliceNumber);
-        addProperty(&_transferFunction);
+        addProperty(&p_sourceImageID);
+        addProperty(&p_targetImageID);
+        addProperty(&p_sliceNumber);
+        addProperty(&p_transferFunction);
     }
 
     SliceExtractor::~SliceExtractor() {
@@ -73,20 +73,20 @@ namespace campvis {
     }
 
     void SliceExtractor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataLocal> img(data, _sourceImageID.getValue());
+        DataContainer::ScopedTypedData<ImageDataLocal> img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
                 updateProperties(img);
                 const tgt::svec3& imgSize = img->getSize();
-                ImageDataLocal* slice = img->getSubImage(tgt::svec3(0, 0, _sliceNumber.getValue()), tgt::svec3(imgSize.x-1, imgSize.y-1, _sliceNumber.getValue()));
+                ImageDataLocal* slice = img->getSubImage(tgt::svec3(0, 0, p_sliceNumber.getValue()), tgt::svec3(imgSize.x-1, imgSize.y-1, p_sliceNumber.getValue()));
                 ImageDataGL* glData = ImageDataConverter::tryConvert<ImageDataGL>(slice);
                 ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
 
                 _shader->activate();
                 tgt::TextureUnit inputUnit, tfUnit;
                 glData->bind(_shader, inputUnit);
-                _transferFunction.getTF()->bind(_shader, tfUnit);
+                p_transferFunction.getTF()->bind(_shader, tfUnit);
 
                 rt->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -98,7 +98,7 @@ namespace campvis {
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
 
-                data.addData(_targetImageID.getValue(), rt);
+                data.addData(p_targetImageID.getValue(), rt);
                 delete slice;
                 delete glData;
             }
@@ -115,8 +115,8 @@ namespace campvis {
 
     void SliceExtractor::updateProperties(const ImageData* img) {
         const tgt::svec3& imgSize = img->getSize();
-        if (_sliceNumber.getMaxValue() != imgSize.z - 1){
-            _sliceNumber.setMaxValue(imgSize.z - 1);
+        if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
+            p_sliceNumber.setMaxValue(imgSize.z - 1);
         }
     }
 

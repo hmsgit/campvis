@@ -42,17 +42,17 @@ namespace campvis {
 
     ProxyGeometryGenerator::ProxyGeometryGenerator()
         : AbstractProcessor()
-        , _sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
-        , _geometryID("geometryID", "Output Geometry ID", "proxygeometry", DataNameProperty::WRITE)
-        , _clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-        , _clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-        , _clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_geometryID("geometryID", "Output Geometry ID", "proxygeometry", DataNameProperty::WRITE)
+        , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
     {
-        addProperty(&_sourceImageID);
-        addProperty(&_geometryID);
-        addProperty(&_clipX);
-        addProperty(&_clipY);
-        addProperty(&_clipZ);
+        addProperty(&p_sourceImageID);
+        addProperty(&p_geometryID);
+        addProperty(&p_clipX);
+        addProperty(&p_clipY);
+        addProperty(&p_clipZ);
     }
 
     ProxyGeometryGenerator::~ProxyGeometryGenerator() {
@@ -60,32 +60,32 @@ namespace campvis {
     }
 
     void ProxyGeometryGenerator::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageData> img(data, _sourceImageID.getValue());
+        DataContainer::ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
                 if (img.getDataHandle().getTimestamp() != _sourceTimestamp) {
-                    _clipX.setMaxValue(tgt::ivec2(img->getSize().x, img->getSize().x));
-                    _clipY.setMaxValue(tgt::ivec2(img->getSize().y, img->getSize().y));
-                    _clipZ.setMaxValue(tgt::ivec2(img->getSize().z, img->getSize().z));
+                    p_clipX.setMaxValue(tgt::ivec2(img->getSize().x, img->getSize().x));
+                    p_clipY.setMaxValue(tgt::ivec2(img->getSize().y, img->getSize().y));
+                    p_clipZ.setMaxValue(tgt::ivec2(img->getSize().z, img->getSize().z));
 
-                    _clipX.setValue(tgt::ivec2(0, img->getSize().x));
-                    _clipY.setValue(tgt::ivec2(0, img->getSize().y));
-                    _clipZ.setValue(tgt::ivec2(0, img->getSize().z));
+                    p_clipX.setValue(tgt::ivec2(0, img->getSize().x));
+                    p_clipY.setValue(tgt::ivec2(0, img->getSize().y));
+                    p_clipZ.setValue(tgt::ivec2(0, img->getSize().z));
                     _sourceTimestamp = img.getDataHandle().getTimestamp();
                 }
-                tgt::Bounds volumeExtent = img->getWorldBounds(tgt::svec3(_clipX.getValue().x, _clipY.getValue().x, _clipZ.getValue().x), tgt::svec3(_clipX.getValue().y, _clipY.getValue().y, _clipZ.getValue().y));
+                tgt::Bounds volumeExtent = img->getWorldBounds(tgt::svec3(p_clipX.getValue().x, p_clipY.getValue().x, p_clipZ.getValue().x), tgt::svec3(p_clipX.getValue().y, p_clipY.getValue().y, p_clipZ.getValue().y));
                 tgt::vec3 numSlices = tgt::vec3(img->getSize());
 
 
-                tgt::vec3 texLLF(static_cast<float>(_clipX.getValue().x), static_cast<float>(_clipY.getValue().x), static_cast<float>(_clipZ.getValue().x));
+                tgt::vec3 texLLF(static_cast<float>(p_clipX.getValue().x), static_cast<float>(p_clipY.getValue().x), static_cast<float>(p_clipZ.getValue().x));
                 texLLF /= numSlices;
-                tgt::vec3 texURB(static_cast<float>(_clipX.getValue().y), static_cast<float>(_clipY.getValue().y), static_cast<float>(_clipZ.getValue().y));
+                tgt::vec3 texURB(static_cast<float>(p_clipX.getValue().y), static_cast<float>(p_clipY.getValue().y), static_cast<float>(p_clipZ.getValue().y));
                 texURB /= numSlices;
 
                 MeshGeometry* cube = MeshGeometry::createCube(volumeExtent, tgt::Bounds(texLLF, texURB)).clone();
-                data.addData(_geometryID.getValue(), cube);
-                _geometryID.issueWrite();
+                data.addData(p_geometryID.getValue(), cube);
+                p_geometryID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

@@ -74,15 +74,15 @@ namespace campvis {
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty _sourceImageID;    ///< image ID for input image
-        DataNameProperty _geometryID;       ///< ID for input geometry
-        DataNameProperty _mirrorID;         ///< ID for input mirror geometry
-        DataNameProperty _entryImageID;     ///< image ID for output entry points image
-        DataNameProperty _exitImageID;      ///< image ID for output exit points image
+        DataNameProperty p_sourceImageID;    ///< image ID for input image
+        DataNameProperty p_geometryID;       ///< ID for input geometry
+        DataNameProperty p_mirrorID;         ///< ID for input mirror geometry
+        DataNameProperty p_entryImageID;     ///< image ID for output entry points image
+        DataNameProperty p_exitImageID;      ///< image ID for output exit points image
 
-        CameraProperty _camera;
+        CameraProperty p_camera;
 
-        BoolProperty _enableMirror;         ///< Enable Virtual Mirror Feature
+        BoolProperty p_enableMirror;         ///< Enable Virtual Mirror Feature
 
 
     protected:

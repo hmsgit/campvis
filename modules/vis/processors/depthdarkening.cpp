@@ -46,22 +46,22 @@ namespace campvis {
 
     DepthDarkening::DepthDarkening(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , _inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
-        , _outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
-        , _sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f)
-        , _lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f)
-        , _useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, InvalidationLevel::INVALID_SHADER)
-        , _coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
-        , _warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
+        , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
+        , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f)
+        , p_lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f)
+        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, InvalidationLevel::INVALID_SHADER)
+        , p_coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , p_warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _shader(0)
     {
-        addProperty(&_inputImage);
-        addProperty(&_outputImage);
-        addProperty(&_sigma);
-        addProperty(&_lambda);
-        addProperty(&_useColorCoding);
-        addProperty(&_coldColor);
-        addProperty(&_warmColor);
+        addProperty(&p_inputImage);
+        addProperty(&p_outputImage);
+        addProperty(&p_sigma);
+        addProperty(&p_lambda);
+        addProperty(&p_useColorCoding);
+        addProperty(&p_coldColor);
+        addProperty(&p_warmColor);
     }
 
     DepthDarkening::~DepthDarkening() {
@@ -81,7 +81,7 @@ namespace campvis {
     }
 
     void DepthDarkening::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> inputImage(data, _inputImage.getValue());
+        DataContainer::ScopedTypedData<ImageDataRenderTarget> inputImage(data, p_inputImage.getValue());
 
         if (inputImage != 0) {
             if (_invalidationLevel.isInvalidShader()) {
@@ -115,13 +115,13 @@ namespace campvis {
             
             _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
             _shader->setUniform("_direction", tgt::vec2(1.f, 0.f));
-            _shader->setUniform("_sigma", _sigma.getValue());
-            _shader->setUniform("_lambda", _lambda.getValue());
+            _shader->setUniform("_sigma", p_sigma.getValue());
+            _shader->setUniform("_lambda", p_lambda.getValue());
             _shader->setUniform("_minDepth", minDepth);
             _shader->setUniform("_maxDepth", maxDepth);
-            if (_useColorCoding.getValue()) {
-                _shader->setUniform("_coldColor", _coldColor.getValue());
-                _shader->setUniform("_warmColor", _warmColor.getValue());
+            if (p_useColorCoding.getValue()) {
+                _shader->setUniform("_coldColor", p_coldColor.getValue());
+                _shader->setUniform("_warmColor", p_warmColor.getValue());
             }
 
             tempTarget->activate();
@@ -145,9 +145,9 @@ namespace campvis {
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(_outputImage.getValue() + "temp", tempTarget);
-            data.addData(_outputImage.getValue(), outputTarget);
-            _outputImage.issueWrite();
+            data.addData(p_outputImage.getValue() + "temp", tempTarget);
+            data.addData(p_outputImage.getValue(), outputTarget);
+            p_outputImage.issueWrite();
         }
         else {
             LERROR("No suitable input image found.");
@@ -157,7 +157,7 @@ namespace campvis {
     }
 
     std::string DepthDarkening::generateHeader() const {
-        if (_useColorCoding.getValue())
+        if (p_useColorCoding.getValue())
             return "#define USE_COLORCODING\n";
         else
             return "";

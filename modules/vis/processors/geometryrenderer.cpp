@@ -43,16 +43,16 @@ namespace campvis {
 
     GeometryRenderer::GeometryRenderer(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , _geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
-        , _renderTargetID("_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
-        , _camera("camera", "Camera")
-        , _color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
+        , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
+        , p_camera("camera", "Camera")
+        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
-        addProperty(&_geometryID);
-        addProperty(&_renderTargetID);
-        addProperty(&_camera);
-        addProperty(&_color);
+        addProperty(&p_geometryID);
+        addProperty(&p_renderTargetID);
+        addProperty(&p_camera);
+        addProperty(&p_color);
     }
 
     GeometryRenderer::~GeometryRenderer() {
@@ -74,16 +74,16 @@ namespace campvis {
     }
 
     void GeometryRenderer::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, _geometryID.getValue());
+        DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
 
         if (proxyGeometry != 0 && _shader != 0) {
             // set modelview and projection matrices
             glPushAttrib(GL_ALL_ATTRIB_BITS);
 
             _shader->activate();
-            _shader->setUniform("_projectionMatrix", _camera.getValue().getProjectionMatrix());
-            _shader->setUniform("_viewMatrix", _camera.getValue().getViewMatrix());
-            _shader->setUniform("_color", _color.getValue());
+            _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
+            _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
+            _shader->setUniform("_color", p_color.getValue());
 
             // create entry points texture
             ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
@@ -100,8 +100,8 @@ namespace campvis {
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(_renderTargetID.getValue(), rt);
-            _renderTargetID.issueWrite();
+            data.addData(p_renderTargetID.getValue(), rt);
+            p_renderTargetID.issueWrite();
         }
         else {
             LERROR("No suitable input geometry found.");

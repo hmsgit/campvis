@@ -58,16 +58,16 @@ namespace campvis {
         _trackballEH = new TrackballNavigationEventHandler(&_camera, _renderTargetSize.getValue());
         _eventHandlers.push_back(_trackballEH);
 
-        _processors.push_back(&_imageReader);
-        _processors.push_back(&_pgGenerator);
-        _processors.push_back(&_vmgGenerator);
-        _processors.push_back(&_vmRenderer);
-        _processors.push_back(&_eepGenerator);
-        _processors.push_back(&_vmEepGenerator);
-        _processors.push_back(&_dvrNormal);
-        _processors.push_back(&_dvrVM);
-        _processors.push_back(&_depthDarkening);
-        _processors.push_back(&_combine);
+        addProcessor(&_imageReader);
+        addProcessor(&_pgGenerator);
+        addProcessor(&_vmgGenerator);
+        addProcessor(&_vmRenderer);
+        addProcessor(&_eepGenerator);
+        addProcessor(&_vmEepGenerator);
+        addProcessor(&_dvrNormal);
+        addProcessor(&_dvrVM);
+        addProcessor(&_depthDarkening);
+        addProcessor(&_combine);
     }
 
     DVRVis::~DVRVis() {
@@ -77,67 +77,67 @@ namespace campvis {
     void DVRVis::init() {
         VisualizationPipeline::init();
 
-        _camera.addSharedProperty(&_vmgGenerator._camera);
-        _camera.addSharedProperty(&_vmRenderer._camera);
-        _camera.addSharedProperty(&_eepGenerator._camera);
-        _camera.addSharedProperty(&_vmEepGenerator._camera);
-        _camera.addSharedProperty(&_dvrNormal._camera);
-        _camera.addSharedProperty(&_dvrVM._camera);
+        _camera.addSharedProperty(&_vmgGenerator.p_camera);
+        _camera.addSharedProperty(&_vmRenderer.p_camera);
+        _camera.addSharedProperty(&_eepGenerator.p_camera);
+        _camera.addSharedProperty(&_vmEepGenerator.p_camera);
+        _camera.addSharedProperty(&_dvrNormal.p_camera);
+        _camera.addSharedProperty(&_dvrVM.p_camera);
 
-        //_imageReader._url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
-        _imageReader._url.setValue("D:\\Medical Data\\smallHeart.mhd");
-        _imageReader._targetImageID.setValue("reader.output");
+        //_imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
+        _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
+        _imageReader.p_targetImageID.setValue("reader.output");
 
-        _dvrNormal._targetImageID.setValue("drr.output");
-        _dvrNormal._sourceImageID.setValue("eep.input");
+        _dvrNormal.p_targetImageID.setValue("drr.output");
+        _dvrNormal.p_sourceImageID.setValue("eep.input");
 
          Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrNormal._transferFunction.replaceTF(dvrTF);
+         _dvrNormal.p_transferFunction.replaceTF(dvrTF);
 
          Geometry1DTransferFunction* vmTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
          vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
          vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrVM._transferFunction.replaceTF(vmTF);
+         _dvrVM.p_transferFunction.replaceTF(vmTF);
 
-        _dvrVM._targetImageID.setValue("dvr.output");
-        _dvrVM._sourceImageID.setValue("eep.input");
+        _dvrVM.p_targetImageID.setValue("dvr.output");
+        _dvrVM.p_sourceImageID.setValue("eep.input");
 
-        _eepGenerator._sourceImageID.setValue("eep.input");
-        _vmEepGenerator._sourceImageID.setValue("eep.input");
-        _pgGenerator._sourceImageID.setValue("eep.input");
+        _eepGenerator.p_sourceImageID.setValue("eep.input");
+        _vmEepGenerator.p_sourceImageID.setValue("eep.input");
+        _pgGenerator.p_sourceImageID.setValue("eep.input");
 
-        _vmRenderer._renderTargetID.connect(&_combine._mirrorRenderID);
-        _vmEepGenerator._entryImageID.setValue("vm.eep.entry");
-        _vmEepGenerator._exitImageID.setValue("vm.eep.exit");
-        _vmEepGenerator._enableMirror.setValue(true);
+        _vmRenderer.p_renderTargetID.connect(&_combine.p_mirrorRenderID);
+        _vmEepGenerator.p_entryImageID.setValue("vm.eep.entry");
+        _vmEepGenerator.p_exitImageID.setValue("vm.eep.exit");
+        _vmEepGenerator.p_enableMirror.setValue(true);
 
         // not the most beautiful way... *g*
         // this will all get better with scripting support.
         static_cast<BoolProperty*>(_vmEepGenerator.getProperty("applyMask"))->setValue(true);
-        _vmRenderer._renderTargetID.connect(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
+        _vmRenderer.p_renderTargetID.connect(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
 
         _renderTargetID.setValue("combine");
 
-        _pgGenerator._geometryID.connect(&_vmEepGenerator._geometryID);
-        _vmgGenerator._mirrorID.connect(&_vmEepGenerator._mirrorID);
-        _vmgGenerator._mirrorID.connect(&_vmRenderer._geometryID);
-        _vmgGenerator._mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));
-        _vmgGenerator._poi.setValue(tgt::vec3(40.f, 40.f, 40.f));
-        _vmgGenerator._size.setValue(60.f);
+        _pgGenerator.p_geometryID.connect(&_vmEepGenerator.p_geometryID);
+        _vmgGenerator.p_mirrorID.connect(&_vmEepGenerator.p_mirrorID);
+        _vmgGenerator.p_mirrorID.connect(&_vmRenderer.p_geometryID);
+        _vmgGenerator.p_mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));
+        _vmgGenerator.p_poi.setValue(tgt::vec3(40.f, 40.f, 40.f));
+        _vmgGenerator.p_size.setValue(60.f);
 
-        _eepGenerator._entryImageID.connect(&_dvrNormal._entryImageID);
-        _vmEepGenerator._entryImageID.connect(&_dvrVM._entryImageID);
+        _eepGenerator.p_entryImageID.connect(&_dvrNormal.p_entryImageID);
+        _vmEepGenerator.p_entryImageID.connect(&_dvrVM.p_entryImageID);
 
-        _eepGenerator._exitImageID.connect(&_dvrNormal._exitImageID);
-        _vmEepGenerator._exitImageID.connect(&_dvrVM._exitImageID);
+        _eepGenerator.p_exitImageID.connect(&_dvrNormal.p_exitImageID);
+        _vmEepGenerator.p_exitImageID.connect(&_dvrVM.p_exitImageID);
 
-        _dvrVM._targetImageID.connect(&_combine._mirrorImageID);
-        _combine._targetImageID.setValue("combine");
+        _dvrVM.p_targetImageID.connect(&_combine.p_mirrorImageID);
+        _combine.p_targetImageID.setValue("combine");
 
-        _dvrNormal._targetImageID.connect(&_depthDarkening._inputImage);
-        _depthDarkening._outputImage.connect(&_combine._normalImageID);
+        _dvrNormal.p_targetImageID.connect(&_depthDarkening.p_inputImage);
+        _depthDarkening.p_outputImage.connect(&_combine.p_normalImageID);
 
         _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _vmgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
@@ -169,7 +169,7 @@ namespace campvis {
                 ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
                 if (local != 0) {
                     DataHandle dh = _data.addData("clr.input", local);
-                    _dvrNormal._transferFunction.getTF()->setImageHandle(dh);
+                    _dvrNormal.p_transferFunction.getTF()->setImageHandle(dh);
                 }
                 {
                     tgt::GLContextScopedLock lock(_canvas->getContext());

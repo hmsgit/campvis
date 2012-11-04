@@ -71,11 +71,11 @@ namespace campvis {
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty _geometryID;       ///< ID for input geometry
-        DataNameProperty _renderTargetID;   ///< image ID for output image
-        CameraProperty _camera;
+        DataNameProperty p_geometryID;       ///< ID for input geometry
+        DataNameProperty p_renderTargetID;   ///< image ID for output image
+        CameraProperty p_camera;
 
-        Vec4Property _color;                ///< rendering color
+        Vec4Property p_color;                ///< rendering color
 
     protected:
 

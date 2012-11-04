@@ -38,15 +38,15 @@ namespace campvis {
 
     SimpleRaycaster::SimpleRaycaster(GenericProperty<tgt::ivec2>& canvasSize)
         : RaycastingProcessor(canvasSize, "modules/vis/glsl/simpleraycaster.frag", true)
-        , _targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , _enableShadowing("EnableShadowing", "Enable Hard Shadows", false, InvalidationLevel::INVALID_SHADER)
-        , _shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
+        , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
+        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows", false, InvalidationLevel::INVALID_SHADER)
+        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&_targetImageID);
-        addProperty(&_enableShadowing);
-        addProperty(&_shadowIntensity);
+        addProperty(&p_targetImageID);
+        addProperty(&p_enableShadowing);
+        addProperty(&p_shadowIntensity);
         decoratePropertyCollection(this);
     }
 
@@ -63,8 +63,8 @@ namespace campvis {
         GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3, buffers);
 
-        if (_enableShadowing.getValue())
-            _shader->setUniform("_shadowIntensity", _shadowIntensity.getValue());
+        if (p_enableShadowing.getValue())
+            _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDepthFunc(GL_ALWAYS);
@@ -72,13 +72,13 @@ namespace campvis {
         LGL_ERROR;
 
         output->deactivate();
-        data.addData(_targetImageID.getValue(), output);
-        _targetImageID.issueWrite();
+        data.addData(p_targetImageID.getValue(), output);
+        p_targetImageID.issueWrite();
     }
 
     std::string SimpleRaycaster::generateHeader() const {
         std::string toReturn = RaycastingProcessor::generateHeader();
-        if (_enableShadowing.getValue())
+        if (p_enableShadowing.getValue())
             toReturn += "#define ENABLE_SHADOWING\n";
         return toReturn;
     }

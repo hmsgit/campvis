@@ -95,7 +95,7 @@ namespace campvis {
         tgtAssert(processor != 0, "Processor must not be 0!");
 
         // add processor to processor list and connect signals
-        _processors.push_back(processor);
+        VisualizationPipeline::addProcessor(processor);
         processor->s_invalidated.connect<DigraphVisualizationPipeline>(this, &DigraphVisualizationPipeline::onProcessorInvalidated);
 
         // create DependencyNode

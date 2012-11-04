@@ -45,11 +45,11 @@ namespace campvis {
 
     MhdImageReader::MhdImageReader() 
         : AbstractProcessor()
-        , _url("url", "Image URL", "")
-        , _targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output", DataNameProperty::WRITE)
+        , p_url("url", "Image URL", "")
+        , p_targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output", DataNameProperty::WRITE)
     {
-        addProperty(&_url);
-        addProperty(&_targetImageID);
+        addProperty(&p_url);
+        addProperty(&p_targetImageID);
     }
 
     MhdImageReader::~MhdImageReader() {
@@ -59,7 +59,7 @@ namespace campvis {
     void MhdImageReader::process(DataContainer& data) {
         try {
             // start parsing
-            TextFileParser tfp(_url.getValue(), true, "=");
+            TextFileParser tfp(p_url.getValue(), true, "=");
             tfp.parse<TextFileParser::ItemSeparatorLines>();
 
             // init optional parameters with sane default values
@@ -124,11 +124,11 @@ namespace campvis {
             // get raw image location:
             url = StringUtils::trim(tfp.getString("ElementDataFile"));
             if (url == "LOCAL") {
-                url = _url.getValue();
+                url = p_url.getValue();
                 // find beginning of local data:
-                tgt::File* file = FileSys.open(_url.getValue());
+                tgt::File* file = FileSys.open(p_url.getValue());
                 if (!file || !file->isOpen())
-                    throw tgt::FileException("Could not open file " + _url.getValue() + " for reading.", _url.getValue());
+                    throw tgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
 
                 while (!file->eof()) {
                     std::string line = StringUtils::trim(file->getLine());
@@ -144,15 +144,15 @@ namespace campvis {
                 return;
             }
             else {
-                url = tgt::FileSystem::cleanupPath(tgt::FileSystem::dirName(_url.getValue()) + "/" + url);
+                url = tgt::FileSystem::cleanupPath(tgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
             } 
 
 
 
             // all parsing done - lets create the image:
             ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, 1, offset, e);
-            data.addData(_targetImageID.getValue(), image);
-            _targetImageID.issueWrite();
+            data.addData(p_targetImageID.getValue(), image);
+            p_targetImageID.issueWrite();
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());

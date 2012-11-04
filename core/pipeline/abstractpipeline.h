@@ -95,6 +95,12 @@ namespace campvis {
         DataContainer& getDataContainer();
 
         /**
+         * Adds the processors \a processor to this pipeline's processor list.
+         * \param   processor   The processor to add.
+         */
+        void addProcessor(AbstractProcessor* processor);
+
+        /**
          * Returns the list of processors of this pipeline.
          * \return  _processors
          */
@@ -147,6 +153,8 @@ namespace campvis {
          * \param   processor   Processor to execute.
          */
         void executeProcessor(AbstractProcessor* processor);
+
+
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline

@@ -67,10 +67,6 @@ namespace campvis {
         }
     }
 
-    PropertyCollection& VisualizationPipeline::getPropertyCollection() {
-        return _properties;
-    }
-
     void VisualizationPipeline::init() {
         AbstractPipeline::init();
     }

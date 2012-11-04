@@ -64,11 +64,11 @@ namespace campvis {
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates a Digitally Reconstructed Radiograph."; };
 
-        DataNameProperty _targetImageID;    ///< image ID for output image
+        DataNameProperty p_targetImageID;    ///< image ID for output image
 
-        FloatProperty _shift;
-        FloatProperty _scale;
-        BoolProperty _invertMapping;
+        FloatProperty p_shift;
+        FloatProperty p_scale;
+        BoolProperty p_invertMapping;
 
     protected:
         /// \see RaycastingProcessor::processImpl()
@@ -76,7 +76,7 @@ namespace campvis {
 
         /**
          * \see RaycastingProcessor::generateHeader()
-         * \return  "#define DRR_INVERT 1" if \a _invertMapping is set to true.
+         * \return  "#define DRR_INVERT 1" if \a p_invertMapping is set to true.
          */
         virtual std::string generateHeader() const;
 

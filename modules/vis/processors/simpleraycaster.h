@@ -64,9 +64,9 @@ namespace campvis {
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
 
-        DataNameProperty _targetImageID;    ///< image ID for output image
-        BoolProperty _enableShadowing;
-        FloatProperty _shadowIntensity;
+        DataNameProperty p_targetImageID;    ///< image ID for output image
+        BoolProperty p_enableShadowing;
+        FloatProperty p_shadowIntensity;
     
     protected:
         /// \see RaycastingProcessor::processImpl()
