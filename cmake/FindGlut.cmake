@@ -6,7 +6,7 @@
 # win32: GLUT_DEBUG_LIBRARY, GLUT_RELEASE_LIBRARY, GLUT_DEBUG_DLLS, GLUT_RELEASE_DLLS
 
 IF(WIN32)
-    SET(GLUT_DIR "${CAMPVIS_HOME}/ext/glut" CACHE PATH "If glut is not found, set this path")
+    SET(GLUT_DIR "${CampvisHome}/ext/glut" CACHE PATH "If glut is not found, set this path")
    
     SET(GLUT_DEFINITIONS "-DGLUT_NO_LIB_PRAGMA")
        

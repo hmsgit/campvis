@@ -6,7 +6,7 @@
 # win32: GLEW_LIBRARY_DEBUG, GLEW_LIBRARY_RELEASE, GLEW_DLL_DEBUG, GLEW_DLL_RELEASE, GLEW_LICENSE_FILE
 
 IF (WIN32)
-    SET(GLEW_DIR "${CAMPVIS_HOME}/ext/glew" CACHE PATH "If glew is not found, set this path")
+    SET(GLEW_DIR "${CampvisHome}/ext/glew" CACHE PATH "If glew is not found, set this path")
    
     # SET(GLEW_DEFINITIONS "-DGLEW_STATIC")
        

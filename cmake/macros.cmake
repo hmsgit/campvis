@@ -18,7 +18,7 @@ ENDMACRO(LIST_SUBDIRECTORIES)
 MACRO(COPY_EXTERNAL_DLLS DebugDLLs ReleaseDLLs failOnError)
     MESSAGE(STATUS "Copying external DLLs")
     
-    SET(debug_dir "${CAMPVIS_HOME}/bin/Debug")
+    SET(debug_dir "${CampvisHome}/bin/Debug")
     IF(NOT EXISTS ${debug_dir})
         FILE(MAKE_DIRECTORY ${debug_dir})    
     ENDIF()
@@ -36,7 +36,7 @@ MACRO(COPY_EXTERNAL_DLLS DebugDLLs ReleaseDLLs failOnError)
         ENDIF()
     ENDFOREACH()
     
-    SET(release_dir "${CAMPVIS_HOME}/bin/Release")
+    SET(release_dir "${CampvisHome}/bin/Release")
     IF(NOT EXISTS ${release_dir})
         FILE(MAKE_DIRECTORY ${release_dir})    
     ENDIF()
@@ -64,13 +64,13 @@ MACRO(ADD_COPY_DLL_COMMAND Target DebugDLLs ReleaseDLLs)
         MESSAGE(${dll})
         ADD_CUSTOM_COMMAND(
             TARGET ${Target}
-            COMMAND ${CMAKE_COMMAND} -E copy ${dll} ${CAMPVIS_HOME}/bin/Debug
+            COMMAND ${CMAKE_COMMAND} -E copy ${dll} ${CampvisHome}/bin/Debug
         )
     ENDFOREACH()
     FOREACH(dll ${${ReleaseDLLs}})
         ADD_CUSTOM_COMMAND(
             TARGET ${Target}
-            COMMAND ${CMAKE_COMMAND} -E copy ${dll} ${CAMPVIS_HOME}/bin/Release
+            COMMAND ${CMAKE_COMMAND} -E copy ${dll} ${CampvisHome}/bin/Release
         )
     ENDFOREACH()
 ENDMACRO(ADD_COPY_DLL_COMMAND)
