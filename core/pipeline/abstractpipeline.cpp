@@ -129,6 +129,7 @@ namespace campvis {
     }
 
     void AbstractPipeline::addProcessor(AbstractProcessor* processor) {
+        tgtAssert(processor != 0, "Processor must not be 0.")
         _processors.push_back(processor);
     }
 }

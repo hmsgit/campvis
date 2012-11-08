@@ -42,7 +42,7 @@ using namespace campvis;
  **/
 int main(int argc, char** argv) {
     CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
+    app.addVisualizationPipeline("SliceVis", new SliceVis());
     app.addVisualizationPipeline("DVRVis", new DVRVis());
 
     app.init();

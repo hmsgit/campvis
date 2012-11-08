@@ -112,4 +112,9 @@ namespace campvis {
             AbstractPipeline::onPropertyChanged(prop);
     }
 
+    void VisualizationPipeline::addEventHandler(AbstractEventHandler* eventHandler) {
+        tgtAssert(eventHandler != 0, "Event handler must not be 0.");
+        _eventHandlers.push_back(eventHandler);
+    }
+
 }
