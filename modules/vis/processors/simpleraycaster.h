@@ -67,6 +67,8 @@ namespace campvis {
         DataNameProperty p_targetImageID;    ///< image ID for output image
         BoolProperty p_enableShadowing;
         FloatProperty p_shadowIntensity;
+        BoolProperty p_enableAdaptiveStepsize;
+
     
     protected:
         /// \see RaycastingProcessor::processImpl()

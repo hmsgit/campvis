@@ -57,12 +57,18 @@ uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
 
+#ifdef ENABLE_ADAPTIVE_STEPSIZE
+float _stepPower = 0.0;
+bool _inVoid = false;
+#endif
+
 #ifdef ENABLE_SHADOWING
 uniform float _shadowIntensity;
 #endif
 
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
+
 
 /**
  * Computes the DRR by simple raycasting and returns the final fragment color.
@@ -81,10 +87,47 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     while (t < tend) {
+        // compute sample position
+#ifdef ENABLE_ADAPTIVE_STEPSIZE
+        vec3 singleStep = direction * _samplingStepSize;
+        vec3 samplePosition = entryPoint.rgb + singleStep * exp2(_stepPower);
+#else
         vec3 samplePosition = entryPoint.rgb + t * direction;
+#endif
+
+        // lookup intensity and TF
         float intensity = getElement3DNormalized(_volume, samplePosition).a;
-        vec3 gradient = computeGradient(_volume, samplePosition);
         vec4 color = lookupTF(_transferFunction, intensity);
+
+#ifdef ENABLE_ADAPTIVE_STEPSIZE
+        if (color.a == 0.0) {
+            // we're within void, make the steps bigger
+            _inVoid = true;
+            if (_stepPower < 5.0)
+                _stepPower += 1.0;
+        }
+        else {
+            // we're outside void, perform compositing but make sure we didn't miss anything => perform intersection refinement
+            // we try to find the intersection point using binary search until _stepPower is back to 0:
+            while (_stepPower > 0.0) {
+                _stepPower -= 1.0;
+
+                samplePosition = entryPoint.rgb + singleStep * exp2(_stepPower);
+                intensity = getElement3DNormalized(_volume, samplePosition).a;
+                color = lookupTF(_transferFunction, intensity);
+
+                if (color.a == 0.0) {
+                    // we're back in the void - look on the right-hand side
+                    entryPoint.rgb = samplePosition;
+                }
+                else {
+                    // we're still in the matter - look on the left-hand side
+                    // nothing to do here...
+                }
+            }
+            _inVoid = false;
+        }
+#endif
 
 #ifdef ENABLE_SHADOWING
         // simple and expensive implementation of hard shadows
@@ -112,12 +155,13 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 #endif
 
-#ifdef ENABLE_SHADING
-        color.rgb = calculatePhongShading(textureToWorld(_volume, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
-#endif
-
         // perform compositing
         if (color.a > 0.0) {
+#ifdef ENABLE_SHADING
+            // compute gradient (needed for shading and normals)
+            vec3 gradient = computeGradient(_volume, samplePosition);
+            color.rgb = calculatePhongShading(textureToWorld(_volume, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
+#endif
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
             result.rgb = mix(color.rgb, result.rgb, result.a);
@@ -128,7 +172,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (firstHitT < 0.0 && result.a > 0.0) {
             firstHitT = t;
             out_FHP = vec4(samplePosition, 1.0);
-            out_FHN = vec4(normalize(gradient), 1.0);
+            out_FHN = vec4(normalize(computeGradient(_volume, samplePosition)), 1.0);
         }
 
         // early ray termination
@@ -137,7 +181,12 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             t = tend;
         }
 
+#ifdef ENABLE_ADAPTIVE_STEPSIZE
+        entryPoint.rgb = samplePosition;
+        t += _samplingStepSize * exp2(_stepPower);
+#else
         t += _samplingStepSize;
+#endif
     }
 
     // calculate depth value from ray parameter
@@ -147,7 +196,6 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         float depthExit = getElement2DNormalized(_exitPointsDepth, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
-
     return result;
 }
 

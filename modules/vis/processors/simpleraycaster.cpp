@@ -41,12 +41,14 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows", false, InvalidationLevel::INVALID_SHADER)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
+        , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", false, InvalidationLevel::INVALID_SHADER)
     {
         addDecorator(new ProcessorDecoratorShading());
 
         addProperty(&p_targetImageID);
         addProperty(&p_enableShadowing);
         addProperty(&p_shadowIntensity);
+        addProperty(&p_enableAdaptiveStepsize);
         decoratePropertyCollection(this);
     }
 
@@ -80,6 +82,8 @@ namespace campvis {
         std::string toReturn = RaycastingProcessor::generateHeader();
         if (p_enableShadowing.getValue())
             toReturn += "#define ENABLE_SHADOWING\n";
+        if (p_enableAdaptiveStepsize.getValue())
+            toReturn += "#define ENABLE_ADAPTIVE_STEPSIZE\n";
         return toReturn;
     }
 
