@@ -71,7 +71,7 @@ const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
 
 /**
- * Computes the DRR by simple raycasting and returns the final fragment color.
+ * Performs the raycasting and returns the final fragment color.
  */
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
@@ -89,8 +89,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     while (t < tend) {
         // compute sample position
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
-        vec3 singleStep = direction * _samplingStepSize;
-        vec3 samplePosition = entryPoint.rgb + singleStep * exp2(_stepPower);
+        vec3 samplePosition = entryPoint.rgb + direction * _samplingStepSize;
 #else
         vec3 samplePosition = entryPoint.rgb + t * direction;
 #endif
@@ -100,29 +99,28 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec4 color = lookupTF(_transferFunction, intensity);
 
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
-        if (color.a == 0.0) {
+        if (color.a <= 0.0) {
             // we're within void, make the steps bigger
             _inVoid = true;
-            if (_stepPower < 5.0)
-                _stepPower += 1.0;
         }
         else {
-            // we're outside void, perform compositing but make sure we didn't miss anything => perform intersection refinement
-            // we try to find the intersection point using binary search until _stepPower is back to 0:
-            while (_stepPower > 0.0) {
-                _stepPower -= 1.0;
+            if (_inVoid) {
+                // we just left the void, perform intersection refinement
+                for (_stepPower = 1.0; _stepPower < 5.0; _stepPower += 1.0) {
+                    vec3 newSamplePosition = entryPoint.rgb + direction * (_samplingStepSize / exp2(_stepPower));
+                    float newIntensity = getElement3DNormalized(_volume, newSamplePosition).a;
+                    vec4 newColor = lookupTF(_transferFunction, newIntensity);
 
-                samplePosition = entryPoint.rgb + singleStep * exp2(_stepPower);
-                intensity = getElement3DNormalized(_volume, samplePosition).a;
-                color = lookupTF(_transferFunction, intensity);
-
-                if (color.a == 0.0) {
-                    // we're back in the void - look on the right-hand side
-                    entryPoint.rgb = samplePosition;
-                }
-                else {
-                    // we're still in the matter - look on the left-hand side
-                    // nothing to do here...
+                    if (newColor.a <= 0.0) {
+                        // we're back in the void - look on the right-hand side
+                        entryPoint.rgb = newSamplePosition;
+                    }
+                    else {
+                        // we're still in the matter - look on the left-hand side
+                        samplePosition = newSamplePosition;
+                        color = newColor;
+                        t -= _samplingStepSize / exp2(_stepPower);
+                    }
                 }
             }
             _inVoid = false;
@@ -183,7 +181,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
         entryPoint.rgb = samplePosition;
-        t += _samplingStepSize * exp2(_stepPower);
+        t += _samplingStepSize;
 #else
         t += _samplingStepSize;
 #endif
