@@ -50,7 +50,7 @@ namespace campvis {
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , p_camera("camera", "Camera")
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , p_samplingStepSize("samplingStepSize", "Sampling Step Size", .05f, 0.001f, 1.f)
+        , p_samplingRate("SamplingRate", "Sampling Rate", 2.f, 0.1f, 10.f)
         , p_jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
         , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
         , _fragmentShaderFilename(fragmentShaderFileName)
@@ -62,7 +62,7 @@ namespace campvis {
         addProperty(&p_exitImageID);
         addProperty(&p_camera);  
         addProperty(&p_transferFunction);
-        addProperty(&p_samplingStepSize);
+        addProperty(&p_samplingRate);
         addProperty(&p_jitterEntryPoints);
         addProperty(&p_jitterStepSizeMultiplier);
     }
@@ -107,12 +107,14 @@ namespace campvis {
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_jitterEntryPoints", p_jitterEntryPoints.getValue());
                 _shader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
-                _shader->setUniform("_samplingStepSize", p_samplingStepSize.getValue() * .1f);
+
+                float samplingStepSize = 1.f / (p_samplingRate.getValue() * tgt::max(img->getSize()));
+                _shader->setUniform("_samplingStepSize", samplingStepSize);
 
                 const tgt::Camera& cam = p_camera.getValue();
                 float n = cam.getNearDist();
                 float f = cam.getFarDist();
-                _shader->setUniform("_cameraPosition", p_camera.getValue().getPosition());
+                _shader->setUniform("_cameraPosition", cam.getPosition());
                 _shader->setUniform("const_to_z_e_1", 0.5f + 0.5f*((f+n)/(f-n)));
                 _shader->setUniform("const_to_z_e_2", ((f-n)/(f*n)));
                 _shader->setUniform("const_to_z_w_1", ((f*n)/(f-n)));

@@ -58,7 +58,6 @@ uniform vec3 _cameraPosition;
 uniform float _samplingStepSize;
 
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
-float _stepPower = 0.0;
 bool _inVoid = false;
 #endif
 
@@ -88,11 +87,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
     while (t < tend) {
         // compute sample position
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-        vec3 samplePosition = entryPoint.rgb + direction * _samplingStepSize;
-#else
         vec3 samplePosition = entryPoint.rgb + t * direction;
-#endif
 
         // lookup intensity and TF
         float intensity = getElement3DNormalized(_volume, samplePosition).a;
@@ -105,25 +100,31 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
         else {
             if (_inVoid) {
+                float formerT = t - _samplingStepSize;
+
                 // we just left the void, perform intersection refinement
-                for (_stepPower = 1.0; _stepPower < 5.0; _stepPower += 1.0) {
-                    vec3 newSamplePosition = entryPoint.rgb + direction * (_samplingStepSize / exp2(_stepPower));
+                for (float stepPower = 0.5; stepPower > 0.05; stepPower /= 2.0) {
+                    // compute refined sample position
+                    float newT = formerT + _samplingStepSize * stepPower;
+                    vec3 newSamplePosition = entryPoint.rgb + newT * direction;
+
+                    // lookup refined intensity + TF
                     float newIntensity = getElement3DNormalized(_volume, newSamplePosition).a;
                     vec4 newColor = lookupTF(_transferFunction, newIntensity);
 
                     if (newColor.a <= 0.0) {
                         // we're back in the void - look on the right-hand side
-                        entryPoint.rgb = newSamplePosition;
+                        formerT = newT;
                     }
                     else {
                         // we're still in the matter - look on the left-hand side
                         samplePosition = newSamplePosition;
                         color = newColor;
-                        t -= _samplingStepSize / exp2(_stepPower);
+                        t -= _samplingStepSize * stepPower;
                     }
                 }
+                _inVoid = false;
             }
-            _inVoid = false;
         }
 #endif
 
@@ -180,8 +181,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
-        entryPoint.rgb = samplePosition;
-        t += _samplingStepSize;
+        t += _samplingStepSize * (_inVoid ? 1.0 : 0.125);
 #else
         t += _samplingStepSize;
 #endif

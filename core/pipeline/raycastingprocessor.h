@@ -104,7 +104,7 @@ namespace campvis {
 
         CameraProperty p_camera;                         ///< Camera used for ray casting
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
-        FloatProperty p_samplingStepSize;                ///< Ray casting step size
+        FloatProperty p_samplingRate;                    ///< Ray casting sampling rate
         BoolProperty p_jitterEntryPoints;                ///< Flag whether to jitter the entry points
         FloatProperty p_jitterStepSizeMultiplier;        ///< Step size multiplier for entry points jitter
 
