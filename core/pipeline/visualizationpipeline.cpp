@@ -41,7 +41,8 @@ namespace campvis {
     VisualizationPipeline::VisualizationPipeline() 
         : AbstractPipeline()
         , tgt::EventListener()
-        , _renderTargetSize("canvasSize", "Canvas Size", tgt::ivec2(128, 128))
+        , _lqMode(false)
+        , _effectiveRenderTargetSize("canvasSize", "Canvas Size", tgt::ivec2(128, 128))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget")
         , _canvas(0)
     {
@@ -76,7 +77,12 @@ namespace campvis {
     }
 
     const tgt::ivec2& VisualizationPipeline::getRenderTargetSize() const {
-        return _renderTargetSize.getValue();
+        return _renderTargetSize;
+    }
+
+    void VisualizationPipeline::setRenderTargetSize(const tgt::ivec2& size) {
+        _renderTargetSize = size;
+        updateEffectiveRenderTargetSize();
     }
 
     void VisualizationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
@@ -87,10 +93,6 @@ namespace campvis {
 
     const std::string& VisualizationPipeline::getRenderTargetID() const {
         return _renderTargetID.getValue();
-    }
-
-    void VisualizationPipeline::setRenderTargetSize(const tgt::ivec2& size) {
-        _renderTargetSize.setValue(size);
     }
 
     void VisualizationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor* processor) {
@@ -115,6 +117,23 @@ namespace campvis {
     void VisualizationPipeline::addEventHandler(AbstractEventHandler* eventHandler) {
         tgtAssert(eventHandler != 0, "Event handler must not be 0.");
         _eventHandlers.push_back(eventHandler);
+    }
+
+    void VisualizationPipeline::enableLowQualityMode() {
+        _lqMode = true;
+        updateEffectiveRenderTargetSize();
+    }
+
+    void VisualizationPipeline::disableLowQualityMode() {
+        _lqMode = false;
+        updateEffectiveRenderTargetSize();
+    }
+
+    void VisualizationPipeline::updateEffectiveRenderTargetSize() {
+        if (_lqMode)
+            _effectiveRenderTargetSize.setValue(_renderTargetSize / 2);
+        else
+            _effectiveRenderTargetSize.setValue(_renderTargetSize);
     }
 
 }

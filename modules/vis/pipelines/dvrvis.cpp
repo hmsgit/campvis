@@ -44,18 +44,18 @@ namespace campvis {
         , _imageReader()
         , _pgGenerator()
         , _vmgGenerator()
-        , _vmRenderer(_renderTargetSize)
-        , _eepGenerator(_renderTargetSize)
-        , _vmEepGenerator(_renderTargetSize)
-        , _dvrNormal(_renderTargetSize)
-        , _dvrVM(_renderTargetSize)
-        , _depthDarkening(_renderTargetSize)
-        , _combine(_renderTargetSize)
+        , _vmRenderer(_effectiveRenderTargetSize)
+        , _eepGenerator(_effectiveRenderTargetSize)
+        , _vmEepGenerator(_effectiveRenderTargetSize)
+        , _dvrNormal(_effectiveRenderTargetSize)
+        , _dvrVM(_effectiveRenderTargetSize)
+        , _depthDarkening(_effectiveRenderTargetSize)
+        , _combine(_effectiveRenderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventHandler(&_camera, _renderTargetSize.getValue());
+        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
         _eventHandlers.push_back(_trackballEH);
 
         addProcessor(&_imageReader);
@@ -150,8 +150,8 @@ namespace campvis {
         _depthDarkening.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
         _combine.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
 
-        _trackballEH->setViewportSize(_renderTargetSize.getValue());
-        _renderTargetSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
+        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
+        _effectiveRenderTargetSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
     }
 
     void DVRVis::execute() {
@@ -225,8 +225,8 @@ namespace campvis {
     }
 
     void DVRVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_renderTargetSize.getValue());
-        float ratio = static_cast<float>(_renderTargetSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().y);
+        _trackballEH->setViewportSize(_renderTargetSize);
+        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
 

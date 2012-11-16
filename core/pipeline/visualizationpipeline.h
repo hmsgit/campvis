@@ -104,7 +104,7 @@ namespace campvis {
 
         /**
          * Returns the viewport size of the target canvas
-         * \return _renderTargetSize
+         * \return _effectiveRenderTargetSize
          */
         const tgt::ivec2& getRenderTargetSize() const;
 
@@ -119,6 +119,20 @@ namespace campvis {
          * \param   eventHandler    The event handler to add.
          */
         void addEventHandler(AbstractEventHandler* eventHandler);
+
+        /**
+         * Enables low quality mode, which effectively reduces the render target size by factor 4.
+         * \note    Do not forget to call disableLowQualityMode().
+         * \sa      disableLowQualityMode()
+         */
+        void enableLowQualityMode();
+
+        /**
+         * Disables low quality mode, which effectively resets the render target size to its original value;
+         * \note    Do not forget to call disableLowQualityMode().
+         * \sa      disableLowQualityMode()
+         */
+        void disableLowQualityMode();
 
         /// Signal emitted when the pipeline's render target has changed
         sigslot::signal0<> s_renderTargetChanged;
@@ -146,8 +160,17 @@ namespace campvis {
          */
         void lockGLContextAndExecuteProcessor(AbstractProcessor* processor);
 
-        GenericProperty<tgt::ivec2> _renderTargetSize;      ///< Viewport size of target canvas
-        StringProperty _renderTargetID;                     ///< ID of the render target image to be rendered to the canvas
+        /**
+         * Updates the _effectiveRenderTargetSize property considering LQ mode.
+         */
+        void updateEffectiveRenderTargetSize();
+
+        tgt::ivec2 _renderTargetSize;                           ///< original render target size
+        bool _lqMode;                                           ///< Flag whether low quality mode is enables
+
+        GenericProperty<tgt::ivec2> _effectiveRenderTargetSize; ///< actual size of the render targets (considering LQ mode)
+        StringProperty _renderTargetID;                         ///< ID of the render target image to be rendered to the canvas
+
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
 
         tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.

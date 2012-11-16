@@ -31,6 +31,7 @@
 #include "tgt/assert.h"
 #include "tgt/event/mouseevent.h"
 #include "core/properties/cameraproperty.h"
+#include "core/pipeline/visualizationpipeline.h"
 
 namespace campvis {
 
@@ -63,8 +64,9 @@ namespace campvis {
 
     const std::string TrackballNavigationEventHandler::loggerCat_ = "CAMPVis.core.eventhandler.TrackballNavigationEventHandler";
 
-    TrackballNavigationEventHandler::TrackballNavigationEventHandler(CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
+    TrackballNavigationEventHandler::TrackballNavigationEventHandler(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
         : AbstractEventHandler()
+        , _parentPipeline(parentPipeline)
         , _cameraProperty(cameraProperty)
         , _cpnw(cameraProperty)
         , _trackball(0)
@@ -98,10 +100,14 @@ namespace campvis {
     void TrackballNavigationEventHandler::execute(tgt::Event* e) {
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
-            if (me->action() == tgt::MouseEvent::PRESSED)
+            if (me->action() == tgt::MouseEvent::PRESSED) {
+                _parentPipeline->enableLowQualityMode();
                 _trackball->mousePressEvent(me);
-            else if (me->action() == tgt::MouseEvent::RELEASED)
+            }
+            else if (me->action() == tgt::MouseEvent::RELEASED) {
+                _parentPipeline->disableLowQualityMode();
                 _trackball->mouseReleaseEvent(me);
+            }
             else if (me->action() == tgt::MouseEvent::MOTION)
                 _trackball->mouseMoveEvent(me);
             else if (me->action() == tgt::MouseEvent::WHEEL)

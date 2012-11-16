@@ -37,6 +37,7 @@
 
 namespace campvis {
     class CameraProperty;
+    class VisualizationPipeline;
 
     /**
      * Wrapper to adapt a CameraProperty to the tgt::Trackball interface.
@@ -67,8 +68,11 @@ namespace campvis {
     public:
         /**
          * Creates a TrackballNavigationEventHandler.
+         * \param   parentPipeline  Parent pipeline of this event handler, must not be 0.
+         * \param   cameraProperty  The CameraProperty to apply the navigation to.
+         * \param   viewportSize    Initial viewport size
          */
-        TrackballNavigationEventHandler(CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
+        TrackballNavigationEventHandler(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
 
         /**
          * Virtual Destructor
@@ -116,10 +120,11 @@ namespace campvis {
         void setSceneBounds(const tgt::Bounds& bounds);
 
     protected:
-        CameraProperty* _cameraProperty;
-        CamPropNavigationWrapper _cpnw;
-        tgt::Trackball* _trackball;
-        tgt::Bounds _sceneBounds;
+        VisualizationPipeline* _parentPipeline; ///< The parent VisualizationPipeline
+        CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
+        CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
+        tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
+        tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
 
         static const std::string loggerCat_;
     };

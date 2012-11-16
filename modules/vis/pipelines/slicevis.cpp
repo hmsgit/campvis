@@ -39,7 +39,7 @@ namespace campvis {
         , _imageReader()
         , _gvg()
         , _lhh()
-        , _sliceExtractor(_renderTargetSize)
+        , _sliceExtractor(_effectiveRenderTargetSize)
         , _wheelHandler(&_sliceExtractor.p_sliceNumber)
     {
         addProcessor(&_imageReader);
