@@ -39,9 +39,7 @@
 #include "core/datastructures/imagedatagl.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/tools/job.h"
-#include "core/tools/quadrenderer.h"
 
-#include "application/gui/datacontainertreewidget.h"
 
 namespace campvis {
 
@@ -50,12 +48,10 @@ namespace campvis {
         , _dataContainer(0)
         , _paintShader(0)
         , _quad(0)
-        , dimX_(0)
-        , dimY_(0)
-        , scaledWidth_(0)
-        , scaledHeight_(0)
-        , selected_(0)
-        , fullscreen_(false)
+        , _numTiles(0, 0)
+        , _quadSize(0, 0)
+        , _selectedTexture(0)
+        , _renderFullscreen(false)
     {
 
         makeCurrent();
@@ -79,8 +75,11 @@ namespace campvis {
         _paintShader->setAttributeLocation(0, "in_Position");
         _paintShader->setAttributeLocation(1, "in_TexCoords");
 
+        createQuad();
+
         // set this as painter to get notified when window size changes
         setPainter(this, false);
+        getEventHandler()->addListenerToFront(this);
     }
 
     void DataContainerInspectorCanvas::deinit() {
@@ -179,12 +178,9 @@ namespace campvis {
             setWindowTitle(title);*/
 
         // update layout dimensions
-        dimX_ = (int)ceil(sqrt((float)textures.size()));
-        dimY_ = ceil((float)textures.size() / dimX_);
-
-        scaledWidth_ = size_.x / dimX_;
-        scaledHeight_ = size_.y / dimY_;
-        createQuad(scaledWidth_, scaledHeight_);
+        _numTiles.x = ceil(sqrt(static_cast<float>(textures.size())));
+        _numTiles.y = ceil(static_cast<float>(textures.size()) / _numTiles.x);
+        _quadSize = size_ / _numTiles;
 
         _paintShader->activate();
 
@@ -195,20 +191,23 @@ namespace campvis {
         tu.activate();
         _paintShader->setUniform("_texture._texture", tu.getUnitNumber());
 
-        if (fullscreen_) {
-            if(selected_ >= 0 && selected_ < (int)textures.size()) {
-                paintTexture(textures[selected_]);
+        if (_renderFullscreen) {
+            if(_selectedTexture >= 0 && _selectedTexture < (int)textures.size()) {
+                tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(size_, 1.f));
+                _paintShader->setUniform("_modelMatrix", scaleMatrix);
+                paintTexture(textures[_selectedTexture]);
             }
         }
         else {
-            for (int y = 0; y < dimY_; ++y) {
-                for (int x = 0; x < dimX_; ++x) {
-                    int index = (dimX_ * y) + x;
+            for (int y = 0; y < _numTiles.y; ++y) {
+                for (int x = 0; x < _numTiles.y; ++x) {
+                    int index = (_numTiles.x * y) + x;
                     if (index >= static_cast<int>(textures.size()))
                         break;
 
-                    tgt::mat4 translation = tgt::mat4::createTranslation(tgt::vec3(scaledWidth_ * x, scaledHeight_ * y, 0.f));
-                    _paintShader->setUniform("_modelMatrix", translation);
+                    tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(_quadSize, 1.f));
+                    tgt::mat4 translation = tgt::mat4::createTranslation(tgt::vec3(_quadSize.x * x, _quadSize.y * y, 0.f));
+                    _paintShader->setUniform("_modelMatrix", translation * scaleMatrix);
                     paintTexture(textures[index]);
                 }
             }
@@ -234,13 +233,13 @@ namespace campvis {
         GLJobProc.enqueueJob(this, new CallMemberFuncJob<DataContainerInspectorCanvas>(this, &DataContainerInspectorCanvas::paint), OpenGLJobProcessor::PaintJob);
     }
 
-    void DataContainerInspectorCanvas::createQuad(float width, float height) {
+    void DataContainerInspectorCanvas::createQuad() {
         std::vector<tgt::vec3> vertices, texCorods;
 
         vertices.push_back(tgt::vec3( 0.f,  0.f, 0.f));
-        vertices.push_back(tgt::vec3(width, 0.f, 0.f));
-        vertices.push_back(tgt::vec3(width, height, 0.f));
-        vertices.push_back(tgt::vec3( 0.f,  height, 0.f));
+        vertices.push_back(tgt::vec3(1.f, 0.f, 0.f));
+        vertices.push_back(tgt::vec3(1.f, 1.f, 0.f));
+        vertices.push_back(tgt::vec3( 0.f,  1.f, 0.f));
         texCorods.push_back(tgt::vec3(0.f, 1.f, 0.f));
         texCorods.push_back(tgt::vec3(1.f, 1.f, 0.f));
         texCorods.push_back(tgt::vec3(1.f, 0.f, 0.f));
@@ -252,6 +251,19 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::sizeChanged(const tgt::ivec2&) {
+        invalidate();
+    }
+
+    void DataContainerInspectorCanvas::mouseDoubleClickEvent(tgt::MouseEvent* e) {
+        if (_renderFullscreen) {
+            _renderFullscreen = false;
+        }
+        else {
+            tgt::ivec2 selectedIndex(e->x() / _quadSize.x, e->y() / _quadSize.y);
+            _selectedTexture = (selectedIndex.y * _numTiles.x) + selectedIndex.x;
+            _renderFullscreen = true;
+        }
+        e->accept();
         invalidate();
     }
 

@@ -121,6 +121,7 @@ namespace campvis {
         _renderTargetID.setValue("combine");
 
         _pgGenerator.p_geometryID.connect(&_vmEepGenerator.p_geometryID);
+        _pgGenerator.p_geometryID.connect(&_eepGenerator.p_geometryID);
         _vmgGenerator.p_mirrorID.connect(&_vmEepGenerator.p_mirrorID);
         _vmgGenerator.p_mirrorID.connect(&_vmRenderer.p_geometryID);
         _vmgGenerator.p_mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));

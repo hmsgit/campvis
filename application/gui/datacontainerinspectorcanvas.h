@@ -32,6 +32,8 @@
 
 #include "sigslot/sigslot.h"
 #include "tgt/painter.h"
+#include "tgt/event/eventlistener.h"
+#include "tgt/event/mouseevent.h"
 #include "tgt/qt/qtcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tbb/include/tbb/mutex.h"
@@ -51,7 +53,7 @@ namespace campvis {
     class DataHandle;
     class FaceGeometry;
 
-    class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public sigslot::has_slots<> {
+    class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public tgt::EventListener, public sigslot::has_slots<> {
         Q_OBJECT;
 
     public:
@@ -98,6 +100,12 @@ namespace campvis {
         /// This is meant be overridden to adjust camera settings to new canvas dimensions
         virtual void sizeChanged(const tgt::ivec2&);
 
+        /**
+         * Called on double click event on this canvas
+         * \param   e   Mouse event arguments
+         */
+        virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
+
     private slots:
 
     protected:
@@ -114,25 +122,29 @@ namespace campvis {
          */
         void invalidate();
 
+        /**
+         * Renders the given texture.
+         * Binds the texture to the shader, sets the uniforms and renders the quad.
+         * \param   texture     The texture to render.
+         */
         void paintTexture(const tgt::Texture* texture);
 
-        void createQuad(float width, float height);
+        /**
+         * Creates the quad used for rendering the textures.
+         */
+        void createQuad();
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         std::map<std::string, DataHandle> _handles;     ///< Local copy of the DataHandles to inspect
-        tbb::mutex _localMutex;
+        tbb::mutex _localMutex;                         ///< Mutex protecting the local members
 
-        tgt::Shader* _paintShader;
-        FaceGeometry* _quad;
+        tgt::Shader* _paintShader;                      ///< GLSL shader for rendering the textures
+        FaceGeometry* _quad;                            ///< Quad used for rendering
 
-        int dimX_;
-        int dimY_;
-
-        int scaledWidth_;
-        int scaledHeight_;
-
-        size_t selected_;
-        bool fullscreen_;
+        tgt::ivec2 _numTiles;                           ///< number of tiles on texture overview
+        tgt::ivec2 _quadSize;                           ///< size in pixels for each tile in overview
+        size_t _selectedTexture;                        ///< index of selected texture for fullscreen view
+        bool _renderFullscreen;                         ///< flag whether to render in full screen
 
     };
 }

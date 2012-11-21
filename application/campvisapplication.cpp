@@ -124,7 +124,11 @@ namespace campvis {
         if (_argc > 0) {
             // ugly hack
             std::string basePath(_argv[0]);
-            basePath = tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(basePath)));
+            basePath = tgt::FileSystem::parentDir(basePath);
+            ShdrMgr.addPath(basePath);
+            ShdrMgr.addPath(basePath + "/core/glsl");
+
+            basePath = tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(basePath));
             ShdrMgr.addPath(basePath);
             ShdrMgr.addPath(basePath + "/core/glsl");
 

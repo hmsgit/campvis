@@ -126,7 +126,8 @@ namespace campvis {
             if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
             	_selectedPipeline = pipeline;
                 _selectedProcessor = 0;
-                _dcInspectorCanvas->setDataContainer(&_selectedPipeline->getDataContainer());
+                if (_dcInspectorCanvas != 0)
+                    _dcInspectorCanvas->setDataContainer(&_selectedPipeline->getDataContainer());
 
                 if (_dcInspectorWidget != 0)
                     onBtnShowDataContainerInspectorClicked();
