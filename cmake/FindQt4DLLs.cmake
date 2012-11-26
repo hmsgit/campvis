@@ -20,7 +20,7 @@ ENDIF()
 IF(DLL_DIR)
     SET(QT_DLLS_FOUND TRUE)
     
-    FOREACH(component ${Qt4DLLsCAMPVIS_FIND_COMPONENTS})
+    FOREACH(component ${Qt4DLLs_FIND_COMPONENTS})
         IF(EXISTS ${DLL_DIR}/${component}d4.dll)
             LIST(APPEND QT_DEBUG_DLLS ${DLL_DIR}/${component}d4.dll)
         ELSE()

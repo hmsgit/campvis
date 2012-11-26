@@ -58,21 +58,15 @@ ENDIF()
 # Copy External DLLs
 #
 IF(WIN32)
+    # gather Qt4 DLLs - TODO: remove redundant naming of required components 
+    FIND_PACKAGE(Qt4DLLs COMPONENTS QtCore QtGui QtOpenGL)
+    LIST(APPEND CampvisExternalDllsDebug ${QT_DEBUG_DLLS})
+    LIST(APPEND CampvisExternalDllsRelease ${QT_RELEASE_DLLS})
+
     LIST(REMOVE_DUPLICATES CampvisExternalDllsDebug)
     LIST(REMOVE_DUPLICATES CampvisExternalDllsRelease)
 
     IF(CAMPVIS_COPY_EXTERNAL_DLLS)
         COPY_EXTERNAL_DLLS(CampvisExternalDllsDebug CampvisExternalDllsRelease false)
-    ENDIF()
-    
-    IF(CAMPVIS_ADD_INSTALL_TARGET)
-        INSTALL(FILES ${CampvisExternalDllsDebug} 
-            DESTINATION .
-            CONFIGURATIONS Debug
-        )
-        INSTALL(FILES ${CampvisExternalDllsRelease}
-            DESTINATION .
-            CONFIGURATIONS Release
-        )
     ENDIF()
 ENDIF()

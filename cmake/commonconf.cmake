@@ -1,7 +1,8 @@
 IF(NOT CommonconfProcessed)
 
 SET(CampvisHome ${CMAKE_CURRENT_SOURCE_DIR})
-MESSAGE(STATUS "TUMVis Home: ${CampvisHome}")
+MESSAGE(STATUS "TUMVis Source Directory: ${CampvisHome}")
+MESSAGE(STATUS "TUMVis Binary Directory: ${CMAKE_BINARY_DIR}")
 
 # include macros
 INCLUDE(${CampvisHome}/cmake/macros.cmake)
@@ -53,9 +54,9 @@ ENDIF()
 
 
 # set binary output path
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CampvisHome}/bin")
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CampvisHome}/bin")
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CampvisHome}/bin")
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 # common include directories
 LIST(APPEND CampvisGlobalIncludeDirs "${CampvisHome}/ext")
@@ -205,7 +206,6 @@ FOREACH(ModDir ${ModDirs})
     # check whether  module.cmake file exists
     SET(ModFile ${ModulesDir}/${ModDir}/${ModDir}.cmake)
     IF(EXISTS ${ModFile})
-        MESSAGE(STATUS "* Found Module ${ModDir}")
         STRING(TOLOWER ${ModDir} ModDirLower)
         STRING(TOUPPER ${ModDir} ModDirUpper)
 
@@ -230,10 +230,15 @@ FOREACH(ModDir ${ModDirs})
             UNSET(ThisModSources)
             UNSET(ThisModHeaders)
             
-        ELSEIF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
+            MESSAGE(STATUS "* Found Module '${ModDir}' . ENABLED")
+        ELSE()
+            MESSAGE(STATUS "* Found Module '${ModDir}'")
+        ENDIF(CAMPVIS_BUILD_MODULE_${ModDirUpper})
+        
+        IF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
             # add a CMake option for building this module
             OPTION(CAMPVIS_BUILD_MODULE_${ModDirUpper}  "Build Module ${ModDir}" OFF)
-        ENDIF(CAMPVIS_BUILD_MODULE_${ModDirUpper})
+        ENDIF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
         
     ELSE(EXISTS ${ModFile})
         MESSAGE(STATUS "* WARNING: Found Directory ${ModDir} Without CMake file - ignored")
@@ -243,4 +248,3 @@ ENDFOREACH(ModDir ${ModDirs})
 
 SET(CommonconfProcessed TRUE)
 ENDIF(NOT CommonconfProcessed)
- 
