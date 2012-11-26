@@ -27,51 +27,56 @@
 // 
 // ================================================================================================
 
-#include "TransferFunctionProperty.h"
+#ifndef TRANSFUNCWINDOWINGEVENTHANDLER_H__
+#define TRANSFUNCWINDOWINGEVENTHANDLER_H__
+
+#include "tgt/logmanager.h"
+#include "tgt/vector.h"
+#include "core/eventhandlers/abstracteventhandler.h"
 
 namespace campvis {
+    class TransferFunctionProperty;
 
-    const std::string TransferFunctionProperty::loggerCat_ = "CAMPVis.core.datastructures.TransferFunctionProperty";
+    /**
+     * Event handler that maps mouse click-and-drag events to the windowing of a transfer function.
+     * 
+     */
+    class TransFuncWindowingEventHandler : public AbstractEventHandler {
+    public:
+        /**
+         * Creates a TransFuncWindowingEventHandler.
+         */
+        TransFuncWindowingEventHandler(TransferFunctionProperty* property);
 
-    TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
-        : AbstractProperty(name, title, il)
-        , _transferFunction(tf)
-    {
-        tgtAssert(tf != 0, "Assigned transfer function must not be 0.");
-        tf->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
-    }
-
-    TransferFunctionProperty::~TransferFunctionProperty() {
-        _transferFunction->s_changed.disconnect(this);
-        delete _transferFunction;
-    }
-
-    AbstractTransferFunction* TransferFunctionProperty::getTF() {
-        return _transferFunction;
-    }
-
-    void TransferFunctionProperty::onTFChanged() {
-        s_changed(this);
-    }
-
-    void TransferFunctionProperty::deinit() {
-        _transferFunction->deinit();
-    }
-
-    void TransferFunctionProperty::replaceTF(AbstractTransferFunction* tf) {
-        tgtAssert(tf != 0, "Transfer function must not be 0.");
-        s_BeforeTFReplace(_transferFunction);
-
-        if (_transferFunction != 0)
-            _transferFunction->s_changed.disconnect(this);
-        delete _transferFunction;
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~TransFuncWindowingEventHandler();
 
 
-        _transferFunction = tf;
-        if (_transferFunction != 0)
-            _transferFunction->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
+        /**
+         * Checks, whether the given event \a e is handled by this EventHandler.
+         * \param e     The event to check
+         * \return      True, if the given event is handled by this EventHandler.
+         */
+        virtual bool accept(tgt::Event* e);
 
-        s_AfterTFReplace(_transferFunction);
-    }
+        /**
+         * Performs the event handling.
+         * \param e     The event to handle
+         */
+        virtual void execute(tgt::Event* e);
+
+    protected:
+        TransferFunctionProperty* _prop;
+
+        bool _mousePressed;                 ///< Flag whether the mouse is currently pressed
+        tgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed
+        tgt::vec2 _originalIntensityDomain; ///< TF intensity domain when mouse was pressed
+
+        static const std::string loggerCat_;
+    };
 
 }
+
+#endif // TRANSFUNCWINDOWINGEVENTHANDLER_H__

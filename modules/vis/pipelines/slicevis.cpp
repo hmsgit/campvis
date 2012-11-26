@@ -41,12 +41,14 @@ namespace campvis {
         , _lhh()
         , _sliceExtractor(_effectiveRenderTargetSize)
         , _wheelHandler(&_sliceExtractor.p_sliceNumber)
+        , _tfWindowingHandler(&_sliceExtractor.p_transferFunction)
     {
         addProcessor(&_imageReader);
 //         addProcessor(&_gvg);
 //         addProcessor(&_lhh);
         addProcessor(&_sliceExtractor);
         addEventHandler(&_wheelHandler);
+        addEventHandler(&_tfWindowingHandler);
     }
 
     SliceVis::~SliceVis() {

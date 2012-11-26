@@ -32,6 +32,7 @@
 
 #include "core/datastructures/imagedatalocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
+#include "core/eventhandlers/transfuncwindowingeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
@@ -71,6 +72,7 @@ namespace campvis {
         SliceExtractor _sliceExtractor;
 
         MWheelToNumericPropertyEventHandler _wheelHandler;
+        TransFuncWindowingEventHandler _tfWindowingHandler;
 
     };
 }
