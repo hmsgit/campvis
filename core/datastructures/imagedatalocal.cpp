@@ -30,9 +30,46 @@
 #include "imagedatalocal.h"
 
 #include "tbb/include/tbb/tbb.h"
+#include "tbb/include/tbb/spin_mutex.h"
+#include <limits>
 
 namespace campvis {
     
+    class NormalizedIntensityRangeGenerator {
+    public:
+        NormalizedIntensityRangeGenerator(const ImageDataLocal* intensityData, Interval<float>* interval)
+            : _intensityData(intensityData)
+            , _interval(interval)
+        {
+            *_interval = Interval<float>();
+        }
+
+        void operator() (const tbb::blocked_range<size_t>& range) const {
+            float localMin = std::numeric_limits<float>::max();
+            float localMax = -std::numeric_limits<float>::max();
+
+            for (size_t i = range.begin(); i != range.end(); ++i) {
+                float value = _intensityData->getElementNormalized(i, 0);
+                localMax = std::max(localMax, value);
+                localMin = std::min(localMin, value);
+            }
+
+            {
+                // TODO: there is probably a more elegant method...
+                tbb::spin_mutex::scoped_lock(_mutex);
+                _interval->nibble(localMin);
+                _interval->nibble(localMax);
+            }
+        }
+
+    protected:
+        const ImageDataLocal* _intensityData;
+        Interval<float>* _interval;
+        tbb::spin_mutex _mutex;
+    };
+
+    // ================================================================================================
+
     class IntensityHistogramGenerator {
     public:
         IntensityHistogramGenerator(const ImageDataLocal* intensityData, ImageDataLocal::IntensityHistogramType* histogram)
@@ -62,10 +99,18 @@ namespace campvis {
         , _numChannels(numChannels)
         , _intensityHistogram(0)
     {
+        _intensityRangeDirty = true;
     }
 
     ImageDataLocal::~ImageDataLocal() {
         delete _intensityHistogram;
+    }
+
+    const Interval<float>& ImageDataLocal::getNormalizedIntensityRange() const {
+        if (_intensityRangeDirty)
+            computeNormalizedIntensityRange();
+
+        return _normalizedIntensityRange;
     }
 
     const ConcurrentGenericHistogramND<float, 1>& ImageDataLocal::getIntensityHistogram() const {
@@ -75,11 +120,17 @@ namespace campvis {
         return *_intensityHistogram;
     }
 
+    void ImageDataLocal::computeNormalizedIntensityRange() const {
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), NormalizedIntensityRangeGenerator(this, &_normalizedIntensityRange));
+        _intensityRangeDirty = false;
+    }
+
     void ImageDataLocal::computeIntensityHistogram() const {
         delete _intensityHistogram;
 
-        float mins = 0.f;
-        float maxs = 1.f;
+        const Interval<float>& i = getNormalizedIntensityRange();
+        float mins = i.getLeft();
+        float maxs = i.getRight();
         size_t numBuckets = 1024;
         _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
         tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), IntensityHistogramGenerator(this, _intensityHistogram));

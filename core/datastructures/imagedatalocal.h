@@ -35,6 +35,7 @@
 
 #include "core/tools/concurrenthistogram.h"
 #include "core/tools/endianhelper.h"
+#include "core/tools/interval.h"
 #include "core/tools/weaklytypedpointer.h"
 
 #include <cstring>
@@ -168,6 +169,15 @@ namespace campvis {
         virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value) = 0;
 
         /**
+         * Returns the range of normalized intensities.
+         * All
+         * \sa      getElementNormalized()
+         * \note    The intensity range is computed using lazy evaluation.
+         * \return  _normalizedIntensityRange
+         */
+        const Interval<float>& getNormalizedIntensityRange() const;
+
+        /**
          * Returns the intensity distribution normalized to float as 1D histogram.
          * \note    The intensity histogram is computed using lazy evaluation, hence, computation
          *          may take some time.
@@ -177,13 +187,20 @@ namespace campvis {
 
     protected:
         /**
-         * Computes the intensity histogram;
+         * Computes the normalized intensity range.
+         */
+        void computeNormalizedIntensityRange() const;
+
+        /**
+         * Computes the intensity histogram.
          */
         void computeIntensityHistogram() const;
 
         WeaklyTypedPointer::BaseType _baseType;     ///< Base type of the image data
         size_t _numChannels;                        ///< Number of channels per image element.
 
+        mutable tbb::atomic<bool> _intensityRangeDirty;         ///< Flag whether _normalizedIntensityRange is dirty and has to be recomputed
+        mutable Interval<float> _normalizedIntensityRange;      ///< Range of the normalized intensities, mutable to allow lazy instantiation
         mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram, mutable to allow lazy instantiation
 
         static const std::string loggerCat_;
