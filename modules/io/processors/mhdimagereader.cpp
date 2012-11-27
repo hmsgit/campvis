@@ -71,9 +71,14 @@ namespace campvis {
             EndianHelper::Endianness e = EndianHelper::LITTLE_ENDIAN;
 
             // image type
-            if (tfp.getString("ObjectType") != "Image") {
-                LERROR("Error while parsing MHD header: ObjectType = Image expected");
-                return;
+            if (tfp.hasKey("ObjectType")) {
+                if (tfp.getString("ObjectType") != "Image") {
+                    LERROR("Error while parsing MHD header: ObjectType = Image expected");
+                    return;
+                }
+            }
+            else {
+                LWARNING("No Key 'ObjectType' found - assuming Image.");
             }
 
             // dimensionality and size

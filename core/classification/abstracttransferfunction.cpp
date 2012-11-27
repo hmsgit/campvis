@@ -86,11 +86,15 @@ namespace campvis {
     }
 
     void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/) {
-        // TODO:    lock here or in createTexture?
+        tgtAssert(shader != 0, "Shader must not be 0.");
+
         {
+            // TODO:    lock here or in createTexture?
             tbb::mutex::scoped_lock lock(_localMutex);
             if (_texture == 0 || _dirtyTexture) {
+                shader->deactivate();
                 createTexture();
+                shader->activate();
             }
         }
 
@@ -157,6 +161,7 @@ namespace campvis {
     void AbstractTransferFunction::setImageHandle(const DataHandle& imageHandle) {
         _imageHandle = imageHandle;
         _dirtyHistogram = true;
+        s_imageHandleChanged();
     }
 
     void AbstractTransferFunction::computeIntensityHistogram() const {

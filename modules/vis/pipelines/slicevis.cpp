@@ -31,6 +31,8 @@
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedataconverter.h"
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
 
 namespace campvis {
 
@@ -67,8 +69,11 @@ namespace campvis {
 
         _sliceExtractor.p_sourceImageID.setValue("se.input");
         _sliceExtractor.p_sliceNumber.setValue(0);
+
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
-        _sliceExtractor.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(0, 0.05f));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
+        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        _sliceExtractor.p_transferFunction.replaceTF(tf);
 
         _renderTargetID.setValue("renderTarget");
         _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
@@ -91,7 +96,8 @@ namespace campvis {
             DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
             ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
             if (local != 0) {
-                _data.addData("se.input", local);
+                DataHandle dh = _data.addData("se.input", local);
+                _sliceExtractor.p_transferFunction.getTF()->setImageHandle(dh);
             }
         }
 //         if (! _gvg.getInvalidationLevel().isValid()) {

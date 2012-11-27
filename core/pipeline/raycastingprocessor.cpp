@@ -97,7 +97,6 @@ namespace campvis {
                 }
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
-                p_transferFunction.getTF()->uploadTexture();
 
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();

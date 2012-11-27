@@ -147,6 +147,9 @@ namespace campvis {
         /// Signal emitted when transfer function has changed.
         sigslot::signal0<> s_changed;
 
+        /// Signal emitted when the image DataHandle for this TF has changed.
+        sigslot::signal0<> s_imageHandleChanged;
+
     protected:
         /**
          * Computes the intensity histogram;

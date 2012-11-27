@@ -61,6 +61,12 @@ namespace campvis {
          */
         virtual ~TransferFunctionPropertyWidget();
 
+        /**
+         * Slot to be called when the propertie's TF changed its image DataHandle.
+         * Resets the intensity domain borders.
+         */
+        void onTransferFunctionImageHandleChanged();
+
     protected:
         /**
          * Gets called when the property has changed, so that widget can update its state.
@@ -72,6 +78,8 @@ namespace campvis {
         void onDomainChanged(double value);
         /// slot called when edit TF button clicked
         void onEditClicked(bool checked);
+        /// slot called when _btnFitDomainToImage clicked
+        void onFitClicked(bool checked);
 
     private:
         QWidget* _widget;                   ///< Widget grouping the widgets together
@@ -80,6 +88,7 @@ namespace campvis {
         QLabel* _lblDomain;                 ///< intensity domain label
         QDoubleSpinBox* _spinDomainLeft;    ///< spin edit for intensity domain lower bound
         QDoubleSpinBox* _spinDomainRight;   ///< spin edit for intensity domain upper bound
+        QPushButton* _btnFitDomainToImage;  ///< button for fitting the intensity domain to the image 
         QPushButton* _btnEditTF;            ///< button for showing the TF editor widget
 
         QDockWidget* _dockWidget;                   ///< DockWidget for transfer function editor

@@ -31,6 +31,8 @@
 
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 #include "application/gui/properties/transferfunctioneditorfactory.h"
+#include "core/datastructures/imagedatalocal.h"
+
 #include <QDockWidget>
 #include <QDoubleSpinBox>
 #include <QGridLayout>
@@ -71,18 +73,38 @@ namespace campvis {
 
         updateWidgetFromProperty();
 
+        _btnFitDomainToImage = new QPushButton("Fit Intensity Domain to Image", _widget);
+        _gridLayout->addWidget(_btnFitDomainToImage, 1, 0, 1, 3);
+
         _btnEditTF = new QPushButton("Edit Transfer Function", _widget);
-        _gridLayout->addWidget(_btnEditTF, 1, 0, 1, 3);
+        _gridLayout->addWidget(_btnEditTF, 2, 0, 1, 3);
 
         addWidget(_widget);
+
+        onTransferFunctionImageHandleChanged();
+        property->getTF()->s_imageHandleChanged.connect(this, &TransferFunctionPropertyWidget::onTransferFunctionImageHandleChanged);
 
         connect(_spinDomainLeft, SIGNAL(valueChanged(double)), this, SLOT(onDomainChanged(double)));
         connect(_spinDomainRight, SIGNAL(valueChanged(double)), this, SLOT(onDomainChanged(double)));
         connect(_btnEditTF, SIGNAL(clicked(bool)), this, SLOT(onEditClicked(bool)));
+        connect(_btnFitDomainToImage, SIGNAL(clicked(bool)), this, SLOT(onFitClicked(bool)));
     }
 
     TransferFunctionPropertyWidget::~TransferFunctionPropertyWidget() {
+        static_cast<TransferFunctionProperty*>(_property)->getTF()->s_imageHandleChanged.disconnect(this);
         delete _dockWidget;
+    }
+
+    void TransferFunctionPropertyWidget::onTransferFunctionImageHandleChanged() {
+        DataHandle dh = static_cast<TransferFunctionProperty*>(_property)->getTF()->getImageHandle();
+        if (dh.getData() != 0) {
+            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(dh.getData());
+            if (idl != 0) {
+                Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
+                _spinDomainLeft->setMinimum(intensityInterval.getLeft());
+                _spinDomainRight->setMaximum(intensityInterval.getRight());
+            }
+        }
     }
 
     void TransferFunctionPropertyWidget::updateWidgetFromProperty() {
@@ -121,6 +143,20 @@ namespace campvis {
         }
 
         _dockWidget->setVisible(true);
+    }
+
+    void TransferFunctionPropertyWidget::onFitClicked(bool checked) {
+        TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
+        AbstractTransferFunction* tf = prop->getTF();
+
+        DataHandle dh = tf->getImageHandle();
+        if (dh.getData() != 0) {
+            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(dh.getData());
+            if (idl != 0) {
+                Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
+                tf->setIntensityDomain(tgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));
+            }
+        }
     }
 
 
