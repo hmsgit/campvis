@@ -44,17 +44,44 @@ namespace campvis {
      */
     struct ImageDataConverter {
     public:
+        /**
+         * Tries to convert \a source to \a TO ImageData type.
+         * \note    Caller takes ownership of the created ImageData pointer.
+         * \tparam  TO      Target conversion type.
+         * \param   source  ImageData source for conversion.
+         * \return  A pointer to the converted ImageData object, 0 if conversion failed.
+         */
         template<class TO>
         static TO* tryConvert(const ImageData* source);
 
+        /**
+         * Converts \a source to \a TO ImageData type.
+         * \note    Caller takes ownership of the created ImageData pointer.
+         * \note    Valid conversions have to be implemented using template specialization.
+         * \tparam  FROM    Source conversion type.
+         * \tparam  TO      Target conversion type.
+         * \param   source  ImageData source for conversion.
+         * \return  A pointer to the converted ImageData object, 0 if conversion failed.
+         */
         template<class FROM, class TO>
         static TO* convert(const FROM* source);
 
     protected:
+        /**
+         * Helper function for creating a GenericImageDataLocal<BASETYPE, NUMCHANNELS> from an ImageDataDisk
+         * \note    Caller takes ownership of the created ImageData pointer.
+         * \tparam  BASETYPE    Image element base type
+         * \tparam  NUMCHANNELS Number of channels per image element.
+         * \param   source      ImageData source for conversion.
+         * \return  A pointer to the converted GenericImageDataLocal<BASETYPE, NUMCHANNELS> object, 0 if conversion failed.
+         */
         template<typename BASETYPE, size_t NUMCHANNELS>
         static GenericImageDataLocal<BASETYPE, NUMCHANNELS>* convertToGenericLocal(const ImageDataDisk* source);
+        
         static const std::string loggerCat_;
     };
+
+// ================================================================================================
 
     template<class FROM, class TO>
     TO* campvis::ImageDataConverter::convert(const FROM* source) {

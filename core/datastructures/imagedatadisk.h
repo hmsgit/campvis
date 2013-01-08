@@ -97,7 +97,8 @@ namespace campvis {
 
         /**
          * Downloads the whole image data to local memory.
-         * \return  Pointer to the image data in the local memory.
+         * \note    The caller has to take ownership of the returned pointer.
+         * \return  Pointer to the image data in the local memory, to be owned by caller.
          */
         WeaklyTypedPointer getImageData() const;
 
