@@ -591,7 +591,7 @@ void Shader::setHeaders(const string& customHeader) {
 
 void Shader::bindFragDataLocation(GLuint colorNumber, std::string name) {
     if (GpuCaps.getShaderVersion() >= GpuCapabilities::GlVersion::SHADER_VERSION_130) {
-        glBindFragDataLocationEXT(id_, colorNumber, name.c_str());
+        glBindFragDataLocation(id_, colorNumber, name.c_str());
     }
 }
 

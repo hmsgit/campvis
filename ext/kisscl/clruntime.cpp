@@ -94,7 +94,7 @@ namespace kisscl {
         std::vector<ContextProperty> properties = Context::generateGlSharingProperties();
         properties.insert(properties.end(), additionalProperties.begin(), additionalProperties.end());
 
-        for (std::vector<Device*>::const_iterator it = _gpuDevices.begin(); it != _gpuDevices.end(); ++it) {
+        for (std::vector<Device*>::const_iterator it = _cpuDevices.begin(); it != _cpuDevices.end(); ++it) {
             toReturn = new Context(*it, properties);
             if (toReturn->isValid())
                 return toReturn;

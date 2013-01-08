@@ -1,19 +1,33 @@
-#include "tools/raycasting.cl"
+//#include "tools/raycasting.cl"
+float4 jitterEntryPoint(float4 position, float4 direction, float stepSize) {
+    float random;
+    fract(sin((float)get_global_id(0) * 12.9898f + (float)get_global_id(1) * 78.233f) * 43758.5453f, &random);
+    return position + direction * (stepSize * random);
+}
+
 
 __constant sampler_t smpNorm = CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR;
-__constant float SAMPLING_BASE_INTERVAL_RCP = 200.0;
+__constant float SAMPLING_BASE_INTERVAL_RCP = 200.0f;
 
 /**
  * Makes a simple raycast through the volume for entry to exit point with minimal diffuse shading.
  */
-float4 simpleRaycast(__global read_only image3d_t volumeTex, __global read_only image2d_t tfData, const float4 entryPoint, const float4 exitPoint, float* depth, const float stepSize, float tfLowerBound, float tfUpperBound) {
+float4 simpleRaycast(
+    image3d_t volumeTex, 
+    image2d_t tfData, 
+    const float4 entryPoint, 
+    const float4 exitPoint, 
+    float* depth, 
+    const float stepSize, 
+    float tfLowerBound, 
+    float tfUpperBound) {
 
     // result color
-    float4 result = (float4)(0.0, 0.0, 0.0, 0.0);
+    float4 result = (float4)(0.0f, 0.0f, 0.0f, 0.0f);
 
-    float t = 0.0; //the current position on the ray with entryPoint as the origin
+    float t = 0.0f; //the current position on the ray with entryPoint as the origin
     float4 direction = exitPoint - entryPoint; //the direction of the ray
-    direction.w = 0.0;
+    direction.w = 0.0f;
     float tend = fast_length(direction); //the length of the ray
 
     direction = fast_normalize(direction);
@@ -59,11 +73,11 @@ float4 simpleRaycast(__global read_only image3d_t volumeTex, __global read_only 
 
 //main for raycasting. This function is called for every pixel in view.
 // TODO: Depth values are currently not read or written as OpenCL does not support OpenGL GL_DEPTH_COMPONENT image formats.
-__kernel void clraycaster(__global read_only image3d_t volumeTex,
-                      __global read_only image2d_t tfData,
-                      __global read_only image2d_t entryTexCol,
-                      __global read_only image2d_t exitTexCol,
-                      __global write_only image2d_t outCol,
+__kernel void clraycaster( read_only image3d_t volumeTex,
+                       read_only image2d_t tfData,
+                       read_only image2d_t entryTexCol,
+                       read_only image2d_t exitTexCol,
+                       write_only image2d_t outCol,
                       float stepSize,
                       float tfLowerBound,
                       float tfUpperBound
@@ -90,9 +104,9 @@ __kernel void clraycaster(__global read_only image3d_t volumeTex,
 }
 
 
-__kernel void foobar(__global read_only image2d_t entryTexCol,
-                      __global read_only image2d_t exitTexCol,
-                      __global write_only image2d_t outCol)
+__kernel void foobar( read_only image2d_t entryTexCol,
+                       read_only image2d_t exitTexCol,
+                       write_only image2d_t outCol)
 {
     //output image pixel coordinates
     int2 target = (int2)(get_global_id(0), get_global_id(1));

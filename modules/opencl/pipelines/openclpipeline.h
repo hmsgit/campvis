@@ -27,29 +27,54 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/slicevis.h"
-#include "modules/opencl/pipelines/openclpipeline.h"
+#ifndef OPENCLPIPELINE_H__
+#define OPENCLPIPELINE_H__
 
-using namespace campvis;
+#include "core/datastructures/imagedatalocal.h"
+#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/pipeline/visualizationpipeline.h"
+#include "core/properties/cameraproperty.h"
+#include "modules/io/processors/mhdimagereader.h"
+#include "modules/vis/processors/proxygeometrygenerator.h"
+#include "modules/vis/processors/eepgenerator.h"
+#include "modules/opencl/processors/clraycaster.h"
 
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-    app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
+namespace campvis {
+    class OpenCLPipeline : public VisualizationPipeline {
+    public:
+        /**
+         * Creates a VisualizationPipeline.
+         */
+        OpenCLPipeline();
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~OpenCLPipeline();
 
-    return toReturn;
+        /// \see VisualizationPipeline::init()
+        virtual void init();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const;
+
+        /**
+         * Execute this pipeline.
+         **/
+        virtual void execute();
+
+        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+
+    protected:
+        CameraProperty _camera;
+        MhdImageReader _imageReader;
+        ProxyGeometryGenerator _pgGenerator;
+        EEPGenerator _eepGenerator;
+        CLRaycaster _clRaycaster;
+
+        TrackballNavigationEventHandler* _trackballEH;
+
+    };
 }
+
+#endif // OPENCLPIPELINE_H__

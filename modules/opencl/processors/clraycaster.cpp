@@ -93,8 +93,8 @@ namespace campvis {
 
         _clContext = CLRtm.createGlSharingContext();
         if (_clContext != 0) {
-            _clProgram = CLRtm.loadProgram(_clContext, "modules/vis/cl/clraycaster.cl");
-            _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable");
+            _clProgram = CLRtm.loadProgram(_clContext, "modules/opencl/cl/clraycaster.cl");
+            _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable -g -s \"C:\\Users\\Christian\\Documents\\TUM\\code\\campvis\\modules\\opencl\\cl\\clraycaster.cl\"");
             _clProgram->build();
         }
     }
@@ -103,6 +103,44 @@ namespace campvis {
         CLRtm.dispose(_clProgram);
         delete _clContext;
         VisualizationProcessor::deinit();
+    }
+
+
+    // Helper function to get OpenCL image format string (channel order and type) from constant
+    // *********************************************************************
+    const char* oclImageFormatString(cl_uint uiImageFormat)
+    {
+        // cl_channel_order 
+        if (uiImageFormat == CL_R)return "CL_R";  
+        if (uiImageFormat == CL_A)return "CL_A";  
+        if (uiImageFormat == CL_RG)return "CL_RG";  
+        if (uiImageFormat == CL_RA)return "CL_RA";  
+        if (uiImageFormat == CL_RGB)return "CL_RGB";
+        if (uiImageFormat == CL_RGBA)return "CL_RGBA";  
+        if (uiImageFormat == CL_BGRA)return "CL_BGRA";  
+        if (uiImageFormat == CL_ARGB)return "CL_ARGB";  
+        if (uiImageFormat == CL_INTENSITY)return "CL_INTENSITY";  
+        if (uiImageFormat == CL_LUMINANCE)return "CL_LUMINANCE";  
+
+        // cl_channel_type 
+        if (uiImageFormat == CL_SNORM_INT8)return "CL_SNORM_INT8";
+        if (uiImageFormat == CL_SNORM_INT16)return "CL_SNORM_INT16";
+        if (uiImageFormat == CL_UNORM_INT8)return "CL_UNORM_INT8";
+        if (uiImageFormat == CL_UNORM_INT16)return "CL_UNORM_INT16";
+        if (uiImageFormat == CL_UNORM_SHORT_565)return "CL_UNORM_SHORT_565";
+        if (uiImageFormat == CL_UNORM_SHORT_555)return "CL_UNORM_SHORT_555";
+        if (uiImageFormat == CL_UNORM_INT_101010)return "CL_UNORM_INT_101010";
+        if (uiImageFormat == CL_SIGNED_INT8)return "CL_SIGNED_INT8";
+        if (uiImageFormat == CL_SIGNED_INT16)return "CL_SIGNED_INT16";
+        if (uiImageFormat == CL_SIGNED_INT32)return "CL_SIGNED_INT32";
+        if (uiImageFormat == CL_UNSIGNED_INT8)return "CL_UNSIGNED_INT8";
+        if (uiImageFormat == CL_UNSIGNED_INT16)return "CL_UNSIGNED_INT16";
+        if (uiImageFormat == CL_UNSIGNED_INT32)return "CL_UNSIGNED_INT32";
+        if (uiImageFormat == CL_HALF_FLOAT)return "CL_HALF_FLOAT";
+        if (uiImageFormat == CL_FLOAT)return "CL_FLOAT";
+
+        // unknown constant
+        return "Unknown";
     }
 
     void CLRaycaster::process(DataContainer& data) {
@@ -121,6 +159,54 @@ namespace campvis {
                     if (_invalidationLevel.isInvalidShader()) {
                         _clProgram->build();
                     }
+
+// ================================================================================================
+                    // Determine and show image format support 
+//                     cl_uint uiNumSupportedFormats = 0;
+// 
+//                     // 2D
+//                     clGetSupportedImageFormats(_clContext->getId(), CL_MEM_READ_ONLY, 
+//                         CL_MEM_OBJECT_IMAGE2D,   
+//                         NULL, NULL, &uiNumSupportedFormats);
+//                     cl_image_format* ImageFormats = new cl_image_format[uiNumSupportedFormats];
+//                     clGetSupportedImageFormats(_clContext->getId(), CL_MEM_READ_ONLY, 
+//                         CL_MEM_OBJECT_IMAGE2D,   
+//                         uiNumSupportedFormats, ImageFormats, NULL);
+//                     printf("  ---------------------------------\n");
+//                     printf("  2D Image Formats Supported (%u)\n", uiNumSupportedFormats); 
+//                     printf("  ---------------------------------\n");
+//                     printf("  %-6s%-16s%-22s\n\n", "#", "Channel Order", "Channel Type"); 
+//                     for(unsigned int i = 0; i < uiNumSupportedFormats; i++) 
+//                     {  
+//                         printf("  %-6u%-16s%-22s\n", (i + 1),
+//                             oclImageFormatString(ImageFormats[i].image_channel_order), 
+//                             oclImageFormatString(ImageFormats[i].image_channel_data_type));
+//                     }
+//                     printf("\n"); 
+//                     delete [] ImageFormats;
+// 
+//                     // 3D
+//                     clGetSupportedImageFormats(_clContext->getId(), CL_MEM_READ_ONLY, 
+//                         CL_MEM_OBJECT_IMAGE3D,   
+//                         NULL, NULL, &uiNumSupportedFormats);
+//                     ImageFormats = new cl_image_format[uiNumSupportedFormats];
+//                     clGetSupportedImageFormats(_clContext->getId(), CL_MEM_READ_ONLY, 
+//                         CL_MEM_OBJECT_IMAGE3D,   
+//                         uiNumSupportedFormats, ImageFormats, NULL);
+//                     printf("  ---------------------------------\n");
+//                     printf("  3D Image Formats Supported (%u)\n", uiNumSupportedFormats); 
+//                     printf("  ---------------------------------\n");
+//                     printf("  %-6s%-16s%-22s\n\n", "#", "Channel Order", "Channel Type"); 
+//                     for(unsigned int i = 0; i < uiNumSupportedFormats; i++) 
+//                     {  
+//                         printf("  %-6u%-16s%-22s\n", (i + 1),
+//                             oclImageFormatString(ImageFormats[i].image_channel_order), 
+//                             oclImageFormatString(ImageFormats[i].image_channel_data_type));
+//                     }
+//                     printf("\n"); 
+//                     delete [] ImageFormats;
+
+// ================================================================================================
 
                     if (img.getDataHandle().getTimestamp() != _volumeTimestamp) {
                         WeaklyTypedPointer wtp = img->getWeaklyTypedPointer();

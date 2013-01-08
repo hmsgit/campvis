@@ -254,7 +254,7 @@ namespace campvis {
     cl_channel_order WeaklyTypedPointer::getClChannelOrder() const {
         switch (_numChannels) {
             case 1: 
-                return CL_A;
+                return CL_INTENSITY;
             case 2: 
                 return CL_RA;
             case 4:
