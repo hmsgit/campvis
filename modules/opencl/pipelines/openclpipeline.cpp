@@ -91,12 +91,6 @@ namespace campvis {
         _eepGenerator.p_entryImageID.connect(&_clRaycaster._entryImageID);
         _eepGenerator.p_exitImageID.connect(&_clRaycaster._exitImageID);
 
-
-        _imageReader.s_invalidated.connect<OpenCLPipeline>(this, &OpenCLPipeline::onProcessorInvalidated);
-        _pgGenerator.s_invalidated.connect<OpenCLPipeline>(this, &OpenCLPipeline::onProcessorInvalidated);
-        _eepGenerator.s_invalidated.connect<OpenCLPipeline>(this, &OpenCLPipeline::onProcessorInvalidated);
-        _clRaycaster.s_invalidated.connect<OpenCLPipeline>(this, &OpenCLPipeline::onProcessorInvalidated);
-
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<OpenCLPipeline>(this, &OpenCLPipeline::onRenderTargetSizeChanged);
     }

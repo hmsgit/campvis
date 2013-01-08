@@ -53,6 +53,7 @@ namespace campvis {
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             try {
                 (*it)->init();
+                (*it)->s_invalidated.connect(this, &AbstractPipeline::onProcessorInvalidated);
             }
             catch (tgt::Exception& e) {
                 LERROR("Caught Exception during initialization of processor: " << e.what());
@@ -66,6 +67,7 @@ namespace campvis {
         // deinitialize all processors:
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             try {
+                (*it)->s_invalidated.disconnect(this);
                 (*it)->deinit();
             }
             catch (tgt::Exception& e) {

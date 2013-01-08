@@ -140,17 +140,6 @@ namespace campvis {
         _dvrNormal.p_targetImageID.connect(&_depthDarkening.p_inputImage);
         _depthDarkening.p_outputImage.connect(&_combine.p_normalImageID);
 
-        _imageReader.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _vmgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _vmRenderer.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _pgGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _eepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _vmEepGenerator.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _dvrNormal.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _dvrVM.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _depthDarkening.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-        _combine.s_invalidated.connect<DVRVis>(this, &DVRVis::onProcessorInvalidated);
-
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
     }

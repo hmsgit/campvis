@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "slicevis.h"
+#include "ixpvdemo.h"
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedataconverter.h"
@@ -36,92 +36,72 @@
 
 namespace campvis {
 
-    SliceVis::SliceVis()
+    IxpvDemo::IxpvDemo()
         : VisualizationPipeline()
-        , _imageReader()
-        , _gvg()
-        , _lhh()
-        , _sliceExtractor(_effectiveRenderTargetSize)
-        , _wheelHandler(&_sliceExtractor.p_sliceNumber)
-        , _tfWindowingHandler(&_sliceExtractor.p_transferFunction)
+        , _xrayReader()
+        , _ctReader()
+        , _usReader()
+        , _usSliceExtractor(_effectiveRenderTargetSize)
+        , _wheelHandler(&_usSliceExtractor.p_sliceNumber)
+        , _tfWindowingHandler(&_usSliceExtractor.p_transferFunction)
     {
-        addProcessor(&_imageReader);
-//         addProcessor(&_gvg);
-//         addProcessor(&_lhh);
-        addProcessor(&_sliceExtractor);
+        addProcessor(&_xrayReader);
+        addProcessor(&_ctReader);
+        addProcessor(&_usReader);
+        addProcessor(&_usSliceExtractor);
         addEventHandler(&_wheelHandler);
         addEventHandler(&_tfWindowingHandler);
     }
 
-    SliceVis::~SliceVis() {
+    IxpvDemo::~IxpvDemo() {
     }
 
-    void SliceVis::init() {
+    void IxpvDemo::init() {
         VisualizationPipeline::init();
 
-        _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
-        _imageReader.p_targetImageID.setValue("reader.output");
+        _xrayReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
+        _xrayReader.p_targetImageID.setValue("xray");
 
-        _gvg.p_inputVolume.setValue("se.input");
-
-//         _lhh.p_inputVolume.setValue("se.input");
-//         _gvg._outputGradients.connect(&_lhh._inputGradients);
-
-        _sliceExtractor.p_sourceImageID.setValue("se.input");
-        _sliceExtractor.p_sliceNumber.setValue(0);
+        _usSliceExtractor.p_sliceNumber.setValue(0);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
-        _sliceExtractor.p_transferFunction.replaceTF(tf);
+        _usSliceExtractor.p_transferFunction.replaceTF(tf);
 
         _renderTargetID.setValue("renderTarget");
-        _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
+        _renderTargetID.addSharedProperty(&(_usSliceExtractor.p_targetImageID));
     }
 
-    void SliceVis::execute() {
+    void IxpvDemo::execute() {
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
             _invalidationLevel.setValid();
             // TODO:    think whether we want to lock all processors already here.
         }
-        if (! _imageReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_imageReader);
+        if (! _xrayReader.getInvalidationLevel().isValid()) {
+            executeProcessor(&_xrayReader);
 
             // convert data
             DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
             ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
             if (local != 0) {
                 DataHandle dh = _data.addData("se.input", local);
-                _sliceExtractor.p_transferFunction.getTF()->setImageHandle(dh);
+                _usSliceExtractor.p_transferFunction.getTF()->setImageHandle(dh);
             }
         }
-//         if (! _gvg.getInvalidationLevel().isValid()) {
-//             executeProcessor(&_gvg);
-//         }
-//         if (! _lhh.getInvalidationLevel().isValid()) {
-//             lockGLContextAndExecuteProcessor(&_lhh);
-//         }
-        if (! _sliceExtractor.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_sliceExtractor);
+        if (! _usSliceExtractor.getInvalidationLevel().isValid()) {
+            lockGLContextAndExecuteProcessor(&_usSliceExtractor);
         }
     }
 
-    void SliceVis::keyEvent(tgt::KeyEvent* e) {
+    void IxpvDemo::keyEvent(tgt::KeyEvent* e) {
         if (e->pressed()) {
-            switch (e->keyCode()) {
-                case tgt::KeyEvent::K_UP:
-                    _sliceExtractor.p_sliceNumber.increment();
-                    break;
-                case tgt::KeyEvent::K_DOWN:
-                    _sliceExtractor.p_sliceNumber.decrement();
-                    break;
-            }
         }
     }
 
-    const std::string SliceVis::getName() const {
-        return "SliceVis";
+    const std::string IxpvDemo::getName() const {
+        return "IXPV Demo";
     }
 
 }

@@ -39,7 +39,6 @@ uniform vec2 _viewportSizeRCP;
 
 uniform bool _integrateGeometry;            ///< flag whether to integrate geometry into the EEP
 uniform bool _isEntrypoint;                 ///< true if current run is for entrypoints, false if current run is for exitpoints
-uniform Texture2D _entryColorTexture;       ///< depth texture of the entrypoints (only used in exitpoints run)
 uniform Texture2D _entryDepthTexture;       ///< depth texture of the entrypoints (only used in exitpoints run)
 uniform Texture2D _geometryDepthTexture;    ///< depth texture of rendered geometry
 

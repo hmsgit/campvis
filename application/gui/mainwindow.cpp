@@ -132,6 +132,9 @@ namespace campvis {
                 if (_dcInspectorWidget != 0)
                     onBtnShowDataContainerInspectorClicked();
             }
+            else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
+                _selectedProcessor = processor;
+            }
         }
         else {
             emit updatePropCollectionWidget(0);
@@ -146,6 +149,7 @@ namespace campvis {
         if (_selectedProcessor != 0 && _selectedPipeline != 0) {
             // this is not as trivial as it seems:
             // We need the pipeline, probably an OpenGL context...
+            _selectedProcessor->applyInvalidationLevel(InvalidationLevel::INVALID_RESULT);
         }
         else if (_selectedPipeline != 0) {
             

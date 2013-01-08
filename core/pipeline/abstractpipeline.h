@@ -95,7 +95,10 @@ namespace campvis {
         DataContainer& getDataContainer();
 
         /**
-         * Adds the processors \a processor to this pipeline's processor list.
+         * Adds the processor \a processor to this pipeline's processor list.
+         * \note    The s_invalidated signal of each processor on this list will be automatically 
+         *          connected to onProcessorInvalidated() during initialization and disconnected
+         *          during deinitialization.
          * \param   processor   The processor to add.
          */
         void addProcessor(AbstractProcessor* processor);

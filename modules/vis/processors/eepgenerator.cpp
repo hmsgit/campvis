@@ -138,13 +138,14 @@ namespace campvis {
 
                 decorateRenderProlog(data, _shader);
                 
+                const tgt::Camera& cam = p_camera.getValue();
+                tgt::TextureUnit geometryDepthUnit, entryDepthUnit;
+
                 _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_modelMatrix", mirrorMatrix);
-                const tgt::Camera& cam = p_camera.getValue();
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
-                tgt::TextureUnit geometryDepthUnit;
 
                 if (geometryImage != 0) {
                      geometryImage->bind(_shader, 0, &geometryDepthUnit, "", "_geometryDepthTexture");
@@ -191,8 +192,7 @@ namespace campvis {
                 _shader->setUniform("_isEntrypoint", false);
 
                 if (geometryImage != 0) {
-                    tgt::TextureUnit entryColorUnit, entryDepthUnit;
-                    entrypoints->bind(_shader, &entryColorUnit, &entryDepthUnit, "_entryColorTexture", "_entryDepthTexture");
+                    entrypoints->bind(_shader, 0, &entryDepthUnit, "", "_entryDepthTexture");
                 }
 
                 glDepthFunc(GL_GREATER);
