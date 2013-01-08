@@ -47,6 +47,7 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Input Geometry ID", "proxygeometry", DataNameProperty::READ)
         , p_mirrorID("mirrorID", "Input Mirror ID", "mirror", DataNameProperty::READ)
+        , p_geometryImageId("GeometryImageId", "Rendered Geometry to Integrate (optional)", "", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
         , p_exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
@@ -58,6 +59,7 @@ namespace campvis {
         addProperty(&p_sourceImageID);
         addProperty(&p_geometryID);
         addProperty(&p_mirrorID);
+        addProperty(&p_geometryImageId);
         addProperty(&p_entryImageID);
         addProperty(&p_exitImageID);
         addProperty(&p_camera);
@@ -95,6 +97,8 @@ namespace campvis {
                     _shader->setHeaders(generateHeader());
                     _shader->rebuild();
                 }
+
+                DataContainer::ScopedTypedData<ImageDataRenderTarget> geometryImage(data, p_geometryImageId.getValue());
 
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
@@ -137,8 +141,32 @@ namespace campvis {
                 _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_modelMatrix", mirrorMatrix);
-                _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
+                const tgt::Camera& cam = p_camera.getValue();
+                _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+                tgt::TextureUnit geometryDepthUnit;
+
+                if (geometryImage != 0) {
+                     geometryImage->bind(_shader, 0, &geometryDepthUnit, "", "_geometryDepthTexture");
+
+                    _shader->setUniform("_integrateGeometry", true);
+                    _shader->setUniform("_near", cam.getNearDist());
+                    _shader->setUniform("_far", cam.getFarDist());
+
+                    tgt::mat4 inverseView = tgt::mat4::identity;
+                    if (cam.getViewMatrix().invert(inverseView))
+                        _shader->setUniform("_inverseViewMatrix", inverseView);
+
+                    tgt::mat4 inverseProjection = tgt::mat4::identity;
+                    if (cam.getProjectionMatrix().invert(inverseProjection))
+                        _shader->setUniform("_inverseProjectionMatrix", inverseProjection);
+
+                    _shader->setUniform("_volumeWorldToTexture", img->getMappingInformation().getWorldToTextureMatrix());
+                }
+                else {
+                    _shader->setUniform("_integrateGeometry", false);
+                }
+
                 _shader->setIgnoreUniformLocationError(false);
 
                 glEnable(GL_CULL_FACE);
@@ -147,6 +175,7 @@ namespace campvis {
                 // create entry points texture
                 ImageDataRenderTarget* entrypoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
                 entrypoints->activate();
+                _shader->setUniform("_isEntrypoint", true);
 
                 glDepthFunc(GL_LESS);
                 glClearDepth(1.0f);
@@ -159,6 +188,12 @@ namespace campvis {
                 // create exit points texture
                 ImageDataRenderTarget* exitpoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
                 exitpoints->activate();
+                _shader->setUniform("_isEntrypoint", false);
+
+                if (geometryImage != 0) {
+                    tgt::TextureUnit entryColorUnit, entryDepthUnit;
+                    entrypoints->bind(_shader, &entryColorUnit, &entryDepthUnit, "_entryColorTexture", "_entryDepthTexture");
+                }
 
                 glDepthFunc(GL_GREATER);
                 glClearDepth(0.0f);

@@ -77,6 +77,7 @@ namespace campvis {
         DataNameProperty p_sourceImageID;    ///< image ID for input image
         DataNameProperty p_geometryID;       ///< ID for input geometry
         DataNameProperty p_mirrorID;         ///< ID for input mirror geometry
+        DataNameProperty p_geometryImageId;  ///< image ID for the optional rendered geometry to integrate into the EEP
         DataNameProperty p_entryImageID;     ///< image ID for output entry points image
         DataNameProperty p_exitImageID;      ///< image ID for output exit points image
 
