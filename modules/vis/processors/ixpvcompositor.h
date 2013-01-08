@@ -27,8 +27,8 @@
 // 
 // ================================================================================================
 
-#ifndef VIRTUALMIRRORCOMBINE_H__
-#define VIRTUALMIRRORCOMBINE_H__
+#ifndef IXPVCOMPOSITOR_H__
+#define IXPVCOMPOSITOR_H__
 
 #include <string>
 
@@ -45,19 +45,19 @@ namespace campvis {
     class ImageData;
 
     /**
-     * Performs the composition of a rendering, a virtual mirror rendering and the corresponding mirror.
+     * Performs IXPV composition of a 3D slice rendering and a X-Ray image.
      */
-    class VirtualMirrorCombine : public VisualizationProcessor, public HasProcessorDecorators {
+    class IxpvCompositor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
-         * Constructs a new VirtualMirrorCombine Processor
+         * Constructs a new IxpvCompositor Processor
          **/
-        VirtualMirrorCombine(GenericProperty<tgt::ivec2>& canvasSize);
+        IxpvCompositor(GenericProperty<tgt::ivec2>& canvasSize);
 
         /**
          * Destructor
          **/
-        virtual ~VirtualMirrorCombine();
+        virtual ~IxpvCompositor();
 
         /// \see AbstractProcessor::init
         virtual void init();
@@ -66,16 +66,17 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "VirtualMirrorCombine"; };
+        virtual const std::string getName() const { return "IxpvCompositor"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Combines Normal DVR and Virtual Mirror DVR images."; };
+        virtual const std::string getDescription() const { return "Performs IXPV composition of a 3D volume rendering and a X-Ray image."; };
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty p_normalImageID;            ///< image ID for normal DVR input image
-        DataNameProperty p_mirrorImageID;            ///< image ID for mirror DVR input image
-        DataNameProperty p_mirrorRenderID;           ///< image ID for rendered mirror input image
-        DataNameProperty p_targetImageID;            ///< image ID for output image
+        DataNameProperty p_xRayImageId;             ///< image ID for X-Ray input image
+        DataNameProperty p_3dSliceImageId;          ///< image ID for the slice input image rendered in 3D world space
+        DataNameProperty p_drrFullImageId;          ///< image ID full DRR input image
+        DataNameProperty p_drrClippedImageId;       ///< image ID clipped DRR input image
+        DataNameProperty p_targetImageId;           ///< image ID for output image
 
     protected:
         tgt::Shader* _shader;                           ///< Shader for slice rendering
@@ -85,4 +86,4 @@ namespace campvis {
 
 }
 
-#endif // VIRTUALMIRRORCOMBINE_H__
+#endif // IXPVCOMPOSITOR_H__
