@@ -51,6 +51,25 @@ namespace campvis {
     class ImageDataGL : public ImageData {
     public:
         /**
+         * Creates and returns new ImageDataGL representation from a tgt::Texture.
+         * The caller takes ownership of the returned pointer.
+         * 
+         * \note   This static factory method serves mainly for convenience to automatically
+         *         calculate the dimensionality and size of the texture.
+         * \param  texture  OpenGL texture to use, must not be 0, ImageDataGL will take ownership of this texture.
+         */
+        static ImageDataGL* createFromTexture(tgt::Texture* texture);
+        
+        /**
+         * Creates a new ImageDataGL representation from a tgt::Texture.
+         *
+         * \param dimensionality    Dimensionality of data
+         * \param size              Size of this image (number of elements per dimension)
+         * \param texture           OpenGL texture to use, must not be 0, ImageDataGL will take ownership of this texture.
+         */
+        ImageDataGL(size_t dimensionality, const tgt::svec3& size, tgt::Texture* texture);
+
+        /**
          * Creates a new ImageDataGL representation.
          *
          * \param dimensionality    Dimensionality of data
@@ -75,7 +94,6 @@ namespace campvis {
          * Destructor
          */
         virtual ~ImageDataGL();
-
 
        
         /**

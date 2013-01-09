@@ -82,11 +82,11 @@ SET(TGT_SOURCES
 # define library target
 ################################################################################
 ADD_LIBRARY(tgt ${TGT_SOURCES} ${TGT_HEADERS})
-ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CAMPVIS_MODULE_DEFINITIONS} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
 IF(CAMPVIS_SHARED_LIBS AND MSVC)
 	ADD_DEFINITIONS("-DTGT_BUILD_DLL")
 ENDIF()
-INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CAMPVIS_MODULE_INCLUDE_DIRECTORIES})
+INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
 
 ################################################################################

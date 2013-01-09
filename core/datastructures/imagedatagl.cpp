@@ -36,6 +36,28 @@ namespace campvis {
 
     const std::string ImageDataGL::loggerCat_ = "CAMPVis.core.datastructures.ImageDataGL";
 
+    ImageDataGL* ImageDataGL::createFromTexture(tgt::Texture* texture) {
+        tgtAssert(texture != 0, "Given texture must not be 0.");
+        size_t dimensionality = 0;
+        tgt::svec3 size(texture->getDimensions());
+
+        if (size.z > 1)
+            dimensionality = 3;
+        else if (size.y > 1)
+            dimensionality = 2;
+        else
+            dimensionality = 1;
+
+        return new ImageDataGL(dimensionality, size, texture);
+    }
+
+    ImageDataGL::ImageDataGL(size_t dimensionality, const tgt::svec3& size, tgt::Texture* texture)
+        : ImageData(dimensionality, size)
+        , _texture(texture)
+    {
+        tgtAssert(texture != 0, "Given texture must not be 0.");
+    }
+
     ImageDataGL::ImageDataGL(size_t dimensionality, const tgt::svec3& size, const WeaklyTypedPointer& wtp) 
         : ImageData(dimensionality, size)
     {
