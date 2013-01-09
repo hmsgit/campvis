@@ -27,10 +27,8 @@
 // 
 // ================================================================================================
 
-#ifndef GEOMETRYTOOLS_H__
-#define GEOMETRYTOOLS_H__
-
-
+#ifndef ALGORITHMICGEOMETRY_H__
+#define ALGORITHMICGEOMETRY_H__
 
 #include "tgt/vector.h"
 
@@ -92,4 +90,4 @@ namespace campvis {
 
 }
 
-#endif // GEOMETRYTOOLS_H__
+#endif // ALGORITHMICGEOMETRY_H__

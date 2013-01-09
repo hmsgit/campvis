@@ -59,7 +59,7 @@ namespace campvis {
     void IxpvDemo::init() {
         VisualizationPipeline::init();
 
-        _xrayReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
+        _xrayReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CarmXrayImages\\APView_1.jpg");
         _xrayReader.p_targetImageID.setValue("xray");
 
         _usSliceExtractor.p_sliceNumber.setValue(0);
@@ -80,10 +80,10 @@ namespace campvis {
             // TODO:    think whether we want to lock all processors already here.
         }
         if (! _xrayReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_xrayReader);
+            lockGLContextAndExecuteProcessor(&_xrayReader);
 
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
+            DataContainer::ScopedTypedData<ImageData> img(_data, _xrayReader.p_targetImageID.getValue());
             ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
             if (local != 0) {
                 DataHandle dh = _data.addData("se.input", local);

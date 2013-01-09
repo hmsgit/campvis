@@ -35,6 +35,7 @@
 #include "core/eventhandlers/transfuncwindowingeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
+#include "modules/devil/processors/devilimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
 
 namespace campvis {
@@ -64,7 +65,7 @@ namespace campvis {
         virtual void keyEvent(tgt::KeyEvent* e);
 
     protected:
-        MhdImageReader _xrayReader;
+        DevilImageReader _xrayReader;
         MhdImageReader _ctReader;
         MhdImageReader _usReader;
 
