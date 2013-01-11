@@ -60,18 +60,16 @@ namespace campvis {
 
 
         _spinDomainLeft = new QDoubleSpinBox(_widget);
-        _spinDomainLeft->setMinimum(0);
+        _spinDomainLeft->setMinimum(-10000);
         _spinDomainLeft->setDecimals(2);
         _spinDomainLeft->setSingleStep(0.01);
         _gridLayout->addWidget(_spinDomainLeft, 0, 1);
 
         _spinDomainRight = new QDoubleSpinBox(_widget);
-        _spinDomainRight->setMaximum(1);
+        _spinDomainRight->setMaximum(10000);
         _spinDomainRight->setDecimals(2);
         _spinDomainRight->setSingleStep(0.01);
         _gridLayout->addWidget(_spinDomainRight, 0, 2);
-
-        updateWidgetFromProperty();
 
         _btnFitDomainToImage = new QPushButton("Fit Intensity Domain to Image", _widget);
         _gridLayout->addWidget(_btnFitDomainToImage, 1, 0, 1, 3);
@@ -82,6 +80,7 @@ namespace campvis {
         addWidget(_widget);
 
         onTransferFunctionImageHandleChanged();
+        updateWidgetFromProperty();
         property->getTF()->s_imageHandleChanged.connect(this, &TransferFunctionPropertyWidget::onTransferFunctionImageHandleChanged);
 
         connect(_spinDomainLeft, SIGNAL(valueChanged(double)), this, SLOT(onDomainChanged(double)));
@@ -101,8 +100,8 @@ namespace campvis {
             const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(dh.getData());
             if (idl != 0) {
                 Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
-                _spinDomainLeft->setMinimum(intensityInterval.getLeft());
-                _spinDomainRight->setMaximum(intensityInterval.getRight());
+//                 _spinDomainLeft->setMinimum(intensityInterval.getLeft());
+//                 _spinDomainRight->setMaximum(intensityInterval.getRight());
             }
         }
     }
@@ -113,12 +112,12 @@ namespace campvis {
         const tgt::vec2& domain = tf->getIntensityDomain();
 
         _spinDomainLeft->blockSignals(true);
-        _spinDomainLeft->setMaximum(domain.y);
+        //_spinDomainLeft->setMaximum(domain.y);
         _spinDomainLeft->setValue(domain.x);
         _spinDomainLeft->blockSignals(false);
 
         _spinDomainRight->blockSignals(true);
-        _spinDomainRight->setMinimum(domain.x);
+        /*_spinDomainRight->setMinimum(domain.x);*/
         _spinDomainRight->setValue(domain.y);
         _spinDomainRight->blockSignals(false);
     }
@@ -126,8 +125,8 @@ namespace campvis {
     void TransferFunctionPropertyWidget::onDomainChanged(double value) {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         _ignorePropertyUpdates = true;
-        _spinDomainLeft->setMaximum(_spinDomainRight->value());
-        _spinDomainRight->setMinimum(_spinDomainLeft->value());
+//         _spinDomainLeft->setMaximum(_spinDomainRight->value());
+//         _spinDomainRight->setMinimum(_spinDomainLeft->value());
         tgt::vec2 newDomain(static_cast<float>(_spinDomainLeft->value()), static_cast<float>(_spinDomainRight->value()));
         prop->getTF()->setIntensityDomain(newDomain);
         _ignorePropertyUpdates = false;

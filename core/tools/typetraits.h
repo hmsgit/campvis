@@ -315,21 +315,21 @@ namespace {
     };
 
     /**
-     * Template specialization for unsigned integer types, map from [min, max] to [-1.0, 1.0]
+     * Template specialization for unsigned integer types, map from [min, max] to [0.0, 1.0]
      */
     template<>
     struct TypeNormalizerHelper<false, true> {
         template<typename T>
         static float normalizeToFloat(T value) {
             if (value >= 0)
-                return static_cast<float>(value) / std::numeric_limits<T>::max();
+                return (static_cast<float>(value) / std::numeric_limits<T>::max()) * .5f + .5f;
             else
-                return static_cast<float>(value) / -std::numeric_limits<T>::min();
+                return (static_cast<float>(value) / -std::numeric_limits<T>::min()) * .5f + .5f;
         }
 
         template<typename T>
         static T denormalizeFromFloat(float value) {
-            value = tgt::clamp(value, -1.0f, 1.0f);
+            value = (tgt::clamp(value, 0.0f, 1.0f) - .5f) * 2.f;
             if(value >= 0.0f)
                 return static_cast<T>(value * std::numeric_limits<T>::max());
             else

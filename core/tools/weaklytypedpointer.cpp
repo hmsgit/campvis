@@ -264,6 +264,15 @@ namespace campvis {
                 return CL_A;
         }
     }
+
+    bool WeaklyTypedPointer::isInteger() const {
+        return (_baseType != FLOAT);
+    }
+
+    bool WeaklyTypedPointer::isSigned() const {
+        return (_baseType == INT8) || (_baseType == INT16) || (_baseType == INT32);
+    }
+
 #endif
 
 }

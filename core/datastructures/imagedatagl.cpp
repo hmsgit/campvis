@@ -102,10 +102,31 @@ namespace campvis {
         }
 
         _texture->bind();
+
+        // TODO: map signed types
+        // map signed integer types from [-1.0:1.0] to [0.0:1.0] in order to avoid clamping of negative values
+        if (wtp.isInteger() && wtp.isSigned()) {
+            glPushAttrib(GL_ALL_ATTRIB_BITS);
+            glPixelTransferf(GL_RED_SCALE,   0.5f);
+            glPixelTransferf(GL_GREEN_SCALE, 0.5f);
+            glPixelTransferf(GL_BLUE_SCALE,  0.5f);
+            glPixelTransferf(GL_ALPHA_SCALE, 0.5f);
+
+            glPixelTransferf(GL_RED_BIAS,    0.5f);
+            glPixelTransferf(GL_GREEN_BIAS,  0.5f);
+            glPixelTransferf(GL_BLUE_BIAS,   0.5f);
+            glPixelTransferf(GL_ALPHA_BIAS,  0.5f);
+
+            //pixelTransferMapping_ = RealWorldMapping(0.5f, 0.5f, "");
+            _mappingInformation.setRealWorldMapping(LinearMapping<float>(.5f, .5f));
+        }
+
         _texture->uploadTexture();
         _texture->setWrapping(tgt::Texture::CLAMP);
 
-        // TODO: map signed types
+        if (wtp.isInteger() && wtp.isSigned()) {
+            glPopAttrib();
+        }
 
         // revoke ownership of local pixel data from the texture
         _texture->setPixelData(0);
@@ -145,6 +166,7 @@ namespace campvis {
             shader->setUniform(texUniform + "._voxelSize", _mappingInformation.getVoxelSize());
             shader->setUniform(texUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _mappingInformation.getVoxelSize());
             shader->setUniform(texUniform + "._textureToWorldMatrix", _mappingInformation.getTextureToWorldMatrix());
+            shader->setUniform(texUniform + "._realWorldMapping", tgt::vec2(_mappingInformation.getRealWorldMapping()._shift, _mappingInformation.getRealWorldMapping()._scale));
             break;
 
         default:

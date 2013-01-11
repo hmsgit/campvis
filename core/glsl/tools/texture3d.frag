@@ -43,6 +43,8 @@ struct Texture3D {
 
     // Transformation matrices
     mat4 _textureToWorldMatrix;
+
+    vec2 _realWorldMapping;
 };
 
 /**
@@ -77,4 +79,12 @@ vec4 getElement3DNormalized(in Texture3D tex, in vec3 texCoords) {
  */
 vec4 textureToWorld(in Texture3D tex, in vec3 texCoords) {
     return tex._textureToWorldMatrix * vec4(texCoords, 1.0);
+}
+
+float applyRealWorldMapping(Texture3D tex, float value) {
+    return (value + tex._realWorldMapping.x) * tex._realWorldMapping.y;
+}
+
+float applyInverseRealWorldMapping(Texture3D tex, float value) {
+    return (value - tex._realWorldMapping.x) / tex._realWorldMapping.y;
 }

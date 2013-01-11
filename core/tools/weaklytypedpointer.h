@@ -120,6 +120,10 @@ namespace campvis {
 
         GLint getGlInternalFormat() const;
 
+        bool isInteger() const;
+
+        bool isSigned() const;
+
 #ifdef HAS_KISSCL
         cl_channel_type getClChannelType() const;
 
