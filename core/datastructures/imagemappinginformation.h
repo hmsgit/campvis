@@ -109,7 +109,7 @@ namespace campvis {
         /**
          * Updates the X-to-Y matrices.
          */
-        void updateMatrixes();
+        void updateMatrices();
 
         tgt::vec3 _size;                                ///< Image size (number of elements, redundant...)
         tgt::vec3 _offset;                              ///< Position of LLF corner in world coordinates (mm)

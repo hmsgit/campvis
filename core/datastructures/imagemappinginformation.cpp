@@ -39,7 +39,7 @@ namespace campvis {
         , _voxelSize(voxelSize)
         , _realWorldValueMapping(realWorldValueMapping)
     {
-        updateMatrixes();
+        updateMatrices();
     }
 
     const tgt::vec3& ImageMappingInformation::getOffset() const {
@@ -58,7 +58,7 @@ namespace campvis {
         _realWorldValueMapping = rwvm;
     }
 
-    void ImageMappingInformation::updateMatrixes() {
+    void ImageMappingInformation::updateMatrices() {
         _textureToWolrdTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
         if (! _textureToWolrdTransformation.invert(_worldToTextureTransformation))
             tgtAssert(false, "Could not invert texture-to-world matrix. That should not happen!");

@@ -36,10 +36,16 @@ out vec4 out_Color;
 uniform vec2 _viewportSize;
 uniform vec2 _viewportSizeRCP;
 uniform Texture2D _colorTexture;
+
+#ifndef NO_DEPTH
 uniform Texture2D _depthTexture;
+#endif
 
 void main() {
     vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
     out_Color = getElement2DNormalized(_colorTexture, fragCoord);
+
+#ifndef NO_DEPTH
     gl_FragDepth = getElement2DNormalized(_depthTexture, fragCoord).z;
+#endif
 }

@@ -132,7 +132,7 @@ namespace campvis {
          * Returns the value of the currently selected option.
          * \return  _options[_value]._value
          */
-        T getValue() const;
+        T getOptionValue() const;
 
 
         /**
@@ -179,12 +179,12 @@ namespace campvis {
 
     template<typename T>
     const GenericOption<T>& campvis::GenericOptionProperty<T>::getOption() const {
-        return _options[_value];
+        return _options[getValue()];
     }
 
     template<typename T>
-    T campvis::GenericOptionProperty<T>::getValue() const {
-        return _options[_value]._value;
+    T campvis::GenericOptionProperty<T>::getOptionValue() const {
+        return _options[getValue()]._value;
     }
 
     template<typename T>

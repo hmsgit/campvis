@@ -227,7 +227,7 @@ namespace campvis {
         }
 
         size_t numBytesPerElement = sizeof(ElementType);
-        size_t numElements = tgt::hmul(_size);
+        size_t numElements = tgt::hmul(newSize);
         ElementType* newData = new ElementType[numElements];
 
         // slice image data into new array

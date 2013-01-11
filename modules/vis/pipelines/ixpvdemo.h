@@ -85,7 +85,6 @@ namespace campvis {
         DRRRaycaster _ctClippedDRR;
 
         MhdImageReader _usReader;
-
         SliceExtractor _usSliceExtractor;
 
         RenderTargetCompositor _compositor;

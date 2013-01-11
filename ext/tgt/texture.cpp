@@ -342,8 +342,9 @@ void Texture::uploadTexture() {
                             format_, dataType_, pixels_);
             break;
 #endif
-
     }
+
+    LGL_ERROR;
 }
 
 tgt::Color Texture::texelAsFloat(size_t x, size_t y) const {

@@ -85,6 +85,9 @@ namespace campvis {
     void ImageDataGL::createTexture(const WeaklyTypedPointer& wtp) {
         tgtAssert(wtp._pointer != 0, "Pointer to image data must not be 0!");
 
+        // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         _texture = new tgt::Texture(reinterpret_cast<GLubyte*>(wtp._pointer), _size, wtp.getGlFormat(), wtp.getGlInternalFormat(), wtp.getGlDataType(), tgt::Texture::LINEAR);
         switch (_dimensionality) {
             case 1:
@@ -101,6 +104,8 @@ namespace campvis {
                 break;
         }
 
+        tgt::TextureUnit tempUnit;
+        tempUnit.activate();
         _texture->bind();
 
         // TODO: map signed types
@@ -131,6 +136,7 @@ namespace campvis {
         // revoke ownership of local pixel data from the texture
         _texture->setPixelData(0);
 
+        tgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
     }
 

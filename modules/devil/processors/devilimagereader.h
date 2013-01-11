@@ -32,11 +32,12 @@
 
 #include <string>
 
-#include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 
 namespace tgt {
+    class Shader;
     class TextureReaderDevil;
 }
 
@@ -47,12 +48,12 @@ namespace campvis {
      *
      * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
      */
-    class DevilImageReader : public AbstractProcessor {
+    class DevilImageReader : public VisualizationProcessor {
     public:
         /**
          * Constructs a new DevilImageReader Processor
          **/
-        DevilImageReader();
+        DevilImageReader(GenericProperty<tgt::ivec2>& canvasSize);
 
         /**
          * Destructor
@@ -60,8 +61,14 @@ namespace campvis {
         virtual ~DevilImageReader();
 
 
+        /// \see AbstractProcessor::init
+        virtual void init();
+
+        /// \see AbstractProcessor::deinit
+        virtual void deinit();
+
         /**
-         * Reads the MHD file into an ImageDataDisk representation
+         * Reads the image file into an ImageDataRenderTarget
          * \param data  DataContainer to work on
          */
         virtual void process(DataContainer& data);
@@ -75,7 +82,7 @@ namespace campvis {
         DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:
-
+        tgt::Shader* _shader;
         tgt::TextureReaderDevil* _devilTextureReader;
 
         static const std::string loggerCat_;

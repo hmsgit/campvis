@@ -35,6 +35,8 @@
 #include "tgt/shadermanager.h"
 #include "tgt/tgt_gl.h"
 
+#include "core/datastructures/imagedatagl.h"
+
 namespace campvis {
 
     const std::string ImageDataRenderTarget::loggerCat_ = "CAMPVis.core.datastructures.ImageDataRenderTarget";
@@ -63,6 +65,32 @@ namespace campvis {
         tgtAssert(_colorTextures.front() != 0, "Color texture is 0, something went terribly wrong...");
         tgtAssert(_depthTexture != 0, "Depth texture is 0, something went terribly wrong...");
         tgtAssert(_fbo != 0, "Framebuffer object is 0, something went terribly wrong...");
+    }
+
+    ImageDataRenderTarget::ImageDataRenderTarget(const ImageDataGL* colorTexture, const ImageDataGL* depthTexture /* = 0 */)
+        : ImageData(2, colorTexture->getSize())
+        , _colorTextures(0)
+        , _depthTexture(0)
+        , _fbo(0)
+    {
+        tgtAssert(colorTexture != 0, "Color texture must not be 0.");
+
+        if (!GpuCaps.isNpotSupported() && !GpuCaps.areTextureRectanglesSupported()) {
+            LWARNING("Neither non-power-of-two textures nor texture rectangles seem to be supported!");
+        }
+
+        _fbo = new tgt::FramebufferObject();
+        if (!_fbo) {
+            LERROR("Failed to initialize framebuffer object!");
+            return;
+        }
+
+        // TODO: finish implementation!
+        tgtAssert(false, "Method not yet fully implemented!");
+
+//         _fbo->activate();
+//         tgt::Texture* cc = colorTexture->getTexture()
+//         _fbo->attachTexture(cc, GL_COLOR_ATTACHMENT0);
     }
 
     ImageDataRenderTarget::~ImageDataRenderTarget() {
@@ -184,6 +212,9 @@ namespace campvis {
         // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
         tgt::TextureUnit rtUnit;
         rtUnit.activate();
+
+        // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         // create texture
         tgt::Texture* tex = 0;

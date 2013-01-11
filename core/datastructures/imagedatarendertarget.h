@@ -43,6 +43,7 @@ namespace tgt {
 }
 
 namespace campvis {
+    class ImageDataGL;
 
     /**
      * Stores render target data.
@@ -65,6 +66,13 @@ namespace campvis {
          * \param internalFormatDepth   Internal OpenGL format for the depth texture.
          */
         ImageDataRenderTarget(const tgt::svec3& size, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
+
+        /**
+         * Creates a new ImageDataRenderTarget from one color texture and one optional depth texture.
+         * \param   colorTexture    Color texture, must not be 0
+         * \param   depthTexture    Depth texture, optional, must have valid internal format and same dimensions as \a colorTexture
+         */
+        ImageDataRenderTarget(const ImageDataGL* colorTexture, const ImageDataGL* depthTexture = 0);
 
         /**
          * Destructor

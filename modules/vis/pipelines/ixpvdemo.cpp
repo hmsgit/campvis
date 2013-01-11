@@ -39,7 +39,7 @@ namespace campvis {
 
     IxpvDemo::IxpvDemo()
         : VisualizationPipeline()
-        , _xrayReader()
+        , _xrayReader(_effectiveRenderTargetSize)
         , _ctReader()
         , _ctProxy()
         , _ctFullEEP(_effectiveRenderTargetSize)
@@ -52,19 +52,19 @@ namespace campvis {
         , _camera("camera", "Camera")
         , _trackballHandler(0)
     {
-        addProcessor(&_xrayReader);
-
-        addProcessor(&_ctReader);
-        addProcessor(&_ctProxy);
-        addProcessor(&_ctFullEEP);
-        addProcessor(&_ctClippedEEP);
-        addProcessor(&_ctFullDRR);
-        addProcessor(&_ctClippedDRR);
+//         addProcessor(&_xrayReader);
+// 
+//         addProcessor(&_ctReader);
+//         addProcessor(&_ctProxy);
+//         addProcessor(&_ctFullEEP);
+//         addProcessor(&_ctClippedEEP);
+//         addProcessor(&_ctFullDRR);
+//         addProcessor(&_ctClippedDRR);
 
         addProcessor(&_usReader);
         addProcessor(&_usSliceExtractor);
 
-        addProcessor(&_compositor);
+//        addProcessor(&_compositor);
 
         addProperty(&_camera);
 
@@ -124,6 +124,12 @@ namespace campvis {
 
         // = US Setup =====================================================================================
 
+        _usReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Ultrasound\\gaussianSmoothedUS_UChar.mhd");
+        _usReader.p_targetImageID.setValue("us.image");
+        _usReader.p_targetImageID.connect(&_usSliceExtractor.p_sourceImageID);
+
+        _usSliceExtractor.p_targetImageID.setValue("us.slice");
+        
         _usSliceExtractor.p_sliceNumber.setValue(0);
 
 
@@ -132,9 +138,9 @@ namespace campvis {
         _xrayReader.p_targetImageID.connect(&_compositor.p_firstImageId);
         _ctFullDRR.p_targetImageID.connect(&_compositor.p_secondImageId);
         _compositor.p_targetImageId.setValue("composed");
-        _compositor.p_compositingMethod.selectById("alpha");
+        _compositor.p_compositingMethod.selectById("diff");
 
-        _renderTargetID.setValue("ct.drr.full");
+        _renderTargetID.setValue("us.slice");
 
         _trackballHandler->setViewportSize(_renderTargetSize);
     }
@@ -159,15 +165,16 @@ namespace campvis {
                     _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
                     _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(dh);
                     _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                }
-                {
-                    tgt::GLContextScopedLock lock(_canvas->getContext());
-                    ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(local);
-                    if (gl != 0) {
-                        _data.addData(_ctReader.p_targetImageID.getValue(), gl);
+
+                    {
+                        tgt::GLContextScopedLock lock(_canvas->getContext());
+                        ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(local);
+                        if (gl != 0) {
+                            _data.addData(_ctReader.p_targetImageID.getValue(), gl);
+                        }
                     }
+                    CtxtMgr.releaseCurrentContext();
                 }
-                CtxtMgr.releaseCurrentContext();
 
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
@@ -178,6 +185,31 @@ namespace campvis {
             }
         }
 
+        if (! _usReader.getInvalidationLevel().isValid()) {
+            executeProcessor(&_usReader);
+
+            // convert data
+            DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
+            if (img != 0) {
+                ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
+                if (local != 0) {
+                    DataHandle dh = _data.addData("us.image", local);
+                    Interval<float> ii = local->getNormalizedIntensityRange();
+                    _usSliceExtractor.p_transferFunction.getTF()->setImageHandle(dh);
+                    _usSliceExtractor.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                    _usSliceExtractor.p_sliceNumber.setValue(125);
+
+                    {
+                        tgt::GLContextScopedLock lock(_canvas->getContext());
+                        ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(local);
+                        if (gl != 0) {
+                            _data.addData("foobar-test", gl);
+                        }
+                    }
+                    CtxtMgr.releaseCurrentContext(); 
+                }
+            }
+        }
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             if (! (*it)->getInvalidationLevel().isValid())
                 lockGLContextAndExecuteProcessor(*it);
