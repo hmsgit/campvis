@@ -187,6 +187,9 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    template<typename T>
+    const std::string campvis::NumericProperty<T>::loggerCat_ = "CAMPVis.core.properties.NumericProperty";
+
 // = Typedefs =====================================================================================
 
     typedef NumericProperty<int> IntProperty;

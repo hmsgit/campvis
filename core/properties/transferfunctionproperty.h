@@ -67,9 +67,10 @@ namespace campvis {
 
         /**
          * Replaces the transfer function with \a tf.
+         * TransferFunctionProperty takes ownership of \a tf.
          * \note    First triggers s_BeforeTFReplace, then deletes the current TF, replaces it with
          *          \a tf and finally triffers s_AfterTFReplace.
-         * \param   tf  The new transfer function for this property.
+         * \param   tf  The new transfer function for this property. TransferFunctionProperty takes ownership.
          */
         void replaceTF(AbstractTransferFunction* tf);
 
