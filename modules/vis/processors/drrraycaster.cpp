@@ -59,12 +59,15 @@ namespace campvis {
         ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
         rt->activate();
 
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glDisable(GL_DEPTH_TEST);
         if (p_invertMapping.getValue())
             glClearColor(0.f, 0.f, 0.f, 1.f);
         else
             glClearColor(1.f, 1.f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         QuadRdr.renderQuad();
+        glPopAttrib();
         LGL_ERROR;
 
         rt->deactivate();

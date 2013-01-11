@@ -44,8 +44,7 @@ uniform Texture2D _entryPoints;          // ray entry points
 uniform Texture2D _exitPoints;           // ray exit points
 uniform Texture3D _volume;            // texture lookup parameters for volume_
 
-uniform sampler1D _tfTex;
-uniform TFParameters _tfTextureParameters;
+uniform TransferFunction1D _transferFunction;
 
 uniform float _samplingStepSize;
 uniform float _shift;
@@ -70,9 +69,12 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
         jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     while (t < tend) {
+        // compute sample position
         vec3 samplePosition = entryPoint.rgb + t * direction;
-        vec4 voxel = getElement3DNormalized(_volume, samplePosition);
-        vec4 color = lookupTF(_tfTextureParameters, _tfTex, voxel.a);
+
+        // lookup intensity and TF
+        float intensity = getElement3DNormalized(_volume, samplePosition).a;
+        vec4 color = lookupTF(_transferFunction, intensity);
 
 #ifdef DEPTH_MAPPING
         // use Bernstein Polynomials for depth-color mapping
@@ -100,9 +102,6 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
 
         t += _samplingStepSize;
     }
-
-    // DRR images don't have a meaningful depth value
-    gl_FragDepth = 1.0;
 
 #ifdef DEPTH_MAPPING
     result.rgb = result.rgb * vec3(exp(-result.a + _shift));

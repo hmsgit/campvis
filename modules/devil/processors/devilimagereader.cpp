@@ -61,25 +61,14 @@ namespace campvis {
     }
 
     void DevilImageReader::process(DataContainer& data) {
-        try {
-            tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
-            if (tex == 0) {
-                LERROR("Unknown error while loading image.");
-                return;
-            }
-
-            // all parsing done - lets create the image:
+        tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
+        if (tex != 0) {
             ImageDataGL* image = ImageDataGL::createFromTexture(tex);
             data.addData(p_targetImageID.getValue(), image);
             p_targetImageID.issueWrite();
         }
-        catch (tgt::Exception& e) {
-            LERROR("Error while loading image: " << e.what());
-            return;
-        }
-        catch (std::exception& e) {
-            LERROR("Error while loading image: " << e.what());
-            return;
+        else {
+            LERROR("Could not load image.");
         }
 
         _invalidationLevel.setValid();

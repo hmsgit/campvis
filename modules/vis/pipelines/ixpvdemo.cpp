@@ -30,6 +30,7 @@
 #include "ixpvdemo.h"
 
 #include "tgt/event/keyevent.h"
+#include "tgt/qt/qtcontextmanager.h"
 #include "core/datastructures/imagedataconverter.h"
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -40,68 +41,161 @@ namespace campvis {
         : VisualizationPipeline()
         , _xrayReader()
         , _ctReader()
+        , _ctProxy()
+        , _ctFullEEP(_effectiveRenderTargetSize)
+        , _ctClippedEEP(_effectiveRenderTargetSize)
+        , _ctFullDRR(_effectiveRenderTargetSize)
+        , _ctClippedDRR(_effectiveRenderTargetSize)
         , _usReader()
         , _usSliceExtractor(_effectiveRenderTargetSize)
-        , _wheelHandler(&_usSliceExtractor.p_sliceNumber)
-        , _tfWindowingHandler(&_usSliceExtractor.p_transferFunction)
+        , _compositor(_effectiveRenderTargetSize)
+        , _camera("camera", "Camera")
+        , _trackballHandler(0)
     {
         addProcessor(&_xrayReader);
+
         addProcessor(&_ctReader);
+        addProcessor(&_ctProxy);
+        addProcessor(&_ctFullEEP);
+        addProcessor(&_ctClippedEEP);
+        addProcessor(&_ctFullDRR);
+        addProcessor(&_ctClippedDRR);
+
         addProcessor(&_usReader);
         addProcessor(&_usSliceExtractor);
-        addEventHandler(&_wheelHandler);
-        addEventHandler(&_tfWindowingHandler);
+
+        addProcessor(&_compositor);
+
+        addProperty(&_camera);
+
+        _trackballHandler = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
+        addEventHandler(_trackballHandler);
+        //addEventHandler(&_tfWindowingHandler);
     }
 
     IxpvDemo::~IxpvDemo() {
+        delete _trackballHandler;
     }
 
     void IxpvDemo::init() {
         VisualizationPipeline::init();
 
+        // = Camera Setup =================================================================================
+        _camera.addSharedProperty(&_ctFullEEP.p_camera);
+        _camera.addSharedProperty(&_ctClippedEEP.p_camera);
+        _camera.addSharedProperty(&_ctFullDRR.p_camera);
+        _camera.addSharedProperty(&_ctClippedDRR.p_camera);
+
+        // = X-Ray Setup ==================================================================================
         _xrayReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CarmXrayImages\\APView_1.jpg");
-        _xrayReader.p_targetImageID.setValue("xray");
+        _xrayReader.p_targetImageID.setValue("xray.image");
+
+        // = CT Setup =====================================================================================
+
+        _ctReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CT_8007_003_5mm_STD_20110224\\Fantome_20110224_8007_003_6_1_ABD-_portalvenös_X_S___5mm_STD.mhd");
+        _ctReader.p_targetImageID.setValue("ct.image");
+        _ctReader.p_targetImageID.connect(&_ctProxy.p_sourceImageID);
+        _ctReader.p_targetImageID.connect(&_ctFullEEP.p_sourceImageID);
+        _ctReader.p_targetImageID.connect(&_ctClippedEEP.p_sourceImageID);
+        _ctReader.p_targetImageID.connect(&_ctFullDRR.p_sourceImageID);
+        _ctReader.p_targetImageID.connect(&_ctClippedDRR.p_sourceImageID);
+
+        _ctProxy.p_geometryID.setValue("ct.proxy");
+        _ctProxy.p_geometryID.connect(&_ctFullEEP.p_geometryID);
+        _ctProxy.p_geometryID.connect(&_ctClippedEEP.p_geometryID);
+
+        _ctFullEEP.p_entryImageID.setValue("ct.entry.full");
+        _ctFullEEP.p_entryImageID.connect(&_ctFullDRR.p_entryImageID);
+        _ctFullEEP.p_exitImageID.setValue("ct.exit.full");
+        _ctFullEEP.p_exitImageID.connect(&_ctFullDRR.p_exitImageID);
+
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
+        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(0, 0, 0, 180)));
+        _ctFullDRR.p_transferFunction.replaceTF(tf);
+        _ctFullDRR.p_targetImageID.setValue("ct.drr.full");
+        _ctFullDRR.p_samplingRate.setValue(1.f);
+        
+        Geometry1DTransferFunction* tf2 = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
+        tf2->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(0, 0, 0, 180)));
+        _ctClippedDRR.p_transferFunction.replaceTF(tf2);
+        _ctClippedDRR.p_targetImageID.setValue("ct.drr.clipped");
+        _ctClippedDRR.p_samplingRate.setValue(1.f);
+
+
+        // = US Setup =====================================================================================
 
         _usSliceExtractor.p_sliceNumber.setValue(0);
 
-        // TODO: replace this hardcoded domain by automatically determined from image min/max values
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
-        _usSliceExtractor.p_transferFunction.replaceTF(tf);
 
-        _renderTargetID.setValue("renderTarget");
-        _renderTargetID.addSharedProperty(&(_usSliceExtractor.p_targetImageID));
+        // = Compositing Setup ============================================================================
+
+        _xrayReader.p_targetImageID.connect(&_compositor.p_firstImageId);
+        _ctFullDRR.p_targetImageID.connect(&_compositor.p_secondImageId);
+        _compositor.p_targetImageId.setValue("composed");
+        _compositor.p_compositingMethod.selectById("alpha");
+
+        _renderTargetID.setValue("ct.drr.full");
+
+        _trackballHandler->setViewportSize(_renderTargetSize);
     }
 
     void IxpvDemo::execute() {
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
             _invalidationLevel.setValid();
-            // TODO:    think whether we want to lock all processors already here.
         }
-        if (! _xrayReader.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_xrayReader);
+
+        if (! _ctReader.getInvalidationLevel().isValid()) {
+            executeProcessor(&_ctReader);
 
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, _xrayReader.p_targetImageID.getValue());
-            ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
-            if (local != 0) {
-                DataHandle dh = _data.addData("se.input", local);
-                _usSliceExtractor.p_transferFunction.getTF()->setImageHandle(dh);
+            DataContainer::ScopedTypedData<ImageData> img(_data, _ctReader.p_targetImageID.getValue());
+            if (img != 0) {
+                ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
+                if (local != 0) {
+                    DataHandle dh = _data.addData("ct.image.local", local);
+                    Interval<float> ii = local->getNormalizedIntensityRange();
+                    _ctFullDRR.p_transferFunction.getTF()->setImageHandle(dh);
+                    _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                    _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(dh);
+                    _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                }
+                {
+                    tgt::GLContextScopedLock lock(_canvas->getContext());
+                    ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(local);
+                    if (gl != 0) {
+                        _data.addData(_ctReader.p_targetImageID.getValue(), gl);
+                    }
+                }
+                CtxtMgr.releaseCurrentContext();
+
+                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+
+                _trackballHandler->setSceneBounds(volumeExtent);
+                _trackballHandler->setCenter(volumeExtent.center());
+                _trackballHandler->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
             }
         }
-        if (! _usSliceExtractor.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_usSliceExtractor);
-        }
-    }
 
-    void IxpvDemo::keyEvent(tgt::KeyEvent* e) {
-        if (e->pressed()) {
+        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
+            if (! (*it)->getInvalidationLevel().isValid())
+                lockGLContextAndExecuteProcessor(*it);
         }
     }
+// 
+//     void IxpvDemo::keyEvent(tgt::KeyEvent* e) {
+//         if (e->pressed()) {
+//         }
+//     }
 
     const std::string IxpvDemo::getName() const {
         return "IXPV Demo";
     }
 
+    void IxpvDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
+        _trackballHandler->setViewportSize(_renderTargetSize);
+        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        _camera.setWindowRatio(ratio);
+    }
 }

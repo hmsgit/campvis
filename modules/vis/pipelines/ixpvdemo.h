@@ -31,12 +31,21 @@
 #define IXPVDEMO_H__
 
 #include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include "core/properties/cameraproperty.h"
 #include "core/pipeline/visualizationpipeline.h"
+
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
+#include "modules/vis/processors/proxygeometrygenerator.h"
+#include "modules/vis/processors/geometryrenderer.h"
+#include "modules/vis/processors/eepgenerator.h"
+#include "modules/vis/processors/drrraycaster.h"
+#include "modules/vis/processors/simpleraycaster.h"
+#include "modules/vis/processors/rendertargetcompositor.h"
+
 
 namespace campvis {
     class IxpvDemo : public VisualizationPipeline {
@@ -62,17 +71,28 @@ namespace campvis {
          **/
         virtual void execute();
 
-        virtual void keyEvent(tgt::KeyEvent* e);
+        //virtual void keyEvent(tgt::KeyEvent* e);
 
+        void onRenderTargetSizeChanged(const AbstractProperty* prop);
     protected:
         DevilImageReader _xrayReader;
+
         MhdImageReader _ctReader;
+        ProxyGeometryGenerator _ctProxy;
+        EEPGenerator _ctFullEEP;
+        EEPGenerator _ctClippedEEP;
+        DRRRaycaster _ctFullDRR;
+        DRRRaycaster _ctClippedDRR;
+
         MhdImageReader _usReader;
 
         SliceExtractor _usSliceExtractor;
 
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-        TransFuncWindowingEventHandler _tfWindowingHandler;
+        RenderTargetCompositor _compositor;
+
+        CameraProperty _camera;
+
+        TrackballNavigationEventHandler* _trackballHandler;
     };
 }
 
