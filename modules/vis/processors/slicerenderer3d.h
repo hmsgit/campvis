@@ -27,74 +27,70 @@
 // 
 // ================================================================================================
 
-#ifndef IXPVDEMO_H__
-#define IXPVDEMO_H__
+#ifndef SLICERENDERER3D_H__
+#define SLICERENDERER3D_H__
 
-#include "core/datastructures/imagedatalocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include <string>
+
+#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
+#include "core/properties/transferfunctionproperty.h"
 #include "core/properties/cameraproperty.h"
-#include "core/pipeline/visualizationpipeline.h"
 
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/devil/processors/devilimagereader.h"
-#include "modules/vis/processors/sliceextractor.h"
-#include "modules/vis/processors/proxygeometrygenerator.h"
-#include "modules/vis/processors/geometryrenderer.h"
-#include "modules/vis/processors/eepgenerator.h"
-#include "modules/vis/processors/drrraycaster.h"
-#include "modules/vis/processors/simpleraycaster.h"
-#include "modules/vis/processors/rendertargetcompositor.h"
-#include "modules/vis/processors/slicerenderer3d.h"
-
-
-namespace campvis {
-    class IxpvDemo : public VisualizationPipeline {
-    public:
-        /**
-         * Creates a VisualizationPipeline.
-         */
-        IxpvDemo();
-
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~IxpvDemo();
-
-        /// \see VisualizationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
-
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
-
-        //virtual void keyEvent(tgt::KeyEvent* e);
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-    protected:
-        DevilImageReader _xrayReader;
-
-        MhdImageReader _ctReader;
-        ProxyGeometryGenerator _ctProxy;
-        EEPGenerator _ctFullEEP;
-        EEPGenerator _ctClippedEEP;
-        DRRRaycaster _ctFullDRR;
-        DRRRaycaster _ctClippedDRR;
-
-        MhdImageReader _usReader;
-        SliceRenderer3D _usSliceRenderer;
-
-        RenderTargetCompositor _compositor;
-
-        CameraProperty _camera;
-
-        TrackballNavigationEventHandler* _trackballHandler;
-    };
+namespace tgt {
+    class Shader;
 }
 
-#endif // IXPVDEMO_H__
+namespace campvis {
+    class ImageData;
 
+    /**
+     * Extracts a slice from a 3D image and renders it into a rendertarget.
+     */
+    class SliceRenderer3D : public VisualizationProcessor {
+    public:
+        /**
+         * Constructs a new SliceRenderer3D Processor
+         **/
+        SliceRenderer3D(GenericProperty<tgt::ivec2>& canvasSize);
+
+        /**
+         * Destructor
+         **/
+        virtual ~SliceRenderer3D();
+
+        /// \see AbstractProcessor::init
+        virtual void init();
+
+        /// \see AbstractProcessor::deinit
+        virtual void deinit();
+
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "SliceRenderer3D"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
+
+        /// \see AbstractProcessor::process()
+        virtual void process(DataContainer& data);
+
+        DataNameProperty p_sourceImageID;                  ///< image ID for input image
+        DataNameProperty p_targetImageID;                  ///< image ID for output image
+
+        CameraProperty p_camera;
+        IntProperty p_sliceNumber;                       ///< number of the slice to extract
+        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+
+    protected:
+        /// adapts the range of the p_sliceNumber property to the image
+        void updateProperties(const ImageData* img);
+
+        tgt::Shader* _shader;                           ///< Shader for slice rendering
+
+        static const std::string loggerCat_;
+    };
+
+}
+
+#endif // SLICERENDERER3D_H__

@@ -47,24 +47,24 @@ namespace campvis {
         , _ctFullDRR(_effectiveRenderTargetSize)
         , _ctClippedDRR(_effectiveRenderTargetSize)
         , _usReader()
-        , _usSliceExtractor(_effectiveRenderTargetSize)
+        , _usSliceRenderer(_effectiveRenderTargetSize)
         , _compositor(_effectiveRenderTargetSize)
         , _camera("camera", "Camera")
         , _trackballHandler(0)
     {
-//         addProcessor(&_xrayReader);
-// 
-//         addProcessor(&_ctReader);
-//         addProcessor(&_ctProxy);
-//         addProcessor(&_ctFullEEP);
-//         addProcessor(&_ctClippedEEP);
-//         addProcessor(&_ctFullDRR);
-//         addProcessor(&_ctClippedDRR);
+         addProcessor(&_xrayReader);
+ 
+         addProcessor(&_ctReader);
+         addProcessor(&_ctProxy);
+         addProcessor(&_ctFullEEP);
+         addProcessor(&_ctClippedEEP);
+         addProcessor(&_ctFullDRR);
+         addProcessor(&_ctClippedDRR);
 
         addProcessor(&_usReader);
-        addProcessor(&_usSliceExtractor);
+        addProcessor(&_usSliceRenderer);
 
-//        addProcessor(&_compositor);
+        addProcessor(&_compositor);
 
         addProperty(&_camera);
 
@@ -85,6 +85,7 @@ namespace campvis {
         _camera.addSharedProperty(&_ctClippedEEP.p_camera);
         _camera.addSharedProperty(&_ctFullDRR.p_camera);
         _camera.addSharedProperty(&_ctClippedDRR.p_camera);
+        _camera.addSharedProperty(&_usSliceRenderer.p_camera);
 
         // = X-Ray Setup ==================================================================================
         _xrayReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CarmXrayImages\\APView_1.jpg");
@@ -126,11 +127,11 @@ namespace campvis {
 
         _usReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Ultrasound\\gaussianSmoothedUS_UChar.mhd");
         _usReader.p_targetImageID.setValue("us.image");
-        _usReader.p_targetImageID.connect(&_usSliceExtractor.p_sourceImageID);
+        _usReader.p_targetImageID.connect(&_usSliceRenderer.p_sourceImageID);
 
-        _usSliceExtractor.p_targetImageID.setValue("us.slice");
+        _usSliceRenderer.p_targetImageID.setValue("us.slice");
         
-        _usSliceExtractor.p_sliceNumber.setValue(0);
+        _usSliceRenderer.p_sliceNumber.setValue(0);
 
 
         // = Compositing Setup ============================================================================
@@ -193,20 +194,20 @@ namespace campvis {
             if (img != 0) {
                 ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
                 if (local != 0) {
-                    DataHandle dh = _data.addData("us.image", local);
+                    DataHandle dh = _data.addData("us.image.local", local);
                     Interval<float> ii = local->getNormalizedIntensityRange();
-                    _usSliceExtractor.p_transferFunction.getTF()->setImageHandle(dh);
-                    _usSliceExtractor.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                    _usSliceExtractor.p_sliceNumber.setValue(125);
+                    _usSliceRenderer.p_transferFunction.getTF()->setImageHandle(dh);
+                    _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                    _usSliceRenderer.p_sliceNumber.setValue(125);
 
                     {
                         tgt::GLContextScopedLock lock(_canvas->getContext());
                         ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(local);
                         if (gl != 0) {
-                            _data.addData("foobar-test", gl);
+                            _data.addData(_usSliceRenderer.p_sourceImageID.getValue(), gl);
                         }
                     }
-                    CtxtMgr.releaseCurrentContext(); 
+                    CtxtMgr.releaseCurrentContext();
                 }
             }
         }

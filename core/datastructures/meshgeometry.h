@@ -86,7 +86,7 @@ namespace campvis {
          * \param   epsilon Clipping precision
          * \return  The clipped MeshGeometry
          */
-        MeshGeometry clipAgainstPlane(float p, const tgt::vec3& normal, bool close = true, float epsilon = 1e-8f) const;
+        MeshGeometry clipAgainstPlane(float p, const tgt::vec3& normal, bool close = true, float epsilon = 1e-4f) const;
 
         /**
          * Renders this MeshGeometry.
