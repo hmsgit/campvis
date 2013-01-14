@@ -56,6 +56,10 @@ namespace campvis {
         return _mappingInformation;
     }
 
+    void ImageData::setMappingInformation(const ImageMappingInformation& imi) {
+        _mappingInformation = imi;
+    }
+
     tgt::Bounds ImageData::getWorldBounds() const {
         return tgt::Bounds(_mappingInformation.getOffset(), _mappingInformation.getOffset() + (tgt::vec3(_size) * _mappingInformation.getVoxelSize()));
     }

@@ -34,7 +34,7 @@
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
 
 namespace campvis {
     /**
@@ -68,6 +68,9 @@ namespace campvis {
 
         StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image
+
+        Vec3Property p_imageOffset;         ///< Image Offset in mm
+        Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
 

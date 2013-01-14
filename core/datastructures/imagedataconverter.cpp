@@ -73,13 +73,16 @@ namespace campvis {
     campvis::ImageDataGL* ImageDataConverter::convert(const ImageDataDisk* source) {
         WeaklyTypedPointer wtp = source->getImageData();
         ImageDataGL* toReturn = new ImageDataGL(source->getDimensionality(), source->getSize(), wtp);
+        toReturn->setMappingInformation(source->getMappingInformation());
         delete wtp._pointer;
         return toReturn;
     }
 
     template<>
     campvis::ImageDataGL* ImageDataConverter::convert(const ImageDataLocal* source) {
-        return new ImageDataGL(source->getDimensionality(), source->getSize(), source->getWeaklyTypedPointer());
+        ImageDataGL* toReturn = new ImageDataGL(source->getDimensionality(), source->getSize(), source->getWeaklyTypedPointer());
+        toReturn->setMappingInformation(source->getMappingInformation());
+        return toReturn;
     }
 
 }

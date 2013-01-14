@@ -47,9 +47,13 @@ namespace campvis {
         : AbstractProcessor()
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output", DataNameProperty::WRITE)
+        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
     {
         addProperty(&p_url);
         addProperty(&p_targetImageID);
+        addProperty(&p_imageOffset);
+        addProperty(&p_voxelSize);
     }
 
     MhdImageReader::~MhdImageReader() {
@@ -69,6 +73,9 @@ namespace campvis {
             WeaklyTypedPointer::BaseType pt;
             size_t offset = 0;
             EndianHelper::Endianness e = EndianHelper::LITTLE_ENDIAN;
+
+            tgt::vec3 voxelSize(1.f);
+            tgt::vec3 imageOffset(0.f);
 
             // image type
             if (tfp.hasKey("ObjectType")) {
@@ -124,6 +131,12 @@ namespace campvis {
                 e = (tfp.getBool("ElementByteOrderMSB") ? EndianHelper::BIG_ENDIAN : EndianHelper::LITTLE_ENDIAN);
             
             // TODO: spacing, element size, etc.
+            if (tfp.hasKey("ElementSpacing")) {
+                voxelSize = tfp.getVec3("ElementSpacing");
+            }
+            if (tfp.hasKey("Position")) {
+                imageOffset = tfp.getVec3("Position");
+            }
 
 
             // get raw image location:
@@ -156,6 +169,7 @@ namespace campvis {
 
             // all parsing done - lets create the image:
             ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, 1, offset, e);
+            image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
             data.addData(p_targetImageID.getValue(), image);
             p_targetImageID.issueWrite();
         }

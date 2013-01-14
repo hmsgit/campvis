@@ -75,6 +75,12 @@ namespace campvis {
         const ImageMappingInformation& getMappingInformation() const;
 
         /**
+         * Sets the mapping information for this image to \a imi.
+         * \param   imi The new ImageMappingInformation for this image.
+         */
+        void setMappingInformation(const ImageMappingInformation& imi);
+
+        /**
          * Returns the image extent in world coordinates.
          * \return  The image extent in world coordinates.
          */

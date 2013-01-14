@@ -46,6 +46,7 @@ namespace campvis {
             VALID               = 0,
             INVALID_RESULT      = 1 << 0,
             INVALID_SHADER      = 1 << 1,
+            INVALID_FILE        = 1 << 2,
         };
 
         /**

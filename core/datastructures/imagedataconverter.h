@@ -127,10 +127,13 @@ namespace campvis {
         // TODO: check (un)signed int/float?
 
         WeaklyTypedPointer wtp = source->getImageData();
-        return new GenericImageDataLocal<BASETYPE, NUMCHANNELS>(
+        GenericImageDataLocal<BASETYPE, NUMCHANNELS>* toReturn = new GenericImageDataLocal<BASETYPE, NUMCHANNELS>(
             source->getDimensionality(), 
             source->getSize(), 
             reinterpret_cast<typename TypeTraits<BASETYPE, NUMCHANNELS>::ElementType*>(wtp._pointer));        
+        toReturn->setMappingInformation(source->getMappingInformation());
+
+        return toReturn;
     }
 
 }
