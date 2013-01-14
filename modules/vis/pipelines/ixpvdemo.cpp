@@ -137,13 +137,14 @@ namespace campvis {
         _ctFullDRR.p_transferFunction.replaceTF(tf);
         _ctFullDRR.p_targetImageID.setValue("ct.drr.full");
         _ctFullDRR.p_samplingRate.setValue(1.f);
+        _ctFullDRR.p_invertMapping.setValue(true);
         
         Geometry1DTransferFunction* tf2 = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf2->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(0, 0, 0, 180)));
         _ctClippedDRR.p_transferFunction.replaceTF(tf2);
         _ctClippedDRR.p_targetImageID.setValue("ct.drr.clipped");
         _ctClippedDRR.p_samplingRate.setValue(1.f);
-
+        _ctClippedDRR.p_invertMapping.setValue(true);
 
         // = US Setup =====================================================================================
 
@@ -201,9 +202,9 @@ namespace campvis {
                     _ctDVR.p_transferFunction.getTF()->setImageHandle(dh);
                     _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
                     _ctFullDRR.p_transferFunction.getTF()->setImageHandle(dh);
-                    _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                    _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.33f, .7f));
                     _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(dh);
-                    _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                    _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.33f, .7f));
 
                     {
                         tgt::GLContextScopedLock lock(_canvas->getContext());
@@ -220,7 +221,10 @@ namespace campvis {
 
                 _trackballHandler->setSceneBounds(volumeExtent);
                 _trackballHandler->setCenter(volumeExtent.center());
-                _trackballHandler->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                _trackballHandler->reinitializeCamera(
+                    tgt::vec3(399.f, -900.f, 468.f), 
+                    tgt::vec3(155.5f, 229.5f, 254.6f), 
+                    tgt::vec3(0.959f, 0.279f, -0.042f));
             }
         }
 

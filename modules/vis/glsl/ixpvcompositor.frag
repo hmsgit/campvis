@@ -70,5 +70,10 @@ void main() {
         fragDepth = min(xRayDepth, sliceDepth);
         
     out_Color = weightingFactor*xRayColor + (1.0-weightingFactor)*sliceColor;
-    //gl_FragDepth = fragDepth;
+    gl_FragDepth = fragDepth;
+
+    
+    if (out_Color.a == 0) {
+        renderBackground(ex_TexCoord.xy, out_Color);
+    }
 }
