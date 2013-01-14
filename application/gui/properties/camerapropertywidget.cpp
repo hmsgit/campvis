@@ -27,36 +27,45 @@
 // 
 // ================================================================================================
 
-#include "abstractpropertywidget.h"
-#include "core/properties/abstractproperty.h"
+#include "camerapropertywidget.h"
+
+#include <QGridLayout>
+#include <QLabel>
+#include "core/tools/stringutils.h"
 
 namespace campvis {
-
-    AbstractPropertyWidget::AbstractPropertyWidget(AbstractProperty* property, QWidget* parent /*= 0*/)
-        : QWidget(parent)
-        , _property(property)
-        , _ignorePropertyUpdates(false)
-        , _layout(0)
+    CameraPropertyWidget::CameraPropertyWidget(CameraProperty* property, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, parent)
+        , _lblCameraPosition(0)
+        , _lblLookDirection(0)
+        , _lblUpVector(0)
     {
-        _titleLabel = new QLabel(QString::fromStdString(_property->getTitle() + ":"), this);
+        _widget = new QWidget(this);
+        QGridLayout* gridLayout = new QGridLayout(_widget);
+        _widget->setLayout(gridLayout);
 
-        _layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-        _layout->setSpacing(8);
-        _layout->addWidget(_titleLabel, 0);
+        _lblCameraPosition = new QLabel("Position: ", _widget);
+        gridLayout->addWidget(_lblCameraPosition, 0, 0);
+        _lblFocusPosition = new QLabel("Focus: ", _widget);
+        gridLayout->addWidget(_lblFocusPosition, 1, 0);
+        _lblLookDirection = new QLabel("Look Direction: ", _widget);
+        gridLayout->addWidget(_lblLookDirection, 2, 0);
+        _lblUpVector = new QLabel("Up Vector: ", _widget);
+        gridLayout->addWidget(_lblUpVector, 3, 0);
 
-        _property->s_changed.connect(this, &AbstractPropertyWidget::onPropertyChanged);
+        addWidget(_widget);
+        updateWidgetFromProperty();
     }
 
-    AbstractPropertyWidget::~AbstractPropertyWidget() {
-        _property->s_changed.disconnect(this);
+    CameraPropertyWidget::~CameraPropertyWidget() {
     }
 
-    void AbstractPropertyWidget::addWidget(QWidget* widget) {
-        _layout->addWidget(widget, 1);
+    void CameraPropertyWidget::updateWidgetFromProperty() {
+        CameraProperty* prop = static_cast<CameraProperty*>(_property);
+        _lblCameraPosition->setText("Position: " + QString::fromStdString(StringUtils::toString(prop->getValue().getPosition())));
+        _lblFocusPosition->setText("Focus: " + QString::fromStdString(StringUtils::toString(prop->getValue().getFocus())));
+        _lblLookDirection->setText("Look Direction: " + QString::fromStdString(StringUtils::toString(prop->getValue().getLook())));
+        _lblUpVector->setText("Up Vector: " + QString::fromStdString(StringUtils::toString(prop->getValue().getUpVector())));
     }
 
-    void AbstractPropertyWidget::onPropertyChanged(const AbstractProperty* property) {
-        if (!_ignorePropertyUpdates)
-            updateWidgetFromProperty();
-    }
 }

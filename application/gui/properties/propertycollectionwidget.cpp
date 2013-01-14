@@ -72,6 +72,7 @@ namespace campvis {
 
     void PropertyCollectionWidget::setupWidget() {
         _layout = new QVBoxLayout();
+        _layout->setSpacing(0);
         setLayout(_layout);
     }
 

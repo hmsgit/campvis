@@ -31,12 +31,14 @@
 
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/boolpropertywidget.h"
+#include "application/gui/properties/camerapropertywidget.h"
 #include "application/gui/properties/intpropertywidget.h"
 #include "application/gui/properties/floatpropertywidget.h"
 #include "application/gui/properties/stringpropertywidget.h"
 #include "application/gui/properties/transferfunctionpropertywidget.h"
 
 #include "core/properties/abstractproperty.h"
+#include "core/properties/cameraproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
@@ -78,6 +80,10 @@ namespace campvis {
 
         if (StringProperty* tester = dynamic_cast<StringProperty*>(property)) {
             return new StringPropertyWidget(tester);
+        }
+
+        if (CameraProperty* tester = dynamic_cast<CameraProperty*>(property)) {
+            return new CameraPropertyWidget(tester);
         }
 
         if (TransferFunctionProperty* tester = dynamic_cast<TransferFunctionProperty*>(property)) {

@@ -27,36 +27,50 @@
 // 
 // ================================================================================================
 
-#include "abstractpropertywidget.h"
-#include "core/properties/abstractproperty.h"
+#ifndef CAMERAPROPERTYWIDGET_H__
+#define CAMERAPROPERTYWIDGET_H__
+
+#include "application/gui/properties/abstractpropertywidget.h"
+#include "core/properties/cameraproperty.h"
+
+class QLabel;
 
 namespace campvis {
+    /**
+     * Widget for a Camera.
+     * For now just offering read-access.
+     */
+    class CameraPropertyWidget : public AbstractPropertyWidget {
+        Q_OBJECT;
 
-    AbstractPropertyWidget::AbstractPropertyWidget(AbstractProperty* property, QWidget* parent /*= 0*/)
-        : QWidget(parent)
-        , _property(property)
-        , _ignorePropertyUpdates(false)
-        , _layout(0)
-    {
-        _titleLabel = new QLabel(QString::fromStdString(_property->getTitle() + ":"), this);
+    public:
+        /**
+         * Creates a new CameraPropertyWidget for the property \a property.
+         * \param   property    The property the widget shall handle
+         * \param   parent      Parent Qt widget
+         */
+        CameraPropertyWidget(CameraProperty* property, QWidget* parent = 0);
 
-        _layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-        _layout->setSpacing(8);
-        _layout->addWidget(_titleLabel, 0);
+        /**
+         * Destructor
+         */
+        virtual ~CameraPropertyWidget();
 
-        _property->s_changed.connect(this, &AbstractPropertyWidget::onPropertyChanged);
-    }
+    protected:
+        /**
+         * Gets called when the property has changed, so that widget can update its state.
+         */
+        virtual void updateWidgetFromProperty();
 
-    AbstractPropertyWidget::~AbstractPropertyWidget() {
-        _property->s_changed.disconnect(this);
-    }
+    private:
+        QWidget* _widget;
+        QLabel* _lblCameraPosition;
+        QLabel* _lblFocusPosition;
+        QLabel* _lblLookDirection;
+        QLabel* _lblUpVector;
 
-    void AbstractPropertyWidget::addWidget(QWidget* widget) {
-        _layout->addWidget(widget, 1);
-    }
-
-    void AbstractPropertyWidget::onPropertyChanged(const AbstractProperty* property) {
-        if (!_ignorePropertyUpdates)
-            updateWidgetFromProperty();
-    }
+    };
 }
+
+#endif // CAMERAPROPERTYWIDGET_H__
+

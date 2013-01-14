@@ -29,6 +29,7 @@ SET(CampvisApplicationToBeMocced
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
+    gui/properties/camerapropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h
     gui/properties/geometry1dtransferfunctioneditor.h
