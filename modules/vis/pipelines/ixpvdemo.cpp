@@ -44,27 +44,33 @@ namespace campvis {
         , _ctProxy()
         , _ctFullEEP(_effectiveRenderTargetSize)
         , _ctClippedEEP(_effectiveRenderTargetSize)
+        , _ctDVR(_effectiveRenderTargetSize)
         , _ctFullDRR(_effectiveRenderTargetSize)
         , _ctClippedDRR(_effectiveRenderTargetSize)
         , _usReader()
         , _usSliceRenderer(_effectiveRenderTargetSize)
         , _compositor(_effectiveRenderTargetSize)
+        , _compositor2(_effectiveRenderTargetSize)
+        , _ixpvCompositor(_effectiveRenderTargetSize)
         , _camera("camera", "Camera")
         , _trackballHandler(0)
     {
-         addProcessor(&_xrayReader);
- 
-         addProcessor(&_ctReader);
-         addProcessor(&_ctProxy);
-         addProcessor(&_ctFullEEP);
-         addProcessor(&_ctClippedEEP);
-         addProcessor(&_ctFullDRR);
-         addProcessor(&_ctClippedDRR);
+        addProcessor(&_xrayReader);
 
         addProcessor(&_usReader);
         addProcessor(&_usSliceRenderer);
 
+        addProcessor(&_ctReader);
+        addProcessor(&_ctProxy);
+        addProcessor(&_ctFullEEP);
+        addProcessor(&_ctClippedEEP);
+        addProcessor(&_ctDVR);
+        addProcessor(&_ctFullDRR);
+        addProcessor(&_ctClippedDRR);
+
         addProcessor(&_compositor);
+        addProcessor(&_compositor2);
+        addProcessor(&_ixpvCompositor);
 
         addProperty(&_camera);
 
@@ -83,6 +89,7 @@ namespace campvis {
         // = Camera Setup =================================================================================
         _camera.addSharedProperty(&_ctFullEEP.p_camera);
         _camera.addSharedProperty(&_ctClippedEEP.p_camera);
+        _camera.addSharedProperty(&_ctDVR.p_camera);
         _camera.addSharedProperty(&_ctFullDRR.p_camera);
         _camera.addSharedProperty(&_ctClippedDRR.p_camera);
         _camera.addSharedProperty(&_usSliceRenderer.p_camera);
@@ -98,6 +105,7 @@ namespace campvis {
         _ctReader.p_targetImageID.connect(&_ctProxy.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctFullEEP.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctClippedEEP.p_sourceImageID);
+        _ctReader.p_targetImageID.connect(&_ctDVR.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctFullDRR.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctClippedDRR.p_sourceImageID);
 
@@ -107,8 +115,22 @@ namespace campvis {
 
         _ctFullEEP.p_entryImageID.setValue("ct.entry.full");
         _ctFullEEP.p_entryImageID.connect(&_ctFullDRR.p_entryImageID);
+        _ctFullEEP.p_entryImageID.connect(&_ctDVR.p_entryImageID);
         _ctFullEEP.p_exitImageID.setValue("ct.exit.full");
         _ctFullEEP.p_exitImageID.connect(&_ctFullDRR.p_exitImageID);
+        _ctFullEEP.p_exitImageID.connect(&_ctDVR.p_exitImageID);
+
+        _ctClippedEEP.p_entryImageID.setValue("ct.entry.clipped");
+        _ctClippedEEP.p_entryImageID.connect(&_ctClippedDRR.p_entryImageID);
+        _ctClippedEEP.p_exitImageID.setValue("ct.exit.clipped");
+        _ctClippedEEP.p_exitImageID.connect(&_ctClippedDRR.p_exitImageID);
+
+        Geometry1DTransferFunction* tfDvr = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
+        //        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(0, 0, 0, 180)));
+        tfDvr->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .6f), tgt::col4(255, 192, 0, 255), tgt::col4(255, 192, 0, 255)));
+        _ctDVR.p_transferFunction.replaceTF(tfDvr);
+        _ctDVR.p_targetImageID.setValue("ct.dvr");
+        _ctDVR.p_samplingRate.setValue(1.f);
 
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(0, 0, 0, 180)));
@@ -128,8 +150,11 @@ namespace campvis {
         _usReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Ultrasound\\gaussianSmoothedUS_UChar.mhd");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_targetImageID.connect(&_usSliceRenderer.p_sourceImageID);
+        _usReader.p_imageOffset.setValue(tgt::vec3(-600.f, 80.f, -530.f));
+        _usReader.p_voxelSize.setValue(tgt::vec3(1.f, 1.f, 1.3f));
 
         _usSliceRenderer.p_targetImageID.setValue("us.slice");
+        _usSliceRenderer.p_targetImageID.connect(&_ctClippedEEP.p_geometryImageId);
         
         _usSliceRenderer.p_sliceNumber.setValue(0);
 
@@ -141,7 +166,18 @@ namespace campvis {
         _compositor.p_targetImageId.setValue("composed");
         _compositor.p_compositingMethod.selectById("diff");
 
-        _renderTargetID.setValue("us.slice");
+        _ctDVR.p_targetImageID.connect(&_compositor2.p_firstImageId);
+        _usSliceRenderer.p_targetImageID.connect(&_compositor2.p_secondImageId);
+        _compositor2.p_targetImageId.setValue("composed2");
+        _compositor2.p_compositingMethod.selectById("depth");
+
+        _xrayReader.p_targetImageID.connect(&_ixpvCompositor.p_xRayImageId);
+        _usSliceRenderer.p_targetImageID.connect(&_ixpvCompositor.p_3dSliceImageId);
+        _ctFullDRR.p_targetImageID.connect(&_ixpvCompositor.p_drrFullImageId);
+        _ctClippedDRR.p_targetImageID.connect(&_ixpvCompositor.p_drrClippedImageId);
+        _ixpvCompositor.p_targetImageId.setValue("ixpv");
+
+        _renderTargetID.setValue("ixpv");
 
         _trackballHandler->setViewportSize(_renderTargetSize);
     }
@@ -162,6 +198,8 @@ namespace campvis {
                 if (local != 0) {
                     DataHandle dh = _data.addData("ct.image.local", local);
                     Interval<float> ii = local->getNormalizedIntensityRange();
+                    _ctDVR.p_transferFunction.getTF()->setImageHandle(dh);
+                    _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
                     _ctFullDRR.p_transferFunction.getTF()->setImageHandle(dh);
                     _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
                     _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(dh);
@@ -198,6 +236,7 @@ namespace campvis {
                     Interval<float> ii = local->getNormalizedIntensityRange();
                     _usSliceRenderer.p_transferFunction.getTF()->setImageHandle(dh);
                     _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                    _usSliceRenderer.updateProperties(img);
                     _usSliceRenderer.p_sliceNumber.setValue(125);
 
                     {

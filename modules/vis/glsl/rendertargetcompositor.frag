@@ -74,6 +74,20 @@ void main() {
         out_Color = vec4(vec3(1.0) - abs(firstColor - secondColor).xyz, max(firstColor.w, secondColor.w));
         gl_FragDepth = min(firstDepth, secondDepth);
     }
+    else if (_compositingMethod == 4) {
+        // depth test
+        float firstDepth = getElement2DNormalized(_firstDepth, ex_TexCoord.xy).z;
+        float secondDepth = getElement2DNormalized(_secondDepth, ex_TexCoord.xy).z;
+
+        if (firstDepth > secondDepth) {
+            out_Color = getElement2DNormalized(_secondColor, ex_TexCoord.xy);
+            gl_FragDepth = secondDepth;
+        }
+        else {
+            out_Color = getElement2DNormalized(_firstColor, ex_TexCoord.xy);
+            gl_FragDepth = firstDepth;
+        }
+    }
     else {
         // should not occur, but makes the GLSL compiler happy
         out_Color = vec4(0.0);

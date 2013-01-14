@@ -82,10 +82,10 @@ namespace campvis {
         IntProperty p_sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
-    protected:
         /// adapts the range of the p_sliceNumber property to the image
         void updateProperties(const ImageData* img);
 
+    protected:
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;

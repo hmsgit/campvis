@@ -43,11 +43,12 @@
 
 namespace campvis {
 
-    static const GenericOption<CompositingMode> compositingOptions[4] = {
+    static const GenericOption<CompositingMode> compositingOptions[5] = {
         GenericOption<CompositingMode>("first", "Only First", CompositingModeFirst),
         GenericOption<CompositingMode>("second", "Only Second", CompositingModeSecond),
         GenericOption<CompositingMode>("alpha", "Alpha Blending", CompositingModeAlpha),
-        GenericOption<CompositingMode>("diff", "Difference", CompositingModeDifference)
+        GenericOption<CompositingMode>("diff", "Difference", CompositingModeDifference),
+        GenericOption<CompositingMode>("depth", "Depth Test", CompositingModeDepth)
     };
 
     const std::string RenderTargetCompositor::loggerCat_ = "CAMPVis.modules.vis.RenderTargetCompositor";
@@ -57,7 +58,7 @@ namespace campvis {
         , p_firstImageId("FirstImageId", "First Input Image", "", DataNameProperty::READ)
         , p_secondImageId("SecondImageId", "Second Input Image", "", DataNameProperty::READ)
         , p_targetImageId("TargetImageId", "Output Image", "", DataNameProperty::WRITE)
-        , p_compositingMethod("CompositingMethod", "Compositing Method", compositingOptions, 4)
+        , p_compositingMethod("CompositingMethod", "Compositing Method", compositingOptions, 5)
         , p_alphaValue("AlphaValue", "AlphaValue", .5f, 0.f, 1.f)
         , _shader(0)
     {

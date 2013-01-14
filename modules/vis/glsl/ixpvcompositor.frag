@@ -26,55 +26,49 @@
  * commercial licensing please contact the authors.                   *
  *                                                                    *
  **********************************************************************/
+ 
+#version 330
 
+in vec3 ex_TexCoord;
+out vec4 out_Color;
 
-#include "modules/mod_sampler2d.frag"
+#include "tools/texture2d.frag"
+#include "tools/background.frag"
 
-uniform SAMPLER2D_TYPE colorTex0_;
-uniform SAMPLER2D_TYPE depthTex0_;
-uniform TEXTURE_PARAMETERS textureParameters0_;
+uniform Texture2D _xRayColor;
+uniform Texture2D _xRayDepth;
+uniform Texture2D _sliceColor;
+uniform Texture2D _sliceDepth;
 
-uniform SAMPLER2D_TYPE colorTex1_;
-uniform SAMPLER2D_TYPE depthTex1_;
-uniform TEXTURE_PARAMETERS textureParameters1_;
-
-uniform SAMPLER2D_TYPE colorTexDRRMax_;
-uniform TEXTURE_PARAMETERS textureParametersDRRMax_;
-
-uniform SAMPLER2D_TYPE colorTexDRRClipped_;
-uniform TEXTURE_PARAMETERS textureParametersDRRClipped_;
+uniform Texture2D _drrFullColor;
+uniform Texture2D _drrClippedColor;
 
 /***
  * The main method.
  ***/
 void main() {
-    vec2 fragCoord = gl_FragCoord.xy;
-
     // fetch input textures
-    vec4 color0 = textureLookup2Dscreen(colorTex0_, textureParameters0_, fragCoord);
-    float depth0 = textureLookup2Dscreen(depthTex0_, textureParameters0_, fragCoord).z;
-    vec4 color1 = textureLookup2Dscreen(colorTex1_, textureParameters1_, fragCoord);
-    float depth1 = textureLookup2Dscreen(depthTex1_, textureParameters1_, fragCoord).z;
+    vec4 xRayColor = getElement2DNormalized(_xRayColor, ex_TexCoord.xy);
+    float xRayDepth = getElement2DNormalized(_xRayDepth, ex_TexCoord.xy).z;
+    vec4 sliceColor = getElement2DNormalized(_sliceColor, ex_TexCoord.xy);
+    float sliceDepth = getElement2DNormalized(_sliceDepth, ex_TexCoord.xy).z;
     
-    float drrMax = textureLookup2Dscreen(colorTexDRRMax_, textureParametersDRRMax_, fragCoord).r;
-    float drrClipped = textureLookup2Dscreen(colorTexDRRClipped_, textureParametersDRRClipped_, fragCoord).r;
+    float drrFull = getElement2DNormalized(_drrFullColor, ex_TexCoord.xy).r;
+    float drrClipped = getElement2DNormalized(_drrClippedColor, ex_TexCoord.xy).r;
     
 	float weightingFactor = 0.0;
 	if (drrClipped > 0)
-		weightingFactor = clamp(drrClipped / drrMax, 0.0, 1.0);
+		weightingFactor = clamp(drrClipped / drrFull, 0.0, 1.0);
 	
-    vec4 fragColor = vec4(0.0, 0.0, 0.0, 1.0);
     float fragDepth = weightingFactor;
     
     if (weightingFactor == 0.0)
-        fragDepth = depth1;
+        fragDepth = sliceDepth;
     else if (weightingFactor == 1.0)
-        fragDepth = depth0;
+        fragDepth = xRayDepth;
     else
-        fragDepth = min(depth0, depth1);
+        fragDepth = min(xRayDepth, sliceDepth);
         
-    fragColor = weightingFactor*color0 + (1.0-weightingFactor)*color1;
-
-    FragData0 = fragColor;
-    gl_FragDepth = fragDepth;
+    out_Color = weightingFactor*xRayColor + (1.0-weightingFactor)*sliceColor;
+    //gl_FragDepth = fragDepth;
 }

@@ -46,6 +46,7 @@
 #include "modules/vis/processors/simpleraycaster.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
 #include "modules/vis/processors/slicerenderer3d.h"
+#include "modules/vis/processors/ixpvcompositor.h"
 
 
 namespace campvis {
@@ -82,6 +83,7 @@ namespace campvis {
         ProxyGeometryGenerator _ctProxy;
         EEPGenerator _ctFullEEP;
         EEPGenerator _ctClippedEEP;
+        SimpleRaycaster _ctDVR;
         DRRRaycaster _ctFullDRR;
         DRRRaycaster _ctClippedDRR;
 
@@ -89,6 +91,8 @@ namespace campvis {
         SliceRenderer3D _usSliceRenderer;
 
         RenderTargetCompositor _compositor;
+        RenderTargetCompositor _compositor2;
+        IxpvCompositor _ixpvCompositor;
 
         CameraProperty _camera;
 

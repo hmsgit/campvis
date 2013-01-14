@@ -51,6 +51,7 @@ namespace campvis {
             CompositingModeSecond = 1,
             CompositingModeAlpha = 2,
             CompositingModeDifference = 3,
+            CompositingModeDepth = 4
         };
     }
 

@@ -58,6 +58,7 @@ namespace campvis {
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_targetImageID);
+        addProperty(&p_camera);
         addProperty(&p_sliceNumber);
         addProperty(&p_transferFunction);
     }
@@ -100,12 +101,17 @@ namespace campvis {
 
                 ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
 
+                glPushAttrib(GL_ALL_ATTRIB_BITS);
+                glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
                 _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+
+                tgt::mat4 trafoMatrix = tgt::mat4::createScale(tgt::vec3(-1.f, 1.f, -1.f));
+                _shader->setUniform("_modelMatrix", trafoMatrix);
 
                 tgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
@@ -120,6 +126,7 @@ namespace campvis {
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
+                glPopAttrib();
 
                 data.addData(p_targetImageID.getValue(), rt);
                 p_targetImageID.issueWrite();
