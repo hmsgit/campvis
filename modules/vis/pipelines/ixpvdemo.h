@@ -32,7 +32,7 @@
 
 #include "core/datastructures/imagedatalocal.h"
 #include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
 #include "core/properties/cameraproperty.h"
 #include "core/pipeline/visualizationpipeline.h"
 
@@ -97,6 +97,7 @@ namespace campvis {
         CameraProperty _camera;
 
         TrackballNavigationEventHandler* _trackballHandler;
+        MWheelToNumericPropertyEventHandler _wheelHandler;
     };
 }
 

@@ -81,8 +81,12 @@ namespace campvis {
         /**
          * Clips this MeshGeometry against an aribtrary clip plane.
          * The clipped MeshGeometry is returned.
+         * \note    When clipping against one of the faces of this mesh, the mesh closing 
+         *          algorithm might fail and return an invalid mesh!
          * \param   p       Point on clip plane
          * \param   normal  Clip plane normal
+         * \param   close   Flag, whether the returned mesh shall be closed. 
+         *                  If true, the closing face will be the last one in the returned MeshGeometry.
          * \param   epsilon Clipping precision
          * \return  The clipped MeshGeometry
          */

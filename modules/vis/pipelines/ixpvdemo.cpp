@@ -54,6 +54,7 @@ namespace campvis {
         , _ixpvCompositor(_effectiveRenderTargetSize)
         , _camera("camera", "Camera")
         , _trackballHandler(0)
+        , _wheelHandler(&_usSliceRenderer.p_sliceNumber)
     {
         addProcessor(&_xrayReader);
 
@@ -75,8 +76,8 @@ namespace campvis {
         addProperty(&_camera);
 
         _trackballHandler = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
+        addEventHandler(&_wheelHandler);
         addEventHandler(_trackballHandler);
-        //addEventHandler(&_tfWindowingHandler);
     }
 
     IxpvDemo::~IxpvDemo() {
@@ -202,9 +203,9 @@ namespace campvis {
                     _ctDVR.p_transferFunction.getTF()->setImageHandle(dh);
                     _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
                     _ctFullDRR.p_transferFunction.getTF()->setImageHandle(dh);
-                    _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.33f, .7f));
+                    _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
                     _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(dh);
-                    _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.33f, .7f));
+                    _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
 
                     {
                         tgt::GLContextScopedLock lock(_canvas->getContext());

@@ -200,7 +200,7 @@ namespace campvis {
         }
         else {
             for (int y = 0; y < _numTiles.y; ++y) {
-                for (int x = 0; x < _numTiles.y; ++x) {
+                for (int x = 0; x < _numTiles.x; ++x) {
                     int index = (_numTiles.x * y) + x;
                     if (index >= static_cast<int>(textures.size()))
                         break;
