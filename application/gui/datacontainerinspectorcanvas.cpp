@@ -141,8 +141,7 @@ namespace campvis {
         std::vector<const tgt::Texture*> textures;
         for (std::map<std::string, DataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
             if (const ImageDataGL* imgGL = dynamic_cast<const ImageDataGL*>(it->second.getData())) {
-                if (imgGL->getDimensionality() == 2)
-            	    textures.push_back(imgGL->getTexture());
+          	    textures.push_back(imgGL->getTexture());
             }
             else if (const ImageDataRenderTarget* imgRT = dynamic_cast<const ImageDataRenderTarget*>(it->second.getData())) {
                 if (imgRT->getDimensionality() == 2) {
@@ -187,15 +186,15 @@ namespace campvis {
         tgt::mat4 projection = tgt::mat4::createOrtho(0, size_.x, 0, size_.y, -1, 1);
         _paintShader->setUniform("_projectionMatrix", projection);
 
-        tgt::TextureUnit tu;
-        tu.activate();
-        _paintShader->setUniform("_texture._texture", tu.getUnitNumber());
+        tgt::TextureUnit unit2d, unit3d;
+        _paintShader->setUniform("_texture2d._texture", unit2d.getUnitNumber());
+        _paintShader->setUniform("_texture3d._texture", unit3d.getUnitNumber());
 
         if (_renderFullscreen) {
             if(_selectedTexture >= 0 && _selectedTexture < (int)textures.size()) {
                 tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(size_, 1.f));
                 _paintShader->setUniform("_modelMatrix", scaleMatrix);
-                paintTexture(textures[_selectedTexture]);
+                paintTexture2D(textures[_selectedTexture], unit2d, unit3d);
             }
         }
         else {
@@ -208,7 +207,7 @@ namespace campvis {
                     tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(_quadSize, 1.f));
                     tgt::mat4 translation = tgt::mat4::createTranslation(tgt::vec3(_quadSize.x * x, _quadSize.y * y, 0.f));
                     _paintShader->setUniform("_modelMatrix", translation * scaleMatrix);
-                    paintTexture(textures[index]);
+                    paintTexture2D(textures[index], unit2d, unit3d);
                 }
             }
         }
@@ -218,12 +217,24 @@ namespace campvis {
         glPopAttrib();
     }
 
-    void DataContainerInspectorCanvas::paintTexture(const tgt::Texture* texture) {
-        texture->bind();
+    void DataContainerInspectorCanvas::paintTexture2D(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d) {
 
         _paintShader->setIgnoreUniformLocationError(true);
-        _paintShader->setUniform("_texture._size", tgt::vec2(texture->getDimensions().xy()));
-        _paintShader->setUniform("_texture._sizeRCP", tgt::vec2(1.f) / tgt::vec2(texture->getDimensions().xy()));
+        if (texture->getDimensions().z == 1) {
+            unit2d.activate();
+            texture->bind();
+            _paintShader->setUniform("_is3d", false);
+            _paintShader->setUniform("_texture2d._size", tgt::vec2(texture->getDimensions().xy()));
+            _paintShader->setUniform("_texture2d._sizeRCP", tgt::vec2(1.f) / tgt::vec2(texture->getDimensions().xy()));
+        }
+        else {
+            unit3d.activate();
+            texture->bind();
+            _paintShader->setUniform("_is3d", true);
+            _paintShader->setUniform("_sliceNumber", -1);
+            _paintShader->setUniform("_texture3d._size", tgt::vec3(texture->getDimensions()));
+            _paintShader->setUniform("_texture3d._sizeRCP", tgt::vec3(1.f) / tgt::vec3(texture->getDimensions()));
+        }
         _paintShader->setIgnoreUniformLocationError(false);
 
         _quad->render();

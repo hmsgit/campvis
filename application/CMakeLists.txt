@@ -13,6 +13,8 @@ FILE(GLOB CampvisApplicationSources
 
 FILE(GLOB CampvisApplicationHeaders
     *.h
+    glsl/*.frag
+    glsl/*.vert
     gui/*.h
     gui/properties/*.h
     tools/*.h

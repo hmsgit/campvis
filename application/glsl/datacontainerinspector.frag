@@ -33,14 +33,35 @@ in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #include "tools/texture2d.frag"
-uniform Texture2D _texture;
+#include "tools/texture3d.frag"
+
+uniform Texture2D _texture2d;
+uniform Texture3D _texture3d;
+uniform bool _is3d;
+uniform int _sliceNumber;
 uniform vec4 _color;
 
 const vec4 checkerboardColor1 = vec4(0.75, 0.75, 0.75, 1.0);
 const vec4 checkerboardColor2 = vec4(0.50, 0.50, 0.50, 1.0);
 
 void main() {
-    out_Color = getElement2DNormalized(_texture, ex_TexCoord.xy);
+    if (_is3d) {
+        if (_sliceNumber < 0) {
+            // perform MIP
+            out_Color = vec4(0.0);
+            for (float slice = 0.0; slice < 1.0; slice += _texture3d._sizeRCP.z) {
+                out_Color = max(out_Color, getElement3DNormalized(_texture3d, vec3(ex_TexCoord.xy, slice)));
+            }
+        }
+        else {
+            // render the corresponding slice
+            vec3 coord = vec3(ex_TexCoord.xy, _texture3d._sizeRCP.z * _sliceNumber);
+            out_Color = getElement3DNormalized(_texture3d, coord);
+        }
+    }
+    else {
+        out_Color = getElement2DNormalized(_texture2d, ex_TexCoord.xy);
+    }
 
     // mix with fancy checkerboard pattern:
     if ((mod(ex_TexCoord.x * 10.0, 2.0) > 1.0) ^^ (mod(ex_TexCoord.y * 10.0, 2.0) > 1.0))

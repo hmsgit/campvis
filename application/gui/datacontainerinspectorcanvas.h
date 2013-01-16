@@ -123,11 +123,11 @@ namespace campvis {
         void invalidate();
 
         /**
-         * Renders the given texture.
+         * Renders the given 2D texture.
          * Binds the texture to the shader, sets the uniforms and renders the quad.
          * \param   texture     The texture to render.
          */
-        void paintTexture(const tgt::Texture* texture);
+        void paintTexture2D(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
 
         /**
          * Creates the quad used for rendering the textures.
