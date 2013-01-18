@@ -33,7 +33,8 @@
 #include "tgt/glcontext.h"
 #include "tgt/qt/qtcontextmanager.h"
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationconverter.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
+
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
@@ -72,6 +73,7 @@ namespace campvis {
         //_imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.connect(&_pgGenerator.p_sourceImageID);
         _imageReader.p_targetImageID.connect(&_eepGenerator.p_sourceImageID);
 
         _clRaycaster._targetImageID.setValue("cl.output");
@@ -82,7 +84,6 @@ namespace campvis {
          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
          _clRaycaster._transferFunction.replaceTF(dvrTF);
 
-        _pgGenerator.p_sourceImageID.setValue("eep.input");
 
 
         _renderTargetID.setValue("cl.output");

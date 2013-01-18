@@ -140,14 +140,14 @@ namespace campvis {
 
         std::vector<const tgt::Texture*> textures;
         for (std::map<std::string, DataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
-            if (const ImageRepresentationGL* imgGL = dynamic_cast<const ImageRepresentationGL*>(it->second.getData())) {
-          	    textures.push_back(imgGL->getTexture());
-            }
-            else if (const ImageRepresentationRenderTarget* imgRT = dynamic_cast<const ImageRepresentationRenderTarget*>(it->second.getData())) {
-                if (imgRT->getDimensionality() == 2) {
+            if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
+                if (const ImageRepresentationRenderTarget* imgRT = img->getRepresentation<ImageRepresentationRenderTarget>(false)) {
                     for (size_t i = 0; i < imgRT->getNumColorTextures(); ++i)
-            	        textures.push_back(imgRT->getColorTexture(i));
+                        textures.push_back(imgRT->getColorTexture(i));
                     textures.push_back(imgRT->getDepthTexture());
+                }
+                else if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
+                    textures.push_back(imgGL->getTexture());
                 }
             }
         }

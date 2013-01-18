@@ -36,7 +36,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
-#include "core/datastructures/imagerepresentationconverter.h"
+
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/facegeometry.h"
 

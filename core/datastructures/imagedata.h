@@ -36,12 +36,11 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/abstractimagerepresentation.h"
 #include "core/datastructures/imagemappinginformation.h"
-//#include "core/datastructures/imagerepresentationconverter.h"
+//
 
 #include <vector>
 
 namespace campvis {
-
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.
      * Different representations (e.g. local memory, OpenGL texture, OpenCL buffer) are
@@ -157,15 +156,17 @@ namespace campvis {
 
         /**
          * Returns a representation of this image of type \a T.
-         * Looks, whether such a representations already exists, if not, tries to create one using
-         * the ImageRepresentationConverter. Returns 0 on failure.
+         * Looks, whether such a representations already exists, if not and \a performConversion is 
+         * set, the method tries to create T::tryConvertFrom(). Returns 0 on failure.
+         * \note    You do \b NOT have ownership of the returned pointer!
+         *          The returned pointer is valid as long as this ImageData object exists.
          * \note    If \a T is OpenGL related, make sure to call this method from a valid and locked OpenGL context.
-         * \note    The returned pointer is valid as long as this ImageData object exists.
-         * \return  A pointer to a representation of type \a T, valid as long as this ImageData object exists.
-         *          0 if no such representation could be created.
+         * \param   performConversion   Flag whether to perform representation conversion if necessary.
+         * \return  A pointer to a representation of type \a T, you do NOT have ownership, valid as long 
+         *          as this ImageData object exists. 0 if no such representation could be created.
          */
         template<typename T>
-        const T* getRepresentation() const;
+        const T* getRepresentation(bool performConversion = true) const;
 
     protected:
         /**
@@ -196,25 +197,31 @@ namespace campvis {
     }
 
     template<typename T>
-    const T* campvis::ImageData::getRepresentation() const {
+    const T* campvis::ImageData::getRepresentation(bool performConversion /*= true*/) const {
         // look, whether we already have a suitable representation
         for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (typeid(T*) == typeid(*it)) {
-                return static_cast<const T*>(*it);
+            if (const T* tester = dynamic_cast<const T*>(*it))
+                return tester;
+            //if (typeid(T) == typeid(**it)) {
+            //    return static_cast<const T*>(*it);
+            //}
+        }
+
+        if (performConversion) {
+            // no representation found, create a new one
+            for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
+                const T* tester = T::tryConvertFrom(*it);// ImageRepresentationConverter::tryConvert<T>(*it);
+                if (tester != 0) {
+                    _representations.push_back(tester);
+                    return tester;
+                }
             }
+
+            // could not create a suitable representation
+            LDEBUG("Could not create a " + std::string(typeid(T*).name()) + " representation.");
+            return 0;
         }
 
-        // no representation found, create a new one
-        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
-//             const T* tester = ImageRepresentationConverter::tryConvert<T>(*it);
-//             if (tester != 0) {
-//                 _representations.push_back(tester);
-//                 return tester;
-//             }
-        }
-
-        // could not create a suitable representation
-        LDEBUG("Could not create a " + std::string(typeid(T*).name()) + " representation.");
         return 0;
     }
 }

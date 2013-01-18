@@ -31,7 +31,8 @@
 
 #include "tbb/include/tbb/tbb.h"
 #include "tbb/include/tbb/spin_mutex.h"
-#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationdisk.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
 
 #include <limits>
 
@@ -108,6 +109,18 @@ namespace campvis {
         delete _intensityHistogram;
     }
 
+    ImageRepresentationLocal* ImageRepresentationLocal::tryConvertFrom(const AbstractImageRepresentation* source) {
+        if (source == 0)
+            return 0;
+
+        // test source image type via dynamic cast
+        if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
+            return convertToGenericLocal(tester);
+        }
+
+        return 0;
+    }
+
     const Interval<float>& ImageRepresentationLocal::getNormalizedIntensityRange() const {
         if (_intensityRangeDirty)
             computeNormalizedIntensityRange();
@@ -137,5 +150,48 @@ namespace campvis {
         _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
         tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), IntensityHistogramGenerator(this, _intensityHistogram));
     }
+
+    ImageRepresentationLocal* ImageRepresentationLocal::convertToGenericLocal(const ImageRepresentationDisk* source) {
+        WeaklyTypedPointer wtp = source->getImageData();
+
+#define CONVERT_TO_GENERIC_LOCAL(baseType,numChannels) \
+        return new GenericImageRepresentationLocal<baseType, numChannels>( \
+            source->getParent(), \
+            reinterpret_cast< TypeTraits<baseType, numChannels>::ElementType*>(wtp._pointer));
+
+#define DISPATCH_CONVERSION(numChannels) \
+        if (source->getNumChannels() == (numChannels)) { \
+            switch (source->getBaseType()) { \
+                case WeaklyTypedPointer::UINT8: \
+                    CONVERT_TO_GENERIC_LOCAL(uint8_t, (numChannels)) \
+                case WeaklyTypedPointer::INT8: \
+                    CONVERT_TO_GENERIC_LOCAL(int8_t, (numChannels)) \
+                case WeaklyTypedPointer::UINT16: \
+                    CONVERT_TO_GENERIC_LOCAL(uint16_t, (numChannels)) \
+                case WeaklyTypedPointer::INT16: \
+                    CONVERT_TO_GENERIC_LOCAL(int16_t, (numChannels)) \
+                case WeaklyTypedPointer::UINT32: \
+                    CONVERT_TO_GENERIC_LOCAL(uint32_t, (numChannels)) \
+                case WeaklyTypedPointer::INT32: \
+                    CONVERT_TO_GENERIC_LOCAL(int32_t, (numChannels)) \
+                case WeaklyTypedPointer::FLOAT: \
+                    CONVERT_TO_GENERIC_LOCAL(float, (numChannels)) \
+                default: \
+                    tgtAssert(false, "Should not reach this - wrong base data type!"); \
+                    return 0; \
+            } \
+        }
+
+        DISPATCH_CONVERSION(1)
+        else DISPATCH_CONVERSION(2)
+        else DISPATCH_CONVERSION(3)
+        else DISPATCH_CONVERSION(4)
+        else {
+            tgtAssert(false, "Should not reach this - wrong number of channel!");
+            return 0;
+        }
+
+    }
+
 
 }

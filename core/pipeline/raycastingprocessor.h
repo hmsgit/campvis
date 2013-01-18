@@ -128,12 +128,6 @@ namespace campvis {
          */
         virtual std::string generateHeader() const;
 
-        /**
-         * Gets called, when die image in p_sourceImageID has changed.
-         * \param   sourceImage DataHandle to the current sourceImage
-         */
-        virtual void onSourceImageChanged(DataContainer& data);
-
         const std::string _fragmentShaderFilename;      ///< Filename for the fragment shader being automatically loaded.
         tgt::Shader* _shader;                           ///< Shader for raycasting
         bool _bindEntryExitDepthTextures;               ///< Flag whether to also bind the depth textures of the entry-/exit points.

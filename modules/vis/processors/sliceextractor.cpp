@@ -35,7 +35,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
-#include "core/datastructures/imagerepresentationconverter.h"
+
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -102,7 +102,6 @@ namespace campvis {
                 data.addData(p_targetImageID.getValue(), rt.first);
                 p_targetImageID.issueWrite();
                 delete slice;
-                delete glData;
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

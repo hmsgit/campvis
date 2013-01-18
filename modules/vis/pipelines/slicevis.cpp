@@ -30,7 +30,7 @@
 #include "slicevis.h"
 
 #include "tgt/event/keyevent.h"
-#include "core/datastructures/imagerepresentationconverter.h"
+
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 

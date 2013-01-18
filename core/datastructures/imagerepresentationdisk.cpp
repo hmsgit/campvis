@@ -52,13 +52,14 @@ namespace campvis {
     ImageRepresentationDisk* ImageRepresentationDisk::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
+        const tgt::svec3& size = getSize();
         tgt::svec3 newSize = urb - llf;
-        if (newSize == getSize()) {
+        if (newSize == size) {
             // nothing has changed, just provide a copy:
             return clone();
         }
 
-        size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _numChannels) * llf.x;
+        size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _numChannels) * (llf.x + llf.y * size.y + llf.z * size.x * size.y);
         // the stride doesn't change!
         tgt::svec3 newStride = (_stride == tgt::svec3::zero) ? getCanonicStride(getSize()) : _stride;
         return new ImageRepresentationDisk(parent, _url, _type, _numChannels, newOffset, _endianess, newStride);
@@ -212,6 +213,11 @@ namespace campvis {
 
     size_t ImageRepresentationDisk::getNumChannels() const {
         return _numChannels;
+    }
+
+    ImageRepresentationDisk* ImageRepresentationDisk::tryConvertFrom(const AbstractImageRepresentation* source) {
+        // no conversion availible for now
+        return 0;
     }
 
 }

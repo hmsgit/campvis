@@ -43,7 +43,7 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
-#include "core/datastructures/imagerepresentationconverter.h"
+
 
 #include "core/classification/simpletransferfunction.h"
 

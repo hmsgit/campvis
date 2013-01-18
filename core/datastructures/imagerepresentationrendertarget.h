@@ -92,6 +92,15 @@ namespace campvis {
          */
         virtual ~ImageRepresentationRenderTarget();
        
+        /**
+         * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
+         * Returns 0 if conversion was not successful or source representation type is not compatible.
+         * \note    The caller has to take ownership of the returned pointer if not 0.
+         * \param   source  Source image representation for conversion.
+         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
+         */
+        static ImageRepresentationRenderTarget* tryConvertFrom(const AbstractImageRepresentation* source);
+
         /// \see AbstractImageRepresentation::clone()
         virtual ImageRepresentationRenderTarget* clone() const;
 

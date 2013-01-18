@@ -35,6 +35,8 @@
 #include "tgt/tgt_gl.h"
 
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationdisk.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 
 namespace campvis {
 
@@ -55,6 +57,25 @@ namespace campvis {
 
     ImageRepresentationGL::~ImageRepresentationGL() {
         delete _texture;
+    }
+
+    ImageRepresentationGL* ImageRepresentationGL::tryConvertFrom(const AbstractImageRepresentation* source) {
+        if (source == 0)
+            return 0;
+
+        // test source image type via dynamic cast
+        if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
+            WeaklyTypedPointer wtp = tester->getImageData();
+            ImageRepresentationGL* toReturn = new ImageRepresentationGL(tester->getParent(), wtp);
+            delete wtp._pointer;
+            return toReturn;
+        }
+        else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
+            ImageRepresentationGL* toReturn = new ImageRepresentationGL(tester->getParent(), tester->getWeaklyTypedPointer());
+            return toReturn;
+        }
+
+        return 0;
     }
 
     ImageRepresentationGL* ImageRepresentationGL::clone() const {
@@ -194,5 +215,6 @@ namespace campvis {
     size_t ImageRepresentationGL::getVideoMemoryFootprint() const {
         return _texture->getSizeOnGPU();
     }
+
 
 }

@@ -38,6 +38,7 @@
 #include "core/tools/weaklytypedpointer.h"
 
 namespace campvis {
+    class ImageRepresentationDisk;
 
     /**
      * Abstract base class for storing image data in the local memory.
@@ -62,6 +63,15 @@ namespace campvis {
          * Destructor
          */
         virtual ~ImageRepresentationLocal();
+
+        /**
+         * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
+         * Returns 0 if conversion was not successful or source representation type is not compatible.
+         * \note    The caller has to take ownership of the returned pointer if not 0.
+         * \param   source  Source image representation for conversion.
+         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
+         */
+        static ImageRepresentationLocal* tryConvertFrom(const AbstractImageRepresentation* source);
 
         /// \see AbstractData::clone()
         virtual ImageRepresentationLocal* clone() const = 0;
@@ -201,6 +211,9 @@ namespace campvis {
         static const std::string loggerCat_;
 
     private:
+
+        static ImageRepresentationLocal* convertToGenericLocal(const ImageRepresentationDisk* source);
+
         // We don't want this data to be copied - clone() must be enough
         // (read: We are too lazy to implement a correct copy constructor / assignment-operator)
          ImageRepresentationLocal(const ImageRepresentationLocal& rhs);

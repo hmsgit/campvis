@@ -318,4 +318,9 @@ namespace campvis {
         return sum;
     }
 
+    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::tryConvertFrom(const AbstractImageRepresentation* source) {
+        // no conversion availible for now
+        return 0;
+    }
+
 }
