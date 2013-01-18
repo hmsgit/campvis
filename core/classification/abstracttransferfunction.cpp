@@ -36,13 +36,13 @@
 #include "tgt/texture.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedatalocal.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 
 namespace campvis {
     
     class IntensityHistogramGenerator {
     public:
-        IntensityHistogramGenerator(const ImageDataLocal* intensityData, AbstractTransferFunction::IntensityHistogramType* histogram)
+        IntensityHistogramGenerator(const ImageRepresentationLocal* intensityData, AbstractTransferFunction::IntensityHistogramType* histogram)
             : _intensityData(intensityData)
             , _histogram(histogram)
         {}
@@ -55,7 +55,7 @@ namespace campvis {
         }
 
     protected:
-        const ImageDataLocal* _intensityData;
+        const ImageRepresentationLocal* _intensityData;
         AbstractTransferFunction::IntensityHistogramType* _histogram;
     };
 
@@ -169,7 +169,7 @@ namespace campvis {
         _intensityHistogram = 0;
 
         if (_imageHandle.getData() != 0) {
-            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(_imageHandle.getData());
+            const ImageRepresentationLocal* idl = dynamic_cast<const ImageRepresentationLocal*>(_imageHandle.getData());
             if (idl != 0) {
                 float mins = _intensityDomain.x;
                 float maxs = _intensityDomain.y;

@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "slicevis.h"
+#include "advancedusvis.h"
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagerepresentationconverter.h"
@@ -36,7 +36,7 @@
 
 namespace campvis {
 
-    SliceVis::SliceVis()
+    AdvancedUsVis::AdvancedUsVis()
         : VisualizationPipeline()
         , _imageReader()
         , _gvg()
@@ -53,20 +53,21 @@ namespace campvis {
         addEventHandler(&_tfWindowingHandler);
     }
 
-    SliceVis::~SliceVis() {
+    AdvancedUsVis::~AdvancedUsVis() {
     }
 
-    void SliceVis::init() {
+    void AdvancedUsVis::init() {
         VisualizationPipeline::init();
 
         _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.connect(&_gvg.p_inputVolume);
-        _imageReader.p_targetImageID.connect(&_lhh.p_inputVolume);
-        _imageReader.p_targetImageID.connect(&_sliceExtractor.p_sourceImageID);
 
+        _gvg.p_inputVolume.setValue("reader.output");
+
+//         _lhh.p_inputVolume.setValue("se.input");
 //         _gvg._outputGradients.connect(&_lhh._inputGradients);
 
+        _sliceExtractor.p_sourceImageID.setValue("reader.output");
         _sliceExtractor.p_sliceNumber.setValue(0);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
@@ -78,7 +79,7 @@ namespace campvis {
         _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
     }
 
-    void SliceVis::execute() {
+    void AdvancedUsVis::execute() {
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
             _invalidationLevel.setValid();
@@ -88,7 +89,7 @@ namespace campvis {
             executeProcessor(&_imageReader);
 
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
+            ImageRepresentationLocal::ScopedRepresentation img(_data, "reader.output");
             if (img != 0) {
                 _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
             }
@@ -104,7 +105,7 @@ namespace campvis {
         }
     }
 
-    void SliceVis::keyEvent(tgt::KeyEvent* e) {
+    void AdvancedUsVis::keyEvent(tgt::KeyEvent* e) {
         if (e->pressed()) {
             switch (e->keyCode()) {
                 case tgt::KeyEvent::K_UP:
@@ -117,8 +118,8 @@ namespace campvis {
         }
     }
 
-    const std::string SliceVis::getName() const {
-        return "SliceVis";
+    const std::string AdvancedUsVis::getName() const {
+        return "AdvancedUsVis";
     }
 
 }

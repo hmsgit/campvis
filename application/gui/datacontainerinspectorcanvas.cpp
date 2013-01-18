@@ -35,8 +35,8 @@
 
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/datahandle.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedatagl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/tools/job.h"
 
@@ -140,10 +140,10 @@ namespace campvis {
 
         std::vector<const tgt::Texture*> textures;
         for (std::map<std::string, DataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
-            if (const ImageDataGL* imgGL = dynamic_cast<const ImageDataGL*>(it->second.getData())) {
+            if (const ImageRepresentationGL* imgGL = dynamic_cast<const ImageRepresentationGL*>(it->second.getData())) {
           	    textures.push_back(imgGL->getTexture());
             }
-            else if (const ImageDataRenderTarget* imgRT = dynamic_cast<const ImageDataRenderTarget*>(it->second.getData())) {
+            else if (const ImageRepresentationRenderTarget* imgRT = dynamic_cast<const ImageRepresentationRenderTarget*>(it->second.getData())) {
                 if (imgRT->getDimensionality() == 2) {
                     for (size_t i = 0; i < imgRT->getNumColorTextures(); ++i)
             	        textures.push_back(imgRT->getColorTexture(i));

@@ -34,8 +34,9 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratormasking.h"
 
@@ -88,7 +89,7 @@ namespace campvis {
     }
 
     void EEPGenerator::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataGL> img(data, p_sourceImageID.getValue());
+        ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
         DataContainer::ScopedTypedData<MeshGeometry> proxyGeometry(data, p_geometryID.getValue());
 
         if (img != 0 && proxyGeometry != 0 && _shader != 0) {
@@ -98,9 +99,9 @@ namespace campvis {
                     _shader->rebuild();
                 }
 
-                DataContainer::ScopedTypedData<ImageDataRenderTarget> geometryImage(data, p_geometryImageId.getValue());
+                ImageRepresentationRenderTarget::ScopedRepresentation geometryImage(data, p_geometryImageId.getValue());
 
-                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
 
                 // clip proxy geometry against near-plane to support camera in volume
@@ -162,7 +163,7 @@ namespace campvis {
                     if (cam.getProjectionMatrix().invert(inverseProjection))
                         _shader->setUniform("_inverseProjectionMatrix", inverseProjection);
 
-                    _shader->setUniform("_volumeWorldToTexture", img->getMappingInformation().getWorldToTextureMatrix());
+                    _shader->setUniform("_volumeWorldToTexture", img->getParent()->getMappingInformation().getWorldToTextureMatrix());
                 }
                 else {
                     _shader->setUniform("_integrateGeometry", false);
@@ -174,8 +175,8 @@ namespace campvis {
                 glEnable(GL_DEPTH_TEST);
 
                 // create entry points texture
-                ImageDataRenderTarget* entrypoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
-                entrypoints->activate();
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> entrypoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
+                entrypoints.second->activate();
                 _shader->setUniform("_isEntrypoint", true);
 
                 glDepthFunc(GL_LESS);
@@ -184,15 +185,15 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_FRONT : GL_BACK);
                 clipped.render();
 
-                entrypoints->deactivate();
+                entrypoints.second->deactivate();
 
                 // create exit points texture
-                ImageDataRenderTarget* exitpoints = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
-                exitpoints->activate();
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> exitpoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
+                exitpoints.second->activate();
                 _shader->setUniform("_isEntrypoint", false);
 
                 if (geometryImage != 0) {
-                    entrypoints->bind(_shader, 0, &entryDepthUnit, "", "_entryDepthTexture");
+                    entrypoints.second->bind(_shader, 0, &entryDepthUnit, "", "_entryDepthTexture");
                 }
 
                 glDepthFunc(GL_GREATER);
@@ -201,15 +202,15 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_BACK : GL_FRONT);
                 clipped.render();
 
-                exitpoints->deactivate();
+                exitpoints.second->deactivate();
 
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 glPopAttrib();
                 LGL_ERROR;
 
-                data.addData(p_entryImageID.getValue(), entrypoints);
-                data.addData(p_exitImageID.getValue(), exitpoints);
+                data.addData(p_entryImageID.getValue(), entrypoints.first);
+                data.addData(p_exitImageID.getValue(), exitpoints.first);
                 p_entryImageID.issueWrite();
                 p_exitImageID.issueWrite();
             }

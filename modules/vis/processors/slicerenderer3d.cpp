@@ -34,9 +34,9 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/facegeometry.h"
 
@@ -78,11 +78,11 @@ namespace campvis {
     }
 
     void SliceRenderer3D::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataGL> img(data, p_sourceImageID.getValue());
+        ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                updateProperties(img);
+                updateProperties(img->getParent());
                 const tgt::Camera& cam = p_camera.getValue();
                 const tgt::svec3& imgSize = img->getSize();
 
@@ -90,16 +90,16 @@ namespace campvis {
                 // Create the cube proxy geometry for the volume, then clip the cube against the slice plane.
                 // The closing face is the slice proxy geometry.
                 // This is probably not the fastest, but an elegant solution, which also supports arbitrary slice orientations. :)
-                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 MeshGeometry cube = MeshGeometry::createCube(volumeExtent, tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
 
                 tgt::vec3 normal(0.f, 0.f, 1.f);
-                float p = img->getMappingInformation().getOffset().z + (p_sliceNumber.getValue() * img->getMappingInformation().getVoxelSize().z);
+                float p = img->getParent()->getMappingInformation().getOffset().z + (p_sliceNumber.getValue() * img->getParent()->getMappingInformation().getVoxelSize().z);
                 MeshGeometry clipped = cube.clipAgainstPlane(p, normal, true);
                 FaceGeometry slice = clipped.getFaces().back(); // the last face is the closing face
 
 
-                ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
                 glEnable(GL_DEPTH_TEST);
@@ -117,18 +117,18 @@ namespace campvis {
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                rt->activate();
+                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 _shader->setAttributeLocation(0, "in_Position");
                 _shader->setAttributeLocation(1, "in_TexCoord");
                 slice.render();
-                rt->deactivate();
+                rt.second->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
                 glPopAttrib();
 
-                data.addData(p_targetImageID.getValue(), rt);
+                data.addData(p_targetImageID.getValue(), rt.first);
                 p_targetImageID.issueWrite();
             }
             else {

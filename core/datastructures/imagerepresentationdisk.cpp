@@ -28,13 +28,15 @@
 // ================================================================================================
 
 #include "imagerepresentationdisk.h"
+
 #include "tgt/filesystem.h"
+
 
 namespace campvis {
     const std::string ImageRepresentationDisk::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationDisk";
 
     ImageRepresentationDisk::ImageRepresentationDisk(const ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t numChannels, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
-        : AbstractImageRepresentation(parent)
+        : GenericAbstractImageRepresentation<ImageRepresentationDisk>(parent)
         , _url(url)
         , _offset(offset)
         , _type(type)
@@ -47,7 +49,7 @@ namespace campvis {
     ImageRepresentationDisk::~ImageRepresentationDisk() {
     }
 
-    ImageRepresentationDisk* ImageRepresentationDisk::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
+    ImageRepresentationDisk* ImageRepresentationDisk::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
         tgt::svec3 newSize = urb - llf;
@@ -59,7 +61,7 @@ namespace campvis {
         size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _numChannels) * llf.x;
         // the stride doesn't change!
         tgt::svec3 newStride = (_stride == tgt::svec3::zero) ? getCanonicStride(getSize()) : _stride;
-        return new ImageRepresentationDisk(_parent, _url, _type, _numChannels, newOffset, _endianess, newStride);
+        return new ImageRepresentationDisk(parent, _url, _type, _numChannels, newOffset, _endianess, newStride);
     }
 
     campvis::WeaklyTypedPointer ImageRepresentationDisk::getImageData() const {

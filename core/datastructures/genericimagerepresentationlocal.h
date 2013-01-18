@@ -38,7 +38,7 @@
 namespace campvis {
 
     /**
-     * Templated version of ImageDataLocal, storing image data in the local memory.
+     * Templated version of ImageRepresentationLocal, storing image data in the local memory.
      *
      * \sa      TypeTraits
      * \tparam  BASETYPE    Base type of the image data (type of a single channel of an image element)
@@ -76,28 +76,28 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
         /// \see AbstractImageRepresentation::getSubImage
-        virtual ThisType* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ThisType* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
          * Returns a WeaklyTypedPointer to the image data.
-         * \note    The pointer is still owned by this ImageDataLocal. If you want a copy, use clone().
+         * \note    The pointer is still owned by this ImageRepresentationLocal. If you want a copy, use clone().
          * \return  A WeaklyTypedPointer to the image data.
          */
         virtual const WeaklyTypedPointer getWeaklyTypedPointer() const;
 
-        /// \see ImageDataLocal::getElementNormalized
+        /// \see ImageRepresentationLocal::getElementNormalized
         virtual float getElementNormalized(size_t index, size_t channel) const;
 
-        /// \see ImageDataLocal::getElementNormalized
+        /// \see ImageRepresentationLocal::getElementNormalized
         virtual float getElementNormalized(const tgt::svec3& position, size_t channel) const;
 
-        /// \see ImageDataLocal::getElementNormalizedLinear
+        /// \see ImageRepresentationLocal::getElementNormalizedLinear
         virtual float getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const;
 
-        /// \see ImageDataLocal::setElementNormalized
+        /// \see ImageRepresentationLocal::setElementNormalized
         virtual void setElementNormalized(size_t index, size_t channel, float value);
 
-        /// \see ImageDataLocal::setElementNormalized
+        /// \see ImageRepresentationLocal::setElementNormalized
         virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value);
 
 
@@ -208,11 +208,11 @@ namespace campvis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hor(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
+    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
+        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
         const tgt::svec3& size = getSize();
-        tgt::svec3 newSize = urb - llf + tgt::svec3(1);
+        tgt::svec3 newSize = urb - llf;
         if (newSize == size) {
             // nothing has changed, just provide a copy:
             return clone();
@@ -231,15 +231,15 @@ namespace campvis {
 
         // slice image data into new array
         size_t index = 0;
-        for (size_t z = llf.z; z <= urb.z; ++z) {
-            for (size_t y = llf.y; y <= urb.y; ++y) {
+        for (size_t z = llf.z; z < urb.z; ++z) {
+            for (size_t y = llf.y; y < urb.y; ++y) {
                 size_t offset = llf.x + (y * size.x) + (z * size.y * size.x);
                 memcpy(newData + index, _data + offset, newSize.x * numBytesPerElement);
                 index += newSize.x;
             }
         }        
 
-        return new ThisType(_parent, newData);
+        return new ThisType(parent, newData);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>

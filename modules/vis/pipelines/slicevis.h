@@ -30,7 +30,7 @@
 #ifndef SLICEVIS_H__
 #define SLICEVIS_H__
 
-#include "core/datastructures/imagedatalocal.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
 #include "core/eventhandlers/transfuncwindowingeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"

@@ -30,7 +30,7 @@
 #ifndef IXPVDEMO_H__
 #define IXPVDEMO_H__
 
-#include "core/datastructures/imagedatalocal.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
 #include "core/properties/cameraproperty.h"

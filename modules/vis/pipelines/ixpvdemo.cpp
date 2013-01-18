@@ -31,7 +31,8 @@
 
 #include "tgt/event/keyevent.h"
 #include "tgt/qt/qtcontextmanager.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
@@ -194,30 +195,17 @@ namespace campvis {
             executeProcessor(&_ctReader);
 
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, _ctReader.p_targetImageID.getValue());
-            if (img != 0) {
-                ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
-                if (local != 0) {
-                    DataHandle dh = _data.addData("ct.image.local", local);
-                    Interval<float> ii = local->getNormalizedIntensityRange();
-                    _ctDVR.p_transferFunction.getTF()->setImageHandle(dh);
-                    _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                    _ctFullDRR.p_transferFunction.getTF()->setImageHandle(dh);
-                    _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
-                    _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(dh);
-                    _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
+            ImageRepresentationLocal::ScopedRepresentation local(_data, _ctReader.p_targetImageID.getValue());
+            if (local != 0) {
+                Interval<float> ii = local->getNormalizedIntensityRange();
+                _ctDVR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                _ctFullDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
+                _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
 
-                    {
-                        tgt::GLContextScopedLock lock(_canvas->getContext());
-                        ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(local);
-                        if (gl != 0) {
-                            _data.addData(_ctReader.p_targetImageID.getValue(), gl);
-                        }
-                    }
-                    CtxtMgr.releaseCurrentContext();
-                }
-
-                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
                 tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
                 _trackballHandler->setSceneBounds(volumeExtent);
@@ -233,26 +221,13 @@ namespace campvis {
             executeProcessor(&_usReader);
 
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
-            if (img != 0) {
-                ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
-                if (local != 0) {
-                    DataHandle dh = _data.addData("us.image.local", local);
-                    Interval<float> ii = local->getNormalizedIntensityRange();
-                    _usSliceRenderer.p_transferFunction.getTF()->setImageHandle(dh);
-                    _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                    _usSliceRenderer.updateProperties(img);
-                    _usSliceRenderer.p_sliceNumber.setValue(125);
-
-                    {
-                        tgt::GLContextScopedLock lock(_canvas->getContext());
-                        ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(local);
-                        if (gl != 0) {
-                            _data.addData(_usSliceRenderer.p_sourceImageID.getValue(), gl);
-                        }
-                    }
-                    CtxtMgr.releaseCurrentContext();
-                }
+            ImageRepresentationLocal::ScopedRepresentation local(_data, _usReader.p_targetImageID.getValue());
+            if (local != 0) {
+                Interval<float> ii = local->getNormalizedIntensityRange();
+                _usSliceRenderer.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                _usSliceRenderer.updateProperties(local.getImageData());
+                _usSliceRenderer.p_sliceNumber.setValue(125);
             }
         }
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {

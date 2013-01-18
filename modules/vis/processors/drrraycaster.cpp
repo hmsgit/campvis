@@ -30,7 +30,7 @@
 #include "drrraycaster.h"
 
 #include "core/tools/quadrenderer.h"
-#include "core/datastructures/imagedatarendertarget.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
 
 namespace campvis {
     const std::string DRRRaycaster::loggerCat_ = "CAMPVis.modules.vis.DRRRaycaster";
@@ -56,8 +56,8 @@ namespace campvis {
         _shader->setUniform("_shift", p_shift.getValue());
         _shader->setUniform("_scale", p_scale.getValue());
 
-        ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-        rt->activate();
+        std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+        rt.second->activate();
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glDisable(GL_DEPTH_TEST);
@@ -70,8 +70,8 @@ namespace campvis {
         glPopAttrib();
         LGL_ERROR;
 
-        rt->deactivate();
-        data.addData(p_targetImageID.getValue(), rt);
+        rt.second->deactivate();
+        data.addData(p_targetImageID.getValue(), rt.first);
         p_targetImageID.issueWrite();
     }
 

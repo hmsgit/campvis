@@ -32,8 +32,9 @@
 #include <fstream>
 
 #include "tgt/filesystem.h"
-#include "core/datastructures/imagedatadisk.h"
-#include "core/datastructures/genericimagedatalocal.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationdisk.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/textfileparser.h"
 
 /*
@@ -168,7 +169,8 @@ namespace campvis {
 
 
             // all parsing done - lets create the image:
-            ImageDataDisk* image = new ImageDataDisk(url, dimensionality, size, pt, 1, offset, e);
+            ImageData* image = new ImageData(dimensionality, size);
+            image->setInitialRepresentation(new ImageRepresentationDisk(image, url, pt, 1, offset, e));
             image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
             data.addData(p_targetImageID.getValue(), image);
             p_targetImageID.issueWrite();

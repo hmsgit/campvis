@@ -68,7 +68,7 @@ namespace campvis {
         virtual void deinit();
 
         /**
-         * Reads the image file into an ImageDataRenderTarget
+         * Reads the image file into an ImageRepresentationRenderTarget
          * \param data  DataContainer to work on
          */
         virtual void process(DataContainer& data);

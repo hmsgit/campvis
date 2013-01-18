@@ -36,14 +36,15 @@
 
 #include "tbb/include/tbb/tbb.h"
 
-#include "core/datastructures/genericimagedatalocal.h"
-#include "core/datastructures/imagedatagl.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/tools/concurrenthistogram.h"
 
 namespace campvis {
     class LHGenerator {
     public:
-        LHGenerator(const ImageDataLocal* intensities, const GenericImageDataLocal<float, 4>* gradients, ImageDataLocal* fl, ImageDataLocal* fh, float epsilon)
+        LHGenerator(const ImageRepresentationLocal* intensities, const GenericImageRepresentationLocal<float, 4>* gradients, ImageRepresentationLocal* fl, ImageRepresentationLocal* fh, float epsilon)
             : _intensities(intensities)
             , _gradients(gradients)
             , _fl(fl)
@@ -56,7 +57,7 @@ namespace campvis {
 
         void operator() (const tbb::blocked_range<size_t>& range) const {
             for (size_t i = range.begin(); i != range.end(); ++i) {
-                tgt::svec3 pos = _intensities->indexToPosition(i);
+                tgt::svec3 pos = _intensities->getParent()->indexToPosition(i);
                 const tgt::svec3& size = _intensities->getSize();
 
                 const tgt::vec4& gradient = _gradients->getElement(i);
@@ -103,10 +104,10 @@ namespace campvis {
             return _intensities->getElementNormalizedLinear(position, 0);;
         }
 
-        const ImageDataLocal* _intensities;
-        const GenericImageDataLocal<float, 4>* _gradients;
-        ImageDataLocal* _fl;
-        ImageDataLocal* _fh;
+        const ImageRepresentationLocal* _intensities;
+        const GenericImageRepresentationLocal<float, 4>* _gradients;
+        ImageRepresentationLocal* _fl;
+        ImageRepresentationLocal* _fh;
         float _epsilon;
     };
 
@@ -114,7 +115,7 @@ namespace campvis {
 
     class LHHistogramGenerator {
     public:
-        LHHistogramGenerator(const ImageDataLocal* fl, const ImageDataLocal* fh, ConcurrentGenericHistogramND<float, 2>* histogram)
+        LHHistogramGenerator(const ImageRepresentationLocal* fl, const ImageRepresentationLocal* fh, ConcurrentGenericHistogramND<float, 2>* histogram)
             : _fl(fl)
             , _fh(fh)
             , _histogram(histogram)
@@ -131,8 +132,8 @@ namespace campvis {
         }
     }
     protected:
-        const ImageDataLocal* _fl;
-        const ImageDataLocal* _fh;
+        const ImageRepresentationLocal* _fl;
+        const ImageRepresentationLocal* _fh;
         ConcurrentGenericHistogramND<float, 2>* _histogram;
     };
 
@@ -158,40 +159,40 @@ namespace campvis {
     }
 
     void LHHistogram::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataLocal> intensities(data, p_inputVolume.getValue());
-        DataContainer::ScopedTypedData< GenericImageDataLocal<float, 4> > gradients(data, p_inputGradients.getValue());
+        //ImageRepresentationLocal::ScopedRepresentation intensities(data, p_inputVolume.getValue());
+        //GenericImageRepresentationLocal<float, 4>::ScopedRepresentation gradients(data, p_inputGradients.getValue());
 
-        if (intensities != 0 && gradients != 0) {
-            ImageDataLocal* fl = intensities->clone();
-            ImageDataLocal* fh = intensities->clone();
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHGenerator(intensities, gradients, fl, fh, .006f));
+        //if (intensities != 0 && gradients != 0) {
+        //    ImageRepresentationLocal* fl = intensities->clone();
+        //    ImageRepresentationLocal* fh = intensities->clone();
+        //    tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHGenerator(intensities, gradients, fl, fh, .006f));
 
-            float mins[2] = { 0.f, 0.f };
-            float maxs[2] = { .1f, .1f };
-            size_t numBuckets[2] = { 256, 256 };
-            ConcurrentGenericHistogramND<float, 2> lhHistogram(mins, maxs, numBuckets);
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHHistogramGenerator(fl, fh, &lhHistogram));
+        //    float mins[2] = { 0.f, 0.f };
+        //    float maxs[2] = { .1f, .1f };
+        //    size_t numBuckets[2] = { 256, 256 };
+        //    ConcurrentGenericHistogramND<float, 2> lhHistogram(mins, maxs, numBuckets);
+        //    tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHHistogramGenerator(fl, fh, &lhHistogram));
 
-            // TODO: ugly hack...
-            float* tmp = new float[256*256];
-            for (size_t i = 0; i < 256*256; ++i)
-                tmp[i] = static_cast<float>(lhHistogram.getBuckets()[i]) / static_cast<float>(lhHistogram.getMaxFilling());
+        //    // TODO: ugly hack...
+        //    float* tmp = new float[256*256];
+        //    for (size_t i = 0; i < 256*256; ++i)
+        //        tmp[i] = static_cast<float>(lhHistogram.getBuckets()[i]) / static_cast<float>(lhHistogram.getMaxFilling());
 
-            WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
-            ImageDataGL* tex = new ImageDataGL(2, tgt::svec3(256, 256, 1), wtp);
-            delete [] tmp;
+        //    WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
+        //    ImageRepresentationGL* tex = new ImageRepresentationGL(2, tgt::svec3(256, 256, 1), wtp);
+        //    delete [] tmp;
 
-            data.addData("foo", tex);
-            data.addData(p_outputFH.getValue(), fh);
-            data.addData(p_outputFL.getValue(), fl);
-            p_outputFH.issueWrite();
-            p_outputFL.issueWrite();
-        }
-        else {
-            LDEBUG("No suitable intensities image found.");
-        }
+        //    data.addData("foo", tex);
+        //    data.addData(p_outputFH.getValue(), fh);
+        //    data.addData(p_outputFL.getValue(), fl);
+        //    p_outputFH.issueWrite();
+        //    p_outputFL.issueWrite();
+        //}
+        //else {
+        //    LDEBUG("No suitable intensities image found.");
+        //}
 
-        _invalidationLevel.setValid();
+        //_invalidationLevel.setValid();
     }
 
 }

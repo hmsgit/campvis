@@ -34,7 +34,7 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedatagl.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/meshgeometry.h"
 
 namespace campvis {

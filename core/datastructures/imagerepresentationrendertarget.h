@@ -27,15 +27,17 @@
 // 
 // ================================================================================================
 
-#ifndef IMAGEDATARENDERTARGET_H__
-#define IMAGEDATARENDERTARGET_H__
+#ifndef IMAGEREPRESENTATIONRENDERTARGET_H__
+#define IMAGEREPRESENTATIONRENDERTARGET_H__
 
 #include "tgt/framebufferobject.h"
 #include "tgt/texture.h"
 #include "tgt/textureunit.h"
 #include "tgt/vector.h"
-#include "core/datastructures/imagedata.h"
+#include "core/datastructures/genericabstractimagerepresentation.h"
+#include "core/datastructures/imagerepresentationgl.h"
 
+#include <utility>
 #include <vector>
 
 namespace tgt {
@@ -43,12 +45,12 @@ namespace tgt {
 }
 
 namespace campvis {
-    class ImageDataGL;
+    class ImageRepresentationGL;
 
     /**
      * Stores render target data.
      * This is basically a wrapper for multiple OpenGL textures (color + depth) and their attachment to the framebuffer.
-     * Each ImageDataRenderTarget has at least one color texture and exactly one depth texture attachment.
+     * Each ImageRepresentationRenderTarget has at least one color texture and exactly one depth texture attachment.
      * 
      * \note    Its dimensionality must be 2.
      * 
@@ -56,44 +58,51 @@ namespace campvis {
      *          The member functions don't double check, whether the pointers are != 0. Make sure, that this 
      *          is a sane design and if not, adapt the code.
      */
-    class ImageDataRenderTarget : public ImageData {
+    class ImageRepresentationRenderTarget : public GenericAbstractImageRepresentation<ImageRepresentationRenderTarget> {
     public:
         /**
-         * Creates a new ImageDataRenderTarget representation with one color and one depth attachment.
-         *
-         * \param size                  Size of this image (number of elements per dimension)
-         * \param internalFormatColor   Internal OpenGL format for the color texture.
-         * \param internalFormatDepth   Internal OpenGL format for the depth texture.
+         * Creates a new ImageRepresentationRenderTarget and a new ImageData with the given specifications.
+         * Assigns the representation to the image.
+         * 
+         * \param   size                  Size of this image (number of elements per dimension)
+         * \param   internalFormatColor   Internal OpenGL format for the color texture.
+         * \param   internalFormatDepth   Internal OpenGL format for the depth texture.
+         * \return  A pair of the created ImageData and the created RenderTarget image representation.
          */
-        ImageDataRenderTarget(const tgt::svec3& size, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
+        static std::pair<ImageData*, ImageRepresentationRenderTarget*> createWithImageData(const tgt::svec2& size, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
 
         /**
-         * Creates a new ImageDataRenderTarget from one color texture and one optional depth texture.
+         * Creates a new ImageRepresentationRenderTarget representation with one color and one depth attachment.
+         *
+         * \param   parent                Image this representation represents, must not be 0.
+         * \param   internalFormatColor   Internal OpenGL format for the color texture.
+         * \param   internalFormatDepth   Internal OpenGL format for the depth texture.
+         */
+        ImageRepresentationRenderTarget(const ImageData* parent, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
+
+        /**
+         * Creates a new ImageRepresentationRenderTarget from one color texture and one optional depth texture.
          * \param   colorTexture    Color texture, must not be 0
          * \param   depthTexture    Depth texture, optional, must have valid internal format and same dimensions as \a colorTexture
          */
-        ImageDataRenderTarget(const ImageDataGL* colorTexture, const ImageDataGL* depthTexture = 0);
+        ImageRepresentationRenderTarget(const ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture = 0);
 
         /**
          * Destructor
          */
-        virtual ~ImageDataRenderTarget();
+        virtual ~ImageRepresentationRenderTarget();
        
-        /**
-         * \see AbstractData::clone()
-         **/
-        virtual ImageDataRenderTarget* clone() const;
+        /// \see AbstractImageRepresentation::clone()
+        virtual ImageRepresentationRenderTarget* clone() const;
 
-        /// \see AbstractData::getLocalMemoryFootprint()
+        /// \see AbstractImageRepresentation::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
 
-        /// \see AbstractData::getVideoMemoryFootprint()
+        /// \see AbstractImageRepresentation::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
-        /**
-         * \see ImageData::getSubImage
-         */
-        virtual ImageDataRenderTarget* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
+        /// \see AbstractImageRepresentation::getSubImage
+        virtual ImageRepresentationRenderTarget* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
          * Creates and initializes a new OpenGL texture according to \a internalFormat and attaches it to the FBO.
@@ -183,7 +192,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
 }
 
-#endif // IMAGEDATARENDERTARGET_H__
+#endif // IMAGEREPRESENTATIONRENDERTARGET_H__

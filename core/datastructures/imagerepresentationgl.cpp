@@ -41,14 +41,14 @@ namespace campvis {
     const std::string ImageRepresentationGL::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationGL";
 
     ImageRepresentationGL::ImageRepresentationGL(const ImageData* parent, tgt::Texture* texture)
-        : AbstractImageRepresentation(parent)
+        : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
         , _texture(texture)
     {
         tgtAssert(texture != 0, "Given texture must not be 0.");
     }
 
     ImageRepresentationGL::ImageRepresentationGL(const ImageData* parent, const WeaklyTypedPointer& wtp) 
-        : AbstractImageRepresentation(parent)
+        : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
     {
         createTexture(wtp);
     }
@@ -65,7 +65,7 @@ namespace campvis {
         return toReturn;
     }
 
-    ImageRepresentationGL* ImageRepresentationGL::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
+    ImageRepresentationGL* ImageRepresentationGL::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         // TODO: implement
         tgtAssert(false, "not yet implemented...");
         return 0;

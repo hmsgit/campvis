@@ -33,9 +33,9 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -90,11 +90,11 @@ namespace campvis {
     }
 
     void RenderTargetCompositor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> firstImage(data, p_firstImageId.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> secondImage(data, p_secondImageId.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation firstImage(data, p_firstImageId.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation secondImage(data, p_secondImageId.getValue());
 
         if (firstImage != 0 && secondImage != 0 ) {
-            ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
@@ -109,18 +109,18 @@ namespace campvis {
 
             decorateRenderProlog(data, _shader);
 
-            rt->activate();
+            rt.second->activate();
             LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            rt->deactivate();
+            rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(p_targetImageId.getValue(), rt);
+            data.addData(p_targetImageId.getValue(), rt.first);
             p_targetImageId.issueWrite();
         }
         else {

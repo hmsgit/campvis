@@ -30,7 +30,7 @@
 #ifndef OPENCLPIPELINE_H__
 #define OPENCLPIPELINE_H__
 
-#include "core/datastructures/imagedatalocal.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"

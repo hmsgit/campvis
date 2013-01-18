@@ -42,6 +42,30 @@ namespace campvis {
     }
 
     ImageData::~ImageData() {
+        clearRepresentations();
+    }
+
+    ImageData* ImageData::clone() const {
+        ImageData* toReturn = new ImageData(_dimensionality, _size);
+        toReturn->_mappingInformation = _mappingInformation;
+        toReturn->_representations.assign(_representations.begin(), _representations.end());
+        return toReturn;
+    }
+
+    size_t ImageData::getLocalMemoryFootprint() const {
+        size_t toReturn = sizeof(*this) + _representations.size() * sizeof(AbstractImageRepresentation*);
+        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
+            toReturn += (*it)->getLocalMemoryFootprint();
+
+        return toReturn;
+    }
+
+    size_t ImageData::getVideoMemoryFootprint() const {
+        size_t toReturn = 0;
+        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
+            toReturn += (*it)->getVideoMemoryFootprint();
+
+        return toReturn;
     }
 
     size_t ImageData::getDimensionality() const {
@@ -70,6 +94,36 @@ namespace campvis {
             _mappingInformation.getOffset() + (tgt::vec3(urb) * _mappingInformation.getVoxelSize()));
     }
 
+    ImageData* ImageData::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
+        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
+
+        tgt::svec3 newSize = urb - llf;
+        if (newSize == getSize()) {
+            // nothing has changed, just provide a copy:
+            return clone();
+        }
+
+        // compute new dimensionality
+        size_t newDimensionality = 1;
+        if (newSize.y > 1)
+            newDimensionality = 2;
+        if (newSize.z > 1)
+            newDimensionality = 3;
+
+        // create new ImageData object and assign mapping information
+        ImageData* toReturn = new ImageData(newDimensionality, newSize);
+        toReturn->_mappingInformation = ImageMappingInformation(newSize, _mappingInformation.getOffset(), _mappingInformation.getVoxelSize(), _mappingInformation.getRealWorldMapping());
+        
+        // create sub-image of every image representation
+        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
+            AbstractImageRepresentation* si = (*it)->getSubImage(toReturn, llf, urb);
+            if (si != 0)
+                toReturn->_representations.push_back(si);
+        }
+
+        return toReturn;
+    }
+
     size_t ImageData::getNumElements() const {
         return _numElements;
     }
@@ -84,5 +138,12 @@ namespace campvis {
         size_t x = index % _size.x;
         return tgt::svec3(x, y, z);
     }
+
+    void ImageData::clearRepresentations() {
+        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
+            delete *it;
+        _representations.clear();
+    }
+
 
 }

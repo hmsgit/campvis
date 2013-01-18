@@ -37,9 +37,10 @@
 #include "tgt/filesystem.h"
 #include "tgt/texturereaderdevil.h"
 
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/genericimagedatalocal.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
 
 #include "core/tools/quadrenderer.h"
 
@@ -78,9 +79,10 @@ namespace campvis {
     void DevilImageReader::process(DataContainer& data) {
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
         if (tex != 0) {
-            ImageDataGL* image = ImageDataGL::createFromTexture(tex);
+            ImageData id (2, tex->getDimensions());
+            ImageRepresentationGL image(&id, tex);
 
-            ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
@@ -92,23 +94,21 @@ namespace campvis {
             _shader->setIgnoreUniformLocationError(false);
             tgt::TextureUnit texUnit;
 
-            image->bind(_shader, texUnit, "_colorTexture");
+            image.bind(_shader, texUnit, "_colorTexture");
 
-            rt->activate();
+            rt.second->activate();
             LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            rt->deactivate();
+            rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(p_targetImageID.getValue(), rt);
+            data.addData(p_targetImageID.getValue(), rt.first);
             p_targetImageID.issueWrite();
-
-            delete image;
         }
         else {
             LERROR("Could not load image.");

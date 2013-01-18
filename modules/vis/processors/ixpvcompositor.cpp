@@ -33,9 +33,9 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -80,13 +80,13 @@ namespace campvis {
     }
 
     void IxpvCompositor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> xRayImage(data, p_xRayImageId.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> sliceImage(data, p_3dSliceImageId.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> drrFullImage(data, p_drrFullImageId.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> drrClippedImage(data, p_drrClippedImageId.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation xRayImage(data, p_xRayImageId.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation sliceImage(data, p_3dSliceImageId.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation drrFullImage(data, p_drrFullImageId.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation drrClippedImage(data, p_drrClippedImageId.getValue());
 
         if (xRayImage != 0 && sliceImage != 0 && drrFullImage != 0 && drrClippedImage != 0) {
-            ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
@@ -101,18 +101,18 @@ namespace campvis {
 
             decorateRenderProlog(data, _shader);
 
-            rt->activate();
+            rt.second->activate();
             LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            rt->deactivate();
+            rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(p_targetImageId.getValue(), rt);
+            data.addData(p_targetImageId.getValue(), rt.first);
             p_targetImageId.issueWrite();
         }
         else {

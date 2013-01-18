@@ -34,9 +34,9 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -56,6 +56,7 @@ namespace campvis {
         , _fragmentShaderFilename(fragmentShaderFileName)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
+        , _sourceImageTimestamp(0)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_entryImageID);
@@ -85,12 +86,18 @@ namespace campvis {
     }
 
     void RaycastingProcessor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataGL> img(data, p_sourceImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> entryPoints(data, p_entryImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> exitPoints(data, p_exitImageID.getValue());
+        ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation entryPoints(data, p_entryImageID.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation exitPoints(data, p_exitImageID.getValue());
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
+                if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
+                    // source DataHandle has changed
+                    _sourceImageTimestamp = img.getDataHandle().getTimestamp();
+                    p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+                }
+
                 if (_invalidationLevel.isInvalidShader()) {
                     _shader->setHeaders(generateHeader());
                     _shader->rebuild();

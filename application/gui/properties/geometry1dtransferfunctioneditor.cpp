@@ -39,7 +39,7 @@
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
-#include "core/datastructures/imagedatalocal.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"
 

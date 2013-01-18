@@ -58,7 +58,7 @@ namespace campvis {
     public:
         /**
          * Proxy class for scoped strongly-typed access to the data of a DataContainer.
-         * From the outside ScopedTypedData<T> behaves exactly like a const T*, but internally it preserves the
+         * From the outside DataContainer::ScopedTypedData<T> behaves exactly like a const T*, but internally it preserves the
          * reference counting of a DataHandle. Use this class when you want temporary access to a strongly-typed
          * data item in a DataContainer but don't want to to the dynamic_cast yourself.
          *

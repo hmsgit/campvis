@@ -31,6 +31,8 @@
 
 #include "tbb/include/tbb/tbb.h"
 #include "tbb/include/tbb/spin_mutex.h"
+#include "core/datastructures/imagedata.h"
+
 #include <limits>
 
 namespace campvis {
@@ -94,7 +96,7 @@ namespace campvis {
     const std::string ImageRepresentationLocal::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationLocal";
 
     ImageRepresentationLocal::ImageRepresentationLocal(const ImageData* parent, WeaklyTypedPointer::BaseType baseType, size_t numChannels)
-        : AbstractImageRepresentation(parent)
+        : GenericAbstractImageRepresentation<ImageRepresentationLocal>(parent)
         , _baseType(baseType)
         , _numChannels(numChannels)
         , _intensityHistogram(0)

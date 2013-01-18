@@ -34,8 +34,9 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/datastructures/meshgeometry.h"
 
 namespace campvis {
@@ -86,8 +87,8 @@ namespace campvis {
             _shader->setUniform("_color", p_color.getValue());
 
             // create entry points texture
-            ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1), GL_RGBA16);
-            rt->activate();
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
+            rt.second->activate();
 
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
@@ -95,12 +96,12 @@ namespace campvis {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             proxyGeometry->render();
 
-            rt->deactivate();
+            rt.second->deactivate();
             _shader->deactivate();
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(p_renderTargetID.getValue(), rt);
+            data.addData(p_renderTargetID.getValue(), rt.first);
             p_renderTargetID.issueWrite();
         }
         else {

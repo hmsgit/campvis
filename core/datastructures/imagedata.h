@@ -31,9 +31,14 @@
 #define IMAGEDATA_H__
 
 #include "tgt/bounds.h"
+#include "tgt/logmanager.h"
 #include "tgt/vector.h"
 #include "core/datastructures/abstractdata.h"
+#include "core/datastructures/abstractimagerepresentation.h"
 #include "core/datastructures/imagemappinginformation.h"
+//#include "core/datastructures/imagerepresentationconverter.h"
+
+#include <vector>
 
 namespace campvis {
 
@@ -49,6 +54,25 @@ namespace campvis {
         ImageData(size_t dimensionality, const tgt::svec3& size);
 
         virtual ~ImageData();
+
+        /**
+         * Prototype - clone method, some people call this virtual constructor...
+         * \note    Deep-copies all contained representations!
+         * \return  A copy of this object.
+         */
+        virtual ImageData* clone() const;
+
+        /**
+         * Returns the local memory footprint of the data in bytes.
+         * \return  Number of bytes occupied in local memory by the data.
+         */
+        virtual size_t getLocalMemoryFootprint() const;
+
+        /**
+         * Returns the video memory footprint of the data in bytes.
+         * \return  Number of bytes occupied in video memory by the data.
+         */
+        virtual size_t getVideoMemoryFootprint() const;
 
         /**
          * Dimensionality of this image.
@@ -97,12 +121,13 @@ namespace campvis {
         /**
          * Returns the subimage of this image given by \a llf and \a urb.
          * TODO: Check whether it is necessary to adjust image mapping!
-         *
+         * 
+         * \note    Creates sub-images of all representations.
          * \param   llf     Lower-Left-Front coordinates of subimage
          * \param   urb     Upper-Right-Back coordinates of subimage
-         * \return  An image containing the subimage of this with the given coordinates.
+         * \return  An image containing the sub-image of this image with the given coordinates.
          */
-        virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
+        virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
          * Transforms a vector based position to the corresponding array index.
@@ -121,7 +146,37 @@ namespace campvis {
          * \return  Vector based image coordinates.
          */
         tgt::svec3 indexToPosition(size_t index) const;
+
+        /**
+         * Sets the initial representation of this ImageData.
+         * \note    Removes and deletes all existing representations.
+         * \param   representation  Initial representation of this image.
+         */
+        template<typename T>
+        void setInitialRepresentation(const T* representation);
+
+        /**
+         * Returns a representation of this image of type \a T.
+         * Looks, whether such a representations already exists, if not, tries to create one using
+         * the ImageRepresentationConverter. Returns 0 on failure.
+         * \note    If \a T is OpenGL related, make sure to call this method from a valid and locked OpenGL context.
+         * \note    The returned pointer is valid as long as this ImageData object exists.
+         * \return  A pointer to a representation of type \a T, valid as long as this ImageData object exists.
+         *          0 if no such representation could be created.
+         */
+        template<typename T>
+        const T* getRepresentation() const;
+
     protected:
+        /**
+         * Clears all representations from the vector and frees the memory.
+         * \note    Make sure to call this method only when nobody else holds pointers to the
+         *          representations as they will be invalidated.
+         */
+        void clearRepresentations();
+
+        /// List of all representations of this image. Mutable to allow lazy instantiation of new representations.
+        mutable std::vector<const AbstractImageRepresentation*> _representations;
 
         size_t _dimensionality;                         ///< Dimensionality of this image
         tgt::svec3 _size;                               ///< Size of this image (number of elements per dimension)
@@ -131,6 +186,37 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+
+// = Template definition ==========================================================================
+
+    template<typename T>
+    void campvis::ImageData::setInitialRepresentation(const T* representation) {
+        clearRepresentations();
+        _representations.push_back(representation);
+    }
+
+    template<typename T>
+    const T* campvis::ImageData::getRepresentation() const {
+        // look, whether we already have a suitable representation
+        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
+            if (typeid(T*) == typeid(*it)) {
+                return static_cast<const T*>(*it);
+            }
+        }
+
+        // no representation found, create a new one
+        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
+//             const T* tester = ImageRepresentationConverter::tryConvert<T>(*it);
+//             if (tester != 0) {
+//                 _representations.push_back(tester);
+//                 return tester;
+//             }
+        }
+
+        // could not create a suitable representation
+        LDEBUG("Could not create a " + std::string(typeid(T*).name()) + " representation.");
+        return 0;
+    }
 }
 
 #endif // IMAGEDATA_H__

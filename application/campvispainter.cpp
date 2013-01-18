@@ -37,7 +37,8 @@
 
 #include "tgt/quadric.h"
 
-#include "core/datastructures/imagedatarendertarget.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
@@ -94,7 +95,7 @@ namespace campvis {
         glViewport(0, 0, size.x, size.y);
 
         // try get Data
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> image(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
+        ImageRepresentationRenderTarget::ScopedRepresentation image(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (image != 0) {
             // activate shader

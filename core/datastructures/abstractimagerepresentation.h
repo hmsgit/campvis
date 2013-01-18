@@ -106,7 +106,7 @@ namespace campvis {
          * \param   urb     Upper-Right-Back coordinates of subimage
          * \return  An image representation containing the subimage of this with the given coordinates.
          */
-        virtual AbstractImageRepresentation* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
+        virtual AbstractImageRepresentation* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
     protected:
 
@@ -114,7 +114,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // ABSTRACTIMAGEREPRESENTATION_H__

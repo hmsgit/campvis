@@ -32,7 +32,8 @@
 #include "tgt/event/keyevent.h"
 #include "tgt/glcontext.h"
 #include "tgt/qt/qtcontextmanager.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
@@ -71,6 +72,7 @@ namespace campvis {
         //_imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.connect(&_eepGenerator.p_sourceImageID);
 
         _clRaycaster._targetImageID.setValue("cl.output");
         _clRaycaster._sourceImageID.setValue("clr.input");
@@ -80,7 +82,6 @@ namespace campvis {
          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
          _clRaycaster._transferFunction.replaceTF(dvrTF);
 
-        _eepGenerator.p_sourceImageID.setValue("eep.input");
         _pgGenerator.p_sourceImageID.setValue("eep.input");
 
 
@@ -105,31 +106,19 @@ namespace campvis {
             executeProcessor(&_imageReader);
 
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
+            ImageRepresentationLocal::ScopedRepresentation img(_data, "reader.output");
             if (img != 0) {
-                ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
-                if (local != 0) {
-                    size_t numElements = local->getNumElements();
-                    float* asFloats = new float[numElements];
-                    for (size_t i = 0; i < numElements; ++i)
-                        asFloats[i] = local->getElementNormalized(i, 0);
-                    GenericImageDataLocal<float, 1>* imageWithFloats = new GenericImageDataLocal<float, 1>(local->getDimensionality(), local->getSize(), asFloats);
+                size_t numElements = img->getNumElements();
+                float* asFloats = new float[numElements];
+                for (size_t i = 0; i < numElements; ++i)
+                    asFloats[i] = img->getElementNormalized(i, 0);
+                ImageData* id = new ImageData(img->getDimensionality(), img->getSize());
+                GenericImageRepresentationLocal<float, 1>* imageWithFloats = new GenericImageRepresentationLocal<float, 1>(id, asFloats);
+                id->setInitialRepresentation(imageWithFloats);
 
-                    DataHandle dh = _data.addData("clr.input", imageWithFloats);
-                    _clRaycaster._transferFunction.getTF()->setImageHandle(dh);
-                }
-                delete local;
-                {
-                    tgt::GLContextScopedLock lock(_canvas->getContext());
-                    ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(img);
-                    if (gl != 0) {
-                        _data.addData("eep.input", gl);
-                    }
-                }
+                DataHandle dh = _data.addData("clr.input", id);
 
-                CtxtMgr.releaseCurrentContext();
-
-                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
                 _trackballEH->setSceneBounds(volumeExtent);

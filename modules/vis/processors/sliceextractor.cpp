@@ -33,9 +33,9 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -73,32 +73,34 @@ namespace campvis {
     }
 
     void SliceExtractor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataLocal> img(data, p_sourceImageID.getValue());
+        DataContainer::ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
                 updateProperties(img);
                 const tgt::svec3& imgSize = img->getSize();
-                ImageDataLocal* slice = img->getSubImage(tgt::svec3(0, 0, p_sliceNumber.getValue()), tgt::svec3(imgSize.x-1, imgSize.y-1, p_sliceNumber.getValue()));
-                ImageDataGL* glData = ImageDataConverter::tryConvert<ImageDataGL>(slice);
-                ImageDataRenderTarget* rt = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+                ImageData* slice = img->getSubImage(tgt::svec3(0, 0, p_sliceNumber.getValue()), tgt::svec3(imgSize.x, imgSize.y, p_sliceNumber.getValue()+1));
+
+                const ImageRepresentationGL* glData = slice->getRepresentation<ImageRepresentationGL>();
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
                 _shader->activate();
                 tgt::TextureUnit inputUnit, tfUnit;
                 glData->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                rt->activate();
+                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 _shader->setAttributeLocation(0, "in_Position");
                 _shader->setAttributeLocation(1, "in_TexCoord");
                 QuadRdr.renderQuad();
-                rt->deactivate();
+                rt.second->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
 
-                data.addData(p_targetImageID.getValue(), rt);
+                data.addData(p_targetImageID.getValue(), rt.first);
+                p_targetImageID.issueWrite();
                 delete slice;
                 delete glData;
             }

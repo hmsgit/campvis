@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "imagedatarendertarget.h"
+#include "imagerepresentationrendertarget.h"
 
 #include "tgt/assert.h"
 #include "tgt/gpucapabilities.h"
@@ -35,19 +35,27 @@
 #include "tgt/shadermanager.h"
 #include "tgt/tgt_gl.h"
 
-#include "core/datastructures/imagedatagl.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationgl.h"
 
 namespace campvis {
 
-    const std::string ImageDataRenderTarget::loggerCat_ = "CAMPVis.core.datastructures.ImageDataRenderTarget";
+    const std::string ImageRepresentationRenderTarget::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationRenderTarget";
 
-    ImageDataRenderTarget::ImageDataRenderTarget(const tgt::svec3& size, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/)
-        : ImageData(2, size)
+    std::pair<ImageData*, ImageRepresentationRenderTarget*> ImageRepresentationRenderTarget::createWithImageData(const tgt::svec2& size, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/) {
+        ImageData* id = new ImageData(2, tgt::svec3(size, 1));
+        ImageRepresentationRenderTarget* toReturn = new ImageRepresentationRenderTarget(id, internalFormatColor, internalFormatDepth);
+        id->setInitialRepresentation(toReturn);
+        return std::make_pair(id, toReturn);
+    }
+
+    ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(const ImageData* parent, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/)
+        : GenericAbstractImageRepresentation<ImageRepresentationRenderTarget>(parent)
         , _colorTextures(0)
         , _depthTexture(0)
         , _fbo(0)
     {
-        tgtAssert(size.z == 1, "RenderTargets are only two-dimensional, expected size.z == 1.");
+        tgtAssert(parent->getSize().z == 1, "RenderTargets are only two-dimensional, expected parent image size.z == 1.");
 
         if (!GpuCaps.isNpotSupported() && !GpuCaps.areTextureRectanglesSupported()) {
             LWARNING("Neither non-power-of-two textures nor texture rectangles seem to be supported!");
@@ -67,13 +75,19 @@ namespace campvis {
         tgtAssert(_fbo != 0, "Framebuffer object is 0, something went terribly wrong...");
     }
 
-    ImageDataRenderTarget::ImageDataRenderTarget(const ImageDataGL* colorTexture, const ImageDataGL* depthTexture /* = 0 */)
-        : ImageData(2, colorTexture->getSize())
+    ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(const ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture /* = 0 */)
+        : GenericAbstractImageRepresentation<ImageRepresentationRenderTarget>(parent)
         , _colorTextures(0)
         , _depthTexture(0)
         , _fbo(0)
     {
+        tgtAssert(parent->getSize().z == 1, "RenderTargets are only two-dimensional, expected parent image size.z == 1.");
         tgtAssert(colorTexture != 0, "Color texture must not be 0.");
+
+        tgtAssert(parent->getSize() == colorTexture->getSize(), "Texture size must match parent image size");
+        tgtAssert(parent->getDimensionality() == colorTexture->getDimensionality(), "Texture dimensionality must match parent image dimensionality");
+        tgtAssert(depthTexture == 0 || parent->getSize() == depthTexture->getSize(), "Texture size must match parent image size");
+        tgtAssert(depthTexture == 0 || parent->getDimensionality() == depthTexture->getDimensionality(), "Texture dimensionality must match parent image dimensionality");
 
         if (!GpuCaps.isNpotSupported() && !GpuCaps.areTextureRectanglesSupported()) {
             LWARNING("Neither non-power-of-two textures nor texture rectangles seem to be supported!");
@@ -93,7 +107,7 @@ namespace campvis {
 //         _fbo->attachTexture(cc, GL_COLOR_ATTACHMENT0);
     }
 
-    ImageDataRenderTarget::~ImageDataRenderTarget() {
+    ImageRepresentationRenderTarget::~ImageRepresentationRenderTarget() {
         if (_fbo != 0) {
             _fbo->activate();
             _fbo->detachAll();
@@ -106,78 +120,78 @@ namespace campvis {
         delete _depthTexture;
     }
     
-    void ImageDataRenderTarget::activate() {
+    void ImageRepresentationRenderTarget::activate() {
         _fbo->activate();
-        glViewport(0, 0, _size.x, _size.y);
+        glViewport(0, 0, getSize().x, getSize().y);
     }
 
-    void ImageDataRenderTarget::deactivate() {
+    void ImageRepresentationRenderTarget::deactivate() {
         _fbo->deactivate();
     }
 
-    void ImageDataRenderTarget::bindColorTexture(size_t index /*= 0*/) const {
+    void ImageRepresentationRenderTarget::bindColorTexture(size_t index /*= 0*/) const {
         tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
         _colorTextures[index]->bind();
     }
 
-    void ImageDataRenderTarget::bindColorTexture(const tgt::TextureUnit& texUnit, size_t index /*= 0*/) const {
+    void ImageRepresentationRenderTarget::bindColorTexture(const tgt::TextureUnit& texUnit, size_t index /*= 0*/) const {
         tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
         texUnit.activate();
         _colorTextures[index]->bind();
     }
 
-    void ImageDataRenderTarget::bindDepthTexture() const {
+    void ImageRepresentationRenderTarget::bindDepthTexture() const {
         _depthTexture->bind();
     }
 
-    void ImageDataRenderTarget::bindDepthTexture(const tgt::TextureUnit& texUnit) const {
+    void ImageRepresentationRenderTarget::bindDepthTexture(const tgt::TextureUnit& texUnit) const {
         texUnit.activate();
         _depthTexture->bind();
     }
 
-    void ImageDataRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit* colorTexUnit, const tgt::TextureUnit* depthTexUnit, const std::string& colorTexUniform /*= "_colorTextures"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, size_t index /*= 0*/) const {
+    void ImageRepresentationRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit* colorTexUnit, const tgt::TextureUnit* depthTexUnit, const std::string& colorTexUniform /*= "_colorTextures"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, size_t index /*= 0*/) const {
         tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
         if (colorTexUnit != 0) {
             bindColorTexture(*colorTexUnit, index);
             shader->setUniform(colorTexUniform + "._texture", colorTexUnit->getUnitNumber());
-            shader->setUniform(colorTexUniform + "._size", tgt::vec2(_size.xy()));
-            shader->setUniform(colorTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+            shader->setUniform(colorTexUniform + "._size", tgt::vec2(getSize().xy()));
+            shader->setUniform(colorTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
         }
         if (depthTexUnit != 0) {
             bindDepthTexture(*depthTexUnit);
             shader->setUniform(depthTexUniform + "._texture", depthTexUnit->getUnitNumber());
-            shader->setUniform(depthTexUniform + "._size", tgt::vec2(_size.xy()));
-            shader->setUniform(depthTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_size.xy()));
+            shader->setUniform(depthTexUniform + "._size", tgt::vec2(getSize().xy()));
+            shader->setUniform(depthTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
         }
         shader->setIgnoreUniformLocationError(tmp);
     }
 
-    ImageDataRenderTarget* ImageDataRenderTarget::clone() const {
+    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::clone() const {
         tgtAssert(false, "To be implemented!");
         return 0;
     }
 
-    ImageDataRenderTarget* ImageDataRenderTarget::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
+    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         tgtAssert(false, "To be implemented!");
         return 0;
     }
 
-    const tgt::Texture* ImageDataRenderTarget::getColorTexture(size_t index /*= 0*/) const {
+    const tgt::Texture* ImageRepresentationRenderTarget::getColorTexture(size_t index /*= 0*/) const {
         tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
        return _colorTextures[index];
     }
 
-    const tgt::Texture* ImageDataRenderTarget::getDepthTexture() const {
+    const tgt::Texture* ImageRepresentationRenderTarget::getDepthTexture() const {
         return _depthTexture;
     }
 
-    size_t ImageDataRenderTarget::getNumColorTextures() const {
+    size_t ImageRepresentationRenderTarget::getNumColorTextures() const {
         return _colorTextures.size();
     }
 
-    void ImageDataRenderTarget::createAndAttachTexture(GLint internalFormat) {
+    void ImageRepresentationRenderTarget::createAndAttachTexture(GLint internalFormat) {
         // do sanity tests:
         GLenum attachment = 0;
         switch(internalFormat) {
@@ -220,45 +234,45 @@ namespace campvis {
         tgt::Texture* tex = 0;
         switch(internalFormat) {
             case GL_RGB:
-                tex = new tgt::Texture(0, _size, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
                 _colorTextures.push_back(tex);
                 break;
             case GL_RGB16F_ARB:
-                tex = new tgt::Texture(0, _size, GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
                 _colorTextures.push_back(tex);
                 break;
             case GL_RGBA:
-                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
                 _colorTextures.push_back(tex);
                 break;
             case GL_RGBA8:
-                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
                 _colorTextures.push_back(tex);
                 break;
             case GL_RGBA16:
-                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
                 _colorTextures.push_back(tex);
                 break;
             case GL_RGBA16F:
-                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA16F, GL_FLOAT, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_RGBA, GL_RGBA16F, GL_FLOAT, tgt::Texture::LINEAR);
                 _colorTextures.push_back(tex);
                 break;
             case GL_RGBA32F:
-                tex = new tgt::Texture(0, _size, GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::LINEAR);
                 _colorTextures.push_back(tex);
                 break;
 
             case GL_DEPTH_COMPONENT16:
-                tex = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, tgt::Texture::LINEAR);
                 _depthTexture = tex;
                 break;
             case GL_DEPTH_COMPONENT24:
-                tex = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
                 _depthTexture = tex;
                 break;
 #ifdef GL_DEPTH_COMPONENT32F
             case GL_DEPTH_COMPONENT32F:
-                tex = new tgt::Texture(0, _size, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
+                tex = new tgt::Texture(0, getSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
                 break;
 #endif
 
@@ -275,7 +289,7 @@ namespace campvis {
         _fbo->deactivate();
     }
 
-    size_t ImageDataRenderTarget::getLocalMemoryFootprint() const {
+    size_t ImageRepresentationRenderTarget::getLocalMemoryFootprint() const {
         size_t sum = 0;
         sum += sizeof(tgt::FramebufferObject);
 
@@ -293,7 +307,7 @@ namespace campvis {
         return sizeof(*this) + sum;
     }
 
-    size_t ImageDataRenderTarget::getVideoMemoryFootprint() const {
+    size_t ImageRepresentationRenderTarget::getVideoMemoryFootprint() const {
         size_t sum = 0;
         for (std::vector<tgt::Texture*>::const_iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it)
             sum += (*it)->getSizeOnGPU();

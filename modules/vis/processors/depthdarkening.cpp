@@ -33,9 +33,9 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -81,7 +81,7 @@ namespace campvis {
     }
 
     void DepthDarkening::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> inputImage(data, p_inputImage.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation inputImage(data, p_inputImage.getValue());
 
         if (inputImage != 0) {
             if (_invalidationLevel.isInvalidShader()) {
@@ -102,8 +102,8 @@ namespace campvis {
                 maxDepth = std::max(maxDepth, curDepth);
             }
 
-            ImageDataRenderTarget* tempTarget = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-            ImageDataRenderTarget* outputTarget = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> tempTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
@@ -124,29 +124,29 @@ namespace campvis {
                 _shader->setUniform("_warmColor", p_warmColor.getValue());
             }
 
-            tempTarget->activate();
+            tempTarget.second->activate();
             LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            tempTarget->deactivate();
+            tempTarget.second->deactivate();
 
             inputImage->bind(_shader, &colorUnit, &depthUnit);
-            tempTarget->bind(_shader, 0, &pass2DepthUnit, "", "_depthPass2Texture");
+            tempTarget.second->bind(_shader, 0, &pass2DepthUnit, "", "_depthPass2Texture");
             _shader->setUniform("_direction", tgt::vec2(0.f, 1.f));
             
-            outputTarget->activate();
+            outputTarget.second->activate();
             LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            outputTarget->deactivate();
+            outputTarget.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
             glPopAttrib();
             LGL_ERROR;
 
-            data.addData(p_outputImage.getValue() + "temp", tempTarget);
-            data.addData(p_outputImage.getValue(), outputTarget);
+            data.addData(p_outputImage.getValue() + "temp", tempTarget.first);
+            data.addData(p_outputImage.getValue(), outputTarget.first);
             p_outputImage.issueWrite();
         }
         else {

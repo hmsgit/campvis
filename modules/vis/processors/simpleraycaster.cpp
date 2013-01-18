@@ -30,7 +30,7 @@
 #include "simpleraycaster.h"
 
 #include "core/tools/quadrenderer.h"
-#include "core/datastructures/imagedatarendertarget.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
@@ -57,10 +57,10 @@ namespace campvis {
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data) {
-        ImageDataRenderTarget* output = new ImageDataRenderTarget(tgt::svec3(_renderTargetSize.getValue(), 1));
-        output->createAndAttachTexture(GL_RGBA32F);
-        output->createAndAttachTexture(GL_RGBA32F);
-        output->activate();
+        std::pair<ImageData*, ImageRepresentationRenderTarget*> output = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+        output.second->createAndAttachTexture(GL_RGBA32F);
+        output.second->createAndAttachTexture(GL_RGBA32F);
+        output.second->activate();
 
         GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3, buffers);
@@ -73,8 +73,8 @@ namespace campvis {
         QuadRdr.renderQuad();
         LGL_ERROR;
 
-        output->deactivate();
-        data.addData(p_targetImageID.getValue(), output);
+        output.second->deactivate();
+        data.addData(p_targetImageID.getValue(), output.first);
         p_targetImageID.issueWrite();
     }
 

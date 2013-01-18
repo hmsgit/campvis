@@ -32,7 +32,7 @@
 
 #include "tgt/tgt_gl.h"
 #include "tgt/texture.h"
-#include "core/datastructures/abstractimagerepresentation.h"
+#include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/weaklytypedpointer.h"
 
@@ -47,7 +47,7 @@ namespace campvis {
      * Stores image data as OpenGL texture.
      * Can bei instantiated either by a WeaklyTypedPointer or strongly typed by an GenericImageRepresentationLocal.
      */
-    class ImageRepresentationGL : public AbstractImageRepresentation {
+    class ImageRepresentationGL : public GenericAbstractImageRepresentation<ImageRepresentationGL> {
     public:
         
         /**
@@ -70,7 +70,7 @@ namespace campvis {
          * Creates a new ImageRepresentationGL representation from GenericImageRepresentationLocal.
          *
          * \param   parent      Image this representation represents, must not be 0.
-         * \param   data        Pointer to the GenericImageDataLocal instance, must not be 0
+         * \param   data        Pointer to the GenericImageRepresentationLocal instance, must not be 0
          * \tparam  BASETYPE        Base type of image data
          * \tparam  NUMCHANNELS     Number of channels per element
          */
@@ -97,7 +97,7 @@ namespace campvis {
         /**
          * \see AbstractImageRepresentation::getSubImage
          */
-        virtual ImageRepresentationGL* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ImageRepresentationGL* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
 
         /**
@@ -175,6 +175,7 @@ namespace campvis {
 
         setupAndUploadTexture(_texture, TypeTraitsHelperPerBasetype<BASETYPE>::isInteger, TypeTraitsHelperPerBasetype<BASETYPE>::isSigned);
     }
+
 }
 
 #endif // IMAGEREPRESENTATIONGL_H__

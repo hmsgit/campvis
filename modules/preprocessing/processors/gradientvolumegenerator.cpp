@@ -34,13 +34,14 @@
 
 #include "tbb/include/tbb/tbb.h"
 
-#include "core/datastructures/genericimagedatalocal.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
 
 namespace campvis {
 
     class ApplyCentralDifferences {
     public:
-        ApplyCentralDifferences(const ImageDataLocal* input, GenericImageDataLocal<float, 4>* output)
+        ApplyCentralDifferences(const ImageRepresentationLocal* input, GenericImageRepresentationLocal<float, 4>* output)
             : _input(input)
             , _output(output)
         {
@@ -48,7 +49,7 @@ namespace campvis {
 
         void operator() (const tbb::blocked_range<size_t>& range) const {
             for (size_t i = range.begin(); i != range.end(); ++i) {
-                tgt::svec3 pos = _input->indexToPosition(i);
+                tgt::svec3 pos = _input->getParent()->indexToPosition(i);
                 const tgt::svec3& size = _input->getSize();
 
                 float dx, dy, dz, mdx, mdy, mdz;
@@ -70,15 +71,15 @@ namespace campvis {
 
 
                 tgt::vec3 gradient(mdx - dx, mdy - dy, mdz - dz);
-                gradient /= _input->getMappingInformation().getVoxelSize() * tgt::vec3(2.f);
+                gradient /= _input->getParent()->getMappingInformation().getVoxelSize() * tgt::vec3(2.f);
                 
                 _output->setElement(i, tgt::vec4(gradient, tgt::length(gradient)));
             }
         }
 
     protected:
-        const ImageDataLocal* _input;
-        GenericImageDataLocal<float, 4>* _output;
+        const ImageRepresentationLocal* _input;
+        GenericImageRepresentationLocal<float, 4>* _output;
     };
 
 // ================================================================================================
@@ -99,13 +100,15 @@ namespace campvis {
     }
 
     void GradientVolumeGenerator::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageDataLocal> input(data, p_inputVolume.getValue());
+        ImageRepresentationLocal::ScopedRepresentation input(data, p_inputVolume.getValue());
 
         if (input != 0) {
-            GenericImageDataLocal<float, 4>* output = new GenericImageDataLocal<float, 4>(input->getDimensionality(), input->getSize(), 0);
+            ImageData* id = new ImageData(input->getDimensionality(), input->getSize());
+            GenericImageRepresentationLocal<float, 4>* output = new GenericImageRepresentationLocal<float, 4>(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), ApplyCentralDifferences(input, output));
 
-            data.addData(p_outputGradients.getValue(), output);
+            id->setInitialRepresentation(output);
+            data.addData(p_outputGradients.getValue(), id);
             p_outputGradients.issueWrite();
         }
         else {

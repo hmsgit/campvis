@@ -60,7 +60,7 @@ namespace campvis {
         if (_applyMask.getValue()) {
             shader->setUniform("_maskColor", _maskColor.getValue());
 
-            _maskImage = new DataContainer::ScopedTypedData<ImageDataRenderTarget>(dataContainer, _maskID.getValue());
+            _maskImage = new ImageRepresentationRenderTarget::ScopedRepresentation(dataContainer, _maskID.getValue());
             if (*_maskImage != 0) {
                 (*_maskImage)->bind(shader, _texUnit, 0, "_maskImage");
             }

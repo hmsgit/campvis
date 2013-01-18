@@ -32,7 +32,8 @@
 #include "tgt/event/keyevent.h"
 #include "tgt/glcontext.h"
 #include "tgt/qt/qtcontextmanager.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
@@ -87,9 +88,14 @@ namespace campvis {
         //_imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.connect(&_eepGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.connect(&_vmEepGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.connect(&_pgGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.connect(&_dvrVM.p_sourceImageID);
+        _imageReader.p_targetImageID.connect(&_dvrNormal.p_sourceImageID);
 
         _dvrNormal.p_targetImageID.setValue("drr.output");
-        _dvrNormal.p_sourceImageID.setValue("eep.input");
+        _dvrVM.p_targetImageID.setValue("dvr.output");
 
          Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
@@ -100,13 +106,6 @@ namespace campvis {
          vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
          vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
          _dvrVM.p_transferFunction.replaceTF(vmTF);
-
-        _dvrVM.p_targetImageID.setValue("dvr.output");
-        _dvrVM.p_sourceImageID.setValue("eep.input");
-
-        _eepGenerator.p_sourceImageID.setValue("eep.input");
-        _vmEepGenerator.p_sourceImageID.setValue("eep.input");
-        _pgGenerator.p_sourceImageID.setValue("eep.input");
 
         _vmRenderer.p_renderTargetID.connect(&_combine.p_mirrorRenderID);
         _vmEepGenerator.p_entryImageID.setValue("vm.eep.entry");
@@ -156,20 +155,6 @@ namespace campvis {
             // convert data
             DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
             if (img != 0) {
-                ImageDataLocal* local = ImageDataConverter::tryConvert<ImageDataLocal>(img);
-                if (local != 0) {
-                    DataHandle dh = _data.addData("clr.input", local);
-                    _dvrNormal.p_transferFunction.getTF()->setImageHandle(dh);
-                }
-                {
-                    tgt::GLContextScopedLock lock(_canvas->getContext());
-                    ImageDataGL* gl = ImageDataConverter::tryConvert<ImageDataGL>(img);
-                    if (gl != 0) {
-                        _data.addData("eep.input", gl);
-                    }
-                }
-                CtxtMgr.releaseCurrentContext();
-
                 tgt::Bounds volumeExtent = img->getWorldBounds();
                 tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 

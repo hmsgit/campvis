@@ -30,7 +30,7 @@
 #ifndef IMAGEREPRESENTATIONDISK_H__
 #define IMAGEREPRESENTATIONDISK_H__
 
-#include "core/datastructures/abstractimagerepresentation.h"
+#include "core/datastructures/genericabstractimagerepresentation.h"
 
 #include "core/tools/endianhelper.h"
 #include "core/tools/weaklytypedpointer.h"
@@ -42,7 +42,7 @@ namespace campvis {
      * 
      * \todo    Number of channels
      */
-    class ImageRepresentationDisk : public AbstractImageRepresentation {
+    class ImageRepresentationDisk : public GenericAbstractImageRepresentation<ImageRepresentationDisk> {
     public:
         /**
          * Creates a new ImageData disk representation.
@@ -81,7 +81,7 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
         /// \see AbstractImageRepresentation::getSubImage
-        virtual ImageRepresentationDisk* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ImageRepresentationDisk* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
 
         /**

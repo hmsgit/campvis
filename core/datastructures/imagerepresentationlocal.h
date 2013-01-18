@@ -30,7 +30,7 @@
 #ifndef IMAGEREPRESENTATIONLOCAL_H__
 #define IMAGEREPRESENTATIONLOCAL_H__
 
-#include "core/datastructures/abstractimagerepresentation.h"
+#include "core/datastructures/genericabstractimagerepresentation.h"
 
 #include "core/tools/concurrenthistogram.h"
 #include "core/tools/endianhelper.h"
@@ -44,7 +44,7 @@ namespace campvis {
      * 
      * \todo    implement padding, add some kind of cool iterators
      */
-    class ImageRepresentationLocal : public AbstractImageRepresentation {
+    class ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
     public:
         typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
 
@@ -67,7 +67,7 @@ namespace campvis {
         virtual ImageRepresentationLocal* clone() const = 0;
 
         /// \see ImageData::getSubImage()
-        virtual ImageRepresentationLocal* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
+        virtual ImageRepresentationLocal* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
         /**
          * Returns a WeaklyTypedPointer to the image data.

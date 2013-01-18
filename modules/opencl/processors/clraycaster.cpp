@@ -40,10 +40,10 @@
 #include "kisscl/memory.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagedatalocal.h"
-#include "core/datastructures/imagedatagl.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedataconverter.h"
+#include "core/datastructures/imagerepresentationlocal.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -147,9 +147,9 @@ namespace campvis {
         if (_clContext == 0 || _clProgram == 0) 
             return;
 
-        DataContainer::ScopedTypedData<ImageDataLocal> img(data, _sourceImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> entryPoints(data, _entryImageID.getValue());
-        DataContainer::ScopedTypedData<ImageDataRenderTarget> exitPoints(data, _exitImageID.getValue());
+        ImageRepresentationLocal::ScopedRepresentation img(data, _sourceImageID.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation entryPoints(data, _entryImageID.getValue());
+        ImageRepresentationRenderTarget::ScopedRepresentation exitPoints(data, _exitImageID.getValue());
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
@@ -225,8 +225,8 @@ namespace campvis {
                     delete _texExitPointsColor;
                     _texExitPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture());
                     delete _texOutColor;
-                    ImageDataRenderTarget* rt = new ImageDataRenderTarget(dims);
-                    _texOutColor = new kisscl::GLTexture(_clContext, CL_MEM_WRITE_ONLY, rt->getColorTexture());
+                    std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(dims.xy());
+                    _texOutColor = new kisscl::GLTexture(_clContext, CL_MEM_WRITE_ONLY, rt.second->getColorTexture());
 
 
                     // prepare kernel and stuff command queue
@@ -256,7 +256,7 @@ namespace campvis {
                     }
 
                     LGL_ERROR;
-                    data.addData(_targetImageID.getValue(), rt);
+                    data.addData(_targetImageID.getValue(), rt.first);
                     _targetImageID.issueWrite();
                 }
                 else {

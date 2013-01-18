@@ -27,56 +27,54 @@
 // 
 // ================================================================================================
 
-#ifndef MHDIMAGEREADER_H__
-#define MHDIMAGEREADER_H__
+#ifndef ADVANCEDUSVIS_H__
+#define ADVANCEDUSVIS_H__
 
-#include <string>
-
-#include "core/pipeline/abstractprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/datastructures/imagerepresentationlocal.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
+#include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include "core/pipeline/visualizationpipeline.h"
+#include "modules/io/processors/mhdimagereader.h"
+#include "modules/vis/processors/sliceextractor.h"
+#include "modules/preprocessing/processors/gradientvolumegenerator.h"
+#include "modules/preprocessing/processors/lhhistogram.h"
 
 namespace campvis {
-    /**
-     * Reads a MHD image file into the pipeline.
-     *
-     * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
-     */
-    class MhdImageReader : public AbstractProcessor {
+    class AdvancedUsVis : public VisualizationPipeline {
     public:
         /**
-         * Constructs a new MhdImageReader Processor
-         **/
-        MhdImageReader();
-
-        /**
-         * Destructor
-         **/
-        virtual ~MhdImageReader();
-
-
-        /**
-         * Reads the MHD file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
+         * Creates a VisualizationPipeline.
          */
-        virtual void process(DataContainer& data);
+        AdvancedUsVis();
 
-        /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "MhdImageReader"; };
-        /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~AdvancedUsVis();
 
-        StringProperty p_url;               ///< URL for file to read
-        DataNameProperty p_targetImageID;   ///< image ID for read image
+        /// \see VisualizationPipeline::init()
+        virtual void init();
 
-        Vec3Property p_imageOffset;         ///< Image Offset in mm
-        Vec3Property p_voxelSize;           ///< Voxel Size in mm
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const;
+
+        /**
+         * Execute this pipeline.
+         **/
+        virtual void execute();
+
+        virtual void keyEvent(tgt::KeyEvent* e);
 
     protected:
+        MhdImageReader _imageReader;
+        GradientVolumeGenerator _gvg;
+        LHHistogram _lhh;
+        SliceExtractor _sliceExtractor;
 
-        static const std::string loggerCat_;
+        MWheelToNumericPropertyEventHandler _wheelHandler;
+        TransFuncWindowingEventHandler _tfWindowingHandler;
+
     };
-
 }
 
-#endif // MHDIMAGEREADER_H__
+#endif // ADVANCEDUSVIS_H__

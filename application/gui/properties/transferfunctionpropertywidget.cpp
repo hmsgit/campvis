@@ -31,7 +31,7 @@
 
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 #include "application/gui/properties/transferfunctioneditorfactory.h"
-#include "core/datastructures/imagedatalocal.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 
 #include <QDockWidget>
 #include <QDoubleSpinBox>
@@ -97,7 +97,7 @@ namespace campvis {
     void TransferFunctionPropertyWidget::onTransferFunctionImageHandleChanged() {
         DataHandle dh = static_cast<TransferFunctionProperty*>(_property)->getTF()->getImageHandle();
         if (dh.getData() != 0) {
-            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(dh.getData());
+            const ImageRepresentationLocal* idl = dynamic_cast<const ImageRepresentationLocal*>(dh.getData());
             if (idl != 0) {
                 Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
 //                 _spinDomainLeft->setMinimum(intensityInterval.getLeft());
@@ -150,7 +150,7 @@ namespace campvis {
 
         DataHandle dh = tf->getImageHandle();
         if (dh.getData() != 0) {
-            const ImageDataLocal* idl = dynamic_cast<const ImageDataLocal*>(dh.getData());
+            const ImageRepresentationLocal* idl = dynamic_cast<const ImageRepresentationLocal*>(dh.getData());
             if (idl != 0) {
                 Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
                 tf->setIntensityDomain(tgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));

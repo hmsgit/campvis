@@ -36,10 +36,10 @@
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/abstractdata.h"
-#include "core/datastructures/imagedatadisk.h"
-#include "core/datastructures/imagedatalocal.h"
-#include "core/datastructures/imagedatarendertarget.h"
-#include "core/datastructures/imagedatagl.h"
+#include "core/datastructures/imagerepresentationdisk.h"
+#include "core/datastructures/imagerepresentationlocal.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationgl.h"
 
 #include <QHeaderView>
 #include <QStringList>
@@ -91,16 +91,16 @@ namespace campvis {
             else if (column == COLUMN_TYPE) {
                 const AbstractData* data = _dataHandle.getData();
                 tgtAssert(data != 0, "WTF - QtDataHandle with empty data?");
-                if (const ImageDataDisk* tester = dynamic_cast<const ImageDataDisk*>(data)) {
+                if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(data)) {
                 	return QVariant(QString("ImageData on disk"));
                 }
-                else if (const ImageDataLocal* tester = dynamic_cast<const ImageDataLocal*>(data)) {
+                else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(data)) {
                 	return QVariant(QString("ImageData in local memory"));
                 }
-                else if (const ImageDataGL* tester = dynamic_cast<const ImageDataGL*>(data)) {
+                else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(data)) {
                     return QVariant(QString("ImageData in OpenGL texture."));
                 }
-                else if (const ImageDataRenderTarget* tester = dynamic_cast<const ImageDataRenderTarget*>(data)) {
+                else if (const ImageRepresentationRenderTarget* tester = dynamic_cast<const ImageRepresentationRenderTarget*>(data)) {
                     return QVariant(QString("RenderTarget"));
                 }
             }
