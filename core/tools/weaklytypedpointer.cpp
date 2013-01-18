@@ -228,6 +228,14 @@ namespace campvis {
         return (_baseType == rhs._baseType) && (_numChannels == rhs._numChannels) && (_pointer == rhs._pointer);
     }
 
+    bool WeaklyTypedPointer::isInteger() const {
+        return (_baseType != FLOAT);
+    }
+
+    bool WeaklyTypedPointer::isSigned() const {
+        return (_baseType == INT8) || (_baseType == INT16) || (_baseType == INT32);
+    }
+
 #ifdef HAS_KISSCL
     cl_channel_type WeaklyTypedPointer::getClChannelType() const {
         switch (_baseType) {
@@ -264,15 +272,6 @@ namespace campvis {
                 return CL_A;
         }
     }
-
-    bool WeaklyTypedPointer::isInteger() const {
-        return (_baseType != FLOAT);
-    }
-
-    bool WeaklyTypedPointer::isSigned() const {
-        return (_baseType == INT8) || (_baseType == INT16) || (_baseType == INT32);
-    }
-
 #endif
 
 }
