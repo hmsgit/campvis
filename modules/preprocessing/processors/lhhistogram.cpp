@@ -64,11 +64,13 @@ namespace campvis {
                 float fl = _intensities->getElementNormalized(i, 0);
                 float fh = fl;
 
-                float forwardIntensity = integrateHeun(tgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient);
-                float backwardIntensity = integrateHeun(tgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient * -1.f);
+                if (gradient.w > 0) {
+                    float forwardIntensity = integrateHeun(tgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient);
+                    float backwardIntensity = integrateHeun(tgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient * -1.f);
 
-                fh = std::max(forwardIntensity, backwardIntensity);
-                fl = std::min(forwardIntensity, backwardIntensity);
+                    fh = std::max(forwardIntensity, backwardIntensity);
+                    fl = std::min(forwardIntensity, backwardIntensity);
+                }
 
                 _fl->setElementNormalized(i, 0, fl);
                 _fh->setElementNormalized(i, 0, fh);
@@ -91,7 +93,7 @@ namespace campvis {
             tgt::vec3 size(_intensities->getSize());
             size_t numSteps = 0;
 
-            while (gradient1.w > _epsilon) {
+            while (abs(gradient1.w) < _epsilon) {
                 tgt::vec4 gradient2 = getGradientLinear(position + tgt::normalize(gradient1.xyz()) * stepSize/2.f);
                 position += tgt::normalize((gradient1 + gradient2).xyz()) * stepSize;
                 gradient1 = getGradientLinear(position);
@@ -143,13 +145,13 @@ namespace campvis {
 
     LHHistogram::LHHistogram()
         : AbstractProcessor()
-        , p_inputVolume("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
-        , p_inputGradients("InputGradients", "Input Gradient Volume ID", "gradients", DataNameProperty::READ)
+        , p_intensitiesId("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
+        , p_gradientsId("InputGradients", "Input Gradient Volume ID", "gradients", DataNameProperty::READ)
         , p_outputFL("OutputFL", "FL Output Volume", "fl", DataNameProperty::WRITE)
         , p_outputFH("OutputFH", "FH Output Volume", "fh", DataNameProperty::WRITE)
     {
-        addProperty(&p_inputVolume);
-        addProperty(&p_inputGradients);
+        addProperty(&p_intensitiesId);
+        addProperty(&p_gradientsId);
         addProperty(&p_outputFL);
         addProperty(&p_outputFH);
     }
@@ -159,40 +161,50 @@ namespace campvis {
     }
 
     void LHHistogram::process(DataContainer& data) {
-        //ImageRepresentationLocal::ScopedRepresentation intensities(data, p_inputVolume.getValue());
-        //GenericImageRepresentationLocal<float, 4>::ScopedRepresentation gradients(data, p_inputGradients.getValue());
+        ImageRepresentationLocal::ScopedRepresentation intensities(data, p_intensitiesId.getValue());
+        GenericImageRepresentationLocal<float, 4>::ScopedRepresentation gradients(data, p_gradientsId.getValue());
 
-        //if (intensities != 0 && gradients != 0) {
-        //    ImageRepresentationLocal* fl = intensities->clone();
-        //    ImageRepresentationLocal* fh = intensities->clone();
-        //    tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHGenerator(intensities, gradients, fl, fh, .006f));
+        if (intensities != 0 && gradients != 0) {
+            ImageData* imgFl = new ImageData(intensities->getDimensionality(), intensities->getSize(), 1);
+            ImageRepresentationLocal* fl = new GenericImageRepresentationLocal<float, 1>(imgFl, 0);
+            imgFl->setInitialRepresentation(fl);
 
-        //    float mins[2] = { 0.f, 0.f };
-        //    float maxs[2] = { .1f, .1f };
-        //    size_t numBuckets[2] = { 256, 256 };
-        //    ConcurrentGenericHistogramND<float, 2> lhHistogram(mins, maxs, numBuckets);
-        //    tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHHistogramGenerator(fl, fh, &lhHistogram));
+            ImageData* imgFh = new ImageData(intensities->getDimensionality(), intensities->getSize(), 1);
+            ImageRepresentationLocal* fh = new GenericImageRepresentationLocal<float, 1>(imgFh, 0);
+            imgFh->setInitialRepresentation(fh);
 
-        //    // TODO: ugly hack...
-        //    float* tmp = new float[256*256];
-        //    for (size_t i = 0; i < 256*256; ++i)
-        //        tmp[i] = static_cast<float>(lhHistogram.getBuckets()[i]) / static_cast<float>(lhHistogram.getMaxFilling());
+            const GenericImageRepresentationLocal<float, 4>* ggg = gradients;
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHGenerator(intensities, ggg, fl, fh, .003f));
 
-        //    WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
-        //    ImageRepresentationGL* tex = new ImageRepresentationGL(2, tgt::svec3(256, 256, 1), wtp);
-        //    delete [] tmp;
+            Interval<float> interval = intensities->getNormalizedIntensityRange();
+            float mins[2] = { interval.getLeft(), interval.getLeft() };
+            float maxs[2] = { interval.getRight(), interval.getRight() };
+            size_t numBuckets[2] = { 256, 256 };
+            ConcurrentGenericHistogramND<float, 2> lhHistogram(mins, maxs, numBuckets);
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHHistogramGenerator(fl, fh, &lhHistogram));
 
-        //    data.addData("foo", tex);
-        //    data.addData(p_outputFH.getValue(), fh);
-        //    data.addData(p_outputFL.getValue(), fl);
-        //    p_outputFH.issueWrite();
-        //    p_outputFL.issueWrite();
-        //}
-        //else {
-        //    LDEBUG("No suitable intensities image found.");
-        //}
+            // TODO: ugly hack...
+            float* tmp = new float[256*256];
+            for (size_t i = 0; i < 256*256; ++i)
+                tmp[i] = static_cast<float>(lhHistogram.getBuckets()[i]) / static_cast<float>(lhHistogram.getMaxFilling());
 
-        //_invalidationLevel.setValid();
+            WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
+            ImageData* imgTex = new ImageData(2, tgt::svec3(256, 256, 1), 1);
+            ImageRepresentationGL* tex = new ImageRepresentationGL(imgTex, wtp);
+            imgTex->setInitialRepresentation(tex);
+            delete [] tmp;
+
+            data.addData("foo", imgTex);
+            data.addData(p_outputFH.getValue(), imgFh);
+            data.addData(p_outputFL.getValue(), imgFl);
+            p_outputFH.issueWrite();
+            p_outputFL.issueWrite();
+        }
+        else {
+            LDEBUG("No suitable intensities image found.");
+        }
+
+        _invalidationLevel.setValid();
     }
 
 }

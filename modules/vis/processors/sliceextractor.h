@@ -32,6 +32,7 @@
 
 #include <string>
 
+#include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
@@ -48,7 +49,7 @@ namespace campvis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class SliceExtractor : public VisualizationProcessor {
+    class SliceExtractor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new SliceExtractor Processor

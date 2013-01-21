@@ -56,10 +56,10 @@ void main() {
     float drrFull = getElement2DNormalized(_drrFullColor, ex_TexCoord.xy).r;
     float drrClipped = getElement2DNormalized(_drrClippedColor, ex_TexCoord.xy).r;
     
-	float weightingFactor = 0.0;
-	if (drrClipped > 0)
-		weightingFactor = clamp(drrClipped / drrFull, 0.0, 1.0);
-	
+    float weightingFactor = 0.0;
+    if (drrClipped > 0)
+        weightingFactor = clamp(drrClipped / drrFull, 0.0, 1.0);
+    
     float fragDepth = weightingFactor;
     
     if (weightingFactor == 0.0)

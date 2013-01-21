@@ -32,6 +32,7 @@
 in vec3 ex_TexCoord;
 out vec4 out_Color;
 
+//#include "tools/background.frag"
 #include "tools/texture2d.frag"
 #include "tools/transferfunction.frag"
 
@@ -39,6 +40,18 @@ uniform Texture2D _texture;
 uniform TransferFunction1D _transferFunction;
 
 void main() {
-    float intensity = getElement2DNormalized(_texture, ex_TexCoord.xy).a;
-    out_Color = lookupTF(_transferFunction, intensity);
+    vec4 texel = getElement2DNormalized(_texture, ex_TexCoord.xy);
+    if (_texture._numChannels == 1) {
+        out_Color = lookupTF(_transferFunction, texel.a);
+    }
+    else if (_texture._numChannels == 3) {
+        out_Color = vec4(abs(texel.rgb), 1.0);
+    }
+    else if (_texture._numChannels == 4) {
+        out_Color = (abs(texel) - vec4(_transferFunction._intensityDomain.x)) / (_transferFunction._intensityDomain.y - _transferFunction._intensityDomain.x);
+    }
+    
+    //if (out_Color.a == 0) {
+    //    renderBackground(ex_TexCoord.xy, out_Color);
+    //}
 }

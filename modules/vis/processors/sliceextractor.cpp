@@ -35,7 +35,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
-
+#include "core/pipeline/processordecoratorbackground.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -56,6 +56,9 @@ namespace campvis {
         addProperty(&p_targetImageID);
         addProperty(&p_sliceNumber);
         addProperty(&p_transferFunction);
+
+        //addDecorator(new ProcessorDecoratorBackground());
+        decoratePropertyCollection(this);
     }
 
     SliceExtractor::~SliceExtractor() {
@@ -65,6 +68,8 @@ namespace campvis {
     void SliceExtractor::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/sliceextractor.frag", "", false);
+        _shader->setAttributeLocation(0, "in_Position");
+        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void SliceExtractor::deinit() {
@@ -90,17 +95,17 @@ namespace campvis {
                 std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
                 _shader->activate();
+                decorateRenderProlog(data, _shader);
                 tgt::TextureUnit inputUnit, tfUnit;
                 glData->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
                 rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                _shader->setAttributeLocation(0, "in_Position");
-                _shader->setAttributeLocation(1, "in_TexCoord");
                 QuadRdr.renderQuad();
                 rt.second->deactivate();
 
+                decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
 

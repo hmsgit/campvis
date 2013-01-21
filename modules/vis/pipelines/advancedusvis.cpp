@@ -38,16 +38,18 @@ namespace campvis {
 
     AdvancedUsVis::AdvancedUsVis()
         : VisualizationPipeline()
-        , _imageReader()
+        , _usReader()
+        , _confidenceReader()
         , _gvg()
         , _lhh()
         , _sliceExtractor(_effectiveRenderTargetSize)
         , _wheelHandler(&_sliceExtractor.p_sliceNumber)
         , _tfWindowingHandler(&_sliceExtractor.p_transferFunction)
     {
-        addProcessor(&_imageReader);
-//         addProcessor(&_gvg);
-//         addProcessor(&_lhh);
+        addProcessor(&_usReader);
+        addProcessor(&_confidenceReader);
+        addProcessor(&_gvg);
+         addProcessor(&_lhh);
         addProcessor(&_sliceExtractor);
         addEventHandler(&_wheelHandler);
         addEventHandler(&_tfWindowingHandler);
@@ -59,19 +61,21 @@ namespace campvis {
     void AdvancedUsVis::init() {
         VisualizationPipeline::init();
 
-        _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
-        _imageReader.p_targetImageID.setValue("reader.output");
+        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
+        _usReader.p_targetImageID.setValue("us.image");
+        _usReader.p_targetImageID.connect(&_sliceExtractor.p_sourceImageID);
+        _usReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
+        _usReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
 
-        _gvg.p_inputVolume.setValue("reader.output");
+        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
+        _confidenceReader.p_targetImageID.setValue("confidence.image");
 
-//         _lhh.p_inputVolume.setValue("se.input");
-//         _gvg._outputGradients.connect(&_lhh._inputGradients);
+        _gvg.p_targetImageID.connect(&_lhh.p_gradientsId);
 
-        _sliceExtractor.p_sourceImageID.setValue("reader.output");
         _sliceExtractor.p_sliceNumber.setValue(0);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
         _sliceExtractor.p_transferFunction.replaceTF(tf);
 
@@ -85,24 +89,23 @@ namespace campvis {
             _invalidationLevel.setValid();
             // TODO:    think whether we want to lock all processors already here.
         }
-        if (! _imageReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_imageReader);
 
-            // convert data
-            ImageRepresentationLocal::ScopedRepresentation img(_data, "reader.output");
-            if (img != 0) {
-                _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
-            }
+        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
+            if (! (*it)->getInvalidationLevel().isValid())
+                lockGLContextAndExecuteProcessor(*it);
         }
+//         if (! _usReader.getInvalidationLevel().isValid()) {
+//             executeProcessor(&_usReader);
+//         }
 //         if (! _gvg.getInvalidationLevel().isValid()) {
 //             executeProcessor(&_gvg);
 //         }
 //         if (! _lhh.getInvalidationLevel().isValid()) {
 //             lockGLContextAndExecuteProcessor(&_lhh);
 //         }
-        if (! _sliceExtractor.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_sliceExtractor);
-        }
+//         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
+//             lockGLContextAndExecuteProcessor(&_sliceExtractor);
+//         }
     }
 
     void AdvancedUsVis::keyEvent(tgt::KeyEvent* e) {

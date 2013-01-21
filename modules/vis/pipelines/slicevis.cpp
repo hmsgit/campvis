@@ -62,7 +62,7 @@ namespace campvis {
         _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_lhh.p_inputVolume);
+        _imageReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
         _imageReader.p_targetImageID.connect(&_sliceExtractor.p_sourceImageID);
 
 //         _gvg._outputGradients.connect(&_lhh._inputGradients);

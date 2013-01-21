@@ -66,7 +66,8 @@ namespace campvis {
         virtual void keyEvent(tgt::KeyEvent* e);
 
     protected:
-        MhdImageReader _imageReader;
+        MhdImageReader _usReader;
+        MhdImageReader _confidenceReader;
         GradientVolumeGenerator _gvg;
         LHHistogram _lhh;
         SliceExtractor _sliceExtractor;

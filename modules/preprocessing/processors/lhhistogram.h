@@ -62,8 +62,8 @@ namespace campvis {
 
         virtual void process(DataContainer& data);
 
-        DataNameProperty p_inputVolume;      ///< ID for input volume
-        DataNameProperty p_inputGradients;   ///< ID for input gradient volume
+        DataNameProperty p_intensitiesId;      ///< ID for input volume
+        DataNameProperty p_gradientsId;   ///< ID for input gradient volume
 
         DataNameProperty p_outputFL;         ///< ID for output FL volume
         DataNameProperty p_outputFH;         ///< ID for output FH volume
