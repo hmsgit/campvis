@@ -113,7 +113,7 @@ namespace campvis {
                 float* asFloats = new float[numElements];
                 for (size_t i = 0; i < numElements; ++i)
                     asFloats[i] = img->getElementNormalized(i, 0);
-                ImageData* id = new ImageData(img->getDimensionality(), img->getSize());
+                ImageData* id = new ImageData(img->getDimensionality(), img->getSize(), img->getParent()->getNumChannels());
                 GenericImageRepresentationLocal<float, 1>* imageWithFloats = new GenericImageRepresentationLocal<float, 1>(id, asFloats);
                 id->setInitialRepresentation(imageWithFloats);
 

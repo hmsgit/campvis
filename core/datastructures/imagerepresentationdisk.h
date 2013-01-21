@@ -50,7 +50,6 @@ namespace campvis {
          * \param parent            Image this representation represents, must not be 0.
          * \param url               Path to file with raw data
          * \param type              Base type of data
-         * \param numChannels       Number of channels per element
          * \param offset            Offset of first data element in file (in bytes)
          * \param endianness        Endianess of data
          * \param stride            Number of _elemments_ _between_ adjacent elements for each dimension (\see ImageRepresentationDisk::_stride).
@@ -59,7 +58,6 @@ namespace campvis {
             const ImageData* parent,
             const std::string& url,
             WeaklyTypedPointer::BaseType type,
-            size_t numChannels,
             size_t offset = 0,
             EndianHelper::Endianness endianness = EndianHelper::LITTLE_ENDIAN,
             const tgt::svec3& stride = tgt::svec3::zero
@@ -106,12 +104,6 @@ namespace campvis {
          */
         WeaklyTypedPointer::BaseType getBaseType() const;
 
-        /**
-         * Returns the number of channels per element
-         * \return _numChannels
-         */
-        size_t getNumChannels() const;
-
     private:
         /**
          * Calculates the canonical stride for the given image size.
@@ -123,7 +115,6 @@ namespace campvis {
         std::string _url;                       ///< path to file with raw data
         size_t _offset;                         ///< offset of first data element in file (in bytes)
         WeaklyTypedPointer::BaseType _type;     ///< base type of data
-        size_t _numChannels;                    ///< number of channels per element
         EndianHelper::Endianness _endianess;    ///< endianess of data
         
         /**

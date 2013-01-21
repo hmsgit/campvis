@@ -79,7 +79,7 @@ namespace campvis {
     void DevilImageReader::process(DataContainer& data) {
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
         if (tex != 0) {
-            ImageData id (2, tex->getDimensions());
+            ImageData id (2, tex->getDimensions(), tex->getNumChannels());
             ImageRepresentationGL image(&id, tex);
 
             std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());

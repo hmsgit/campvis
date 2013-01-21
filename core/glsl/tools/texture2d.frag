@@ -33,6 +33,7 @@ struct Texture2D {
     sampler2D _texture;
     vec2 _size;
     vec2 _sizeRCP;
+    int _numChannels;
 };
 
 /**

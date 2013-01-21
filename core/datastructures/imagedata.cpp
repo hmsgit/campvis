@@ -32,13 +32,15 @@
 namespace campvis {
     const std::string ImageData::loggerCat_ = "CAMPVis.core.datastructures.ImageData";
 
-    ImageData::ImageData(size_t dimensionality, const tgt::svec3& size) 
+    ImageData::ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels) 
         : AbstractData()
         , _dimensionality(dimensionality)
         , _size(size)
+        , _numChannels(numChannels)
         , _numElements(tgt::hmul(size))
         , _mappingInformation(size, tgt::vec3(0.f), tgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
     {
+        tgtAssert(numChannels > 0, "Number of channels must be greater than 0!");
     }
 
     ImageData::~ImageData() {
@@ -46,7 +48,7 @@ namespace campvis {
     }
 
     ImageData* ImageData::clone() const {
-        ImageData* toReturn = new ImageData(_dimensionality, _size);
+        ImageData* toReturn = new ImageData(_dimensionality, _size, _numChannels);
         toReturn->_mappingInformation = _mappingInformation;
         toReturn->_representations.assign(_representations.begin(), _representations.end());
         return toReturn;
@@ -74,6 +76,10 @@ namespace campvis {
 
     const tgt::svec3& ImageData::getSize() const {
         return _size;
+    }
+
+    size_t ImageData::getNumChannels() const {
+        return _numChannels;
     }
 
     const ImageMappingInformation& ImageData::getMappingInformation() const {
@@ -111,7 +117,7 @@ namespace campvis {
             newDimensionality = 3;
 
         // create new ImageData object and assign mapping information
-        ImageData* toReturn = new ImageData(newDimensionality, newSize);
+        ImageData* toReturn = new ImageData(newDimensionality, newSize, _numChannels);
         toReturn->_mappingInformation = ImageMappingInformation(newSize, _mappingInformation.getOffset(), _mappingInformation.getVoxelSize(), _mappingInformation.getRealWorldMapping());
         
         // create sub-image of every image representation

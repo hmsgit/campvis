@@ -55,9 +55,8 @@ namespace campvis {
          * \param   dimensionality  Dimensionality of data
          * \param   size            Size of this image (number of elements per dimension)
          * \param   baseType        Base type of the image data.
-         * \param   numChannels     Number of channels per image element.
          */
-        ImageRepresentationLocal(const ImageData* parent, WeaklyTypedPointer::BaseType baseType, size_t numChannels);
+        ImageRepresentationLocal(const ImageData* parent, WeaklyTypedPointer::BaseType baseType);
 
         /**
          * Destructor
@@ -202,7 +201,6 @@ namespace campvis {
         void computeIntensityHistogram() const;
 
         WeaklyTypedPointer::BaseType _baseType;     ///< Base type of the image data
-        size_t _numChannels;                        ///< Number of channels per image element.
 
         mutable tbb::atomic<bool> _intensityRangeDirty;         ///< Flag whether _normalizedIntensityRange is dirty and has to be recomputed
         mutable Interval<float> _normalizedIntensityRange;      ///< Range of the normalized intensities, mutable to allow lazy instantiation

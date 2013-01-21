@@ -77,7 +77,12 @@ namespace campvis {
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                updateProperties(img);
+                if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
+                    // source DataHandle has changed
+                    updateProperties(img.getDataHandle());
+                    _sourceImageTimestamp = img.getDataHandle().getTimestamp();
+                }
+
                 const tgt::svec3& imgSize = img->getSize();
                 ImageData* slice = img->getSubImage(tgt::svec3(0, 0, p_sliceNumber.getValue()), tgt::svec3(imgSize.x, imgSize.y, p_sliceNumber.getValue()+1));
 
@@ -114,8 +119,9 @@ namespace campvis {
         _invalidationLevel.setValid();
     }
 
-    void SliceExtractor::updateProperties(const ImageData* img) {
-        const tgt::svec3& imgSize = img->getSize();
+    void SliceExtractor::updateProperties(DataHandle img) {
+        p_transferFunction.getTF()->setImageHandle(img);
+        const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
         if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
             p_sliceNumber.setMaxValue(imgSize.z - 1);
         }

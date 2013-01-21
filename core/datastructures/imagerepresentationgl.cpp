@@ -88,7 +88,7 @@ namespace campvis {
 
     ImageRepresentationGL* ImageRepresentationGL::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         // TODO: implement
-        tgtAssert(false, "not yet implemented...");
+        //LWARNING("ImageRepresentationGL::getSubImage() not implemented!");
         return 0;
     }
 
@@ -177,12 +177,14 @@ namespace campvis {
                 shader->setUniform(texUniform + "._texture", texUnit.getUnitNumber());
                 shader->setUniform(texUniform + "._size", tgt::vec2(getSize().xy()));
                 shader->setUniform(texUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
+                shader->setUniform(texUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
                 break;
 
             case 3:
                 shader->setUniform(texUniform + "._texture", texUnit.getUnitNumber());
                 shader->setUniform(texUniform + "._size", tgt::vec3(getSize()));
                 shader->setUniform(texUniform + "._sizeRCP", tgt::vec3(1.f) / tgt::vec3(getSize()));
+                shader->setUniform(texUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
                 shader->setUniform(texUniform + "._voxelSize", _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texUniform + "._textureToWorldMatrix", _parent->getMappingInformation().getTextureToWorldMatrix());

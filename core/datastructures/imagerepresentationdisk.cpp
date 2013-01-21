@@ -35,12 +35,11 @@
 namespace campvis {
     const std::string ImageRepresentationDisk::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationDisk";
 
-    ImageRepresentationDisk::ImageRepresentationDisk(const ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t numChannels, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
+    ImageRepresentationDisk::ImageRepresentationDisk(const ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
         : GenericAbstractImageRepresentation<ImageRepresentationDisk>(parent)
         , _url(url)
         , _offset(offset)
         , _type(type)
-        , _numChannels(numChannels)
         , _endianess(endianness)
         , _stride(stride)
     {
@@ -59,16 +58,16 @@ namespace campvis {
             return clone();
         }
 
-        size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _numChannels) * (llf.x + llf.y * size.y + llf.z * size.x * size.y);
+        size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _parent->getNumChannels()) * (llf.x + llf.y * size.y + llf.z * size.x * size.y);
         // the stride doesn't change!
         tgt::svec3 newStride = (_stride == tgt::svec3::zero) ? getCanonicStride(getSize()) : _stride;
-        return new ImageRepresentationDisk(parent, _url, _type, _numChannels, newOffset, _endianess, newStride);
+        return new ImageRepresentationDisk(parent, _url, _type, newOffset, _endianess, newStride);
     }
 
     campvis::WeaklyTypedPointer ImageRepresentationDisk::getImageData() const {
         const tgt::svec3& size = getSize();
         size_t numElements = tgt::hmul(size);
-        size_t numBytesPerElement = WeaklyTypedPointer::numBytes(_type, _numChannels);
+        size_t numBytesPerElement = WeaklyTypedPointer::numBytes(_type, _parent->getNumChannels());
         size_t numBytes = numElements * numBytesPerElement;
 
         // open file and prepare for read
@@ -77,7 +76,7 @@ namespace campvis {
             size_t fileSize = static_cast<size_t>(file.tellg());
             if (fileSize < numBytes) {
                 LERROR("File is smaller than expected.");
-                return WeaklyTypedPointer(_type, _numChannels, 0);
+                return WeaklyTypedPointer(_type, _parent->getNumChannels(), 0);
             }
 
             file.seekg(_offset, std::ios::beg);
@@ -182,11 +181,11 @@ namespace campvis {
             }
 
 
-            return WeaklyTypedPointer(_type, _numChannels, static_cast<void*>(data));
+            return WeaklyTypedPointer(_type, _parent->getNumChannels(), static_cast<void*>(data));
         }
         else {
             LERROR("Could not open file " << _url << " for reading.");
-            return WeaklyTypedPointer(_type, _numChannels, 0);
+            return WeaklyTypedPointer(_type, _parent->getNumChannels(), 0);
         }
 
     }
@@ -196,7 +195,7 @@ namespace campvis {
     }
 
     ImageRepresentationDisk* ImageRepresentationDisk::clone() const {
-        return new ImageRepresentationDisk(_parent, _url, _type, _numChannels, _offset, _endianess, _stride);
+        return new ImageRepresentationDisk(_parent, _url, _type, _offset, _endianess, _stride);
     }
 
     size_t ImageRepresentationDisk::getLocalMemoryFootprint() const {
@@ -209,10 +208,6 @@ namespace campvis {
 
     WeaklyTypedPointer::BaseType ImageRepresentationDisk::getBaseType() const {
         return _type;
-    }
-
-    size_t ImageRepresentationDisk::getNumChannels() const {
-        return _numChannels;
     }
 
     ImageRepresentationDisk* ImageRepresentationDisk::tryConvertFrom(const AbstractImageRepresentation* source) {

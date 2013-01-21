@@ -82,11 +82,14 @@ namespace campvis {
 
     protected:
         /// adapts the range of the p_sliceNumber property to the image
-        void updateProperties(const ImageData* img);
+        void updateProperties(DataHandle img);
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
+
+    private:
+        clock_t _sourceImageTimestamp;
     };
 
 }

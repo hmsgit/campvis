@@ -50,8 +50,15 @@ namespace campvis {
      */
     class ImageData : public AbstractData {
     public:
-        ImageData(size_t dimensionality, const tgt::svec3& size);
+        /**
+         * Creates a new ImageData instance with the given parameters.
+         * \param dimensionality    Dimensionality of this image
+         * \param size              Size of this image (number of elements per dimension)
+         * \param numChannels       Number of channels per element
+         */
+        ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
 
+        /// Destructor
         virtual ~ImageData();
 
         /**
@@ -84,6 +91,12 @@ namespace campvis {
          * \return _size
          */
         const tgt::svec3& getSize() const;
+
+        /**
+         * Returns the number of channels per element.
+         * \return  _numChannels
+         */
+        size_t getNumChannels() const;
 
         /**
          * Returns the number of elements (= tgt::hmul(getSize())).
@@ -181,6 +194,7 @@ namespace campvis {
 
         size_t _dimensionality;                         ///< Dimensionality of this image
         tgt::svec3 _size;                               ///< Size of this image (number of elements per dimension)
+        size_t _numChannels;                            ///< Number of channels per element
         size_t _numElements;                            ///< number of elements (= tgt::hmul(size))
         ImageMappingInformation _mappingInformation;    ///< Mapping information of this image
 

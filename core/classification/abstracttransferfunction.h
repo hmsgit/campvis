@@ -125,17 +125,19 @@ namespace campvis {
         const tgt::Texture* getTexture();
 
         /**
-         * Returns a DataHandle to the image for this transfer function, may be 0.
-         * \return  _imageHandle, may be 0!
+         * Returns a DataHandle to the image for this transfer function, its pointer may be 0.
+         * \note    If the data in \a imageHandle is not 0, it points to a valid ImageData object.
+         * \return  _imageHandle, its pointer may be 0.
          */
         DataHandle getImageHandle() const;
 
         /**
-         * Sets the DataHandle for this transfer function, may be 0.
-         * \note    This method makes a copy of \a imageHandle, hence does not take ownership.
-         * \param   imageHandle     The new DataHandle for this transfer function
+         * Sets the DataHandle for this transfer function, its pointer may be 0.
+         * \note    If the data in \a imageHandle is not 0, it must point to a valid ImageData object.
+         * \param   imageHandle     The new DataHandle for this transfer function, if its pointer is 
+         *                          not 0 it must point to a valid ImageData object.
          */
-        void setImageHandle(const DataHandle& imageHandle);
+        void setImageHandle(DataHandle imageHandle);
 
         /**
          * Returns the intensity histogram

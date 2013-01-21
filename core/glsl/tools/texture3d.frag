@@ -37,6 +37,9 @@ struct Texture3D {
     vec3 _size;
     vec3 _sizeRCP;
 
+    // Number of channels
+    int _numChannels;
+
     // Voxel spacing
     vec3 _voxelSize;
     vec3 _voxelSizeRCP;

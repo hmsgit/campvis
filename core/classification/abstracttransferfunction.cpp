@@ -158,7 +158,11 @@ namespace campvis {
         return _imageHandle;
     }
 
-    void AbstractTransferFunction::setImageHandle(const DataHandle& imageHandle) {
+    void AbstractTransferFunction::setImageHandle(DataHandle imageHandle) {
+        tgtAssert(
+            imageHandle.getData() == 0 || dynamic_cast<const ImageData*>(imageHandle.getData()) != 0, 
+            "The data in the image handle must either be 0 or point to a valid ImageData object!");
+
         _imageHandle = imageHandle;
         _dirtyHistogram = true;
         s_imageHandleChanged();

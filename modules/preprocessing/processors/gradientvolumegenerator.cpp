@@ -88,11 +88,11 @@ namespace campvis {
 
     GradientVolumeGenerator::GradientVolumeGenerator()
         : AbstractProcessor()
-        , p_inputVolume("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
-        , p_outputGradients("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
+        , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
+        , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
     {
-        addProperty(&p_inputVolume);
-        addProperty(&p_outputGradients);
+        addProperty(&p_sourceImageID);
+        addProperty(&p_targetImageID);
     }
 
     GradientVolumeGenerator::~GradientVolumeGenerator() {
@@ -100,16 +100,16 @@ namespace campvis {
     }
 
     void GradientVolumeGenerator::process(DataContainer& data) {
-        ImageRepresentationLocal::ScopedRepresentation input(data, p_inputVolume.getValue());
+        ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
         if (input != 0) {
-            ImageData* id = new ImageData(input->getDimensionality(), input->getSize());
+            ImageData* id = new ImageData(input->getDimensionality(), input->getSize(), 4);
             GenericImageRepresentationLocal<float, 4>* output = new GenericImageRepresentationLocal<float, 4>(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), ApplyCentralDifferences(input, output));
 
             id->setInitialRepresentation(output);
-            data.addData(p_outputGradients.getValue(), id);
-            p_outputGradients.issueWrite();
+            data.addData(p_targetImageID.getValue(), id);
+            p_targetImageID.issueWrite();
         }
         else {
             LDEBUG("No suitable input image found.");
