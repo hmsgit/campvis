@@ -27,55 +27,32 @@
 // 
 // ================================================================================================
 
-#ifndef ADVANCEDUSVIS_H__
-#define ADVANCEDUSVIS_H__
+#version 330
 
-#include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/sliceextractor.h"
-#include "modules/preprocessing/processors/gradientvolumegenerator.h"
-#include "modules/preprocessing/processors/lhhistogram.h"
+in vec3 ex_TexCoord;
+out vec4 out_Color;
 
-namespace campvis {
-    class AdvancedUsVis : public VisualizationPipeline {
-    public:
-        /**
-         * Creates a VisualizationPipeline.
-         */
-        AdvancedUsVis();
+#include "tools/colorspace.frag"
+#include "tools/texture3d.frag"
+#include "tools/transferfunction.frag"
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~AdvancedUsVis();
+uniform Texture3D _usImage;
+uniform Texture3D _confidenceMap;
+uniform Texture3D _gradientMap;
+uniform TransferFunction1D _transferFunction;
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
+uniform int _sliceNumber;
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+void main() {
+    vec3 texCoord = vec3(ex_TexCoord.xy, _usImage._sizeRCP.z * (_sliceNumber + 0.5));
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
+    vec4 texel = getElement3DNormalized(_usImage, texCoord);
+    vec4 gradient = getElement3DNormalized(_gradientMap, texCoord);
+    float confidence = getElement3DNormalized(_confidenceMap, texCoord).a;
 
-        virtual void keyEvent(tgt::KeyEvent* e);
+    out_Color = lookupTF(_transferFunction, texel.a);
 
-    protected:
-        MhdImageReader _usReader;
-        MhdImageReader _confidenceReader;
-        GradientVolumeGenerator _gvg;
-        LHHistogram _lhh;
-        SliceExtractor _sliceExtractor;
-
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-        TransFuncWindowingEventHandler _tfWindowingHandler;
-
-    };
+    vec3 hsv = rgb2hsv(out_Color.xyz);
+    hsv.y = 1.0 - confidence;
+    out_Color.xyz = hsv2rgb(hsv);
 }
-
-#endif // ADVANCEDUSVIS_H__

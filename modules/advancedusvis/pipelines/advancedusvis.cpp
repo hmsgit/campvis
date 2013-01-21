@@ -42,15 +42,15 @@ namespace campvis {
         , _confidenceReader()
         , _gvg()
         , _lhh()
-        , _sliceExtractor(_effectiveRenderTargetSize)
-        , _wheelHandler(&_sliceExtractor.p_sliceNumber)
-        , _tfWindowingHandler(&_sliceExtractor.p_transferFunction)
+        , _usFusion(_effectiveRenderTargetSize)
+        , _wheelHandler(&_usFusion.p_sliceNumber)
+        , _tfWindowingHandler(&_usFusion.p_transferFunction)
     {
         addProcessor(&_usReader);
         addProcessor(&_confidenceReader);
         addProcessor(&_gvg);
-         addProcessor(&_lhh);
-        addProcessor(&_sliceExtractor);
+        //addProcessor(&_lhh);
+        addProcessor(&_usFusion);
         addEventHandler(&_wheelHandler);
         addEventHandler(&_tfWindowingHandler);
     }
@@ -63,24 +63,26 @@ namespace campvis {
 
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
         _usReader.p_targetImageID.setValue("us.image");
-        _usReader.p_targetImageID.connect(&_sliceExtractor.p_sourceImageID);
+        _usReader.p_targetImageID.connect(&_usFusion.p_usImageId);
         _usReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
 
         _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
         _confidenceReader.p_targetImageID.setValue("confidence.image");
+        _confidenceReader.p_targetImageID.connect(&_usFusion.p_confidenceImageID);
 
         _gvg.p_targetImageID.connect(&_lhh.p_gradientsId);
+        _gvg.p_targetImageID.connect(&_usFusion.p_gradientImageID);
 
-        _sliceExtractor.p_sliceNumber.setValue(0);
+        _usFusion.p_targetImageID.setValue("us.fused");
+        _usFusion.p_sliceNumber.setValue(0);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
-        _sliceExtractor.p_transferFunction.replaceTF(tf);
+        _usFusion.p_transferFunction.replaceTF(tf);
 
-        _renderTargetID.setValue("renderTarget");
-        _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
+        _usFusion.p_targetImageID.addSharedProperty(&(_renderTargetID));
     }
 
     void AdvancedUsVis::execute() {
@@ -103,8 +105,8 @@ namespace campvis {
 //         if (! _lhh.getInvalidationLevel().isValid()) {
 //             lockGLContextAndExecuteProcessor(&_lhh);
 //         }
-//         if (! _sliceExtractor.getInvalidationLevel().isValid()) {
-//             lockGLContextAndExecuteProcessor(&_sliceExtractor);
+//         if (! _usFusion.getInvalidationLevel().isValid()) {
+//             lockGLContextAndExecuteProcessor(&_usFusion);
 //         }
     }
 
@@ -112,10 +114,10 @@ namespace campvis {
         if (e->pressed()) {
             switch (e->keyCode()) {
                 case tgt::KeyEvent::K_UP:
-                    _sliceExtractor.p_sliceNumber.increment();
+                    _usFusion.p_sliceNumber.increment();
                     break;
                 case tgt::KeyEvent::K_DOWN:
-                    _sliceExtractor.p_sliceNumber.decrement();
+                    _usFusion.p_sliceNumber.decrement();
                     break;
             }
         }

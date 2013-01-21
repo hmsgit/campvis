@@ -27,33 +27,55 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/slicevis.h"
-#include "modules/opencl/pipelines/openclpipeline.h"
+#ifndef ADVANCEDUSVIS_H__
+#define ADVANCEDUSVIS_H__
 
-using namespace campvis;
+#include "core/datastructures/imagerepresentationlocal.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
+#include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include "core/pipeline/visualizationpipeline.h"
+#include "modules/io/processors/mhdimagereader.h"
+#include "modules/advancedusvis/processors/advancedusfusion.h"
+#include "modules/preprocessing/processors/gradientvolumegenerator.h"
+#include "modules/preprocessing/processors/lhhistogram.h"
 
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-//     app.addVisualizationPipeline("IXPV", new IxpvDemo());
-//     app.addVisualizationPipeline("SliceVis", new SliceVis());
-//     app.addVisualizationPipeline("DVRVis", new DVRVis());
-//     app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
+namespace campvis {
+    class AdvancedUsVis : public VisualizationPipeline {
+    public:
+        /**
+         * Creates a VisualizationPipeline.
+         */
+        AdvancedUsVis();
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~AdvancedUsVis();
 
-    return toReturn;
+        /// \see VisualizationPipeline::init()
+        virtual void init();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const;
+
+        /**
+         * Execute this pipeline.
+         **/
+        virtual void execute();
+
+        virtual void keyEvent(tgt::KeyEvent* e);
+
+    protected:
+        MhdImageReader _usReader;
+        MhdImageReader _confidenceReader;
+        GradientVolumeGenerator _gvg;
+        LHHistogram _lhh;
+        AdvancedUsFusion _usFusion;
+
+        MWheelToNumericPropertyEventHandler _wheelHandler;
+        TransFuncWindowingEventHandler _tfWindowingHandler;
+
+    };
 }
+
+#endif // ADVANCEDUSVIS_H__
