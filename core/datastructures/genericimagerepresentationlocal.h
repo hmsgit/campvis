@@ -53,6 +53,76 @@ namespace campvis {
         typedef GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS> ThisType;
 
         /**
+         * Template specialization of the ScopedRepresentation defined in GenericAbstractImageRepresentation<T>
+         * since some compiler get confused by the nested templates.
+         * \note    This is a simple copy and paste from GenericAbstractImageRepresentation<T> with
+         *          explicitly named template parameter.
+         */
+        struct ScopedRepresentation {
+            /**
+             * Creates a new DataHandle to the data item with the key \a name in \a dc, that behaves like a const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>*.
+             * \param   dc      DataContainer to grab data from
+             * \param   name    Key of the DataHandle to search for
+             */
+            ScopedRepresentation(const DataContainer& dc, const std::string& name)
+                : dh(dc.getData(name))
+                , data(0)
+                , representation(0) 
+            {
+                if (dh.getData() != 0) {
+                    data = dynamic_cast<const ImageData*>(dh.getData());
+                    if (data != 0) {
+                        representation = data->getRepresentation< GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS> >();
+                    }
+                }
+            };
+
+            /**
+             * Implicit conversion operator to const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>*.
+             * \return  The image representation of the image in the DataHandle, may be 0 when no DataHandle was found,
+             *           the data is of the wrong type, or no suitable representation was found.
+             */
+            operator const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>*() {
+                return representation;
+            }
+
+            /**
+             * Implicit arrow operator to const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>*.
+             * \return  The image representation of the image in the DataHandle, may be 0 when no DataHandle was found,
+             *           the data is of the wrong type, or no suitable representation was found.
+             */
+            const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* operator->() const {
+                return representation;
+            }
+
+            /**
+             * Gets the DataHandle.
+             * \return dh
+             */
+            DataHandle getDataHandle() const {
+                return dh;
+            }
+
+            /**
+             * Returns the parent ImageData of this image representation.
+             * \return data
+             */
+            const ImageData* getImageData() const {
+                return data;
+            }
+
+        private:
+            /// Not copy-constructable
+            ScopedRepresentation(const ScopedRepresentation& rhs);
+            /// Not assignable
+            ScopedRepresentation& operator=(const ScopedRepresentation& rhs);
+
+            DataHandle dh;                  ///< DataHandle
+            const ImageData* data;          ///< strongly-typed pointer to data, may be 0
+            const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* representation;        ///< strongly-typed pointer to the image representation, may be 0
+        };
+
+        /**
          * Creates a new strongly typed ImageData object storing the image in the local memory.
          * 
          * \param   parent  Image this representation represents, must not be 0.
@@ -65,6 +135,15 @@ namespace campvis {
          */
         virtual ~GenericImageRepresentationLocal();
 
+
+        /**
+         * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
+         * Returns 0 if conversion was not successful or source representation type is not compatible.
+         * \note    The caller has to take ownership of the returned pointer if not 0.
+         * \param   source  Source image representation for conversion.
+         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
+         */
+        static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tryConvertFrom(const AbstractImageRepresentation* source);
 
         /// \see AbstractImageRepresentation::clone()
         virtual ThisType* clone() const;
@@ -187,6 +266,11 @@ namespace campvis {
     template<typename BASETYPE, size_t NUMCHANNELS>
     campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::~GenericImageRepresentationLocal() {
         delete _data;
+    }
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::tryConvertFrom(const AbstractImageRepresentation* source) {
+        return 0;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
