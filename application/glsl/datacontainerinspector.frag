@@ -41,7 +41,7 @@ uniform bool _is3d;
 uniform int _sliceNumber;
 uniform vec4 _color;
 
-const vec4 checkerboardColor1 = vec4(0.75, 0.75, 0.75, 1.0);
+const vec4 checkerboardColor1 = vec4(0.90, 0.90, 0.90, 1.0);
 const vec4 checkerboardColor2 = vec4(0.50, 0.50, 0.50, 1.0);
 
 void main() {
@@ -55,7 +55,7 @@ void main() {
         }
         else {
             // render the corresponding slice
-            vec3 coord = vec3(ex_TexCoord.xy, _texture3d._sizeRCP.z * _sliceNumber);
+            vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_texture3d._size.z));
             out_Color = getElement3DNormalized(_texture3d, coord);
         }
     }

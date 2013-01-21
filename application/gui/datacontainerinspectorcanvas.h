@@ -106,6 +106,12 @@ namespace campvis {
          */
         virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
 
+        /**
+         * Called on mouse wheel even on this canvas.
+         * \param   e   Mouse event arguments
+         */
+        virtual void wheelEvent(tgt::MouseEvent* e);
+
     private slots:
 
     protected:
@@ -145,6 +151,8 @@ namespace campvis {
         tgt::ivec2 _quadSize;                           ///< size in pixels for each tile in overview
         size_t _selectedTexture;                        ///< index of selected texture for fullscreen view
         bool _renderFullscreen;                         ///< flag whether to render in full screen
+
+        int _currentSlice;                           ///< current slice if rendering a 3D image fullscreen, render MIP if negative
 
     };
 }

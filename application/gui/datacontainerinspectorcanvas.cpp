@@ -52,6 +52,7 @@ namespace campvis {
         , _quadSize(0, 0)
         , _selectedTexture(0)
         , _renderFullscreen(false)
+        , _currentSlice(-1)
     {
 
         makeCurrent();
@@ -228,10 +229,13 @@ namespace campvis {
             _paintShader->setUniform("_texture2d._sizeRCP", tgt::vec2(1.f) / tgt::vec2(texture->getDimensions().xy()));
         }
         else {
+            // clamp current slice to texture size, since this can't be done in event handler:
+            _currentSlice = tgt::clamp(_currentSlice, -1, texture->getDimensions().z);
+
             unit3d.activate();
             texture->bind();
             _paintShader->setUniform("_is3d", true);
-            _paintShader->setUniform("_sliceNumber", -1);
+            _paintShader->setUniform("_sliceNumber", _currentSlice);
             _paintShader->setUniform("_texture3d._size", tgt::vec3(texture->getDimensions()));
             _paintShader->setUniform("_texture3d._sizeRCP", tgt::vec3(1.f) / tgt::vec3(texture->getDimensions()));
         }
@@ -274,8 +278,25 @@ namespace campvis {
             _selectedTexture = (selectedIndex.y * _numTiles.x) + selectedIndex.x;
             _renderFullscreen = true;
         }
-        e->accept();
+        e->ignore();
         invalidate();
+    }
+
+    void DataContainerInspectorCanvas::wheelEvent(tgt::MouseEvent* e) {
+        if (_renderFullscreen) {
+            switch (e->button()) {
+                case tgt::MouseEvent::MOUSE_WHEEL_UP:
+                    ++_currentSlice; // we cant clamp the value here to the number of slices - we do this during rendering
+                    e->ignore();
+                    break;
+                case tgt::MouseEvent::MOUSE_WHEEL_DOWN:
+                    if (_currentSlice >= -1)
+                        --_currentSlice;
+                    e->ignore();
+                    break;
+            }
+            invalidate();
+        }
     }
 
 }

@@ -150,7 +150,7 @@ namespace campvis {
 
         DataHandle dh = tf->getImageHandle();
         if (dh.getData() != 0) {
-            const ImageRepresentationLocal* idl = dynamic_cast<const ImageRepresentationLocal*>(dh.getData());
+            const ImageRepresentationLocal* idl = static_cast<const ImageData*>(dh.getData())->getRepresentation<ImageRepresentationLocal>();
             if (idl != 0) {
                 Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
                 tf->setIntensityDomain(tgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));
