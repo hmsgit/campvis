@@ -43,6 +43,7 @@ namespace campvis {
         , _gvg()
         , _lhh()
         , _usFusion(_effectiveRenderTargetSize)
+        , _usFilter()
         , _wheelHandler(&_usFusion.p_sliceNumber)
         , _tfWindowingHandler(&_usFusion.p_transferFunction)
     {
@@ -51,6 +52,7 @@ namespace campvis {
         addProcessor(&_gvg);
         //addProcessor(&_lhh);
         addProcessor(&_usFusion);
+        addProcessor(&_usFilter);
         addEventHandler(&_wheelHandler);
         addEventHandler(&_tfWindowingHandler);
     }
@@ -66,6 +68,7 @@ namespace campvis {
         _usReader.p_targetImageID.connect(&_usFusion.p_usImageId);
         _usReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
+        _usReader.p_targetImageID.connect(&_usFilter.p_sourceImageID);
 
         _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
         _confidenceReader.p_targetImageID.setValue("confidence.image");
@@ -76,6 +79,9 @@ namespace campvis {
 
         _usFusion.p_targetImageID.setValue("us.fused");
         _usFusion.p_sliceNumber.setValue(0);
+
+        _usFilter.p_targetImageID.setValue("us.filtered");
+        _usFilter.p_filterMode.selectById("gauss");
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));

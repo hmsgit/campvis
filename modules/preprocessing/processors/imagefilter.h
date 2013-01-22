@@ -27,57 +27,54 @@
 // 
 // ================================================================================================
 
-#ifndef ADVANCEDUSVIS_H__
-#define ADVANCEDUSVIS_H__
+#ifndef IMAGEFILTER_H__
+#define IMAGEFILTER_H__
 
-#include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/advancedusvis/processors/advancedusfusion.h"
-#include "modules/preprocessing/processors/gradientvolumegenerator.h"
-#include "modules/preprocessing/processors/lhhistogram.h"
-#include "modules/preprocessing/processors/imagefilter.h"
+#include <string>
+
+#include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
+#include "core/properties/optionproperty.h"
+
+#include "modules/preprocessing/tools/abstractimagefilter.h"
 
 namespace campvis {
-    class AdvancedUsVis : public VisualizationPipeline {
+    /**
+     * Performs different filter operations on images.
+     */
+    class ImageFilter : public AbstractProcessor {
     public:
         /**
-         * Creates a VisualizationPipeline.
-         */
-        AdvancedUsVis();
+         * Constructs a new ImageFilter Processor
+         **/
+        ImageFilter();
 
         /**
-         * Virtual Destructor
+         * Destructor
          **/
-        virtual ~AdvancedUsVis();
+        virtual ~ImageFilter();
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "ImageFilter"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Creates the gradient volume for the given intensity volume."; };
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual void process(DataContainer& data);
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
+        DataNameProperty p_sourceImageID;   ///< ID for input volume
+        DataNameProperty p_targetImageID;   ///< ID for output gradient volume
 
-        virtual void keyEvent(tgt::KeyEvent* e);
+        GenericOptionProperty<std::string> p_filterMode;    ///< Filter mode
+        IntProperty p_kernelSize;
+        FloatProperty p_sigma;
 
     protected:
-        MhdImageReader _usReader;
-        MhdImageReader _confidenceReader;
-        GradientVolumeGenerator _gvg;
-        LHHistogram _lhh;
-        AdvancedUsFusion _usFusion;
-        ImageFilter _usFilter;
 
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-        TransFuncWindowingEventHandler _tfWindowingHandler;
-
+        static const std::string loggerCat_;
     };
+
 }
 
-#endif // ADVANCEDUSVIS_H__
+#endif // IMAGEFILTER_H__

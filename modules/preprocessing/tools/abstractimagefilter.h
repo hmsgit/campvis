@@ -27,57 +27,60 @@
 // 
 // ================================================================================================
 
-#ifndef ADVANCEDUSVIS_H__
-#define ADVANCEDUSVIS_H__
+#ifndef ABSTRACTIMAGEFILTER_H__
+#define ABSTRACTIMAGEFILTER_H__
 
-#include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/advancedusvis/processors/advancedusfusion.h"
-#include "modules/preprocessing/processors/gradientvolumegenerator.h"
-#include "modules/preprocessing/processors/lhhistogram.h"
-#include "modules/preprocessing/processors/imagefilter.h"
+#include "tbb/include/tbb/tbb.h"
+#include "tgt/assert.h"
+
+#include <vector>
 
 namespace campvis {
-    class AdvancedUsVis : public VisualizationPipeline {
-    public:
-        /**
-         * Creates a VisualizationPipeline.
-         */
-        AdvancedUsVis();
+    class ImageRepresentationLocal;
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~AdvancedUsVis();
+    struct AbstractImageFilter {
+        AbstractImageFilter(const ImageRepresentationLocal* input, ImageRepresentationLocal* output)
+            : _input(input)
+            , _output(output)
+        {
+            tgtAssert(input != 0, "Input image must not be 0.");
+            tgtAssert(output != 0, "Output image must not be 0.");
+        }
 
-        /// \see VisualizationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
-
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
-
-        virtual void keyEvent(tgt::KeyEvent* e);
+        virtual void operator() (const tbb::blocked_range<size_t>& range) const = 0;
 
     protected:
-        MhdImageReader _usReader;
-        MhdImageReader _confidenceReader;
-        GradientVolumeGenerator _gvg;
-        LHHistogram _lhh;
-        AdvancedUsFusion _usFusion;
-        ImageFilter _usFilter;
+        const ImageRepresentationLocal* _input;
+        ImageRepresentationLocal* _output;
+    };
 
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-        TransFuncWindowingEventHandler _tfWindowingHandler;
+// ================================================================================================
 
+    struct ImageFilterMedian : public AbstractImageFilter {
+    public:
+        ImageFilterMedian(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize);
+
+        void operator() (const tbb::blocked_range<size_t>& range) const;
+
+    protected:
+        size_t _kernelSize;
+    };
+
+// ================================================================================================
+
+    struct ImageFilterGauss : public AbstractImageFilter {
+    public:
+        ImageFilterGauss(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize, float sigma);
+
+        void operator() (const tbb::blocked_range<size_t>& range) const;
+
+    protected:
+        size_t _kernelSize;
+        size_t _halfKernelSize;
+        float _sigma;
+        std::vector<float> _kernel;
+        float _norm;
     };
 }
 
-#endif // ADVANCEDUSVIS_H__
+#endif // ABSTRACTIMAGEFILTER_H__

@@ -86,7 +86,7 @@ void initGaussKernel() {
 float applyDepthGaussFilter(in vec2 texCoord) {
     float result = 0.0;
     for (int i = -_halfKernelDimension; i <= _halfKernelDimension; ++i) {
-        // TODO: why the fuck dose abs(i) not work here?!?
+        // TODO: why the fuck does abs(i) not work here?!?
         int absi = (i < 0) ? -i : i;
         float curDepth = getElement2DNormalized(_depthPass2Texture, texCoord + (_direction * _viewportSizeRCP * i)).z;
         result += curDepth * _gaussKernel[absi];
