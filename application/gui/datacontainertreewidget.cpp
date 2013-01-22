@@ -36,6 +36,8 @@
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/abstractdata.h"
+#include "core/datastructures/facegeometry.h"
+#include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
@@ -91,17 +93,14 @@ namespace campvis {
             else if (column == COLUMN_TYPE) {
                 const AbstractData* data = _dataHandle.getData();
                 tgtAssert(data != 0, "WTF - QtDataHandle with empty data?");
-                if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(data)) {
-                	return QVariant(QString("ImageData on disk"));
+                if (const ImageData* tester = dynamic_cast<const ImageData*>(data)) {
+                	return QVariant(QString("Image Data"));
                 }
-                else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(data)) {
-                	return QVariant(QString("ImageData in local memory"));
+                else if (const FaceGeometry* tester = dynamic_cast<const FaceGeometry*>(data)) {
+                	return QVariant(QString("Face Geometry"));
                 }
-                else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(data)) {
-                    return QVariant(QString("ImageData in OpenGL texture."));
-                }
-                else if (const ImageRepresentationRenderTarget* tester = dynamic_cast<const ImageRepresentationRenderTarget*>(data)) {
-                    return QVariant(QString("RenderTarget"));
+                else if (const MeshGeometry* tester = dynamic_cast<const MeshGeometry*>(data)) {
+                    return QVariant(QString("Mesh Geometry"));
                 }
             }
             else
