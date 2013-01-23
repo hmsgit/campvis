@@ -227,9 +227,8 @@ namespace campvis {
         if (performConversion) {
             // no representation found, create a new one
             for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
-                const T* tester = T::tryConvertFrom(*it);// ImageRepresentationConverter::tryConvert<T>(*it);
+                const T* tester = T::tryConvertFrom(*it);
                 if (tester != 0) {
-                    _representations.push_back(tester);
                     return tester;
                 }
             }

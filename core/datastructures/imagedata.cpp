@@ -123,8 +123,6 @@ namespace campvis {
         // create sub-image of every image representation
         for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
             AbstractImageRepresentation* si = (*it)->getSubImage(toReturn, llf, urb);
-            if (si != 0)
-                toReturn->_representations.push_back(si);
         }
 
         return toReturn;
