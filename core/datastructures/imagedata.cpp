@@ -151,5 +151,15 @@ namespace campvis {
         _representations.clear();
     }
 
+    void ImageData::addRepresentation(const AbstractImageRepresentation* representation) {
+        tgtAssert(representation != 0, "Representation must not be 0.");
+        _representations.push_back(representation);
+    }
+
+    void ImageData::setInitialRepresentation(const AbstractImageRepresentation* representation) {
+        clearRepresentations();
+        addRepresentation(representation);
+    }
+
 
 }

@@ -33,10 +33,11 @@
 namespace campvis {
     const std::string AbstractImageRepresentation::loggerCat_ = "CAMPVis.core.datastructures.AbstractImageRepresentation";
 
-    AbstractImageRepresentation::AbstractImageRepresentation(const ImageData* parent)
+    AbstractImageRepresentation::AbstractImageRepresentation(ImageData* parent)
         : _parent(parent)
     {
         tgtAssert(parent != 0, "Parent ImageData must not be 0!");
+        parent->addRepresentation(this);
     }
 
     AbstractImageRepresentation::~AbstractImageRepresentation() {

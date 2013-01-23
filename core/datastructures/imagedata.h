@@ -49,6 +49,9 @@ namespace campvis {
      * \todo 
      */
     class ImageData : public AbstractData {
+    // friend so that it can add itself as representation
+    friend class AbstractImageRepresentation;
+
     public:
         /**
          * Creates a new ImageData instance with the given parameters.
@@ -160,14 +163,6 @@ namespace campvis {
         tgt::svec3 indexToPosition(size_t index) const;
 
         /**
-         * Sets the initial representation of this ImageData.
-         * \note    Removes and deletes all existing representations.
-         * \param   representation  Initial representation of this image.
-         */
-        template<typename T>
-        void setInitialRepresentation(const T* representation);
-
-        /**
          * Returns a representation of this image of type \a T.
          * Looks, whether such a representations already exists, if not and \a performConversion is 
          * set, the method tries to create T::tryConvertFrom(). Returns 0 on failure.
@@ -182,6 +177,20 @@ namespace campvis {
         const T* getRepresentation(bool performConversion = true) const;
 
     protected:
+        /**
+         * Adds the given representation to the list of representations.
+         * \note    Since this is non-publich method, no sanity checks are performed!
+         * \param   representation  representation to add, must not be 0.
+         */
+        void addRepresentation(const AbstractImageRepresentation* representation);
+
+        /**
+         * Sets the initial representation of this ImageData.
+         * \note    Removes and deletes all existing representations.
+         * \param   representation  Initial representation of this image.
+         */
+        void setInitialRepresentation(const AbstractImageRepresentation* representation);
+
         /**
          * Clears all representations from the vector and frees the memory.
          * \note    Make sure to call this method only when nobody else holds pointers to the
@@ -203,12 +212,6 @@ namespace campvis {
 
 
 // = Template definition ==========================================================================
-
-    template<typename T>
-    void campvis::ImageData::setInitialRepresentation(const T* representation) {
-        clearRepresentations();
-        _representations.push_back(representation);
-    }
 
     template<typename T>
     const T* campvis::ImageData::getRepresentation(bool performConversion /*= true*/) const {

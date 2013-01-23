@@ -107,7 +107,6 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 4>* output = new GenericImageRepresentationLocal<float, 4>(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), ApplyCentralDifferences(input, output));
 
-            id->setInitialRepresentation(output);
             data.addData(p_targetImageID.getValue(), id);
             p_targetImageID.issueWrite();
         }

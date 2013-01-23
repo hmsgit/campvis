@@ -70,7 +70,7 @@ namespace campvis {
 
         if (input != 0 && input->getParent()->getNumChannels() == 1) {
             ImageData* id = new ImageData(input->getDimensionality(), input->getSize(), 1);
-            ImageRepresentationLocal* output = input->clone();
+            ImageRepresentationLocal* output = input->clone(id);
 
             if (p_filterMode.getOptionValue() == "median") {
                 tbb::parallel_for(
@@ -83,7 +83,6 @@ namespace campvis {
                     ImageFilterGauss(input, output, p_kernelSize.getValue(), p_sigma.getValue()));
             }
 
-            id->setInitialRepresentation(output);
             data.addData(p_targetImageID.getValue(), id);
             p_targetImageID.issueWrite();
         }

@@ -78,14 +78,14 @@ namespace campvis {
          * \param   internalFormatColor   Internal OpenGL format for the color texture.
          * \param   internalFormatDepth   Internal OpenGL format for the depth texture.
          */
-        ImageRepresentationRenderTarget(const ImageData* parent, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
+        ImageRepresentationRenderTarget(ImageData* parent, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
 
         /**
          * Creates a new ImageRepresentationRenderTarget from one color texture and one optional depth texture.
          * \param   colorTexture    Color texture, must not be 0
          * \param   depthTexture    Depth texture, optional, must have valid internal format and same dimensions as \a colorTexture
          */
-        ImageRepresentationRenderTarget(const ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture = 0);
+        ImageRepresentationRenderTarget(ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture = 0);
 
         /**
          * Destructor
@@ -102,7 +102,7 @@ namespace campvis {
         static ImageRepresentationRenderTarget* tryConvertFrom(const AbstractImageRepresentation* source);
 
         /// \see AbstractImageRepresentation::clone()
-        virtual ImageRepresentationRenderTarget* clone() const;
+        virtual ImageRepresentationRenderTarget* clone(ImageData* newParent) const;
 
         /// \see AbstractImageRepresentation::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
@@ -111,7 +111,7 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
         /// \see AbstractImageRepresentation::getSubImage
-        virtual ImageRepresentationRenderTarget* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ImageRepresentationRenderTarget* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
          * Creates and initializes a new OpenGL texture according to \a internalFormat and attaches it to the FBO.

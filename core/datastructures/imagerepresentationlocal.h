@@ -56,7 +56,7 @@ namespace campvis {
          * \param   size            Size of this image (number of elements per dimension)
          * \param   baseType        Base type of the image data.
          */
-        ImageRepresentationLocal(const ImageData* parent, WeaklyTypedPointer::BaseType baseType);
+        ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType);
 
         /**
          * Destructor
@@ -73,10 +73,10 @@ namespace campvis {
         static ImageRepresentationLocal* tryConvertFrom(const AbstractImageRepresentation* source);
 
         /// \see AbstractData::clone()
-        virtual ImageRepresentationLocal* clone() const = 0;
+        virtual ImageRepresentationLocal* clone(ImageData* newParent) const = 0;
 
         /// \see ImageData::getSubImage()
-        virtual ImageRepresentationLocal* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
+        virtual ImageRepresentationLocal* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
         /**
          * Returns a WeaklyTypedPointer to the image data.

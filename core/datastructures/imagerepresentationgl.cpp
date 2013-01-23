@@ -42,14 +42,14 @@ namespace campvis {
 
     const std::string ImageRepresentationGL::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationGL";
 
-    ImageRepresentationGL::ImageRepresentationGL(const ImageData* parent, tgt::Texture* texture)
+    ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, tgt::Texture* texture)
         : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
         , _texture(texture)
     {
         tgtAssert(texture != 0, "Given texture must not be 0.");
     }
 
-    ImageRepresentationGL::ImageRepresentationGL(const ImageData* parent, const WeaklyTypedPointer& wtp) 
+    ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp) 
         : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
     {
         createTexture(wtp);
@@ -66,27 +66,27 @@ namespace campvis {
         // test source image type via dynamic cast
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
             WeaklyTypedPointer wtp = tester->getImageData();
-            ImageRepresentationGL* toReturn = new ImageRepresentationGL(tester->getParent(), wtp);
+            ImageRepresentationGL* toReturn = new ImageRepresentationGL(const_cast<ImageData*>(tester->getParent()), wtp);
             delete wtp._pointer;
             return toReturn;
         }
         else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
-            ImageRepresentationGL* toReturn = new ImageRepresentationGL(tester->getParent(), tester->getWeaklyTypedPointer());
+            ImageRepresentationGL* toReturn = new ImageRepresentationGL(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
 
         return 0;
     }
 
-    ImageRepresentationGL* ImageRepresentationGL::clone() const {
+    ImageRepresentationGL* ImageRepresentationGL::clone(ImageData* newParent) const {
         GLubyte* data = _texture->downloadTextureToBuffer();
         WeaklyTypedPointer wtp(WeaklyTypedPointer::baseType(_texture->getDataType()), WeaklyTypedPointer::numChannels(_texture->getFormat()), data);
-        ImageRepresentationGL* toReturn = new ImageRepresentationGL(_parent, wtp);
+        ImageRepresentationGL* toReturn = new ImageRepresentationGL(newParent, wtp);
         delete data;
         return toReturn;
     }
 
-    ImageRepresentationGL* ImageRepresentationGL::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
+    ImageRepresentationGL* ImageRepresentationGL::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         // TODO: implement
         //LWARNING("ImageRepresentationGL::getSubImage() not implemented!");
         return 0;

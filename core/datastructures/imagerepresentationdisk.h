@@ -55,7 +55,7 @@ namespace campvis {
          * \param stride            Number of _elemments_ _between_ adjacent elements for each dimension (\see ImageRepresentationDisk::_stride).
          */
         ImageRepresentationDisk(
-            const ImageData* parent,
+            ImageData* parent,
             const std::string& url,
             WeaklyTypedPointer::BaseType type,
             size_t offset = 0,
@@ -77,8 +77,8 @@ namespace campvis {
          */
         static ImageRepresentationDisk* tryConvertFrom(const AbstractImageRepresentation* source);
 
-        //\see AbstractImageRepresentation::clone()
-        virtual ImageRepresentationDisk* clone() const;
+        /// \see AbstractImageRepresentation::clone()
+        virtual ImageRepresentationDisk* clone(ImageData* newParent) const;
 
         /// \see AbstractImageRepresentation::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
@@ -87,7 +87,7 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
         /// \see AbstractImageRepresentation::getSubImage
-        virtual ImageRepresentationDisk* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ImageRepresentationDisk* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
 
         /**

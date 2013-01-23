@@ -45,11 +45,10 @@ namespace campvis {
     std::pair<ImageData*, ImageRepresentationRenderTarget*> ImageRepresentationRenderTarget::createWithImageData(const tgt::svec2& size, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/) {
         ImageData* id = new ImageData(2, tgt::svec3(size, 1), 4);
         ImageRepresentationRenderTarget* toReturn = new ImageRepresentationRenderTarget(id, internalFormatColor, internalFormatDepth);
-        id->setInitialRepresentation(toReturn);
         return std::make_pair(id, toReturn);
     }
 
-    ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(const ImageData* parent, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/)
+    ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(ImageData* parent, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/)
         : GenericAbstractImageRepresentation<ImageRepresentationRenderTarget>(parent)
         , _colorTextures(0)
         , _depthTexture(0)
@@ -75,7 +74,7 @@ namespace campvis {
         tgtAssert(_fbo != 0, "Framebuffer object is 0, something went terribly wrong...");
     }
 
-    ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(const ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture /* = 0 */)
+    ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture /* = 0 */)
         : GenericAbstractImageRepresentation<ImageRepresentationRenderTarget>(parent)
         , _colorTextures(0)
         , _depthTexture(0)
@@ -168,12 +167,12 @@ namespace campvis {
         shader->setIgnoreUniformLocationError(tmp);
     }
 
-    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::clone() const {
+    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::clone(ImageData* newParent) const {
         tgtAssert(false, "To be implemented!");
         return 0;
     }
 
-    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
+    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         tgtAssert(false, "To be implemented!");
         return 0;
     }

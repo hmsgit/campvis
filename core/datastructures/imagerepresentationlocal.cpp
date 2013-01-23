@@ -96,7 +96,7 @@ namespace campvis {
 
     const std::string ImageRepresentationLocal::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationLocal";
 
-    ImageRepresentationLocal::ImageRepresentationLocal(const ImageData* parent, WeaklyTypedPointer::BaseType baseType)
+    ImageRepresentationLocal::ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType)
         : GenericAbstractImageRepresentation<ImageRepresentationLocal>(parent)
         , _baseType(baseType)
         , _intensityHistogram(0)
@@ -155,7 +155,7 @@ namespace campvis {
 
 #define CONVERT_TO_GENERIC_LOCAL(baseType,numChannels) \
         return new GenericImageRepresentationLocal<baseType, numChannels>( \
-            source->getParent(), \
+            const_cast<ImageData*>(source->getParent()), \
             reinterpret_cast< TypeTraits<baseType, numChannels>::ElementType*>(wtp._pointer));
 
 #define DISPATCH_CONVERSION(numChannels) \

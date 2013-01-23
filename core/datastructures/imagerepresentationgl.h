@@ -56,7 +56,7 @@ namespace campvis {
          * \param   parent      Image this representation represents, must not be 0.
          * \param   texture     OpenGL texture to use, must not be 0, ImageRepresentationGL will take ownership of this texture.
          */
-        ImageRepresentationGL(const ImageData* parent, tgt::Texture* texture);
+        ImageRepresentationGL(ImageData* parent, tgt::Texture* texture);
 
         /**
          * Creates a new ImageRepresentationGL representation.
@@ -64,7 +64,7 @@ namespace campvis {
          * \param   parent  Image this representation represents, must not be 0.
          * \param   wtp     WeaklyTypedPointer to the image data, must not be 0, ImageRepresentationGL does \b not take ownership of that pointer.
          */
-        ImageRepresentationGL(const ImageData* parent, const WeaklyTypedPointer& wtp);
+        ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp);
 
         /**
          * Creates a new ImageRepresentationGL representation from GenericImageRepresentationLocal.
@@ -75,7 +75,7 @@ namespace campvis {
          * \tparam  NUMCHANNELS     Number of channels per element
          */
         template<typename BASETYPE, size_t NUMCHANNELS>
-        ImageRepresentationGL(const ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data);
+        ImageRepresentationGL(ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data);
 
         /**
          * Destructor
@@ -95,7 +95,7 @@ namespace campvis {
         /**
          * \see AbstractImageRepresentation::clone()
          **/
-        virtual ImageRepresentationGL* clone() const;
+        virtual ImageRepresentationGL* clone(ImageData* newParent) const;
 
         /// \see AbstractImageRepresentation::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
@@ -106,7 +106,7 @@ namespace campvis {
         /**
          * \see AbstractImageRepresentation::getSubImage
          */
-        virtual ImageRepresentationGL* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ImageRepresentationGL* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
 
         /**
@@ -164,7 +164,7 @@ namespace campvis {
 // = Template definition ==========================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    campvis::ImageRepresentationGL::ImageRepresentationGL(const ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data) 
+    campvis::ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data) 
         : AbstractImageRepresentation(parent)
     {
         createTexture<BASETYPE, NUMCHANNELS>(data);

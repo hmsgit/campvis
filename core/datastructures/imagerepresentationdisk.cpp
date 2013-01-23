@@ -35,7 +35,7 @@
 namespace campvis {
     const std::string ImageRepresentationDisk::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationDisk";
 
-    ImageRepresentationDisk::ImageRepresentationDisk(const ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
+    ImageRepresentationDisk::ImageRepresentationDisk(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
         : GenericAbstractImageRepresentation<ImageRepresentationDisk>(parent)
         , _url(url)
         , _offset(offset)
@@ -48,14 +48,14 @@ namespace campvis {
     ImageRepresentationDisk::~ImageRepresentationDisk() {
     }
 
-    ImageRepresentationDisk* ImageRepresentationDisk::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
+    ImageRepresentationDisk* ImageRepresentationDisk::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
         const tgt::svec3& size = getSize();
         tgt::svec3 newSize = urb - llf;
         if (newSize == size) {
             // nothing has changed, just provide a copy:
-            return clone();
+            return clone(parent);
         }
 
         size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _parent->getNumChannels()) * (llf.x + llf.y * size.y + llf.z * size.x * size.y);
@@ -194,8 +194,8 @@ namespace campvis {
         return tgt::svec3(0, size.x, size.x * size.y);
     }
 
-    ImageRepresentationDisk* ImageRepresentationDisk::clone() const {
-        return new ImageRepresentationDisk(_parent, _url, _type, _offset, _endianess, _stride);
+    ImageRepresentationDisk* ImageRepresentationDisk::clone(ImageData* newParent) const {
+        return new ImageRepresentationDisk(newParent, _url, _type, _offset, _endianess, _stride);
     }
 
     size_t ImageRepresentationDisk::getLocalMemoryFootprint() const {

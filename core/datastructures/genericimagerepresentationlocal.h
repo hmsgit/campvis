@@ -128,7 +128,7 @@ namespace campvis {
          * \param   parent  Image this representation represents, must not be 0.
          * \param   data    Pointer to the image data, must not be 0, GenericImageRepresentationLocal takes ownership of this pointer!
          */
-        GenericImageRepresentationLocal(const ImageData* parent, ElementType* data);
+        GenericImageRepresentationLocal(ImageData* parent, ElementType* data);
 
         /**
          * Destructor
@@ -146,7 +146,7 @@ namespace campvis {
         static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tryConvertFrom(const AbstractImageRepresentation* source);
 
         /// \see AbstractImageRepresentation::clone()
-        virtual ThisType* clone() const;
+        virtual ThisType* clone(ImageData* newParent) const;
 
         /// \see AbstractImageRepresentation::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
@@ -155,7 +155,7 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
         /// \see AbstractImageRepresentation::getSubImage
-        virtual ThisType* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
+        virtual ThisType* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
          * Returns a WeaklyTypedPointer to the image data.
@@ -251,7 +251,7 @@ namespace campvis {
 // = Template implementation ======================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::GenericImageRepresentationLocal(const ImageData* parent, ElementType* data)
+    campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::GenericImageRepresentationLocal(ImageData* parent, ElementType* data)
         : ImageRepresentationLocal(parent, TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType)
         , _data(data)
     {
@@ -274,12 +274,12 @@ namespace campvis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::clone() const {
+    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::clone(ImageData* newParent) const {
         size_t numElements = getNumElements();
         ElementType* newData = new ElementType[numElements];
         memcpy(newData, _data, numElements * sizeof(ElementType));
 
-        return new ThisType(_parent, newData);
+        return new ThisType(newParent, newData);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
@@ -293,14 +293,14 @@ namespace campvis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
+    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
         tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
 
         const tgt::svec3& size = getSize();
         tgt::svec3 newSize = urb - llf;
         if (newSize == size) {
             // nothing has changed, just provide a copy:
-            return clone();
+            return clone(parent);
         }
 
         tgt::bvec3 tmp(tgt::greaterThan(newSize, tgt::svec3(1)));

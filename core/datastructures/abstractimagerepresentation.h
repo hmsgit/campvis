@@ -49,7 +49,7 @@ namespace campvis {
          * Creates a new abstract representation for the image \a parent.
          * \param   parent  Image this representation represents, must not be 0.
          */
-        AbstractImageRepresentation(const ImageData* parent);
+        AbstractImageRepresentation(ImageData* parent);
 
         /**
          * Virtual Destructor.
@@ -82,9 +82,10 @@ namespace campvis {
 
         /**
          * Prototype - clone method, some people call this virtual constructor...
+         * \param   newParent   Parent image of the cloned object.
          * \return  A copy of this object.
          */
-        virtual AbstractImageRepresentation* clone() const = 0;
+        virtual AbstractImageRepresentation* clone(ImageData* newParent) const = 0;
         
         /**
          * Returns the local memory footprint of the data in bytes.
@@ -102,11 +103,12 @@ namespace campvis {
          * Returns the subimage representation of this representation given by \a llf and \a urb.
          * TODO: Check whether it is necessary to adjust image mapping!
          *
+         * \param   parent  Parent image of the newly created subimage
          * \param   llf     Lower-Left-Front coordinates of subimage
          * \param   urb     Upper-Right-Back coordinates of subimage
          * \return  An image representation containing the subimage of this with the given coordinates.
          */
-        virtual AbstractImageRepresentation* getSubImage(const ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
+        virtual AbstractImageRepresentation* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
     protected:
 
