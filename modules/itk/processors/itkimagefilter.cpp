@@ -34,7 +34,8 @@
 
 #include "modules/itk/core/genericimagerepresentationitk.h"
 #include <itkMedianImageFilter.h>
-
+#include <itkDiscreteGaussianImageFilter.h>
+#include <itkSobelEdgeDetectionImageFilter.h>
 
 #include "tbb/include/tbb/tbb.h"
 
@@ -94,8 +95,34 @@ namespace campvis {
                 }
             }
             else if (p_filterMode.getOptionValue() == "gauss") {
+                GenericImageRepresentationItk<uint8_t, 1, 3>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue());
+                if (itkRep != 0) {
+                    typedef GenericImageRepresentationItk<uint8_t, 1, 3>::ItkImageType ImageType;
+                    itk::DiscreteGaussianImageFilter<ImageType, ImageType>::Pointer filter = itk::DiscreteGaussianImageFilter<ImageType, ImageType>::New();
+
+                    filter->SetUseImageSpacing(false);
+                    filter->SetVariance(p_sigma.getValue());
+
+                    filter->SetInput(itkRep->getItkImage());
+                    filter->Update();
+
+                    new GenericImageRepresentationItk<uint8_t, 1, 3>(id, filter->GetOutput());
+                    id->getRepresentation<ImageRepresentationLocal>();
+                }
             }
             else if (p_filterMode.getOptionValue() == "sobel") {
+                GenericImageRepresentationItk<uint8_t, 1, 3>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue());
+                if (itkRep != 0) {
+                    typedef GenericImageRepresentationItk<uint8_t, 1, 3>::ItkImageType InputImageType;
+                    typedef GenericImageRepresentationItk<float, 1, 3>::ItkImageType OutputImageType;
+                    itk::SobelEdgeDetectionImageFilter<InputImageType, OutputImageType>::Pointer filter = itk::SobelEdgeDetectionImageFilter<InputImageType, OutputImageType>::New();
+
+                    filter->SetInput(itkRep->getItkImage());
+                    filter->Update();
+
+                    new GenericImageRepresentationItk<float, 1, 3>(id, filter->GetOutput());
+                    id->getRepresentation<ImageRepresentationLocal>();
+                }
             }
 
             data.addData(p_targetImageID.getValue(), id);

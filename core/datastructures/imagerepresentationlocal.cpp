@@ -127,8 +127,8 @@ namespace campvis {
         // what source could be. Thank god, there exists macro magic to create the 56
         // different templated conversion codes.
 #define CONVERT_ITK_TO_GENERIC_LOCAL(basetype, numchannels, dimensionality) \
-        if (const GenericImageRepresentationItk<uint8_t, 1, 3>* tester = dynamic_cast< const GenericImageRepresentationItk<uint8_t, 1, 3>* >(source)) { \
-            typedef GenericImageRepresentationItk<uint8_t, 1, 3>::ItkImageType ImageType; \
+        if (const GenericImageRepresentationItk<basetype, 1, 3>* tester = dynamic_cast< const GenericImageRepresentationItk<basetype, 1, 3>* >(source)) { \
+            typedef GenericImageRepresentationItk<basetype, 1, 3>::ItkImageType ImageType; \
             typedef ImageType::PixelType PixelType; \
             const PixelType* pixelData = tester->getItkImage()->GetBufferPointer(); \
             \
@@ -139,7 +139,7 @@ namespace campvis {
             tgt::svec3 size(s[0], s[1], s[2]); \
             \
             PixelType* pixelDataCopy = new PixelType[tgt::hmul(size)]; \
-            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<uint8_t, 1>::elementSize); \
+            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<basetype, 1>::elementSize); \
             return new GenericImageRepresentationLocal<PixelType, 1>(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
         }
 

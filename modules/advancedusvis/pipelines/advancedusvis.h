@@ -38,7 +38,7 @@
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
-#include "modules/preprocessing/processors/imagefilter.h"
+#include "modules/itk/processors/itkimagefilter.h"
 
 namespace campvis {
     class AdvancedUsVis : public VisualizationPipeline {
@@ -72,7 +72,7 @@ namespace campvis {
         GradientVolumeGenerator _gvg;
         LHHistogram _lhh;
         AdvancedUsFusion _usFusion;
-        ImageFilter _usFilter;
+        ItkImageFilter _usFilter;
 
         MWheelToNumericPropertyEventHandler _wheelHandler;
         TransFuncWindowingEventHandler _tfWindowingHandler;
