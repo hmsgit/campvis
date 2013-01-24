@@ -72,8 +72,9 @@ namespace campvis {
         }
     }
 
-// ================================================================================================
 
+// ================================================================================================
+    
     ImageFilterGauss::ImageFilterGauss(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize, float sigma)
         : AbstractImageFilter(input, output)
         , _kernelSize(kernelSize)
@@ -105,32 +106,47 @@ namespace campvis {
             tgt::svec3 npos = position;
             float sum = 0.f;
 
+            // The gauss convolution filter is separable so it is sufficient to perform
+            // three 1D convolutions - one for each axis.
+
             size_t zmin = position.z >= halfKernelDim ? position.z - halfKernelDim : 0;
             size_t zmax = std::min(position.z+halfKernelDim, size.z-1);
             for (npos.z = zmin; npos.z <= zmax; npos.z++) {
                 int i = abs(static_cast<int>(position.z) - static_cast<int>(npos.z));
                 sum += _input->getElementNormalized(npos, 0) * _kernel[i];
             }
+            sum /= _norm;
+            _output->setElementNormalized(index, 0, sum);
             npos.z = position.z;
+            sum = 0.f;
+
+            // FIXME: barrier sync needed!
 
             size_t ymin = position.y >= halfKernelDim ? position.y - halfKernelDim : 0;
             size_t ymax = std::min(position.y+halfKernelDim, size.y-1);
             for (npos.y=ymin; npos.y<=ymax; npos.y++) {
                 int i = abs(static_cast<int>(position.y) - static_cast<int>(npos.y));
-                sum += _input->getElementNormalized(npos, 0) * _kernel[i];
+                sum += _output->getElementNormalized(npos, 0) * _kernel[i];
             }
+            sum /= _norm;
+            _output->setElementNormalized(index, 0, sum);
             npos.y = position.y;
+            sum = 0.f;
+
+            // FIXME: barrier sync needed!
 
             size_t xmin = position.x >= halfKernelDim ? position.x - halfKernelDim : 0;
             size_t xmax = std::min(position.x+halfKernelDim, size.x-1);
             for (npos.x=xmin; npos.x<=xmax; npos.x++) {
                 int i = abs(static_cast<int>(position.x) - static_cast<int>(npos.x));
-                sum += _input->getElementNormalized(npos, 0) * _kernel[i];
+                sum += _output->getElementNormalized(npos, 0) * _kernel[i];
             }
-
-            sum /= 3.f * _norm;
+            sum /= _norm;
             _output->setElementNormalized(index, 0, sum);
+
         }
     }
+
+
 
 }

@@ -34,6 +34,10 @@
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
+#ifdef CAMPVIS_HAS_MODULE_ITK
+#include "modules/itk/core/genericimagerepresentationitk.h"
+#endif
+
 #include <limits>
 
 namespace campvis {
@@ -117,6 +121,49 @@ namespace campvis {
             return convertToGenericLocal(tester);
         }
 
+#ifdef CAMPVIS_HAS_MODULE_ITK
+        // There is no way to determine basetype, number of channels and dimensionality of
+        // an ITK image at runtime. So there are currently 7*4*2 = 56 different possibilities
+        // what source could be. Thank god, there exists macro magic to create the 56
+        // different templated conversion codes.
+#define CONVERT_ITK_TO_GENERIC_LOCAL(basetype, numchannels, dimensionality) \
+        if (const GenericImageRepresentationItk<uint8_t, 1, 3>* tester = dynamic_cast< const GenericImageRepresentationItk<uint8_t, 1, 3>* >(source)) { \
+            typedef GenericImageRepresentationItk<uint8_t, 1, 3>::ItkImageType ImageType; \
+            typedef ImageType::PixelType PixelType; \
+            const PixelType* pixelData = tester->getItkImage()->GetBufferPointer(); \
+            \
+            ImageType::RegionType region; \
+            region = tester->getItkImage()->GetBufferedRegion(); \
+            \
+            ImageType::SizeType s = region.GetSize(); \
+            tgt::svec3 size(s[0], s[1], s[2]); \
+            \
+            PixelType* pixelDataCopy = new PixelType[tgt::hmul(size)]; \
+            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<uint8_t, 1>::elementSize); \
+            return new GenericImageRepresentationLocal<PixelType, 1>(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
+        }
+
+#define DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(numchannels, dimensionality) \
+    CONVERT_ITK_TO_GENERIC_LOCAL(uint8_t, numchannels, dimensionality) \
+    else CONVERT_ITK_TO_GENERIC_LOCAL(int8_t, numchannels, dimensionality) \
+    else CONVERT_ITK_TO_GENERIC_LOCAL(uint16_t, numchannels, dimensionality) \
+    else CONVERT_ITK_TO_GENERIC_LOCAL(int16_t, numchannels, dimensionality) \
+    else CONVERT_ITK_TO_GENERIC_LOCAL(uint32_t, numchannels, dimensionality) \
+    else CONVERT_ITK_TO_GENERIC_LOCAL(int32_t, numchannels, dimensionality) \
+    else CONVERT_ITK_TO_GENERIC_LOCAL(float, numchannels, dimensionality)
+
+#define DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_D(dimensionality) \
+    DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(1, dimensionality) \
+    else DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(2, dimensionality) \
+    else DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(3, dimensionality) \
+    else DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(4, dimensionality) 
+
+        // okay we've defined our macros. Now we just need to call them so that they call 
+        // each other and create 56 different conversion checks - hooray
+        DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_D(2)
+        else DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_D(3)
+#endif
+
         return 0;
     }
 
@@ -153,38 +200,38 @@ namespace campvis {
     ImageRepresentationLocal* ImageRepresentationLocal::convertToGenericLocal(const ImageRepresentationDisk* source) {
         WeaklyTypedPointer wtp = source->getImageData();
 
-#define CONVERT_TO_GENERIC_LOCAL(baseType,numChannels) \
+#define CONVERT_DISK_TO_GENERIC_LOCAL(baseType,numChannels) \
         return new GenericImageRepresentationLocal<baseType, numChannels>( \
             const_cast<ImageData*>(source->getParent()), \
             reinterpret_cast< TypeTraits<baseType, numChannels>::ElementType*>(wtp._pointer));
 
-#define DISPATCH_CONVERSION(numChannels) \
+#define DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(numChannels) \
         if (source->getParent()->getNumChannels() == (numChannels)) { \
             switch (source->getBaseType()) { \
                 case WeaklyTypedPointer::UINT8: \
-                    CONVERT_TO_GENERIC_LOCAL(uint8_t, (numChannels)) \
+                    CONVERT_DISK_TO_GENERIC_LOCAL(uint8_t, (numChannels)) \
                 case WeaklyTypedPointer::INT8: \
-                    CONVERT_TO_GENERIC_LOCAL(int8_t, (numChannels)) \
+                    CONVERT_DISK_TO_GENERIC_LOCAL(int8_t, (numChannels)) \
                 case WeaklyTypedPointer::UINT16: \
-                    CONVERT_TO_GENERIC_LOCAL(uint16_t, (numChannels)) \
+                    CONVERT_DISK_TO_GENERIC_LOCAL(uint16_t, (numChannels)) \
                 case WeaklyTypedPointer::INT16: \
-                    CONVERT_TO_GENERIC_LOCAL(int16_t, (numChannels)) \
+                    CONVERT_DISK_TO_GENERIC_LOCAL(int16_t, (numChannels)) \
                 case WeaklyTypedPointer::UINT32: \
-                    CONVERT_TO_GENERIC_LOCAL(uint32_t, (numChannels)) \
+                    CONVERT_DISK_TO_GENERIC_LOCAL(uint32_t, (numChannels)) \
                 case WeaklyTypedPointer::INT32: \
-                    CONVERT_TO_GENERIC_LOCAL(int32_t, (numChannels)) \
+                    CONVERT_DISK_TO_GENERIC_LOCAL(int32_t, (numChannels)) \
                 case WeaklyTypedPointer::FLOAT: \
-                    CONVERT_TO_GENERIC_LOCAL(float, (numChannels)) \
+                    CONVERT_DISK_TO_GENERIC_LOCAL(float, (numChannels)) \
                 default: \
                     tgtAssert(false, "Should not reach this - wrong base data type!"); \
                     return 0; \
             } \
         }
 
-        DISPATCH_CONVERSION(1)
-        else DISPATCH_CONVERSION(2)
-        else DISPATCH_CONVERSION(3)
-        else DISPATCH_CONVERSION(4)
+        DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(1)
+        else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(2)
+        else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(3)
+        else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(4)
         else {
             tgtAssert(false, "Should not reach this - wrong number of channel!");
             return 0;

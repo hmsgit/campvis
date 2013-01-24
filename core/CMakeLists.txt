@@ -4,6 +4,7 @@ INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring CAMPVis Core")
 
+# glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     classification/*.cpp
     datastructures/*.cpp
@@ -12,6 +13,14 @@ FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     properties/*.cpp
     tools/*.cpp
 )
+
+# add additional sources from the activated modules
+FOREACH(CampvisModulesCoreSource ${CampvisModulesCoreSources})
+    # adjust relative path
+    SET(ModCoreFile ../modules/${CampvisModulesCoreSource})
+    LIST(APPEND CampvisCoreSources ${ModCoreFile})
+ENDFOREACH()
+
 
 FILE(GLOB CampvisCoreHeaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     classification/*.h
@@ -25,6 +34,13 @@ FILE(GLOB CampvisCoreHeaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     glsl/tools/*.vert
     glsl/tools/*.frag
 )
+
+# add additional sources from the activated modules
+FOREACH(CampvisModulesCoreHeader ${CampvisModulesCoreHeaders})
+    # adjust relative path
+    SET(ModHeaderFile ../modules/${CampvisModulesCoreHeader})
+    LIST(APPEND CampvisCoreHeaders ${ModHeaderFile})
+ENDFOREACH()
 
 #SET(CampvisCoreSources
 #    application/campvis.cpp

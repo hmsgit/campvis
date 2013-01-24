@@ -222,6 +222,11 @@ FOREACH(ModDir ${ModDirs})
             LIST(APPEND CampvisModulesExternalLibs ${ThisModExternalLibs})
             LIST(APPEND CampvisModulesSources ${ThisModSources})
             LIST(APPEND CampvisModulesHeaders ${ThisModHeaders})
+            LIST(APPEND CampvisModulesCoreSources ${ThisModCoreSources})
+            LIST(APPEND CampvisModulesCoreHeaders ${ThisModCoreHeaders})
+            
+            # add definition that this module is activated
+            LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModDirUpper})
             
             # unset module settings to avoid duplicates if module cmake file misses sth.
             UNSET(ThisModDefinitions)
@@ -229,6 +234,8 @@ FOREACH(ModDir ${ModDirs})
             UNSET(ThisModExternalLibs)
             UNSET(ThisModSources)
             UNSET(ThisModHeaders)
+            UNSET(ThisModCoreSources)
+            UNSET(ThisModCoreHeaders)
             
             MESSAGE(STATUS "* Found Module '${ModDir}' . ENABLED")
         ELSE()
