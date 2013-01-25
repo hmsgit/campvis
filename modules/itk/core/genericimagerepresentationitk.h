@@ -243,17 +243,17 @@ namespace campvis {
         }
 
         if (const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tester = dynamic_cast< const GenericImageRepresentationLocal<BASETYPE, 1>* >(source)) {
-            itk::ImportImageFilter<BASETYPE, 3>::Pointer importer = itk::ImportImageFilter<BASETYPE, 3>::New();
+            itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::Pointer importer = itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::New();
 
-            itk::Image<BASETYPE, 3>::SizeType size;
+            itk::Image<BASETYPE, DIMENSIONALITY>::SizeType size;
             size[0] = tester->getSize().x;
             size[1] = tester->getSize().y;
             size[2] = tester->getSize().z;
 
-            itk::Image<BASETYPE, 3>::IndexType start;
+            itk::Image<BASETYPE, DIMENSIONALITY>::IndexType start;
             start.Fill(0);
 
-            itk::Image<BASETYPE, 3>::RegionType region;
+            itk::Image<BASETYPE, DIMENSIONALITY>::RegionType region;
             region.SetSize(size);
             region.SetIndex(start);
             importer->SetRegion(region);
@@ -261,7 +261,7 @@ namespace campvis {
             importer->SetSpacing(tester->getParent()->getMappingInformation().getVoxelSize().elem);
             importer->SetOrigin(tester->getParent()->getMappingInformation().getOffset().elem);
 
-            typedef typename itk::Image<BASETYPE, 3>::PixelType PixelType;
+            typedef typename itk::Image<BASETYPE, DIMENSIONALITY>::PixelType PixelType;
             const PixelType* pixelData = tester->getImageData();
             importer->SetImportPointer(const_cast<PixelType*>(pixelData), tester->getNumElements(), false);
             importer->Update();
@@ -284,7 +284,7 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     size_t campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::getLocalMemoryFootprint() const {
-        // just an approximation, nobody knows it ITK internals...
+        // just an approximation, nobody knows the ITK internals...
         return sizeof(*this) + sizeof(ItkImageType) + getNumElements() * sizeof(ElementType);
     }
 

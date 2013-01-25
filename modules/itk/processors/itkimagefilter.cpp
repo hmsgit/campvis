@@ -42,6 +42,139 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
+// In this class we want to use various ITK filters. Each filter needs the same ITK boilerplate
+// code to be written before and after calling the filter. Futhermore, we need to distinguish 
+// between the different input base types, since ITK doesn't  know runtime type inference.
+// Hence, we define various handy macros that will assemble the necessary C++ code for using the
+// corresponding ITK filters within this processor. Good luck!
+
+/**
+ * Executes the specified filter on the data specified filter.
+ * \param MA_baseType       base type of input image
+ * \param MA_returnType     base type of ouput image
+ * \param MA_numChannels    number of channels of input image
+ * \param MA_dimensionality dimensionality of images
+ * \param MA_filterType     type name if the ITK filter to use (within itk:: namespace)
+ * \param MD_filterBody     additional stuff to execute between filter definition and execution
+ */
+#define PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, MA_numChannels, MA_dimensionality, MA_filterType, MD_filterBody) \
+    { \
+    GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue()); \
+    if (itkRep != 0) { \
+        typedef GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
+        typedef GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
+        itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
+        \
+        MD_filterBody \
+        \
+        filter->SetInput(itkRep->getItkImage()); \
+        filter->Update(); \
+        new GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>(id, filter->GetOutput()); \
+    } \
+    }
+
+#define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+    switch (MA_WTP._numChannels) { \
+        case 1 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
+        case 2 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
+        case 3 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
+        case 4 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
+    }
+
+#define DISPATCH_ITK_FILTER_RD(MA_WTP, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+    switch (MA_WTP._baseType) { \
+        case WeaklyTypedPointer::UINT8: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, uint8_t, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT8: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, int8_t, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::UINT16: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, uint16_t, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT16: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, int16_t, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::UINT32: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, uint32_t, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT32: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, int32_t, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::FLOAT: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, float, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        default: \
+            tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+    } \
+
+#define DISPATCH_ITK_FILTER_D(MA_WTP, MA_dimensionality, MA_filterType, MD_filterBody) \
+    switch (MA_WTP._baseType) { \
+        case WeaklyTypedPointer::UINT8: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, uint8_t, uint8_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT8: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, int8_t, int8_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::UINT16: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, uint16_t, uint16_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT16: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, int16_t, int16_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::UINT32: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, uint32_t, uint32_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT32: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, int32_t, int32_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::FLOAT: \
+            DISPATCH_ITK_FILTER_BRD(MA_WTP, float, float, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        default: \
+            tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+    } \
+
+
+/**
+ * Dispatches the execution for the ITK filter \a MA_filterType with the output base type
+ * of \a MA_returnType for the image \a MA_localRep.
+ * \param MA_localRep       local representation of the image to apply the filter to
+ * \param MA_returnType     base type of ouput image
+ * \param MA_filterType     type name if the ITK filter to use (within itk:: namespace)
+ * \param MD_filterBody     additional stuff to execute between filter definition and execution
+ */
+#define DISPATCH_ITK_FILTER_WITH_EXTRA_RETURN_TYPE(MA_localRep, MA_returnType, MA_filterType, MD_filterBody) \
+    do { \
+        WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
+        switch (MA_localRep->getDimensionality()) { \
+            case 1: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 1, MA_filterType, MD_filterBody) break; \
+            case 2: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 1, MA_filterType, MD_filterBody) break; \
+            case 3: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 1, MA_filterType, MD_filterBody) break; \
+        } \
+    } while (0)
+
+/**
+ * Dispatches the execution for the ITK filter \a MA_filterType for the image \a MA_localRep.
+ * \param MA_localRep       local representation of the image to apply the filter to
+ * \param MA_filterType     type name if the ITK filter to use (within itk:: namespace)
+ * \param MD_filterBody     additional stuff to execute between filter definition and execution
+ */
+#define DISPATCH_ITK_FILTER(MA_localRep, MA_filterType, MD_filterBody) \
+    do { \
+        WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
+        switch (MA_localRep->getDimensionality()) { \
+            case 1: DISPATCH_ITK_FILTER_D(wtp, 1, MA_filterType, MD_filterBody) break; \
+            case 2: DISPATCH_ITK_FILTER_D(wtp, 1, MA_filterType, MD_filterBody) break; \
+            case 3: DISPATCH_ITK_FILTER_D(wtp, 1, MA_filterType, MD_filterBody) break; \
+        } \
+    } while (0)
+
+
+// ================================================================================================
+// = Macros defined, let the party begin!                                                         =
+// ================================================================================================
+
 namespace campvis {
 
     static const GenericOption<std::string> filterModes[3] = {
@@ -71,6 +204,7 @@ namespace campvis {
 
     }
 
+
     void ItkImageFilter::process(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
         
@@ -78,48 +212,20 @@ namespace campvis {
             ImageData* id = new ImageData(input->getDimensionality(), input->getSize(), 1);
 
             if (p_filterMode.getOptionValue() == "median") {
-                GenericImageRepresentationItk<uint8_t, 1, 3>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue());
-                if (itkRep != 0) {
-                    typedef GenericImageRepresentationItk<uint8_t, 1, 3>::ItkImageType ImageType;
-                    itk::MedianImageFilter<ImageType, ImageType>::Pointer filter = itk::MedianImageFilter<ImageType, ImageType>::New();
-
-                    ImageType::SizeType indexRadius;
-                    indexRadius.Fill(1);
-                    filter->SetRadius(indexRadius);
-
-                    filter->SetInput(itkRep->getItkImage());
-                    filter->Update();
-
-                    new GenericImageRepresentationItk<uint8_t, 1, 3>(id, filter->GetOutput());
-                }
+                DISPATCH_ITK_FILTER(input, MedianImageFilter, \
+                    InputImageType::SizeType indexRadius; \
+                    indexRadius.Fill(1); \
+                    filter->SetRadius(indexRadius); \
+                    );
             }
             else if (p_filterMode.getOptionValue() == "gauss") {
-                GenericImageRepresentationItk<uint8_t, 1, 3>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue());
-                if (itkRep != 0) {
-                    typedef GenericImageRepresentationItk<uint8_t, 1, 3>::ItkImageType ImageType;
-                    itk::DiscreteGaussianImageFilter<ImageType, ImageType>::Pointer filter = itk::DiscreteGaussianImageFilter<ImageType, ImageType>::New();
-
-                    filter->SetUseImageSpacing(false);
-                    filter->SetVariance(p_sigma.getValue());
-
-                    filter->SetInput(itkRep->getItkImage());
-                    filter->Update();
-
-                    new GenericImageRepresentationItk<uint8_t, 1, 3>(id, filter->GetOutput());
-                }
+                DISPATCH_ITK_FILTER(input, DiscreteGaussianImageFilter, \
+                    filter->SetUseImageSpacing(false); \
+                    filter->SetVariance(p_sigma.getValue()); \
+                    );
             }
             else if (p_filterMode.getOptionValue() == "sobel") {
-                GenericImageRepresentationItk<uint8_t, 1, 3>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue());
-                if (itkRep != 0) {
-                    typedef GenericImageRepresentationItk<uint8_t, 1, 3>::ItkImageType InputImageType;
-                    typedef GenericImageRepresentationItk<float, 1, 3>::ItkImageType OutputImageType;
-                    itk::SobelEdgeDetectionImageFilter<InputImageType, OutputImageType>::Pointer filter = itk::SobelEdgeDetectionImageFilter<InputImageType, OutputImageType>::New();
-
-                    filter->SetInput(itkRep->getItkImage());
-                    filter->Update();
-
-                    new GenericImageRepresentationItk<float, 1, 3>(id, filter->GetOutput());
-                }
+                DISPATCH_ITK_FILTER_WITH_EXTRA_RETURN_TYPE(input, float, SobelEdgeDetectionImageFilter, );
             }
 
             data.addData(p_targetImageID.getValue(), id);
