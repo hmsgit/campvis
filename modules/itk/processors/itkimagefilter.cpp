@@ -149,8 +149,8 @@
         WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
         switch (MA_localRep->getDimensionality()) { \
             case 1: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 1, MA_filterType, MD_filterBody) break; \
-            case 2: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 1, MA_filterType, MD_filterBody) break; \
-            case 3: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 1, MA_filterType, MD_filterBody) break; \
+            case 2: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 2, MA_filterType, MD_filterBody) break; \
+            case 3: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 3, MA_filterType, MD_filterBody) break; \
         } \
     } while (0)
 
@@ -165,8 +165,8 @@
         WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
         switch (MA_localRep->getDimensionality()) { \
             case 1: DISPATCH_ITK_FILTER_D(wtp, 1, MA_filterType, MD_filterBody) break; \
-            case 2: DISPATCH_ITK_FILTER_D(wtp, 1, MA_filterType, MD_filterBody) break; \
-            case 3: DISPATCH_ITK_FILTER_D(wtp, 1, MA_filterType, MD_filterBody) break; \
+            case 2: DISPATCH_ITK_FILTER_D(wtp, 2, MA_filterType, MD_filterBody) break; \
+            case 3: DISPATCH_ITK_FILTER_D(wtp, 3, MA_filterType, MD_filterBody) break; \
         } \
     } while (0)
 
