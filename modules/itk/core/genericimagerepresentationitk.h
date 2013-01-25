@@ -32,6 +32,7 @@
 
 #include "core/datastructures/abstractimagerepresentation.h"
 #include "core/tools/typetraits.h"
+#include "core/tools/weaklytypedpointer.h"
 #include "modules/itk/core/itktypetraits.h"
 
 #include <itkImage.h>
@@ -40,6 +41,30 @@
 #include <cstring>  // needed for memcpy
 
 namespace campvis {
+    /**
+     * Non templated base class for GenericImageRepresentationItk for easier RTTI check during runtime.
+     */
+    class AbstractImageRepresentationItk : public AbstractImageRepresentation {
+    public:
+        /**
+         * Creates a new AbstractImageRepresentationItk. Just calls the base constructor.
+         * \param   parent  Parent image data of this representation.
+         */
+        AbstractImageRepresentationItk(ImageData* parent)
+            : AbstractImageRepresentation(parent)
+        {};
+
+        /// Virtual destructor
+        virtual ~AbstractImageRepresentationItk() {};
+
+        /**
+         * Returns a WeaklyTypedPointer to the image data.
+         * \note    The pointer is still owned by this ImageRepresentationLocal. If you want a copy, use clone().
+         *          Please make sure not to mess with the pointer even if it's not const for technical reasons...
+         * \return  A WeaklyTypedPointer to the image data.
+         */
+        virtual WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
+    };
 
     /**
      * Templated image representation to hold an ITK image.
@@ -49,7 +74,7 @@ namespace campvis {
      * \tparam  NUMCHANNELS Number of channels of the image data.
      */
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
-    class GenericImageRepresentationItk : public AbstractImageRepresentation {
+    class GenericImageRepresentationItk : public AbstractImageRepresentationItk {
     public:
         /// Type of one single image element
         typedef typename TypeTraits<BASETYPE, NUMCHANNELS>::ElementType ElementType;
@@ -168,9 +193,10 @@ namespace campvis {
         /**
          * Returns a WeaklyTypedPointer to the image data.
          * \note    The pointer is still owned by this ImageRepresentationLocal. If you want a copy, use clone().
+         *          Please make sure not to mess with the pointer even if it's not const for technical reasons...
          * \return  A WeaklyTypedPointer to the image data.
          */
-        virtual const WeaklyTypedPointer getWeaklyTypedPointer() const;
+        virtual WeaklyTypedPointer getWeaklyTypedPointer() const;
 
         /**
          * Returns a pointer to the itk image.
@@ -190,12 +216,11 @@ namespace campvis {
 
     };
 
-
 // = Template implementation ======================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::GenericImageRepresentationItk(ImageData* parent, typename ItkImageType::Pointer itkImage)
-        : AbstractImageRepresentation(parent)
+        : AbstractImageRepresentationItk(parent)
         , _itkImage(itkImage)
     {
         tgtAssert(_parent->getNumChannels() == NUMCHANNELS, "Number of channels must match parent image's number of channels!");
@@ -276,7 +301,7 @@ namespace campvis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
-    const WeaklyTypedPointer campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::getWeaklyTypedPointer() const {
+    WeaklyTypedPointer campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::getWeaklyTypedPointer() const {
         return WeaklyTypedPointer(TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType, NUMCHANNELS, _itkImage->GetBufferPointer());
     }
 

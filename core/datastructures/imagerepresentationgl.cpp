@@ -37,6 +37,9 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
+#ifdef CAMPVIS_HAS_MODULE_ITK
+#include "modules/itk/core/genericimagerepresentationitk.h"
+#endif
 
 namespace campvis {
 
@@ -74,6 +77,12 @@ namespace campvis {
             ImageRepresentationGL* toReturn = new ImageRepresentationGL(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
+#ifdef CAMPVIS_HAS_MODULE_ITK
+        else if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(source)) {
+            ImageRepresentationGL* toReturn = new ImageRepresentationGL(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
+            return toReturn;
+        }
+#endif
 
         return 0;
     }

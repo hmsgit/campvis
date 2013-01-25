@@ -91,7 +91,6 @@ namespace campvis {
                     filter->Update();
 
                     new GenericImageRepresentationItk<uint8_t, 1, 3>(id, filter->GetOutput());
-                    id->getRepresentation<ImageRepresentationLocal>();
                 }
             }
             else if (p_filterMode.getOptionValue() == "gauss") {
@@ -107,7 +106,6 @@ namespace campvis {
                     filter->Update();
 
                     new GenericImageRepresentationItk<uint8_t, 1, 3>(id, filter->GetOutput());
-                    id->getRepresentation<ImageRepresentationLocal>();
                 }
             }
             else if (p_filterMode.getOptionValue() == "sobel") {
@@ -121,7 +119,6 @@ namespace campvis {
                     filter->Update();
 
                     new GenericImageRepresentationItk<float, 1, 3>(id, filter->GetOutput());
-                    id->getRepresentation<ImageRepresentationLocal>();
                 }
             }
 
