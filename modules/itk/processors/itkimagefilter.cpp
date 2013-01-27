@@ -75,10 +75,10 @@
 
 #define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     switch (MA_WTP._numChannels) { \
-        case 1 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
-        case 2 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
-        case 3 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
-        case 4 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) \
+        case 1 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
+        case 2 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
+        case 3 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
+        case 4 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
     }
 
 #define DISPATCH_ITK_FILTER_RD(MA_WTP, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
