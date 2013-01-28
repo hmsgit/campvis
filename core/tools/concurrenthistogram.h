@@ -148,7 +148,7 @@ namespace campvis {
             _arraySize *= _numBuckets[i];
         }
 
-        _buckets = new tbb::atomic<size_t>[_arraySize];
+        _buckets = new tbb::atomic<size_t>[_arraySize + 1];
         for (size_t i = 0; i < _arraySize; ++i)
             _buckets[i] = 0;
         _numSamples = 0;
@@ -188,10 +188,14 @@ namespace campvis {
     template<typename T, size_t ND>
     size_t campvis::ConcurrentGenericHistogramND<T, ND>::getBucketNumber(size_t dimension, T sample) const {
         tgtAssert(dimension < ND, "Dimension out of bounds.");
-#ifdef CAMPVIS_DEBUG
-        if (sample < _min[dimension] || sample > _max[dimension])
+
+        if (sample < _min[dimension] || sample > _max[dimension]) {
+            return _numBuckets[dimension];
+#ifdef CAMPVIS_DEBUG_NOTNOW
             LWARNINGC("CAMPVis.core.tools.ConcurrentGenericHistogramND", "Added sample " << sample << " out of bounds for dimension " << dimension << ".");
 #endif
+        }
+
         double ratio = static_cast<double>(sample - _min[dimension]) / static_cast<double>(_max[dimension] - _min[dimension]);
         return static_cast<size_t>(tgt::clamp(static_cast<int>(ratio * _numBuckets[dimension]), static_cast<int>(0), static_cast<int>(_numBuckets[dimension] - 1)));
     }
@@ -201,6 +205,9 @@ namespace campvis {
         size_t index = 0;
         size_t multiplier = 1;
         for (size_t i = 0; i < ND; ++i) {
+            if (bucketNumbers[i] == _numBuckets[i])
+                return _arraySize;
+
             index += multiplier * bucketNumbers[i];
             multiplier *= _numBuckets[i];
         }

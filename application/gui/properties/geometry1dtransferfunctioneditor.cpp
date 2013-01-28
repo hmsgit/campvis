@@ -43,6 +43,7 @@
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"
 
+#include <QCheckBox>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -52,11 +53,14 @@ namespace campvis {
 
     Geometry1DTransferFunctionEditor::Geometry1DTransferFunctionEditor(Geometry1DTransferFunction* tf, QWidget* parent /*= 0*/)
         : AbstractTransferFunctionEditor(tf, parent)
+        , _logScale(true)
         , _layout(0)
         , _canvas(0)
         , _lblIntensityLeft(0)
         , _lblIntensityRight(0)
         , _btnAddGeometry(0)
+        , _btnRemoveGeometry(0)
+        , _cbLogScale(0)
     {
         _selectedGeometry = 0;
         setupGUI();
@@ -120,18 +124,25 @@ namespace campvis {
             size_t numBuckets = ih->getNumBuckets(0);
             if (numBuckets > 0) {
                 float maxFilling = static_cast<float>(ih->getMaxFilling());
+                if (_logScale)
+                    maxFilling = log(maxFilling);
 
                 float xl = static_cast<float>(0.f) / static_cast<float>(numBuckets);
                 float xr = 0.f;
-                float yl = static_cast<float>(ih->getNumElements(0)) / maxFilling;
+                float yl = (_logScale 
+                    ? log(static_cast<float>(ih->getNumElements(0))) / maxFilling
+                    : static_cast<float>(ih->getNumElements(0)) / maxFilling);
                 float yr = 0.f;
+
 
                 glBegin(GL_QUADS);
                 glColor4f(1.f, .75f, 0.f, .5f);
                 for (size_t i = 1; i < numBuckets; ++i) {
                     xr = static_cast<float>(i) / static_cast<float>(numBuckets);
-                    yr = static_cast<float>(ih->getNumElements(i)) / maxFilling;
-
+                    yr = (_logScale 
+                        ? std::max(0.f, log(static_cast<float>(ih->getNumElements(i))) / maxFilling)
+                        : static_cast<float>(ih->getNumElements(i)) / maxFilling);
+                    
                     glVertex2f(xl, 0.f);
                     glVertex2f(xl, yl);
                     glVertex2f(xr, yr);
@@ -249,7 +260,10 @@ namespace campvis {
         _btnRemoveGeometry = new QPushButton(tr("Remove Geometry"), this);
         buttonLayout->addWidget(_btnRemoveGeometry);
         connect(_btnRemoveGeometry, SIGNAL(clicked()), this, SLOT(onBtnRemoveGeometryClicked()));
-
+        _cbLogScale = new QCheckBox(tr("Logarithmic Scale"), this);
+        _cbLogScale->setChecked(true);
+        buttonLayout->addWidget(_cbLogScale);
+        connect(_cbLogScale, SIGNAL(stateChanged(int)), this, SLOT(onCbLogScaleStateChanged(int)));
         _layout->setColumnStretch(2, 1);
         _layout->setRowStretch(2, 1);
     }
@@ -323,6 +337,11 @@ namespace campvis {
 
             gtf->removeGeometry(geometryToRemove);
         }
+    }
+
+    void Geometry1DTransferFunctionEditor::onCbLogScaleStateChanged(int state) {
+        _logScale = (state & Qt::Checked);
+        invalidate();
     }
 
 

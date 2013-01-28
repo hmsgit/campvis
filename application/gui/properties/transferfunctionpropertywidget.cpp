@@ -112,12 +112,12 @@ namespace campvis {
         const tgt::vec2& domain = tf->getIntensityDomain();
 
         _spinDomainLeft->blockSignals(true);
-        //_spinDomainLeft->setMaximum(domain.y);
+        _spinDomainLeft->setMaximum(domain.y);
         _spinDomainLeft->setValue(domain.x);
         _spinDomainLeft->blockSignals(false);
 
         _spinDomainRight->blockSignals(true);
-        /*_spinDomainRight->setMinimum(domain.x);*/
+        _spinDomainRight->setMinimum(domain.x);
         _spinDomainRight->setValue(domain.y);
         _spinDomainRight->blockSignals(false);
     }
@@ -125,8 +125,8 @@ namespace campvis {
     void TransferFunctionPropertyWidget::onDomainChanged(double value) {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         _ignorePropertyUpdates = true;
-//         _spinDomainLeft->setMaximum(_spinDomainRight->value());
-//         _spinDomainRight->setMinimum(_spinDomainLeft->value());
+        _spinDomainLeft->setMaximum(_spinDomainRight->value());
+        _spinDomainRight->setMinimum(_spinDomainLeft->value());
         tgt::vec2 newDomain(static_cast<float>(_spinDomainLeft->value()), static_cast<float>(_spinDomainRight->value()));
         prop->getTF()->setIntensityDomain(newDomain);
         _ignorePropertyUpdates = false;

@@ -36,6 +36,7 @@
 #include "core/classification/tfgeometry1d.h"
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 
+class QCheckBox;
 class QGridLayout;
 class QLabel;
 class QPushButton;
@@ -104,6 +105,12 @@ namespace campvis {
          */
         void onBtnRemoveGeometryClicked();
 
+        /**
+         * Slot to be called when _cbLogScale's check state has changed.
+         * \param state the checkbox's new Qt::CheckState.
+         */
+        void onCbLogScaleStateChanged(int state);
+
     protected:
         /**
          * Gets called when the property has changed, so that widget can update its state.
@@ -128,6 +135,7 @@ namespace campvis {
 
         std::vector<AbstractTFGeometryManipulator*> _manipulators;
         tbb::atomic<WholeTFGeometryManipulator*> _selectedGeometry;
+        bool _logScale;
         tbb::mutex _localMutex;
 
         QGridLayout* _layout;
@@ -137,6 +145,7 @@ namespace campvis {
         QLabel* _lblIntensityRight;
         QPushButton* _btnAddGeometry;
         QPushButton* _btnRemoveGeometry;
+        QCheckBox* _cbLogScale;
     };
 }
 
