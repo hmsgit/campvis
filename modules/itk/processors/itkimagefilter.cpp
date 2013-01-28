@@ -36,6 +36,8 @@
 #include <itkMedianImageFilter.h>
 #include <itkDiscreteGaussianImageFilter.h>
 #include <itkSobelEdgeDetectionImageFilter.h>
+#include <itkGradientAnisotropicDiffusionImageFilter.h>
+#include <itkCurvatureAnisotropicDiffusionImageFilter.h>
 
 #include "tbb/include/tbb/tbb.h"
 
@@ -177,10 +179,12 @@
 
 namespace campvis {
 
-    static const GenericOption<std::string> filterModes[3] = {
+    static const GenericOption<std::string> filterModes[5] = {
         GenericOption<std::string>("median", "Median"),
         GenericOption<std::string>("gauss", "Gauss"),
         GenericOption<std::string>("sobel", "Sobel"),
+        GenericOption<std::string>("gradientDiffusion", "Gradient Anisotropic Diffusion"),
+        GenericOption<std::string>("curvatureDiffusion", "Curvature Anisotropic Diffusion")
     };
 
     const std::string ItkImageFilter::loggerCat_ = "CAMPVis.modules.classification.ItkImageFilter";
@@ -189,15 +193,21 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
-        , p_filterMode("FilterMode", "Filter Mode", filterModes, 3)
+        , p_filterMode("FilterMode", "Filter Mode", filterModes, 5)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f)
+        , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
+        , p_timeStep("TimeStep", "Time Step", .0625, .001f, .12499f)
+        , p_conductance("Conductance", "Conductance", 1.f, .1f, 5.f)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_targetImageID);
         addProperty(&p_filterMode);
         addProperty(&p_kernelSize);
         addProperty(&p_sigma);
+        addProperty(&p_numberOfSteps);
+        addProperty(&p_timeStep);
+        addProperty(&p_conductance);
     }
 
     ItkImageFilter::~ItkImageFilter() {
@@ -225,7 +235,21 @@ namespace campvis {
                     );
             }
             else if (p_filterMode.getOptionValue() == "sobel") {
-                DISPATCH_ITK_FILTER_WITH_EXTRA_RETURN_TYPE(input, float, SobelEdgeDetectionImageFilter, );
+                DISPATCH_ITK_FILTER_WITH_EXTRA_RETURN_TYPE(input, float, SobelEdgeDetectionImageFilter, /* no body here */);
+            }
+            else if (p_filterMode.getOptionValue() == "gradientDiffusion") {
+                DISPATCH_ITK_FILTER_WITH_EXTRA_RETURN_TYPE(input, float, GradientAnisotropicDiffusionImageFilter, \
+                    filter->SetNumberOfIterations(p_numberOfSteps.getValue()); \
+                    filter->SetTimeStep(p_timeStep.getValue()); \
+                    filter->SetConductanceParameter(p_conductance.getValue()); \
+                    );
+            }
+            else if (p_filterMode.getOptionValue() == "curvatureDiffusion") {
+                DISPATCH_ITK_FILTER_WITH_EXTRA_RETURN_TYPE(input, float, CurvatureAnisotropicDiffusionImageFilter, \
+                    filter->SetNumberOfIterations(p_numberOfSteps.getValue()); \
+                    filter->SetTimeStep(p_timeStep.getValue()); \
+                    filter->SetConductanceParameter(p_conductance.getValue()); \
+                    );
             }
 
             data.addData(p_targetImageID.getValue(), id);

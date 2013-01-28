@@ -69,6 +69,9 @@ namespace campvis {
         GenericOptionProperty<std::string> p_filterMode;    ///< Filter mode
         IntProperty p_kernelSize;
         FloatProperty p_sigma;
+        IntProperty p_numberOfSteps;
+        FloatProperty p_timeStep;
+        FloatProperty p_conductance;
 
     protected:
 
