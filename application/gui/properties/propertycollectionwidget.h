@@ -30,18 +30,21 @@
 #ifndef PROPERTYCOLLECTIONWIDGET_H__
 #define PROPERTYCOLLECTIONWIDGET_H__
 
+#include "sigslot/sigslot.h"
 #include <QList>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <map>
 
 namespace campvis {
+    class AbstractProperty;
     class HasPropertyCollection;
 
     /**
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
-    class PropertyCollectionWidget : public QWidget {
+    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
 
     public:
@@ -63,6 +66,11 @@ namespace campvis {
          */
         void updatePropCollection(HasPropertyCollection* propertyCollection);
 
+        /**
+         * Slot to be called when one of the propertie's visibility has changed.
+         * \param prop  Property that emitted the signal
+         */
+        void onPropertyVisibilityChanged(const AbstractProperty* prop);
 
     private:
         /**
@@ -70,9 +78,15 @@ namespace campvis {
          */
         void setupWidget();
 
+        /**
+         * Clears the _widgetMap and destroys all widgets inside.
+         */
+        void clearWidgetMap();
+
         HasPropertyCollection* _propCollection;    ///< The HasPropertyCollection instance this widget is currently working on.
         QVBoxLayout* _layout;
-        QList<QWidget*> _widgetList;
+        std::map<AbstractProperty*, QWidget*> _widgetMap;
+        //QList<QWidget*> _widgetList;
     };
 }
 

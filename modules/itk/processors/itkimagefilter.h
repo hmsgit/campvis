@@ -74,6 +74,8 @@ namespace campvis {
         FloatProperty p_conductance;
 
     protected:
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties();
 
         static const std::string loggerCat_;
     };

@@ -115,4 +115,13 @@ namespace campvis {
         }
     }
 
+    void HasPropertyCollection::onPropertyChanged(const AbstractProperty* prop) {
+        if (prop->getInvalidationLevel().isInvalidProperties())
+            updateProperties();
+    }
+
+    void HasPropertyCollection::updateProperties() {
+
+    }
+
 }

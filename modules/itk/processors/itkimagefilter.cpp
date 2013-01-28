@@ -193,7 +193,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
-        , p_filterMode("FilterMode", "Filter Mode", filterModes, 5)
+        , p_filterMode("FilterMode", "Filter Mode", filterModes, 5, InvalidationLevel::INVALID_RESULT | InvalidationLevel::INVALID_PROPERTIES)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f)
         , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
@@ -261,6 +261,37 @@ namespace campvis {
 
 
         _invalidationLevel.setValid();
+    }
+
+    void ItkImageFilter::updateProperties() {
+        if (p_filterMode.getOptionValue() == "median") {
+            p_kernelSize.setVisible(true);
+            p_sigma.setVisible(false);
+            p_numberOfSteps.setVisible(false);
+            p_timeStep.setVisible(false);
+            p_conductance.setVisible(false);
+        }
+        else if (p_filterMode.getOptionValue() == "gauss") {
+            p_kernelSize.setVisible(false);
+            p_sigma.setVisible(true);
+            p_numberOfSteps.setVisible(false);
+            p_timeStep.setVisible(false);
+            p_conductance.setVisible(false);
+        }
+        else if (p_filterMode.getOptionValue() == "sobel") {
+            p_kernelSize.setVisible(false);
+            p_sigma.setVisible(false);
+            p_numberOfSteps.setVisible(false);
+            p_timeStep.setVisible(false);
+            p_conductance.setVisible(false);
+        }
+        else if (p_filterMode.getOptionValue() == "gradientDiffusion" || p_filterMode.getOptionValue() == "curvatureDiffusion") {
+            p_kernelSize.setVisible(false);
+            p_sigma.setVisible(false);
+            p_numberOfSteps.setVisible(true);
+            p_timeStep.setVisible(true);
+            p_conductance.setVisible(true);
+        }
     }
 
 }

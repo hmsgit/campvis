@@ -98,6 +98,17 @@ namespace campvis {
          */
         void setInvalidationLevel(const InvalidationLevel& il);
 
+        /**
+         * Returns whether this proberty shall be visible in the GUI.
+         * \return  _isVisible
+         */
+        bool isVisible() const;
+
+        /**
+         * Sets whether this property shall be visible in the GUI.
+         * \param isVisible new visibility flag
+         */
+        void setVisible(bool isVisible);
 
         /**
          * Adds the given property \a prop to the set of shared properties.
@@ -139,12 +150,16 @@ namespace campvis {
         /// Signal emitted, when the property changes.
         sigslot::signal1<const AbstractProperty*> s_changed;
 
+        /// Signal emitted, when the visibility of this property changed
+        sigslot::signal1<const AbstractProperty*> s_visibilityChanged;
+
     protected:
         
         // DO NOT REMOVE THE CONSTNESS OF _name. PropertyCollection relies on it!
         const std::string _name;                ///< Property name (unchangable on purpose!)
         std::string _title;                     ///< Property title (e.g. used for GUI)
         InvalidationLevel _invalidationLevel;   ///< Invalidation level that this property triggers
+        tbb::atomic<bool> _isVisible;           ///< Flag whether this property shall be visible in the GUI
 
         tbb::atomic<bool> _inUse;               ///< flag whether property is currently in use and values are written to back buffer
         tbb::spin_mutex _localMutex;            ///< Mutex used when altering local members

@@ -48,16 +48,12 @@ namespace campvis {
     }
 
     PropertyCollectionWidget::~PropertyCollectionWidget() {
-        qDeleteAll(_widgetList);
+        clearWidgetMap();
     }
 
     void PropertyCollectionWidget::updatePropCollection(HasPropertyCollection* propertyCollection) {
         // remove and delete all widgets of the previous PropertyCollection
-        for (QList<QWidget*>::iterator it = _widgetList.begin(); it != _widgetList.end(); ++it) {
-            _layout->removeWidget(*it);
-        }
-        qDeleteAll(_widgetList);
-        _widgetList.clear();
+        clearWidgetMap();
         
         // create widgets for the new PropertyCollection
         for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
@@ -65,8 +61,10 @@ namespace campvis {
             if (propWidget == 0)
                 propWidget = new QPushButton(QString::fromStdString((*it)->getTitle()));
 
-            _widgetList.push_back(propWidget);
+            _widgetMap.insert(std::make_pair(*it, propWidget));
             _layout->addWidget(propWidget);
+            propWidget->setVisible((*it)->isVisible());
+            (*it)->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
         }
     }
 
@@ -74,6 +72,23 @@ namespace campvis {
         _layout = new QVBoxLayout();
         _layout->setSpacing(0);
         setLayout(_layout);
+    }
+
+    void PropertyCollectionWidget::clearWidgetMap() {
+        for (std::map<AbstractProperty*, QWidget*>::iterator it = _widgetMap.begin(); it != _widgetMap.end(); ++it) {
+            it->first->s_visibilityChanged.disconnect(this);
+            _layout->removeWidget(it->second);
+            delete it->second;
+        }
+
+        _widgetMap.clear();
+    }
+
+    void PropertyCollectionWidget::onPropertyVisibilityChanged(const AbstractProperty* prop) {
+        // const_cast does not harm anything.
+        std::map<AbstractProperty*, QWidget*>::iterator item = _widgetMap.find(const_cast<AbstractProperty*>(prop));
+        if (item != _widgetMap.end())
+            item->second->setVisible(item->first->isVisible());
     }
 
 }

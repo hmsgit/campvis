@@ -114,9 +114,15 @@ namespace campvis {
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * \param   prop    Property that emitted the signal
          */
-        virtual void onPropertyChanged(const AbstractProperty* prop) = 0;
+        virtual void onPropertyChanged(const AbstractProperty* prop);
 
     protected:
+        /**
+         * Gets called, when one of the properties invalidates with an INVALID_PROPERTIES level.
+         * \note    You may overload this method as needed.
+         */
+        virtual void updateProperties();
+
         /**
          * Searches _properties for a property named \a name.
          * \param name  Property name to search for.

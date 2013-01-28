@@ -47,6 +47,7 @@ namespace campvis {
             INVALID_RESULT      = 1 << 0,
             INVALID_SHADER      = 1 << 1,
             INVALID_FILE        = 1 << 2,
+            INVALID_PROPERTIES  = 1 << 3
         };
 
         /**
@@ -79,6 +80,10 @@ namespace campvis {
 
         bool isInvalidShader() const {
             return (_level & static_cast<int>(INVALID_SHADER)) != 0;
+        }
+
+        bool isInvalidProperties() const {
+            return (_level & static_cast<int>(INVALID_PROPERTIES)) != 0;
         }
 
 

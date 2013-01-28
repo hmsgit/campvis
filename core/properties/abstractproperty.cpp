@@ -38,6 +38,7 @@ namespace campvis {
         , _title(title)
         , _invalidationLevel(il)
     {
+        _isVisible = true;
         _inUse = false;
     }
 
@@ -92,6 +93,15 @@ namespace campvis {
 
     void AbstractProperty::deinit() {
 
+    }
+
+    bool AbstractProperty::isVisible() const {
+        return _isVisible;
+    }
+
+    void AbstractProperty::setVisible(bool isVisible) {
+        _isVisible = isVisible;
+        s_visibilityChanged(this);
     }
 
 }

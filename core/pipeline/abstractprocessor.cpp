@@ -75,6 +75,7 @@ namespace campvis {
     }
 
     void AbstractProcessor::onPropertyChanged(const AbstractProperty* prop) {
+        HasPropertyCollection::onPropertyChanged(prop);
         applyInvalidationLevel(prop->getInvalidationLevel());
     }
 
@@ -85,5 +86,6 @@ namespace campvis {
     void AbstractProcessor::setEnabled(bool enabled) {
         _enabled = enabled;
     }
+
 
 }

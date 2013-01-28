@@ -77,7 +77,8 @@ namespace campvis {
     }
 
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
-        _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
+        HasPropertyCollection::onPropertyChanged(prop);
+         _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
         s_PipelineInvalidated();
     }
 
@@ -134,4 +135,6 @@ namespace campvis {
         tgtAssert(processor != 0, "Processor must not be 0.")
         _processors.push_back(processor);
     }
+
+
 }
