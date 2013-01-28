@@ -38,6 +38,7 @@
 #include <itkSobelEdgeDetectionImageFilter.h>
 #include <itkGradientAnisotropicDiffusionImageFilter.h>
 #include <itkCurvatureAnisotropicDiffusionImageFilter.h>
+#include <itkLaplacianSharpeningImageFilter.h>
 
 #include "tbb/include/tbb/tbb.h"
 
@@ -179,12 +180,13 @@
 
 namespace campvis {
 
-    static const GenericOption<std::string> filterModes[5] = {
+    static const GenericOption<std::string> filterModes[6] = {
         GenericOption<std::string>("median", "Median"),
         GenericOption<std::string>("gauss", "Gauss"),
         GenericOption<std::string>("sobel", "Sobel"),
         GenericOption<std::string>("gradientDiffusion", "Gradient Anisotropic Diffusion"),
-        GenericOption<std::string>("curvatureDiffusion", "Curvature Anisotropic Diffusion")
+        GenericOption<std::string>("curvatureDiffusion", "Curvature Anisotropic Diffusion"),
+        GenericOption<std::string>("laplacianSharpening", "Laplacian Sharpening")
     };
 
     const std::string ItkImageFilter::loggerCat_ = "CAMPVis.modules.classification.ItkImageFilter";
@@ -193,7 +195,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
-        , p_filterMode("FilterMode", "Filter Mode", filterModes, 5, InvalidationLevel::INVALID_RESULT | InvalidationLevel::INVALID_PROPERTIES)
+        , p_filterMode("FilterMode", "Filter Mode", filterModes, 6, InvalidationLevel::INVALID_RESULT | InvalidationLevel::INVALID_PROPERTIES)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f)
         , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
@@ -251,7 +253,9 @@ namespace campvis {
                     filter->SetConductanceParameter(p_conductance.getValue()); \
                     );
             }
-
+            else if (p_filterMode.getOptionValue() == "laplacianSharpening") {
+                DISPATCH_ITK_FILTER(input, LaplacianSharpeningImageFilter, /* nothing here */);
+            }
             data.addData(p_targetImageID.getValue(), id);
             p_targetImageID.issueWrite();
         }
@@ -278,7 +282,7 @@ namespace campvis {
             p_timeStep.setVisible(false);
             p_conductance.setVisible(false);
         }
-        else if (p_filterMode.getOptionValue() == "sobel") {
+        else if (p_filterMode.getOptionValue() == "sobel" || p_filterMode.getOptionValue() == "laplacianSharpening") {
             p_kernelSize.setVisible(false);
             p_sigma.setVisible(false);
             p_numberOfSteps.setVisible(false);

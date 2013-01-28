@@ -37,6 +37,7 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
+#include "core/properties/optionproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
 namespace tgt {
@@ -76,12 +77,15 @@ namespace campvis {
         virtual void process(DataContainer& data);
 
         DataNameProperty p_usImageId;                  ///< image ID for input image
+        DataNameProperty p_blurredImageId;
         DataNameProperty p_gradientImageID;
         DataNameProperty p_confidenceImageID;
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
         IntProperty p_sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
+        GenericOptionProperty<std::string> p_view;
+        FloatProperty p_blurredScaling;
 
     protected:
         /// adapts the range of the p_sliceNumber property to the image

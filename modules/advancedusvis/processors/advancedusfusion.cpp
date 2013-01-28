@@ -44,22 +44,36 @@
 namespace campvis {
     const std::string AdvancedUsFusion::loggerCat_ = "CAMPVis.modules.vis.AdvancedUsFusion";
 
+    GenericOption<std::string> viewOptions[5] = {
+        GenericOption<std::string>("us", "Ultrasound Only"),
+        GenericOption<std::string>("smoothed", "Smoothed US Only"),
+        GenericOption<std::string>("sharpened", "Sharpened US Only"),
+        GenericOption<std::string>("mappingSaturation", "Mapping Uncertainty to Saturation"),
+        GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness")
+    };
+
     AdvancedUsFusion::AdvancedUsFusion(GenericProperty<tgt::ivec2>& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ)
+        , p_blurredImageId("BlurredImageId", "Blurred Ultrasound Image", "", DataNameProperty::READ)
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)
         , p_confidenceImageID("ConfidenceImageId", "Confidence Map Input", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
+        , p_view("View", "Image to Render", viewOptions, 5)
+        , p_blurredScaling("BlurredScaling", "Scaling for blurred image intensity", 1.f, .001f, 1000.f)
         , _shader(0)
     {
         addProperty(&p_usImageId);
+        addProperty(&p_blurredImageId);
         addProperty(&p_gradientImageID);
         addProperty(&p_confidenceImageID);
         addProperty(&p_targetImageID);
         addProperty(&p_sliceNumber);
         addProperty(&p_transferFunction);
+        addProperty(&p_view);
+        addProperty(&p_blurredScaling);
 
         decoratePropertyCollection(this);
     }
@@ -82,10 +96,11 @@ namespace campvis {
 
     void AdvancedUsFusion::process(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_usImageId.getValue());
+        ImageRepresentationGL::ScopedRepresentation blurred(data, p_blurredImageId.getValue());
         ImageRepresentationGL::ScopedRepresentation confidence(data, p_confidenceImageID.getValue());
         ImageRepresentationGL::ScopedRepresentation gradients(data, p_gradientImageID.getValue());
 
-        if (img != 0 && gradients != 0 && confidence != 0) {
+        if (img != 0 && blurred != 0 && gradients != 0 && confidence != 0) {
             if (img->getDimensionality() == 3) {
                 if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
                     // source DataHandle has changed
@@ -98,9 +113,12 @@ namespace campvis {
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
                 _shader->setUniform("_sliceNumber", p_sliceNumber.getValue());
+                _shader->setUniform("_viewIndex", p_view.getValue());
+                _shader->setUniform("_blurredScaling", p_blurredScaling.getValue());
 
-                tgt::TextureUnit usUnit, confidenceUnit, gradientUnit, tfUnit;
+                tgt::TextureUnit usUnit, blurredUnit, confidenceUnit, gradientUnit, tfUnit;
                 img->bind(_shader, usUnit, "_usImage");
+                blurred->bind(_shader, blurredUnit, "_blurredImage");
                 confidence->bind(_shader, confidenceUnit, "_confidenceMap");
                 gradients->bind(_shader, gradientUnit, "_gradientMap");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);

@@ -37,22 +37,42 @@ out vec4 out_Color;
 #include "tools/transferfunction.frag"
 
 uniform Texture3D _usImage;
+uniform Texture3D _blurredImage;
 uniform Texture3D _confidenceMap;
 uniform Texture3D _gradientMap;
 uniform TransferFunction1D _transferFunction;
 
 uniform int _sliceNumber;
+uniform int _viewIndex;
+uniform float _blurredScaling;
 
 void main() {
     vec3 texCoord = vec3(ex_TexCoord.xy, _usImage._sizeRCP.z * (_sliceNumber + 0.5));
 
     vec4 texel = getElement3DNormalized(_usImage, texCoord);
+    vec4 blurred = getElement3DNormalized(_blurredImage, texCoord) * _blurredScaling;
     vec4 gradient = getElement3DNormalized(_gradientMap, texCoord);
     float confidence = getElement3DNormalized(_confidenceMap, texCoord).a;
 
-    out_Color = lookupTF(_transferFunction, texel.a);
-
-    vec3 hsv = rgb2hsv(out_Color.xyz);
-    hsv.y = 1.0 - confidence;
-    out_Color.xyz = hsv2rgb(hsv);
+    switch (_viewIndex) {
+        case 0:
+            out_Color = lookupTF(_transferFunction, texel.a);
+            break;
+        case 1:
+            out_Color = lookupTF(_transferFunction, blurred.a);
+            break;
+        case 2:
+            out_Color = lookupTF(_transferFunction, texel.a + texel.a - blurred.a);
+            break;
+        case 3:
+            out_Color = lookupTF(_transferFunction, texel.a);
+            vec3 hsv = rgb2hsv(out_Color.xyz);
+            hsv.y = 1.0 - confidence;
+            out_Color.xyz = hsv2rgb(hsv);
+            break;
+        case 4:
+            float intensity = mix(blurred.a, 2.0 * texel.a - blurred.a, confidence);
+            out_Color = lookupTF(_transferFunction, intensity);
+            break;
+    }
 }

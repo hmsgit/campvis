@@ -79,9 +79,12 @@ namespace campvis {
 
         _usFusion.p_targetImageID.setValue("us.fused");
         _usFusion.p_sliceNumber.setValue(0);
+        _usFusion.p_view.setValue(0);
 
         _usFilter.p_targetImageID.setValue("us.filtered");
+        _usFilter.p_targetImageID.connect(&_usFusion.p_blurredImageId);
         _usFilter.p_filterMode.selectById("gauss");
+        _usFilter.p_sigma.setValue(4.f);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));

@@ -63,7 +63,6 @@ namespace campvis {
         _comboBox->setCurrentIndex(prop->getValue());
 
         _comboBox->blockSignals(false);
-        _comboBox->blockSignals(false);
     }
 
     void OptionPropertyWidget::onComboBoxIndexChanged(int value) {
