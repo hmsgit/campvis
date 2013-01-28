@@ -58,6 +58,12 @@ namespace campvis {
          * Pure virtual destructor.
          */
         virtual ~AbstractOptionProperty() = 0 {};
+
+        /**
+         * Returns all Options als pair of std::strings.
+         * \return  A vector of the options encoded as pair (id, title).
+         */
+        virtual std::vector< std::pair<std::string, std::string> > getOptionsAsPairOfStrings() const = 0;
     };
 
     template<typename T>
@@ -122,6 +128,9 @@ namespace campvis {
          */
         const std::vector< GenericOption<T> >& getOptions() const;
 
+        /// \see AbstractOptionProperty::getOptionsAsPairOfStrings()
+        virtual std::vector< std::pair<std::string, std::string> > getOptionsAsPairOfStrings() const;
+
         /**
          * Returns the currently selected option.
          * \return  _options[_value]
@@ -175,6 +184,15 @@ namespace campvis {
     template<typename T>
     const std::vector< GenericOption<T> >& campvis::GenericOptionProperty<T>::getOptions() const {
         return _options;
+    }
+
+    template<typename T>
+    std::vector< std::pair<std::string, std::string> > campvis::GenericOptionProperty<T>::getOptionsAsPairOfStrings() const {
+        std::vector< std::pair<std::string, std::string> > toReturn;
+        for (std::vector< GenericOption<T> >::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+            toReturn.push_back(std::make_pair(it->_id, it->_title));
+        }
+        return toReturn;
     }
 
     template<typename T>

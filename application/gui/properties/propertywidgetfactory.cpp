@@ -34,12 +34,14 @@
 #include "application/gui/properties/camerapropertywidget.h"
 #include "application/gui/properties/intpropertywidget.h"
 #include "application/gui/properties/floatpropertywidget.h"
+#include "application/gui/properties/optionpropertywidget.h"
 #include "application/gui/properties/stringpropertywidget.h"
 #include "application/gui/properties/transferfunctionpropertywidget.h"
 
 #include "core/properties/abstractproperty.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/genericproperty.h"
+#include "core/properties/optionproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
 
@@ -50,6 +52,11 @@ namespace campvis {
 
         if (BoolProperty* tester = dynamic_cast<BoolProperty*>(property)) {
             return new BoolPropertyWidget(tester);
+        }
+
+        // OptionProperty must test before IntProperty
+        if (AbstractOptionProperty* tester = dynamic_cast<AbstractOptionProperty*>(property)) {
+            return new OptionPropertyWidget(tester);
         }
 
         if (IntProperty* tester = dynamic_cast<IntProperty*>(property)) {
