@@ -55,10 +55,10 @@ namespace campvis {
     }
 
     void BoolPropertyWidget::onStateChanged(int  value) {
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         BoolProperty* prop = static_cast<BoolProperty*>(_property);
         prop->setValue(_spinBox->isChecked());
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
 }

@@ -58,8 +58,8 @@ namespace campvis {
 
     void StringPropertyWidget::onTextChanged(const QString& text) {
         StringProperty* prop = static_cast<StringProperty*>(_property);
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         prop->setValue(text.toStdString());
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 }

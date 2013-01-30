@@ -31,6 +31,7 @@
 #define ABSTRACTPROPERTYWIDGET_H__
 
 #include "sigslot/sigslot.h"
+#include "tbb/include/tbb/atomic.h"
 #include <QBoxLayout>
 #include <QLabel>
 #include <QWidget>
@@ -73,8 +74,8 @@ namespace campvis {
 
         AbstractProperty* _property;    ///< The property this widget handles
 
-        // TODO: This flag is not thread-safe, it probably should be...
-        bool _ignorePropertyUpdates;    ///< Flag whether the widget shall ignore incoming signals from properties being updated.
+        /// Semaphore acts as flag whether the widget shall ignore incoming signals from properties being updated.
+        tbb::atomic<int> _ignorePropertyUpdates;
 
     private:
         /// Slot getting called when the property has changed, so that the widget can be updated.

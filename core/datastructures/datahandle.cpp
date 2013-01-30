@@ -75,8 +75,10 @@ namespace campvis {
         if (_data == 0)
             return;
 
-        if (! _data->isShareable())
-            _data = _data->clone(); // TODO: update timestamp?
+        if (! _data->isShareable()) {
+            _data = _data->clone();
+            _timestamp = clock();
+        }
         _data->addReference();
     }
 

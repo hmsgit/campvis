@@ -75,7 +75,7 @@ namespace campvis {
             n *= -1.f;
 
         // TODO: the implicit GUI updates randomly crashes the applictation...
-        //_mirrorNormal.setValue(n);
+        p_mirrorNormal.setValue(n);
 
         std::vector<tgt::vec3> vertices;
 

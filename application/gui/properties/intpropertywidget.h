@@ -171,18 +171,18 @@ namespace campvis {
 
     template<size_t SIZE>
     void campvis::IVecPropertyWidget<SIZE>::onValueChangedImpl() {
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         PropertyType* prop = static_cast<PropertyType*>(_property);
         typename IVecPropertyWidgetTraits<SIZE>::BaseType newValue;
         for (size_t i = 0; i < size; ++i)
             newValue[i] = _spinBox[i]->value();
         prop->setValue(newValue);
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
     template<size_t SIZE>
     void campvis::IVecPropertyWidget<SIZE>::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (!_ignorePropertyUpdates) {
+        if (_ignorePropertyUpdates == 0) {
             PropertyType* prop = static_cast<PropertyType*>(_property);
             for (size_t i = 0; i < size; ++i) {
                 _spinBox[i]->setMinimum(prop->getMinValue()[i]);

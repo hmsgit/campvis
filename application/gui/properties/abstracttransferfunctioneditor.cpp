@@ -35,8 +35,8 @@ namespace campvis {
     AbstractTransferFunctionEditor::AbstractTransferFunctionEditor(AbstractTransferFunction* tf, QWidget* parent /*= 0*/)
         : QWidget(parent)
         , _transferFunction(tf)
-        , _ignorePropertyUpdates(false)
     {
+        _ignorePropertyUpdates = 0;
         _transferFunction->s_changed.connect(this, &AbstractTransferFunctionEditor::onTFChanged);
     }
 
@@ -45,7 +45,7 @@ namespace campvis {
     }
     
     void AbstractTransferFunctionEditor::onTFChanged() {
-        if (!_ignorePropertyUpdates)
+        if (_ignorePropertyUpdates == 0)
             updateWidgetFromProperty();
     }
 }

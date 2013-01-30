@@ -66,10 +66,10 @@ namespace campvis {
     }
 
     void OptionPropertyWidget::onComboBoxIndexChanged(int value) {
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         AbstractOptionProperty* prop = static_cast<AbstractOptionProperty*>(_property);
         prop->setValue(value);
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
 }

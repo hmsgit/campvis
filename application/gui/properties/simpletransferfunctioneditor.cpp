@@ -77,15 +77,15 @@ namespace campvis {
     }
 
     void SimpleTransferFunctionEditor::onLeftColorChanged(const QColor& color) {
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         static_cast<SimpleTransferFunction*>(_transferFunction)->setLeftColor(QtColorTools::toTgtColor(_cpwColorLeft->color()));
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
     void SimpleTransferFunctionEditor::onRightColorChanged(const QColor& color) {
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         static_cast<SimpleTransferFunction*>(_transferFunction)->setRightColor(QtColorTools::toTgtColor(_cpwColorRight->color()));
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
 

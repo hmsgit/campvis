@@ -57,14 +57,14 @@ namespace campvis {
     }
 
     void IntPropertyWidget::onValueChanged(int value) {
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         IntProperty* prop = static_cast<IntProperty*>(_property);
         prop->setValue(value);
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
     void IntPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (!_ignorePropertyUpdates) {
+        if (_ignorePropertyUpdates == 0) {
             IntProperty* prop = static_cast<IntProperty*>(_property);
             _spinBox->setMinimum(prop->getMinValue());
             _spinBox->setMaximum(prop->getMaxValue());

@@ -124,12 +124,12 @@ namespace campvis {
 
     void TransferFunctionPropertyWidget::onDomainChanged(double value) {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         _spinDomainLeft->setMaximum(_spinDomainRight->value());
         _spinDomainRight->setMinimum(_spinDomainLeft->value());
         tgt::vec2 newDomain(static_cast<float>(_spinDomainLeft->value()), static_cast<float>(_spinDomainRight->value()));
         prop->getTF()->setIntensityDomain(newDomain);
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
     void TransferFunctionPropertyWidget::onEditClicked(bool checked) {

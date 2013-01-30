@@ -103,7 +103,6 @@ namespace campvis {
 
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
-        // TODO:    set domain mapping uniforms
         shader->setUniform(transFuncUniform + "._texture", texUnit.getUnitNumber());
         switch (getDimensionality()) {
             case 1:

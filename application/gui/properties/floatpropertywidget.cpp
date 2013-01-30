@@ -59,14 +59,14 @@ namespace campvis {
     }
 
     void FloatPropertyWidget::onValueChanged(double value) {
-        _ignorePropertyUpdates = true;
+        ++_ignorePropertyUpdates;
         FloatProperty* prop = static_cast<FloatProperty*>(_property);
         prop->setValue(value);
-        _ignorePropertyUpdates = false;
+        --_ignorePropertyUpdates;
     }
 
     void FloatPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (!_ignorePropertyUpdates) {
+        if (_ignorePropertyUpdates == 0) {
             FloatProperty* prop = static_cast<FloatProperty*>(_property);
             _spinBox->setMinimum(prop->getMinValue());
             _spinBox->setMaximum(prop->getMaxValue());

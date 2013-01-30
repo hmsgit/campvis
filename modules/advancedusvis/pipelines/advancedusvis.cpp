@@ -64,11 +64,11 @@ namespace campvis {
         addProcessor(&_usEEP);
         addProcessor(&_usDVR);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
-        _eventHandlers.push_back(_trackballEH);
-
         addEventHandler(&_wheelHandler);
         //addEventHandler(&_tfWindowingHandler);
+
+        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
+        _eventHandlers.push_back(_trackballEH);
     }
 
     AdvancedUsVis::~AdvancedUsVis() {

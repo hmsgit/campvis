@@ -132,7 +132,6 @@ namespace campvis {
         tempUnit.activate();
         _texture->bind();
 
-        // TODO: map signed types
         // map signed integer types from [-1.0:1.0] to [0.0:1.0] in order to avoid clamping of negative values
         if (isInteger && isSigned) {
             glPushAttrib(GL_ALL_ATTRIB_BITS);
