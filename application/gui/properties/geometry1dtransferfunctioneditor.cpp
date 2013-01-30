@@ -159,8 +159,10 @@ namespace campvis {
             tbb::mutex::scoped_lock lock(_localMutex);
 
             // render selected geometry
-            if (_selectedGeometry != 0) {
-                const std::vector<tgt::vec2>& helperPoints = _selectedGeometry->getHelperPoints();
+            WholeTFGeometryManipulator* selectedGeometry = _selectedGeometry;
+            if (selectedGeometry != 0) {
+                // the copy is deliberate for improved thread safety (the whole design is a little messy here...)
+                std::vector<tgt::vec2> helperPoints = selectedGeometry->getHelperPoints();
                 glColor4ub(0, 0, 0, 196);
                 glEnable(GL_LINE_STIPPLE);
                 glLineStipple(1, 0xFAFA);
@@ -198,6 +200,7 @@ namespace campvis {
 
     void Geometry1DTransferFunctionEditor::mousePressEvent(tgt::MouseEvent* e) {
         if (_selectedGeometry != 0 && e->modifiers() & tgt::Event::CTRL) {
+            // add a control point on CTRL+Click
             TFGeometry1D* g = _selectedGeometry->getGeometry();
             std::vector<TFGeometry1D::KeyPoint>& kpts = g->getKeyPoints();
             TFGeometry1D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
