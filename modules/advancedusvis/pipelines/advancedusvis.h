@@ -33,12 +33,16 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
 #include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
 #include "modules/itk/processors/itkimagefilter.h"
+#include "modules/vis/processors/proxygeometrygenerator.h"
+#include "modules/vis/processors/eepgenerator.h"
+#include "modules/vis/processors/simpleraycaster.h"
 
 namespace campvis {
     class AdvancedUsVis : public VisualizationPipeline {
@@ -66,17 +70,26 @@ namespace campvis {
 
         virtual void keyEvent(tgt::KeyEvent* e);
 
+        void onRenderTargetSizeChanged(const AbstractProperty* prop);
     protected:
+        CameraProperty _camera;
+
         MhdImageReader _usReader;
         MhdImageReader _confidenceReader;
         GradientVolumeGenerator _gvg;
         LHHistogram _lhh;
         AdvancedUsFusion _usFusion;
-        ItkImageFilter _usFilter;
+        ItkImageFilter _usBlurFilter;
+
+        ItkImageFilter _usDenoiseilter;
+        ProxyGeometryGenerator _usProxy;
+        EEPGenerator _usEEP;
+        SimpleRaycaster _usDVR;
 
         MWheelToNumericPropertyEventHandler _wheelHandler;
         TransFuncWindowingEventHandler _tfWindowingHandler;
 
+        TrackballNavigationEventHandler* _trackballEH;
     };
 }
 

@@ -38,37 +38,56 @@ namespace campvis {
 
     AdvancedUsVis::AdvancedUsVis()
         : VisualizationPipeline()
+        , _camera("camera", "Camera")
         , _usReader()
         , _confidenceReader()
         , _gvg()
         , _lhh()
         , _usFusion(_effectiveRenderTargetSize)
-        , _usFilter()
+        , _usBlurFilter()
+        , _usDenoiseilter()
+        , _usProxy()
+        , _usEEP(_effectiveRenderTargetSize)
+        , _usDVR(_effectiveRenderTargetSize)
         , _wheelHandler(&_usFusion.p_sliceNumber)
         , _tfWindowingHandler(&_usFusion.p_transferFunction)
+        , _trackballEH(0)
     {
         addProcessor(&_usReader);
         addProcessor(&_confidenceReader);
         addProcessor(&_gvg);
         //addProcessor(&_lhh);
         addProcessor(&_usFusion);
-        addProcessor(&_usFilter);
+        addProcessor(&_usBlurFilter);
+        addProcessor(&_usDenoiseilter);
+        addProcessor(&_usProxy);
+        addProcessor(&_usEEP);
+        addProcessor(&_usDVR);
+
+        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
+        _eventHandlers.push_back(_trackballEH);
+
         addEventHandler(&_wheelHandler);
-        addEventHandler(&_tfWindowingHandler);
+        //addEventHandler(&_tfWindowingHandler);
     }
 
     AdvancedUsVis::~AdvancedUsVis() {
+        delete _trackballEH;
     }
 
     void AdvancedUsVis::init() {
         VisualizationPipeline::init();
+
+        _camera.addSharedProperty(&_usEEP.p_camera);
+        _camera.addSharedProperty(&_usDVR.p_camera);
 
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_targetImageID.connect(&_usFusion.p_usImageId);
         _usReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
-        _usReader.p_targetImageID.connect(&_usFilter.p_sourceImageID);
+        _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
+        _usReader.p_targetImageID.connect(&_usDenoiseilter.p_sourceImageID);
 
         _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
         _confidenceReader.p_targetImageID.setValue("confidence.image");
@@ -81,17 +100,40 @@ namespace campvis {
         _usFusion.p_sliceNumber.setValue(0);
         _usFusion.p_view.setValue(0);
 
-        _usFilter.p_targetImageID.setValue("us.filtered");
-        _usFilter.p_targetImageID.connect(&_usFusion.p_blurredImageId);
-        _usFilter.p_filterMode.selectById("gauss");
-        _usFilter.p_sigma.setValue(4.f);
+        _usBlurFilter.p_targetImageID.setValue("us.blurred");
+        _usBlurFilter.p_targetImageID.connect(&_usFusion.p_blurredImageId);
+        _usBlurFilter.p_filterMode.selectById("gauss");
+        _usBlurFilter.p_sigma.setValue(4.f);
+
+        _usDenoiseilter.p_targetImageID.setValue("us.denoised");
+        _usDenoiseilter.p_targetImageID.connect(&_usProxy.p_sourceImageID);
+        _usDenoiseilter.p_targetImageID.connect(&_usEEP.p_sourceImageID);
+        _usDenoiseilter.p_targetImageID.connect(&_usDVR.p_sourceImageID);
+        _usDenoiseilter.p_filterMode.selectById("gradientDiffusion");
+
+        _usProxy.p_geometryID.setValue("us.proxy");
+        _usProxy.p_geometryID.connect(&_usEEP.p_geometryID);
+
+        _usEEP.p_entryImageID.setValue("us.entry");
+        _usEEP.p_entryImageID.connect(&_usDVR.p_entryImageID);
+        _usEEP.p_exitImageID.setValue("us.exit");
+        _usEEP.p_exitImageID.connect(&_usDVR.p_exitImageID);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
         _usFusion.p_transferFunction.replaceTF(tf);
 
+        // TODO: replace this hardcoded domain by automatically determined from image min/max values
+        Geometry1DTransferFunction* tf2 = new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f));
+        tf2->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        _usDVR.p_transferFunction.replaceTF(tf2);
+        _usDVR.p_targetImageID.setValue("us.dvr");
+
         _usFusion.p_targetImageID.addSharedProperty(&(_renderTargetID));
+
+        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
+        _effectiveRenderTargetSize.s_changed.connect<AdvancedUsVis>(this, &AdvancedUsVis::onRenderTargetSizeChanged);
     }
 
     void AdvancedUsVis::execute() {
@@ -101,22 +143,24 @@ namespace campvis {
             // TODO:    think whether we want to lock all processors already here.
         }
 
+        if (!_usReader.getInvalidationLevel().isValid()) {
+            executeProcessor(&_usReader);
+            // convert data
+            DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
+            if (img != 0) {
+                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+
+                _trackballEH->setSceneBounds(volumeExtent);
+                _trackballEH->setCenter(volumeExtent.center());
+                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+            }
+        }
+
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             if (! (*it)->getInvalidationLevel().isValid())
                 lockGLContextAndExecuteProcessor(*it);
         }
-//         if (! _usReader.getInvalidationLevel().isValid()) {
-//             executeProcessor(&_usReader);
-//         }
-//         if (! _gvg.getInvalidationLevel().isValid()) {
-//             executeProcessor(&_gvg);
-//         }
-//         if (! _lhh.getInvalidationLevel().isValid()) {
-//             lockGLContextAndExecuteProcessor(&_lhh);
-//         }
-//         if (! _usFusion.getInvalidationLevel().isValid()) {
-//             lockGLContextAndExecuteProcessor(&_usFusion);
-//         }
     }
 
     void AdvancedUsVis::keyEvent(tgt::KeyEvent* e) {
@@ -134,6 +178,12 @@ namespace campvis {
 
     const std::string AdvancedUsVis::getName() const {
         return "AdvancedUsVis";
+    }
+
+    void AdvancedUsVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
+        _trackballEH->setViewportSize(_renderTargetSize);
+        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        _camera.setWindowRatio(ratio);
     }
 
 }
