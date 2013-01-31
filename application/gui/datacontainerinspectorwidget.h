@@ -38,6 +38,7 @@
 
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
+#include "application/gui/properties/propertycollectionwidget.h"
 #include "core/tools/opengljobprocessor.h"
 
 #include <QLabel>
@@ -109,18 +110,6 @@ namespace campvis {
         void dataContainerChanged(const QString&, QtDataHandle);
 
     private slots:
-        /**
-         * Slot to be called by the DataContainerTreeWidget when the selected item changes.
-         * \param   index   Index of the selected item
-         */
-        void onDCTWidgetItemClicked(const QModelIndex& index);
-
-        /**
-         * Slot to be called by the DataContainerTreeWidget when the data has changed.
-         * \param   topLeft     
-         * \param   bottomRight 
-         */
-        void onDCTWidgetDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
         /**
          * Slot to be called when the selection in the DataContainerTreeWidget has changed.
@@ -148,14 +137,10 @@ namespace campvis {
         QString humanizeBytes(size_t numBytes) const;
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
-        QtDataHandle _selectedDataHandle;               ///< The currently selected QtDataHandle
-        QString _selectedDataHandleName;                ///< The name of the currently selected QtDataHandle
-        tgt::ivec2 _selectedIndex;                      ///< row/column of selected item
-
-        tbb::mutex _localMutex;
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
         DataContainerInspectorCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents
+        PropertyCollectionWidget* _pcWidget;
 
         QHBoxLayout* _mainLayout;                       ///< Layout for this widget
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle

@@ -119,6 +119,9 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
+        IntProperty p_currentSlice;
+        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+
     private slots:
         /**
          * Slot being called when a QtDataHandle has been added to the DataContainer.
@@ -161,8 +164,6 @@ namespace campvis {
 
         std::map<QString, QtDataHandle> _handles;
         std::vector<const tgt::Texture*> _textures;
-        IntProperty p_currentSlice;
-
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         tbb::mutex _localMutex;                         ///< Mutex protecting the local members

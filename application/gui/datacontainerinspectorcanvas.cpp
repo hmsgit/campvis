@@ -39,6 +39,7 @@
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/tools/job.h"
+#include "core/classification/simpletransferfunction.h"
 
 
 namespace campvis {
@@ -46,6 +47,7 @@ namespace campvis {
     DataContainerInspectorCanvas::DataContainerInspectorCanvas(QWidget* parent /*= 0*/) 
         : tgt::QtThreadedCanvas("DataContainer Inspector", tgt::ivec2(640, 480), tgt::GLCanvas::RGBA_BUFFER, parent, true)
         , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
+        , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(64))
         , _dataContainer(0)
         , _paintShader(0)
         , _quad(0)
@@ -65,6 +67,9 @@ namespace campvis {
             std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
             exit(EXIT_FAILURE);
         }
+
+        addProperty(&p_currentSlice);
+        addProperty(&p_transferFunction);
     }
 
     DataContainerInspectorCanvas::~DataContainerInspectorCanvas() {
@@ -120,7 +125,8 @@ namespace campvis {
         tgt::mat4 projection = tgt::mat4::createOrtho(0, size_.x, 0, size_.y, -1, 1);
         _paintShader->setUniform("_projectionMatrix", projection);
 
-        tgt::TextureUnit unit2d, unit3d;
+        tgt::TextureUnit tfUnit, unit2d, unit3d;
+        p_transferFunction.getTF()->bind(_paintShader, tfUnit);
         _paintShader->setUniform("_texture2d._texture", unit2d.getUnitNumber());
         _paintShader->setUniform("_texture3d._texture", unit3d.getUnitNumber());
 
@@ -151,6 +157,7 @@ namespace campvis {
             _paintShader->setUniform("_is3d", false);
             _paintShader->setUniform("_texture2d._size", tgt::vec2(texture->getDimensions().xy()));
             _paintShader->setUniform("_texture2d._sizeRCP", tgt::vec2(1.f) / tgt::vec2(texture->getDimensions().xy()));
+            _paintShader->setUniform("_texture2d._numChannels", static_cast<int>(texture->getNumChannels()));
         }
         else {
             // clamp current slice to texture size, since this can't be done in event handler:
@@ -162,6 +169,7 @@ namespace campvis {
             _paintShader->setUniform("_sliceNumber", p_currentSlice.getValue());
             _paintShader->setUniform("_texture3d._size", tgt::vec3(texture->getDimensions()));
             _paintShader->setUniform("_texture3d._sizeRCP", tgt::vec3(1.f) / tgt::vec3(texture->getDimensions()));
+            _paintShader->setUniform("_texture2d._numChannels", static_cast<int>(texture->getNumChannels()));
         }
         _paintShader->setIgnoreUniformLocationError(false);
 
@@ -258,6 +266,7 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::updateTextures() {
         _textures.clear();
+        int maxSlices = 1;
         for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
             if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
                 if (const ImageRepresentationRenderTarget* imgRT = img->getRepresentation<ImageRepresentationRenderTarget>(false)) {
@@ -267,9 +276,14 @@ namespace campvis {
                 }
                 else if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
                     _textures.push_back(imgGL->getTexture());
+                    maxSlices = std::max(maxSlices, imgGL->getTexture()->getDimensions().z);
                 }
             }
         }
+
+        if (maxSlices == 1)
+            maxSlices = -1;
+        p_currentSlice.setMaxValue(maxSlices);
     }
 
     void DataContainerInspectorCanvas::onPropertyChanged(const AbstractProperty* prop) {

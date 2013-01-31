@@ -48,9 +48,9 @@ namespace campvis {
     DataContainerInspectorWidget::DataContainerInspectorWidget(QWidget* parent) 
         : QWidget(parent)
         , _dataContainer(0)
-        , _selectedDataHandle(0)
         , _dctWidget(0)
         , _canvas(0)
+        , _pcWidget(0)
         , _mainLayout(0)
         , _infoWidget(0)
         , _infoWidgetLayout(0)
@@ -87,32 +87,6 @@ namespace campvis {
         return QSize(640, 480);
     }
 
-    void DataContainerInspectorWidget::onDCTWidgetItemClicked(const QModelIndex& index) {
-        if (index.isValid()) {
-            // Yak, this is so ugly - another reason why GUI programming sucks...
-            QVariant item = index.data(Qt::UserRole);
-
-            _selectedDataHandle = item.value<QtDataHandle>();
-
-            QModelIndex idxName = index.sibling(index.row(), 0);
-            _selectedDataHandleName = idxName.data(Qt::DisplayRole).toString();
-
-            _selectedIndex = tgt::ivec2(index.row(), index.column());
-        }
-        else {
-            _selectedDataHandle = QtDataHandle(0);
-            _selectedDataHandleName = "";
-            _selectedIndex = tgt::ivec2(-1, -1);
-        }
-
-        updateInfoWidget();
-    }
-
-    void DataContainerInspectorWidget::onDCTWidgetDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) {
-        if (topLeft.row() <= _selectedIndex.x && topLeft.column() <= _selectedIndex.y && bottomRight.row() >= _selectedIndex.x && bottomRight.column() >= _selectedIndex.y) {
-            onDCTWidgetItemClicked(topLeft.sibling(_selectedIndex.x, _selectedIndex.y));
-        }
-    }
 
     void DataContainerInspectorWidget::setupGUI() {
         _mainLayout = new QHBoxLayout();
@@ -144,15 +118,13 @@ namespace campvis {
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _infoWidgetLayout->addWidget(_canvas, 1);
 
+        _pcWidget = new PropertyCollectionWidget(_infoWidget);
+        _pcWidget->updatePropCollection(_canvas);
+        _infoWidgetLayout->addWidget(_pcWidget);
+
         _mainLayout->addWidget(_infoWidget, 1);
 
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
-        connect(
-            _dctWidget, SIGNAL(clicked(const QModelIndex&)), 
-            this, SLOT(onDCTWidgetItemClicked(const QModelIndex&)));
-        connect(
-            _dctWidget->getTreeModel(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
-            this, SLOT(onDCTWidgetDataChanged(const QModelIndex&, const QModelIndex&)));
         connect(
             _dctWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), 
             this, SLOT(onDCTWidgetSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -165,34 +137,47 @@ namespace campvis {
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {
-        if (_selectedDataHandle.getData() != 0) {
-            _lblTimestamp->setText("Timestamp: " + QString::number(_selectedDataHandle.getTimestamp()));
-            _lblName->setText("Name: " + _selectedDataHandleName);
-            _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_selectedDataHandle.getData()->getLocalMemoryFootprint()));
-            _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_selectedDataHandle.getData()->getVideoMemoryFootprint()));
-        }
-        else {
-            _lblTimestamp->setText("Timestamp: ");
-            _lblName->setText("Name: ");
-            _lblLocalMemoryFootprint->setText("Local Memory Footprint: ");
-            _lblVideoMemoryFootprint->setText("Video Memory Footprint: ");
-        }
-
-        // update DataHandles for the DataContainerInspectorCanvas
-        const QItemSelection& selectedItems = _dctWidget->selectionModel()->selection();
+        // get the selection from the tree widget
+        const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
         std::vector< std::pair<QString, QtDataHandle> > handles;
-        for (QItemSelection::const_iterator it = selectedItems.begin(); it != selectedItems.end(); ++it) {
-            const QModelIndexList& indices = it->indexes();
-            for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
-                if (! index->isValid())
-                    continue;
+        float _localFootprint = 0.f;
+        float _videoFootprint = 0.f;
 
-                QVariant item = index->data(Qt::UserRole);
-                QModelIndex idxName = index->sibling(index->row(), 0);
+        // iterate through the indices of the selection
+        for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
+            if (! index->isValid())
+                continue;
 
-                handles.push_back(std::make_pair(idxName.data(Qt::DisplayRole).toString(), item.value<QtDataHandle>()));
+            // get DataHandle and Handle name
+            QVariant item = index->data(Qt::UserRole);
+            QtDataHandle handle = item.value<QtDataHandle>();
+            QModelIndex idxName = index->sibling(index->row(), 0);
+
+            // only consider non-empty DataHandles
+            if (handle.getData() != 0) {
+                handles.push_back(std::make_pair(idxName.data(Qt::DisplayRole).toString(), handle));
+                _localFootprint += handle.getData()->getLocalMemoryFootprint();
+                _videoFootprint += handle.getData()->getVideoMemoryFootprint();
             }
         }
+
+        // update labels
+        if (handles.size() == 1) {
+            _lblName->setText("Name: " + handles.front().first);
+            _lblTimestamp->setText("Timestamp: " + QString::number(handles.front().second.getTimestamp()));
+
+            _canvas->p_transferFunction.getTF()->setImageHandle(handles.front().second);
+        }
+        else {
+            _lblName->setText(QString::number(handles.size()) + " DataHandles selected");
+            _lblTimestamp->setText("Timestamp: n/a");
+
+            _canvas->p_transferFunction.getTF()->setImageHandle(0);
+        }
+        _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_localFootprint));
+        _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_videoFootprint));
+
+        // update DataHandles for the DataContainerInspectorCanvas
         _canvas->setDataHandles(handles);
     }
 

@@ -34,9 +34,11 @@ out vec4 out_Color;
 
 #include "tools/texture2d.frag"
 #include "tools/texture3d.frag"
+#include "tools/transferfunction.frag"
 
 uniform Texture2D _texture2d;
 uniform Texture3D _texture3d;
+uniform TransferFunction1D _transferFunction;
 uniform bool _is3d;
 uniform int _sliceNumber;
 uniform vec4 _color;
@@ -50,17 +52,29 @@ void main() {
             // perform MIP
             out_Color = vec4(0.0);
             for (float slice = 0.0; slice < 1.0; slice += _texture3d._sizeRCP.z) {
-                out_Color = max(out_Color, getElement3DNormalized(_texture3d, vec3(ex_TexCoord.xy, slice)));
+                out_Color = max(out_Color, lookupTF(_transferFunction, getElement3DNormalized(_texture3d, vec3(ex_TexCoord.xy, slice)).a));
             }
         }
         else {
             // render the corresponding slice
             vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_texture3d._size.z));
-            out_Color = getElement3DNormalized(_texture3d, coord);
+            out_Color = lookupTF(_transferFunction, getElement3DNormalized(_texture3d, coord).a);
         }
     }
     else {
-        out_Color = getElement2DNormalized(_texture2d, ex_TexCoord.xy);
+        vec4 texel = getElement2DNormalized(_texture2d, ex_TexCoord.xy);
+        if (_texture2d._numChannels == 1) {
+            out_Color = lookupTF(_transferFunction, texel.a);
+        }
+        else if (_texture2d._numChannels == 3) {
+            out_Color = vec4(abs(texel.rgb), 1.0);
+        }
+        else if (_texture2d._numChannels == 4) {
+            out_Color = (abs(texel) - vec4(_transferFunction._intensityDomain.x)) / (_transferFunction._intensityDomain.y - _transferFunction._intensityDomain.x);
+        }
+        else {
+            out_Color = vec4(0.1, 0.6, 1.0, 0.75);
+        }
     }
 
     // mix with fancy checkerboard pattern:
