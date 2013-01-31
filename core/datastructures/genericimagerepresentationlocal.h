@@ -76,6 +76,23 @@ namespace campvis {
                     }
                 }
             };
+            
+            /**
+             * Creates a new ScopedRepresentation for the given DataHandle, that behaves like a T*.
+             * \param   dh  Source DataHandle
+             */
+            ScopedRepresentation(DataHandle dataHandle)
+                : dh(dataHandle)
+                , data(0)
+                , representation(0) 
+            {
+                if (dh.getData() != 0) {
+                    data = dynamic_cast<const ImageData*>(dh.getData());
+                    if (data != 0) {
+                        representation = data->getRepresentation<ThisType>();
+                    }
+                }
+            };
 
             /**
              * Implicit conversion operator to const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>*.

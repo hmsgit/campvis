@@ -122,8 +122,6 @@ namespace campvis {
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
         DataContainerInspectorWidget* _dcInspectorWidget;   ///< Widget for inspecting the DataContainer of the selected pipeline.
 
-        DataContainerInspectorCanvas* _dcInspectorCanvas;
-
         QPushButton* _btnExecute;                           ///< Button to execute the selected pipeline/processor
         QPushButton* _btnShowDataContainerInspector;        ///< Button to show the DataContainerInspector for the selected pipeline
 

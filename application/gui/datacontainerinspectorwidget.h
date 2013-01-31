@@ -36,6 +36,7 @@
 #include "tgt/qt/qtthreadedcanvas.h"
 
 #include "application/gui/qtdatahandle.h"
+#include "application/gui/datacontainerinspectorcanvas.h"
 #include "core/tools/opengljobprocessor.h"
 
 #include <QLabel>
@@ -48,12 +49,15 @@ class QModelIndex;
 
 namespace tgt {
     class Texture;
+    class TextureUnit;
+    class Shader;
 }
 
 namespace campvis {
     class AbstractPipeline;
     class DataContainer;
     class DataContainerTreeWidget;
+    class FaceGeometry;
 
     class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -86,6 +90,18 @@ namespace campvis {
          * \return QSize(640, 480)
          */
         QSize sizeHint() const;
+        
+        /**
+         * Initializes the OpenGL stuff (e.g. shaders).
+         * Must be called with a valid and locked OpenGL context.
+         */
+        virtual void init();
+
+        /**
+         * Deinitializes the OpenGL stuff (e.g. shaders).
+         * Must be called with a valid and locked OpenGL context.
+         */
+        void deinit();
 
     signals:
         void dataContainerChanged(const QString&, QtDataHandle);
@@ -122,13 +138,17 @@ namespace campvis {
          */
         QString humanizeBytes(size_t numBytes) const;
 
+        tgt::Shader* _paintShader;
+        FaceGeometry* _quad;                            ///< Quad used for rendering
+        int _currentSlice;                           ///< current slice if rendering a 3D image fullscreen, render MIP if negative
+
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         QtDataHandle _selectedDataHandle;               ///< The currently selected QtDataHandle
         QString _selectedDataHandleName;                ///< The name of the currently selected QtDataHandle
         tgt::ivec2 _selectedIndex;                      ///< row/column of selected item
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
-        tgt::QtThreadedCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents
+        DataContainerInspectorCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents
 
         QHBoxLayout* _mainLayout;                       ///< Layout for this widget
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle

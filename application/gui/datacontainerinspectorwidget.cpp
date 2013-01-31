@@ -30,8 +30,16 @@
 #include "datacontainerinspectorwidget.h"
 
 #include "tgt/assert.h"
+#include "tgt/shadermanager.h"
+#include "tgt/textureunit.h"
+#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/qt/qtthreadedcanvas.h"
+
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
+#include "core/datastructures/facegeometry.h"
+#include "core/datastructures/imagerepresentationgl.h"
+
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
 
@@ -39,6 +47,9 @@ namespace campvis {
 
     DataContainerInspectorWidget::DataContainerInspectorWidget(QWidget* parent) 
         : QWidget(parent)
+        , _quad(0)
+        , _paintShader(0)
+        , _currentSlice(-1)
         , _dataContainer(0)
         , _selectedDataHandle(0)
         , _dctWidget(0)
@@ -63,6 +74,9 @@ namespace campvis {
 
         _dataContainer = dataContainer;
         _dctWidget->update(dataContainer);
+
+        if (_canvas != 0)
+            _canvas->setDataContainer(_dataContainer);
         
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.connect(this, &DataContainerInspectorWidget::onDataContainerDataAdded);
@@ -130,9 +144,8 @@ namespace campvis {
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
         _infoWidgetLayout->addWidget(_lblTimestamp);
 
-//         _canvas = CtxtMgr.createContext("DataContainerInspector", "", tgt::ivec2(128, 128), tgt::GLCanvas::RGBA, _infoWidget);
-//         _infoWidgetLayout->addWidget(_canvas, 1);
-        _infoWidgetLayout->addWidget(new QWidget(_infoWidget), 1);
+        _canvas = new DataContainerInspectorCanvas(_infoWidget);
+        _infoWidgetLayout->addWidget(_canvas, 1);
 
         _mainLayout->addWidget(_infoWidget, 1);
 
@@ -178,6 +191,16 @@ namespace campvis {
             return QString::number(numBytes) + "." + QString::number(remainder) + units[index];
         else
             return QString::number(numBytes) + units[index];
+    }
+
+    void DataContainerInspectorWidget::init() {
+        if (_canvas != 0)
+            _canvas->init();
+    }
+
+    void DataContainerInspectorWidget::deinit() {
+        if (_canvas != 0)
+            _canvas->deinit();
     }
 
 }

@@ -46,7 +46,6 @@ namespace campvis {
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
-        , _dcInspectorCanvas(0)
         , _btnExecute(0)
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
@@ -58,15 +57,14 @@ namespace campvis {
 
     MainWindow::~MainWindow() {
         _application->s_PipelinesChanged.disconnect(this);
-        delete _dcInspectorCanvas;
         delete _dcInspectorWidget;
     }
 
     void MainWindow::setup() {
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
 
-        _dcInspectorCanvas = new DataContainerInspectorCanvas();
-        _dcInspectorCanvas->show();
+        _dcInspectorWidget = new DataContainerInspectorWidget();
+        _dcInspectorWidget->show();
 
         _centralWidget = new QWidget(this);
         QHBoxLayout* mainLayout = new QHBoxLayout();
@@ -126,9 +124,6 @@ namespace campvis {
             if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
             	_selectedPipeline = pipeline;
                 _selectedProcessor = 0;
-                if (_dcInspectorCanvas != 0)
-                    _dcInspectorCanvas->setDataContainer(&_selectedPipeline->getDataContainer());
-
                 if (_dcInspectorWidget != 0)
                     onBtnShowDataContainerInspectorClicked();
             }
@@ -158,22 +153,19 @@ namespace campvis {
 
     void MainWindow::onBtnShowDataContainerInspectorClicked() {
         if (_selectedPipeline != 0) {
-            if (_dcInspectorWidget == 0) {
-                _dcInspectorWidget = new DataContainerInspectorWidget();
-            }
             _dcInspectorWidget->setDataContainer(&(_selectedPipeline->getDataContainer()));
             _dcInspectorWidget->show();
         }
     }
 
     void MainWindow::init() {
-        if (_dcInspectorCanvas != 0)
-            _dcInspectorCanvas->init();
+        if (_dcInspectorWidget != 0)
+            _dcInspectorWidget->init();
     }
 
     void MainWindow::deinit() {
-        if (_dcInspectorCanvas != 0)
-            _dcInspectorCanvas->deinit();
+        if (_dcInspectorWidget != 0)
+            _dcInspectorWidget->deinit();
     }
 
 }
