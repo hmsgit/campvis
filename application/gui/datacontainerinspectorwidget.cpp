@@ -89,6 +89,8 @@ namespace campvis {
 
 
     void DataContainerInspectorWidget::setupGUI() {
+        setWindowTitle(tr("DataContainer Inspector"));
+
         _mainLayout = new QHBoxLayout();
         _mainLayout->setSpacing(4);
         setLayout(_mainLayout);
@@ -166,7 +168,8 @@ namespace campvis {
             _lblName->setText("Name: " + handles.front().first);
             _lblTimestamp->setText("Timestamp: " + QString::number(handles.front().second.getTimestamp()));
 
-            _canvas->p_transferFunction.getTF()->setImageHandle(handles.front().second);
+            if (dynamic_cast<const ImageData*>(handles.front().second.getData()))
+                _canvas->p_transferFunction.getTF()->setImageHandle(handles.front().second);
         }
         else {
             _lblName->setText(QString::number(handles.size()) + " DataHandles selected");
