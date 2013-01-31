@@ -77,6 +77,8 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::init() {
+        initAllProperties();
+
         GLJobProc.registerContext(this);
         _paintShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "", false);
         _paintShader->setAttributeLocation(0, "in_Position");
@@ -90,6 +92,8 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::deinit() {
+        deinitAllProperties();
+
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);
         }

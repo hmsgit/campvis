@@ -56,15 +56,17 @@ namespace campvis {
         clearWidgetMap();
         
         // create widgets for the new PropertyCollection
-        for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
-            QWidget* propWidget = PropertyWidgetFactory::createWidget(*it);
-            if (propWidget == 0)
-                propWidget = new QPushButton(QString::fromStdString((*it)->getTitle()));
+        if (propertyCollection != 0) {
+            for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
+                QWidget* propWidget = PropertyWidgetFactory::createWidget(*it);
+                if (propWidget == 0)
+                    propWidget = new QPushButton(QString::fromStdString((*it)->getTitle()));
 
-            _widgetMap.insert(std::make_pair(*it, propWidget));
-            _layout->addWidget(propWidget);
-            propWidget->setVisible((*it)->isVisible());
-            (*it)->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
+                _widgetMap.insert(std::make_pair(*it, propWidget));
+                _layout->addWidget(propWidget);
+                propWidget->setVisible((*it)->isVisible());
+                (*it)->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
+            }
         }
     }
 

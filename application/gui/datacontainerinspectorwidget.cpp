@@ -209,6 +209,8 @@ namespace campvis {
     void DataContainerInspectorWidget::deinit() {
         if (_canvas != 0)
             _canvas->deinit();
+
+        _pcWidget->updatePropCollection(0);
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {

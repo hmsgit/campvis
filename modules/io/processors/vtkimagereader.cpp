@@ -72,7 +72,7 @@ namespace campvis {
 
     void VtkImageReader::process(DataContainer& data) {
         try {
-            std::ifstream file(p_url.getValue(), std::ifstream::in);
+            std::ifstream file(p_url.getValue().c_str(), std::ifstream::in);
             if (!file.is_open() || file.bad())
                 throw tgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
 
