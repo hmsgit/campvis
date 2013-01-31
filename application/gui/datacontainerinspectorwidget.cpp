@@ -47,9 +47,6 @@ namespace campvis {
 
     DataContainerInspectorWidget::DataContainerInspectorWidget(QWidget* parent) 
         : QWidget(parent)
-        , _quad(0)
-        , _paintShader(0)
-        , _currentSlice(-1)
         , _dataContainer(0)
         , _selectedDataHandle(0)
         , _dctWidget(0)
@@ -74,10 +71,8 @@ namespace campvis {
 
         _dataContainer = dataContainer;
         _dctWidget->update(dataContainer);
+        updateInfoWidget();
 
-        if (_canvas != 0)
-            _canvas->setDataContainer(_dataContainer);
-        
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.connect(this, &DataContainerInspectorWidget::onDataContainerDataAdded);
         }
@@ -125,6 +120,8 @@ namespace campvis {
         setLayout(_mainLayout);
 
         _dctWidget = new DataContainerTreeWidget(this);
+        _dctWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+        _dctWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
         _mainLayout->addWidget(_dctWidget);
 
         _infoWidget = new QWidget(this);
@@ -157,6 +154,12 @@ namespace campvis {
             _dctWidget->getTreeModel(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), 
             this, SLOT(onDCTWidgetDataChanged(const QModelIndex&, const QModelIndex&)));
         connect(
+            _dctWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), 
+            this, SLOT(onDCTWidgetSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&)));
+        connect(
+            this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
+            _canvas, SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
+        connect(
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
     }
@@ -174,6 +177,23 @@ namespace campvis {
             _lblLocalMemoryFootprint->setText("Local Memory Footprint: ");
             _lblVideoMemoryFootprint->setText("Video Memory Footprint: ");
         }
+
+        // update DataHandles for the DataContainerInspectorCanvas
+        const QItemSelection& selectedItems = _dctWidget->selectionModel()->selection();
+        std::vector< std::pair<QString, QtDataHandle> > handles;
+        for (QItemSelection::const_iterator it = selectedItems.begin(); it != selectedItems.end(); ++it) {
+            const QModelIndexList& indices = it->indexes();
+            for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
+                if (! index->isValid())
+                    continue;
+
+                QVariant item = index->data(Qt::UserRole);
+                QModelIndex idxName = index->sibling(index->row(), 0);
+
+                handles.push_back(std::make_pair(idxName.data(Qt::DisplayRole).toString(), item.value<QtDataHandle>()));
+            }
+        }
+        _canvas->setDataHandles(handles);
     }
 
     QString DataContainerInspectorWidget::humanizeBytes(size_t numBytes) const {
@@ -201,6 +221,10 @@ namespace campvis {
     void DataContainerInspectorWidget::deinit() {
         if (_canvas != 0)
             _canvas->deinit();
+    }
+
+    void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
+        updateInfoWidget();
     }
 
 }

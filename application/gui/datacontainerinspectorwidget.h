@@ -34,6 +34,7 @@
 #include "tgt/painter.h"
 #include "tgt/qt/qtcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
+#include "tbb/include/tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
@@ -46,6 +47,7 @@
 #include <QString>
 
 class QModelIndex;
+class QItemSelection;
 
 namespace tgt {
     class Texture;
@@ -120,6 +122,13 @@ namespace campvis {
          */
         void onDCTWidgetDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
+        /**
+         * Slot to be called when the selection in the DataContainerTreeWidget has changed.
+         * \param selected      selected items
+         * \param deselected    deselected items
+         */
+        void onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+
     protected:
         /**
          * Setup the GUI stuff
@@ -138,14 +147,12 @@ namespace campvis {
          */
         QString humanizeBytes(size_t numBytes) const;
 
-        tgt::Shader* _paintShader;
-        FaceGeometry* _quad;                            ///< Quad used for rendering
-        int _currentSlice;                           ///< current slice if rendering a 3D image fullscreen, render MIP if negative
-
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         QtDataHandle _selectedDataHandle;               ///< The currently selected QtDataHandle
         QString _selectedDataHandleName;                ///< The name of the currently selected QtDataHandle
         tgt::ivec2 _selectedIndex;                      ///< row/column of selected item
+
+        tbb::mutex _localMutex;
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
         DataContainerInspectorCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents

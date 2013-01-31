@@ -38,6 +38,11 @@
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tbb/include/tbb/mutex.h"
 
+#include "application/gui/qtdatahandle.h"
+
+#include "core/properties/propertycollection.h"
+#include "core/properties/numericproperty.h"
+#include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"
 
 namespace tgt {
@@ -53,7 +58,7 @@ namespace campvis {
     class DataHandle;
     class FaceGeometry;
 
-    class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public tgt::EventListener, public sigslot::has_slots<> {
+    class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public tgt::EventListener, public HasPropertyCollection {
         Q_OBJECT;
 
     public:
@@ -80,11 +85,7 @@ namespace campvis {
          */
         void deinit();
 
-        /**
-         * Set the DataContainer this widget is inspecting.
-         * \param   dataContainer   The DataContainer this widget shall inspect, may be 0.
-         */
-        void setDataContainer(DataContainer* dataContainer);
+        void setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles);
 
         /**
          * Size hint for the default window size
@@ -111,8 +112,20 @@ namespace campvis {
          * \param   e   Mouse event arguments
          */
         virtual void wheelEvent(tgt::MouseEvent* e);
+        
+        /**
+         * Slot getting called when one of the observed properties changed and notifies its observers.
+         * \param   prop    Property that emitted the signal
+         */
+        virtual void onPropertyChanged(const AbstractProperty* prop);
 
     private slots:
+        /**
+         * Slot being called when a QtDataHandle has been added to the DataContainer.
+         * \param   key     Name of the QtDataHandle
+         * \param   dh      The added QtDataHandle
+         */
+        void onDataContainerChanged(const QString& key, QtDataHandle dh);
 
     protected:
         /**
@@ -124,6 +137,12 @@ namespace campvis {
         void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
 
         /**
+         * Updates the textures vector.
+         * \note Only call with acquired lock!!
+         */
+        void updateTextures();
+
+        /**
          * To be called when the canvas is invalidated, issues new paint job.
          */
         void invalidate();
@@ -133,15 +152,19 @@ namespace campvis {
          * Binds the texture to the shader, sets the uniforms and renders the quad.
          * \param   texture     The texture to render.
          */
-        void paintTexture2D(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
+        void paintTexture(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
 
         /**
          * Creates the quad used for rendering the textures.
          */
         void createQuad();
 
+        std::map<QString, QtDataHandle> _handles;
+        std::vector<const tgt::Texture*> _textures;
+        IntProperty p_currentSlice;
+
+
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
-        std::map<std::string, DataHandle> _handles;     ///< Local copy of the DataHandles to inspect
         tbb::mutex _localMutex;                         ///< Mutex protecting the local members
 
         tgt::Shader* _paintShader;                      ///< GLSL shader for rendering the textures

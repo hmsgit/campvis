@@ -171,17 +171,13 @@ namespace campvis {
         delete _intensityHistogram;
         _intensityHistogram = 0;
 
-        if (_imageHandle.getData() != 0) {
-            const ImageData* id = dynamic_cast<const ImageData*>(_imageHandle.getData());
-            if (id != 0) {
-                if(const ImageRepresentationLocal* idl = id->getRepresentation<ImageRepresentationLocal>()) {
-                    float mins = _intensityDomain.x;
-                    float maxs = _intensityDomain.y;
-                    size_t numBuckets = std::min(WeaklyTypedPointer::numBytes(idl->getWeaklyTypedPointer()._baseType) << 8, 512U);
-                    _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
-                    tbb::parallel_for(tbb::blocked_range<size_t>(0, idl->getNumElements()), IntensityHistogramGenerator(idl, _intensityHistogram));
-                }
-            }
+        ImageRepresentationLocal::ScopedRepresentation repLocal(_imageHandle);
+        if (repLocal != 0) {
+            float mins = _intensityDomain.x;
+            float maxs = _intensityDomain.y;
+            size_t numBuckets = std::min(WeaklyTypedPointer::numBytes(repLocal->getWeaklyTypedPointer()._baseType) << 8, 512U);
+            _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, repLocal->getNumElements()), IntensityHistogramGenerator(repLocal, _intensityHistogram));
         }
 
         _dirtyHistogram = false;

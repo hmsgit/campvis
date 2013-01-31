@@ -45,6 +45,7 @@ namespace campvis {
 
     DataContainerInspectorCanvas::DataContainerInspectorCanvas(QWidget* parent /*= 0*/) 
         : tgt::QtThreadedCanvas("DataContainer Inspector", tgt::ivec2(640, 480), tgt::GLCanvas::RGBA_BUFFER, parent, true)
+        , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
         , _dataContainer(0)
         , _paintShader(0)
         , _quad(0)
@@ -93,93 +94,25 @@ namespace campvis {
         delete _quad;
     }
 
-    void DataContainerInspectorCanvas::setDataContainer(DataContainer* dataContainer) {
-        if (_dataContainer != 0) {
-            _dataContainer->s_dataAdded.disconnect(this);
-        }
-
-        {
-            tbb::mutex::scoped_lock lock(_localMutex);
-            _dataContainer = dataContainer;
-            if (_dataContainer != 0) {
-                _handles = _dataContainer->getHandlesCopy();
-            }
-        }
-
-        if (_dataContainer != 0) {
-            _dataContainer->s_dataAdded.connect(this, &DataContainerInspectorCanvas::onDataContainerDataAdded);
-        }
-
-        invalidate();
-    }
-
     QSize DataContainerInspectorCanvas::sizeHint() const {
         return QSize(640, 480);
     }
 
-    void DataContainerInspectorCanvas::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
-        {
-            tbb::mutex::scoped_lock lock(_localMutex);
-
-            // check whether DataHandle is already existing
-            std::map<std::string, DataHandle>::iterator lb = _handles.lower_bound(name);
-            if (lb == _handles.end() || lb->first != name) {
-                // not existant -> insert
-                _handles.insert(std::make_pair(name, DataHandle(dh)));
-            }
-            else {
-                // existant -> replace
-                lb->second = DataHandle(dh);
-            }
-        }
-
-        invalidate();
-    }
 
     void DataContainerInspectorCanvas::paint() {
         tbb::mutex::scoped_lock lock(_localMutex);
-
-        std::vector<const tgt::Texture*> textures;
-        for (std::map<std::string, DataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
-            if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
-                if (const ImageRepresentationRenderTarget* imgRT = img->getRepresentation<ImageRepresentationRenderTarget>(false)) {
-                    for (size_t i = 0; i < imgRT->getNumColorTextures(); ++i)
-                        textures.push_back(imgRT->getColorTexture(i));
-                    textures.push_back(imgRT->getDepthTexture());
-                }
-                else if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
-                    textures.push_back(imgGL->getTexture());
-                }
-            }
-        }
+        if (_textures.empty())
+            return;
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
-
         glViewport(0, 0, size_.x, size_.y);
         glClearColor(0.7f, 0.7f, 0.7f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         LGL_ERROR;
 
-        if (textures.empty()) {
-            glPopAttrib();
-            return;
-        }
-
-        // update window title
-        int memsize = 0;
-        for (size_t i = 0; i < textures.size(); ++i) {
-            memsize += textures[i]->getSizeOnGPU();
-        }
-        memsize /= 1024 * 1024;
-        /*QString title = tr("DataContainer Inspector: %1 Textures (%2 mb)").arg(textures.size()).arg(memsize);
-        if (parentWidget() && parentWidget()->parentWidget())
-            parentWidget()->parentWidget()->setWindowTitle(title);
-        else
-            setWindowTitle(title);*/
-
         // update layout dimensions
-        _numTiles.x = ceil(sqrt(static_cast<float>(textures.size())));
-        _numTiles.y = ceil(static_cast<float>(textures.size()) / _numTiles.x);
+        _numTiles.x = ceil(sqrt(static_cast<float>(_textures.size())));
+        _numTiles.y = ceil(static_cast<float>(_textures.size()) / _numTiles.x);
         _quadSize = size_ / _numTiles;
 
         _paintShader->activate();
@@ -191,25 +124,16 @@ namespace campvis {
         _paintShader->setUniform("_texture2d._texture", unit2d.getUnitNumber());
         _paintShader->setUniform("_texture3d._texture", unit3d.getUnitNumber());
 
-        if (_renderFullscreen) {
-            if(_selectedTexture >= 0 && _selectedTexture < (int)textures.size()) {
-                tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(size_, 1.f));
-                _paintShader->setUniform("_modelMatrix", scaleMatrix);
-                paintTexture2D(textures[_selectedTexture], unit2d, unit3d);
-            }
-        }
-        else {
-            for (int y = 0; y < _numTiles.y; ++y) {
-                for (int x = 0; x < _numTiles.x; ++x) {
-                    int index = (_numTiles.x * y) + x;
-                    if (index >= static_cast<int>(textures.size()))
-                        break;
+        for (int y = 0; y < _numTiles.y; ++y) {
+            for (int x = 0; x < _numTiles.x; ++x) {
+                int index = (_numTiles.x * y) + x;
+                if (index >= static_cast<int>(_textures.size()))
+                    break;
 
-                    tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(_quadSize, 1.f));
-                    tgt::mat4 translation = tgt::mat4::createTranslation(tgt::vec3(_quadSize.x * x, _quadSize.y * y, 0.f));
-                    _paintShader->setUniform("_modelMatrix", translation * scaleMatrix);
-                    paintTexture2D(textures[index], unit2d, unit3d);
-                }
+                tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(_quadSize, 1.f));
+                tgt::mat4 translation = tgt::mat4::createTranslation(tgt::vec3(_quadSize.x * x, _quadSize.y * y, 0.f));
+                _paintShader->setUniform("_modelMatrix", translation * scaleMatrix);
+                paintTexture(_textures[index], unit2d, unit3d);
             }
         }
 
@@ -218,7 +142,7 @@ namespace campvis {
         glPopAttrib();
     }
 
-    void DataContainerInspectorCanvas::paintTexture2D(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d) {
+    void DataContainerInspectorCanvas::paintTexture(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d) {
 
         _paintShader->setIgnoreUniformLocationError(true);
         if (texture->getDimensions().z == 1) {
@@ -235,7 +159,7 @@ namespace campvis {
             unit3d.activate();
             texture->bind();
             _paintShader->setUniform("_is3d", true);
-            _paintShader->setUniform("_sliceNumber", _currentSlice);
+            _paintShader->setUniform("_sliceNumber", p_currentSlice.getValue());
             _paintShader->setUniform("_texture3d._size", tgt::vec3(texture->getDimensions()));
             _paintShader->setUniform("_texture3d._sizeRCP", tgt::vec3(1.f) / tgt::vec3(texture->getDimensions()));
         }
@@ -297,6 +221,60 @@ namespace campvis {
             }
             invalidate();
         }
+    }
+
+    void DataContainerInspectorCanvas::onDataContainerChanged(const QString& key, QtDataHandle dh) {
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+
+            // check whether DataHandle is already existing
+            std::map<QString, QtDataHandle>::iterator lb = _handles.lower_bound(key);
+            if (lb == _handles.end() || lb->first != key) {
+                // not existant -> do nothing
+            }
+            else {
+                // existant -> replace
+                lb->second = QtDataHandle(dh);
+                // update _textures array
+                updateTextures();
+            }
+        }
+        
+        invalidate();
+    }
+
+    void DataContainerInspectorCanvas::setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles) {
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            _handles.clear();
+            for (std::vector< std::pair<QString, QtDataHandle> >::const_iterator it = handles.begin(); it != handles.end(); ++it)
+                _handles.insert(*it);
+
+            updateTextures();
+        }
+
+        invalidate();
+    }
+
+    void DataContainerInspectorCanvas::updateTextures() {
+        _textures.clear();
+        for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
+            if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
+                if (const ImageRepresentationRenderTarget* imgRT = img->getRepresentation<ImageRepresentationRenderTarget>(false)) {
+                    for (size_t i = 0; i < imgRT->getNumColorTextures(); ++i)
+                        _textures.push_back(imgRT->getColorTexture(i));
+                    _textures.push_back(imgRT->getDepthTexture());
+                }
+                else if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
+                    _textures.push_back(imgGL->getTexture());
+                }
+            }
+        }
+    }
+
+    void DataContainerInspectorCanvas::onPropertyChanged(const AbstractProperty* prop) {
+        HasPropertyCollection::onPropertyChanged(prop);
+        invalidate();
     }
 
 }
