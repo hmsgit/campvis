@@ -146,7 +146,6 @@ int Texture::calcBpp(GLint internalformat) {
         case GL_RED:
         case GL_GREEN:
         case GL_BLUE:
-        case GL_ALPHA:
         case GL_ALPHA8:
         case GL_INTENSITY:
         case GL_LUMINANCE:
@@ -157,16 +156,20 @@ int Texture::calcBpp(GLint internalformat) {
         case 2:
         case GL_LUMINANCE_ALPHA:
         case GL_INTENSITY16:
+        case GL_ALPHA16:
         case GL_DEPTH_COMPONENT16:
             bpp = 2;
             break;
 
         case GL_RGB:
+        case GL_RGB8:
         case GL_BGR:
         case GL_DEPTH_COMPONENT24:
             bpp = 3;
             break;
 
+        case GL_ALPHA:
+        case GL_ALPHA32F_ARB:
         case GL_RGBA:
         case GL_RGBA8:
         case GL_BGRA:

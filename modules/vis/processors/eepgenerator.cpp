@@ -106,7 +106,7 @@ namespace campvis {
 
                 // clip proxy geometry against near-plane to support camera in volume
                 // FIXME:   In some cases, the near plane is not rendered correctly...
-                float nearPlaneDistToOrigin = tgt::dot(p_camera.getValue().getPosition(), -p_camera.getValue().getLook()) - p_camera.getValue().getNearDist() - .001f;
+                float nearPlaneDistToOrigin = tgt::dot(p_camera.getValue().getPosition(), -p_camera.getValue().getLook()) - p_camera.getValue().getNearDist() - .002f;
                 MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -p_camera.getValue().getLook(), true, 0.02f);
 
                 // start render setup
