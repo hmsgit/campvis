@@ -43,6 +43,7 @@
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
+#include "modules/vis/processors/quadview.h"
 
 namespace campvis {
     class AdvancedUsVis : public VisualizationPipeline {
@@ -78,8 +79,13 @@ namespace campvis {
         MhdImageReader _confidenceReader;
         GradientVolumeGenerator _gvg;
         LHHistogram _lhh;
-        AdvancedUsFusion _usFusion;
+        AdvancedUsFusion _usFusion1;
+        AdvancedUsFusion _usFusion2;
+        AdvancedUsFusion _usFusion3;
+        AdvancedUsFusion _usFusion4;
         ItkImageFilter _usBlurFilter;
+
+        QuadView _quadView;
 
         ItkImageFilter _usDenoiseilter;
         ProxyGeometryGenerator _usProxy;

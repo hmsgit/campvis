@@ -43,22 +43,30 @@ namespace campvis {
         , _confidenceReader()
         , _gvg()
         , _lhh()
-        , _usFusion(_effectiveRenderTargetSize)
+        , _usFusion1(_effectiveRenderTargetSize)
+        , _usFusion2(_effectiveRenderTargetSize)
+        , _usFusion3(_effectiveRenderTargetSize)
+        , _usFusion4(_effectiveRenderTargetSize)
         , _usBlurFilter()
+        , _quadView(_effectiveRenderTargetSize)
         , _usDenoiseilter()
         , _usProxy()
         , _usEEP(_effectiveRenderTargetSize)
         , _usDVR(_effectiveRenderTargetSize)
-        , _wheelHandler(&_usFusion.p_sliceNumber)
-        , _tfWindowingHandler(&_usFusion.p_transferFunction)
+        , _wheelHandler(&_usFusion1.p_sliceNumber)
+        , _tfWindowingHandler(&_usFusion1.p_transferFunction)
         , _trackballEH(0)
     {
         addProcessor(&_usReader);
         addProcessor(&_confidenceReader);
         addProcessor(&_gvg);
         //addProcessor(&_lhh);
-        addProcessor(&_usFusion);
         addProcessor(&_usBlurFilter);
+        addProcessor(&_usFusion1);
+        addProcessor(&_usFusion2);
+        addProcessor(&_usFusion3);
+        addProcessor(&_usFusion4);
+        addProcessor(&_quadView);
         addProcessor(&_usDenoiseilter);
         addProcessor(&_usProxy);
         addProcessor(&_usEEP);
@@ -83,7 +91,10 @@ namespace campvis {
 
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
         _usReader.p_targetImageID.setValue("us.image");
-        _usReader.p_targetImageID.connect(&_usFusion.p_usImageId);
+        _usReader.p_targetImageID.connect(&_usFusion1.p_usImageId);
+        _usReader.p_targetImageID.connect(&_usFusion2.p_usImageId);
+        _usReader.p_targetImageID.connect(&_usFusion3.p_usImageId);
+        _usReader.p_targetImageID.connect(&_usFusion4.p_usImageId);
         _usReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
         _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
@@ -91,25 +102,53 @@ namespace campvis {
 
         _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
         _confidenceReader.p_targetImageID.setValue("confidence.image");
-        _confidenceReader.p_targetImageID.connect(&_usFusion.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
 
         _gvg.p_targetImageID.connect(&_lhh.p_gradientsId);
-        _gvg.p_targetImageID.connect(&_usFusion.p_gradientImageID);
+        _gvg.p_targetImageID.connect(&_usFusion1.p_gradientImageID);
+        _gvg.p_targetImageID.connect(&_usFusion2.p_gradientImageID);
+        _gvg.p_targetImageID.connect(&_usFusion3.p_gradientImageID);
+        _gvg.p_targetImageID.connect(&_usFusion4.p_gradientImageID);
 
-        _usFusion.p_targetImageID.setValue("us.fused");
-        _usFusion.p_sliceNumber.setValue(0);
-        _usFusion.p_view.setValue(0);
+        _usFusion1.p_targetImageID.setValue("us.fused1");
+        _usFusion1.p_targetImageID.connect(&_quadView.p_inputImage1);
+        _usFusion1.p_view.selectById("us");
+        _usFusion1.p_sliceNumber.setValue(0);
+        _usFusion1.p_sliceNumber.addSharedProperty(&_usFusion2.p_sliceNumber);
+        _usFusion1.p_sliceNumber.addSharedProperty(&_usFusion3.p_sliceNumber);
+        _usFusion1.p_sliceNumber.addSharedProperty(&_usFusion4.p_sliceNumber);
+
+        _usFusion2.p_targetImageID.setValue("us.fused2");
+        _usFusion2.p_targetImageID.connect(&_quadView.p_inputImage2);
+        _usFusion2.p_view.selectById("mappingSaturationHSV");
+
+        _usFusion3.p_targetImageID.setValue("us.fused3");
+        _usFusion3.p_targetImageID.connect(&_quadView.p_inputImage3);
+        _usFusion3.p_view.selectById("mappingChromacity");
+
+        _usFusion4.p_targetImageID.setValue("us.fused4");
+        _usFusion4.p_targetImageID.connect(&_quadView.p_inputImage4);
+        _usFusion4.p_view.selectById("mappingSharpness");
 
         _usBlurFilter.p_targetImageID.setValue("us.blurred");
-        _usBlurFilter.p_targetImageID.connect(&_usFusion.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.connect(&_usFusion1.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.connect(&_usFusion2.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.connect(&_usFusion3.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.connect(&_usFusion4.p_blurredImageId);
         _usBlurFilter.p_filterMode.selectById("gauss");
         _usBlurFilter.p_sigma.setValue(4.f);
+
+        _quadView.p_outputImage.setValue("quadview.output");
 
         _usDenoiseilter.p_targetImageID.setValue("us.denoised");
         _usDenoiseilter.p_targetImageID.connect(&_usProxy.p_sourceImageID);
         _usDenoiseilter.p_targetImageID.connect(&_usEEP.p_sourceImageID);
         _usDenoiseilter.p_targetImageID.connect(&_usDVR.p_sourceImageID);
         _usDenoiseilter.p_filterMode.selectById("gradientDiffusion");
+        _usDenoiseilter.p_numberOfSteps.setValue(3);
 
         _usProxy.p_geometryID.setValue("us.proxy");
         _usProxy.p_geometryID.connect(&_usEEP.p_geometryID);
@@ -122,7 +161,7 @@ namespace campvis {
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
-        _usFusion.p_transferFunction.replaceTF(tf);
+        _usFusion1.p_transferFunction.replaceTF(tf);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf2 = new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f));
@@ -130,7 +169,7 @@ namespace campvis {
         _usDVR.p_transferFunction.replaceTF(tf2);
         _usDVR.p_targetImageID.setValue("us.dvr");
 
-        _usFusion.p_targetImageID.addSharedProperty(&(_renderTargetID));
+        _renderTargetID.setValue("quadview.output");
 
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<AdvancedUsVis>(this, &AdvancedUsVis::onRenderTargetSizeChanged);
@@ -167,10 +206,10 @@ namespace campvis {
         if (e->pressed()) {
             switch (e->keyCode()) {
                 case tgt::KeyEvent::K_UP:
-                    _usFusion.p_sliceNumber.increment();
+                    _usFusion1.p_sliceNumber.increment();
                     break;
                 case tgt::KeyEvent::K_DOWN:
-                    _usFusion.p_sliceNumber.decrement();
+                    _usFusion1.p_sliceNumber.decrement();
                     break;
             }
         }
