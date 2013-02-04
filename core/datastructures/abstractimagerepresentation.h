@@ -111,6 +111,15 @@ namespace campvis {
         virtual AbstractImageRepresentation* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
     protected:
+        /**
+         * Adds this image representations to the parent image data.
+         */
+        void addToParent() const;
+
+        /// Not copy-constructable
+        AbstractImageRepresentation(const AbstractImageRepresentation& rhs);
+        /// Not assignable
+        AbstractImageRepresentation& operator=(const AbstractImageRepresentation& rhs);
 
         const ImageData* _parent;       ///< Image this representation represents, must not be 0.
 

@@ -72,7 +72,7 @@
         \
         filter->SetInput(itkRep->getItkImage()); \
         filter->Update(); \
-        new GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>(id, filter->GetOutput()); \
+        GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::create(id, filter->GetOutput()); \
     } \
     }
 

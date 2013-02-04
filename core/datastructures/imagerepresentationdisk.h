@@ -45,16 +45,20 @@ namespace campvis {
     class ImageRepresentationDisk : public GenericAbstractImageRepresentation<ImageRepresentationDisk> {
     public:
         /**
-         * Creates a new ImageData disk representation.
+         * Creates a new ImageRepresentationDisk with the given parameters and automatically
+         * adds it to \a parent which will take ownerwhip.
          *
-         * \param parent            Image this representation represents, must not be 0.
-         * \param url               Path to file with raw data
-         * \param type              Base type of data
-         * \param offset            Offset of first data element in file (in bytes)
-         * \param endianness        Endianess of data
-         * \param stride            Number of _elemments_ _between_ adjacent elements for each dimension (\see ImageRepresentationDisk::_stride).
+         * \note    You do \b not own the returned pointer.
+         *
+         * \param   parent     Image this representation represents, must not be 0, will take ownership of the returned pointer.
+         * \param   url        Path to file with raw data
+         * \param   type       Base type of data
+         * \param   offset     Offset of first data element in file (in bytes)
+         * \param   endianness Endianess of data
+         * \param   stride     Number of _elements_ _between_ adjacent elements for each dimension (\see ImageRepresentationDisk::_stride).
+         * \return  A pointer to the newly created ImageRepresentationDisk, you do \b not own this pointer!
          */
-        ImageRepresentationDisk(
+        static ImageRepresentationDisk* create(
             ImageData* parent,
             const std::string& url,
             WeaklyTypedPointer::BaseType type,
@@ -62,6 +66,7 @@ namespace campvis {
             EndianHelper::Endianness endianness = EndianHelper::LITTLE_ENDIAN,
             const tgt::svec3& stride = tgt::svec3::zero
             );
+
 
         /**
          * Destructor
@@ -71,9 +76,9 @@ namespace campvis {
         /**
          * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
          * Returns 0 if conversion was not successful or source representation type is not compatible.
-         * \note    The caller has to take ownership of the returned pointer if not 0.
+         * \note    The callee, respectively the callee's parent, has the ownership of the returned pointer.
          * \param   source  Source image representation for conversion.
-         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
+         * \return  A pointer to a local representation of \a source or 0 on failure. The caller does \b not have ownership.
          */
         static ImageRepresentationDisk* tryConvertFrom(const AbstractImageRepresentation* source);
 
@@ -104,7 +109,28 @@ namespace campvis {
          */
         WeaklyTypedPointer::BaseType getBaseType() const;
 
-    private:
+    protected:
+        /**
+         * Creates a new ImageData disk representation.
+         * \note  The Constructor is protected since image representations are not supposed to be
+         *        created via the new operator - use ImageRepresentationDisk::create() instead.
+         *
+         * \param parent            Image this representation represents, must not be 0.
+         * \param url               Path to file with raw data
+         * \param type              Base type of data
+         * \param offset            Offset of first data element in file (in bytes)
+         * \param endianness        Endianess of data
+         * \param stride            Number of _elements_ _between_ adjacent elements for each dimension (\see ImageRepresentationDisk::_stride).
+         */
+        ImageRepresentationDisk(
+            ImageData* parent,
+            const std::string& url,
+            WeaklyTypedPointer::BaseType type,
+            size_t offset = 0,
+            EndianHelper::Endianness endianness = EndianHelper::LITTLE_ENDIAN,
+            const tgt::svec3& stride = tgt::svec3::zero
+            );
+
         /**
          * Calculates the canonical stride for the given image size.
          * \param size  Image size (number of elements per dimension).

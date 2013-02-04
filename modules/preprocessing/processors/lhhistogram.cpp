@@ -166,10 +166,10 @@ namespace campvis {
 
         if (intensities != 0 && gradients != 0) {
             ImageData* imgFl = new ImageData(intensities->getDimensionality(), intensities->getSize(), 1);
-            ImageRepresentationLocal* fl = new GenericImageRepresentationLocal<float, 1>(imgFl, 0);
+            ImageRepresentationLocal* fl = GenericImageRepresentationLocal<float, 1>::create(imgFl, 0);
 
             ImageData* imgFh = new ImageData(intensities->getDimensionality(), intensities->getSize(), 1);
-            ImageRepresentationLocal* fh = new GenericImageRepresentationLocal<float, 1>(imgFh, 0);
+            ImageRepresentationLocal* fh = GenericImageRepresentationLocal<float, 1>::create(imgFh, 0);
 
             const GenericImageRepresentationLocal<float, 4>* ggg = gradients;
             tbb::parallel_for(tbb::blocked_range<size_t>(0, intensities->getNumElements()), LHGenerator(intensities, ggg, fl, fh, .003f));
@@ -188,7 +188,7 @@ namespace campvis {
 
             WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
             ImageData* imgTex = new ImageData(2, tgt::svec3(256, 256, 1), 1);
-            ImageRepresentationGL* tex = new ImageRepresentationGL(imgTex, wtp);
+            ImageRepresentationGL* tex = ImageRepresentationGL::create(imgTex, wtp);
             delete [] tmp;
 
             data.addData("foo", imgTex);

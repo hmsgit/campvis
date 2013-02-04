@@ -46,14 +46,6 @@ namespace campvis {
      */
     class AbstractImageRepresentationItk : public AbstractImageRepresentation {
     public:
-        /**
-         * Creates a new AbstractImageRepresentationItk. Just calls the base constructor.
-         * \param   parent  Parent image data of this representation.
-         */
-        AbstractImageRepresentationItk(ImageData* parent)
-            : AbstractImageRepresentation(parent)
-        {};
-
         /// Virtual destructor
         virtual ~AbstractImageRepresentationItk() {};
 
@@ -64,6 +56,15 @@ namespace campvis {
          * \return  A WeaklyTypedPointer to the image data.
          */
         virtual WeaklyTypedPointer getWeaklyTypedPointer() const = 0;
+
+    protected:
+        /**
+         * Creates a new AbstractImageRepresentationItk. Just calls the base constructor.
+         * \param   parent  Parent image data of this representation.
+         */
+        AbstractImageRepresentationItk(ImageData* parent)
+            : AbstractImageRepresentation(parent)
+        {};
     };
 
     /**
@@ -178,7 +179,7 @@ namespace campvis {
          * \param   parent  Image this representation represents, must not be 0.
          * \param   data    Pointer to the image data, must not be 0, GenericImageRepresentationItk takes ownership of this pointer!
          */
-        GenericImageRepresentationItk(ImageData* parent, typename ItkImageType::Pointer itkImage);
+        static GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* create(ImageData* parent, typename ItkImageType::Pointer itkImage);
 
         /**
          * Destructor
@@ -228,12 +229,26 @@ namespace campvis {
         typename ItkImageType::ConstPointer getItkImage() const;
 
     protected:
+        /**
+         * Creates a new strongly typed ImageData object storing the image in the local memory.
+         * 
+         * \param   parent  Image this representation represents, must not be 0.
+         * \param   data    Pointer to the image data, must not be 0, GenericImageRepresentationItk takes ownership of this pointer!
+         */
+        GenericImageRepresentationItk(ImageData* parent, typename ItkImageType::Pointer itkImage);
 
         typename ItkImageType::Pointer _itkImage;
 
     };
 
 // = Template implementation ======================================================================
+
+    template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
+    GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::create(ImageData* parent, typename ItkImageType::Pointer itkImage) {
+        ThisType* toReturn = new ThisType(parent, itkImage);
+        toReturn->addToParent();
+        return toReturn;
+    }
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::GenericImageRepresentationItk(ImageData* parent, typename ItkImageType::Pointer itkImage)
@@ -285,7 +300,7 @@ namespace campvis {
 
             ItkImageType::Pointer itkImage = importer->GetOutput();
             if (itkImage.IsNotNull())
-                return new ThisType(const_cast<ImageData*>(tester->getParent()), itkImage); // const_cast perfectly valid here
+                return ThisType::create(const_cast<ImageData*>(tester->getParent()), itkImage); // const_cast perfectly valid here
             else
                 return 0;
         }
@@ -296,7 +311,7 @@ namespace campvis {
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::clone(ImageData* newParent) const {
         ItkImageType::Pointer newItkImage = _itkImage->Clone();
-        return new ThisType(newParent, newItkImage);
+        return ThisType::create(newParent, newItkImage);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>

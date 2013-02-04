@@ -170,7 +170,7 @@ namespace campvis {
 
             // all parsing done - lets create the image:
             ImageData* image = new ImageData(dimensionality, size, 1);
-            ImageRepresentationDisk* ird = new ImageRepresentationDisk(image, url, pt, offset, e);
+            ImageRepresentationDisk::create(image, url, pt, offset, e);
             image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
             data.addData(p_targetImageID.getValue(), image);
             p_targetImageID.issueWrite();

@@ -35,6 +35,12 @@
 namespace campvis {
     const std::string ImageRepresentationDisk::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationDisk";
 
+    ImageRepresentationDisk* ImageRepresentationDisk::create(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec3::zero */) {
+        ImageRepresentationDisk* toReturn = new ImageRepresentationDisk(parent, url, type, offset, endianness, stride);
+        toReturn->addToParent();
+        return toReturn;
+    }
+
     ImageRepresentationDisk::ImageRepresentationDisk(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
         : GenericAbstractImageRepresentation<ImageRepresentationDisk>(parent)
         , _url(url)
@@ -195,7 +201,7 @@ namespace campvis {
     }
 
     ImageRepresentationDisk* ImageRepresentationDisk::clone(ImageData* newParent) const {
-        return new ImageRepresentationDisk(newParent, _url, _type, _offset, _endianess, _stride);
+        return ImageRepresentationDisk::create(newParent, _url, _type, _offset, _endianess, _stride);
     }
 
     size_t ImageRepresentationDisk::getLocalMemoryFootprint() const {

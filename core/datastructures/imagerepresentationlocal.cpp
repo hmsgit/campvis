@@ -140,7 +140,7 @@ namespace campvis {
             \
             PixelType* pixelDataCopy = new PixelType[tgt::hmul(size)]; \
             memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<basetype, 1>::elementSize); \
-            return new GenericImageRepresentationLocal<PixelType, 1>(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
+            return GenericImageRepresentationLocal<PixelType, 1>::create(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
         }
 
 #define DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(numchannels, dimensionality) \
@@ -201,7 +201,7 @@ namespace campvis {
         WeaklyTypedPointer wtp = source->getImageData();
 
 #define CONVERT_DISK_TO_GENERIC_LOCAL(baseType,numChannels) \
-        return new GenericImageRepresentationLocal<baseType, numChannels>( \
+        return GenericImageRepresentationLocal<baseType, numChannels>::create( \
             const_cast<ImageData*>(source->getParent()), \
             reinterpret_cast< TypeTraits<baseType, numChannels>::ElementType*>(wtp._pointer));
 

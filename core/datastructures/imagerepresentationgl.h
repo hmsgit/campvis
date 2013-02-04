@@ -49,33 +49,29 @@ namespace campvis {
      */
     class ImageRepresentationGL : public GenericAbstractImageRepresentation<ImageRepresentationGL> {
     public:
-        
         /**
-         * Creates a new ImageRepresentationGL representation from a tgt::Texture.
+         * Creates a new ImageRepresentationGL representation from a tgt::Texture and automatically
+         * adds it to \a parent which will take ownerwhip.
+         *
+         * \note    You do \b not own the returned pointer.
          * 
-         * \param   parent      Image this representation represents, must not be 0.
-         * \param   texture     OpenGL texture to use, must not be 0, ImageRepresentationGL will take ownership of this texture.
+         * \param   parent  Image this representation represents, must not be 0, will take ownership of the returned pointer.
+         * \param   texture OpenGL texture to use, must not be 0, ImageRepresentationGL will take ownership of this texture.
+         * \return  A pointer to the newly created ImageRepresentationGL, you do \b not own this pointer!
          */
-        ImageRepresentationGL(ImageData* parent, tgt::Texture* texture);
+        static ImageRepresentationGL* create(ImageData* parent, tgt::Texture* texture);        
 
         /**
-         * Creates a new ImageRepresentationGL representation.
+         * Creates a new ImageRepresentationGL representation from a tgt::Texture and automatically
+         * adds it to \a parent which will take ownerwhip.
          *
-         * \param   parent  Image this representation represents, must not be 0.
+         * \note    You do \b not own the returned pointer.
+         * 
+         * \param   parent  Image this representation represents, must not be 0, will take ownership of the returned pointer.
          * \param   wtp     WeaklyTypedPointer to the image data, must not be 0, ImageRepresentationGL does \b not take ownership of that pointer.
+         * \return  A pointer to the newly created ImageRepresentationGL, you do \b not own this pointer!
          */
-        ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp);
-
-        /**
-         * Creates a new ImageRepresentationGL representation from GenericImageRepresentationLocal.
-         *
-         * \param   parent      Image this representation represents, must not be 0.
-         * \param   data        Pointer to the GenericImageRepresentationLocal instance, must not be 0
-         * \tparam  BASETYPE        Base type of image data
-         * \tparam  NUMCHANNELS     Number of channels per element
-         */
-        template<typename BASETYPE, size_t NUMCHANNELS>
-        ImageRepresentationGL(ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data);
+        static ImageRepresentationGL* create(ImageData* parent, const WeaklyTypedPointer& wtp);        
 
         /**
          * Destructor
@@ -86,9 +82,9 @@ namespace campvis {
         /**
          * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
          * Returns 0 if conversion was not successful or source representation type is not compatible.
-         * \note    The caller has to take ownership of the returned pointer if not 0.
+         * \note    The callee, respectively the callee's parent, has the ownership of the returned pointer.
          * \param   source  Source image representation for conversion.
-         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
+         * \return  A pointer to a local representation of \a source or 0 on failure. The caller does \b not have ownership.
          */
         static ImageRepresentationGL* tryConvertFrom(const AbstractImageRepresentation* source);
        
@@ -139,6 +135,33 @@ namespace campvis {
 
 
     protected:
+        /**
+         * Creates a new ImageRepresentationGL representation from a tgt::Texture.
+         * 
+         * \param   parent      Image this representation represents, must not be 0.
+         * \param   texture     OpenGL texture to use, must not be 0, ImageRepresentationGL will take ownership of this texture.
+         */
+        ImageRepresentationGL(ImageData* parent, tgt::Texture* texture);
+
+        /**
+         * Creates a new ImageRepresentationGL representation.
+         *
+         * \param   parent  Image this representation represents, must not be 0.
+         * \param   wtp     WeaklyTypedPointer to the image data, must not be 0, ImageRepresentationGL does \b not take ownership of that pointer.
+         */
+        ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp);
+
+        /**
+         * Creates a new ImageRepresentationGL representation from GenericImageRepresentationLocal.
+         *
+         * \param   parent      Image this representation represents, must not be 0.
+         * \param   data        Pointer to the GenericImageRepresentationLocal instance, must not be 0
+         * \tparam  BASETYPE        Base type of image data
+         * \tparam  NUMCHANNELS     Number of channels per element
+         */
+        template<typename BASETYPE, size_t NUMCHANNELS>
+        ImageRepresentationGL(ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data);
+
         /**
          * Creates the OpenGL texture from the given pointer \a wtp.
          * \param wtp   WeaklyTypedPointer with source image data

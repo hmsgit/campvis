@@ -170,7 +170,7 @@ namespace campvis {
                 file >> tmp; \
                 data[i] = static_cast<C_TYPE>(tmp); \
             } \
-            rep = new GenericImageRepresentationLocal<C_TYPE, 1>(image, data); \
+            rep = GenericImageRepresentationLocal<C_TYPE, 1>::create(image, data); \
         } \
     } while (0)
 

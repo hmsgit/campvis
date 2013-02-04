@@ -45,6 +45,18 @@ namespace campvis {
 
     const std::string ImageRepresentationGL::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationGL";
 
+    ImageRepresentationGL* ImageRepresentationGL::create(ImageData* parent, tgt::Texture* texture) {
+        ImageRepresentationGL* toReturn = new ImageRepresentationGL(parent, texture);
+        toReturn->addToParent();
+        return toReturn;
+    }
+
+    ImageRepresentationGL* ImageRepresentationGL::create(ImageData* parent, const WeaklyTypedPointer& wtp) {
+        ImageRepresentationGL* toReturn = new ImageRepresentationGL(parent, wtp);
+        toReturn->addToParent();
+        return toReturn;
+    }
+
     ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, tgt::Texture* texture)
         : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
         , _texture(texture)
@@ -69,17 +81,17 @@ namespace campvis {
         // test source image type via dynamic cast
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
             WeaklyTypedPointer wtp = tester->getImageData();
-            ImageRepresentationGL* toReturn = new ImageRepresentationGL(const_cast<ImageData*>(tester->getParent()), wtp);
+            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
             delete wtp._pointer;
             return toReturn;
         }
         else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
-            ImageRepresentationGL* toReturn = new ImageRepresentationGL(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
+            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
 #ifdef CAMPVIS_HAS_MODULE_ITK
         else if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(source)) {
-            ImageRepresentationGL* toReturn = new ImageRepresentationGL(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
+            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
 #endif
@@ -90,7 +102,7 @@ namespace campvis {
     ImageRepresentationGL* ImageRepresentationGL::clone(ImageData* newParent) const {
         GLubyte* data = _texture->downloadTextureToBuffer();
         WeaklyTypedPointer wtp(WeaklyTypedPointer::baseType(_texture->getDataType()), WeaklyTypedPointer::numChannels(_texture->getFormat()), data);
-        ImageRepresentationGL* toReturn = new ImageRepresentationGL(newParent, wtp);
+        ImageRepresentationGL* toReturn = ImageRepresentationGL::create(newParent, wtp);
         delete data;
         return toReturn;
     }

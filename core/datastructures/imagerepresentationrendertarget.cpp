@@ -42,9 +42,16 @@ namespace campvis {
 
     const std::string ImageRepresentationRenderTarget::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationRenderTarget";
 
+    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::create(ImageData* parent, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/) {
+        ImageRepresentationRenderTarget* toReturn = new ImageRepresentationRenderTarget(parent, internalFormatColor, internalFormatDepth);
+        toReturn->addToParent();
+        return toReturn;
+    }
+
     std::pair<ImageData*, ImageRepresentationRenderTarget*> ImageRepresentationRenderTarget::createWithImageData(const tgt::svec2& size, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/) {
         ImageData* id = new ImageData(2, tgt::svec3(size, 1), 4);
         ImageRepresentationRenderTarget* toReturn = new ImageRepresentationRenderTarget(id, internalFormatColor, internalFormatDepth);
+        toReturn->addToParent();
         return std::make_pair(id, toReturn);
     }
 

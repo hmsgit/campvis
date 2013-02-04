@@ -50,15 +50,6 @@ namespace campvis {
         typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
 
         /**
-         * Creates a new ImageData representation in local memory.
-         *
-         * \param   dimensionality  Dimensionality of data
-         * \param   size            Size of this image (number of elements per dimension)
-         * \param   baseType        Base type of the image data.
-         */
-        ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType);
-
-        /**
          * Destructor
          */
         virtual ~ImageRepresentationLocal();
@@ -66,9 +57,9 @@ namespace campvis {
         /**
          * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
          * Returns 0 if conversion was not successful or source representation type is not compatible.
-         * \note    The caller has to take ownership of the returned pointer if not 0.
+         * \note    The callee, respectively the callee's parent, has the ownership of the returned pointer.
          * \param   source  Source image representation for conversion.
-         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
+         * \return  A pointer to a local representation of \a source or 0 on failure. The caller does \b not have ownership.
          */
         static ImageRepresentationLocal* tryConvertFrom(const AbstractImageRepresentation* source);
 
@@ -190,6 +181,15 @@ namespace campvis {
         const IntensityHistogramType& getIntensityHistogram() const;
 
     protected:
+        /**
+         * Creates a new ImageData representation in local memory.
+         *
+         * \param   dimensionality  Dimensionality of data
+         * \param   size            Size of this image (number of elements per dimension)
+         * \param   baseType        Base type of the image data.
+         */
+        ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType);
+
         /**
          * Computes the normalized intensity range.
          */

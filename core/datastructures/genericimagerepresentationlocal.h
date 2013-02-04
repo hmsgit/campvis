@@ -138,14 +138,18 @@ namespace campvis {
             const ImageData* data;          ///< strongly-typed pointer to data, may be 0
             const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* representation;        ///< strongly-typed pointer to the image representation, may be 0
         };
-
+        
         /**
-         * Creates a new strongly typed ImageData object storing the image in the local memory.
-         * 
-         * \param   parent  Image this representation represents, must not be 0.
+         * Creates a new GenericImageRepresentationLocal with the given parameters and automatically
+         * adds it to \a parent which will take ownerwhip.
+         *
+         * \note    You do \b not own the returned pointer.
+         *
+         * \param   parent     Image this representation represents, must not be 0, will take ownership of the returned pointer.
          * \param   data    Pointer to the image data, must not be 0, GenericImageRepresentationLocal takes ownership of this pointer!
+         * \return  A pointer to the newly created ImageRepresentationDisk, you do \b not own this pointer!
          */
-        GenericImageRepresentationLocal(ImageData* parent, ElementType* data);
+        static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* create(ImageData* parent, ElementType* data);
 
         /**
          * Destructor
@@ -156,9 +160,9 @@ namespace campvis {
         /**
          * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
          * Returns 0 if conversion was not successful or source representation type is not compatible.
-         * \note    The caller has to take ownership of the returned pointer if not 0.
+         * \note    The callee, respectively the callee's parent, has the ownership of the returned pointer.
          * \param   source  Source image representation for conversion.
-         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
+         * \return  A pointer to a local representation of \a source or 0 on failure. The caller does \b not have ownership.
          */
         static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tryConvertFrom(const AbstractImageRepresentation* source);
 
@@ -260,12 +264,26 @@ namespace campvis {
         ElementType getElementLinear(const tgt::vec3 position) const;
 
     protected:
+        /**
+         * Creates a new strongly typed ImageData object storing the image in the local memory.
+         * 
+         * \param   parent  Image this representation represents, must not be 0.
+         * \param   data    Pointer to the image data, must not be 0, GenericImageRepresentationLocal takes ownership of this pointer!
+         */
+        GenericImageRepresentationLocal(ImageData* parent, ElementType* data);
 
         ElementType* _data;
 
     };
 
 // = Template implementation ======================================================================
+
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(ImageData* parent, ElementType* data) {
+        ThisType* toReturn = new ThisType(parent, data);
+        toReturn->addToParent();
+        return toReturn;
+    }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::GenericImageRepresentationLocal(ImageData* parent, ElementType* data)
@@ -296,7 +314,7 @@ namespace campvis {
         ElementType* newData = new ElementType[numElements];
         memcpy(newData, _data, numElements * sizeof(ElementType));
 
-        return new ThisType(newParent, newData);
+        return ThisType::create(newParent, newData);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>

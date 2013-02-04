@@ -114,7 +114,7 @@ namespace campvis {
                 for (size_t i = 0; i < numElements; ++i)
                     asFloats[i] = img->getElementNormalized(i, 0);
                 ImageData* id = new ImageData(img->getDimensionality(), img->getSize(), img->getParent()->getNumChannels());
-                GenericImageRepresentationLocal<float, 1>* imageWithFloats = new GenericImageRepresentationLocal<float, 1>(id, asFloats);
+                GenericImageRepresentationLocal<float, 1>* imageWithFloats = GenericImageRepresentationLocal<float, 1>::create(id, asFloats);
 
                 DataHandle dh = _data.addData("clr.input", id);
 

@@ -80,7 +80,7 @@ namespace campvis {
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
         if (tex != 0) {
             ImageData id (2, tex->getDimensions(), tex->getNumChannels());
-            ImageRepresentationGL* image = new ImageRepresentationGL(&id, tex);
+            ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
 
             std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             glPushAttrib(GL_ALL_ATTRIB_BITS);
