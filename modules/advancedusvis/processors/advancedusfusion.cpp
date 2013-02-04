@@ -44,11 +44,13 @@
 namespace campvis {
     const std::string AdvancedUsFusion::loggerCat_ = "CAMPVis.modules.vis.AdvancedUsFusion";
 
-    GenericOption<std::string> viewOptions[5] = {
+    GenericOption<std::string> viewOptions[7] = {
         GenericOption<std::string>("us", "Ultrasound Only"),
         GenericOption<std::string>("smoothed", "Smoothed US Only"),
         GenericOption<std::string>("sharpened", "Sharpened US Only"),
-        GenericOption<std::string>("mappingSaturation", "Mapping Uncertainty to Saturation"),
+        GenericOption<std::string>("mappingSaturationHSV", "Mapping Uncertainty to Saturation (HSV)"),
+        GenericOption<std::string>("mappingSaturationHSL", "Mapping Uncertainty to Saturation (HSL)"),
+        GenericOption<std::string>("mappingChromacity", "Mapping Uncertainty to Chromacity"),
         GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness")
     };
 
@@ -61,7 +63,7 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , p_view("View", "Image to Render", viewOptions, 5)
+        , p_view("View", "Image to Render", viewOptions, 7)
         , p_blurredScaling("BlurredScaling", "Scaling for blurred image intensity", 1.f, .001f, 1000.f)
         , _shader(0)
     {

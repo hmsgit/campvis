@@ -51,6 +51,7 @@ namespace campvis {
     }
 
     void DataContainer::addDataHandle(const std::string& name, const DataHandle& dh) {
+        tgtAssert(dh.getData() != 0, "The data in the DataHandle must not be 0!");
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
             std::map<std::string, DataHandle>::iterator it = _handles.lower_bound(name);

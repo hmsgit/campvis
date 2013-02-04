@@ -131,8 +131,8 @@ namespace campvis {
          * In doing so, the DataContainer (respectively the created DataHandle) takes ownership of \a data
          * and will manage its lifetime. So don't even think about deleting \a data yourself!
          *
-         * \param   name    Key for accessing the DataHandle within this DataContainer
-         * \param   data    DataHandle to add.
+         * \param   name    Key for accessing the DataHandle within this DataContainer.
+         * \param   data    The data to wrap in a DataHandle and add to this DataContainer, must not be 0.
          * \return  A DataHandle containing \a data.
          */
         DataHandle addData(const std::string& name, AbstractData* data);
@@ -196,6 +196,7 @@ namespace campvis {
         sigslot::signal0<> s_changed;
 
     private:
+        /// Map of the DataHandles in this collection and their IDs. The DataHandles contain valid data.
         std::map<std::string, DataHandle> _handles;
         mutable tbb::spin_mutex _localMutex;
 
