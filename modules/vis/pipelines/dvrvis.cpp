@@ -143,6 +143,11 @@ namespace campvis {
         _effectiveRenderTargetSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
     }
 
+    void DVRVis::deinit() {
+        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        VisualizationPipeline::deinit();
+    }
+
     void DVRVis::execute() {
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);

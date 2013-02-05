@@ -27,6 +27,7 @@
 // 
 // ================================================================================================
 
+#include "tgt/assert.h"
 #include "abstractprocessor.h"
 
 namespace campvis {
@@ -36,8 +37,9 @@ namespace campvis {
 
     AbstractProcessor::AbstractProcessor()
         : HasPropertyCollection()
-        , _enabled(true)
     {
+        _enabled = true;
+        _locked = 0;
     }
 
     AbstractProcessor::~AbstractProcessor() {
@@ -66,12 +68,20 @@ namespace campvis {
     }
 
 
-    void AbstractProcessor::lockProperties() {
+    void AbstractProcessor::lockProcessor() {
+        while (_locked.compare_and_swap(true, false) == true); // TODO: busy waiting us fu**ing ugly...
+        _locked = true;
         lockAllProperties();
     }
 
-    void AbstractProcessor::unlockProperties() {
+    void AbstractProcessor::unlockProcessor() {
+        tgtAssert(_locked == true, "Called AbstractProcessor::unlockProcessor() on unlocked processor!");
         unlockAllProperties();
+        _locked = false;
+    }
+
+    bool AbstractProcessor::isLocked() {
+        return _locked != 0;
     }
 
     void AbstractProcessor::onPropertyChanged(const AbstractProperty* prop) {

@@ -177,6 +177,11 @@ namespace campvis {
         _effectiveRenderTargetSize.s_changed.connect<AdvancedUsVis>(this, &AdvancedUsVis::onRenderTargetSizeChanged);
     }
 
+    void AdvancedUsVis::deinit() {
+        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        VisualizationPipeline::deinit();
+    }
+
     void AdvancedUsVis::execute() {
         {
             tbb::spin_mutex::scoped_lock lock(_localMutex);

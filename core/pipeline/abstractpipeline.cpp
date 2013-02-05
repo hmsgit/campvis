@@ -98,18 +98,25 @@ namespace campvis {
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
-        if (processor->getEnabled() && !processor->getInvalidationLevel().isValid()) {
-            processor->lockProperties();
-            processor->setEnabled(false); // TODO: dirty hack to avoid multiple execution of the same processor -> introduce s.th. like _processor.isLocked()
+        if (processor->getEnabled() && !processor->isLocked() && !processor->getInvalidationLevel().isValid()) {
+            processor->lockProcessor();
 #ifdef CAMPVIS_DEBUG
             clock_t startTime = clock();
 #endif
-            processor->process(_data);
+            try {
+                processor->process(_data);
+            }
+            catch (std::exception& e) {
+                LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": " << e.what());
+            }
+            catch (...) {
+                LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": unknown exception");
+            }
+
 #ifdef CAMPVIS_DEBUG
             clock_t endTime = clock();
 #endif
-            processor->setEnabled(true);
-            processor->unlockProperties();
+            processor->unlockProcessor();
 
 #ifdef CAMPVIS_DEBUG
             LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));

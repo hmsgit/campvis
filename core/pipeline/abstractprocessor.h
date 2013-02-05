@@ -31,6 +31,7 @@
 #define PROCESSOR_H__
 
 #include "sigslot/sigslot.h"
+#include "tbb/include/tbb/atomic.h"
 #include "tgt/logmanager.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/tools/invalidationlevel.h"
@@ -138,17 +139,24 @@ namespace campvis {
         void setEnabled(bool enabled);
         
         /**
+         * 
          * Locks all properties in the processor's PropertyCollection and marks them as "in use".
-         * \sa  AbstractProcessor::unlock
+         * \sa  AbstractProcessor::unlockProcessor
          */
-        void lockProperties();
+        void lockProcessor();
 
         /**
          * Unlocks all properties in the processor's PropertyCollection and marks them as "not in use".
-         * \sa  AbstractProcessor::lock
+         * \sa  AbstractProcessor::lockProcessor
          */
-        void unlockProperties();
+        void unlockProcessor();
 
+        /**
+         * Returns the current lockProcessor status of this processor.
+         * If a processor is locked, all of its properties are locked and its process method must not be called.
+         * \return  _locked != 0
+         */
+        bool isLocked();
 
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;
@@ -162,7 +170,11 @@ namespace campvis {
 
     protected:
         InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
-        bool _enabled;                              ///< flag whether this processor is currently enabled
+        tbb::atomic<bool> _enabled;                 ///< flag whether this processor is currently enabled
+
+        /// Flag whether this processor is currently locked
+        /// (This implies, that all properties are locked and it is not valid to call process())
+        tbb::atomic<bool> _locked;
 
         static const std::string loggerCat_;
     };

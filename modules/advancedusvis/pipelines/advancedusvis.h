@@ -61,6 +61,9 @@ namespace campvis {
         /// \see VisualizationPipeline::init()
         virtual void init();
 
+        /// \see VisualizationPipeline::deinit()
+        virtual void deinit();
+
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const;
 
