@@ -161,7 +161,7 @@ namespace campvis {
         InvalidationLevel _invalidationLevel;   ///< Invalidation level that this property triggers
         tbb::atomic<bool> _isVisible;           ///< Flag whether this property shall be visible in the GUI
 
-        tbb::atomic<bool> _inUse;               ///< flag whether property is currently in use and values are written to back buffer
+        tbb::atomic<int> _inUse;                ///< flag whether property is currently in use and values are written to back buffer
         tbb::spin_mutex _localMutex;            ///< Mutex used when altering local members
 
         /**

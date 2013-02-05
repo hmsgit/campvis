@@ -167,7 +167,7 @@ namespace campvis {
         T vv = validateValue(value);
         tbb::spin_mutex::scoped_lock lock(_localMutex);
 
-        if (_inUse)
+        if (_inUse != 0)
             setBackValue(vv);
         else {
             setFrontValue(vv);
@@ -181,7 +181,7 @@ namespace campvis {
 
         if (_backBuffer != _value)
             setFrontValue(_backBuffer);
-        _inUse = false;
+        AbstractProperty::unlock();
     }
 
     template<typename T>

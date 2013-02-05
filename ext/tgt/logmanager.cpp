@@ -187,7 +187,7 @@ void ConsoleLog::logFiltered(const std::string& cat, LogLevel level, const std::
     if (colorOutput_)
         output += "\033[00m"; // return to default color (Reset all attributes)
 
-    std::cout << output << std::endl;
+    std::cout << output << '\n';
 }
 
 void ConsoleLog::enableColors(bool enable) {

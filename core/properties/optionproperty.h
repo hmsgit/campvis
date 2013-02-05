@@ -197,12 +197,12 @@ namespace campvis {
 
     template<typename T>
     const GenericOption<T>& campvis::GenericOptionProperty<T>::getOption() const {
-        return _options[getValue()];
+        return _options[_value];
     }
 
     template<typename T>
     T campvis::GenericOptionProperty<T>::getOptionValue() const {
-        return _options[getValue()]._value;
+        return _options[_value]._value;
     }
 
     template<typename T>

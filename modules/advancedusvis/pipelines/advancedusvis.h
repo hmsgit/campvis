@@ -73,6 +73,8 @@ namespace campvis {
 
         void onRenderTargetSizeChanged(const AbstractProperty* prop);
     protected:
+        void foobar();
+
         CameraProperty _camera;
 
         MhdImageReader _usReader;

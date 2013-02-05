@@ -33,6 +33,8 @@
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/tools/simplejobprocessor.h"
+#include "core/tools/job.h"
 
 namespace campvis {
 
@@ -183,18 +185,12 @@ namespace campvis {
         }
 
         if (!_usReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_usReader);
-            // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
-            if (img != 0) {
-                tgt::Bounds volumeExtent = img->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-                _trackballEH->setSceneBounds(volumeExtent);
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
-            }
+            SimpleJobProc.enqueueJob(makeJob(this, &AdvancedUsVis::foobar));
         }
+        if (!_usDenoiseilter.getInvalidationLevel().isValid()) {
+            SimpleJobProc.enqueueJob(makeJob<AdvancedUsVis, AbstractProcessor*>(this, &AdvancedUsVis::executeProcessor, &_usDenoiseilter));
+        }
+
 
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             if (! (*it)->getInvalidationLevel().isValid())
@@ -223,6 +219,21 @@ namespace campvis {
         _trackballEH->setViewportSize(_renderTargetSize);
         float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
         _camera.setWindowRatio(ratio);
+    }
+
+    void AdvancedUsVis::foobar() {
+        executeProcessor(&_usReader);
+
+        // convert data
+        DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
+        if (img != 0) {
+            tgt::Bounds volumeExtent = img->getWorldBounds();
+            tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+
+            _trackballEH->setSceneBounds(volumeExtent);
+            _trackballEH->setCenter(volumeExtent.center());
+            _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+        }
     }
 
 }

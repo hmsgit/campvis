@@ -46,6 +46,7 @@
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
 #include "core/tools/opengljobprocessor.h"
+#include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/visualizationpipeline.h"
@@ -71,6 +72,7 @@ namespace campvis {
         tgt::QtContextManager::init();
 
         OpenGLJobProcessor::init();
+        SimpleJobProcessor::init();
     }
 
     CampVisApplication::~CampVisApplication() {
@@ -189,6 +191,7 @@ namespace campvis {
 #endif
         }
 
+        SimpleJobProcessor::deinit();
         OpenGLJobProcessor::deinit();
 
         tgt::QtContextManager::deinit();

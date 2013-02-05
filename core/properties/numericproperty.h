@@ -178,9 +178,6 @@ namespace campvis {
          */
         virtual T validateValue(const T& value);
 
-        
-        T _value;                               ///< value of the property
-        T _backBuffer;                          ///< back buffer for values when property is in use
         T _minValue;                            ///< Minimum value for this property
         T _maxValue;                            ///< Maximum value for this property
 
@@ -247,25 +244,25 @@ namespace campvis {
     template<typename T>
     void campvis::NumericProperty<T>::setMinValue(const T& value) {
         _minValue = value;
-        setValue(validateValue(getValue()));
+        setValue(validateValue(_value));
         s_minMaxChanged(this);
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::setMaxValue(const T& value) {
         _maxValue = value;
-        setValue(validateValue(getValue()));
+        setValue(validateValue(_value));
         s_minMaxChanged(this);
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::increment() {
-        setValue(getValue() + T(1));
+        setValue(_value + T(1));
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::decrement() {
-        setValue(getValue() - T(1));
+        setValue(_value - T(1));
     }
 }
 

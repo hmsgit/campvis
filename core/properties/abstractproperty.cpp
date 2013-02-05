@@ -39,7 +39,7 @@ namespace campvis {
         , _invalidationLevel(il)
     {
         _isVisible = true;
-        _inUse = false;
+        _inUse = 0;
     }
 
     AbstractProperty::~AbstractProperty() {
@@ -80,11 +80,11 @@ namespace campvis {
     }
 
     void AbstractProperty::lock() {
-        _inUse = true;
+        ++_inUse;
     }
 
     void AbstractProperty::unlock() {
-        _inUse = false;
+        --_inUse;
     }
 
     void AbstractProperty::init() {

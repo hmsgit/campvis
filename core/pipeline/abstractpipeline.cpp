@@ -100,6 +100,7 @@ namespace campvis {
 
         if (processor->getEnabled() && !processor->getInvalidationLevel().isValid()) {
             processor->lockProperties();
+            processor->setEnabled(false); // TODO: dirty hack to avoid multiple execution of the same processor -> introduce s.th. like _processor.isLocked()
 #ifdef CAMPVIS_DEBUG
             clock_t startTime = clock();
 #endif
@@ -107,6 +108,7 @@ namespace campvis {
 #ifdef CAMPVIS_DEBUG
             clock_t endTime = clock();
 #endif
+            processor->setEnabled(true);
             processor->unlockProperties();
 
 #ifdef CAMPVIS_DEBUG

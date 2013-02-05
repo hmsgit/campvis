@@ -189,7 +189,7 @@ namespace campvis {
     }
 
     void TumVisPainter::onRenderTargetChanged() {
-        GLJobProc.enqueueJob(getCanvas(), make_job(this, &TumVisPainter::paint), OpenGLJobProcessor::PaintJob);
+        GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &TumVisPainter::paint), OpenGLJobProcessor::PaintJob);
     }
 
     void TumVisPainter::setCanvas(tgt::GLCanvas* canvas) {
