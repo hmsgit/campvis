@@ -51,7 +51,7 @@ namespace campvis {
         virtual void execute() = 0;
     };
 
-
+// = Specific Jobs ================================================================================
 
     /**
      * Specific job, that is calling a member function pasing no argument.
@@ -127,6 +127,33 @@ namespace campvis {
         void (T::*_callee)(A1);     /// <Member function to call
         A1 _arg1;                   ///< Argument to pass to \a callee
     };
+
+// = Helper functions for easier creation of jobs =================================================
+
+    /**
+     * Creates a new CallMemberFuncJob for the object \a target.
+     * \note    The caller takes ownership of the returned pointer.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \return  Pointer to the newly created CallMemberFuncJob. Caller has ownership!
+     */
+    template<class T>
+    CallMemberFuncJob<T>* make_job(T* target, void (T::*callee)()) {
+        return new CallMemberFuncJob<T>(target, callee);
+    }
+
+    /**
+     * Creates a new CallMemberFunc1ArgJob for the object \a target.
+     * \note    The caller takes ownership of the returned pointer.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \param   arg1    First argument to pass to \callee.
+     * \return  Pointer to the newly created CallMemberFunc1ArgJob. Caller has ownership!
+     */
+    template<class T, class A1>
+    CallMemberFunc1ArgJob<T, A1>* make_job(T* target, void (T::*callee)(A1), A1 arg1) {
+        return new CallMemberFunc1ArgJob<T, A1>(target, callee, arg1);
+    }
 
 }
 

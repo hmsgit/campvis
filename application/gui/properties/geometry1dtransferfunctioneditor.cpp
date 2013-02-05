@@ -225,7 +225,7 @@ namespace campvis {
     }
 
     void Geometry1DTransferFunctionEditor::invalidate() {
-        GLJobProc.enqueueJob(_canvas, new CallMemberFuncJob<Geometry1DTransferFunctionEditor>(this, &Geometry1DTransferFunctionEditor::paint), OpenGLJobProcessor::PaintJob);
+        GLJobProc.enqueueJob(_canvas, make_job(this, &Geometry1DTransferFunctionEditor::paint), OpenGLJobProcessor::PaintJob);
     }
 
     void Geometry1DTransferFunctionEditor::setupGUI() {

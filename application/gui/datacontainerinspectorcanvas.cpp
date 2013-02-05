@@ -181,7 +181,7 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::invalidate() {
-        GLJobProc.enqueueJob(this, new CallMemberFuncJob<DataContainerInspectorCanvas>(this, &DataContainerInspectorCanvas::paint), OpenGLJobProcessor::PaintJob);
+        GLJobProc.enqueueJob(this, make_job(this, &DataContainerInspectorCanvas::paint), OpenGLJobProcessor::PaintJob);
     }
 
     void DataContainerInspectorCanvas::createQuad() {

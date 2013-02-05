@@ -99,7 +99,7 @@ namespace campvis {
         tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         GLJobProc.enqueueJob(
             _canvas, 
-            new CallMemberFunc1ArgJob<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor),
+            make_job<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor),
             OpenGLJobProcessor::SerialJob);
     }
 

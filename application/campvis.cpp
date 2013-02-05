@@ -32,7 +32,9 @@
 #include "modules/vis/pipelines/ixpvdemo.h"
 #include "modules/vis/pipelines/dvrvis.h"
 #include "modules/vis/pipelines/slicevis.h"
+#ifdef HAS_KISSCL
 #include "modules/opencl/pipelines/openclpipeline.h"
+#endif
 
 using namespace campvis;
 
@@ -46,10 +48,12 @@ using namespace campvis;
 int main(int argc, char** argv) {
     CampVisApplication app(argc, argv);
     app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-//     app.addVisualizationPipeline("IXPV", new IxpvDemo());
-//     app.addVisualizationPipeline("SliceVis", new SliceVis());
-//     app.addVisualizationPipeline("DVRVis", new DVRVis());
-//     app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
+    //app.addVisualizationPipeline("IXPV", new IxpvDemo());
+    //app.addVisualizationPipeline("SliceVis", new SliceVis());
+    //app.addVisualizationPipeline("DVRVis", new DVRVis());
+#ifdef HAS_KISSCL
+    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
+#endif
 
     app.init();
     int toReturn = app.run();

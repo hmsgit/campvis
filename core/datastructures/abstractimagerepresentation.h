@@ -57,7 +57,7 @@ namespace campvis {
         virtual ~AbstractImageRepresentation();
 
         /**
-         * Returns the parent ImageData this representation is representing.
+         * Returns the newParent ImageData this representation is representing.
          * \return _parent
          */
         const ImageData* getParent() const;
@@ -103,16 +103,16 @@ namespace campvis {
          * Returns the subimage representation of this representation given by \a llf and \a urb.
          * TODO: Check whether it is necessary to adjust image mapping!
          *
-         * \param   parent  Parent image of the newly created subimage
-         * \param   llf     Lower-Left-Front coordinates of subimage
-         * \param   urb     Upper-Right-Back coordinates of subimage
+         * \param   newParent   Parent image of the newly created subimage
+         * \param   llf         Lower-Left-Front coordinates of subimage
+         * \param   urb         Upper-Right-Back coordinates of subimage
          * \return  An image representation containing the subimage of this with the given coordinates.
          */
-        virtual AbstractImageRepresentation* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
+        virtual AbstractImageRepresentation* getSubImage(ImageData* newParent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
     protected:
         /**
-         * Adds this image representations to the parent image data.
+         * Adds this image representations to the newParent image data.
          */
         void addToParent() const;
 
