@@ -177,6 +177,15 @@ ELSE(TBB_FOUND)
     MESSAGE(FATAL_ERROR "TBB not found!")
 ENDIF(TBB_FOUND)
 
+# Eigen
+IF(EXISTS "${CampvisHome}/ext/eigen/Eigen/Eigen")
+    MESSAGE(STATUS "* Found Eigen")
+    LIST(APPEND CampvisGlobalIncludeDirs "${CampvisHome}/ext/eigen")
+    LIST(APPEND CampvisGlobalDefinitions -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS)
+ELSE()
+    MESSAGE(WARNING "Did not find Eigen - Eigen library must be placed in ext/eigen/!")
+ENDIF()
+
 # detect libraries
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 MESSAGE(STATUS "Detecting Optional External Libraries:")
