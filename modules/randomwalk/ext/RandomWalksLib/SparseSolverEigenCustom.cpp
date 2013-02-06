@@ -19,7 +19,7 @@ std::vector<double> SparseSolverEigenCustom::solve_Ax_b(SparseMatrix<double> A, 
 			xmat[uidx[it.index()]] = it.value();
 	}
 
-	for (int i=0; i<seeds->size(); i++)
+	for (size_t i=0; i<seeds->size(); i++)
 	{
 		if((*labels)[i] == active_label)
 			xmat[(*seeds)[i]] = 1.0;

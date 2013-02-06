@@ -26,7 +26,7 @@ std::vector<double> SparseSolverEigenCG::solve_Ax_b(SparseMatrix<double> A, Spar
 		xmat[uidx[i]] = val;
 	}
 
-	for (int i=0; i<seeds->size(); i++)
+	for (size_t i=0; i<seeds->size(); i++)
 	{
 		if((*labels)[i] == active_label)
 			xmat[(*seeds)[i]] = 1.0;

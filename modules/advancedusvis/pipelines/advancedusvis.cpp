@@ -43,6 +43,7 @@ namespace campvis {
         , _camera("camera", "Camera")
         , _usReader()
         , _confidenceReader()
+        , _confidenceGenerator()
         , _gvg()
         , _lhh()
         , _usFusion1(_effectiveRenderTargetSize)
@@ -61,6 +62,7 @@ namespace campvis {
     {
         addProcessor(&_usReader);
         addProcessor(&_confidenceReader);
+        addProcessor(&_confidenceGenerator);
         addProcessor(&_gvg);
         //addProcessor(&_lhh);
         addProcessor(&_usBlurFilter);
@@ -93,6 +95,7 @@ namespace campvis {
 
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
         _usReader.p_targetImageID.setValue("us.image");
+        _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_usFusion1.p_usImageId);
         _usReader.p_targetImageID.connect(&_usFusion2.p_usImageId);
         _usReader.p_targetImageID.connect(&_usFusion3.p_usImageId);
@@ -103,11 +106,13 @@ namespace campvis {
         _usReader.p_targetImageID.connect(&_usDenoiseilter.p_sourceImageID);
 
         _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
-        _confidenceReader.p_targetImageID.setValue("confidence.image");
-        _confidenceReader.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
-        _confidenceReader.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
-        _confidenceReader.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
-        _confidenceReader.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.setValue("confidence.image.read");
+
+        _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
+        _confidenceGenerator.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
+        _confidenceGenerator.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
+        _confidenceGenerator.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
+        _confidenceGenerator.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
 
         _gvg.p_targetImageID.connect(&_lhh.p_gradientsId);
         _gvg.p_targetImageID.connect(&_usFusion1.p_gradientImageID);

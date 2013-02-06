@@ -38,7 +38,7 @@ std::vector<double> SparseSolverViennaGPU::solve_Ax_b(SparseMatrix<double> A, Sp
 		xmat[uidx[i]] = x_dense(i);
 	}
 
-	for (int i=0; i<seeds->size(); i++)
+	for (size_t i=0; i<seeds->size(); i++)
 	{
 		if((*labels)[i] == active_label)
 			xmat[(*seeds)[i]] = 1.0;

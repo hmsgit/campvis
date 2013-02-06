@@ -3,8 +3,11 @@
 #include "SparseSolverEigenCG.h"
 #include "SparseSolverEigenBiCGSTAB.h"
 #include "SparseSolverEigenCustom.h"
+
+#ifdef RANDOMWALKSLIB_HAS_OPENCL
 #include "SparseSolverViennaCPU.h"
 #include "SparseSolverViennaGPU.h"
+#endif
 
 #include <iostream>
 
@@ -32,6 +35,7 @@ SparseSolverInterface * SparseSolverFactory::createSolver(std::string type, int 
 		SparseSolverInterface * solver = new SparseSolverEigenCustom(iterations,tolerance);
 		return solver;
 	}
+#ifdef RANDOMWALKSLIB_HAS_OPENCL
 	else if(type.compare("Vienna-CG-CPU")==0)
 	{
 		SparseSolverInterface * solver = new SparseSolverViennaCPU(iterations,tolerance);
@@ -42,6 +46,7 @@ SparseSolverInterface * SparseSolverFactory::createSolver(std::string type, int 
 		SparseSolverInterface * solver = new SparseSolverViennaGPU(iterations,tolerance);
 		return solver;
 	}
+#endif
 	else
 	{
 		return new SparseSolverEigenLLT();

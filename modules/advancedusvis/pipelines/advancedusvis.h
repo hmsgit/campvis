@@ -44,6 +44,7 @@
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
 #include "modules/vis/processors/quadview.h"
+#include "modules/randomwalk/processors/confidencemapgenerator.h"
 
 namespace campvis {
     class AdvancedUsVis : public VisualizationPipeline {
@@ -82,6 +83,8 @@ namespace campvis {
 
         MhdImageReader _usReader;
         MhdImageReader _confidenceReader;
+        ConfidenceMapGenerator _confidenceGenerator;
+
         GradientVolumeGenerator _gvg;
         LHHistogram _lhh;
         AdvancedUsFusion _usFusion1;

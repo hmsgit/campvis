@@ -26,7 +26,7 @@ void ConfidenceMaps2D::setMatrix2D(const std::vector<double> * matrix, int rows,
 		max_mat = (*matrix).front();
 
 		//Find min-max
-		for(int i=0; i<matrix->size();i++)
+		for(size_t i=0; i<matrix->size();i++)
 		{
 			double val = (*matrix)[i];
 			if( val< min_mat )
@@ -43,7 +43,7 @@ void ConfidenceMaps2D::setMatrix2D(const std::vector<double> * matrix, int rows,
 		if(diff<epsilon_diff)
 			diff = epsilon_diff;
 
-		for(int i=0; i<matrix_ptr->size();i++)
+		for(size_t i=0; i<matrix_ptr->size();i++)
 			(*matrix_ptr)[i] = ((*matrix_ptr)[i] - min_mat) /diff;
 	}
 
