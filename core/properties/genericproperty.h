@@ -30,7 +30,7 @@
 #ifndef GENERICPROPERTY_H__
 #define GENERICPROPERTY_H__
 
-#include "tbb/include/tbb/spin_mutex.h"
+#include "tbb/spin_mutex.h"
 #include "tgt/logmanager.h"
 #include "core/properties/abstractproperty.h"
 

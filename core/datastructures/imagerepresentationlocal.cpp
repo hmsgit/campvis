@@ -29,8 +29,8 @@
 
 #include "imagerepresentationlocal.h"
 
-#include "tbb/include/tbb/tbb.h"
-#include "tbb/include/tbb/spin_mutex.h"
+#include "tbb/tbb.h"
+#include "tbb/spin_mutex.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 

@@ -30,7 +30,7 @@
 #ifndef OBSERVER_H__
 #define OBSERVER_H__
 
-#include "tbb/include/tbb/spin_mutex.h"
+#include "tbb/spin_mutex.h"
 #include <set>
 
 namespace campvis {

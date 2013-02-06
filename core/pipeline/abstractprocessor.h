@@ -31,7 +31,7 @@
 #define PROCESSOR_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/include/tbb/atomic.h"
+#include "tbb/atomic.h"
 #include "tgt/logmanager.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/tools/invalidationlevel.h"

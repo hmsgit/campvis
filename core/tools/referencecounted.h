@@ -30,7 +30,7 @@
 #ifndef REFERENCECOUNTED_H__
 #define REFERENCECOUNTED_H__
 
-#include "tbb/include/tbb/atomic.h"
+#include "tbb/atomic.h"
 
 namespace campvis {
     /**

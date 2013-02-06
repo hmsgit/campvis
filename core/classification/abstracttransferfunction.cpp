@@ -29,7 +29,7 @@
 
 #include "abstracttransferfunction.h"
 
-#include "tbb/include/tbb/tbb.h"
+#include "tbb/tbb.h"
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"

@@ -37,7 +37,7 @@
 #include "tgt/qt/qtapplication.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/qt/qtcontextmanager.h"
-#include "tbb/include/tbb/compat/thread"
+#include "tbb/compat/thread"
 
 #ifdef HAS_KISSCL
 #include "kisscl/clruntime.h"

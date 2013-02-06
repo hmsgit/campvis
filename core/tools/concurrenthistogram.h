@@ -34,7 +34,7 @@
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
 #include "tgt/tgt_math.h"
-#include "tbb/include/tbb/atomic.h"
+#include "tbb/atomic.h"
 
 namespace campvis {
 

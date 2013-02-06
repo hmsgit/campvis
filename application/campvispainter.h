@@ -31,8 +31,8 @@
 #define CAMPVISPAINTER_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/include/tbb/atomic.h"
-#include "tbb/include/tbb/compat/condition_variable"
+#include "tbb/atomic.h"
+#include "tbb/compat/condition_variable"
 
 #include "tgt/logmanager.h"
 #include "tgt/painter.h"

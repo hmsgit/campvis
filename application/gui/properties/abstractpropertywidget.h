@@ -31,7 +31,7 @@
 #define ABSTRACTPROPERTYWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/include/tbb/atomic.h"
+#include "tbb/atomic.h"
 #include <QBoxLayout>
 #include <QLabel>
 #include <QWidget>

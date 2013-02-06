@@ -32,7 +32,7 @@
 
 #include "sigslot/sigslot.h"
 #include "core/tools/runnable.h"
-#include "tbb/include/tbb/compat/condition_variable"
+#include "tbb/compat/condition_variable"
 
 namespace campvis {
     class AbstractPipeline;

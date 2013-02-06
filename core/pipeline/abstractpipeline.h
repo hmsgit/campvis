@@ -32,8 +32,8 @@
 
 #include "sigslot/sigslot.h"
 #include "tgt/logmanager.h"
-#include "tbb/include/tbb/spin_mutex.h"
-#include "tbb/include/tbb/mutex.h"
+#include "tbb/spin_mutex.h"
+#include "tbb/mutex.h"
 #include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"

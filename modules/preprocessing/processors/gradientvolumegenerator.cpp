@@ -32,7 +32,7 @@
 #include "tgt/glmath.h"
 #include "tgt/logmanager.h"
 
-#include "tbb/include/tbb/tbb.h"
+#include "tbb/tbb.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"

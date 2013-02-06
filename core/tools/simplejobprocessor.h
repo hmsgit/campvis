@@ -31,7 +31,7 @@
 #define SIMPLEJOBPROCESSOR_H__
 
 #include "tgt/singleton.h"
-#include "tbb/include/tbb/task_group.h"
+#include "tbb/task_group.h"
 
 namespace campvis {
     /**

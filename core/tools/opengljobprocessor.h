@@ -32,11 +32,11 @@
 
 #include "sigslot/sigslot.h"
 #include "tgt/singleton.h"
-#include "tbb/include/tbb/atomic.h"
-#include "tbb/include/tbb/concurrent_queue.h"
-#include "tbb/include/tbb/concurrent_hash_map.h"
-#include "tbb/include/tbb/concurrent_vector.h"
-#include "tbb/include/tbb/compat/condition_variable"
+#include "tbb/atomic.h"
+#include "tbb/concurrent_queue.h"
+#include "tbb/concurrent_hash_map.h"
+#include "tbb/concurrent_vector.h"
+#include "tbb/compat/condition_variable"
 #include "core/tools/job.h"
 #include "core/tools/runnable.h"
 

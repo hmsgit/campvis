@@ -30,7 +30,7 @@
 #ifndef GEOMETRY1DTRANSFERFUNCTIONEDITOR_H__
 #define GEOMETRY1DTRANSFERFUNCTIONEDITOR_H__
 
-#include "tbb/include/tbb/mutex.h"
+#include "tbb/mutex.h"
 #include "tgt/painter.h"
 #include "tgt/event/eventlistener.h"
 #include "core/classification/tfgeometry1d.h"

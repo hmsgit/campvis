@@ -36,7 +36,7 @@
 #include "tgt/event/mouseevent.h"
 #include "tgt/qt/qtcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
-#include "tbb/include/tbb/mutex.h"
+#include "tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"
 

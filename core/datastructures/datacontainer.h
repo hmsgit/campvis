@@ -31,7 +31,7 @@
 #define DATACONTAINER_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/include/tbb/spin_mutex.h"
+#include "tbb/spin_mutex.h"
 #include "core/datastructures/datahandle.h"
 
 #include <string>
