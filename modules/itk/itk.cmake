@@ -11,7 +11,7 @@ IF(ITK_FOUND)
     #SET(ThisModIncludeDirs ${ITK_INCLUDE_DIRS})
     #SET(ThisModExternalLibs ${ITK_LIBRARIES})
     
-    MESSAGE(STATUS "** Found ITK library")
+    MESSAGE(STATUS "  Found ITK library")
 ELSE(ITK_FOUND)
     MESSAGE(FATAL_ERROR "Could not locate ITK.")
 ENDIF(ITK_FOUND)

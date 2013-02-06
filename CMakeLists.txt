@@ -28,8 +28,8 @@ ENDIF()
 #
 # Further Build Configurations
 #
-
 include(cmake/commonconf.cmake)
+include(cmake/parseModulesDir.cmake)
 
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 
