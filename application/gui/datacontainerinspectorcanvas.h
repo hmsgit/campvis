@@ -164,6 +164,7 @@ namespace campvis {
 
         std::map<QString, QtDataHandle> _handles;
         std::vector<const tgt::Texture*> _textures;
+        bool _texturesDirty;
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         tbb::mutex _localMutex;                         ///< Mutex protecting the local members

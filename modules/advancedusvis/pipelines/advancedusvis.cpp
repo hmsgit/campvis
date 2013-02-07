@@ -200,6 +200,9 @@ namespace campvis {
         if (!_usDenoiseilter.getInvalidationLevel().isValid()) {
             SimpleJobProc.enqueueJob(makeJob<AdvancedUsVis, AbstractProcessor*>(this, &AdvancedUsVis::executeProcessor, &_usDenoiseilter));
         }
+        if (!_confidenceGenerator.getInvalidationLevel().isValid()) {
+            SimpleJobProc.enqueueJob(makeJob<AdvancedUsVis, AbstractProcessor*>(this, &AdvancedUsVis::executeProcessor, &_confidenceGenerator));
+        }
 
 
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {

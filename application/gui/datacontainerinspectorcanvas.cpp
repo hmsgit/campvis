@@ -110,6 +110,9 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::paint() {
         tbb::mutex::scoped_lock lock(_localMutex);
+        if (_texturesDirty)
+            updateTextures();
+
         if (_textures.empty())
             return;
 
@@ -262,7 +265,7 @@ namespace campvis {
             for (std::vector< std::pair<QString, QtDataHandle> >::const_iterator it = handles.begin(); it != handles.end(); ++it)
                 _handles.insert(*it);
 
-            updateTextures();
+            _texturesDirty = true;
         }
 
         invalidate();
@@ -288,6 +291,7 @@ namespace campvis {
         if (maxSlices == 1)
             maxSlices = -1;
         p_currentSlice.setMaxValue(maxSlices);
+        _texturesDirty = false;
     }
 
     void DataContainerInspectorCanvas::onPropertyChanged(const AbstractProperty* prop) {
