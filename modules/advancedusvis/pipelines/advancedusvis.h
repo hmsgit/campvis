@@ -34,8 +34,9 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
 #include "core/eventhandlers/transfuncwindowingeventhandler.h"
 #include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/digraphvisualizationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
+#include "modules/io/processors/csvdimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
@@ -47,10 +48,10 @@
 #include "modules/randomwalk/processors/confidencemapgenerator.h"
 
 namespace campvis {
-    class AdvancedUsVis : public VisualizationPipeline {
+    class AdvancedUsVis : public DigraphVisualizationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a VisualizationPipeline. 
          */
         AdvancedUsVis();
 
@@ -77,12 +78,18 @@ namespace campvis {
 
         void onRenderTargetSizeChanged(const AbstractProperty* prop);
     protected:
-        void foobar();
+
+        /**
+         * Slot getting called when one of the observed processors got validated.
+         * Updates the camera properties, when the input image has changed.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorValidated(AbstractProcessor* processor);
 
         CameraProperty _camera;
 
-        MhdImageReader _usReader;
-        MhdImageReader _confidenceReader;
+        CsvdImageReader _usReader;
+        CsvdImageReader _confidenceReader;
         ConfidenceMapGenerator _confidenceGenerator;
 
         GradientVolumeGenerator _gvg;

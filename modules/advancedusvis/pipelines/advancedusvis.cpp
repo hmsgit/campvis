@@ -39,7 +39,7 @@
 namespace campvis {
 
     AdvancedUsVis::AdvancedUsVis()
-        : VisualizationPipeline()
+        : DigraphVisualizationPipeline()
         , _camera("camera", "Camera")
         , _usReader()
         , _confidenceReader()
@@ -90,10 +90,13 @@ namespace campvis {
     void AdvancedUsVis::init() {
         VisualizationPipeline::init();
 
+        _usReader.s_validated.connect(this, &AdvancedUsVis::onProcessorValidated);
+
         _camera.addSharedProperty(&_usEEP.p_camera);
         _camera.addSharedProperty(&_usDVR.p_camera);
 
-        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
+        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
+        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\US.csvd");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_usFusion1.p_usImageId);
@@ -105,7 +108,8 @@ namespace campvis {
         _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_usDenoiseilter.p_sourceImageID);
 
-        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
+        //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
+        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\Map.csvd");
         _confidenceReader.p_targetImageID.setValue("confidence.image.read");
 
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
@@ -193,7 +197,7 @@ namespace campvis {
             _invalidationLevel.setValid();
             // TODO:    think whether we want to lock all processors already here.
         }
-
+/*
         if (!_usReader.getInvalidationLevel().isValid()) {
             SimpleJobProc.enqueueJob(makeJob(this, &AdvancedUsVis::foobar));
         }
@@ -208,7 +212,7 @@ namespace campvis {
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             if (! (*it)->getInvalidationLevel().isValid())
                 lockGLContextAndExecuteProcessor(*it);
-        }
+        }*/
     }
 
     void AdvancedUsVis::keyEvent(tgt::KeyEvent* e) {
@@ -234,18 +238,19 @@ namespace campvis {
         _camera.setWindowRatio(ratio);
     }
 
-    void AdvancedUsVis::foobar() {
-        executeProcessor(&_usReader);
+    void AdvancedUsVis::onProcessorValidated(AbstractProcessor* processor) {
+        if (processor = &_usReader) {
+            // convert data
+            DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
+            if (img != 0) {
+                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
-        // convert data
-        DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
-        if (img != 0) {
-            tgt::Bounds volumeExtent = img->getWorldBounds();
-            tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+                _trackballEH->setSceneBounds(volumeExtent);
+                _trackballEH->setCenter(volumeExtent.center());
+                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+            }
 
-            _trackballEH->setSceneBounds(volumeExtent);
-            _trackballEH->setCenter(volumeExtent.center());
-            _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
         }
     }
 

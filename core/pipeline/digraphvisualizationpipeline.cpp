@@ -35,6 +35,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
+#include "core/tools/simplejobprocessor.h"
 
 #include <stack>
 
@@ -127,7 +128,26 @@ namespace campvis {
     }
 
     void DigraphVisualizationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
-        // TODO: implement
+        // dirty hack - implement proper initialization...
+        if (_canvas == 0)
+            return;
+
+        // TODO: think about a more elaborate implementation, this one doesn't care about the processor graph
+        std::map<AbstractProcessor*, DependencyNode*>::iterator node = _processorNodeMap.find(processor);
+        if (node != _processorNodeMap.end()) {
+            if (node->second->_isVisualizationProcessor) {
+                GLJobProc.enqueueJob(
+                    _canvas, 
+                    makeJobOnHeap<DigraphVisualizationPipeline, AbstractProcessor*>(this, &DigraphVisualizationPipeline::executeProcessor, processor), 
+                    OpenGLJobProcessor::SerialJob);
+            }
+            else {
+                SimpleJobProc.enqueueJob(makeJob<DigraphVisualizationPipeline, AbstractProcessor*>(this, &DigraphVisualizationPipeline::executeProcessor, processor));
+            }
+        }
+        else {
+            LWARNING("Caught invalidation of a processor that is not in the processor graph!");
+        }
     }
 
 }

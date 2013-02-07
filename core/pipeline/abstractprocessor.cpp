@@ -27,6 +27,7 @@
 // 
 // ================================================================================================
 
+#include "tbb/compat/thread"
 #include "tgt/assert.h"
 #include "abstractprocessor.h"
 
@@ -57,6 +58,9 @@ namespace campvis {
         if (! _invalidationLevel.isValid()) {
             s_invalidated(this);
         }
+        else {
+            s_validated(this);
+        }
     }
 
     void AbstractProcessor::init() {
@@ -69,7 +73,8 @@ namespace campvis {
 
 
     void AbstractProcessor::lockProcessor() {
-        while (_locked.compare_and_swap(true, false) == true); // TODO: busy waiting us fu**ing ugly...
+        while (_locked.compare_and_swap(true, false) == true) // TODO: busy waiting us fu**ing ugly...
+            std::this_thread::yield();
         _locked = true;
         lockAllProperties();
     }

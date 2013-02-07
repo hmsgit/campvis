@@ -47,7 +47,7 @@ namespace campvis {
      * Specialization of the VisualizationPipeline that performs automatic evaluation based on
      * an acyclic directed dependency graph.
      * 
-     * \todo    Think about thread-safety. The current graph implementation is \b not thread-safe.
+     * \todo    Implement thread-safety. The current graph implementation is \b not thread-safe.
      */
     class DigraphVisualizationPipeline : public VisualizationPipeline {
     public:

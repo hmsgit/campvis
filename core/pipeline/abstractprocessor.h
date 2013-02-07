@@ -161,6 +161,9 @@ namespace campvis {
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;
 
+        /// Signal emitted when the processor has been validated.
+        sigslot::signal1<AbstractProcessor*> s_validated;
+
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * \param   prop    Property that emitted the signal
