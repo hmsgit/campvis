@@ -33,7 +33,8 @@
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "core/properties/genericproperty.h"
 
-#include <QLineEdit>
+class QLineEdit;
+class QPushButton;
 
 namespace campvis {
     /**
@@ -63,9 +64,11 @@ namespace campvis {
 
     private slots:
         void onTextChanged(const QString& text);
+        void onBtnLoadFileClicked(bool flag);
 
     private:
         QLineEdit* _lineEdit;
+        QPushButton* _btnLoadFile;
 
     };
 }

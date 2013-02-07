@@ -28,16 +28,28 @@
 // ================================================================================================
 
 #include "stringpropertywidget.h"
+#include "core/properties/datanameproperty.h"
+
+#include <QLineEdit>
+#include <QPushButton>
+#include <QDir>
+#include <QFileDialog>
 
 namespace campvis {
     StringPropertyWidget::StringPropertyWidget(StringProperty* property, QWidget* parent /*= 0*/)
         : AbstractPropertyWidget(property, parent)
         , _lineEdit(0)
+        , _btnLoadFile(0)
     {
         _lineEdit = new QLineEdit(this);
         _lineEdit->setText(QString::fromStdString(property->getValue()));
-        
         addWidget(_lineEdit);
+
+        if (! dynamic_cast<DataNameProperty*>(property)) {
+            _btnLoadFile = new QPushButton(tr("Load File"), this);
+            addWidget(_btnLoadFile);
+            connect(_btnLoadFile, SIGNAL(clicked(bool)), this, SLOT(onBtnLoadFileClicked(bool)));
+        }
 
         connect(_lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
     }
@@ -62,4 +74,35 @@ namespace campvis {
         prop->setValue(text.toStdString());
         --_ignorePropertyUpdates;
     }
+
+    void StringPropertyWidget::onBtnLoadFileClicked(bool flag) {
+        StringProperty* prop = static_cast<StringProperty*>(_property);
+
+        QString dialogCaption = QString::fromStdString(prop->getTitle());
+        QString directory;
+        // use directory of current property value if any, default directory otherwise
+        if (! prop->getValue().empty())
+            directory = QString::fromStdString(prop->getValue());
+        else
+            directory = tr("");
+
+        const QString fileFilter = /*QString::fromStdString(property_->getFileFilter()) + ";;" + */tr("All files (*)");
+
+        QString filename;
+//        if (property_->getFileMode() == FileDialogProperty::OPEN_FILE) {
+            filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
+/*        }
+        else if (property_->getFileMode() == FileDialogProperty::SAVE_FILE) {
+            filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
+        }
+        else if (property_->getFileMode() == FileDialogProperty::DIRECTORY) {
+            filename = QFileDialog::getExistingDirectory(QWidget::parentWidget(), dialogCaption, QString::fromStdString(property_->get()));
+        }*/
+
+        if (! filename.isEmpty()) {
+            prop->setValue(filename.toStdString());
+            //emit modified();
+        }
+    }
+
 }
