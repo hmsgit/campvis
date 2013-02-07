@@ -5,6 +5,7 @@
 #ifndef CONFIDENCE_MAPS_2D_FACADE_H__
 #define CONFIDENCE_MAPS_2D_FACADE_H__
 
+#include "ConfidenceMaps2D.h"
 #include <vector>
 
 /** \brief	Facade for computing confidence map for 2D image
@@ -36,7 +37,7 @@ public:
 	/// Set desired solver (default Eigen LLT)
 	void setSolver(std::string solver, int iterations = 2000, double tolerance = 1.0e-7);
 private:
-	ConfidenceMaps2D * maps2D; ///< Implementation of confidence estimation
+	ConfidenceMaps2D maps2D; ///< Implementation of confidence estimation
 	std::vector<int> seeds; ///< Seeds/boundary conditions
 	std::vector<int> labels; ///< Labels for seeds
 };
