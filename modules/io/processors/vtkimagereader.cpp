@@ -164,23 +164,23 @@ namespace campvis {
 #define DISPATCH_PARSING(VTK_TYPE, C_TYPE, TMP_TYPE) \
     do { \
         if (splitted[3] == VTK_TYPE) { \
-            C_TYPE* data = new C_TYPE[numPoints]; \
+            C_TYPE* dataArray = new C_TYPE[numPoints]; \
             TMP_TYPE tmp; \
             for (size_t i = 0; i < numPoints && file.good(); ++i) { \
                 file >> tmp; \
-                data[i] = static_cast<C_TYPE>(tmp); \
+                dataArray[i] = static_cast<C_TYPE>(tmp); \
             } \
-            rep = GenericImageRepresentationLocal<C_TYPE, 1>::create(image, data); \
+            rep = GenericImageRepresentationLocal<C_TYPE, 1>::create(image, dataArray); \
         } \
     } while (0)
 
-                DISPATCH_PARSING("unsigned_char", uint8_t, uint16_t);
-                DISPATCH_PARSING("char", int8_t, int16_t);
-                DISPATCH_PARSING("unsigned_short", uint16_t, uint16_t);
-                DISPATCH_PARSING("short", int16_t, int16_t);
-                DISPATCH_PARSING("unsigned_int", uint32_t, uint32_t);
-                DISPATCH_PARSING("int", int32_t, int32_t);
-                DISPATCH_PARSING("float", float, float);
+                DISPATCH_PARSING("unsigned_char"    , uint8_t, uint16_t);
+                DISPATCH_PARSING("char"             , int8_t, int16_t);
+                DISPATCH_PARSING("unsigned_short"   , uint16_t, uint16_t);
+                DISPATCH_PARSING("short"            , int16_t, int16_t);
+                DISPATCH_PARSING("unsigned_int"     , uint32_t, uint32_t);
+                DISPATCH_PARSING("int"              , int32_t, int32_t);
+                DISPATCH_PARSING("float"            , float, float);
 
                 if (rep != 0) {
                     // all parsing done - lets create the image:

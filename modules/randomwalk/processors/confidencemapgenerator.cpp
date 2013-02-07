@@ -146,7 +146,7 @@ namespace campvis {
             float* outputValues = new float[numElements];
 
             tbb::parallel_for(
-                tbb::blocked_range<size_t>(0, imageSize.z, imageSize.z),
+                tbb::blocked_range<size_t>(0, imageSize.z),
                 CMGenerator(input, outputValues, p_solver.getOptionValue(), p_alpha.getValue(), p_beta.getValue(), p_gamma.getValue(), p_normalizeValues.getValue()));
 
             ImageData* output = new ImageData(input->getDimensionality(), input->getSize(), 1);

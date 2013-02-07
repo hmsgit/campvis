@@ -27,9 +27,12 @@
 // 
 // ================================================================================================
 
-#include "mhdimagereader.h"
+#include "csvdimagereader.h"
 
+#include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
 
 #include "tgt/filesystem.h"
 #include "core/datastructures/imagedata.h"
@@ -37,17 +40,13 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/textfileparser.h"
 
-/*
- * Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
- */
-
 namespace campvis {
-    const std::string MhdImageReader::loggerCat_ = "CAMPVis.modules.io.MhdImageReader";
+    const std::string CsvdImageReader::loggerCat_ = "CAMPVis.modules.io.CsvdImageReader";
 
-    MhdImageReader::MhdImageReader() 
+    CsvdImageReader::CsvdImageReader() 
         : AbstractProcessor()
         , p_url("url", "Image URL", "")
-        , p_targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output", DataNameProperty::WRITE)
+        , p_targetImageID("targetImageName", "Target Image ID", "CsvdImageReader.output", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
     {
@@ -57,126 +56,111 @@ namespace campvis {
         addProperty(&p_voxelSize);
     }
 
-    MhdImageReader::~MhdImageReader() {
+    CsvdImageReader::~CsvdImageReader() {
 
     }
 
-    void MhdImageReader::process(DataContainer& data) {
+    void CsvdImageReader::process(DataContainer& data) {
         try {
             // start parsing
             TextFileParser tfp(p_url.getValue(), true, "=");
             tfp.parse<TextFileParser::ItemSeparatorLines>();
 
             // init optional parameters with sane default values
-            std::string url;
-            size_t dimensionality;
+            size_t dimensionality = 3;
             tgt::svec3 size;
             WeaklyTypedPointer::BaseType pt;
             size_t numChannels = 1;
-            size_t offset = 0;
-            EndianHelper::Endianness e = EndianHelper::LITTLE_ENDIAN;
 
             tgt::vec3 voxelSize(1.f);
             tgt::vec3 imageOffset(0.f);
 
-            // image type
-            if (tfp.hasKey("ObjectType")) {
-                if (tfp.getString("ObjectType") != "Image") {
-                    LERROR("Error while parsing MHD header: ObjectType = Image expected");
-                    return;
-                }
-            }
-            else {
-                LWARNING("No Key 'ObjectType' found - assuming Image.");
-            }
-
             // dimensionality and size
-            dimensionality = tfp.getSizeT("NDims");
-            if (dimensionality == 2)
-                size = tgt::svec3(tfp.getSvec2("DimSize"), 1);
-            else if (dimensionality == 3)
-                size = tfp.getSvec3("DimSize");
+            if (tfp.hasKey("Size")) {
+                size = tfp.getSvec3("Size");
+            }
             else {
-                LERROR("Error while parsing MHD header: Unsupported dimensionality: " << dimensionality);
+                LERROR("Error while parsing CSVD header: No Size specified.");
                 return;
             }
 
             // element type
             std::string et = tfp.getString("ElementType");
-            if (et == "MET_UCHAR")
+            if (et == "UINT8")
                 pt = WeaklyTypedPointer::UINT8;
-            else if (et == "MET_CHAR")
+            else if (et == "INT8")
                 pt = WeaklyTypedPointer::INT8;
-            else if (et == "MET_USHORT")
+            else if (et == "UINT16")
                 pt = WeaklyTypedPointer::UINT16;
-            else if (et == "MET_SHORT")
+            else if (et == "INT16")
                 pt = WeaklyTypedPointer::INT16;
-            else if (et == "MET_UINT")
+            else if (et == "UINT32")
                 pt = WeaklyTypedPointer::UINT32;
-            else if (et == "MET_INT")
+            else if (et == "INT32")
                 pt = WeaklyTypedPointer::INT32;
-            else if (et == "MET_FLOAT")
+            else if (et == "FLOAT")
                 pt = WeaklyTypedPointer::FLOAT;
             else {
                 LERROR("Error while parsing MHD header: Unsupported element type: " << et);
                 return;
             }
 
-            // further optional parameters:
-            if (tfp.hasKey("HeaderSize")) {
-                // header size can be -1...
-                int tmp = tfp.getInt("HeaderSize");
-                if (tmp >= 0)
-                    offset = static_cast<int>(tmp);
-            }
-            if (tfp.hasKey("ElementByteOrderMSB"))
-                e = (tfp.getBool("ElementByteOrderMSB") ? EndianHelper::BIG_ENDIAN : EndianHelper::LITTLE_ENDIAN);
-            
-            // TODO: spacing, element size, etc.
-            if (tfp.hasKey("ElementSpacing")) {
-                voxelSize = tfp.getVec3("ElementSpacing");
-            }
-            if (tfp.hasKey("Position")) {
-                imageOffset = tfp.getVec3("Position");
-            }
-            if (tfp.hasKey("ElementNumberOfChannels")) {
-                numChannels = tfp.getSizeT("ElementNumberOfChannels");
-            }
+            // dimensionality and size
+            if (tfp.hasKey("CsvFileBaseName")) {
+                ImageData* image = new ImageData(dimensionality, size, 1);
+                ImageRepresentationLocal* rep = 0;
+                size_t index = 0;
 
-            // get raw image location:
-            url = StringUtils::trim(tfp.getString("ElementDataFile"));
-            if (url == "LOCAL") {
-                url = p_url.getValue();
-                // find beginning of local data:
-                tgt::File* file = FileSys.open(p_url.getValue());
-                if (!file || !file->isOpen())
-                    throw tgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
+                std::string url = StringUtils::trim(tfp.getString("CsvFileBaseName"));
+                url = tgt::FileSystem::cleanupPath(tgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
 
-                while (!file->eof()) {
-                    std::string line = StringUtils::trim(file->getLine());
-                    if (line.find("ElementDataFile") == 0) {
-                        offset = file->tell();
-                    }
-                file->close();
-                delete file;
+                // start parsing of CSV files
+#define DISPATCH_PARSING(WTP_TYPE, C_TYPE, TMP_TYPE) \
+    if (pt == WTP_TYPE) {\
+        C_TYPE* dataArray = new C_TYPE[tgt::hmul(size)]; \
+        for (size_t slice = 0; slice < size.z; ++slice) { \
+            std::stringstream ss; \
+            ss << url << slice << ".csv"; \
+            std::string concatenated = ss.str(); \
+             \
+            std::ifstream file(concatenated.c_str(), std::ifstream::in); \
+            if (!file.is_open() || file.bad()) \
+                throw tgt::FileException("Could not open file " + ss.str() + " for reading.", p_url.getValue()); \
+                 \
+            TMP_TYPE tmp; \
+            for (size_t column = 0; column < size.y; ++column) { \
+                for (size_t row = 0; row < size.x && file.good(); ++row) { \
+                    file >> tmp; \
+                    dataArray[index++] = static_cast<C_TYPE>(tmp); \
+                    file.get(); /* TODO: simple hack to advance to next character - but there might be more than one... */ \
+                } \
+            } \
+        } \
+        rep = GenericImageRepresentationLocal<C_TYPE, 1>::create(image, dataArray); \
+    }
+
+                DISPATCH_PARSING(WeaklyTypedPointer::UINT8      , uint8_t, uint16_t)
+                else DISPATCH_PARSING(WeaklyTypedPointer::INT8  , int8_t, int16_t)
+                else DISPATCH_PARSING(WeaklyTypedPointer::UINT16, uint16_t, uint16_t)
+                else DISPATCH_PARSING(WeaklyTypedPointer::INT16 , int16_t, int16_t)
+                else DISPATCH_PARSING(WeaklyTypedPointer::UINT32, uint32_t, uint32_t)
+                else DISPATCH_PARSING(WeaklyTypedPointer::INT32 , int32_t, int32_t)
+                else DISPATCH_PARSING(WeaklyTypedPointer::FLOAT , float, float)
+                
+                if (rep != 0) {
+                    // all parsing done - lets create the image:
+                    image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
+                    data.addData(p_targetImageID.getValue(), image);
+                    p_targetImageID.issueWrite();
+                }
+                else {
+                    throw tgt::FileException("Error while parsing the data.", p_url.getValue());
                 }
             }
-            else if (url == "LIST") {
-                LERROR("Error while loading MHD file: Image list currently not supported.");
+            else {
+                LERROR("Error while parsing CSVD header: No file names specified.");
                 return;
             }
-            else {
-                url = tgt::FileSystem::cleanupPath(tgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
-            } 
-
-
-
-            // all parsing done - lets create the image:
-            ImageData* image = new ImageData(dimensionality, size, numChannels);
-            ImageRepresentationDisk::create(image, url, pt, offset, e);
-            image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
-            data.addData(p_targetImageID.getValue(), image);
-            p_targetImageID.issueWrite();
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
