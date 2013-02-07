@@ -42,6 +42,9 @@
 #include <vector>
 
 namespace campvis {
+    class ImageRepresentationLocal;
+    class AbstractImageRepresentationItk;
+
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.
      * Different representations (e.g. local memory, OpenGL texture, OpenCL buffer) are
@@ -166,7 +169,7 @@ namespace campvis {
         /**
          * Returns a representation of this image of type \a T.
          * Looks, whether such a representations already exists, if not and \a performConversion is 
-         * set, the method tries to create T::tryConvertFrom(). Returns 0 on failure.
+         * set, the method tries to create it via T::tryConvertFrom(). Returns 0 on failure.
          * \note    You do \b NOT have ownership of the returned pointer!
          *          The returned pointer is valid as long as this ImageData object exists.
          * \note    If \a T is OpenGL related, make sure to call this method from a valid and locked OpenGL context.
@@ -178,6 +181,9 @@ namespace campvis {
         const T* getRepresentation(bool performConversion = true) const;
 
     protected:
+        template<typename T>
+        const T* tryPerformConversion() const;
+
         /**
          * Adds the given representation to the list of representations.
          * \note    Since this is non-publich method, no sanity checks are performed!
@@ -215,32 +221,46 @@ namespace campvis {
 // = Template definition ==========================================================================
 
     template<typename T>
-    const T* campvis::ImageData::getRepresentation(bool performConversion /*= true*/) const {
+    const T* campvis::ImageData::getRepresentation(bool performConversion) const {
         // look, whether we already have a suitable representation
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (const T* tester = dynamic_cast<const T*>(*it))
-                return tester;
-            //if (typeid(T) == typeid(**it)) {
-            //    return static_cast<const T*>(*it);
-            //}
+            //if (const T* tester = dynamic_cast<const T*>(*it))
+            //    return tester;
+            if (typeid(T) == typeid(**it)) {
+                return static_cast<const T*>(*it);
+            }
         }
 
         if (performConversion) {
-            // no representation found, create a new one
-            for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-                const T* tester = T::tryConvertFrom(*it);
-                if (tester != 0) {
-                    return tester;
-                }
-            }
-
-            // could not create a suitable representation
-            LDEBUG("Could not create a " + std::string(typeid(T*).name()) + " representation.");
-            return 0;
+            return tryPerformConversion<T>();
         }
 
         return 0;
     }
+
+    template<>
+    const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
+
+#ifdef CAMPVIS_HAS_MODULE_ITK
+    template<>
+    const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
+#endif
+
+    template<typename T>
+    const T* campvis::ImageData::tryPerformConversion() const {
+        // no representation found, create a new one
+        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
+            const T* tester = T::tryConvertFrom(*it);
+            if (tester != 0) {
+                return tester;
+            }
+        }
+
+        // could not create a suitable representation
+        LDEBUG("Could not create a " + std::string(typeid(T*).name()) + " representation.");
+        return 0;
+    }
+
 }
 
 #endif // IMAGEDATA_H__
