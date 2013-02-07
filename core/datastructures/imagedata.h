@@ -30,13 +30,14 @@
 #ifndef IMAGEDATA_H__
 #define IMAGEDATA_H__
 
+#include "tbb/concurrent_vector.h"
 #include "tgt/bounds.h"
 #include "tgt/logmanager.h"
 #include "tgt/vector.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/abstractimagerepresentation.h"
 #include "core/datastructures/imagemappinginformation.h"
-//
+
 
 #include <vector>
 
@@ -194,17 +195,17 @@ namespace campvis {
         /**
          * Clears all representations from the vector and frees the memory.
          * \note    Make sure to call this method only when nobody else holds pointers to the
-         *          representations as they will be invalidated.
+         *          representations as they will be invalidated. This method is \b not thread-safe!
          */
         void clearRepresentations();
 
         /// List of all representations of this image. Mutable to allow lazy instantiation of new representations.
-        mutable std::vector<const AbstractImageRepresentation*> _representations;
+        mutable tbb::concurrent_vector<const AbstractImageRepresentation*> _representations;
 
-        size_t _dimensionality;                         ///< Dimensionality of this image
-        tgt::svec3 _size;                               ///< Size of this image (number of elements per dimension)
-        size_t _numChannels;                            ///< Number of channels per element
-        size_t _numElements;                            ///< number of elements (= tgt::hmul(size))
+        const size_t _dimensionality;                   ///< Dimensionality of this image
+        const tgt::svec3 _size;                         ///< Size of this image (number of elements per dimension)
+        const size_t _numChannels;                      ///< Number of channels per element
+        const size_t _numElements;                      ///< number of elements (= tgt::hmul(size))
         ImageMappingInformation _mappingInformation;    ///< Mapping information of this image
 
         static const std::string loggerCat_;
@@ -216,7 +217,7 @@ namespace campvis {
     template<typename T>
     const T* campvis::ImageData::getRepresentation(bool performConversion /*= true*/) const {
         // look, whether we already have a suitable representation
-        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
+        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
             if (const T* tester = dynamic_cast<const T*>(*it))
                 return tester;
             //if (typeid(T) == typeid(**it)) {
@@ -226,7 +227,7 @@ namespace campvis {
 
         if (performConversion) {
             // no representation found, create a new one
-            for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
+            for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
                 const T* tester = T::tryConvertFrom(*it);
                 if (tester != 0) {
                     return tester;

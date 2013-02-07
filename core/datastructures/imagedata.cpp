@@ -50,13 +50,15 @@ namespace campvis {
     ImageData* ImageData::clone() const {
         ImageData* toReturn = new ImageData(_dimensionality, _size, _numChannels);
         toReturn->_mappingInformation = _mappingInformation;
-        toReturn->_representations.assign(_representations.begin(), _representations.end());
+        tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator start = _representations.begin();
+        tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator end = _representations.end();
+        toReturn->_representations.assign(start, end);
         return toReturn;
     }
 
     size_t ImageData::getLocalMemoryFootprint() const {
         size_t toReturn = sizeof(*this) + _representations.size() * sizeof(AbstractImageRepresentation*);
-        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
+        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it)
             toReturn += (*it)->getLocalMemoryFootprint();
 
         return toReturn;
@@ -64,7 +66,7 @@ namespace campvis {
 
     size_t ImageData::getVideoMemoryFootprint() const {
         size_t toReturn = 0;
-        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
+        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it)
             toReturn += (*it)->getVideoMemoryFootprint();
 
         return toReturn;
@@ -121,7 +123,7 @@ namespace campvis {
         toReturn->_mappingInformation = ImageMappingInformation(newSize, _mappingInformation.getOffset(), _mappingInformation.getVoxelSize(), _mappingInformation.getRealWorldMapping());
         
         // create sub-image of every image representation
-        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it) {
+        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
             AbstractImageRepresentation* si = (*it)->getSubImage(toReturn, llf, urb);
             toReturn->addRepresentation(si);
         }
@@ -145,7 +147,7 @@ namespace campvis {
     }
 
     void ImageData::clearRepresentations() {
-        for (std::vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
+        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::iterator it = _representations.begin(); it != _representations.end(); ++it)
             delete *it;
         _representations.clear();
     }
