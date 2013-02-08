@@ -31,6 +31,7 @@
 #define VISUALIZATIONPIPELINE_H__
 
 #include "sigslot/sigslot.h"
+#include "tbb/concurrent_hash_map.h"
 #include "tgt/vector.h"
 #include "tgt/event/eventlistener.h"
 #include "core/eventhandlers/abstracteventhandler.h"
@@ -78,10 +79,13 @@ namespace campvis {
         virtual void deinit();
 
         /**
-         * Execute this pipeline.
-         * Pipeline must have a valid canvas set before calling this method.
-         **/
-        virtual void execute() = 0;
+         * Adds the processor \a processor to this pipeline's processor list.
+         * \note    The s_invalidated signal of each processor on this list will be automatically 
+         *          connected to onProcessorInvalidated() during initialization and disconnected
+         *          during deinitialization.
+         * \param   processor   The processor to add.
+         */
+        void addProcessor(AbstractProcessor* processor);
 
         /**
          * Performs the event handling for the assigned canvas.
@@ -152,6 +156,13 @@ namespace campvis {
          * \param   prop    Property that emitted the signal
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
+        
+        /**
+         * Slot getting called when one of the observed processors got invalidated.
+         * The default behaviour is just to set the invalidation level to invalid.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
         /**
          * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 
@@ -164,6 +175,8 @@ namespace campvis {
          * Updates the _effectiveRenderTargetSize property considering LQ mode.
          */
         void updateEffectiveRenderTargetSize();
+
+        tbb::concurrent_hash_map<AbstractProcessor*, bool> _isVisProcessorMap;
 
         tgt::ivec2 _renderTargetSize;                           ///< original render target size
         bool _lqMode;                                           ///< Flag whether low quality mode is enables

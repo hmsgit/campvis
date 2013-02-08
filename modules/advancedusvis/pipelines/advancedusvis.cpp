@@ -198,11 +198,6 @@ namespace campvis {
     }
 
     void AdvancedUsVis::execute() {
-        {
-            tbb::spin_mutex::scoped_lock lock(_localMutex);
-            _invalidationLevel.setValid();
-            // TODO:    think whether we want to lock all processors already here.
-        }
 /*
         if (!_usReader.getInvalidationLevel().isValid()) {
             SimpleJobProc.enqueueJob(makeJob(this, &AdvancedUsVis::foobar));

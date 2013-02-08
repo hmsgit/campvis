@@ -44,7 +44,6 @@ namespace tgt {
 namespace campvis {
     class AbstractPipeline;
     class MainWindow;
-    class PipelineEvaluator;
     class TumVisPainter;
     class VisualizationPipeline;
 
@@ -122,8 +121,6 @@ namespace campvis {
     private:
         /// All pipelines (incuding VisualizationPipelines)
         std::vector<AbstractPipeline*> _pipelines;
-        /// All pipeline evaluators (separated from _pipelines because we probably want multiple pipelines per evaluator later)
-        std::vector<PipelineEvaluator*> _pipelineEvaluators;
         /// All visualisations (i.e. VisualizationPipelines with their corresponding painters/canvases)
         std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> > _visualizations;
 

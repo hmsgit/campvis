@@ -31,6 +31,8 @@
 
 #include "tgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/tools/job.h"
+#include "core/tools/simplejobprocessor.h"
 #include <ctime>
 
 
@@ -39,8 +41,8 @@ namespace campvis {
 
     AbstractPipeline::AbstractPipeline() 
         : HasPropertyCollection()
-        , _enabled(true)
     {
+        _enabled = true;
     }
 
     AbstractPipeline::~AbstractPipeline() {
@@ -78,12 +80,13 @@ namespace campvis {
 
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
         HasPropertyCollection::onPropertyChanged(prop);
-         _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
         s_PipelineInvalidated();
     }
 
     void AbstractPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
-        _invalidationLevel.setLevel(InvalidationLevel::INVALID_RESULT);
+        if (processor->getEnabled())
+            SimpleJobProc.enqueueJob(makeJob(this, &AbstractPipeline::executeProcessor, processor));
+
         s_PipelineInvalidated();
     }
 
@@ -119,13 +122,9 @@ namespace campvis {
             processor->unlockProcessor();
 
 #ifdef CAMPVIS_DEBUG
-            LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+            //LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
 #endif
         }
-    }
-
-    InvalidationLevel& AbstractPipeline::getInvalidationLevel() {
-        return _invalidationLevel;
     }
 
     const std::vector<AbstractProcessor*>& AbstractPipeline::getProcessors() const {
@@ -143,6 +142,16 @@ namespace campvis {
     void AbstractPipeline::addProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.")
         _processors.push_back(processor);
+    }
+
+    void AbstractPipeline::lockAllProcessors() {
+        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it)
+            (*it)->lockProcessor();
+    }
+
+    void AbstractPipeline::unlockAllProcessors() {
+        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it)
+            (*it)->unlockProcessor();
     }
 
 

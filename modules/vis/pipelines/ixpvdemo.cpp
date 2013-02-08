@@ -99,6 +99,7 @@ namespace campvis {
         // = X-Ray Setup ==================================================================================
         _xrayReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CarmXrayImages\\APView_1.jpg");
         _xrayReader.p_targetImageID.setValue("xray.image");
+        _xrayReader.p_useRenderTarget.setValue(true);
 
         // = CT Setup =====================================================================================
 
@@ -110,6 +111,7 @@ namespace campvis {
         _ctReader.p_targetImageID.connect(&_ctDVR.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctFullDRR.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctClippedDRR.p_sourceImageID);
+        _ctReader.s_validated.connect(this, &IxpvDemo::onProcessorValidated);
 
         _ctProxy.p_geometryID.setValue("ct.proxy");
         _ctProxy.p_geometryID.connect(&_ctFullEEP.p_geometryID);
@@ -150,6 +152,7 @@ namespace campvis {
 
         // = US Setup =====================================================================================
 
+        _usReader.s_validated.connect(this, &IxpvDemo::onProcessorValidated);
         _usReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Ultrasound\\gaussianSmoothedUS_UChar.mhd");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_targetImageID.connect(&_usSliceRenderer.p_sourceImageID);
@@ -184,63 +187,7 @@ namespace campvis {
 
         _trackballHandler->setViewportSize(_renderTargetSize);
     }
-
-    void IxpvDemo::execute() {
-        {
-            tbb::spin_mutex::scoped_lock lock(_localMutex);
-            _invalidationLevel.setValid();
-        }
-
-        if (! _ctReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_ctReader);
-
-            // convert data
-            ImageRepresentationLocal::ScopedRepresentation local(_data, _ctReader.p_targetImageID.getValue());
-            if (local != 0) {
-                Interval<float> ii = local->getNormalizedIntensityRange();
-                _ctDVR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
-                _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                _ctFullDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
-                _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
-                _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
-                _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
-
-                tgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-                _trackballHandler->setSceneBounds(volumeExtent);
-                _trackballHandler->setCenter(volumeExtent.center());
-                _trackballHandler->reinitializeCamera(
-                    tgt::vec3(399.f, -900.f, 468.f), 
-                    tgt::vec3(155.5f, 229.5f, 254.6f), 
-                    tgt::vec3(0.959f, 0.279f, -0.042f));
-            }
-        }
-
-        if (! _usReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_usReader);
-
-            // convert data
-            ImageRepresentationLocal::ScopedRepresentation local(_data, _usReader.p_targetImageID.getValue());
-            if (local != 0) {
-                Interval<float> ii = local->getNormalizedIntensityRange();
-                _usSliceRenderer.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
-                _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                _usSliceRenderer.updateProperties(local.getImageData());
-                _usSliceRenderer.p_sliceNumber.setValue(125);
-            }
-        }
-        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
-            if (! (*it)->getInvalidationLevel().isValid())
-                lockGLContextAndExecuteProcessor(*it);
-        }
-    }
-// 
-//     void IxpvDemo::keyEvent(tgt::KeyEvent* e) {
-//         if (e->pressed()) {
-//         }
-//     }
-
+    
     const std::string IxpvDemo::getName() const {
         return "IXPV Demo";
     }
@@ -250,4 +197,43 @@ namespace campvis {
         float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
+
+    void IxpvDemo::onProcessorValidated(AbstractProcessor* processor) {
+        if (processor == &_ctReader) {
+            ImageRepresentationLocal::ScopedRepresentation local(_data, _ctReader.p_targetImageID.getValue());
+            if (local != 0) {
+                // set TF handles
+                Interval<float> ii = local->getNormalizedIntensityRange();
+                _ctDVR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                _ctFullDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
+                _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
+
+                // update camera
+                tgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
+                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+
+                _trackballHandler->setSceneBounds(volumeExtent);
+                _trackballHandler->setCenter(volumeExtent.center());
+                _trackballHandler->reinitializeCamera(
+                    tgt::vec3(399.f, -900.f, 468.f), 
+                    tgt::vec3(155.5f, 229.5f, 254.6f), 
+                    tgt::vec3(0.959f, 0.279f, -0.042f));
+            }   
+        }
+        else if (processor == &_usReader) {
+            // set TF handles
+            ImageRepresentationLocal::ScopedRepresentation local(_data, _usReader.p_targetImageID.getValue());
+            if (local != 0) {
+                Interval<float> ii = local->getNormalizedIntensityRange();
+                _usSliceRenderer.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                _usSliceRenderer.updateProperties(local.getImageData());
+                _usSliceRenderer.p_sliceNumber.setValue(125);
+            }
+        }
+    }
+
 }

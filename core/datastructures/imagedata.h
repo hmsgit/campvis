@@ -224,13 +224,12 @@ namespace campvis {
     const T* campvis::ImageData::getRepresentation(bool performConversion) const {
         // look, whether we already have a suitable representation
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            //if (const T* tester = dynamic_cast<const T*>(*it))
-            //    return tester;
             if (typeid(T) == typeid(**it)) {
                 return static_cast<const T*>(*it);
             }
         }
 
+        // no representation found, create a new one
         if (performConversion) {
             return tryPerformConversion<T>();
         }
@@ -248,7 +247,9 @@ namespace campvis {
 
     template<typename T>
     const T* campvis::ImageData::tryPerformConversion() const {
-        // no representation found, create a new one
+        // TODO: Currently, we do not check, for multiple parallel conversions into the same
+        //       target type. This does not harm thread-safety but may lead to multiple 
+        //       representations of the same type for a single image.
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
             const T* tester = T::tryConvertFrom(*it);
             if (tester != 0) {

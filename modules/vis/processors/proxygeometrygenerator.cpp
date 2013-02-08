@@ -96,7 +96,7 @@ namespace campvis {
             LERROR("No suitable input image found.");
         }
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 
 }

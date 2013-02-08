@@ -32,8 +32,10 @@
 #include "tgt/glcanvas.h"
 #include "tgt/glcontext.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/pipeline/visualizationprocessor.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
+#include "core/tools/simplejobprocessor.h"
 
 namespace campvis {
     const std::string VisualizationPipeline::loggerCat_ = "CAMPVis.core.datastructures.VisualizationPipeline";
@@ -134,6 +136,34 @@ namespace campvis {
             _effectiveRenderTargetSize.setValue(_renderTargetSize / 2);
         else
             _effectiveRenderTargetSize.setValue(_renderTargetSize);
+    }
+
+    void VisualizationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
+        if (_canvas == 0)
+            return;
+
+        tbb::concurrent_hash_map<AbstractProcessor*, bool>::const_accessor a;
+        if (_isVisProcessorMap.find(a, processor)) {
+            if (a->second) {
+                // is VisualizationProcessor
+                GLJobProc.enqueueJob(
+                    _canvas, 
+                    makeJobOnHeap<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor), 
+                    OpenGLJobProcessor::SerialJob);
+            }
+            else {
+                SimpleJobProc.enqueueJob(makeJob<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor));
+            }
+        }
+        else {
+            tgtAssert(false, "Could not find processor in processor map.");
+            LWARNING("Caught invalidation of a non-registered processor!");
+        }
+    }
+
+    void VisualizationPipeline::addProcessor(AbstractProcessor* processor) {
+        _isVisProcessorMap.insert(std::make_pair(processor, (dynamic_cast<VisualizationProcessor*>(processor) != 0)));
+        AbstractPipeline::addProcessor(processor);
     }
 
 }

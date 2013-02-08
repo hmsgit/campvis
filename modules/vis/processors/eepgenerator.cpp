@@ -94,7 +94,7 @@ namespace campvis {
 
         if (img != 0 && proxyGeometry != 0 && _shader != 0) {
             if (img->getDimensionality() == 3) {
-                if (_invalidationLevel.isInvalidShader()) {
+                if (getInvalidationLevel().isInvalidShader()) {
                     _shader->setHeaders(generateHeader());
                     _shader->rebuild();
                 }
@@ -222,7 +222,7 @@ namespace campvis {
             LERROR("No suitable input image or proxy geometry found.");
         }
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 
     std::string EEPGenerator::generateHeader() const {

@@ -78,11 +78,6 @@ namespace campvis {
         virtual void deinit();
 
         /**
-         * Execute this pipeline.
-         **/
-        virtual void execute() = 0;
-
-        /**
          * Returns the DataContainer of this pipeline, const version.
          * \return _data
          */
@@ -114,12 +109,6 @@ namespace campvis {
          * \return  The name of this pipeline.
          */
         virtual const std::string getName() const = 0;
-        
-        /**
-         * Gets the current InvalidationLevel of this pipeline.
-         * \return _invalidationLevel
-         */
-        InvalidationLevel& getInvalidationLevel();
 
         /**
          * Gets the flag whether this pipeline is currently enabled.
@@ -137,6 +126,16 @@ namespace campvis {
         sigslot::signal0<> s_PipelineInvalidated;
 
     protected:
+        /**
+         * Locks all processors.
+         */
+        void lockAllProcessors();
+
+        /**
+         * Unlocks all processors.
+         */
+        void unlockAllProcessors();
+
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * The default behaviour is just to set the invalidation level to invalid.
@@ -161,11 +160,9 @@ namespace campvis {
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
-        InvalidationLevel _invalidationLevel;               ///< current invalidation level
-        bool _enabled;                                      ///< flag whether this pipeline is currently enabled
+        tbb::atomic<bool> _enabled;                         ///< flag whether this pipeline is currently enabled
 
-        tbb::spin_mutex _localMutex;                        ///< mutex for altering local members
-        tbb::mutex _evaluationMutex;                        ///< mutex for the evaluation of this pipeline
+        //tbb::spin_mutex _localMutex;                        ///< mutex for altering local members
 
         static const std::string loggerCat_;
     };

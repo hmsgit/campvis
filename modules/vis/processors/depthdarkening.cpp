@@ -84,7 +84,7 @@ namespace campvis {
         ImageRepresentationRenderTarget::ScopedRepresentation inputImage(data, p_inputImage.getValue());
 
         if (inputImage != 0) {
-            if (_invalidationLevel.isInvalidShader()) {
+            if (getInvalidationLevel().isInvalidShader()) {
                 _shader->setHeaders(generateHeader());
                 _shader->rebuild();
             }
@@ -153,7 +153,7 @@ namespace campvis {
             LERROR("No suitable input image found.");
         }
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 
     std::string DepthDarkening::generateHeader() const {

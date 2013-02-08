@@ -64,6 +64,7 @@ namespace campvis {
         _imageReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
         _imageReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
         _imageReader.p_targetImageID.connect(&_sliceExtractor.p_sourceImageID);
+        _imageReader.s_validated.connect(this, &SliceVis::onProcessorValidated);
 
 //         _gvg._outputGradients.connect(&_lhh._inputGradients);
 
@@ -76,32 +77,6 @@ namespace campvis {
 
         _renderTargetID.setValue("renderTarget");
         _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
-    }
-
-    void SliceVis::execute() {
-        {
-            tbb::spin_mutex::scoped_lock lock(_localMutex);
-            _invalidationLevel.setValid();
-            // TODO:    think whether we want to lock all processors already here.
-        }
-        if (! _imageReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_imageReader);
-
-            // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
-            if (img != 0) {
-                _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
-            }
-        }
-//         if (! _gvg.getInvalidationLevel().isValid()) {
-//             executeProcessor(&_gvg);
-//         }
-//         if (! _lhh.getInvalidationLevel().isValid()) {
-//             lockGLContextAndExecuteProcessor(&_lhh);
-//         }
-        if (! _sliceExtractor.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_sliceExtractor);
-        }
     }
 
     void SliceVis::keyEvent(tgt::KeyEvent* e) {
@@ -119,6 +94,15 @@ namespace campvis {
 
     const std::string SliceVis::getName() const {
         return "SliceVis";
+    }
+
+    void SliceVis::onProcessorValidated(AbstractProcessor* processor) {
+        if (processor == &_imageReader) {
+            DataContainer::ScopedTypedData<ImageData> img(_data, _imageReader.p_targetImageID.getValue());
+            if (img != 0) {
+                _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+            }
+        }
     }
 
 }

@@ -98,7 +98,7 @@ namespace campvis {
                     p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
                 }
 
-                if (_invalidationLevel.isInvalidShader()) {
+                if (getInvalidationLevel().isInvalidShader()) {
                     _shader->setHeaders(generateHeader());
                     _shader->rebuild();
                 }
@@ -158,7 +158,7 @@ namespace campvis {
             LERROR("No suitable input image found.");
         }
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 
     std::string RaycastingProcessor::generateHeader() const {

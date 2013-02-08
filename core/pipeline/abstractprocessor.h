@@ -172,7 +172,6 @@ namespace campvis {
 
 
     protected:
-        InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
         tbb::atomic<bool> _enabled;                 ///< flag whether this processor is currently enabled
 
         /// Flag whether this processor is currently locked
@@ -180,6 +179,10 @@ namespace campvis {
         tbb::atomic<bool> _locked;
 
         static const std::string loggerCat_;
+
+    private:
+        InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
+
     };
 
 }

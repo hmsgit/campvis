@@ -264,7 +264,7 @@ namespace campvis {
         }
 
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 
     void ItkImageFilter::updateProperties() {

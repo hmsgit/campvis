@@ -50,7 +50,6 @@
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/visualizationpipeline.h"
-#include "core/pipeline/pipelineevaluator.h"
 
 namespace campvis {
 
@@ -79,9 +78,6 @@ namespace campvis {
         tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
         // delete everything in the right order:
-        for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
-            delete *it;
-        }
         for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             delete it->second;
         }
@@ -211,18 +207,8 @@ namespace campvis {
 
         _mainWindow->show();
 
-        // Start evaluator/render threads
-        for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
-            (*it)->start();
-        }
-
         // Start QApplication
         int toReturn = QApplication::exec();
-
-        // QApplication has returned -> Stop evaluator/render threads
-        for (std::vector<PipelineEvaluator*>::iterator it = _pipelineEvaluators.begin(); it != _pipelineEvaluators.end(); ++it) {
-            (*it)->stop();
-        }
 
         return toReturn;
     }
@@ -231,9 +217,6 @@ namespace campvis {
         tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(pipeline != 0, "Pipeline must not be 0.");
         _pipelines.push_back(pipeline);
-
-        PipelineEvaluator* pe = new PipelineEvaluator(pipeline);
-        _pipelineEvaluators.push_back(pe);
 
         s_PipelinesChanged();
     }

@@ -115,7 +115,7 @@ namespace campvis {
         }
 
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 
 }

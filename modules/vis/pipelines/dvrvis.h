@@ -66,14 +66,17 @@ namespace campvis {
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const;
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
 
         void onRenderTargetSizeChanged(const AbstractProperty* prop);
 
     protected:
+        /**
+         * Slot getting called when one of the observed processors got validated.
+         * Updates the camera properties, when the input image has changed.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorValidated(AbstractProcessor* processor);
+
         CameraProperty _camera;
         MhdImageReader _imageReader;
         ProxyGeometryGenerator _pgGenerator;

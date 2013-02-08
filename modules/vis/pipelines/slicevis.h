@@ -58,14 +58,17 @@ namespace campvis {
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const;
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
 
         virtual void keyEvent(tgt::KeyEvent* e);
 
     protected:
+        /**
+         * Slot getting called when one of the observed processors got validated.
+         * Updates the camera properties, when the input image has changed.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorValidated(AbstractProcessor* processor);
+
         MhdImageReader _imageReader;
         GradientVolumeGenerator _gvg;
         LHHistogram _lhh;

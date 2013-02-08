@@ -98,7 +98,7 @@ namespace campvis {
         data.addData(p_mirrorID.getValue(), mirror);
         p_mirrorID.issueWrite();
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 
 }

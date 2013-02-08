@@ -124,6 +124,6 @@ namespace campvis {
             LERROR("Could not load image.");
         }
 
-        _invalidationLevel.setValid();
+        applyInvalidationLevel(InvalidationLevel::VALID);
     }
 }

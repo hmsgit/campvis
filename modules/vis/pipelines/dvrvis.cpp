@@ -77,6 +77,8 @@ namespace campvis {
 
     void DVRVis::init() {
         VisualizationPipeline::init();
+        
+        _imageReader.s_validated.connect(this, &DVRVis::onProcessorValidated);
 
         _camera.addSharedProperty(&_vmgGenerator.p_camera);
         _camera.addSharedProperty(&_vmRenderer.p_camera);
@@ -90,9 +92,9 @@ namespace campvis {
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.connect(&_eepGenerator.p_sourceImageID);
         _imageReader.p_targetImageID.connect(&_vmEepGenerator.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_pgGenerator.p_sourceImageID);
         _imageReader.p_targetImageID.connect(&_dvrVM.p_sourceImageID);
         _imageReader.p_targetImageID.connect(&_dvrNormal.p_sourceImageID);
+        _imageReader.p_targetImageID.connect(&_pgGenerator.p_sourceImageID);
 
         _dvrNormal.p_targetImageID.setValue("drr.output");
         _dvrVM.p_targetImageID.setValue("dvr.output");
@@ -141,63 +143,12 @@ namespace campvis {
 
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
+        
     }
 
     void DVRVis::deinit() {
         _effectiveRenderTargetSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
-    }
-
-    void DVRVis::execute() {
-        {
-            tbb::spin_mutex::scoped_lock lock(_localMutex);
-            _invalidationLevel.setValid();
-            // TODO:    think whether we want to lock all processors already here.
-        }
-        if (! _imageReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_imageReader);
-
-            // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, "reader.output");
-            if (img != 0) {
-                tgt::Bounds volumeExtent = img->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-                _trackballEH->setSceneBounds(volumeExtent);
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
-            }
-
-        }
-        if (! _pgGenerator.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_pgGenerator);
-        }
-        if (! _vmgGenerator.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_vmgGenerator);
-        }
-        if (! _vmRenderer.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_vmRenderer);
-        }
-        if (! _eepGenerator.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_eepGenerator);
-        }
-        if (! _vmEepGenerator.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_vmEepGenerator);
-        }
-        if (!_dvrNormal.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_dvrNormal);
-            lockGLContextAndExecuteProcessor(&_depthDarkening);
-        }
-        if (!_dvrVM.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_dvrVM);
-            lockGLContextAndExecuteProcessor(&_combine);
-        }
-        if (!_depthDarkening.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_depthDarkening);
-        }
-        if (!_combine.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_combine);
-        }
     }
 
     const std::string DVRVis::getName() const {
@@ -208,6 +159,21 @@ namespace campvis {
         _trackballEH->setViewportSize(_renderTargetSize);
         float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
         _camera.setWindowRatio(ratio);
+    }
+
+    void DVRVis::onProcessorValidated(AbstractProcessor* processor) {
+        if (processor == &_imageReader) {
+            // update camera
+            DataContainer::ScopedTypedData<ImageData> img(_data, _imageReader.p_targetImageID.getValue());
+            if (img != 0) {
+                tgt::Bounds volumeExtent = img->getWorldBounds();
+                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+
+                _trackballEH->setSceneBounds(volumeExtent);
+                _trackballEH->setCenter(volumeExtent.center());
+                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+            }
+        }
     }
 
 
