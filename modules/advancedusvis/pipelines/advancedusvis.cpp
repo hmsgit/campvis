@@ -41,8 +41,8 @@ namespace campvis {
     AdvancedUsVis::AdvancedUsVis()
         : DigraphVisualizationPipeline()
         , _camera("camera", "Camera")
-        , _usReader()
-        , _confidenceReader()
+        , _usReader(_effectiveRenderTargetSize)
+        , _confidenceReader(_effectiveRenderTargetSize)
         , _confidenceGenerator()
         , _gvg()
         , _lhh()
@@ -96,7 +96,8 @@ namespace campvis {
         _camera.addSharedProperty(&_usDVR.p_camera);
 
         //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
-        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\US.csvd");
+        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\US.csvd");
+        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\us.png");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_usFusion1.p_usImageId);
@@ -109,14 +110,19 @@ namespace campvis {
         _usReader.p_targetImageID.connect(&_usDenoiseilter.p_sourceImageID);
 
         //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
-        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\Map.csvd");
+        //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\Map.csvd");
+        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\cm.png");
         _confidenceReader.p_targetImageID.setValue("confidence.image.read");
+        _confidenceReader.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
 
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
-        _confidenceGenerator.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
-        _confidenceGenerator.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
-        _confidenceGenerator.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
-        _confidenceGenerator.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
 
         _gvg.p_targetImageID.connect(&_lhh.p_gradientsId);
         _gvg.p_targetImageID.connect(&_usFusion1.p_gradientImageID);

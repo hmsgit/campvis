@@ -140,7 +140,7 @@ namespace campvis {
     void ConfidenceMapGenerator::process(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
-        if (input != 0 && input->getDimensionality() >= 2 && input->getParent()->getNumChannels() == 1) {
+        if (input != 0 && input->getDimensionality() >= 2 && input->getParent()->getNumChannels() >= 1) {
             const tgt::svec3& imageSize = input->getSize();
             size_t numElements = input->getNumElements();
             float* outputValues = new float[numElements];

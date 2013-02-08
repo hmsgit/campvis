@@ -134,6 +134,15 @@ namespace campvis {
         const tgt::Texture* getTexture() const;
 
 
+        /**
+         * Returns a WeaklyTypedPointer to the data of this representation.
+         * You do \b not own the pointer - do \b not modify its content!
+         * \note    Make sure to call this method from a valid OpenGL context.
+         * \return  A WeaklyTypedPointer to the data of this representation. Neither you own nor you may modify its data!
+         */
+        const WeaklyTypedPointer getWeaklyTypedPointer() const;
+
+
     protected:
         /**
          * Creates a new ImageRepresentationGL representation from a tgt::Texture.

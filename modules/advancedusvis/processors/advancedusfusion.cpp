@@ -103,7 +103,7 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation gradients(data, p_gradientImageID.getValue());
 
         if (img != 0 && blurred != 0 && gradients != 0 && confidence != 0) {
-            if (img->getDimensionality() == 3) {
+            if (img->getDimensionality() >= 2) {
                 if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
                     // source DataHandle has changed
                     updateProperties(img.getDataHandle());

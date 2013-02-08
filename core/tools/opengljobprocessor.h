@@ -108,6 +108,16 @@ namespace campvis {
         void run();
 
         /**
+         * Pauses the job processor as at the next possible moment.
+         */
+        void pause();
+
+        /**
+         * Resume the execution of the job processor.
+         */
+        void resume();
+
+        /**
          * Enqueues the given Job with the given priority.
          * 
          * \note    OpenGLJobProcessor takes ownership of \a job.
@@ -116,6 +126,14 @@ namespace campvis {
          * \param   priority    Priority of the job to enqueue
          */
         void enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, JobType priority);
+
+
+        /**
+         * Returns an arbitrary registered OpenGL context.
+         * \note    You can do really messy things with this. Do not use this method unless
+         *          you know what you're doing and know that there is no other way...
+         */
+        tgt::GLCanvas* iKnowWhatImDoingGetArbitraryContext();
 
 
     protected:
@@ -162,6 +180,7 @@ namespace campvis {
         tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*> _contextQueueMap;
         tbb::concurrent_vector<tgt::GLCanvas*> _contexts;
 
+        tbb::atomic<int> _pause;
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
 
         tgt::GLCanvas* _currentContext;         ///< current active OpenGL context

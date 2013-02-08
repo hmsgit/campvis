@@ -52,10 +52,12 @@ namespace campvis {
         : VisualizationProcessor(canvasSize)
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
+        , p_useRenderTarget("UseRenderTarget", "Read Into RenderTarget", false)
         , _devilTextureReader(0)
     {
         addProperty(&p_url);
         addProperty(&p_targetImageID);
+        addProperty(&p_useRenderTarget);
 
         _devilTextureReader = new tgt::TextureReaderDevil();
     }
@@ -79,36 +81,44 @@ namespace campvis {
     void DevilImageReader::process(DataContainer& data) {
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
         if (tex != 0) {
-            ImageData id (2, tex->getDimensions(), tex->getNumChannels());
-            ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
+            if (p_useRenderTarget.getValue()) {
+                ImageData id (2, tex->getDimensions(), tex->getNumChannels());
+                ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
 
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_ALWAYS);
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                glPushAttrib(GL_ALL_ATTRIB_BITS);
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_ALWAYS);
 
-            _shader->activate();
-            _shader->setIgnoreUniformLocationError(true);
-            _shader->setUniform("_viewportSize", _renderTargetSize.getValue());
-            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
-            _shader->setIgnoreUniformLocationError(false);
-            tgt::TextureUnit texUnit;
+                _shader->activate();
+                _shader->setIgnoreUniformLocationError(true);
+                _shader->setUniform("_viewportSize", _renderTargetSize.getValue());
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                _shader->setIgnoreUniformLocationError(false);
+                tgt::TextureUnit texUnit;
 
-            image->bind(_shader, texUnit, "_colorTexture");
+                image->bind(_shader, texUnit, "_colorTexture");
 
-            rt.second->activate();
-            LGL_ERROR;
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            QuadRdr.renderQuad();
-            rt.second->deactivate();
+                rt.second->activate();
+                LGL_ERROR;
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                QuadRdr.renderQuad();
+                rt.second->deactivate();
 
-            _shader->deactivate();
-            tgt::TextureUnit::setZeroUnit();
-            glPopAttrib();
-            LGL_ERROR;
+                _shader->deactivate();
+                tgt::TextureUnit::setZeroUnit();
+                glPopAttrib();
+                LGL_ERROR;
 
-            data.addData(p_targetImageID.getValue(), rt.first);
-            p_targetImageID.issueWrite();
+                data.addData(p_targetImageID.getValue(), rt.first);
+                p_targetImageID.issueWrite();
+            }
+            else {
+                ImageData* id = new ImageData(2, tex->getDimensions(), tex->getNumChannels());
+                ImageRepresentationGL::create(id, tex);
+                data.addData(p_targetImageID.getValue(), id);
+                p_targetImageID.issueWrite();
+            }
         }
         else {
             LERROR("Could not load image.");

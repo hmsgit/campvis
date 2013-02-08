@@ -210,7 +210,8 @@ namespace campvis {
 
     private:
 
-        static ImageRepresentationLocal* convertToGenericLocal(const ImageRepresentationDisk* source);
+
+        static ImageRepresentationLocal* convertToGenericLocal(const AbstractImageRepresentation* source, const WeaklyTypedPointer& wtp);
 
         // We don't want this data to be copied - clone() must be enough
         // (read: We are too lazy to implement a correct copy constructor / assignment-operator)

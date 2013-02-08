@@ -38,6 +38,7 @@ namespace campvis {
     OpenGLJobProcessor::OpenGLJobProcessor()
         : _currentContext(0)
     {
+        _pause = 0;
     }
 
     OpenGLJobProcessor::~OpenGLJobProcessor() {
@@ -123,6 +124,13 @@ namespace campvis {
                     delete jobToDo;
                 }
             }
+            
+            while (_pause > 0) {
+                CtxtMgr.releaseCurrentContext();
+                _evaluationCondition.wait(lock);
+                _currentContext->getContext()->acquire();
+                hadWork = true;
+            }
 
             if (! hadWork) {
                 CtxtMgr.releaseCurrentContext();
@@ -133,6 +141,21 @@ namespace campvis {
 
         // release OpenGL context, so that other threads can access it
         CtxtMgr.releaseCurrentContext();
+    }
+
+    void OpenGLJobProcessor::pause() {
+        ++_pause;
+    }
+
+    void OpenGLJobProcessor::resume() {
+        if (_pause == 0) {
+            tgtAssert(false, "Called resume on non-paused job processor!");
+            return;
+        }
+
+        --_pause;
+        if (_pause == 0)
+            _evaluationCondition.notify_all();
     }
 
     void OpenGLJobProcessor::enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, JobType priority) {
@@ -181,6 +204,17 @@ namespace campvis {
         if (_contextQueueMap.find(a, context)) {
             delete a->second;
             _contextQueueMap.erase(a);
+        }
+    }
+
+    tgt::GLCanvas* OpenGLJobProcessor::iKnowWhatImDoingGetArbitraryContext() {
+        if (_currentContext != 0)
+            return _currentContext;
+        else if (!_contexts.empty())
+            return _contexts.front();
+        else {
+            tgtAssert(false, "No Contexts registered!");
+            return 0;
         }
     }
 

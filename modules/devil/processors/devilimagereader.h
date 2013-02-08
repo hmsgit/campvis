@@ -80,6 +80,7 @@ namespace campvis {
 
         StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image
+        BoolProperty p_useRenderTarget;     ///< Flag whether to read into a render target
 
     protected:
         tgt::Shader* _shader;

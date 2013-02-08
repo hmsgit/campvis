@@ -284,6 +284,6 @@ namespace campvis {
         tgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
 
         setModel(_treeModel);
-   }
+    }
 
 }

@@ -37,6 +37,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
 #ifdef CAMPVIS_HAS_MODULE_ITK
 #include "modules/itk/core/genericimagerepresentationitk.h"
 #endif
@@ -236,6 +237,13 @@ namespace campvis {
 
     size_t ImageRepresentationGL::getVideoMemoryFootprint() const {
         return _texture->getSizeOnGPU();
+    }
+
+    const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointer() const {
+        if (_texture->getPixelData() == 0) {
+            _texture->downloadTexture();
+        }
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), _texture->getPixelData());
     }
 
 

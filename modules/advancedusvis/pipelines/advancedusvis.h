@@ -35,6 +35,7 @@
 #include "core/eventhandlers/transfuncwindowingeventhandler.h"
 #include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/pipeline/digraphvisualizationpipeline.h"
+#include "modules/devil/processors/devilimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/csvdimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
@@ -88,8 +89,8 @@ namespace campvis {
 
         CameraProperty _camera;
 
-        CsvdImageReader _usReader;
-        CsvdImageReader _confidenceReader;
+        DevilImageReader _usReader;
+        DevilImageReader _confidenceReader;
         ConfidenceMapGenerator _confidenceGenerator;
 
         GradientVolumeGenerator _gvg;

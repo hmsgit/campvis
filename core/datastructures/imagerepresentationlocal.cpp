@@ -29,10 +29,14 @@
 
 #include "imagerepresentationlocal.h"
 
+#include "tgt/qt/qtcontextmanager.h"
 #include "tbb/tbb.h"
 #include "tbb/spin_mutex.h"
 #include "core/datastructures/imagerepresentationdisk.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
+#include "core/tools/opengljobprocessor.h"
+#include "core/tools/job.h"
 
 #ifdef CAMPVIS_HAS_MODULE_ITK
 #include "modules/itk/core/genericimagerepresentationitk.h"
@@ -118,7 +122,24 @@ namespace campvis {
 
         // test source image type via dynamic cast
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
-            return convertToGenericLocal(tester);
+            return convertToGenericLocal(tester, tester->getImageData());
+        }
+        else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
+            tgt::GLCanvas* context = GLJobProc.iKnowWhatImDoingGetArbitraryContext();
+            ImageRepresentationLocal* toReturn = 0;
+            GLJobProc.pause();
+            try {
+                tbb::mutex::scoped_lock lock(CtxtMgr.getGlMutex());
+                context->getContext()->acquire();
+                WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
+                toReturn = convertToGenericLocal(source, wtp);
+                CtxtMgr.releaseCurrentContext();
+            }
+            catch (...) {
+                LERROR("An unknown error occured during conversion...");
+            }
+            GLJobProc.resume();
+            return toReturn;
         }
 
 #ifdef CAMPVIS_HAS_MODULE_ITK
@@ -197,9 +218,7 @@ namespace campvis {
         tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), IntensityHistogramGenerator(this, _intensityHistogram));
     }
 
-    ImageRepresentationLocal* ImageRepresentationLocal::convertToGenericLocal(const ImageRepresentationDisk* source) {
-        WeaklyTypedPointer wtp = source->getImageData();
-
+    ImageRepresentationLocal* ImageRepresentationLocal::convertToGenericLocal(const AbstractImageRepresentation* source, const WeaklyTypedPointer& wtp) {
 #define CONVERT_DISK_TO_GENERIC_LOCAL(baseType,numChannels) \
         return GenericImageRepresentationLocal<baseType, numChannels>::create( \
             const_cast<ImageData*>(source->getParent()), \
@@ -207,7 +226,7 @@ namespace campvis {
 
 #define DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(numChannels) \
         if (source->getParent()->getNumChannels() == (numChannels)) { \
-            switch (source->getBaseType()) { \
+            switch (wtp._baseType) { \
                 case WeaklyTypedPointer::UINT8: \
                     CONVERT_DISK_TO_GENERIC_LOCAL(uint8_t, (numChannels)) \
                 case WeaklyTypedPointer::INT8: \
@@ -238,6 +257,5 @@ namespace campvis {
         }
 
     }
-
-
+    
 }
