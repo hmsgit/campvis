@@ -119,6 +119,12 @@ namespace campvis {
         void createAndAttachTexture(GLint internalFormat);
 
         /**
+         * Gets the number of color textures/attachments of this render target.
+         * \return  _colorTextures.size()
+         */
+        size_t getNumColorTextures() const;
+
+        /**
          * Gets the color texture of this render target
          * \param   index   Index of the color texture attachment to return.
          * \return  _colorTextures[index]
@@ -142,50 +148,55 @@ namespace campvis {
         void deactivate();
 
         /**
-         * Binds the color texture without activating a texture unit.
-         */
-        void bindColorTexture(size_t index = 0) const;
-
-        /**
-         * Binds the depth texture without activating a texture unit.
-         */
-        void bindDepthTexture() const;
-
-        /**
-         * Activates the texture unit \a texUnit and binds the color texture.
-         * \param   texUnit     Texture unit to activate
-         */
-        void bindColorTexture(const tgt::TextureUnit& texUnit, size_t index = 0) const;
-
-        /**
-         * Activates the texture unit \a texUnit and binds the depth texture.
-         * \param   texUnit     Texture unit to activate
-         */
-        void bindDepthTexture(const tgt::TextureUnit& texUnit) const;
-
-        /**
-         * Gets the number of color textures/attachments of this render target.
-         * \return  _colorTextures.size()
-         */
-        size_t getNumColorTextures() const;
-
-        /**
-         * Binds the textures of this render target and sets the according shader uniforms.
-         * Of \a colorTexUnit or \a depthTexUnit is 0, the corresponding texture will not be bound
-         * and the corresponding uniforms will not be set.
+         * Binds the color texture with index \a index of this render target
+         * and sets the corresponding shader uniforms.
          * 
          * \param shader                    Shader to set the uniforms to.
-         * \param colorTexUnit              Pointer to color texture unit, may be 0.
-         * \param depthTexUnit              Pointer to depth texture unit, may be 0.
-         * \param colorTexUniform           Name for color texture struct uniform.
-         * \param depthTexUniform           Name for depth texture struct uniform.
+         * \param colorTexUnit              Color texture unit.
+         * \param colorTexUniform           Name for color texture sampler.
+         * \param texParamsUniform           Name for texture parameters struct uniform.
+         * \param index                     Index of the color texture to bind.
+         */
+        void bindColorTexture(
+            tgt::Shader* shader,
+            const tgt::TextureUnit& colorTexUnit, 
+            const std::string& colorTexUniform = "_colorTexture",
+            const std::string& texParamsUniform = "_texParams",
+            size_t index = 0) const;
+
+        /**
+         * Binds the depth texture of this render target and sets the corresponding shader uniforms.
+         * 
+         * \param shader                    Shader to set the uniforms to.
+         * \param depthTexUnit              Depth texture unit.
+         * \param depthTexUniform           Name for depth texture sampler.
+         * \param texParamsUniform           Name for texture parameters struct uniform.
+         */
+        void bindDepthTexture(
+            tgt::Shader* shader,
+            const tgt::TextureUnit& depthTexUnit,
+            const std::string& depthTexUniform = "_depthTexture", 
+            const std::string& texParamsUniform = "_texParams") const;
+
+        /**
+         * Binds the color texture with index \a index and the depth texture of this render target
+         * and sets the corresponding shader uniforms.
+         * 
+         * \param shader                    Shader to set the uniforms to.
+         * \param colorTexUnit              Color texture unit.
+         * \param depthTexUnit              Depth texture unit.
+         * \param colorTexUniform           Name for color texture sampler.
+         * \param depthTexUniform           Name for depth texture sampler.
+         * \param texParamsUniform           Name for texture parameters struct uniform.
+         * \param index                     Index of the color texture to bind.
          */
         void bind(
             tgt::Shader* shader,
-            const tgt::TextureUnit* colorTexUnit, 
-            const tgt::TextureUnit* depthTexUnit, 
+            const tgt::TextureUnit& colorTexUnit, 
+            const tgt::TextureUnit& depthTexUnit, 
             const std::string& colorTexUniform = "_colorTexture",
             const std::string& depthTexUniform = "_depthTexture",
+            const std::string& texParamsUniform = "_texParams",
             size_t index = 0) const;
 
 
@@ -205,6 +216,18 @@ namespace campvis {
          * \param   depthTexture    Depth texture, optional, must have valid internal format and same dimensions as \a colorTexture
          */
         ImageRepresentationRenderTarget(ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture = 0);
+
+        /**
+         * Activates the texture unit \a texUnit and binds the color texture.
+         * \param   texUnit     Texture unit to activate
+         */
+        void bindColorTexture(const tgt::TextureUnit& texUnit, size_t index = 0) const;
+
+        /**
+         * Activates the texture unit \a texUnit and binds the depth texture.
+         * \param   texUnit     Texture unit to activate
+         */
+        void bindDepthTexture(const tgt::TextureUnit& texUnit) const;
 
         std::vector<tgt::Texture*> _colorTextures;      ///< color textures
         tgt::Texture* _depthTexture;                    ///< depth texture

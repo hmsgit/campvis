@@ -94,22 +94,22 @@ namespace campvis {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (inputImage1 != 0) {
-            inputImage1->bind(_shader, &colorUnit, &depthUnit);
+            inputImage1->bind(_shader, colorUnit, depthUnit);
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(-.5f, .5f, 0.f)));
             QuadRdr.renderQuad();
         }
         if (inputImage2 != 0) {
-            inputImage2->bind(_shader, &colorUnit, &depthUnit);
+            inputImage2->bind(_shader, colorUnit, depthUnit);
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(.5f, .5f, 0.f)));
             QuadRdr.renderQuad();
         }
         if (inputImage3 != 0) {
-            inputImage3->bind(_shader, &colorUnit, &depthUnit);
+            inputImage3->bind(_shader, colorUnit, depthUnit);
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(-.5f, -.5f, 0.f)));
             QuadRdr.renderQuad();
         }
         if (inputImage4 != 0) {
-            inputImage4->bind(_shader, &colorUnit, &depthUnit);
+            inputImage4->bind(_shader, colorUnit, depthUnit);
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(.5f, -.5f, 0.f)));
             QuadRdr.renderQuad();
         }

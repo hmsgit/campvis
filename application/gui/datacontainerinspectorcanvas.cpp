@@ -134,8 +134,8 @@ namespace campvis {
 
         tgt::TextureUnit tfUnit, unit2d, unit3d;
         p_transferFunction.getTF()->bind(_paintShader, tfUnit);
-        _paintShader->setUniform("_texture2d._texture", unit2d.getUnitNumber());
-        _paintShader->setUniform("_texture3d._texture", unit3d.getUnitNumber());
+        _paintShader->setUniform("_texture2d", unit2d.getUnitNumber());
+        _paintShader->setUniform("_texture3d", unit3d.getUnitNumber());
 
         for (int y = 0; y < _numTiles.y; ++y) {
             for (int x = 0; x < _numTiles.x; ++x) {
@@ -162,9 +162,9 @@ namespace campvis {
             unit2d.activate();
             texture->bind();
             _paintShader->setUniform("_is3d", false);
-            _paintShader->setUniform("_texture2d._size", tgt::vec2(texture->getDimensions().xy()));
-            _paintShader->setUniform("_texture2d._sizeRCP", tgt::vec2(1.f) / tgt::vec2(texture->getDimensions().xy()));
-            _paintShader->setUniform("_texture2d._numChannels", static_cast<int>(texture->getNumChannels()));
+            _paintShader->setUniform("_2dTextureParams._size", tgt::vec2(texture->getDimensions().xy()));
+            _paintShader->setUniform("_2dTextureParams._sizeRCP", tgt::vec2(1.f) / tgt::vec2(texture->getDimensions().xy()));
+            _paintShader->setUniform("_2dTextureParams._numChannels", static_cast<int>(texture->getNumChannels()));
         }
         else {
             // clamp current slice to texture size, since this can't be done in event handler:
@@ -174,9 +174,9 @@ namespace campvis {
             texture->bind();
             _paintShader->setUniform("_is3d", true);
             _paintShader->setUniform("_sliceNumber", p_currentSlice.getValue());
-            _paintShader->setUniform("_texture3d._size", tgt::vec3(texture->getDimensions()));
-            _paintShader->setUniform("_texture3d._sizeRCP", tgt::vec3(1.f) / tgt::vec3(texture->getDimensions()));
-            _paintShader->setUniform("_texture2d._numChannels", static_cast<int>(texture->getNumChannels()));
+            _paintShader->setUniform("_3dTextureParams._size", tgt::vec3(texture->getDimensions()));
+            _paintShader->setUniform("_3dTextureParams._sizeRCP", tgt::vec3(1.f) / tgt::vec3(texture->getDimensions()));
+            _paintShader->setUniform("_3dTextureParams._numChannels", static_cast<int>(texture->getNumChannels()));
         }
         _paintShader->setIgnoreUniformLocationError(false);
 

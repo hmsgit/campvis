@@ -30,11 +30,12 @@
 
 #ifdef APPLY_MASK
 #include "tools/texture2d.frag"
-uniform Texture2D _maskImage;   ///< mask image \
+uniform sampler2D _maskImage;   ///< mask image
+uniform TextureParameters2D _maskTexParams;
 uniform vec4 _maskColor;        ///< mask color
 
 #define MASKING_PROLOG(COORDS) \
-    vec4 maskValue = getElement2DNormalized(_maskImage, (COORDS) ); \
+    vec4 maskValue = getElement2DNormalized(_maskImage, _maskTexParams, (COORDS) ); \
     if (distance(maskValue, _maskColor) > 0.01) {
 
 #define MASKING_EPILOG \

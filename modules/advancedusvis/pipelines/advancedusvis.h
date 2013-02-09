@@ -89,8 +89,8 @@ namespace campvis {
 
         CameraProperty _camera;
 
-        DevilImageReader _usReader;
-        DevilImageReader _confidenceReader;
+        CsvdImageReader _usReader;
+        CsvdImageReader _confidenceReader;
         ConfidenceMapGenerator _confidenceGenerator;
 
         GradientVolumeGenerator _gvg;

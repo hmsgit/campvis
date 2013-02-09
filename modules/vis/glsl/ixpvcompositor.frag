@@ -35,26 +35,32 @@ out vec4 out_Color;
 #include "tools/texture2d.frag"
 #include "tools/background.frag"
 
-uniform Texture2D _xRayColor;
-uniform Texture2D _xRayDepth;
-uniform Texture2D _sliceColor;
-uniform Texture2D _sliceDepth;
+uniform sampler2D _xRayColor;
+uniform sampler2D _xRayDepth;
+uniform TextureParameters2D _xRayTexParams;
 
-uniform Texture2D _drrFullColor;
-uniform Texture2D _drrClippedColor;
+uniform sampler2D _sliceColor;
+uniform sampler2D _sliceDepth;
+uniform TextureParameters2D _sliceTexParams;
+
+uniform sampler2D _drrFullColor;
+uniform TextureParameters2D _drrFullTexParams;
+
+uniform sampler2D _drrClippedColor;
+uniform TextureParameters2D _drrClippedTexParams;
 
 /***
  * The main method.
  ***/
 void main() {
     // fetch input textures
-    vec4 xRayColor = getElement2DNormalized(_xRayColor, ex_TexCoord.xy);
-    float xRayDepth = getElement2DNormalized(_xRayDepth, ex_TexCoord.xy).z;
-    vec4 sliceColor = getElement2DNormalized(_sliceColor, ex_TexCoord.xy);
-    float sliceDepth = getElement2DNormalized(_sliceDepth, ex_TexCoord.xy).z;
+    vec4 xRayColor = getElement2DNormalized(_xRayColor, _xRayTexParams, ex_TexCoord.xy);
+    float xRayDepth = getElement2DNormalized(_xRayDepth, _xRayTexParams, ex_TexCoord.xy).z;
+    vec4 sliceColor = getElement2DNormalized(_sliceColor, _sliceTexParams, ex_TexCoord.xy);
+    float sliceDepth = getElement2DNormalized(_sliceDepth, _sliceTexParams, ex_TexCoord.xy).z;
     
-    float drrFull = getElement2DNormalized(_drrFullColor, ex_TexCoord.xy).r;
-    float drrClipped = getElement2DNormalized(_drrClippedColor, ex_TexCoord.xy).r;
+    float drrFull = getElement2DNormalized(_drrFullColor, _drrFullTexParams, ex_TexCoord.xy).r;
+    float drrClipped = getElement2DNormalized(_drrClippedColor, _drrClippedTexParams, ex_TexCoord.xy).r;
     
     float weightingFactor = 0.0;
     if (drrClipped > 0)

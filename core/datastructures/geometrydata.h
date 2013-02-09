@@ -31,9 +31,11 @@
 #define GEOMETRYDATA_H__
 
 #include "core/datastructures/abstractdata.h"
+#include <vector>
 
 namespace tgt {
     class BufferObject;
+    class QtCanvas;
 }
 
 namespace campvis {
@@ -55,6 +57,8 @@ namespace campvis {
 
         GeometryData& operator=(const GeometryData& rhs);
 
+        static void deleteBuffers(std::vector<tgt::BufferObject*> buffers);
+
         virtual AbstractData* clone() const = 0;
 
         /// \see AbstractData::getVideoMemoryFootprint()
@@ -69,8 +73,9 @@ namespace campvis {
         /**
          * Creates the OpenGL VBOs and the VAO for this geometry.
          * Must be called from a valid OpenGL context.
+         * \note    When overwriting this method, make sure to call base class method first!
          */
-        virtual void createGLBuffers() const = 0;
+        virtual void createGLBuffers() const;
 
         const tgt::BufferObject* getVerticesBuffer() const;
 
@@ -83,10 +88,22 @@ namespace campvis {
     protected:
         // mutable to support const lazy initialization
         mutable bool _buffersInitialized;
-        mutable tgt::BufferObject* _verticesBuffer;
-        mutable tgt::BufferObject* _texCoordsBuffer;
-        mutable tgt::BufferObject* _colorsBuffer;
-        mutable tgt::BufferObject* _normalsBuffer;
+
+        enum { NUM_BUFFERS = 4 };
+
+        union {
+            struct {
+                mutable tgt::BufferObject* _verticesBuffer;
+                mutable tgt::BufferObject* _texCoordsBuffer;
+                mutable tgt::BufferObject* _colorsBuffer;
+                mutable tgt::BufferObject* _normalsBuffer;
+            };
+
+            mutable tgt::BufferObject* _buffers[NUM_BUFFERS];
+        };
+
+    private:
+        mutable tgt::QtCanvas* _context;        ///< OpenGL context the buffers were created in (so that they can be deleted correctly)
     };
 
 }

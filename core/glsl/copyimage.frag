@@ -35,17 +35,18 @@ out vec4 out_Color;
 
 uniform vec2 _viewportSize;
 uniform vec2 _viewportSizeRCP;
-uniform Texture2D _colorTexture;
+uniform sampler2D _colorTexture;
+uniform TextureParameters2D _texParams;
 
 #ifndef NO_DEPTH
-uniform Texture2D _depthTexture;
+uniform sampler2D _depthTexture;
 #endif
 
 void main() {
     vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
-    out_Color = getElement2DNormalized(_colorTexture, fragCoord);
+    out_Color = getElement2DNormalized(_colorTexture, _texParams, fragCoord);
 
 #ifndef NO_DEPTH
-    gl_FragDepth = getElement2DNormalized(_depthTexture, fragCoord).z;
+    gl_FragDepth = getElement2DNormalized(_depthTexture, _texParams, fragCoord).z;
 #endif
 }

@@ -77,9 +77,9 @@ namespace campvis {
         if (_enableShading.getValue())
             toReturn.append("#define ENABLE_SHADING\n");
         if (_centralDifferences.getValue())
-            toReturn.append("#define computeGradient(tex,texCoords) computeGradientFilteredCentralDifferences(tex, texCoords)\n");
+            toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientFilteredCentralDifferences(tex, texParams, texCoords)\n");
         else
-            toReturn.append("#define computeGradient(tex,texCoords) computeGradientForwardDifferences(tex, texCoords)\n");
+            toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientForwardDifferences(tex, texParams, texCoords)\n");
 
         return toReturn;
     }

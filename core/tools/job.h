@@ -90,7 +90,7 @@ namespace campvis {
 
     protected:
         T* _target;                 ///< Target object
-        void (T::*_callee)();       /// <Member function to call
+        void (T::*_callee)();       ///< Member function to call
     };
 
     /**
@@ -128,7 +128,43 @@ namespace campvis {
 
     protected:
         T* _target;                 ///< Target object
-        void (T::*_callee)(A1);     /// <Member function to call
+        void (T::*_callee)(A1);     ///< Member function to call
+        A1 _arg1;                   ///< Argument to pass to \a callee
+    };
+    
+    /**
+     * Specific job, that is calling a member function pasing a single argument.
+     */
+    template<class A1>
+    class CallFunc1ArgJob : public AbstractJob {
+    public:
+        /**
+         * Creates an new job, that is calling \a callee on \a target pasing \a arg1 as single argument.
+         * \param   target  Target object
+         * \param   callee  Member function to call
+         * \param   arg1    Argument to pass to \a callee
+         */
+        CallFunc1ArgJob(void (*callee)(A1), A1 arg1)
+            : _callee(callee)
+            , _arg1(arg1)
+        {
+            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+        }
+
+        /**
+         * Destructor, nothing to do here
+         */
+        ~CallFunc1ArgJob() {};
+
+        /**
+         * Executes this job by calling the member function.
+         */
+        virtual void execute() {
+            (*_callee)(_arg1);
+        }
+
+    protected:
+        void (*_callee)(A1);        ///< Function to call
         A1 _arg1;                   ///< Argument to pass to \a callee
     };
 
@@ -180,6 +216,31 @@ namespace campvis {
     template<class T, class A1>
     CallMemberFunc1ArgJob<T, A1> makeJob(T* target, void (T::*callee)(A1), A1 arg1) {
         return CallMemberFunc1ArgJob<T, A1>(target, callee, arg1);
+    }
+
+    /**
+     * Creates a new CallMemberFunc1ArgJob on the heap  for the object \a target.
+     * \note    The caller takes ownership of the returned pointer.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \param   arg1    First argument to pass to \callee.
+     * \return  Pointer to the newly created CallMemberFunc1ArgJob. Caller has ownership!
+     */
+    template<class A1>
+    CallFunc1ArgJob<A1>* makeJobOnHeap(void (*callee)(A1), A1 arg1) {
+        return new CallFunc1ArgJob<A1>(callee, arg1);
+    }
+
+    /**
+     * Creates a new CallMemberFunc1ArgJob on the stack  for the object \a target.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \param   arg1    First argument to pass to \callee.
+     * \return  The newly created CallMemberFunc1ArgJob.
+     */
+    template<class A1>
+    CallFunc1ArgJob<A1> makeJob(void (*callee)(A1), A1 arg1) {
+        return CallFunc1ArgJob<A1>(callee, arg1);
     }
 
 }

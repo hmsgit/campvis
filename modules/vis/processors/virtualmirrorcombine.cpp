@@ -92,9 +92,9 @@ namespace campvis {
             _shader->activate();
             tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
 
-            normalImage->bind(_shader, &normalColorUnit, &normalDepthUnit, "_normalColor", "_normalDepth");
-            mirrorImage->bind(_shader, &mirrorColorUnit, &mirrorDepthUnit, "_mirrorColor", "_mirrorDepth");
-            mirrorRendered->bind(_shader, 0, &mirrorRenderedDepthUnit, "", "_mirrorRenderedDepth");
+            normalImage->bind(_shader, normalColorUnit, normalDepthUnit, "_normalColor", "_normalDepth", "_normalTexParams");
+            mirrorImage->bind(_shader, mirrorColorUnit, mirrorDepthUnit, "_mirrorColor", "_mirrorDepth", "_mirrorTexParams");
+            mirrorRendered->bindDepthTexture(_shader, mirrorRenderedDepthUnit, "_mirrorRenderedDepth", "_mirrorRenderedTexParams");
 
             decorateRenderProlog(data, _shader);
 

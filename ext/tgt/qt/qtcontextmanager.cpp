@@ -80,4 +80,9 @@ namespace tgt {
         setCurrent(0);
     }
 
+    QtCanvas* QtContextManager::getCurrentContext() const {
+        return _currentContext->getCanvas();
+    }
+
+
 }

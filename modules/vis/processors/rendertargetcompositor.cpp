@@ -102,8 +102,8 @@ namespace campvis {
             _shader->activate();
             tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 
-            firstImage->bind(_shader, &firstColorUnit, &firstDepthUnit, "_firstColor", "_firstDepth");
-            secondImage->bind(_shader, &secondColorUnit, &secondDepthUnit, "_secondColor", "_secondDepth");
+            firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
+            secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
             _shader->setUniform("_compositingMethod", p_compositingMethod.getOptionValue());
             _shader->setUniform("_alpha", p_alphaValue.getValue());
 

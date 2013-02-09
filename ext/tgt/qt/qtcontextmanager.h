@@ -58,6 +58,8 @@ namespace tgt {
          */
         QtGLContext* getContextByKey(const std::string& key);
 
+        QtCanvas* getCurrentContext() const;
+
         tbb::mutex& getGlMutex();
 
         void releaseCurrentContext();

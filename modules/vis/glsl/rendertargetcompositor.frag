@@ -35,10 +35,13 @@ out vec4 out_Color;
 #include "tools/texture2d.frag"
 #include "tools/background.frag"
 
-uniform Texture2D _firstColor;
-uniform Texture2D _firstDepth;
-uniform Texture2D _secondColor;
-uniform Texture2D _secondDepth;
+uniform sampler2D _firstColor;
+uniform sampler2D _firstDepth;
+uniform TextureParameters2D _firstTexParams;
+
+uniform sampler2D _secondColor;
+uniform sampler2D _secondDepth;
+uniform TextureParameters2D _secondTexParams;
 
 uniform int _compositingMethod;
 uniform float _alpha;
@@ -46,45 +49,45 @@ uniform float _alpha;
 void main() {
     if (_compositingMethod == 0) {
         // only first
-        out_Color = getElement2DNormalized(_firstColor, ex_TexCoord.xy);
-        gl_FragDepth = getElement2DNormalized(_firstDepth, ex_TexCoord.xy).z;
+        out_Color = getElement2DNormalized(_firstColor, _firstTexParams, ex_TexCoord.xy);
+        gl_FragDepth = getElement2DNormalized(_firstDepth, _firstTexParams, ex_TexCoord.xy).z;
     }
     else if (_compositingMethod == 1) {
         // only second
-        out_Color = getElement2DNormalized(_secondColor, ex_TexCoord.xy);
-        gl_FragDepth = getElement2DNormalized(_secondDepth, ex_TexCoord.xy).z;
+        out_Color = getElement2DNormalized(_secondColor, _secondTexParams, ex_TexCoord.xy);
+        gl_FragDepth = getElement2DNormalized(_secondDepth, _secondTexParams, ex_TexCoord.xy).z;
     }
     else if (_compositingMethod == 2) {
         // alpha blending
-        vec4 firstColor = getElement2DNormalized(_firstColor, ex_TexCoord.xy);
-        float firstDepth = getElement2DNormalized(_firstDepth, ex_TexCoord.xy).z;
-        vec4 secondColor = getElement2DNormalized(_secondColor, ex_TexCoord.xy);
-        float secondDepth = getElement2DNormalized(_secondDepth, ex_TexCoord.xy).z;
+        vec4 firstColor = getElement2DNormalized(_firstColor, _firstTexParams, ex_TexCoord.xy);
+        float firstDepth = getElement2DNormalized(_firstDepth, _firstTexParams, ex_TexCoord.xy).z;
+        vec4 secondColor = getElement2DNormalized(_secondColor, _secondTexParams, ex_TexCoord.xy);
+        float secondDepth = getElement2DNormalized(_secondDepth, _secondTexParams, ex_TexCoord.xy).z;
 
         out_Color = mix(firstColor, secondColor, _alpha);
         gl_FragDepth = min(firstDepth, secondDepth);
     }
     else if (_compositingMethod == 3) {
         // difference
-        vec4 firstColor = getElement2DNormalized(_firstColor, ex_TexCoord.xy);
-        float firstDepth = getElement2DNormalized(_firstDepth, ex_TexCoord.xy).z;
-        vec4 secondColor = getElement2DNormalized(_secondColor, ex_TexCoord.xy);
-        float secondDepth = getElement2DNormalized(_secondDepth, ex_TexCoord.xy).z;
+        vec4 firstColor = getElement2DNormalized(_firstColor, _firstTexParams, ex_TexCoord.xy);
+        float firstDepth = getElement2DNormalized(_firstDepth, _firstTexParams, ex_TexCoord.xy).z;
+        vec4 secondColor = getElement2DNormalized(_secondColor, _secondTexParams, ex_TexCoord.xy);
+        float secondDepth = getElement2DNormalized(_secondDepth, _secondTexParams, ex_TexCoord.xy).z;
 
         out_Color = vec4(vec3(1.0) - abs(firstColor - secondColor).xyz, max(firstColor.w, secondColor.w));
         gl_FragDepth = min(firstDepth, secondDepth);
     }
     else if (_compositingMethod == 4) {
         // depth test
-        float firstDepth = getElement2DNormalized(_firstDepth, ex_TexCoord.xy).z;
-        float secondDepth = getElement2DNormalized(_secondDepth, ex_TexCoord.xy).z;
+        float firstDepth = getElement2DNormalized(_firstDepth, _firstTexParams, ex_TexCoord.xy).z;
+        float secondDepth = getElement2DNormalized(_secondDepth, _secondTexParams, ex_TexCoord.xy).z;
 
         if (firstDepth > secondDepth) {
-            out_Color = getElement2DNormalized(_secondColor, ex_TexCoord.xy);
+            out_Color = getElement2DNormalized(_secondColor, _secondTexParams, ex_TexCoord.xy);
             gl_FragDepth = secondDepth;
         }
         else {
-            out_Color = getElement2DNormalized(_firstColor, ex_TexCoord.xy);
+            out_Color = getElement2DNormalized(_firstColor, _firstTexParams, ex_TexCoord.xy);
             gl_FragDepth = firstDepth;
         }
     }

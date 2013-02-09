@@ -35,9 +35,12 @@ out vec4 out_Color;
 
 uniform vec2 _viewportSizeRCP;
 
-uniform Texture2D _colorTexture;
-uniform Texture2D _depthTexture;
-uniform Texture2D _depthPass2Texture;
+uniform sampler2D _colorTexture;
+uniform sampler2D _depthTexture;
+uniform TextureParameters2D _texParams;
+
+uniform sampler2D _depthPass2Texture;
+uniform TextureParameters2D _pass2TexParams;
 
 uniform vec2 _direction;
 uniform float _sigma;
@@ -88,7 +91,7 @@ float applyDepthGaussFilter(in vec2 texCoord) {
     for (int i = -_halfKernelDimension; i <= _halfKernelDimension; ++i) {
         // TODO: why the fuck does abs(i) not work here?!?
         int absi = (i < 0) ? -i : i;
-        float curDepth = getElement2DNormalized(_depthPass2Texture, texCoord + (_direction * _viewportSizeRCP * i)).z;
+        float curDepth = getElement2DNormalized(_depthPass2Texture, _pass2TexParams, texCoord + (_direction * _viewportSizeRCP * i)).z;
         result += curDepth * _gaussKernel[absi];
     }
     result /= _norm;
@@ -109,11 +112,11 @@ void main() {
         gl_FragDepth = filteredDepth;
     } else {
         // we are in the second vertical pass and have to modulate the color
-        float curDepth = getElement2DNormalized(_depthTexture, texCoord).z;
+        float curDepth = getElement2DNormalized(_depthTexture, _texParams, texCoord).z;
         float deltaD = normalizeDepth(filteredDepth) - normalizeDepth(curDepth);
 
         // apply depth darkening
-        vec4 curColor = getElement2DNormalized(_colorTexture, texCoord);
+        vec4 curColor = getElement2DNormalized(_colorTexture, _texParams, texCoord);
         if (curColor.a == 0)
             discard;
 

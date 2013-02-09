@@ -36,9 +36,18 @@ out vec4 out_Color;
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
-uniform Texture2D _texture2d;
-uniform Texture3D _texture3d;
-uniform TransferFunction1D _transferFunction;
+// 2D texture
+uniform sampler2D _texture2d;
+uniform TextureParameters2D _2dTextureParams;
+
+// 3D texture
+uniform sampler3D _texture3d;
+uniform TextureParameters3D _3dTextureParams;
+
+// Transfer Function
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
+
 uniform bool _is3d;
 uniform int _sliceNumber;
 uniform vec4 _color;
@@ -51,26 +60,26 @@ void main() {
         if (_sliceNumber < 0) {
             // perform MIP
             out_Color = vec4(0.0);
-            for (float slice = 0.0; slice < 1.0; slice += _texture3d._sizeRCP.z) {
-                out_Color = max(out_Color, lookupTF(_transferFunction, getElement3DNormalized(_texture3d, vec3(ex_TexCoord.xy, slice)).a));
+            for (float slice = 0.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
+                out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, vec3(ex_TexCoord.xy, slice)).a));
             }
         }
         else {
             // render the corresponding slice
-            vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_texture3d._size.z));
-            out_Color = lookupTF(_transferFunction, getElement3DNormalized(_texture3d, coord).a);
+            vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_3dTextureParams._size.z));
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, coord).a);
         }
     }
     else {
-        vec4 texel = getElement2DNormalized(_texture2d, ex_TexCoord.xy);
-        if (_texture2d._numChannels == 1) {
-            out_Color = lookupTF(_transferFunction, texel.a);
+        vec4 texel = getElement2DNormalized(_texture2d, _2dTextureParams, ex_TexCoord.xy);
+        if (_2dTextureParams._numChannels == 1) {
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
         }
-        else if (_texture2d._numChannels == 3) {
+        else if (_2dTextureParams._numChannels == 3) {
             out_Color = vec4(abs(texel.rgb), 1.0);
         }
-        else if (_texture2d._numChannels == 4) {
-            out_Color = (abs(texel) - vec4(_transferFunction._intensityDomain.x)) / (_transferFunction._intensityDomain.y - _transferFunction._intensityDomain.x);
+        else if (_2dTextureParams._numChannels == 4) {
+            out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
         }
         else {
             out_Color = vec4(0.1, 0.6, 1.0, 0.75);

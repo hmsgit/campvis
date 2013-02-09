@@ -35,23 +35,28 @@ out vec4 out_Color;
 #include "tools/texture2d.frag"
 #include "tools/background.frag"
 
-uniform Texture2D _normalColor;
-uniform Texture2D _normalDepth;
-uniform Texture2D _mirrorColor;
-uniform Texture2D _mirrorDepth;
-uniform Texture2D _mirrorRenderedDepth;
+uniform sampler2D _normalColor;
+uniform sampler2D _normalDepth;
+uniform TextureParameters2D _normalTexParams;
+
+uniform sampler2D _mirrorColor;
+uniform sampler2D _mirrorDepth;
+uniform TextureParameters2D _mirrorTexParams;
+
+uniform sampler2D _mirrorRenderedDepth;
+uniform TextureParameters2D _mirrorRenderedTexParams;
 
 void main() {
-    float normalDepth = getElement2DNormalized(_normalDepth, ex_TexCoord.xy).z;
-    float mirrorRenderedDepth = getElement2DNormalized(_mirrorRenderedDepth, ex_TexCoord.xy).z;
+    float normalDepth = getElement2DNormalized(_normalDepth, _normalTexParams, ex_TexCoord.xy).z;
+    float mirrorRenderedDepth = getElement2DNormalized(_mirrorRenderedDepth, _mirrorRenderedTexParams, ex_TexCoord.xy).z;
 
     if (normalDepth <= mirrorRenderedDepth) {
-        out_Color = getElement2DNormalized(_normalColor, ex_TexCoord.xy);
+        out_Color = getElement2DNormalized(_normalColor, _normalTexParams, ex_TexCoord.xy);
         gl_FragDepth = normalDepth;
     }
     else {
-        out_Color = getElement2DNormalized(_mirrorColor, ex_TexCoord.xy);
-        gl_FragDepth = getElement2DNormalized(_mirrorDepth, ex_TexCoord.xy).z;
+        out_Color = getElement2DNormalized(_mirrorColor, _mirrorTexParams, ex_TexCoord.xy);
+        gl_FragDepth = getElement2DNormalized(_mirrorDepth, _mirrorTexParams, ex_TexCoord.xy).z;
     }
 
     if (out_Color.a == 0) {

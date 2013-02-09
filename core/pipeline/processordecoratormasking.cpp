@@ -62,7 +62,7 @@ namespace campvis {
 
             _maskImage = new ImageRepresentationRenderTarget::ScopedRepresentation(dataContainer, _maskID.getValue());
             if (*_maskImage != 0) {
-                (*_maskImage)->bind(shader, _texUnit, 0, "_maskImage");
+                (*_maskImage)->bindColorTexture(shader, *_texUnit, "_maskImage", "_maskTexParams");
             }
             else {
                 LERRORC("CAMPVis.core.ProcessorDecoratorMasking", "No valid mask image found!");

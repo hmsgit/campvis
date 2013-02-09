@@ -47,7 +47,7 @@
 namespace campvis {
     const std::string TumVisPainter::loggerCat_ = "CAMPVis.core.TumVisPainter";
 
-    TumVisPainter::TumVisPainter(tgt::QtThreadedCanvas* canvas, VisualizationPipeline* pipeline)
+    TumVisPainter::TumVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline)
         : Runnable()
         , tgt::Painter(canvas)
         , _pipeline(0)
@@ -107,7 +107,7 @@ namespace campvis {
 
             // bind input textures
             tgt::TextureUnit colorUnit, depthUnit;
-            image->bind(_copyShader, &colorUnit, &depthUnit);
+            image->bind(_copyShader, colorUnit, depthUnit);
             LGL_ERROR;
 
             // execute the shader

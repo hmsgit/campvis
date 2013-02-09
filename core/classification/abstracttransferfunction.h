@@ -95,9 +95,10 @@ namespace campvis {
          * \note    Calling thread must have a valid OpenGL context.
          * \param   shader                      Shader used for rendering
          * \param   texUnit                     Texture unit to bind texture to
-         * \param   transFuncUniform            Uniform name to store the TF struct
+         * \param   transFuncUniform            Uniform name to store the TF sampler
+         * \param   transFuncParamsUniform      Uniform name to store the TF parameters struct
          */
-        void bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform = "_transferFunction");
+        void bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform = "_transferFunction", const std::string& transFuncParamsUniform = "_transferFunctionParams");
         
         /**
          * Creates the OpenGL texture.

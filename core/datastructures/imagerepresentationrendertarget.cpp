@@ -135,42 +135,46 @@ namespace campvis {
         _fbo->deactivate();
     }
 
-    void ImageRepresentationRenderTarget::bindColorTexture(size_t index /*= 0*/) const {
-        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
-        _colorTextures[index]->bind();
-    }
-
-    void ImageRepresentationRenderTarget::bindColorTexture(const tgt::TextureUnit& texUnit, size_t index /*= 0*/) const {
-        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
-        texUnit.activate();
-        _colorTextures[index]->bind();
-    }
-
-    void ImageRepresentationRenderTarget::bindDepthTexture() const {
-        _depthTexture->bind();
-    }
-
-    void ImageRepresentationRenderTarget::bindDepthTexture(const tgt::TextureUnit& texUnit) const {
-        texUnit.activate();
-        _depthTexture->bind();
-    }
-
-    void ImageRepresentationRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit* colorTexUnit, const tgt::TextureUnit* depthTexUnit, const std::string& colorTexUniform /*= "_colorTextures"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, size_t index /*= 0*/) const {
+    void ImageRepresentationRenderTarget::bindColorTexture(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
         tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
-        if (colorTexUnit != 0) {
-            bindColorTexture(*colorTexUnit, index);
-            shader->setUniform(colorTexUniform + "._texture", colorTexUnit->getUnitNumber());
-            shader->setUniform(colorTexUniform + "._size", tgt::vec2(getSize().xy()));
-            shader->setUniform(colorTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
-        }
-        if (depthTexUnit != 0) {
-            bindDepthTexture(*depthTexUnit);
-            shader->setUniform(depthTexUniform + "._texture", depthTexUnit->getUnitNumber());
-            shader->setUniform(depthTexUniform + "._size", tgt::vec2(getSize().xy()));
-            shader->setUniform(depthTexUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
-        }
+
+        bindColorTexture(colorTexUnit, index);
+        shader->setUniform(colorTexUniform, colorTexUnit.getUnitNumber());
+        shader->setUniform(texParamsUniform + "._size", tgt::vec2(getSize().xy()));
+        shader->setUniform(texParamsUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
+        shader->setUniform(texParamsUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
+
+        shader->setIgnoreUniformLocationError(tmp);
+    }
+
+    void ImageRepresentationRenderTarget::bindDepthTexture(tgt::Shader* shader, const tgt::TextureUnit& depthTexUnit, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/) const {
+        bool tmp = shader->getIgnoreUniformLocationError();
+        shader->setIgnoreUniformLocationError(true);
+
+        bindDepthTexture(depthTexUnit);
+        shader->setUniform(depthTexUniform, depthTexUnit.getUnitNumber());
+        shader->setUniform(texParamsUniform + "._size", tgt::vec2(getSize().xy()));
+        shader->setUniform(texParamsUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
+        shader->setUniform(texParamsUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
+
+        shader->setIgnoreUniformLocationError(tmp);
+    }
+
+    void ImageRepresentationRenderTarget::bind(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const tgt::TextureUnit& depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
+        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
+        bool tmp = shader->getIgnoreUniformLocationError();
+        shader->setIgnoreUniformLocationError(true);
+
+        bindColorTexture(colorTexUnit, index);
+        bindDepthTexture(depthTexUnit);
+        shader->setUniform(colorTexUniform, colorTexUnit.getUnitNumber());
+        shader->setUniform(depthTexUniform, depthTexUnit.getUnitNumber());
+        shader->setUniform(texParamsUniform + "._size", tgt::vec2(getSize().xy()));
+        shader->setUniform(texParamsUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
+        shader->setUniform(texParamsUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
+
         shader->setIgnoreUniformLocationError(tmp);
     }
 
@@ -328,5 +332,17 @@ namespace campvis {
         // no conversion availible for now
         return 0;
     }
+
+    void ImageRepresentationRenderTarget::bindColorTexture(const tgt::TextureUnit& texUnit, size_t index /*= 0*/) const {
+        tgtAssert(index < _colorTextures.size(), "Color texture index out of bounds!");
+        texUnit.activate();
+        _colorTextures[index]->bind();
+    }
+
+    void ImageRepresentationRenderTarget::bindDepthTexture(const tgt::TextureUnit& texUnit) const {
+        texUnit.activate();
+        _depthTexture->bind();
+    }
+
 
 }

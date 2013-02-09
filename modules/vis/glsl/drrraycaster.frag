@@ -40,11 +40,21 @@ uniform vec2 _viewportSizeRCP;
 uniform bool _jitterEntryPoints;
 uniform float _jitterStepSizeMultiplier;
 
-uniform Texture2D _entryPoints;          // ray entry points
-uniform Texture2D _exitPoints;           // ray exit points
-uniform Texture3D _volume;            // texture lookup parameters for volume_
+// ray entry points
+uniform sampler2D _entryPoints;
+uniform TextureParameters2D _entryParams;
 
-uniform TransferFunction1D _transferFunction;
+// ray exit points
+uniform sampler2D _exitPoints;
+uniform TextureParameters2D _exitParams;
+
+// DRR volume
+uniform sampler3D _volume;
+uniform TextureParameters3D _volumeTextureParams;
+
+// Transfer function
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
 
 uniform float _samplingStepSize;
 uniform float _shift;
@@ -73,8 +83,8 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         // lookup intensity and TF
-        float intensity = getElement3DNormalized(_volume, samplePosition).a;
-        vec4 color = lookupTF(_transferFunction, intensity);
+        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).a;
+        vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
 #ifdef DEPTH_MAPPING
         // use Bernstein Polynomials for depth-color mapping
@@ -124,8 +134,8 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
  ***/
 void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
-    vec3 frontPos = getElement2DNormalized(_entryPoints, p).rgb;
-    vec3 backPos = getElement2DNormalized(_exitPoints, p).rgb;
+    vec3 frontPos = getElement2DNormalized(_entryPoints, _entryParams, p).rgb;
+    vec3 backPos = getElement2DNormalized(_exitPoints, _exitParams, p).rgb;
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {

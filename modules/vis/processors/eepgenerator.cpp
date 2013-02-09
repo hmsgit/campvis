@@ -149,7 +149,7 @@ namespace campvis {
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
                 if (geometryImage != 0) {
-                     geometryImage->bind(_shader, 0, &geometryDepthUnit, "", "_geometryDepthTexture");
+                    geometryImage->bindDepthTexture(_shader, geometryDepthUnit, "_geometryDepthTexture", "_geometryDepthTexParams");
 
                     _shader->setUniform("_integrateGeometry", true);
                     _shader->setUniform("_near", cam.getNearDist());
@@ -193,7 +193,7 @@ namespace campvis {
                 _shader->setUniform("_isEntrypoint", false);
 
                 if (geometryImage != 0) {
-                    entrypoints.second->bind(_shader, 0, &entryDepthUnit, "", "_entryDepthTexture");
+                    entrypoints.second->bindDepthTexture(_shader, entryDepthUnit, "_entryDepthTexture", "_entryDepthTexParams");
                 }
 
                 glDepthFunc(GL_GREATER);

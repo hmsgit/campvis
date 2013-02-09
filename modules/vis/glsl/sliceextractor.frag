@@ -36,19 +36,23 @@ out vec4 out_Color;
 #include "tools/texture2d.frag"
 #include "tools/transferfunction.frag"
 
-uniform Texture2D _texture;
-uniform TransferFunction1D _transferFunction;
+uniform sampler2D _texture;
+uniform TextureParameters2D _textureParams;
+
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
 
 void main() {
-    vec4 texel = getElement2DNormalized(_texture, ex_TexCoord.xy);
-    if (_texture._numChannels == 1) {
-        out_Color = lookupTF(_transferFunction, texel.a);
+    vec4 texel = getElement2DNormalized(_texture, _textureParams, ex_TexCoord.xy);
+
+    if (_textureParams._numChannels == 1) {
+        out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
     }
-    else if (_texture._numChannels == 3) {
+    else if (_textureParams._numChannels == 3) {
         out_Color = vec4(abs(texel.rgb), 1.0);
     }
-    else if (_texture._numChannels == 4) {
-        out_Color = (abs(texel) - vec4(_transferFunction._intensityDomain.x)) / (_transferFunction._intensityDomain.y - _transferFunction._intensityDomain.x);
+    else if (_textureParams._numChannels == 4) {
+        out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
     }
     
     //if (out_Color.a == 0) {

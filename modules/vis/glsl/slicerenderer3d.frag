@@ -35,12 +35,15 @@ out vec4 out_Color;
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
-uniform Texture3D _texture;
-uniform TransferFunction1D _transferFunction;
+uniform sampler3D _texture;
+uniform TextureParameters3D _textureParams;
+
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
 
 void main() {
-    float intensity = getElement3DNormalized(_texture, ex_TexCoord).a;
-    out_Color = lookupTF(_transferFunction, intensity);
+    float intensity = getElement3DNormalized(_texture, _textureParams, ex_TexCoord).a;
+    out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
     // don't write fragment if fully transparent (in particular don't write to depth buffer!)
     if (out_Color == 0.0)

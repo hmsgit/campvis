@@ -37,6 +37,7 @@ QtCanvas::QtCanvas(const std::string& title,
     , GLCanvas(title, size, buffers)
     , _context(this)
 {
+    _context = QtGLContext(this);
     resize(size.x, size.y);
     if (shared && shareWidget_ == 0)
         shareWidget_ = this;

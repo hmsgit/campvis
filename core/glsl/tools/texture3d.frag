@@ -29,10 +29,7 @@
 
 // TODO: implement coordinate transformation using a trafo matrix?
 
-struct Texture3D {
-    // The texture
-    sampler3D _texture;
-
+struct TextureParameters3D {
     // Texture size
     vec3 _size;
     vec3 _sizeRCP;
@@ -52,42 +49,44 @@ struct Texture3D {
 
 /**
  * Texture lookup function for 3D textures using voxel coordinates, i.e [(0,0) , textureSize].
- * \param	tex			Texture3D struct with texture for lookup
+ * \param	tex			Sampler to texture
+ * \param	texParams   TextureParameters3D struct with texture for lookup
  * \param	texCoords	Lookup coordinates in pixel coordinates
  * \return	The texel at the given coordinates.
  */
-vec4 getElement3D(in Texture3D tex, in vec3 texCoords) {
-    vec3 texCoordsNormalized = texCoords * tex._sizeRCP;
+vec4 getElement3D(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
+    vec3 texCoordsNormalized = texCoords * texParams._sizeRCP;
     //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoordsNormalized, 0.0, 1.0)).xy;
-    return texture(tex._texture, texCoordsNormalized);
+    return texture(tex, texCoordsNormalized);
 }
 
 /**
  * Texture lookup function for 3D textures using normalized texture coordinates, i.e. [0,1].
- * \param	tex			Texture3D struct with texture for lookup
+ * \param	tex			Sampler to texture
+ * \param	texParams   TextureParameters3D struct with texture for lookup
  * \param	texCoords	Lookup coordinates in normlized texture coordinates
  * \return	The texel at the given coordinates.
  */
-vec4 getElement3DNormalized(in Texture3D tex, in vec3 texCoords) {
+vec4 getElement3DNormalized(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
     //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoords, 0.0, 1.0)).xy;
-    return texture(tex._texture, texCoords);
+    return texture(tex, texCoords);
 }
 
 /**
  * Transforms texture coordinates for texture \a tex to world coordinates using the texture's
  * texture-to-world matrix.
- * \param   tex         texture
+ * \param	texParams   TextureParameters3D struct with texture for lookup
  * \param   texCoords   texture coordinates
  * \return  \a texCoords transformes to woorld coordinates.
  */
-vec4 textureToWorld(in Texture3D tex, in vec3 texCoords) {
-    return tex._textureToWorldMatrix * vec4(texCoords, 1.0);
+vec4 textureToWorld(in TextureParameters3D texParams, in vec3 texCoords) {
+    return texParams._textureToWorldMatrix * vec4(texCoords, 1.0);
 }
 
-float applyRealWorldMapping(Texture3D tex, float value) {
+float applyRealWorldMapping(in TextureParameters3D tex, in float value) {
     return (value + tex._realWorldMapping.x) * tex._realWorldMapping.y;
 }
 
-float applyInverseRealWorldMapping(Texture3D tex, float value) {
+float applyInverseRealWorldMapping(in TextureParameters3D tex, in float value) {
     return (value - tex._realWorldMapping.x) / tex._realWorldMapping.y;
 }

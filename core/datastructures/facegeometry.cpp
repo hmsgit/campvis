@@ -129,6 +129,8 @@ namespace campvis {
     }
 
     void FaceGeometry::createGLBuffers() const {
+        GeometryData::createGLBuffers();
+
         if (! _buffersInitialized) {
             try {
                 _verticesBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);

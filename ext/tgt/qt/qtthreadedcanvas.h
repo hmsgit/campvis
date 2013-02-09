@@ -16,7 +16,7 @@ namespace tgt {
             const tgt::GLCanvas::Buffers buffers = tgt::GLCanvas::RGBADD,
             QWidget* parent = 0, bool shared = false, Qt::WFlags f = 0, char* name = 0);
 
-        ~QtThreadedCanvas();
+        virtual ~QtThreadedCanvas();
 
         // override Qt events so that they don't interfere with the threading.
         void resizeEvent(QResizeEvent *event) {

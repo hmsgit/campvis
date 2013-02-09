@@ -20,8 +20,10 @@ namespace tgt {
     BufferObject::~BufferObject() {
         tgtAssert(_assignedAttributes.empty(), "Destructing a BufferObject, that is still bound to a VertexAttribute.");
 
-        if (_id != 0)
+        if (_id != 0) {
             glDeleteBuffers(1, &_id);
+            LGL_ERROR;
+        }
     }
 
     void BufferObject::bind() {

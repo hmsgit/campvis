@@ -27,13 +27,11 @@
 // 
 // ================================================================================================
 
-struct TransferFunction1D {
-    sampler1D _texture;         ///< The texture containing the TF LUT
+struct TFParameters1D {
     vec2 _intensityDomain;      ///< The intensity domain to map the LUT to
 };
 
-struct TransferFunction2D {
-    sampler2D _texture;         ///< The texture containing the TF LUT
+struct TFParameters2D {
     vec2 _intensityDomainX;     ///< The intensity domain for mapping the x value to the LUT
 };
 
@@ -55,24 +53,26 @@ float mapIntensityToTFDomain(in vec2 intensityDomain, in float intensity) {
 /**
  * Performs a 1D transfer function lookup for the given TF and intensity.
  * Before lookup \a intensity will be mapped to the TF domain.
- * \param	tf			1D Transfer function struct
+ * \param	tf			1D Transfer function sampler
+ * \param   texParams   TF parameters struct
  * \param	intensity	Image intensity (normalized to [0, 1])
  * \return	The color of the transfer function at the given intensity.
  */
-vec4 lookupTF(in TransferFunction1D tf, in float intensity) {
-    intensity = mapIntensityToTFDomain(tf._intensityDomain, intensity);
-    return (intensity >= 0.0 ? texture(tf._texture, intensity) : vec4(0.0, 0.0, 0.0, 0.0));
+vec4 lookupTF(in sampler1D tf, in TFParameters1D texParams, in float intensity) {
+    intensity = mapIntensityToTFDomain(texParams._intensityDomain, intensity);
+    return (intensity >= 0.0 ? texture(tf, intensity) : vec4(0.0, 0.0, 0.0, 0.0));
 }
 
 /**
  * Performs a 2D transfer function lookup for the given TF, intensity and y-value.
  * Before lookup \a intensity will be mapped to the TF domain.
- * \param	tf		    2D Transfer function struct
+ * \param	tf			2D Transfer function sampler
+ * \param   texParams   TF parameters struct
  * \param	intensity	Image intensity (normalized to [0, 1])
  * \param	y			y-value for lookup
  * \return	The color of the transfer function at the given intensity and y-value.
  */
-vec4 lookupTF(in TransferFunction2D tf, in float intensity, in float y) {
-    intensity = mapIntensityToTFDomain(tf._intensityDomainX, intensity);
-    return (intensity >= 0.0 ? texture(tf._texture, vec2(intensity, y)) : vec4(0.0, 0.0, 0.0, 0.0));
+vec4 lookupTF(in sampler2D tf, in TFParameters2D texParams, in float intensity, in float y) {
+    intensity = mapIntensityToTFDomain(texParams._intensityDomainX, intensity);
+    return (intensity >= 0.0 ? texture(tf, vec2(intensity, y)) : vec4(0.0, 0.0, 0.0, 0.0));
 }

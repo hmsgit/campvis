@@ -39,8 +39,12 @@ uniform vec2 _viewportSizeRCP;
 
 uniform bool _integrateGeometry;            ///< flag whether to integrate geometry into the EEP
 uniform bool _isEntrypoint;                 ///< true if current run is for entrypoints, false if current run is for exitpoints
-uniform Texture2D _entryDepthTexture;       ///< depth texture of the entrypoints (only used in exitpoints run)
-uniform Texture2D _geometryDepthTexture;    ///< depth texture of rendered geometry
+
+uniform sampler2D _entryDepthTexture;       ///< depth texture of the entrypoints (only used in exitpoints run)
+uniform TextureParameters2D _entryDepthTexParams;
+
+uniform sampler2D _geometryDepthTexture;    ///< depth texture of rendered geometry
+uniform TextureParameters2D _geometryDepthTexParams;
 
 uniform float _near;
 uniform float _far;
@@ -55,7 +59,7 @@ void main() {
     float fragDepth = gl_FragCoord.z;
 
     if (_integrateGeometry) {
-        float geometryDepth = getElement2DNormalized(_geometryDepthTexture, fragCoordNormalized).z;
+        float geometryDepth = getElement2DNormalized(_geometryDepthTexture, _geometryDepthTexParams, fragCoordNormalized).z;
 
         if (_isEntrypoint) {
             // integrating geometry into Entrypoints
@@ -74,7 +78,7 @@ void main() {
         }
         else {
             // integrating geometry into Exitpoints
-            float entryDepth = getElement2DNormalized(_entryDepthTexture, fragCoordNormalized).z;
+            float entryDepth = getElement2DNormalized(_entryDepthTexture, _entryDepthTexParams, fragCoordNormalized).z;
             float exitDepth = gl_FragCoord.z;
 
             if (geometryDepth <= entryDepth) {

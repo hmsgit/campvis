@@ -103,14 +103,14 @@ namespace campvis {
 
         // = CT Setup =====================================================================================
 
-        _ctReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CT_8007_003_5mm_STD_20110224\\Fantome_20110224_8007_003_6_1_ABD-_portalvenös_X_S___5mm_STD.mhd");
-        _ctReader.p_targetImageID.setValue("ct.image");
         _ctReader.p_targetImageID.connect(&_ctProxy.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctFullEEP.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctClippedEEP.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctDVR.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctFullDRR.p_sourceImageID);
         _ctReader.p_targetImageID.connect(&_ctClippedDRR.p_sourceImageID);
+        _ctReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CT_8007_003_5mm_STD_20110224\\Fantome_20110224_8007_003_6_1_ABD-_portalvenös_X_S___5mm_STD.mhd");
+        _ctReader.p_targetImageID.setValue("ct.image");
         _ctReader.s_validated.connect(this, &IxpvDemo::onProcessorValidated);
 
         _ctProxy.p_geometryID.setValue("ct.proxy");

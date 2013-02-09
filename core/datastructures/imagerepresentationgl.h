@@ -106,26 +106,17 @@ namespace campvis {
 
 
         /**
-         * Binds the texture without activating a texture unit.
-         */
-        void bind() const;
-
-        /**
-         * Activates the texture unit \a texUnit and binds the texture.
-         * \param   texUnit     Texture unit to activate
-         */
-        void bind(const tgt::TextureUnit& texUnit) const;
-
-        /**
          * Binds the image to the given shader using \a texUnit as texture unit and \a texUniform as shader uniform.
-         * \param   shader      Shader to bind image and set uniforms to.
-         * \param   texUnit     TextureUnit to bind image to.
-         * \param   texUniform  Uniform name for the sampler.
+         * \param   shader              Shader to bind image and set uniforms to.
+         * \param   texUnit             TextureUnit to bind image to.
+         * \param   texUniform          Uniform name for the sampler.
+         * \param   texParamsUniform    Name for texture parameters struct uniform.
          */
         void bind(
             tgt::Shader* shader,
             const tgt::TextureUnit& texUnit, 
-            const std::string& texUniform = "_texture") const;
+            const std::string& texUniform = "_texture",
+            const std::string& texParamsUniform = "_textureParams") const;
 
         /**
          * Gets the OpenGL texture.
@@ -170,6 +161,17 @@ namespace campvis {
          */
         template<typename BASETYPE, size_t NUMCHANNELS>
         ImageRepresentationGL(ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data);
+
+        /**
+         * Binds the texture without activating a texture unit.
+         */
+        void bind() const;
+
+        /**
+         * Activates the texture unit \a texUnit and binds the texture.
+         * \param   texUnit     Texture unit to activate
+         */
+        void bind(const tgt::TextureUnit& texUnit) const;
 
         /**
          * Creates the OpenGL texture from the given pointer \a wtp.

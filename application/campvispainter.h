@@ -62,7 +62,7 @@ namespace campvis {
          * \param   canvas      Canvas to render on
          * \param   pipeline    Pipeline to render
          */
-        TumVisPainter(tgt::QtThreadedCanvas* canvas, VisualizationPipeline* pipeline);
+        TumVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline);
 
         /**
          * Destructor, stops and waits for the rendering thread if it's still running.

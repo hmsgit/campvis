@@ -100,9 +100,8 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_usImageId.getValue());
         ImageRepresentationGL::ScopedRepresentation blurred(data, p_blurredImageId.getValue());
         ImageRepresentationGL::ScopedRepresentation confidence(data, p_confidenceImageID.getValue());
-        ImageRepresentationGL::ScopedRepresentation gradients(data, p_gradientImageID.getValue());
 
-        if (img != 0 && blurred != 0 && gradients != 0 && confidence != 0) {
+        if (img != 0 && blurred != 0 && confidence != 0) {
             if (img->getDimensionality() >= 2) {
                 if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
                     // source DataHandle has changed
@@ -118,11 +117,10 @@ namespace campvis {
                 _shader->setUniform("_viewIndex", p_view.getValue());
                 _shader->setUniform("_blurredScaling", p_blurredScaling.getValue());
 
-                tgt::TextureUnit usUnit, blurredUnit, confidenceUnit, gradientUnit, tfUnit;
-                img->bind(_shader, usUnit, "_usImage");
-                blurred->bind(_shader, blurredUnit, "_blurredImage");
-                confidence->bind(_shader, confidenceUnit, "_confidenceMap");
-                gradients->bind(_shader, gradientUnit, "_gradientMap");
+                tgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit;
+                img->bind(_shader, usUnit, "_usImage", "_usTextureParams");
+                blurred->bind(_shader, blurredUnit, "_blurredImage", "_blurredTextureParams");
+                confidence->bind(_shader, confidenceUnit, "_confidenceMap", "_confidenceTextureParams");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
                 rt.second->activate();

@@ -127,20 +127,19 @@ namespace campvis {
                 _shader->setUniform("const_to_z_w_2", 0.5f*((f+n)/(f-n))+0.5f);
                 _shader->setIgnoreUniformLocationError(false);
 
-
                 tgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
-                img->bind(_shader, volumeUnit, "_volume");
+                img->bind(_shader, volumeUnit, "_volume", "_volumeTextureParams");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
                 if (! _bindEntryExitDepthTextures) {
-                    entryPoints->bind(_shader, &entryUnit, 0, "_entryPoints");
-                    exitPoints->bind(_shader, &exitUnit, 0, "_exitPoints");
+                    entryPoints->bindColorTexture(_shader, entryUnit, "_entryPoints", "_entryParams");
+                    exitPoints->bindColorTexture(_shader, exitUnit, "_exitPoints", "_exitParams");
                     processImpl(data);
                 }
                 else {
                     tgt::TextureUnit entryUnitDepth, exitUnitDepth;
-                    entryPoints->bind(_shader, &entryUnit, &entryUnitDepth, "_entryPoints", "_entryPointsDepth");
-                    exitPoints->bind(_shader, &exitUnit, &exitUnitDepth, "_exitPoints", "_exitPointsDepth");
+                    entryPoints->bind(_shader, entryUnit, entryUnitDepth, "_entryPoints", "_entryPointsDepth", "_entryParams");
+                    exitPoints->bind(_shader, exitUnit, exitUnitDepth, "_exitPoints", "_exitPointsDepth", "_exitParams");
                     processImpl(data);
                 }
 

@@ -40,7 +40,7 @@ namespace tgt {
 /**
  * Qt implementation of GLCanvas. Inherits QGLWidget and combines the Qt methods and tgt methods.
  */
-class QtCanvas : public QGLWidget, public GLCanvas {
+class QtCanvas : public GLCanvas, public QGLWidget {
 public:
     /**
      * The constructor. Allows the user to specify a shared widget that this canvas will share
@@ -63,7 +63,7 @@ public:
     /**
      * Destructor. Closes window (if canvas is a window).
      */
-    ~QtCanvas();
+    virtual ~QtCanvas();
 
 
     /// initialize canvas

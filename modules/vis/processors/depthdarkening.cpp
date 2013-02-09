@@ -110,8 +110,8 @@ namespace campvis {
 
             _shader->activate();
             tgt::TextureUnit colorUnit, depthUnit, pass2DepthUnit;
-            inputImage->bind(_shader, &colorUnit, &depthUnit);
-            inputImage->bind(_shader, 0, &pass2DepthUnit, "", "_depthPass2Texture");
+            inputImage->bind(_shader, colorUnit, depthUnit);
+            inputImage->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             
             _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
             _shader->setUniform("_direction", tgt::vec2(1.f, 0.f));
@@ -130,8 +130,8 @@ namespace campvis {
             QuadRdr.renderQuad();
             tempTarget.second->deactivate();
 
-            inputImage->bind(_shader, &colorUnit, &depthUnit);
-            tempTarget.second->bind(_shader, 0, &pass2DepthUnit, "", "_depthPass2Texture");
+            inputImage->bind(_shader, colorUnit, depthUnit);
+            tempTarget.second->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             _shader->setUniform("_direction", tgt::vec2(0.f, 1.f));
             
             outputTarget.second->activate();

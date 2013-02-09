@@ -184,7 +184,7 @@ namespace campvis {
         _texture->bind();
     }
 
-    void ImageRepresentationGL::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/) const {
+    void ImageRepresentationGL::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/, const std::string& texParamsUniform) const {
         bind(texUnit);
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
@@ -195,21 +195,21 @@ namespace campvis {
                 break;
 
             case 2:
-                shader->setUniform(texUniform + "._texture", texUnit.getUnitNumber());
-                shader->setUniform(texUniform + "._size", tgt::vec2(getSize().xy()));
-                shader->setUniform(texUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
-                shader->setUniform(texUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
+                shader->setUniform(texUniform, texUnit.getUnitNumber());
+                shader->setUniform(texParamsUniform + "._size", tgt::vec2(getSize().xy()));
+                shader->setUniform(texParamsUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
+                shader->setUniform(texParamsUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
                 break;
 
             case 3:
-                shader->setUniform(texUniform + "._texture", texUnit.getUnitNumber());
-                shader->setUniform(texUniform + "._size", tgt::vec3(getSize()));
-                shader->setUniform(texUniform + "._sizeRCP", tgt::vec3(1.f) / tgt::vec3(getSize()));
-                shader->setUniform(texUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
-                shader->setUniform(texUniform + "._voxelSize", _parent->getMappingInformation().getVoxelSize());
-                shader->setUniform(texUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
-                shader->setUniform(texUniform + "._textureToWorldMatrix", _parent->getMappingInformation().getTextureToWorldMatrix());
-                shader->setUniform(texUniform + "._realWorldMapping", tgt::vec2(_parent->getMappingInformation().getRealWorldMapping()._shift, _parent->getMappingInformation().getRealWorldMapping()._scale));
+                shader->setUniform(texUniform, texUnit.getUnitNumber());
+                shader->setUniform(texParamsUniform + "._size", tgt::vec3(getSize()));
+                shader->setUniform(texParamsUniform + "._sizeRCP", tgt::vec3(1.f) / tgt::vec3(getSize()));
+                shader->setUniform(texParamsUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
+                shader->setUniform(texParamsUniform + "._voxelSize", _parent->getMappingInformation().getVoxelSize());
+                shader->setUniform(texParamsUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
+                shader->setUniform(texParamsUniform + "._textureToWorldMatrix", _parent->getMappingInformation().getTextureToWorldMatrix());
+                shader->setUniform(texParamsUniform + "._realWorldMapping", tgt::vec2(_parent->getMappingInformation().getRealWorldMapping()._shift, _parent->getMappingInformation().getRealWorldMapping()._scale));
                 break;
 
             default:

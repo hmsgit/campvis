@@ -85,7 +85,7 @@ namespace campvis {
         _texture = 0;
     }
 
-    void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/) {
+    void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/, const std::string& transFuncParamsUniform /*= "_transferFunctionParameters"*/) {
         tgtAssert(shader != 0, "Shader must not be 0.");
 
         {
@@ -103,13 +103,13 @@ namespace campvis {
 
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
-        shader->setUniform(transFuncUniform + "._texture", texUnit.getUnitNumber());
+        shader->setUniform(transFuncUniform, texUnit.getUnitNumber());
         switch (getDimensionality()) {
             case 1:
-                shader->setUniform(transFuncUniform + "._intensityDomain", tgt::vec2(_intensityDomain));
+                shader->setUniform(transFuncParamsUniform + "._intensityDomain", tgt::vec2(_intensityDomain));
                 break;
             case 2:
-                shader->setUniform(transFuncUniform + "._intensityDomainX", tgt::vec2(_intensityDomain));
+                shader->setUniform(transFuncParamsUniform + "._intensityDomainX", tgt::vec2(_intensityDomain));
                 break;
             default:
                 tgtAssert(false, "Unsupported TF dimensionality!");

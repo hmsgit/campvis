@@ -44,13 +44,25 @@ uniform vec2 _viewportSizeRCP;
 uniform bool _jitterEntryPoints;
 uniform float _jitterStepSizeMultiplier;
 
-uniform Texture2D _entryPoints;         // ray entry points
-uniform Texture2D _entryPointsDepth;    // ray entry points depth
-uniform Texture2D _exitPoints;          // ray exit points
-uniform Texture2D _exitPointsDepth;     // ray exit points depth
-uniform Texture3D _volume;              // texture lookup parameters for volume_
 
-uniform TransferFunction1D _transferFunction;
+// ray entry points
+uniform sampler2D _entryPoints;
+uniform sampler2D _entryPointsDepth;
+uniform TextureParameters2D _entryParams;
+
+// ray exit points
+uniform sampler2D _exitPoints;
+uniform sampler2D _exitPointsDepth;
+uniform TextureParameters2D _exitParams;
+
+// DRR volume
+uniform sampler3D _volume;
+uniform TextureParameters3D _volumeTextureParams;
+
+// Transfer function
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
+
 
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
@@ -90,8 +102,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         // lookup intensity and TF
-        float intensity = getElement3DNormalized(_volume, samplePosition).a;
-        vec4 color = lookupTF(_transferFunction, intensity);
+        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).a;
+        vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
         if (color.a <= 0.0) {
@@ -109,8 +121,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                     vec3 newSamplePosition = entryPoint.rgb + newT * direction;
 
                     // lookup refined intensity + TF
-                    float newIntensity = getElement3DNormalized(_volume, newSamplePosition).a;
-                    vec4 newColor = lookupTF(_transferFunction, newIntensity);
+                    float newIntensity = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition).a;
+                    vec4 newColor = lookupTF(_transferFunction, _transferFunctionParams, newIntensity);
 
                     if (newColor.a <= 0.0) {
                         // we're back in the void - look on the right-hand side
@@ -132,7 +144,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // simple and expensive implementation of hard shadows
         if (color.a > 0.1) {
             // compute direction from sample to light
-            vec3 L = normalize(_lightSource._position - textureToWorld(_volume, samplePosition).xyz) * _samplingStepSize;
+            vec3 L = normalize(_lightSource._position - textureToWorld(_volumeTextureParams, samplePosition).xyz) * _samplingStepSize;
 
             bool finished = false;
             vec3 position = samplePosition + L;
@@ -141,8 +153,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             // traverse ray from sample to light
             while (! finished) {
                 // grab intensity and TF opacity
-                intensity = getElement3DNormalized(_volume, position).a;
-                shadowFactor += lookupTF(_transferFunction, intensity).a;
+                intensity = getElement3DNormalized(_volume, _volumeTextureParams, position).a;
+                shadowFactor += lookupTF(_transferFunction, _transferFunctionParams, intensity).a;
 
                 position += L;
                 finished = (shadowFactor > 0.95)
@@ -158,8 +170,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (color.a > 0.0) {
 #ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)
-            vec3 gradient = computeGradient(_volume, samplePosition);
-            color.rgb = calculatePhongShading(textureToWorld(_volume, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
+            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
+            color.rgb = calculatePhongShading(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
 #endif
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
@@ -171,7 +183,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (firstHitT < 0.0 && result.a > 0.0) {
             firstHitT = t;
             out_FHP = vec4(samplePosition, 1.0);
-            out_FHN = vec4(normalize(computeGradient(_volume, samplePosition)), 1.0);
+            out_FHN = vec4(normalize(computeGradient(_volume, _volumeTextureParams, samplePosition)), 1.0);
         }
 
         // early ray termination
@@ -190,8 +202,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     // calculate depth value from ray parameter
     gl_FragDepth = 1.0;
     if (firstHitT >= 0.0) {
-        float depthEntry = getElement2DNormalized(_entryPointsDepth, texCoords).z;
-        float depthExit = getElement2DNormalized(_exitPointsDepth, texCoords).z;
+        float depthEntry = getElement2DNormalized(_entryPointsDepth, _entryParams, texCoords).z;
+        float depthExit = getElement2DNormalized(_exitPointsDepth, _exitParams, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
     return result;
@@ -202,8 +214,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
  ***/
 void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
-    vec3 frontPos = getElement2DNormalized(_entryPoints, p).rgb;
-    vec3 backPos = getElement2DNormalized(_exitPoints, p).rgb;
+    vec3 frontPos = getElement2DNormalized(_entryPoints, _entryParams, p).rgb;
+    vec3 backPos = getElement2DNormalized(_exitPoints, _exitParams, p).rgb;
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {

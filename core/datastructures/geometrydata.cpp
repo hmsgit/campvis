@@ -31,6 +31,9 @@
 #include "tgt/buffer.h"
 #include "tgt/vertexarrayobject.h"
 
+#include "tgt/qt/qtcontextmanager.h"
+#include "core/tools/opengljobprocessor.h"
+
 namespace campvis {
 
     GeometryData::GeometryData() 
@@ -40,6 +43,7 @@ namespace campvis {
         , _texCoordsBuffer(0)
         , _colorsBuffer(0)
         , _normalsBuffer(0)
+        , _context(0)
     {
     }
 
@@ -55,10 +59,10 @@ namespace campvis {
     }
 
     GeometryData::~GeometryData() {
-        delete _verticesBuffer;
-        delete _texCoordsBuffer;
-        delete _colorsBuffer;
-        delete _normalsBuffer;
+        if (_buffersInitialized) {
+            std::vector<tgt::BufferObject*> buffers(_buffers, _buffers + NUM_BUFFERS);
+            GLJobProc.enqueueJob(_context, makeJobOnHeap(&GeometryData::deleteBuffers, buffers), OpenGLJobProcessor::LowPriorityJob);
+        }
     }
 
     GeometryData& GeometryData::operator=(const GeometryData& rhs) {
@@ -68,20 +72,23 @@ namespace campvis {
         AbstractData::operator=(rhs);
 
         // delete old VBOs and null pointers
-        delete _verticesBuffer;
+        if (_buffersInitialized) {
+            std::vector<tgt::BufferObject*> buffers(_buffers, _buffers + NUM_BUFFERS);
+            GLJobProc.enqueueJob(_context, makeJobOnHeap(&GeometryData::deleteBuffers, buffers), OpenGLJobProcessor::LowPriorityJob);
+        }
+
         _verticesBuffer = 0;
-
-        delete _texCoordsBuffer;
         _texCoordsBuffer = 0;
-
-        delete _colorsBuffer;
         _colorsBuffer = 0;
-
-        delete _normalsBuffer;
         _normalsBuffer = 0;
-
         _buffersInitialized = false;
+
         return *this;
+    }
+
+    void GeometryData::deleteBuffers(std::vector<tgt::BufferObject*> buffers) {
+        for (std::vector<tgt::BufferObject*>::iterator it = buffers.begin(); it != buffers.end(); ++it)
+            delete *it;
     }
 
     size_t GeometryData::getVideoMemoryFootprint() const {
@@ -97,6 +104,11 @@ namespace campvis {
             sum += _normalsBuffer->getBufferSize();
 
         return sum;
+    }
+
+    void GeometryData::createGLBuffers() const {
+        if (! _buffersInitialized) 
+            _context = CtxtMgr.getCurrentContext();
     }
 
     const tgt::BufferObject* GeometryData::getVerticesBuffer() const {

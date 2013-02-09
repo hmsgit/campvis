@@ -113,6 +113,8 @@ namespace campvis {
     }
 
     void MeshGeometry::createGLBuffers() const {
+        GeometryData::createGLBuffers();
+
         if (! _buffersInitialized) {
             bool createTexCoordsBuffer = true;
             bool createColorsBuffer = true;

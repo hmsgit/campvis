@@ -94,10 +94,10 @@ namespace campvis {
             _shader->activate();
             tgt::TextureUnit xRayColorUnit, xRayDepthUnit, sliceColorUnit, sliceDepthUnit, drrFullUnit, drrClippedUnit;
 
-            xRayImage->bind(_shader, &xRayColorUnit, &xRayDepthUnit, "_xRayColor", "_xRayDepth");
-            sliceImage->bind(_shader, &sliceColorUnit, &sliceDepthUnit, "_sliceColor", "_sliceDepth");
-            drrFullImage->bind(_shader, &drrFullUnit, 0, "_drrFullColor", "");
-            drrClippedImage->bind(_shader, &drrClippedUnit, 0, "_drrClippedColor", "");
+            xRayImage->bind(_shader, xRayColorUnit, xRayDepthUnit, "_xRayColor", "_xRayDepth", "_xRayTexParams");
+            sliceImage->bind(_shader, sliceColorUnit, sliceDepthUnit, "_sliceColor", "_sliceDepth", "_sliceTexParams");
+            drrFullImage->bindColorTexture(_shader, drrFullUnit, "_drrFullColor", "_drrFullTexParams");
+            drrClippedImage->bindColorTexture(_shader, drrClippedUnit, "_drrClippedColor", "_drrClippedTexParams");
 
             decorateRenderProlog(data, _shader);
 

@@ -34,10 +34,11 @@ out vec4 out_Color;
 
 #include "tools/texture2d.frag"
 
-uniform Texture2D _colorTexture;
-uniform Texture2D _depthTexture;
+uniform sampler2D _colorTexture;
+uniform sampler2D _depthTexture;
+uniform TextureParameters2D _texParams;
 
 void main() {
-    out_Color = getElement2DNormalized(_colorTexture, ex_TexCoord.xy);
-    gl_FragDepth = getElement2DNormalized(_depthTexture, ex_TexCoord.xy).z;
+    out_Color = getElement2DNormalized(_colorTexture, _texParams, ex_TexCoord.xy);
+    gl_FragDepth = getElement2DNormalized(_depthTexture, _texParams, ex_TexCoord.xy).z;
 }
