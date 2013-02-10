@@ -30,6 +30,7 @@
 #include "tbb/compat/thread"
 #include "tgt/assert.h"
 #include "abstractprocessor.h"
+#include "core/properties/abstractproperty.h"
 
 namespace campvis {
 
@@ -41,26 +42,11 @@ namespace campvis {
     {
         _enabled = true;
         _locked = 0;
+        _level = VALID;
     }
 
     AbstractProcessor::~AbstractProcessor() {
 
-    }
-
-    const InvalidationLevel& AbstractProcessor::getInvalidationLevel() const {
-        return _invalidationLevel;
-    }
-
-    void AbstractProcessor::applyInvalidationLevel(InvalidationLevel il) {
-        _invalidationLevel.setLevel(il);
-
-        // If processor is no longer valid, notify observers
-        if (! _invalidationLevel.isValid()) {
-            s_invalidated(this);
-        }
-        else {
-            s_validated(this);
-        }
     }
 
     void AbstractProcessor::init() {
@@ -91,7 +77,7 @@ namespace campvis {
 
     void AbstractProcessor::onPropertyChanged(const AbstractProperty* prop) {
         HasPropertyCollection::onPropertyChanged(prop);
-        applyInvalidationLevel(prop->getInvalidationLevel());
+        invalidate(prop->getInvalidationLevel());
     }
 
     bool AbstractProcessor::getEnabled() const {
@@ -100,6 +86,22 @@ namespace campvis {
 
     void AbstractProcessor::setEnabled(bool enabled) {
         _enabled = enabled;
+    }
+
+    void AbstractProcessor::invalidate(int level) {
+        int tmp;
+        do {
+            tmp = _level;
+        } while (_level.compare_and_swap(tmp | level, tmp) != tmp);
+        s_invalidated(this);
+    }
+
+    void AbstractProcessor::validate(int level) {
+        int tmp;
+        do {
+            tmp = _level;
+        } while (_level.compare_and_swap(tmp & (~level), tmp) != tmp);
+        s_validated(this);
     }
 
 

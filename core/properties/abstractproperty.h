@@ -34,7 +34,7 @@
 #include "tbb/atomic.h"
 #include "tbb/spin_mutex.h"
 #include "tgt/logmanager.h"
-#include "core/tools/invalidationlevel.h"
+#include "core/pipeline/abstractprocessor.h"
 
 #include <set>
 #include <string>
@@ -52,9 +52,9 @@ namespace campvis {
          * Creates a new AbstractProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
-         * \param il        Invalidation level that this property triggers
+         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        AbstractProperty(const std::string& name, const std::string& title, InvalidationLevel il = InvalidationLevel::INVALID_RESULT);
+        AbstractProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
          * Virtual Destructor
@@ -90,13 +90,13 @@ namespace campvis {
          * Returns the invalidation level that this property triggers.
          * \return  _invalidationLevel
          */
-        const InvalidationLevel& getInvalidationLevel() const;
+        int getInvalidationLevel() const;
 
         /**
          * Sets the invalidation level that this property triggers.
          * \param il    New invalidation level that this property triggers.
          */
-        void setInvalidationLevel(const InvalidationLevel& il);
+        void setInvalidationLevel(AbstractProcessor::InvalidationLevel il);
 
         /**
          * Returns whether this proberty shall be visible in the GUI.
@@ -158,7 +158,7 @@ namespace campvis {
         // DO NOT REMOVE THE CONSTNESS OF _name. PropertyCollection relies on it!
         const std::string _name;                ///< Property name (unchangable on purpose!)
         std::string _title;                     ///< Property title (e.g. used for GUI)
-        InvalidationLevel _invalidationLevel;   ///< Invalidation level that this property triggers
+        int _invalidationLevel;                 ///< Invalidation level that this property triggers
         tbb::atomic<bool> _isVisible;           ///< Flag whether this property shall be visible in the GUI
 
         tbb::atomic<int> _inUse;                ///< flag whether property is currently in use and values are written to back buffer

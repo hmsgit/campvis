@@ -107,7 +107,7 @@ namespace campvis {
          * \param value     Initial value of the property
          * \param minValue  Minimum value for this property
          * \param maxValue  Maximum value for this property
-         * \param il        Invalidation level that this property triggers
+         * \param invalidationLevel  Invalidation level that this property triggers
          */
         NumericProperty(
             const std::string& name,
@@ -115,7 +115,7 @@ namespace campvis {
             const T& value,
             const T& minValue,
             const T& maxValue,
-            InvalidationLevel il = InvalidationLevel::INVALID_RESULT);
+            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
          * Virtual Destructor
@@ -202,8 +202,8 @@ namespace campvis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value, const T& minValue, const T& maxValue, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
-        : GenericProperty<T>(name, title, value, il)
+    campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value, const T& minValue, const T& maxValue, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
+        : GenericProperty<T>(name, title, value, invalidationLevel)
         , _minValue(minValue)
         , _maxValue(maxValue)
     {

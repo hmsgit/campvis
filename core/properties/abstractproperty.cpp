@@ -33,10 +33,10 @@ namespace campvis {
 
     const std::string AbstractProperty::loggerCat_ = "CAMPVis.core.datastructures.AbstractProperty";
 
-    AbstractProperty::AbstractProperty(const std::string& name, const std::string& title, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
+    AbstractProperty::AbstractProperty(const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
         : _name(name)
         , _title(title)
-        , _invalidationLevel(il)
+        , _invalidationLevel(invalidationLevel)
     {
         _isVisible = true;
         _inUse = 0;
@@ -53,11 +53,11 @@ namespace campvis {
         return _title;
     }
 
-    const InvalidationLevel& AbstractProperty::getInvalidationLevel() const {
+    int AbstractProperty::getInvalidationLevel() const {
         return _invalidationLevel;
     }
 
-    void AbstractProperty::setInvalidationLevel(const InvalidationLevel& il) {
+    void AbstractProperty::setInvalidationLevel(AbstractProcessor::InvalidationLevel il) {
         _invalidationLevel = il;
     }
 

@@ -201,7 +201,7 @@ namespace campvis {
             LDEBUG("No suitable intensities image found.");
         }
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
 }

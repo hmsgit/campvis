@@ -158,7 +158,7 @@ namespace campvis {
             LDEBUG("No suitable input image found.");
         }
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
 }

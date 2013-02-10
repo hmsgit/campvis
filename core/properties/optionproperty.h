@@ -47,10 +47,10 @@ namespace campvis {
          * Creates a new AbstractOptionProperty.
          * \param name      Property name
          * \param title     Property title (e.g. used for GUI)
-         * \param il        Invalidation level that this property triggers
+         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        AbstractOptionProperty(const std::string& name, const std::string& title, InvalidationLevel il = InvalidationLevel::INVALID_RESULT)
-            : IntProperty(name, title, -1, -1, -1, il)
+        AbstractOptionProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT)
+            : IntProperty(name, title, -1, -1, -1, invalidationLevel)
         {            
         };
 
@@ -107,14 +107,14 @@ namespace campvis {
          * \param title     Property title (e.g. used for GUI)
          * \param options   Array of the options for this property, must not be 0, must not be empty.
          * \param count     Number of items in \a options (number of options), must be greater 0.
-         * \param il        Invalidation level that this property triggers
+         * \param invalidationLevel  Invalidation level that this property triggers
          */
         GenericOptionProperty(
             const std::string& name, 
             const std::string& title, 
             const GenericOption<T>* options,
             size_t count,
-            InvalidationLevel il = InvalidationLevel::INVALID_RESULT);
+            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
          * Destructor
@@ -164,8 +164,8 @@ namespace campvis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, size_t count, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
-        : AbstractOptionProperty(name, title, il)
+    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, size_t count, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
+        : AbstractOptionProperty(name, title, invalidationLevel)
     {
         tgtAssert(options != 0, "Pointer to options array must not be 0.")
         tgtAssert(count > 0, "The number of options must be greater 0.");

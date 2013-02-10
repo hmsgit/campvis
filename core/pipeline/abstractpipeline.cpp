@@ -101,7 +101,7 @@ namespace campvis {
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
-        if (processor->getEnabled() && !processor->isLocked() && !processor->getInvalidationLevel().isValid()) {
+        if (processor->getEnabled() && !processor->isLocked() && processor->hasInvalidResult()) {
             processor->lockProcessor();
 #ifdef CAMPVIS_DEBUG
             clock_t startTime = clock();

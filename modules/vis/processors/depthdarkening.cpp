@@ -50,7 +50,7 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f)
         , p_lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f)
-        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, InvalidationLevel::INVALID_SHADER)
+        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, AbstractProcessor::INVALID_SHADER)
         , p_coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , p_warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _shader(0)
@@ -84,9 +84,10 @@ namespace campvis {
         ImageRepresentationRenderTarget::ScopedRepresentation inputImage(data, p_inputImage.getValue());
 
         if (inputImage != 0) {
-            if (getInvalidationLevel().isInvalidShader()) {
+            if (hasInvalidShader()) {
                 _shader->setHeaders(generateHeader());
                 _shader->rebuild();
+                validate(INVALID_SHADER);
             }
 
             // TODO: const cast is ugly...
@@ -153,7 +154,7 @@ namespace campvis {
             LERROR("No suitable input image found.");
         }
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
     std::string DepthDarkening::generateHeader() const {

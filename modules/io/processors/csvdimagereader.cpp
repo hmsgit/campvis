@@ -171,6 +171,6 @@ namespace campvis {
             return;
         }
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 }

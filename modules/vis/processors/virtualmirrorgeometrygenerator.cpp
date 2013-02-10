@@ -44,7 +44,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_mirrorID("geometryID", "Output Geometry ID", "mirror", DataNameProperty::WRITE)
         , p_mirrorCenter("mirrorCenter", "Mirror Center", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
-        , p_mirrorNormal("mirrorNormal", "Mirror Normal", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f), InvalidationLevel::VALID)
+        , p_mirrorNormal("mirrorNormal", "Mirror Normal", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f), AbstractProcessor::VALID)
         , p_size("mirrorSize", "Mirror Size", 4.0f, 0.1f, 1000.0f)
         , p_numVertices("Roundness", "Roundness", 16, 4, 128)
         , p_poi("poi", "Point of Interest", tgt::vec3::zero, tgt::vec3(-100.f), tgt::vec3(1000.f))
@@ -98,7 +98,7 @@ namespace campvis {
         data.addData(p_mirrorID.getValue(), mirror);
         p_mirrorID.issueWrite();
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
 }

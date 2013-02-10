@@ -50,13 +50,13 @@ namespace campvis {
          * \param name      Property name
          * \param title     Property title (e.g. used for GUI)
          * \param value     Initial value of the property
-         * \param il        Invalidation level that this property triggers
+         * \param invalidationLevel  Invalidation level that this property triggers
          */
         GenericProperty(
             const std::string& name,
             const std::string& title,
             const T& value,
-            InvalidationLevel il = InvalidationLevel::INVALID_RESULT);
+            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
          * Virtual Destructor
@@ -133,8 +133,8 @@ namespace campvis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::GenericProperty<T>::GenericProperty(const std::string& name, const std::string& title, const T& value, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/) 
-        : AbstractProperty(name, title, il)
+    campvis::GenericProperty<T>::GenericProperty(const std::string& name, const std::string& title, const T& value, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/) 
+        : AbstractProperty(name, title, invalidationLevel)
         , _value(value)
         , _backBuffer(value)
     {

@@ -121,7 +121,7 @@ namespace campvis {
 
         data.addData(p_outputImage.getValue(), outputTarget.first);
         p_outputImage.issueWrite();
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
 }

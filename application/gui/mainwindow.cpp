@@ -144,10 +144,12 @@ namespace campvis {
         if (_selectedProcessor != 0 && _selectedPipeline != 0) {
             // this is not as trivial as it seems:
             // We need the pipeline, probably an OpenGL context...
-            _selectedProcessor->applyInvalidationLevel(InvalidationLevel::INVALID_RESULT);
+            _selectedProcessor->invalidate(AbstractProcessor::INVALID_RESULT);
         }
         else if (_selectedPipeline != 0) {
-            
+            for (std::vector<AbstractProcessor*>::const_iterator it = _selectedPipeline->getProcessors().begin(); it != _selectedPipeline->getProcessors().end(); ++it) {
+                (*it)->invalidate(AbstractProcessor::INVALID_RESULT);
+            }
         }
     }
 

@@ -195,7 +195,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
-        , p_filterMode("FilterMode", "Filter Mode", filterModes, 6, InvalidationLevel::INVALID_RESULT | InvalidationLevel::INVALID_PROPERTIES)
+        , p_filterMode("FilterMode", "Filter Mode", filterModes, 6, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f)
         , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
@@ -264,7 +264,7 @@ namespace campvis {
         }
 
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
     void ItkImageFilter::updateProperties() {

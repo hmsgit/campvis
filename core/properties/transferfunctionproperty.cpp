@@ -33,8 +33,8 @@ namespace campvis {
 
     const std::string TransferFunctionProperty::loggerCat_ = "CAMPVis.core.datastructures.TransferFunctionProperty";
 
-    TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, InvalidationLevel il /*= InvalidationLevel::INVALID_RESULT*/)
-        : AbstractProperty(name, title, il)
+    TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
+        : AbstractProperty(name, title, invalidationLevel)
         , _transferFunction(tf)
     {
         tgtAssert(tf != 0, "Assigned transfer function must not be 0.");

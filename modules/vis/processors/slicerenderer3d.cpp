@@ -139,7 +139,7 @@ namespace campvis {
             LERROR("No suitable input image found.");
         }
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
     void SliceRenderer3D::updateProperties(const ImageData* img) {

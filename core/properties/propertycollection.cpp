@@ -28,6 +28,7 @@
 // ================================================================================================
 
 #include "propertycollection.h"
+#include "core/properties/abstractproperty.h"
 
 namespace campvis {
     HasPropertyCollection::HasPropertyCollection() {
@@ -116,7 +117,7 @@ namespace campvis {
     }
 
     void HasPropertyCollection::onPropertyChanged(const AbstractProperty* prop) {
-        if (prop->getInvalidationLevel().isInvalidProperties())
+        if (prop->getInvalidationLevel() & AbstractProcessor::INVALID_PROPERTIES)
             updateProperties();
     }
 

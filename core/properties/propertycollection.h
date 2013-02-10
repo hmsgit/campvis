@@ -31,13 +31,13 @@
 #define PROPERTYCOLLECTION_H__
 
 #include "sigslot/sigslot.h"
-#include "core/properties/abstractproperty.h"
-
 #include <vector>
 #include <string>
 
 
 namespace campvis {
+    class AbstractProperty;
+
     /// A PropertyCollection wraps around a bunch of properties - currently its just a typedef...
     typedef std::vector<AbstractProperty*> PropertyCollection;
 

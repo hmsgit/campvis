@@ -108,7 +108,7 @@ namespace campvis {
             LERROR("No suitable input geometry found.");
         }
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
 }

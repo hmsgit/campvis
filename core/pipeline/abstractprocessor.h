@@ -34,7 +34,6 @@
 #include "tbb/atomic.h"
 #include "tgt/logmanager.h"
 #include "core/datastructures/datacontainer.h"
-#include "core/tools/invalidationlevel.h"
 #include "core/properties/propertycollection.h"
 
 #include <string>
@@ -57,17 +56,17 @@ namespace campvis {
      * \sa AbstractPipeline
      */
     class AbstractProcessor : public HasPropertyCollection {
-
-    /**
-     * We have to find a trade-off:
-     * On the one hand, we want to follow the information-hiding concept and keep the processor's
-     * properties private. On the other hand pipelines will usually want direct access to them
-     * (e.g. in order to setup data IDs or property sharing) and the properties in the PropertyCollection
-     * are not strongly typed. Hence, we declare AbstractPipeline as our friend.
-     */
-    friend class AbstractPipeline;  // TODO: this does not work as intended...
-
     public:
+        /**
+         * Available invalidation levels
+         */
+        enum InvalidationLevel {
+            VALID               = 0,        ///< Valid
+            INVALID_RESULT      = 1 << 0,   ///< Need to rerun the process() method
+            INVALID_SHADER      = 1 << 1,   ///< Need to recompile the shader
+            INVALID_FILE        = 1 << 2,   ///< Need to reread the file
+            INVALID_PROPERTIES  = 1 << 3    ///< Need to update the properties
+        };
 
         /**
          * Creates a AbstractProcessor.
@@ -101,12 +100,6 @@ namespace campvis {
         virtual void process(DataContainer& data) = 0;
 
         /**
-         * Returns the invalidation level of this processor.
-         * \return _invalidationLevel
-         */
-        const InvalidationLevel& getInvalidationLevel() const;
-
-        /**
          * Gets the name of this very processor. To be defined by every subclass.
          * \return  The name of this processor.
          */
@@ -117,14 +110,6 @@ namespace campvis {
          * \return  A description what this processor does.
          */
         virtual const std::string getDescription() const = 0;
-
-        /**
-         * Update the processor's invalidation level by \a il.
-         * If \a il is VALID, the processor's invalidation level will be set to VALID.
-         * If \a il is one of the INVALID_X state, the processor's corresponding flag will be set.
-         * \param il    Invalidation level to apply.
-         */
-        void applyInvalidationLevel(InvalidationLevel il);
 
         /**
          * Gets the flag whether this processor is currently enabled.
@@ -158,18 +143,104 @@ namespace campvis {
          */
         bool isLocked();
 
+// = Invalidation Level related stuff =============================================================
+
+        /**
+         * Returns the current invalidation level.
+         * \return _level
+         */
+        int getInvalidationLevel() const {
+            return _level;
+        }
+
+        /**
+         * Returns wheter the invalidation level is valid (i.e. no invalid flag is set).
+         * \return _level == VALID
+         */
+        bool isValid() const {
+            return _level == static_cast<int>(VALID);
+        }
+
+        /**
+         * Returns wheter the the INVALID_RESULT flag is set.
+         * \return _level & INVALID_RESULT
+         */
+        bool hasInvalidResult() const {
+            return (_level & static_cast<int>(INVALID_RESULT)) != 0;
+        }
+
+        /**
+         * Returns wheter the the INVALID_SHADER flag is set.
+         * \return _level & INVALID_SHADER
+         */
+        bool hasInvalidShader() const {
+            return (_level & static_cast<int>(INVALID_SHADER)) != 0;
+        }
+
+        /**
+         * Returns wheter the the INVALID_FILE flag is set.
+         * \return _level & INVALID_FILE
+         */
+        bool hasInvalidFile() const {
+            return (_level & static_cast<int>(INVALID_FILE)) != 0;
+        }
+
+        /**
+         * Returns wheter the the INVALID_PROPERTIES flag is set.
+         * \return _level & INVALID_PROPERTIES
+         */
+        bool hasInvalidProperties() const {
+            return (_level & static_cast<int>(INVALID_PROPERTIES)) != 0;
+        }
+
+        /**
+         * Sets the invalidation level to valid (i.e. clears all invalidation flags).
+         */
+        void setValid() {
+            _level = static_cast<int>(VALID);
+        }
+
+        /**
+         * Sets all invalidation flags specified in \a level.
+         * \param   level   Flags to set to invalid.
+         */
+        void invalidate(int level);
+
+        /**
+         * Sets all invalidation flags specified in \a il's level.
+         * \param   il  Flags to set to invalid.
+         */
+        void invalidate(InvalidationLevel il) {
+            invalidate(static_cast<int>(il));
+        }
+
+        /**
+         * Clears all invalidation flags specified in \a level.
+         * \param   level   Flags to set to valid.
+         */
+        void validate(int level);
+
+        /**
+         * Clears all invalidation flags specified in \a il's level.
+         * \param   il  Flags to set to valid.
+         */
+        void validate(InvalidationLevel il) {
+            validate(static_cast<int>(il));
+        }
+
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;
 
         /// Signal emitted when the processor has been validated.
         sigslot::signal1<AbstractProcessor*> s_validated;
 
+// = Slots ========================================================================================
+
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * \param   prop    Property that emitted the signal
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
-
 
     protected:
         tbb::atomic<bool> _enabled;                 ///< flag whether this processor is currently enabled
@@ -178,11 +249,10 @@ namespace campvis {
         /// (This implies, that all properties are locked and it is not valid to call process())
         tbb::atomic<bool> _locked;
 
-        static const std::string loggerCat_;
-
     private:
-        InvalidationLevel _invalidationLevel;       ///< current invalidation level of this processor
+        tbb::atomic<int> _level;        ///< current invalidation level
 
+        static const std::string loggerCat_;
     };
 
 }

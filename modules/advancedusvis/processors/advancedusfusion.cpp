@@ -143,7 +143,7 @@ namespace campvis {
             LERROR("No suitable input image found.");
         }
 
-        applyInvalidationLevel(InvalidationLevel::VALID);
+        validate(INVALID_RESULT);
     }
 
     void AdvancedUsFusion::updateProperties(DataHandle img) {
