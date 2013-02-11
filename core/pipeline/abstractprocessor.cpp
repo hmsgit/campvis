@@ -68,7 +68,13 @@ namespace campvis {
     void AbstractProcessor::unlockProcessor() {
         tgtAssert(_locked == true, "Called AbstractProcessor::unlockProcessor() on unlocked processor!");
         unlockAllProperties();
+        int summed = VALID;
+        int il;
+        while (_queuedInvalidations.try_pop(il)) {
+            summed |= il;
+        }
         _locked = false;
+        invalidate(summed);
     }
 
     bool AbstractProcessor::isLocked() {
@@ -89,11 +95,17 @@ namespace campvis {
     }
 
     void AbstractProcessor::invalidate(int level) {
-        int tmp;
-        do {
-            tmp = _level;
-        } while (_level.compare_and_swap(tmp | level, tmp) != tmp);
-        s_invalidated(this);
+        if (_locked) {
+            // TODO: this is not 100% thread-safe - an invalidation might slip through if the processor is unlocked during invalidation
+            _queuedInvalidations.push(level);
+        }
+        else {
+            int tmp;
+            do {
+                tmp = _level;
+            } while (_level.compare_and_swap(tmp | level, tmp) != tmp);
+            s_invalidated(this);
+        }
     }
 
     void AbstractProcessor::validate(int level) {

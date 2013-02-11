@@ -32,6 +32,7 @@
 
 #include "sigslot/sigslot.h"
 #include "tbb/atomic.h"
+#include "tbb/concurrent_queue.h"
 #include "tgt/logmanager.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"
@@ -250,7 +251,8 @@ namespace campvis {
         tbb::atomic<bool> _locked;
 
     private:
-        tbb::atomic<int> _level;        ///< current invalidation level
+        tbb::atomic<int> _level;            ///< current invalidation level
+        tbb::concurrent_queue<int> _queuedInvalidations;
 
         static const std::string loggerCat_;
     };

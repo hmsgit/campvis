@@ -34,7 +34,6 @@
 #include "tgt/logmanager.h"
 #include "tbb/spin_mutex.h"
 #include "tbb/mutex.h"
-#include "core/tools/invalidationlevel.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"
 
