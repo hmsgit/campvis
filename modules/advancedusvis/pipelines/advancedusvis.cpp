@@ -62,7 +62,7 @@ namespace campvis {
     {
         addProcessor(&_usReader);
         addProcessor(&_confidenceReader);
-        addProcessor(&_confidenceGenerator);
+        //addProcessor(&_confidenceGenerator);
         addProcessor(&_gvg);
         //addProcessor(&_lhh);
         addProcessor(&_usBlurFilter);
@@ -71,10 +71,10 @@ namespace campvis {
         addProcessor(&_usFusion3);
         addProcessor(&_usFusion4);
         addProcessor(&_quadView);
-        addProcessor(&_usDenoiseilter);
-        addProcessor(&_usProxy);
-        addProcessor(&_usEEP);
-        addProcessor(&_usDVR);
+        //addProcessor(&_usDenoiseilter);
+        //addProcessor(&_usProxy);
+        //addProcessor(&_usEEP);
+        //addProcessor(&_usDVR);
 
         addEventHandler(&_wheelHandler);
         //addEventHandler(&_tfWindowingHandler);
@@ -95,8 +95,8 @@ namespace campvis {
         _camera.addSharedProperty(&_usEEP.p_camera);
         _camera.addSharedProperty(&_usDVR.p_camera);
 
-        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
-        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\US.csvd");
+        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
+        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\US.csvd");
         //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\us.png");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
@@ -109,8 +109,8 @@ namespace campvis {
         _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_usDenoiseilter.p_sourceImageID);
 
-        //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
-        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\Map.csvd");
+        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
+        //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\Map.csvd");
         //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\cm.png");
         _confidenceReader.p_targetImageID.setValue("confidence.image.read");
         _confidenceReader.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
@@ -144,7 +144,7 @@ namespace campvis {
 
         _usFusion3.p_targetImageID.setValue("us.fused3");
         _usFusion3.p_targetImageID.connect(&_quadView.p_inputImage3);
-        _usFusion3.p_view.selectById("mappingChromacity");
+        _usFusion3.p_view.selectById("mappingChromacityHCY");
 
         _usFusion4.p_targetImageID.setValue("us.fused4");
         _usFusion4.p_targetImageID.connect(&_quadView.p_inputImage4);

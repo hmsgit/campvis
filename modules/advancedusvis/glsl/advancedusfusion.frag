@@ -85,12 +85,33 @@ void main() {
             break;
         case 5:
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+            vec3 tsl = rgb2tsl(out_Color.xyz);
+            //tsl.x = 0.15;
+            //tsl.y = 1.0 - confidence;
+            out_Color.xyz = tsl2rgb(tsl);
+            break;
+        case 6:
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+            vec3 hcl = rgb2hcl(out_Color.xyz);
+            hcl.x = 0.15;
+            hcl.y = 1.0 - confidence;
+            out_Color.xyz = hcl2rgb(hcl);
+            break;
+        case 7:
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
             vec3 hcy = rgb2hcy(out_Color.xyz);
             hcy.x = 0.15;
             hcy.y = 1.0 - confidence;
             out_Color.xyz = hcy2rgb(hcy);
             break;
-        case 6:
+        case 8:
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+            vec3 lab = rgb2lab(out_Color.xyz);
+            lab.y = (1.0 - confidence);
+            //lab.z = 50.0 * (1.0 - confidence);
+            out_Color.xyz = lab2rgb(lab);
+            break;
+        case 9:
             float intensity = mix(blurred.a, 2.0 * texel.a - blurred.a, confidence);
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
             break;

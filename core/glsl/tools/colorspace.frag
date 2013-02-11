@@ -31,6 +31,10 @@
 // Should sum to unity.
 const vec3 HCYwts_ = vec3(0.299, 0.587, 0.114);
 
+float HCLgamma_ = 3.0;
+float HCLy0_ = 100;
+float HCLmaxL_ = 0.530454533953517;
+
 /**
  * Converts pure Hue to RGB
  * Using the efficient implementation from http://www.chilliant.com/rgb2hsv.html.
@@ -103,6 +107,48 @@ vec3 hcy2rgb(in vec3 HCY) {
     return (RGB - vec3(Z, Z, Z)) * HCY.y + HCY.z;
 }
 
+
+vec3 hcl2rgb(in vec3 HCL)
+{
+  vec3 RGB = vec3(0.0, 0.0, 0.0);
+  if (HCL.z != 0.0) {
+    float H = HCL.x;
+    float C = HCL.y;
+    float L = HCL.z * HCLmaxL_;
+    float Q = exp((1.0 - C / (2.0 * L)) * (HCLgamma_ / HCLy0_));
+    float U = (2.0 * L - C) / (2.0 * Q - 1.0);
+    float V = C / Q;
+    float T = tan((H + min(fract(2.0 * H) / 4.0, fract(-2.0 * H) / 8.0)) * 6.283185307);
+    H *= 6.0;
+    if (H <= 1.0) {
+      RGB.r = 1.0;
+      RGB.g = T / (1.0 + T);
+    }
+    else if (H <= 2.0) {
+      RGB.r = (1.0 + T) / T;
+      RGB.g = 1.0;
+    }
+    else if (H <= 3.0) {
+      RGB.g = 1.0;
+      RGB.b = 1.0 + T;
+    }
+    else if (H <= 4.0) {
+      RGB.g = 1.0 / (1.0 + T);
+      RGB.b = 1.0;
+    }
+    else if (H <= 5.0) {
+      RGB.r = -1.0 / T;
+      RGB.b = 1.0;
+    }
+    else {
+      RGB.r = 1.0;
+      RGB.b = -T;
+    }
+    return RGB * V + U;
+  }
+  return RGB;
+}
+
 /**
  * Converts a color from RGB space to HSV space.
  * Using the efficient implementation from http://www.chilliant.com/rgb2hsv.html.
@@ -167,6 +213,26 @@ vec3 rgb2hcy(in vec3 RGB) {
     return HCY;
 }
 
+vec3 rgb2hcl(in vec3 RGB) {
+  vec3 HCL = vec3(0.0, 0.0, 0.0);
+  float H = 0.0;
+  float U, V;
+  U = -min(RGB.r, min(RGB.g, RGB.b));
+  V = max(RGB.r, max(RGB.g, RGB.b));
+  float Q = HCLgamma_ / HCLy0_;
+  HCL.y = V + U;
+  if (HCL.y != 0.0)
+  {
+    H = atan(RGB.g - RGB.b, RGB.r - RGB.g) / 3.14159265;
+    Q *= -U / V;
+  }
+  Q = exp(Q);
+  HCL.x = fract(H / 2.0 - min(fract(H), fract(-H)) / 6.0);
+  HCL.y *= Q;
+  HCL.z = mix(U, V, Q) / (HCLmaxL_ * 2.0);
+  return HCL;
+}
+
 /**
  * Converts a color from RGB space to CIEXYZ space.
  * \see     http://wiki.labomedia.org/images/1/10/Orange_Book_-_OpenGL_Shading_Language_2nd_Edition.pdf
@@ -193,4 +259,91 @@ vec3 ciexyz2rgb(in vec3 colorCIEXYZ) {
         -1.537150, 1.875992, -0.204043,
         -0.498535, 0.041556, 1.057311);
     return colorCIEXYZ * conversionMatrix;
+}
+
+vec3 rgb2tsl(in vec3 RGB) {
+    const float twoPiRCP_ = 0.15915494309;
+    const float oneThird = 1.0 / 3.0;
+    vec3 TSL = vec3(0.0, 0.0, 0.0);
+    float sum = RGB.r + RGB.g + RGB.b;
+    float rs = (RGB.r / sum) - oneThird;
+    float gs = (RGB.g / sum) - oneThird;
+
+    if (gs > 0)
+        TSL.x = twoPiRCP_ * atan(rs/gs + 0.25);
+    else if (gs < 0)
+        TSL.x = twoPiRCP_ * atan(rs/gs + 0.75);
+
+    TSL.y = sqrt(9.0 * (rs*rs + gs*gs) / 5.0);
+
+    TSL.z = dot(RGB, HCYwts_);
+    return TSL;
+};
+
+vec3 tsl2rgb(in vec3 TSL) {
+    vec3 RGB = vec3(0.0, 0.0, 0.0);
+    float x = -1.0 / tan(TSL.x * 6.283185307);
+    
+    if (TSL.x == 0.0)
+        RGB.g = 0.0;
+    else if (TSL.x > 0.5)
+        RGB.g = TSL.y * -sqrt(5.0/(9.0 * (x*x + 1.0)));
+    else if (TSL.x < 0.5)
+        RGB.g = TSL.y * sqrt(5.0/(9.0 * (x*x + 1.0)));
+    
+    if (TSL.x == 0)
+        RGB.r = TSL.y * sqrt(5.0)/3.0;
+    else
+        RGB.r = x * RGB.g + (1.0/3.0);
+
+    RGB.b = 1.0 - RGB.r - RGB.g;
+    float k = 1.0 / (0.185*RGB.r + 0.473*RGB.b + 0.114);
+    return k * RGB;
+}
+
+// ================================================================================================
+
+float lab_helper_F(in float p) {
+    if (p<0.008856)
+        return p*(841.0/108.0) + (4.0/29.0);
+    return pow(p,1.0/3.0);
+}
+
+
+vec3 xyz2lab(in vec3 XYZ) {
+    float fX = XYZ.x/0.950456;
+    float fY = XYZ.y/1.0;
+    float fZ = XYZ.z/1.088754;
+    fX = lab_helper_F(fX);
+    fY = lab_helper_F(fY);
+    fZ = lab_helper_F(fZ);
+    return vec3(116.0 * fY - 16.0,
+                500.0 * (fX - fY),
+                200.0 * (fY - fZ));
+}
+
+float lab_helper_invF(in float p) {
+    float r = p*p*p;
+    if (r < 0.008856)
+        return (p-4.0/29.0)*(108.0/841.0);
+    else
+        return r;
+}
+
+vec3 lab2xyz(in vec3 LAB) {
+    float Y = (LAB.x + 16.0)/116.0;
+    float X = Y + LAB.y/500.0;
+    float Z = Y - LAB.z/200.0;
+    X = 0.950456 * lab_helper_invF(X);
+    Y = 1.0 * lab_helper_invF(Y);
+    Z = 1.088754 * lab_helper_invF(Z);
+    return vec3(X, Y, Z);
+}
+
+vec3 rgb2lab(in vec3 RGB) {
+    return xyz2lab(rgb2ciexyz(RGB));
+}
+
+vec3 lab2rgb(in vec3 LAB) {
+    return ciexyz2rgb(lab2xyz(LAB));
 }

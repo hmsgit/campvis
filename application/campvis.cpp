@@ -47,8 +47,8 @@ using namespace campvis;
  **/
 int main(int argc, char** argv) {
     CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    app.addVisualizationPipeline("IXPV", new IxpvDemo());
+    app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
+    //app.addVisualizationPipeline("IXPV", new IxpvDemo());
     //app.addVisualizationPipeline("SliceVis", new SliceVis());
     //app.addVisualizationPipeline("DVRVis", new DVRVis());
 #ifdef HAS_KISSCL
