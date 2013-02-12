@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new SliceRenderer3D Processor
          **/
-        SliceRenderer3D(GenericProperty<tgt::ivec2>& canvasSize);
+        SliceRenderer3D(IVec2Property& canvasSize);
 
         /**
          * Destructor

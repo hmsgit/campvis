@@ -84,6 +84,8 @@ public:
      */
     virtual void resizeGL(int w, int h);
 
+    virtual void setSize(ivec2 newSize);
+
     /**
      * Called by Qt if there is a paint event; it uses the \a painter_ to paint() something.
      */

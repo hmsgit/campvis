@@ -51,7 +51,7 @@ namespace campvis {
         /**
          * Constructs a new GeometryRenderer Processor
          **/
-        GeometryRenderer(GenericProperty<tgt::ivec2>& canvasSize);
+        GeometryRenderer(IVec2Property& canvasSize);
 
         /**
          * Destructor

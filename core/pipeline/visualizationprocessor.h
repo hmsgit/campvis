@@ -32,7 +32,7 @@
 
 #include "tgt/vector.h"
 #include "core/pipeline/abstractprocessor.h"
-#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
 
 namespace campvis {
 
@@ -55,7 +55,7 @@ namespace campvis {
          *          be assigned as shared property of the given \a renderTargetSize property.
          * \param   renderTargetSize    Reference to the parent pipeline's render target size property.
          */
-        VisualizationProcessor(GenericProperty<tgt::ivec2>& renderTargetSize);
+        VisualizationProcessor(IVec2Property& renderTargetSize);
 
         /**
          * Virtual Destructor
@@ -64,7 +64,7 @@ namespace campvis {
 
 
     protected:
-        GenericProperty<tgt::ivec2> _renderTargetSize;        ///< Viewport size of target canvas
+        IVec2Property _renderTargetSize;        ///< Viewport size of target canvas
     };
 
 }

@@ -175,6 +175,8 @@ public:
     /// Getter
     ivec2 getSize() const;
 
+    virtual void setSize(ivec2 newSize) = 0;
+
     /// Getter
     int getWidth() const;
 

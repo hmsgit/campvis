@@ -53,7 +53,7 @@ namespace campvis {
 
     const std::string RenderTargetCompositor::loggerCat_ = "CAMPVis.modules.vis.RenderTargetCompositor";
 
-    RenderTargetCompositor::RenderTargetCompositor(GenericProperty<tgt::ivec2>& canvasSize)
+    RenderTargetCompositor::RenderTargetCompositor(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_firstImageId("FirstImageId", "First Input Image", "", DataNameProperty::READ)
         , p_secondImageId("SecondImageId", "Second Input Image", "", DataNameProperty::READ)

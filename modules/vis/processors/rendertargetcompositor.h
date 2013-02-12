@@ -63,7 +63,7 @@ namespace campvis {
         /**
          * Constructs a new RenderTargetCompositor Processor
          **/
-        RenderTargetCompositor(GenericProperty<tgt::ivec2>& canvasSize);
+        RenderTargetCompositor(IVec2Property& canvasSize);
 
         /**
          * Destructor

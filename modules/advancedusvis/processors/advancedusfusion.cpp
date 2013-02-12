@@ -57,7 +57,7 @@ namespace campvis {
         GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness")
     };
 
-    AdvancedUsFusion::AdvancedUsFusion(GenericProperty<tgt::ivec2>& canvasSize)
+    AdvancedUsFusion::AdvancedUsFusion(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ)
         , p_blurredImageId("BlurredImageId", "Blurred Ultrasound Image", "", DataNameProperty::READ)

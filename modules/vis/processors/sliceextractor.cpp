@@ -44,7 +44,7 @@
 namespace campvis {
     const std::string SliceExtractor::loggerCat_ = "CAMPVis.modules.vis.SliceExtractor";
 
-    SliceExtractor::SliceExtractor(GenericProperty<tgt::ivec2>& canvasSize)
+    SliceExtractor::SliceExtractor(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)

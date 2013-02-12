@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new VirtualMirrorCombine Processor
          **/
-        VirtualMirrorCombine(GenericProperty<tgt::ivec2>& canvasSize);
+        VirtualMirrorCombine(IVec2Property& canvasSize);
 
         /**
          * Destructor

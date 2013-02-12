@@ -53,7 +53,7 @@ namespace campvis {
         /**
          * Constructs a new DevilImageReader Processor
          **/
-        DevilImageReader(GenericProperty<tgt::ivec2>& canvasSize);
+        DevilImageReader(IVec2Property& canvasSize);
 
         /**
          * Destructor

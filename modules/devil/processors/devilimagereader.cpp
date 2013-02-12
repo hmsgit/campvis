@@ -48,7 +48,7 @@
 namespace campvis {
     const std::string DevilImageReader::loggerCat_ = "CAMPVis.modules.io.DevilImageReader";
 
-    DevilImageReader::DevilImageReader(GenericProperty<tgt::ivec2>& canvasSize)
+    DevilImageReader::DevilImageReader(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)

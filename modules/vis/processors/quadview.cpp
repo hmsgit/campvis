@@ -44,7 +44,7 @@
 namespace campvis {
     const std::string QuadView::loggerCat_ = "CAMPVis.modules.vis.QuadView";
 
-    QuadView::QuadView(GenericProperty<tgt::ivec2>& canvasSize)
+    QuadView::QuadView(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_inputImage1("InputImage1", "First Input Image", "", DataNameProperty::READ)
         , p_inputImage2("InputImage2", "Second Input Image", "", DataNameProperty::READ)

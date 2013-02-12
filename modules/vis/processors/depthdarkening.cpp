@@ -44,7 +44,7 @@
 namespace campvis {
     const std::string DepthDarkening::loggerCat_ = "CAMPVis.modules.vis.DepthDarkening";
 
-    DepthDarkening::DepthDarkening(GenericProperty<tgt::ivec2>& canvasSize)
+    DepthDarkening::DepthDarkening(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)

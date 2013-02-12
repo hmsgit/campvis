@@ -571,4 +571,9 @@ KeyEvent::KeyCode QtCanvas::getKey(int key) {
     }
 }
 
+void QtCanvas::setSize(ivec2 newSize) {
+    QWidget::resize(newSize.x, newSize.y);
+}
+
+
 } // namespace

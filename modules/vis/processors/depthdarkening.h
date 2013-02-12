@@ -51,7 +51,7 @@ namespace campvis {
         /**
          * Constructs a new DepthDarkening Processor
          **/
-        DepthDarkening(GenericProperty<tgt::ivec2>& canvasSize);
+        DepthDarkening(IVec2Property& canvasSize);
 
         /**
          * Destructor

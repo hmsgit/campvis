@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new IxpvCompositor Processor
          **/
-        IxpvCompositor(GenericProperty<tgt::ivec2>& canvasSize);
+        IxpvCompositor(IVec2Property& canvasSize);
 
         /**
          * Destructor

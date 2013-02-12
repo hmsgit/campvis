@@ -79,7 +79,7 @@ namespace campvis {
         addEventHandler(&_wheelHandler);
         //addEventHandler(&_tfWindowingHandler);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
+        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
         _eventHandlers.push_back(_trackballEH);
     }
 
@@ -239,7 +239,7 @@ namespace campvis {
     }
 
     void AdvancedUsVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_renderTargetSize);
+        _trackballEH->setViewportSize(_canvasSize.getValue());
         float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }

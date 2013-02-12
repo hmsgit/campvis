@@ -47,7 +47,7 @@
 namespace campvis {
     const std::string SliceRenderer3D::loggerCat_ = "CAMPVis.modules.vis.SliceRenderer3D";
 
-    SliceRenderer3D::SliceRenderer3D(GenericProperty<tgt::ivec2>& canvasSize)
+    SliceRenderer3D::SliceRenderer3D(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)

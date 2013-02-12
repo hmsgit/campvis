@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new SliceExtractor Processor
          **/
-        SliceExtractor(GenericProperty<tgt::ivec2>& canvasSize);
+        SliceExtractor(IVec2Property& canvasSize);
 
         /**
          * Destructor

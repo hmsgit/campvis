@@ -43,7 +43,7 @@
 namespace campvis {
     const std::string RaycastingProcessor::loggerCat_ = "CAMPVis.modules.vis.RaycastingProcessor";
 
-    RaycastingProcessor::RaycastingProcessor(GenericProperty<tgt::ivec2>& renderTargetSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
+    RaycastingProcessor::RaycastingProcessor(IVec2Property& renderTargetSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
         : VisualizationProcessor(renderTargetSize)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)

@@ -47,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new QuadView Processor
          **/
-        QuadView(GenericProperty<tgt::ivec2>& canvasSize);
+        QuadView(IVec2Property& canvasSize);
 
         /**
          * Destructor

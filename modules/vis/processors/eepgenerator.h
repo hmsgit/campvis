@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new EEPGenerator Processor
          **/
-        EEPGenerator(GenericProperty<tgt::ivec2>& canvasSize);
+        EEPGenerator(IVec2Property& canvasSize);
 
         /**
          * Destructor

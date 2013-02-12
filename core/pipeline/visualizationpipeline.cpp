@@ -44,12 +44,14 @@ namespace campvis {
         : AbstractPipeline()
         , tgt::EventListener()
         , _lqMode(false)
-        , _effectiveRenderTargetSize("canvasSize", "Canvas Size", tgt::ivec2(128, 128))
+        , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
+        , _effectiveRenderTargetSize("EffectiveRenderTargetSize", "Render Target Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget")
         , _canvas(0)
     {
         _data.s_dataAdded.connect(this, &VisualizationPipeline::onDataContainerDataAdded);
         addProperty(&_renderTargetID);
+        addProperty(&_canvasSize);
         _renderTargetID.s_changed.connect<VisualizationPipeline>(this, &VisualizationPipeline::onPropertyChanged);
     }
 
@@ -79,11 +81,13 @@ namespace campvis {
     }
 
     const tgt::ivec2& VisualizationPipeline::getRenderTargetSize() const {
-        return _renderTargetSize;
+        return _canvasSize.getValue();
     }
 
     void VisualizationPipeline::setRenderTargetSize(const tgt::ivec2& size) {
-        _renderTargetSize = size;
+        if (_canvasSize.getValue() != size)
+            _canvasSize.setValue(size);
+
         updateEffectiveRenderTargetSize();
     }
 
@@ -112,6 +116,10 @@ namespace campvis {
     void VisualizationPipeline::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &_renderTargetID)
             s_renderTargetChanged();
+        else if (prop == &_canvasSize && _canvas != 0) {
+            if (_canvasSize.getValue() != _canvas->getSize())
+                _canvas->setSize(_canvasSize.getValue());
+        }
         else
             AbstractPipeline::onPropertyChanged(prop);
     }
@@ -133,9 +141,9 @@ namespace campvis {
 
     void VisualizationPipeline::updateEffectiveRenderTargetSize() {
         if (_lqMode)
-            _effectiveRenderTargetSize.setValue(_renderTargetSize / 2);
+            _effectiveRenderTargetSize.setValue(_canvasSize.getValue() / 2);
         else
-            _effectiveRenderTargetSize.setValue(_renderTargetSize);
+            _effectiveRenderTargetSize.setValue(_canvasSize.getValue());
     }
 
     void VisualizationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {

@@ -55,7 +55,7 @@ namespace campvis {
         /**
          * Constructs a new AdvancedUsFusion Processor
          **/
-        AdvancedUsFusion(GenericProperty<tgt::ivec2>& canvasSize);
+        AdvancedUsFusion(IVec2Property& canvasSize);
 
         /**
          * Destructor

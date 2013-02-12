@@ -43,7 +43,7 @@
 namespace campvis {
     const std::string EEPGenerator::loggerCat_ = "CAMPVis.modules.vis.EEPGenerator";
 
-    EEPGenerator::EEPGenerator(GenericProperty<tgt::ivec2>& canvasSize)
+    EEPGenerator::EEPGenerator(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Input Geometry ID", "proxygeometry", DataNameProperty::READ)

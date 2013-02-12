@@ -44,7 +44,7 @@
 namespace campvis {
     const std::string IxpvCompositor::loggerCat_ = "CAMPVis.modules.vis.IxpvCompositor";
 
-    IxpvCompositor::IxpvCompositor(GenericProperty<tgt::ivec2>& canvasSize)
+    IxpvCompositor::IxpvCompositor(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_xRayImageId("XRayImageId", "X-Ray input image", "", DataNameProperty::READ)
         , p_3dSliceImageId("3DSliceImageId", "Slice input image rendered in 3D world space", "", DataNameProperty::READ)

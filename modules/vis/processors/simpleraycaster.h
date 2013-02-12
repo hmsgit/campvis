@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new SimpleRaycaster Processor
          **/
-        SimpleRaycaster(GenericProperty<tgt::ivec2>& canvasSize);
+        SimpleRaycaster(IVec2Property& canvasSize);
 
         /**
          * Destructor

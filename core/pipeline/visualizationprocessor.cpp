@@ -31,11 +31,11 @@
 
 namespace campvis {
 
-    VisualizationProcessor::VisualizationProcessor(GenericProperty<tgt::ivec2>& canvasSize)
+    VisualizationProcessor::VisualizationProcessor(IVec2Property& renderTargetSize)
         : AbstractProcessor()
-        , _renderTargetSize("canvasSize", "Canvas Size", canvasSize.getValue())
+        , _renderTargetSize("renderTargetSize", "Canvas Size", renderTargetSize.getValue(), renderTargetSize.getMinValue(), renderTargetSize.getMaxValue())
     {
-        canvasSize.addSharedProperty(&_renderTargetSize);
+        renderTargetSize.addSharedProperty(&_renderTargetSize);
         _renderTargetSize.s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
     }
 
