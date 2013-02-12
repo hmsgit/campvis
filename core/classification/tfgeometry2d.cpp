@@ -66,6 +66,10 @@ namespace campvis {
 
     }
 
+    TFGeometry2D* TFGeometry2D::clone() const {
+        return new TFGeometry2D(_keyPoints);
+    }
+
     std::vector<TFGeometry2D::KeyPoint>& TFGeometry2D::getKeyPoints() {
         return _keyPoints;
     }
@@ -129,6 +133,7 @@ namespace campvis {
 
         std::sort(_keyPoints.begin(), _keyPoints.end(), KeyPointSorter(_center._position));
     }
+
 
 
 }

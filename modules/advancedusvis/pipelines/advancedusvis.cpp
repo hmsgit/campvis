@@ -179,12 +179,15 @@ namespace campvis {
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _usFusion1.p_transferFunction.replaceTF(tf);
+        _usFusion2.p_transferFunction.replaceTF(tf->clone());
+        _usFusion3.p_transferFunction.replaceTF(tf->clone());
+        _usFusion4.p_transferFunction.replaceTF(tf->clone());
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf2 = new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f));
-        tf2->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        tf2->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _usDVR.p_transferFunction.replaceTF(tf2);
         _usDVR.p_targetImageID.setValue("us.dvr");
 

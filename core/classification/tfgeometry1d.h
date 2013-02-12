@@ -68,6 +68,12 @@ namespace campvis {
         virtual ~TFGeometry1D();
 
         /**
+         * Clones this transfer function geometry.
+         * \return  A clone of this transfer function geometry, caller takes ownership of the pointer.
+         */
+        TFGeometry1D* clone() const;
+
+        /**
          * Returns the vector of KeyPoints.
          * \return 
          */

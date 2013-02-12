@@ -54,6 +54,12 @@ namespace campvis {
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
          */
         virtual ~Geometry2DTransferFunction();
+                
+        /**
+         * Clones this transfer function.
+         * \return  A clone of this transfer function, caller takes ownership of the pointer.
+         */
+        virtual Geometry2DTransferFunction* clone() const;
 
         /**
          * Returns the dimensionality of the transfer function.

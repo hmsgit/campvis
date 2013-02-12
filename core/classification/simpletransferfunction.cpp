@@ -50,6 +50,13 @@ namespace campvis {
 
     }
 
+    SimpleTransferFunction* SimpleTransferFunction::clone() const {
+        SimpleTransferFunction* toReturn = new SimpleTransferFunction(_size.x, _intensityDomain);
+        toReturn->setLeftColor(_leftColor);
+        toReturn->setRightColor(_rightColor);
+        return toReturn;
+    }
+
     size_t SimpleTransferFunction::getDimensionality() const {
         return 1;
     }
@@ -99,5 +106,6 @@ namespace campvis {
     const tgt::col4& SimpleTransferFunction::getRightColor() const {
         return _rightColor;
     }
+
 
 }

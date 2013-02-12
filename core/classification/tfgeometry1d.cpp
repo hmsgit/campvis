@@ -51,6 +51,10 @@ namespace campvis {
 
     }
 
+    TFGeometry1D* TFGeometry1D::clone() const {
+        return new TFGeometry1D(_keyPoints);
+    }
+
     std::vector<TFGeometry1D::KeyPoint>& TFGeometry1D::getKeyPoints() {
         return _keyPoints;
     }

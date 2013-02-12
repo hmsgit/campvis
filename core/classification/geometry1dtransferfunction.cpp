@@ -49,6 +49,14 @@ namespace campvis {
     Geometry1DTransferFunction::~Geometry1DTransferFunction() {
     }
 
+    Geometry1DTransferFunction* Geometry1DTransferFunction::clone() const {
+        Geometry1DTransferFunction* toReturn = new Geometry1DTransferFunction(_size.x, _intensityDomain);
+        for (std::vector<TFGeometry1D*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+            toReturn->addGeometry((*it)->clone());
+        }
+        return toReturn;
+    }
+
     size_t Geometry1DTransferFunction::getDimensionality() const {
         return 1;
     }

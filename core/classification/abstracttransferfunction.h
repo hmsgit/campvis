@@ -80,6 +80,12 @@ namespace campvis {
         virtual ~AbstractTransferFunction();
 
         /**
+         * Clones this transfer function.
+         * \return  A clone of this transfer function, caller takes ownership of the pointer.
+         */
+        virtual AbstractTransferFunction* clone() const = 0;
+
+        /**
          * Deletes the OpenGL texture, hence, this methods has to be called from a thread with a valid OpenGL context!
          */
         virtual void deinit();

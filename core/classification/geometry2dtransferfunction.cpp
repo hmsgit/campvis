@@ -49,6 +49,14 @@ namespace campvis {
     Geometry2DTransferFunction::~Geometry2DTransferFunction() {
     }
 
+    Geometry2DTransferFunction* Geometry2DTransferFunction::clone() const {
+        Geometry2DTransferFunction* toReturn = new Geometry2DTransferFunction(_size.xy(), _intensityDomain);
+        for (std::vector<TFGeometry2D*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+            toReturn->addGeometry((*it)->clone());
+        }
+        return toReturn;
+    }
+
     size_t Geometry2DTransferFunction::getDimensionality() const {
         return 2;
     }

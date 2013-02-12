@@ -42,9 +42,9 @@ struct TFParameters2D {
  * \return	Intensity mapped to transfer function domain for LUT.
  */
 float mapIntensityToTFDomain(in vec2 intensityDomain, in float intensity) {
-    if(intensity <= intensityDomain.x)
+    if(intensity < intensityDomain.x)
        return -1.0;
-    else if(intensity >= intensityDomain.y)
+    else if(intensity > intensityDomain.y)
        return -1.0;
     else
         return (intensity - intensityDomain.x) / (intensityDomain.y - intensityDomain.x);
