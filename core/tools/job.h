@@ -167,6 +167,44 @@ namespace campvis {
         void (*_callee)(A1);        ///< Function to call
         A1 _arg1;                   ///< Argument to pass to \a callee
     };
+    
+    /**
+     * Specific job, that is calling a member function pasing a single argument.
+     */
+    template<class A1, class A2>
+    class CallFunc2ArgJob : public AbstractJob {
+    public:
+        /**
+         * Creates an new job, that is calling \a callee on \a target pasing \a arg1 as single argument.
+         * \param   target  Target object
+         * \param   callee  Member function to call
+         * \param   arg1    Argument to pass to \a callee
+         */
+        CallFunc2ArgJob(void (*callee)(A1, A2), A1 arg1, A2 arg2)
+            : _callee(callee)
+            , _arg1(arg1)
+            , _arg2(arg2)
+        {
+            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+        }
+
+        /**
+         * Destructor, nothing to do here
+         */
+        ~CallFunc2ArgJob() {};
+
+        /**
+         * Executes this job by calling the member function.
+         */
+        virtual void execute() {
+            (*_callee)(_arg1, _arg2);
+        }
+
+    protected:
+        void (*_callee)(A1, A2);        ///< Function to call
+        A1 _arg1;                   ///< First Argument to pass to \a callee
+        A2 _arg2;                   ///< Second Argument to pass to \a callee
+    };
 
 // = Helper functions for easier creation of jobs =================================================
 
@@ -219,12 +257,12 @@ namespace campvis {
     }
 
     /**
-     * Creates a new CallMemberFunc1ArgJob on the heap  for the object \a target.
+     * Creates a new CallFunc1ArgJob on the heap  for the object \a target.
      * \note    The caller takes ownership of the returned pointer.
      * \param   target  Target object to call method from.
      * \param   callee  Pointer to method to call.
      * \param   arg1    First argument to pass to \callee.
-     * \return  Pointer to the newly created CallMemberFunc1ArgJob. Caller has ownership!
+     * \return  Pointer to the newly created CallFunc1ArgJob. Caller has ownership!
      */
     template<class A1>
     CallFunc1ArgJob<A1>* makeJobOnHeap(void (*callee)(A1), A1 arg1) {
@@ -232,17 +270,42 @@ namespace campvis {
     }
 
     /**
-     * Creates a new CallMemberFunc1ArgJob on the stack  for the object \a target.
+     * Creates a new CallFunc1ArgJob on the stack  for the object \a target.
      * \param   target  Target object to call method from.
      * \param   callee  Pointer to method to call.
      * \param   arg1    First argument to pass to \callee.
-     * \return  The newly created CallMemberFunc1ArgJob.
+     * \return  The newly created CallFunc1ArgJob.
      */
     template<class A1>
     CallFunc1ArgJob<A1> makeJob(void (*callee)(A1), A1 arg1) {
         return CallFunc1ArgJob<A1>(callee, arg1);
     }
 
+    /**
+     * Creates a new CallFunc2ArgJob on the heap  for the object \a target.
+     * \note    The caller takes ownership of the returned pointer.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \param   arg1    First argument to pass to \callee.
+     * \param   arg2    Second argument to pass to \callee.
+     * \return  Pointer to the newly created CallFunc2ArgJob. Caller has ownership!
+     */
+    template<class A1, class A2>
+    CallFunc2ArgJob<A1, A2>* makeJobOnHeap(void (*callee)(A1, A2), A1 arg1, A2 arg2) {
+        return new CallFunc2ArgJob<A1, A2>(callee, arg1, arg2);
+    }
+
+    /**
+     * Creates a new CallFunc2ArgJob on the stack  for the object \a target.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \param   arg2    Second argument to pass to \callee.
+     * \return  The newly created CallFunc2ArgJob.
+     */
+    template<class A1, class A2>
+    CallFunc2ArgJob<A1, A2> makeJob(void (*callee)(A1, A2), A1 arg1, A2 arg2) {
+        return CallFunc2ArgJob<A1, A2>(callee, arg1, arg2);
+    }
 }
 
 #endif // JOB_H__

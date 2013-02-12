@@ -217,6 +217,7 @@ namespace campvis {
                 break;
         }
         shader->setIgnoreUniformLocationError(tmp);
+        LGL_ERROR;
     }
 
     const tgt::Texture* ImageRepresentationGL::getTexture() const {

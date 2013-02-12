@@ -46,6 +46,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QString>
+#include <QPushButton>
 
 class QModelIndex;
 class QItemSelection;
@@ -118,6 +119,11 @@ namespace campvis {
          */
         void onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
+        /**
+         * Slot being called when the user clicks on the "Save to File" button.
+         */
+        void onBtnSaveToFileClicked();
+
     protected:
         /**
          * Setup the GUI stuff
@@ -128,6 +134,14 @@ namespace campvis {
          * Updates _infoWidget
          */
         void updateInfoWidget();
+
+        /**
+         * Saves the Image in \a handle to the file \a filename.
+         * \note    This method must be called with a valid OpenGL context!
+         * \param handle    DataHandle containing the image to save. Must be of type ImageData having an ImageRepresentationRenderTarget inside!
+         * \param filename  Filename for the file to save.
+         */
+        static void saveToFile(DataHandle handle, std::string filename);
 
         /**
          * Returns a string with \a numBytes humanized (i.e. "numBytes/1024^n [KMG]Byte")
@@ -150,6 +164,7 @@ namespace campvis {
         QLabel* _lblLocalMemoryFootprint;
         QLabel* _lblVideoMemoryFootprint;
         QLabel* _lblTimestamp;
+        QPushButton* _btnSaveToFile;
     };
 }
 

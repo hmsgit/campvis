@@ -55,6 +55,6 @@ ADD_EXECUTABLE(campvis-application
     ${CampvisApplicationSources} ${CampvisApplicationHeaders} 
     ${CampvisApplicationMoc}
 ) 
-ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${QT_DEFINITIONS})
-INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
+INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
+TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
