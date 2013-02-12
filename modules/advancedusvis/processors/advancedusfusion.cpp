@@ -68,6 +68,7 @@ namespace campvis {
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_view("View", "Image to Render", viewOptions, 10)
         , p_blurredScaling("BlurredScaling", "Scaling for blurred image intensity", 1.f, .001f, 1000.f)
+        , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
     {
         addProperty(&p_usImageId);
@@ -89,7 +90,7 @@ namespace campvis {
 
     void AdvancedUsFusion::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/advancedusvis/glsl/advancedusfusion.frag", "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/advancedusvis/glsl/advancedusfusion.frag", generateHeader(), false);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -110,6 +111,8 @@ namespace campvis {
                     // source DataHandle has changed
                     updateProperties(img.getDataHandle());
                     _sourceImageTimestamp = img.getDataHandle().getTimestamp();
+                    _shader->setHeaders(generateHeader());
+                    _shader->rebuild();
                 }
 
                 std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
@@ -155,6 +158,14 @@ namespace campvis {
         if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
             p_sliceNumber.setMaxValue(imgSize.z - 1);
         }
+        p_use3DTexture.setValue(static_cast<const ImageData*>(img.getData())->getDimensionality() == 3);
+    }
+
+    std::string AdvancedUsFusion::generateHeader() const {
+        std::string toReturn = getDecoratedHeader();
+        if (p_use3DTexture.getValue())
+            toReturn += "#define USE_3D_TEX 1\n";
+        return toReturn;
     }
 
 }

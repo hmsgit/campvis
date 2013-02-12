@@ -279,8 +279,10 @@ namespace campvis {
 
             itk::Image<BASETYPE, DIMENSIONALITY>::SizeType size;
             size[0] = tester->getSize().x;
-            size[1] = tester->getSize().y;
-            size[2] = tester->getSize().z;
+            if (source->getDimensionality() >= 2)
+                size[1] = tester->getSize().y;
+            if (source->getDimensionality() >= 3)
+                size[2] = tester->getSize().z;
 
             itk::Image<BASETYPE, DIMENSIONALITY>::IndexType start;
             start.Fill(0);

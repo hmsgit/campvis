@@ -134,10 +134,16 @@ namespace campvis {
             
             // TODO: spacing, element size, etc.
             if (tfp.hasKey("ElementSpacing")) {
-                voxelSize = tfp.getVec3("ElementSpacing");
+                if (dimensionality == 3)
+                    voxelSize = tfp.getVec3("ElementSpacing");
+                else if (dimensionality == 2)
+                    voxelSize = tgt::vec3(tfp.getVec2("ElementSpacing"), 1.f);
             }
             if (tfp.hasKey("Position")) {
-                imageOffset = tfp.getVec3("Position");
+                if (dimensionality == 3)
+                    imageOffset = tfp.getVec3("Position");
+                else if (dimensionality == 2)
+                    imageOffset = tgt::vec3(tfp.getVec2("Position"), 0.f);
             }
             if (tfp.hasKey("ElementNumberOfChannels")) {
                 numChannels = tfp.getSizeT("ElementNumberOfChannels");

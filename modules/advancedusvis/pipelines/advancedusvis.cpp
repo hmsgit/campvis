@@ -95,7 +95,8 @@ namespace campvis {
         _camera.addSharedProperty(&_usEEP.p_camera);
         _camera.addSharedProperty(&_usDVR.p_camera);
 
-        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
+        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\CurefabCS\\Stent_Patient_ B-Mode_2013-02-11T14.56.46z\\01_us.mhd");
+        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
         //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\US.csvd");
         //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\us.png");
         _usReader.p_targetImageID.setValue("us.image");
@@ -109,7 +110,8 @@ namespace campvis {
         _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
         _usReader.p_targetImageID.connect(&_usDenoiseilter.p_sourceImageID);
 
-        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
+        _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\CurefabCS\\Stent_Patient_ B-Mode_2013-02-11T14.56.46z\\01_cm.mhd");
+        //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
         //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel\\Athanasios\\Map.csvd");
         //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\cm.png");
         _confidenceReader.p_targetImageID.setValue("confidence.image.read");

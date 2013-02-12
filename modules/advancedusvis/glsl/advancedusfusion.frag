@@ -33,17 +33,28 @@ in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #include "tools/colorspace.frag"
+#include "tools/texture2d.frag"
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
-uniform sampler3D _usImage;
-uniform TextureParameters3D _usTextureParams;
+#ifdef USE_3D_TEX
+#define SAMPLER_TYPE sampler3D
+#define TEXPARAMS_TYPE TextureParameters3D
+#define TEXTURE_LOOKUP_FUNC getElement3DNormalized
+#else
+#define SAMPLER_TYPE sampler2D
+#define TEXPARAMS_TYPE TextureParameters2D
+#define TEXTURE_LOOKUP_FUNC getElement2DNormalized
+#endif
 
-uniform sampler3D _blurredImage;
-uniform TextureParameters3D _blurredTextureParams;
+uniform SAMPLER_TYPE _usImage;
+uniform TEXPARAMS_TYPE _usTextureParams;
 
-uniform sampler3D _confidenceMap;
-uniform TextureParameters3D _confidenceTextureParams;
+uniform SAMPLER_TYPE _blurredImage;
+uniform TEXPARAMS_TYPE _blurredTextureParams;
+
+uniform SAMPLER_TYPE _confidenceMap;
+uniform TEXPARAMS_TYPE _confidenceTextureParams;
 
 uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
@@ -53,11 +64,15 @@ uniform int _viewIndex;
 uniform float _blurredScaling;
 
 void main() {
+#ifdef USE_3D_TEX
     vec3 texCoord = vec3(ex_TexCoord.xy, _usTextureParams._sizeRCP.z * (_sliceNumber + 0.5));
+#else
+    vec2 texCoord = ex_TexCoord.xy;
+#endif
 
-    vec4 texel = getElement3DNormalized(_usImage, _usTextureParams, texCoord);
-    vec4 blurred = getElement3DNormalized(_blurredImage, _blurredTextureParams, texCoord) * _blurredScaling;
-    float confidence = getElement3DNormalized(_confidenceMap, _confidenceTextureParams, texCoord).a;
+    vec4 texel = TEXTURE_LOOKUP_FUNC(_usImage, _usTextureParams, texCoord);
+    vec4 blurred = TEXTURE_LOOKUP_FUNC(_blurredImage, _blurredTextureParams, texCoord) * _blurredScaling;
+    float confidence = TEXTURE_LOOKUP_FUNC(_confidenceMap, _confidenceTextureParams, texCoord).a;
 
     switch (_viewIndex) {
         case 0:

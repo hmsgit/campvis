@@ -86,10 +86,13 @@ namespace campvis {
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
         GenericOptionProperty<std::string> p_view;
         FloatProperty p_blurredScaling;
+        BoolProperty p_use3DTexture;
 
     protected:
         /// adapts the range of the p_sliceNumber property to the image
         void updateProperties(DataHandle img);
+
+        std::string generateHeader() const;
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 
