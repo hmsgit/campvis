@@ -85,7 +85,8 @@ namespace campvis {
         IntProperty p_sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
         GenericOptionProperty<std::string> p_view;
-        FloatProperty p_blurredScaling;
+        FloatProperty p_confidenceScaling;
+        FloatProperty p_hue;
         BoolProperty p_use3DTexture;
 
     protected:

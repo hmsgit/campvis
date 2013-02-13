@@ -70,7 +70,7 @@ namespace campvis {
 
         tgt::col4 diff = _rightColor - _leftColor;
         for (size_t i = 0; i < _size.x; ++i) {
-            float multiplier = static_cast<float>(i) / _size.x;
+            float multiplier = static_cast<float>(i) / (_size.x - 1);
             tgt::col4& texel = _texture->texel<tgt::col4>(i);
             for (size_t j = 0; j < 4; ++j) {
                 texel[j] = static_cast<uint8_t>(_leftColor[j] + (static_cast<float>(diff[j]) * multiplier));

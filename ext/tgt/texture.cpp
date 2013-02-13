@@ -292,8 +292,8 @@ void Texture::applyFilter() {
             glTexParameterf(type_, GL_TEXTURE_MAX_ANISOTROPY_EXT, GpuCaps.getMaxTextureAnisotropy());
 
         case MIPMAP:
-            glTexParameteri(type_,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-            glTexParameteri(type_,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(type_,GL_TEXTURE_MAG_FILTER,GL_NEAREST_MIPMAP_NEAREST);
+            glTexParameteri(type_,GL_TEXTURE_MIN_FILTER,GL_NEAREST_MIPMAP_NEAREST);
             glTexParameteri(type_, GL_SGIS_generate_mipmap, GL_TRUE);
             break;
     }
@@ -326,17 +326,23 @@ void Texture::uploadTexture() {
         case GL_TEXTURE_1D:
             glTexImage1D(GL_TEXTURE_1D, 0, internalformat_, dimensions_.x, 0,
                          format_, dataType_, pixels_);
+            if (filter_ == MIPMAP)
+                glGenerateMipmap(GL_TEXTURE_1D);
             break;
 
         case GL_TEXTURE_2D:
             glTexImage2D(GL_TEXTURE_2D, 0, internalformat_, dimensions_.x, dimensions_.y, 0,
                          format_, dataType_, pixels_);
+            if (filter_ == MIPMAP)
+                glGenerateMipmap(GL_TEXTURE_2D);
             break;
 
         case GL_TEXTURE_3D:
             glTexImage3D(GL_TEXTURE_3D, 0, internalformat_,
                          dimensions_.x, dimensions_.y, dimensions_.z, 0,
                          format_, dataType_, pixels_);
+            if (filter_ == MIPMAP)
+                glGenerateMipmap(GL_TEXTURE_3D);
             break;
 
 #ifdef GL_TEXTURE_RECTANGLE_ARB

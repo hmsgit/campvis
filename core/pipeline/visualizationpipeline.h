@@ -180,6 +180,7 @@ namespace campvis {
 
         IVec2Property _canvasSize;                              ///< original canvas size
         bool _lqMode;                                           ///< Flag whether low quality mode is enables
+        bool _ignoreCanvasSizeUpdate;
 
         IVec2Property _effectiveRenderTargetSize;               ///< actual size of the render targets (considering LQ mode)
         StringProperty _renderTargetID;                         ///< ID of the render target image to be rendered to the canvas

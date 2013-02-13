@@ -44,6 +44,7 @@ namespace campvis {
         : AbstractPipeline()
         , tgt::EventListener()
         , _lqMode(false)
+        , _ignoreCanvasSizeUpdate(false)
         , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
         , _effectiveRenderTargetSize("EffectiveRenderTargetSize", "Render Target Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget")
@@ -85,8 +86,9 @@ namespace campvis {
     }
 
     void VisualizationPipeline::setRenderTargetSize(const tgt::ivec2& size) {
-        if (_canvasSize.getValue() != size)
+        if (_canvasSize.getValue() != size && !_ignoreCanvasSizeUpdate) {
             _canvasSize.setValue(size);
+        }
 
         updateEffectiveRenderTargetSize();
     }
@@ -116,9 +118,12 @@ namespace campvis {
     void VisualizationPipeline::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &_renderTargetID)
             s_renderTargetChanged();
-        else if (prop == &_canvasSize && _canvas != 0) {
-            if (_canvasSize.getValue() != _canvas->getSize())
+        else if (prop == &_canvasSize && _canvas != 0 && !_ignoreCanvasSizeUpdate) {
+            if (_canvasSize.getValue() != _canvas->getSize()) {
+                _ignoreCanvasSizeUpdate = true;
                 _canvas->setSize(_canvasSize.getValue());
+                _ignoreCanvasSizeUpdate = false;
+            }
         }
         else
             AbstractPipeline::onPropertyChanged(prop);

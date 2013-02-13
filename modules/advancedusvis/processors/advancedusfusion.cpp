@@ -44,7 +44,7 @@
 namespace campvis {
     const std::string AdvancedUsFusion::loggerCat_ = "CAMPVis.modules.vis.AdvancedUsFusion";
 
-    GenericOption<std::string> viewOptions[10] = {
+    GenericOption<std::string> viewOptions[11] = {
         GenericOption<std::string>("us", "Ultrasound Only"),
         GenericOption<std::string>("smoothed", "Smoothed US Only"),
         GenericOption<std::string>("sharpened", "Sharpened US Only"),
@@ -54,7 +54,8 @@ namespace campvis {
         GenericOption<std::string>("mappingChromacityHCL", "Mapping Uncertainty to Chromacity (HCL)"),
         GenericOption<std::string>("mappingChromacityHCY", "Mapping Uncertainty to Chromacity (HCY)"),
         GenericOption<std::string>("mappingLAB", "Mapping Uncertainty L*a*b"),
-        GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness")
+        GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness"),
+        GenericOption<std::string>("pixelate", "Pixelate (Experimental)")
     };
 
     AdvancedUsFusion::AdvancedUsFusion(IVec2Property& canvasSize)
@@ -66,8 +67,9 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , p_view("View", "Image to Render", viewOptions, 10)
-        , p_blurredScaling("BlurredScaling", "Scaling for blurred image intensity", 1.f, .001f, 1000.f)
+        , p_view("View", "Image to Render", viewOptions, 11)
+        , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f)
+        , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
     {
@@ -79,7 +81,8 @@ namespace campvis {
         addProperty(&p_sliceNumber);
         addProperty(&p_transferFunction);
         addProperty(&p_view);
-        addProperty(&p_blurredScaling);
+        addProperty(&p_confidenceScaling);
+        addProperty(&p_hue);
 
         decoratePropertyCollection(this);
     }
@@ -119,10 +122,12 @@ namespace campvis {
 
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
-                _shader->setUniform("_sliceNumber", p_sliceNumber.getValue());
+                if (p_use3DTexture.getValue())
+                    _shader->setUniform("_sliceNumber", p_sliceNumber.getValue());
                 _shader->setUniform("_viewIndex", p_view.getValue());
-                _shader->setUniform("_blurredScaling", p_blurredScaling.getValue());
-
+                _shader->setUniform("_confidenceScaling", p_confidenceScaling.getValue());
+                _shader->setUniform("_hue", p_hue.getValue());
+                
                 tgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit;
                 img->bind(_shader, usUnit, "_usImage", "_usTextureParams");
                 blurred->bind(_shader, blurredUnit, "_blurredImage", "_blurredTextureParams");
