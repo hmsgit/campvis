@@ -204,7 +204,7 @@ namespace campvis {
         // create texture
         GLenum dataType = GL_UNSIGNED_BYTE;
         _texture = new tgt::Texture(_size, GL_RGBA, dataType, tgt::Texture::LINEAR);
-        _texture->setWrapping(tgt::Texture::CLAMP);
+        _texture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
         _texture->uploadTexture();
         LGL_ERROR;
 

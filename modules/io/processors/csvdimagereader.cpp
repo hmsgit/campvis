@@ -81,6 +81,7 @@ namespace campvis {
             }
             else {
                 LERROR("Error while parsing CSVD header: No Size specified.");
+                validate(INVALID_RESULT);
                 return;
             }
 
@@ -102,6 +103,7 @@ namespace campvis {
                 pt = WeaklyTypedPointer::FLOAT;
             else {
                 LERROR("Error while parsing MHD header: Unsupported element type: " << et);
+                validate(INVALID_RESULT);
                 return;
             }
 
@@ -118,6 +120,7 @@ namespace campvis {
 #define DISPATCH_PARSING(WTP_TYPE, C_TYPE, TMP_TYPE) \
     if (pt == WTP_TYPE) {\
         C_TYPE* dataArray = new C_TYPE[tgt::hmul(size)]; \
+        memset(dataArray, 0, sizeof(C_TYPE) * tgt::hmul(size)); \
         for (size_t slice = 0; slice < size.z; ++slice) { \
             std::stringstream ss; \
             ss << url << slice << ".csv"; \
@@ -128,13 +131,15 @@ namespace campvis {
                 throw tgt::FileException("Could not open file " + ss.str() + " for reading.", p_url.getValue()); \
                  \
             TMP_TYPE tmp; \
-            for (size_t column = 0; column < size.y; ++column) { \
+            for (size_t column = 0; column < size.y && file.good(); ++column) { \
                 for (size_t row = 0; row < size.x && file.good(); ++row) { \
                     file >> tmp; \
                     dataArray[index++] = static_cast<C_TYPE>(tmp); \
                     file.get(); /* TODO: simple hack to advance to next character - but there might be more than one... */ \
                 } \
             } \
+            \
+            file.close(); \
         } \
         rep = GenericImageRepresentationLocal<C_TYPE, 1>::create(image, dataArray); \
     }
@@ -159,15 +164,18 @@ namespace campvis {
             }
             else {
                 LERROR("Error while parsing CSVD header: No file names specified.");
+                validate(INVALID_RESULT);
                 return;
             }
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
+            validate(INVALID_RESULT);
             return;
         }
         catch (std::exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
+            validate(INVALID_RESULT);
             return;
         }
 

@@ -117,7 +117,7 @@ namespace campvis {
     void ImageRepresentationGL::createTexture(const WeaklyTypedPointer& wtp) {
         tgtAssert(wtp._pointer != 0, "Pointer to image data must not be 0!");
 
-        _texture = new tgt::Texture(reinterpret_cast<GLubyte*>(wtp._pointer), getSize(), wtp.getGlFormat(), wtp.getGlInternalFormat(), wtp.getGlDataType(), tgt::Texture::MIPMAP);
+        _texture = new tgt::Texture(reinterpret_cast<GLubyte*>(wtp._pointer), getSize(), wtp.getGlFormat(), wtp.getGlInternalFormat(), wtp.getGlDataType(), tgt::Texture::LINEAR);
         setupAndUploadTexture(_texture, wtp.isInteger(), wtp.isSigned());
 
     }

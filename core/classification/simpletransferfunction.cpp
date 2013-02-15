@@ -66,7 +66,7 @@ namespace campvis {
 
         GLenum dataType = GL_UNSIGNED_BYTE;
         _texture = new tgt::Texture(_size, GL_RGBA, dataType, tgt::Texture::LINEAR);
-        _texture->setWrapping(tgt::Texture::CLAMP);
+        _texture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
 
         tgt::col4 diff = _rightColor - _leftColor;
         for (size_t i = 0; i < _size.x; ++i) {

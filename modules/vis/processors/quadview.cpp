@@ -82,8 +82,10 @@ namespace campvis {
         ImageRepresentationRenderTarget::ScopedRepresentation inputImage3(data, p_inputImage3.getValue());
         ImageRepresentationRenderTarget::ScopedRepresentation inputImage4(data, p_inputImage4.getValue());
 
-        if (inputImage1 == 0 && inputImage2 == 0 && inputImage3 == 0 && inputImage4 == 0)
+        if (inputImage1 == 0 && inputImage2 == 0 && inputImage3 == 0 && inputImage4 == 0) {
+            validate(INVALID_RESULT);
             return;
+        }
 
         std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
         tgt::TextureUnit colorUnit, depthUnit;
