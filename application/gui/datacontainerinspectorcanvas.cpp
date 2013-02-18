@@ -39,7 +39,8 @@
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/tools/job.h"
-#include "core/classification/simpletransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
+#include "core/classification/geometry1dtransferfunction.h"
 
 
 namespace campvis {
@@ -47,7 +48,7 @@ namespace campvis {
     DataContainerInspectorCanvas::DataContainerInspectorCanvas(QWidget* parent /*= 0*/) 
         : tgt::QtThreadedCanvas("DataContainer Inspector", tgt::ivec2(640, 480), tgt::GLCanvas::RGBA_BUFFER, parent, true)
         , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
-        , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(64))
+        , p_transferFunction("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f)))
         , _dataContainer(0)
         , _paintShader(0)
         , _quad(0)
@@ -57,6 +58,7 @@ namespace campvis {
         , _renderFullscreen(false)
         , _currentSlice(-1)
     {
+        static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
 
         makeCurrent();
         // Init GLEW for this context
@@ -162,6 +164,7 @@ namespace campvis {
             unit2d.activate();
             texture->bind();
             _paintShader->setUniform("_is3d", false);
+            _paintShader->setUniform("_isDepthTexture", texture->isDepthTexture());
             _paintShader->setUniform("_2dTextureParams._size", tgt::vec2(texture->getDimensions().xy()));
             _paintShader->setUniform("_2dTextureParams._sizeRCP", tgt::vec2(1.f) / tgt::vec2(texture->getDimensions().xy()));
             _paintShader->setUniform("_2dTextureParams._numChannels", static_cast<int>(texture->getNumChannels()));
@@ -251,7 +254,7 @@ namespace campvis {
                 // existant -> replace
                 lb->second = QtDataHandle(dh);
                 // update _textures array
-                updateTextures();
+                _texturesDirty = true;
             }
         }
         

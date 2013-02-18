@@ -309,6 +309,12 @@ public:
      */
     bool isTextureRectangle() const;
 
+    /**
+     * Returns, whether texture is a depth texture.
+     * \return  internalformat_ == GL_DEPTH_COMPONENT
+     */
+    bool isDepthTexture() const;
+
 /*
     1D access, always possible
 */

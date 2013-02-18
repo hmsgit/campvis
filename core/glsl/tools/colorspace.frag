@@ -323,9 +323,9 @@ vec3 xyz2lab(in vec3 XYZ) {
 }
 
 float lab_helper_invF(in float p) {
-    float r = p*p*p;
+    float r = pow(p, 3.0);
     if (r < 0.008856)
-        return (p-4.0/29.0)*(108.0/841.0);
+        return (p - 4.0/29.0)*(108.0/841.0);
     else
         return r;
 }
@@ -340,10 +340,84 @@ vec3 lab2xyz(in vec3 LAB) {
     return vec3(X, Y, Z);
 }
 
+// ================================================================================================
+
+const float lab_epsilon_ = 0.008856;
+const float lab_kappa_ = 903.3;
+const float pi_ = 3.14159265;
+const float two_pi_ = 6.2831853;
+
+float lab_helper_F2(in float p) {
+    if (p > lab_epsilon_)
+        return pow(p, 1.0/3.0);
+    else
+        return (lab_kappa_ * p + 16.0) / 116.0;
+}
+
+vec3 xyz2lab2(in vec3 XYZ) {
+    float fX = XYZ.x/0.950456;
+    float fY = XYZ.y/1.0;
+    float fZ = XYZ.z/1.088754;
+    fX = lab_helper_F2(fX);
+    fY = lab_helper_F2(fY);
+    fZ = lab_helper_F2(fZ);
+    return vec3(116.0 * fY - 16.0,
+                500.0 * (fX - fY),
+                200.0 * (fY - fZ));
+}
+
+float lab_helper_invF2(in float p) {
+    float r = p*p*p;
+    if (r < 0.008856)
+        return (p-4.0/29.0)*(108.0/841.0);
+    else
+        return r;
+}
+
+vec3 lab2xyz2(in vec3 LAB) {
+    float yr = (LAB.x > lab_kappa_ * lab_epsilon_) ? pow((LAB.x + 16.0) / 116.0, 3.0) : LAB.x / lab_kappa_;
+
+    float fy = (yr > lab_epsilon_) ? (LAB.x + 16.0) / 116.0 : (lab_kappa_ * yr + 16.0) / 116.0;
+    float fx = LAB.y / 500.0 + fy;
+    float fz = fy - LAB.z / 200.0;
+
+    float xr = (pow(fx, 3.0) > lab_epsilon_) ? pow(fx, 3.0) : (fx * 116.0 - 16.0) / lab_kappa_;
+    float zr = (pow(fz, 3.0) > lab_epsilon_) ? pow(fz, 3.0) : (fz * 116.0 - 16.0) / lab_kappa_;
+
+    return vec3(
+        0.950456 * xr,
+        1.0 * yr,
+        1.088754 * zr);
+}
+
+vec3 lab2lch(in vec3 LAB) {
+    LAB.y = sqrt(pow(LAB.y, 2.0) + pow(LAB.z, 2.0));
+    LAB.z = atan(LAB.z, LAB.y);
+
+    LAB.z = mod(LAB.z, two_pi_);
+
+    return LAB;
+}
+
+vec3 lch2lab(in vec3 LCH) {
+    float c = LCH.y;
+    LCH.y = cos(LCH.z) * c;
+    LCH.z = sin(LCH.z) * c;
+    return LCH;
+}
+
 vec3 rgb2lab(in vec3 RGB) {
     return xyz2lab(rgb2ciexyz(RGB));
 }
 
 vec3 lab2rgb(in vec3 LAB) {
     return ciexyz2rgb(lab2xyz(LAB));
+}
+
+vec3 rgb2lch(in vec3 RGB) {
+    return lab2lch(rgb2lab(RGB));
+}
+
+vec3 lch2rgb(in vec3 LCH) {
+    return lab2rgb(lch2lab(LCH));
 }

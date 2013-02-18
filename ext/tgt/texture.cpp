@@ -292,9 +292,8 @@ void Texture::applyFilter() {
             glTexParameterf(type_, GL_TEXTURE_MAX_ANISOTROPY_EXT, GpuCaps.getMaxTextureAnisotropy());
 
         case MIPMAP:
-            glTexParameteri(type_,GL_TEXTURE_MAG_FILTER,GL_NEAREST_MIPMAP_NEAREST);
+            glTexParameteri(type_,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
             glTexParameteri(type_,GL_TEXTURE_MIN_FILTER,GL_NEAREST_MIPMAP_NEAREST);
-            glTexParameteri(type_, GL_SGIS_generate_mipmap, GL_TRUE);
             break;
     }
 }
@@ -500,5 +499,14 @@ bool Texture::isTextureRectangle() const {
     return false;
 #endif
 }
+
+bool Texture::isDepthTexture() const {
+    return internalformat_ == GL_DEPTH_COMPONENT
+        || internalformat_ == GL_DEPTH_COMPONENT16 
+        || internalformat_ == GL_DEPTH_COMPONENT24
+        || internalformat_ == GL_DEPTH_COMPONENT32
+        || internalformat_ == GL_DEPTH_COMPONENT32F;
+}
+
 
 } // namespace tgt

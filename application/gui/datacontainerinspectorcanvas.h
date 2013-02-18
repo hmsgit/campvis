@@ -141,7 +141,7 @@ namespace campvis {
 
         /**
          * Updates the textures vector.
-         * \note Only call with acquired lock!!
+         * \note Only call with acquired lock and valid OpenGL context!!
          */
         void updateTextures();
 

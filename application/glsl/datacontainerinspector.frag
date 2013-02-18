@@ -51,6 +51,7 @@ uniform TFParameters1D _transferFunctionParams;
 uniform bool _is3d;
 uniform int _sliceNumber;
 uniform vec4 _color;
+uniform bool _isDepthTexture;
 
 const vec4 checkerboardColor1 = vec4(0.90, 0.90, 0.90, 1.0);
 const vec4 checkerboardColor2 = vec4(0.50, 0.50, 0.50, 1.0);
@@ -73,7 +74,7 @@ void main() {
     else {
         vec4 texel = getElement2DNormalized(_texture2d, _2dTextureParams, ex_TexCoord.xy);
         if (_2dTextureParams._numChannels == 1) {
-            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, (_isDepthTexture ? texel.r : texel.a));
         }
         else if (_2dTextureParams._numChannels == 3) {
             out_Color = vec4(abs(texel.rgb), 1.0);
