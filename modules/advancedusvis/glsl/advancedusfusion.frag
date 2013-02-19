@@ -127,10 +127,10 @@ void main() {
                 break;
             case 8:
                 out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
-                vec3 lab = rgb2lch(out_Color.xyz);
-                //lab.y = 100.0 * _hue * (1.0 - confidence) - 50.0;
-                //lab.z = 100.0 * _hue * (1.0 - confidence);
-                out_Color.xyz = lch2rgb(lab);
+                vec3 lch = rgb2lch(out_Color.xyz);
+                lch.z = 6.2831853 * _hue;
+                lch.y = 100.0 * (1.0 - confidence);
+                out_Color.xyz = lch2rgb(lch);
                 break;
             case 9:
                 float intensity = mix(blurred.a, (2.0 * texel.a - blurred.a), confidence);
@@ -140,7 +140,7 @@ void main() {
                 float lod = max(floor((1.0 - confidence) * 6.0), 0.0);
 
                 vec4 lodTexel = texture(_usImage, texCoord, lod);
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, lodTexel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, lodTexel.a);   
                 break;
         }
     }

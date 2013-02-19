@@ -29,11 +29,15 @@
 
 // The weights of RGB contributions to luminance.
 // Should sum to unity.
-const vec3 HCYwts_ = vec3(0.299, 0.587, 0.114);
+const vec3 colorspace_HcyWts_ = vec3(0.299, 0.587, 0.114);
+const vec3 colorspace_LabWts_ = vec3(95.0456, 100.0, 108.8754);
 
-float HCLgamma_ = 3.0;
-float HCLy0_ = 100;
-float HCLmaxL_ = 0.530454533953517;
+const float colorspace_pi_ = 3.14159265;
+const float colorspace_two_pi_ = 6.2831853;
+
+float colorspace_HclGamma_ = 3.0;
+float colorspace_HclY0_ = 100;
+float colorspace_HclMaxL_ = 0.530454533953517;
 
 /**
  * Converts pure Hue to RGB
@@ -97,7 +101,7 @@ vec3 hsl2rgb(in vec3 HSL) {
  */
 vec3 hcy2rgb(in vec3 HCY) {
     vec3 RGB = hue2rgb(HCY.x);
-    float Z = dot(RGB, HCYwts_);
+    float Z = dot(RGB, colorspace_HcyWts_);
     if (HCY.z < Z) {
         HCY.y *= HCY.z / Z;
     }
@@ -114,8 +118,8 @@ vec3 hcl2rgb(in vec3 HCL)
   if (HCL.z != 0.0) {
     float H = HCL.x;
     float C = HCL.y;
-    float L = HCL.z * HCLmaxL_;
-    float Q = exp((1.0 - C / (2.0 * L)) * (HCLgamma_ / HCLy0_));
+    float L = HCL.z * colorspace_HclMaxL_;
+    float Q = exp((1.0 - C / (2.0 * L)) * (colorspace_HclGamma_ / colorspace_HclY0_));
     float U = (2.0 * L - C) / (2.0 * Q - 1.0);
     float V = C / Q;
     float T = tan((H + min(fract(2.0 * H) / 4.0, fract(-2.0 * H) / 8.0)) * 6.283185307);
@@ -200,10 +204,10 @@ vec3 rgb2hcy(in vec3 RGB) {
     U = -min(RGB.r, min(RGB.g, RGB.b));
     V = max(RGB.r, max(RGB.g, RGB.b));
     HCY.y = V + U;
-    HCY.z = dot(RGB, HCYwts_);
+    HCY.z = dot(RGB, colorspace_HcyWts_);
     if (HCY.y != 0) {
         HCY.x = rgbcv2hue(RGB, HCY.y, V);
-        float Z = dot(hue2rgb(HCY.x), HCYwts_);
+        float Z = dot(hue2rgb(HCY.x), colorspace_HcyWts_);
         if (HCY.z > Z) {
             HCY.z = 1 - HCY.z;
             Z = 1 - Z;
@@ -219,7 +223,7 @@ vec3 rgb2hcl(in vec3 RGB) {
   float U, V;
   U = -min(RGB.r, min(RGB.g, RGB.b));
   V = max(RGB.r, max(RGB.g, RGB.b));
-  float Q = HCLgamma_ / HCLy0_;
+  float Q = colorspace_HclGamma_ / colorspace_HclY0_;
   HCL.y = V + U;
   if (HCL.y != 0.0)
   {
@@ -229,36 +233,8 @@ vec3 rgb2hcl(in vec3 RGB) {
   Q = exp(Q);
   HCL.x = fract(H / 2.0 - min(fract(H), fract(-H)) / 6.0);
   HCL.y *= Q;
-  HCL.z = mix(U, V, Q) / (HCLmaxL_ * 2.0);
+  HCL.z = mix(U, V, Q) / (colorspace_HclMaxL_ * 2.0);
   return HCL;
-}
-
-/**
- * Converts a color from RGB space to CIEXYZ space.
- * \see     http://wiki.labomedia.org/images/1/10/Orange_Book_-_OpenGL_Shading_Language_2nd_Edition.pdf
- * \param   colorRGB    color in RGB space
- * \return  The given color in CIEXYZ space.
- */
-vec3 rgb2ciexyz(in vec3 colorRGB) {
-    const mat3 conversionMatrix = mat3(
-        0.412453, 0.212671, 0.019334,
-        0.357580, 0.715160, 0.119193,
-        0.180423, 0.072169, 0.950227);
-    return colorRGB * conversionMatrix;
-}
-
-/**
- * Converts a color from CIEXYZ space to RGB space.
- * \see     http://wiki.labomedia.org/images/1/10/Orange_Book_-_OpenGL_Shading_Language_2nd_Edition.pdf
- * \param   colorCIEXYZ   color in CIEXYZ space
- * \return  The given color in RGB space.
- */
-vec3 ciexyz2rgb(in vec3 colorCIEXYZ) {
-    const mat3 conversionMatrix = mat3(
-        3.240479, -0.969256, 0.055648,
-        -1.537150, 1.875992, -0.204043,
-        -0.498535, 0.041556, 1.057311);
-    return colorCIEXYZ * conversionMatrix;
 }
 
 vec3 rgb2tsl(in vec3 RGB) {
@@ -276,7 +252,7 @@ vec3 rgb2tsl(in vec3 RGB) {
 
     TSL.y = sqrt(9.0 * (rs*rs + gs*gs) / 5.0);
 
-    TSL.z = dot(RGB, HCYwts_);
+    TSL.z = dot(RGB, colorspace_HcyWts_);
     return TSL;
 };
 
@@ -303,102 +279,107 @@ vec3 tsl2rgb(in vec3 TSL) {
 
 // ================================================================================================
 
-float lab_helper_F(in float p) {
-    if (p<0.008856)
-        return p*(841.0/108.0) + (4.0/29.0);
-    return pow(p,1.0/3.0);
+/**
+ * Converts a color from RGB space to CIE XYZ space.
+ * \see     http://easyrgb.com
+ * \param   RGB    color in RGB space
+ * \return  The given color in CIE XYZ space.
+ */
+vec3 rgb2xyz(in vec3 RGB) {
+    bvec3 tmp = greaterThan(RGB, vec3(0.04045));
+    RGB =   (vec3(tmp)      * pow((RGB + 0.055) / 1.055, vec3(2.4))) 
+          + (vec3(not(tmp)) * (RGB / 12.92));
+
+    RGB *= 100.0;
+
+    const mat3 conversionMatrix = mat3(
+        0.412453, 0.357580, 0.180423,
+        0.212671, 0.715160, 0.072169,
+        0.019334, 0.119193, 0.950227);
+    return RGB * conversionMatrix;
 }
 
+/**
+ * Converts a color from CIE XYZ space to RGB space.
+ * \see     http://easyrgb.com
+ * \param   XYZ   color in CIE XYZ space
+ * \return  The given color in RGB space.
+ */
+vec3 xyz2rgb(in vec3 XYZ) {
+    XYZ /= 100.0;
 
-vec3 xyz2lab(in vec3 XYZ) {
-    float fX = XYZ.x/0.950456;
-    float fY = XYZ.y/1.0;
-    float fZ = XYZ.z/1.088754;
-    fX = lab_helper_F(fX);
-    fY = lab_helper_F(fY);
-    fZ = lab_helper_F(fZ);
-    return vec3(116.0 * fY - 16.0,
-                500.0 * (fX - fY),
-                200.0 * (fY - fZ));
-}
+    const mat3 conversionMatrix = mat3(
+        3.240479, -1.537150, -0.498535,
+        -0.969256, 1.875992, 0.041556,
+        0.055648, -0.204043, 1.057311);
 
-float lab_helper_invF(in float p) {
-    float r = pow(p, 3.0);
-    if (r < 0.008856)
-        return (p - 4.0/29.0)*(108.0/841.0);
-    else
-        return r;
-}
-
-vec3 lab2xyz(in vec3 LAB) {
-    float Y = (LAB.x + 16.0)/116.0;
-    float X = Y + LAB.y/500.0;
-    float Z = Y - LAB.z/200.0;
-    X = 0.950456 * lab_helper_invF(X);
-    Y = 1.0 * lab_helper_invF(Y);
-    Z = 1.088754 * lab_helper_invF(Z);
-    return vec3(X, Y, Z);
+    bvec3 tmp = greaterThan(XYZ, vec3(0.0031308));
+    XYZ =   (vec3(tmp)      * (1.055 * pow(XYZ, vec3(1.0/2.4)) - 0.055))
+          + (vec3(not(tmp)) * (XYZ * 12.92));
+    
+    return XYZ;
 }
 
 // ================================================================================================
 
-const float lab_epsilon_ = 0.008856;
-const float lab_kappa_ = 903.3;
-const float pi_ = 3.14159265;
-const float two_pi_ = 6.2831853;
+/**
+ * Converts a color from XYZ space to L*a*b* space.
+ * \see     http://easyrgb.com
+ * \param   XYZ    color in XYZ space
+ * \return  The given color in L*a*b* space.
+ */
+vec3 xyz2lab(in vec3 XYZ) {
+    XYZ /= colorspace_LabWts_;
 
-float lab_helper_F2(in float p) {
-    if (p > lab_epsilon_)
-        return pow(p, 1.0/3.0);
-    else
-        return (lab_kappa_ * p + 16.0) / 116.0;
+    bvec3 mask = greaterThan(XYZ, vec3(0.008856));
+    XYZ =   (vec3(mask)      * pow(XYZ, vec3(1.0/3.0)))
+          + (vec3(not(mask)) * (7.787 * XYZ + 16.0/116.0));
+
+    return vec3(116.0 * XYZ.y - 16.0,
+                500.0 * (XYZ.x - XYZ.y),
+                200.0 * (XYZ.y - XYZ.z));
 }
 
-vec3 xyz2lab2(in vec3 XYZ) {
-    float fX = XYZ.x/0.950456;
-    float fY = XYZ.y/1.0;
-    float fZ = XYZ.z/1.088754;
-    fX = lab_helper_F2(fX);
-    fY = lab_helper_F2(fY);
-    fZ = lab_helper_F2(fZ);
-    return vec3(116.0 * fY - 16.0,
-                500.0 * (fX - fY),
-                200.0 * (fY - fZ));
+/**
+ * Converts a color from LAB space to XYZ space.
+ * \see     http://easyrgb.com
+ * \param   LAB    color in L*a*b* space
+ * \return  The given color in XYZ space.
+ */
+vec3 lab2xyz(in vec3 LAB) {
+    vec3 XYZ = vec3(0.0);
+    XYZ.y = (LAB.x + 16.0) / 116.0;
+    XYZ.x = LAB.y / 500.0 + XYZ.y;
+    XYZ.z = XYZ.y - LAB.z / 200.0;
+
+    bvec3 mask = greaterThan(pow(XYZ, vec3(3.0)), vec3(0.008856));
+    XYZ =   (vec3(mask)      * pow(XYZ, vec3(3.0)))
+          + (vec3(not(mask)) * ((XYZ - 16.0 / 116.0) / 7.787));
+
+    return XYZ * colorspace_LabWts_;
 }
 
-float lab_helper_invF2(in float p) {
-    float r = p*p*p;
-    if (r < 0.008856)
-        return (p-4.0/29.0)*(108.0/841.0);
-    else
-        return r;
-}
-
-vec3 lab2xyz2(in vec3 LAB) {
-    float yr = (LAB.x > lab_kappa_ * lab_epsilon_) ? pow((LAB.x + 16.0) / 116.0, 3.0) : LAB.x / lab_kappa_;
-
-    float fy = (yr > lab_epsilon_) ? (LAB.x + 16.0) / 116.0 : (lab_kappa_ * yr + 16.0) / 116.0;
-    float fx = LAB.y / 500.0 + fy;
-    float fz = fy - LAB.z / 200.0;
-
-    float xr = (pow(fx, 3.0) > lab_epsilon_) ? pow(fx, 3.0) : (fx * 116.0 - 16.0) / lab_kappa_;
-    float zr = (pow(fz, 3.0) > lab_epsilon_) ? pow(fz, 3.0) : (fz * 116.0 - 16.0) / lab_kappa_;
-
-    return vec3(
-        0.950456 * xr,
-        1.0 * yr,
-        1.088754 * zr);
-}
-
+/**
+ * Converts a color from L*a*b* space to L*C*H* space.
+ * \see     http://easyrgb.com
+ * \param   LAB    color in L*a*b* space
+ * \return  The given color in L*C*H* space.
+ */
 vec3 lab2lch(in vec3 LAB) {
     LAB.y = sqrt(pow(LAB.y, 2.0) + pow(LAB.z, 2.0));
     LAB.z = atan(LAB.z, LAB.y);
 
-    LAB.z = mod(LAB.z, two_pi_);
+    LAB.z = mod(LAB.z, colorspace_two_pi_);
 
     return LAB;
 }
 
+/**
+ * Converts a color from L*C*H* space to L*a*b* space.
+ * \see     http://easyrgb.com
+ * \param   LCH    color in L*C*H* space
+ * \return  The given color in L*a*b* space.
+ */
 vec3 lch2lab(in vec3 LCH) {
     float c = LCH.y;
     LCH.y = cos(LCH.z) * c;
@@ -406,18 +387,42 @@ vec3 lch2lab(in vec3 LCH) {
     return LCH;
 }
 
+/**
+ * Converts a color from RGB space to L*a*b* space.
+ * \see     http://easyrgb.com
+ * \param   RGB    color in RGB space
+ * \return  The given color in L*a*b* space.
+ */
 vec3 rgb2lab(in vec3 RGB) {
-    return xyz2lab(rgb2ciexyz(RGB));
+    return xyz2lab(rgb2xyz(RGB));
 }
 
+/**
+ * Converts a color from L*a*b* space to RGB space.
+ * \see     http://easyrgb.com
+ * \param   LAB    color in L*a*b* space
+ * \return  The given color in RGB space.
+ */
 vec3 lab2rgb(in vec3 LAB) {
-    return ciexyz2rgb(lab2xyz(LAB));
+    return xyz2rgb(lab2xyz(LAB));
 }
 
+/**
+ * Converts a color from RGB space to L*C*H* space.
+ * \see     http://easyrgb.com
+ * \param   RGB    color in RGB space
+ * \return  The given color in L*C*H* space.
+ */
 vec3 rgb2lch(in vec3 RGB) {
     return lab2lch(rgb2lab(RGB));
 }
 
+/**
+ * Converts a color from L*C*H* space to RGB space.
+ * \see     http://easyrgb.com
+ * \param   LCH    color in L*C*H* space
+ * \return  The given color in RGB space.
+ */
 vec3 lch2rgb(in vec3 LCH) {
     return lab2rgb(lch2lab(LCH));
 }

@@ -146,7 +146,8 @@ namespace campvis {
 
         _usFusion3.p_targetImageID.setValue("us.fused3");
         _usFusion3.p_targetImageID.connect(&_quadView.p_inputImage3);
-        _usFusion3.p_view.selectById("mappingChromacityHCY");
+        _usFusion3.p_view.selectById("mappingLAB");
+        _usFusion3.p_hue.setValue(0.22f);
 
         _usFusion4.p_targetImageID.setValue("us.fused4");
         _usFusion4.p_targetImageID.connect(&_quadView.p_inputImage4);

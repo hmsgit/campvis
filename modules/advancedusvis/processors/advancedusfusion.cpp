@@ -118,7 +118,7 @@ namespace campvis {
                     _shader->rebuild();
                 }
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA32F);
 
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
