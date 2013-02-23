@@ -31,11 +31,15 @@
 
 #include "tbb/tbb.h"
 #include "tgt/logmanager.h"
+#include "tgt/tgt_math.h"
+#include "tgt/vector.h"
+#include "core/tools/interval.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
 #include "modules/randomwalk/ext/RandomWalksLib/ConfidenceMaps2DFacade.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace campvis {
@@ -47,28 +51,26 @@ namespace campvis {
         GenericOption<std::string>("Eigen-CG-Custom", "Eigen-CG-Custom"),
     };
 
-
     class CMGenerator {
     public:
-        CMGenerator(const ImageRepresentationLocal* input, float* output, const std::string& solver, float alpha, float beta, float gamma, bool normalizeValues)
+        CMGenerator(
+            const ImageRepresentationLocal* input, float* output, const ConfidenceMapGenerator* processor)
             : _input(input)
             , _output(output)
-            , _solver(solver)
-            , _alpha(alpha)
-            , _beta(beta)
-            , _gamma(gamma)
-            , _normalizeValues(normalizeValues)
+            , _processor(processor)
         {
             tgtAssert(input != 0, "Pointer to Input must not be 0.");
             tgtAssert(output != 0, "Pointer to Output must not be 0.");
             _numElementsPerSlice = tgt::hmul(_input->getSize().xy());
+            _fanAngles = Interval<float>(_processor->p_angles.getValue());
+            _fanSize = Interval<float>(_processor->p_lengths.getValue());
         }
 
 
         void operator() (const tbb::blocked_range<size_t>& range) const {
             // Get each slice of the range through the confidence map generator
             ConfidenceMaps2DFacade _cmGenerator;
-            _cmGenerator.setSolver(_solver);
+            _cmGenerator.setSolver(_processor->p_solver.getOptionValue());
             std::vector<double> inputValues;
             const tgt::svec3& imageSize = _input->getSize();
             inputValues.resize(_numElementsPerSlice);
@@ -76,25 +78,74 @@ namespace campvis {
 
             for (size_t slice = range.begin(); slice < range.end(); ++slice) {
                 // Since the confidence map generator expects a vector of double, we need to copy the image data...
-                // meanwhile, we transform the pixel order to column-major:
-                for (size_t i = 0; i < _numElementsPerSlice; ++i) {
-                    size_t row = i / imageSize.y;
-                    size_t column = i % imageSize.y;
-                    size_t index = row + imageSize.x * column;
-                    inputValues[i] = static_cast<double>(_input->getElementNormalized(index + offset, 0));
+                if (! _processor->p_curvilinear.getValue()) {
+                    // meanwhile, we transform the pixel order to column-major:
+                    for (size_t i = 0; i < _numElementsPerSlice; ++i) {
+                        size_t row = i / imageSize.y;
+                        size_t column = i % imageSize.y;
+                        size_t index = row + imageSize.x * column;
+                        inputValues[i] = static_cast<double>(_input->getElementNormalized(index + offset, 0));
+                    }
+                }
+                else {
+                    // meanwhile, we transform the polar fan geometry to cartesian:
+                    // x, y are the indices of the target (column-major) array
+                    for (size_t y = 0; y < imageSize.x; ++y) {
+                        float phi = _fanAngles.getLeft() + static_cast<float>(y) / static_cast<float>(imageSize.x) * _fanAngles.size();
+                        for (size_t x = 0; x < imageSize.y; ++x) {
+                            float r = _fanSize.getLeft() + static_cast<float>(x) / static_cast<float>(imageSize.y) * _fanSize.size();
+
+                            tgt::vec3 cc(r * cos(phi) + _processor->p_origin.getValue().x, r * sin(phi) + _processor->p_origin.getValue().y, 0.f);
+                            tgtAssert(x + imageSize.y * y < _numElementsPerSlice, "asdasd");
+                            inputValues[x + imageSize.y * y] = static_cast<double>(_input->getElementNormalizedLinear(cc, 0));
+                        }
+                    }
                 }
 
                 // compute confidence map
-                _cmGenerator.setImage(inputValues, _input->getSize().y, _input->getSize().x, _alpha, _normalizeValues);
-                std::vector<double> tmp = _cmGenerator.computeMap(_beta, _gamma);
+                _cmGenerator.setImage(inputValues, _input->getSize().y, _input->getSize().x, _processor->p_alpha.getValue(), _processor->p_normalizeValues.getValue());
+                std::vector<double> tmp = _cmGenerator.computeMap(_processor->p_beta.getValue(), _processor->p_gamma.getValue());
 
                 // copy back
-                for (size_t i = 0; i < _numElementsPerSlice; ++i) {
-                    size_t row = i / imageSize.y;
-                    size_t column = i % imageSize.y;
-                    size_t index = row + imageSize.x * column;
-                    _output[index + offset] = static_cast<float>(tmp[i]);
+                if (! _processor->p_curvilinear.getValue()) {
+                    for (size_t i = 0; i < _numElementsPerSlice; ++i) {
+                        size_t row = i / imageSize.y;
+                        size_t column = i % imageSize.y;
+                        size_t index = row + imageSize.x * column;
+                        _output[index + offset] = static_cast<float>(tmp[i]);
+                    }
                 }
+                else {
+                    // transform cartesian back to polar coordinates
+                    // x, y are the indices of the target (row-major) array
+                    for (size_t y = 0; y < imageSize.y; ++y) {
+                        for (size_t x = 0; x < imageSize.x; ++x) {
+                            float dx = static_cast<float>(x) - _processor->p_origin.getValue().x;
+                            float dy = static_cast<float>(y) - _processor->p_origin.getValue().y;
+
+                            float r = (sqrt(dx*dx + dy*dy) - _fanSize.getLeft()) / _fanSize.size();
+                            float phi = atan2(dy, dx);
+                            if (phi < 0.f)
+                                phi += 2.f * tgt::PIf;
+
+                            phi = (phi - _fanAngles.getLeft()) / _fanAngles.size();
+
+                            // for now just nearest neighbour sampling:
+                            int column = tgt::iround(r * imageSize.y);
+                            int row = tgt::iround(phi * imageSize.x);
+                            if (column > 0 && column < static_cast<int>(imageSize.y) && row > 0 && row < static_cast<int>(imageSize.x)) {
+                                tgtAssert(x + imageSize.x * y < _numElementsPerSlice, "asdasd2");
+                                tgtAssert(column + imageSize.y * row < _numElementsPerSlice, "asdasd3");
+                                _output[x + imageSize.x * y] = tmp[column + imageSize.y * row];
+                            }
+                            else {
+                                _output[x + imageSize.x * y] = 0.f;
+                            }
+                        }
+                    }
+
+                }
+                //std::copy(inputValues.begin(), inputValues.end(), _output);
 
                 offset += _numElementsPerSlice;
             }
@@ -103,11 +154,10 @@ namespace campvis {
         const ImageRepresentationLocal* _input;
         float* _output;
         size_t _numElementsPerSlice;
-        std::string _solver;
-        float _alpha;
-        float _beta;
-        float _gamma;
-        bool _normalizeValues;
+        const ConfidenceMapGenerator* _processor;
+
+        Interval<float> _fanAngles;
+        Interval<float> _fanSize;
     };
 
 // ================================================================================================
@@ -123,6 +173,11 @@ namespace campvis {
         , p_gamma("Gamma", "Gamma Parameter", .06f, .01f, 1.f)
         , p_normalizeValues("NormalizeValues", "Noramlize Values", false)
         , p_solver("FilterMode", "Filter Mode", solvers, 4)
+        , p_curvilinear("Curvilinear", "Curvilinear Transducer?", false)
+        , p_origin("PolarOrigin", "Polar Origin", tgt::vec2(0.f), tgt::vec2(-1000.f), tgt::vec2(1000.f))
+        , p_angles("PolarAngles", "Polar Angles", tgt::vec2(0.f, 1.f), tgt::vec2(0.f), tgt::vec2(1000.f))
+        , p_lengths("PolarLengths", "Polar Lengths", tgt::vec2(0.f, 100.f), tgt::vec2(0.f), tgt::vec2(1000.f))
+        
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_targetImageID);
@@ -131,6 +186,10 @@ namespace campvis {
         addProperty(&p_gamma);
         addProperty(&p_normalizeValues);
         addProperty(&p_solver);
+        addProperty(&p_curvilinear);
+        addProperty(&p_origin);
+        addProperty(&p_angles);
+        addProperty(&p_lengths);
     }
 
     ConfidenceMapGenerator::~ConfidenceMapGenerator() {
@@ -147,9 +206,9 @@ namespace campvis {
 
             tbb::parallel_for(
                 tbb::blocked_range<size_t>(0, imageSize.z),
-                CMGenerator(input, outputValues, p_solver.getOptionValue(), p_alpha.getValue(), p_beta.getValue(), p_gamma.getValue(), p_normalizeValues.getValue()));
+                CMGenerator(input, outputValues, this));
 
-            ImageData* output = new ImageData(input->getDimensionality(), input->getSize(), 1);
+            ImageData* output = new ImageData(input->getDimensionality(), tgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
             GenericImageRepresentationLocal<float, 1>* confidenceMap = GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
             data.addData(p_targetImageID.getValue(), output);
             p_targetImageID.issueWrite();

@@ -35,6 +35,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
+#include "core/properties/optionproperty.h"
 
 namespace tgt {
     class Shader;
@@ -80,7 +81,7 @@ namespace campvis {
 
         StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image
-        BoolProperty p_useRenderTarget;     ///< Flag whether to read into a render target
+        GenericOptionProperty<std::string> p_importType;
 
     protected:
         tgt::Shader* _shader;

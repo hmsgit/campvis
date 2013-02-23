@@ -2,6 +2,7 @@
 #define INTERVAL_H__
 
 #include "tgt/tgt_math.h"
+#include "tgt/vector.h"
 #include <limits>
 
 namespace campvis {
@@ -34,6 +35,12 @@ namespace campvis {
          * \param   rightOpen   Flag whether right interval border is open, defaults to false
          */
         Interval(T left, T right, bool leftOpen=false, bool rightOpen=false);
+
+        /**
+         * Creates a new closed Interval<T> with the given vec2 as values
+         * \param   vec     Vector with interval borders
+         */
+        explicit Interval(const tgt::Vector2<T>& vec);
 
         /**
          * Destructor
@@ -192,7 +199,6 @@ namespace campvis {
     };
 
 
-
     // ---------------------------------------- implementation ----------------------------------------
 
     template<typename T>
@@ -219,6 +225,17 @@ namespace campvis {
         , _leftOpen(leftOpen)
         , _rightOpen(rightOpen)
     {}
+
+    template<typename T>
+    Interval<T>::Interval(const tgt::Vector2<T>& vec)
+        : _left(vec.x)
+        , _right(vec.y)
+        , _leftOpen(false)
+        , _rightOpen(false)
+    {
+        if (_left > _right)
+            std::swap(_left, _right);
+    }
 
     template<typename T>
     Interval<T>::~Interval() {

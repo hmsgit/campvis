@@ -99,7 +99,6 @@ namespace campvis {
         // = X-Ray Setup ==================================================================================
         _xrayReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CarmXrayImages\\APView_1.jpg");
         _xrayReader.p_targetImageID.setValue("xray.image");
-        _xrayReader.p_useRenderTarget.setValue(true);
 
         // = CT Setup =====================================================================================
 

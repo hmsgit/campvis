@@ -306,12 +306,12 @@ vec3 rgb2xyz(in vec3 RGB) {
  * \return  The given color in RGB space.
  */
 vec3 xyz2rgb(in vec3 XYZ) {
-    XYZ /= 100.0;
-
     const mat3 conversionMatrix = mat3(
         3.240479, -1.537150, -0.498535,
         -0.969256, 1.875992, 0.041556,
         0.055648, -0.204043, 1.057311);
+
+    XYZ = XYZ * conversionMatrix / 100.0;
 
     bvec3 tmp = greaterThan(XYZ, vec3(0.0031308));
     XYZ =   (vec3(tmp)      * (1.055 * pow(XYZ, vec3(1.0/2.4)) - 0.055))
@@ -357,6 +357,41 @@ vec3 lab2xyz(in vec3 LAB) {
           + (vec3(not(mask)) * ((XYZ - 16.0 / 116.0) / 7.787));
 
     return XYZ * colorspace_LabWts_;
+}
+
+/**
+ * Converts a color from XYZ space to Hunter L*a*b* space.
+ * \see     http://easyrgb.com
+ * \param   XYZ    color in XYZ space
+ * \return  The given color in Hunter L*a*b* space.
+ */
+vec3 xyz2hlab(in vec3 XYZ) {
+    vec3 hLab = vec3(0.0);
+
+    hLab.x = 10.0 * sqrt(XYZ.y);
+    hLab.y = 17.5 * (((1.02 * XYZ.x) - XYZ.y) / sqrt(XYZ.y));
+    hLab.z = 7.0 * ((XYZ.y - (0.847 * XYZ.z)) / sqrt(XYZ.y));
+
+    return hLab;
+}
+
+/**
+ * Converts a color from Hunter L*a*b* space to XYZ space.
+ * \see     http://easyrgb.com
+ * \param   LAB    color in Hunter L*a*b* space
+ * \return  The given color in XYZ space.
+ */
+vec3 hlab2xyz(in vec3 LAB) {
+    vec3 XYZ = vec3(0.0);
+
+    XYZ.y = pow(LAB.x / 10.0, 2.0);
+    XYZ.x = LAB.y / 17.5 * LAB.x / 10.0;
+    XYZ.z = LAB.z / 7.0 * LAB.x / 10.0;
+
+    XYZ.x = (XYZ.x + LAB.y) / 1.02;
+    XYZ.z = -(XYZ.z - LAB.y) / 0.847;
+
+    return XYZ;
 }
 
 /**

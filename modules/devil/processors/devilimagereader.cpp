@@ -48,16 +48,22 @@
 namespace campvis {
     const std::string DevilImageReader::loggerCat_ = "CAMPVis.modules.io.DevilImageReader";
 
+    GenericOption<std::string> importOptions[3] = {
+        GenericOption<std::string>("rt", "Render Target"),
+        GenericOption<std::string>("texture", "OpenGL Texture"),
+        GenericOption<std::string>("localIntensity", "Local Intensity Image")
+    };
+
     DevilImageReader::DevilImageReader(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
-        , p_useRenderTarget("UseRenderTarget", "Read Into RenderTarget", false)
+        , p_importType("ImportType", "Import Type", importOptions, 3)
         , _devilTextureReader(0)
     {
         addProperty(&p_url);
         addProperty(&p_targetImageID);
-        addProperty(&p_useRenderTarget);
+        addProperty(&p_importType);
 
         _devilTextureReader = new tgt::TextureReaderDevil();
     }
@@ -81,7 +87,7 @@ namespace campvis {
     void DevilImageReader::process(DataContainer& data) {
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
         if (tex != 0) {
-            if (p_useRenderTarget.getValue()) {
+            if (p_importType.getOptionValue() == "rt") {
                 ImageData id (2, tex->getDimensions(), tex->getNumChannels());
                 ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
 
@@ -113,9 +119,30 @@ namespace campvis {
                 data.addData(p_targetImageID.getValue(), rt.first);
                 p_targetImageID.issueWrite();
             }
-            else {
+            else if (p_importType.getOptionValue() == "texture") {
                 ImageData* id = new ImageData(2, tex->getDimensions(), tex->getNumChannels());
                 ImageRepresentationGL::create(id, tex);
+                data.addData(p_targetImageID.getValue(), id);
+                p_targetImageID.issueWrite();
+            }
+            else if (p_importType.getOptionValue() == "localIntensity") {
+                // TODO: Clean up pre-MICCAI mess!
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                tex->downloadTexture();
+                size_t numElements = tgt::hmul(tex->getDimensions());
+                ImageData* id = new ImageData(2, tex->getDimensions(), 1);
+
+                // TODO: use macro magic to switch through the different data types and number of channels
+                if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
+                    tgt::Vector3<uint8_t>* data = reinterpret_cast<tgt::Vector3<uint8_t>*>(tex->getPixelData());
+                    uint8_t* copy = new uint8_t[numElements];
+                    for (size_t i = 0; i < numElements; ++i) {
+                        copy[i] = data[i].x;
+                    }
+                    GenericImageRepresentationLocal<uint8_t, 1>::create(id, copy);
+                }
+
+                delete tex;
                 data.addData(p_targetImageID.getValue(), id);
                 p_targetImageID.issueWrite();
             }

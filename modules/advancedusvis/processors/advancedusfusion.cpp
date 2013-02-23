@@ -44,7 +44,7 @@
 namespace campvis {
     const std::string AdvancedUsFusion::loggerCat_ = "CAMPVis.modules.vis.AdvancedUsFusion";
 
-    GenericOption<std::string> viewOptions[11] = {
+    GenericOption<std::string> viewOptions[12] = {
         GenericOption<std::string>("us", "Ultrasound Only"),
         GenericOption<std::string>("smoothed", "Smoothed US Only"),
         GenericOption<std::string>("sharpened", "Sharpened US Only"),
@@ -53,7 +53,8 @@ namespace campvis {
         GenericOption<std::string>("mappingSaturationTSL", "Mapping Uncertainty to Saturation (TSL)"),
         GenericOption<std::string>("mappingChromacityHCL", "Mapping Uncertainty to Chromacity (HCL)"),
         GenericOption<std::string>("mappingChromacityHCY", "Mapping Uncertainty to Chromacity (HCY)"),
-        GenericOption<std::string>("mappingLAB", "Mapping Uncertainty L*a*b"),
+        GenericOption<std::string>("mappingLAB", "Mapping Uncertainty L*a*b*"),
+        GenericOption<std::string>("mappingHunterLAB", "Mapping Uncertainty Hunter L*a*b*"),
         GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness"),
         GenericOption<std::string>("pixelate", "Pixelate (Experimental)")
     };
@@ -67,7 +68,7 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , p_view("View", "Image to Render", viewOptions, 11)
+        , p_view("View", "Image to Render", viewOptions, 12)
         , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f)
         , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)

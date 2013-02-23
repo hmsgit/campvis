@@ -38,6 +38,7 @@
 namespace campvis {
     /**
      * Creates Confidence Maps for Ultrasound Images.
+     * TODO: Clean up pre-MICCAI mess!
      */
     class ConfidenceMapGenerator : public AbstractProcessor {
     public:
@@ -66,6 +67,12 @@ namespace campvis {
         FloatProperty p_gamma;                          ///< Gamma Parameter
         BoolProperty p_normalizeValues;                 ///< Flag whether to normalize the values before computation
         GenericOptionProperty<std::string> p_solver;    ///< Solver to use
+
+        BoolProperty p_curvilinear;
+        Vec2Property p_origin;
+        Vec2Property p_angles;
+        Vec2Property p_lengths;
+
 
     protected:
 
