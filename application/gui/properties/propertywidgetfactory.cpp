@@ -30,6 +30,7 @@
 #include "propertywidgetfactory.h"
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/buttonpropertywidget.h"
 #include "application/gui/properties/boolpropertywidget.h"
 #include "application/gui/properties/camerapropertywidget.h"
 #include "application/gui/properties/intpropertywidget.h"
@@ -52,6 +53,9 @@ namespace campvis {
 
         if (BoolProperty* tester = dynamic_cast<BoolProperty*>(property)) {
             return new BoolPropertyWidget(tester);
+        }
+        if (ButtonProperty* tester = dynamic_cast<ButtonProperty*>(property)) {
+            return new ButtonPropertyWidget(tester);
         }
 
         // OptionProperty must test before IntProperty
