@@ -67,6 +67,7 @@ namespace campvis {
         FloatProperty p_gamma;                          ///< Gamma Parameter
         BoolProperty p_normalizeValues;                 ///< Flag whether to normalize the values before computation
         GenericOptionProperty<std::string> p_solver;    ///< Solver to use
+        IntProperty p_numSteps;
 
         BoolProperty p_curvilinear;
         Vec2Property p_origin;

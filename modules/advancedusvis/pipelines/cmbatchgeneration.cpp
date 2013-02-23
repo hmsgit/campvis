@@ -33,8 +33,18 @@
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/job.h"
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+#include <IL/il.h>
+#include <IL/ilu.h>
+#endif
+
+#include <sstream>
+#include <iomanip>
 
 namespace campvis {
 
@@ -44,11 +54,20 @@ namespace campvis {
         , _confidenceGenerator()
         , _usBlurFilter()
         , _usFusion(_effectiveRenderTargetSize)
+        , p_sourcePath("SourcePath", "Source Files Path", "")
+        , p_targetPath("TargetPath", "Target Files Path", "")
+        , p_range("Range", "Files Range", tgt::ivec2(0, 1), tgt::ivec2(0, 0), tgt::ivec2(10000, 10000))
+        , p_execute("Execute", "Execute Batch Pipeline")
     {
         addProcessor(&_usReader);
         addProcessor(&_confidenceGenerator);
         addProcessor(&_usFusion);
         addProcessor(&_usBlurFilter);
+
+        addProperty(&p_sourcePath);
+        addProperty(&p_targetPath);
+        addProperty(&p_range);
+        addProperty(&p_execute);
     }
 
     CmBatchGeneration::~CmBatchGeneration() {
@@ -57,12 +76,11 @@ namespace campvis {
     void CmBatchGeneration::init() {
         VisualizationPipeline::init();
 
-        _usReader.s_validated.connect(this, &CmBatchGeneration::onProcessorValidated);
+        p_sourcePath.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\bl01");
+        p_targetPath.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\bl01cm");
+        p_range.setValue(tgt::ivec2(0, 1));
+        p_execute.s_clicked.connect(this, &CmBatchGeneration::execute);
 
-
-        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\CurefabCS\\Stent_Patient_ B-Mode_2013-02-11T14.56.46z\\01_us.mhd");
-        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\BMode_01.mhd");
-        //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel");
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\us.png");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_importType.selectById("localIntensity");
@@ -73,10 +91,10 @@ namespace campvis {
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
         _confidenceGenerator.p_targetImageID.connect(&_usFusion.p_confidenceImageID);
         _confidenceGenerator.p_curvilinear.setValue(true);
-        //_confidenceGenerator.p_origin.setValue(tgt::vec2(320.f, 444s.f));
-        //_confidenceGenerator.p_angles.setValue(tgt::vec2(225.f / 180.f * tgt::PIf, 315.f / 180.f * tgt::PIf));
-        _confidenceGenerator.p_origin.setValue(tgt::vec2(320.f, 35.f));
-        _confidenceGenerator.p_angles.setValue(tgt::vec2(45.f / 180.f * tgt::PIf, 135.f / 180.f * tgt::PIf));
+        _confidenceGenerator.p_origin.setValue(tgt::vec2(320.f, 444.f));
+        _confidenceGenerator.p_angles.setValue(tgt::vec2(225.f / 180.f * tgt::PIf, 315.f / 180.f * tgt::PIf));
+        //_confidenceGenerator.p_origin.setValue(tgt::vec2(320.f, 35.f));
+        //_confidenceGenerator.p_angles.setValue(tgt::vec2(45.f / 180.f * tgt::PIf, 135.f / 180.f * tgt::PIf));
         _confidenceGenerator.p_lengths.setValue(tgt::vec2(0.f, 410.f));
 
         _usFusion.p_targetImageID.setValue("us.fused");
@@ -102,35 +120,80 @@ namespace campvis {
     }
 
     void CmBatchGeneration::execute() {
-/*
-        if (!_usReader.getInvalidationLevel().isValid()) {
-            SimpleJobProc.enqueueJob(makeJob(this, &CmBatchGeneration::foobar));
-        }
-        if (!_usDenoiseilter.getInvalidationLevel().isValid()) {
-            SimpleJobProc.enqueueJob(makeJob<CmBatchGeneration, AbstractProcessor*>(this, &CmBatchGeneration::executeProcessor, &_usDenoiseilter));
-        }
-        if (!_confidenceGenerator.getInvalidationLevel().isValid()) {
-            SimpleJobProc.enqueueJob(makeJob<CmBatchGeneration, AbstractProcessor*>(this, &CmBatchGeneration::executeProcessor, &_confidenceGenerator));
-        }
+        if (p_range.getValue().x > p_range.getValue().y)
+            return;
 
-
-        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
-            if (! (*it)->getInvalidationLevel().isValid())
-                lockGLContextAndExecuteProcessor(*it);
-        }*/
-    }
-
-    void CmBatchGeneration::keyEvent(tgt::KeyEvent* e) {
+        for (int i = p_range.getValue().x; i < p_range.getValue().y; ++i) {
+            GLJobProc.enqueueJob(_canvas, makeJobOnHeap(this, &CmBatchGeneration::executePass, i), OpenGLJobProcessor::SerialJob);
+        }
     }
 
     const std::string CmBatchGeneration::getName() const {
         return "CmBatchGeneration";
     }
 
-    void CmBatchGeneration::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor = &_usReader) {
+    void CmBatchGeneration::onProcessorInvalidated(AbstractProcessor* processor) {
+        // do nothing here - we do our own evaluation
+    }
 
+    void CmBatchGeneration::executePass(int path) {
+        std::stringstream ss;
+
+        // set up processors:
+        ss << p_sourcePath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".tga";
+        _usReader.p_url.setValue(ss.str());
+
+        executeProcessor(&_usReader);
+
+        DataHandle dh = _data.getData(_usReader.p_targetImageID.getValue());
+        if (dh.getData() != 0) {
+            if (const ImageData* tester = dynamic_cast<const ImageData*>(dh.getData())) {
+            	_canvasSize.setValue(tester->getSize().xy());
+            }
         }
+
+        executeProcessor(&_confidenceGenerator);
+        executeProcessor(&_usBlurFilter);
+        executeProcessor(&_usFusion);
+
+        // get result
+        ImageRepresentationRenderTarget::ScopedRepresentation repRT(_data, _usFusion.p_targetImageID.getValue());
+        if (repRT != 0) {
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+            std::stringstream sss;
+            sss << p_targetPath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".png";
+            std::string filename = sss.str();
+            if (tgt::FileSystem::fileExtension(filename).empty()) {
+                LERROR("Filename has no extension");
+                return;
+            }
+
+            // get color buffer content
+            GLubyte* colorBuffer = repRT->getColorTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_SHORT);
+            tgt::ivec2 size = repRT->getSize().xy();
+
+            // create Devil image from image data and write it to file
+            ILuint img;
+            ilGenImages(1, &img);
+            ilBindImage(img);
+
+            // put pixels into IL-Image
+            ilTexImage(size.x, size.y, 1, 4, IL_RGBA, IL_UNSIGNED_SHORT, colorBuffer);
+            ilEnable(IL_FILE_OVERWRITE);
+            ilResetWrite();
+            ILboolean success = ilSaveImage(filename.c_str());
+            ilDeleteImages(1, &img);
+
+            delete[] colorBuffer;
+
+            if (!success) {
+                LERROR("Could not save image to file: " << ilGetError());
+            }
+#else
+            return;
+#endif
+        }
+
     }
 
 }

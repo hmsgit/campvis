@@ -31,9 +31,6 @@
 #define CMBATCHGENERATION_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -47,6 +44,9 @@
 #include "modules/vis/processors/simpleraycaster.h"
 #include "modules/vis/processors/quadview.h"
 #include "modules/randomwalk/processors/confidencemapgenerator.h"
+
+#include "core/properties/buttonproperty.h"
+#include "core/properties/genericproperty.h"
 
 namespace campvis {
     class CmBatchGeneration : public VisualizationPipeline {
@@ -73,23 +73,27 @@ namespace campvis {
         /**
          * Execute this pipeline.
          **/
-        virtual void execute();
-
-        virtual void keyEvent(tgt::KeyEvent* e);
-
+        void execute();
+        
     protected:
-
         /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
+         * Slot getting called when one of the observed processors got invalidated.
+         * Overwrites the default behaviour to do nothing.
          */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
+        virtual void onProcessorInvalidated(AbstractProcessor* processor);
+
+        void executePass(int path);
 
         DevilImageReader _usReader;
         ConfidenceMapGenerator _confidenceGenerator;
         ItkImageFilter _usBlurFilter;
         AdvancedUsFusion _usFusion;
+
+        StringProperty p_sourcePath;
+        StringProperty p_targetPath;
+        IVec2Property p_range;
+
+        ButtonProperty p_execute;
     };
 }
 

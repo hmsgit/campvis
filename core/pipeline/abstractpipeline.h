@@ -144,7 +144,7 @@ namespace campvis {
 
         /**
          * Slot getting called when one of the observed processors got invalidated.
-         * The default behaviour is just to set the invalidation level to invalid.
+         * The default behaviour is to dispatch a job to execute the invalidated processor and emit the s_invalidated signal.
          * \param   processor   The processor that emitted the signal
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);

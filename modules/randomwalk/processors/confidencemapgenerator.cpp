@@ -70,7 +70,7 @@ namespace campvis {
         void operator() (const tbb::blocked_range<size_t>& range) const {
             // Get each slice of the range through the confidence map generator
             ConfidenceMaps2DFacade _cmGenerator;
-            _cmGenerator.setSolver(_processor->p_solver.getOptionValue());
+            _cmGenerator.setSolver(_processor->p_solver.getOptionValue(), _processor->p_numSteps.getValue());
             std::vector<double> inputValues;
             const tgt::svec3& imageSize = _input->getSize();
             inputValues.resize(_numElementsPerSlice);
@@ -145,8 +145,6 @@ namespace campvis {
                     }
 
                 }
-                //std::copy(inputValues.begin(), inputValues.end(), _output);
-
                 offset += _numElementsPerSlice;
             }
         }
@@ -173,6 +171,7 @@ namespace campvis {
         , p_gamma("Gamma", "Gamma Parameter", .06f, .01f, 1.f)
         , p_normalizeValues("NormalizeValues", "Noramlize Values", false)
         , p_solver("FilterMode", "Filter Mode", solvers, 4)
+        , p_numSteps("NumSteps", "Number of Solver Steps", 1000, 100, 5000)
         , p_curvilinear("Curvilinear", "Curvilinear Transducer?", false)
         , p_origin("PolarOrigin", "Polar Origin", tgt::vec2(0.f), tgt::vec2(-1000.f), tgt::vec2(1000.f))
         , p_angles("PolarAngles", "Polar Angles", tgt::vec2(0.f, 1.f), tgt::vec2(0.f), tgt::vec2(1000.f))
@@ -186,6 +185,7 @@ namespace campvis {
         addProperty(&p_gamma);
         addProperty(&p_normalizeValues);
         addProperty(&p_solver);
+        addProperty(&p_numSteps);
         addProperty(&p_curvilinear);
         addProperty(&p_origin);
         addProperty(&p_angles);
@@ -212,12 +212,12 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* confidenceMap = GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
             data.addData(p_targetImageID.getValue(), output);
             p_targetImageID.issueWrite();
+
+            validate(INVALID_RESULT);
         }
         else {
             LDEBUG("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
 }
