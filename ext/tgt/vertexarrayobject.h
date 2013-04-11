@@ -37,10 +37,10 @@ namespace tgt {
          * \param   index         Index of the generic vertex attribute to be modified.
          * \param   bufferObject  BufferObject to bind
          */
-        VertexAttribute(size_t index, BufferObject* bufferObject, size_t stride, size_t offset);
+        VertexAttribute(GLuint index, BufferObject* bufferObject, GLsizei stride, size_t offset);
 
-        size_t _index;                      ///< Index of the generic vertex attribute to be modified.
-        size_t _stride;                     ///< Specifies the byte offset between consecutive generic vertex attributes.
+        GLuint _index;                      ///< Index of the generic vertex attribute to be modified.
+        GLsizei _stride;                    ///< Specifies the byte offset between consecutive generic vertex attributes.
         size_t _offset;                     ///< Offset in bytes to the first element in the buffer.
 
         BufferObject* _bufferObject;        ///< BufferObject that is bound to this VertexAttribute.
@@ -100,7 +100,7 @@ namespace tgt {
          * \param   offset 
          * \return  
          */
-        size_t addVertexAttribute(AttributeType attributeType, BufferObject* bufferObject, size_t stride = 0, size_t offset = 0, bool enable = true);
+        size_t addVertexAttribute(AttributeType attributeType, BufferObject* bufferObject, GLsizei stride = 0, size_t offset = 0, bool enable = true);
 
         /**
          *
@@ -109,7 +109,7 @@ namespace tgt {
          * \param stride 
          * \param offset 
          */
-        void updateVertexAttribute(size_t index, BufferObject* bufferObject, size_t stride = 0, size_t offset = 0);
+        void updateVertexAttribute(size_t index, BufferObject* bufferObject, GLsizei stride = 0, size_t offset = 0);
 
         /**
          * Enables the VertexAttribute with the given index in the OpenGL client state.
@@ -151,7 +151,7 @@ namespace tgt {
          */
         static void initStaticMembers();
 
-        size_t _id;                                         ///< Id of the internal OpenGL handle to the VAO.
+        GLuint _id;                                         ///< Id of the internal OpenGL handle to the VAO.
         std::vector<VertexAttribute> _attributes;           ///< List of all VertexAttributes of this VAO.
         std::vector<bool> _enabledAttributes;               ///< List of the enabled VertexAttributes.
         std::map<AttributeType, size_t> _attributeTypeMap;  ///< Map of the AttributeTypes to their indices in the VertexAttributes list.

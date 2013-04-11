@@ -122,9 +122,9 @@ namespace campvis {
         LGL_ERROR;
 
         if (_vertices.size() > 2)
-            glDrawArrays(GL_POLYGON, 0, _vertices.size());
+            glDrawArrays(GL_POLYGON, 0, static_cast<GLsizei>(_vertices.size()));
         else
-            glDrawArrays(GL_LINES, 0, _vertices.size());
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices.size()));
         LGL_ERROR;
     }
 

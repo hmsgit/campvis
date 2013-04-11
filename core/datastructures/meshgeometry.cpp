@@ -100,9 +100,9 @@ namespace campvis {
             vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _normalsBuffer);
         LGL_ERROR;
 
-        size_t startIndex = 0;
+        GLint startIndex = 0;
         for (std::vector<FaceGeometry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it) {
-            size_t numVertices = it->getVertices().size();
+            GLsizei numVertices = static_cast<GLsizei>(it->getVertices().size());
             if (numVertices > 2)
                 glDrawArrays(GL_POLYGON, startIndex, numVertices);
             else

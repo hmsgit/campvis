@@ -128,7 +128,7 @@ namespace campvis {
         p_transferFunction.getTF()->setImageHandle(img);
         const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
         if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
-            p_sliceNumber.setMaxValue(imgSize.z - 1);
+            p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
     }
 

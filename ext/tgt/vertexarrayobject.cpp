@@ -8,7 +8,7 @@ namespace tgt {
 
     const std::string VertexAttribute::loggerCat_ = "tgt.VertexAttribute";
 
-    VertexAttribute::VertexAttribute(size_t index, BufferObject* bufferObject, size_t stride, size_t offset)
+    VertexAttribute::VertexAttribute(GLuint index, BufferObject* bufferObject, GLsizei stride, size_t offset)
         : _index(index)
         , _stride(stride)
         , _offset(offset)
@@ -19,7 +19,7 @@ namespace tgt {
         _bufferObject->bindToVertexAttribute(this);
         // Todo: implement normalized flag if needed
         _bufferObject->bind();
-        glVertexAttribPointer(_index, _bufferObject->getElementSize(), _bufferObject->getBaseType(), false, _stride, reinterpret_cast<void*>(_offset));
+        glVertexAttribPointer(_index, static_cast<GLint>(_bufferObject->getElementSize()), _bufferObject->getBaseType(), false, _stride, reinterpret_cast<void*>(_offset));
     }
 
     VertexAttribute::~VertexAttribute() {
@@ -70,7 +70,7 @@ namespace tgt {
 //         }
     }
 
-    size_t VertexArrayObject::addVertexAttribute(AttributeType attributeType, BufferObject* bufferObject, size_t stride /*= 0*/, size_t offset /*= 0*/, bool enableNow /*= true*/) {
+    size_t VertexArrayObject::addVertexAttribute(AttributeType attributeType, BufferObject* bufferObject, GLsizei stride /*= 0*/, size_t offset /*= 0*/, bool enableNow /*= true*/) {
         if (_attributes.size() > 16) {
             // TODO:    The better way would be to check glGet(GL_MAX_VERTEX_ATTRIBS), but the standard says 16 is the minimum
             //          number to be supported and that should be enough and I currently feel lazy. If you're reading this, 
@@ -86,7 +86,7 @@ namespace tgt {
         // bind and create VertexAttribute
         bind();
         size_t index = _attributes.size();
-        _attributes.push_back(VertexAttribute(index, bufferObject, stride, offset));
+        _attributes.push_back(VertexAttribute(static_cast<GLuint>(index), bufferObject, stride, offset));
 
         // add to attribute-type map
         if (attributeType != UnspecifiedAttribute)
@@ -99,18 +99,18 @@ namespace tgt {
         return index;
     }
 
-    void VertexArrayObject::updateVertexAttribute(size_t index, BufferObject* bufferObject, size_t stride /*= 0*/, size_t offset /*= 0*/) {
+    void VertexArrayObject::updateVertexAttribute(size_t index, BufferObject* bufferObject, GLsizei stride /*= 0*/, size_t offset /*= 0*/) {
         tgtAssert(index < _attributes.size(), "Index out of bounds.");
 
         bind();
-        _attributes[index] = VertexAttribute(index, bufferObject, stride, offset);
+        _attributes[index] = VertexAttribute(static_cast<GLuint>(index), bufferObject, stride, offset);
     }
 
     void VertexArrayObject::enableVertexAttribute(size_t index) {
         tgtAssert(index < _enabledAttributes.size(), "Index out of bounds.");
 
         bind();
-        glEnableVertexAttribArray(index);
+        glEnableVertexAttribArray(static_cast<GLuint>(index));
         _enabledAttributes[index] = true;
     }
 
@@ -123,7 +123,7 @@ namespace tgt {
         tgtAssert(index < _enabledAttributes.size(), "Index out of bounds.");
 
         bind();
-        glDisableVertexAttribArray(index);
+        glDisableVertexAttribArray(static_cast<GLuint>(index));
         _enabledAttributes[index] = false;
     }
 

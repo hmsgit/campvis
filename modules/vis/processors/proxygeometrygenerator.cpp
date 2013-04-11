@@ -66,13 +66,13 @@ namespace campvis {
         if (img != 0) {
             if (img->getDimensionality() == 3) {
                 if (img.getDataHandle().getTimestamp() != _sourceTimestamp) {
-                    p_clipX.setMaxValue(tgt::ivec2(img->getSize().x, img->getSize().x));
-                    p_clipY.setMaxValue(tgt::ivec2(img->getSize().y, img->getSize().y));
-                    p_clipZ.setMaxValue(tgt::ivec2(img->getSize().z, img->getSize().z));
+                    p_clipX.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().x), static_cast<int>(img->getSize().x)));
+                    p_clipY.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().y), static_cast<int>(img->getSize().y)));
+                    p_clipZ.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().z), static_cast<int>(img->getSize().z)));
 
-                    p_clipX.setValue(tgt::ivec2(0, img->getSize().x));
-                    p_clipY.setValue(tgt::ivec2(0, img->getSize().y));
-                    p_clipZ.setValue(tgt::ivec2(0, img->getSize().z));
+                    p_clipX.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().x)));
+                    p_clipY.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().y)));
+                    p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().z)));
                     _sourceTimestamp = img.getDataHandle().getTimestamp();
                 }
                 tgt::Bounds volumeExtent = img->getWorldBounds(tgt::svec3(p_clipX.getValue().x, p_clipY.getValue().x, p_clipZ.getValue().x), tgt::svec3(p_clipX.getValue().y, p_clipY.getValue().y, p_clipZ.getValue().y));

@@ -175,7 +175,7 @@ namespace campvis {
         if (repLocal != 0) {
             float mins = _intensityDomain.x;
             float maxs = _intensityDomain.y;
-            size_t numBuckets = std::min(WeaklyTypedPointer::numBytes(repLocal->getWeaklyTypedPointer()._baseType) << 8, 512U);
+            size_t numBuckets = std::min(WeaklyTypedPointer::numBytes(repLocal->getWeaklyTypedPointer()._baseType) << 8, static_cast<size_t>(512));
             _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, repLocal->getNumElements()), IntensityHistogramGenerator(repLocal, _intensityHistogram));
         }

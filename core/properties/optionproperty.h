@@ -113,7 +113,7 @@ namespace campvis {
             const std::string& name, 
             const std::string& title, 
             const GenericOption<T>* options,
-            size_t count,
+            int count,
             int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
@@ -155,7 +155,7 @@ namespace campvis {
          * Sets the selected option to the option with the given index.
          * \param   index   Index of the option to select in the option array.
          */
-        void selectByIndex(size_t index);
+        void selectByIndex(int index);
 
     protected:
         std::vector< GenericOption<T> > _options;
@@ -164,7 +164,7 @@ namespace campvis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, size_t count, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
+    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, int count, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
         : AbstractOptionProperty(name, title, invalidationLevel)
     {
         tgtAssert(options != 0, "Pointer to options array must not be 0.")
@@ -217,7 +217,7 @@ namespace campvis {
     }
 
     template<typename T>
-    void campvis::GenericOptionProperty<T>::selectByIndex(size_t index) {
+    void campvis::GenericOptionProperty<T>::selectByIndex(int index) {
         tgtAssert(index > 0 && index < _options.size(), "Index out of bounds.");
         setValue(index);
     }

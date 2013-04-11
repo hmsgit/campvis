@@ -84,7 +84,7 @@ namespace campvis {
             bool binary = false;
             std::string url;
             size_t dimensionality = 3;
-            tgt::svec3 size(0U);
+            tgt::svec3 size(static_cast<size_t>(0));
 
             tgt::vec3 voxelSize(1.f);
             tgt::vec3 imageOffset(0.f);
