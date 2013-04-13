@@ -130,6 +130,14 @@ namespace campvis {
             ShdrMgr.addPath(basePath);
             ShdrMgr.addPath(basePath + "/core/glsl");
 
+#ifdef CAMPVIS_SOURCE_DIR
+            {
+                std::string sourcePath = CAMPVIS_SOURCE_DIR;
+                ShdrMgr.addPath(sourcePath);
+                ShdrMgr.addPath(sourcePath + "/core/glsl");
+            }
+#endif
+
 #ifdef HAS_KISSCL
             if (_useOpenCL) {
                 CLRtm.addPath(basePath);

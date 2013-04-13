@@ -103,7 +103,7 @@ namespace campvis {
                 }
 
                 // compute confidence map
-                _cmGenerator.setImage(inputValues, _input->getSize().y, _input->getSize().x, _processor->p_alpha.getValue(), _processor->p_normalizeValues.getValue());
+                _cmGenerator.setImage(inputValues, static_cast<int>(_input->getSize().y), static_cast<int>(_input->getSize().x), _processor->p_alpha.getValue(), _processor->p_normalizeValues.getValue());
                 std::vector<double> tmp = _cmGenerator.computeMap(_processor->p_beta.getValue(), _processor->p_gamma.getValue());
 
                 // copy back

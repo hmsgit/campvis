@@ -44,18 +44,21 @@ SET(CampvisApplicationToBeMocced
     gui/properties/transferfunctionpropertywidget.h
 )
 
+LIST(APPEND CampvisApplicationDefinitions "-DCAMPVIS_SOURCE_DIR=\"${CampvisHome}\"")
+
 #
 # Qt related stuff:
 #
 FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
 QT4_WRAP_CPP(CampvisApplicationMoc ${CampvisApplicationToBeMocced})
 LIST(APPEND CampvisApplicationSources ${CampvisApplicationMoc})
-
 INCLUDE(${QT_USE_FILE})
+
+
 ADD_EXECUTABLE(campvis-application 
     ${CampvisApplicationSources} ${CampvisApplicationHeaders} 
     ${CampvisApplicationMoc}
 ) 
-ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})

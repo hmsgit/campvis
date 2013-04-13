@@ -128,7 +128,7 @@ namespace campvis {
     
     void ImageRepresentationRenderTarget::activate() {
         _fbo->activate();
-        glViewport(0, 0, getSize().x, getSize().y);
+        glViewport(0, 0, static_cast<GLsizei>(getSize().x), static_cast<GLsizei>(getSize().y));
     }
 
     void ImageRepresentationRenderTarget::deactivate() {
@@ -217,7 +217,7 @@ namespace campvis {
                     LWARNING("Tried to attach more color textures to FBO than supported, aborted.");
                     return;
                 }
-                attachment = GL_COLOR_ATTACHMENT0 + _colorTextures.size();
+                attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + _colorTextures.size());
                 break;
 
             case GL_DEPTH_COMPONENT16:

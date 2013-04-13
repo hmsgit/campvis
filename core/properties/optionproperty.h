@@ -209,7 +209,7 @@ namespace campvis {
     void campvis::GenericOptionProperty<T>::selectById(const std::string& id) {
         for (size_t i = 0; i < _options.size(); ++i) {
             if (_options[i]._id == id) {
-                setValue(i);
+                setValue(static_cast<int>(i));
                 return;
             }
         }

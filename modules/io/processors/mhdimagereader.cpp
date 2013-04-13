@@ -186,10 +186,12 @@ namespace campvis {
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
+            validate(INVALID_RESULT);
             return;
         }
         catch (std::exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
+            validate(INVALID_RESULT);
             return;
         }
 

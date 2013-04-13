@@ -68,7 +68,7 @@ namespace campvis {
             // this is a simple round-robing scheduling between all contexts:
             bool hadWork = false;
             // TODO: consider only non-empty context queues here
-            clock_t maxTimePerContext = 30 / _contexts.size();
+            clock_t maxTimePerContext = static_cast<clock_t>(30 / _contexts.size());
 
             for (size_t i = 0; i < _contexts.size(); ++i) {
                 clock_t startTimeCurrentContext = clock() * 1000 / CLOCKS_PER_SEC;
