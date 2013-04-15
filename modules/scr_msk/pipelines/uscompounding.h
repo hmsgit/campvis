@@ -27,48 +27,52 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
-
-using namespace campvis;
-
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
+#ifndef USCOMPOUNDING_H__
+#define USCOMPOUNDING_H__
 
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
+#include "core/datastructures/imagerepresentationlocal.h"
+#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/pipeline/visualizationpipeline.h"
+#include "core/properties/cameraproperty.h"
 
-    return toReturn;
+#include "modules/scr_msk/processors/trackedusfilereader.h"
+#include "modules/scr_msk/processors/trackedussweepframerenderer3d.h"
+
+namespace campvis {
+    class UsCompounding : public VisualizationPipeline {
+    public:
+        /**
+         * Creates a VisualizationPipeline. 
+         */
+        UsCompounding();
+
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~UsCompounding();
+
+        /// \see VisualizationPipeline::init()
+        virtual void init();
+
+        /// \see VisualizationPipeline::deinit()
+        virtual void deinit();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const;
+        
+    protected:
+        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+
+        void onBoundingBoxChanged(tgt::Bounds b);
+
+        CameraProperty p_camera;
+
+        TrackedUsFileReader _reader;
+        TrackedUsSweepFrameRenderer3D _renderer;
+
+        TrackballNavigationEventHandler* _trackballEH;
+    };
 }
+
+#endif // USCOMPOUNDING_H__

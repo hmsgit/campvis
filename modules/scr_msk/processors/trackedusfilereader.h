@@ -27,48 +27,52 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
+#ifndef TRACKEDUSFILEREADER_H__
+#define TRACKEDUSFILEREADER_H__
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
+#include <string>
 
-using namespace campvis;
+#include "core/pipeline/abstractprocessor.h"
+#include "core/properties/datanameproperty.h"
 
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
+namespace campvis {
+    /**
+     * Reads a MHD image file into the pipeline.
+     *
+     * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
+     */
+    class TrackedUsFileReader : public AbstractProcessor {
+    public:
+        /**
+         * Constructs a new TrackedUsFileReader Processor
+         **/
+        TrackedUsFileReader();
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
+        /**
+         * Destructor
+         **/
+        virtual ~TrackedUsFileReader();
 
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
+        /**
+         * Reads the MHD file into an ImageRepresentationDisk representation
+         * \param data  DataContainer to work on
+         */
+        virtual void process(DataContainer& data);
 
-    return toReturn;
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "TrackedUsFileReader"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
+
+        StringProperty p_url;               ///< URL for file to read
+        DataNameProperty p_targetImageID;   ///< image ID for read image
+
+    protected:
+
+        static const std::string loggerCat_;
+    };
+
 }
+
+#endif // TRACKEDUSFILEREADER_H__

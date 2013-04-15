@@ -27,48 +27,44 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
-
-using namespace campvis;
-
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
+#include "trackedusfilereader.h"
+#include "tgt/filesystem.h"
+#include "modules/scr_msk/datastructures/usinterfacedata.h"
 
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
+namespace campvis {
+    const std::string TrackedUsFileReader::loggerCat_ = "CAMPVis.modules.io.TrackedUsFileReader";
 
-    return toReturn;
+    TrackedUsFileReader::TrackedUsFileReader() 
+        : AbstractProcessor()
+        , p_url("url", "Image URL", "")
+        , p_targetImageID("targetImageName", "Target Image ID", "TrackedUsFileReader.output", DataNameProperty::WRITE)
+    {
+        addProperty(&p_url);
+        addProperty(&p_targetImageID);
+    }
+
+    TrackedUsFileReader::~TrackedUsFileReader() {
+
+    }
+
+    void TrackedUsFileReader::process(DataContainer& data) {
+        try {
+            std::string path = tgt::FileSystem::parentDir(p_url.getValue());
+            TrackedUSFileIO* fio = new TrackedUSFileIO();
+            fio->parse(path.c_str());
+            fio->open(0);
+
+            TrackedUsFileIoData* file = new TrackedUsFileIoData(fio);
+            data.addData(p_targetImageID.getValue(), file);
+            p_targetImageID.issueWrite();
+        }
+        catch (std::exception& e) {
+            LERROR("Error : " << e.what());
+            validate(INVALID_RESULT);
+            return;
+        }
+
+        validate(INVALID_RESULT);
+    }
 }

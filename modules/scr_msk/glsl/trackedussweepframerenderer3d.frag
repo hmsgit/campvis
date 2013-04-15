@@ -27,48 +27,25 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
+#version 330
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
+in vec3 ex_TexCoord;
+out vec4 out_Color;
 
-using namespace campvis;
+#include "tools/texture2d.frag"
+#include "tools/transferfunction.frag"
 
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
+uniform sampler2D _texture;
+uniform TextureParameters2D _textureParameters;
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
 
+void main() {
+    float intensity = getElement2DNormalized(_texture, _textureParameters, ex_TexCoord.xy).a;
+    out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
-
-    return toReturn;
+    // don't write fragment if fully transparent (in particular don't write to depth buffer!)
+    if (out_Color == 0.0)
+        discard;
 }
