@@ -54,6 +54,7 @@ QT4_WRAP_CPP(CampvisApplicationMoc ${CampvisApplicationToBeMocced})
 LIST(APPEND CampvisApplicationSources ${CampvisApplicationMoc})
 INCLUDE(${QT_USE_FILE})
 
+LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
 ADD_EXECUTABLE(campvis-application 
     ${CampvisApplicationSources} ${CampvisApplicationHeaders} 

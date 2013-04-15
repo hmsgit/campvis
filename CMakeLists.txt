@@ -31,6 +31,8 @@ ENDIF()
 include(cmake/commonconf.cmake)
 include(cmake/parseModulesDir.cmake)
 
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 
 IF(CAMPVIS_BUILD_LIB_TGT)
@@ -59,7 +61,7 @@ ENDIF()
 #
 IF(WIN32)
     # gather Qt4 DLLs - TODO: remove redundant naming of required components 
-    FIND_PACKAGE(Qt4DLLs COMPONENTS QtCore QtGui QtOpenGL)
+    FIND_PACKAGE(Qt4DLLs COMPONENTS QtCore QtGui QtOpenGL QtNetwork QtXmlPatterns)
     LIST(APPEND CampvisExternalDllsDebug ${QT_DEBUG_DLLS})
     LIST(APPEND CampvisExternalDllsRelease ${QT_RELEASE_DLLS})
 
