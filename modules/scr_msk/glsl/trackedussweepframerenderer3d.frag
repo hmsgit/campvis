@@ -42,10 +42,15 @@ uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
 void main() {
-    float intensity = getElement2DNormalized(_texture, _textureParameters, ex_TexCoord.xy).a;
-    out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
+    if (ex_TexCoord.x < 0.0) {
+        out_Color = vec4(1.0);
+    }
+    else  {
+        float intensity = getElement2DNormalized(_texture, _textureParameters, ex_TexCoord.xy).a;
+        out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
-    // don't write fragment if fully transparent (in particular don't write to depth buffer!)
-    if (out_Color == 0.0)
-        discard;
+        // don't write fragment if fully transparent (in particular don't write to depth buffer!)
+        if (out_Color == 0.0)
+            discard;
+    }
 }

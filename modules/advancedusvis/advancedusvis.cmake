@@ -13,3 +13,5 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 	modules/advancedusvis/pipelines/*.h
 	modules/advancedusvis/processors/*.h
 )
+
+SET(ThisModShaderDirectories "modules/advancedusvis/glsl")

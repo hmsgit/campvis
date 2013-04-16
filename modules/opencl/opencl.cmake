@@ -17,5 +17,5 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 	modules/opencl/processors/*.h
 )
 
-
 LIST(APPEND ThisModExternalLibs kisscl)
+SET(ThisModShaderDirectories "modules/opencl/cl")

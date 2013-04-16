@@ -38,3 +38,5 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 	modules/scr_msk/pipelines/*.h
 	modules/scr_msk/processors/*.h
 )
+
+SET(ThisModShaderDirectories "modules/scr_msk/glsl")

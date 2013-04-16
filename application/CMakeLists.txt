@@ -63,3 +63,15 @@ ADD_EXECUTABLE(campvis-application
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+
+IF(CAMPVIS_DEPLOY_SHADERS)
+    LIST(APPEND CampvisShaderDirectories "application/glsl")
+    LIST(APPEND CampvisShaderDirectories "core/glsl")
+
+    FOREACH(Directory ${CampvisShaderDirectories})
+        ADD_CUSTOM_COMMAND(
+            TARGET campvis-application
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CampvisHome}/${Directory}" "$<TARGET_FILE_DIR:campvis-application>/${Directory}"
+        )
+    ENDFOREACH()
+ENDIF(CAMPVIS_DEPLOY_SHADERS)

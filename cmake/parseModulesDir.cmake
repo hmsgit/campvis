@@ -39,6 +39,9 @@ FOREACH(ModDir ${ModDirs})
             LIST(APPEND CampvisExternalDllsDebug ${ThisModExternalDllsDebug})
             LIST(APPEND CampvisExternalDllsRelease ${ThisModExternalDllsRelease})
             
+            # add shader directory to deployment list
+            LIST(APPEND CampvisShaderDirectories ${ThisModShaderDirectories})
+            
             # add definition that this module is activated
             LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModDirUpper})
             
@@ -53,6 +56,7 @@ FOREACH(ModDir ${ModDirs})
             UNSET(ThisModCoreHeaders)
             UNSET(ThisModExternalDllsDebug)
             UNSET(ThisModExternalDllsRelease)
+            UNSET(ThisModShaderDirectories)
         ELSE()
             MESSAGE(STATUS "* Found Module '${ModDir}'")
         ENDIF(CAMPVIS_BUILD_MODULE_${ModDirUpper})

@@ -17,7 +17,9 @@ OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                 
 OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                                             ON )
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                          ON )
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON )
-OPTION(CAMPVIS_BUILD_LIB_KISSCL     "Build KissCL Library"                                          OFF )
+OPTION(CAMPVIS_BUILD_LIB_KISSCL     "Build KissCL Library"                                          OFF)
+
+OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
 
 IF(WIN32)
     OPTION(CAMPVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON )
@@ -52,9 +54,11 @@ IF(CAMPVIS_BUILD_MODULES)
     ADD_SUBDIRECTORY(modules)
 ENDIF()
 
+
 IF(CAMPVIS_BUILD_APPLICATION)
     ADD_SUBDIRECTORY(application)
 ENDIF()
+
 
 #
 # Copy External DLLs

@@ -55,25 +55,16 @@ MACRO(COPY_EXTERNAL_DLLS DebugDLLs ReleaseDLLs failOnError)
     ENDFOREACH()
 ENDMACRO()
 
-# adds custom commands to a target that copy the passed debug and release DLLs 
-# to the corresponding output directories (currently not in use)
-MACRO(ADD_COPY_DLL_COMMAND Target DebugDLLs ReleaseDLLs)
-    #MESSAGE(${${DebugDLLs}})
+MACRO(DEPLOY_DIRECTORY Target DirectoryList)
     MESSAGE(${Target})
-    FOREACH(dll ${${DebugDLLs}})
-        MESSAGE(${dll})
+    MESSAGE(${DirectoryList})
+    FOREACH(Directory ${DirectoryList})
         ADD_CUSTOM_COMMAND(
             TARGET ${Target}
-            COMMAND ${CMAKE_COMMAND} -E copy ${dll} ${CMAKE_BINARY_DIR}/bin/Debug
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_PATH}/${Directory}" "$<TARGET_FILE_DIR:${Target}>/${Directory}"
         )
     ENDFOREACH()
-    FOREACH(dll ${${ReleaseDLLs}})
-        ADD_CUSTOM_COMMAND(
-            TARGET ${Target}
-            COMMAND ${CMAKE_COMMAND} -E copy ${dll} ${CMAKE_BINARY_DIR}/bin/Release
-        )
-    ENDFOREACH()
-ENDMACRO(ADD_COPY_DLL_COMMAND)
+ENDMACRO(DEPLOY_DIRECTORY)
 
 # adapted from: http://stackoverflow.com/questions/148570/using-pre-compiled-headers-with-cmake
 MACRO(ADD_MSVC_PRECOMPILED_HEADER PrecompiledHeader PrecompiledSource SourcesVar)
