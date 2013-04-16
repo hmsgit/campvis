@@ -51,9 +51,18 @@ namespace campvis {
     void TrackedUsFileReader::process(DataContainer& data) {
         try {
             std::string path = tgt::FileSystem::parentDir(p_url.getValue());
+            if (! tgt::FileSystem::fileExists(path + "/content.xml")) {
+                LERROR("No Tracked US data in this directory");
+                validate(INVALID_RESULT);
+                return;
+            }
+
             TrackedUSFileIO* fio = new TrackedUSFileIO();
             fio->parse(path.c_str());
-            fio->open(0);
+            if (! fio->open(0)) {
+                validate(INVALID_RESULT);
+                return;
+            }
 
             TrackedUsFileIoData* file = new TrackedUsFileIoData(fio);
             data.addData(p_targetImageID.getValue(), file);

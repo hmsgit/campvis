@@ -36,6 +36,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
+#include "core/properties/buttonproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/properties/cameraproperty.h"
@@ -85,6 +86,8 @@ namespace campvis {
         CameraProperty p_camera;
         IntProperty p_sweepNumber;                          ///< Number of the sweep to display
         IntProperty p_frameNumber;                          ///< Number of the frame to display
+        BoolProperty p_showConfidenceMap;                   ///< Flag whether to show confidence map instead of US image
+        ButtonProperty p_smoothButton;
 
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
@@ -96,12 +99,16 @@ namespace campvis {
         sigslot::signal1<tgt::Bounds> s_boundingBoxChanged;
 
     protected:
+        void onSmoothButtonClicked();
+
+        void updateBoundingBox();
+
         tgt::Shader* _shader;                           ///< Shader for slice rendering
         TrackedUSSweep* _currentSweep;
+        tgt::Bounds _bounds;
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // TRACKEDUSSWEEPFRAMERENDERER3D_H__

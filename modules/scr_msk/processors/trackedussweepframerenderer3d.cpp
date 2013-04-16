@@ -50,6 +50,46 @@
 #include <usinterface/include/trackedusframe.h>
 #include <usinterface/include/trackedussweep.h>
 
+
+namespace {
+    struct AverageTopCornersAccessFunc {
+        vct3 operator() (const TrackedUSSweep::CornerUnion* corners, size_t index) {
+            return (corners[index]._topLeftCorner + corners[index]._topRightCorner) * 0.5;
+        }
+    };
+
+    template<class AccessFunc, int KERNEL_SIZE>
+    struct GaussianSmoothingFunc {
+        AccessFunc a;
+        double kernel[KERNEL_SIZE + 1];
+        double sigma;
+
+        GaussianSmoothingFunc() {
+            sigma = static_cast<double>(KERNEL_SIZE) / 2.5; // rough estimate
+
+            for (size_t i = 0; i <= KERNEL_SIZE; ++i) {
+                double f = static_cast<float>(i);
+                kernel[i] = exp(-(f*f) / (2.0 * sigma * sigma));
+            }
+        }
+
+        vct3 operator() (const TrackedUSSweep::CornerUnion* corners, size_t index, size_t start, size_t end) {
+            vct3 toReturn(0.0);
+            double norm = 0.0;
+            for (int offset = -KERNEL_SIZE; offset <= KERNEL_SIZE; ++offset) {
+                int i = static_cast<int>(index) + offset;
+                if (i >= start && i < end) {
+                    toReturn += a(corners, i) * kernel[abs(offset)];
+                    norm += kernel[abs(offset)];
+                }
+            }
+
+            toReturn /= norm;
+            return toReturn;
+        }
+    };
+}
+
 namespace campvis {
     const std::string TrackedUsSweepFrameRenderer3D::loggerCat_ = "CAMPVis.modules.vis.TrackedUsSweepFrameRenderer3D";
 
@@ -60,6 +100,8 @@ namespace campvis {
         , p_camera("Camera", "Camera")
         , p_sweepNumber("sweepNumber", "SweepNumber", 0, 0, 0, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_frameNumber("sliceNumber", "Slice Number", 0, 0, 0)
+        , p_showConfidenceMap("ShowConfidenceMap", "Show Confidence Map", false)
+        , p_smoothButton("SmoothButton", "Smooth Tracking")
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
         , _currentSweep(0)
@@ -69,7 +111,10 @@ namespace campvis {
         addProperty(&p_camera);
         addProperty(&p_sweepNumber);
         addProperty(&p_frameNumber);
+        addProperty(&p_showConfidenceMap);
+        addProperty(&p_smoothButton);
         addProperty(&p_transferFunction);
+
     }
 
     TrackedUsSweepFrameRenderer3D::~TrackedUsSweepFrameRenderer3D() {
@@ -79,9 +124,11 @@ namespace campvis {
     void TrackedUsSweepFrameRenderer3D::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/scr_msk/glsl/trackedussweepframerenderer3d.frag", "", false);
+        p_smoothButton.s_clicked.connect(this, &TrackedUsSweepFrameRenderer3D::onSmoothButtonClicked);
     }
 
     void TrackedUsSweepFrameRenderer3D::deinit() {
+        p_smoothButton.s_clicked.disconnect(this);
         VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
         delete _currentSweep;
@@ -105,69 +152,71 @@ namespace campvis {
                     reinterpret_cast<const tgt::dvec3*>(_currentSweep->getCorner(frameNr)._corners) + 4);
 
                 std::vector<tgt::vec3> texCoords;
-                texCoords.push_back(tgt::vec3(0.f, 0.f, 0.f));
+                texCoords.push_back(tgt::vec3(0.f, 1.f, 0.f)); // swapped top/bottom texture coordinates to
+                texCoords.push_back(tgt::vec3(1.f, 1.f, 0.f)); // comply with mirrored y axis in OpenGL
                 texCoords.push_back(tgt::vec3(1.f, 0.f, 0.f));
-                texCoords.push_back(tgt::vec3(1.f, 1.f, 0.f));
-                texCoords.push_back(tgt::vec3(0.f, 1.f, 0.f));
+                texCoords.push_back(tgt::vec3(0.f, 0.f, 0.f));
 
                 FaceGeometry slice(corners, texCoords);
+                MeshGeometry bb = MeshGeometry::createCube(_bounds, tgt::Bounds(tgt::vec3(-1.f), tgt::vec3(-1.f)));
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                const unsigned char* tmp = (p_showConfidenceMap.getValue() ? _currentSweep->getConfidenceMap(frameNr) : _currentSweep->getTrackedUSFrame(frameNr)->getImageBuffer());
+                if (tmp != 0) {
+                    std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
-                glPushAttrib(GL_ALL_ATTRIB_BITS);
-                glEnable(GL_DEPTH_TEST);
-                _shader->activate();
+                    glPushAttrib(GL_ALL_ATTRIB_BITS);
+                    glEnable(GL_DEPTH_TEST);
+                    _shader->activate();
+                    _shader->setIgnoreUniformLocationError(true);
+                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                    _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
+                    _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
-                _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
-                _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+                    tgt::TextureUnit inputUnit, tfUnit;
+                    inputUnit.activate();
 
-                tgt::TextureUnit inputUnit, tfUnit;
-                inputUnit.activate();
+                    tgt::Texture tex(
+                        const_cast<unsigned char*>(tmp), 
+                        tgt::vec3(_currentSweep->Width(), _currentSweep->Height(), 1), 
+                        GL_ALPHA,
+                        GL_ALPHA8,
+                        GL_UNSIGNED_BYTE, 
+                        tgt::Texture::LINEAR);
+                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                    tex.setType(GL_TEXTURE_2D);
+                    tex.bind();
+                    tex.uploadTexture();
+                    tex.setWrapping(tgt::Texture::CLAMP);
+                    tex.setPixelData(0);
 
-                tgt::Texture tex(
-                    const_cast<unsigned char*>(_currentSweep->getTrackedUSFrame(frameNr)->getImageBuffer()), 
-                    tgt::vec3(_currentSweep->Width(), _currentSweep->Height(), 1), 
-                    GL_ALPHA,
-                    GL_ALPHA8,
-                    GL_UNSIGNED_BYTE, 
-                    tgt::Texture::LINEAR);
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                tex.setType(GL_TEXTURE_2D);
-                tex.bind();
-                tex.uploadTexture();
-                tex.setWrapping(tgt::Texture::CLAMP);
-                tex.setPixelData(0);
+                    _shader->setUniform("_texture", inputUnit.getUnitNumber());
+                    _shader->setUniform("_textureParameters._size", tgt::vec2(_currentSweep->Width(), _currentSweep->Height()));
+                    _shader->setUniform("_textureParameters._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_currentSweep->Width(), _currentSweep->Height()));
+                    _shader->setUniform("_textureParameters._numChannels", 1);
 
-                _shader->setUniform("_texture", inputUnit.getUnitNumber());
-                _shader->setUniform("_textureParameters._size", tgt::vec2(_currentSweep->Width(), _currentSweep->Height()));
-                _shader->setUniform("_textureParameters._sizeRCP", tgt::vec2(1.f) / tgt::vec2(_currentSweep->Width(), _currentSweep->Height()));
-                _shader->setUniform("_textureParameters._numChannels", 1);
+                    p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                p_transferFunction.getTF()->bind(_shader, tfUnit);
+                    rt.second->activate();
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    _shader->setAttributeLocation(0, "in_Position");
+                    _shader->setAttributeLocation(1, "in_TexCoord");
 
-                rt.second->activate();
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                _shader->setAttributeLocation(0, "in_Position");
-                _shader->setAttributeLocation(1, "in_TexCoord");
-                slice.render();
-                rt.second->deactivate();
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                    bb.render();
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-                _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
-                glPopAttrib();
+                    slice.render();
+                    rt.second->deactivate();
 
-                data.addData(p_targetImageID.getValue(), rt.first);
-                p_targetImageID.issueWrite();
+                    _shader->setIgnoreUniformLocationError(false);
+                    _shader->deactivate();
+                    tgt::TextureUnit::setZeroUnit();
+                    glPopAttrib();
+
+                    data.addData(p_targetImageID.getValue(), rt.first);
+                    p_targetImageID.issueWrite();
+                }
             }
-
-//             if (img->getDimensionality() == 3) {
-//                 updateProperties(img->getParent());
-//             }
-//             else {
-//                 LERROR("Input image must have dimensionality of 3.");
-//             }
         }
         else {
             LERROR("No suitable input image found.");
@@ -205,9 +254,15 @@ namespace campvis {
                     _currentSweep->CalculateCornersAndPose();
                     _currentSweep->CalculatePrincipalAxes();
 
-                    tgt::dvec3 llf, urb;
-                    _currentSweep->BoundingBox(llf.elem, urb.elem);
-                    s_boundingBoxChanged(tgt::Bounds(llf, urb));
+                    if (_currentSweep->getConfidenceMap() == 0) {
+                        p_showConfidenceMap.setValue(false);
+                        p_showConfidenceMap.setVisible(false);
+                    }
+                    else {
+                        p_showConfidenceMap.setVisible(true);
+                    }
+
+                    updateBoundingBox();
                 }
                 else {
                     _currentSweep = 0;
@@ -222,6 +277,21 @@ namespace campvis {
 
     const TrackedUSSweep* TrackedUsSweepFrameRenderer3D::getCurrentSweep() const {
         return _currentSweep;
+    }
+
+    void TrackedUsSweepFrameRenderer3D::onSmoothButtonClicked() {
+        if (_currentSweep != 0) {
+            _currentSweep->SmoothCorners(AverageTopCornersAccessFunc(), GaussianSmoothingFunc<AverageTopCornersAccessFunc, 16>());
+            updateBoundingBox();
+            invalidate(AbstractProcessor::INVALID_RESULT);
+        }
+    }
+
+    void TrackedUsSweepFrameRenderer3D::updateBoundingBox() {
+        tgt::dvec3 llf, urb;
+        _currentSweep->BoundingBox(llf.elem, urb.elem);
+        _bounds = tgt::Bounds(llf, urb);
+        s_boundingBoxChanged(_bounds);
     }
 
 }
