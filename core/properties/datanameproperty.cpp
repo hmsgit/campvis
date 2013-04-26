@@ -68,6 +68,10 @@ namespace campvis {
     }
 
     void DataNameProperty::notifyReaders() {
+        for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
+            // static_cast ist safe here since correct type is ensured during add of shared property
+            static_cast<DataNameProperty*>(*it)->notifyReaders();
+        }
         s_changed(this);
     }
 
