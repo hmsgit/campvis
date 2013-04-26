@@ -145,6 +145,12 @@ namespace campvis {
                 else if (dimensionality == 2)
                     imageOffset = tgt::vec3(tfp.getVec2("Position"), 0.f);
             }
+            if (tfp.hasKey("VolumePosition")) {
+                if (dimensionality == 3)
+                    imageOffset = tfp.getVec3("VolumePosition");
+                else if (dimensionality == 2)
+                    imageOffset = tgt::vec3(tfp.getVec2("VolumePosition"), 0.f);
+            }
             if (tfp.hasKey("ElementNumberOfChannels")) {
                 numChannels = tfp.getSizeT("ElementNumberOfChannels");
             }
@@ -180,7 +186,7 @@ namespace campvis {
             // all parsing done - lets create the image:
             ImageData* image = new ImageData(dimensionality, size, numChannels);
             ImageRepresentationDisk::create(image, url, pt, offset, e);
-            image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
+            image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
             data.addData(p_targetImageID.getValue(), image);
             p_targetImageID.issueWrite();
         }
