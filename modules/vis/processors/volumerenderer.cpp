@@ -79,11 +79,6 @@ namespace campvis {
         _eepGenerator.init();
         _raycaster.init();
 
-        // connect the three processors together
-        _pgGenerator.p_geometryID.connect(&_eepGenerator.p_geometryID);
-        _eepGenerator.p_entryImageID.connect(&_raycaster.p_entryImageID);
-        _eepGenerator.p_exitImageID.connect(&_raycaster.p_exitImageID);
-
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _raycaster.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
@@ -99,9 +94,12 @@ namespace campvis {
     void VolumeRenderer::process(DataContainer& data) {
         if (getInvalidationLevel() & PG_INVALID) {
             _pgGenerator.process(data);
+            _eepGenerator.process(data);
+            _raycaster.process(data);
         }
         else if (getInvalidationLevel() & EEP_INVALID) {
             _eepGenerator.process(data);
+            _raycaster.process(data);
         }
         else if (getInvalidationLevel() & RAYCASTER_INVALID) {
             _raycaster.process(data);
@@ -127,8 +125,13 @@ namespace campvis {
     void VolumeRenderer::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &p_outputImage) {
             _pgGenerator.p_geometryID.setValue(p_outputImage.getValue() + ".geometry");
+            _eepGenerator.p_geometryID.setValue(p_outputImage.getValue() + ".geometry");
+
             _eepGenerator.p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
+            _raycaster.p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
+
             _eepGenerator.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
+            _raycaster.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
         }
         VisualizationProcessor::onPropertyChanged(prop);
     }
