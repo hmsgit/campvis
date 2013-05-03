@@ -87,11 +87,14 @@ namespace campvis {
 
         /**
          * Slot getting called when one of the observed processors got invalidated.
-         * The default behaviour is to dispatch a job to execute the invalidated processor and emit the s_invalidated signal.
+         * Invalidates this meta-processor with the corresponding level.
          * \param   processor   The processor that emitted the signal
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
+        /**
+         * \see VisualizationProcessor::onPropertyChanged
+         */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
         ProxyGeometryGenerator _pgGenerator;

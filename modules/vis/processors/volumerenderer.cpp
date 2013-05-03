@@ -46,7 +46,7 @@ namespace campvis {
         : VisualizationProcessor(canvasSize)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
         , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
-        , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
+        , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , _pgGenerator()
         , _eepGenerator(canvasSize)
         , _raycaster(canvasSize)
