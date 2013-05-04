@@ -20,7 +20,8 @@ namespace tgt {
 
     QtThreadedCanvas* QtContextManager::createContext(const std::string& key, const std::string& title /*= ""*/, const ivec2& size /*= ivec2(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)*/, const GLCanvas::Buffers buffers /*= RGBADD*/, QWidget* parent /*= 0*/, bool shared /*= true*/, Qt::WFlags f /*= 0*/, char* name /*= 0*/)
     {
-        tgtAssert(_contexts.find(key) == _contexts.end(), "A context with the same key already exists!");
+        // FIXME: rethink this concept of unique IDs
+        //tgtAssert(_contexts.find(key) == _contexts.end(), "A context with the same key already exists!");
 
         tbb::mutex::scoped_lock lock(_glMutex);
         QtThreadedCanvas* toReturn = new QtThreadedCanvas(title, size, buffers, parent, shared, f, name);

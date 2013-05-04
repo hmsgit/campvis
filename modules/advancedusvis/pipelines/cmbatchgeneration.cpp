@@ -30,6 +30,7 @@
 #include "cmbatchgeneration.h"
 
 #include "tgt/event/keyevent.h"
+#include "tgt/filesystem.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -54,8 +55,10 @@ namespace campvis {
         , _confidenceGenerator()
         , _usBlurFilter()
         , _usFusion(_effectiveRenderTargetSize)
+        , p_autoExecution("AutoExecution", "Automatic Execution", false)
         , p_sourcePath("SourcePath", "Source Files Path", "")
-        , p_targetPath("TargetPath", "Target Files Path", "")
+        , p_targetPathColor("TargetPathColor", "Target Path Color Files", "")
+        , p_targetPathFuzzy("TargetPathFuzzy", "Target Path Fuzzy Files", "")
         , p_range("Range", "Files Range", tgt::ivec2(0, 1), tgt::ivec2(0, 0), tgt::ivec2(10000, 10000))
         , p_execute("Execute", "Execute Batch Pipeline")
     {
@@ -64,8 +67,10 @@ namespace campvis {
         addProcessor(&_usFusion);
         addProcessor(&_usBlurFilter);
 
+        addProperty(&p_autoExecution);
         addProperty(&p_sourcePath);
-        addProperty(&p_targetPath);
+        addProperty(&p_targetPathColor);
+        addProperty(&p_targetPathFuzzy);
         addProperty(&p_range);
         addProperty(&p_execute);
     }
@@ -76,12 +81,13 @@ namespace campvis {
     void CmBatchGeneration::init() {
         VisualizationPipeline::init();
 
-        p_sourcePath.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\bl01");
-        p_targetPath.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\bl01cm");
+        p_sourcePath.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase");
+        p_targetPathColor.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\color");
+        p_targetPathFuzzy.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\fuzzy");
         p_range.setValue(tgt::ivec2(0, 1));
         p_execute.s_clicked.connect(this, &CmBatchGeneration::execute);
 
-        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\us.png");
+        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\11_niere_re_durch_leber2\\original\\export0000.bmp");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_importType.selectById("localIntensity");
         _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
@@ -91,11 +97,12 @@ namespace campvis {
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
         _confidenceGenerator.p_targetImageID.connect(&_usFusion.p_confidenceImageID);
         _confidenceGenerator.p_curvilinear.setValue(true);
-        _confidenceGenerator.p_origin.setValue(tgt::vec2(320.f, 444.f));
-        _confidenceGenerator.p_angles.setValue(tgt::vec2(225.f / 180.f * tgt::PIf, 315.f / 180.f * tgt::PIf));
+        _confidenceGenerator.p_origin.setValue(tgt::vec2(340.f, 540.f));
+        _confidenceGenerator.p_angles.setValue(tgt::vec2(4.064f, 5.363f));
+        //_confidenceGenerator.p_angles.setValue(tgt::vec2(232.f / 180.f * tgt::PIf, 307.f / 180.f * tgt::PIf));
         //_confidenceGenerator.p_origin.setValue(tgt::vec2(320.f, 35.f));
         //_confidenceGenerator.p_angles.setValue(tgt::vec2(45.f / 180.f * tgt::PIf, 135.f / 180.f * tgt::PIf));
-        _confidenceGenerator.p_lengths.setValue(tgt::vec2(0.f, 410.f));
+        _confidenceGenerator.p_lengths.setValue(tgt::vec2(116.f, 543.f));
 
         _usFusion.p_targetImageID.setValue("us.fused");
         _usFusion.p_view.selectById("mappingSharpness");
@@ -123,6 +130,7 @@ namespace campvis {
         if (p_range.getValue().x > p_range.getValue().y)
             return;
 
+        p_autoExecution.setValue(false);
         for (int i = p_range.getValue().x; i < p_range.getValue().y; ++i) {
             GLJobProc.enqueueJob(_canvas, makeJobOnHeap(this, &CmBatchGeneration::executePass, i), OpenGLJobProcessor::SerialJob);
         }
@@ -133,14 +141,15 @@ namespace campvis {
     }
 
     void CmBatchGeneration::onProcessorInvalidated(AbstractProcessor* processor) {
-        // do nothing here - we do our own evaluation
+        if (p_autoExecution.getValue())
+            VisualizationPipeline::onProcessorInvalidated(processor);
     }
 
     void CmBatchGeneration::executePass(int path) {
         std::stringstream ss;
 
         // set up processors:
-        ss << p_sourcePath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".tga";
+        ss << p_sourcePath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
         _usReader.p_url.setValue(ss.str());
 
         executeProcessor(&_usReader);
@@ -154,14 +163,27 @@ namespace campvis {
 
         executeProcessor(&_confidenceGenerator);
         executeProcessor(&_usBlurFilter);
-        executeProcessor(&_usFusion);
 
+        _usFusion.p_view.selectById("mappingLAB");
+        executeProcessor(&_usFusion);
+        save(path, p_targetPathColor.getValue());
+
+//         _usFusion.p_view.selectById("mappingSharpness");
+//         executeProcessor(&_usFusion);
+//         save(path, p_targetPathFuzzy.getValue());
+        
+    }
+
+    void CmBatchGeneration::save(int path, const std::string& basePath) {
         // get result
         ImageRepresentationRenderTarget::ScopedRepresentation repRT(_data, _usFusion.p_targetImageID.getValue());
         if (repRT != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
+            if (! tgt::FileSystem::dirExists(basePath))
+                tgt::FileSystem::createDirectory(basePath);
+
             std::stringstream sss;
-            sss << p_targetPath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".png";
+            sss << basePath << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
             std::string filename = sss.str();
             if (tgt::FileSystem::fileExtension(filename).empty()) {
                 LERROR("Filename has no extension");
@@ -193,7 +215,6 @@ namespace campvis {
             return;
 #endif
         }
-
     }
 
 }

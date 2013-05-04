@@ -84,13 +84,18 @@ namespace campvis {
 
         void executePass(int path);
 
+        void save(int path, const std::string& basePath);
+
         DevilImageReader _usReader;
         ConfidenceMapGenerator _confidenceGenerator;
         ItkImageFilter _usBlurFilter;
         AdvancedUsFusion _usFusion;
 
+        BoolProperty p_autoExecution;
+
         StringProperty p_sourcePath;
-        StringProperty p_targetPath;
+        StringProperty p_targetPathColor;
+        StringProperty p_targetPathFuzzy;
         IVec2Property p_range;
 
         ButtonProperty p_execute;

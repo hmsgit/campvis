@@ -38,6 +38,8 @@
 #include "core/pipeline/processordecoratorbackground.h"
 
 #include "core/classification/simpletransferfunction.h"
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
 
 #include "core/tools/quadrenderer.h"
 
@@ -47,7 +49,7 @@ namespace campvis {
     GenericOption<std::string> viewOptions[12] = {
         GenericOption<std::string>("us", "Ultrasound Only"),
         GenericOption<std::string>("smoothed", "Smoothed US Only"),
-        GenericOption<std::string>("sharpened", "Sharpened US Only"),
+        GenericOption<std::string>("cm", "Confidence Map US Only"),
         GenericOption<std::string>("mappingSaturationHSV", "Mapping Uncertainty to Saturation (HSV)"),
         GenericOption<std::string>("mappingSaturationHSL", "Mapping Uncertainty to Saturation (HSL)"),
         GenericOption<std::string>("mappingSaturationTSL", "Mapping Uncertainty to Saturation (TSL)"),
@@ -68,8 +70,10 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
+        , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
         , p_view("View", "Image to Render", viewOptions, 12)
         , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f)
+        , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f)
         , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
@@ -78,12 +82,17 @@ namespace campvis {
         addProperty(&p_blurredImageId);
         addProperty(&p_gradientImageID);
         addProperty(&p_confidenceImageID);
+        addProperty(&p_blurredScaling);
         addProperty(&p_targetImageID);
         addProperty(&p_sliceNumber);
         addProperty(&p_transferFunction);
+        addProperty(&p_confidenceTF);
         addProperty(&p_view);
         addProperty(&p_confidenceScaling);
         addProperty(&p_hue);
+
+        Geometry1DTransferFunction* tf = static_cast<Geometry1DTransferFunction*>(p_confidenceTF.getTF());
+        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 96), tgt::col4(0, 0, 0, 0)));
 
         decoratePropertyCollection(this);
     }
@@ -115,11 +124,12 @@ namespace campvis {
                     // source DataHandle has changed
                     updateProperties(img.getDataHandle());
                     _sourceImageTimestamp = img.getDataHandle().getTimestamp();
-                    _shader->setHeaders(generateHeader());
-                    _shader->rebuild();
+                    //p_confidenceTF.getTF()->setImageHandle(confidence.getDataHandle());
+                    //_shader->setHeaders(generateHeader());
+                    //_shader->rebuild();
                 }
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA32F);
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
@@ -128,12 +138,14 @@ namespace campvis {
                 _shader->setUniform("_viewIndex", p_view.getValue());
                 _shader->setUniform("_confidenceScaling", p_confidenceScaling.getValue());
                 _shader->setUniform("_hue", p_hue.getValue());
+                _shader->setUniform("_blurredScale", 1.f / p_blurredScaling.getValue());
                 
-                tgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit;
+                tgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit, tf2Unit;
                 img->bind(_shader, usUnit, "_usImage", "_usTextureParams");
                 blurred->bind(_shader, blurredUnit, "_blurredImage", "_blurredTextureParams");
                 confidence->bind(_shader, confidenceUnit, "_confidenceMap", "_confidenceTextureParams");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
+                p_confidenceTF.getTF()->bind(_shader, tf2Unit, "_confidenceTF", "_confidenceTFParams");
 
                 rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
