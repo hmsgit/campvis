@@ -210,7 +210,7 @@ namespace campvis {
 
         _texture = new tgt::Texture(
             reinterpret_cast<GLubyte*>(data->getImageData()), 
-            _size, 
+            this->getSize(),
             TypeTraits<BASETYPE, NUMCHANNELS>::glFormat,
             TypeTraits<BASETYPE, NUMCHANNELS>::glInternalFormat, 
             TypeTraits<BASETYPE, NUMCHANNELS>::glDataType, 

@@ -56,7 +56,7 @@ public:
     /**
      * Pure virtual destructor
      */
-    virtual ~IHasCamera() = 0 {};
+    virtual ~IHasCamera() {};
 
     /**
      * Returns the camera to modify by Navigation.

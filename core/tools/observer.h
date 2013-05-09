@@ -146,7 +146,7 @@ namespace campvis {
          */
         void notifyObservers(const T& args) const {
             tbb::spin_mutex::scoped_lock lock(_localMutex);
-            for (std::set< GenericObserver<T>* >::iterator it = _observers.begin(); it != _observers.end(); ++it) {
+            for (typename std::set< GenericObserver<T>* >::iterator it = _observers.begin(); it != _observers.end(); ++it) {
                 (*it)->onNotify(args);
             }
         };

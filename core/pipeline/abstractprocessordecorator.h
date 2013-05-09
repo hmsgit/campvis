@@ -51,7 +51,7 @@ namespace campvis {
         /**
          * Pure virtual Destructor
          */
-        virtual ~AbstractProcessorDecorator() = 0 {};
+        virtual ~AbstractProcessorDecorator() {};
 
         /**
          * Gets called by the processor during initialization to let the decorator

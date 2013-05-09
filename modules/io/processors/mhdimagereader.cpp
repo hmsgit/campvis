@@ -74,7 +74,7 @@ namespace campvis {
             WeaklyTypedPointer::BaseType pt;
             size_t numChannels = 1;
             size_t offset = 0;
-            EndianHelper::Endianness e = EndianHelper::LITTLE_ENDIAN;
+            EndianHelper::Endianness e = EndianHelper::IS_LITTLE_ENDIAN;
 
             tgt::vec3 voxelSize(1.f);
             tgt::vec3 imageOffset(0.f);
@@ -130,7 +130,7 @@ namespace campvis {
                     offset = static_cast<int>(tmp);
             }
             if (tfp.hasKey("ElementByteOrderMSB"))
-                e = (tfp.getBool("ElementByteOrderMSB") ? EndianHelper::BIG_ENDIAN : EndianHelper::LITTLE_ENDIAN);
+                e = (tfp.getBool("ElementByteOrderMSB") ? EndianHelper::IS_BIG_ENDIAN : EndianHelper::IS_LITTLE_ENDIAN);
             
             // TODO: spacing, element size, etc.
             if (tfp.hasKey("ElementSpacing")) {

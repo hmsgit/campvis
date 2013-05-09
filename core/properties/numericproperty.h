@@ -220,7 +220,7 @@ namespace campvis {
         tgtAssert(prop != 0, "Shared property must not be 0!");
         if (NumericProperty<T>* tmp = dynamic_cast< NumericProperty<T>* >(prop)) {
             AbstractProperty::addSharedProperty(prop);
-            tmp->setValue(getValue());
+            tmp->setValue(GenericProperty<T>::getValue());
             return;
         }
         tgtAssert(false, "Shared property must be of the same type as this property!");
@@ -244,25 +244,25 @@ namespace campvis {
     template<typename T>
     void campvis::NumericProperty<T>::setMinValue(const T& value) {
         _minValue = value;
-        setValue(validateValue(_value));
+        this->setValue(validateValue(this->_value));
         s_minMaxChanged(this);
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::setMaxValue(const T& value) {
         _maxValue = value;
-        setValue(validateValue(_value));
+        this->setValue(validateValue(this->_value));
         s_minMaxChanged(this);
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::increment() {
-        setValue(_value + T(1));
+        this->setValue(this->_value + T(1));
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::decrement() {
-        setValue(_value - T(1));
+        this->setValue(this->_value - T(1));
     }
 }
 

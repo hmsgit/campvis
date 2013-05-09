@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "TransferFunctionProperty.h"
+#include "transferfunctionproperty.h"
 
 namespace campvis {
 

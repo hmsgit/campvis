@@ -163,7 +163,7 @@ namespace campvis {
             return "";
         std::stringstream s;
         s << tokens[0];
-        for (std::vector<T>::size_type i = 1; i < tokens.size(); ++i)
+        for (typename std::vector<T>::size_type i = 1; i < tokens.size(); ++i)
             s << delimiter << tokens[i];
         return s.str();
     }

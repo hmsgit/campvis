@@ -278,20 +278,18 @@ namespace {
      * \tparam  ISFLOAT     Flag whether base type is floating point or integer
      * \tparam  ISSIGNED    Flag whether base type is signed or not (ignored when ISFLOAT == true)
      */
-    template<bool ISFLOAT, bool ISSIGNED>
+    template<typename T, bool ISFLOAT, bool ISSIGNED>
     struct TypeNormalizerHelper {};
 
     /**
      * Template specialization for floating point types - no normalization needed.
      */
-    template<bool ISSIGNED>
-    struct TypeNormalizerHelper<true, ISSIGNED> {
-        template<typename T>
+    template<typename T, bool ISSIGNED>
+    struct TypeNormalizerHelper<T, true, ISSIGNED> {
         static float normalizeToFloat(T value) {
             return static_cast<float>(value);
         }
 
-        template<typename T>
         static T denormalizeFromFloat(float value) {
             return static_cast<T>(value);
         };
@@ -300,14 +298,12 @@ namespace {
     /**
      * Template specialization for unsigned integer types, map from [0, max] to [0.0, 1.0]
      */
-    template<>
-    struct TypeNormalizerHelper<false, false> {
-        template<typename T>
+    template<typename T>
+    struct TypeNormalizerHelper<T, false, false> {
         static float normalizeToFloat(T value) {
             return static_cast<float>(value) / std::numeric_limits<T>::max();
         }
 
-        template<typename T>
         static T denormalizeFromFloat(float value) {
             value = tgt::clamp(value, 0.0f, 1.0f);
             return static_cast<T>(value * std::numeric_limits<T>::max());
@@ -317,9 +313,8 @@ namespace {
     /**
      * Template specialization for unsigned integer types, map from [min, max] to [0.0, 1.0]
      */
-    template<>
-    struct TypeNormalizerHelper<false, true> {
-        template<typename T>
+    template<typename T>
+    struct TypeNormalizerHelper<T, false, true> {
         static float normalizeToFloat(T value) {
             if (value >= 0)
                 return (static_cast<float>(value) / std::numeric_limits<T>::max()) * .5f + .5f;
@@ -327,7 +322,6 @@ namespace {
                 return (static_cast<float>(value) / -std::numeric_limits<T>::min()) * .5f + .5f;
         }
 
-        template<typename T>
         static T denormalizeFromFloat(float value) {
             value = (tgt::clamp(value, 0.0f, 1.0f) - .5f) * 2.f;
             if(value >= 0.0f)
@@ -413,7 +407,7 @@ namespace {
          */
         template<typename T>
         static float normalizeToFloat(T value) {
-            return TypeNormalizerHelper<TypeTraitsHelperPerBasetype<T>::isFloat, TypeTraitsHelperPerBasetype<T>::isSigned>::normalizeToFloat<T>(value);
+            return TypeNormalizerHelper<T, TypeTraitsHelperPerBasetype<T>::isFloat, TypeTraitsHelperPerBasetype<T>::isSigned>::normalizeToFloat(value);
         };
 
         /**
@@ -428,7 +422,7 @@ namespace {
          */
         template<typename T>
         static T denormalizeFromFloat(float value) {
-            return TypeNormalizerHelper<TypeTraitsHelperPerBasetype<T>::isFloat, TypeTraitsHelperPerBasetype<T>::isSigned>::denormalizeFromFloat<T>(value);
+            return TypeNormalizerHelper<T, TypeTraitsHelperPerBasetype<T>::isFloat, TypeTraitsHelperPerBasetype<T>::isSigned>::denormalizeFromFloat(value);
         }
     };
 }

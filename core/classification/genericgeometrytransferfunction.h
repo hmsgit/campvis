@@ -121,7 +121,7 @@ namespace campvis {
 
     template<class T>
     campvis::GenericGeometryTransferFunction<T>::~GenericGeometryTransferFunction() {
-        for (std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+        for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
             (*it)->s_changed.disconnect(this);
             delete *it;
         }
@@ -161,7 +161,7 @@ namespace campvis {
     void campvis::GenericGeometryTransferFunction<T>::removeGeometry(T* geometry) {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
-            for (std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+            for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
                 if (*it == geometry) {
                     _geometries.erase(it);
                     break;
@@ -233,7 +233,7 @@ namespace campvis {
         glLoadIdentity();
 
 
-        for (std::vector<T*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+        for (typename std::vector<T*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
             (*it)->render();
         }
 

@@ -100,8 +100,8 @@ namespace campvis {
     struct EndianHelper {
         /// Type of Endianness
         enum Endianness {
-            LITTLE_ENDIAN,  ///< little endian
-            BIG_ENDIAN      ///< big endian
+            IS_LITTLE_ENDIAN,  ///< little endian
+            IS_BIG_ENDIAN      ///< big endian
         };
 
         /**
@@ -113,7 +113,7 @@ namespace campvis {
                 uint32_t i;
                 char c[4];
             } bint = {0x01020304};
-            return (bint.c[0] == 1) ? BIG_ENDIAN : LITTLE_ENDIAN;
+            return (bint.c[0] == 1) ? IS_BIG_ENDIAN : IS_LITTLE_ENDIAN;
         }
 
         /**

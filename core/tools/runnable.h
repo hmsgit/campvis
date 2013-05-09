@@ -78,7 +78,7 @@ namespace campvis {
         /// Runnables are not copyable
         Runnable& operator =(Runnable const&);
 
-        std::thread _thread;                    ///< Thread of the Runnable
+        std::thread* _thread;                    ///< Thread of the Runnable
     };
 
 }

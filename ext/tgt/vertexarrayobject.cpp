@@ -33,7 +33,7 @@ namespace tgt {
 
     const std::string VertexArrayObject::loggerCat_ = "tgt.VertexArrayObject";
 
-    VertexArrayObject::VertexArrayObject(bool autoBind) 
+    VertexArrayObject::VertexArrayObject(bool autoBind) throw (tgt::Exception)
         : _id(0)
         , _enabledAttributes(16, false)
     {

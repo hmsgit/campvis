@@ -43,7 +43,7 @@ namespace campvis {
         /**
          * Pure virtual destructor.
          */
-        virtual ~AbstractJob() = 0 {};
+        virtual ~AbstractJob() {};
 
         /**
          * Executes the job, to be overwritten by subclasses.

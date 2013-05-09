@@ -56,7 +56,7 @@ namespace campvis {
         /**
          * Pure virtual Destructor
          */
-        virtual ~AbstractTFGeometryManipulator() = 0 {};
+        virtual ~AbstractTFGeometryManipulator() {};
 
         /**
          * Sets the new viewport size.

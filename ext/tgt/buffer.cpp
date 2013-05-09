@@ -2,7 +2,7 @@
 
 
 namespace tgt {
-    BufferObject::BufferObject(TargetType target, UsageType usage)
+    BufferObject::BufferObject(TargetType target, UsageType usage) throw (tgt::Exception)
         : _id(0)
         , _targetType(target)
         , _usageType(usage)

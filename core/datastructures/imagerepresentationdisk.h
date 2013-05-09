@@ -63,7 +63,7 @@ namespace campvis {
             const std::string& url,
             WeaklyTypedPointer::BaseType type,
             size_t offset = 0,
-            EndianHelper::Endianness endianness = EndianHelper::LITTLE_ENDIAN,
+            EndianHelper::Endianness endianness = EndianHelper::IS_LITTLE_ENDIAN,
             const tgt::svec3& stride = tgt::svec3::zero
             );
 
@@ -127,7 +127,7 @@ namespace campvis {
             const std::string& url,
             WeaklyTypedPointer::BaseType type,
             size_t offset = 0,
-            EndianHelper::Endianness endianness = EndianHelper::LITTLE_ENDIAN,
+            EndianHelper::Endianness endianness = EndianHelper::IS_LITTLE_ENDIAN,
             const tgt::svec3& stride = tgt::svec3::zero
             );
 

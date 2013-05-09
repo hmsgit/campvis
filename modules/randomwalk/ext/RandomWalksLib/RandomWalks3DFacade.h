@@ -10,6 +10,7 @@
  *  \date	11.06.2012
  */
 
+#include <string>
 #include <vector>
 class RandomWalks3D;
 

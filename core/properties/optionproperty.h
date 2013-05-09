@@ -57,7 +57,7 @@ namespace campvis {
         /**
          * Pure virtual destructor.
          */
-        virtual ~AbstractOptionProperty() = 0 {};
+        virtual ~AbstractOptionProperty() {};
 
         /**
          * Returns all Options als pair of std::strings.
@@ -189,7 +189,7 @@ namespace campvis {
     template<typename T>
     std::vector< std::pair<std::string, std::string> > campvis::GenericOptionProperty<T>::getOptionsAsPairOfStrings() const {
         std::vector< std::pair<std::string, std::string> > toReturn;
-        for (std::vector< GenericOption<T> >::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        for (typename std::vector< GenericOption<T> >::const_iterator it = _options.begin(); it != _options.end(); ++it) {
             toReturn.push_back(std::make_pair(it->_id, it->_title));
         }
         return toReturn;

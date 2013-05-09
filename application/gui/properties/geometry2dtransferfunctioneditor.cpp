@@ -38,7 +38,7 @@
 #include "application/gui/properties/tfgeometrymanipulator.h"
 
 #include "core/classification/geometry2dtransferfunction.h"
-#include "core/classification/TFGeometry2D.h"
+#include "core/classification/tfgeometry2d.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"

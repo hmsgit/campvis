@@ -140,7 +140,7 @@ namespace campvis {
                 for (size_t i = 1; i < numBuckets; ++i) {
                     xr = static_cast<float>(i) / static_cast<float>(numBuckets);
                     yr = (_logScale 
-                        ? std::max(0.f, log(static_cast<float>(ih->getNumElements(i))) / maxFilling)
+                        ? std::max(0.f, static_cast<float>(log(static_cast<float>(ih->getNumElements(i)))) / maxFilling)
                         : static_cast<float>(ih->getNumElements(i)) / maxFilling);
                     
                     glVertex2f(xl, 0.f);
@@ -204,7 +204,7 @@ namespace campvis {
             TFGeometry1D* g = _selectedGeometry->getGeometry();
             std::vector<TFGeometry1D::KeyPoint>& kpts = g->getKeyPoints();
             TFGeometry1D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
-            std::vector<TFGeometry1D::KeyPoint>::const_iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
+            std::vector<TFGeometry1D::KeyPoint>::iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
             if (lb != kpts.end()) {
                 kp._color = lb->_color;
             }

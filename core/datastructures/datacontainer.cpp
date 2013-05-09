@@ -82,7 +82,7 @@ namespace campvis {
 
     void DataContainer::removeData(const std::string& name) {
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        std::map<std::string, DataHandle>::const_iterator it = _handles.find(name);
+        std::map<std::string, DataHandle>::iterator it = _handles.find(name);
         if (it != _handles.end()) {
             _handles.erase(it);
         }

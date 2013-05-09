@@ -13,6 +13,7 @@
  *	Grady, L.: Random walks for image segmentation, IEEE Transactions on Pattern Analysis and Machine Intelligence, 28, 11, 1768--1783, 2006
  */
 
+#include <string>
 #include <vector>
 class RandomWalks2D;
 
