@@ -88,6 +88,9 @@ IF(WIN32)
     # prevent error: number of sections exceeded object file format limit
     LIST(APPEND CampvisGlobalDefinitions /bigobj)
     
+    # enable SSE2 instructions for MSVC
+    LIST(APPEND CampvisGlobalDefinitions /arch:SSE2)
+    
     # allows 32 Bit builds to use more than 2GB RAM (VC++ only)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
     SET(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")

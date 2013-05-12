@@ -85,6 +85,10 @@ namespace campvis {
     }
 
     void VolumeRenderer::deinit() {
+        _pgGenerator.s_invalidated.disconnect(this);
+        _eepGenerator.s_invalidated.disconnect(this);
+        _raycaster.s_invalidated.disconnect(this);
+
         _pgGenerator.deinit();
         _eepGenerator.deinit();
         _raycaster.deinit();
