@@ -41,18 +41,26 @@ namespace campvis {
         , _thread(0) 
     {
         _stopExecution = false;
+        _running = false;
     }
 
     Runnable::~Runnable() {
-        stop();
-	delete _thread;
+        if (_running)
+            stop();
+
+	    delete _thread;
     }
 
     void Runnable::stop() {
+        if (!_running || _thread == 0)
+            return;
+
         _stopExecution = true; 
         try { 
             if (_thread->joinable())
                 _thread->join(); 
+
+            _running = false;
         } 
         catch(std::exception& e) { 
             LERRORC("CAMPVis.core.tools.Runnable", "Caught exception during _thread.join: " << e.what());
@@ -61,6 +69,7 @@ namespace campvis {
 
     void Runnable::start() { 
         _thread = new std::thread(&invokeThread, this);
+        _running = true;
     }
 }
 

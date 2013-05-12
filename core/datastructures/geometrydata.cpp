@@ -60,8 +60,12 @@ namespace campvis {
 
     GeometryData::~GeometryData() {
         if (_buffersInitialized) {
-            std::vector<tgt::BufferObject*> buffers(_buffers, _buffers + NUM_BUFFERS);
-            GLJobProc.enqueueJob(_context, makeJobOnHeap(&GeometryData::deleteBuffers, buffers), OpenGLJobProcessor::LowPriorityJob);
+            delete _verticesBuffer;
+            delete _texCoordsBuffer;
+            delete _colorsBuffer;
+            delete _normalsBuffer;
+//             std::vector<tgt::BufferObject*> buffers(_buffers, _buffers + NUM_BUFFERS);
+//             GLJobProc.enqueueJob(_context, makeJobOnHeap(&GeometryData::deleteBuffers, buffers), OpenGLJobProcessor::LowPriorityJob);
         }
     }
 
@@ -73,8 +77,12 @@ namespace campvis {
 
         // delete old VBOs and null pointers
         if (_buffersInitialized) {
-            std::vector<tgt::BufferObject*> buffers(_buffers, _buffers + NUM_BUFFERS);
-            GLJobProc.enqueueJob(_context, makeJobOnHeap(&GeometryData::deleteBuffers, buffers), OpenGLJobProcessor::LowPriorityJob);
+            delete _verticesBuffer;
+            delete _texCoordsBuffer;
+            delete _colorsBuffer;
+            delete _normalsBuffer;
+//             std::vector<tgt::BufferObject*> buffers(_buffers, _buffers + NUM_BUFFERS);
+//             GLJobProc.enqueueJob(_context, makeJobOnHeap(&GeometryData::deleteBuffers, buffers), OpenGLJobProcessor::LowPriorityJob);
         }
 
         _verticesBuffer = 0;

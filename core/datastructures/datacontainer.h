@@ -31,6 +31,7 @@
 #define DATACONTAINER_H__
 
 #include "sigslot/sigslot.h"
+#include "tbb/concurrent_unordered_map.h"
 #include "tbb/spin_mutex.h"
 #include "core/datastructures/datahandle.h"
 
@@ -171,6 +172,12 @@ namespace campvis {
         void removeData(const std::string& name);
 
         /**
+         * Removes all DataHandles from this DataContainer.
+         * \note    This method is \b NOT thread-safe!
+         */
+        void clear();
+
+        /**
          * Returns a copy of the current list of DataHandles.
          * \note    Use with caution, this method is to be considered as slow, as it includes several 
          *          copies and locks the whole DataContainer during execution.
@@ -184,7 +191,7 @@ namespace campvis {
          *          copies and locks the whole DataContainer during execution.
          * \return  A copy of the current handles map. The caller has to take ownership of the passed pointers!
          */
-        std::map<std::string, DataHandle> getHandlesCopy() const;
+        //std::map<std::string, DataHandle> getHandlesCopy() const;
 
         /**
          * Signal emitted when data has been added to this DataContainer (this includes also data being replaced).
@@ -197,8 +204,10 @@ namespace campvis {
 
     private:
         /// Map of the DataHandles in this collection and their IDs. The DataHandles contain valid data.
-        std::map<std::string, DataHandle> _handles;
+        //std::map<std::string, DataHandle> _handles;
         mutable tbb::spin_mutex _localMutex;
+
+        tbb::concurrent_unordered_map<std::string, DataHandle> _handles;
 
         static const std::string loggerCat_;
     };

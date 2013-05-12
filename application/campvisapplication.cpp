@@ -183,9 +183,6 @@ namespace campvis {
 
             _mainWindow->deinit();
 
-            // deinit OpenGL and tgt
-            tgt::deinitGL();
-
             QuadRenderer::deinit();
 
 #ifdef HAS_KISSCL
@@ -193,6 +190,10 @@ namespace campvis {
                 kisscl::CLRuntime::deinit();
             }
 #endif
+
+
+            // deinit OpenGL and tgt
+            tgt::deinitGL();
         }
 
         SimpleJobProcessor::deinit();

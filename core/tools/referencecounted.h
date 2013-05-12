@@ -91,6 +91,8 @@ namespace campvis {
          */
         bool isShared() const;
 
+        static void deleteInstance(ReferenceCounted* instance);
+
     private:
         tbb::atomic<size_t> _refCount;      ///< number of references to this object
         bool _shareable;                    ///< flag whether this object is shareable, i.e. no non-const pointers to this object exist

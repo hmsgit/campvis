@@ -114,11 +114,12 @@ namespace campvis {
     }
 
     ImageRepresentationRenderTarget::~ImageRepresentationRenderTarget() {
-        if (_fbo != 0) {
-            _fbo->activate();
-            _fbo->detachAll();
-            _fbo->deactivate();
-        }
+        // TODO: double check whether deleting FBOs without detaching their attachments is not harmful
+//         if (_fbo != 0) {
+//             _fbo->activate();
+//             _fbo->detachAll();
+//             _fbo->deactivate();
+//         }
 
         delete _fbo;
         for (std::vector<tgt::Texture*>::iterator it = _colorTextures.begin(); it != _colorTextures.end(); ++it)

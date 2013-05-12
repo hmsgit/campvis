@@ -171,7 +171,7 @@ namespace campvis {
              * \return (_serialJobs.empty() && _lowPriorityJobs.empty() && (_paintJob == 0))
              */
             bool empty() const {
-                return (_serialJobs.empty() && _lowPriorityJobs.empty() && (_paintJob == 0));
+                return ((_paintJob == 0) && _serialJobs.empty() && _lowPriorityJobs.empty());
             }
         };
 

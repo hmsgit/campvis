@@ -83,6 +83,7 @@ namespace campvis {
     void AbstractTransferFunction::deinit() {
         delete _texture;
         _texture = 0;
+        _imageHandle = DataHandle(0);
     }
 
     void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/, const std::string& transFuncParamsUniform /*= "_transferFunctionParameters"*/) {

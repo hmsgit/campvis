@@ -30,6 +30,8 @@
 #include "opengljobprocessor.h"
 
 #include "tgt/assert.h"
+#include "tgt/logmanager.h"
+#include "tgt/openglgarbagecollector.h"
 #include "tgt/qt/qtcontextmanager.h"
 #include "core/tools/job.h"
 
@@ -57,12 +59,11 @@ namespace campvis {
     void OpenGLJobProcessor::stop() {
         _stopExecution = true;
         _evaluationCondition.notify_all();
-
-        Runnable::stop();
     }
 
     void OpenGLJobProcessor::run() {
         std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
+        clock_t lastCleanupTime = clock() * 1000 / CLOCKS_PER_SEC;
 
         while (! _stopExecution) {
             // this is a simple round-robing scheduling between all contexts:
@@ -122,6 +123,13 @@ namespace campvis {
                 if (jobToDo != 0) {
                     jobToDo->execute();
                     delete jobToDo;
+                }
+
+
+                // fourth: start the GC if it's time
+                if (clock() * 1000 / CLOCKS_PER_SEC - lastCleanupTime > 250) {
+                    GLGC.deleteGarbage();
+                    lastCleanupTime = clock();
                 }
             }
             

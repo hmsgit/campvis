@@ -100,6 +100,7 @@ namespace campvis {
             _dataContainer->s_dataAdded.disconnect(this);
         }
 
+        _handles.clear();
         GLJobProc.deregisterContext(this);
         ShdrMgr.dispose(_paintShader);
         delete _quad;
@@ -257,8 +258,9 @@ namespace campvis {
                 _texturesDirty = true;
             }
         }
-        
-        invalidate();
+
+        if (_texturesDirty)
+            invalidate();
     }
 
     void DataContainerInspectorCanvas::setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles) {

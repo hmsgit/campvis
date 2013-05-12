@@ -28,6 +28,8 @@
 // ================================================================================================
 
 #include "referencecounted.h"
+#include "core/tools/job.h"
+#include "core/tools/simplejobprocessor.h"
 
 namespace campvis {
     ReferenceCounted::ReferenceCounted()
@@ -55,7 +57,7 @@ namespace campvis {
 
     void ReferenceCounted::removeReference() {
         if (--_refCount == 0)
-            delete this;
+            SimpleJobProc.enqueueJob(makeJob(&ReferenceCounted::deleteInstance, this));
     }
 
     void ReferenceCounted::markUnsharable() {
@@ -68,6 +70,10 @@ namespace campvis {
 
     bool ReferenceCounted::isShared() const {
         return _refCount > 1;
+    }
+
+    void ReferenceCounted::deleteInstance(ReferenceCounted* instance) {
+        delete instance;
     }
 
 }

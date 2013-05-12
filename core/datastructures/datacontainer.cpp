@@ -53,13 +53,13 @@ namespace campvis {
     void DataContainer::addDataHandle(const std::string& name, const DataHandle& dh) {
         tgtAssert(dh.getData() != 0, "The data in the DataHandle must not be 0!");
         {
-            tbb::spin_mutex::scoped_lock lock(_localMutex);
-            std::map<std::string, DataHandle>::iterator it = _handles.lower_bound(name);
-            if (it != _handles.end() && it->first == name) {
+            //tbb::spin_mutex::scoped_lock lock(_localMutex);
+            tbb::concurrent_unordered_map<std::string, DataHandle>::iterator it = _handles.find(name);
+            if (it != _handles.end()/* && it->first == name*/) {
                 it->second = dh;
             }
             else {
-                _handles.insert(it, std::make_pair(name, dh));
+                _handles.insert(/*it,*/ std::make_pair(name, dh));
             }
         }
         s_dataAdded(name, dh);
@@ -67,13 +67,13 @@ namespace campvis {
     }
 
     bool DataContainer::hasData(const std::string& name) const {
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
+        //tbb::spin_mutex::scoped_lock lock(_localMutex);
         return (_handles.find(name) != _handles.end());
     }
 
     DataHandle DataContainer::getData(const std::string& name) const {
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
-        std::map<std::string, DataHandle>::const_iterator it = _handles.find(name);
+        //tbb::spin_mutex::scoped_lock lock(_localMutex);
+        tbb::concurrent_unordered_map<std::string, DataHandle>::const_iterator it = _handles.find(name);
         if (it == _handles.end())
             return DataHandle(0);
         else
@@ -82,9 +82,9 @@ namespace campvis {
 
     void DataContainer::removeData(const std::string& name) {
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        std::map<std::string, DataHandle>::iterator it = _handles.find(name);
+        tbb::concurrent_unordered_map<std::string, DataHandle>::const_iterator it = _handles.find(name);
         if (it != _handles.end()) {
-            _handles.erase(it);
+            _handles.unsafe_erase(it);
         }
     }
 
@@ -93,16 +93,21 @@ namespace campvis {
         toReturn.reserve(_handles.size());
 
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        for (std::map<std::string, DataHandle>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
+        for (tbb::concurrent_unordered_map<std::string, DataHandle>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
             toReturn.push_back(std::make_pair(it->first, it->second));
         }
 
         return toReturn;
     }
 
-    std::map<std::string, DataHandle> DataContainer::getHandlesCopy() const {
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
-        return _handles;
+//     tbb::concurrent_unordered_map<std::string, DataHandle> DataContainer::getHandlesCopy() const {
+//         //tbb::spin_mutex::scoped_lock lock(_localMutex);
+//         return _handles;
+//     }
+
+    void DataContainer::clear() {
+        //tbb::spin_mutex::scoped_lock lock(_localMutex);
+        _handles.clear();
     }
 
 }

@@ -79,6 +79,7 @@ namespace campvis {
         Runnable& operator =(Runnable const&);
 
         std::thread* _thread;                    ///< Thread of the Runnable
+        tbb::atomic<bool> _running;
     };
 
 }

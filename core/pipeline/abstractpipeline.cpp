@@ -76,6 +76,9 @@ namespace campvis {
                 LERROR("Caught Exception during deinitialization of processor: " << e.what());
             }
         }
+
+        // clear DataContainer
+        _data.clear();
     }
 
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
@@ -122,7 +125,7 @@ namespace campvis {
             processor->unlockProcessor();
 
 #ifdef CAMPVIS_DEBUG
-            LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+            //LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
 #endif
         }
     }

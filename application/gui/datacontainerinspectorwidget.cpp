@@ -193,7 +193,7 @@ namespace campvis {
             _lblName->setText(QString::number(handles.size()) + " DataHandles selected");
             _lblTimestamp->setText("Timestamp: n/a");
 
-            _canvas->p_transferFunction.getTF()->setImageHandle(0);
+            _canvas->p_transferFunction.getTF()->setImageHandle(DataHandle(0));
         }
         _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_localFootprint));
         _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_videoFootprint));
@@ -229,6 +229,13 @@ namespace campvis {
             _canvas->deinit();
 
         _pcWidget->updatePropCollection(0);
+
+        if (_dataContainer != 0) {
+            _dataContainer->s_dataAdded.disconnect(this);
+        }
+
+        _dataContainer = 0;
+        _dctWidget->update(0);
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {

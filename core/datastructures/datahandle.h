@@ -58,7 +58,7 @@ namespace campvis {
          *          counting mechanism. Make sure not to interfere with it or delete \a data yourself!
          * \param   data    Data for the DataHandle
          */
-        DataHandle(AbstractData* data);
+        explicit DataHandle(AbstractData* data = 0);
 
         /**
          * Copy-constructor

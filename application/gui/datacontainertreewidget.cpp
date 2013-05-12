@@ -221,10 +221,12 @@ namespace campvis {
         delete _rootItem;
         _rootItem = new DataContainerTreeRootItem();
 
-        std::vector< std::pair< std::string, DataHandle> > handlesCopy = dataContainer->getDataHandlesCopy();
-        for (std::vector< std::pair< std::string, DataHandle> >::iterator it = handlesCopy.begin(); it != handlesCopy.end(); ++it) {
-            DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(it->second), it->first, _rootItem);
-            _itemMap.insert(std::make_pair(QString::fromStdString(it->first), dhti));
+        if (dataContainer != 0) {
+            std::vector< std::pair< std::string, DataHandle> > handlesCopy = dataContainer->getDataHandlesCopy();
+            for (std::vector< std::pair< std::string, DataHandle> >::iterator it = handlesCopy.begin(); it != handlesCopy.end(); ++it) {
+                DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(it->second), it->first, _rootItem);
+                _itemMap.insert(std::make_pair(QString::fromStdString(it->first), dhti));
+            }
         }
     }
 
