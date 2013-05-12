@@ -46,6 +46,7 @@ SET(TGT_SOURCES
 	light.cpp
 	logmanager.cpp
 	naturalcubicspline.cpp
+	openglgarbagecollector.cpp
 	painter.cpp
 	shadermanager.cpp
 	spline.cpp

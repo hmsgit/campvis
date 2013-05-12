@@ -24,6 +24,7 @@
 
 #include "tgt/framebufferobject.h"
 #include "tgt/logmanager.h"
+#include "tgt/openglgarbagecollector.h"
 
 namespace tgt {
 
@@ -37,7 +38,7 @@ FramebufferObject::FramebufferObject()
 
 FramebufferObject::~FramebufferObject()
 {
-    glDeleteFramebuffersEXT(1, &id_);
+    GLGC.addGarbageFramebufferObject(id_);
 }
 
 void FramebufferObject::activate()

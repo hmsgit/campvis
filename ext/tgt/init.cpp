@@ -27,6 +27,7 @@
 #include "tgt/tgt_gl.h"
 
 #include "tgt/assert.h"
+#include "tgt/openglgarbagecollector.h"
 #include "tgt/singleton.h"
 #include "tgt/gpucapabilities.h"
 #ifdef _MSC_VER
@@ -112,9 +113,13 @@ void initGL(InitFeature::Features featureset) {
 
     // starting shadermanager
     ShaderManager::init();
+
+    OpenGLGarbageCollector::init();
 }
 
 void deinitGL() {
+    if (OpenGLGarbageCollector::isInited())
+        OpenGLGarbageCollector::deinit();
     if (GpuCapabilities::isInited())
         GpuCapabilities::deinit();
 #ifdef _MSC_VER

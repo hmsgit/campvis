@@ -75,6 +75,12 @@ namespace tgt {
         size_t getBufferSize() const;
 
         /**
+         * Gets the OpenGL id of this buffer object;
+         * \return _id
+         */
+        GLuint getId() const { return _id; };
+
+        /**
          * Binds the buffer object to the current OpenGL context.
          * \param target    Target type of buffer object
          */

@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include "tgt/openglgarbagecollector.h"
 
 
 namespace tgt {
@@ -21,8 +22,7 @@ namespace tgt {
         tgtAssert(_assignedAttributes.empty(), "Destructing a BufferObject, that is still bound to a VertexAttribute.");
 
         if (_id != 0) {
-            glDeleteBuffers(1, &_id);
-            LGL_ERROR;
+            GLGC.addGarbageBufferObject(_id);
         }
     }
 

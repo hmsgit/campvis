@@ -58,6 +58,8 @@ public:
 
     static GLuint getActiveObject();
 
+    GLuint getId() const { return id_; };
+
 protected:
     GLuint generateId();
 

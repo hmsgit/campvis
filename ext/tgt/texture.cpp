@@ -27,6 +27,7 @@
 
 #include "tgt/gpucapabilities.h"
 #include "tgt/filesystem.h"
+#include "tgt/openglgarbagecollector.h"
 
 namespace tgt {
 
@@ -91,6 +92,15 @@ Texture::Texture(GLubyte* data, const tgt::ivec3& dimensions, GLint format,
     init(false);
     arraySize_ = hmul(dimensions_) * bpp_;
 }
+
+Texture::~Texture() {
+    if (id_)
+        GLGC.addGarbageTexture(id_);
+
+    if (pixels_)
+        delete[] pixels_;
+}
+
 
 void Texture::init(bool allocData) {
 #ifndef GL_TEXTURE_RECTANGLE_ARB

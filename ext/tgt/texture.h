@@ -94,14 +94,7 @@ public:
     * The destructor deletes the Texture in OpenGL.
     * Handled by the texturemanager!
     */
-    virtual ~Texture()
-    {
-        if (id_)
-            glDeleteTextures(1, &id_);
-
-        if (pixels_)
-            delete[] pixels_;
-    }
+    virtual ~Texture();
 
     /// allocates an appropriate buffer for the texture
     void alloc() {
