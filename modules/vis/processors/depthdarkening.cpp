@@ -105,7 +105,6 @@ namespace campvis {
 
             std::pair<ImageData*, ImageRepresentationRenderTarget*> tempTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
 
@@ -143,7 +142,8 @@ namespace campvis {
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
-            glPopAttrib();
+            glDepthFunc(GL_LESS);
+            glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
             data.addData(p_outputImage.getValue() + "temp", tempTarget.first);

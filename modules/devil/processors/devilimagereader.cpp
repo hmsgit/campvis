@@ -92,9 +92,6 @@ namespace campvis {
                 ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
 
                 std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-                glPushAttrib(GL_ALL_ATTRIB_BITS);
-                glEnable(GL_DEPTH_TEST);
-                glDepthFunc(GL_ALWAYS);
 
                 _shader->activate();
                 _shader->setIgnoreUniformLocationError(true);
@@ -106,14 +103,12 @@ namespace campvis {
                 image->bind(_shader, texUnit, "_colorTexture");
 
                 rt.second->activate();
-                LGL_ERROR;
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
                 rt.second->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
-                glPopAttrib();
                 LGL_ERROR;
 
                 data.addData(p_targetImageID.getValue(), rt.first);

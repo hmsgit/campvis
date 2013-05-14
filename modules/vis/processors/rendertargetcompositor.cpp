@@ -95,10 +95,7 @@ namespace campvis {
 
         if (firstImage != 0 && secondImage != 0 ) {
             std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_ALWAYS);
-
+ 
             _shader->activate();
             tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 
@@ -110,14 +107,12 @@ namespace campvis {
             decorateRenderProlog(data, _shader);
 
             rt.second->activate();
-            LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
             rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
-            glPopAttrib();
             LGL_ERROR;
 
             data.addData(p_targetImageId.getValue(), rt.first);

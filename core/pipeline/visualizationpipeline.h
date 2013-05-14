@@ -138,6 +138,14 @@ namespace campvis {
          */
         void disableLowQualityMode();
 
+        /**
+         * Executes \a processor and afterwards checks the OpenGL state to be valid.
+         * \note    Only call from with a valid OpenGL context
+         * \param   processor   Processor to execute
+         */
+        void executeProcessorAndCheckOpenGLState(AbstractProcessor* processor);
+
+
         /// Signal emitted when the pipeline's render target has changed
         sigslot::signal0<> s_renderTargetChanged;
 

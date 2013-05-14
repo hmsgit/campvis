@@ -104,9 +104,6 @@ namespace campvis {
                     validate(INVALID_SHADER);
                 }
 
-                glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-                glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
                 _shader->setIgnoreUniformLocationError(true);
@@ -147,7 +144,6 @@ namespace campvis {
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
-                glPopAttrib();
                 LGL_ERROR;
             }
             else {

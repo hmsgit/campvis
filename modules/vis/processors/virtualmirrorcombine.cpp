@@ -85,7 +85,6 @@ namespace campvis {
 
         if (normalImage != 0 && mirrorImage != 0 && mirrorRendered != 0) {
             std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
 
@@ -106,7 +105,8 @@ namespace campvis {
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
-            glPopAttrib();
+            glDepthFunc(GL_LESS);
+            glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
             data.addData(p_targetImageID.getValue(), rt.first);

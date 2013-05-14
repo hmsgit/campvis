@@ -37,6 +37,26 @@
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 
+namespace {
+    GLboolean getGlBool(GLenum param) {
+        GLboolean toReturn;
+        glGetBooleanv(param, &toReturn);
+        return toReturn;
+    };
+
+    GLint getGlInt(GLenum param) {
+        GLint toReturn;
+        glGetIntegerv(param, &toReturn);
+        return toReturn;
+    };
+
+    GLfloat getGlFloat(GLenum param) {
+        GLfloat toReturn;
+        glGetFloatv(param, &toReturn);
+        return toReturn;
+    }
+}
+
 namespace campvis {
     const std::string VisualizationPipeline::loggerCat_ = "CAMPVis.core.datastructures.VisualizationPipeline";
 
@@ -161,7 +181,7 @@ namespace campvis {
                 // is VisualizationProcessor
                 GLJobProc.enqueueJob(
                     _canvas, 
-                    makeJobOnHeap<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessor, processor), 
+                    makeJobOnHeap<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessorAndCheckOpenGLState, processor), 
                     OpenGLJobProcessor::SerialJob);
             }
             else {
@@ -177,6 +197,30 @@ namespace campvis {
     void VisualizationPipeline::addProcessor(AbstractProcessor* processor) {
         _isVisProcessorMap.insert(std::make_pair(processor, (dynamic_cast<VisualizationProcessor*>(processor) != 0)));
         AbstractPipeline::addProcessor(processor);
+    }
+    
+    void VisualizationPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
+        AbstractPipeline::executeProcessor(processor);
+
+#ifdef CAMPVIS_DEBUG
+//         tgtAssert(getGlBool(GL_DEPTH_TEST) == false, "Invalid OpenGL state after processor execution, GL_DEPTH_TEST != false.");
+//         tgtAssert(getGlBool(GL_SCISSOR_TEST) == false, "Invalid OpenGL state after processor execution, GL_SCISSOR_TEST != false.");
+// 
+//         tgtAssert(getGlInt(GL_CULL_FACE_MODE) == GL_BACK, "Invalid OpenGL state after processor execution, GL_CULL_FACE_MODE != GL_BACk.");
+//         tgtAssert(getGlInt(GL_DEPTH_FUNC) == GL_LESS, "Invalid OpenGL state after processor execution, GL_DEPTH_FUNC != GL_LESS.");
+// 
+//         tgtAssert(getGlFloat(GL_DEPTH_CLEAR_VALUE) == 1.f, "Invalid OpenGL state after processor execution, GL_DEPTH_CLEAR_VALUE != 1.f.");
+// 
+//         tgtAssert(getGlFloat(GL_RED_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_RED_SCALE != 1.f.");
+//         tgtAssert(getGlFloat(GL_GREEN_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_GREEN_SCALE != 1.f.");
+//         tgtAssert(getGlFloat(GL_BLUE_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_BLUE_SCALE != 1.f.");
+//         tgtAssert(getGlFloat(GL_ALPHA_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_ALPHA_SCALE != 1.f.");
+// 
+//         tgtAssert(getGlFloat(GL_RED_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_RED_BIAS != 0.f.");
+//         tgtAssert(getGlFloat(GL_GREEN_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_GREEN_BIAS != 0.f.");
+//         tgtAssert(getGlFloat(GL_BLUE_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_BLUE_BIAS != 0.f.");
+//         tgtAssert(getGlFloat(GL_ALPHA_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_ALPHA_BIAS != 0.f.");
+#endif
     }
 
 }

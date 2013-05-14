@@ -70,6 +70,8 @@ namespace campvis {
     void SliceRenderer3D::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/slicerenderer3d.frag", "", false);
+        _shader->setAttributeLocation(0, "in_Position");
+        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void SliceRenderer3D::deinit() {
@@ -101,7 +103,6 @@ namespace campvis {
 
                 std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
-                glPushAttrib(GL_ALL_ATTRIB_BITS);
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
@@ -119,14 +120,12 @@ namespace campvis {
 
                 rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                _shader->setAttributeLocation(0, "in_Position");
-                _shader->setAttributeLocation(1, "in_TexCoord");
                 slice.render();
                 rt.second->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
-                glPopAttrib();
+                glDisable(GL_DEPTH_TEST);
 
                 data.addData(p_targetImageID.getValue(), rt.first);
                 p_targetImageID.issueWrite();

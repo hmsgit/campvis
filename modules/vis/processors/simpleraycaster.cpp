@@ -69,7 +69,6 @@ namespace campvis {
             _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDepthFunc(GL_ALWAYS);
         QuadRdr.renderQuad();
         LGL_ERROR;
 

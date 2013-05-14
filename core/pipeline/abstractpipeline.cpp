@@ -125,7 +125,7 @@ namespace campvis {
             processor->unlockProcessor();
 
 #ifdef CAMPVIS_DEBUG
-            //LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+            LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
 #endif
         }
     }

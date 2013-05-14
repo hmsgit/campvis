@@ -87,9 +87,6 @@ namespace campvis {
 
         if (xRayImage != 0 && sliceImage != 0 && drrFullImage != 0 && drrClippedImage != 0) {
             std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_ALWAYS);
 
             _shader->activate();
             tgt::TextureUnit xRayColorUnit, xRayDepthUnit, sliceColorUnit, sliceDepthUnit, drrFullUnit, drrClippedUnit;
@@ -109,7 +106,6 @@ namespace campvis {
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
-            glPopAttrib();
             LGL_ERROR;
 
             data.addData(p_targetImageId.getValue(), rt.first);

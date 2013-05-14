@@ -111,7 +111,6 @@ namespace campvis {
                 MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -p_camera.getValue().getLook(), true, 0.02f);
 
                 // start render setup
-                glPushAttrib(GL_ALL_ATTRIB_BITS);
                 _shader->activate();
 
                 // setup virtual mirror if necessary
@@ -207,7 +206,13 @@ namespace campvis {
 
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
-                glPopAttrib();
+
+                glDepthFunc(GL_LESS);
+                glClearDepth(1.0f);
+                glCullFace(GL_BACK);
+                glDisable(GL_CULL_FACE);
+                glDisable(GL_DEPTH_TEST);
+
                 LGL_ERROR;
 
                 data.addData(p_entryImageID.getValue(), entrypoints.first);

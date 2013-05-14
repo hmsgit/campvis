@@ -79,8 +79,6 @@ namespace campvis {
 
         if (proxyGeometry != 0 && _shader != 0) {
             // set modelview and projection matrices
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
-
             _shader->activate();
             _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
             _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
@@ -98,7 +96,7 @@ namespace campvis {
 
             rt.second->deactivate();
             _shader->deactivate();
-            glPopAttrib();
+            glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
             data.addData(p_renderTargetID.getValue(), rt.first);

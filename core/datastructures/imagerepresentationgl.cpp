@@ -147,7 +147,6 @@ namespace campvis {
 
         // map signed integer types from [-1.0:1.0] to [0.0:1.0] in order to avoid clamping of negative values
         if (isInteger && isSigned) {
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
             glPixelTransferf(GL_RED_SCALE,   0.5f);
             glPixelTransferf(GL_GREEN_SCALE, 0.5f);
             glPixelTransferf(GL_BLUE_SCALE,  0.5f);
@@ -165,7 +164,16 @@ namespace campvis {
         _texture->setWrapping(tgt::Texture::CLAMP);
 
         if (isInteger && isSigned) {
-            glPopAttrib();
+            // restore default
+            glPixelTransferf(GL_RED_SCALE,   1.0f);
+            glPixelTransferf(GL_GREEN_SCALE, 1.0f);
+            glPixelTransferf(GL_BLUE_SCALE,  1.0f);
+            glPixelTransferf(GL_ALPHA_SCALE, 1.0f);
+
+            glPixelTransferf(GL_RED_BIAS,    0.0f);
+            glPixelTransferf(GL_GREEN_BIAS,  0.0f);
+            glPixelTransferf(GL_BLUE_BIAS,   0.0f);
+            glPixelTransferf(GL_ALPHA_BIAS,  0.0f);
         }
 
         // revoke ownership of local pixel data from the texture
