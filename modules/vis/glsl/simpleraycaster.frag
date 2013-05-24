@@ -115,7 +115,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                 float formerT = t - _samplingStepSize;
 
                 // we just left the void, perform intersection refinement
-                for (float stepPower = 0.5; stepPower > 0.05; stepPower /= 2.0) {
+                for (float stepPower = 0.5; stepPower > 0.1; stepPower /= 2.0) {
                     // compute refined sample position
                     float newT = formerT + _samplingStepSize * stepPower;
                     vec3 newSamplePosition = entryPoint.rgb + newT * direction;

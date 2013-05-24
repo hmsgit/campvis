@@ -138,11 +138,11 @@ namespace campvis {
             if (node->second->_isVisualizationProcessor) {
                 GLJobProc.enqueueJob(
                     _canvas, 
-                    makeJobOnHeap<DigraphVisualizationPipeline, AbstractProcessor*>(this, &DigraphVisualizationPipeline::executeProcessor, processor), 
+                    makeJobOnHeap<DigraphVisualizationPipeline, AbstractProcessor*, bool>(this, &DigraphVisualizationPipeline::executeProcessor, processor, true), 
                     OpenGLJobProcessor::SerialJob);
             }
             else {
-                SimpleJobProc.enqueueJob(makeJob<DigraphVisualizationPipeline, AbstractProcessor*>(this, &DigraphVisualizationPipeline::executeProcessor, processor));
+                SimpleJobProc.enqueueJob(makeJob<DigraphVisualizationPipeline, AbstractProcessor*, bool>(this, &DigraphVisualizationPipeline::executeProcessor, processor, false));
             }
         }
         else {

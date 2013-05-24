@@ -41,6 +41,7 @@ namespace campvis {
         : HasPropertyCollection()
     {
         _enabled = true;
+        _clockExecutionTime = false;
         _locked = 0;
         _level = VALID;
     }
@@ -114,6 +115,14 @@ namespace campvis {
             tmp = _level;
         } while (_level.compare_and_swap(tmp & (~level), tmp) != tmp);
         s_validated(this);
+    }
+
+    bool AbstractProcessor::getClockExecutionTime() const {
+        return _clockExecutionTime;
+    }
+
+    void AbstractProcessor::setClockExecutionTime(bool value) {
+        _clockExecutionTime = value;
     }
 
 

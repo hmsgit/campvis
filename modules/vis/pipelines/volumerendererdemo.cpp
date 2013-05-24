@@ -72,10 +72,10 @@ namespace campvis {
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.connect(&_vr.p_inputVolume);
 
-//          Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-//          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-//          dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-//          _dvrNormal.p_transferFunction.replaceTF(dvrTF);
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
+        static_cast<TransferFunctionProperty*>(_vr.getProperty("transferFunction"))->replaceTF(dvrTF);
 
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<VolumeRendererDemo>(this, &VolumeRendererDemo::onRenderTargetSizeChanged);

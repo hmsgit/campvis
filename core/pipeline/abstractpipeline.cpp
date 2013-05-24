@@ -88,7 +88,7 @@ namespace campvis {
 
     void AbstractPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
         if (processor->getEnabled())
-            SimpleJobProc.enqueueJob(makeJob(this, &AbstractPipeline::executeProcessor, processor));
+            SimpleJobProc.enqueueJob(makeJob(this, &AbstractPipeline::executeProcessor, processor, false));
 
         s_PipelineInvalidated();
     }
@@ -101,14 +101,13 @@ namespace campvis {
         return _data;
     }
 
-    void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
+    void AbstractPipeline::executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
         if (processor->getEnabled() && !processor->isLocked() && processor->hasInvalidResult()) {
             processor->lockProcessor();
-#ifdef CAMPVIS_DEBUG
             clock_t startTime = clock();
-#endif
+
             try {
                 processor->process(_data);
             }
@@ -119,14 +118,17 @@ namespace campvis {
                 LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": unknown exception");
             }
 
-#ifdef CAMPVIS_DEBUG
-            clock_t endTime = clock();
-#endif
-            processor->unlockProcessor();
+            if (processor->getClockExecutionTime()) {
+                clock_t endTime = clock();
+                LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+            }
 
-#ifdef CAMPVIS_DEBUG
-            LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
-#endif
+            // Unlocking processors might be expensive, since a long chain of invalidations might be started
+            // -> do this in another thread...
+            if (unlockInExtraThred)
+                SimpleJobProc.enqueueJob(makeJob(processor, &AbstractProcessor::unlockProcessor));
+            else
+                processor->unlockProcessor();
         }
     }
 

@@ -167,18 +167,60 @@ namespace campvis {
         void (*_callee)(A1);        ///< Function to call
         A1 _arg1;                   ///< Argument to pass to \a callee
     };
-    
+
     /**
      * Specific job, that is calling a member function pasing a single argument.
+     */
+    template<class T, class A1, class A2>
+    class CallMemberFunc2ArgJob : public AbstractJob {
+    public:
+        /**
+         * Creates an new job, that is calling \a callee on \a target pasing \a arg1 and \a arg2 as arguments.
+         * \param   target  Target object
+         * \param   callee  Member function to call
+         * \param   arg1    First argument to pass to \a callee
+         * \param   arg2    Second argument to pass to \a callee
+         */
+        CallMemberFunc2ArgJob(T* target, void (T::*callee)(A1, A2), A1 arg1, A2 arg2)
+            : _target(target)
+            , _callee(callee)
+            , _arg1(arg1)
+            , _arg2(arg2)
+        {
+            tgtAssert(_target != 0, "Target object must not be 0.");
+            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+        }
+
+        /**
+         * Destructor, nothing to do here
+         */
+        ~CallMemberFunc2ArgJob() {};
+
+        /**
+         * Executes this job by calling the member function.
+         */
+        virtual void execute() {
+            (_target->*_callee)(_arg1, _arg2);
+        }
+
+    protected:
+        T* _target;                 ///< Target object
+        void (T::*_callee)(A1, A2); ///< Member function to call
+        A1 _arg1;                   ///< First argument to pass to \a callee
+        A2 _arg2;                   ///< Second argument to pass to \a callee
+    };
+    
+    /**
+     * Specific job, that is calling a function passing two arguments.
      */
     template<class A1, class A2>
     class CallFunc2ArgJob : public AbstractJob {
     public:
         /**
-         * Creates an new job, that is calling \a callee on \a target pasing \a arg1 as single argument.
-         * \param   target  Target object
-         * \param   callee  Member function to call
-         * \param   arg1    Argument to pass to \a callee
+         * Creates an new job, that is calling \a callee passing \a arg1 and \a arg2 as arguments.
+         * \param   callee  Function to call
+         * \param   arg1    First argument to pass to \a callee
+         * \param   arg2    Second argument to pass to \a callee
          */
         CallFunc2ArgJob(void (*callee)(A1, A2), A1 arg1, A2 arg2)
             : _callee(callee)
@@ -194,14 +236,14 @@ namespace campvis {
         ~CallFunc2ArgJob() {};
 
         /**
-         * Executes this job by calling the member function.
+         * Executes this job by calling the function.
          */
         virtual void execute() {
             (*_callee)(_arg1, _arg2);
         }
 
     protected:
-        void (*_callee)(A1, A2);        ///< Function to call
+        void (*_callee)(A1, A2);    ///< Function to call
         A1 _arg1;                   ///< First Argument to pass to \a callee
         A2 _arg2;                   ///< Second Argument to pass to \a callee
     };
@@ -279,6 +321,31 @@ namespace campvis {
     template<class A1>
     CallFunc1ArgJob<A1> makeJob(void (*callee)(A1), A1 arg1) {
         return CallFunc1ArgJob<A1>(callee, arg1);
+    }
+
+    /**
+     * Creates a new CallMemberFunc1ArgJob on the heap  for the object \a target.
+     * \note    The caller takes ownership of the returned pointer.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \param   arg1    First argument to pass to \callee.
+     * \return  Pointer to the newly created CallMemberFunc1ArgJob. Caller has ownership!
+     */
+    template<class T, class A1, class A2>
+    CallMemberFunc2ArgJob<T, A1, A2>* makeJobOnHeap(T* target, void (T::*callee)(A1, A2), A1 arg1, A2 arg2) {
+        return new CallMemberFunc2ArgJob<T, A1, A2>(target, callee, arg1, arg2);
+    }
+
+    /**
+     * Creates a new CallMemberFunc1ArgJob on the stack  for the object \a target.
+     * \param   target  Target object to call method from.
+     * \param   callee  Pointer to method to call.
+     * \param   arg1    First argument to pass to \callee.
+     * \return  The newly created CallMemberFunc1ArgJob.
+     */
+    template<class T, class A1, class A2>
+    CallMemberFunc2ArgJob<T, A1, A2> makeJob(T* target, void (T::*callee)(A1, A2), A1 arg1, A2 arg2) {
+        return CallMemberFunc2ArgJob<T, A1, A2>(target, callee, arg1, arg2);
     }
 
     /**

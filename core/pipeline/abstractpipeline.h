@@ -152,8 +152,9 @@ namespace campvis {
         /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
+         * \param   unlockInExtraThred  If true, the call to processor->unlock() will be done in an extra thread.
          */
-        void executeProcessor(AbstractProcessor* processor);
+        void executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred);
 
 
         DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline

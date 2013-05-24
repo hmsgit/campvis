@@ -123,6 +123,18 @@ namespace campvis {
          * \param   enabled     New flag whether this processor is currently enabled.
          */
         void setEnabled(bool enabled);
+
+        /**
+         * Returns whether to measure the execution time of this processor.
+         * \return  _clockExecutionTime
+         */
+        bool getClockExecutionTime() const;
+
+        /**
+         * Sets whether to measure the execution time of this processor.
+         * \param   value   The new flag vlaue whether to measure the execution time of this processor.
+         */
+        void setClockExecutionTime(bool value);
         
         /**
          * 
@@ -245,6 +257,7 @@ namespace campvis {
 
     protected:
         tbb::atomic<bool> _enabled;                 ///< flag whether this processor is currently enabled
+        tbb::atomic<bool> _clockExecutionTime;      ///< flag whether to measure the execution time of this processor
 
         /// Flag whether this processor is currently locked
         /// (This implies, that all properties are locked and it is not valid to call process())

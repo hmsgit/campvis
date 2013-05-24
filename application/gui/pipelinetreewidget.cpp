@@ -38,7 +38,8 @@ namespace campvis {
     namespace {
         const int COLUMN_NAME = 0;
         const int COLUMN_ENABLED_STATE = 1;
-        const int COLUMN_DESCRIPTION = 2;
+        const int COLUMN_CLOCK_STATE = 2;
+        const int COLUMN_DESCRIPTION = 3;
     }
 
 // = TreeModel items ==============================================================================
@@ -102,6 +103,8 @@ namespace campvis {
             case Qt::CheckStateRole:
                 if (column == COLUMN_ENABLED_STATE)
                     return _processor->getEnabled() ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
+                else if (column == COLUMN_CLOCK_STATE)
+                    return _processor->getClockExecutionTime() ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
                 else
                     return QVariant();
             case Qt::UserRole:
@@ -121,6 +124,12 @@ namespace campvis {
                 return true;
             }
         }
+        else if (column == COLUMN_CLOCK_STATE) {
+            if (role == Qt::CheckStateRole) {
+                _processor->setClockExecutionTime(value == Qt::Checked ? true : false);
+                return true;
+            }
+        }
         return false;
     }
 
@@ -136,6 +145,8 @@ namespace campvis {
                 return QVariant(QString("Description"));
             else if (column == COLUMN_ENABLED_STATE)
                 return QVariant(QString("Enabled"));
+            else if (column == COLUMN_CLOCK_STATE)
+                return QVariant(QString("Clock"));
         }
 
         return QVariant();
@@ -183,6 +194,8 @@ namespace campvis {
             case COLUMN_NAME:
                 return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
             case COLUMN_ENABLED_STATE:
+                return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+            case COLUMN_CLOCK_STATE:
                 return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
         }
 
@@ -241,7 +254,7 @@ namespace campvis {
     }
 
     int PipelineTreeModel::columnCount(const QModelIndex &parent /*= QModelIndex()*/) const {
-        return 3;
+        return 4;
     }
 
     void PipelineTreeModel::setData(const std::vector<AbstractPipeline*>& pipelines) {
