@@ -104,10 +104,15 @@ namespace campvis {
                 std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
                 tgt::mat4 texCoordsMatrix = tgt::mat4::zero;
+                float renderTargetRatio = static_cast<float>(_renderTargetSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().y);
+                float sliceRatio = 1.f;
                 switch (p_sliceOrientation.getValue()) {
                 case XY_PLANE:
                     texCoordsMatrix = tgt::mat4::identity;
                     texCoordsMatrix.t23 = (static_cast<float>(p_zSliceNumber.getValue() + 0.5f) / static_cast<float>(imgSize.z));
+                    sliceRatio = 
+                          (static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x)
+                        / (static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y);
                     break;
 
                 case XZ_PLANE:
@@ -115,7 +120,11 @@ namespace campvis {
                     texCoordsMatrix.t12 = 1.f;   // components on vectors being multiplied with it
                     texCoordsMatrix.t21 = 1.f;
                     texCoordsMatrix.t33 = 1.f;
+                    sliceRatio = static_cast<float>(imgSize.x) / static_cast<float>(imgSize.y);
                     texCoordsMatrix.t13 = (static_cast<float>(p_ySliceNumber.getValue() + 0.5f) / static_cast<float>(imgSize.y));
+                    sliceRatio = 
+                           (static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x) 
+                         / (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z);
                     break;
 
                 case YZ_PLANE:
@@ -124,8 +133,14 @@ namespace campvis {
                     texCoordsMatrix.t20 = 1.f;
                     texCoordsMatrix.t33 = 1.f;
                     texCoordsMatrix.t13 = (static_cast<float>(p_xSliceNumber.getValue() + 0.5f) / static_cast<float>(imgSize.x));
+                    sliceRatio = 
+                          (static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y)
+                        / (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z);
                     break;
                 }
+                
+                float ratioRatio = sliceRatio / renderTargetRatio;
+                tgt::mat4 modelMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
 
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
@@ -133,6 +148,7 @@ namespace campvis {
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
                 _shader->setUniform("_texCoordsMatrix", texCoordsMatrix);
+                _shader->setUniform("_modelMatrix", modelMatrix);
 
                 rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
