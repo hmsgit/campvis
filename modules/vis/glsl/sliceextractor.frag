@@ -33,17 +33,19 @@ in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 //#include "tools/background.frag"
-#include "tools/texture2d.frag"
+#include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
-uniform sampler2D _texture;
-uniform TextureParameters2D _textureParams;
+uniform sampler3D _texture;
+uniform TextureParameters3D _textureParams;
 
 uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
+uniform mat4 _texCoordsMatrix;
+
 void main() {
-    vec4 texel = getElement2DNormalized(_texture, _textureParams, ex_TexCoord.xy);
+    vec4 texel = getElement3DNormalized(_texture, _textureParams, (_texCoordsMatrix * vec4(ex_TexCoord, 1.0)).xyz);
 
     if (_textureParams._numChannels == 1) {
         out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);

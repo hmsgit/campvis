@@ -134,6 +134,8 @@ namespace campvis {
             }
             
             while (_pause > 0) {
+                GLGC.deleteGarbage();
+                lastCleanupTime = clock();
                 CtxtMgr.releaseCurrentContext();
                 _evaluationCondition.wait(lock);
                 _currentContext->getContext()->acquire();
@@ -141,6 +143,8 @@ namespace campvis {
             }
 
             if (! hadWork) {
+                GLGC.deleteGarbage();
+                lastCleanupTime = clock();
                 CtxtMgr.releaseCurrentContext();
                 _evaluationCondition.wait(lock);
                 _currentContext->getContext()->acquire();

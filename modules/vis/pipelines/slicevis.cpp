@@ -42,7 +42,7 @@ namespace campvis {
         , _gvg()
         , _lhh()
         , _sliceExtractor(_effectiveRenderTargetSize)
-        , _wheelHandler(&_sliceExtractor.p_sliceNumber)
+        , _wheelHandler(&_sliceExtractor.p_zSliceNumber)
         , _tfWindowingHandler(&_sliceExtractor.p_transferFunction)
     {
         addProcessor(&_imageReader);
@@ -68,7 +68,7 @@ namespace campvis {
 
 //         _gvg._outputGradients.connect(&_lhh._inputGradients);
 
-        _sliceExtractor.p_sliceNumber.setValue(0);
+        _sliceExtractor.p_xSliceNumber.setValue(0);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
@@ -83,10 +83,10 @@ namespace campvis {
         if (e->pressed()) {
             switch (e->keyCode()) {
                 case tgt::KeyEvent::K_UP:
-                    _sliceExtractor.p_sliceNumber.increment();
+                    _sliceExtractor.p_xSliceNumber.increment();
                     break;
                 case tgt::KeyEvent::K_DOWN:
-                    _sliceExtractor.p_sliceNumber.decrement();
+                    _sliceExtractor.p_xSliceNumber.decrement();
                     break;
             }
         }

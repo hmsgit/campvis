@@ -36,6 +36,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
+#include "core/properties/optionproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
@@ -51,6 +52,12 @@ namespace campvis {
      */
     class SliceExtractor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
+        enum SliceOrientation {
+            XY_PLANE = 0,
+            XZ_PLANE = 1,
+            YZ_PLANE = 2
+        };
+
         /**
          * Constructs a new SliceExtractor Processor
          **/
@@ -78,11 +85,14 @@ namespace campvis {
         DataNameProperty p_sourceImageID;                  ///< image ID for input image
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
-        IntProperty p_sliceNumber;                       ///< number of the slice to extract
+        GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
+        IntProperty p_xSliceNumber;                         ///< number of the slice in X direction
+        IntProperty p_ySliceNumber;                         ///< number of the slice in Y direction
+        IntProperty p_zSliceNumber;                         ///< number of the slice in Z direction
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
     protected:
-        /// adapts the range of the p_sliceNumber property to the image
+        /// adapts the range of the p_xSliceNumber property to the image
         void updateProperties(DataHandle img);
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
