@@ -32,6 +32,7 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
+#include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
@@ -55,9 +56,12 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", compositingOptions, 3)
-        , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0)
+        , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0) 
+        , p_xSliceColor("XSliceColor", "X Slice Color", tgt::vec4(1.f, 0.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_ySliceNumber("YSliceNumber", "Y Slice Number", 0, 0, 0)
+        , p_ySliceColor("YSliceColor", "Y Slice Color", tgt::vec4(0.f, 1.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_zSliceNumber("ZSliceNumber", "Z Slice Number", 0, 0, 0)
+        , p_zSliceColor("ZSliceColor", "Z Slice Color", tgt::vec4(0.f, 0.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
@@ -65,8 +69,11 @@ namespace campvis {
         addProperty(&p_targetImageID);
         addProperty(&p_sliceOrientation);
         addProperty(&p_xSliceNumber);
+        addProperty(&p_xSliceColor);
         addProperty(&p_ySliceNumber);
+        addProperty(&p_ySliceColor);
         addProperty(&p_zSliceNumber);
+        addProperty(&p_zSliceColor);
         addProperty(&p_transferFunction);
 
         //addDecorator(new ProcessorDecoratorBackground());
@@ -100,59 +107,140 @@ namespace campvis {
                     validate(AbstractProcessor::INVALID_PROPERTIES);
                 }
 
-                const tgt::svec3& imgSize = img->getSize();
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                tgt::vec3 imgSize(img->getSize());
 
+                // current slices in texture coordinates
+                tgt::vec3 sliceTexCoord = tgt::vec3(.5f + p_xSliceNumber.getValue(), .5f + p_ySliceNumber.getValue(), .5f + p_zSliceNumber.getValue()) / imgSize;
+                // texture coordinate transformation matrix (will be configured later)
                 tgt::mat4 texCoordsMatrix = tgt::mat4::zero;
+
                 float renderTargetRatio = static_cast<float>(_renderTargetSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().y);
                 float sliceRatio = 1.f;
+
                 switch (p_sliceOrientation.getValue()) {
-                case XY_PLANE:
-                    texCoordsMatrix = tgt::mat4::identity;
-                    texCoordsMatrix.t23 = (static_cast<float>(p_zSliceNumber.getValue() + 0.5f) / static_cast<float>(imgSize.z));
-                    sliceRatio = 
-                          (static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x)
-                        / (static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y);
-                    break;
+                    case XY_PLANE:
+                        texCoordsMatrix.t00 = 1.f;
+                        texCoordsMatrix.t11 = 1.f;
+                        texCoordsMatrix.t22 = 1.f;
+                        //texCoordsMatrix.t13 = 1.f;
+                        texCoordsMatrix.t23 = sliceTexCoord.z;
+                        sliceRatio = 
+                              (static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x)
+                            / (static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y);
+                        break;
 
-                case XZ_PLANE:
-                    texCoordsMatrix.t00 = 1.f;   // setup a permutation matrix, swapping z- and y-
-                    texCoordsMatrix.t12 = 1.f;   // components on vectors being multiplied with it
-                    texCoordsMatrix.t21 = 1.f;
-                    texCoordsMatrix.t33 = 1.f;
-                    sliceRatio = static_cast<float>(imgSize.x) / static_cast<float>(imgSize.y);
-                    texCoordsMatrix.t13 = (static_cast<float>(p_ySliceNumber.getValue() + 0.5f) / static_cast<float>(imgSize.y));
-                    sliceRatio = 
-                           (static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x) 
-                         / (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z);
-                    break;
+                    case XZ_PLANE:
+                        texCoordsMatrix.t00 = 1.f;
+                        texCoordsMatrix.t12 = 1.f;
+                        texCoordsMatrix.t21 = 1.f;
+                        texCoordsMatrix.t33 = 1.f;
+                        texCoordsMatrix.t13 = sliceTexCoord.y;
+                        sliceRatio = 
+                               (static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x) 
+                             / (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z);
+                        break;
 
-                case YZ_PLANE:
-                    texCoordsMatrix.t01 = 1.f;   // setup a permutation matrix, swapping x-, y- and z-
-                    texCoordsMatrix.t12 = 1.f;   // components on vectors being multiplied with it
-                    texCoordsMatrix.t20 = 1.f;
-                    texCoordsMatrix.t33 = 1.f;
-                    texCoordsMatrix.t13 = (static_cast<float>(p_xSliceNumber.getValue() + 0.5f) / static_cast<float>(imgSize.x));
-                    sliceRatio = 
-                          (static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y)
-                        / (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z);
-                    break;
+                    case YZ_PLANE:
+                        texCoordsMatrix.t02 = 1.f; 
+                        texCoordsMatrix.t10 = 1.f;
+                        texCoordsMatrix.t21 = 1.f;
+                        //texCoordsMatrix.t13 = 0.f;
+                        texCoordsMatrix.t33 = 1.f;
+                        texCoordsMatrix.t03 = sliceTexCoord.x;
+                        sliceRatio = 
+                              (static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y)
+                            / (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z);
+                        break;
                 }
                 
+                // configure model matrix so that slices are rendered with correct aspect ratio
                 float ratioRatio = sliceRatio / renderTargetRatio;
                 tgt::mat4 modelMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
 
+                // prepare OpenGL
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
                 tgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
+
+                // render slice
                 _shader->setUniform("_texCoordsMatrix", texCoordsMatrix);
                 _shader->setUniform("_modelMatrix", modelMatrix);
-
+                _shader->setUniform("_useTexturing", true);
                 rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
+
+                // render slice markers
+                glLineWidth(2.f);
+                _shader->setUniform("_useTexturing", false);
+                switch (p_sliceOrientation.getValue()) {
+                    case XY_PLANE:
+                        _shader->setUniform("_color", p_zSliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_LOOP);
+
+                        modelMatrix.t00 = 0.f;
+                        modelMatrix.t03 = 2.f * sliceTexCoord.x - 1.f;
+                        modelMatrix.t03 *= (ratioRatio > 1) ? 1.f : ratioRatio;
+                        _shader->setUniform("_modelMatrix", modelMatrix);
+                        _shader->setUniform("_color", p_xSliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_STRIP);
+
+                        modelMatrix.t00 = (ratioRatio > 1) ? 1.f : ratioRatio;
+                        modelMatrix.t11 = 0.f;
+                        modelMatrix.t03 = 0.f;
+                        modelMatrix.t13 = 2.f * sliceTexCoord.y - 1.f;
+                        modelMatrix.t13 *= (ratioRatio > 1) ? 1.f : ratioRatio;
+                        _shader->setUniform("_modelMatrix", modelMatrix);
+                        _shader->setUniform("_color", p_ySliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_STRIP);
+                        break;
+
+                    case XZ_PLANE:
+                        _shader->setUniform("_color", p_ySliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_LOOP);
+
+                        modelMatrix.t00 = 0.f;
+                        modelMatrix.t03 = 2.f * sliceTexCoord.x - 1.f;
+                        modelMatrix.t03 *= (ratioRatio > 1) ? 1.f : ratioRatio;
+                        _shader->setUniform("_modelMatrix", modelMatrix);
+                        _shader->setUniform("_color", p_xSliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_STRIP);
+
+                        modelMatrix.t00 = (ratioRatio > 1) ? 1.f : ratioRatio;
+                        modelMatrix.t11 = 0.f;
+                        modelMatrix.t03 = 0.f;
+                        modelMatrix.t13 = 2.f * sliceTexCoord.z - 1.f;
+                        modelMatrix.t13 *= (ratioRatio > 1) ? 1.f / ratioRatio : 1.f;
+                        _shader->setUniform("_modelMatrix", modelMatrix);
+                        _shader->setUniform("_color", p_zSliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_STRIP);
+                        break;
+
+                    case YZ_PLANE:
+                        _shader->setUniform("_color", p_xSliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_LOOP);
+
+                        modelMatrix.t00 = 0.f;
+                        modelMatrix.t03 = 2.f * sliceTexCoord.y - 1.f;
+                        modelMatrix.t03 *= (ratioRatio > 1) ? 1.f : ratioRatio;
+                        _shader->setUniform("_modelMatrix", modelMatrix);
+                        _shader->setUniform("_color", p_ySliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_STRIP);
+
+                        modelMatrix.t00 = (ratioRatio > 1) ? 1.f : ratioRatio;
+                        modelMatrix.t11 = 0.f;
+                        modelMatrix.t03 = 0.f;
+                        modelMatrix.t13 = 2.f * sliceTexCoord.z - 1.f;
+                        modelMatrix.t13 *= (ratioRatio > 1) ? 1.f / ratioRatio : 1.f;
+                        _shader->setUniform("_modelMatrix", modelMatrix);
+                        _shader->setUniform("_color", p_zSliceColor.getValue());
+                        QuadRdr.renderQuad(GL_LINE_STRIP);
+                        break;
+                }
+
                 rt.second->deactivate();
 
                 decorateRenderEpilog(_shader);
@@ -185,6 +273,9 @@ namespace campvis {
         if (p_zSliceNumber.getMaxValue() != imgSize.z - 1){
             p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
+    }
+
+    void SliceExtractor::updateBorderGeometry() {
     }
 
 }

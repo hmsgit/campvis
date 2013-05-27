@@ -103,7 +103,7 @@ namespace campvis {
         return _faceNormal;
     }
 
-    void FaceGeometry::render() const {
+    void FaceGeometry::render(GLenum mode) const {
         createGLBuffers();
         if (! _buffersInitialized) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -121,10 +121,7 @@ namespace campvis {
             vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _normalsBuffer);
         LGL_ERROR;
 
-        if (_vertices.size() > 2)
-            glDrawArrays(GL_POLYGON, 0, static_cast<GLsizei>(_vertices.size()));
-        else
-            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices.size()));
+        glDrawArrays(mode, 0, static_cast<GLsizei>(_vertices.size()));
         LGL_ERROR;
     }
 

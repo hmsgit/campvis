@@ -82,7 +82,7 @@ namespace campvis {
     }
 
 
-    void MeshGeometry::render() const {
+    void MeshGeometry::render(GLenum mode) const {
         createGLBuffers();
         if (! _buffersInitialized) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -104,7 +104,7 @@ namespace campvis {
         for (std::vector<FaceGeometry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it) {
             GLsizei numVertices = static_cast<GLsizei>(it->getVertices().size());
             if (numVertices > 2)
-                glDrawArrays(GL_POLYGON, startIndex, numVertices);
+                glDrawArrays(mode, startIndex, numVertices);
             else
                 glDrawArrays(GL_LINES, startIndex, numVertices);
             startIndex += numVertices;

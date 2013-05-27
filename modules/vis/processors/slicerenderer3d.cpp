@@ -120,7 +120,7 @@ namespace campvis {
 
                 rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                slice.render();
+                slice.render(GL_POLYGON);
                 rt.second->deactivate();
 
                 _shader->deactivate();

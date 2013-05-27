@@ -32,6 +32,9 @@
 
 #include <string>
 
+#include "tgt/buffer.h"
+#include "tgt/vertexarrayobject.h"
+
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
@@ -45,6 +48,7 @@ namespace tgt {
 }
 
 namespace campvis {
+    class FaceGeometry;
     class ImageData;
 
     /**
@@ -87,13 +91,18 @@ namespace campvis {
 
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
         IntProperty p_xSliceNumber;                         ///< number of the slice in X direction
+        Vec4Property p_xSliceColor;                         ///< color for x marker
         IntProperty p_ySliceNumber;                         ///< number of the slice in Y direction
+        Vec4Property p_ySliceColor;                         ///< color for y marker
         IntProperty p_zSliceNumber;                         ///< number of the slice in Z direction
+        Vec4Property p_zSliceColor;                         ///< color for z marker
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
     protected:
         /// adapts the range of the p_xSliceNumber property to the image
         void updateProperties(DataHandle img);
+
+        void updateBorderGeometry();
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 

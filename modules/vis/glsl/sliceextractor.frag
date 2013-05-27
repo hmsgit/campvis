@@ -44,20 +44,24 @@ uniform TFParameters1D _transferFunctionParams;
 
 uniform mat4 _texCoordsMatrix;
 
-void main() {
-    vec4 texel = getElement3DNormalized(_texture, _textureParams, (_texCoordsMatrix * vec4(ex_TexCoord, 1.0)).xyz);
+uniform bool _useTexturing;
+uniform vec4 _color;
 
-    if (_textureParams._numChannels == 1) {
-        out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+void main() {
+    if (_useTexturing) {
+        vec4 texel = getElement3DNormalized(_texture, _textureParams, (_texCoordsMatrix * vec4(ex_TexCoord, 1.0)).xyz);
+
+        if (_textureParams._numChannels == 1) {
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+        }
+        else if (_textureParams._numChannels == 3) {
+            out_Color = vec4(abs(texel.rgb), 1.0);
+        }
+        else if (_textureParams._numChannels == 4) {
+            out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
+        }
     }
-    else if (_textureParams._numChannels == 3) {
-        out_Color = vec4(abs(texel.rgb), 1.0);
-    }
-    else if (_textureParams._numChannels == 4) {
-        out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
-    }
-    
-    //if (out_Color.a == 0) {
-    //    renderBackground(ex_TexCoord.xy, out_Color);
-    //}
+    else {
+        out_Color = _color;
+    }    
 }

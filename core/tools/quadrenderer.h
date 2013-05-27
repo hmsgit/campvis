@@ -50,7 +50,7 @@ namespace campvis {
          */
         virtual ~QuadRenderer();
 
-        void renderQuad();
+        void renderQuad(GLenum mode = GL_POLYGON);
 
     private:
         QuadRenderer();

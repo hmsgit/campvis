@@ -184,7 +184,7 @@ namespace campvis {
         }
         _paintShader->setIgnoreUniformLocationError(false);
 
-        _quad->render();
+        _quad->render(GL_POLYGON);
     }
 
     void DataContainerInspectorCanvas::invalidate() {

@@ -56,8 +56,8 @@ namespace campvis {
         delete _quad;
     }
 
-    void QuadRenderer::renderQuad() {
-        _quad->render();
+    void QuadRenderer::renderQuad(GLenum mode) {
+        _quad->render(mode);
     }
 
 

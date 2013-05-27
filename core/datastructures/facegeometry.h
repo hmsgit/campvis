@@ -128,8 +128,9 @@ namespace campvis {
         /**
          * Renders this FaceGeometry.
          * Must be called from a valid OpenGL context.
+         * \param   mode    OpenGL rendering mode for this face
          */
-        virtual void render() const;
+        virtual void render(GLenum mode) const;
 
         /**
          * Creates the OpenGL VBOs and the VAO for this face's geometry.

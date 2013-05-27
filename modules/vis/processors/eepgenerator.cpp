@@ -183,7 +183,7 @@ namespace campvis {
                 glClearDepth(1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(p_enableMirror.getValue() ? GL_FRONT : GL_BACK);
-                clipped.render();
+                clipped.render(GL_POLYGON);
 
                 entrypoints.second->deactivate();
 
@@ -200,7 +200,7 @@ namespace campvis {
                 glClearDepth(0.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glCullFace(p_enableMirror.getValue() ? GL_BACK : GL_FRONT);
-                clipped.render();
+                clipped.render(GL_POLYGON);
 
                 exitpoints.second->deactivate();
 

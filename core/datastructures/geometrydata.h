@@ -30,6 +30,7 @@
 #ifndef GEOMETRYDATA_H__
 #define GEOMETRYDATA_H__
 
+#include "tgt/tgt_gl.h"
 #include "core/datastructures/abstractdata.h"
 #include <vector>
 
@@ -68,7 +69,7 @@ namespace campvis {
          * Renders this GeometryData.
          * Must be called from a valid OpenGL context.
          */
-        virtual void render() const = 0;
+        virtual void render(GLenum mode = GL_POLYGON) const = 0;
 
         /**
          * Creates the OpenGL VBOs and the VAO for this geometry.
