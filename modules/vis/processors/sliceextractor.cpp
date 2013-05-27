@@ -119,10 +119,10 @@ namespace campvis {
 
                 switch (p_sliceOrientation.getValue()) {
                     case XY_PLANE:
+                        // keep texture coordinates for x,y, shift z coordinates to slice value
                         texCoordsMatrix.t00 = 1.f;
                         texCoordsMatrix.t11 = 1.f;
                         texCoordsMatrix.t22 = 1.f;
-                        //texCoordsMatrix.t13 = 1.f;
                         texCoordsMatrix.t23 = sliceTexCoord.z;
                         sliceRatio = 
                               (static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x)
@@ -130,6 +130,7 @@ namespace campvis {
                         break;
 
                     case XZ_PLANE:
+                        // permute y and z coordinates, shift y to slice 
                         texCoordsMatrix.t00 = 1.f;
                         texCoordsMatrix.t12 = 1.f;
                         texCoordsMatrix.t21 = 1.f;
@@ -141,10 +142,10 @@ namespace campvis {
                         break;
 
                     case YZ_PLANE:
+                        // permute x,y and z coordinates, shift x to slice
                         texCoordsMatrix.t02 = 1.f; 
                         texCoordsMatrix.t10 = 1.f;
                         texCoordsMatrix.t21 = 1.f;
-                        //texCoordsMatrix.t13 = 0.f;
                         texCoordsMatrix.t33 = 1.f;
                         texCoordsMatrix.t03 = sliceTexCoord.x;
                         sliceRatio = 
@@ -174,6 +175,8 @@ namespace campvis {
                 QuadRdr.renderQuad();
 
                 // render slice markers
+                // for each slice render a bounding box (GL_LINE_LOOP) in slice color and horizontal/vertical
+                // lines (GL_LINE_STRIP) as reference for the other axis-aligned slices
                 glLineWidth(2.f);
                 _shader->setUniform("_useTexturing", false);
                 switch (p_sliceOrientation.getValue()) {
