@@ -187,7 +187,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // early ray termination
-        if (result.a >= 1.0) {
+        if (result.a > 0.975) {
             result.a = 1.0;
             t = tend;
         }

@@ -75,7 +75,9 @@ namespace campvis {
             summed |= il;
         }
         _locked = false;
-        invalidate(summed);
+
+        if (summed != VALID)
+            invalidate(summed);
     }
 
     bool AbstractProcessor::isLocked() {

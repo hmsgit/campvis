@@ -160,7 +160,9 @@ namespace campvis {
                 FaceGeometry slice(corners, texCoords);
                 MeshGeometry bb = MeshGeometry::createCube(_bounds, tgt::Bounds(tgt::vec3(-1.f), tgt::vec3(-1.f)));
 
-                const unsigned char* tmp = (p_showConfidenceMap.getValue() ? _currentSweep->getConfidenceMap(frameNr) : _currentSweep->getTrackedUSFrame(frameNr)->getImageBuffer());
+                const unsigned char* tmp = (p_showConfidenceMap.getValue() ? _currentSweep->getConfidenceMap(frameNr) : _currentSweep->getTrackedUSFrame(frameNr)->getQuartsampledBuffer().Pointer());
+                size_t width = (p_showConfidenceMap.getValue() ? _currentSweep->Width() / 4 : _currentSweep->Width()/4);
+                size_t height = (p_showConfidenceMap.getValue() ? _currentSweep->Height() / 4 : _currentSweep->Height()/4);
                 if (tmp != 0) {
                     std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
@@ -177,7 +179,7 @@ namespace campvis {
 
                     tgt::Texture tex(
                         const_cast<unsigned char*>(tmp), 
-                        tgt::vec3(_currentSweep->Width(), _currentSweep->Height(), 1), 
+                        tgt::vec3(width, height, 1), 
                         GL_ALPHA,
                         GL_ALPHA8,
                         GL_UNSIGNED_BYTE, 
