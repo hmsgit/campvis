@@ -52,6 +52,7 @@ namespace campvis {
         , _selectedProcessor(0)
     {
         tgtAssert(_application != 0, "Application must not be 0.");
+        ui.setupUi(this);
         setup();
     }
 
@@ -63,18 +64,17 @@ namespace campvis {
     void MainWindow::setup() {
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
 
+        setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+        setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
         _dcInspectorWidget = new DataContainerInspectorWidget();
-        _dcInspectorWidget->show();
+        ui.dataContainerInspectorDock->setWidget(_dcInspectorWidget);
 
-        _centralWidget = new QWidget(this);
-        QHBoxLayout* mainLayout = new QHBoxLayout();
-        mainLayout->setSpacing(4);
+        _pipelineWidget = new PipelineTreeWidget();
+        ui.pipelineTreeDock->setWidget(_pipelineWidget);
 
-        _pipelineWidget = new PipelineTreeWidget(_centralWidget);
-        mainLayout->addWidget(_pipelineWidget);
-
-        QWidget* rightWidget = new QWidget(_centralWidget);
-        mainLayout->addWidget(rightWidget);
+        QWidget* rightWidget = new QWidget();
+        ui.pipelinePropertiesDock->setWidget(rightWidget);
 
         QVBoxLayout* rightLayout = new QVBoxLayout();
         rightLayout->setSpacing(4);
@@ -89,8 +89,6 @@ namespace campvis {
         _propCollectionWidget = new PropertyCollectionWidget(_centralWidget);
         rightLayout->addWidget(_propCollectionWidget);
 
-        _centralWidget->setLayout(mainLayout);
-        setCentralWidget(_centralWidget);
 
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), 

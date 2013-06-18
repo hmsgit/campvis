@@ -34,6 +34,7 @@
 #include "application/campvisapplication.h"
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
+#include "application/ui_mainwindow.h"
 
 #include <QMainWindow>
 #include <QVBoxLayout>
@@ -114,6 +115,8 @@ namespace campvis {
          * Setup Qt GUI stuff
          */
         void setup();
+
+        Ui::MainWindow ui;                                  ///< Interface definition of the MainWindow
 
         CampVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
 
