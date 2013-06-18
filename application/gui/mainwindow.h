@@ -34,12 +34,14 @@
 #include "application/campvisapplication.h"
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
+#include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
 
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QTextEdit>
 #include <vector>
 
 namespace campvis {
@@ -130,6 +132,8 @@ namespace campvis {
 
         AbstractPipeline* _selectedPipeline;                ///< currently selected pipeline
         AbstractProcessor* _selectedProcessor;              ///< currently selected processor
+        QTextEditLog* _log;                                 ///< Log appending messages to a QTextEdit
+        QTextEdit* _logViewer;                              ///< Widget displaying log messages
     };
 }
 

@@ -50,6 +50,8 @@ namespace campvis {
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
         , _selectedProcessor(0)
+        , _logViewer(0)
+        , _log(0)
     {
         tgtAssert(_application != 0, "Application must not be 0.");
         ui.setupUi(this);
@@ -89,6 +91,9 @@ namespace campvis {
         _propCollectionWidget = new PropertyCollectionWidget(_centralWidget);
         rightLayout->addWidget(_propCollectionWidget);
 
+        _logViewer = new QTextEdit();
+        _logViewer->setReadOnly(true);
+        ui.logViewerDock->setWidget(_logViewer);
 
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), 
@@ -161,11 +166,17 @@ namespace campvis {
     void MainWindow::init() {
         if (_dcInspectorWidget != 0)
             _dcInspectorWidget->init();
+
+        _log = new QTextEditLog(_logViewer);
+        _log->addCat("", true);
+        LogMgr.addLog(_log);
     }
 
     void MainWindow::deinit() {
         if (_dcInspectorWidget != 0)
             _dcInspectorWidget->deinit();
+
+        LogMgr.removeLog(_log);
     }
 
 }
