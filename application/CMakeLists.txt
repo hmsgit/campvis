@@ -46,6 +46,7 @@ SET(CampvisApplicationToBeMocced
     gui/properties/simpletransferfunctioneditor.h
     gui/properties/stringpropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
+    tools/qtexteditlog.h
 )
 
 LIST(APPEND CampvisApplicationDefinitions "-DCAMPVIS_SOURCE_DIR=\"${CampvisHome}\"")
