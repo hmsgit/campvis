@@ -63,7 +63,9 @@ namespace campvis {
         virtual ~VisualizationProcessor();
 
 
-    protected:
+
+
+    //protected:
         IVec2Property _renderTargetSize;        ///< Viewport size of target canvas
     };
 

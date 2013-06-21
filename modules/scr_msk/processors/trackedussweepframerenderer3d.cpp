@@ -49,6 +49,7 @@
 #include <usinterface/include/trackedusfileio.h>
 #include <usinterface/include/trackedusframe.h>
 #include <usinterface/include/trackedussweep.h>
+#include <usinterface/include/sweepvisitor/sweepsmoothinggaussian.h>
 
 
 namespace {
@@ -160,9 +161,9 @@ namespace campvis {
                 FaceGeometry slice(corners, texCoords);
                 MeshGeometry bb = MeshGeometry::createCube(_bounds, tgt::Bounds(tgt::vec3(-1.f), tgt::vec3(-1.f)));
 
-                const unsigned char* tmp = (p_showConfidenceMap.getValue() ? _currentSweep->getConfidenceMap(frameNr) : _currentSweep->getTrackedUSFrame(frameNr)->getQuartsampledBuffer().Pointer());
-                size_t width = (p_showConfidenceMap.getValue() ? _currentSweep->Width() / 4 : _currentSweep->Width()/4);
-                size_t height = (p_showConfidenceMap.getValue() ? _currentSweep->Height() / 4 : _currentSweep->Height()/4);
+                const unsigned char* tmp = (p_showConfidenceMap.getValue() ? _currentSweep->getConfidenceMap(frameNr) : _currentSweep->getTrackedUSFrame(frameNr)->getImageBuffer());
+                size_t width = (p_showConfidenceMap.getValue() ? _currentSweep->Width() / 4 : _currentSweep->Width());
+                size_t height = (p_showConfidenceMap.getValue() ? _currentSweep->Height() / 4 : _currentSweep->Height());
                 if (tmp != 0) {
                     std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
 
@@ -204,10 +205,10 @@ namespace campvis {
                     _shader->setAttributeLocation(1, "in_TexCoord");
 
                     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                    bb.render();
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    bb.render(GL_LINE_LOOP);
 
-                    slice.render();
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    slice.render(GL_POLYGON);
                     rt.second->deactivate();
 
                     _shader->setIgnoreUniformLocationError(false);
@@ -283,7 +284,8 @@ namespace campvis {
 
     void TrackedUsSweepFrameRenderer3D::onSmoothButtonClicked() {
         if (_currentSweep != 0) {
-            _currentSweep->SmoothCorners(AverageTopCornersAccessFunc(), GaussianSmoothingFunc<AverageTopCornersAccessFunc, 16>());
+            SweepSmoothingGaussian smoother(_currentSweep, 16);
+            smoother.applyToAll();
             updateBoundingBox();
             invalidate(AbstractProcessor::INVALID_RESULT);
         }
