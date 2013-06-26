@@ -251,4 +251,10 @@ namespace campvis {
         CtxtMgr.releaseCurrentContext();
     }
 
+    void CampVisApplication::registerDockWidget(Qt::DockWidgetArea area, QDockWidget* dock) {
+        tgtAssert(dock != 0, "Dock widget must not be 0.");
+
+        _mainWindow->addDockWidget(area, dock);
+    }
+
 }

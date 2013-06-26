@@ -34,6 +34,7 @@
 
 #include "sigslot/sigslot.h"
 #include <QApplication>
+#include <QDockWidget>
 #include <utility>
 #include <vector>
 
@@ -107,6 +108,15 @@ namespace campvis {
          * \param   vp      VisualizationPipeline to add.
          */
         void addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp);
+
+        /**
+         * Adds a dock widget to the main window.
+         * The dock widget will be automatically docked in the specified area.
+         *
+         * \param   area    Area of the main window to which the dock widget should be added.
+         * \param   dock    The dock widget to add to the main window.
+         */
+        void registerDockWidget(Qt::DockWidgetArea area, QDockWidget* dock);
 
         /**
          * Runs the actual application.
