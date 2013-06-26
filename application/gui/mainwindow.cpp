@@ -46,6 +46,7 @@ namespace campvis {
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
+        , _dcInspectorDock(0)
         , _btnExecute(0)
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
@@ -67,10 +68,11 @@ namespace campvis {
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
 
         setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+        setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
         setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+        setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
-        _dcInspectorWidget = new DataContainerInspectorWidget();
-        ui.dataContainerInspectorDock->setWidget(_dcInspectorWidget);
+        setTabPosition(Qt::TopDockWidgetArea, QTabWidget::North);
 
         _pipelineWidget = new PipelineTreeWidget();
         ui.pipelineTreeDock->setWidget(_pipelineWidget);
@@ -93,7 +95,10 @@ namespace campvis {
 
         _logViewer = new QTextEdit();
         _logViewer->setReadOnly(true);
+        ui.logViewerDock->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         ui.logViewerDock->setWidget(_logViewer);
+
+        _dcInspectorWidget = new DataContainerInspectorWidget();
 
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), 
@@ -127,8 +132,6 @@ namespace campvis {
             if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
             	_selectedPipeline = pipeline;
                 _selectedProcessor = 0;
-                if (_dcInspectorWidget != 0)
-                    onBtnShowDataContainerInspectorClicked();
             }
             else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
                 _selectedProcessor = processor;
@@ -158,8 +161,15 @@ namespace campvis {
 
     void MainWindow::onBtnShowDataContainerInspectorClicked() {
         if (_selectedPipeline != 0) {
+            if (_dcInspectorDock == 0) {
+                _dcInspectorDock = dockPrimaryWidget("Data Container inspector", _dcInspectorWidget);
+            } else {
+                // Activate the dock's tab
+                _dcInspectorDock->setVisible(true);
+                _dcInspectorDock->raise();
+            }
+
             _dcInspectorWidget->setDataContainer(&(_selectedPipeline->getDataContainer()));
-            _dcInspectorWidget->show();
         }
     }
 
@@ -177,6 +187,28 @@ namespace campvis {
             _dcInspectorWidget->deinit();
 
         LogMgr.removeLog(_log);
+    }
+
+    void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* widget) {
+        dockPrimaryWidget(name, widget);
+    }
+
+    QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {
+        QDockWidget* dockWidget = new QDockWidget(QString::fromStdString(name));
+        dockWidget->setWidget(widget);
+        dockWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+        if (_primaryDocks.empty()) {
+            addDockWidget(Qt::TopDockWidgetArea, dockWidget);
+        } else {
+            tabifyDockWidget(_primaryDocks.back(), dockWidget);
+            // Activate the dock's tab
+            dockWidget->setVisible(true);
+            dockWidget->raise();
+        }
+
+        _primaryDocks.push_back(dockWidget);
+        return dockWidget;
     }
 
 }

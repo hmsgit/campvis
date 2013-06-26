@@ -89,6 +89,13 @@ namespace campvis {
          */
         QSize sizeHint() const;
 
+        /**
+         * Adds a widget of a visualization pipeline to the main window.
+         * \param   name       the name of the visualization pipeline.
+         * \param   widget     the pipeline's widget to add to the main window.
+         */
+        void addVisualizationPipelineWidget(const std::string& name, QWidget* widget);
+
     signals:
         /// Qt signal for updating the PipelineWidget.
         void updatePipelineWidget(const std::vector<AbstractPipeline*>&);
@@ -118,6 +125,18 @@ namespace campvis {
          */
         void setup();
 
+        /**
+         * Adds a widget to the top docking area of the main window.
+         * This method creates a new dock with the specified name,
+         * sets its widget to the given widget, and docks it in top
+         * docking area of the main window. If there are already
+         * other docks there, they're tabified with the new dock.
+         * \param   name       the name that will be given to the created dock
+         * \param   widget     the widget to add to the top docking area of the main window
+         * \return  the dock created to store the provided widget
+         */
+        QDockWidget* dockPrimaryWidget(const std::string& name, QWidget* widget);
+
         Ui::MainWindow ui;                                  ///< Interface definition of the MainWindow
 
         CampVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
@@ -126,6 +145,7 @@ namespace campvis {
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
         DataContainerInspectorWidget* _dcInspectorWidget;   ///< Widget for inspecting the DataContainer of the selected pipeline.
+        QDockWidget* _dcInspectorDock;                      ///< Dock storing the above DataContainerInspectorWidget instance.
 
         QPushButton* _btnExecute;                           ///< Button to execute the selected pipeline/processor
         QPushButton* _btnShowDataContainerInspector;        ///< Button to show the DataContainerInspector for the selected pipeline
@@ -134,6 +154,7 @@ namespace campvis {
         AbstractProcessor* _selectedProcessor;              ///< currently selected processor
         QTextEditLog* _log;                                 ///< Log appending messages to a QTextEdit
         QTextEdit* _logViewer;                              ///< Widget displaying log messages
+        std::vector<QDockWidget*> _primaryDocks;           ///< Docks located in top docking area of the main window
     };
 }
 

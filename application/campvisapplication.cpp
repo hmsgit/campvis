@@ -237,7 +237,7 @@ namespace campvis {
         // create canvas and painter for the VisPipeline and connect all together
         tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
         GLJobProc.registerContext(canvas);
-        _mainWindow->setCentralWidget(canvas);
+        _mainWindow->addVisualizationPipelineWidget(name, canvas);
         canvas->init();
 
         TumVisPainter* painter = new TumVisPainter(canvas, vp);
