@@ -32,6 +32,7 @@ SET(CampvisApplicationToBeMocced
     gui/pipelinetreewidget.h
     gui/qtcolortools.h
     gui/qtdatahandle.h
+    gui/logviewerwidget.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
@@ -63,10 +64,10 @@ INCLUDE(${QT_USE_FILE})
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
-ADD_EXECUTABLE(campvis-application 
-    ${CampvisApplicationSources} ${CampvisApplicationHeaders} 
+ADD_EXECUTABLE(campvis-application
+    ${CampvisApplicationSources} ${CampvisApplicationHeaders}
     ${CampvisApplicationMoc}
-) 
+)
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})

@@ -25,13 +25,14 @@ namespace campvis {
          * QTextEditLog doesn't take ownership of the QTextEdit instance it's passed.
          *
          * \param   output           a QTextEdit instance to which messages will be logged
+         * \param   parent           the log's parent object
          * \param   dateStamping     should logged messages be date-stamped
          * \param   timeStamping     should logged messages be time-stamped
          * \param   showCat          should the category be printed along with the messages
          * \param   showLevel        should the LogLevel be printed along with the messages
          */
-        QTextEditLog(QTextEdit* logDisplay, bool dateStamping = true, bool timeStamping = true,
-                     bool showCat = true, bool showLevel = true);
+        QTextEditLog(QTextEdit* logDisplay, QObject* parent = 0, bool dateStamping = true,
+                     bool timeStamping = true, bool showCat = true, bool showLevel = true);
         virtual ~QTextEditLog() {}
         bool isOpen() { return true; }
 

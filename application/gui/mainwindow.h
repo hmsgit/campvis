@@ -34,6 +34,7 @@
 #include "application/campvisapplication.h"
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
+#include "application/gui/logviewerwidget.h"
 #include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
 
@@ -41,7 +42,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <QTextEdit>
 #include <vector>
 
 namespace campvis {
@@ -152,9 +152,8 @@ namespace campvis {
 
         AbstractPipeline* _selectedPipeline;                ///< currently selected pipeline
         AbstractProcessor* _selectedProcessor;              ///< currently selected processor
-        QTextEditLog* _log;                                 ///< Log appending messages to a QTextEdit
-        QTextEdit* _logViewer;                              ///< Widget displaying log messages
-        std::vector<QDockWidget*> _primaryDocks;           ///< Docks located in top docking area of the main window
+        LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
+        std::vector<QDockWidget*> _primaryDocks;            ///< Docks located in top docking area of the main window
     };
 }
 

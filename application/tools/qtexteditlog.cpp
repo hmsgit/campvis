@@ -4,9 +4,10 @@
 
 namespace campvis {
 
-    QTextEditLog::QTextEditLog(QTextEdit* logDisplay, bool dateStamping, bool timeStamping,
-                               bool showCat, bool showLevel)
-        : _logDisplay(logDisplay)
+    QTextEditLog::QTextEditLog(QTextEdit* logDisplay, QObject* parent, bool dateStamping,
+                               bool timeStamping, bool showCat, bool showLevel)
+        : QObject(parent)
+        , _logDisplay(logDisplay)
     {
         tgtAssert(logDisplay != 0, "Log display widget must not be 0.");
 
