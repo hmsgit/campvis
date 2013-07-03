@@ -36,8 +36,11 @@ namespace campvis {
     {
         setupGUI();
 
-        _log = new QTextEditLog(_logDisplay, this);
+        _log = new BufferingLog(100, this);
         _log->addCat("", true);
+
+        connect(_log, SIGNAL(s_messageAppended(const QString&)),
+                _logDisplay, SLOT(append(const QString&)));
     }
 
     LogViewerWidget::~LogViewerWidget() {

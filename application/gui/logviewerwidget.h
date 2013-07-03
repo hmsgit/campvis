@@ -36,7 +36,7 @@
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 
-#include "application/tools/qtexteditlog.h"
+#include "application/tools/bufferinglog.h"
 
 #include <QLabel>
 #include <QWidget>
@@ -89,7 +89,7 @@ namespace campvis {
         QPushButton* _clear_button;                     ///< Button used for clearing the log display
         QLineEdit* _filter_line_edit;                   ///< Text field where filter terms are entered
         QLabel* _filter_label;                          ///< Button used for clearing the log display
-        QTextEditLog* _log;                             ///< Log appending messages to a QTextEdit
+        BufferingLog* _log;                             ///< Log buffering messages
         QTextEdit* _logDisplay;                         ///< Widget displaying log messages
     };
 }
