@@ -93,6 +93,11 @@ namespace campvis {
         _pgGenerator.deinit();
         _eepGenerator.deinit();
         _raycaster.deinit();
+
+        removeProperty(&_raycaster.p_transferFunction);
+        removeProperty(&_raycaster.p_samplingRate);
+        removeProperty(_raycaster.getProperty("CentralDifferences"));
+
         VisualizationProcessor::deinit();
     }
 
