@@ -27,8 +27,6 @@
 // 
 // ================================================================================================
 
-#version 330
-
 layout(location = 0) out vec4 out_Color;     ///< outgoing fragment color
 layout(location = 1) out vec4 out_FHP;       ///< outgoing fragment first hitpoint
 layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit normal

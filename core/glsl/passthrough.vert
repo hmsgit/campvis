@@ -27,8 +27,6 @@
 // 
 // ================================================================================================
 
-#version 330
-
 in vec3 in_Position;        ///< incoming vertex position
 in vec3 in_TexCoord;        ///< incoming texture coordinate
 in vec4 in_Color;           ///< incoming color

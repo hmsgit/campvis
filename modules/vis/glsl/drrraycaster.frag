@@ -27,8 +27,6 @@
 // 
 // ================================================================================================
 
-#version 330
-
 out vec4 out_Color;         ///< outgoing fragment color
 
 #include "tools/raycasting.frag"
