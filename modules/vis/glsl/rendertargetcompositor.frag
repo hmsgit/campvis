@@ -26,8 +26,6 @@
  * commercial licensing please contact the authors.                   *
  *                                                                    *
  **********************************************************************/
- 
-#version 330
 
 in vec3 ex_TexCoord;
 out vec4 out_Color;

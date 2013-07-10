@@ -41,6 +41,8 @@ namespace tgt {
     class Shader;
 }
 
+class FaceGeometry;
+
 namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
@@ -85,9 +87,7 @@ namespace campvis {
         /// Not the most beautiful design though.
         enum ProcessorInvalidationLevel {
             VR_INVALID = 1 << 4,
-            X_SLICE_INVALID = 1 << 5,
-            Y_SLICE_INVALID = 1 << 6,
-            Z_SLICE_INVALID = 1 << 7,
+            SLICES_INVALID = 1 << 5,
         };
 
         /**
@@ -102,8 +102,19 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
+        void composeFinalRendering(DataContainer& data);
+
+        /// adapts the range of the p_xSliceNumber property to the image
+        void updateProperties(DataHandle img);
+
+        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        FaceGeometry* _quad;
+
         VolumeRenderer _raycaster;
         SliceExtractor _sliceExtractor;
+
+        IVec2Property p_sliceRenderSize;
+        IVec2Property p_volumeRenderSize;
 
         static const std::string loggerCat_;
     };

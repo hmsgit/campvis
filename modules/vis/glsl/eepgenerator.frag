@@ -27,8 +27,6 @@
 // 
 // ================================================================================================
 
-#version 330
-
 in vec3 ex_TexCoord;            ///< incoming texture coordinate
 out vec4 out_Color;             ///< outgoing fragment color
 

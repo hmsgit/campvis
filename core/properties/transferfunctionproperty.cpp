@@ -62,8 +62,10 @@ namespace campvis {
         tgtAssert(tf != 0, "Transfer function must not be 0.");
         s_BeforeTFReplace(_transferFunction);
 
-        if (_transferFunction != 0)
+        if (_transferFunction != 0) {
             _transferFunction->s_changed.disconnect(this);
+            _transferFunction->deinit();
+        }
         delete _transferFunction;
 
 

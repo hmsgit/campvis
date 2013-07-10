@@ -133,8 +133,8 @@ namespace campvis {
             _fbo->activate();
             _fbo->detachAll();
             _fbo->deactivate();
-            LGL_ERROR;
             delete _fbo;
+            _fbo = 0;
         }
 
         AbstractTransferFunction::deinit();
