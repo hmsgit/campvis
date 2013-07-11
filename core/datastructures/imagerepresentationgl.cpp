@@ -82,6 +82,12 @@ namespace campvis {
         // test source image type via dynamic cast
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
             WeaklyTypedPointer wtp = tester->getImageData();
+
+            if (wtp._pointer == 0) {
+                LERROR("Could not load image from disk during conversion.");
+                return 0;
+            }
+
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
             delete wtp._pointer;
             return toReturn;

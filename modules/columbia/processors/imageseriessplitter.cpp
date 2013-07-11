@@ -27,59 +27,40 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/volumerendererdemo.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
+#include "imageseriessplitter.h"
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
+#include "core/datastructures/imageseries.h"
 
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-#include "modules/columbia/pipelines/columbia1.h"
-#endif
+namespace campvis {
+    const std::string ImageSeriesSplitter::loggerCat_ = "CAMPVis.modules.io.ImageSeriesSplitter";
 
-using namespace campvis;
+    ImageSeriesSplitter::ImageSeriesSplitter() 
+        : AbstractProcessor()
+        , p_inputID("InputID", "Input Image Series ID", "input", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_outputID("OutputID", "Output Image ID", "output", DataNameProperty::WRITE)
+        , p_imageIndex("ImageIndex", "Image to Select", 0, 0, 0)
+    {
+        addProperty(&p_inputID);
+        addProperty(&p_outputID);
+        addProperty(&p_imageIndex);
+    }
 
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-    //app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
+    ImageSeriesSplitter::~ImageSeriesSplitter() {
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    //app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
+    }
 
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-    app.addVisualizationPipeline("Columbia", new Columbia1());
-#endif
+    void ImageSeriesSplitter::process(DataContainer& data) {
+        DataContainer::ScopedTypedData<ImageSeries> series(data, p_inputID.getValue());
+        if (series != 0) {
+            if (hasInvalidProperties()) {
+                p_imageIndex.setMaxValue(series->getNumImages());
+            }
+            if (p_imageIndex.getValue() < static_cast<int>(series->getNumImages())) {
+                data.addDataHandle(p_outputID.getValue(), series->getImage(p_imageIndex.getValue()));
+                p_outputID.issueWrite();
+            }
+        }
 
-
-
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
-
-    return toReturn;
+        validate(INVALID_RESULT);
+    }
 }

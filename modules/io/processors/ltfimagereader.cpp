@@ -82,15 +82,17 @@ namespace campvis {
         std::string noExt = tgt::FileSystem::fullBaseName(p_url.getValue());
         std::string::size_type offset = noExt.find_last_not_of("0123456789");
         if (offset != std::string::npos) {
+            ++offset;
             std::string base = noExt.substr(0, offset);
             int index = StringUtils::fromString<int>(noExt.substr(offset));
             ImageSeries* series = new ImageSeries();
 
             while (tgt::FileSystem::fileExists(base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf")) {
                 ImageData* image = new ImageData(dimensionality, p_size.getValue(), p_numChannels.getValue());
-                ImageRepresentationDisk::create(image, StringUtils::toString(index, noExt.size() - offset, '0'), p_baseType.getOptionValue(), 0, EndianHelper::getLocalEndianness());
+                ImageRepresentationDisk::create(image, base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf", p_baseType.getOptionValue(), 0, EndianHelper::getLocalEndianness());
                 image->setMappingInformation(ImageMappingInformation(p_size.getValue(), p_imageOffset.getValue(), p_voxelSize.getValue()));
                 series->addImage(image);
+                ++index;
             }
 
             data.addData(p_targetImageID.getValue(), series);

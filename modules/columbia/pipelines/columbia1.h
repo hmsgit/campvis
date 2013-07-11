@@ -27,59 +27,60 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/volumerendererdemo.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
+#ifndef COLUMBIA1_H__
+#define COLUMBIA1_H__
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-#include "modules/columbia/pipelines/columbia1.h"
-#endif
-
-using namespace campvis;
-
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-    //app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    //app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-    app.addVisualizationPipeline("Columbia", new Columbia1());
-#endif
+#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/pipeline/visualizationpipeline.h"
+#include "core/properties/cameraproperty.h"
 
 
+#include "modules/io/processors/ltfimagereader.h"
+#include "modules/columbia/processors/imageseriessplitter.h"
+#include "modules/vis/processors/volumerenderer.h"
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
+namespace campvis {
+    class Columbia1 : public VisualizationPipeline {
+    public:
+        /**
+         * Creates a VisualizationPipeline.
+         */
+        Columbia1();
 
-    return toReturn;
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~Columbia1();
+
+        /// \see VisualizationPipeline::init()
+        virtual void init();
+
+        /// \see VisualizationPipeline::deinit()
+        virtual void deinit();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const;
+
+
+        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+
+    protected:
+        /**
+         * Slot getting called when one of the observed processors got validated.
+         * Updates the camera properties, when the input image has changed.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorValidated(AbstractProcessor* processor);
+
+        CameraProperty _camera;
+
+        LtfImageReader _imageReader;
+        ImageSeriesSplitter _splitter;
+        VolumeRenderer _vr;
+
+        TrackballNavigationEventHandler* _trackballEH;
+
+    };
 }
+
+#endif // COLUMBIA1_H__

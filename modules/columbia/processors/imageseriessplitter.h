@@ -27,59 +27,50 @@
 // 
 // ================================================================================================
 
-#include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/volumerendererdemo.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
+#ifndef IMAGESERIESSPLITTER_H__
+#define IMAGESERIESSPLITTER_H__
 
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
+#include "core/pipeline/abstractprocessor.h"
+#include "core/properties/datanameproperty.h"
+#include "core/properties/numericproperty.h"
 
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-#include "modules/columbia/pipelines/columbia1.h"
-#endif
+namespace campvis {
+    /**
+     * Splits an ImageSeries into its single images.
+     */
+    class ImageSeriesSplitter : public AbstractProcessor {
+    public:
+        /**
+         * Constructs a new ImageSeriesSplitter Processor
+         **/
+        ImageSeriesSplitter();
 
-using namespace campvis;
-
-/**
- * CAMPVis main function, application entry point
- *
- * \param   argc    number of passed arguments
- * \param   argv    vector of arguments
- * \return  0 if program exited successfully
- **/
-int main(int argc, char** argv) {
-    CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-    //app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    //app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-    app.addVisualizationPipeline("Columbia", new Columbia1());
-#endif
+        /**
+         * Destructor
+         **/
+        virtual ~ImageSeriesSplitter();
 
 
+        /**
+         * Reads the raw file into an ImageRepresentationDisk representation
+         * \param data  DataContainer to work on
+         */
+        virtual void process(DataContainer& data);
 
-    app.init();
-    int toReturn = app.run();
-    app.deinit();
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "ImageSeriesSplitter"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Splits an ImageSeries into its single images."; };
 
-    return toReturn;
+        DataNameProperty p_inputID;   ///< image ID for input image series
+        DataNameProperty p_outputID;   ///< image ID for output image
+        IntProperty p_imageIndex;           ///< index of the image to select
+
+    protected:
+
+        static const std::string loggerCat_;
+    };
+
 }
+
+#endif // IMAGESERIESSPLITTER_H__
