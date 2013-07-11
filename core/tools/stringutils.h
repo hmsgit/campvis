@@ -31,6 +31,7 @@
 #define STRINGUTILS_H__
 
 #include "tgt/exception.h"
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -120,6 +121,16 @@ namespace campvis {
         static std::string toString(const T& value);
 
         /**
+         * Converts the value \a value to a zero-padded string.
+         * \param   value           The value to convert, must be compatible with std::stringstream.
+         * \param   paddingWidth    Number of digits for padding to apply
+         * \param   fill            Fill character for padding
+         * \return  A string representation of \a value.
+         */
+        template<class T>
+        static std::string toString(const T& value, size_t paddingWidth, char fill);
+
+        /**
          * Converts the string \a str to its original value.
          * \param str   The string to convert
          * \return  The back-converted value of \a str, type must be compatible with std::stringstream.
@@ -147,6 +158,12 @@ namespace campvis {
         return stream.str();
     }
 
+    template<class T>
+    std::string StringUtils::toString(const T& value, size_t paddingWidth, char fill) {
+        std::ostringstream stream;
+        stream << std::setw(paddingWidth) << std::setfill(fill) << value;
+        return stream.str();
+    }
     template<class T>
     T StringUtils::fromString(const std::string& str) throw (tgt::Exception) {
         T toReturn;
