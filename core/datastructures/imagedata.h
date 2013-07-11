@@ -43,7 +43,6 @@
 
 namespace campvis {
     class ImageRepresentationLocal;
-    class AbstractImageRepresentationItk;
 
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.
@@ -241,6 +240,8 @@ namespace campvis {
     const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
 
 #ifdef CAMPVIS_HAS_MODULE_ITK
+    class AbstractImageRepresentationItk;
+
     template<>
     const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
 #endif
