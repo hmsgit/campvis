@@ -74,14 +74,31 @@ namespace campvis {
          */
         void deinit();
 
-    signals:
-        void dataContainerChanged(const QString&);
-
     protected:
         /**
          * Setup the the log viewer's GUI
          */
         void setupGUI();
+
+    private slots:
+        /**
+         * Append the given message to the log viewer
+         *
+         * \param message message to append to the log viewer
+         */
+        void appendMessage(const QString& message);
+
+        /**
+         * Delete all messages from the log viewer
+         */
+        void clearMessages();
+
+        /**
+         * Filter out log messages that don't contain the given text.
+         *
+         * \param text text to look for in log messages
+         */
+        void filterLogMessages(const QString& text);
 
     private:
         QVBoxLayout* _mainLayout;                       ///< Main layout of this widget
@@ -90,6 +107,7 @@ namespace campvis {
         QLineEdit* _filter_line_edit;                   ///< Text field where filter terms are entered
         QLabel* _filter_label;                          ///< Button used for clearing the log display
         BufferingLog* _log;                             ///< Log buffering messages
+        std::deque<QString> _logMessages;               ///< Queue storing a limited number of recent log messages
         QTextEdit* _logDisplay;                         ///< Widget displaying log messages
     };
 }

@@ -7,14 +7,12 @@
 #include <deque>
 #include <QObject>
 
-using namespace tgt;
-
 namespace campvis {
 
     /**
      * BufferingLog stores up to the specified number of messages in memory.
      */
-    class BufferingLog : public QObject, public Log {
+    class BufferingLog : public QObject, public tgt::Log {
 
         Q_OBJECT
 
@@ -49,7 +47,7 @@ namespace campvis {
         unsigned int _maxSize;
         tbb::mutex _localMutex;
         std::deque<std::string> _buffer;
-        void logFiltered(const std::string &cat, LogLevel level, const std::string& msg, const std::string& extendedInfo="");
+        void logFiltered(const std::string &cat, tgt::LogLevel level, const std::string& msg, const std::string& extendedInfo="");
     };
 }
 

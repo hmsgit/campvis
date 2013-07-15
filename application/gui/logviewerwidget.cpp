@@ -40,7 +40,7 @@ namespace campvis {
         _log->addCat("", true);
 
         connect(_log, SIGNAL(s_messageAppended(const QString&)),
-                _logDisplay, SLOT(append(const QString&)));
+                this, SLOT(appendMessage(const QString&)));
     }
 
     LogViewerWidget::~LogViewerWidget() {
@@ -72,7 +72,8 @@ namespace campvis {
         _logDisplay->setReadOnly(true);
         _mainLayout->addWidget(_logDisplay);
 
-        connect(_clear_button, SIGNAL(clicked()), _logDisplay, SLOT(clear()));
+        connect(_clear_button, SIGNAL(clicked()), this, SLOT(clearMessages()));
+        connect(_filter_line_edit, SIGNAL(textEdited(const QString&)), this, SLOT(filterLogMessages(const QString&)));
     }
 
     void LogViewerWidget::init() {
@@ -81,6 +82,33 @@ namespace campvis {
 
     void LogViewerWidget::deinit() {
         LogMgr.removeLog(_log);
+    }
+
+    void LogViewerWidget::appendMessage(const QString& message)
+    {
+        _logDisplay->append(message);
+        _logMessages.push_back(message);
+    }
+
+    void LogViewerWidget::clearMessages()
+    {
+        _logDisplay->clear();
+        _logMessages.clear();
+    }
+
+    void LogViewerWidget::filterLogMessages(const QString& text)
+    {
+        QRegExp regexp = QRegExp(text, Qt::CaseInsensitive, QRegExp::FixedString);
+        _logDisplay->clear();
+        QTextDocument *logDocument = _logDisplay->document();
+        QTextCursor cursor = QTextCursor(logDocument);
+
+        for (std::deque<QString>::iterator it = _logMessages.begin(); it != _logMessages.end(); it++) {
+            if (regexp.indexIn(*it) != -1) {
+                cursor.insertText(*it);
+                cursor.insertText("\n");
+            }
+        }
     }
 
 }
