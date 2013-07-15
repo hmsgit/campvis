@@ -45,6 +45,7 @@ QtCanvas::QtCanvas(const std::string& title,
     setWindowTitle(QString(title.c_str()));
 
     setFocusPolicy(Qt::StrongFocus);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // we have our own AutoBufferSwap-mechanism (GLCanvas::setAutoFlush), so disable the one of qt
     setAutoBufferSwap(false);
@@ -573,6 +574,12 @@ KeyEvent::KeyCode QtCanvas::getKey(int key) {
 
 void QtCanvas::setSize(ivec2 newSize) {
     QWidget::resize(newSize.x, newSize.y);
+}
+
+QSize QtCanvas::sizeHint() const {
+    const ivec2& size = getSize();
+
+    return QSize(size.x, size.y);
 }
 
 

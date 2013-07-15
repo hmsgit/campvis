@@ -84,6 +84,14 @@ public:
      */
     virtual void resizeGL(int w, int h);
 
+    /*
+     * Return the recommended size for the canvas.
+     *
+     * This method is called by Qt to determine how much space to allocate to display the canvas.
+     * The returned size is the same as reported by getSize().
+     */
+    virtual QSize sizeHint() const;
+
     virtual void setSize(ivec2 newSize);
 
     /**
