@@ -37,6 +37,7 @@
 #include "tbb/mutex.h"
 
 #include "application/tools/bufferinglog.h"
+#include "application/gui/loghighlighter.h"
 
 #include <QLabel>
 #include <QWidget>
@@ -80,13 +81,24 @@ namespace campvis {
          */
         void setupGUI();
 
-    private slots:
+    public slots:
         /**
          * Append the given message to the log viewer
+         *
+         * This function adds the specified message to the log viewer's message cache and
+         * displays it.
          *
          * \param message message to append to the log viewer
          */
         void appendMessage(const QString& message);
+
+    private slots:
+        /**
+         * Display the given message in the log viewer
+         *
+         * \param message message to display in the log viewer
+         */
+        void displayMessage(const QString& message);
 
         /**
          * Delete all messages from the log viewer
@@ -109,6 +121,8 @@ namespace campvis {
         BufferingLog* _log;                             ///< Log buffering messages
         std::deque<QString> _logMessages;               ///< Queue storing a limited number of recent log messages
         QTextEdit* _logDisplay;                         ///< Widget displaying log messages
+        const QRegExp* _filterRegExp;                   ///< Current filter regexp
+        LogHighlighter* _logHighlighter;                ///< Highlighter for log messages
     };
 }
 

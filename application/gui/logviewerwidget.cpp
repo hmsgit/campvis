@@ -33,6 +33,7 @@ namespace campvis {
 
     LogViewerWidget::LogViewerWidget(QWidget* parent)
         : QWidget(parent)
+        , _filterRegExp(0)
     {
         setupGUI();
 
@@ -72,6 +73,14 @@ namespace campvis {
         _logDisplay->setReadOnly(true);
         _mainLayout->addWidget(_logDisplay);
 
+        // Use the system's default monospace font at the default size in the log viewer
+        QFont monoFont = QFont("Monospace");
+        monoFont.setStyleHint(QFont::TypeWriter);
+        monoFont.setPointSize(QFont().pointSize() + 1);
+
+        _logDisplay->document()->setDefaultFont(monoFont);
+        _logHighlighter = new LogHighlighter(_logDisplay);
+
         connect(_clear_button, SIGNAL(clicked()), this, SLOT(clearMessages()));
         connect(_filter_line_edit, SIGNAL(textEdited(const QString&)), this, SLOT(filterLogMessages(const QString&)));
     }
@@ -86,8 +95,15 @@ namespace campvis {
 
     void LogViewerWidget::appendMessage(const QString& message)
     {
-        _logDisplay->append(message);
         _logMessages.push_back(message);
+        displayMessage(message);
+    }
+
+    void LogViewerWidget::displayMessage(const QString& message)
+    {
+        if (_filterRegExp == 0 || _filterRegExp->indexIn(message) != -1) {
+            _logDisplay->append(message);
+        }
     }
 
     void LogViewerWidget::clearMessages()
@@ -98,16 +114,17 @@ namespace campvis {
 
     void LogViewerWidget::filterLogMessages(const QString& text)
     {
-        QRegExp regexp = QRegExp(text, Qt::CaseInsensitive, QRegExp::FixedString);
+        if (text.length() == 0) {
+            _filterRegExp = 0;
+        } else {
+            _filterRegExp = new QRegExp(text, Qt::CaseInsensitive, QRegExp::FixedString);
+        }
+
         _logDisplay->clear();
-        QTextDocument *logDocument = _logDisplay->document();
-        QTextCursor cursor = QTextCursor(logDocument);
+        _logHighlighter->setFilterRegExp(_filterRegExp);
 
         for (std::deque<QString>::iterator it = _logMessages.begin(); it != _logMessages.end(); it++) {
-            if (regexp.indexIn(*it) != -1) {
-                cursor.insertText(*it);
-                cursor.insertText("\n");
-            }
+            displayMessage(*it);
         }
     }
 

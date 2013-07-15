@@ -33,6 +33,7 @@ SET(CampvisApplicationToBeMocced
     gui/qtcolortools.h
     gui/qtdatahandle.h
     gui/logviewerwidget.h
+    gui/loghighlighter.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
