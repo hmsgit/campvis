@@ -67,7 +67,7 @@ namespace campvis {
         , _ignoreCanvasSizeUpdate(false)
         , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
         , _effectiveRenderTargetSize("EffectiveRenderTargetSize", "Render Target Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
-        , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget")
+        , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget", DataNameProperty::READ)
         , _canvas(0)
     {
         _data.s_dataAdded.connect(this, &VisualizationPipeline::onDataContainerDataAdded);

@@ -99,8 +99,8 @@ namespace campvis {
             _pipelineWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onPipelineWidgetItemClicked(const QModelIndex&)));
         connect(
-            this, SIGNAL(updatePropCollectionWidget(HasPropertyCollection*)),
-            _propCollectionWidget, SLOT(updatePropCollection(HasPropertyCollection*)));
+            this, SIGNAL(updatePropCollectionWidget(HasPropertyCollection*, DataContainer*)),
+            _propCollectionWidget, SLOT(updatePropCollection(HasPropertyCollection*, DataContainer*)));
         connect(
             _btnExecute, SIGNAL(clicked()), 
             this, SLOT(onBtnExecuteClicked()));
@@ -119,7 +119,6 @@ namespace campvis {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
             HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
-            emit updatePropCollectionWidget(ptr);
 
             if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
             	_selectedPipeline = pipeline;
@@ -129,10 +128,18 @@ namespace campvis {
             }
             else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
                 _selectedProcessor = processor;
+
+                QVariant parentItem = index.parent().data(Qt::UserRole);
+                HasPropertyCollection* pptr = static_cast<HasPropertyCollection*>(parentItem.value<void*>());
+                if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(pptr)) {
+                    _selectedPipeline = pipeline;
+                }
             }
+
+            emit updatePropCollectionWidget(ptr, &_selectedPipeline->getDataContainer());
         }
         else {
-            emit updatePropCollectionWidget(0);
+            emit updatePropCollectionWidget(0, 0);
         }
     }
 

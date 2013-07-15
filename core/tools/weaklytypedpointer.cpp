@@ -78,7 +78,7 @@ namespace campvis {
             case 4:
                 return GL_RGBA;
             default:
-                tgtAssert(false, "Should not reach hier, wrong number of channels!");
+                tgtAssert(false, "Should not reach this, wrong number of channels!");
                 return GL_ALPHA;
         }
     }

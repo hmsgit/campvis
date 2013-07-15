@@ -33,6 +33,7 @@ SET(CampvisApplicationToBeMocced
     gui/properties/boolpropertywidget.h
     gui/properties/buttonpropertywidget.h
     gui/properties/camerapropertywidget.h
+    gui/properties/datanamepropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h
     gui/properties/geometry1dtransferfunctioneditor.h

@@ -33,6 +33,7 @@
 namespace campvis {
     class AbstractPropertyWidget;
     class AbstractProperty;
+    class DataContainer;
 
     /**
      * Factory class offering the static method createWidget to create property widgets for a given
@@ -44,9 +45,10 @@ namespace campvis {
          * Creates the corresponding property widget for the given property \a property.
          * \note    The callee has to take the ownership of the returned pointer.
          * \param   property    Property to generate the widget for.
+         * \param   dc          Pointer to the DataContainer the property shall use - defaults to 0.
          * \return  A new property widget for the given property (depending on its type).
          */
-        static AbstractPropertyWidget* createWidget(AbstractProperty* property);
+        static AbstractPropertyWidget* createWidget(AbstractProperty* property, DataContainer* dc = 0);
     };
 }
 #endif // PROPERTYWIDGETFACTORY_H__

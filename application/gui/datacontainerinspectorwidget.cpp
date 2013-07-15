@@ -136,7 +136,7 @@ namespace campvis {
         _infoWidgetLayout->addWidget(_canvas, 1);
 
         _pcWidget = new PropertyCollectionWidget(_infoWidget);
-        _pcWidget->updatePropCollection(_canvas);
+        _pcWidget->updatePropCollection(_canvas, _dataContainer);
         _infoWidgetLayout->addWidget(_pcWidget);
 
         _mainLayout->addWidget(_infoWidget, 1);
@@ -228,7 +228,7 @@ namespace campvis {
         if (_canvas != 0)
             _canvas->deinit();
 
-        _pcWidget->updatePropCollection(0);
+        _pcWidget->updatePropCollection(0, 0);
 
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);

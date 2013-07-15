@@ -75,4 +75,8 @@ namespace campvis {
         s_changed(this);
     }
 
+    DataNameProperty::DataAccessInfo DataNameProperty::getAccessInfo() const {
+        return _accessInfo;
+    }
+
 }

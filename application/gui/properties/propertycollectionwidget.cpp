@@ -31,6 +31,7 @@
 
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
+#include "core/datastructures/datacontainer.h"
 #include "core/properties/abstractproperty.h"
 #include "core/properties/propertycollection.h"
 
@@ -51,14 +52,14 @@ namespace campvis {
         clearWidgetMap();
     }
 
-    void PropertyCollectionWidget::updatePropCollection(HasPropertyCollection* propertyCollection) {
+    void PropertyCollectionWidget::updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc) {
         // remove and delete all widgets of the previous PropertyCollection
         clearWidgetMap();
         
         // create widgets for the new PropertyCollection
         if (propertyCollection != 0) {
             for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
-                QWidget* propWidget = PropertyWidgetFactory::createWidget(*it);
+                QWidget* propWidget = PropertyWidgetFactory::createWidget(*it, dc);
                 if (propWidget == 0)
                     propWidget = new QPushButton(QString::fromStdString((*it)->getTitle()));
 

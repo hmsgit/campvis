@@ -44,6 +44,7 @@ namespace campvis {
         , _camera("camera", "Camera")
         , _imageReader()
         , _vr(_effectiveRenderTargetSize)
+        , _sr(_effectiveRenderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
@@ -54,6 +55,7 @@ namespace campvis {
         addProcessor(&_imageReader);
         addProcessor(&_splitter);
         addProcessor(&_vr);
+        addProcessor(&_sr);
     }
 
     Columbia1::~Columbia1() {
@@ -67,6 +69,7 @@ namespace campvis {
 
         _camera.addSharedProperty(&_vr.p_camera);
         _vr.p_outputImage.setValue("vr");
+        _sr.p_targetImageID.setValue("sr");
         _renderTargetID.setValue("vr");
 
         _imageReader.p_url.setValue("D:/Medical Data/Columbia/inputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_diffused_crop_00.ltf");
@@ -75,6 +78,7 @@ namespace campvis {
         _imageReader.p_targetImageID.connect(&_splitter.p_inputID);
 
         _splitter.p_outputID.connect(&_vr.p_inputVolume);
+        _splitter.p_outputID.connect(&_sr.p_sourceImageID);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));

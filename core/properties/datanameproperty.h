@@ -76,6 +76,12 @@ namespace campvis {
          */
         void disconnect(DataNameProperty* reader);
 
+        /**
+         * Returns the access info of this property defining whether processor will read or write.
+         * \return  _accessInfo
+         */
+        DataAccessInfo getAccessInfo() const;
+
         void issueWrite();
 
     protected:

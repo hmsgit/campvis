@@ -53,7 +53,7 @@ namespace campvis {
 
     SliceExtractor::SliceExtractor(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", compositingOptions, 3)
         , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0) 

@@ -90,7 +90,7 @@ namespace campvis {
         /// Qt signal for updating the PipelineWidget.
         void updatePipelineWidget(const std::vector<AbstractPipeline*>&);
         /// Qt signal for updating the PropertyCollectionWidget
-        void updatePropCollectionWidget(HasPropertyCollection*);
+        void updatePropCollectionWidget(HasPropertyCollection*, DataContainer*);
 
     private slots:
         /**

@@ -27,68 +27,56 @@
 // 
 // ================================================================================================
 
-#ifndef PROPERTYCOLLECTIONWIDGET_H__
-#define PROPERTYCOLLECTIONWIDGET_H__
+#ifndef DATANAMEPROPERTYWIDGET_H__
+#define DATANAMEPROPERTYWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include <QList>
-#include <QVBoxLayout>
-#include <QWidget>
-#include <map>
+#include "application/gui/properties/abstractpropertywidget.h"
+
+class QComboBox;
+class QLineEdit;
 
 namespace campvis {
-    class AbstractProperty;
+    class DataNameProperty;
     class DataContainer;
-    class HasPropertyCollection;
+    class DataHandle;
 
     /**
-     * Main Window for the CAMPVis application.
-     * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
+     * Widget for a DataNameProperty
      */
-    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots<> {
+    class DataNamePropertyWidget : public AbstractPropertyWidget {
         Q_OBJECT;
 
     public:
         /**
-         * Creates a new PropertyCollectionWidget.
-         * \param   parent  Parent widget, may be 0.
+         * Creates a new PropertyWidget for the property \a property.
+         * \param   property    The property the widget shall handle
+         * \param   parent      Parent Qt widget
          */
-        PropertyCollectionWidget(QWidget* parent = 0);
+        DataNamePropertyWidget(DataNameProperty* property, DataContainer* dc, QWidget* parent = 0);
 
         /**
-         * Destructor.
+         * Destructor
          */
-        ~PropertyCollectionWidget();
+        virtual ~DataNamePropertyWidget();
 
-    public slots:
+    protected:
         /**
-         * Updates the property collection this widget works on.
-         * \param   propertyCollection  New HasPropertyCollection instance for this widget, may be 0.
+         * Gets called when the property has changed, so that widget can update its state.
          */
-        void updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc);
+        virtual void updateWidgetFromProperty();
 
-        /**
-         * Slot to be called when one of the propertie's visibility has changed.
-         * \param prop  Property that emitted the signal
-         */
-        void onPropertyVisibilityChanged(const AbstractProperty* prop);
+        void onDataAdded(const std::string& key, const DataHandle& dh);
+
+    private slots:
+        void onTextChanged(const QString& text);
 
     private:
-        /**
-         * Sets up this widget
-         */
-        void setupWidget();
+        QLineEdit* _lineEdit;
+        QComboBox* _combobox;
+        DataContainer* _dc;
 
-        /**
-         * Clears the _widgetMap and destroys all widgets inside.
-         */
-        void clearWidgetMap();
-
-        HasPropertyCollection* _propCollection;    ///< The HasPropertyCollection instance this widget is currently working on.
-        QVBoxLayout* _layout;
-        std::map<AbstractProperty*, QWidget*> _widgetMap;
-        //QList<QWidget*> _widgetList;
     };
 }
 
-#endif // PROPERTYCOLLECTIONWIDGET_H__
+#endif // DATANAMEPROPERTYWIDGET_H__

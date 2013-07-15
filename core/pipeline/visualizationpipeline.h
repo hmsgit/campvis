@@ -36,6 +36,7 @@
 #include "tgt/event/eventlistener.h"
 #include "core/eventhandlers/abstracteventhandler.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
 
 #include <vector>
@@ -186,12 +187,12 @@ namespace campvis {
 
         tbb::concurrent_hash_map<AbstractProcessor*, bool> _isVisProcessorMap;
 
-        IVec2Property _canvasSize;                              ///< original canvas size
-        bool _lqMode;                                           ///< Flag whether low quality mode is enables
+        IVec2Property _canvasSize;                          ///< original canvas size
+        bool _lqMode;                                       ///< Flag whether low quality mode is enables
         bool _ignoreCanvasSizeUpdate;
 
-        IVec2Property _effectiveRenderTargetSize;               ///< actual size of the render targets (considering LQ mode)
-        StringProperty _renderTargetID;                         ///< ID of the render target image to be rendered to the canvas
+        IVec2Property _effectiveRenderTargetSize;           ///< actual size of the render targets (considering LQ mode)
+        DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
 
         std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
 

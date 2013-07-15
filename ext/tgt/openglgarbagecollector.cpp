@@ -50,21 +50,21 @@ namespace tgt {
         
         // delete textures
         if (! _texturesToDelete[backIndex].empty()) {
-            glDeleteTextures(_texturesToDelete[backIndex].size(), &(_texturesToDelete[backIndex].front()));
+            glDeleteTextures(static_cast<GLsizei>(_texturesToDelete[backIndex].size()), &(_texturesToDelete[backIndex].front()));
             //LDEBUGC("tgt.OpenGLGarbageCollector", "Deleted " << _texturesToDelete[backIndex].size() << " Textures.");
             _texturesToDelete[backIndex].clear();
         }
 
         // delete FBOs
         if (! _fbosToDelete[backIndex].empty()) {
-            glDeleteFramebuffers(_fbosToDelete[backIndex].size(), &(_fbosToDelete[backIndex].front()));
+            glDeleteFramebuffers(static_cast<GLsizei>(_fbosToDelete[backIndex].size()), &(_fbosToDelete[backIndex].front()));
             //LDEBUGC("tgt.OpenGLGarbageCollector", "Deleted " << _fbosToDelete[backIndex].size() << " FBOs.");
             _fbosToDelete[backIndex].clear();
         }
 
         // delete buffers
         if (! _buffersToDelete[backIndex].empty()) {
-            glDeleteBuffers(_buffersToDelete[backIndex].size(), &(_buffersToDelete[backIndex].front()));
+            glDeleteBuffers(static_cast<GLsizei>(_buffersToDelete[backIndex].size()), &(_buffersToDelete[backIndex].front()));
            // LDEBUGC("tgt.OpenGLGarbageCollector", "Deleted " << _buffersToDelete[backIndex].size() << " Buffers.");
             _buffersToDelete[backIndex].clear();
         }
