@@ -20,6 +20,10 @@ FILE(GLOB CampvisApplicationHeaders
     tools/*.h
 )
 
+FILE(GLOB CampvisApplicationForms
+    ui/*.ui
+)
+
 SET(CampvisApplicationToBeMocced
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
@@ -28,6 +32,8 @@ SET(CampvisApplicationToBeMocced
     gui/pipelinetreewidget.h
     gui/qtcolortools.h
     gui/qtdatahandle.h
+    gui/logviewerwidget.h
+    gui/loghighlighter.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
@@ -43,6 +49,8 @@ SET(CampvisApplicationToBeMocced
     gui/properties/simpletransferfunctioneditor.h
     gui/properties/stringpropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
+    tools/qtexteditlog.h
+    tools/bufferinglog.h
 )
 
 LIST(APPEND CampvisApplicationDefinitions "-DCAMPVIS_SOURCE_DIR=\"${CampvisHome}\"")
@@ -53,14 +61,16 @@ LIST(APPEND CampvisApplicationDefinitions "-DCAMPVIS_SOURCE_DIR=\"${CampvisHome}
 FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
 QT4_WRAP_CPP(CampvisApplicationMoc ${CampvisApplicationToBeMocced})
 LIST(APPEND CampvisApplicationSources ${CampvisApplicationMoc})
+QT4_WRAP_UI(CampvisApplicationFormsHeaders ${CampvisApplicationForms})
+LIST(APPEND CampvisApplicationSources ${CampvisApplicationFormsHeaders})
 INCLUDE(${QT_USE_FILE})
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
-ADD_EXECUTABLE(campvis-application 
-    ${CampvisApplicationSources} ${CampvisApplicationHeaders} 
+ADD_EXECUTABLE(campvis-application
+    ${CampvisApplicationSources} ${CampvisApplicationHeaders}
     ${CampvisApplicationMoc}
-) 
+)
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})

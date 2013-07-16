@@ -238,6 +238,7 @@ namespace campvis {
         // create canvas and painter for the VisPipeline and connect all together
         tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
         GLJobProc.registerContext(canvas);
+        _mainWindow->addVisualizationPipelineWidget(name, canvas);
         canvas->init();
 
         TumVisPainter* painter = new TumVisPainter(canvas, vp);
@@ -249,6 +250,12 @@ namespace campvis {
         addPipeline(vp);
 
         CtxtMgr.releaseCurrentContext();
+    }
+
+    void CampVisApplication::registerDockWidget(Qt::DockWidgetArea area, QDockWidget* dock) {
+        tgtAssert(dock != 0, "Dock widget must not be 0.");
+
+        _mainWindow->addDockWidget(area, dock);
     }
 
 }

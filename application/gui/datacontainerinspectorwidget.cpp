@@ -133,6 +133,7 @@ namespace campvis {
         _infoWidgetLayout->addWidget(_btnSaveToFile);
 
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
+        _canvas->setMinimumSize(QSize(100, 100));
         _infoWidgetLayout->addWidget(_canvas, 1);
 
         _pcWidget = new PropertyCollectionWidget(_infoWidget);

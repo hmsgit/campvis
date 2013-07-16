@@ -46,12 +46,15 @@ namespace campvis {
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
+        , _dcInspectorDock(0)
         , _btnExecute(0)
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
         , _selectedProcessor(0)
+        , _logViewer(0)
     {
         tgtAssert(_application != 0, "Application must not be 0.");
+        ui.setupUi(this);
         setup();
     }
 
@@ -63,18 +66,18 @@ namespace campvis {
     void MainWindow::setup() {
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
 
-        _dcInspectorWidget = new DataContainerInspectorWidget();
-        _dcInspectorWidget->show();
+        setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+        setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+        setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+        setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
-        _centralWidget = new QWidget(this);
-        QHBoxLayout* mainLayout = new QHBoxLayout();
-        mainLayout->setSpacing(4);
+        setTabPosition(Qt::TopDockWidgetArea, QTabWidget::North);
 
-        _pipelineWidget = new PipelineTreeWidget(_centralWidget);
-        mainLayout->addWidget(_pipelineWidget);
+        _pipelineWidget = new PipelineTreeWidget();
+        ui.pipelineTreeDock->setWidget(_pipelineWidget);
 
-        QWidget* rightWidget = new QWidget(_centralWidget);
-        mainLayout->addWidget(rightWidget);
+        QWidget* rightWidget = new QWidget();
+        ui.pipelinePropertiesDock->setWidget(rightWidget);
 
         QVBoxLayout* rightLayout = new QVBoxLayout();
         rightLayout->setSpacing(4);
@@ -89,8 +92,11 @@ namespace campvis {
         _propCollectionWidget = new PropertyCollectionWidget(_centralWidget);
         rightLayout->addWidget(_propCollectionWidget);
 
-        _centralWidget->setLayout(mainLayout);
-        setCentralWidget(_centralWidget);
+        _logViewer = new LogViewerWidget();
+        ui.logViewerDock->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        ui.logViewerDock->setWidget(_logViewer);
+
+        _dcInspectorWidget = new DataContainerInspectorWidget();
 
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), 
@@ -123,8 +129,6 @@ namespace campvis {
             if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
             	_selectedPipeline = pipeline;
                 _selectedProcessor = 0;
-                if (_dcInspectorWidget != 0)
-                    onBtnShowDataContainerInspectorClicked();
             }
             else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
                 _selectedProcessor = processor;
@@ -162,19 +166,52 @@ namespace campvis {
 
     void MainWindow::onBtnShowDataContainerInspectorClicked() {
         if (_selectedPipeline != 0) {
+            if (_dcInspectorDock == 0) {
+                _dcInspectorDock = dockPrimaryWidget("Data Container inspector", _dcInspectorWidget);
+            } else {
+                // Activate the dock's tab
+                _dcInspectorDock->setVisible(true);
+                _dcInspectorDock->raise();
+            }
+
             _dcInspectorWidget->setDataContainer(&(_selectedPipeline->getDataContainer()));
-            _dcInspectorWidget->show();
         }
     }
 
     void MainWindow::init() {
         if (_dcInspectorWidget != 0)
             _dcInspectorWidget->init();
+
+        _logViewer->init();
     }
 
     void MainWindow::deinit() {
         if (_dcInspectorWidget != 0)
             _dcInspectorWidget->deinit();
+
+        _logViewer->deinit();
+    }
+
+    void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* widget) {
+        dockPrimaryWidget(name, widget);
+    }
+
+    QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {
+        QDockWidget* dockWidget = new QDockWidget(QString::fromStdString(name));
+        dockWidget->setWidget(widget);
+        dockWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+        if (_primaryDocks.empty()) {
+            addDockWidget(Qt::TopDockWidgetArea, dockWidget);
+        } else {
+            tabifyDockWidget(_primaryDocks.back(), dockWidget);
+            // Activate the dock's tab
+            dockWidget->setVisible(true);
+            dockWidget->raise();
+        }
+
+        _primaryDocks.push_back(dockWidget);
+        return dockWidget;
     }
 
 }

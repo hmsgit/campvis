@@ -31,6 +31,7 @@
 
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 #include "application/gui/properties/transferfunctioneditorfactory.h"
+#include "application/campvisapplication.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 
 #include <QDockWidget>
@@ -139,9 +140,11 @@ namespace campvis {
 
             _dockWidget = new QDockWidget("Transfer Function Editor");
             _dockWidget->setWidget(_editor);
-        }
 
-        _dockWidget->setVisible(true);
+            static_cast<CampVisApplication*>(qApp)->registerDockWidget(Qt::BottomDockWidgetArea, _dockWidget);
+        } else {
+          _dockWidget->setVisible(true);
+        }
     }
 
     void TransferFunctionPropertyWidget::onFitClicked(bool checked) {
