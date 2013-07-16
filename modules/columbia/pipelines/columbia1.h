@@ -37,6 +37,7 @@
 
 #include "modules/io/processors/ltfimagereader.h"
 #include "modules/columbia/processors/imageseriessplitter.h"
+#include "modules/columbia/processors/strainraycaster.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/vis/processors/volumerenderer.h"
 
@@ -78,6 +79,7 @@ namespace campvis {
         LtfImageReader _imageReader;
         ImageSeriesSplitter _splitter;
         VolumeRenderer _vr;
+        StrainRaycaster _src;
         SliceExtractor _sr;
 
         TrackballNavigationEventHandler* _trackballEH;

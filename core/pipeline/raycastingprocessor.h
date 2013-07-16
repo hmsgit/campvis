@@ -40,6 +40,8 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include "core/datastructures/imagerepresentationgl.h"
+
 namespace tgt {
     class Shader;
 }
@@ -116,8 +118,9 @@ namespace campvis {
          *
          * \sa      RaycastingProcessor::process()
          * \param   data    DataContainer to work on.
+         * \param   image   The image to render
          */
-        virtual void processImpl(DataContainer& data) = 0;
+        virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) = 0;
 
         /**
          * Returns an additional header that will be linked into the fragment shader.

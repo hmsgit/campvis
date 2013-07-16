@@ -56,7 +56,7 @@ namespace campvis {
 
     }
 
-    void SimpleRaycaster::processImpl(DataContainer& data) {
+    void SimpleRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
         std::pair<ImageData*, ImageRepresentationRenderTarget*> output = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
         output.second->createAndAttachTexture(GL_RGBA32F);
         output.second->createAndAttachTexture(GL_RGBA32F);

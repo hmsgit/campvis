@@ -27,41 +27,57 @@
 // 
 // ================================================================================================
 
-#include "imageseriessplitter.h"
+#ifndef STRAINRAYCASTER_H__
+#define STRAINRAYCASTER_H__
 
-#include "core/datastructures/imageseries.h"
+#include "core/pipeline/raycastingprocessor.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/numericproperty.h"
+#include "core/properties/transferfunctionproperty.h"
+
+#include <string>
+
+namespace tgt {
+    class Shader;
+}
 
 namespace campvis {
-    const std::string ImageSeriesSplitter::loggerCat_ = "CAMPVis.modules.io.ImageSeriesSplitter";
+    /**
+     * Performs strain volume ray casting.
+     */
+    class StrainRaycaster : public RaycastingProcessor {
+    public:
+        /**
+         * Constructs a new StrainRaycaster Processor
+         **/
+        StrainRaycaster(IVec2Property& canvasSize);
 
-    ImageSeriesSplitter::ImageSeriesSplitter() 
-        : AbstractProcessor()
-        , p_inputID("InputID", "Input Image Series ID", "input", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
-        , p_outputID("OutputID", "Output Image ID", "output", DataNameProperty::WRITE)
-        , p_imageIndex("ImageIndex", "Image to Select", 0, 0, 0)
-    {
-        addProperty(&p_inputID);
-        addProperty(&p_outputID);
-        addProperty(&p_imageIndex);
-    }
+        /**
+         * Destructor
+         **/
+        virtual ~StrainRaycaster();
 
-    ImageSeriesSplitter::~ImageSeriesSplitter() {
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "StrainRaycaster"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
 
-    }
+        DataNameProperty p_targetImageID;    ///< image ID for output image
+        BoolProperty p_enableShadowing;
+        FloatProperty p_shadowIntensity;
+        BoolProperty p_enableAdaptiveStepsize;
 
-    void ImageSeriesSplitter::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageSeries> series(data, p_inputID.getValue());
-        if (series != 0) {
-            if (hasInvalidProperties()) {
-                p_imageIndex.setMaxValue(series->getNumImages());
-                validate(INVALID_PROPERTIES);
-            }
-            if (p_imageIndex.getValue() < static_cast<int>(series->getNumImages())) {
-                data.addDataHandle(p_outputID.getValue(), series->getImage(p_imageIndex.getValue()));
-                p_outputID.issueWrite();
-            }
-        }
+    
+    protected:
+        /// \see RaycastingProcessor::processImpl()
+        virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
 
-        validate(INVALID_RESULT);
-    }
+        /// \see RaycastingProcessor::generateHeader()
+        virtual std::string generateHeader() const;
+
+        static const std::string loggerCat_;
+    };
+
 }
+
+#endif // STRAINRAYCASTER_H__

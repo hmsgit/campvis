@@ -27,59 +27,60 @@
 // 
 // ================================================================================================
 
-#include "drrraycaster.h"
+#include "strainraycaster.h"
 
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
-    const std::string DRRRaycaster::loggerCat_ = "CAMPVis.modules.vis.DRRRaycaster";
+    const std::string StrainRaycaster::loggerCat_ = "CAMPVis.modules.vis.StrainRaycaster";
 
-    DRRRaycaster::DRRRaycaster(IVec2Property& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/vis/glsl/drrraycaster.frag", false)
+    StrainRaycaster::StrainRaycaster(IVec2Property& canvasSize)
+        : RaycastingProcessor(canvasSize, "modules/columbia/glsl/strainraycaster.frag", true)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
-        , p_scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)
-        , p_invertMapping("invertMapping", "Invert Mapping", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
+        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows", false, AbstractProcessor::INVALID_SHADER)
+        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
+        , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true, AbstractProcessor::INVALID_SHADER)
     {
+        addDecorator(new ProcessorDecoratorShading());
+
         addProperty(&p_targetImageID);
-        addProperty(&p_shift);
-        addProperty(&p_scale);
-        addProperty(&p_invertMapping);
+        addProperty(&p_enableShadowing);
+        addProperty(&p_shadowIntensity);
+        addProperty(&p_enableAdaptiveStepsize);
+        decoratePropertyCollection(this);
     }
 
-    DRRRaycaster::~DRRRaycaster() {
+    StrainRaycaster::~StrainRaycaster() {
 
     }
 
-    void DRRRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
-        _shader->setUniform("_shift", p_shift.getValue());
-        _shader->setUniform("_scale", p_scale.getValue());
+    void StrainRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        if (image.getImageData()->getNumChannels() == 3 || image.getImageData()->getNumChannels() == 4) {
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> output = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+            output.second->activate();
 
-        std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-        rt.second->activate();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            QuadRdr.renderQuad();
+            LGL_ERROR;
 
-        if (p_invertMapping.getValue())
-            glClearColor(0.f, 0.f, 0.f, 1.f);
-        else
-            glClearColor(1.f, 1.f, 1.f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        QuadRdr.renderQuad();
-        LGL_ERROR;
-
-        rt.second->deactivate();
-        data.addData(p_targetImageID.getValue(), rt.first);
-        p_targetImageID.issueWrite();
+            output.second->deactivate();
+            data.addData(p_targetImageID.getValue(), output.first);
+            p_targetImageID.issueWrite();
+        }
+        else {
+            LERROR("Wrong Number of Channels in Input Volume.");
+        }
     }
 
-    std::string DRRRaycaster::generateHeader() const {
-        std::string toReturn;
-
-        if (p_invertMapping.getValue())
-            toReturn += "#define DRR_INVERT 1\n";
-        //         if (depthMapping_.get())
-        //             header +="#define DEPTH_MAPPING 1\n";
-
+    std::string StrainRaycaster::generateHeader() const {
+        std::string toReturn = RaycastingProcessor::generateHeader();
+        if (p_enableShadowing.getValue())
+            toReturn += "#define ENABLE_SHADOWING\n";
+        if (p_enableAdaptiveStepsize.getValue())
+            toReturn += "#define ENABLE_ADAPTIVE_STEPSIZE\n";
         return toReturn;
     }
+
 }

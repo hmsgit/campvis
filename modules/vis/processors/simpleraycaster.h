@@ -72,7 +72,7 @@ namespace campvis {
     
     protected:
         /// \see RaycastingProcessor::processImpl()
-        virtual void processImpl(DataContainer& data);
+        virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
 
         /// \see RaycastingProcessor::generateHeader()
         virtual std::string generateHeader() const;

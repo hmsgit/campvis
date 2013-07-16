@@ -34,7 +34,6 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
 
 
@@ -132,13 +131,13 @@ namespace campvis {
                 if (! _bindEntryExitDepthTextures) {
                     entryPoints->bindColorTexture(_shader, entryUnit, "_entryPoints", "_entryParams");
                     exitPoints->bindColorTexture(_shader, exitUnit, "_exitPoints", "_exitParams");
-                    processImpl(data);
+                    processImpl(data, img);
                 }
                 else {
                     tgt::TextureUnit entryUnitDepth, exitUnitDepth;
                     entryPoints->bind(_shader, entryUnit, entryUnitDepth, "_entryPoints", "_entryPointsDepth", "_entryParams");
                     exitPoints->bind(_shader, exitUnit, exitUnitDepth, "_exitPoints", "_exitPointsDepth", "_exitParams");
-                    processImpl(data);
+                    processImpl(data, img);
                 }
 
                 decorateRenderEpilog(_shader);

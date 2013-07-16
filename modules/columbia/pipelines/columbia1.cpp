@@ -45,6 +45,7 @@ namespace campvis {
         , _imageReader()
         , _vr(_effectiveRenderTargetSize)
         , _sr(_effectiveRenderTargetSize)
+        , _src(_effectiveRenderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
@@ -55,6 +56,7 @@ namespace campvis {
         addProcessor(&_imageReader);
         addProcessor(&_splitter);
         addProcessor(&_vr);
+        addProcessor(&_src);
         addProcessor(&_sr);
     }
 
@@ -68,8 +70,10 @@ namespace campvis {
         _splitter.s_validated.connect(this, &Columbia1::onProcessorValidated);
 
         _camera.addSharedProperty(&_vr.p_camera);
+        _camera.addSharedProperty(&_src.p_camera);
         _vr.p_outputImage.setValue("vr");
         _sr.p_targetImageID.setValue("sr");
+        _src.p_targetImageID.setValue("src");
         _renderTargetID.setValue("vr");
 
         _imageReader.p_url.setValue("D:/Medical Data/Columbia/inputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_diffused_crop_00.ltf");
@@ -78,6 +82,7 @@ namespace campvis {
         _imageReader.p_targetImageID.connect(&_splitter.p_inputID);
 
         _splitter.p_outputID.connect(&_vr.p_inputVolume);
+        _splitter.p_outputID.connect(&_src.p_sourceImageID);
         _splitter.p_outputID.connect(&_sr.p_sourceImageID);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
@@ -110,11 +115,13 @@ namespace campvis {
             DataContainer::ScopedTypedData<ImageData> img(_data, _splitter.p_outputID.getValue());
             if (img != 0) {
                 tgt::Bounds volumeExtent = img->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+                if (_trackballEH->getSceneBounds() != volumeExtent) {
+                    tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
-                _trackballEH->setSceneBounds(volumeExtent);
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                    _trackballEH->setSceneBounds(volumeExtent);
+                    _trackballEH->setCenter(volumeExtent.center());
+                    _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                }
             }
         }
     }
