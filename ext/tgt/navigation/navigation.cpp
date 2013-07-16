@@ -168,6 +168,11 @@ void Navigation::updateClippingPlanes() {
     getCamera()->setFarDist(diag + 2 * dist);
 }
 
+const tgt::Bounds& Navigation::getSceneBounds() const {
+    return _sceneBounds;
+}
+
+
 
 /***********************************************************************
 

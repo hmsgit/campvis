@@ -35,6 +35,9 @@
 
 #include <QSpinBox>
 
+class QCheckBox;
+class QTimer;
+
 namespace campvis {
     /**
      * Widget for a IntProperty
@@ -63,12 +66,19 @@ namespace campvis {
 
     private slots:
         void onValueChanged(int value);
+        void onIntervalValueChanged(int value);
+        void onEnableTimerChanged(int state);
+        void onTimer();
 
     private:
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
         QSpinBox* _spinBox;
+
+        QTimer* _timer;
+        QCheckBox* _cbEnableTimer;
+        QSpinBox* _sbInterval;
 
     };
 

@@ -65,6 +65,14 @@ class TGT_API Bounds {
         addPoint(v2);
     }
 
+    bool operator== (const Bounds& rhs) const {
+        return (llf_ == rhs.llf_) && (urb_ == rhs.urb_);
+    }
+
+    bool operator!= (const Bounds& rhs) const {
+        return (llf_ != rhs.llf_) || (urb_ != rhs.urb_);
+    }
+
     /**
     *   Enlarges the box (if necessary) to contain v
     */

@@ -29,19 +29,45 @@
 
 #include "intpropertywidget.h"
 
+#include <QCheckBox>
+#include <QTimer>
+#include <QGridLayout>
+#include <QWidget>
+
 namespace campvis {
     IntPropertyWidget::IntPropertyWidget(IntProperty* property, QWidget* parent /*= 0*/)
         : AbstractPropertyWidget(property, parent)
         , _spinBox(0)
+        , _timer(0)
     {
-        _spinBox = new QSpinBox(this);
+        _timer = new QTimer(this);
+        _timer->setSingleShot(false);
+
+        QWidget* widget = new QWidget(this);
+        QGridLayout* layout = new QGridLayout(widget);
+        widget->setLayout(layout);
+
+        _spinBox = new QSpinBox(widget);
         _spinBox->setMinimum(property->getMinValue());
         _spinBox->setMaximum(property->getMaxValue());
         _spinBox->setValue(property->getValue());
-        
-        addWidget(_spinBox);
+        layout->addWidget(_spinBox, 0, 0, 1, 2);
 
+        _cbEnableTimer = new QCheckBox("Enable Timer", widget);
+        layout->addWidget(_cbEnableTimer, 1, 0);
+
+        _sbInterval = new QSpinBox(widget);
+        _sbInterval->setMinimum(1);
+        _sbInterval->setMaximum(2000);
+        _sbInterval->setValue(50);
+        layout->addWidget(_sbInterval, 1, 1);
+
+        addWidget(widget);
+
+        connect(_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
         connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+        connect(_cbEnableTimer, SIGNAL(stateChanged(int)), this, SLOT(onEnableTimerChanged(int)));
+        connect(_sbInterval, SIGNAL(valueChanged(int)), this, SLOT(onIntervalValueChanged(int)));
         property->s_minMaxChanged.connect(this, &IntPropertyWidget::onPropertyMinMaxChanged);
     }
 
@@ -69,6 +95,28 @@ namespace campvis {
             _spinBox->setMinimum(prop->getMinValue());
             _spinBox->setMaximum(prop->getMaxValue());
         }
+    }
+
+    void IntPropertyWidget::onIntervalValueChanged(int value) {
+        _timer->setInterval(value);
+    }
+
+    void IntPropertyWidget::onEnableTimerChanged(int state) {
+        if (state == Qt::Checked) {
+            _timer->setInterval(_sbInterval->value());
+            _timer->start();
+        }
+        else if (state == Qt::Unchecked) {
+            _timer->stop();
+        }
+    }
+
+    void IntPropertyWidget::onTimer() {
+        IntProperty* prop = static_cast<IntProperty*>(_property);
+        if (prop->getValue() < prop->getMaxValue())
+            prop->increment();
+        else
+            prop->setValue(prop->getMinValue());
     }
 
 }

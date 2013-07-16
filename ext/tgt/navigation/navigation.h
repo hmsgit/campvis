@@ -102,6 +102,12 @@ public:
      * \param   bounds  New bounds for the rendered scene.
      */
     void setSceneBounds(const tgt::Bounds& bounds);
+    
+    /**
+        * Returns the current scene bounds for this trackball.
+        * \return  _sceneBounds
+        */
+    const tgt::Bounds& getSceneBounds() const;
 
     //     void setCanvas(GLCanvas* hcam) { hcam_ = hcam; }
 //     GLCanvas* getCanvas() const { return hcam_->; }

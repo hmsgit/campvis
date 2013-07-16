@@ -134,4 +134,8 @@ namespace campvis {
         _trackball->setSceneBounds(bounds);
     }
 
+    const tgt::Bounds& TrackballNavigationEventHandler::getSceneBounds() const {
+        return _trackball->getSceneBounds();
+    }
+
 }

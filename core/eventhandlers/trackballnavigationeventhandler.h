@@ -119,6 +119,12 @@ namespace campvis {
          */
         void setSceneBounds(const tgt::Bounds& bounds);
 
+        /**
+         * Returns the current scene bounds for this trackball.
+         * \return  _sceneBounds
+         */
+        const tgt::Bounds& getSceneBounds() const;
+
     protected:
         VisualizationPipeline* _parentPipeline; ///< The parent VisualizationPipeline
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
