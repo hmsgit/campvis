@@ -141,7 +141,7 @@ namespace campvis {
             _dockWidget = new QDockWidget("Transfer Function Editor");
             _dockWidget->setWidget(_editor);
 
-            static_cast<CampVisApplication*>(qApp)->registerDockWidget(Qt::RightDockWidgetArea, _dockWidget);
+            static_cast<CampVisApplication*>(qApp)->registerDockWidget(Qt::BottomDockWidgetArea, _dockWidget);
         } else {
           _dockWidget->setVisible(true);
         }
