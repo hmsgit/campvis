@@ -35,19 +35,20 @@
 namespace campvis {
     const std::string ImageRepresentationDisk::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationDisk";
 
-    ImageRepresentationDisk* ImageRepresentationDisk::create(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec3::zero */) {
-        ImageRepresentationDisk* toReturn = new ImageRepresentationDisk(parent, url, type, offset, endianness, stride);
+    ImageRepresentationDisk* ImageRepresentationDisk::create(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec3::zero */, bool multichannelSideBySide /*= false*/) {
+        ImageRepresentationDisk* toReturn = new ImageRepresentationDisk(parent, url, type, offset, endianness, stride, multichannelSideBySide);
         toReturn->addToParent();
         return toReturn;
     }
 
-    ImageRepresentationDisk::ImageRepresentationDisk(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */)
+    ImageRepresentationDisk::ImageRepresentationDisk(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */, bool multichannelSideBySide /*= false*/)
         : GenericAbstractImageRepresentation<ImageRepresentationDisk>(parent)
         , _url(url)
         , _offset(offset)
         , _type(type)
         , _endianess(endianness)
         , _stride(stride)
+        , _multichannelSideBySide(multichannelSideBySide)
     {
     }
 
@@ -186,6 +187,21 @@ namespace campvis {
                 }
             }
 
+            if (_multichannelSideBySide && _parent->getNumChannels() > 1) {
+                // there is no simple in-place solution, so we copy everything around...
+                char* reordered = new char[numBytes];
+                size_t numBytesPerChannel = numBytesPerElement / _parent->getNumChannels();
+                for (size_t i = 0; i < numElements; ++i) {
+                    for (size_t j = 0; j < _parent->getNumChannels(); ++j) {
+                        size_t fromOffset = (i + j*numElements) * numBytesPerChannel;
+                        size_t toOffset = (j + i*_parent->getNumChannels()) * numBytesPerChannel;
+                        memcpy(reordered + toOffset, data + fromOffset, numBytesPerChannel);
+                    }
+                }
+
+                std::swap(data, reordered);
+                delete [] reordered;
+            }
 
             return WeaklyTypedPointer(_type, _parent->getNumChannels(), static_cast<void*>(data));
         }

@@ -56,6 +56,7 @@ namespace campvis {
          * \param   offset     Offset of first data element in file (in bytes)
          * \param   endianness Endianess of data
          * \param   stride     Number of _elements_ _between_ adjacent elements for each dimension (\see ImageRepresentationDisk::_stride).
+         * \param   multichannelSideBySide  Flag whether multichannel images are stored side by side
          * \return  A pointer to the newly created ImageRepresentationDisk, you do \b not own this pointer!
          */
         static ImageRepresentationDisk* create(
@@ -64,7 +65,8 @@ namespace campvis {
             WeaklyTypedPointer::BaseType type,
             size_t offset = 0,
             EndianHelper::Endianness endianness = EndianHelper::IS_LITTLE_ENDIAN,
-            const tgt::svec3& stride = tgt::svec3::zero
+            const tgt::svec3& stride = tgt::svec3::zero,
+            bool multichannelSideBySide = false
             );
 
 
@@ -121,6 +123,7 @@ namespace campvis {
          * \param offset            Offset of first data element in file (in bytes)
          * \param endianness        Endianess of data
          * \param stride            Number of _elements_ _between_ adjacent elements for each dimension (\see ImageRepresentationDisk::_stride).
+         * \param multichannelSideBySide    Flag whether multichannel images are stored side by side
          */
         ImageRepresentationDisk(
             ImageData* parent,
@@ -128,7 +131,8 @@ namespace campvis {
             WeaklyTypedPointer::BaseType type,
             size_t offset = 0,
             EndianHelper::Endianness endianness = EndianHelper::IS_LITTLE_ENDIAN,
-            const tgt::svec3& stride = tgt::svec3::zero
+            const tgt::svec3& stride = tgt::svec3::zero,
+            bool multichannelSideBySide = false
             );
 
         /**
@@ -149,6 +153,8 @@ namespace campvis {
          * the x-dimension 0, for the y-dimension _size.x and for the z-dimension (_size.x * _size.y).
          **/
         tgt::svec3 _stride;
+
+        bool _multichannelSideBySide;           ///< Flag whether multichannel images are stored side by side
 
         static const std::string loggerCat_;
     };

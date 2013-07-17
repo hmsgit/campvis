@@ -89,7 +89,7 @@ namespace campvis {
 
             while (tgt::FileSystem::fileExists(base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf")) {
                 ImageData* image = new ImageData(dimensionality, p_size.getValue(), p_numChannels.getValue());
-                ImageRepresentationDisk::create(image, base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf", p_baseType.getOptionValue(), 0, EndianHelper::getLocalEndianness());
+                ImageRepresentationDisk::create(image, base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf", p_baseType.getOptionValue(), 0, EndianHelper::getLocalEndianness(), tgt::svec3::zero, true);
                 image->setMappingInformation(ImageMappingInformation(p_size.getValue(), p_imageOffset.getValue(), p_voxelSize.getValue()));
                 series->addImage(image);
                 ++index;
