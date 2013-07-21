@@ -92,10 +92,10 @@ namespace campvis {
 
         /**
          * Adds a widget of a visualization pipeline to the main window.
-         * \param   name       the name of the visualization pipeline.
-         * \param   widget     the pipeline's widget to add to the main window.
+         * \param   name       the name of the visualization pipeline
+         * \param   canvas     the pipeline's canvas
          */
-        void addVisualizationPipelineWidget(const std::string& name, QWidget* widget);
+        void addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
 
     signals:
         /// Qt signal for updating the PipelineWidget.

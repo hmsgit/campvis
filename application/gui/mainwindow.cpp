@@ -34,6 +34,7 @@
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/qtdatahandle.h"
+#include "application/gui/visualizationpipelinewrapper.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 
@@ -198,9 +199,8 @@ namespace campvis {
         _logViewer->deinit();
     }
 
-    void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* widget) {
-        QMdiSubWindow* subWindow = _mdiArea->addSubWindow(widget);
-        subWindow->setWindowTitle(QString::fromStdString(name));
+    void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
+        VisualizationPipelineWrapper* widget = new VisualizationPipelineWrapper(name, canvas, _mdiArea, this);
     }
 
     QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {
