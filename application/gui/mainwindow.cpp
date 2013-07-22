@@ -37,12 +37,14 @@
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 
+#include <QMdiSubWindow>
+
 namespace campvis {
 
     MainWindow::MainWindow(CampVisApplication* application)
         : QMainWindow()
         , _application(application)
-        , _centralWidget(0)
+        , _mdiArea(0)
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
@@ -73,6 +75,10 @@ namespace campvis {
 
         setTabPosition(Qt::TopDockWidgetArea, QTabWidget::North);
 
+        _mdiArea = new QMdiArea();
+        _mdiArea->tileSubWindows();
+        setCentralWidget(_mdiArea);
+
         _pipelineWidget = new PipelineTreeWidget();
         ui.pipelineTreeDock->setWidget(_pipelineWidget);
 
@@ -89,7 +95,7 @@ namespace campvis {
         _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", rightWidget);
         rightLayout->addWidget(_btnShowDataContainerInspector);
 
-        _propCollectionWidget = new PropertyCollectionWidget(_centralWidget);
+        _propCollectionWidget = new PropertyCollectionWidget();
         rightLayout->addWidget(_propCollectionWidget);
 
         _logViewer = new LogViewerWidget();
@@ -193,7 +199,8 @@ namespace campvis {
     }
 
     void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* widget) {
-        dockPrimaryWidget(name, widget);
+        QMdiSubWindow* subWindow = _mdiArea->addSubWindow(widget);
+        subWindow->setWindowTitle(QString::fromStdString(name));
     }
 
     QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {

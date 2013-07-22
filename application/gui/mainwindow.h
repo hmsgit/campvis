@@ -42,6 +42,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QMdiArea>
 #include <vector>
 
 namespace campvis {
@@ -141,7 +142,7 @@ namespace campvis {
 
         CampVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
 
-        QWidget* _centralWidget;                            ///< Central widget of the MainWindow
+        QMdiArea* _mdiArea;                                 ///< MDI area (the window's central widget)
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
         DataContainerInspectorWidget* _dcInspectorWidget;   ///< Widget for inspecting the DataContainer of the selected pipeline.
