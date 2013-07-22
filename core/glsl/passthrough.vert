@@ -33,6 +33,7 @@ in vec4 in_Color;           ///< incoming color
 
 out vec3 ex_TexCoord;       ///< outgoing texture coordinate
 out vec4 ex_Color;          ///< outgoing color
+out vec4 ex_Position;       ///< outgoing world coordinates
 
 /// Matrix defining model-to-world transformation
 uniform mat4 _modelMatrix = mat4(
@@ -58,6 +59,8 @@ uniform mat4 _projectionMatrix = mat4(
 
 void main() {
     gl_Position = _projectionMatrix * (_viewMatrix * (_modelMatrix * vec4(in_Position, 1.0)));
+    ex_Position = gl_Position;
+
     ex_TexCoord = in_TexCoord;
     ex_Color = in_Color;
 }

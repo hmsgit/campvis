@@ -33,6 +33,7 @@
 #include <string>
 
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
@@ -46,7 +47,7 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class GeometryRenderer : public VisualizationProcessor {
+    class GeometryRenderer : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new GeometryRenderer Processor
@@ -78,6 +79,10 @@ namespace campvis {
         Vec4Property p_color;                ///< rendering color
 
     protected:
+        /**
+         * Generates the GLSL header.
+         */
+        std::string generateGlslHeader() const;
 
         tgt::Shader* _shader;                           ///< Shader for EEP generation
 

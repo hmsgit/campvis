@@ -38,6 +38,7 @@
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/datastructures/meshgeometry.h"
+#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
     const std::string GeometryRenderer::loggerCat_ = "CAMPVis.modules.vis.GeometryRenderer";
@@ -50,10 +51,14 @@ namespace campvis {
         , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
+        addDecorator(new ProcessorDecoratorShading());
+
         addProperty(&p_geometryID);
         addProperty(&p_renderTargetID);
         addProperty(&p_camera);
         addProperty(&p_color);
+
+        decoratePropertyCollection(this);
     }
 
     GeometryRenderer::~GeometryRenderer() {
@@ -78,8 +83,15 @@ namespace campvis {
         DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
 
         if (proxyGeometry != 0 && _shader != 0) {
+            if (hasInvalidShader()) {
+                _shader->setHeaders(generateGlslHeader());
+                _shader->rebuild();
+                validate(INVALID_SHADER);
+            }
+
             // set modelview and projection matrices
             _shader->activate();
+            decorateRenderProlog(data, _shader);
             _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
             _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
             _shader->setUniform("_color", p_color.getValue());
@@ -95,6 +107,7 @@ namespace campvis {
             proxyGeometry->render();
 
             rt.second->deactivate();
+            decorateRenderEpilog(_shader);
             _shader->deactivate();
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
@@ -107,6 +120,11 @@ namespace campvis {
         }
 
         validate(INVALID_RESULT);
+    }
+
+    std::string GeometryRenderer::generateGlslHeader() const {
+        std::string toReturn = getDecoratedHeader();
+        return toReturn;
     }
 
 }
