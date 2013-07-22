@@ -90,6 +90,8 @@ namespace tgt {
          */
         void unbind();
 
+        void setIndexBuffer(BufferObject* bufferObject);
+
         /**
          * Add a VertexAttribute to this VertexArrayObject.
          * A VertexAttribute refers to a BufferObject and defines where to find the (geometry, normal, ...) data

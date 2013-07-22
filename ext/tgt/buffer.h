@@ -14,7 +14,8 @@ namespace tgt {
 
     public:
         enum TargetType {
-            ARRAY_BUFFER = GL_ARRAY_BUFFER
+            ARRAY_BUFFER = GL_ARRAY_BUFFER,
+            ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER
         };
 
         enum UsageType {
@@ -61,6 +62,12 @@ namespace tgt {
          * \return  _baseType
          */
         BaseType getBaseType() const;
+
+        /**
+         * Gets the target type of this buffer
+         * \return  _targetType
+         */
+        TargetType getTargetType() const;
 
         /**
          * Gets the number of elements per element (1, 2, 3 or 4).
