@@ -43,9 +43,11 @@ namespace campvis {
         : VisualizationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
+        , _vtkReader()
         , _vr(_effectiveRenderTargetSize)
         , _sr(_effectiveRenderTargetSize)
         , _src(_effectiveRenderTargetSize)
+        , _gr(_effectiveRenderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
@@ -54,10 +56,12 @@ namespace campvis {
         _eventHandlers.push_back(_trackballEH);
 
         addProcessor(&_imageReader);
+        addProcessor(&_vtkReader);
         addProcessor(&_splitter);
         addProcessor(&_vr);
         addProcessor(&_src);
         addProcessor(&_sr);
+        addProcessor(&_gr);
     }
 
     Columbia1::~Columbia1() {
@@ -71,6 +75,8 @@ namespace campvis {
 
         _camera.addSharedProperty(&_vr.p_camera);
         _camera.addSharedProperty(&_src.p_camera);
+        _camera.addSharedProperty(&_gr.p_camera);
+
         _vr.p_outputImage.setValue("vr");
         _sr.p_targetImageID.setValue("sr");
         _src.p_targetImageID.setValue("src");
@@ -81,6 +87,10 @@ namespace campvis {
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.connect(&_splitter.p_inputID);
 
+        _vtkReader.p_targetImageID.setValue("mesh");
+        _vtkReader.p_url.setValue("D:/Medical Data/Columbia/inputs/Myocardium Meshes/FullVolumeLV_3D_25Hz_ED_Mesh_Endo.vtk");
+        _vtkReader.p_targetImageID.connect(&_gr.p_geometryID);
+
         _splitter.p_outputID.connect(&_vr.p_inputVolume);
         _splitter.p_outputID.connect(&_src.p_sourceImageID);
         _splitter.p_outputID.connect(&_sr.p_sourceImageID);
@@ -89,6 +99,8 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_vr.getProperty("transferFunction"))->replaceTF(dvrTF);
+
+        _gr.p_renderTargetID.setValue("gr");
 
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<Columbia1>(this, &Columbia1::onRenderTargetSizeChanged);

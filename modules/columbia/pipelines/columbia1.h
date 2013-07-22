@@ -36,10 +36,12 @@
 
 
 #include "modules/io/processors/ltfimagereader.h"
+#include "modules/io/processors/vtkimagereader.h"
 #include "modules/columbia/processors/imageseriessplitter.h"
 #include "modules/columbia/processors/strainraycaster.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/vis/processors/volumerenderer.h"
+#include "modules/vis/processors/geometryrenderer.h"
 
 namespace campvis {
     class Columbia1 : public VisualizationPipeline {
@@ -77,10 +79,12 @@ namespace campvis {
         CameraProperty _camera;
 
         LtfImageReader _imageReader;
+        VtkImageReader _vtkReader;
         ImageSeriesSplitter _splitter;
         VolumeRenderer _vr;
         StrainRaycaster _src;
         SliceExtractor _sr;
+        GeometryRenderer _gr;
 
         TrackballNavigationEventHandler* _trackballEH;
 

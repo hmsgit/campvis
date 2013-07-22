@@ -32,6 +32,7 @@
 
 #include <string>
 
+#include "tgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
@@ -73,6 +74,9 @@ namespace campvis {
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+
+        void parsePolydata(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
 
         static const std::string loggerCat_;
     };
