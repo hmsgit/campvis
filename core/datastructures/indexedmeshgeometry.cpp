@@ -109,9 +109,7 @@ namespace campvis {
             vao.addVertexAttribute(tgt::VertexArrayObject::ColorsAttribute, _colorsBuffer);
         if (_normalsBuffer)
             vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _normalsBuffer);
-
-        vao.setIndexBuffer(_indicesBuffer);
-        LGL_ERROR;
+        vao.bindIndexBuffer(_indicesBuffer);
 
         glDrawElements(mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_SHORT, 0);
         LGL_ERROR;

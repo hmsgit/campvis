@@ -70,7 +70,7 @@ namespace tgt {
 //         }
     }
 
-    void VertexArrayObject::setIndexBuffer(BufferObject* bufferObject) {
+    void VertexArrayObject::bindIndexBuffer(BufferObject* bufferObject) {
         tgtAssert(bufferObject->getTargetType() == BufferObject::ELEMENT_ARRAY_BUFFER, "Buffer needs to have target type ELEMENT_ARRAY_BUFFER!");
 
         bind();
