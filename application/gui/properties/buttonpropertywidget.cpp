@@ -49,7 +49,7 @@ namespace campvis {
 
     void ButtonPropertyWidget::onButtonClicked(bool) {
         ButtonProperty* bp = static_cast<ButtonProperty*>(_property);
-        bp->s_clicked();
+        bp->click();
     }
 
 }

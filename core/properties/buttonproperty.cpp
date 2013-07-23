@@ -41,4 +41,9 @@ namespace campvis {
     ButtonProperty::~ButtonProperty() {
     }
 
+    void ButtonProperty::click() {
+        s_clicked();
+        s_changed(this);
+    }
+
 }
