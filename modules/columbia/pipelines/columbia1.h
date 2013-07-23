@@ -39,6 +39,7 @@
 #include "modules/io/processors/vtkimagereader.h"
 #include "modules/columbia/processors/geometrystrainrenderer.h"
 #include "modules/columbia/processors/imageseriessplitter.h"
+#include "modules/columbia/processors/strainfibertracker.h"
 #include "modules/columbia/processors/strainraycaster.h"
 #include "modules/vis/processors/geometryrenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
@@ -86,6 +87,8 @@ namespace campvis {
         StrainRaycaster _src;
         SliceExtractor _sr;
         GeometryRenderer _gr;
+
+        StrainFiberTracker _sft;
 
         TrackballNavigationEventHandler* _trackballEH;
 

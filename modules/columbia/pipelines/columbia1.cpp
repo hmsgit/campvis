@@ -48,6 +48,7 @@ namespace campvis {
         , _sr(_effectiveRenderTargetSize)
         , _src(_effectiveRenderTargetSize)
         , _gr(_effectiveRenderTargetSize)
+        , _sft()
         , _trackballEH(0)
     {
         addProperty(&_camera);
@@ -58,10 +59,11 @@ namespace campvis {
         addProcessor(&_imageReader);
         addProcessor(&_vtkReader);
         addProcessor(&_splitter);
-        addProcessor(&_vr);
-        addProcessor(&_src);
+        //addProcessor(&_vr);
+        //addProcessor(&_src);
         addProcessor(&_sr);
         addProcessor(&_gr);
+        addProcessor(&_sft);
     }
 
     Columbia1::~Columbia1() {
@@ -80,10 +82,12 @@ namespace campvis {
         _vr.p_outputImage.setValue("vr");
         _sr.p_targetImageID.setValue("sr");
         _src.p_targetImageID.setValue("src");
-        _renderTargetID.setValue("vr");
+        _renderTargetID.setValue("sr");
 
-        _imageReader.p_url.setValue("D:/Medical Data/Columbia/inputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_diffused_crop_00.ltf");
+        _imageReader.p_url.setValue("D:/Medical Data/Columbia/outputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_crop_flow_field_00_00.ltf");
         _imageReader.p_size.setValue(tgt::ivec3(224, 176, 208));
+        _imageReader.p_numChannels.setValue(3);
+        _imageReader.p_baseType.selectById("float");
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.connect(&_splitter.p_inputID);
 
@@ -94,13 +98,16 @@ namespace campvis {
         _splitter.p_outputID.connect(&_vr.p_inputVolume);
         _splitter.p_outputID.connect(&_src.p_sourceImageID);
         _splitter.p_outputID.connect(&_sr.p_sourceImageID);
-
+        _splitter.p_outputID.connect(&_sft.p_strainId);
+         
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_vr.getProperty("transferFunction"))->replaceTF(dvrTF);
 
         _gr.p_renderTargetID.setValue("gr");
+
+        _sft.p_outputID.setValue("fibers");
 
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<Columbia1>(this, &Columbia1::onRenderTargetSizeChanged);

@@ -52,6 +52,11 @@ namespace campvis {
         virtual ~ButtonProperty();
 
         /**
+         * Simulates a click event.
+         */
+        void click();
+
+        /**
          * Signal emitted when button was clicked.
          */
         sigslot::signal0<> s_clicked;

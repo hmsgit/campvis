@@ -45,8 +45,12 @@ namespace tgt {
 
     void OpenGLGarbageCollector::deleteGarbage() {
         tbb::spin_mutex::scoped_lock lock(_mutex);
-        size_t backIndex = _currentFrontindex;
-        _currentFrontindex = (_currentFrontindex+1) % 2;
+        size_t backIndex;
+        {
+            backIndex = _currentFrontindex;
+            tbb::spin_mutex::scoped_lock lock(_addMutex);
+            _currentFrontindex = (_currentFrontindex+1) % 2;
+        }
         
         // delete textures
         if (! _texturesToDelete[backIndex].empty()) {
