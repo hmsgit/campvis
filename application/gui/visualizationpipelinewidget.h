@@ -37,31 +37,51 @@ namespace campvis {
     /**
      * Specialised widget for visualization pipelines.
      *
-     * VisualizationPipelineWidget can be seamlessly used with MDI subwindows, as well as
-     * a top-level floating window.
+     * VisualizationPipelineWidget can be seamlessly used with MDI subwindows and as a top-level
+     * floating window. When detached, it reports changes in its position via the s_positionChanged
+     * signal. Higher-level components listen to this signal to decide when to dock the widget in
+     * an MDI area. VisualizationPipelineWidget also implements additional methods (forceWindowDrag,
+     * stopWindowDrag) that should be used to coordinate the docking with respect to
+     * grabbing/releasing the mouse input.
      */
     class VisualizationPipelineWidget : public QWidget {
 
-        Q_OBJECT;
+        Q_OBJECT
 
     public:
         /**
-         * Construct a floating widget for a visualization pipeline.
+         * Construct a widget for a visualization pipeline.
          *
          * \param canvas the pipeline's canvas
          * \param parent the widget's parent
          */
         VisualizationPipelineWidget(QWidget* canvas, QWidget* parent = 0);
 
-    public slots:
         /**
          * Enter the widget into forced drag mode.
          *
-         * This slot is invoked after the the widget has been detached from an MDI area and become
-         * a floating window. It lets the user drag the window as if it was still the same widget
-         * (MdiSubWindow) that has just been "pulled out" of the MDI area.
+         * This method is to be invoked after the the widget has been detached from an MDI area and
+         * become a floating window. It causes the widget to grab the mouse input and follow the
+         * cursor. As a result, the user can seamlessly continue dragging the widget after it has
+         * been "pulled out" of the MDI area.
          */
         void forceWindowDrag();
+
+        /**
+         * Cancel the dragging of the widget.
+         *
+         * This method causes the widget to release the mouse grab and stop following the cursor.
+         * It's supposed to be called when the widget is re-docked in an MDI area.
+         */
+        void stopWindowDrag();
+
+    signals:
+        /**
+         * Emitted when the widget's position changes.
+         *
+         * \param newPos the widget's new position
+         */
+        void s_positionChanged(const QPoint& newPos);
 
     protected:
         /**
@@ -73,6 +93,11 @@ namespace campvis {
          * Event handler that receives mouse release events for the widget.
          */
         virtual void mouseReleaseEvent(QMouseEvent * event);
+
+        /**
+         * Event handler that receives move events for the window.
+         */
+        virtual void moveEvent(QMoveEvent* event);
 
     private:
         bool _dragActive;            ///< Is the widget currently being dragged?

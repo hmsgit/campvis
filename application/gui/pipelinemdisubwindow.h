@@ -37,24 +37,55 @@ namespace campvis {
     /**
      * QMdiSubWindow subclass for visualization pipeline widgets.
      *
-     * PipelineMdiSubWindow implements special move semantics: once it's been mostly dragged out of
-     * its MDI area, it disappears and releases its widget, making it a top-level floating window. 
+     * PipelineMdiSubWindow reports changes in its position via the s_positionChanged signal.
+     * Higher-level components listen to this signal to decide when to detach the subwindow from
+     * its MDI area. PipelineMdiSubWindow also implements additional methods (stopWindowDrag) that
+     * should be used to coordinate this detaching with respect to grabbing/releasing the mouse
+     * input.
      */
     class PipelineMdiSubWindow : public QMdiSubWindow {
 
-        Q_OBJECT;
+        Q_OBJECT
+
+    public:
+        /**
+         * Construct an MDI subwindow for a visualization pipeline.
+         *
+         * \param parent the window's parent
+         * \param flags options customizing the frame of the subwindow
+         */
+        PipelineMdiSubWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+
+        /**
+         * Cancel the dragging of the window.
+         *
+         * This method causes the window to release the mouse grab and stop following the cursor.
+         * It's supposed to be called when the window is detached from the MDI area.
+         */
+        void stopWindowDrag();
 
     signals:
         /**
-         * Emitted when the subwindow is ejected from the MDI area (by dragging).
+         * Emitted when the subwindow's position changes.
+         *
+         * \param newPos the subwindow's new position
          */
-        void s_leftMdiArea();
+        void s_positionChanged(const QPoint& newPos);
 
     protected:
         /**
-         * Event handler that receives move events for the window.
+         * Event handler that receives mouse move events for the widget.
          */
-        virtual void moveEvent(QMoveEvent* event);
+        virtual void mouseMoveEvent(QMouseEvent* event);
+
+        /**
+         * Event handler that receives mouse release events for the widget.
+         */
+        virtual void mouseReleaseEvent(QMouseEvent * event);
+
+    private:
+        bool _dragActive;            ///< Is the window currently being dragged?
+        QPoint _lastMousePos;        ///< Last reported mouse position
 
     };
 }

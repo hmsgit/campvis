@@ -38,6 +38,7 @@ namespace campvis {
     VisualizationPipelineWidget::VisualizationPipelineWidget(QWidget* canvas, QWidget* parent /*= 0*/)
         : QWidget(parent)
         , _dragActive(false)
+        , _lastMousePos()
     {
         QLayout* layout = new QHBoxLayout();
         layout->setContentsMargins(0, 0, 0, 0);
@@ -47,25 +48,36 @@ namespace campvis {
     }
 
     void VisualizationPipelineWidget::forceWindowDrag() {
-        if (!_dragActive) {
+        if (!_dragActive && parent() == 0) {
             _dragActive = true;
             _lastMousePos = QCursor::pos();
             grabMouse();
         }
     }
 
+    void VisualizationPipelineWidget::stopWindowDrag() {
+        if (_dragActive) {
+            _dragActive = false;
+            releaseMouse();
+        }
+    }
+
     void VisualizationPipelineWidget::mouseMoveEvent(QMouseEvent* event) {
         const QPoint& mousePos = event->globalPos();
+        const QPoint& newPos = pos() + (mousePos - _lastMousePos);
 
-        move(pos() + (mousePos - _lastMousePos));
+        move(newPos);
         _lastMousePos = mousePos;
     }
 
     void VisualizationPipelineWidget::mouseReleaseEvent(QMouseEvent* event) {
         if (event->button() == Qt::LeftButton) {
-            _dragActive = false;
-            releaseMouse();
+            stopWindowDrag();
         }
+    }
+
+    void VisualizationPipelineWidget::moveEvent(QMoveEvent* /*event*/) {
+        emit s_positionChanged(frameGeometry().topLeft());
     }
 
 }

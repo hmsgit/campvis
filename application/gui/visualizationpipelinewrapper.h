@@ -46,7 +46,7 @@ namespace campvis {
      */
     class VisualizationPipelineWrapper : public QObject {
 
-        Q_OBJECT;
+        Q_OBJECT
 
     public:
         /**
@@ -65,11 +65,18 @@ namespace campvis {
 
     private slots:
         /**
-         * Re-tile subwindows in the MDI area.
+         * Track the position of the pipeline's widget and dock it if necessary.
          *
-         * This slot is invoked whenever the pipeline's MDI subwindow is detached or reattached.
+         * This slot is invoked when the pipeline's widget is floating and its position changes.
          */
-        void retileMdiSubWindows();
+        void trackFloatingWindowsPosition(const QPoint& newPos);
+
+        /**
+         * Track the position of the pipeline's MDI subwindow and detach it if necessary.
+         *
+         * This slot is invoked when the position of the pipeline's MDI subwindow changes.
+         */
+        void trackMdiSubWindowsPosition(const QPoint& newPos);
 
     private:
         QMdiArea* _mdiArea;                              ///< The MDI area associated with the widget
