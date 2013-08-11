@@ -42,6 +42,7 @@ namespace campvis {
     Columbia1::Columbia1()
         : VisualizationPipeline()
         , _camera("camera", "Camera")
+        , _boundsData("BoundsData", "Bounds Data", "sfr", DataNameProperty::READ)
         , _imageReader()
         , _vtkReader()
         , _vr(_effectiveRenderTargetSize)
@@ -49,9 +50,11 @@ namespace campvis {
         , _src(_effectiveRenderTargetSize)
         , _gr(_effectiveRenderTargetSize)
         , _sft()
+        , _sfr(_effectiveRenderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
+        addProperty(&_boundsData);
 
         _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
         _eventHandlers.push_back(_trackballEH);
@@ -64,6 +67,7 @@ namespace campvis {
         addProcessor(&_sr);
         addProcessor(&_gr);
         addProcessor(&_sft);
+        addProcessor(&_sfr);
     }
 
     Columbia1::~Columbia1() {
@@ -78,11 +82,12 @@ namespace campvis {
         _camera.addSharedProperty(&_vr.p_camera);
         _camera.addSharedProperty(&_src.p_camera);
         _camera.addSharedProperty(&_gr.p_camera);
+        _camera.addSharedProperty(&_sfr.p_camera);
 
         _vr.p_outputImage.setValue("vr");
         _sr.p_targetImageID.setValue("sr");
         _src.p_targetImageID.setValue("src");
-        _renderTargetID.setValue("sr");
+        _renderTargetID.setValue("sfr");
 
         _imageReader.p_url.setValue("D:/Medical Data/Columbia/outputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_crop_flow_field_00_00.ltf");
         _imageReader.p_size.setValue(tgt::ivec3(224, 176, 208));
@@ -108,6 +113,9 @@ namespace campvis {
         _gr.p_renderTargetID.setValue("gr");
 
         _sft.p_outputID.setValue("fibers");
+        _sft.p_outputID.connect(&_sfr.p_strainId);
+
+        _sfr.p_renderTargetID.setValue("sfr");
 
         _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
         _effectiveRenderTargetSize.s_changed.connect<Columbia1>(this, &Columbia1::onRenderTargetSizeChanged);
@@ -144,6 +152,7 @@ namespace campvis {
             }
         }
     }
+
 
 
 }

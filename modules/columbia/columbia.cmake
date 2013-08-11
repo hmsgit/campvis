@@ -11,6 +11,7 @@ FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
     modules/columbia/datastructures/*.h
     modules/columbia/glsl/*.frag
+    modules/columbia/glsl/*.geom
     modules/columbia/glsl/*.vert
 	modules/columbia/pipelines/*.h
 	modules/columbia/processors/*.h

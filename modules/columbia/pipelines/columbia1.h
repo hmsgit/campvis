@@ -40,6 +40,7 @@
 #include "modules/columbia/processors/geometrystrainrenderer.h"
 #include "modules/columbia/processors/imageseriessplitter.h"
 #include "modules/columbia/processors/strainfibertracker.h"
+#include "modules/columbia/processors/strainfiberrenderer.h"
 #include "modules/columbia/processors/strainraycaster.h"
 #include "modules/vis/processors/geometryrenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
@@ -79,6 +80,7 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         CameraProperty _camera;
+        DataNameProperty _boundsData;
 
         LtfImageReader _imageReader;
         VtkImageReader _vtkReader;
@@ -89,6 +91,7 @@ namespace campvis {
         GeometryRenderer _gr;
 
         StrainFiberTracker _sft;
+        StrainFiberRenderer _sfr;
 
         TrackballNavigationEventHandler* _trackballEH;
 
