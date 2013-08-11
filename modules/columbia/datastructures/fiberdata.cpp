@@ -29,30 +29,77 @@
 
 #include "fiberdata.h"
 
+#include "tgt/buffer.h"
+#include "tgt/logmanager.h"
+#include "tgt/vertexarrayobject.h"
+
 namespace campvis {
 
     FiberData::FiberData() 
         : AbstractData()
+        , _vertexBuffer(0)
+        , _tangentBuffer(0)
+        , _buffersInitialized(false)
+        , _vboFiberStartIndices(0)
+        , _vboFiberCounts(0)
     {
     }
 
+    FiberData::FiberData(const FiberData& rhs)
+        : AbstractData(rhs)
+        , _vertices(rhs._vertices)
+        , _fibers(rhs._fibers)
+        , _vertexBuffer(0)
+        , _tangentBuffer(0)
+        , _buffersInitialized(false)
+        , _vboFiberStartIndices(0)
+        , _vboFiberCounts(0)
+    {}
+
     FiberData::~FiberData() {
+        delete _vertexBuffer;
+        delete _tangentBuffer;
+        delete [] _vboFiberStartIndices;
+        delete [] _vboFiberCounts;
+    }
+
+    FiberData& FiberData::operator=(const FiberData& rhs) {
+        if (this == &rhs)
+            return *this;
+
+        AbstractData::operator=(rhs);
+
+        _vertices = rhs._vertices;
+        _fibers = rhs._fibers;
+
+        // delete old VBOs and null pointers
+        delete _vertexBuffer;
+        delete _tangentBuffer;
+
+        _vertexBuffer = 0;
+        _tangentBuffer = 0;
+        _buffersInitialized = false;
+
+        return *this;
 
     }
 
     void FiberData::addFiber(const std::deque<tgt::vec3>& vertices) {
         _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
         _fibers.push_back(Fiber(_vertices.size() - vertices.size(), _vertices.size()));
+        _buffersInitialized = false;
     }
 
     void FiberData::addFiber(const std::vector<tgt::vec3>& vertices) {
         _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
         _fibers.push_back(Fiber(_vertices.size() - vertices.size(), _vertices.size()));
+        _buffersInitialized = false;
     }
 
     void FiberData::clear() {
         _fibers.clear();
         _vertices.clear();
+        _buffersInitialized = false;
     }
 
     void FiberData::updateLengths() const {
@@ -93,7 +140,87 @@ namespace campvis {
     }
 
     size_t FiberData::getVideoMemoryFootprint() const {
-        return 0;
+        size_t sum = 0;
+        if (_vertexBuffer != 0)
+            sum += _vertexBuffer->getBufferSize();
+        if (_tangentBuffer != 0)
+            sum += _tangentBuffer->getBufferSize();
+
+        return sum;
+    }
+
+    void FiberData::createGlBuffers() const {
+        if (_buffersInitialized)
+            return;
+
+        // reset everything
+        delete _vertexBuffer;
+        delete _tangentBuffer;
+        delete [] _vboFiberStartIndices;
+        delete [] _vboFiberCounts;
+        _vboFiberArraySize = 0;
+        _vboFiberStartIndices = new GLint[_vertices.size()];
+        _vboFiberCounts = new GLint[_vertices.size()];
+
+        std::vector<tgt::vec3> tangents;
+        tangents.resize(_vertices.size());
+
+        for (std::vector<Fiber>::const_iterator it = _fibers.begin(); it != _fibers.end(); ++it) {
+            _vboFiberStartIndices[_vboFiberArraySize] = static_cast<GLint>(it->_startIndex);
+            _vboFiberCounts[_vboFiberArraySize] = static_cast<GLsizei>(it->_endIndex - it->_startIndex);
+            ++_vboFiberArraySize;
+
+            tgt::vec3 dirPrev = tgt::vec3::zero;
+            tgt::vec3 dirNext = tgt::vec3::zero;
+
+            for (size_t i = it->_startIndex; i < it->_endIndex-1; ++i) {
+                dirNext = _vertices[i+1] - _vertices[i];
+                tangents[i] = tgt::normalize(dirPrev + dirNext);
+                dirPrev = dirNext;
+            }
+
+            tangents[it->_endIndex - 1] = dirPrev;
+        }
+
+        try {
+            _vertexBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+            _vertexBuffer->data(&_vertices.front(), _vertices.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+
+            _tangentBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+            _tangentBuffer->data(&tangents.front(), tangents.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+        }
+        catch (tgt::Exception& e) {
+            LERRORC("CAMPVis.modules.columbia.FiberData", "Error creating OpenGL Buffer objects: " << e.what());
+            _buffersInitialized = false;
+            return;
+        }
+
+        LGL_ERROR;
+        _buffersInitialized = true;
+    }
+
+    void FiberData::render(GLenum mode /*= GL_LINE_STRIP*/) const {
+        createGlBuffers();
+        if (! _buffersInitialized) {
+            LERRORC("CAMPVis.modules.columbia.FiberData", "Cannot render without initialized OpenGL buffers.");
+            return;
+        }
+
+        tgt::VertexArrayObject vao;
+        vao.addVertexAttribute(tgt::VertexArrayObject::VerticesAttribute, _vertexBuffer);
+        vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _tangentBuffer);
+        LGL_ERROR;
+
+        glMultiDrawArrays(mode, _vboFiberStartIndices, _vboFiberCounts, _vboFiberArraySize);
+        LGL_ERROR;
+
+    }
+
+    tgt::Bounds FiberData::getWorldBounds() const {
+        tgt::Bounds toReturn;
+        for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
+            toReturn.addPoint(*it);
+        return toReturn;
     }
 
 }

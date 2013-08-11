@@ -224,9 +224,9 @@ namespace campvis {
         const tgt::mat4& VtW = strainData.getParent()->getMappingInformation().getVoxelToWorldMatrix();
         float threshold = p_strainThreshold.getValue() * p_strainThreshold.getValue();
 
-        for (size_t z = 0; z < strainData.getSize().z; ++z) {
-            for (size_t y = 0; y < strainData.getSize().y; ++y) {
-                for (size_t x = 0; x < strainData.getSize().x; ++x) {
+        for (size_t z = 0; z < strainData.getSize().z; z += 2) {
+            for (size_t y = 0; y < strainData.getSize().y; y += 2) {
+                for (size_t x = 0; x < strainData.getSize().x; x += 2) {
                     tgt::vec3 pos(x, y, z);
                     if (tgt::lengthSq(getVec3FloatLinear(strainData, pos)) > threshold) {
                         seeds.push_back((VtW * tgt::vec4(pos, 1.f)).xyz());

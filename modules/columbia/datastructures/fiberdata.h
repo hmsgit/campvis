@@ -30,11 +30,18 @@
 #ifndef FIBERDATA_H__
 #define FIBERDATA_H__
 
+#include "tgt/bounds.h"
+#include "tgt/tgt_gl.h"
 #include "tgt/vector.h"
+
 #include "core/datastructures/abstractdata.h"
 
 #include <deque>
 #include <vector>
+
+namespace tgt {
+    class BufferObject;
+}
 
 namespace campvis {
 
@@ -67,10 +74,23 @@ namespace campvis {
         FiberData();
 
         /**
+         * Copy Constructor.
+         * \param   rhs source
+         */
+        FiberData(const FiberData& rhs);
+
+        /**
          * Destructor.
          */
         virtual ~FiberData();
 
+
+        /**
+         * Assignment Operator
+         * \param   rhs     Source
+         * \return  *this
+         */
+        FiberData& operator=(const FiberData& rhs);
 
         /**
          * Generates a new fiber from the given vertices and adds it to this data structure.
@@ -114,6 +134,20 @@ namespace campvis {
          */
         bool empty() const;
 
+        /**
+         * Returns the fiber data extent in world coordinates.
+         * \note    Caution: Calling this method is expensive as the bounds are computed each time.
+         * \return  The fiber data extent in world coordinates.
+         */
+        tgt::Bounds getWorldBounds() const;
+
+        /**
+         * Renders the Fiber geometry of this data set in the current OpenGL context.
+         * \note    Must be called from a valid openGL context!
+         * \param   mode    OpenGL render mode (defaults to GL_LINE_STRIP).
+         */
+        void render(GLenum mode = GL_LINE_STRIP) const;
+
         
         /// \see AbstractData::clone()
         virtual FiberData* clone() const;
@@ -125,9 +159,21 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
     protected:
+        /**
+         * Creates the OpenGL buffers with vertex and tangent data.
+         */
+        void createGlBuffers() const;
+
         std::vector<tgt::vec3> _vertices;   ///< The fiber vertex (coordinates) data
         std::vector<Fiber> _fibers;         ///< The fiber meta data
 
+        mutable tgt::BufferObject* _vertexBuffer;   ///< Pointer to OpenGL buffer with vertex data (lazy-instantiated)
+        mutable tgt::BufferObject* _tangentBuffer;  ///< Pointer to OpenGL buffer with tangent data (lazy-instantiated)
+        mutable bool _buffersInitialized;           ///< flag whether all OpenGL buffers were successfully initialized
+
+        mutable GLint* _vboFiberStartIndices;       ///< VBO start indices for each fiber
+        mutable GLsizei* _vboFiberCounts;           ///< number of indices for each fiber
+        mutable GLsizei _vboFiberArraySize;         ///< number of elements in the above two lists
     };
 
 }

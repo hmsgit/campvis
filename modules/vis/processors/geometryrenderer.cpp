@@ -91,10 +91,13 @@ namespace campvis {
 
             // set modelview and projection matrices
             _shader->activate();
+            _shader->setIgnoreUniformLocationError(true);
             decorateRenderProlog(data, _shader);
             _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
             _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
             _shader->setUniform("_color", p_color.getValue());
+            _shader->setUniform("_cameraPosition", p_camera.getValue().getPosition());
+            _shader->setIgnoreUniformLocationError(false);
 
             // create entry points texture
             std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
