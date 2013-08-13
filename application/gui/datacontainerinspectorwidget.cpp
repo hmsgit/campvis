@@ -236,7 +236,6 @@ namespace campvis {
         }
 
         _dataContainer = 0;
-        _dctWidget->update(0);
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {

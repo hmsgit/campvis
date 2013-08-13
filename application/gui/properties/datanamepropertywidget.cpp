@@ -80,10 +80,20 @@ namespace campvis {
     void DataNamePropertyWidget::updateWidgetFromProperty() {
         DataNameProperty* prop = static_cast<DataNameProperty*>(_property);
         QString qs = QString::fromStdString(prop->getValue());
-        if (_lineEdit->text() != qs) {
-            _lineEdit->blockSignals(true);
-            _lineEdit->setText(qs);
-            _lineEdit->blockSignals(false);
+
+        if (prop->getAccessInfo() == DataNameProperty::READ) {
+            int idx = _combobox->findText(qs);
+            if (idx != -1)
+                _combobox->setCurrentIndex(idx);
+            else
+                _combobox->setEditText(qs);
+        }
+        else {
+            if (_lineEdit->text() != qs) {
+                _lineEdit->blockSignals(true);
+                _lineEdit->setText(qs);
+                _lineEdit->blockSignals(false);
+            }
         }
     }
 
