@@ -150,6 +150,8 @@ namespace campvis {
          */
         QString humanizeBytes(size_t numBytes) const;
 
+        bool _inited;
+
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer

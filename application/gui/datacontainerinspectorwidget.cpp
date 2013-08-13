@@ -59,6 +59,7 @@ namespace campvis {
 
     DataContainerInspectorWidget::DataContainerInspectorWidget(QWidget* parent) 
         : QWidget(parent)
+        , _inited(false)
         , _dataContainer(0)
         , _dctWidget(0)
         , _canvas(0)
@@ -158,6 +159,9 @@ namespace campvis {
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {
+        if (!_inited)
+            return;
+
         // get the selection from the tree widget
         const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
         std::vector< std::pair<QString, QtDataHandle> > handles;
@@ -223,9 +227,12 @@ namespace campvis {
     void DataContainerInspectorWidget::init() {
         if (_canvas != 0)
             _canvas->init();
+
+        _inited = true;
     }
 
     void DataContainerInspectorWidget::deinit() {
+        _inited = false;
         if (_canvas != 0)
             _canvas->deinit();
 
@@ -236,6 +243,7 @@ namespace campvis {
         }
 
         _dataContainer = 0;
+        _dctWidget->update(0);
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
