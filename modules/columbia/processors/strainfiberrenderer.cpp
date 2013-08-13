@@ -43,6 +43,12 @@
 #include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
+
+    static const GenericOption<StrainFiberRenderer::RenderMode> renderModeOptions[2] = {
+        GenericOption<StrainFiberRenderer::RenderMode>("Stripes", "Stripes", StrainFiberRenderer::STRIPES), 
+        GenericOption<StrainFiberRenderer::RenderMode>("Tubes", "Tubes", StrainFiberRenderer::TUBES)
+    };
+
     const std::string StrainFiberRenderer::loggerCat_ = "CAMPVis.modules.vis.StrainFiberRenderer";
 
     StrainFiberRenderer::StrainFiberRenderer(IVec2Property& canvasSize)
@@ -51,6 +57,7 @@ namespace campvis {
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera ID")//, "camera", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT, DataNameProperty::CameraData)
         , p_lineWidth("LineWidth", "Line width", 3.f, .5f, 10.f)
+        , p_renderMode("RenderMode", "Render Mode", renderModeOptions, 2, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
         , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
@@ -60,6 +67,7 @@ namespace campvis {
         addProperty(&p_renderTargetID);
         addProperty(&p_camera);
         addProperty(&p_color);
+        addProperty(&p_renderMode);
         addProperty(&p_lineWidth);
 
         decoratePropertyCollection(this);
@@ -76,6 +84,7 @@ namespace campvis {
             _shader->setAttributeLocation(0, "in_Position");
             _shader->setAttributeLocation(1, "in_TexCoord");
         }
+        invalidate(AbstractProcessor::INVALID_SHADER);
     }
 
     void StrainFiberRenderer::deinit() {
@@ -85,14 +94,14 @@ namespace campvis {
     }
 
     void StrainFiberRenderer::process(DataContainer& data) {
+        if (hasInvalidShader()) {
+            _shader->setHeaders(generateGlslHeader());
+            _shader->rebuild();
+            validate(INVALID_SHADER);
+        }
+        
         DataContainer::ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
-
         if (strainData != 0 && _shader != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateGlslHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
             const tgt::Camera& camera = p_camera.getValue();
 
             // set modelview and projection matrices
@@ -102,7 +111,7 @@ namespace campvis {
             _shader->setUniform("_projectionMatrix", camera.getProjectionMatrix());
             _shader->setUniform("_viewMatrix", camera.getViewMatrix());
             _shader->setUniform("_cameraPosition", camera.getPosition());
-            _shader->setUniform("_fiberWidth", p_lineWidth.getValue());
+            _shader->setUniform("_fiberWidth", p_lineWidth.getValue()/4.f);
             _shader->setIgnoreUniformLocationError(false); 
 
             // create entry points texture
@@ -136,6 +145,17 @@ namespace campvis {
 
     std::string StrainFiberRenderer::generateGlslHeader() const {
         std::string toReturn = getDecoratedHeader();
+
+        switch (p_renderMode.getOptionValue()) {
+            case STRIPES:
+                toReturn += "#define DO_STRIPES\n";
+                break;
+            case TUBES:
+                toReturn += "#define DO_TUBES\n";
+                break;
+
+        }
+
         return toReturn;
     }
 

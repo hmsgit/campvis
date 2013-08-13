@@ -95,7 +95,14 @@ vec4 applyTubeTexture(vec3 color) {
 
 
 void main() {
-    vec4 color = applyTubeTexture(geom_Color.rbg);//vec4(geom_Normal, 1.0);
+    vec4 color;
+#ifdef DO_STRIPES
+    color = applyTubeTexture(geom_Color.rbg);//vec4(geom_Normal, 1.0);
+#endif
+#ifdef DO_TUBES
+    color = geom_Color;
+#endif
+
     out_Color = color;
 
 #ifdef ENABLE_SHADING
@@ -106,4 +113,6 @@ void main() {
 
     out_Color.rgb = calculatePhongShading(geom_Position.xyz / geom_Position.z, _lightSource, _cameraPosition, geom_Normal, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
 #endif
+
+    gl_FragDepth = gl_FragCoord.z;
 }

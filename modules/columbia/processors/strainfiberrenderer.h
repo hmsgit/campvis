@@ -38,6 +38,7 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
+#include "core/properties/optionproperty.h"
 #include "core/properties/cameraproperty.h"
 
 namespace tgt {
@@ -50,6 +51,11 @@ namespace campvis {
      */
     class StrainFiberRenderer : public VisualizationProcessor, public HasProcessorDecorators {
     public:
+        enum RenderMode {
+            STRIPES,
+            TUBES
+        };
+
         /**
          * Constructs a new StrainFiberRenderer Processor
          **/
@@ -77,6 +83,7 @@ namespace campvis {
         DataNameProperty p_renderTargetID;   ///< image ID for output image
         CameraProperty p_camera;
 
+        GenericOptionProperty<RenderMode> p_renderMode;
         FloatProperty p_lineWidth;
         Vec4Property p_color;                ///< rendering color
 

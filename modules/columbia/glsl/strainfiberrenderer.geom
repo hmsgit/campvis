@@ -28,7 +28,16 @@
 // ================================================================================================
 
 layout (lines) in;
+
+#ifdef DO_STRIPES
 layout (triangle_strip, max_vertices = 4) out;
+#endif
+
+#ifdef DO_TUBES
+#define NUM_SIDES 6
+layout (triangle_strip, max_vertices = 14) out;
+#endif
+
 
 in vec3 vert_TexCoord[];           ///< incoming texture coordinate
 in vec4 vert_Position[];
@@ -42,8 +51,11 @@ out float geom_SineFlag;
 uniform vec3 _cameraPosition;
 uniform float _fiberWidth;
 
+const float PI = 3.1415926535897932384626433832795;
 
 void main() {
+
+#ifdef DO_STRIPES
     vec4 displacement[2];
     vec3 normal[2];
 
@@ -85,4 +97,52 @@ void main() {
     EmitVertex();
 
     EndPrimitive();
+#endif
+
+#ifdef DO_TUBES
+    mat3 rotMatrix[2];
+    for (int i = 0; i < 2; ++i) {
+        // calculate correct rotation matrix for pseudo-cylinder footprint:
+        vec3 rotBotZ = normalize(vert_TexCoord[i]); // already normalized!
+        bool degenerated = (rotBotZ.x == 0 && rotBotZ.z == 0);
+        vec3 rotBotX = degenerated ? vec3(1.f, 0.f, 0.f) : normalize(vec3(rotBotZ.z, 0.f, -rotBotZ.x));
+        vec3 rotBotY = degenerated ? vec3(0.f, 0.f, 1.f) : normalize(cross(rotBotZ, rotBotX));
+        rotMatrix[i] = mat3(rotBotX, rotBotY, rotBotZ);
+    }
+
+    vec3 normals[NUM_SIDES];
+    for (int i = 0; i < NUM_SIDES; ++i) {
+        float angle = float(i)/float(NUM_SIDES) * 2.0 * PI;
+        normals[i] = normalize(vec3(cos(angle) - sin(angle), sin(angle) + cos(angle), 0.0));
+    }
+
+    for (int i = 0; i < NUM_SIDES; ++i) {
+        geom_Color = vec4(vert_TexCoord[0], 1.0);
+        geom_Normal = normals[i] * rotMatrix[0];
+        geom_Position = vert_Position[0] + (vec4(geom_Normal, 0.0) * _fiberWidth);
+        gl_Position = geom_Position;
+        EmitVertex();
+
+        geom_Color = vec4(vert_TexCoord[1], 1.0);
+        geom_Normal = normals[i] * rotMatrix[1];
+        geom_Position = vert_Position[1] + (vec4(geom_Normal, 0.0) * _fiberWidth);
+        gl_Position = geom_Position;
+        EmitVertex();
+    }
+
+    geom_Color = vec4(vert_TexCoord[0], 1.0);
+    geom_Normal = normals[0] * rotMatrix[0];
+    geom_Position = vert_Position[0] + (vec4(geom_Normal, 0.0) * _fiberWidth);
+    gl_Position = geom_Position;
+    EmitVertex();
+
+    geom_Color = vec4(vert_TexCoord[1], 1.0);
+    geom_Normal = normals[0] * rotMatrix[1];
+    geom_Position = vert_Position[1] + (vec4(geom_Normal, 0.0) * _fiberWidth);
+    gl_Position = geom_Position;
+    EmitVertex();
+
+    EndPrimitive;
+
+#endif
 }

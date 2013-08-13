@@ -72,6 +72,8 @@ namespace campvis {
 
         ButtonProperty p_updateButton;      ///< Button to start tracking
 
+        IntProperty p_seedDistance;
+
         IntProperty p_numSteps;             ///< Maximum number of steps per fiber
         FloatProperty p_stepSize;           ///< Base step size
 

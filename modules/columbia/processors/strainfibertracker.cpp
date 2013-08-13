@@ -169,6 +169,7 @@ namespace campvis {
         , p_strainId("StrainId", "Input Strain Data", "input", DataNameProperty::READ, AbstractProcessor::VALID)
         , p_outputID("OutputId", "Output Fiber Data", "output", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , p_updateButton("UpdateButton", "Perform Tracking")
+        , p_seedDistance("SeedDistance", "Seed Distance", 4, 1, 16, AbstractProcessor::VALID)
         , p_numSteps("NumSteps", "Maximum Number of Steps", 256, 16, 1024, AbstractProcessor::VALID)
         , p_stepSize("StepSize", "Base Step Size", 1.f, .01f, 10.f, AbstractProcessor::VALID)
         , p_strainThreshold("StrainThreshold", "Local Strain Threshold", .5f, .1f, 1.f, AbstractProcessor::VALID)
@@ -177,6 +178,7 @@ namespace campvis {
         addProperty(&p_strainId);
         addProperty(&p_outputID);
         addProperty(&p_updateButton);
+        addProperty(&p_seedDistance);
         addProperty(&p_numSteps);
         addProperty(&p_stepSize);
         addProperty(&p_strainThreshold);
@@ -223,10 +225,11 @@ namespace campvis {
         std::vector<tgt::vec3> seeds;
         const tgt::mat4& VtW = strainData.getParent()->getMappingInformation().getVoxelToWorldMatrix();
         float threshold = p_strainThreshold.getValue() * p_strainThreshold.getValue();
+        int inc = p_seedDistance.getValue();
 
-        for (size_t z = 0; z < strainData.getSize().z; z += 2) {
-            for (size_t y = 0; y < strainData.getSize().y; y += 2) {
-                for (size_t x = 0; x < strainData.getSize().x; x += 2) {
+        for (size_t z = 0; z < strainData.getSize().z; z += inc) {
+            for (size_t y = 0; y < strainData.getSize().y; y += inc) {
+                for (size_t x = 0; x < strainData.getSize().x; x += inc) {
                     tgt::vec3 pos(x, y, z);
                     if (tgt::lengthSq(getVec3FloatLinear(strainData, pos)) > threshold) {
                         seeds.push_back((VtW * tgt::vec4(pos, 1.f)).xyz());
