@@ -56,7 +56,9 @@ namespace campvis {
         addProperty(&_raycaster.p_transferFunction);
         addProperty(&_raycaster.p_samplingRate);
         addProperty(&p_outputImage);
+
         addProperty(_raycaster.getProperty("CentralDifferences"));
+        addProperty(_eepGenerator.getProperty("GeometryImageId"));
 
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);

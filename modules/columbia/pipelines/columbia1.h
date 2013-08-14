@@ -43,6 +43,7 @@
 #include "modules/columbia/processors/strainfiberrenderer.h"
 #include "modules/columbia/processors/strainraycaster.h"
 #include "modules/vis/processors/geometryrenderer.h"
+#include "modules/vis/processors/rendertargetcompositor.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/vis/processors/volumerenderer.h"
 
@@ -83,8 +84,12 @@ namespace campvis {
         DataNameProperty _boundsData;
 
         LtfImageReader _imageReader;
+        ImageSeriesSplitter _imageSplitter;
+
+        LtfImageReader _flowReader;
+        ImageSeriesSplitter _flowSplitter;
+
         VtkImageReader _vtkReader;
-        ImageSeriesSplitter _splitter;
         VolumeRenderer _vr;
         StrainRaycaster _src;
         SliceExtractor _sr;
@@ -92,6 +97,8 @@ namespace campvis {
 
         StrainFiberTracker _sft;
         StrainFiberRenderer _sfr;
+
+        RenderTargetCompositor _compositor;
 
         TrackballNavigationEventHandler* _trackballEH;
 

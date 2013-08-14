@@ -46,7 +46,7 @@ namespace campvis {
     EEPGenerator::EEPGenerator(IVec2Property& canvasSize)
         : VisualizationProcessor(canvasSize)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
-        , p_geometryID("geometryID", "Input Geometry ID", "proxygeometry", DataNameProperty::READ)
+        , p_geometryID("geometryID", "Input Proxy Geometry ID", "proxygeometry", DataNameProperty::READ)
         , p_mirrorID("mirrorID", "Input Mirror ID", "mirror", DataNameProperty::READ)
         , p_geometryImageId("GeometryImageId", "Rendered Geometry to Integrate (optional)", "", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
