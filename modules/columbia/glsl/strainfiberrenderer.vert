@@ -35,30 +35,10 @@ out vec3 vert_TexCoord;       ///< outgoing texture coordinate
 out vec4 vert_Color;          ///< outgoing color
 out vec4 vert_Position;       ///< outgoing world coordinates
 
-/// Matrix defining model-to-world transformation
-uniform mat4 _modelMatrix = mat4(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    0.0, 0.0, 0.0, 1.0);
-
-/// Matrix defining view transformation
-uniform mat4 _viewMatrix = mat4(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    0.0, 0.0, 0.0, 1.0);
-
-/// Matrix defining projection transformation
-uniform mat4 _projectionMatrix = mat4(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    0.0, 0.0, 0.0, 1.0);
 
 
 void main() {
-    vert_Position = _projectionMatrix * (_viewMatrix * (_modelMatrix * vec4(in_Position, 1.0)));
+    vert_Position = vec4(in_Position, 1.0);
     gl_Position = vert_Position;
 
     vert_TexCoord = in_TexCoord;
