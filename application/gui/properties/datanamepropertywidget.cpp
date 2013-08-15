@@ -53,13 +53,8 @@ namespace campvis {
                 _combobox->addItems(sl);
                 dc->s_dataAdded.connect(this, &DataNamePropertyWidget::onDataAdded);
 
-                int idx = _combobox->findText(QString::fromStdString(property->getValue()));
-                if (idx != -1)
-                    _combobox->setCurrentIndex(idx);
-                else
-                    _combobox->setEditText(QString::fromStdString(property->getValue()));
+                setCurrentComboBoxText(QString::fromStdString(property->getValue()));
             }
-
 
             addWidget(_combobox);
             connect(_combobox, SIGNAL(editTextChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
@@ -80,11 +75,26 @@ namespace campvis {
     void DataNamePropertyWidget::updateWidgetFromProperty() {
         DataNameProperty* prop = static_cast<DataNameProperty*>(_property);
         QString qs = QString::fromStdString(prop->getValue());
-        if (_lineEdit->text() != qs) {
+
+        if (prop->getAccessInfo() == DataNameProperty::READ) {
+            _combobox->blockSignals(true);
+            setCurrentComboBoxText(qs);
+            _combobox->blockSignals(false);
+        }
+        else if (_lineEdit->text() != qs) {
             _lineEdit->blockSignals(true);
             _lineEdit->setText(qs);
             _lineEdit->blockSignals(false);
         }
+    }
+
+    void DataNamePropertyWidget::setCurrentComboBoxText(const QString& text) {
+        int idx = _combobox->findText(text);
+
+        if (idx != -1)
+            _combobox->setCurrentIndex(idx);
+        else
+            _combobox->setEditText(text);
     }
 
     void DataNamePropertyWidget::onTextChanged(const QString& text) {
