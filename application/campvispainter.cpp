@@ -190,8 +190,12 @@ namespace campvis {
             getCanvas()->getEventHandler()->addListenerToFront(_pipeline);
     }
 
-    void TumVisPainter::onRenderTargetChanged() {
+    void TumVisPainter::repaint() {
         GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &TumVisPainter::paint), OpenGLJobProcessor::PaintJob);
+    }
+
+    void TumVisPainter::onRenderTargetChanged() {
+        repaint();
     }
 
     void TumVisPainter::setCanvas(tgt::GLCanvas* canvas) {

@@ -94,9 +94,9 @@ namespace campvis {
         QSize sizeHint() const;
 
         /**
-         * Performs the painting.
+         * Schedule a repaint job for the inspector's render target
          */
-        void paint();
+        void repaint();
 
         /// This is meant be overridden to adjust camera settings to new canvas dimensions
         virtual void sizeChanged(const tgt::ivec2&);
@@ -131,6 +131,11 @@ namespace campvis {
         void onDataContainerChanged(const QString& key, QtDataHandle dh);
 
     protected:
+        /**
+         * Performs the painting.
+         */
+        virtual void paint();
+
         /**
          * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
          * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.

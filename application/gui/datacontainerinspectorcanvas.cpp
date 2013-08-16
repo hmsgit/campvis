@@ -210,6 +210,10 @@ namespace campvis {
         _quad->createGLBuffers();
     }
 
+    void DataContainerInspectorCanvas::repaint() {
+        invalidate();
+    }
+
     void DataContainerInspectorCanvas::sizeChanged(const tgt::ivec2&) {
         invalidate();
     }
