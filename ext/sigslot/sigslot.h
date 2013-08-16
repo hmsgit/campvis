@@ -92,7 +92,7 @@
 
 #include <set>
 #include <list>
-#include "tbb/include/tbb/spin_mutex.h"
+#include "tbb/spin_mutex.h"
 
 #define _SIGSLOT_HAS_TBB
 /*
