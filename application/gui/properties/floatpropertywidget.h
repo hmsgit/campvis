@@ -34,6 +34,7 @@
 #include "core/properties/numericproperty.h"
 
 #include <QDoubleSpinBox>
+#include <QSlider>
 
 namespace campvis {
     /**
@@ -62,13 +63,41 @@ namespace campvis {
         virtual void updateWidgetFromProperty();
 
     private slots:
-        void onValueChanged(double value);
+        /// Slot getting called when the spin box's value changes
+        void onSpinBoxValueChanged(double value);
+        /// Slot getting called when the slider's value changes
+        void onSliderValueChanged(int value);
 
     private:
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        QDoubleSpinBox* _spinBox;
+        /**
+         * Calculate and set the slider's value.
+         *
+         * The slider's value will be based on the provided current, step, and minimum value of the property.
+         *
+         * \param   value       The property's current value
+         * \param   stepValue   The property's step value
+         * \param   minValue    The property's minimum value
+         */
+        void setSliderValue(float value, float stepValue, float minValue);
+
+        /**
+         * Calculate and set the slider's properties.
+         *
+         * The slider's properties (current and maximum value) will be based on the provided current, step, minimum,
+         * and maximum value of the property.
+         *
+         * \param   value       The property's current value
+         * \param   stepValue   The property's step value
+         * \param   minValue    The property's minimum value
+         * \param   maxValue    The property's maximum value
+         */
+        void setSliderProperties(float value, float stepValue, float minValue, float maxValue);
+
+        QSlider* _slider;                       ///< Slider allowing the user to quickly change the property's value
+        QDoubleSpinBox* _spinBox;               ///< Spin box displaying the property's current value
 
     };
 
