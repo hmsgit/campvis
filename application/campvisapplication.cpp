@@ -55,7 +55,7 @@ namespace campvis {
 
     const std::string CampVisApplication::loggerCat_ = "CAMPVis.application.CampVisApplication";
 
-    CampVisApplication::CampVisApplication(int argc, char** argv, bool useOpenCL) 
+    CampVisApplication::CampVisApplication(int& argc, char** argv, bool useOpenCL) 
         : QApplication(argc, argv)
         , _localContext(0)
         , _mainWindow(0)

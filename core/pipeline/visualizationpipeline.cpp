@@ -77,7 +77,6 @@ namespace campvis {
     }
 
     VisualizationPipeline::~VisualizationPipeline() {
-        _data.s_dataAdded.disconnect(this);
     }
 
     void VisualizationPipeline::onEvent(tgt::Event* e) {
@@ -98,6 +97,9 @@ namespace campvis {
     }
 
     void VisualizationPipeline::deinit() {
+        _data.s_dataAdded.disconnect(this);
+        _renderTargetID.s_changed.disconnect(this);
+	
         AbstractPipeline::deinit();
     }
 

@@ -61,7 +61,6 @@ using namespace campvis;
  **/
 int main(int argc, char** argv) {
     #ifdef Q_WS_X11
-  std::cout << "XInitThreads()\n";
         XInitThreads();
     #endif
   

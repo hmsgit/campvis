@@ -70,7 +70,7 @@ namespace campvis {
          * \param   argv        vector of arguments
          * \param   useOpenCL   Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
          */
-        CampVisApplication(int argc, char** argv, bool useOpenCL = true);
+        CampVisApplication(int& argc, char** argv, bool useOpenCL = true);
 
         /**
          * Destructor, make sure to call deinit() first.
