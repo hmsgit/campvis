@@ -150,7 +150,7 @@ namespace campvis {
     }
 
     void FiberData::createGlBuffers() const {
-        if (_buffersInitialized)
+        if (_buffersInitialized || _fibers.empty() || _vertices.empty())
             return;
 
         // reset everything
@@ -200,6 +200,9 @@ namespace campvis {
     }
 
     void FiberData::render(GLenum mode /*= GL_LINE_STRIP*/) const {
+        if (_fibers.empty() || _vertices.empty())
+            return;
+
         createGlBuffers();
         if (! _buffersInitialized) {
             LERRORC("CAMPVis.modules.columbia.FiberData", "Cannot render without initialized OpenGL buffers.");

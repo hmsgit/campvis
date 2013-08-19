@@ -17,8 +17,8 @@ IF(cisst_FOUND AND MskSourceDirectory AND MskBuildDirectory AND RegEngineSourceD
 	LIST(APPEND ThisModExternalLibs debug usinterface-vc10d optimized usinterface-vc10)
 	LIST(APPEND ThisModLinkDirectories ${MskLibraryDirectory} ${PCL_LIBRARY_DIRS} "${MSK_SOURCE_DIR}/extern/lib" ${RegEngineBuildDir})
 	
-	LIST(APPEND ThisModExternalDllsDebug "${RegEngineBuildDir}/Debug/RegistrationEngined.dll" "${cisst_DIR}/lib/Debug/cisstCommon.dll" "${cisst_DIR}/lib/Debug/cisstVector.dll" "${PCL_DIR}/bin/pcl_common_debug.dll" "${MskBuildDirectory}/Debug/usinterface-vc10d.dll")
-	LIST(APPEND ThisModExternalDllsRelease "${RegEngineBuildDir}/Release/RegistrationEngine.dll" "${cisst_DIR}/lib/Release/cisstCommon.dll" "${cisst_DIR}/lib/Release/cisstVector.dll" "${PCL_DIR}/bin/pcl_common_release.dll" "${MskBuildDirectory}/Release/usinterface-vc10.dll")
+	LIST(APPEND ThisModExternalDllsDebug "${RegEngineBuildDir}/Debug/RegistrationEngined.dll" "${cisst_DIR}/lib/Debug/cisstCommon.dll" "${cisst_DIR}/lib/Debug/cisstVector.dll" "${PCL_DIR}/../bin/pcl_common_debug.dll" "${MskBuildDirectory}/Debug/usinterface-vc10d.dll")
+	LIST(APPEND ThisModExternalDllsRelease "${RegEngineBuildDir}/Release/RegistrationEngine.dll" "${cisst_DIR}/lib/Release/cisstCommon.dll" "${cisst_DIR}/lib/Release/cisstVector.dll" "${PCL_DIR}/../bin/pcl_common_release.dll" "${MskBuildDirectory}/Release/usinterface-vc10.dll")
 ELSE()
 	MESSAGE(FATAL_ERROR "Please specify the path to the MSK project and its dependencies!")
 ENDIF()
