@@ -60,7 +60,7 @@ namespace campvis {
      *  5. call deinit()
      *  6. You can now safely destroy your CampVisApplication
      */
-    class CampVisApplication : QApplication {
+    class CampVisApplication : public QApplication {
     friend class MainWindow;
 
     public:

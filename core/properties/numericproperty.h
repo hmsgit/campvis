@@ -243,32 +243,32 @@ namespace campvis {
 
     template<typename T>
     void campvis::NumericProperty<T>::setMinValue(const T& value) {
-        _minValue = value;
+        this->_minValue = value;
         this->setValue(validateValue(this->_value));
 
-        for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
+        for (std::set<AbstractProperty*>::iterator it = this->_sharedProperties.begin(); it != this->_sharedProperties.end(); ++it) {
             // We ensure all shared properties to be of type NumericProperty<T> in the addSharedProperty overload.
             // Hence, static_cast ist safe.
             NumericProperty<T>* child = static_cast< NumericProperty<T>* >(*it);
             child->setMinValue(value);
         }
 
-        s_minMaxChanged(this);
+        this->s_minMaxChanged(this);
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::setMaxValue(const T& value) {
-        _maxValue = value;
+        this->_maxValue = value;
         this->setValue(validateValue(this->_value));
 
-        for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
+        for (std::set<AbstractProperty*>::iterator it = this->_sharedProperties.begin(); it != this->_sharedProperties.end(); ++it) {
             // We ensure all shared properties to be of type NumericProperty<T> in the addSharedProperty overload.
             // Hence, static_cast ist safe.
             NumericProperty<T>* child = static_cast< NumericProperty<T>* >(*it);
             child->setMaxValue(value);
         }
 
-        s_minMaxChanged(this);
+        this->s_minMaxChanged(this);
     }
 
     template<typename T>
