@@ -115,6 +115,7 @@ namespace campvis {
         }
         else if (getInvalidationLevel() & RAYCASTER_INVALID) {
             _raycaster.process(data);
+            p_outputImage.issueWrite();
         }
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);

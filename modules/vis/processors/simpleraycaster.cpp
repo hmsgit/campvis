@@ -68,8 +68,10 @@ namespace campvis {
         if (p_enableShadowing.getValue())
             _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
 
+        glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         QuadRdr.renderQuad();
+        glDisable(GL_DEPTH_TEST);
         LGL_ERROR;
 
         output.second->deactivate();
