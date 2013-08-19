@@ -45,7 +45,11 @@ namespace tgt {
 namespace campvis {
     class ImageData;
 
-    namespace {
+    /**
+     * Performs the composition of a multiple render targets
+     */
+    class RenderTargetCompositor : public VisualizationProcessor, public HasProcessorDecorators {
+    public:
         enum CompositingMode {
             CompositingModeFirst = 0,
             CompositingModeSecond = 1,
@@ -53,13 +57,7 @@ namespace campvis {
             CompositingModeDifference = 3,
             CompositingModeDepth = 4
         };
-    }
 
-    /**
-     * Performs the composition of a multiple render targets
-     */
-    class RenderTargetCompositor : public VisualizationProcessor, public HasProcessorDecorators {
-    public:
         /**
          * Constructs a new RenderTargetCompositor Processor
          **/

@@ -43,12 +43,12 @@
 
 namespace campvis {
 
-    static const GenericOption<CompositingMode> compositingOptions[5] = {
-        GenericOption<CompositingMode>("first", "Only First", CompositingModeFirst),
-        GenericOption<CompositingMode>("second", "Only Second", CompositingModeSecond),
-        GenericOption<CompositingMode>("alpha", "Alpha Blending", CompositingModeAlpha),
-        GenericOption<CompositingMode>("diff", "Difference", CompositingModeDifference),
-        GenericOption<CompositingMode>("depth", "Depth Test", CompositingModeDepth)
+    static const GenericOption<RenderTargetCompositor::CompositingMode> compositingOptions[5] = {
+        GenericOption<RenderTargetCompositor::CompositingMode>("first", "Only First", RenderTargetCompositor::CompositingModeFirst),
+        GenericOption<RenderTargetCompositor::CompositingMode>("second", "Only Second", RenderTargetCompositor::CompositingModeSecond),
+        GenericOption<RenderTargetCompositor::CompositingMode>("alpha", "Alpha Blending", RenderTargetCompositor::CompositingModeAlpha),
+        GenericOption<RenderTargetCompositor::CompositingMode>("diff", "Difference", RenderTargetCompositor::CompositingModeDifference),
+        GenericOption<RenderTargetCompositor::CompositingMode>("depth", "Depth Test", RenderTargetCompositor::CompositingModeDepth)
     };
 
     const std::string RenderTargetCompositor::loggerCat_ = "CAMPVis.modules.vis.RenderTargetCompositor";
