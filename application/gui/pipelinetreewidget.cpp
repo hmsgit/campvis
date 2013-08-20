@@ -31,6 +31,7 @@
 
 #include "tgt/assert.h"
 #include <QHeaderView>
+#include <QScrollBar>
 #include <QStringList>
 
 namespace campvis {
@@ -282,6 +283,27 @@ namespace campvis {
 
     }
 
+    QSize PipelineTreeWidget::sizeHint() const {
+        int height = 0;
+
+        // First of all, sum up the heights of top-level items and their children
+        for (int i = 0; i < model()->rowCount(); i++) {
+            QModelIndex index = model()->index(i, 0);
+            height += sizeHintForRow(i);
+
+            if (model()->hasChildren(index)) {
+                height += model()->rowCount(index) * sizeHintForIndex(index.child(0, 0)).height();
+            }
+        }
+
+        // Next, add the heights of the horizontal scrollbar, header, and frame
+        height += horizontalScrollBar()->sizeHint().height();
+        height += header()->sizeHint().height();
+        height += 2 * frameWidth();
+
+        return QSize(QTreeView::sizeHint().width(), height);
+    }
+
     void PipelineTreeWidget::update(const std::vector<AbstractPipeline*>& pipelines) {
         // clear selection before setting the new data or we will encounter random crashes...
         selectionModel()->clear();
@@ -290,6 +312,9 @@ namespace campvis {
         expandAll();
         resizeColumnToContents(0);
         resizeColumnToContents(1);
+
+        // The widget's size hint might have changed, notify the layout
+        updateGeometry();
     }
 
     void PipelineTreeWidget::setupWidget() {

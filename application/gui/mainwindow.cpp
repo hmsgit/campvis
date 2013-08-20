@@ -82,6 +82,7 @@ namespace campvis {
         setCentralWidget(_mdiArea);
 
         _pipelineWidget = new PipelineTreeWidget();
+        _pipelineWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
         ui.pipelineTreeDock->setWidget(_pipelineWidget);
 
         _pipelinePropertiesScrollArea = new QScrollArea();
