@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
     //app.addVisualizationPipeline("Columbia", new Columbia1());
 #endif
 
-    compiler error;
+
 
     app.init();
     int toReturn = app.run();

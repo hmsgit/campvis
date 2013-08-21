@@ -47,11 +47,6 @@ namespace campvis {
         , _mappingInformation(size, tgt::vec3(0.f), tgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
     {
         tgtAssert(numChannels > 0, "Number of channels must be greater than 0!");
-
-        char* foo = new char[123];
-        void* bar = foo;
-        delete foo;
-
     }
 
     ImageData::~ImageData() {
