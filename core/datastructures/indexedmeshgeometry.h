@@ -93,6 +93,9 @@ namespace campvis {
          */
         virtual void createGLBuffers() const;
 
+        /// \see GeometryData::getWorldBounds
+        virtual tgt::Bounds getWorldBounds() const;
+
     protected:
 
         std::vector<uint16_t> _indices;                 ///< Index list defining the faces

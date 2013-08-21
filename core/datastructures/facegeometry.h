@@ -137,6 +137,9 @@ namespace campvis {
          * Must be called from a valid OpenGL context.
          */
         virtual void createGLBuffers() const;
+                
+        /// \see GeometryData::getWorldBounds
+        virtual tgt::Bounds getWorldBounds() const;
 
 
     protected:

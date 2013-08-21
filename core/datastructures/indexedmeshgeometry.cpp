@@ -149,5 +149,13 @@ namespace campvis {
             _buffersInitialized = true;
         }
     }
-    
+
+    tgt::Bounds IndexedMeshGeometry::getWorldBounds() const {
+        tgt::Bounds toReturn;
+        for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
+            toReturn.addPoint(*it);
+        return toReturn;
+    }
+
+
 }

@@ -222,4 +222,11 @@ namespace campvis {
         return FaceGeometry(verts, texCoords, cols, norms);
     }
 
+    tgt::Bounds FaceGeometry::getWorldBounds() const {
+        tgt::Bounds toReturn;
+        for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
+            toReturn.addPoint(*it);
+        return toReturn;
+    }
+
 }

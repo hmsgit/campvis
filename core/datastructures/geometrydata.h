@@ -31,6 +31,7 @@
 #define GEOMETRYDATA_H__
 
 #include "tgt/tgt_gl.h"
+#include "tgt/bounds.h"
 #include "core/datastructures/abstractdata.h"
 #include <vector>
 
@@ -70,6 +71,12 @@ namespace campvis {
          * Must be called from a valid OpenGL context.
          */
         virtual void render(GLenum mode = GL_POLYGON) const = 0;
+        
+        /**
+         * Returns the geometry extent in world coordinates.
+         * \return  The geometry extent in world coordinates.
+         */
+        virtual tgt::Bounds getWorldBounds() const = 0;
 
         /**
          * Creates the OpenGL VBOs and the VAO for this geometry.

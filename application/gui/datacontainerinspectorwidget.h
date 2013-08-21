@@ -166,6 +166,8 @@ namespace campvis {
         QLabel* _lblLocalMemoryFootprint;
         QLabel* _lblVideoMemoryFootprint;
         QLabel* _lblTimestamp;
+        QLabel* _lblSize;
+        QLabel* _lblBounds;
         QPushButton* _btnSaveToFile;
     };
 }

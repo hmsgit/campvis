@@ -392,4 +392,12 @@ namespace campvis {
         return MeshGeometry(tmp);
     }
 
+    tgt::Bounds MeshGeometry::getWorldBounds() const {
+        tgt::Bounds toReturn;
+        for (size_t i = 0; i < _faces.size(); ++i)
+            for (std::vector<tgt::vec3>::const_iterator it = _faces[i].getVertices().begin(); it != _faces[i].getVertices().end(); ++it)
+                toReturn.addPoint(*it);
+        return toReturn;
+    }
+
 }

@@ -47,8 +47,13 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/facegeometry.h"
+#include "core/datastructures/geometrydata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
+
+#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
+#include "modules/columbia/datastructures/fiberdata.h"
+#endif
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
@@ -130,6 +135,12 @@ namespace campvis {
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
         _infoWidgetLayout->addWidget(_lblTimestamp);
 
+        _lblSize = new QLabel(tr("Size: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblSize);
+
+        _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblBounds);
+
         _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
         _infoWidgetLayout->addWidget(_btnSaveToFile);
 
@@ -191,8 +202,39 @@ namespace campvis {
             _lblName->setText("Name: " + handles.front().first);
             _lblTimestamp->setText("Timestamp: " + QString::number(handles.front().second.getTimestamp()));
 
-            if (dynamic_cast<const ImageData*>(handles.front().second.getData()))
+            if (const ImageData* tester = dynamic_cast<const ImageData*>(handles.front().second.getData())) {
                 _canvas->p_transferFunction.getTF()->setImageHandle(handles.front().second);
+                std::ostringstream ss;
+
+                ss << tester->getSize();
+                _lblSize->setText(tr("Size: ") + QString::fromStdString(ss.str()));
+
+                ss.str("");
+                ss << tester->getWorldBounds();
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+            }
+            else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
+                _lblSize->setText(tr("Size: n/a"));
+
+                std::ostringstream ss;
+                ss << tester->getWorldBounds();
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+            }
+#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
+            else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
+                std::ostringstream ss;
+                ss << "Size: " << tester->numFibers() << " Fibers with " << tester->numSegments() << " Segments.";
+                _lblSize->setText(QString::fromStdString(ss.str()));
+
+                ss.str("");
+                ss << tester->getWorldBounds();
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+            }
+#endif
+            else {
+                _lblSize->setText(tr("Size: n/a"));
+                _lblBounds->setText(tr("World Bounds: n/a")); 
+            }
         }
         else {
             _lblName->setText(QString::number(handles.size()) + " DataHandles selected");
