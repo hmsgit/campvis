@@ -39,7 +39,7 @@
 #include "core/datastructures/imagerepresentationgl.h"
 
 namespace campvis {
-
+    
     const std::string ImageRepresentationRenderTarget::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationRenderTarget";
 
     ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::create(ImageData* parent, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/) {
@@ -55,6 +55,19 @@ namespace campvis {
         return std::make_pair(id, toReturn);
     }
 
+    ImageRepresentationRenderTarget* ImageRepresentationRenderTarget::create(ImageData* parent, const tgt::FramebufferObject* fbo) {
+        ImageRepresentationRenderTarget* toReturn = new ImageRepresentationRenderTarget(parent, fbo);
+        toReturn->addToParent();
+        return toReturn;
+    }
+
+    std::pair<ImageData*, ImageRepresentationRenderTarget*> ImageRepresentationRenderTarget::createWithImageData(const tgt::svec2& size, const tgt::FramebufferObject* fbo) {
+        ImageData* id = new ImageData(2, tgt::svec3(size, 1), 4);
+        ImageRepresentationRenderTarget* toReturn = new ImageRepresentationRenderTarget(id, fbo);
+        toReturn->addToParent();
+        return std::make_pair(id, toReturn);
+    }
+
     ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(ImageData* parent, GLint internalFormatColor /*= GL_RGBA8*/, GLint internalFormatDepth /*= GL_DEPTH_COMPONENT24*/)
         : GenericAbstractImageRepresentation<ImageRepresentationRenderTarget>(parent)
         , _colorTextures(0)
@@ -62,10 +75,6 @@ namespace campvis {
         , _fbo(0)
     {
         tgtAssert(parent->getSize().z == 1, "RenderTargets are only two-dimensional, expected parent image size.z == 1.");
-
-        if (!GpuCaps.isNpotSupported() && !GpuCaps.areTextureRectanglesSupported()) {
-            LWARNING("Neither non-power-of-two textures nor texture rectangles seem to be supported!");
-        }
 
         _fbo = new tgt::FramebufferObject();
         if (!_fbo) {
@@ -111,6 +120,23 @@ namespace campvis {
 //         _fbo->activate();
 //         tgt::Texture* cc = colorTexture->getTexture()
 //         _fbo->attachTexture(cc, GL_COLOR_ATTACHMENT0);
+    }
+
+    ImageRepresentationRenderTarget::ImageRepresentationRenderTarget(ImageData* parent, const tgt::FramebufferObject* fbo)
+        : GenericAbstractImageRepresentation<ImageRepresentationRenderTarget>(parent)
+        , _colorTextures(0)
+        , _depthTexture(0)
+        , _fbo(0)
+    {
+        tgtAssert(parent->getSize().z == 1, "RenderTargets are only two-dimensional, expected parent image size.z == 1.");
+
+        tgt::Texture *const *const attachments = fbo->getAttachments();
+        for (size_t i = 0; i < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
+            if (attachments[i] != 0)
+                _colorTextures.push_back(attachments[i]);
+        }
+        if (attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS] != 0)
+            _depthTexture = attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS];
     }
 
     ImageRepresentationRenderTarget::~ImageRepresentationRenderTarget() {
@@ -344,6 +370,9 @@ namespace campvis {
         texUnit.activate();
         _depthTexture->bind();
     }
+
+
+
 
 
 }

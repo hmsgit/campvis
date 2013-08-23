@@ -45,6 +45,7 @@
 
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
+#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"
@@ -106,10 +107,13 @@ namespace campvis {
 
         // ensure matching OpenGL specs
         if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3) {
-            LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intendet.");
+            LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intended.");
         }
         if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
-            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intendet.");
+            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
+        }
+        if (!GpuCaps.isNpotSupported() && !GpuCaps.areTextureRectanglesSupported()) {
+            LERROR("Neither non-power-of-two textures nor texture rectangles seem to be supported. CAMPVis will probably not work as intended.");
         }
 
         QuadRenderer::init();

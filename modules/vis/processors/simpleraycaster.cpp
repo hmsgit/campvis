@@ -57,12 +57,13 @@ namespace campvis {
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
-        std::pair<ImageData*, ImageRepresentationRenderTarget*> output = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-        output.second->createAndAttachTexture(GL_RGBA32F);
-        output.second->createAndAttachTexture(GL_RGBA32F);
-        output.second->activate();
+        FramebufferActivationGuard fag(this);
+        createAndAttachTexture(GL_RGBA8);
+        createAndAttachTexture(GL_RGBA32F);
+        createAndAttachTexture(GL_RGBA32F);
+        createAndAttachDepthTexture();
 
-        GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+        static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3, buffers);
 
         if (p_enableShadowing.getValue())
@@ -74,8 +75,7 @@ namespace campvis {
         glDisable(GL_DEPTH_TEST);
         LGL_ERROR;
 
-        output.second->deactivate();
-        data.addData(p_targetImageID.getValue(), output.first);
+        data.addData(p_targetImageID.getValue(), createImageDataFromFbo());
         p_targetImageID.issueWrite();
     }
 

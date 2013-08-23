@@ -30,24 +30,51 @@
 #ifndef VISUALIZATIONPROCESSOR_H__
 #define VISUALIZATIONPROCESSOR_H__
 
+#include "tgt/framebufferobject.h"
+#include "tgt/texture.h"
 #include "tgt/vector.h"
+
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/numericproperty.h"
 
 namespace campvis {
+    class ImageData;
 
     /**
      * Specialization of AbstractProcessor for visualization purposes.
+     * 
      * VisualizationProcessors are required to be called by a VisualizationPipeline which ensure
      * to provide a valid OpenGL context when calling the processor's process() method. Hence, a
      * VisualizationProcessor is allowed/capable of performing OpenGl operations.
-     * For determining the canvas/viewport size, a VisualizationProcessor gets a reference to the
-     * parent pipeline's render target size property during instantiation.
+     * 
+     * Each VisualizationProcessor has its own OpenGL FramebufferObject, which is created during
+     * init(). For determining the canvas/viewport size, a VisualizationProcessor gets a reference 
+     * to the parent pipeline's render target size property during instantiation.
      * 
      * \sa VisualizationPipeline
      */
     class VisualizationProcessor : public AbstractProcessor {
     public:
+        struct FramebufferActivationGuard {
+        public:
+            FramebufferActivationGuard(VisualizationProcessor* vp)
+                : _parentProcessor(vp)
+                , _fbo(vp->_fbo)
+            {
+                tgtAssert(_fbo != 0, "FBO must not be 0.");
+                _fbo->activate();
+            }
+
+            ~FramebufferActivationGuard() {
+                _fbo->detachAll();
+                _fbo->deactivate();
+            }
+
+
+        private:
+            VisualizationProcessor* _parentProcessor;
+            tgt::FramebufferObject* _fbo;
+        };
 
         /**
          * Creates a VisualizationProcessor.
@@ -62,11 +89,55 @@ namespace campvis {
          **/
         virtual ~VisualizationProcessor();
 
+                
+        /// \see AbstractProcessor::init()
+        virtual void init();
+        
+        /// \see AbstractProcessor::deinit()
+        virtual void deinit();
 
 
+        /**
+         * Creates a texture with the given format and attaches it to the FBO to \a attachment.
+         * \param   internalFormat  Internal OpenGL texture format
+         * \param   attachment      Target attachment for texture
+         */
+        void createAndAttachTexture(GLint internalFormat, GLenum attachment);
 
-    //protected:
+        /**
+         * Creates a texture with the given format and attaches it to the FBO using the default attachments.
+         * \note    Default attachment are GL_DEPTH_ATTACHMENT for depth textures and 
+         *          GL_COLOR_ATTACHMENT_0 + <number of color textures attached>.
+         * \param   internalFormat  Internal OpenGL texture format
+         */
+        void createAndAttachTexture(GLint internalFormat);
+
+        /**
+         * Creates a color texture with format GL_RGBA8 and attaches it to the FBO using the 
+         * default attachment.
+         */
+        void createAndAttachColorTexture();
+
+        /**
+         * Creates a depth texture with format GL_DEPTH_COMPONENT24 and attaches it to the FBO 
+         * using the default attachment.
+         */
+        void createAndAttachDepthTexture();
+
+//    protected:
+        /**
+         * Creates an ImageData object from the textures currently attached to the FBO.
+         * \note    The caller takes ownership of the returned pointer.
+         * \return  A pointer to the created ImageData object.
+         */
+        ImageData* createImageDataFromFbo() const;
+
+        tgt::ivec3 getRenderTargetSize() const;
+
+        tgt::FramebufferObject* _fbo;
         IVec2Property _renderTargetSize;        ///< Viewport size of target canvas
+
+        static const std::string loggerCat_;
     };
 
 }

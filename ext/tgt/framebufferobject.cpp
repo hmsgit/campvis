@@ -32,7 +32,9 @@ const std::string FramebufferObject::loggerCat_("tgt.FramebufferObject");
 
 FramebufferObject::FramebufferObject()
   : id_(0)
+  , numColorAttachments_(0)
 {
+    memset(attachments_, 0, sizeof(Texture*) * (TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+2));
     generateId();
 }
 
@@ -67,22 +69,24 @@ void FramebufferObject::attachTexture(Texture* texture, GLenum attachment, int m
             glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, attachment, texture->getType(), texture->getId(), mipLevel );
             break;
     }
-    attachedTextures_[attachment] = texture;
+
+    size_t index = decodeAttachment(attachment);
+    attachments_[index] = texture;
+    if (index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
+        ++numColorAttachments_;
 }
 
 Texture* FramebufferObject::getTextureAtAttachment(GLenum attachment) {
-    std::map<GLenum, Texture*>::iterator iter = attachedTextures_.find(attachment);
-    if( iter != attachedTextures_.end() ) {
-        return attachedTextures_[attachment];
-    }
-    else
-        return 0;
+    return attachments_[decodeAttachment(attachment)];
 }
 
 void FramebufferObject::detachTexture(GLenum attachment) {
-    std::map<GLenum, Texture*>::iterator iter = attachedTextures_.find(attachment);
-    if( iter != attachedTextures_.end() ) {
-        attachedTextures_.erase(iter);
+    size_t index = decodeAttachment(attachment);
+    if (attachments_[index] != 0) {
+        attachments_[index] = 0;
+
+        if (index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
+            --numColorAttachments_;
     }
     else {
         LWARNING("Trying to detach unknown texture!");
@@ -92,9 +96,16 @@ void FramebufferObject::detachTexture(GLenum attachment) {
 }
 
 void FramebufferObject::detachAll() {
-    while(!attachedTextures_.empty()) {
-        detachTexture(attachedTextures_.begin()->first);
+    for (GLenum i = 0; i < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
+        if (colorAttachments_[i] != 0)
+            detachTexture(GL_COLOR_ATTACHMENT0 + i);
     }
+    if (depthAttachment_ != 0)
+        detachTexture(GL_DEPTH_ATTACHMENT);
+    if (stencilAttachment_ != 0)
+        detachTexture(GL_STENCIL_ATTACHMENT);
+
+    numColorAttachments_ = 0;
 }
 
 bool FramebufferObject::isComplete() const
@@ -147,6 +158,27 @@ GLuint FramebufferObject::generateId() {
     id_ = 0;
     glGenFramebuffersEXT(1, &id_);
     return id_;
+}
+
+Texture*const *const FramebufferObject::getAttachments() const {
+    return attachments_;
+}
+
+const Texture* FramebufferObject::getColorAttachment(size_t index /*= 0*/) const {
+    tgtAssert(index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS, "Index out of bounds!");
+    return attachments_[index];
+}
+
+const Texture* FramebufferObject::getDepthAttachment() const {
+    return attachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS];
+}
+
+const Texture* FramebufferObject::getStencilAttachment() const {
+    return attachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+1];
+}
+
+size_t FramebufferObject::getNumColorAttachments() const {
+    return numColorAttachments_;
 }
 
 } // namespace

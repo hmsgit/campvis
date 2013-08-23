@@ -31,22 +31,29 @@
 #define IMAGEREPRESENTATIONRENDERTARGET_H__
 
 #include "tgt/framebufferobject.h"
+#include "tgt/singleton.h"
 #include "tgt/texture.h"
 #include "tgt/textureunit.h"
 #include "tgt/vector.h"
 #include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/datastructures/imagerepresentationgl.h"
 
+#include "tbb/atomic.h"
+#include "tbb/spin_mutex.h"
+
+#include <list>
 #include <utility>
 #include <vector>
 
 namespace tgt {
     class Shader;
+    class FramebufferObject;
 }
 
 namespace campvis {
     class ImageRepresentationGL;
-
+    class ImageRepresentationRenderTarget;
+    
     /**
      * Stores render target data.
      * This is basically a wrapper for multiple OpenGL textures (color + depth) and their attachment to the framebuffer.
@@ -70,7 +77,7 @@ namespace campvis {
          * \param   internalFormatColor   Internal OpenGL format for the color texture.
          * \param   internalFormatDepth   Internal OpenGL format for the depth texture.
          * \return  A pointer to the newly created ImageRepresentationRenderTarget, you do \b not own this pointer!
-        */
+         */
         static ImageRepresentationRenderTarget* create(ImageData* parent, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
 
         /**
@@ -83,6 +90,32 @@ namespace campvis {
          * \return  A pair of the created ImageData and the created RenderTarget image representation.
          */
         static std::pair<ImageData*, ImageRepresentationRenderTarget*> createWithImageData(const tgt::svec2& size, GLint internalFormatColor = GL_RGBA8, GLint internalFormatDepth = GL_DEPTH_COMPONENT24);
+
+        /**
+         * Creates a new ImageRepresentationRenderTarget representation with one color and one depth attachment
+         * and automatically adds it to \a parent which will take ownerwhip.
+         *
+         * \note    You do \b not own the returned pointer..
+         * \note    ImageRepresentationRenderTarget will take ownership of all textures attached to \a fbo.
+         *
+         * \param   parent      Image this representation represents, must not be 0.
+         * \param   fbo         FrameBufferObject to use the attachements from.
+         * \return  A pointer to the newly created ImageRepresentationRenderTarget, you do \b not own this pointer!
+         */
+        static ImageRepresentationRenderTarget* create(ImageData* parent, const tgt::FramebufferObject* fbo);
+
+        /**
+         * Creates a new ImageRepresentationRenderTarget and a new ImageData with the given specifications.
+         * Assigns the representation to the image.
+         * 
+         * \note    ImageRepresentationRenderTarget will take ownership of all textures attached to \a fbo.
+         *
+         * \param   parent      Image this representation represents, must not be 0.
+         * \param   fbo         FrameBufferObject to use the attachements from.
+         * 
+         * \return  A pair of the created ImageData and the created RenderTarget image representation.
+         */
+        static std::pair<ImageData*, ImageRepresentationRenderTarget*> createWithImageData(const tgt::svec2& size, const tgt::FramebufferObject* fbo);
 
         /**
          * Destructor
@@ -212,10 +245,19 @@ namespace campvis {
 
         /**
          * Creates a new ImageRepresentationRenderTarget from one color texture and one optional depth texture.
+         * \param   parent                Image this representation represents, must not be 0.
          * \param   colorTexture    Color texture, must not be 0
          * \param   depthTexture    Depth texture, optional, must have valid internal format and same dimensions as \a colorTexture
          */
         ImageRepresentationRenderTarget(ImageData* parent, const ImageRepresentationGL* colorTexture, const ImageRepresentationGL* depthTexture = 0);
+
+        /**
+         * Creates a new ImageRepresentationRenderTarget from one color texture and one optional depth texture.
+         * \note    ImageRepresentationRenderTarget will take ownership of all textures attached to \a fbo.
+         * \param   parent      Image this representation represents, must not be 0.
+         * \param   fbo         FrameBufferObject to use the attachements from.
+         */
+        ImageRepresentationRenderTarget(ImageData* parent, const tgt::FramebufferObject* fbo);
 
         /**
          * Activates the texture unit \a texUnit and binds the color texture.
