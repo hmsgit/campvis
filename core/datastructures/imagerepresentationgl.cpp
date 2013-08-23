@@ -92,25 +92,25 @@ namespace campvis {
 
             switch (wtp._baseType) {
                 case WeaklyTypedPointer::UINT8:
-                    delete static_cast<uint8_t*>(wtp._pointer);
+                    delete [] static_cast<uint8_t*>(wtp._pointer);
                     break;
                 case WeaklyTypedPointer::INT8:
-                    delete static_cast<int8_t*>(wtp._pointer);
+                    delete [] static_cast<int8_t*>(wtp._pointer);
                     break;
                 case WeaklyTypedPointer::UINT16:
-                    delete static_cast<uint16_t*>(wtp._pointer);
+                    delete [] static_cast<uint16_t*>(wtp._pointer);
                     break;
                 case WeaklyTypedPointer::INT16:
-                    delete static_cast<int16_t*>(wtp._pointer);
+                    delete [] static_cast<int16_t*>(wtp._pointer);
                     break;
                 case WeaklyTypedPointer::UINT32:
-                    delete static_cast<uint32_t*>(wtp._pointer);
+                    delete [] static_cast<uint32_t*>(wtp._pointer);
                     break;
                 case WeaklyTypedPointer::INT32:
-                    delete static_cast<int32_t*>(wtp._pointer);
+                    delete [] static_cast<int32_t*>(wtp._pointer);
                     break;
                 case WeaklyTypedPointer::FLOAT:
-                    delete static_cast<float*>(wtp._pointer);
+                    delete [] static_cast<float*>(wtp._pointer);
                     break;
                 default:
                     tgtAssert(false, "Should not reach this - wrong base data type!");
