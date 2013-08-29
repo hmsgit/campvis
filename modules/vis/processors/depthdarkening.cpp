@@ -103,8 +103,7 @@ namespace campvis {
                 maxDepth = std::max(maxDepth, curDepth);
             }
 
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> tempTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+            FramebufferActivationGuard fag(this);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
 
@@ -124,21 +123,22 @@ namespace campvis {
                 _shader->setUniform("_warmColor", p_warmColor.getValue());
             }
 
-            tempTarget.second->activate();
-            LGL_ERROR;
+            createAndAttachDepthTexture();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            tempTarget.second->deactivate();
+
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> tempTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
+            _fbo->detachAll();
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
 
             inputImage->bind(_shader, colorUnit, depthUnit);
             tempTarget.second->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             _shader->setUniform("_direction", tgt::vec2(0.f, 1.f));
             
-            outputTarget.second->activate();
-            LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            outputTarget.second->deactivate();
+            std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
@@ -146,7 +146,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_outputImage.getValue() + "temp", tempTarget.first);
+            delete tempTarget.first;
             data.addData(p_outputImage.getValue(), outputTarget.first);
             p_outputImage.issueWrite();
         }

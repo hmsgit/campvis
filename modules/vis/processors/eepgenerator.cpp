@@ -137,6 +137,7 @@ namespace campvis {
                     }
                 }
 
+                FramebufferActivationGuard fag(this);
                 decorateRenderProlog(data, _shader);
                 
                 const tgt::Camera& cam = p_camera.getValue();
@@ -175,8 +176,8 @@ namespace campvis {
                 glEnable(GL_DEPTH_TEST);
 
                 // create entry points texture
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> entrypoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
-                entrypoints.second->activate();
+                createAndAttachTexture(GL_RGBA16);
+                createAndAttachDepthTexture();
                 _shader->setUniform("_isEntrypoint", true);
 
                 glDepthFunc(GL_LESS);
@@ -185,11 +186,12 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_FRONT : GL_BACK);
                 clipped.render(GL_POLYGON);
 
-                entrypoints.second->deactivate();
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> entrypoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
+                _fbo->detachAll();
 
                 // create exit points texture
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> exitpoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
-                exitpoints.second->activate();
+                createAndAttachTexture(GL_RGBA16);
+                createAndAttachDepthTexture();
                 _shader->setUniform("_isEntrypoint", false);
 
                 if (geometryImage != 0) {
@@ -202,8 +204,7 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_BACK : GL_FRONT);
                 clipped.render(GL_POLYGON);
 
-                exitpoints.second->deactivate();
-
+                std::pair<ImageData*, ImageRepresentationRenderTarget*> exitpoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
 

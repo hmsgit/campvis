@@ -84,24 +84,23 @@ namespace campvis {
         ImageRepresentationRenderTarget::ScopedRepresentation mirrorRendered(data, p_mirrorRenderID.getValue());
 
         if (normalImage != 0 && mirrorImage != 0 && mirrorRendered != 0) {
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
 
-            _shader->activate();
-            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
+            FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
 
+            _shader->activate();
+            decorateRenderProlog(data, _shader);
+
+            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
             normalImage->bind(_shader, normalColorUnit, normalDepthUnit, "_normalColor", "_normalDepth", "_normalTexParams");
             mirrorImage->bind(_shader, mirrorColorUnit, mirrorDepthUnit, "_mirrorColor", "_mirrorDepth", "_mirrorTexParams");
             mirrorRendered->bindDepthTexture(_shader, mirrorRenderedDepthUnit, "_mirrorRenderedDepth", "_mirrorRenderedTexParams");
 
-            decorateRenderProlog(data, _shader);
-
-            rt.second->activate();
-            LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
@@ -109,7 +108,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_targetImageID.getValue(), rt.first);
+            data.addData(p_targetImageID.getValue(), ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo).first);
             p_targetImageID.issueWrite();
         }
         else {

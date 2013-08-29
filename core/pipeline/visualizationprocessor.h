@@ -63,6 +63,9 @@ namespace campvis {
             {
                 tgtAssert(_fbo != 0, "FBO must not be 0.");
                 _fbo->activate();
+
+                const tgt::ivec2& windowSize = vp->_renderTargetSize.getValue();
+                glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
             }
 
             ~FramebufferActivationGuard() {

@@ -100,8 +100,9 @@ namespace campvis {
             _shader->setIgnoreUniformLocationError(false);
 
             // create entry points texture
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
-            rt.second->activate();
+            FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
 
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
@@ -109,13 +110,12 @@ namespace campvis {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             proxyGeometry->render();
 
-            rt.second->deactivate();
             decorateRenderEpilog(_shader);
             _shader->deactivate();
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_renderTargetID.getValue(), rt.first);
+            data.addData(p_renderTargetID.getValue(), ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo).first);
             p_renderTargetID.issueWrite();
         }
         else {
