@@ -31,17 +31,17 @@
 #define FLOATPROPERTYWIDGET_H__
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/doubleadjusterwidget.h"
 #include "core/properties/numericproperty.h"
 
 #include <QDoubleSpinBox>
-#include <QSlider>
 
 namespace campvis {
     /**
      * Widget for a FloatProperty
      */
     class FloatPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
+        Q_OBJECT
 
     public:
         /**
@@ -62,42 +62,19 @@ namespace campvis {
          */
         virtual void updateWidgetFromProperty();
 
+    signals:
+        /// Signal emitted when the property's value changes
+        void propertyValueChanged(double value);
+
     private slots:
-        /// Slot getting called when the spin box's value changes
-        void onSpinBoxValueChanged(double value);
-        /// Slot getting called when the slider's value changes
-        void onSliderValueChanged(int value);
+        /// Slot getting called when the adjuster's value changes
+        void onAdjusterValueChanged(double value);
 
     private:
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        /**
-         * Calculate and set the slider's value.
-         *
-         * The slider's value will be based on the provided current, step, and minimum value of the property.
-         *
-         * \param   value       The property's current value
-         * \param   stepValue   The property's step value
-         * \param   minValue    The property's minimum value
-         */
-        void setSliderValue(float value, float stepValue, float minValue);
-
-        /**
-         * Calculate and set the slider's properties.
-         *
-         * The slider's properties (current and maximum value) will be based on the provided current, step, minimum,
-         * and maximum value of the property.
-         *
-         * \param   value       The property's current value
-         * \param   stepValue   The property's step value
-         * \param   minValue    The property's minimum value
-         * \param   maxValue    The property's maximum value
-         */
-        void setSliderProperties(float value, float stepValue, float minValue, float maxValue);
-
-        QSlider* _slider;                       ///< Slider allowing the user to quickly change the property's value
-        QDoubleSpinBox* _spinBox;               ///< Spin box displaying the property's current value
+        DoubleAdjusterWidget* _adjuster;        ///< Widget allowing the user to change the property's value
 
     };
 

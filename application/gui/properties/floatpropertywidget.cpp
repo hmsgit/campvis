@@ -29,35 +29,24 @@
 
 #include "floatpropertywidget.h"
 
-#include <cmath>
-
 namespace campvis {
     FloatPropertyWidget::FloatPropertyWidget(FloatProperty* property, QWidget* parent /*= 0*/)
         : AbstractPropertyWidget(property, parent)
-        , _slider(0)
-        , _spinBox(0)
+        , _adjuster(0)
     {
-        const float& maxValue = property->getMaxValue();
-        const float& minValue = property->getMinValue();
-        const float& value = property->getValue();
         const float stepValue = 0.01f;
 
-        _slider = new QSlider(Qt::Horizontal);
-        setSliderProperties(value, stepValue, minValue, maxValue);
+        _adjuster = new DoubleAdjusterWidget();
+        _adjuster->setMinimum(property->getMinValue());
+        _adjuster->setMaximum(property->getMaxValue());
+        _adjuster->setDecimals(3);
+        _adjuster->setSingleStep(stepValue);
+        _adjuster->setValue(property->getValue());
 
-        _spinBox = new QDoubleSpinBox(this);
-        _spinBox->setMinimum(minValue);
-        _spinBox->setMaximum(maxValue);
-        _spinBox->setDecimals(3);
-        _spinBox->setSingleStep(stepValue);
-        _spinBox->setValue(value);
-        _spinBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        addWidget(_adjuster);
 
-        addWidget(_slider);
-        addWidget(_spinBox);
-
-        connect(_spinBox, SIGNAL(valueChanged(double)), this, SLOT(onSpinBoxValueChanged(double)));
-        connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
+        connect(_adjuster, SIGNAL(valueChanged(double)), this, SLOT(onAdjusterValueChanged(double)));
+        connect(this, SIGNAL(propertyValueChanged(double)), _adjuster, SLOT(setValue(double)));
         property->s_minMaxChanged.connect(this, &FloatPropertyWidget::onPropertyMinMaxChanged);
     }
 
@@ -67,53 +56,23 @@ namespace campvis {
 
     void FloatPropertyWidget::updateWidgetFromProperty() {
         FloatProperty* prop = static_cast<FloatProperty*>(_property);
-        _spinBox->blockSignals(true);
-        _spinBox->setValue(prop->getValue());
-        _spinBox->blockSignals(false);
-        setSliderValue(prop->getValue(), 0.01f, prop->getMinValue());
+        _adjuster->blockSignals(true);
+        emit propertyValueChanged(prop->getValue());
+        _adjuster->blockSignals(false);
     }
 
-    void FloatPropertyWidget::onSpinBoxValueChanged(double value) {
+    void FloatPropertyWidget::onAdjusterValueChanged(double value) {
         ++_ignorePropertyUpdates;
         FloatProperty* prop = static_cast<FloatProperty*>(_property);
         prop->setValue(value);
-        setSliderValue(value, 0.01f, prop->getMinValue());
-        --_ignorePropertyUpdates;
-    }
-
-    void FloatPropertyWidget::onSliderValueChanged(int value) {
-        FloatProperty* prop = static_cast<FloatProperty*>(_property);
-
-        ++_ignorePropertyUpdates;
-        const float newPropValue = prop->getMinValue() + value * 0.01;
-        prop->setValue(newPropValue);
-        _spinBox->blockSignals(true);
-        _spinBox->setValue(newPropValue);
-        _spinBox->blockSignals(false);
         --_ignorePropertyUpdates;
     }
 
     void FloatPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
         if (_ignorePropertyUpdates == 0) {
-            FloatProperty* prop = static_cast<FloatProperty*>(_property);
-            const float& maxValue = prop->getMaxValue();
-            const float& minValue = prop->getMinValue();
-
-            _spinBox->setMinimum(minValue);
-            _spinBox->setMaximum(maxValue);
-            setSliderProperties(prop->getValue(), 0.01f, minValue, maxValue);
+            const FloatProperty* prop = static_cast<const FloatProperty*>(property);
+            _adjuster->setMinimum(prop->getMinValue());
+            _adjuster->setMaximum(prop->getMaxValue());
         }
-    }
-
-    void FloatPropertyWidget::setSliderValue(float value, float stepValue, float minValue) {
-        _slider->blockSignals(true);
-        _slider->setValue(std::ceil((value - minValue) / stepValue));
-        _slider->blockSignals(false);
-    }
-
-    void FloatPropertyWidget::setSliderProperties(float value, float stepValue, float minValue, float maxValue) {
-        // by default minimum and single step are 0 and 1, respectively, so we don't have to change them
-        _slider->setMaximum(std::ceil((maxValue - minValue) / stepValue));
-        setSliderValue(value, stepValue, minValue);
     }
 }
