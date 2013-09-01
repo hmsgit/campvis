@@ -34,8 +34,6 @@
 #include "application/gui/doubleadjusterwidget.h"
 #include "core/properties/numericproperty.h"
 
-#include <QDoubleSpinBox>
-
 namespace campvis {
     /**
      * Widget for a FloatProperty
@@ -139,7 +137,7 @@ namespace campvis {
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        QDoubleSpinBox* _spinBox[size];
+        DoubleAdjusterWidget* _adjusters[size];
     };
 
 // ================================================================================================
@@ -149,13 +147,13 @@ namespace campvis {
         : AbstractPropertyWidget(property, parent)
     {
         for (size_t i = 0; i < size; ++i) {
-            _spinBox[i] = new QDoubleSpinBox(this);
-            _spinBox[i]->setMinimum(property->getMinValue()[i]);
-            _spinBox[i]->setMaximum(property->getMaxValue()[i]);
-            _spinBox[i]->setDecimals(3);
-            _spinBox[i]->setSingleStep(0.01);
-            _spinBox[i]->setValue(property->getValue()[i]);
-            addWidget(_spinBox[i]);
+            _adjusters[i] = new DoubleAdjusterWidget();
+            _adjusters[i]->setMinimum(property->getMinValue()[i]);
+            _adjusters[i]->setMaximum(property->getMaxValue()[i]);
+            _adjusters[i]->setDecimals(3);
+            _adjusters[i]->setSingleStep(0.01);
+            _adjusters[i]->setValue(property->getValue()[i]);
+            addWidget(_adjusters[i]);
         }
 
         property->s_minMaxChanged.connect(this, &VecPropertyWidget::onPropertyMinMaxChanged);
@@ -171,9 +169,9 @@ namespace campvis {
     void campvis::VecPropertyWidget<SIZE>::updateWidgetFromProperty() {
         PropertyType* prop = static_cast<PropertyType*>(_property);
         for (size_t i = 0; i < size; ++i) {
-            _spinBox[i]->blockSignals(true);
-            _spinBox[i]->setValue(prop->getValue()[i]);
-            _spinBox[i]->blockSignals(false);
+            _adjusters[i]->blockSignals(true);
+            _adjusters[i]->setValue(prop->getValue()[i]);
+            _adjusters[i]->blockSignals(false);
         }
     }
 
@@ -183,7 +181,7 @@ namespace campvis {
         PropertyType* prop = static_cast<PropertyType*>(_property);
         typename VecPropertyWidgetTraits<SIZE>::BaseType newValue;
         for (size_t i = 0; i < size; ++i)
-            newValue[i] = _spinBox[i]->value();
+            newValue[i] = _adjusters[i]->value();
         prop->setValue(newValue);
         --_ignorePropertyUpdates;
     }
@@ -193,8 +191,8 @@ namespace campvis {
         if (_ignorePropertyUpdates == 0) {
             PropertyType* prop = static_cast<PropertyType*>(_property);
             for (size_t i = 0; i < size; ++i) {
-                _spinBox[i]->setMinimum(prop->getMinValue()[i]);
-                _spinBox[i]->setMaximum(prop->getMaxValue()[i]);
+                _adjusters[i]->setMinimum(prop->getMinValue()[i]);
+                _adjusters[i]->setMaximum(prop->getMaxValue()[i]);
             }
         }
     }
@@ -208,7 +206,7 @@ namespace campvis {
             : VecPropertyWidget<2>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
             }
         }
 
@@ -225,7 +223,7 @@ namespace campvis {
             : VecPropertyWidget<3>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
             }
         }
 
@@ -242,7 +240,7 @@ namespace campvis {
             : VecPropertyWidget<4>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
             }
         }
 
