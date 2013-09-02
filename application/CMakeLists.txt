@@ -37,6 +37,7 @@ SET(CampvisApplicationToBeMocced
     gui/pipelinemdisubwindow.h
     gui/visualizationpipelinewidget.h
     gui/visualizationpipelinewrapper.h
+    gui/doubleadjusterwidget.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
