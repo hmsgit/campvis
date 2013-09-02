@@ -144,7 +144,7 @@ namespace campvis {
 
     template<size_t SIZE>
     campvis::VecPropertyWidget<SIZE>::VecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, true, parent)
     {
         for (size_t i = 0; i < size; ++i) {
             _adjusters[i] = new DoubleAdjusterWidget();

@@ -48,10 +48,14 @@ namespace campvis {
     public:
         /**
          * Creates a new PropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         *
+         * If displayBoxed is true, the widget is displayed vertically in a QGroupBox.
+         *
+         * \param   property        The property the widget shall handle
+         * \param   displayBoxed    Should the widget be displayed in a group box?
+         * \param   parent          Parent Qt widget
          */
-        AbstractPropertyWidget(AbstractProperty* property, QWidget* parent = 0);
+        AbstractPropertyWidget(AbstractProperty* property, bool displayBoxed = false, QWidget* parent = 0);
 
         /**
          * Destructor

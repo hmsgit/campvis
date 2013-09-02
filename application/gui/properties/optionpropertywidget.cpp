@@ -34,7 +34,7 @@
 
 namespace campvis {
     OptionPropertyWidget::OptionPropertyWidget(AbstractOptionProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
         , _comboBox(0)
     {
         _comboBox = new QComboBox(this);

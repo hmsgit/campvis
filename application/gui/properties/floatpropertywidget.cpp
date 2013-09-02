@@ -31,7 +31,7 @@
 
 namespace campvis {
     FloatPropertyWidget::FloatPropertyWidget(FloatProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
         , _adjuster(0)
     {
         const float stepValue = 0.01f;

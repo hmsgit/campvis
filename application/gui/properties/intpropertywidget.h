@@ -150,7 +150,7 @@ namespace campvis {
 
     template<size_t SIZE>
     campvis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
     {
         for (size_t i = 0; i < size; ++i) {
             _spinBox[i] = new QSpinBox(this);

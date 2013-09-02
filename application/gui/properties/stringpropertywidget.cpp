@@ -37,7 +37,7 @@
 
 namespace campvis {
     StringPropertyWidget::StringPropertyWidget(StringProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
         , _lineEdit(0)
         , _btnLoadFile(0)
     {
