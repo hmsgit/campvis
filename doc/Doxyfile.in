@@ -711,7 +711,6 @@ FILE_PATTERNS          = *.c \
                          *.md \
                          *.mm \
                          *.dox \
-                         *.py \
                          *.f90 \
                          *.f \
                          *.for \
@@ -735,7 +734,9 @@ EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/../ext/tbb \
                          @CMAKE_CURRENT_SOURCE_DIR@/../ext/glew \
                          @CMAKE_CURRENT_SOURCE_DIR@/../ext/glut \
                          @CMAKE_CURRENT_SOURCE_DIR@/../ext/sigslot \
-						 @CMAKE_CURRENT_SOURCE_DIR@/../modules/randomwalk/ext/RandomWalksLib/viennacl
+                         @CMAKE_CURRENT_SOURCE_DIR@/../ext/kisscl/CL \
+						 @CMAKE_CURRENT_SOURCE_DIR@/../modules/devil/ext \
+						 @CMAKE_CURRENT_SOURCE_DIR@/../modules/randomwalk/ext
 						 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or 
 # directories that are symbolic links (a Unix file system feature) are excluded 
