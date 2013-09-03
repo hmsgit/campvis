@@ -18,6 +18,7 @@ OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                        
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
 OPTION(CAMPVIS_BUILD_LIB_KISSCL     "Build KissCL Library"                                          OFF)
+OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   ON)
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
 
@@ -57,6 +58,10 @@ ENDIF()
 
 IF(CAMPVIS_BUILD_APPLICATION)
     ADD_SUBDIRECTORY(application)
+ENDIF()
+
+IF(CAMPVIS_BUILD_DOXYGEN)
+    ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 ENDIF()
 
 
