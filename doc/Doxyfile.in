@@ -730,12 +730,12 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is 
 # run.
 
-EXCLUDE                = ../ext/tbb \
-                         ../ext/eigen \
-                         ../ext/glew \
-                         ../ext/glut \
-                         ../ext/sigslot \
-						 ../modules/randomwalk/ext/RandomWalksLib/viennacl
+EXCLUDE                = ext/tbb \
+                         ext/eigen \
+                         ext/glew \
+                         ext/glut \
+                         ext/sigslot \
+						 modules/randomwalk/ext/RandomWalksLib/viennacl
 						 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or 
 # directories that are symbolic links (a Unix file system feature) are excluded 
