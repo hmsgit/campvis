@@ -731,11 +731,12 @@ RECURSIVE              = YES
 # run.
 
 EXCLUDE                = ../ext/tbb \
-                         ../ext/boost \
+                         ../ext/eigen \
                          ../ext/glew \
                          ../ext/glut \
-                         ../ext/sigslot
-
+                         ../ext/sigslot \
+						 ../modules/randomwalk/ext/RandomWalksLib/viennacl
+						 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or 
 # directories that are symbolic links (a Unix file system feature) are excluded 
 # from the input.
