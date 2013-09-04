@@ -37,6 +37,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratormasking.h"
 
@@ -186,7 +187,7 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_FRONT : GL_BACK);
                 clipped.render(GL_POLYGON);
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> entrypoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
+                RenderData* entrypoints = new RenderData(_fbo);
                 _fbo->detachAll();
 
                 // create exit points texture
@@ -195,7 +196,7 @@ namespace campvis {
                 _shader->setUniform("_isEntrypoint", false);
 
                 if (geometryImage != 0) {
-                    entrypoints.second->bindDepthTexture(_shader, entryDepthUnit, "_entryDepthTexture", "_entryDepthTexParams");
+                    entrypoints->bindDepthTexture(_shader, entryDepthUnit, "_entryDepthTexture", "_entryDepthTexParams");
                 }
 
                 glDepthFunc(GL_GREATER);
@@ -204,7 +205,8 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_BACK : GL_FRONT);
                 clipped.render(GL_POLYGON);
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> exitpoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
+                RenderData* exitpoints = new RenderData(_fbo);
+                //std::pair<ImageData*, ImageRepresentationRenderTarget*> exitpoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
 
@@ -216,8 +218,8 @@ namespace campvis {
 
                 LGL_ERROR;
 
-                data.addData(p_entryImageID.getValue(), entrypoints.first);
-                data.addData(p_exitImageID.getValue(), exitpoints.first);
+                data.addData(p_entryImageID.getValue(), entrypoints);
+                data.addData(p_exitImageID.getValue(), exitpoints);
                 p_entryImageID.issueWrite();
                 p_exitImageID.issueWrite();
             }

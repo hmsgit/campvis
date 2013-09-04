@@ -29,6 +29,7 @@
 
 #include "renderdata.h"
 
+#include "tgt/framebufferobject.h"
 #include "tgt/textureunit.h"
 #include "tgt/shadermanager.h"
 
@@ -44,6 +45,25 @@ namespace campvis {
         , _depthTexture(0)
     {
 
+    }
+
+    RenderData::RenderData(const tgt::FramebufferObject* fbo)
+        : AbstractData()
+        , _depthTexture(0)
+    {
+        tgt::Texture *const *const attachments = fbo->getAttachments();
+        for (size_t i = 0; i < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
+            if (attachments[i] != 0) {
+                ImageData* img = new ImageData(2, attachments[i]->getDimensions(), attachments[i]->getNumChannels());
+                ImageRepresentationGL* rep = ImageRepresentationGL::create(img, attachments[i]);
+                _colorTextures.push_back(DataHandle(img));
+            }
+        }
+        if (attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS] != 0) {
+            ImageData* img = new ImageData(2, attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getDimensions(), attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getNumChannels());
+            ImageRepresentationGL* rep = ImageRepresentationGL::create(img, attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]);
+            _depthTexture = DataHandle(img);
+        }
     }
 
     RenderData::~RenderData() {
@@ -88,7 +108,7 @@ namespace campvis {
 
     const ImageData* RenderData::getColorTexture(size_t index /*= 0*/) const {
         tgtAssert(index < _colorTextures.size(), "Index out of bounds.");
-        if (index < _colorTextures.size())
+        if (index >= _colorTextures.size())
             return 0;
 
         return static_cast<const ImageData*>(_colorTextures[index].getData());
@@ -116,7 +136,7 @@ namespace campvis {
 
     void RenderData::bindColorTexture(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
         tgtAssert(index < _colorTextures.size(), "Index out of bounds.");
-        if (index < _colorTextures.size())
+        if (index >= _colorTextures.size())
             return;
 
         const ImageData* id = static_cast<const ImageData*>(_colorTextures[index].getData());

@@ -34,6 +34,7 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationrendertarget.h"
 
 
@@ -86,8 +87,8 @@ namespace campvis {
 
     void RaycastingProcessor::process(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation entryPoints(data, p_entryImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation exitPoints(data, p_exitImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> entryPoints(data, p_entryImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> exitPoints(data, p_exitImageID.getValue());
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {

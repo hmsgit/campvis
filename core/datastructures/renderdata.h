@@ -36,6 +36,7 @@
 #include <vector>
 
 namespace tgt {
+    class FramebufferObject;
     class Shader;
     class TextureUnit;
 }
@@ -58,6 +59,13 @@ namespace campvis {
          * Constructor, creates empty RenderData.
          */
         RenderData();
+
+        /**
+         * Constructur, creates RenderData from all textures attached to \a fbo.
+         * \note    Must be called from a valid OpenGL context.
+         * \param   fbo     FBO to use textures from.
+         */
+        explicit RenderData(const tgt::FramebufferObject* fbo);
 
         /**
          * Destructor
