@@ -45,7 +45,6 @@
 
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"

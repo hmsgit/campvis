@@ -31,8 +31,6 @@
 #define PROCESSORDECORATORSHADING_H__
 
 #include "tgt/textureunit.h"
-#include "core/datastructures/datacontainer.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"

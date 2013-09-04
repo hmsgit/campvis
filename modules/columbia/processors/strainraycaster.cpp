@@ -30,7 +30,7 @@
 #include "strainraycaster.h"
 
 #include "core/tools/quadrenderer.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
@@ -58,15 +58,13 @@ namespace campvis {
 
     void StrainRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
         if (image.getImageData()->getNumChannels() == 3 || image.getImageData()->getNumChannels() == 4) {
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> output = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            output.second->activate();
+            FramebufferActivationGuard fag(this);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
             LGL_ERROR;
 
-            output.second->deactivate();
-            data.addData(p_targetImageID.getValue(), output.first);
+            data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
             p_targetImageID.issueWrite();
         }
         else {

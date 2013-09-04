@@ -34,7 +34,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -81,9 +81,9 @@ namespace campvis {
     }
 
     void DepthDarkening::process(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation inputImage(data, p_inputImage.getValue());
+        DataContainer::ScopedTypedData<RenderData> inputImage(data, p_inputImage.getValue());
 
-        if (inputImage != 0) {
+        if (inputImage != 0 && inputImage->hasDepthTexture()) {
             if (hasInvalidShader()) {
                 _shader->setHeaders(generateHeader());
                 _shader->rebuild();
@@ -91,12 +91,13 @@ namespace campvis {
             }
 
             // TODO: const cast is ugly...
-            const_cast<tgt::Texture*>(inputImage->getDepthTexture())->downloadTexture();
-            float* pixels = (float*)inputImage->getDepthTexture()->getPixelData();
+            const tgt::Texture* tex = inputImage->getDepthTexture()->getRepresentation<ImageRepresentationGL>()->getTexture();
+            const_cast<tgt::Texture*>(tex)->downloadTexture();
+            const float* pixels = reinterpret_cast<const float*>(tex->getPixelData());
             float curDepth = *(pixels);
             float minDepth = curDepth;
             float maxDepth = curDepth;
-            size_t numPixels = inputImage->getNumElements();
+            size_t numPixels = inputImage->getDepthTexture()->getNumElements();
             for (size_t i = 1; i < numPixels; ++i) {
                 curDepth = pixels[i];
                 minDepth = std::min(minDepth, curDepth);
@@ -127,18 +128,17 @@ namespace campvis {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
 
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> tempTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
+            RenderData tempTarget(_fbo);
             _fbo->detachAll();
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
 
             inputImage->bind(_shader, colorUnit, depthUnit);
-            tempTarget.second->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
+            tempTarget.bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             _shader->setUniform("_direction", tgt::vec2(0.f, 1.f));
             
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
@@ -146,8 +146,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            delete tempTarget.first;
-            data.addData(p_outputImage.getValue(), outputTarget.first);
+            data.addData(p_outputImage.getValue(), new RenderData(_fbo));
             p_outputImage.issueWrite();
         }
         else {

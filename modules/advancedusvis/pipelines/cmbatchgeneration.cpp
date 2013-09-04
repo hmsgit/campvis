@@ -34,7 +34,8 @@
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/renderdata.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/job.h"
@@ -176,8 +177,9 @@ namespace campvis {
 
     void CmBatchGeneration::save(int path, const std::string& basePath) {
         // get result
-        ImageRepresentationRenderTarget::ScopedRepresentation repRT(_data, _usFusion.p_targetImageID.getValue());
-        if (repRT != 0) {
+        DataContainer::ScopedTypedData<RenderData> rd(_data, _usFusion.p_targetImageID.getValue());
+        const ImageRepresentationGL* rep = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>(false);
+        if (rep != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
             if (! tgt::FileSystem::dirExists(basePath))
                 tgt::FileSystem::createDirectory(basePath);
@@ -191,8 +193,8 @@ namespace campvis {
             }
 
             // get color buffer content
-            GLubyte* colorBuffer = repRT->getColorTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_SHORT);
-            tgt::ivec2 size = repRT->getSize().xy();
+            GLubyte* colorBuffer = rep->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_SHORT);
+            tgt::ivec2 size = rep->getSize().xy();
 
             // create Devil image from image data and write it to file
             ILuint img;

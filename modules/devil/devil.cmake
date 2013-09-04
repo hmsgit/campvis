@@ -6,8 +6,8 @@ LIST(APPEND ThisModDefinitions -DTGT_HAS_DEVIL)
 IF(UNIX)
 	# Unix-like systems have their DevIL lib via their package manager
 	FIND_PACKAGE(DevIL REQUIRED)
-        SET(ThisModIncludeDirs ${IL_INCLUDE_DIR})
-        SET(ThisModExternalLibs ${IL_LIBRARIES} ${ILU_LIBRARIES})
+        LIST(APPEND CampvisGlobalIncludeDirs ${IL_INCLUDE_DIR})
+        LIST(APPEND CampvisGlobalExternalLibs ${IL_LIBRARIES} ${ILU_LIBRARIES})
 	IF(IL_FOUND)
 		MESSAGE(STATUS "** Found DevIL library")
 	ELSE()
@@ -15,10 +15,10 @@ IF(UNIX)
 	ENDIF()
 ELSEIF(WIN32)
 	# DevIL libs for Windows systems are shipped with this module, make sure they're copied to the dist folder.
-    SET(ThisModIncludeDirs "${ThisModDir}/ext/devil/include")
+    LIST(APPEND CampvisGlobalIncludeDirs "${ThisModDir}/ext/devil/include")
 
     IF(CAMPVIS_WIN32)
-        SET(ThisModExternalLibs 
+        LIST(APPEND CampvisGlobalExternalLibs 
             "${ThisModDir}/ext/devil/lib/win32/DevIL.lib"
             "${ThisModDir}/ext/devil/lib/win32/ILU.lib"
         )
@@ -32,7 +32,7 @@ ELSEIF(WIN32)
             "${ThisModDir}/ext/devil/lib/win32/ILU.dll"
         )
     ELSEIF(CAMPVIS_WIN64)
-        SET(ThisModExternalLibs 
+        LIST(APPEND CampvisGlobalExternalLibs
             "${ThisModDir}/ext/devil/lib/win64/DevIL.lib"
             "${ThisModDir}/ext/devil/lib/win64/ILU.lib"
         )

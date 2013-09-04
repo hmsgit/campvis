@@ -30,7 +30,7 @@
 #include "simpleraycaster.h"
 
 #include "core/tools/quadrenderer.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
@@ -75,7 +75,7 @@ namespace campvis {
         glDisable(GL_DEPTH_TEST);
         LGL_ERROR;
 
-        data.addData(p_targetImageID.getValue(), createImageDataFromFbo());
+        data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
         p_targetImageID.issueWrite();
     }
 

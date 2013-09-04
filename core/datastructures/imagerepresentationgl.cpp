@@ -37,7 +37,6 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
 #ifdef CAMPVIS_HAS_MODULE_ITK
 #include "modules/itk/core/genericimagerepresentationitk.h"
 #endif

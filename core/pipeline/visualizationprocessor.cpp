@@ -31,7 +31,6 @@
 
 #include "tgt/textureunit.h"
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
 
 namespace campvis {
 
@@ -162,12 +161,6 @@ namespace campvis {
 
     void VisualizationProcessor::createAndAttachDepthTexture() {
         createAndAttachTexture(GL_DEPTH_COMPONENT24);
-    }
-
-    ImageData* VisualizationProcessor::createImageDataFromFbo() const {
-        ImageData* toReturn = new ImageData(2, getRenderTargetSize(), 4);
-        ImageRepresentationRenderTarget::create(toReturn, _fbo);
-        return toReturn;
     }
 
 }

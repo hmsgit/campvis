@@ -36,7 +36,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratorshading.h"
 
@@ -92,6 +92,7 @@ namespace campvis {
             }
 
             // set modelview and projection matrices
+            FramebufferActivationGuard fag(this);
             _shader->activate();
             decorateRenderProlog(data, _shader);
             _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
@@ -101,23 +102,18 @@ namespace campvis {
             tgt::TextureUnit strainUnit;
             strainData->bind(_shader, strainUnit, "_strainTexture");
 
-            // create entry points texture
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
-            rt.second->activate();
-
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             glClearDepth(1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             proxyGeometry->render();
 
-            rt.second->deactivate();
             decorateRenderEpilog(_shader);
             _shader->deactivate();
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_renderTargetID.getValue(), rt.first);
+            data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
             p_renderTargetID.issueWrite();
         }
         else {

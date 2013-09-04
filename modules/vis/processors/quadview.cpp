@@ -32,9 +32,7 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -77,22 +75,20 @@ namespace campvis {
     }
 
     void QuadView::process(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation inputImage1(data, p_inputImage1.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation inputImage2(data, p_inputImage2.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation inputImage3(data, p_inputImage3.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation inputImage4(data, p_inputImage4.getValue());
+        DataContainer::ScopedTypedData<RenderData> inputImage1(data, p_inputImage1.getValue());
+        DataContainer::ScopedTypedData<RenderData> inputImage2(data, p_inputImage2.getValue());
+        DataContainer::ScopedTypedData<RenderData> inputImage3(data, p_inputImage3.getValue());
+        DataContainer::ScopedTypedData<RenderData> inputImage4(data, p_inputImage4.getValue());
 
         if (inputImage1 == 0 && inputImage2 == 0 && inputImage3 == 0 && inputImage4 == 0) {
             validate(INVALID_RESULT);
             return;
         }
 
-        std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+        FramebufferActivationGuard fag(this);
         tgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
         _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(.5f, .5f, .5f)));
-        outputTarget.second->activate();
-        LGL_ERROR;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (inputImage1 != 0) {
@@ -116,12 +112,11 @@ namespace campvis {
             QuadRdr.renderQuad();
         }
 
-        outputTarget.second->deactivate();
         _shader->deactivate();
         tgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
-        data.addData(p_outputImage.getValue(), outputTarget.first);
+        data.addData(p_outputImage.getValue(), new RenderData(_fbo));
         p_outputImage.issueWrite();
         validate(INVALID_RESULT);
     }

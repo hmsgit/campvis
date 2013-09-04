@@ -35,8 +35,6 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
-
 
 #include "core/classification/simpletransferfunction.h"
 

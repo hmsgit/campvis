@@ -35,8 +35,7 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratorshading.h"
 
@@ -115,7 +114,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_renderTargetID.getValue(), ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo).first);
+            data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
             p_renderTargetID.issueWrite();
         }
         else {

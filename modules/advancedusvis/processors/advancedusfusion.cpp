@@ -34,7 +34,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorbackground.h"
 
 #include "core/classification/simpletransferfunction.h"
@@ -129,7 +129,7 @@ namespace campvis {
                     //_shader->rebuild();
                 }
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                FramebufferActivationGuard fag(this);
 
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
@@ -147,16 +147,14 @@ namespace campvis {
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
                 p_confidenceTF.getTF()->bind(_shader, tf2Unit, "_confidenceTF", "_confidenceTFParams");
 
-                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
-                rt.second->deactivate();
 
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
 
-                data.addData(p_targetImageID.getValue(), rt.first);
+                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
                 p_targetImageID.issueWrite();
             }
             else {

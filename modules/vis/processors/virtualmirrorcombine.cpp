@@ -32,9 +32,7 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -79,9 +77,9 @@ namespace campvis {
     }
 
     void VirtualMirrorCombine::process(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation normalImage(data, p_normalImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation mirrorImage(data, p_mirrorImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation mirrorRendered(data, p_mirrorRenderID.getValue());
+        DataContainer::ScopedTypedData<RenderData> normalImage(data, p_normalImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> mirrorImage(data, p_mirrorImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> mirrorRendered(data, p_mirrorRenderID.getValue());
 
         if (normalImage != 0 && mirrorImage != 0 && mirrorRendered != 0) {
             glEnable(GL_DEPTH_TEST);
@@ -108,7 +106,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_targetImageID.getValue(), ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo).first);
+            data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
             p_targetImageID.issueWrite();
         }
         else {

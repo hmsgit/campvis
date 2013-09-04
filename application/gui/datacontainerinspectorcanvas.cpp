@@ -35,7 +35,7 @@
 
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/datahandle.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/tools/job.h"
@@ -283,14 +283,22 @@ namespace campvis {
         int maxSlices = 1;
         for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
             if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
-                if (const ImageRepresentationRenderTarget* imgRT = img->getRepresentation<ImageRepresentationRenderTarget>(false)) {
-                    for (size_t i = 0; i < imgRT->getNumColorTextures(); ++i)
-                        _textures.push_back(imgRT->getColorTexture(i));
-                    _textures.push_back(imgRT->getDepthTexture());
-                }
-                else if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
+                if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
                     _textures.push_back(imgGL->getTexture());
                     maxSlices = std::max(maxSlices, imgGL->getTexture()->getDimensions().z);
+                }
+            }
+            else if (const RenderData* rd = dynamic_cast<const RenderData*>(it->second.getData())) {
+                for (size_t i = 0; i < rd->getNumColorTextures(); ++i) {
+                    const ImageRepresentationGL* imgGL = rd->getColorTexture(i)->getRepresentation<ImageRepresentationGL>();
+                    if (imgGL)
+                        _textures.push_back(imgGL->getTexture());
+                }
+                if (rd->hasDepthTexture()) {
+                    const ImageRepresentationGL* imgGL = rd->getDepthTexture()->getRepresentation<ImageRepresentationGL>();
+                    if (imgGL)
+                        _textures.push_back(imgGL->getTexture());
+
                 }
             }
         }

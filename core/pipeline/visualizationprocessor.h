@@ -128,12 +128,6 @@ namespace campvis {
         void createAndAttachDepthTexture();
 
 //    protected:
-        /**
-         * Creates an ImageData object from the textures currently attached to the FBO.
-         * \note    The caller takes ownership of the returned pointer.
-         * \return  A pointer to the created ImageData object.
-         */
-        ImageData* createImageDataFromFbo() const;
 
         tgt::ivec3 getRenderTargetSize() const;
 

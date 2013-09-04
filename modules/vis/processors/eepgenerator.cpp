@@ -36,7 +36,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratormasking.h"
@@ -101,7 +101,7 @@ namespace campvis {
                     validate(INVALID_SHADER);
                 }
 
-                ImageRepresentationRenderTarget::ScopedRepresentation geometryImage(data, p_geometryImageId.getValue());
+                DataContainer::ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
 
                 tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
@@ -206,7 +206,6 @@ namespace campvis {
                 clipped.render(GL_POLYGON);
 
                 RenderData* exitpoints = new RenderData(_fbo);
-                //std::pair<ImageData*, ImageRepresentationRenderTarget*> exitpoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), _fbo);
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
 

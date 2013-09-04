@@ -36,7 +36,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/facegeometry.h"
@@ -165,7 +165,7 @@ namespace campvis {
                 size_t width = (p_showConfidenceMap.getValue() ? _currentSweep->Width() / 4 : _currentSweep->Width());
                 size_t height = (p_showConfidenceMap.getValue() ? _currentSweep->Height() / 4 : _currentSweep->Height());
                 if (tmp != 0) {
-                    std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                    FramebufferActivationGuard fag(this);
 
                     glPushAttrib(GL_ALL_ATTRIB_BITS);
                     glEnable(GL_DEPTH_TEST);
@@ -199,7 +199,6 @@ namespace campvis {
 
                     p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                    rt.second->activate();
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                     _shader->setAttributeLocation(0, "in_Position");
                     _shader->setAttributeLocation(1, "in_TexCoord");
@@ -209,14 +208,13 @@ namespace campvis {
 
                     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                     slice.render(GL_POLYGON);
-                    rt.second->deactivate();
 
                     _shader->setIgnoreUniformLocationError(false);
                     _shader->deactivate();
                     tgt::TextureUnit::setZeroUnit();
                     glPopAttrib();
 
-                    data.addData(p_targetImageID.getValue(), rt.first);
+                    data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
                     p_targetImageID.issueWrite();
                 }
             }

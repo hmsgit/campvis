@@ -46,8 +46,6 @@ namespace tgt {
 }
 
 namespace campvis {
-    class ImageRepresentationRenderTarget;
-
     /**
      * Abstract base class for CAMPVis Pipelines.
      * 

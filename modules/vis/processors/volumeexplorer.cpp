@@ -33,10 +33,7 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
-#include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
-
+#include "core/datastructures/renderdata.h"
 
 #include "core/classification/simpletransferfunction.h"
 #include "core/tools/quadrenderer.h"
@@ -169,15 +166,15 @@ namespace campvis {
     }
 
     void VolumeExplorer::composeFinalRendering(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation vrImage(data, p_outputImage.getValue() + ".raycaster");
-        ImageRepresentationRenderTarget::ScopedRepresentation xSliceImage(data, p_outputImage.getValue() + ".xSlice");
-        ImageRepresentationRenderTarget::ScopedRepresentation ySliceImage(data, p_outputImage.getValue() + ".ySlice");
-        ImageRepresentationRenderTarget::ScopedRepresentation zSliceImage(data, p_outputImage.getValue() + ".zSlice");
+        DataContainer::ScopedTypedData<RenderData> vrImage(data, p_outputImage.getValue() + ".raycaster");
+        DataContainer::ScopedTypedData<RenderData> xSliceImage(data, p_outputImage.getValue() + ".xSlice");
+        DataContainer::ScopedTypedData<RenderData> ySliceImage(data, p_outputImage.getValue() + ".ySlice");
+        DataContainer::ScopedTypedData<RenderData> zSliceImage(data, p_outputImage.getValue() + ".zSlice");
 
         if (vrImage == 0 && xSliceImage == 0 && ySliceImage == 0 && zSliceImage == 0)
             return;
 
-        std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+        FramebufferActivationGuard fag(this);
         tgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
 
@@ -186,8 +183,6 @@ namespace campvis {
         const tgt::ivec2 srs = p_sliceRenderSize.getValue();
 
         _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, rts.x, rts.y, 0, -1, 1));
-        outputTarget.second->activate();
-        LGL_ERROR;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (vrImage != 0) {
@@ -216,12 +211,11 @@ namespace campvis {
             _quad->render(GL_POLYGON);
         }
 
-        outputTarget.second->deactivate();
         _shader->deactivate();
         tgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
-        data.addData(p_outputImage.getValue(), outputTarget.first);
+        data.addData(p_outputImage.getValue(), new RenderData(_fbo));
         p_outputImage.issueWrite();
     }
 

@@ -29,8 +29,9 @@
 
 #include "drrraycaster.h"
 
+#include "tgt/shadermanager.h"
 #include "core/tools/quadrenderer.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 namespace campvis {
     const std::string DRRRaycaster::loggerCat_ = "CAMPVis.modules.vis.DRRRaycaster";
@@ -53,11 +54,9 @@ namespace campvis {
     }
 
     void DRRRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        FramebufferActivationGuard fag(this);
         _shader->setUniform("_shift", p_shift.getValue());
         _shader->setUniform("_scale", p_scale.getValue());
-
-        std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-        rt.second->activate();
 
         if (p_invertMapping.getValue())
             glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -67,8 +66,7 @@ namespace campvis {
         QuadRdr.renderQuad();
         LGL_ERROR;
 
-        rt.second->deactivate();
-        data.addData(p_targetImageID.getValue(), rt.first);
+        data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
         p_targetImageID.issueWrite();
     }
 
