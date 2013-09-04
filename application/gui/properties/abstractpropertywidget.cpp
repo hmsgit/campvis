@@ -58,6 +58,7 @@ namespace campvis {
         }
 
         _property->s_changed.connect(this, &AbstractPropertyWidget::onPropertyChanged);
+        connect(this, SIGNAL(s_propertyChanged(const AbstractProperty*)), this, SLOT(updateWidgetFromProperty()));
     }
 
     AbstractPropertyWidget::~AbstractPropertyWidget() {
@@ -70,6 +71,6 @@ namespace campvis {
 
     void AbstractPropertyWidget::onPropertyChanged(const AbstractProperty* property) {
         if (_ignorePropertyUpdates == 0)
-            updateWidgetFromProperty();
+            emit s_propertyChanged(property);
     }
 }

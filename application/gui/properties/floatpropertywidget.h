@@ -60,10 +60,6 @@ namespace campvis {
          */
         virtual void updateWidgetFromProperty();
 
-    signals:
-        /// Signal emitted when the property's value changes
-        void propertyValueChanged(double value);
-
     private slots:
         /// Slot getting called when the adjuster's value changes
         void onAdjusterValueChanged(double value);

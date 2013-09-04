@@ -46,7 +46,6 @@ namespace campvis {
         addWidget(_adjuster);
 
         connect(_adjuster, SIGNAL(valueChanged(double)), this, SLOT(onAdjusterValueChanged(double)));
-        connect(this, SIGNAL(propertyValueChanged(double)), _adjuster, SLOT(setValue(double)));
         property->s_minMaxChanged.connect(this, &FloatPropertyWidget::onPropertyMinMaxChanged);
     }
 
@@ -57,7 +56,7 @@ namespace campvis {
     void FloatPropertyWidget::updateWidgetFromProperty() {
         FloatProperty* prop = static_cast<FloatProperty*>(_property);
         _adjuster->blockSignals(true);
-        emit propertyValueChanged(prop->getValue());
+        _adjuster->setValue(prop->getValue());
         _adjuster->blockSignals(false);
     }
 
