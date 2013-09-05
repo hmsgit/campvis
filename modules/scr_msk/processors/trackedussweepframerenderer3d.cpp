@@ -166,6 +166,8 @@ namespace campvis {
                 size_t height = (p_showConfidenceMap.getValue() ? _currentSweep->Height() / 4 : _currentSweep->Height());
                 if (tmp != 0) {
                     FramebufferActivationGuard fag(this);
+                    createAndAttachColorTexture();
+                    createAndAttachDepthTexture();
 
                     glPushAttrib(GL_ALL_ATTRIB_BITS);
                     glEnable(GL_DEPTH_TEST);

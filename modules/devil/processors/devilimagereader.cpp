@@ -94,6 +94,9 @@ namespace campvis {
                 ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
 
                 FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
+
                 _shader->activate();
                 _shader->setIgnoreUniformLocationError(true);
                 _shader->setUniform("_viewportSize", _renderTargetSize.getValue());

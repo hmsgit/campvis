@@ -175,6 +175,9 @@ namespace campvis {
             return;
 
         FramebufferActivationGuard fag(this);
+        createAndAttachColorTexture();
+        createAndAttachDepthTexture();
+
         tgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
 

@@ -55,6 +55,9 @@ namespace campvis {
 
     void DRRRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
         FramebufferActivationGuard fag(this);
+        createAndAttachColorTexture();
+        createAndAttachDepthTexture();
+
         _shader->setUniform("_shift", p_shift.getValue());
         _shader->setUniform("_scale", p_scale.getValue());
 

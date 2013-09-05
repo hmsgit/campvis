@@ -160,6 +160,9 @@ namespace campvis {
 
                 // prepare OpenGL
                 FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
+
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
                 tgt::TextureUnit inputUnit, tfUnit;

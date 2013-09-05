@@ -104,6 +104,9 @@ namespace campvis {
 
             // set modelview and projection matrices
             FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
+
             _shader->activate();
             _shader->setIgnoreUniformLocationError(true);
             decorateRenderProlog(data, _shader);

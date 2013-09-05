@@ -93,7 +93,9 @@ namespace campvis {
 
         if (firstImage != 0 && secondImage != 0 ) {
             FramebufferActivationGuard fag(this);
- 
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
+
             _shader->activate();
             tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 

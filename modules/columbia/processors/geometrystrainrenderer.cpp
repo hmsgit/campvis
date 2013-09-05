@@ -93,6 +93,9 @@ namespace campvis {
 
             // set modelview and projection matrices
             FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
+
             _shader->activate();
             decorateRenderProlog(data, _shader);
             _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());

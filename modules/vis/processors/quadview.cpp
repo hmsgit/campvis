@@ -86,6 +86,9 @@ namespace campvis {
         }
 
         FramebufferActivationGuard fag(this);
+        createAndAttachColorTexture();
+        createAndAttachDepthTexture();
+
         tgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
         _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(.5f, .5f, .5f)));

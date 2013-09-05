@@ -130,6 +130,8 @@ namespace campvis {
                 }
 
                 FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
                 _shader->activate();
                 decorateRenderProlog(data, _shader);

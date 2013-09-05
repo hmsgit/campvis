@@ -101,6 +101,9 @@ namespace campvis {
                 FaceGeometry slice = clipped.getFaces().back(); // the last face is the closing face
 
                 FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
+
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 

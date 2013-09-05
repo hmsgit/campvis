@@ -59,6 +59,8 @@ namespace campvis {
     void StrainRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
         if (image.getImageData()->getNumChannels() == 3 || image.getImageData()->getNumChannels() == 4) {
             FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
