@@ -33,6 +33,7 @@
 #include "core/datastructures/datahandle.h"
 #include "core/datastructures/abstractdata.h"
 
+#include <string>
 #include <vector>
 
 namespace tgt {
