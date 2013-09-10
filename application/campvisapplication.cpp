@@ -147,6 +147,15 @@ namespace campvis {
                 CLRtm.addPath(basePath);
                 CLRtm.addPath(basePath + "/core/cl");
             }
+
+#ifdef CAMPVIS_SOURCE_DIR
+            {
+                std::string sourcePath = CAMPVIS_SOURCE_DIR;
+                CLRtm.addPath(sourcePath);
+                CLRtm.addPath(sourcePath + "/core/glsl");
+            }
+#endif
+
 #endif
         }
 

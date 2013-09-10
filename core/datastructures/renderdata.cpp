@@ -157,7 +157,8 @@ namespace campvis {
     }
 
     void RenderData::bind(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const tgt::TextureUnit& depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
-        bindDepthTexture(shader, depthTexUnit, depthTexUniform, texParamsUniform);
+        if (hasDepthTexture())
+            bindDepthTexture(shader, depthTexUnit, depthTexUniform, texParamsUniform);
         bindColorTexture(shader, colorTexUnit, colorTexUniform, texParamsUniform, index);
     }
 

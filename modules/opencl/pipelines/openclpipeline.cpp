@@ -51,7 +51,7 @@ namespace campvis {
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _renderTargetSize);
+        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
         _eventHandlers.push_back(_trackballEH);
 
         addProcessor(&_imageReader);
@@ -75,6 +75,7 @@ namespace campvis {
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.connect(&_pgGenerator.p_sourceImageID);
         _imageReader.p_targetImageID.connect(&_eepGenerator.p_sourceImageID);
+        _imageReader.s_validated.connect(this, &OpenCLPipeline::onProcessorValidated);
 
         _clRaycaster._targetImageID.setValue("cl.output");
         _clRaycaster._sourceImageID.setValue("clr.input");
@@ -97,16 +98,24 @@ namespace campvis {
         _effectiveRenderTargetSize.s_changed.connect<OpenCLPipeline>(this, &OpenCLPipeline::onRenderTargetSizeChanged);
     }
 
-    void OpenCLPipeline::execute() {
-        {
-            tbb::spin_mutex::scoped_lock lock(_localMutex);
-            _invalidationLevel.setValid();
-            // TODO:    think whether we want to lock all processors already here.
-        }
-        if (! _imageReader.getInvalidationLevel().isValid()) {
-            executeProcessor(&_imageReader);
+    void OpenCLPipeline::deinit() {
+        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        VisualizationPipeline::deinit();
+    }
 
-            // convert data
+    const std::string OpenCLPipeline::getName() const {
+        return "OpenCLPipeline";
+    }
+
+    void OpenCLPipeline::onRenderTargetSizeChanged(const AbstractProperty* prop) {
+        _trackballEH->setViewportSize(_canvasSize.getValue());
+        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        _camera.setWindowRatio(ratio);
+    }
+
+    void OpenCLPipeline::onProcessorValidated(AbstractProcessor* processor) {
+        if (processor == &_imageReader) {
+            // update camera
             ImageRepresentationLocal::ScopedRepresentation img(_data, "reader.output");
             if (img != 0) {
                 size_t numElements = img->getNumElements();
@@ -117,7 +126,7 @@ namespace campvis {
                 GenericImageRepresentationLocal<float, 1>* imageWithFloats = GenericImageRepresentationLocal<float, 1>::create(id, asFloats);
 
                 DataHandle dh = _data.addData("clr.input", id);
-
+                
                 tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
@@ -125,28 +134,9 @@ namespace campvis {
                 _trackballEH->setCenter(volumeExtent.center());
                 _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
             }
-
-        }
-        if (! _pgGenerator.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_pgGenerator);
-        }
-        if (! _eepGenerator.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_eepGenerator);
-        }
-        if (! _clRaycaster.getInvalidationLevel().isValid()) {
-            lockGLContextAndExecuteProcessor(&_clRaycaster);
         }
     }
 
-    const std::string OpenCLPipeline::getName() const {
-        return "OpenCLPipeline";
-    }
-
-    void OpenCLPipeline::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_renderTargetSize);
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
-        _camera.setWindowRatio(ratio);
-    }
 
 
 }
