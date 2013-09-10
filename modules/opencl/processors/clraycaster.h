@@ -63,7 +63,7 @@ namespace campvis {
          * \param   fragmentShaderFileName      Filename for the fragment shader being automatically loaded.
          * \param   bindEntryExitDepthTextures  Flag whether to also bind the depth textures of the entry-/exit points.
          */
-        CLRaycaster(GenericProperty<tgt::ivec2>& renderTargetSize);
+        CLRaycaster(IVec2Property& renderTargetSize);
 
         /**
          * Destructor

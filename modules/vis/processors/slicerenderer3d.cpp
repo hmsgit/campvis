@@ -35,7 +35,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/facegeometry.h"
@@ -100,8 +100,9 @@ namespace campvis {
                 MeshGeometry clipped = cube.clipAgainstPlane(p, normal, true);
                 FaceGeometry slice = clipped.getFaces().back(); // the last face is the closing face
 
-
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
@@ -118,16 +119,14 @@ namespace campvis {
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 slice.render(GL_POLYGON);
-                rt.second->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
                 glDisable(GL_DEPTH_TEST);
 
-                data.addData(p_targetImageID.getValue(), rt.first);
+                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
                 p_targetImageID.issueWrite();
             }
             else {

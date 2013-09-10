@@ -40,7 +40,6 @@
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/datastructures/imagerepresentationgl.h"
 
 #include <QHeaderView>

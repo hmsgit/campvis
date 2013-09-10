@@ -25,6 +25,10 @@
 #ifndef TGT_FRAMEBUFFEROBJECT_H
 #define TGT_FRAMEBUFFEROBJECT_H
 
+/// if you run out of FBO color attachments, edit this value o_O
+#define TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS 6
+
+#include "tgt/assert.h"
 #include "tgt/texture.h"
 #include "tgt/types.h"
 
@@ -46,7 +50,7 @@ public:
 
     /// Bind a texture to the "attachment" point of this FBO
     void attachTexture(Texture* texture,
-                       GLenum attachment = GL_COLOR_ATTACHMENT0_EXT,
+                       GLenum attachment = GL_COLOR_ATTACHMENT0,
                        int mipLevel      = 0,
                        int zSlice        = 0);
 
@@ -60,12 +64,42 @@ public:
 
     GLuint getId() const { return id_; };
 
+    Texture *const *const getAttachments() const;
+
+    size_t getNumColorAttachments() const;
+
+    const Texture* getColorAttachment(size_t index = 0) const;
+    const Texture* getDepthAttachment() const;
+    const Texture* getStencilAttachment() const;
+
 protected:
     GLuint generateId();
 
     GLuint id_;
-    std::map<GLenum, Texture*> attachedTextures_;
 
+    size_t decodeAttachment(GLenum attachment) {
+        switch (attachment) {
+            case GL_DEPTH_ATTACHMENT:
+                return TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS;
+            case GL_STENCIL_ATTACHMENT:
+                return TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS + 1;
+            default:
+                tgtAssert((attachment - GL_COLOR_ATTACHMENT0) < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS, "Color attachments out of bounds - adjust TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS define!");
+                return attachment - GL_COLOR_ATTACHMENT0;
+        }
+    }
+
+    union {
+        struct {
+            Texture* colorAttachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS];
+            Texture* depthAttachment_;
+            Texture* stencilAttachment_;
+        };
+
+        Texture* attachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+2];
+    };
+
+    size_t numColorAttachments_;
     static const std::string loggerCat_; ///< category used in logging
 };
 

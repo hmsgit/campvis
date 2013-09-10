@@ -33,8 +33,7 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -80,13 +79,15 @@ namespace campvis {
     }
 
     void IxpvCompositor::process(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation xRayImage(data, p_xRayImageId.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation sliceImage(data, p_3dSliceImageId.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation drrFullImage(data, p_drrFullImageId.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation drrClippedImage(data, p_drrClippedImageId.getValue());
+        DataContainer::ScopedTypedData<RenderData> xRayImage(data, p_xRayImageId.getValue());
+        DataContainer::ScopedTypedData<RenderData> sliceImage(data, p_3dSliceImageId.getValue());
+        DataContainer::ScopedTypedData<RenderData> drrFullImage(data, p_drrFullImageId.getValue());
+        DataContainer::ScopedTypedData<RenderData> drrClippedImage(data, p_drrClippedImageId.getValue());
 
         if (xRayImage != 0 && sliceImage != 0 && drrFullImage != 0 && drrClippedImage != 0) {
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+            FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
 
             _shader->activate();
             tgt::TextureUnit xRayColorUnit, xRayDepthUnit, sliceColorUnit, sliceDepthUnit, drrFullUnit, drrClippedUnit;
@@ -98,17 +99,14 @@ namespace campvis {
 
             decorateRenderProlog(data, _shader);
 
-            rt.second->activate();
-            LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
 
-            data.addData(p_targetImageId.getValue(), rt.first);
+            data.addData(p_targetImageId.getValue(), new RenderData(_fbo));
             p_targetImageId.issueWrite();
         }
         else {

@@ -30,6 +30,7 @@
 #include "datacontainerinspectorwidget.h"
 
 #include "tgt/assert.h"
+#include "tgt/logmanager.h"
 #include "tgt/filesystem.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
@@ -49,7 +50,7 @@
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
 #include "modules/columbia/datastructures/fiberdata.h"
@@ -61,6 +62,8 @@
 #include <QFileDialog>
 
 namespace campvis {
+
+    const std::string DataContainerInspectorWidget::loggerCat_ = "CAMPVis.application.DataContainerInspectorWidget";
 
     DataContainerInspectorWidget::DataContainerInspectorWidget(QWidget* parent) 
         : QWidget(parent)
@@ -308,21 +311,19 @@ namespace campvis {
 
             // only consider non-empty DataHandles that are ImageData and have render target representations
             if (handle.getData() != 0) {
-                if (const ImageData* tester = dynamic_cast<const ImageData*>(handle.getData())) {
-                    if (const ImageRepresentationRenderTarget* repRT = tester->getRepresentation<ImageRepresentationRenderTarget>(false)) {
-                        QString dialogCaption = "Export " + idxName.data(Qt::DisplayRole).toString() + " as Image";
-                        QString directory = tr("");
-                        const QString fileFilter = tr("*.png;;PNG images (*.png)");
+                if (dynamic_cast<const ImageData*>(handle.getData()) || dynamic_cast<const RenderData*>(handle.getData())) {
+                    QString dialogCaption = "Export " + idxName.data(Qt::DisplayRole).toString() + " as Image";
+                    QString directory = tr("");
+                    const QString fileFilter = tr("*.png;;PNG images (*.png)");
 
-                        QString filename = QFileDialog::getSaveFileName(this, dialogCaption, directory, fileFilter);
+                    QString filename = QFileDialog::getSaveFileName(this, dialogCaption, directory, fileFilter);
 
-                        if (! filename.isEmpty()) {
-                            // Texture access needs OpenGL context - dispatch method call:
-                            GLJobProc.enqueueJob(
-                                _canvas, 
-                                makeJobOnHeap(&DataContainerInspectorWidget::saveToFile, handle, filename.toStdString()), 
-                                OpenGLJobProcessor::SerialJob);
-                        }
+                    if (! filename.isEmpty()) {
+                        // Texture access needs OpenGL context - dispatch method call:
+                        GLJobProc.enqueueJob(
+                            _canvas, 
+                            makeJobOnHeap(&DataContainerInspectorWidget::saveToFile, handle, filename.toStdString()), 
+                            OpenGLJobProcessor::SerialJob);
                     }
                 }
             }
@@ -336,13 +337,35 @@ namespace campvis {
             return;
         }
 
-        // we did the test before, hence, static_cast ist safe
-        const ImageRepresentationRenderTarget* repRT = static_cast<const ImageData*>(handle.getData())->getRepresentation<ImageRepresentationRenderTarget>(false);
-        tgtAssert(repRT != 0, "DataHandle must be of type ImageData having an ImageRepresentationRenderTarget inside - otherwise you're not allowed to call this method!");
+        // get the ImageData object (either directly or from the RenderData)
+        const ImageData* id = 0;
+        if (const RenderData* tester = dynamic_cast<const RenderData*>(handle.getData())) {
+            id = tester->getColorTexture(0);
+        }
+        else if (const ImageData* tester = dynamic_cast<const ImageData*>(handle.getData())) {
+            id = tester;
+        }
+        else {
+            LERROR("Could not extract image to save.");
+            return;
+        }
 
-        // get color buffer content
-        GLubyte* colorBuffer = repRT->getColorTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_SHORT);
-        tgt::ivec2 size = repRT->getSize().xy();
+        // extract the data
+        WeaklyTypedPointer wtp(WeaklyTypedPointer::UINT8, 1, 0);
+        const ImageRepresentationGL* repGL = id->getRepresentation<ImageRepresentationGL>(false);
+        if (repGL != 0) // if it's a GL texture, download it (we do not want to use the automatic conversion method here)
+            wtp = repGL->getWeaklyTypedPointer();
+        else {
+            const ImageRepresentationLocal* repLocal = id->getRepresentation<ImageRepresentationLocal>(true);
+            if (repLocal != 0)
+                wtp = repLocal->getWeaklyTypedPointer();
+        }
+
+        if (wtp._pointer == 0) {
+            LERROR("Could not extract image to save.");
+            return;
+        }
+
 
         // create Devil image from image data and write it to file
         ILuint img;
@@ -350,13 +373,12 @@ namespace campvis {
         ilBindImage(img);
 
         // put pixels into IL-Image
-        ilTexImage(size.x, size.y, 1, 4, IL_RGBA, IL_UNSIGNED_SHORT, colorBuffer);
+        tgt::ivec2 size = id->getSize().xy();
+        ilTexImage(size.x, size.y, 1, static_cast<ILubyte>(wtp._numChannels), wtp.getIlFormat(), wtp.getIlDataType(), wtp._pointer);
         ilEnable(IL_FILE_OVERWRITE);
         ilResetWrite();
         ILboolean success = ilSaveImage(filename.c_str());
         ilDeleteImages(1, &img);
-
-        delete[] colorBuffer;
 
         if (!success) {
             LERRORC("CAMPVis.application.DataContainerInspectorWidget", "Could not save image to file: " << ilGetError());

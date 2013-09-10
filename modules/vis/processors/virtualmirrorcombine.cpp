@@ -32,9 +32,7 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -79,29 +77,28 @@ namespace campvis {
     }
 
     void VirtualMirrorCombine::process(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation normalImage(data, p_normalImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation mirrorImage(data, p_mirrorImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation mirrorRendered(data, p_mirrorRenderID.getValue());
+        DataContainer::ScopedTypedData<RenderData> normalImage(data, p_normalImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> mirrorImage(data, p_mirrorImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> mirrorRendered(data, p_mirrorRenderID.getValue());
 
         if (normalImage != 0 && mirrorImage != 0 && mirrorRendered != 0) {
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
 
-            _shader->activate();
-            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
+            FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
 
+            _shader->activate();
+            decorateRenderProlog(data, _shader);
+
+            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
             normalImage->bind(_shader, normalColorUnit, normalDepthUnit, "_normalColor", "_normalDepth", "_normalTexParams");
             mirrorImage->bind(_shader, mirrorColorUnit, mirrorDepthUnit, "_mirrorColor", "_mirrorDepth", "_mirrorTexParams");
             mirrorRendered->bindDepthTexture(_shader, mirrorRenderedDepthUnit, "_mirrorRenderedDepth", "_mirrorRenderedTexParams");
 
-            decorateRenderProlog(data, _shader);
-
-            rt.second->activate();
-            LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
@@ -109,7 +106,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_targetImageID.getValue(), rt.first);
+            data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
             p_targetImageID.issueWrite();
         }
         else {

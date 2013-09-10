@@ -40,6 +40,11 @@
 #include "kisscl/kisscl.h"
 #endif
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+#include <IL/il.h>
+#include <IL/ilu.h>
+#endif
+
 namespace campvis {
 
     /**
@@ -123,6 +128,12 @@ namespace campvis {
         bool isInteger() const;
 
         bool isSigned() const;
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+        ILenum getIlFormat() const;
+
+        ILenum getIlDataType() const;
+#endif
 
 #ifdef HAS_KISSCL
         cl_channel_type getClChannelType() const;

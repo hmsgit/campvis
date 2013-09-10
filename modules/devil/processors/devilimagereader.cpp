@@ -35,11 +35,13 @@
 
 #include "tgt/logmanager.h"
 #include "tgt/filesystem.h"
+#include "tgt/shadermanager.h"
 #include "tgt/texturereaderdevil.h"
+#include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
 #include "core/tools/quadrenderer.h"
@@ -91,7 +93,9 @@ namespace campvis {
                 ImageData id (2, tex->getDimensions(), tex->getNumChannels());
                 ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
                 _shader->activate();
                 _shader->setIgnoreUniformLocationError(true);
@@ -102,16 +106,14 @@ namespace campvis {
 
                 image->bind(_shader, texUnit, "_colorTexture");
 
-                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
-                rt.second->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
                 LGL_ERROR;
 
-                data.addData(p_targetImageID.getValue(), rt.first);
+                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
                 p_targetImageID.issueWrite();
             }
             else if (p_importType.getOptionValue() == "texture") {

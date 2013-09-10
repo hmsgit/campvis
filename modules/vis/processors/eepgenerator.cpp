@@ -36,7 +36,8 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
+#include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratormasking.h"
 
@@ -100,7 +101,7 @@ namespace campvis {
                     validate(INVALID_SHADER);
                 }
 
-                ImageRepresentationRenderTarget::ScopedRepresentation geometryImage(data, p_geometryImageId.getValue());
+                DataContainer::ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
 
                 tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
@@ -137,6 +138,7 @@ namespace campvis {
                     }
                 }
 
+                FramebufferActivationGuard fag(this);
                 decorateRenderProlog(data, _shader);
                 
                 const tgt::Camera& cam = p_camera.getValue();
@@ -175,8 +177,8 @@ namespace campvis {
                 glEnable(GL_DEPTH_TEST);
 
                 // create entry points texture
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> entrypoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
-                entrypoints.second->activate();
+                createAndAttachTexture(GL_RGBA16);
+                createAndAttachDepthTexture();
                 _shader->setUniform("_isEntrypoint", true);
 
                 glDepthFunc(GL_LESS);
@@ -185,15 +187,16 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_FRONT : GL_BACK);
                 clipped.render(GL_POLYGON);
 
-                entrypoints.second->deactivate();
+                RenderData* entrypoints = new RenderData(_fbo);
+                _fbo->detachAll();
 
                 // create exit points texture
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> exitpoints = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue(), GL_RGBA16);
-                exitpoints.second->activate();
+                createAndAttachTexture(GL_RGBA16);
+                createAndAttachDepthTexture();
                 _shader->setUniform("_isEntrypoint", false);
 
                 if (geometryImage != 0) {
-                    entrypoints.second->bindDepthTexture(_shader, entryDepthUnit, "_entryDepthTexture", "_entryDepthTexParams");
+                    entrypoints->bindDepthTexture(_shader, entryDepthUnit, "_entryDepthTexture", "_entryDepthTexParams");
                 }
 
                 glDepthFunc(GL_GREATER);
@@ -202,8 +205,7 @@ namespace campvis {
                 glCullFace(p_enableMirror.getValue() ? GL_BACK : GL_FRONT);
                 clipped.render(GL_POLYGON);
 
-                exitpoints.second->deactivate();
-
+                RenderData* exitpoints = new RenderData(_fbo);
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
 
@@ -215,8 +217,8 @@ namespace campvis {
 
                 LGL_ERROR;
 
-                data.addData(p_entryImageID.getValue(), entrypoints.first);
-                data.addData(p_exitImageID.getValue(), exitpoints.first);
+                data.addData(p_entryImageID.getValue(), entrypoints);
+                data.addData(p_exitImageID.getValue(), exitpoints);
                 p_entryImageID.issueWrite();
                 p_exitImageID.issueWrite();
             }
