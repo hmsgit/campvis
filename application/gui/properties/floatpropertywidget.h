@@ -30,8 +30,8 @@
 #ifndef FLOATPROPERTYWIDGET_H__
 #define FLOATPROPERTYWIDGET_H__
 
+#include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/doubleadjusterwidget.h"
 #include "core/properties/numericproperty.h"
 
 namespace campvis {

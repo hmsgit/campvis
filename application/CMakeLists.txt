@@ -8,6 +8,7 @@ FILE(GLOB CampvisApplicationSources
     *.cpp
     gui/*.cpp
     gui/properties/*.cpp
+    gui/adjusterwidgets/*.cpp
     tools/*.cpp
 )
 
@@ -17,6 +18,7 @@ FILE(GLOB CampvisApplicationHeaders
     glsl/*.vert
     gui/*.h
     gui/properties/*.h
+    gui/adjusterwidgets/*.h
     tools/*.h
 )
 
@@ -37,7 +39,7 @@ SET(CampvisApplicationToBeMocced
     gui/pipelinemdisubwindow.h
     gui/visualizationpipelinewidget.h
     gui/visualizationpipelinewrapper.h
-    gui/doubleadjusterwidget.h
+    gui/adjusterwidgets/doubleadjusterwidget.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h

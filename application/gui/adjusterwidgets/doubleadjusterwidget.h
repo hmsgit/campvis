@@ -30,8 +30,7 @@
 #ifndef DOUBLEADJUSTERWIDGET_H__
 #define DOUBLEADJUSTERWIDGET_H__
 
-#include <QDoubleSpinBox>
-#include <QSlider>
+#include "abstractadjusterwidget.h"
 
 namespace campvis {
     /**
@@ -40,92 +39,65 @@ namespace campvis {
      * DoubleAdjusterWidget consists of a slider, which can be used to quickly change numeric values, and a spin box,
      * which is better suited for precise adjustments.
      */
-    class DoubleAdjusterWidget : public QWidget {
+    class DoubleAdjusterWidget : public AbstractAdjusterWidget<double> {
+
         Q_OBJECT
 
     public:
         /**
          * Creates a new DoubleAdjusterWidget.
-         * \param   parent      Parent Qt widget
+         * \param   parent      parent Qt widget
          */
         DoubleAdjusterWidget(QWidget* parent = 0);
 
         /**
-         * Return the adjuster's current value.
-         */
-        double value() const;
-
-        /**
-         * Change the adjuster's minimum value.
-         * \param   minimum      New minimum value for the adjuster
-         */
-        void setMinimum(double minimum);
-
-        /**
-         * Change the adjuster's maximum value.
-         * \param   maximum      New maximum value for the adjuster
-         */
-        void setMaximum(double maximum);
-
-        /**
-         * Change the adjuster's single step value.
-         * \param   value      New single step value for the adjuster
-         */
-        void setSingleStep(double value);
-
-        /**
          * Set how many decimals the adjuster will use for displaying and interpreting doubles.
-         * \param   prec      Number of decimals the adjuster will use
+         * \param   prec      number of decimals the adjuster will use
          */
         void setDecimals(int prec);
 
     public slots:
         /**
          * Change the adjuster's current value.
-         * \param   value      New value for the adjuster
+         * \param   value      new value for the adjuster
          */
         void setValue(double value);
 
     signals:
         /**
          * This signal is emitted whenever the adjuster's value is changed.
-         * \param   value      New value of the adjuster
+         * \param   value      new value of the adjuster
          */
         void valueChanged(double value);
 
-    private slots:
-        /// Slot getting called when the spin box's value changes
-        void onSpinBoxValueChanged(double value);
-        /// Slot getting called when the slider's value changes
-        void onSliderValueChanged(int value);
-
-    private:
+    protected:
         /**
          * Calculate and set the slider's value.
          *
-         * The slider's value will be based on the provided current, step, and minimum value of the property.
+         * The slider's value will be based on the provided current value of the adjuster, as well as its step and
+         * minimum value.
          *
-         * \param   value       The property's current value
-         * \param   stepValue   The property's step value
-         * \param   minValue    The property's minimum value
+         * \param   value       the adjuster's new value
          */
-        void setSliderValue(double value, double stepValue, double minValue);
+        void setSliderValue(double value);
 
         /**
          * Calculate and set the slider's properties.
          *
-         * The slider's properties (current and maximum value) will be based on the provided current, step, minimum,
-         * and maximum value of the property.
+         * The slider's properties will be based on the provided step, minimum, and maximum value of the adjuster.
          *
-         * \param   value       The property's current value
-         * \param   stepValue   The property's step value
-         * \param   minValue    The property's minimum value
-         * \param   maxValue    The property's maximum value
+         * \param   stepValue   the adjuster's step value
+         * \param   minValue    the adjuster's minimum value
+         * \param   maxValue    the adjuster's maximum value
          */
-        void setSliderProperties(double value, double stepValue, double minValue, double maxValue);
+        void setSliderProperties(double stepValue, double minValue, double maxValue);
 
-        QSlider* _slider;                       ///< Slider allowing the user to quickly change the value
-        QDoubleSpinBox* _spinBox;               ///< Spin box displaying the current value
+    private slots:
+        /// Slot getting called when the spin box's value changes
+        void onSpinBoxValueChanged(double value);
+
+        /// Slot getting called when the slider's value changes
+        void onSliderValueChanged(int value);
 
     };
 

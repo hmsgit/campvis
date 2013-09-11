@@ -29,91 +29,47 @@
 
 #include "doubleadjusterwidget.h"
 
-#include <QHBoxLayout>
-
 #include <cmath>
 
 namespace campvis {
     DoubleAdjusterWidget::DoubleAdjusterWidget(QWidget* parent /*= 0*/)
-        : QWidget(parent)
-        , _slider(0)
-        , _spinBox(0)
+        : AbstractAdjusterWidget<double>(parent)
     {
-        _spinBox = new QDoubleSpinBox();
-        _spinBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-
-        _slider = new QSlider(Qt::Horizontal);
-        setSliderProperties(_spinBox->value(), _spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
-
-        QHBoxLayout* layout = new QHBoxLayout;
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(_slider);
-        layout->addWidget(_spinBox);
-        setLayout(layout);
+        setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
 
         connect(_spinBox, SIGNAL(valueChanged(double)), this, SLOT(onSpinBoxValueChanged(double)));
         connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
     }
 
-    double DoubleAdjusterWidget::value() const
-    {
-        return _spinBox->value();
-    }
-
     void DoubleAdjusterWidget::setValue(double value)
     {
-        _spinBox->setValue(value);
-        setSliderValue(value, _spinBox->singleStep(), _spinBox->minimum());
-    }
-
-    void DoubleAdjusterWidget::setMinimum(double minimum)
-    {
-        _spinBox->setMinimum(minimum);
-        setSliderProperties(_spinBox->value(), _spinBox->singleStep(), minimum, _spinBox->maximum());
-    }
-
-    void DoubleAdjusterWidget::setMaximum(double maximum)
-    {
-        _spinBox->setMaximum(maximum);
-        setSliderProperties(_spinBox->value(), _spinBox->singleStep(), _spinBox->minimum(), maximum);
-    }
-
-    void DoubleAdjusterWidget::setSingleStep(double value)
-    {
-        _spinBox->setSingleStep(value);
-        setSliderProperties(_spinBox->value(), value, _spinBox->minimum(), _spinBox->maximum());
+        setValueImpl(value);
     }
 
     void DoubleAdjusterWidget::setDecimals(int prec)
     {
         _spinBox->setDecimals(prec);
-        setSliderProperties(_spinBox->value(), _spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
+        setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
     }
 
     void DoubleAdjusterWidget::onSpinBoxValueChanged(double value) {
+        onSpinBoxValueChangedImpl(value);
         emit valueChanged(value);
-        setSliderValue(value, _spinBox->singleStep(), _spinBox->minimum());
     }
 
     void DoubleAdjusterWidget::onSliderValueChanged(int value) {
         const double newValue = _spinBox->minimum() + value * _spinBox->singleStep();
-
-        _spinBox->blockSignals(true);
-        _spinBox->setValue(newValue);
-        _spinBox->blockSignals(false);
-
+        onSliderValueChangedImpl(newValue);
         emit valueChanged(newValue);
     }
 
-    void DoubleAdjusterWidget::setSliderValue(double value, double stepValue, double minValue) {
-        _slider->blockSignals(true);
-        _slider->setValue(std::ceil((value - minValue) / stepValue));
-        _slider->blockSignals(false);
+    void DoubleAdjusterWidget::setSliderValue(double value) {
+        AbstractAdjusterWidget<double>::setSliderValue(std::ceil((value - minimum()) / singleStep()));
     }
 
-    void DoubleAdjusterWidget::setSliderProperties(double value, double stepValue, double minValue, double maxValue) {
+    void DoubleAdjusterWidget::setSliderProperties(double stepValue, double minValue, double maxValue) {
         // by default minimum and single step are 0 and 1, respectively, so we don't have to change them
-        _slider->setMaximum(std::ceil((maxValue - minValue) / stepValue));
-        setSliderValue(value, stepValue, minValue);
+        AbstractAdjusterWidget<double>::setSliderProperties(1, 0, std::ceil((maxValue - minValue) / stepValue));
+        setSliderValue(value());
     }
 }
