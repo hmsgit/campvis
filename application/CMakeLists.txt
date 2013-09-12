@@ -40,6 +40,7 @@ SET(CampvisApplicationToBeMocced
     gui/visualizationpipelinewidget.h
     gui/visualizationpipelinewrapper.h
     gui/adjusterwidgets/doubleadjusterwidget.h
+    gui/adjusterwidgets/intadjusterwidget.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
