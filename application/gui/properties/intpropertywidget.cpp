@@ -37,7 +37,7 @@
 namespace campvis {
     IntPropertyWidget::IntPropertyWidget(IntProperty* property, QWidget* parent /*= 0*/)
         : AbstractPropertyWidget(property, false, parent)
-        , _spinBox(0)
+        , _adjuster(0)
         , _timer(0)
     {
         _timer = new QTimer(this);
@@ -47,11 +47,11 @@ namespace campvis {
         QGridLayout* layout = new QGridLayout(widget);
         widget->setLayout(layout);
 
-        _spinBox = new QSpinBox(widget);
-        _spinBox->setMinimum(property->getMinValue());
-        _spinBox->setMaximum(property->getMaxValue());
-        _spinBox->setValue(property->getValue());
-        layout->addWidget(_spinBox, 0, 0, 1, 2);
+        _adjuster = new IntAdjusterWidget;
+        _adjuster->setMinimum(property->getMinValue());
+        _adjuster->setMaximum(property->getMaxValue());
+        _adjuster->setValue(property->getValue());
+        layout->addWidget(_adjuster, 0, 0, 1, 2);
 
         _cbEnableTimer = new QCheckBox("Enable Timer", widget);
         layout->addWidget(_cbEnableTimer, 1, 0);
@@ -65,7 +65,7 @@ namespace campvis {
         addWidget(widget);
 
         connect(_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-        connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+        connect(_adjuster, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
         connect(_cbEnableTimer, SIGNAL(stateChanged(int)), this, SLOT(onEnableTimerChanged(int)));
         connect(_sbInterval, SIGNAL(valueChanged(int)), this, SLOT(onIntervalValueChanged(int)));
         property->s_minMaxChanged.connect(this, &IntPropertyWidget::onPropertyMinMaxChanged);
@@ -77,9 +77,9 @@ namespace campvis {
 
     void IntPropertyWidget::updateWidgetFromProperty() {
         IntProperty* prop = static_cast<IntProperty*>(_property);
-        _spinBox->blockSignals(true);
-        _spinBox->setValue(prop->getValue());
-        _spinBox->blockSignals(false);
+        _adjuster->blockSignals(true);
+        _adjuster->setValue(prop->getValue());
+        _adjuster->blockSignals(false);
     }
 
     void IntPropertyWidget::onValueChanged(int value) {
@@ -92,8 +92,8 @@ namespace campvis {
     void IntPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
         if (_ignorePropertyUpdates == 0) {
             IntProperty* prop = static_cast<IntProperty*>(_property);
-            _spinBox->setMinimum(prop->getMinValue());
-            _spinBox->setMaximum(prop->getMaxValue());
+            _adjuster->setMinimum(prop->getMinValue());
+            _adjuster->setMaximum(prop->getMaxValue());
         }
     }
 

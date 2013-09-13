@@ -30,10 +30,9 @@
 #ifndef INTPROPERTYWIDGET_H__
 #define INTPROPERTYWIDGET_H__
 
+#include "application/gui/adjusterwidgets/intadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "core/properties/numericproperty.h"
-
-#include <QSpinBox>
 
 class QCheckBox;
 class QTimer;
@@ -74,7 +73,7 @@ namespace campvis {
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        QSpinBox* _spinBox;
+        IntAdjusterWidget* _adjuster;
 
         QTimer* _timer;
         QCheckBox* _cbEnableTimer;
@@ -143,21 +142,21 @@ namespace campvis {
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        QSpinBox* _spinBox[size];
+        IntAdjusterWidget* _adjusters[size];
     };
 
 // ================================================================================================
 
     template<size_t SIZE>
     campvis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+        : AbstractPropertyWidget(property, true, parent)
     {
         for (size_t i = 0; i < size; ++i) {
-            _spinBox[i] = new QSpinBox(this);
-            _spinBox[i]->setMinimum(property->getMinValue()[i]);
-            _spinBox[i]->setMaximum(property->getMaxValue()[i]);
-            _spinBox[i]->setValue(property->getValue()[i]);
-            addWidget(_spinBox[i]);
+            _adjusters[i] = new IntAdjusterWidget;
+            _adjusters[i]->setMinimum(property->getMinValue()[i]);
+            _adjusters[i]->setMaximum(property->getMaxValue()[i]);
+            _adjusters[i]->setValue(property->getValue()[i]);
+            addWidget(_adjusters[i]);
         }
 
         property->s_minMaxChanged.connect(this, &IVecPropertyWidget::onPropertyMinMaxChanged);
@@ -173,9 +172,9 @@ namespace campvis {
     void campvis::IVecPropertyWidget<SIZE>::updateWidgetFromProperty() {
         PropertyType* prop = static_cast<PropertyType*>(_property);
         for (size_t i = 0; i < size; ++i) {
-            _spinBox[i]->blockSignals(true);
-            _spinBox[i]->setValue(prop->getValue()[i]);
-            _spinBox[i]->blockSignals(false);
+            _adjusters[i]->blockSignals(true);
+            _adjusters[i]->setValue(prop->getValue()[i]);
+            _adjusters[i]->blockSignals(false);
         }
     }
 
@@ -185,7 +184,7 @@ namespace campvis {
         PropertyType* prop = static_cast<PropertyType*>(_property);
         typename IVecPropertyWidgetTraits<SIZE>::BaseType newValue;
         for (size_t i = 0; i < size; ++i)
-            newValue[i] = _spinBox[i]->value();
+            newValue[i] = _adjusters[i]->value();
         prop->setValue(newValue);
         --_ignorePropertyUpdates;
     }
@@ -195,8 +194,8 @@ namespace campvis {
         if (_ignorePropertyUpdates == 0) {
             PropertyType* prop = static_cast<PropertyType*>(_property);
             for (size_t i = 0; i < size; ++i) {
-                _spinBox[i]->setMinimum(prop->getMinValue()[i]);
-                _spinBox[i]->setMaximum(prop->getMaxValue()[i]);
+                _adjusters[i]->setMinimum(prop->getMinValue()[i]);
+                _adjusters[i]->setMaximum(prop->getMaxValue()[i]);
             }
         }
     }
@@ -210,7 +209,7 @@ namespace campvis {
             : IVecPropertyWidget<2>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
             }
         }
 
@@ -227,7 +226,7 @@ namespace campvis {
             : IVecPropertyWidget<3>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
             }
         }
 
@@ -244,7 +243,7 @@ namespace campvis {
             : IVecPropertyWidget<4>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
+                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
             }
         }
 
