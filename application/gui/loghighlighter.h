@@ -101,11 +101,11 @@ namespace campvis {
          */
         int highlightRegExp(const QString& text, int offset, const QRegExp& regExp, const QTextCharFormat& format);
 
-        const QRegExp* _filterRegExp;                                   ///< Current filter regexp
-        const QRegExp* _logLevelRegExp;                                 ///< Regexp matching log level strings
-        QTextCharFormat _filterMatchFormat;                             ///< Format for highlighting filter matches
-        std::list<std::pair<QRegExp, QTextCharFormat>> _rules;          ///< Set of general highlighting rules
-        std::list<std::pair<QString, QTextCharFormat>> _logLevelRules;  ///< Highlighting rules for log levels
+        const QRegExp* _filterRegExp;                                     ///< Current filter regexp
+        const QRegExp* _logLevelRegExp;                                   ///< Regexp matching log level strings
+        QTextCharFormat _filterMatchFormat;                               ///< Format for highlighting filter matches
+        std::list< std::pair<QRegExp, QTextCharFormat> > _rules;          ///< Set of general highlighting rules
+        std::list< std::pair<QString, QTextCharFormat> > _logLevelRules;  ///< Highlighting rules for log levels
     };
 }
 

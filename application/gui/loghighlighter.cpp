@@ -47,7 +47,7 @@ namespace campvis {
         _filterMatchFormat.setForeground(fgBrush);
 
         // Rules for highlighting date stamps, time stamps, and categories
-        std::list<std::pair<QRegExp, QTextCharFormat>>::iterator it = _rules.begin();
+        std::list< std::pair<QRegExp, QTextCharFormat> >::iterator it = _rules.begin();
 
         std::pair<QRegExp, QTextCharFormat>& dateStampRule = *it++;
         dateStampRule.first.setPattern("\\[(\\d{2}\\.){2}\\d{4}\\]");
@@ -63,7 +63,7 @@ namespace campvis {
 
         // Rules for highlighting log levels
         _logLevelRegExp = new QRegExp("\\((Debug|Info|Warning|Error|Fatal)\\)");
-        std::list<std::pair<QString, QTextCharFormat>>::iterator logLevelIt = _logLevelRules.begin();
+        std::list< std::pair<QString, QTextCharFormat> >::iterator logLevelIt = _logLevelRules.begin();
 
         std::pair<QString, QTextCharFormat>& debugRule = *logLevelIt++;
         debugRule.first = "Debug";
@@ -101,7 +101,7 @@ namespace campvis {
     void LogHighlighter::highlightBlock(const QString& text)
     {
         int offset = 0;
-        std::list<std::pair<QRegExp, QTextCharFormat>>::iterator it = _rules.begin();
+        std::list< std::pair<QRegExp, QTextCharFormat> >::iterator it = _rules.begin();
 
         do {
             std::pair<QRegExp, QTextCharFormat>& rule = *it++;
@@ -149,8 +149,8 @@ namespace campvis {
         int pos = _logLevelRegExp->indexIn(text, offset);
 
         if (pos != -1) {
-            QString& logLevel = _logLevelRegExp->cap(1);
-            std::list<std::pair<QString, QTextCharFormat>>::iterator it = _logLevelRules.begin();
+            const QString& logLevel = _logLevelRegExp->cap(1);
+            std::list< std::pair<QString, QTextCharFormat> >::iterator it = _logLevelRules.begin();
 
             do {
                 std::pair<QString, QTextCharFormat>& rule = *it++;
