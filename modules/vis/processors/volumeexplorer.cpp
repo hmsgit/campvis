@@ -45,15 +45,15 @@ namespace campvis {
         : VisualizationProcessor(canvasSize)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
         , p_camera("Camera", "Camera")
-        , p_xSlice("XSlice", "Slice in YZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
-        , p_ySlice("YSlice", "Slice in XZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
-        , p_zSlice("ZSlice", "Slice in XY Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
+        , p_xSlice("XSlice", "Slice in YZ Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
+        , p_ySlice("YSlice", "Slice in XZ Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
+        , p_zSlice("ZSlice", "Slice in XY Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
         , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(128))
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
         , _raycaster(canvasSize)
         , _sliceExtractor(canvasSize)
-        , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
-        , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
+        , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
+        , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
     {
         addProperty(&p_inputVolume);
         addProperty(&p_camera);

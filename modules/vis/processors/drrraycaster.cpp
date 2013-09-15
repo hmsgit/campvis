@@ -39,8 +39,8 @@ namespace campvis {
     DRRRaycaster::DRRRaycaster(IVec2Property& canvasSize)
         : RaycastingProcessor(canvasSize, "modules/vis/glsl/drrraycaster.frag", false)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
-        , p_scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)
+        , p_shift("shift", "Normalization Shift", 0.f, -10.f, 10.f, 0.1f)
+        , p_scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f, 0.1f)
         , p_invertMapping("invertMapping", "Invert Mapping", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
     {
         addProperty(&p_targetImageID);

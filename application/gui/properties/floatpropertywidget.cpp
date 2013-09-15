@@ -40,17 +40,19 @@ namespace campvis {
         _adjuster->setMinimum(property->getMinValue());
         _adjuster->setMaximum(property->getMaxValue());
         _adjuster->setDecimals(3);
-        _adjuster->setSingleStep(stepValue);
+        _adjuster->setSingleStep(property->getStepValue());
         _adjuster->setValue(property->getValue());
 
         addWidget(_adjuster);
 
         connect(_adjuster, SIGNAL(valueChanged(double)), this, SLOT(onAdjusterValueChanged(double)));
         property->s_minMaxChanged.connect(this, &FloatPropertyWidget::onPropertyMinMaxChanged);
+        property->s_stepChanged.connect(this, &FloatPropertyWidget::onPropertyStepChanged);
     }
 
     FloatPropertyWidget::~FloatPropertyWidget() {
         static_cast<FloatProperty*>(_property)->s_minMaxChanged.disconnect(this);
+        static_cast<FloatProperty*>(_property)->s_stepChanged.disconnect(this);
     }
 
     void FloatPropertyWidget::updateWidgetFromProperty() {
@@ -72,6 +74,13 @@ namespace campvis {
             const FloatProperty* prop = static_cast<const FloatProperty*>(property);
             _adjuster->setMinimum(prop->getMinValue());
             _adjuster->setMaximum(prop->getMaxValue());
+        }
+    }
+
+    void FloatPropertyWidget::onPropertyStepChanged(const AbstractProperty* property) {
+        if (_ignorePropertyUpdates == 0) {
+            const FloatProperty* prop = static_cast<const FloatProperty*>(property);
+            _adjuster->setSingleStep(prop->getStepValue());
         }
     }
 }

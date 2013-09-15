@@ -50,6 +50,7 @@ namespace campvis {
         _adjuster = new IntAdjusterWidget;
         _adjuster->setMinimum(property->getMinValue());
         _adjuster->setMaximum(property->getMaxValue());
+        _adjuster->setSingleStep(property->getStepValue());
         _adjuster->setValue(property->getValue());
         layout->addWidget(_adjuster, 0, 0, 1, 2);
 
@@ -69,10 +70,12 @@ namespace campvis {
         connect(_cbEnableTimer, SIGNAL(stateChanged(int)), this, SLOT(onEnableTimerChanged(int)));
         connect(_sbInterval, SIGNAL(valueChanged(int)), this, SLOT(onIntervalValueChanged(int)));
         property->s_minMaxChanged.connect(this, &IntPropertyWidget::onPropertyMinMaxChanged);
+        property->s_stepChanged.connect(this, &IntPropertyWidget::onPropertyStepChanged);
     }
 
     IntPropertyWidget::~IntPropertyWidget() {
         static_cast<IntProperty*>(_property)->s_minMaxChanged.disconnect(this);
+        static_cast<IntProperty*>(_property)->s_stepChanged.disconnect(this);
     }
 
     void IntPropertyWidget::updateWidgetFromProperty() {
@@ -94,6 +97,13 @@ namespace campvis {
             IntProperty* prop = static_cast<IntProperty*>(_property);
             _adjuster->setMinimum(prop->getMinValue());
             _adjuster->setMaximum(prop->getMaxValue());
+        }
+    }
+
+    void IntPropertyWidget::onPropertyStepChanged(const AbstractProperty* property) {
+        if (_ignorePropertyUpdates == 0) {
+            IntProperty* prop = static_cast<IntProperty*>(_property);
+            _adjuster->setSingleStep(prop->getStepValue());
         }
     }
 

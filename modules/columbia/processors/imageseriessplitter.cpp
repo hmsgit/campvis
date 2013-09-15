@@ -38,7 +38,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_inputID("InputID", "Input Image Series ID", "input", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_outputID("OutputID", "Output Image ID", "output", DataNameProperty::WRITE)
-        , p_imageIndex("ImageIndex", "Image to Select", 0, 0, 0)
+        , p_imageIndex("ImageIndex", "Image to Select", 0, 0, 0, 1)
     {
         addProperty(&p_inputID);
         addProperty(&p_outputID);

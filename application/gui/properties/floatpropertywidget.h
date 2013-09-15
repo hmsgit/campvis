@@ -68,6 +68,9 @@ namespace campvis {
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
+        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
+        virtual void onPropertyStepChanged(const AbstractProperty* property);
+
         DoubleAdjusterWidget* _adjuster;        ///< Widget allowing the user to change the property's value
 
     };
@@ -133,6 +136,9 @@ namespace campvis {
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
+        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
+        virtual void onPropertyStepChanged(const AbstractProperty* property);
+
         DoubleAdjusterWidget* _adjusters[size];
     };
 
@@ -147,18 +153,19 @@ namespace campvis {
             _adjusters[i]->setMinimum(property->getMinValue()[i]);
             _adjusters[i]->setMaximum(property->getMaxValue()[i]);
             _adjusters[i]->setDecimals(3);
-            _adjusters[i]->setSingleStep(0.01);
+            _adjusters[i]->setSingleStep(property->getStepValue()[i]);
             _adjusters[i]->setValue(property->getValue()[i]);
             addWidget(_adjusters[i]);
         }
 
         property->s_minMaxChanged.connect(this, &VecPropertyWidget::onPropertyMinMaxChanged);
-
+        property->s_stepChanged.connect(this, &VecPropertyWidget::onPropertyStepChanged);
     }
 
     template<size_t SIZE>
     campvis::VecPropertyWidget<SIZE>::~VecPropertyWidget() {
         static_cast<PropertyType*>(_property)->s_minMaxChanged.disconnect(this);
+        static_cast<PropertyType*>(_property)->s_stepChanged.disconnect(this);
     }
 
     template<size_t SIZE>
@@ -189,6 +196,16 @@ namespace campvis {
             for (size_t i = 0; i < size; ++i) {
                 _adjusters[i]->setMinimum(prop->getMinValue()[i]);
                 _adjusters[i]->setMaximum(prop->getMaxValue()[i]);
+            }
+        }
+    }
+
+    template<size_t SIZE>
+    void campvis::VecPropertyWidget<SIZE>::onPropertyStepChanged(const AbstractProperty* property) {
+        if (_ignorePropertyUpdates == 0) {
+            PropertyType* prop = static_cast<PropertyType*>(_property);
+            for (size_t i = 0; i < size; ++i) {
+                _adjusters[i]->setSingleStep(prop->getStepValue()[i]);
             }
         }
     }

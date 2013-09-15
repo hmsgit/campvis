@@ -52,8 +52,8 @@ namespace campvis {
         : AbstractProcessor()
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "VtkImageReader.output", DataNameProperty::WRITE)
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
         addProperty(&p_url);
         addProperty(&p_targetImageID);
