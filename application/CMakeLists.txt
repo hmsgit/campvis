@@ -75,6 +75,13 @@ ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${Campv
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
+
+IF(CAMPVIS_GROUP_SOURCE_FILES)
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationSources ${CampvisHome} "")
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationHeaders ${CampvisHome} "")
+ENDIF()
+
+
 IF(CAMPVIS_DEPLOY_SHADERS)
     LIST(APPEND CampvisShaderDirectories "application/glsl")
     LIST(APPEND CampvisShaderDirectories "core/glsl")

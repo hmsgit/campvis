@@ -21,6 +21,7 @@ OPTION(CAMPVIS_BUILD_LIB_KISSCL     "Build KissCL Library"                      
 OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   ON)
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
+OPTION(CAMPVIS_GROUP_SOURCE_FILES   "Group source files by directory"                               OFF)
 
 IF(WIN32)
     OPTION(CAMPVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON)
@@ -33,8 +34,6 @@ ENDIF()
 #
 include(cmake/commonconf.cmake)
 include(cmake/parseModulesDir.cmake)
-
-SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 
