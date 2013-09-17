@@ -69,6 +69,10 @@ namespace campvis {
         virtual const std::string getName() const { return "VolumeExplorer"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Combines a volume raycaster and 3 slice views for explorative volume visualization."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
 

@@ -66,6 +66,10 @@ namespace campvis {
         virtual const std::string getName() const { return "StrainFiberTracker"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a fiber tracking of incomoing strain data."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         DataNameProperty p_strainId;   ///< image ID for input strain data
         DataNameProperty p_outputID;   ///< image ID for output fiber data

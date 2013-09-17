@@ -41,7 +41,7 @@
 
 namespace campvis {
     /**
-     * Genereates entry-/exit point textures for the given image and camera.
+     * Generates proxy geometry for a virtual mirror.
      */
     class VirtualMirrorGeometryGenerator : public AbstractProcessor {
     public:
@@ -58,7 +58,11 @@ namespace campvis {
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "VirtualMirrorGeometryGenerator"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Genereates entry-/exit point textures for the given image and camera."; };
+        virtual const std::string getDescription() const { return "Generates proxy geometry for a virtual mirror."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
 

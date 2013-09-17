@@ -74,6 +74,10 @@ namespace campvis {
         virtual const std::string getName() const { return "CLRaycaster"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Proof of concept processor for OpenCL based Volume raycasting."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         /**
          * Initalizes the Processor, loads and builds the shader.

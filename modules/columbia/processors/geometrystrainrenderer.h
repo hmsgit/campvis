@@ -69,6 +69,10 @@ namespace campvis {
         virtual const std::string getName() const { return "GeometryStrainRenderer"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Renders Geometry."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
 

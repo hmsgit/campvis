@@ -69,6 +69,13 @@ namespace campvis {
             INVALID_PROPERTIES  = 1 << 3    ///< Need to update the properties
         };
 
+        /// Current state of a processor in terms of stability.
+        enum ProcessorState {
+            EXPERIMENTAL,
+            TESTING,
+            STABLE
+        };
+
         /**
          * Creates a AbstractProcessor.
          */
@@ -111,6 +118,18 @@ namespace campvis {
          * \return  A description what this processor does.
          */
         virtual const std::string getDescription() const = 0;
+
+        /**
+         * Gets the name of the author of this processor. Can be handy if you have questions on how to do XYZ with this processor.
+         * \return  The name of the author of this processor.
+         */
+        virtual const std::string getAuthor() const = 0;
+
+        /**
+         * Gets the current processor state in terms of stability. To be defined by every subclass.
+         * \return  The current processor state in terms of stability.
+         */
+        virtual const ProcessorState getProcessorState() const = 0;
 
         /**
          * Gets the flag whether this processor is currently enabled.
