@@ -48,21 +48,26 @@ namespace campvis {
         , p_xSlice("XSlice", "Slice in YZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
         , p_ySlice("YSlice", "Slice in XZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
         , p_zSlice("ZSlice", "Slice in XY Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
-        , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(128))
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
         , _raycaster(canvasSize)
         , _sliceExtractor(canvasSize)
         , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
         , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
+        , _xSliceHandler(&p_xSlice)
+        , _ySliceHandler(&p_ySlice)
+        , _zSliceHandler(&p_zSlice)
+        , _windowingHandler(&_sliceExtractor.p_transferFunction)
+        , _trackballEH(0)
     {
         addProperty(&p_inputVolume);
         addProperty(&p_camera);
         addProperty(&p_xSlice);
         addProperty(&p_ySlice);
         addProperty(&p_zSlice);
-        addProperty(&p_transferFunction);
         addProperty(&p_outputImage);
 
+        addProperty(&_sliceExtractor.p_transferFunction);
+        addProperty(_raycaster.getProperty("TransferFunction"));
 
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
         p_inputVolume.addSharedProperty(&_sliceExtractor.p_sourceImageID);
@@ -74,10 +79,17 @@ namespace campvis {
 
         p_sliceRenderSize.addSharedProperty(&_sliceExtractor._renderTargetSize);
         p_volumeRenderSize.addSharedProperty(&_raycaster._renderTargetSize);
+
+        addProperty(&p_sliceRenderSize);
+        addProperty(&p_volumeRenderSize);
+
+
+        // Event-Handlers
+        _trackballEH = new TrackballNavigationEventHandler(0, &_raycaster.p_camera, p_volumeRenderSize.getValue());
     }
 
     VolumeExplorer::~VolumeExplorer() {
-
+        delete _trackballEH;
     }
 
     void VolumeExplorer::init() {
@@ -88,9 +100,6 @@ namespace campvis {
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/quadview.frag", "", false);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
-
-        p_transferFunction.addSharedProperty(_sliceExtractor.getProperty("TransferFunction"));
-        p_transferFunction.addSharedProperty(&_sliceExtractor.p_transferFunction);
 
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
@@ -107,6 +116,8 @@ namespace campvis {
 
         _quad = new FaceGeometry(vertices, texCorods);
         _quad->createGLBuffers();
+
+        _trackballEH->setViewportSize(p_volumeRenderSize.getValue());
     }
 
     void VolumeExplorer::deinit() {
@@ -155,6 +166,10 @@ namespace campvis {
         if (prop == &_renderTargetSize) {
             p_sliceRenderSize.setValue(tgt::ivec2(_renderTargetSize.getValue().y / 3, _renderTargetSize.getValue().y / 3));
             p_volumeRenderSize.setValue(tgt::ivec2(_renderTargetSize.getValue().x - _renderTargetSize.getValue().y / 3, _renderTargetSize.getValue().y));
+
+            _trackballEH->setViewportSize(p_volumeRenderSize.getValue());
+            float ratio = static_cast<float>(p_volumeRenderSize.getValue().x) / static_cast<float>(p_volumeRenderSize.getValue().y);
+            _raycaster.p_camera.setWindowRatio(ratio);
         }
         if (prop == &p_outputImage) {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
@@ -182,8 +197,8 @@ namespace campvis {
         _shader->activate();
 
         tgt::vec2 rts(_renderTargetSize.getValue());
-        const tgt::ivec2 vrs = p_volumeRenderSize.getValue();
-        const tgt::ivec2 srs = p_sliceRenderSize.getValue();
+        const tgt::ivec2& vrs = p_volumeRenderSize.getValue();
+        const tgt::ivec2& srs = p_sliceRenderSize.getValue();
 
         _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, rts.x, rts.y, 0, -1, 1));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -226,12 +241,17 @@ namespace campvis {
         if (processor == &_raycaster) {
             invalidate(VR_INVALID);
         }
+        if (processor == &_sliceExtractor) {
+            invalidate(SLICES_INVALID);
+        }
 
         invalidate(AbstractProcessor::INVALID_RESULT);
     }
 
     void VolumeExplorer::updateProperties(DataHandle img) {
-        p_transferFunction.getTF()->setImageHandle(img);
+        _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img);
+        static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->getTF()->setImageHandle(img);
+
         const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
         if (p_xSlice.getMaxValue() != imgSize.x - 1){
             p_xSlice.setMaxValue(static_cast<int>(imgSize.x) - 1);
@@ -242,6 +262,21 @@ namespace campvis {
         if (p_zSlice.getMaxValue() != imgSize.z - 1){
             p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
+
+        tgt::Bounds volumeExtent = static_cast<const ImageData*>(img.getData())->getWorldBounds();
+        tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+
+        _trackballEH->setSceneBounds(volumeExtent);
+        _trackballEH->setCenter(volumeExtent.center());
+        _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _raycaster.p_camera.getValue().getUpVector());
+    }
+
+    bool VolumeExplorer::accept(tgt::Event* e) {
+        return true;
+    }
+
+    void VolumeExplorer::execute(tgt::Event* e) {
+        _trackballEH->execute(e);
     }
 
 }

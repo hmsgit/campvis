@@ -57,6 +57,9 @@ namespace campvis {
 
         /// \see AbstractProperty::deinit()
         virtual void deinit();
+        /// \see AbstractProperty::addSharedProperty()
+        virtual void addSharedProperty(AbstractProperty* prop);
+
 
         /**
          * Gets the TransferFunction of this property.

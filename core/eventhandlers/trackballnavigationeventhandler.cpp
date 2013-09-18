@@ -101,11 +101,13 @@ namespace campvis {
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
             if (me->action() == tgt::MouseEvent::PRESSED) {
-                _parentPipeline->enableLowQualityMode();
+                if (_parentPipeline)
+                    _parentPipeline->enableLowQualityMode();
                 _trackball->mousePressEvent(me);
             }
             else if (me->action() == tgt::MouseEvent::RELEASED) {
-                _parentPipeline->disableLowQualityMode();
+                if (_parentPipeline)
+                    _parentPipeline->disableLowQualityMode();
                 _trackball->mouseReleaseEvent(me);
             }
             else if (me->action() == tgt::MouseEvent::MOTION)

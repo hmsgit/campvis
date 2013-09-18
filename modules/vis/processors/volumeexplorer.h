@@ -30,6 +30,11 @@
 #ifndef VOLUMEEXPLORER_H__
 #define VOLUMEEXPLORER_H__
 
+#include "core/eventhandlers/abstracteventhandler.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/transfuncwindowingeventhandler.h"
+
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
@@ -47,7 +52,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class VolumeExplorer : public VisualizationProcessor {
+    class VolumeExplorer : public VisualizationProcessor, public AbstractEventHandler {
     public:
         /**
          * Constructs a new VolumeExplorer Processor
@@ -74,6 +79,11 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
+        /// \see AbstractEventHandler::accept()
+        virtual bool accept(tgt::Event* e);
+        /// \see AbstractEventHandler::execute()
+        virtual void execute(tgt::Event* e);
+
         virtual void process(DataContainer& data);
 
         DataNameProperty p_inputVolume;              ///< image ID for first input image
@@ -82,7 +92,6 @@ namespace campvis {
         IntProperty p_xSlice;
         IntProperty p_ySlice;
         IntProperty p_zSlice;
-        TransferFunctionProperty p_transferFunction;
 
         DataNameProperty p_outputImage;              ///< image ID for output image
 
@@ -119,6 +128,13 @@ namespace campvis {
 
         IVec2Property p_sliceRenderSize;
         IVec2Property p_volumeRenderSize;
+
+
+        MWheelToNumericPropertyEventHandler _xSliceHandler;
+        MWheelToNumericPropertyEventHandler _ySliceHandler;
+        MWheelToNumericPropertyEventHandler _zSliceHandler;
+        TransFuncWindowingEventHandler _windowingHandler;
+        TrackballNavigationEventHandler* _trackballEH;
 
         static const std::string loggerCat_;
     };
