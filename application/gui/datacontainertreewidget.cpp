@@ -41,6 +41,7 @@
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/renderdata.h"
 
 #include <QHeaderView>
 #include <QStringList>
@@ -100,6 +101,9 @@ namespace campvis {
                 }
                 else if (const MeshGeometry* tester = dynamic_cast<const MeshGeometry*>(data)) {
                     return QVariant(QString("Mesh Geometry"));
+                }
+                else if (const RenderData* tester = dynamic_cast<const RenderData*>(data)) {
+                    return QVariant(QString("Render Data"));
                 }
             }
             else

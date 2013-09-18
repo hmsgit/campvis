@@ -223,6 +223,22 @@ namespace campvis {
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
             }
+            else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
+                const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
+                if (id != 0) {
+                    std::ostringstream ss;
+                    ss << id->getSize();
+                    _lblSize->setText(tr("Size: ") + QString::fromStdString(ss.str()));
+
+                    ss.str("");
+                    ss << id->getWorldBounds();
+                    _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+                }
+                else {
+                    _lblSize->setText(tr("Size: n/a"));
+                    _lblBounds->setText(tr("World Bounds: n/a")); 
+                }
+            }
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
             else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
                 std::ostringstream ss;
