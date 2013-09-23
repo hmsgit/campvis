@@ -34,12 +34,10 @@ namespace campvis {
         : AbstractPropertyWidget(property, false, parent)
         , _adjuster(0)
     {
-        const float stepValue = 0.01f;
-
         _adjuster = new DoubleAdjusterWidget();
         _adjuster->setMinimum(property->getMinValue());
         _adjuster->setMaximum(property->getMaxValue());
-        _adjuster->setDecimals(3);
+        _adjuster->setDecimals(property->getDecimals());
         _adjuster->setSingleStep(property->getStepValue());
         _adjuster->setValue(property->getValue());
 
@@ -48,11 +46,15 @@ namespace campvis {
         connect(_adjuster, SIGNAL(valueChanged(double)), this, SLOT(onAdjusterValueChanged(double)));
         property->s_minMaxChanged.connect(this, &FloatPropertyWidget::onPropertyMinMaxChanged);
         property->s_stepChanged.connect(this, &FloatPropertyWidget::onPropertyStepChanged);
+        property->s_decimalsChanged.connect(this, &FloatPropertyWidget::onPropertyDecimalsChanged);
     }
 
     FloatPropertyWidget::~FloatPropertyWidget() {
-        static_cast<FloatProperty*>(_property)->s_minMaxChanged.disconnect(this);
-        static_cast<FloatProperty*>(_property)->s_stepChanged.disconnect(this);
+        FloatProperty* property = static_cast<FloatProperty*>(_property);
+
+        property->s_minMaxChanged.disconnect(this);
+        property->s_stepChanged.disconnect(this);
+        property->s_decimalsChanged.disconnect(this);
     }
 
     void FloatPropertyWidget::updateWidgetFromProperty() {
@@ -81,6 +83,13 @@ namespace campvis {
         if (_ignorePropertyUpdates == 0) {
             const FloatProperty* prop = static_cast<const FloatProperty*>(property);
             _adjuster->setSingleStep(prop->getStepValue());
+        }
+    }
+
+    void FloatPropertyWidget::onPropertyDecimalsChanged(const AbstractProperty* property) {
+        if (_ignorePropertyUpdates == 0) {
+            const FloatProperty* prop = static_cast<const FloatProperty*>(property);
+            _adjuster->setDecimals(prop->getDecimals());
         }
     }
 }
