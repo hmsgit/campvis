@@ -31,8 +31,8 @@
 #define SIMPLERAYCASTER_H__
 
 #include "core/pipeline/raycastingprocessor.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
 #include <string>

@@ -208,14 +208,10 @@ namespace campvis {
 // = Typedefs =====================================================================================
 
     typedef NumericProperty<int> IntProperty;
-    typedef NumericProperty<float> FloatProperty;
 
     typedef NumericProperty<tgt::ivec2> IVec2Property;
-    typedef NumericProperty<tgt::vec2> Vec2Property;
     typedef NumericProperty<tgt::ivec3> IVec3Property;
-    typedef NumericProperty<tgt::vec3> Vec3Property;
     typedef NumericProperty<tgt::ivec4> IVec4Property;
-    typedef NumericProperty<tgt::vec4> Vec4Property;
 
 // = Template Implementation ======================================================================
 

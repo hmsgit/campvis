@@ -36,8 +36,8 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
 
 namespace tgt {
     class Shader;

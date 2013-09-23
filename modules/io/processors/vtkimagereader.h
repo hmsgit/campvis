@@ -35,7 +35,7 @@
 #include "tgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 
 namespace campvis {
     /**

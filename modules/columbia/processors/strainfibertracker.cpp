@@ -171,9 +171,9 @@ namespace campvis {
         , p_updateButton("UpdateButton", "Perform Tracking")
         , p_seedDistance("SeedDistance", "Seed Distance", 4, 1, 16, 1, AbstractProcessor::VALID)
         , p_numSteps("NumSteps", "Maximum Number of Steps", 256, 16, 1024, 1, AbstractProcessor::VALID)
-        , p_stepSize("StepSize", "Base Step Size", 1.f, .01f, 10.f, 0.01f, AbstractProcessor::VALID)
-        , p_strainThreshold("StrainThreshold", "Local Strain Threshold", .5f, .1f, 1.f, 0.01f, AbstractProcessor::VALID)
-        , p_maximumAngle("MaximumAngle", "Maxium Angle", 25.f, 0.f, 100.f, 0.1f, AbstractProcessor::VALID)
+        , p_stepSize("StepSize", "Base Step Size", 1.f, .01f, 10.f, 0.01f, 2, AbstractProcessor::VALID)
+        , p_strainThreshold("StrainThreshold", "Local Strain Threshold", .5f, .1f, 1.f, 0.01f, 2, AbstractProcessor::VALID)
+        , p_maximumAngle("MaximumAngle", "Maxium Angle", 25.f, 0.f, 100.f, 0.1f, 2, AbstractProcessor::VALID)
     {
         addProperty(&p_strainId);
         addProperty(&p_outputID);

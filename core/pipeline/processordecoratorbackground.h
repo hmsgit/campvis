@@ -31,7 +31,7 @@
 #define PROCESSORDECORATORBACKGROUND_H__
 
 #include "core/pipeline/abstractprocessordecorator.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 
 namespace campvis {
 

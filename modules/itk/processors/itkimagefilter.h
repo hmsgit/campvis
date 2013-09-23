@@ -34,6 +34,7 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"

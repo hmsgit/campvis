@@ -32,7 +32,7 @@
 
 #include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 
 namespace campvis {
     /**
