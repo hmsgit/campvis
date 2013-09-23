@@ -58,6 +58,7 @@ namespace campvis {
         , _zSliceHandler(&p_zSlice)
         , _windowingHandler(&_sliceExtractor.p_transferFunction)
         , _trackballEH(0)
+        , _mousePressed(false)
     {
         addProperty(&p_inputVolume);
         addProperty(&p_camera);
@@ -101,6 +102,7 @@ namespace campvis {
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
 
+        _sliceExtractor.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
         std::vector<tgt::vec3> vertices, texCorods;
@@ -276,7 +278,39 @@ namespace campvis {
     }
 
     void VolumeExplorer::execute(tgt::Event* e) {
-        _trackballEH->execute(e);
+        if (typeid(*e) == typeid(tgt::MouseEvent)) {
+            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
+
+            if (!_mousePressed && me->x() <= p_sliceRenderSize.getValue().x) {
+                if (me->action() == tgt::MouseEvent::WHEEL) {
+                    if (me->y() <= p_sliceRenderSize.getValue().y)
+                        _xSliceHandler.execute(e);
+                    else if (me->y() <= 2*p_sliceRenderSize.getValue().y)
+                        _ySliceHandler.execute(e);
+                    else
+                        _zSliceHandler.execute(e);
+                }
+                else {
+                    _windowingHandler.execute(e);
+                }
+            }
+            else {
+                if (me->action() == tgt::MouseEvent::PRESSED)
+                    _mousePressed = true;
+                else if (me->action() == tgt::MouseEvent::RELEASED)
+                    _mousePressed = false;
+
+                tgt::MouseEvent adjustedMe(
+                    me->x() - p_sliceRenderSize.getValue().x,
+                    me->y(),
+                    me->action(),
+                    me->modifiers(),
+                    me->button(),
+                    me->viewport() - tgt::ivec2(p_sliceRenderSize.getValue().x, 0)
+                    );
+                _trackballEH->execute(&adjustedMe);
+            }
+        }
     }
 
 }

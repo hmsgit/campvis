@@ -135,6 +135,7 @@ namespace campvis {
         MWheelToNumericPropertyEventHandler _zSliceHandler;
         TransFuncWindowingEventHandler _windowingHandler;
         TrackballNavigationEventHandler* _trackballEH;
+        bool _mousePressed;
 
         static const std::string loggerCat_;
     };
