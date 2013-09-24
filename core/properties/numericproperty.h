@@ -307,12 +307,12 @@ namespace campvis {
 
     template<typename T>
     void campvis::NumericProperty<T>::increment() {
-        this->setValue(this->_value + T(1));
+        this->setValue(this->_value + this->_stepValue);
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::decrement() {
-        this->setValue(this->_value - T(1));
+        this->setValue(this->_value - this->_stepValue);
     }
 }
 
