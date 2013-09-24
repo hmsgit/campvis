@@ -68,7 +68,7 @@ namespace campvis {
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)
         , p_confidenceImageID("ConfidenceImageId", "Confidence Map Input", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0, 1)
+        , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
         , p_view("View", "Image to Render", viewOptions, 12)

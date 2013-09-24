@@ -100,7 +100,7 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
         , p_sweepNumber("sweepNumber", "SweepNumber", 0, 0, 0, 1, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
-        , p_frameNumber("sliceNumber", "Slice Number", 0, 0, 0, 1)
+        , p_frameNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_showConfidenceMap("ShowConfidenceMap", "Show Confidence Map", false)
         , p_smoothButton("SmoothButton", "Smooth Tracking")
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))

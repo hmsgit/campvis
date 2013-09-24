@@ -171,7 +171,7 @@ namespace campvis {
         , p_gamma("Gamma", "Gamma Parameter", .06f, .01f, 1.f, 0.01f)
         , p_normalizeValues("NormalizeValues", "Normalize Values", false)
         , p_solver("FilterMode", "Filter Mode", solvers, 4)
-        , p_numSteps("NumSteps", "Number of Solver Steps", 1000, 100, 5000, 1)
+        , p_numSteps("NumSteps", "Number of Solver Steps", 1000, 100, 5000)
         , p_curvilinear("Curvilinear", "Curvilinear Transducer?", false)
         , p_origin("PolarOrigin", "Polar Origin", tgt::vec2(0.f), tgt::vec2(-1000.f), tgt::vec2(1000.f), tgt::vec2(0.1f))
         , p_angles("PolarAngles", "Polar Angles", tgt::vec2(0.f, 1.f), tgt::vec2(0.f), tgt::vec2(1000.f), tgt::vec2(0.1f))

@@ -116,7 +116,7 @@ namespace campvis {
             const T& value,
             const T& minValue,
             const T& maxValue,
-            const T& stepValue,
+            const T& stepValue = T(1),
             int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
@@ -216,7 +216,9 @@ namespace campvis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value, const T& minValue, const T& maxValue, const T& stepValue, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
+    campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value,
+                                                 const T& minValue, const T& maxValue, const T& stepValue /*= T(1)*/,
+                                                 int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
         : GenericProperty<T>(name, title, value, invalidationLevel)
         , _minValue(minValue)
         , _maxValue(maxValue)

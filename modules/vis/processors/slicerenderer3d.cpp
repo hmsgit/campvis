@@ -52,7 +52,7 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
-        , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0, 1)
+        , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {

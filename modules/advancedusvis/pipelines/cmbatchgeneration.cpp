@@ -60,7 +60,7 @@ namespace campvis {
         , p_sourcePath("SourcePath", "Source Files Path", "")
         , p_targetPathColor("TargetPathColor", "Target Path Color Files", "")
         , p_targetPathFuzzy("TargetPathFuzzy", "Target Path Fuzzy Files", "")
-        , p_range("Range", "Files Range", tgt::ivec2(0, 1), tgt::ivec2(0, 0), tgt::ivec2(10000, 10000), tgt::ivec2(1, 1))
+        , p_range("Range", "Files Range", tgt::ivec2(0, 1), tgt::ivec2(0, 0), tgt::ivec2(10000, 10000))
         , p_execute("Execute", "Execute Batch Pipeline")
     {
         addProcessor(&_usReader);

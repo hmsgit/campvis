@@ -47,7 +47,7 @@ namespace campvis {
 
     DataContainerInspectorCanvas::DataContainerInspectorCanvas(QWidget* parent /*= 0*/) 
         : tgt::QtThreadedCanvas("DataContainer Inspector", tgt::ivec2(640, 480), tgt::GLCanvas::RGBA_BUFFER, parent, true)
-        , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1, 1)
+        , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
         , p_transferFunction("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f)))
         , _dataContainer(0)
         , _paintShader(0)

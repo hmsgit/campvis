@@ -51,7 +51,7 @@ namespace campvis {
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
         , p_filterMode("FilterMode", "Filter Mode", filterModes, 2)
-        , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15, 1)
+        , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f, 0.1f)
     {
         addProperty(&p_sourceImageID);
