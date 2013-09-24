@@ -43,7 +43,7 @@ namespace campvis {
         : VisualizationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
-        , _ve(_effectiveRenderTargetSize)
+        , _ve(&_effectiveRenderTargetSize)
     {
         addProperty(&_camera);
 

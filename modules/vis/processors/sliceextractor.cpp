@@ -51,8 +51,8 @@ namespace campvis {
 
     const std::string SliceExtractor::loggerCat_ = "CAMPVis.modules.vis.SliceExtractor";
 
-    SliceExtractor::SliceExtractor(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    SliceExtractor::SliceExtractor(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", compositingOptions, 3)
@@ -114,7 +114,7 @@ namespace campvis {
                 // texture coordinate transformation matrix (will be configured later)
                 tgt::mat4 texCoordsMatrix = tgt::mat4::zero;
 
-                float renderTargetRatio = static_cast<float>(_renderTargetSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().y);
+                float renderTargetRatio = static_cast<float>(_viewportSizeProperty->getValue().x) / static_cast<float>(_viewportSizeProperty->getValue().y);
                 float sliceRatio = 1.f;
 
                 switch (p_sliceOrientation.getValue()) {

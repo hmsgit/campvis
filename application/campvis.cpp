@@ -70,8 +70,8 @@ int main(int argc, char** argv) {
     //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
 //    app.addVisualizationPipeline("IXPV", new IxpvDemo());
     //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
-    app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
+    app.addVisualizationPipeline("DVRVis", new DVRVis());
+    //app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
     app.addVisualizationPipeline("VolumeExplorerDemo", new VolumeExplorerDemo());
 #ifdef HAS_KISSCL
     //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());

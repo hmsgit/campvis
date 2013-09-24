@@ -61,8 +61,8 @@ namespace campvis {
         GenericOption<std::string>("pixelate", "Pixelate (Experimental)")
     };
 
-    AdvancedUsFusion::AdvancedUsFusion(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    AdvancedUsFusion::AdvancedUsFusion(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ)
         , p_blurredImageId("BlurredImageId", "Blurred Ultrasound Image", "", DataNameProperty::READ)
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)

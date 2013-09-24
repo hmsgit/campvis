@@ -59,7 +59,7 @@ namespace campvis {
         /**
          * Constructs a new StrainFiberRenderer Processor
          **/
-        StrainFiberRenderer(IVec2Property& canvasSize);
+        StrainFiberRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

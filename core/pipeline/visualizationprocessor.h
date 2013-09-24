@@ -64,7 +64,7 @@ namespace campvis {
                 tgtAssert(_fbo != 0, "FBO must not be 0.");
                 _fbo->activate();
 
-                const tgt::ivec2& windowSize = vp->_renderTargetSize.getValue();
+                const tgt::ivec2& windowSize = vp->_viewportSizeProperty->getValue();
                 glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
             }
 
@@ -81,11 +81,16 @@ namespace campvis {
 
         /**
          * Creates a VisualizationProcessor.
+         * 
          * \note    The render target size property of this VisualizationProcessor will automatically 
          *          be assigned as shared property of the given \a renderTargetSize property.
-         * \param   renderTargetSize    Reference to the parent pipeline's render target size property.
+         * \note    This processor will keep and access \a renderTargetSize, so make sure the referenced
+         *          property exists at least as long as this processor or you set it to a different
+         *          property before using setViewportSizeProperty().
+         *          
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          */
-        VisualizationProcessor(IVec2Property& renderTargetSize);
+        VisualizationProcessor(IVec2Property* viewportSizeProp);
 
         /**
          * Virtual Destructor
@@ -99,6 +104,17 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
 
+
+        /**
+         * Sets the property defining the viewport size to \a viewportSizeProp.
+         * \note    This processor will keep and access this pointer, so make sure the referenced
+         *          property exists at least as long as this processor or you set it to a different
+         *          property before.
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
+         */
+        virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
+
+    protected:
 
         /**
          * Creates a texture with the given format and attaches it to the FBO to \a attachment.
@@ -127,12 +143,15 @@ namespace campvis {
          */
         void createAndAttachDepthTexture();
 
-//    protected:
-
+        /**
+         * Returns the current viewport size as ivec3.
+         * \return  tgt::ivec3(_viewportSizeProperty->getValue(), 1)
+         */
         tgt::ivec3 getRenderTargetSize() const;
 
-        tgt::FramebufferObject* _fbo;
-        IVec2Property _renderTargetSize;        ///< Viewport size of target canvas
+
+        tgt::FramebufferObject* _fbo;               ///< The FBO used by this VisualizationProcessor
+        IVec2Property* _viewportSizeProperty;       ///< Pointer to the property defining the viewport size.
 
         static const std::string loggerCat_;
     };

@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new GeometryStrainRenderer Processor
          **/
-        GeometryStrainRenderer(IVec2Property& canvasSize);
+        GeometryStrainRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

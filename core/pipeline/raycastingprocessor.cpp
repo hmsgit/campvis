@@ -41,8 +41,8 @@
 namespace campvis {
     const std::string RaycastingProcessor::loggerCat_ = "CAMPVis.modules.vis.RaycastingProcessor";
 
-    RaycastingProcessor::RaycastingProcessor(IVec2Property& renderTargetSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
-        : VisualizationProcessor(renderTargetSize)
+    RaycastingProcessor::RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
+        : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
@@ -106,7 +106,7 @@ namespace campvis {
 
                 _shader->setIgnoreUniformLocationError(true);
                 decorateRenderProlog(data, _shader);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_viewportSizeProperty->getValue()));
                 _shader->setUniform("_jitterEntryPoints", p_jitterEntryPoints.getValue());
                 _shader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
 

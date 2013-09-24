@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new IxpvCompositor Processor
          **/
-        IxpvCompositor(IVec2Property& canvasSize);
+        IxpvCompositor(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

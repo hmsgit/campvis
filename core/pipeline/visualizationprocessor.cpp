@@ -38,25 +38,26 @@ namespace campvis {
 
 // ================================================================================================
 
-    VisualizationProcessor::VisualizationProcessor(IVec2Property& renderTargetSize)
+    VisualizationProcessor::VisualizationProcessor(IVec2Property* viewportSizeProp)
         : AbstractProcessor()
         , _fbo(0)
-        , _renderTargetSize("renderTargetSize", "Canvas Size", renderTargetSize.getValue(), renderTargetSize.getMinValue(), renderTargetSize.getMaxValue())
+        , _viewportSizeProperty(viewportSizeProp)
     {
-        renderTargetSize.addSharedProperty(&_renderTargetSize);
-        _renderTargetSize.s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
+        tgtAssert(_viewportSizeProperty != 0, "Pointer must not be 0!");
     }
 
     VisualizationProcessor::~VisualizationProcessor() {
-
     }
 
     void VisualizationProcessor::init() {
         AbstractProcessor::init();
+
         _fbo = new tgt::FramebufferObject();
+        _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
     }
 
     void VisualizationProcessor::deinit() {
+        _viewportSizeProperty->s_changed.disconnect(this);
         _fbo->detachAll();
         delete _fbo;
         AbstractProcessor::deinit();
@@ -152,7 +153,7 @@ namespace campvis {
     }
 
     tgt::ivec3 VisualizationProcessor::getRenderTargetSize() const {
-        return tgt::ivec3(_renderTargetSize.getValue(), 1);
+        return tgt::ivec3(_viewportSizeProperty->getValue(), 1);
     }
 
     void VisualizationProcessor::createAndAttachColorTexture() {
@@ -161,6 +162,14 @@ namespace campvis {
 
     void VisualizationProcessor::createAndAttachDepthTexture() {
         createAndAttachTexture(GL_DEPTH_COMPONENT24);
+    }
+
+    void VisualizationProcessor::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
+        tgtAssert(viewportSizeProp != 0, "Pointer must not be 0.");
+
+        _viewportSizeProperty->s_changed.disconnect(this);
+        _viewportSizeProperty = viewportSizeProp;
+        _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
     }
 
 }

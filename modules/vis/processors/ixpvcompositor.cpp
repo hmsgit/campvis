@@ -43,8 +43,8 @@
 namespace campvis {
     const std::string IxpvCompositor::loggerCat_ = "CAMPVis.modules.vis.IxpvCompositor";
 
-    IxpvCompositor::IxpvCompositor(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    IxpvCompositor::IxpvCompositor(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_xRayImageId("XRayImageId", "X-Ray input image", "", DataNameProperty::READ)
         , p_3dSliceImageId("3DSliceImageId", "Slice input image rendered in 3D world space", "", DataNameProperty::READ)
         , p_drrFullImageId("DrrFullImageId", "Full DRR input image", "", DataNameProperty::READ)

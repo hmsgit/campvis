@@ -45,8 +45,8 @@ namespace campvis {
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
-        , _eepGenerator(_effectiveRenderTargetSize)
-        , _clRaycaster(_effectiveRenderTargetSize)
+        , _eepGenerator(&_effectiveRenderTargetSize)
+        , _clRaycaster(&_effectiveRenderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);

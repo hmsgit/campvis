@@ -57,7 +57,6 @@ namespace campvis {
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const;
 
-
         void onRenderTargetSizeChanged(const AbstractProperty* prop);
 
     protected:

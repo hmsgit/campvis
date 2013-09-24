@@ -58,7 +58,7 @@ namespace campvis {
         /**
          * Constructs a new VolumeExplorer Processor
          **/
-        VolumeExplorer(IVec2Property& canvasSize);
+        VolumeExplorer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -79,7 +79,7 @@ namespace campvis {
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
-
+        
         /// \see tgt::EventListener::onEvent()
         virtual void onEvent(tgt::Event* e);
 

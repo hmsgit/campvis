@@ -50,8 +50,8 @@
 namespace campvis {
     const std::string CLRaycaster::loggerCat_ = "CAMPVis.modules.vis.CLRaycaster";
 
-    CLRaycaster::CLRaycaster(IVec2Property& renderTargetSize)
-        : VisualizationProcessor(renderTargetSize)
+    CLRaycaster::CLRaycaster(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , _sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , _entryImageID("entryImageID", "Output Entry Points Image", "", DataNameProperty::READ)
         , _exitImageID("exitImageID", "Output Exit Points Image", "", DataNameProperty::READ)

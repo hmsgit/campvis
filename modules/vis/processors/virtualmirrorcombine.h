@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new VirtualMirrorCombine Processor
          **/
-        VirtualMirrorCombine(IVec2Property& canvasSize);
+        VirtualMirrorCombine(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

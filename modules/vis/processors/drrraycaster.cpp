@@ -36,8 +36,8 @@
 namespace campvis {
     const std::string DRRRaycaster::loggerCat_ = "CAMPVis.modules.vis.DRRRaycaster";
 
-    DRRRaycaster::DRRRaycaster(IVec2Property& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/vis/glsl/drrraycaster.frag", false)
+    DRRRaycaster::DRRRaycaster(IVec2Property* viewportSizeProp)
+        : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/drrraycaster.frag", false)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
         , p_scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)

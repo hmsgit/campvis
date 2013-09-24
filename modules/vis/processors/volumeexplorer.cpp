@@ -41,16 +41,16 @@
 namespace campvis {
     const std::string VolumeExplorer::loggerCat_ = "CAMPVis.modules.vis.VolumeExplorer";
 
-    VolumeExplorer::VolumeExplorer(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
         , p_camera("Camera", "Camera")
         , p_xSlice("XSlice", "Slice in YZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
         , p_ySlice("YSlice", "Slice in XZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
         , p_zSlice("ZSlice", "Slice in XY Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
-        , _raycaster(canvasSize)
-        , _sliceExtractor(canvasSize)
+        , _raycaster(viewportSizeProp)
+        , _sliceExtractor(viewportSizeProp)
         , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
         , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
         , _xSliceHandler(&p_xSlice)
@@ -78,8 +78,8 @@ namespace campvis {
         p_ySlice.addSharedProperty(&_sliceExtractor.p_ySliceNumber);
         p_zSlice.addSharedProperty(&_sliceExtractor.p_zSliceNumber);
 
-        p_sliceRenderSize.addSharedProperty(&_sliceExtractor._renderTargetSize);
-        p_volumeRenderSize.addSharedProperty(&_raycaster._renderTargetSize);
+        _sliceExtractor.setViewportSizeProperty(&p_sliceRenderSize);
+        _raycaster.setViewportSizeProperty(&p_volumeRenderSize);
 
         addProperty(&p_sliceRenderSize);
         addProperty(&p_volumeRenderSize);
@@ -165,9 +165,9 @@ namespace campvis {
     }
 
     void VolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {
-        if (prop == &_renderTargetSize) {
-            p_sliceRenderSize.setValue(tgt::ivec2(_renderTargetSize.getValue().y / 3, _renderTargetSize.getValue().y / 3));
-            p_volumeRenderSize.setValue(tgt::ivec2(_renderTargetSize.getValue().x - _renderTargetSize.getValue().y / 3, _renderTargetSize.getValue().y));
+        if (prop == _viewportSizeProperty) {
+            p_sliceRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
+            p_volumeRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
 
             _trackballEH->setViewportSize(p_volumeRenderSize.getValue());
             float ratio = static_cast<float>(p_volumeRenderSize.getValue().x) / static_cast<float>(p_volumeRenderSize.getValue().y);
@@ -198,7 +198,7 @@ namespace campvis {
         tgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
 
-        tgt::vec2 rts(_renderTargetSize.getValue());
+        tgt::vec2 rts(_viewportSizeProperty->getValue());
         const tgt::ivec2& vrs = p_volumeRenderSize.getValue();
         const tgt::ivec2& srs = p_sliceRenderSize.getValue();
 
@@ -207,7 +207,7 @@ namespace campvis {
 
         if (vrImage != 0) {
             vrImage->bind(_shader, colorUnit, depthUnit);
-            float ratio = static_cast<float>(p_volumeRenderSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().x);
+            float ratio = static_cast<float>(p_volumeRenderSize.getValue().x) / static_cast<float>(_viewportSizeProperty->getValue().x);
             _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
             _quad->render(GL_POLYGON);

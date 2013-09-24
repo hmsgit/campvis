@@ -65,7 +65,7 @@ namespace campvis {
         /**
          * Constructs a new SliceExtractor Processor
          **/
-        SliceExtractor(IVec2Property& canvasSize);
+        SliceExtractor(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

@@ -94,8 +94,8 @@ namespace {
 namespace campvis {
     const std::string TrackedUsSweepFrameRenderer3D::loggerCat_ = "CAMPVis.modules.vis.TrackedUsSweepFrameRenderer3D";
 
-    TrackedUsSweepFrameRenderer3D::TrackedUsSweepFrameRenderer3D(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    TrackedUsSweepFrameRenderer3D::TrackedUsSweepFrameRenderer3D(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceFioID", "Input Tracked US File IO", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
@@ -173,7 +173,7 @@ namespace campvis {
                     glEnable(GL_DEPTH_TEST);
                     _shader->activate();
                     _shader->setIgnoreUniformLocationError(true);
-                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_viewportSizeProperty->getValue()));
                     _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                     _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 

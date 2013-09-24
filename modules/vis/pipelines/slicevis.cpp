@@ -41,7 +41,7 @@ namespace campvis {
         , _imageReader()
         , _gvg()
         , _lhh()
-        , _sliceExtractor(_effectiveRenderTargetSize)
+        , _sliceExtractor(&_effectiveRenderTargetSize)
         , _wheelHandler(&_sliceExtractor.p_zSliceNumber)
         , _tfWindowingHandler(&_sliceExtractor.p_transferFunction)
     {

@@ -51,7 +51,7 @@ namespace campvis {
         /**
          * Constructs a new DepthDarkening Processor
          **/
-        DepthDarkening(IVec2Property& canvasSize);
+        DepthDarkening(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

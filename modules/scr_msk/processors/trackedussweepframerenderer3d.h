@@ -59,7 +59,7 @@ namespace campvis {
         /**
          * Constructs a new TrackedUsSweepFrameRenderer3D Processor
          **/
-        TrackedUsSweepFrameRenderer3D(IVec2Property& canvasSize);
+        TrackedUsSweepFrameRenderer3D(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

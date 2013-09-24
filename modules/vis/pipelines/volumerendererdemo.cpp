@@ -43,7 +43,7 @@ namespace campvis {
         : VisualizationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
-        , _vr(_effectiveRenderTargetSize)
+        , _vr(&_effectiveRenderTargetSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);

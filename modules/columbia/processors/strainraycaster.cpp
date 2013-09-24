@@ -36,8 +36,8 @@
 namespace campvis {
     const std::string StrainRaycaster::loggerCat_ = "CAMPVis.modules.vis.StrainRaycaster";
 
-    StrainRaycaster::StrainRaycaster(IVec2Property& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/columbia/glsl/strainraycaster.frag", true)
+    StrainRaycaster::StrainRaycaster(IVec2Property* viewportSizeProp)
+        : RaycastingProcessor(viewportSizeProp, "modules/columbia/glsl/strainraycaster.frag", true)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows", false, AbstractProcessor::INVALID_SHADER)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
