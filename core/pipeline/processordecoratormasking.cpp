@@ -38,7 +38,7 @@ namespace campvis {
         : AbstractProcessorDecorator()
         , _applyMask("applyMask", "Apply Mask to image", false, AbstractProcessor::INVALID_SHADER)
         , _maskID("maskID", "Mask Image ID", "mask", DataNameProperty::READ)
-        , _maskColor("maskColor", "Mask Color", tgt::vec4(0.f), tgt::vec4(0.f), tgt::vec4(1.f), tgt::vec4(0.01f))
+        , _maskColor("maskColor", "Mask Color", tgt::vec4(0.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _texUnit(0)
         , _maskImage(0)
     {

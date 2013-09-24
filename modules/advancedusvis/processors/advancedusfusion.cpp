@@ -74,7 +74,7 @@ namespace campvis {
         , p_view("View", "Image to Render", viewOptions, 12)
         , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f, 0.1f)
-        , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f, 0.01f)
+        , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
     {

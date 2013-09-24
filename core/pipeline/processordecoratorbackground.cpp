@@ -36,8 +36,8 @@ namespace campvis {
 
     ProcessorDecoratorBackground::ProcessorDecoratorBackground()
         : AbstractProcessorDecorator()
-        , _backgroundColor1("backgroundColor1", "Background Color 1", tgt::vec4(.9f, .9f, .9f, 1), tgt::vec4(0.f), tgt::vec4(1.f), tgt::vec4(0.01f))
-        , _backgroundColor2("backgroundColor2", "Background Color 2", tgt::vec4(.6f, .6f, .6f, 1), tgt::vec4(0.f), tgt::vec4(1.f), tgt::vec4(0.01f))
+        , _backgroundColor1("backgroundColor1", "Background Color 1", tgt::vec4(.9f, .9f, .9f, 1), tgt::vec4(0.f), tgt::vec4(1.f))
+        , _backgroundColor2("backgroundColor2", "Background Color 2", tgt::vec4(.6f, .6f, .6f, 1), tgt::vec4(0.f), tgt::vec4(1.f))
     {
     }
 

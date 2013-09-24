@@ -168,7 +168,7 @@ namespace campvis {
         , p_targetImageID("OutputConfidenceMap", "Output Confidence Map Image ID", "confidencemap", DataNameProperty::WRITE)
         , p_alpha("Alpha", "Alpha Parameter", 2.f, .1f, 10.f, 0.1f)
         , p_beta("Beta", "Beta Parameter", 100.f, 1.f, 1000.f, 0.1f)
-        , p_gamma("Gamma", "Gamma Parameter", .06f, .01f, 1.f, 0.01f)
+        , p_gamma("Gamma", "Gamma Parameter", .06f, .01f, 1.f)
         , p_normalizeValues("NormalizeValues", "Normalize Values", false)
         , p_solver("FilterMode", "Filter Mode", solvers, 4)
         , p_numSteps("NumSteps", "Number of Solver Steps", 1000, 100, 5000)

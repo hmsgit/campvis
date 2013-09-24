@@ -57,7 +57,7 @@ namespace campvis {
         , p_secondImageId("SecondImageId", "Second Input Image", "", DataNameProperty::READ)
         , p_targetImageId("TargetImageId", "Output Image", "", DataNameProperty::WRITE)
         , p_compositingMethod("CompositingMethod", "Compositing Method", compositingOptions, 5)
-        , p_alphaValue("AlphaValue", "AlphaValue", .5f, 0.f, 1.f, 0.01f)
+        , p_alphaValue("AlphaValue", "AlphaValue", .5f, 0.f, 1.f)
         , _shader(0)
     {
         addProperty(&p_firstImageId);

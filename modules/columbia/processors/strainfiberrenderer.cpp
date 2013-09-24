@@ -56,7 +56,7 @@ namespace campvis {
         , p_camera("Camera", "Camera ID")//, "camera", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT, DataNameProperty::CameraData)
         , p_lineWidth("LineWidth", "Line width", 3.f, .5f, 10.f, 0.1f)
         , p_renderMode("RenderMode", "Render Mode", renderModeOptions, 2, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
-        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f), tgt::vec4(0.01f))
+        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorShading());

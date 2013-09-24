@@ -96,7 +96,7 @@ namespace campvis {
             const T& value,
             const T& minValue,
             const T& maxValue,
-            const T& stepValue,
+            const T& stepValue = T(0.01f),
             const DecimalsType& decimals = DecimalsType(3),
             int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 

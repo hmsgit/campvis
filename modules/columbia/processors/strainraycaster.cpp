@@ -40,7 +40,7 @@ namespace campvis {
         : RaycastingProcessor(canvasSize, "modules/columbia/glsl/strainraycaster.frag", true)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows", false, AbstractProcessor::INVALID_SHADER)
-        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f, 0.01f)
+        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
         , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true, AbstractProcessor::INVALID_SHADER)
     {
         addDecorator(new ProcessorDecoratorShading());

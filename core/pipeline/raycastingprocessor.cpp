@@ -50,7 +50,7 @@ namespace campvis {
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_samplingRate("SamplingRate", "Sampling Rate", 2.f, 0.1f, 10.f, 0.1f)
         , p_jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
-        , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f, 0.01f)
+        , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
         , _fragmentShaderFilename(fragmentShaderFileName)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)

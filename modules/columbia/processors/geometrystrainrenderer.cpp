@@ -49,7 +49,7 @@ namespace campvis {
         , p_strainId("StrainDataId", "Input Strain Data ID", "gr.strain", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
-        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f), tgt::vec4(0.01f))
+        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorShading());
