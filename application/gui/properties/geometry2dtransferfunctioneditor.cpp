@@ -257,7 +257,7 @@ namespace campvis {
     void Geometry2DTransferFunctionEditor::updateManipulators() {
         tbb::mutex::scoped_lock lock(_localMutex);
 
-        _canvas->getEventHandler()->addListenerToFront(this);
+        _canvas->getEventHandler()->addEventListenerToFront(this);
     }
 
     void Geometry2DTransferFunctionEditor::onGeometryCollectionChanged() {

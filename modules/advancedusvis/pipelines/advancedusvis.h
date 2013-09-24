@@ -31,9 +31,9 @@
 #define ADVANCEDUSVIS_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
+#include "core/eventhandlers/transfuncwindowingeventlistener.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/digraphvisualizationpipeline.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -108,10 +108,10 @@ namespace campvis {
         EEPGenerator _usEEP;
         SimpleRaycaster _usDVR;
 
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-        TransFuncWindowingEventHandler _tfWindowingHandler;
+        MWheelToNumericPropertyEventListener _wheelHandler;
+        TransFuncWindowingEventListener _tfWindowingHandler;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
     };
 }
 

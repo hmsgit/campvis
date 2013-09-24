@@ -27,16 +27,38 @@
 // 
 // ================================================================================================
 
-#include "abstracteventhandler.h"
+#include "mwheeltonumericpropertyeventlistener.h"
+
+#include "tgt/assert.h"
+#include "tgt/event/mouseevent.h"
+#include "core/properties/numericproperty.h"
 
 namespace campvis {
-    const std::string AbstractEventHandler::loggerCat_ = "CAMPVis.core.eventhandler.AbstractEventhandler";
+    const std::string MWheelToNumericPropertyEventListener::loggerCat_ = "CAMPVis.core.eventhandler.MWheelToNumericPropertyEventListener";
 
-    AbstractEventHandler::AbstractEventHandler() {
-
+    MWheelToNumericPropertyEventListener::MWheelToNumericPropertyEventListener(INumericProperty* property)
+        : tgt::EventListener()
+        , _prop(property)
+    {
+        tgtAssert(_prop != 0, "Assigned property must not be 0.");
+        setEventTypes(tgt::Event::WHEELEVENT);
     }
 
-    AbstractEventHandler::~AbstractEventHandler() {
+    MWheelToNumericPropertyEventListener::~MWheelToNumericPropertyEventListener() {
 
     }
+    
+    void MWheelToNumericPropertyEventListener::wheelEvent(tgt::MouseEvent* e) {
+        switch (e->button()) {
+            case tgt::MouseEvent::MOUSE_WHEEL_UP:
+                _prop->increment();
+                e->ignore();
+                break;
+            case tgt::MouseEvent::MOUSE_WHEEL_DOWN:
+                _prop->decrement();
+                e->ignore();
+                break;
+        }
+    }
+
 }

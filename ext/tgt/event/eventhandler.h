@@ -33,7 +33,7 @@
 namespace tgt {
 
 class TGT_API EventHandler {
-private:
+protected:
     std::deque<EventListener*> listeners_; ///< The deque containing all the listeners.
 
 public:
@@ -43,33 +43,33 @@ public:
     /**
      * Add a listener to the \a listeners_ deques back.
      */
-    void addListenerToBack(EventListener* e);
+    void addEventListenerToBack(EventListener* e);
 
     /**
      * Add a listener to the \a listeners_ deques front.
      */
-    void addListenerToFront(EventListener* e);
+    void addEventListenerToFront(EventListener* e);
 
     /**
      * Remove a listener from the \a listeners_ deque.
      */
-    void removeListener(EventListener* e);
+    void removeEventListener(EventListener* e);
 
     /**
      * Removes all listeners from \a listeners_ deque.
      */
-    void clear();
+    void clearEventListeners();
 
     /**
      * Send an event to all listeners in the \a listeners_ deque.  If a listener accepts the event,
-     * the broadcast is aborted.  All broadcasted events are deleted at the end of this method.
+     * the broadcastEvent is aborted.  All broadcasted events are deleted at the end of this method.
      */
-    virtual void broadcast(Event* e);
+    virtual void broadcastEvent(Event* e);
 
     /**
      * Returns the number of listeners associated.
      */
-    size_t getListenerNumber() const;
+    size_t getNumEventListeners() const;
 };
 
 }

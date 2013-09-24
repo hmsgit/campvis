@@ -76,9 +76,9 @@ namespace campvis {
 
         addProperty(&_camera);
 
-        _trackballHandler = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
-        addEventHandler(&_wheelHandler);
-        addEventHandler(_trackballHandler);
+        _trackballHandler = new TrackballNavigationEventListener(this, &_camera, _canvasSize.getValue());
+        addEventListenerToBack(&_wheelHandler);
+        addEventListenerToBack(_trackballHandler);
     }
 
     IxpvDemo::~IxpvDemo() {

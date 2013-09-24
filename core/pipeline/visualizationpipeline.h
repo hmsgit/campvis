@@ -32,9 +32,11 @@
 
 #include "sigslot/sigslot.h"
 #include "tbb/concurrent_hash_map.h"
+
 #include "tgt/vector.h"
+#include "tgt/event/eventhandler.h"
 #include "tgt/event/eventlistener.h"
-#include "core/eventhandlers/abstracteventhandler.h"
+
 #include "core/pipeline/abstractpipeline.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
@@ -50,7 +52,7 @@ namespace campvis {
      * Abstract base class for CAMPVis Pipelines.
      * 
      */
-    class VisualizationPipeline : public AbstractPipeline, public tgt::EventListener {
+    class VisualizationPipeline : public AbstractPipeline, public tgt::EventHandler, public tgt::EventListener {
     public:
         /**
          * Creates a VisualizationPipeline.
@@ -116,12 +118,6 @@ namespace campvis {
          * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
          */
         const std::string& getRenderTargetID() const;
-
-        /**
-         * Adds the event handler \a eventHandler to this pipeline's list of event handlers.
-         * \param   eventHandler    The event handler to add.
-         */
-        void addEventHandler(AbstractEventHandler* eventHandler);
 
         /**
          * Enables low quality mode, which effectively reduces the render target size by factor 4.
@@ -191,8 +187,6 @@ namespace campvis {
 
         IVec2Property _effectiveRenderTargetSize;           ///< actual size of the render targets (considering LQ mode)
         DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
-
-        std::vector<AbstractEventHandler*> _eventHandlers;  ///< List of registered event handlers for the pipeline
 
         tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
 

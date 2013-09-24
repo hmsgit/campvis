@@ -49,8 +49,8 @@ namespace campvis {
 //         addProcessor(&_gvg);
 //         addProcessor(&_lhh);
         addProcessor(&_sliceExtractor);
-        addEventHandler(&_wheelHandler);
-        addEventHandler(&_tfWindowingHandler);
+        addEventListenerToBack(&_wheelHandler);
+        addEventListenerToBack(&_tfWindowingHandler);
     }
 
     SliceVis::~SliceVis() {

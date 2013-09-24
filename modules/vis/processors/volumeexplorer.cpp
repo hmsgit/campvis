@@ -86,7 +86,7 @@ namespace campvis {
 
 
         // Event-Handlers
-        _trackballEH = new TrackballNavigationEventHandler(0, &_raycaster.p_camera, p_volumeRenderSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(0, &_raycaster.p_camera, p_volumeRenderSize.getValue());
     }
 
     VolumeExplorer::~VolumeExplorer() {
@@ -273,25 +273,21 @@ namespace campvis {
         _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _raycaster.p_camera.getValue().getUpVector());
     }
 
-    bool VolumeExplorer::accept(tgt::Event* e) {
-        return true;
-    }
-
-    void VolumeExplorer::execute(tgt::Event* e) {
+    void VolumeExplorer::onEvent(tgt::Event* e) {
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
 
             if (!_mousePressed && me->x() <= p_sliceRenderSize.getValue().x) {
                 if (me->action() == tgt::MouseEvent::WHEEL) {
                     if (me->y() <= p_sliceRenderSize.getValue().y)
-                        _xSliceHandler.execute(e);
+                        _xSliceHandler.onEvent(e);
                     else if (me->y() <= 2*p_sliceRenderSize.getValue().y)
-                        _ySliceHandler.execute(e);
+                        _ySliceHandler.onEvent(e);
                     else
-                        _zSliceHandler.execute(e);
+                        _zSliceHandler.onEvent(e);
                 }
                 else {
-                    _windowingHandler.execute(e);
+                    _windowingHandler.onEvent(e);
                 }
             }
             else {
@@ -308,7 +304,7 @@ namespace campvis {
                     me->button(),
                     me->viewport() - tgt::ivec2(p_sliceRenderSize.getValue().x, 0)
                     );
-                _trackballEH->execute(&adjustedMe);
+                _trackballEH->onEvent(&adjustedMe);
             }
         }
     }

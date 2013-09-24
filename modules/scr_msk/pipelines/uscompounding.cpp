@@ -45,8 +45,8 @@ namespace campvis {
 
         addProperty(&p_camera);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &p_camera, _canvasSize.getValue());
-        _eventHandlers.push_back(_trackballEH);
+        _trackballEH = new TrackballNavigationEventListener(this, &p_camera, _canvasSize.getValue());
+        addEventListenerToBack(_trackballEH);
     }
 
     UsCompounding::~UsCompounding() {

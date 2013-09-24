@@ -31,8 +31,8 @@
 #define SLICEVIS_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
+#include "core/eventhandlers/transfuncwindowingeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
@@ -74,8 +74,8 @@ namespace campvis {
         LHHistogram _lhh;
         SliceExtractor _sliceExtractor;
 
-        MWheelToNumericPropertyEventHandler _wheelHandler;
-        TransFuncWindowingEventHandler _tfWindowingHandler;
+        MWheelToNumericPropertyEventListener _wheelHandler;
+        TransFuncWindowingEventListener _tfWindowingHandler;
 
     };
 }

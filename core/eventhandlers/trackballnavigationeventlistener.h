@@ -32,8 +32,8 @@
 
 #include "tgt/bounds.h"
 #include "tgt/logmanager.h"
+#include "tgt/event/eventlistener.h"
 #include "tgt/navigation/trackball.h"
-#include "core/eventhandlers/abstracteventhandler.h"
 
 namespace campvis {
     class CameraProperty;
@@ -64,34 +64,24 @@ namespace campvis {
      * EventHandler implementing a trackball navigation for a CameraProperty.
      * Implementation inspired by http://www.opengl.org/wiki/Trackball
      */
-    class TrackballNavigationEventHandler : public AbstractEventHandler {
+    class TrackballNavigationEventListener : public tgt::EventListener {
     public:
         /**
-         * Creates a TrackballNavigationEventHandler.
+         * Creates a TrackballNavigationEventListener.
          * \param   parentPipeline  Parent pipeline of this event handler, must not be 0.
          * \param   cameraProperty  The CameraProperty to apply the navigation to.
          * \param   viewportSize    Initial viewport size
          */
-        TrackballNavigationEventHandler(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
+        TrackballNavigationEventListener(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~TrackballNavigationEventHandler();
+        virtual ~TrackballNavigationEventListener();
 
 
-        /**
-         * Checks, whether the given event \a e is handled by this EventHandler.
-         * \param e     The event to check
-         * \return      True, if the given event is handled by this EventHandler.
-         */
-        virtual bool accept(tgt::Event* e);
-
-        /**
-         * Performs the event handling.
-         * \param e     The event to handle
-         */
-        virtual void execute(tgt::Event* e);
+        /// \see tgt::EventListener::onEvent()
+        virtual void onEvent(tgt::Event* e);
 
         /**
          * Sets the viewport size to \a viewportSize.

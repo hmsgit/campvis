@@ -30,7 +30,7 @@
 #ifndef VOLUMERENDERERDEMO_H__
 #define VOLUMERENDERERDEMO_H__
 
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -73,7 +73,7 @@ namespace campvis {
         MhdImageReader _imageReader;
         VolumeRenderer _vr;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

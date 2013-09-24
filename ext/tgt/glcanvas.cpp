@@ -52,7 +52,7 @@ GLCanvas::GLCanvas(const std::string& title,
 {}
 
 GLCanvas::~GLCanvas() {
-    eventHandler_->clear();
+    eventHandler_->clearEventListeners();
     delete eventHandler_;
 }
 

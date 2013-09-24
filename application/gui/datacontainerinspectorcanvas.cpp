@@ -90,7 +90,7 @@ namespace campvis {
 
         // set this as painter to get notified when window size changes
         setPainter(this, false);
-        getEventHandler()->addListenerToFront(this);
+        getEventHandler()->addEventListenerToFront(this);
     }
 
     void DataContainerInspectorCanvas::deinit() {

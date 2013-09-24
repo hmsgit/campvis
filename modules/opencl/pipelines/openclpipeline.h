@@ -31,7 +31,7 @@
 #define OPENCLPIPELINE_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -76,7 +76,7 @@ namespace campvis {
         EEPGenerator _eepGenerator;
         CLRaycaster _clRaycaster;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

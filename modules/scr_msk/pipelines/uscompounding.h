@@ -32,7 +32,7 @@
 
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
@@ -71,7 +71,7 @@ namespace campvis {
         TrackedUsFileReader _reader;
         TrackedUsSweepFrameRenderer3D _renderer;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
     };
 }
 

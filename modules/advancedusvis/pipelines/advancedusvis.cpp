@@ -76,11 +76,11 @@ namespace campvis {
         //addProcessor(&_usEEP);
         //addProcessor(&_usDVR);
 
-        addEventHandler(&_wheelHandler);
+        addEventListenerToBack(&_wheelHandler);
         //addEventHandler(&_tfWindowingHandler);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
-        _eventHandlers.push_back(_trackballEH);
+        _trackballEH = new TrackballNavigationEventListener(this, &_camera, _canvasSize.getValue());
+        addEventListenerToBack(_trackballEH);
     }
 
     AdvancedUsVis::~AdvancedUsVis() {

@@ -61,6 +61,7 @@ namespace campvis {
 
     VisualizationPipeline::VisualizationPipeline() 
         : AbstractPipeline()
+        , tgt::EventHandler()
         , tgt::EventListener()
         , _lqMode(false)
         , _ignoreCanvasSizeUpdate(false)
@@ -79,15 +80,14 @@ namespace campvis {
     }
 
     void VisualizationPipeline::onEvent(tgt::Event* e) {
-        // cycle through event handlers, ask each one if it handles the event and if so, execute it.
-        for (std::vector<AbstractEventHandler*>::iterator it = _eventHandlers.begin(); it != _eventHandlers.end() && e->isAccepted(); ++it) {
-            if ((*it)->accept(e)) {
-                (*it)->execute(e);
+        // copy and paste from tgt::EventHandler::onEvent() but without deleting e
+        for (size_t i = 0 ; i < listeners_.size() ; ++i) {
+            // check if current listener listens to the eventType of e
+            if(listeners_[i]->getEventTypes() & e->getEventType() ){
+                listeners_[i]->onEvent(e);
+                if (e->isAccepted())
+                    break;
             }
-        }
-
-        if (e->isAccepted()) {
-            EventListener::onEvent(e);
         }
     }
 
@@ -148,11 +148,6 @@ namespace campvis {
         }
         else
             AbstractPipeline::onPropertyChanged(prop);
-    }
-
-    void VisualizationPipeline::addEventHandler(AbstractEventHandler* eventHandler) {
-        tgtAssert(eventHandler != 0, "Event handler must not be 0.");
-        _eventHandlers.push_back(eventHandler);
     }
 
     void VisualizationPipeline::enableLowQualityMode() {

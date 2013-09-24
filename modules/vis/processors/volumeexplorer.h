@@ -30,10 +30,11 @@
 #ifndef VOLUMEEXPLORER_H__
 #define VOLUMEEXPLORER_H__
 
-#include "core/eventhandlers/abstracteventhandler.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/eventhandlers/transfuncwindowingeventhandler.h"
+#include "tgt/event/eventlistener.h"
+
+#include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
+#include "core/eventhandlers/transfuncwindowingeventlistener.h"
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
@@ -52,7 +53,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class VolumeExplorer : public VisualizationProcessor, public AbstractEventHandler {
+    class VolumeExplorer : public VisualizationProcessor, public tgt::EventListener {
     public:
         /**
          * Constructs a new VolumeExplorer Processor
@@ -79,10 +80,8 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        /// \see AbstractEventHandler::accept()
-        virtual bool accept(tgt::Event* e);
-        /// \see AbstractEventHandler::execute()
-        virtual void execute(tgt::Event* e);
+        /// \see tgt::EventListener::onEvent()
+        virtual void onEvent(tgt::Event* e);
 
         virtual void process(DataContainer& data);
 
@@ -130,11 +129,11 @@ namespace campvis {
         IVec2Property p_volumeRenderSize;
 
 
-        MWheelToNumericPropertyEventHandler _xSliceHandler;
-        MWheelToNumericPropertyEventHandler _ySliceHandler;
-        MWheelToNumericPropertyEventHandler _zSliceHandler;
-        TransFuncWindowingEventHandler _windowingHandler;
-        TrackballNavigationEventHandler* _trackballEH;
+        MWheelToNumericPropertyEventListener _xSliceHandler;
+        MWheelToNumericPropertyEventListener _ySliceHandler;
+        MWheelToNumericPropertyEventListener _zSliceHandler;
+        TransFuncWindowingEventListener _windowingHandler;
+        TrackballNavigationEventListener* _trackballEH;
         bool _mousePressed;
 
         static const std::string loggerCat_;

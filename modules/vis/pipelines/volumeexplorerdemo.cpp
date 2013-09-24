@@ -50,7 +50,7 @@ namespace campvis {
         addProcessor(&_imageReader);
         addProcessor(&_ve);
 
-        addEventHandler(&_ve);
+        addEventListenerToBack(&_ve);
     }
 
     VolumeExplorerDemo::~VolumeExplorerDemo() {

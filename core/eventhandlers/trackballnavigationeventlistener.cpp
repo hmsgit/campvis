@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "trackballnavigationeventhandler.h"
+#include "trackballnavigationeventlistener.h"
 #include "tgt/assert.h"
 #include "tgt/event/mouseevent.h"
 #include "core/properties/cameraproperty.h"
@@ -60,12 +60,12 @@ namespace campvis {
         _dirty = false;
     }
 
-// = TrackballNavigationEventHandler ==============================================================
+// = TrackballNavigationEventListener ==============================================================
 
-    const std::string TrackballNavigationEventHandler::loggerCat_ = "CAMPVis.core.eventhandler.TrackballNavigationEventHandler";
+    const std::string TrackballNavigationEventListener::loggerCat_ = "CAMPVis.core.eventhandler.TrackballNavigationEventListener";
 
-    TrackballNavigationEventHandler::TrackballNavigationEventHandler(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
-        : AbstractEventHandler()
+    TrackballNavigationEventListener::TrackballNavigationEventListener(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
+        : tgt::EventListener()
         , _parentPipeline(parentPipeline)
         , _cameraProperty(cameraProperty)
         , _cpnw(cameraProperty)
@@ -75,29 +75,11 @@ namespace campvis {
         _trackball = new tgt::Trackball(&_cpnw, viewportSize);
     }
 
-    TrackballNavigationEventHandler::~TrackballNavigationEventHandler() {
+    TrackballNavigationEventListener::~TrackballNavigationEventListener() {
         delete _trackball;
     }
 
-    bool TrackballNavigationEventHandler::accept(tgt::Event* e) {
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
-            if (me->action() == tgt::MouseEvent::PRESSED)
-                return true;
-            else if (me->action() == tgt::MouseEvent::RELEASED)
-                return true;
-            else if (me->action() == tgt::MouseEvent::MOTION)
-                return true;
-            else if (me->action() == tgt::MouseEvent::WHEEL)
-                return true;
-        }
-        else if (typeid(*e) == typeid(tgt::KeyEvent)) {
-            return true;
-        }
-        return false;
-    }
-
-    void TrackballNavigationEventHandler::execute(tgt::Event* e) {
+    void TrackballNavigationEventListener::onEvent(tgt::Event* e) {
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
             if (me->action() == tgt::MouseEvent::PRESSED) {
@@ -120,23 +102,23 @@ namespace campvis {
         }
     }
 
-    void TrackballNavigationEventHandler::reinitializeCamera(const tgt::vec3& position, const tgt::vec3& focus, const tgt::vec3& upVector) {
+    void TrackballNavigationEventListener::reinitializeCamera(const tgt::vec3& position, const tgt::vec3& focus, const tgt::vec3& upVector) {
         _trackball->reinitializeCamera(position, focus, upVector);
     }
 
-    void TrackballNavigationEventHandler::setCenter(const tgt::vec3& center) {
+    void TrackballNavigationEventListener::setCenter(const tgt::vec3& center) {
         _trackball->setCenter(center);
     }
 
-    void TrackballNavigationEventHandler::setViewportSize(const tgt::ivec2& viewportSize) {
+    void TrackballNavigationEventListener::setViewportSize(const tgt::ivec2& viewportSize) {
         _trackball->setViewprtSize(viewportSize);
     }
 
-    void TrackballNavigationEventHandler::setSceneBounds(const tgt::Bounds& bounds) {
+    void TrackballNavigationEventListener::setSceneBounds(const tgt::Bounds& bounds) {
         _trackball->setSceneBounds(bounds);
     }
 
-    const tgt::Bounds& TrackballNavigationEventHandler::getSceneBounds() const {
+    const tgt::Bounds& TrackballNavigationEventListener::getSceneBounds() const {
         return _trackball->getSceneBounds();
     }
 

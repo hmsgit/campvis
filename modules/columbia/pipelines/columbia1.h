@@ -30,7 +30,7 @@
 #ifndef COLUMBIA1_H__
 #define COLUMBIA1_H__
 
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
@@ -100,7 +100,7 @@ namespace campvis {
 
         RenderTargetCompositor _compositor;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

@@ -30,7 +30,6 @@
 #ifndef VolumeExplorerDemo_H__
 #define VolumeExplorerDemo_H__
 
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
