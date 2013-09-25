@@ -35,20 +35,30 @@
 #include "tgt/event/eventlistener.h"
 #include "tgt/navigation/trackball.h"
 
+#include <vector>
+
 namespace campvis {
     class CameraProperty;
-    class VisualizationPipeline;
+    class VisualizationProcessor;
 
     /**
      * Wrapper to adapt a CameraProperty to the tgt::Trackball interface.
      */
     class CamPropNavigationWrapper : public tgt::IHasCamera {
     public:
+        /**
+         * Constructor
+         * \param   camProp     The CameraProperty to wrap around.
+         */
         CamPropNavigationWrapper(CameraProperty* camProp);
+
+        /// Virtual Destructor
         virtual ~CamPropNavigationWrapper();
 
+        /// \see tgt::IHasCamera::getCamera()
         virtual tgt::Camera* getCamera();
 
+        /// \see tgt::IHasCamera::update()
         virtual void update();
 
     private:
@@ -68,11 +78,10 @@ namespace campvis {
     public:
         /**
          * Creates a TrackballNavigationEventListener.
-         * \param   parentPipeline  Parent pipeline of this event handler, must not be 0.
          * \param   cameraProperty  The CameraProperty to apply the navigation to.
          * \param   viewportSize    Initial viewport size
          */
-        TrackballNavigationEventListener(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
+        TrackballNavigationEventListener(CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
 
         /**
          * Virtual Destructor
@@ -115,12 +124,29 @@ namespace campvis {
          */
         const tgt::Bounds& getSceneBounds() const;
 
+
+        /**
+         * Adds \a vp to the list of LQ mode processors.
+         * During interaction, TrackballNavigationEventListener will set the LQ mode flag of all
+         * LQ mode processors.
+         * \param   vp  VisualizationProcessor to add to the list of LQ mode processors.
+         */
+        void addLqModeProcessor(VisualizationProcessor* vp);
+
+        /**
+         * Removes \a vp from the list of LQ mode processors.
+         * \param   vp  VisualizationProcessor to remove from the list of LQ mode processors.
+         */
+        void removeLqModeProcessor(VisualizationProcessor* vp);
+
     protected:
-        VisualizationPipeline* _parentPipeline; ///< The parent VisualizationPipeline
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
         CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
         tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
         tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
+
+        /// List of processors for which to enable LQ mode during interaction
+        std::vector<VisualizationProcessor*> _lqModeProcessors;
 
         static const std::string loggerCat_;
     };

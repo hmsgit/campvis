@@ -64,7 +64,7 @@ namespace campvis {
                 tgtAssert(_fbo != 0, "FBO must not be 0.");
                 _fbo->activate();
 
-                const tgt::ivec2& windowSize = vp->_viewportSizeProperty->getValue();
+                const tgt::ivec2& windowSize = vp->getEffectiveViewportSize();
                 glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
             }
 
@@ -114,6 +114,9 @@ namespace campvis {
          */
         virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
+
+        BoolProperty p_lqMode;                      ///< Flag whether to enable LQ mode (halfsamples effective viewport size)
+
     protected:
 
         /**
@@ -144,14 +147,20 @@ namespace campvis {
         void createAndAttachDepthTexture();
 
         /**
+         * Returns the effective viewport size considering LQ mode.
+         * \return  lqMode ? _viewportSize/2 : _viewportSize
+         */
+        tgt::ivec2 getEffectiveViewportSize() const;
+
+        /**
          * Returns the current viewport size as ivec3.
-         * \return  tgt::ivec3(_viewportSizeProperty->getValue(), 1)
+         * \return  tgt::ivec3(getEffectiveViewportSize(), 1)
          */
         tgt::ivec3 getRenderTargetSize() const;
 
 
         tgt::FramebufferObject* _fbo;               ///< The FBO used by this VisualizationProcessor
-        IVec2Property* _viewportSizeProperty;       ///< Pointer to the property defining the viewport size.
+        IVec2Property* _viewportSizeProperty;       ///< Pointer to the property defining the viewport (canvas) size.
 
         static const std::string loggerCat_;
     };

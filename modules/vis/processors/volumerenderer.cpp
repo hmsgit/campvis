@@ -46,8 +46,8 @@ namespace campvis {
         , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
         , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , _pgGenerator()
-        , _eepGenerator(_viewportSizeProperty)
-        , _raycaster(_viewportSizeProperty)
+        , _eepGenerator(viewportSizeProp)
+        , _raycaster(viewportSizeProp)
     {
         addProperty(&p_inputVolume);
         addProperty(&p_camera);
@@ -79,6 +79,8 @@ namespace campvis {
         _pgGenerator.init();
         _eepGenerator.init();
         _raycaster.init();
+
+        p_lqMode.addSharedProperty(&_raycaster.p_lqMode);
 
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);

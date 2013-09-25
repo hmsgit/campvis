@@ -99,8 +99,8 @@ namespace campvis {
 
                 _shader->activate();
                 _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSize", _viewportSizeProperty->getValue());
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_viewportSizeProperty->getValue()));
+                _shader->setUniform("_viewportSize", getEffectiveViewportSize());
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setIgnoreUniformLocationError(false);
                 tgt::TextureUnit texUnit;
 

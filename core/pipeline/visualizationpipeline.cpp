@@ -63,10 +63,8 @@ namespace campvis {
         : AbstractPipeline()
         , tgt::EventHandler()
         , tgt::EventListener()
-        , _lqMode(false)
         , _ignoreCanvasSizeUpdate(false)
         , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
-        , _effectiveRenderTargetSize("EffectiveRenderTargetSize", "Render Target Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget", DataNameProperty::READ)
         , _canvas(0)
     {
@@ -110,8 +108,6 @@ namespace campvis {
         if (_canvasSize.getValue() != size && !_ignoreCanvasSizeUpdate) {
             _canvasSize.setValue(size);
         }
-
-        updateEffectiveRenderTargetSize();
     }
 
     void VisualizationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
@@ -148,23 +144,6 @@ namespace campvis {
         }
         else
             AbstractPipeline::onPropertyChanged(prop);
-    }
-
-    void VisualizationPipeline::enableLowQualityMode() {
-        _lqMode = true;
-        updateEffectiveRenderTargetSize();
-    }
-
-    void VisualizationPipeline::disableLowQualityMode() {
-        _lqMode = false;
-        updateEffectiveRenderTargetSize();
-    }
-
-    void VisualizationPipeline::updateEffectiveRenderTargetSize() {
-        if (_lqMode)
-            _effectiveRenderTargetSize.setValue(_canvasSize.getValue() / 2);
-        else
-            _effectiveRenderTargetSize.setValue(_canvasSize.getValue());
     }
 
     void VisualizationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {

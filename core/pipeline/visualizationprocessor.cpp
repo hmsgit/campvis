@@ -40,10 +40,13 @@ namespace campvis {
 
     VisualizationProcessor::VisualizationProcessor(IVec2Property* viewportSizeProp)
         : AbstractProcessor()
+        , p_lqMode("LqMode", "Low Quality Mode", false)
         , _fbo(0)
         , _viewportSizeProperty(viewportSizeProp)
     {
         tgtAssert(_viewportSizeProperty != 0, "Pointer must not be 0!");
+
+        addProperty(&p_lqMode);
     }
 
     VisualizationProcessor::~VisualizationProcessor() {
@@ -152,8 +155,12 @@ namespace campvis {
         createAndAttachTexture(internalFormat, attachment);
     }
 
+    tgt::ivec2 VisualizationProcessor::getEffectiveViewportSize() const {
+        return (p_lqMode.getValue() ? _viewportSizeProperty->getValue() / 2 : _viewportSizeProperty->getValue());
+    }
+
     tgt::ivec3 VisualizationProcessor::getRenderTargetSize() const {
-        return tgt::ivec3(_viewportSizeProperty->getValue(), 1);
+        return tgt::ivec3(getEffectiveViewportSize(), 1);
     }
 
     void VisualizationProcessor::createAndAttachColorTexture() {

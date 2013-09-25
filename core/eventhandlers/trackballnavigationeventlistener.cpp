@@ -31,7 +31,7 @@
 #include "tgt/assert.h"
 #include "tgt/event/mouseevent.h"
 #include "core/properties/cameraproperty.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/visualizationprocessor.h"
 
 namespace campvis {
 
@@ -64,9 +64,8 @@ namespace campvis {
 
     const std::string TrackballNavigationEventListener::loggerCat_ = "CAMPVis.core.eventhandler.TrackballNavigationEventListener";
 
-    TrackballNavigationEventListener::TrackballNavigationEventListener(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
+    TrackballNavigationEventListener::TrackballNavigationEventListener(CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
         : tgt::EventListener()
-        , _parentPipeline(parentPipeline)
         , _cameraProperty(cameraProperty)
         , _cpnw(cameraProperty)
         , _trackball(0)
@@ -83,13 +82,13 @@ namespace campvis {
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
             if (me->action() == tgt::MouseEvent::PRESSED) {
-                if (_parentPipeline)
-                    _parentPipeline->enableLowQualityMode();
+                for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it)
+                    (*it)->p_lqMode.setValue(true);
                 _trackball->mousePressEvent(me);
             }
             else if (me->action() == tgt::MouseEvent::RELEASED) {
-                if (_parentPipeline)
-                    _parentPipeline->disableLowQualityMode();
+                for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it)
+                    (*it)->p_lqMode.setValue(false);
                 _trackball->mouseReleaseEvent(me);
             }
             else if (me->action() == tgt::MouseEvent::MOTION)
@@ -120,6 +119,20 @@ namespace campvis {
 
     const tgt::Bounds& TrackballNavigationEventListener::getSceneBounds() const {
         return _trackball->getSceneBounds();
+    }
+
+    void TrackballNavigationEventListener::addLqModeProcessor(VisualizationProcessor* vp) {
+        tgtAssert(vp != 0, "Pointer to processor must not be 0.");
+        tgtAssert(std::find(_lqModeProcessors.begin(), _lqModeProcessors.end(), vp) == _lqModeProcessors.end(), "Processor already in list of LQ mode processors.");
+
+        _lqModeProcessors.push_back(vp);
+    }
+
+    void TrackballNavigationEventListener::removeLqModeProcessor(VisualizationProcessor* vp) {
+        for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it) {
+            if (*it == vp)
+                _lqModeProcessors.erase(it);
+        }
     }
 
 }

@@ -109,7 +109,7 @@ namespace campvis {
 
         /**
          * Returns the viewport size of the target canvas
-         * \return _effectiveRenderTargetSize
+         * \return _canvasSize
          */
         const tgt::ivec2& getRenderTargetSize() const;
 
@@ -118,20 +118,6 @@ namespace campvis {
          * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
          */
         const std::string& getRenderTargetID() const;
-
-        /**
-         * Enables low quality mode, which effectively reduces the render target size by factor 4.
-         * \note    Do not forget to call disableLowQualityMode().
-         * \sa      disableLowQualityMode()
-         */
-        void enableLowQualityMode();
-
-        /**
-         * Disables low quality mode, which effectively resets the render target size to its original value;
-         * \note    Do not forget to call disableLowQualityMode().
-         * \sa      disableLowQualityMode()
-         */
-        void disableLowQualityMode();
 
         /**
          * Executes \a processor and afterwards checks the OpenGL state to be valid.
@@ -174,18 +160,11 @@ namespace campvis {
          */
         void lockGLContextAndExecuteProcessor(AbstractProcessor* processor);
 
-        /**
-         * Updates the _effectiveRenderTargetSize property considering LQ mode.
-         */
-        void updateEffectiveRenderTargetSize();
-
         tbb::concurrent_hash_map<AbstractProcessor*, bool> _isVisProcessorMap;
 
         IVec2Property _canvasSize;                          ///< original canvas size
-        bool _lqMode;                                       ///< Flag whether low quality mode is enables
         bool _ignoreCanvasSizeUpdate;
 
-        IVec2Property _effectiveRenderTargetSize;           ///< actual size of the render targets (considering LQ mode)
         DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
 
         tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.

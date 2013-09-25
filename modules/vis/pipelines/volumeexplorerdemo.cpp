@@ -43,7 +43,7 @@ namespace campvis {
         : VisualizationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
-        , _ve(&_effectiveRenderTargetSize)
+        , _ve(&_canvasSize)
     {
         addProperty(&_camera);
 
@@ -74,11 +74,11 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_ve.getProperty("TransferFunction"))->replaceTF(dvrTF);
 
-        _effectiveRenderTargetSize.s_changed.connect<VolumeExplorerDemo>(this, &VolumeExplorerDemo::onRenderTargetSizeChanged);
+        _canvasSize.s_changed.connect<VolumeExplorerDemo>(this, &VolumeExplorerDemo::onRenderTargetSizeChanged);
     }
 
     void VolumeExplorerDemo::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 

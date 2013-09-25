@@ -46,19 +46,22 @@ namespace campvis {
         , _imageReader()
         , _flowReader()
         , _vtkReader()
-        , _vr(&_effectiveRenderTargetSize)
-        , _sr(&_effectiveRenderTargetSize)
-        , _src(&_effectiveRenderTargetSize)
-        , _gr(&_effectiveRenderTargetSize)
+        , _vr(&_canvasSize)
+        , _sr(&_canvasSize)
+        , _src(&_canvasSize)
+        , _gr(&_canvasSize)
         , _sft()
-        , _sfr(&_effectiveRenderTargetSize)
-        , _compositor(&_effectiveRenderTargetSize)
+        , _sfr(&_canvasSize)
+        , _compositor(&_canvasSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
         addProperty(&_boundsData);
 
-        _trackballEH = new TrackballNavigationEventListener(this, &_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH->addLqModeProcessor(&_vr);
+        _trackballEH->addLqModeProcessor(&_src);
+        _trackballEH->addLqModeProcessor(&_sfr);
         addEventListenerToBack(_trackballEH);
 
         addProcessor(&_imageReader);
@@ -142,12 +145,12 @@ namespace campvis {
         _sfr.p_renderTargetID.connect(static_cast<DataNameProperty*>(_vr.getProperty("GeometryImageId")));
         _sfr.p_renderTargetID.connect(&_compositor.p_firstImageId);
 
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<Columbia1>(this, &Columbia1::onRenderTargetSizeChanged);
+        _trackballEH->setViewportSize(_canvasSize.getValue());
+        _canvasSize.s_changed.connect<Columbia1>(this, &Columbia1::onRenderTargetSizeChanged);
     }
 
     void Columbia1::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -157,7 +160,7 @@ namespace campvis {
 
     void Columbia1::onRenderTargetSizeChanged(const AbstractProperty* prop) {
         _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
 

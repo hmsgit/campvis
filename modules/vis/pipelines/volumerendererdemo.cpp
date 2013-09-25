@@ -43,12 +43,13 @@ namespace campvis {
         : VisualizationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
-        , _vr(&_effectiveRenderTargetSize)
+        , _vr(&_canvasSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventListener(this, &_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH->addLqModeProcessor(&_vr);
         addEventListenerToBack(_trackballEH);
 
         addProcessor(&_imageReader);
@@ -77,12 +78,12 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_vr.getProperty("TransferFunction"))->replaceTF(dvrTF);
 
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<VolumeRendererDemo>(this, &VolumeRendererDemo::onRenderTargetSizeChanged);
+        _trackballEH->setViewportSize(_canvasSize.getValue());
+        _canvasSize.s_changed.connect<VolumeRendererDemo>(this, &VolumeRendererDemo::onRenderTargetSizeChanged);
     }
 
     void VolumeRendererDemo::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -92,7 +93,7 @@ namespace campvis {
 
     void VolumeRendererDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
         _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
 

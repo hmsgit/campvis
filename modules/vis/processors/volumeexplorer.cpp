@@ -86,7 +86,8 @@ namespace campvis {
 
 
         // Event-Handlers
-        _trackballEH = new TrackballNavigationEventListener(0, &_raycaster.p_camera, p_volumeRenderSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, p_volumeRenderSize.getValue());
+        _trackballEH->addLqModeProcessor(&_raycaster);
     }
 
     VolumeExplorer::~VolumeExplorer() {
@@ -207,7 +208,7 @@ namespace campvis {
 
         if (vrImage != 0) {
             vrImage->bind(_shader, colorUnit, depthUnit);
-            float ratio = static_cast<float>(p_volumeRenderSize.getValue().x) / static_cast<float>(_viewportSizeProperty->getValue().x);
+            float ratio = static_cast<float>(vrs.x) / static_cast<float>(rts.x);
             _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
             _quad->render(GL_POLYGON);
@@ -278,10 +279,12 @@ namespace campvis {
     }
 
     void VolumeExplorer::onEvent(tgt::Event* e) {
+        // forward the event to the correspsonding event listeners depending on the mouse position
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
 
             if (!_mousePressed && me->x() <= p_sliceRenderSize.getValue().x) {
+                // cycle slices
                 if (me->action() == tgt::MouseEvent::WHEEL) {
                     if (me->y() <= p_sliceRenderSize.getValue().y)
                         _xSliceHandler.onEvent(e);
@@ -290,11 +293,14 @@ namespace campvis {
                     else
                         _zSliceHandler.onEvent(e);
                 }
+
+                // adjust slice TF windowing
                 else {
                     _windowingHandler.onEvent(e);
                 }
             }
             else {
+                // raycasting trackball navigation
                 if (me->action() == tgt::MouseEvent::PRESSED)
                     _mousePressed = true;
                 else if (me->action() == tgt::MouseEvent::RELEASED)

@@ -40,19 +40,19 @@ namespace campvis {
 
     IxpvDemo::IxpvDemo()
         : VisualizationPipeline()
-        , _xrayReader(&_effectiveRenderTargetSize)
+        , _xrayReader(&_canvasSize)
         , _ctReader()
         , _ctProxy()
-        , _ctFullEEP(&_effectiveRenderTargetSize)
-        , _ctClippedEEP(&_effectiveRenderTargetSize)
-        , _ctDVR(&_effectiveRenderTargetSize)
-        , _ctFullDRR(&_effectiveRenderTargetSize)
-        , _ctClippedDRR(&_effectiveRenderTargetSize)
+        , _ctFullEEP(&_canvasSize)
+        , _ctClippedEEP(&_canvasSize)
+        , _ctDVR(&_canvasSize)
+        , _ctFullDRR(&_canvasSize)
+        , _ctClippedDRR(&_canvasSize)
         , _usReader()
-        , _usSliceRenderer(&_effectiveRenderTargetSize)
-        , _compositor(&_effectiveRenderTargetSize)
-        , _compositor2(&_effectiveRenderTargetSize)
-        , _ixpvCompositor(&_effectiveRenderTargetSize)
+        , _usSliceRenderer(&_canvasSize)
+        , _compositor(&_canvasSize)
+        , _compositor2(&_canvasSize)
+        , _ixpvCompositor(&_canvasSize)
         , _camera("camera", "Camera")
         , _trackballHandler(0)
         , _wheelHandler(&_usSliceRenderer.p_sliceNumber)
@@ -76,7 +76,7 @@ namespace campvis {
 
         addProperty(&_camera);
 
-        _trackballHandler = new TrackballNavigationEventListener(this, &_camera, _canvasSize.getValue());
+        _trackballHandler = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
         addEventListenerToBack(&_wheelHandler);
         addEventListenerToBack(_trackballHandler);
     }
@@ -193,7 +193,7 @@ namespace campvis {
 
     void IxpvDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
         _trackballHandler->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
 

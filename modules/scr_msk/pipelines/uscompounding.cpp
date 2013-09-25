@@ -45,7 +45,7 @@ namespace campvis {
 
         addProperty(&p_camera);
 
-        _trackballEH = new TrackballNavigationEventListener(this, &p_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&p_camera, _canvasSize.getValue());
         addEventListenerToBack(_trackballEH);
     }
 
@@ -64,12 +64,12 @@ namespace campvis {
         _renderer.p_targetImageID.setValue("us.frame.output");
         _renderTargetID.setValue(_renderer.p_targetImageID.getValue());
 
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<UsCompounding>(this, &UsCompounding::onRenderTargetSizeChanged);
+        _trackballEH->setViewportSize(_canvasSize.getValue());
+        _canvasSize.s_changed.connect<UsCompounding>(this, &UsCompounding::onRenderTargetSizeChanged);
     }
 
     void UsCompounding::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -79,7 +79,7 @@ namespace campvis {
 
     void UsCompounding::onRenderTargetSizeChanged(const AbstractProperty* prop) {
         _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
         p_camera.setWindowRatio(ratio);
     }
 

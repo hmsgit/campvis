@@ -106,7 +106,7 @@ namespace campvis {
 
                 _shader->setIgnoreUniformLocationError(true);
                 decorateRenderProlog(data, _shader);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_viewportSizeProperty->getValue()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_jitterEntryPoints", p_jitterEntryPoints.getValue());
                 _shader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
 

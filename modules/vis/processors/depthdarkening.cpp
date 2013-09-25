@@ -113,7 +113,7 @@ namespace campvis {
             inputImage->bind(_shader, colorUnit, depthUnit);
             inputImage->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             
-            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_viewportSizeProperty->getValue()));
+            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
             _shader->setUniform("_direction", tgt::vec2(1.f, 0.f));
             _shader->setUniform("_sigma", p_sigma.getValue());
             _shader->setUniform("_lambda", p_lambda.getValue());

@@ -46,16 +46,16 @@ namespace campvis {
         , _confidenceGenerator()
         , _gvg()
         , _lhh()
-        , _usFusion1(&_effectiveRenderTargetSize)
-        , _usFusion2(&_effectiveRenderTargetSize)
-        , _usFusion3(&_effectiveRenderTargetSize)
-        , _usFusion4(&_effectiveRenderTargetSize)
+        , _usFusion1(&_canvasSize)
+        , _usFusion2(&_canvasSize)
+        , _usFusion3(&_canvasSize)
+        , _usFusion4(&_canvasSize)
         , _usBlurFilter()
-        , _quadView(&_effectiveRenderTargetSize)
+        , _quadView(&_canvasSize)
         , _usDenoiseilter()
         , _usProxy()
-        , _usEEP(&_effectiveRenderTargetSize)
-        , _usDVR(&_effectiveRenderTargetSize)
+        , _usEEP(&_canvasSize)
+        , _usDVR(&_canvasSize)
         , _wheelHandler(&_usFusion1.p_sliceNumber)
         , _tfWindowingHandler(&_usFusion1.p_transferFunction)
         , _trackballEH(0)
@@ -79,7 +79,7 @@ namespace campvis {
         addEventListenerToBack(&_wheelHandler);
         //addEventHandler(&_tfWindowingHandler);
 
-        _trackballEH = new TrackballNavigationEventListener(this, &_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
         addEventListenerToBack(_trackballEH);
     }
 
@@ -194,12 +194,12 @@ namespace campvis {
 
         _renderTargetID.setValue("quadview.output");
 
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<AdvancedUsVis>(this, &AdvancedUsVis::onRenderTargetSizeChanged);
+        _trackballEH->setViewportSize(_canvasSize.getValue());
+        _canvasSize.s_changed.connect<AdvancedUsVis>(this, &AdvancedUsVis::onRenderTargetSizeChanged);
     }
 
     void AdvancedUsVis::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -241,7 +241,7 @@ namespace campvis {
 
     void AdvancedUsVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
         _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
 

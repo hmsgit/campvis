@@ -173,7 +173,7 @@ namespace campvis {
                     glEnable(GL_DEPTH_TEST);
                     _shader->activate();
                     _shader->setIgnoreUniformLocationError(true);
-                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_viewportSizeProperty->getValue()));
+                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                     _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                     _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 

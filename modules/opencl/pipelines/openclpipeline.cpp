@@ -45,13 +45,14 @@ namespace campvis {
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
-        , _eepGenerator(&_effectiveRenderTargetSize)
-        , _clRaycaster(&_effectiveRenderTargetSize)
+        , _eepGenerator(&_canvasSize)
+        , _clRaycaster(&_canvasSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventListener(this, &_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH->addLqModeProcessor(&_clRaycaster);
         addEventListenerToBack(_trackballEH);
 
         addProcessor(&_imageReader);
@@ -94,12 +95,12 @@ namespace campvis {
         _eepGenerator.p_entryImageID.connect(&_clRaycaster._entryImageID);
         _eepGenerator.p_exitImageID.connect(&_clRaycaster._exitImageID);
 
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<OpenCLPipeline>(this, &OpenCLPipeline::onRenderTargetSizeChanged);
+        _trackballEH->setViewportSize(_canvasSize.getValue());
+        _canvasSize.s_changed.connect<OpenCLPipeline>(this, &OpenCLPipeline::onRenderTargetSizeChanged);
     }
 
     void OpenCLPipeline::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -109,7 +110,7 @@ namespace campvis {
 
     void OpenCLPipeline::onRenderTargetSizeChanged(const AbstractProperty* prop) {
         _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
+        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
         _camera.setWindowRatio(ratio);
     }
 

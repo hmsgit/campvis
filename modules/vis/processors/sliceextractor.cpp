@@ -114,7 +114,7 @@ namespace campvis {
                 // texture coordinate transformation matrix (will be configured later)
                 tgt::mat4 texCoordsMatrix = tgt::mat4::zero;
 
-                float renderTargetRatio = static_cast<float>(_viewportSizeProperty->getValue().x) / static_cast<float>(_viewportSizeProperty->getValue().y);
+                float renderTargetRatio = static_cast<float>(getEffectiveViewportSize().x) / static_cast<float>(getEffectiveViewportSize().y);
                 float sliceRatio = 1.f;
 
                 switch (p_sliceOrientation.getValue()) {
