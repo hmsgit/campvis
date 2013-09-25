@@ -34,6 +34,7 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
@@ -60,6 +61,10 @@ namespace campvis {
         virtual const std::string getName() const { return "ItkImageFilter"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates the gradient volume for the given intensity volume."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         virtual void process(DataContainer& data);
 

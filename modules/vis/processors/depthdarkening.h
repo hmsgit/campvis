@@ -34,7 +34,7 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 
 namespace tgt {
     class Shader;
@@ -51,7 +51,7 @@ namespace campvis {
         /**
          * Constructs a new DepthDarkening Processor
          **/
-        DepthDarkening(IVec2Property& canvasSize);
+        DepthDarkening(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -68,6 +68,10 @@ namespace campvis {
         virtual const std::string getName() const { return "DepthDarkening"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Applies depth darkening post processing to simulate shadows."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         virtual void process(DataContainer& data);
 

@@ -59,6 +59,10 @@ namespace campvis {
         virtual const std::string getName() const { return "LHHistogram"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates Lookup volumes vor generation LH-Histograms of volumes as well as the LH histogram."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
 

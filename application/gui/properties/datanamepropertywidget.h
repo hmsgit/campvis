@@ -45,7 +45,7 @@ namespace campvis {
      * Widget for a DataNameProperty
      */
     class DataNamePropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
+        Q_OBJECT
 
     public:
         /**
@@ -72,6 +72,16 @@ namespace campvis {
         void onTextChanged(const QString& text);
 
     private:
+        /**
+         * Set the combo box's current text to the provided value.
+         *
+         * If \c text can already be found in the combo box, the corresponding item is made active. Otherwise, \c text
+         * is set as the contents of the combo box's text edit.
+         *
+         * \param   text      text to be set in the combo box
+         */
+        void setCurrentComboBoxText(const QString& text);
+
         QLineEdit* _lineEdit;
         QComboBox* _combobox;
         DataContainer* _dc;

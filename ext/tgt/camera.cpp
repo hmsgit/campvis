@@ -43,6 +43,7 @@ Camera::Camera(const vec3& position, const vec3& focus, const vec3& up,
       upVector_(normalize(up)),
       frust_(Frustum(fovy, ratio, distn, distf)),
       windowRatio_(1.f),
+      viewMatrixValid_(false),
       projectionMode_(pm)
 {
     viewMatrix_ = mat4::createLookAt(position, focus, up);

@@ -27,6 +27,10 @@
 
 namespace tgt {
 
+void Painter::repaint() {
+    paint();
+}
+
 Painter::Painter(GLCanvas* canvas)
     : canvas_(canvas)
 {}

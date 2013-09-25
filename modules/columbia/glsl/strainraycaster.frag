@@ -95,7 +95,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
         // lookup intensity and TF
         vec4 strain = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition);
-        vec4 color = (_volumeTextureParams._numChannels == 4) ? strain : vec4(strain.xyz, 0.2);
+        vec4 color = (_volumeTextureParams._numChannels == 4) ? strain : vec4(strain.xyz, 0.0);
+        color.a = clamp(length(strain.xyz)/1.0, 0.0, 1.0);
 
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
         if (color.a <= 0.0) {
@@ -114,7 +115,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
                     // lookup refined intensity + TF
                     vec4 newStrain = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition);
-                    vec4 newColor = (_volumeTextureParams._numChannels == 4) ? newStrain : vec4(newStrain.xyz, 0.2);
+                    vec4 newColor = (_volumeTextureParams._numChannels == 4) ? newStrain : vec4(newStrain.xyz, 0.0);
+                    newColor.a = clamp(length(newColor.xyz)/1.0, 0.0, 1.0);
 
                     if (newColor.a <= 0.0) {
                         // we're back in the void - look on the right-hand side

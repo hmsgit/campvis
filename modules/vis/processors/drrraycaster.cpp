@@ -29,17 +29,18 @@
 
 #include "drrraycaster.h"
 
+#include "tgt/shadermanager.h"
 #include "core/tools/quadrenderer.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 namespace campvis {
     const std::string DRRRaycaster::loggerCat_ = "CAMPVis.modules.vis.DRRRaycaster";
 
-    DRRRaycaster::DRRRaycaster(IVec2Property& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/vis/glsl/drrraycaster.frag", false)
+    DRRRaycaster::DRRRaycaster(IVec2Property* viewportSizeProp)
+        : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/drrraycaster.frag", false)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_shift("shift", "Normalization Shift", 0.f, -10.f, 10.f)
-        , p_scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f)
+        , p_shift("shift", "Normalization Shift", 0.f, -10.f, 10.f, 0.1f)
+        , p_scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f, 0.1f)
         , p_invertMapping("invertMapping", "Invert Mapping", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
     {
         addProperty(&p_targetImageID);
@@ -53,11 +54,12 @@ namespace campvis {
     }
 
     void DRRRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        FramebufferActivationGuard fag(this);
+        createAndAttachColorTexture();
+        createAndAttachDepthTexture();
+
         _shader->setUniform("_shift", p_shift.getValue());
         _shader->setUniform("_scale", p_scale.getValue());
-
-        std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-        rt.second->activate();
 
         if (p_invertMapping.getValue())
             glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -67,8 +69,7 @@ namespace campvis {
         QuadRdr.renderQuad();
         LGL_ERROR;
 
-        rt.second->deactivate();
-        data.addData(p_targetImageID.getValue(), rt.first);
+        data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
         p_targetImageID.issueWrite();
     }
 

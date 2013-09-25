@@ -34,7 +34,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorbackground.h"
 
 #include "core/classification/simpletransferfunction.h"
@@ -61,8 +61,8 @@ namespace campvis {
         GenericOption<std::string>("pixelate", "Pixelate (Experimental)")
     };
 
-    AdvancedUsFusion::AdvancedUsFusion(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    AdvancedUsFusion::AdvancedUsFusion(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ)
         , p_blurredImageId("BlurredImageId", "Blurred Ultrasound Image", "", DataNameProperty::READ)
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)
@@ -72,8 +72,8 @@ namespace campvis {
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
         , p_view("View", "Image to Render", viewOptions, 12)
-        , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f)
-        , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f)
+        , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f, 0.1f)
+        , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
@@ -129,7 +129,9 @@ namespace campvis {
                     //_shader->rebuild();
                 }
 
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
@@ -147,16 +149,14 @@ namespace campvis {
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
                 p_confidenceTF.getTF()->bind(_shader, tf2Unit, "_confidenceTF", "_confidenceTFParams");
 
-                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
-                rt.second->deactivate();
 
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
 
-                data.addData(p_targetImageID.getValue(), rt.first);
+                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
                 p_targetImageID.issueWrite();
             }
             else {

@@ -34,7 +34,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -44,12 +44,12 @@
 namespace campvis {
     const std::string DepthDarkening::loggerCat_ = "CAMPVis.modules.vis.DepthDarkening";
 
-    DepthDarkening::DepthDarkening(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    DepthDarkening::DepthDarkening(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
-        , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f)
-        , p_lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f)
+        , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f, 0.1f)
+        , p_lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f, 0.1f)
         , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, AbstractProcessor::INVALID_SHADER)
         , p_coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , p_warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
@@ -81,9 +81,9 @@ namespace campvis {
     }
 
     void DepthDarkening::process(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation inputImage(data, p_inputImage.getValue());
+        DataContainer::ScopedTypedData<RenderData> inputImage(data, p_inputImage.getValue());
 
-        if (inputImage != 0) {
+        if (inputImage != 0 && inputImage->hasDepthTexture()) {
             if (hasInvalidShader()) {
                 _shader->setHeaders(generateHeader());
                 _shader->rebuild();
@@ -91,20 +91,20 @@ namespace campvis {
             }
 
             // TODO: const cast is ugly...
-            const_cast<tgt::Texture*>(inputImage->getDepthTexture())->downloadTexture();
-            float* pixels = (float*)inputImage->getDepthTexture()->getPixelData();
+            const tgt::Texture* tex = inputImage->getDepthTexture()->getRepresentation<ImageRepresentationGL>()->getTexture();
+            const_cast<tgt::Texture*>(tex)->downloadTexture();
+            const float* pixels = reinterpret_cast<const float*>(tex->getPixelData());
             float curDepth = *(pixels);
             float minDepth = curDepth;
             float maxDepth = curDepth;
-            size_t numPixels = inputImage->getNumElements();
+            size_t numPixels = inputImage->getDepthTexture()->getNumElements();
             for (size_t i = 1; i < numPixels; ++i) {
                 curDepth = pixels[i];
                 minDepth = std::min(minDepth, curDepth);
                 maxDepth = std::max(maxDepth, curDepth);
             }
 
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> tempTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+            FramebufferActivationGuard fag(this);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
 
@@ -113,7 +113,7 @@ namespace campvis {
             inputImage->bind(_shader, colorUnit, depthUnit);
             inputImage->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             
-            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
             _shader->setUniform("_direction", tgt::vec2(1.f, 0.f));
             _shader->setUniform("_sigma", p_sigma.getValue());
             _shader->setUniform("_lambda", p_lambda.getValue());
@@ -124,21 +124,21 @@ namespace campvis {
                 _shader->setUniform("_warmColor", p_warmColor.getValue());
             }
 
-            tempTarget.second->activate();
-            LGL_ERROR;
+            createAndAttachDepthTexture();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            tempTarget.second->deactivate();
+
+            RenderData tempTarget(_fbo);
+            _fbo->detachAll();
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
 
             inputImage->bind(_shader, colorUnit, depthUnit);
-            tempTarget.second->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
+            tempTarget.bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             _shader->setUniform("_direction", tgt::vec2(0.f, 1.f));
             
-            outputTarget.second->activate();
-            LGL_ERROR;
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            outputTarget.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
@@ -146,8 +146,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;
 
-            data.addData(p_outputImage.getValue() + "temp", tempTarget.first);
-            data.addData(p_outputImage.getValue(), outputTarget.first);
+            data.addData(p_outputImage.getValue(), new RenderData(_fbo));
             p_outputImage.issueWrite();
         }
         else {

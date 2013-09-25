@@ -31,8 +31,8 @@
 #define IXPVDEMO_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
-#include "core/eventhandlers/mwheeltonumericpropertyeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
+#include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/properties/cameraproperty.h"
 #include "core/pipeline/visualizationpipeline.h"
 
@@ -70,8 +70,6 @@ namespace campvis {
 
 
         //virtual void keyEvent(tgt::KeyEvent* e);
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -99,8 +97,8 @@ namespace campvis {
 
         CameraProperty _camera;
 
-        TrackballNavigationEventHandler* _trackballHandler;
-        MWheelToNumericPropertyEventHandler _wheelHandler;
+        TrackballNavigationEventListener* _trackballHandler;
+        MWheelToNumericPropertyEventListener _wheelHandler;
     };
 }
 

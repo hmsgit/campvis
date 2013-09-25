@@ -148,6 +148,14 @@ namespace campvis {
          */
         virtual ~PipelineTreeWidget();
 
+        /**
+         * Return the recommended size for the widget.
+         *
+         * This method tries to calculate a sensible height for the wigdet, while still reusing QTreeView's hardcoded
+         * width.
+         */
+        virtual QSize sizeHint() const;
+
 
     public slots:
         /**

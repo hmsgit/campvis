@@ -33,10 +33,7 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
-#include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
-
+#include "core/datastructures/renderdata.h"
 
 #include "core/classification/simpletransferfunction.h"
 #include "core/tools/quadrenderer.h"
@@ -44,28 +41,34 @@
 namespace campvis {
     const std::string VolumeExplorer::loggerCat_ = "CAMPVis.modules.vis.VolumeExplorer";
 
-    VolumeExplorer::VolumeExplorer(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
         , p_camera("Camera", "Camera")
-        , p_xSlice("XSlice", "Slice in YZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
-        , p_ySlice("YSlice", "Slice in XZ Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
-        , p_zSlice("ZSlice", "Slice in XY Plane", 0, 0, 0, INVALID_RESULT | SLICES_INVALID)
-        , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(128))
+        , p_xSlice("XSlice", "Slice in YZ Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
+        , p_ySlice("YSlice", "Slice in XZ Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
+        , p_zSlice("ZSlice", "Slice in XY Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
-        , _raycaster(canvasSize)
-        , _sliceExtractor(canvasSize)
-        , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
-        , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), AbstractProcessor::VALID)
+        , _raycaster(viewportSizeProp)
+        , _sliceExtractor(viewportSizeProp)
+        , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
+        , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
+        , _xSliceHandler(&p_xSlice)
+        , _ySliceHandler(&p_ySlice)
+        , _zSliceHandler(&p_zSlice)
+        , _windowingHandler(&_sliceExtractor.p_transferFunction)
+        , _trackballEH(0)
+        , _mousePressed(false)
     {
         addProperty(&p_inputVolume);
         addProperty(&p_camera);
         addProperty(&p_xSlice);
         addProperty(&p_ySlice);
         addProperty(&p_zSlice);
-        addProperty(&p_transferFunction);
         addProperty(&p_outputImage);
 
+        addProperty(&_sliceExtractor.p_transferFunction);
+        addProperty(_raycaster.getProperty("TransferFunction"));
 
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
         p_inputVolume.addSharedProperty(&_sliceExtractor.p_sourceImageID);
@@ -75,12 +78,20 @@ namespace campvis {
         p_ySlice.addSharedProperty(&_sliceExtractor.p_ySliceNumber);
         p_zSlice.addSharedProperty(&_sliceExtractor.p_zSliceNumber);
 
-        p_sliceRenderSize.addSharedProperty(&_sliceExtractor._renderTargetSize);
-        p_volumeRenderSize.addSharedProperty(&_raycaster._renderTargetSize);
+        _sliceExtractor.setViewportSizeProperty(&p_sliceRenderSize);
+        _raycaster.setViewportSizeProperty(&p_volumeRenderSize);
+
+        addProperty(&p_sliceRenderSize);
+        addProperty(&p_volumeRenderSize);
+
+
+        // Event-Handlers
+        _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, &p_volumeRenderSize);
+        _trackballEH->addLqModeProcessor(&_raycaster);
     }
 
     VolumeExplorer::~VolumeExplorer() {
-
+        delete _trackballEH;
     }
 
     void VolumeExplorer::init() {
@@ -92,9 +103,7 @@ namespace campvis {
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
 
-        p_transferFunction.addSharedProperty(_sliceExtractor.getProperty("TransferFunction"));
-        p_transferFunction.addSharedProperty(&_sliceExtractor.p_transferFunction);
-
+        _sliceExtractor.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
         std::vector<tgt::vec3> vertices, texCorods;
@@ -155,9 +164,9 @@ namespace campvis {
     }
 
     void VolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {
-        if (prop == &_renderTargetSize) {
-            p_sliceRenderSize.setValue(tgt::ivec2(_renderTargetSize.getValue().y / 3, _renderTargetSize.getValue().y / 3));
-            p_volumeRenderSize.setValue(tgt::ivec2(_renderTargetSize.getValue().x - _renderTargetSize.getValue().y / 3, _renderTargetSize.getValue().y));
+        if (prop == _viewportSizeProperty) {
+            p_sliceRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
+            p_volumeRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
         }
         if (prop == &p_outputImage) {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
@@ -169,30 +178,31 @@ namespace campvis {
     }
 
     void VolumeExplorer::composeFinalRendering(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation vrImage(data, p_outputImage.getValue() + ".raycaster");
-        ImageRepresentationRenderTarget::ScopedRepresentation xSliceImage(data, p_outputImage.getValue() + ".xSlice");
-        ImageRepresentationRenderTarget::ScopedRepresentation ySliceImage(data, p_outputImage.getValue() + ".ySlice");
-        ImageRepresentationRenderTarget::ScopedRepresentation zSliceImage(data, p_outputImage.getValue() + ".zSlice");
+        DataContainer::ScopedTypedData<RenderData> vrImage(data, p_outputImage.getValue() + ".raycaster");
+        DataContainer::ScopedTypedData<RenderData> xSliceImage(data, p_outputImage.getValue() + ".xSlice");
+        DataContainer::ScopedTypedData<RenderData> ySliceImage(data, p_outputImage.getValue() + ".ySlice");
+        DataContainer::ScopedTypedData<RenderData> zSliceImage(data, p_outputImage.getValue() + ".zSlice");
 
         if (vrImage == 0 && xSliceImage == 0 && ySliceImage == 0 && zSliceImage == 0)
             return;
 
-        std::pair<ImageData*, ImageRepresentationRenderTarget*> outputTarget = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+        FramebufferActivationGuard fag(this);
+        createAndAttachColorTexture();
+        createAndAttachDepthTexture();
+
         tgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
 
-        tgt::vec2 rts(_renderTargetSize.getValue());
-        const tgt::ivec2 vrs = p_volumeRenderSize.getValue();
-        const tgt::ivec2 srs = p_sliceRenderSize.getValue();
+        tgt::vec2 rts(_viewportSizeProperty->getValue());
+        tgt::vec2 vrs(p_volumeRenderSize.getValue());
+        tgt::vec2 srs(p_sliceRenderSize.getValue());
 
         _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, rts.x, rts.y, 0, -1, 1));
-        outputTarget.second->activate();
-        LGL_ERROR;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (vrImage != 0) {
             vrImage->bind(_shader, colorUnit, depthUnit);
-            float ratio = static_cast<float>(p_volumeRenderSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().x);
+            float ratio = static_cast<float>(vrs.x) / static_cast<float>(rts.x);
             _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
             _quad->render(GL_POLYGON);
@@ -216,25 +226,33 @@ namespace campvis {
             _quad->render(GL_POLYGON);
         }
 
-        outputTarget.second->deactivate();
         _shader->deactivate();
         tgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
-        data.addData(p_outputImage.getValue(), outputTarget.first);
+        data.addData(p_outputImage.getValue(), new RenderData(_fbo));
         p_outputImage.issueWrite();
     }
 
     void VolumeExplorer::onProcessorInvalidated(AbstractProcessor* processor) {
-        if (processor == &_raycaster) {
-            invalidate(VR_INVALID);
-        }
+        // make sure to only invalidate ourself if the invalidation is not triggered by us
+        // => the _locked state is a trustworthy source for this information :)
+        if (! isLocked()) {
+            if (processor == &_raycaster) {
+                invalidate(VR_INVALID);
+            }
+            if (processor == &_sliceExtractor) {
+                invalidate(SLICES_INVALID);
+            }
 
-        invalidate(AbstractProcessor::INVALID_RESULT);
+            invalidate(AbstractProcessor::INVALID_RESULT);
+        }
     }
 
     void VolumeExplorer::updateProperties(DataHandle img) {
-        p_transferFunction.getTF()->setImageHandle(img);
+        _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img);
+        static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->getTF()->setImageHandle(img);
+
         const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
         if (p_xSlice.getMaxValue() != imgSize.x - 1){
             p_xSlice.setMaxValue(static_cast<int>(imgSize.x) - 1);
@@ -244,6 +262,49 @@ namespace campvis {
         }
         if (p_zSlice.getMaxValue() != imgSize.z - 1){
             p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
+        }
+
+        _trackballEH->reinitializeCamera(static_cast<const ImageData*>(img.getData()));
+    }
+
+    void VolumeExplorer::onEvent(tgt::Event* e) {
+        // forward the event to the correspsonding event listeners depending on the mouse position
+        if (typeid(*e) == typeid(tgt::MouseEvent)) {
+            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
+
+            if (!_mousePressed && me->x() <= p_sliceRenderSize.getValue().x) {
+                // cycle slices
+                if (me->action() == tgt::MouseEvent::WHEEL) {
+                    if (me->y() <= p_sliceRenderSize.getValue().y)
+                        _xSliceHandler.onEvent(e);
+                    else if (me->y() <= 2*p_sliceRenderSize.getValue().y)
+                        _ySliceHandler.onEvent(e);
+                    else
+                        _zSliceHandler.onEvent(e);
+                }
+
+                // adjust slice TF windowing
+                else {
+                    _windowingHandler.onEvent(e);
+                }
+            }
+            else {
+                // raycasting trackball navigation
+                if (me->action() == tgt::MouseEvent::PRESSED)
+                    _mousePressed = true;
+                else if (me->action() == tgt::MouseEvent::RELEASED)
+                    _mousePressed = false;
+
+                tgt::MouseEvent adjustedMe(
+                    me->x() - p_sliceRenderSize.getValue().x,
+                    me->y(),
+                    me->action(),
+                    me->modifiers(),
+                    me->button(),
+                    me->viewport() - tgt::ivec2(p_sliceRenderSize.getValue().x, 0)
+                    );
+                _trackballEH->onEvent(&adjustedMe);
+            }
         }
     }
 

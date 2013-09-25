@@ -32,9 +32,10 @@
 
 #include <string>
 
+#include "tgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 
 namespace campvis {
     /**
@@ -64,7 +65,11 @@ namespace campvis {
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "VtkImageReader"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
+        virtual const std::string getDescription() const { return "Reads a VTK image into the pipeline."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image
@@ -73,6 +78,9 @@ namespace campvis {
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+
+        void parsePolydata(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
 
         static const std::string loggerCat_;
     };

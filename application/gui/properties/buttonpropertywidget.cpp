@@ -33,7 +33,7 @@
 
 namespace campvis {
     ButtonPropertyWidget::ButtonPropertyWidget(ButtonProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
         , _button(0)
     {
         _button = new QPushButton(QString::fromStdString(property->getTitle()), this);
@@ -49,7 +49,7 @@ namespace campvis {
 
     void ButtonPropertyWidget::onButtonClicked(bool) {
         ButtonProperty* bp = static_cast<ButtonProperty*>(_property);
-        bp->s_clicked();
+        bp->click();
     }
 
 }

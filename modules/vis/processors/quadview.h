@@ -47,7 +47,7 @@ namespace campvis {
         /**
          * Constructs a new QuadView Processor
          **/
-        QuadView(IVec2Property& canvasSize);
+        QuadView(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -64,6 +64,10 @@ namespace campvis {
         virtual const std::string getName() const { return "QuadView"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Combines up to four render targets into a single one."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         virtual void process(DataContainer& data);
 

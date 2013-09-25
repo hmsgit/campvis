@@ -1,5 +1,6 @@
 #include "qtthreadedcanvas.h"
 #include "tgt/assert.h"
+#include "tgt/painter.h"
 
 namespace tgt {
     
@@ -12,16 +13,17 @@ namespace tgt {
 
     }
 
-    void QtThreadedCanvas::paintGL() {
-        // all painting done in threaded painter
-    }
-
     void QtThreadedCanvas::repaint() {
-        // all painting done in threaded painter
+        // skip QtCanvas's repaint implementation and generate a paint event with QWidget's repaint instead
+        QWidget::repaint();
     }
 
     void QtThreadedCanvas::paint() {
         // all painting done in threaded painter
+    }
+
+    void QtThreadedCanvas::paintEvent(QPaintEvent* /* event */) {
+        painter_->repaint();
     }
 
 }

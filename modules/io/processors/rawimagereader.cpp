@@ -62,8 +62,8 @@ namespace campvis {
         , p_offset("Offset", "Byte Offset", 0, 0, std::numeric_limits<int>::max())
         , p_endianness("Endianess", "Endianess", endianOptions, 2)
         , p_targetImageID("targetImageName", "Target Image ID", "RawImageReader.output", DataNameProperty::WRITE)
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
         addProperty(&p_url);
         addProperty(&p_size);

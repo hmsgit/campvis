@@ -27,11 +27,24 @@
 // 
 // ================================================================================================
 
+#include "tools/shading.frag"
+
+
 in vec3 ex_TexCoord;        ///< incoming texture coordinate
+in vec4 ex_Position;        ///< incoming texture coordinate
+
 out vec4 out_Color;         ///< outgoing fragment color
 
 uniform vec4 _color;
+uniform LightSource _lightSource;
+uniform vec3 _cameraPosition;
 
 void main() {
     out_Color = _color;
+
+#ifdef ENABLE_SHADING
+            // compute gradient (needed for shading and normals)
+            vec3 gradient = ex_TexCoord;
+            out_Color.rgb = calculatePhongShading(ex_Position.xyz / ex_Position.z, _lightSource, _cameraPosition, gradient, _color.rgb, _color.rgb, vec3(1.0, 1.0, 1.0));
+#endif
 }

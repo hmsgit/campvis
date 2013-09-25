@@ -34,7 +34,7 @@
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 
 namespace campvis {
     /**
@@ -65,6 +65,10 @@ namespace campvis {
         virtual const std::string getName() const { return "MhdImageReader"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image

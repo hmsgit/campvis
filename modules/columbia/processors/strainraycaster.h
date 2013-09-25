@@ -31,6 +31,7 @@
 #define STRAINRAYCASTER_H__
 
 #include "core/pipeline/raycastingprocessor.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
@@ -50,7 +51,7 @@ namespace campvis {
         /**
          * Constructs a new StrainRaycaster Processor
          **/
-        StrainRaycaster(IVec2Property& canvasSize);
+        StrainRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -61,6 +62,10 @@ namespace campvis {
         virtual const std::string getName() const { return "StrainRaycaster"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         DataNameProperty p_targetImageID;    ///< image ID for output image
         BoolProperty p_enableShadowing;

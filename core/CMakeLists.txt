@@ -1,6 +1,6 @@
 PROJECT(campvis-core)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
-INCLUDE(../cmake/commonconf.cmake)
+#INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring CAMPVis Core")
 
@@ -66,3 +66,9 @@ ADD_LIBRARY(campvis-core
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-core tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
+
+
+IF(CAMPVIS_GROUP_SOURCE_FILES)
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreSources ${CampvisHome} "")
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreHeaders ${CampvisHome} "")
+ENDIF()

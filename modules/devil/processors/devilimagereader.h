@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new DevilImageReader Processor
          **/
-        DevilImageReader(IVec2Property& canvasSize);
+        DevilImageReader(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -78,6 +78,10 @@ namespace campvis {
         virtual const std::string getName() const { return "DevilImageReader"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Reads an image file into the pipeline using the DevIL library."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image

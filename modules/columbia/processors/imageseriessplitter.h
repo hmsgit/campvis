@@ -61,6 +61,10 @@ namespace campvis {
         virtual const std::string getName() const { return "ImageSeriesSplitter"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Splits an ImageSeries into its single images."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         DataNameProperty p_inputID;   ///< image ID for input image series
         DataNameProperty p_outputID;   ///< image ID for output image

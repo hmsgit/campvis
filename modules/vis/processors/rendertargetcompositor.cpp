@@ -32,9 +32,7 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -43,18 +41,18 @@
 
 namespace campvis {
 
-    static const GenericOption<CompositingMode> compositingOptions[5] = {
-        GenericOption<CompositingMode>("first", "Only First", CompositingModeFirst),
-        GenericOption<CompositingMode>("second", "Only Second", CompositingModeSecond),
-        GenericOption<CompositingMode>("alpha", "Alpha Blending", CompositingModeAlpha),
-        GenericOption<CompositingMode>("diff", "Difference", CompositingModeDifference),
-        GenericOption<CompositingMode>("depth", "Depth Test", CompositingModeDepth)
+    static const GenericOption<RenderTargetCompositor::CompositingMode> compositingOptions[5] = {
+        GenericOption<RenderTargetCompositor::CompositingMode>("first", "Only First", RenderTargetCompositor::CompositingModeFirst),
+        GenericOption<RenderTargetCompositor::CompositingMode>("second", "Only Second", RenderTargetCompositor::CompositingModeSecond),
+        GenericOption<RenderTargetCompositor::CompositingMode>("alpha", "Alpha Blending", RenderTargetCompositor::CompositingModeAlpha),
+        GenericOption<RenderTargetCompositor::CompositingMode>("diff", "Difference", RenderTargetCompositor::CompositingModeDifference),
+        GenericOption<RenderTargetCompositor::CompositingMode>("depth", "Depth Test", RenderTargetCompositor::CompositingModeDepth)
     };
 
     const std::string RenderTargetCompositor::loggerCat_ = "CAMPVis.modules.vis.RenderTargetCompositor";
 
-    RenderTargetCompositor::RenderTargetCompositor(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    RenderTargetCompositor::RenderTargetCompositor(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_firstImageId("FirstImageId", "First Input Image", "", DataNameProperty::READ)
         , p_secondImageId("SecondImageId", "Second Input Image", "", DataNameProperty::READ)
         , p_targetImageId("TargetImageId", "Output Image", "", DataNameProperty::WRITE)
@@ -90,12 +88,14 @@ namespace campvis {
     }
 
     void RenderTargetCompositor::process(DataContainer& data) {
-        ImageRepresentationRenderTarget::ScopedRepresentation firstImage(data, p_firstImageId.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation secondImage(data, p_secondImageId.getValue());
+        DataContainer::ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
+        DataContainer::ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
 
         if (firstImage != 0 && secondImage != 0 ) {
-            std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
- 
+            FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
+
             _shader->activate();
             tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 
@@ -105,17 +105,14 @@ namespace campvis {
             _shader->setUniform("_alpha", p_alphaValue.getValue());
 
             decorateRenderProlog(data, _shader);
-
-            rt.second->activate();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
-            rt.second->deactivate();
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
 
-            data.addData(p_targetImageId.getValue(), rt.first);
+            data.addData(p_targetImageId.getValue(), new RenderData(_fbo));
             p_targetImageId.issueWrite();
         }
         else {

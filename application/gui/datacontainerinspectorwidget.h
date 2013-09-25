@@ -138,7 +138,7 @@ namespace campvis {
         /**
          * Saves the Image in \a handle to the file \a filename.
          * \note    This method must be called with a valid OpenGL context!
-         * \param handle    DataHandle containing the image to save. Must be of type ImageData having an ImageRepresentationRenderTarget inside!
+         * \param handle    DataHandle containing the image to save. Must contain ImageData or RenderData!
          * \param filename  Filename for the file to save.
          */
         static void saveToFile(DataHandle handle, std::string filename);
@@ -149,6 +149,8 @@ namespace campvis {
          * \return  "numBytes/1024^n [KMG]Bytes
          */
         QString humanizeBytes(size_t numBytes) const;
+
+        bool _inited;
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
 
@@ -164,7 +166,11 @@ namespace campvis {
         QLabel* _lblLocalMemoryFootprint;
         QLabel* _lblVideoMemoryFootprint;
         QLabel* _lblTimestamp;
+        QLabel* _lblSize;
+        QLabel* _lblBounds;
         QPushButton* _btnSaveToFile;
+
+        static const std::string loggerCat_;
     };
 }
 

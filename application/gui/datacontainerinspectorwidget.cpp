@@ -30,6 +30,7 @@
 #include "datacontainerinspectorwidget.h"
 
 #include "tgt/assert.h"
+#include "tgt/logmanager.h"
 #include "tgt/filesystem.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
@@ -47,8 +48,13 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/facegeometry.h"
+#include "core/datastructures/geometrydata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
+
+#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
+#include "modules/columbia/datastructures/fiberdata.h"
+#endif
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
@@ -57,8 +63,11 @@
 
 namespace campvis {
 
+    const std::string DataContainerInspectorWidget::loggerCat_ = "CAMPVis.application.DataContainerInspectorWidget";
+
     DataContainerInspectorWidget::DataContainerInspectorWidget(QWidget* parent) 
         : QWidget(parent)
+        , _inited(false)
         , _dataContainer(0)
         , _dctWidget(0)
         , _canvas(0)
@@ -129,6 +138,12 @@ namespace campvis {
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
         _infoWidgetLayout->addWidget(_lblTimestamp);
 
+        _lblSize = new QLabel(tr("Size: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblSize);
+
+        _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblBounds);
+
         _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
         _infoWidgetLayout->addWidget(_btnSaveToFile);
 
@@ -158,6 +173,9 @@ namespace campvis {
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {
+        if (!_inited)
+            return;
+
         // get the selection from the tree widget
         const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
         std::vector< std::pair<QString, QtDataHandle> > handles;
@@ -187,8 +205,55 @@ namespace campvis {
             _lblName->setText("Name: " + handles.front().first);
             _lblTimestamp->setText("Timestamp: " + QString::number(handles.front().second.getTimestamp()));
 
-            if (dynamic_cast<const ImageData*>(handles.front().second.getData()))
+            if (const ImageData* tester = dynamic_cast<const ImageData*>(handles.front().second.getData())) {
                 _canvas->p_transferFunction.getTF()->setImageHandle(handles.front().second);
+                std::ostringstream ss;
+
+                ss << tester->getSize();
+                _lblSize->setText(tr("Size: ") + QString::fromStdString(ss.str()));
+
+                ss.str("");
+                ss << tester->getWorldBounds();
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+            }
+            else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
+                _lblSize->setText(tr("Size: n/a"));
+
+                std::ostringstream ss;
+                ss << tester->getWorldBounds();
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+            }
+            else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
+                const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
+                if (id != 0) {
+                    std::ostringstream ss;
+                    ss << id->getSize();
+                    _lblSize->setText(tr("Size: ") + QString::fromStdString(ss.str()));
+
+                    ss.str("");
+                    ss << id->getWorldBounds();
+                    _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+                }
+                else {
+                    _lblSize->setText(tr("Size: n/a"));
+                    _lblBounds->setText(tr("World Bounds: n/a")); 
+                }
+            }
+#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
+            else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
+                std::ostringstream ss;
+                ss << "Size: " << tester->numFibers() << " Fibers with " << tester->numSegments() << " Segments.";
+                _lblSize->setText(QString::fromStdString(ss.str()));
+
+                ss.str("");
+                ss << tester->getWorldBounds();
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+            }
+#endif
+            else {
+                _lblSize->setText(tr("Size: n/a"));
+                _lblBounds->setText(tr("World Bounds: n/a")); 
+            }
         }
         else {
             _lblName->setText(QString::number(handles.size()) + " DataHandles selected");
@@ -223,9 +288,12 @@ namespace campvis {
     void DataContainerInspectorWidget::init() {
         if (_canvas != 0)
             _canvas->init();
+
+        _inited = true;
     }
 
     void DataContainerInspectorWidget::deinit() {
+        _inited = false;
         if (_canvas != 0)
             _canvas->deinit();
 
@@ -259,21 +327,19 @@ namespace campvis {
 
             // only consider non-empty DataHandles that are ImageData and have render target representations
             if (handle.getData() != 0) {
-                if (const ImageData* tester = dynamic_cast<const ImageData*>(handle.getData())) {
-                    if (const ImageRepresentationRenderTarget* repRT = tester->getRepresentation<ImageRepresentationRenderTarget>(false)) {
-                        QString dialogCaption = "Export " + idxName.data(Qt::DisplayRole).toString() + " as Image";
-                        QString directory = tr("");
-                        const QString fileFilter = tr("*.png;;PNG images (*.png)");
+                if (dynamic_cast<const ImageData*>(handle.getData()) || dynamic_cast<const RenderData*>(handle.getData())) {
+                    QString dialogCaption = "Export " + idxName.data(Qt::DisplayRole).toString() + " as Image";
+                    QString directory = tr("");
+                    const QString fileFilter = tr("*.png;;PNG images (*.png)");
 
-                        QString filename = QFileDialog::getSaveFileName(this, dialogCaption, directory, fileFilter);
+                    QString filename = QFileDialog::getSaveFileName(this, dialogCaption, directory, fileFilter);
 
-                        if (! filename.isEmpty()) {
-                            // Texture access needs OpenGL context - dispatch method call:
-                            GLJobProc.enqueueJob(
-                                _canvas, 
-                                makeJobOnHeap(&DataContainerInspectorWidget::saveToFile, handle, filename.toStdString()), 
-                                OpenGLJobProcessor::SerialJob);
-                        }
+                    if (! filename.isEmpty()) {
+                        // Texture access needs OpenGL context - dispatch method call:
+                        GLJobProc.enqueueJob(
+                            _canvas, 
+                            makeJobOnHeap(&DataContainerInspectorWidget::saveToFile, handle, filename.toStdString()), 
+                            OpenGLJobProcessor::SerialJob);
                     }
                 }
             }
@@ -287,13 +353,35 @@ namespace campvis {
             return;
         }
 
-        // we did the test before, hence, static_cast ist safe
-        const ImageRepresentationRenderTarget* repRT = static_cast<const ImageData*>(handle.getData())->getRepresentation<ImageRepresentationRenderTarget>(false);
-        tgtAssert(repRT != 0, "DataHandle must be of type ImageData having an ImageRepresentationRenderTarget inside - otherwise you're not allowed to call this method!");
+        // get the ImageData object (either directly or from the RenderData)
+        const ImageData* id = 0;
+        if (const RenderData* tester = dynamic_cast<const RenderData*>(handle.getData())) {
+            id = tester->getColorTexture(0);
+        }
+        else if (const ImageData* tester = dynamic_cast<const ImageData*>(handle.getData())) {
+            id = tester;
+        }
+        else {
+            LERROR("Could not extract image to save.");
+            return;
+        }
 
-        // get color buffer content
-        GLubyte* colorBuffer = repRT->getColorTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_SHORT);
-        tgt::ivec2 size = repRT->getSize().xy();
+        // extract the data
+        WeaklyTypedPointer wtp(WeaklyTypedPointer::UINT8, 1, 0);
+        const ImageRepresentationGL* repGL = id->getRepresentation<ImageRepresentationGL>(false);
+        if (repGL != 0) // if it's a GL texture, download it (we do not want to use the automatic conversion method here)
+            wtp = repGL->getWeaklyTypedPointer();
+        else {
+            const ImageRepresentationLocal* repLocal = id->getRepresentation<ImageRepresentationLocal>(true);
+            if (repLocal != 0)
+                wtp = repLocal->getWeaklyTypedPointer();
+        }
+
+        if (wtp._pointer == 0) {
+            LERROR("Could not extract image to save.");
+            return;
+        }
+
 
         // create Devil image from image data and write it to file
         ILuint img;
@@ -301,13 +389,12 @@ namespace campvis {
         ilBindImage(img);
 
         // put pixels into IL-Image
-        ilTexImage(size.x, size.y, 1, 4, IL_RGBA, IL_UNSIGNED_SHORT, colorBuffer);
+        tgt::ivec2 size = id->getSize().xy();
+        ilTexImage(size.x, size.y, 1, static_cast<ILubyte>(wtp._numChannels), wtp.getIlFormat(), wtp.getIlDataType(), wtp._pointer);
         ilEnable(IL_FILE_OVERWRITE);
         ilResetWrite();
         ILboolean success = ilSaveImage(filename.c_str());
         ilDeleteImages(1, &img);
-
-        delete[] colorBuffer;
 
         if (!success) {
             LERRORC("CAMPVis.application.DataContainerInspectorWidget", "Could not save image to file: " << ilGetError());

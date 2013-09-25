@@ -35,8 +35,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
 #include "kisscl/kisscl.h"
@@ -59,11 +59,11 @@ namespace campvis {
          * \note    The render target size property of this CLRaycaster will automatically 
          *          be assigned as shared property of the given \a renderTargetSize property.
          * \see     VisualizationProcessor
-         * \param   renderTargetSize            Reference to the parent pipeline's render target size property.
+         * \param   viewportSizeProp            Reference to the parent pipeline's render target size property.
          * \param   fragmentShaderFileName      Filename for the fragment shader being automatically loaded.
          * \param   bindEntryExitDepthTextures  Flag whether to also bind the depth textures of the entry-/exit points.
          */
-        CLRaycaster(GenericProperty<tgt::ivec2>& renderTargetSize);
+        CLRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -74,6 +74,10 @@ namespace campvis {
         virtual const std::string getName() const { return "CLRaycaster"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Proof of concept processor for OpenCL based Volume raycasting."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         /**
          * Initalizes the Processor, loads and builds the shader.

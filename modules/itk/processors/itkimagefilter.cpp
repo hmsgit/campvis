@@ -197,10 +197,10 @@ namespace campvis {
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
         , p_filterMode("FilterMode", "Filter Mode", filterModes, 6, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
-        , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f)
+        , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f, 0.1f)
         , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
-        , p_timeStep("TimeStep", "Time Step", .0625, .001f, .12499f)
-        , p_conductance("Conductance", "Conductance", 1.f, .1f, 5.f)
+        , p_timeStep("TimeStep", "Time Step", .0625, .001f, .12499f, 0.001f)
+        , p_conductance("Conductance", "Conductance", 1.f, .1f, 5.f, 0.1f)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_targetImageID);

@@ -31,7 +31,6 @@
 #include "tgt/tgt_gl.h"
 #include "tgt/glcanvas.h"
 #include "tgt/glcontext.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"

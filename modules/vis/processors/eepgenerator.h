@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new EEPGenerator Processor
          **/
-        EEPGenerator(IVec2Property& canvasSize);
+        EEPGenerator(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -71,6 +71,10 @@ namespace campvis {
         virtual const std::string getName() const { return "EEPGenerator"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Genereates entry-/exit point textures for the given image and camera."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         virtual void process(DataContainer& data);
 

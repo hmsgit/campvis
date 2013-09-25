@@ -125,6 +125,7 @@ namespace campvis {
             return convertToGenericLocal(tester, tester->getImageData());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
+            // FIXME: this here deadlocks, if called from OpenGL context (GLJobProc)!!!
             tgt::GLCanvas* context = GLJobProc.iKnowWhatImDoingGetArbitraryContext();
             ImageRepresentationLocal* toReturn = 0;
             GLJobProc.pause();

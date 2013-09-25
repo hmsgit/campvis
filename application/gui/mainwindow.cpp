@@ -34,15 +34,19 @@
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/qtdatahandle.h"
+#include "application/gui/visualizationpipelinewrapper.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
+
+#include <QMdiSubWindow>
+#include <QScrollBar>
 
 namespace campvis {
 
     MainWindow::MainWindow(CampVisApplication* application)
         : QMainWindow()
         , _application(application)
-        , _centralWidget(0)
+        , _mdiArea(0)
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
@@ -73,27 +77,39 @@ namespace campvis {
 
         setTabPosition(Qt::TopDockWidgetArea, QTabWidget::North);
 
+        _mdiArea = new QMdiArea();
+        _mdiArea->tileSubWindows();
+        setCentralWidget(_mdiArea);
+
         _pipelineWidget = new PipelineTreeWidget();
+        _pipelineWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
         ui.pipelineTreeDock->setWidget(_pipelineWidget);
 
-        QWidget* rightWidget = new QWidget();
-        ui.pipelinePropertiesDock->setWidget(rightWidget);
+        _pipelinePropertiesScrollArea = new QScrollArea();
+        _pipelinePropertiesScrollArea->setWidgetResizable(true);
+        _pipelinePropertiesScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        _pipelinePropertiesScrollArea->setFrameStyle(QScrollArea::NoFrame);
+
+        _pipelinePropertiesWidget = new QWidget();
+        _pipelinePropertiesWidget->installEventFilter(this);
+        _pipelinePropertiesScrollArea->setWidget(_pipelinePropertiesWidget);
+        ui.pipelinePropertiesDock->setWidget(_pipelinePropertiesScrollArea);
 
         QVBoxLayout* rightLayout = new QVBoxLayout();
         rightLayout->setSpacing(4);
-        rightWidget->setLayout(rightLayout);
+        _pipelinePropertiesWidget->setLayout(rightLayout);
 
-        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", rightWidget);
+        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor");
         rightLayout->addWidget(_btnExecute);
 
-        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", rightWidget);
+        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline");
         rightLayout->addWidget(_btnShowDataContainerInspector);
 
-        _propCollectionWidget = new PropertyCollectionWidget(_centralWidget);
+        _propCollectionWidget = new PropertyCollectionWidget();
         rightLayout->addWidget(_propCollectionWidget);
+        rightLayout->addStretch();
 
         _logViewer = new LogViewerWidget();
-        ui.logViewerDock->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         ui.logViewerDock->setWidget(_logViewer);
 
         _dcInspectorWidget = new DataContainerInspectorWidget();
@@ -114,6 +130,15 @@ namespace campvis {
             _btnShowDataContainerInspector, SIGNAL(clicked()), 
             this, SLOT(onBtnShowDataContainerInspectorClicked()));
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
+    }
+
+    bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
+        if (watched == _pipelinePropertiesWidget && event->type() == QEvent::Resize) {
+            _pipelinePropertiesScrollArea->setMinimumWidth(_pipelinePropertiesWidget->minimumSizeHint().width() +
+                                                           _pipelinePropertiesScrollArea->verticalScrollBar()->width());
+        }
+
+        return false;
     }
 
     void MainWindow::onPipelinesChanged() {
@@ -192,8 +217,8 @@ namespace campvis {
         _logViewer->deinit();
     }
 
-    void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* widget) {
-        dockPrimaryWidget(name, widget);
+    void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
+        VisualizationPipelineWrapper* widget = new VisualizationPipelineWrapper(name, canvas, _mdiArea, this);
     }
 
     QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {

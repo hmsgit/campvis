@@ -33,6 +33,7 @@
 #include "modules/vis/pipelines/ixpvdemo.h"
 #include "modules/vis/pipelines/dvrvis.h"
 #include "modules/vis/pipelines/volumerendererdemo.h"
+#include "modules/vis/pipelines/volumeexplorerdemo.h"
 #include "modules/vis/pipelines/slicevis.h"
 #ifdef HAS_KISSCL
 #include "modules/opencl/pipelines/openclpipeline.h"
@@ -46,6 +47,10 @@
 #include "modules/columbia/pipelines/columbia1.h"
 #endif
 
+#ifdef Q_WS_X11
+#include <X11/Xlib.h>
+#endif
+  
 using namespace campvis;
 
 /**
@@ -56,13 +61,18 @@ using namespace campvis;
  * \return  0 if program exited successfully
  **/
 int main(int argc, char** argv) {
+    #ifdef Q_WS_X11
+        XInitThreads();
+    #endif
+  
     CampVisApplication app(argc, argv);
     //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
     //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
 //    app.addVisualizationPipeline("IXPV", new IxpvDemo());
     //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    //app.addVisualizationPipeline("DVRVis", new DVRVis());
+    app.addVisualizationPipeline("DVRVis", new DVRVis());
     //app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
+    app.addVisualizationPipeline("VolumeExplorerDemo", new VolumeExplorerDemo());
 #ifdef HAS_KISSCL
     //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
 #endif
@@ -72,7 +82,7 @@ int main(int argc, char** argv) {
 #endif
 
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-    app.addVisualizationPipeline("Columbia", new Columbia1());
+    //app.addVisualizationPipeline("Columbia", new Columbia1());
 #endif
 
 

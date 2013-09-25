@@ -33,10 +33,11 @@
 #include <string>
 
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 
 namespace tgt {
     class Shader;
@@ -46,12 +47,12 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class GeometryRenderer : public VisualizationProcessor {
+    class GeometryRenderer : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new GeometryRenderer Processor
          **/
-        GeometryRenderer(IVec2Property& canvasSize);
+        GeometryRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -68,6 +69,10 @@ namespace campvis {
         virtual const std::string getName() const { return "GeometryRenderer"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Renders Geometry."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
 
@@ -78,6 +83,10 @@ namespace campvis {
         Vec4Property p_color;                ///< rendering color
 
     protected:
+        /**
+         * Generates the GLSL header.
+         */
+        std::string generateGlslHeader() const;
 
         tgt::Shader* _shader;                           ///< Shader for EEP generation
 

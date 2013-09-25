@@ -32,6 +32,7 @@
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
@@ -56,6 +57,10 @@ namespace campvis {
         virtual const std::string getName() const { return "ConfidenceMapGenerator"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates Confidence Maps for Ultrasound Images."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         virtual void process(DataContainer& data);
 

@@ -35,6 +35,7 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
@@ -55,7 +56,7 @@ namespace campvis {
         /**
          * Constructs a new AdvancedUsFusion Processor
          **/
-        AdvancedUsFusion(IVec2Property& canvasSize);
+        AdvancedUsFusion(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -72,6 +73,10 @@ namespace campvis {
         virtual const std::string getName() const { return "AdvancedUsFusion"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         /// \see AbstractProcessor::process()
         virtual void process(DataContainer& data);

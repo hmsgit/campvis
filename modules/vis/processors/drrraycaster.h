@@ -33,8 +33,8 @@
 #include <string>
 
 #include "core/pipeline/raycastingprocessor.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
 namespace tgt {
@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new DRRRaycaster Processor
          **/
-        DRRRaycaster(IVec2Property& canvasSize);
+        DRRRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -63,6 +63,10 @@ namespace campvis {
         virtual const std::string getName() const { return "DRRRaycaster"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates a Digitally Reconstructed Radiograph."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         DataNameProperty p_targetImageID;    ///< image ID for output image
 

@@ -59,7 +59,7 @@ namespace campvis {
         /**
          * Constructs a new TrackedUsSweepFrameRenderer3D Processor
          **/
-        TrackedUsSweepFrameRenderer3D(IVec2Property& canvasSize);
+        TrackedUsSweepFrameRenderer3D(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -76,6 +76,10 @@ namespace campvis {
         virtual const std::string getName() const { return "TrackedUsSweepFrameRenderer3D"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         /// \see AbstractProcessor::process()
         virtual void process(DataContainer& data);

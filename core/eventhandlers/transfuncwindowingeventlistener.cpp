@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "transfuncwindowingeventhandler.h"
+#include "transfuncwindowingeventlistener.h"
 
 #include "tgt/assert.h"
 #include "tgt/event/mouseevent.h"
@@ -35,34 +35,22 @@
 #include "core/properties/transferfunctionproperty.h"
 
 namespace campvis {
-    const std::string TransFuncWindowingEventHandler::loggerCat_ = "CAMPVis.core.eventhandler.TransFuncWindowingEventHandler";
+    const std::string TransFuncWindowingEventListener::loggerCat_ = "CAMPVis.core.eventhandler.TransFuncWindowingEventListener";
 
-    TransFuncWindowingEventHandler::TransFuncWindowingEventHandler(TransferFunctionProperty* property)
-        : AbstractEventHandler()
+    TransFuncWindowingEventListener::TransFuncWindowingEventListener(TransferFunctionProperty* property)
+        : tgt::EventListener()
         , _prop(property)
     {
         tgtAssert(_prop != 0, "Assigned property must not be 0.");
     }
 
-    TransFuncWindowingEventHandler::~TransFuncWindowingEventHandler() {
+    TransFuncWindowingEventListener::~TransFuncWindowingEventListener() {
 
     }
 
-    bool TransFuncWindowingEventHandler::accept(tgt::Event* e) {
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
-            if (me->action() == tgt::MouseEvent::PRESSED)
-                return true;
-            else if (_mousePressed && me->action() == tgt::MouseEvent::RELEASED)
-                return true;
-            else if (_mousePressed && me->action() == tgt::MouseEvent::MOTION)
-                return true;
-        }
-        return false;
-    }
-
-    void TransFuncWindowingEventHandler::execute(tgt::Event* e) {
-        tgtAssert(dynamic_cast<tgt::MouseEvent*>(e) != 0, "Given event has wrong type. Check if the event is accepted by this event handler before executing it!");
+    void TransFuncWindowingEventListener::onEvent(tgt::Event* e) {
+        if (typeid(*e) != typeid(tgt::MouseEvent))
+            return;
 
         // this is only to be executed when the event was accepted, so the static cast is safe.
         tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);

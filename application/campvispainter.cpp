@@ -31,14 +31,16 @@
 
 #include "tgt/assert.h"
 #include "tgt/camera.h"
+#include "tgt/quadric.h"
+#include "tgt/shadermanager.h"
+#include "tgt/textureunit.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/qt/qtglcontext.h"
 #include "tgt/qt/qtcontextmanager.h"
 
-#include "tgt/quadric.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
@@ -95,9 +97,9 @@ namespace campvis {
         glViewport(0, 0, size.x, size.y);
 
         // try get Data
-        ImageRepresentationRenderTarget::ScopedRepresentation image(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
+        DataContainer::ScopedTypedData<RenderData> rd(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        if (image != 0) {
+        if (rd != 0) {
             // activate shader
             _copyShader->activate();
             _copyShader->setIgnoreUniformLocationError(true);
@@ -107,7 +109,7 @@ namespace campvis {
 
             // bind input textures
             tgt::TextureUnit colorUnit, depthUnit;
-            image->bind(_copyShader, colorUnit, depthUnit);
+            rd->bind(_copyShader, colorUnit, depthUnit);
             LGL_ERROR;
 
             // execute the shader
@@ -168,7 +170,7 @@ namespace campvis {
         if (_pipeline != 0) {
             _pipeline->s_renderTargetChanged.disconnect(this);
             if (getCanvas()->getEventHandler() != 0)
-                getCanvas()->getEventHandler()->removeListener(_pipeline);
+                getCanvas()->getEventHandler()->removeEventListener(_pipeline);
             _pipeline = 0;
         }
     }
@@ -178,18 +180,22 @@ namespace campvis {
         if (_pipeline != 0) {
             _pipeline->s_renderTargetChanged.disconnect(this);
             if (getCanvas()->getEventHandler() != 0)
-                getCanvas()->getEventHandler()->removeListener(_pipeline);
+                getCanvas()->getEventHandler()->removeEventListener(_pipeline);
         }
 
         _pipeline = pipeline;
         _pipeline->s_renderTargetChanged.connect(this, &TumVisPainter::onRenderTargetChanged);
         _pipeline->setRenderTargetSize(getCanvas()->getSize());
         if (getCanvas()->getEventHandler() != 0)
-            getCanvas()->getEventHandler()->addListenerToFront(_pipeline);
+            getCanvas()->getEventHandler()->addEventListenerToFront(_pipeline);
+    }
+
+    void TumVisPainter::repaint() {
+        GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &TumVisPainter::paint), OpenGLJobProcessor::PaintJob);
     }
 
     void TumVisPainter::onRenderTargetChanged() {
-        GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &TumVisPainter::paint), OpenGLJobProcessor::PaintJob);
+        repaint();
     }
 
     void TumVisPainter::setCanvas(tgt::GLCanvas* canvas) {

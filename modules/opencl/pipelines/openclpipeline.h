@@ -31,7 +31,7 @@
 #define OPENCLPIPELINE_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -54,25 +54,27 @@ namespace campvis {
 
         /// \see VisualizationPipeline::init()
         virtual void init();
+        /// \see VisualizationPipeline::deinit()
+        virtual void deinit();
 
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const;
 
-        /**
-         * Execute this pipeline.
-         **/
-        virtual void execute();
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
     protected:
+        /**
+         * Slot getting called when one of the observed processors got validated.
+         * Updates the camera properties, when the input image has changed.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorValidated(AbstractProcessor* processor);
+
         CameraProperty _camera;
         MhdImageReader _imageReader;
         ProxyGeometryGenerator _pgGenerator;
         EEPGenerator _eepGenerator;
         CLRaycaster _clRaycaster;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

@@ -18,8 +18,10 @@ OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                        
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
 OPTION(CAMPVIS_BUILD_LIB_KISSCL     "Build KissCL Library"                                          OFF)
+OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   ON)
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
+OPTION(CAMPVIS_GROUP_SOURCE_FILES   "Group source files by directory"                               OFF)
 
 IF(WIN32)
     OPTION(CAMPVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON)
@@ -32,8 +34,6 @@ ENDIF()
 #
 include(cmake/commonconf.cmake)
 include(cmake/parseModulesDir.cmake)
-
-SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 
@@ -57,6 +57,10 @@ ENDIF()
 
 IF(CAMPVIS_BUILD_APPLICATION)
     ADD_SUBDIRECTORY(application)
+ENDIF()
+
+IF(CAMPVIS_BUILD_DOXYGEN)
+    ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 ENDIF()
 
 

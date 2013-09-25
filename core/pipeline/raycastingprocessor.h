@@ -37,7 +37,7 @@
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
 #include "core/datastructures/imagerepresentationgl.h"
@@ -64,11 +64,11 @@ namespace campvis {
          * \note    The render target size property of this RaycastingProcessor will automatically 
          *          be assigned as shared property of the given \a renderTargetSize property.
          * \see     VisualizationProcessor
-         * \param   renderTargetSize            Reference to the parent pipeline's render target size property.
+         * \param   viewportSizeProp            Pointer to the parent pipeline's render target size property.
          * \param   fragmentShaderFileName      Filename for the fragment shader being automatically loaded.
          * \param   bindEntryExitDepthTextures  Flag whether to also bind the depth textures of the entry-/exit points.
          */
-        RaycastingProcessor(IVec2Property& renderTargetSize, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures);
+        RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures);
 
         /**
          * Destructor

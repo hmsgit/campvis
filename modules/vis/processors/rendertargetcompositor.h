@@ -36,6 +36,7 @@
 #include "core/pipeline/processordecoratorbackground.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/optionproperty.h"
 
 namespace tgt {
@@ -45,7 +46,11 @@ namespace tgt {
 namespace campvis {
     class ImageData;
 
-    namespace {
+    /**
+     * Performs the composition of a multiple render targets
+     */
+    class RenderTargetCompositor : public VisualizationProcessor, public HasProcessorDecorators {
+    public:
         enum CompositingMode {
             CompositingModeFirst = 0,
             CompositingModeSecond = 1,
@@ -53,17 +58,11 @@ namespace campvis {
             CompositingModeDifference = 3,
             CompositingModeDepth = 4
         };
-    }
 
-    /**
-     * Performs the composition of a multiple render targets
-     */
-    class RenderTargetCompositor : public VisualizationProcessor, public HasProcessorDecorators {
-    public:
         /**
          * Constructs a new RenderTargetCompositor Processor
          **/
-        RenderTargetCompositor(IVec2Property& canvasSize);
+        RenderTargetCompositor(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -80,6 +79,10 @@ namespace campvis {
         virtual const std::string getName() const { return "RenderTargetCompositor"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Combines Normal DVR and Virtual Mirror DVR images."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
 

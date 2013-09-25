@@ -8,6 +8,7 @@ FILE(GLOB CampvisApplicationSources
     *.cpp
     gui/*.cpp
     gui/properties/*.cpp
+    gui/adjusterwidgets/*.cpp
     tools/*.cpp
 )
 
@@ -17,6 +18,7 @@ FILE(GLOB CampvisApplicationHeaders
     glsl/*.vert
     gui/*.h
     gui/properties/*.h
+    gui/adjusterwidgets/*.h
     tools/*.h
 )
 
@@ -34,6 +36,11 @@ SET(CampvisApplicationToBeMocced
     gui/qtdatahandle.h
     gui/logviewerwidget.h
     gui/loghighlighter.h
+    gui/pipelinemdisubwindow.h
+    gui/visualizationpipelinewidget.h
+    gui/visualizationpipelinewrapper.h
+    gui/adjusterwidgets/doubleadjusterwidget.h
+    gui/adjusterwidgets/intadjusterwidget.h
     gui/properties/abstractpropertywidget.h
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
@@ -74,6 +81,13 @@ ADD_EXECUTABLE(campvis-application
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+
+
+IF(CAMPVIS_GROUP_SOURCE_FILES)
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationSources ${CampvisHome} "")
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationHeaders ${CampvisHome} "")
+ENDIF()
+
 
 IF(CAMPVIS_DEPLOY_SHADERS)
     LIST(APPEND CampvisShaderDirectories "application/glsl")

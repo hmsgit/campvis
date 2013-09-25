@@ -62,4 +62,8 @@ namespace tgt {
         return _size;
     }
 
+    BufferObject::TargetType BufferObject::getTargetType() const {
+        return _targetType;
+    }
+
 }

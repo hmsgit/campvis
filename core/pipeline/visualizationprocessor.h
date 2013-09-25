@@ -30,43 +30,139 @@
 #ifndef VISUALIZATIONPROCESSOR_H__
 #define VISUALIZATIONPROCESSOR_H__
 
+#include "tgt/framebufferobject.h"
+#include "tgt/texture.h"
 #include "tgt/vector.h"
+
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/numericproperty.h"
 
 namespace campvis {
+    class ImageData;
 
     /**
      * Specialization of AbstractProcessor for visualization purposes.
+     * 
      * VisualizationProcessors are required to be called by a VisualizationPipeline which ensure
      * to provide a valid OpenGL context when calling the processor's process() method. Hence, a
      * VisualizationProcessor is allowed/capable of performing OpenGl operations.
-     * For determining the canvas/viewport size, a VisualizationProcessor gets a reference to the
-     * parent pipeline's render target size property during instantiation.
+     * 
+     * Each VisualizationProcessor has its own OpenGL FramebufferObject, which is created during
+     * init(). For determining the canvas/viewport size, a VisualizationProcessor gets a reference 
+     * to the parent pipeline's render target size property during instantiation.
      * 
      * \sa VisualizationPipeline
      */
     class VisualizationProcessor : public AbstractProcessor {
     public:
+        struct FramebufferActivationGuard {
+        public:
+            FramebufferActivationGuard(VisualizationProcessor* vp)
+                : _parentProcessor(vp)
+                , _fbo(vp->_fbo)
+            {
+                tgtAssert(_fbo != 0, "FBO must not be 0.");
+                _fbo->activate();
+
+                const tgt::ivec2& windowSize = vp->getEffectiveViewportSize();
+                glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
+            }
+
+            ~FramebufferActivationGuard() {
+                _fbo->detachAll();
+                _fbo->deactivate();
+            }
+
+
+        private:
+            VisualizationProcessor* _parentProcessor;
+            tgt::FramebufferObject* _fbo;
+        };
 
         /**
          * Creates a VisualizationProcessor.
+         * 
          * \note    The render target size property of this VisualizationProcessor will automatically 
          *          be assigned as shared property of the given \a renderTargetSize property.
-         * \param   renderTargetSize    Reference to the parent pipeline's render target size property.
+         * \note    This processor will keep and access \a renderTargetSize, so make sure the referenced
+         *          property exists at least as long as this processor or you set it to a different
+         *          property before using setViewportSizeProperty().
+         *          
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          */
-        VisualizationProcessor(IVec2Property& renderTargetSize);
+        VisualizationProcessor(IVec2Property* viewportSizeProp);
 
         /**
          * Virtual Destructor
          **/
         virtual ~VisualizationProcessor();
 
+                
+        /// \see AbstractProcessor::init()
+        virtual void init();
+        
+        /// \see AbstractProcessor::deinit()
+        virtual void deinit();
 
 
+        /**
+         * Sets the property defining the viewport size to \a viewportSizeProp.
+         * \note    This processor will keep and access this pointer, so make sure the referenced
+         *          property exists at least as long as this processor or you set it to a different
+         *          property before.
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
+         */
+        virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
-    //protected:
-        IVec2Property _renderTargetSize;        ///< Viewport size of target canvas
+
+        BoolProperty p_lqMode;                      ///< Flag whether to enable LQ mode (halfsamples effective viewport size)
+
+    protected:
+
+        /**
+         * Creates a texture with the given format and attaches it to the FBO to \a attachment.
+         * \param   internalFormat  Internal OpenGL texture format
+         * \param   attachment      Target attachment for texture
+         */
+        void createAndAttachTexture(GLint internalFormat, GLenum attachment);
+
+        /**
+         * Creates a texture with the given format and attaches it to the FBO using the default attachments.
+         * \note    Default attachment are GL_DEPTH_ATTACHMENT for depth textures and 
+         *          GL_COLOR_ATTACHMENT_0 + <number of color textures attached>.
+         * \param   internalFormat  Internal OpenGL texture format
+         */
+        void createAndAttachTexture(GLint internalFormat);
+
+        /**
+         * Creates a color texture with format GL_RGBA8 and attaches it to the FBO using the 
+         * default attachment.
+         */
+        void createAndAttachColorTexture();
+
+        /**
+         * Creates a depth texture with format GL_DEPTH_COMPONENT24 and attaches it to the FBO 
+         * using the default attachment.
+         */
+        void createAndAttachDepthTexture();
+
+        /**
+         * Returns the effective viewport size considering LQ mode.
+         * \return  lqMode ? _viewportSize/2 : _viewportSize
+         */
+        tgt::ivec2 getEffectiveViewportSize() const;
+
+        /**
+         * Returns the current viewport size as ivec3.
+         * \return  tgt::ivec3(getEffectiveViewportSize(), 1)
+         */
+        tgt::ivec3 getRenderTargetSize() const;
+
+
+        tgt::FramebufferObject* _fbo;               ///< The FBO used by this VisualizationProcessor
+        IVec2Property* _viewportSizeProperty;       ///< Pointer to the property defining the viewport (canvas) size.
+
+        static const std::string loggerCat_;
     };
 
 }

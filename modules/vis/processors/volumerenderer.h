@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new VolumeRenderer Processor
          **/
-        VolumeRenderer(IVec2Property& canvasSize);
+        VolumeRenderer(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -69,6 +69,13 @@ namespace campvis {
         virtual const std::string getName() const { return "VolumeRenderer"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Combines proxy geometry generator, entry/exit point generator and raycasting into one easy-to-use volume renderer."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
+
+        /// \see VisualizationPipeline::setViewportSizeProperty()
+        virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
         virtual void process(DataContainer& data);
 

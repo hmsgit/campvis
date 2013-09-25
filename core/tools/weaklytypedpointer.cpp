@@ -274,4 +274,44 @@ namespace campvis {
     }
 #endif
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+    ILenum WeaklyTypedPointer::getIlFormat() const {
+        switch (_numChannels) {
+            case 1: 
+                return IL_ALPHA;
+            case 2: 
+                return IL_LUMINANCE_ALPHA;
+            case 3:
+                return IL_RGB;
+            case 4:
+                return IL_RGBA;
+            default:
+                tgtAssert(false, "Should not reach this, wrong number of channels!");
+                return IL_ALPHA;
+        }
+    }
+
+    ILenum WeaklyTypedPointer::getIlDataType() const {
+        switch (_baseType) {
+            case WeaklyTypedPointer::UINT8:
+                return IL_UNSIGNED_BYTE;
+            case WeaklyTypedPointer::INT8:
+                return IL_BYTE;
+            case WeaklyTypedPointer::UINT16:
+                return IL_UNSIGNED_SHORT;
+            case WeaklyTypedPointer::INT16:
+                return IL_SHORT;
+            case WeaklyTypedPointer::UINT32:
+                return IL_UNSIGNED_INT;
+            case WeaklyTypedPointer::INT32:
+                return IL_INT;
+            case WeaklyTypedPointer::FLOAT:
+                return IL_FLOAT;
+            default:
+                tgtAssert(false, "Should not reach this - wrong base data type!");
+                return GL_BYTE;
+        }
+    }
+#endif
+
 }

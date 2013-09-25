@@ -35,7 +35,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/facegeometry.h"
@@ -47,8 +47,8 @@
 namespace campvis {
     const std::string SliceRenderer3D::loggerCat_ = "CAMPVis.modules.vis.SliceRenderer3D";
 
-    SliceRenderer3D::SliceRenderer3D(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    SliceRenderer3D::SliceRenderer3D(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
@@ -100,14 +100,15 @@ namespace campvis {
                 MeshGeometry clipped = cube.clipAgainstPlane(p, normal, true);
                 FaceGeometry slice = clipped.getFaces().back(); // the last face is the closing face
 
-
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
                 _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
@@ -118,16 +119,14 @@ namespace campvis {
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 slice.render(GL_POLYGON);
-                rt.second->deactivate();
 
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
                 glDisable(GL_DEPTH_TEST);
 
-                data.addData(p_targetImageID.getValue(), rt.first);
+                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
                 p_targetImageID.issueWrite();
             }
             else {

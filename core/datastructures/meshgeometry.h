@@ -114,6 +114,9 @@ namespace campvis {
          */
         static MeshGeometry createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
 
+        /// \see GeometryData::getWorldBounds
+        virtual tgt::Bounds getWorldBounds() const;
+
     protected:
 
         std::vector<FaceGeometry> _faces;           ///< List of all faces of this mesh

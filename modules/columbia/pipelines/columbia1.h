@@ -30,14 +30,20 @@
 #ifndef COLUMBIA1_H__
 #define COLUMBIA1_H__
 
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
 
 #include "modules/io/processors/ltfimagereader.h"
+#include "modules/io/processors/vtkimagereader.h"
+#include "modules/columbia/processors/geometrystrainrenderer.h"
 #include "modules/columbia/processors/imageseriessplitter.h"
+#include "modules/columbia/processors/strainfibertracker.h"
+#include "modules/columbia/processors/strainfiberrenderer.h"
 #include "modules/columbia/processors/strainraycaster.h"
+#include "modules/vis/processors/geometryrenderer.h"
+#include "modules/vis/processors/rendertargetcompositor.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/vis/processors/volumerenderer.h"
 
@@ -64,8 +70,6 @@ namespace campvis {
         virtual const std::string getName() const;
 
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -75,14 +79,26 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         CameraProperty _camera;
+        DataNameProperty _boundsData;
 
         LtfImageReader _imageReader;
-        ImageSeriesSplitter _splitter;
+        ImageSeriesSplitter _imageSplitter;
+
+        LtfImageReader _flowReader;
+        ImageSeriesSplitter _flowSplitter;
+
+        VtkImageReader _vtkReader;
         VolumeRenderer _vr;
         StrainRaycaster _src;
         SliceExtractor _sr;
+        GeometryRenderer _gr;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        StrainFiberTracker _sft;
+        StrainFiberRenderer _sfr;
+
+        RenderTargetCompositor _compositor;
+
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

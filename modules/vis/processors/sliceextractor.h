@@ -38,6 +38,7 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/optionproperty.h"
 #include "core/properties/numericproperty.h"
@@ -65,7 +66,7 @@ namespace campvis {
         /**
          * Constructs a new SliceExtractor Processor
          **/
-        SliceExtractor(IVec2Property& canvasSize);
+        SliceExtractor(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -82,6 +83,10 @@ namespace campvis {
         virtual const std::string getName() const { return "SliceExtractor"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Extracts a single slice from the input image and renders it using a transfer function."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         /// \see AbstractProcessor::process()
         virtual void process(DataContainer& data);

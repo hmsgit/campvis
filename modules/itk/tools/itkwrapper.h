@@ -58,24 +58,24 @@ namespace campvis {
 // ================================================================================================
 
     template<typename T>
-    static typename itk::Image<T, 3>::Pointer ItkWrapper::convertImageFromCampvisToItk(const ImageData* image) {
+    typename itk::Image<T, 3>::Pointer ItkWrapper::convertImageFromCampvisToItk(const ImageData* image) {
         tgtAssert(image != 0, "Image must not be 0.");
 
         const GenericImageRepresentationLocal<T, 1>* representation = image->getRepresentation< GenericImageRepresentationLocal<T, 1> >();
         if (representation == 0)
             return 0;
 
-        itk::ImportImageFilter<T, 3>::Pointer importer = itk::ImportImageFilter<T, 3>::New();
+        typename itk::ImportImageFilter<T, 3>::Pointer importer = itk::ImportImageFilter<T, 3>::New();
 
-        itk::Image<T, 3>::SizeType size;
+        typename itk::Image<T, 3>::SizeType size;
         size[0] = image->getSize().x;
         size[1] = image->getSize().y;
         size[2] = image->getSize().z;
 
-        itk::Image<T, 3>::IndexType start;
+        typename itk::Image<T, 3>::IndexType start;
         start.Fill(0);
 
-        itk::Image<T, 3>::RegionType region;
+        typename itk::Image<T, 3>::RegionType region;
         region.SetSize(size);
         region.SetIndex(start);
         importer->SetRegion(region);
@@ -96,16 +96,16 @@ namespace campvis {
         typedef typename itk::Image<T, 3>::PixelType PixelType;
         const PixelType* pixelData = image->GetBufferPointer();
 
-        itk::Image<T, 3>::RegionType region;
+        typename itk::Image<T, 3>::RegionType region;
         region = image->GetBufferedRegion();
 
-        itk::Image<T, 3>::SizeType s = region.GetSize();
+        typename itk::Image<T, 3>::SizeType s = region.GetSize();
         tgt::svec3 size(s[0], s[1], s[2]);
 
-        itk::Image<T, 3>::SpacingType sp = image->GetSpacing();
+        typename itk::Image<T, 3>::SpacingType sp = image->GetSpacing();
         tgt::vec3 spacing(sp[0], sp[1], sp[2]);
 
-        itk::Image<T, 3>::PointType o = image->GetOrigin();
+        typename itk::Image<T, 3>::PointType o = image->GetOrigin();
         tgt::vec3 offset(o[0], o[1], o[2]);
 
         ImageData* toReturn = new ImageData(3, size, 1);

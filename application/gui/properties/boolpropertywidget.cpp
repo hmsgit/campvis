@@ -33,7 +33,7 @@
 
 namespace campvis {
     BoolPropertyWidget::BoolPropertyWidget(BoolProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
         , _spinBox(0)
     {
         _spinBox = new QCheckBox(this);

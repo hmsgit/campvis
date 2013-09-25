@@ -70,6 +70,13 @@ namespace tgt {
 //         }
     }
 
+    void VertexArrayObject::bindIndexBuffer(BufferObject* bufferObject) {
+        tgtAssert(bufferObject->getTargetType() == BufferObject::ELEMENT_ARRAY_BUFFER, "Buffer needs to have target type ELEMENT_ARRAY_BUFFER!");
+
+        bind();
+        bufferObject->bind();
+    }
+
     size_t VertexArrayObject::addVertexAttribute(AttributeType attributeType, BufferObject* bufferObject, GLsizei stride /*= 0*/, size_t offset /*= 0*/, bool enableNow /*= true*/) {
         if (_attributes.size() > 16) {
             // TODO:    The better way would be to check glGet(GL_MAX_VERTEX_ATTRIBS), but the standard says 16 is the minimum

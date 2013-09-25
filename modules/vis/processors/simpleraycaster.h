@@ -31,8 +31,8 @@
 #define SIMPLERAYCASTER_H__
 
 #include "core/pipeline/raycastingprocessor.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
 #include <string>
@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new SimpleRaycaster Processor
          **/
-        SimpleRaycaster(IVec2Property& canvasSize);
+        SimpleRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
@@ -63,6 +63,10 @@ namespace campvis {
         virtual const std::string getName() const { return "SimpleRaycaster"; };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         DataNameProperty p_targetImageID;    ///< image ID for output image
         BoolProperty p_enableShadowing;

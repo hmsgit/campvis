@@ -31,6 +31,7 @@
 #define GENERICIMAGEREPRESENTATIONITK_H__
 
 #include "core/datastructures/abstractimagerepresentation.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/typetraits.h"
 #include "core/tools/weaklytypedpointer.h"
 #include "modules/itk/core/itktypetraits.h"
@@ -275,19 +276,19 @@ namespace campvis {
         }
 
         if (const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tester = dynamic_cast< const GenericImageRepresentationLocal<BASETYPE, 1>* >(source)) {
-            itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::Pointer importer = itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::New();
+            typename itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::Pointer importer = itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::New();
 
-            itk::Image<BASETYPE, DIMENSIONALITY>::SizeType size;
+            typename itk::Image<BASETYPE, DIMENSIONALITY>::SizeType size;
             size[0] = tester->getSize().x;
             if (source->getDimensionality() >= 2)
                 size[1] = tester->getSize().y;
             if (source->getDimensionality() >= 3)
                 size[2] = tester->getSize().z;
 
-            itk::Image<BASETYPE, DIMENSIONALITY>::IndexType start;
+            typename itk::Image<BASETYPE, DIMENSIONALITY>::IndexType start;
             start.Fill(0);
 
-            itk::Image<BASETYPE, DIMENSIONALITY>::RegionType region;
+            typename itk::Image<BASETYPE, DIMENSIONALITY>::RegionType region;
             region.SetSize(size);
             region.SetIndex(start);
             importer->SetRegion(region);
@@ -300,7 +301,7 @@ namespace campvis {
             importer->SetImportPointer(const_cast<PixelType*>(pixelData), tester->getNumElements(), false);
             importer->Update();
 
-            ItkImageType::Pointer itkImage = importer->GetOutput();
+            typename ItkImageType::Pointer itkImage = importer->GetOutput();
             if (itkImage.IsNotNull())
                 return ThisType::create(const_cast<ImageData*>(tester->getParent()), itkImage); // const_cast perfectly valid here
             else
@@ -312,7 +313,7 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::clone(ImageData* newParent) const {
-        ItkImageType::Pointer newItkImage = _itkImage->Clone();
+        typename ItkImageType::Pointer newItkImage = _itkImage->Clone();
         return ThisType::create(newParent, newItkImage);
     }
 
@@ -346,7 +347,7 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     typename GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::ItkImageType::ConstPointer campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::getItkImage() const {
-        return ItkImageType::ConstPointer(_itkImage);
+        return typename ItkImageType::ConstPointer(_itkImage);
     }
 }
 

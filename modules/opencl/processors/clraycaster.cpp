@@ -42,7 +42,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 
 
 #include "core/classification/simpletransferfunction.h"
@@ -50,15 +50,15 @@
 namespace campvis {
     const std::string CLRaycaster::loggerCat_ = "CAMPVis.modules.vis.CLRaycaster";
 
-    CLRaycaster::CLRaycaster(GenericProperty<tgt::ivec2>& renderTargetSize)
-        : VisualizationProcessor(renderTargetSize)
+    CLRaycaster::CLRaycaster(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , _sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , _entryImageID("entryImageID", "Output Entry Points Image", "", DataNameProperty::READ)
         , _exitImageID("exitImageID", "Output Exit Points Image", "", DataNameProperty::READ)
         , _targetImageID("targetImageID", "Target image ID", "", DataNameProperty::WRITE)
         , _camera("camera", "Camera")
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f)
+        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f, 0.001f)
         , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
         , _clContext(0)
         , _clProgram(0)
@@ -94,9 +94,10 @@ namespace campvis {
         _clContext = CLRtm.createGlSharingContext();
         if (_clContext != 0) {
             _clProgram = CLRtm.loadProgram(_clContext, "modules/opencl/cl/clraycaster.cl");
-            _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable -g -s \"C:\\Users\\Christian\\Documents\\TUM\\code\\campvis\\modules\\opencl\\cl\\clraycaster.cl\"");
+            _clProgram->setBuildOptions(" -cl-fast-relaxed-math -cl-mad-enable");// -g -s \"C:\\Users\\Christian\\Documents\\TUM\\code\\campvis\\modules\\opencl\\cl\\clraycaster.cl\"");
             _clProgram->build();
         }
+
     }
 
     void CLRaycaster::deinit() {
@@ -148,15 +149,15 @@ namespace campvis {
             return;
 
         ImageRepresentationLocal::ScopedRepresentation img(data, _sourceImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation entryPoints(data, _entryImageID.getValue());
-        ImageRepresentationRenderTarget::ScopedRepresentation exitPoints(data, _exitImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> entryPoints(data, _entryImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> exitPoints(data, _exitImageID.getValue());
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
-                if (entryPoints->getSize() == exitPoints->getSize()) {
-                    tgt::svec3 dims(entryPoints->getColorTexture()->getDimensions());
+                if (entryPoints->getColorTexture()->getSize() == exitPoints->getColorTexture()->getSize()) {
+                    tgt::svec3 dims(entryPoints->getColorTexture()->getSize());
 
-                    if (_invalidationLevel.isInvalidShader()) {
+                    if (hasInvalidShader()) {
                         _clProgram->build();
                     }
 
@@ -221,12 +222,16 @@ namespace campvis {
 
                     // bind shared textures
                     delete _texEntryPointsColor;
-                    _texEntryPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, entryPoints->getColorTexture());
+                    _texEntryPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, entryPoints->getColorTexture()->getRepresentation<ImageRepresentationGL>()->getTexture());
                     delete _texExitPointsColor;
-                    _texExitPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture());
+                    _texExitPointsColor = new kisscl::GLTexture(_clContext, CL_MEM_READ_ONLY, exitPoints->getColorTexture()->getRepresentation<ImageRepresentationGL>()->getTexture());
                     delete _texOutColor;
-                    std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(dims.xy());
-                    _texOutColor = new kisscl::GLTexture(_clContext, CL_MEM_WRITE_ONLY, rt.second->getColorTexture());
+
+
+                    tgt::Texture* ttt = new tgt::Texture(0, dims, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                    ttt->uploadTexture();
+                    ttt->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+                    _texOutColor = new kisscl::GLTexture(_clContext, CL_MEM_WRITE_ONLY, ttt);
 
 
                     // prepare kernel and stuff command queue
@@ -255,8 +260,13 @@ namespace campvis {
                         return;
                     }
 
+                    ImageData* id = new ImageData(2, dims, 4);
+                    ImageRepresentationGL::create(id, ttt);
+                    RenderData* rd = new RenderData();
+                    rd->addColorTexture(id);
                     LGL_ERROR;
-                    data.addData(_targetImageID.getValue(), rt.first);
+
+                    data.addData(_targetImageID.getValue(), rd);
                     _targetImageID.issueWrite();
                 }
                 else {
@@ -271,7 +281,7 @@ namespace campvis {
             LERROR("No suitable input image found.");
         }
 
-        _invalidationLevel.setValid();
+        setValid();
     }
 
     std::string CLRaycaster::generateHeader() const {

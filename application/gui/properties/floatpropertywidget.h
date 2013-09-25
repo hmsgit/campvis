@@ -30,17 +30,16 @@
 #ifndef FLOATPROPERTYWIDGET_H__
 #define FLOATPROPERTYWIDGET_H__
 
+#include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
-#include "core/properties/numericproperty.h"
-
-#include <QDoubleSpinBox>
+#include "core/properties/floatingpointproperty.h"
 
 namespace campvis {
     /**
      * Widget for a FloatProperty
      */
     class FloatPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
+        Q_OBJECT
 
     public:
         /**
@@ -62,13 +61,23 @@ namespace campvis {
         virtual void updateWidgetFromProperty();
 
     private slots:
-        void onValueChanged(double value);
+        /// Slot getting called when the adjuster's value changes
+        void onAdjusterValueChanged(double value);
 
     private:
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        QDoubleSpinBox* _spinBox;
+        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
+        virtual void onPropertyStepChanged(const AbstractProperty* property);
+
+        /**
+         * Slot getting called when the number of significant decimal places of the property has
+         * changed, so that the widget can be updated.
+         */
+        virtual void onPropertyDecimalsChanged(const AbstractProperty* property);
+
+        DoubleAdjusterWidget* _adjuster;        ///< Widget allowing the user to change the property's value
 
     };
 
@@ -133,41 +142,55 @@ namespace campvis {
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
         virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
 
-        QDoubleSpinBox* _spinBox[size];
+        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
+        virtual void onPropertyStepChanged(const AbstractProperty* property);
+
+        /**
+         * Slot getting called when the number of significant decimal places of the property has
+         * changed, so that the widget can be updated.
+         */
+        virtual void onPropertyDecimalsChanged(const AbstractProperty* property);
+
+        DoubleAdjusterWidget* _adjusters[size];
     };
 
 // ================================================================================================
 
     template<size_t SIZE>
     campvis::VecPropertyWidget<SIZE>::VecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, true, parent)
     {
         for (size_t i = 0; i < size; ++i) {
-            _spinBox[i] = new QDoubleSpinBox(this);
-            _spinBox[i]->setMinimum(property->getMinValue()[i]);
-            _spinBox[i]->setMaximum(property->getMaxValue()[i]);
-            _spinBox[i]->setDecimals(3);
-            _spinBox[i]->setSingleStep(0.01);
-            _spinBox[i]->setValue(property->getValue()[i]);
-            addWidget(_spinBox[i]);
+            _adjusters[i] = new DoubleAdjusterWidget();
+            _adjusters[i]->setMinimum(property->getMinValue()[i]);
+            _adjusters[i]->setMaximum(property->getMaxValue()[i]);
+            _adjusters[i]->setDecimals(property->getDecimals()[i]);
+            _adjusters[i]->setSingleStep(property->getStepValue()[i]);
+            _adjusters[i]->setValue(property->getValue()[i]);
+            addWidget(_adjusters[i]);
         }
 
         property->s_minMaxChanged.connect(this, &VecPropertyWidget::onPropertyMinMaxChanged);
-
+        property->s_stepChanged.connect(this, &VecPropertyWidget::onPropertyStepChanged);
+        property->s_decimalsChanged.connect(this, &VecPropertyWidget::onPropertyDecimalsChanged);
     }
 
     template<size_t SIZE>
     campvis::VecPropertyWidget<SIZE>::~VecPropertyWidget() {
-        static_cast<PropertyType*>(_property)->s_minMaxChanged.disconnect(this);
+        PropertyType* property = static_cast<PropertyType*>(_property);
+
+        property->s_minMaxChanged.disconnect(this);
+        property->s_stepChanged.disconnect(this);
+        property->s_decimalsChanged.disconnect(this);
     }
 
     template<size_t SIZE>
     void campvis::VecPropertyWidget<SIZE>::updateWidgetFromProperty() {
         PropertyType* prop = static_cast<PropertyType*>(_property);
         for (size_t i = 0; i < size; ++i) {
-            _spinBox[i]->blockSignals(true);
-            _spinBox[i]->setValue(prop->getValue()[i]);
-            _spinBox[i]->blockSignals(false);
+            _adjusters[i]->blockSignals(true);
+            _adjusters[i]->setValue(prop->getValue()[i]);
+            _adjusters[i]->blockSignals(false);
         }
     }
 
@@ -177,7 +200,7 @@ namespace campvis {
         PropertyType* prop = static_cast<PropertyType*>(_property);
         typename VecPropertyWidgetTraits<SIZE>::BaseType newValue;
         for (size_t i = 0; i < size; ++i)
-            newValue[i] = _spinBox[i]->value();
+            newValue[i] = _adjusters[i]->value();
         prop->setValue(newValue);
         --_ignorePropertyUpdates;
     }
@@ -187,8 +210,28 @@ namespace campvis {
         if (_ignorePropertyUpdates == 0) {
             PropertyType* prop = static_cast<PropertyType*>(_property);
             for (size_t i = 0; i < size; ++i) {
-                _spinBox[i]->setMinimum(prop->getMinValue()[i]);
-                _spinBox[i]->setMaximum(prop->getMaxValue()[i]);
+                _adjusters[i]->setMinimum(prop->getMinValue()[i]);
+                _adjusters[i]->setMaximum(prop->getMaxValue()[i]);
+            }
+        }
+    }
+
+    template<size_t SIZE>
+    void campvis::VecPropertyWidget<SIZE>::onPropertyStepChanged(const AbstractProperty* property) {
+        if (_ignorePropertyUpdates == 0) {
+            PropertyType* prop = static_cast<PropertyType*>(_property);
+            for (size_t i = 0; i < size; ++i) {
+                _adjusters[i]->setSingleStep(prop->getStepValue()[i]);
+            }
+        }
+    }
+
+    template<size_t SIZE>
+    void campvis::VecPropertyWidget<SIZE>::onPropertyDecimalsChanged(const AbstractProperty* property) {
+        if (_ignorePropertyUpdates == 0) {
+            PropertyType* prop = static_cast<PropertyType*>(_property);
+            for (size_t i = 0; i < size; ++i) {
+                _adjusters[i]->setDecimals(prop->getDecimals()[i]);
             }
         }
     }
@@ -202,7 +245,7 @@ namespace campvis {
             : VecPropertyWidget<2>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
             }
         }
 
@@ -219,7 +262,7 @@ namespace campvis {
             : VecPropertyWidget<3>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
             }
         }
 
@@ -236,7 +279,7 @@ namespace campvis {
             : VecPropertyWidget<4>(property, parent)
         {
             for (size_t i = 0; i < size; ++i) {
-                connect(_spinBox[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
             }
         }
 

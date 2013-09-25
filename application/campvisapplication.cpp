@@ -55,7 +55,7 @@ namespace campvis {
 
     const std::string CampVisApplication::loggerCat_ = "CAMPVis.application.CampVisApplication";
 
-    CampVisApplication::CampVisApplication(int argc, char** argv, bool useOpenCL) 
+    CampVisApplication::CampVisApplication(int& argc, char** argv, bool useOpenCL) 
         : QApplication(argc, argv)
         , _localContext(0)
         , _mainWindow(0)
@@ -106,10 +106,13 @@ namespace campvis {
 
         // ensure matching OpenGL specs
         if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3) {
-            LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intendet.");
+            LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intended.");
         }
         if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
-            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intendet.");
+            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
+        }
+        if (!GpuCaps.isNpotSupported() && !GpuCaps.areTextureRectanglesSupported()) {
+            LERROR("Neither non-power-of-two textures nor texture rectangles seem to be supported. CAMPVis will probably not work as intended.");
         }
 
         QuadRenderer::init();
@@ -144,6 +147,15 @@ namespace campvis {
                 CLRtm.addPath(basePath);
                 CLRtm.addPath(basePath + "/core/cl");
             }
+
+#ifdef CAMPVIS_SOURCE_DIR
+            {
+                std::string sourcePath = CAMPVIS_SOURCE_DIR;
+                CLRtm.addPath(sourcePath);
+                CLRtm.addPath(sourcePath + "/core/glsl");
+            }
+#endif
+
 #endif
         }
 

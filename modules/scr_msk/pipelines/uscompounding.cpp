@@ -37,7 +37,7 @@ namespace campvis {
         : VisualizationPipeline()
         , p_camera("Camera", "Camera")
         , _reader()
-        , _renderer(_canvasSize)
+        , _renderer(&_canvasSize)
         , _trackballEH(0)
     {
         addProcessor(&_reader);
@@ -45,8 +45,8 @@ namespace campvis {
 
         addProperty(&p_camera);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &p_camera, _canvasSize.getValue());
-        _eventHandlers.push_back(_trackballEH);
+        _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
+        addEventListenerToBack(_trackballEH);
     }
 
     UsCompounding::~UsCompounding() {
@@ -60,16 +60,14 @@ namespace campvis {
 
         _reader.p_url.setValue("C:/Users/SchuCh01/Documents/Data/Ultrasound/2012-12-12-Test/9l4sweep/content.xml");
         _reader.p_targetImageID.connect(&_renderer.p_sourceImageID);
+
         _renderer.s_boundingBoxChanged.connect(this, &UsCompounding::onBoundingBoxChanged);
         _renderer.p_targetImageID.setValue("us.frame.output");
         _renderTargetID.setValue(_renderer.p_targetImageID.getValue());
-
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<UsCompounding>(this, &UsCompounding::onRenderTargetSizeChanged);
     }
 
     void UsCompounding::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -77,18 +75,8 @@ namespace campvis {
         return "UsCompounding";
     }
 
-    void UsCompounding::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
-        p_camera.setWindowRatio(ratio);
-    }
-
     void UsCompounding::onBoundingBoxChanged(tgt::Bounds b) {
-        tgt::vec3 pos = b.center() - tgt::vec3(0, 0, tgt::length(b.diagonal()));
-
-        _trackballEH->setSceneBounds(b);
-        _trackballEH->setCenter(b.center());
-        _trackballEH->reinitializeCamera(pos, b.center(), p_camera.getValue().getUpVector());
+        _trackballEH->reinitializeCamera(b);
     }
 
 }

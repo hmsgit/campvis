@@ -91,6 +91,12 @@ namespace tgt {
         void unbind();
 
         /**
+         * Binds the provided buffer \a bufferObject as index buffer to this VAO.
+         * \param   bufferObject    Buffer to use as element index buffer.
+         */
+        void bindIndexBuffer(BufferObject* bufferObject);
+
+        /**
          * Add a VertexAttribute to this VertexArrayObject.
          * A VertexAttribute refers to a BufferObject and defines where to find the (geometry, normal, ...) data
          * in it.

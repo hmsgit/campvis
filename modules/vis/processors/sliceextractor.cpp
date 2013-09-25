@@ -35,7 +35,7 @@
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/imagerepresentationrendertarget.h"
+#include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorbackground.h"
 
 #include "core/classification/simpletransferfunction.h"
@@ -51,12 +51,12 @@ namespace campvis {
 
     const std::string SliceExtractor::loggerCat_ = "CAMPVis.modules.vis.SliceExtractor";
 
-    SliceExtractor::SliceExtractor(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    SliceExtractor::SliceExtractor(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", compositingOptions, 3)
-        , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0) 
+        , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0)
         , p_xSliceColor("XSliceColor", "X Slice Color", tgt::vec4(1.f, 0.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_ySliceNumber("YSliceNumber", "Y Slice Number", 0, 0, 0)
         , p_ySliceColor("YSliceColor", "Y Slice Color", tgt::vec4(0.f, 1.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
@@ -114,7 +114,7 @@ namespace campvis {
                 // texture coordinate transformation matrix (will be configured later)
                 tgt::mat4 texCoordsMatrix = tgt::mat4::zero;
 
-                float renderTargetRatio = static_cast<float>(_renderTargetSize.getValue().x) / static_cast<float>(_renderTargetSize.getValue().y);
+                float renderTargetRatio = static_cast<float>(getEffectiveViewportSize().x) / static_cast<float>(getEffectiveViewportSize().y);
                 float sliceRatio = 1.f;
 
                 switch (p_sliceOrientation.getValue()) {
@@ -159,7 +159,10 @@ namespace campvis {
                 tgt::mat4 modelMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
 
                 // prepare OpenGL
-                std::pair<ImageData*, ImageRepresentationRenderTarget*> rt = ImageRepresentationRenderTarget::createWithImageData(_renderTargetSize.getValue());
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
+
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
                 tgt::TextureUnit inputUnit, tfUnit;
@@ -170,7 +173,6 @@ namespace campvis {
                 _shader->setUniform("_texCoordsMatrix", texCoordsMatrix);
                 _shader->setUniform("_modelMatrix", modelMatrix);
                 _shader->setUniform("_useTexturing", true);
-                rt.second->activate();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
 
@@ -244,13 +246,11 @@ namespace campvis {
                         break;
                 }
 
-                rt.second->deactivate();
-
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
                 tgt::TextureUnit::setZeroUnit();
 
-                data.addData(p_targetImageID.getValue(), rt.first);
+                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
                 p_targetImageID.issueWrite();
             }
             else {

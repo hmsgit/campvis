@@ -210,6 +210,10 @@ namespace campvis {
         }
     }
 
+    void Geometry2DTransferFunctionEditor::repaint() {
+        invalidate();
+    }
+
     void Geometry2DTransferFunctionEditor::invalidate() {
         GLJobProc.enqueueJob(_canvas, makeJobOnHeap(this, &Geometry2DTransferFunctionEditor::paint), OpenGLJobProcessor::PaintJob);
     }
@@ -257,7 +261,7 @@ namespace campvis {
     void Geometry2DTransferFunctionEditor::updateManipulators() {
         tbb::mutex::scoped_lock lock(_localMutex);
 
-        _canvas->getEventHandler()->addListenerToFront(this);
+        _canvas->getEventHandler()->addEventListenerToFront(this);
     }
 
     void Geometry2DTransferFunctionEditor::onGeometryCollectionChanged() {

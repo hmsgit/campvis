@@ -30,25 +30,41 @@
 #ifndef TRACKBALLNAVIGATIONEVENTHANDLER_H__
 #define TRACKBALLNAVIGATIONEVENTHANDLER_H__
 
+#include <sigslot/sigslot.h>
+
 #include "tgt/bounds.h"
 #include "tgt/logmanager.h"
+#include "tgt/event/eventlistener.h"
 #include "tgt/navigation/trackball.h"
-#include "core/eventhandlers/abstracteventhandler.h"
+
+#include "core/datastructures/datahandle.h"
+#include "core/properties/numericproperty.h"
+
+#include <vector>
 
 namespace campvis {
     class CameraProperty;
-    class VisualizationPipeline;
+    class IHasWorldBounds;
+    class VisualizationProcessor;
 
     /**
      * Wrapper to adapt a CameraProperty to the tgt::Trackball interface.
      */
     class CamPropNavigationWrapper : public tgt::IHasCamera {
     public:
+        /**
+         * Constructor
+         * \param   camProp     The CameraProperty to wrap around.
+         */
         CamPropNavigationWrapper(CameraProperty* camProp);
+
+        /// Virtual Destructor
         virtual ~CamPropNavigationWrapper();
 
+        /// \see tgt::IHasCamera::getCamera()
         virtual tgt::Camera* getCamera();
 
+        /// \see tgt::IHasCamera::update()
         virtual void update();
 
     private:
@@ -61,43 +77,51 @@ namespace campvis {
     };
 
     /**
-     * EventHandler implementing a trackball navigation for a CameraProperty.
+     * EventListener implementing a trackball navigation for a CameraProperty.
      * Implementation inspired by http://www.opengl.org/wiki/Trackball
+     * 
+     * \note    Also takes care of automatically adjusting the window ratio for the wrapped
+     *          camera when the viewport size changes.
      */
-    class TrackballNavigationEventHandler : public AbstractEventHandler {
+    class TrackballNavigationEventListener : public tgt::EventListener, public sigslot::has_slots<> {
     public:
         /**
-         * Creates a TrackballNavigationEventHandler.
-         * \param   parentPipeline  Parent pipeline of this event handler, must not be 0.
-         * \param   cameraProperty  The CameraProperty to apply the navigation to.
-         * \param   viewportSize    Initial viewport size
+         * Creates a TrackballNavigationEventListener.
+         * \note    TrackballNavigationEventListener keeps and accesses \a viewportSizeProp during the whole
+         *          lifetime. Hence make sure the pointer is valid at all times.
+         * \param   cameraProperty      Pointer to the CameraProperty to apply the navigation to, must not be 0.
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          */
-        TrackballNavigationEventHandler(VisualizationPipeline* parentPipeline, CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
+        TrackballNavigationEventListener(CameraProperty* cameraProperty, IVec2Property* viewportSizeProp);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~TrackballNavigationEventHandler();
+        virtual ~TrackballNavigationEventListener();
+
+
+        /// \see tgt::EventListener::onEvent()
+        virtual void onEvent(tgt::Event* e);
+        
 
 
         /**
-         * Checks, whether the given event \a e is handled by this EventHandler.
-         * \param e     The event to check
-         * \return      True, if the given event is handled by this EventHandler.
+         * Reinitializes the camera using the data in \a hwb.
+         * If the scene bounds have changed, the camera setup is reinitialized positioning the 
+         * camera in front of the data along the z-axis and looking at the center of the data.
+         * 
+         * \param   hwb     Data to use for reinitialization, must not be 0.
          */
-        virtual bool accept(tgt::Event* e);
+        void reinitializeCamera(const IHasWorldBounds* hwb);
 
         /**
-         * Performs the event handling.
-         * \param e     The event to handle
+         * Reinitializes the camera using the data in \a hwb.
+         * If the scene bounds have changed, the camera setup is reinitialized positioning the 
+         * camera in front of the data along the z-axis and looking at the center of the data.
+         * 
+         * \param   hwb     Data to use for reinitialization, must not be 0.
          */
-        virtual void execute(tgt::Event* e);
-
-        /**
-         * Sets the viewport size to \a viewportSize.
-         * \param viewportSize  The new viewport size.
-         */
-        void setViewportSize(const tgt::ivec2& viewportSize);
+        void reinitializeCamera(const tgt::Bounds& worldBounds);
 
         /**
          * Reinitalizes the camera by the given parameters.
@@ -125,12 +149,35 @@ namespace campvis {
          */
         const tgt::Bounds& getSceneBounds() const;
 
+        /**
+         * Adds \a vp to the list of LQ mode processors.
+         * During interaction, TrackballNavigationEventListener will set the LQ mode flag of all
+         * LQ mode processors.
+         * \param   vp  VisualizationProcessor to add to the list of LQ mode processors.
+         */
+        void addLqModeProcessor(VisualizationProcessor* vp);
+
+        /**
+         * Removes \a vp from the list of LQ mode processors.
+         * \param   vp  VisualizationProcessor to remove from the list of LQ mode processors.
+         */
+        void removeLqModeProcessor(VisualizationProcessor* vp);
+
     protected:
-        VisualizationPipeline* _parentPipeline; ///< The parent VisualizationPipeline
+
+
+        /// Slot called when _viewportSizeProp changes 
+        void onViewportSizePropChanged(const AbstractProperty* p);
+
+
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
+        IVec2Property* _viewportSizeProp;       ///< Pointer to the property defining the viewport size
         CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
         tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
         tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
+
+        /// List of processors for which to enable LQ mode during interaction
+        std::vector<VisualizationProcessor*> _lqModeProcessors;
 
         static const std::string loggerCat_;
     };
