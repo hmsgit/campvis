@@ -52,7 +52,7 @@ namespace campvis {
         /**
          * Constructs a new DRRRaycaster Processor
          **/
-        DRRRaycaster(IVec2Property& canvasSize);
+        DRRRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

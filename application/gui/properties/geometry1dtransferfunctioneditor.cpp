@@ -72,7 +72,7 @@ namespace campvis {
     Geometry1DTransferFunctionEditor::~Geometry1DTransferFunctionEditor() {
         tbb::mutex::scoped_lock lock(_localMutex);
 
-        // clear and delete former stuff
+        // clearEventListeners and delete former stuff
         _selectedGeometry = 0;
         for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
             if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
@@ -278,9 +278,9 @@ namespace campvis {
     void Geometry1DTransferFunctionEditor::updateManipulators() {
         tbb::mutex::scoped_lock lock(_localMutex);
 
-        // clear and delete former stuff
+        // clearEventListeners and delete former stuff
         _selectedGeometry = 0;
-        _canvas->getEventHandler()->clear();
+        _canvas->getEventHandler()->clearEventListeners();
         for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
             if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
             	tester->s_selected.disconnect(this);
@@ -295,17 +295,17 @@ namespace campvis {
             // Add manipulator for the whole geometry and register it as event handler:
             WholeTFGeometryManipulator* wtf = new WholeTFGeometryManipulator(_canvas->getSize(), *git);
             _manipulators.push_back(wtf);
-            _canvas->getEventHandler()->addListenerToFront(wtf);
+            _canvas->getEventHandler()->addEventListenerToFront(wtf);
             wtf->s_selected.connect(this, &Geometry1DTransferFunctionEditor::onWholeTFGeometryManipulatorSelected);
 
             // Add a manipulator for each KeyPoint and register it as event handler:
             for (std::vector<TFGeometry1D::KeyPoint>::iterator kpit = (*git)->getKeyPoints().begin(); kpit != (*git)->getKeyPoints().end(); ++kpit) {
                 _manipulators.push_back(new KeyPointManipulator(_canvas->getSize(), *git, kpit));
-                _canvas->getEventHandler()->addListenerToFront(_manipulators.back());
+                _canvas->getEventHandler()->addEventListenerToFront(_manipulators.back());
             }
         }
 
-        _canvas->getEventHandler()->addListenerToFront(this);
+        _canvas->getEventHandler()->addEventListenerToFront(this);
     }
 
     void Geometry1DTransferFunctionEditor::onGeometryCollectionChanged() {

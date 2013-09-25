@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Constructs a new DevilImageReader Processor
          **/
-        DevilImageReader(IVec2Property& canvasSize);
+        DevilImageReader(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

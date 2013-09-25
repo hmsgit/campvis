@@ -63,7 +63,7 @@ void QtTimer::timerEvent(QTimerEvent* /*e*/) {
 
     if ((limit_ == 0 || count_ <= limit_) && !stopped_) {
         tgt::TimeEvent* te = new tgt::TimeEvent(this);
-        eventHandler_->broadcast(te);
+        eventHandler_->broadcastEvent(te);
     } else {
         stop();
     }

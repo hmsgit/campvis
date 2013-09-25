@@ -46,7 +46,7 @@ namespace campvis {
      * 
      * \todo 
      */
-    class GeometryData : public AbstractData {
+    class GeometryData : public AbstractData, public IHasWorldBounds {
     public:
         GeometryData();
 

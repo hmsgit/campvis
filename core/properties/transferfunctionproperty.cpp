@@ -76,4 +76,8 @@ namespace campvis {
         s_AfterTFReplace(_transferFunction);
     }
 
+    void TransferFunctionProperty::addSharedProperty(AbstractProperty* prop) {
+        tgtAssert(false, "Sharing of TF properties not supported!");
+    }
+
 }

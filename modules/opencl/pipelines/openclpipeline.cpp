@@ -45,14 +45,15 @@ namespace campvis {
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
-        , _eepGenerator(_effectiveRenderTargetSize)
-        , _clRaycaster(_effectiveRenderTargetSize)
+        , _eepGenerator(&_canvasSize)
+        , _clRaycaster(&_canvasSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
-        _eventHandlers.push_back(_trackballEH);
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
+        _trackballEH->addLqModeProcessor(&_clRaycaster);
+        addEventListenerToBack(_trackballEH);
 
         addProcessor(&_imageReader);
         addProcessor(&_pgGenerator);
@@ -93,24 +94,15 @@ namespace campvis {
 
         _eepGenerator.p_entryImageID.connect(&_clRaycaster._entryImageID);
         _eepGenerator.p_exitImageID.connect(&_clRaycaster._exitImageID);
-
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<OpenCLPipeline>(this, &OpenCLPipeline::onRenderTargetSizeChanged);
     }
 
     void OpenCLPipeline::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
     const std::string OpenCLPipeline::getName() const {
         return "OpenCLPipeline";
-    }
-
-    void OpenCLPipeline::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
-        _camera.setWindowRatio(ratio);
     }
 
     void OpenCLPipeline::onProcessorValidated(AbstractProcessor* processor) {
@@ -126,13 +118,7 @@ namespace campvis {
                 GenericImageRepresentationLocal<float, 1>* imageWithFloats = GenericImageRepresentationLocal<float, 1>::create(id, asFloats);
 
                 DataHandle dh = _data.addData("clr.input", id);
-                
-                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-                _trackballEH->setSceneBounds(volumeExtent);
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                _trackballEH->reinitializeCamera(img->getParent());
             }
         }
     }

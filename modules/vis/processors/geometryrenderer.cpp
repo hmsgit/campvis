@@ -42,8 +42,8 @@
 namespace campvis {
     const std::string GeometryRenderer::loggerCat_ = "CAMPVis.modules.vis.GeometryRenderer";
 
-    GeometryRenderer::GeometryRenderer(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    GeometryRenderer::GeometryRenderer(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")

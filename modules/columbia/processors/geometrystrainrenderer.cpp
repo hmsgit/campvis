@@ -43,8 +43,8 @@
 namespace campvis {
     const std::string GeometryStrainRenderer::loggerCat_ = "CAMPVis.modules.vis.GeometryStrainRenderer";
 
-    GeometryStrainRenderer::GeometryStrainRenderer(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    GeometryStrainRenderer::GeometryStrainRenderer(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_geometryID("geometryID", "Input Geometry ID", "gr.geometry", DataNameProperty::READ)
         , p_strainId("StrainDataId", "Input Strain Data ID", "gr.strain", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)

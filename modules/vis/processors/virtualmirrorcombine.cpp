@@ -42,8 +42,8 @@
 namespace campvis {
     const std::string VirtualMirrorCombine::loggerCat_ = "CAMPVis.modules.vis.VirtualMirrorCombine";
 
-    VirtualMirrorCombine::VirtualMirrorCombine(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    VirtualMirrorCombine::VirtualMirrorCombine(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_normalImageID("normalImageID", "Normal DVR Input Image", "", DataNameProperty::READ)
         , p_mirrorImageID("mirrorImageID", "Mirror DVR Input Image", "", DataNameProperty::READ)
         , p_mirrorRenderID("mirrorRenderID", "Rendered Mirror Input Image", "", DataNameProperty::READ)

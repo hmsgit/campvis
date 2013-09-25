@@ -31,7 +31,7 @@
 #define OPENCLPIPELINE_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -60,8 +60,6 @@ namespace campvis {
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const;
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -76,7 +74,7 @@ namespace campvis {
         EEPGenerator _eepGenerator;
         CLRaycaster _clRaycaster;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

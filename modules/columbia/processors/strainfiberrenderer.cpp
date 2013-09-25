@@ -49,8 +49,8 @@ namespace campvis {
 
     const std::string StrainFiberRenderer::loggerCat_ = "CAMPVis.modules.vis.StrainFiberRenderer";
 
-    StrainFiberRenderer::StrainFiberRenderer(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    StrainFiberRenderer::StrainFiberRenderer(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_strainId("StrainDataId", "Input Strain Data ID", "gr.strain", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera ID")//, "camera", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT, DataNameProperty::CameraData)

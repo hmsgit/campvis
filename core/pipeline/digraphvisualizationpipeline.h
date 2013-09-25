@@ -33,7 +33,6 @@
 #include "sigslot/sigslot.h"
 #include "tgt/vector.h"
 #include "tgt/event/eventlistener.h"
-#include "core/eventhandlers/abstracteventhandler.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/genericproperty.h"
 

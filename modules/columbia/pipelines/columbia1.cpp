@@ -46,20 +46,23 @@ namespace campvis {
         , _imageReader()
         , _flowReader()
         , _vtkReader()
-        , _vr(_effectiveRenderTargetSize)
-        , _sr(_effectiveRenderTargetSize)
-        , _src(_effectiveRenderTargetSize)
-        , _gr(_effectiveRenderTargetSize)
+        , _vr(&_canvasSize)
+        , _sr(&_canvasSize)
+        , _src(&_canvasSize)
+        , _gr(&_canvasSize)
         , _sft()
-        , _sfr(_effectiveRenderTargetSize)
-        , _compositor(_effectiveRenderTargetSize)
+        , _sfr(&_canvasSize)
+        , _compositor(&_canvasSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
         addProperty(&_boundsData);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
-        _eventHandlers.push_back(_trackballEH);
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
+        _trackballEH->addLqModeProcessor(&_vr);
+        _trackballEH->addLqModeProcessor(&_src);
+        _trackballEH->addLqModeProcessor(&_sfr);
+        addEventListenerToBack(_trackballEH);
 
         addProcessor(&_imageReader);
         addProcessor(&_imageSplitter);
@@ -141,13 +144,10 @@ namespace campvis {
         _sfr.p_renderTargetID.setValue("sfr");
         _sfr.p_renderTargetID.connect(static_cast<DataNameProperty*>(_vr.getProperty("GeometryImageId")));
         _sfr.p_renderTargetID.connect(&_compositor.p_firstImageId);
-
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<Columbia1>(this, &Columbia1::onRenderTargetSizeChanged);
     }
 
     void Columbia1::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -155,25 +155,12 @@ namespace campvis {
         return "Columbia1";
     }
 
-    void Columbia1::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
-        _camera.setWindowRatio(ratio);
-    }
-
     void Columbia1::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageSplitter) {
             // update camera
             DataContainer::ScopedTypedData<ImageData> img(_data, _imageSplitter.p_outputID.getValue());
             if (img != 0) {
-                tgt::Bounds volumeExtent = img->getWorldBounds();
-                if (_trackballEH->getSceneBounds() != volumeExtent) {
-                    tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
-                    _trackballEH->setSceneBounds(volumeExtent);
-                    _trackballEH->setCenter(volumeExtent.center());
-                    _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
-                }
             }
         }
     }

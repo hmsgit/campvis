@@ -170,7 +170,7 @@ namespace campvis {
         if (_pipeline != 0) {
             _pipeline->s_renderTargetChanged.disconnect(this);
             if (getCanvas()->getEventHandler() != 0)
-                getCanvas()->getEventHandler()->removeListener(_pipeline);
+                getCanvas()->getEventHandler()->removeEventListener(_pipeline);
             _pipeline = 0;
         }
     }
@@ -180,14 +180,14 @@ namespace campvis {
         if (_pipeline != 0) {
             _pipeline->s_renderTargetChanged.disconnect(this);
             if (getCanvas()->getEventHandler() != 0)
-                getCanvas()->getEventHandler()->removeListener(_pipeline);
+                getCanvas()->getEventHandler()->removeEventListener(_pipeline);
         }
 
         _pipeline = pipeline;
         _pipeline->s_renderTargetChanged.connect(this, &TumVisPainter::onRenderTargetChanged);
         _pipeline->setRenderTargetSize(getCanvas()->getSize());
         if (getCanvas()->getEventHandler() != 0)
-            getCanvas()->getEventHandler()->addListenerToFront(_pipeline);
+            getCanvas()->getEventHandler()->addEventListenerToFront(_pipeline);
     }
 
     void TumVisPainter::repaint() {

@@ -31,7 +31,7 @@
 #define DVRVIS_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -67,8 +67,6 @@ namespace campvis {
         virtual const std::string getName() const;
 
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -89,7 +87,7 @@ namespace campvis {
         DepthDarkening _depthDarkening;
         VirtualMirrorCombine _combine;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

@@ -27,49 +27,45 @@
 // 
 // ================================================================================================
 
-#ifndef ABSTRACTEVENTHANDLER_H__
-#define ABSTRACTEVENTHANDLER_H__
+#ifndef TRANSFUNCWINDOWINGEVENTHANDLER_H__
+#define TRANSFUNCWINDOWINGEVENTHANDLER_H__
 
 #include "tgt/logmanager.h"
-#include "tgt/event/event.h"
+#include "tgt/vector.h"
+#include "tgt/event/eventlistener.h"
 
 namespace campvis {
+    class TransferFunctionProperty;
 
     /**
-     * Abstract base class for CAMPVis EventHandlers.
+     * Event handler that maps mouse click-and-drag events to the windowing of a transfer function.
      * 
      */
-    class AbstractEventHandler {
+    class TransFuncWindowingEventListener : public tgt::EventListener {
     public:
         /**
-         * Creates a AbstractEventHandler.
+         * Creates a TransFuncWindowingEventListener.
          */
-        AbstractEventHandler();
+        TransFuncWindowingEventListener(TransferFunctionProperty* property);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~AbstractEventHandler();
+        virtual ~TransFuncWindowingEventListener();
 
-
-        /**
-         * Checks, whether the given event \a e is handled by this EventHandler.
-         * \param e     The event to check
-         * \return      True, if the given event is handled by this EventHandler.
-         */
-        virtual bool accept(tgt::Event* e) = 0;
-
-        /**
-         * Performs the event handling.
-         * \param e     The event to handle
-         */
-        virtual void execute(tgt::Event* e) = 0;
+        /// \see tgt::EventListener::onEvent()
+        virtual void onEvent(tgt::Event* e);
 
     protected:
+        TransferFunctionProperty* _prop;
+
+        bool _mousePressed;                 ///< Flag whether the mouse is currently pressed
+        tgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed
+        tgt::vec2 _originalIntensityDomain; ///< TF intensity domain when mouse was pressed
 
         static const std::string loggerCat_;
     };
 
 }
 
-#endif // ABSTRACTEVENTHANDLER_H__
+#endif // TRANSFUNCWINDOWINGEVENTHANDLER_H__

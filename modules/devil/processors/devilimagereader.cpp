@@ -56,8 +56,8 @@ namespace campvis {
         GenericOption<std::string>("localIntensity", "Local Intensity Image")
     };
 
-    DevilImageReader::DevilImageReader(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    DevilImageReader::DevilImageReader(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
         , p_importType("ImportType", "Import Type", importOptions, 3)
@@ -99,8 +99,8 @@ namespace campvis {
 
                 _shader->activate();
                 _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSize", _renderTargetSize.getValue());
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                _shader->setUniform("_viewportSize", getEffectiveViewportSize());
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setIgnoreUniformLocationError(false);
                 tgt::TextureUnit texUnit;
 

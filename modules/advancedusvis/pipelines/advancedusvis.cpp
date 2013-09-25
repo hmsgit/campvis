@@ -46,16 +46,16 @@ namespace campvis {
         , _confidenceGenerator()
         , _gvg()
         , _lhh()
-        , _usFusion1(_effectiveRenderTargetSize)
-        , _usFusion2(_effectiveRenderTargetSize)
-        , _usFusion3(_effectiveRenderTargetSize)
-        , _usFusion4(_effectiveRenderTargetSize)
+        , _usFusion1(&_canvasSize)
+        , _usFusion2(&_canvasSize)
+        , _usFusion3(&_canvasSize)
+        , _usFusion4(&_canvasSize)
         , _usBlurFilter()
-        , _quadView(_effectiveRenderTargetSize)
+        , _quadView(&_canvasSize)
         , _usDenoiseilter()
         , _usProxy()
-        , _usEEP(_effectiveRenderTargetSize)
-        , _usDVR(_effectiveRenderTargetSize)
+        , _usEEP(&_canvasSize)
+        , _usDVR(&_canvasSize)
         , _wheelHandler(&_usFusion1.p_sliceNumber)
         , _tfWindowingHandler(&_usFusion1.p_transferFunction)
         , _trackballEH(0)
@@ -76,11 +76,11 @@ namespace campvis {
         //addProcessor(&_usEEP);
         //addProcessor(&_usDVR);
 
-        addEventHandler(&_wheelHandler);
+        addEventListenerToBack(&_wheelHandler);
         //addEventHandler(&_tfWindowingHandler);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
-        _eventHandlers.push_back(_trackballEH);
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
+        addEventListenerToBack(_trackballEH);
     }
 
     AdvancedUsVis::~AdvancedUsVis() {
@@ -193,13 +193,10 @@ namespace campvis {
         _usDVR.p_targetImageID.setValue("us.dvr");
 
         _renderTargetID.setValue("quadview.output");
-
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<AdvancedUsVis>(this, &AdvancedUsVis::onRenderTargetSizeChanged);
     }
 
     void AdvancedUsVis::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -239,25 +236,13 @@ namespace campvis {
         return "AdvancedUsVis";
     }
 
-    void AdvancedUsVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
-        _camera.setWindowRatio(ratio);
-    }
-
     void AdvancedUsVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor = &_usReader) {
             // convert data
             DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
             if (img != 0) {
-                tgt::Bounds volumeExtent = img->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-                _trackballEH->setSceneBounds(volumeExtent);
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                _trackballEH->reinitializeCamera(img);
             }
-
         }
     }
 

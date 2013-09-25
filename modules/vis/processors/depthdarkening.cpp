@@ -44,8 +44,8 @@
 namespace campvis {
     const std::string DepthDarkening::loggerCat_ = "CAMPVis.modules.vis.DepthDarkening";
 
-    DepthDarkening::DepthDarkening(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    DepthDarkening::DepthDarkening(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f, 0.1f)
@@ -113,7 +113,7 @@ namespace campvis {
             inputImage->bind(_shader, colorUnit, depthUnit);
             inputImage->bindDepthTexture(_shader, pass2DepthUnit, "_depthPass2Texture", "_pass2TexParams");
             
-            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
             _shader->setUniform("_direction", tgt::vec2(1.f, 0.f));
             _shader->setUniform("_sigma", p_sigma.getValue());
             _shader->setUniform("_lambda", p_lambda.getValue());

@@ -33,6 +33,7 @@
 #include "modules/vis/pipelines/ixpvdemo.h"
 #include "modules/vis/pipelines/dvrvis.h"
 #include "modules/vis/pipelines/volumerendererdemo.h"
+#include "modules/vis/pipelines/volumeexplorerdemo.h"
 #include "modules/vis/pipelines/slicevis.h"
 #ifdef HAS_KISSCL
 #include "modules/opencl/pipelines/openclpipeline.h"
@@ -70,7 +71,8 @@ int main(int argc, char** argv) {
 //    app.addVisualizationPipeline("IXPV", new IxpvDemo());
     //app.addVisualizationPipeline("SliceVis", new SliceVis());
     app.addVisualizationPipeline("DVRVis", new DVRVis());
-    app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
+    //app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
+    app.addVisualizationPipeline("VolumeExplorerDemo", new VolumeExplorerDemo());
 #ifdef HAS_KISSCL
     //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
 #endif

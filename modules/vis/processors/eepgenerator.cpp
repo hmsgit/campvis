@@ -44,8 +44,8 @@
 namespace campvis {
     const std::string EEPGenerator::loggerCat_ = "CAMPVis.modules.vis.EEPGenerator";
 
-    EEPGenerator::EEPGenerator(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    EEPGenerator::EEPGenerator(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Input Proxy Geometry ID", "proxygeometry", DataNameProperty::READ)
         , p_mirrorID("mirrorID", "Input Mirror ID", "mirror", DataNameProperty::READ)
@@ -145,7 +145,7 @@ namespace campvis {
                 tgt::TextureUnit geometryDepthUnit, entryDepthUnit;
 
                 _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(_renderTargetSize.getValue()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_modelMatrix", mirrorMatrix);
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());

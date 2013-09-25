@@ -61,11 +61,10 @@ namespace campvis {
 
     VisualizationPipeline::VisualizationPipeline() 
         : AbstractPipeline()
+        , tgt::EventHandler()
         , tgt::EventListener()
-        , _lqMode(false)
         , _ignoreCanvasSizeUpdate(false)
         , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
-        , _effectiveRenderTargetSize("EffectiveRenderTargetSize", "Render Target Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
         , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget", DataNameProperty::READ)
         , _canvas(0)
     {
@@ -79,15 +78,14 @@ namespace campvis {
     }
 
     void VisualizationPipeline::onEvent(tgt::Event* e) {
-        // cycle through event handlers, ask each one if it handles the event and if so, execute it.
-        for (std::vector<AbstractEventHandler*>::iterator it = _eventHandlers.begin(); it != _eventHandlers.end() && e->isAccepted(); ++it) {
-            if ((*it)->accept(e)) {
-                (*it)->execute(e);
+        // copy and paste from tgt::EventHandler::onEvent() but without deleting e
+        for (size_t i = 0 ; i < listeners_.size() ; ++i) {
+            // check if current listener listens to the eventType of e
+            if(listeners_[i]->getEventTypes() & e->getEventType() ){
+                listeners_[i]->onEvent(e);
+                if (e->isAccepted())
+                    break;
             }
-        }
-
-        if (e->isAccepted()) {
-            EventListener::onEvent(e);
         }
     }
 
@@ -110,8 +108,6 @@ namespace campvis {
         if (_canvasSize.getValue() != size && !_ignoreCanvasSizeUpdate) {
             _canvasSize.setValue(size);
         }
-
-        updateEffectiveRenderTargetSize();
     }
 
     void VisualizationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
@@ -148,28 +144,6 @@ namespace campvis {
         }
         else
             AbstractPipeline::onPropertyChanged(prop);
-    }
-
-    void VisualizationPipeline::addEventHandler(AbstractEventHandler* eventHandler) {
-        tgtAssert(eventHandler != 0, "Event handler must not be 0.");
-        _eventHandlers.push_back(eventHandler);
-    }
-
-    void VisualizationPipeline::enableLowQualityMode() {
-        _lqMode = true;
-        updateEffectiveRenderTargetSize();
-    }
-
-    void VisualizationPipeline::disableLowQualityMode() {
-        _lqMode = false;
-        updateEffectiveRenderTargetSize();
-    }
-
-    void VisualizationPipeline::updateEffectiveRenderTargetSize() {
-        if (_lqMode)
-            _effectiveRenderTargetSize.setValue(_canvasSize.getValue() / 2);
-        else
-            _effectiveRenderTargetSize.setValue(_canvasSize.getValue());
     }
 
     void VisualizationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {

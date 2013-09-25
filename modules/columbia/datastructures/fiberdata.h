@@ -48,7 +48,7 @@ namespace campvis {
     /**
      * Data object storing fiber data.
      */
-    class FiberData : public AbstractData {
+    class FiberData : public AbstractData, public IHasWorldBounds {
     public:
         /**
          * Struct storing meta information about a single fiber.
@@ -139,7 +139,7 @@ namespace campvis {
          * \note    Caution: Calling this method is expensive as the bounds are computed each time.
          * \return  The fiber data extent in world coordinates.
          */
-        tgt::Bounds getWorldBounds() const;
+        virtual tgt::Bounds getWorldBounds() const;
 
         /**
          * Renders the Fiber geometry of this data set in the current OpenGL context.

@@ -30,7 +30,7 @@
 #ifndef COLUMBIA1_H__
 #define COLUMBIA1_H__
 
-#include "core/eventhandlers/trackballnavigationeventhandler.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/visualizationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
@@ -70,8 +70,6 @@ namespace campvis {
         virtual const std::string getName() const;
 
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -100,7 +98,7 @@ namespace campvis {
 
         RenderTargetCompositor _compositor;
 
-        TrackballNavigationEventHandler* _trackballEH;
+        TrackballNavigationEventListener* _trackballEH;
 
     };
 }

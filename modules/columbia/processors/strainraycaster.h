@@ -51,7 +51,7 @@ namespace campvis {
         /**
          * Constructs a new StrainRaycaster Processor
          **/
-        StrainRaycaster(IVec2Property& canvasSize);
+        StrainRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

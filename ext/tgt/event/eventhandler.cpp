@@ -37,17 +37,17 @@ EventHandler::EventHandler()
   : listeners_(std::deque<EventListener*>()) {
 }
 
-void EventHandler::addListenerToBack(EventListener* e) {
+void EventHandler::addEventListenerToBack(EventListener* e) {
     tgtAssert(e != 0, "Trying to add null pointer as event listener");
     listeners_.push_back(e);
 }
 
-void EventHandler::addListenerToFront(EventListener* e) {
+void EventHandler::addEventListenerToFront(EventListener* e) {
     tgtAssert(e != 0, "Trying to add null pointer as event listener");
     listeners_.push_front(e);
 }
 
-void EventHandler::removeListener(EventListener* e) {
+void EventHandler::removeEventListener(EventListener* e) {
     std::deque<EventListener*>::iterator pos;
     pos = std::find(listeners_.begin(), listeners_.end(), e);
 
@@ -55,11 +55,11 @@ void EventHandler::removeListener(EventListener* e) {
         listeners_.erase(pos);
 }
 
-void EventHandler::clear() {
+void EventHandler::clearEventListeners() {
     listeners_.clear();
 }
 
-void EventHandler::broadcast(Event* e) {
+void EventHandler::broadcastEvent(Event* e) {
     for (size_t i = 0 ; i < listeners_.size() ; ++i) {
         // check if current listener listens to the eventType of e
         if(listeners_[i]->getEventTypes() & e->getEventType() ){
@@ -71,7 +71,7 @@ void EventHandler::broadcast(Event* e) {
     delete e;
 }
 
-size_t EventHandler::getListenerNumber() const {
+size_t EventHandler::getNumEventListeners() const {
     return listeners_.size();
 }
 

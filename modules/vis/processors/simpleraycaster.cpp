@@ -36,8 +36,8 @@
 namespace campvis {
     const std::string SimpleRaycaster::loggerCat_ = "CAMPVis.modules.vis.SimpleRaycaster";
 
-    SimpleRaycaster::SimpleRaycaster(IVec2Property& canvasSize)
-        : RaycastingProcessor(canvasSize, "modules/vis/glsl/simpleraycaster.frag", true)
+    SimpleRaycaster::SimpleRaycaster(IVec2Property* viewportSizeProp)
+        : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/simpleraycaster.frag", true)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows", false, AbstractProcessor::INVALID_SHADER)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)

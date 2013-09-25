@@ -45,19 +45,22 @@ namespace campvis {
         , _imageReader()
         , _pgGenerator()
         , _vmgGenerator()
-        , _vmRenderer(_effectiveRenderTargetSize)
-        , _eepGenerator(_effectiveRenderTargetSize)
-        , _vmEepGenerator(_effectiveRenderTargetSize)
-        , _dvrNormal(_effectiveRenderTargetSize)
-        , _dvrVM(_effectiveRenderTargetSize)
-        , _depthDarkening(_effectiveRenderTargetSize)
-        , _combine(_effectiveRenderTargetSize)
+        , _vmRenderer(&_canvasSize)
+        , _eepGenerator(&_canvasSize)
+        , _vmEepGenerator(&_canvasSize)
+        , _dvrNormal(&_canvasSize)
+        , _dvrVM(&_canvasSize)
+        , _depthDarkening(&_canvasSize)
+        , _combine(&_canvasSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventHandler(this, &_camera, _canvasSize.getValue());
-        _eventHandlers.push_back(_trackballEH);
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
+        _trackballEH->addLqModeProcessor(&_dvrNormal);
+        _trackballEH->addLqModeProcessor(&_dvrVM);
+        _trackballEH->addLqModeProcessor(&_depthDarkening);
+        addEventListenerToBack(_trackballEH);
 
         addProcessor(&_imageReader);
         addProcessor(&_pgGenerator);
@@ -140,14 +143,10 @@ namespace campvis {
 
         _dvrNormal.p_targetImageID.connect(&_depthDarkening.p_inputImage);
         _depthDarkening.p_outputImage.connect(&_combine.p_normalImageID);
-
-        _trackballEH->setViewportSize(_effectiveRenderTargetSize.getValue());
-        _effectiveRenderTargetSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
-        
     }
 
     void DVRVis::deinit() {
-        _effectiveRenderTargetSize.s_changed.disconnect(this);
+        _canvasSize.s_changed.disconnect(this);
         VisualizationPipeline::deinit();
     }
 
@@ -155,23 +154,12 @@ namespace campvis {
         return "DVRVis";
     }
 
-    void DVRVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_effectiveRenderTargetSize.getValue().x) / static_cast<float>(_effectiveRenderTargetSize.getValue().y);
-        _camera.setWindowRatio(ratio);
-    }
-
     void DVRVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
             DataContainer::ScopedTypedData<ImageData> img(_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
-                tgt::Bounds volumeExtent = img->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-                _trackballEH->setSceneBounds(volumeExtent);
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                _trackballEH->reinitializeCamera(img);
             }
         }
     }

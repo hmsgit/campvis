@@ -59,11 +59,11 @@ namespace campvis {
          * \note    The render target size property of this CLRaycaster will automatically 
          *          be assigned as shared property of the given \a renderTargetSize property.
          * \see     VisualizationProcessor
-         * \param   renderTargetSize            Reference to the parent pipeline's render target size property.
+         * \param   viewportSizeProp            Reference to the parent pipeline's render target size property.
          * \param   fragmentShaderFileName      Filename for the fragment shader being automatically loaded.
          * \param   bindEntryExitDepthTextures  Flag whether to also bind the depth textures of the entry-/exit points.
          */
-        CLRaycaster(IVec2Property& renderTargetSize);
+        CLRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor

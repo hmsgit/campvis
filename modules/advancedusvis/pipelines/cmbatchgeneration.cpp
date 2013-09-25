@@ -52,10 +52,10 @@ namespace campvis {
 
     CmBatchGeneration::CmBatchGeneration()
         : VisualizationPipeline()
-        , _usReader(_effectiveRenderTargetSize)
+        , _usReader(&_canvasSize)
         , _confidenceGenerator()
         , _usBlurFilter()
-        , _usFusion(_effectiveRenderTargetSize)
+        , _usFusion(&_canvasSize)
         , p_autoExecution("AutoExecution", "Automatic Execution", false)
         , p_sourcePath("SourcePath", "Source Files Path", "")
         , p_targetPathColor("TargetPathColor", "Target Path Color Files", "")

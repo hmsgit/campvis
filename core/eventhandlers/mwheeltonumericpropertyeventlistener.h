@@ -27,56 +27,39 @@
 // 
 // ================================================================================================
 
-#ifndef TRANSFUNCWINDOWINGEVENTHANDLER_H__
-#define TRANSFUNCWINDOWINGEVENTHANDLER_H__
+#ifndef MWHEELTONUMERICPROPERTYEVENTHANDLER_H__
+#define MWHEELTONUMERICPROPERTYEVENTHANDLER_H__
 
 #include "tgt/logmanager.h"
-#include "tgt/vector.h"
-#include "core/eventhandlers/abstracteventhandler.h"
+#include "tgt/event/eventlistener.h"
 
 namespace campvis {
-    class TransferFunctionProperty;
+    class INumericProperty;
 
     /**
-     * Event handler that maps mouse click-and-drag events to the windowing of a transfer function.
-     * 
+     * Event handler that maps mouse wheel events to a numeric property.
      */
-    class TransFuncWindowingEventHandler : public AbstractEventHandler {
+    class MWheelToNumericPropertyEventListener : public tgt::EventListener {
     public:
         /**
-         * Creates a TransFuncWindowingEventHandler.
+         * Creates a MWheelToNumericPropertyEventListener.
          */
-        TransFuncWindowingEventHandler(TransferFunctionProperty* property);
+        MWheelToNumericPropertyEventListener(INumericProperty* property);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~TransFuncWindowingEventHandler();
+        virtual ~MWheelToNumericPropertyEventListener();
 
-
-        /**
-         * Checks, whether the given event \a e is handled by this EventHandler.
-         * \param e     The event to check
-         * \return      True, if the given event is handled by this EventHandler.
-         */
-        virtual bool accept(tgt::Event* e);
-
-        /**
-         * Performs the event handling.
-         * \param e     The event to handle
-         */
-        virtual void execute(tgt::Event* e);
+        /// \see tgt::EventListener::wheelEvent()
+        virtual void wheelEvent(tgt::MouseEvent* e);
 
     protected:
-        TransferFunctionProperty* _prop;
-
-        bool _mousePressed;                 ///< Flag whether the mouse is currently pressed
-        tgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed
-        tgt::vec2 _originalIntensityDomain; ///< TF intensity domain when mouse was pressed
+        INumericProperty* _prop;        ///< The Property to map the event to
 
         static const std::string loggerCat_;
     };
 
 }
 
-#endif // TRANSFUNCWINDOWINGEVENTHANDLER_H__
+#endif // MWHEELTONUMERICPROPERTYEVENTHANDLER_H__

@@ -40,14 +40,14 @@
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
 
-    VolumeRenderer::VolumeRenderer(IVec2Property& canvasSize)
-        : VisualizationProcessor(canvasSize)
+    VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp)
+        : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
         , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
         , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , _pgGenerator()
-        , _eepGenerator(canvasSize)
-        , _raycaster(canvasSize)
+        , _eepGenerator(viewportSizeProp)
+        , _raycaster(viewportSizeProp)
     {
         addProperty(&p_inputVolume);
         addProperty(&p_camera);
@@ -79,6 +79,8 @@ namespace campvis {
         _pgGenerator.init();
         _eepGenerator.init();
         _raycaster.init();
+
+        p_lqMode.addSharedProperty(&_raycaster.p_lqMode);
 
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
@@ -145,6 +147,13 @@ namespace campvis {
             _raycaster.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
         }
         VisualizationProcessor::onPropertyChanged(prop);
+    }
+
+    void VolumeRenderer::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
+        _eepGenerator.setViewportSizeProperty(viewportSizeProp);
+        _raycaster.setViewportSizeProperty(viewportSizeProp);
+
+        VisualizationProcessor::setViewportSizeProperty(viewportSizeProp);
     }
 
 }
