@@ -86,7 +86,7 @@ namespace campvis {
 
 
         // Event-Handlers
-        _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, p_volumeRenderSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, &p_volumeRenderSize);
         _trackballEH->addLqModeProcessor(&_raycaster);
     }
 
@@ -119,8 +119,6 @@ namespace campvis {
 
         _quad = new FaceGeometry(vertices, texCorods);
         _quad->createGLBuffers();
-
-        _trackballEH->setViewportSize(p_volumeRenderSize.getValue());
     }
 
     void VolumeExplorer::deinit() {
@@ -169,10 +167,6 @@ namespace campvis {
         if (prop == _viewportSizeProperty) {
             p_sliceRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
             p_volumeRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
-
-            _trackballEH->setViewportSize(p_volumeRenderSize.getValue());
-            float ratio = static_cast<float>(p_volumeRenderSize.getValue().x) / static_cast<float>(p_volumeRenderSize.getValue().y);
-            _raycaster.p_camera.setWindowRatio(ratio);
         }
         if (prop == &p_outputImage) {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");

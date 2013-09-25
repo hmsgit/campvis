@@ -70,8 +70,6 @@ namespace campvis {
 
 
         //virtual void keyEvent(tgt::KeyEvent* e);
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.

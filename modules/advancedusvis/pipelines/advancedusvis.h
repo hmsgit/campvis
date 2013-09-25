@@ -77,7 +77,6 @@ namespace campvis {
 
         virtual void keyEvent(tgt::KeyEvent* e);
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
     protected:
 
         /**

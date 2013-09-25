@@ -45,7 +45,7 @@ namespace campvis {
 
         addProperty(&p_camera);
 
-        _trackballEH = new TrackballNavigationEventListener(&p_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);
     }
 
@@ -63,9 +63,6 @@ namespace campvis {
         _renderer.s_boundingBoxChanged.connect(this, &UsCompounding::onBoundingBoxChanged);
         _renderer.p_targetImageID.setValue("us.frame.output");
         _renderTargetID.setValue(_renderer.p_targetImageID.getValue());
-
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        _canvasSize.s_changed.connect<UsCompounding>(this, &UsCompounding::onRenderTargetSizeChanged);
     }
 
     void UsCompounding::deinit() {
@@ -75,12 +72,6 @@ namespace campvis {
 
     const std::string UsCompounding::getName() const {
         return "UsCompounding";
-    }
-
-    void UsCompounding::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
-        p_camera.setWindowRatio(ratio);
     }
 
     void UsCompounding::onBoundingBoxChanged(tgt::Bounds b) {

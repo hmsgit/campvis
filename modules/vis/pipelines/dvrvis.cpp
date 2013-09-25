@@ -56,7 +56,7 @@ namespace campvis {
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballEH->addLqModeProcessor(&_dvrNormal);
         _trackballEH->addLqModeProcessor(&_dvrVM);
         _trackballEH->addLqModeProcessor(&_depthDarkening);
@@ -143,10 +143,6 @@ namespace campvis {
 
         _dvrNormal.p_targetImageID.connect(&_depthDarkening.p_inputImage);
         _depthDarkening.p_outputImage.connect(&_combine.p_normalImageID);
-
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        _canvasSize.s_changed.connect<DVRVis>(this, &DVRVis::onRenderTargetSizeChanged);
-        
     }
 
     void DVRVis::deinit() {
@@ -156,12 +152,6 @@ namespace campvis {
 
     const std::string DVRVis::getName() const {
         return "DVRVis";
-    }
-
-    void DVRVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
-        _camera.setWindowRatio(ratio);
     }
 
     void DVRVis::onProcessorValidated(AbstractProcessor* processor) {

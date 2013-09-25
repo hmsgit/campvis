@@ -64,17 +64,22 @@ namespace campvis {
 
     const std::string TrackballNavigationEventListener::loggerCat_ = "CAMPVis.core.eventhandler.TrackballNavigationEventListener";
 
-    TrackballNavigationEventListener::TrackballNavigationEventListener(CameraProperty* cameraProperty, const tgt::ivec2& viewportSize)
+    TrackballNavigationEventListener::TrackballNavigationEventListener(CameraProperty* cameraProperty, IVec2Property* viewportSizeProp)
         : tgt::EventListener()
         , _cameraProperty(cameraProperty)
+        , _viewportSizeProp(viewportSizeProp)
         , _cpnw(cameraProperty)
         , _trackball(0)
     {
-        tgtAssert(_cameraProperty != 0, "Assigned property must not be 0.");
-        _trackball = new tgt::Trackball(&_cpnw, viewportSize);
+        tgtAssert(_cameraProperty != 0, "Assigned camera property must not be 0.");
+        tgtAssert(_viewportSizeProp != 0, "Assigned viewport size property must not be 0.");
+
+        _trackball = new tgt::Trackball(&_cpnw, viewportSizeProp->getValue());
+        _viewportSizeProp->s_changed.connect(this, &TrackballNavigationEventListener::onViewportSizePropChanged);
     }
 
     TrackballNavigationEventListener::~TrackballNavigationEventListener() {
+        _viewportSizeProp->s_changed.disconnect(this);
         delete _trackball;
     }
 
@@ -108,11 +113,7 @@ namespace campvis {
     void TrackballNavigationEventListener::setCenter(const tgt::vec3& center) {
         _trackball->setCenter(center);
     }
-
-    void TrackballNavigationEventListener::setViewportSize(const tgt::ivec2& viewportSize) {
-        _trackball->setViewprtSize(viewportSize);
-    }
-
+    
     void TrackballNavigationEventListener::setSceneBounds(const tgt::Bounds& bounds) {
         _trackball->setSceneBounds(bounds);
     }
@@ -133,6 +134,14 @@ namespace campvis {
             if (*it == vp)
                 _lqModeProcessors.erase(it);
         }
+    }
+
+    void TrackballNavigationEventListener::onViewportSizePropChanged(const AbstractProperty* p) {
+        tgtAssert(p == _viewportSizeProp, "Signal from unexpected property! Expected p == _viewportSizeProp.");
+
+        _trackball->setViewprtSize(_viewportSizeProp->getValue());
+        float ratio = static_cast<float>(_viewportSizeProp->getValue().x) / static_cast<float>(_viewportSizeProp->getValue().y);
+        _cameraProperty->setWindowRatio(ratio);
     }
 
 }

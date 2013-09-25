@@ -30,10 +30,14 @@
 #ifndef TRACKBALLNAVIGATIONEVENTHANDLER_H__
 #define TRACKBALLNAVIGATIONEVENTHANDLER_H__
 
+#include <sigslot/sigslot.h>
+
 #include "tgt/bounds.h"
 #include "tgt/logmanager.h"
 #include "tgt/event/eventlistener.h"
 #include "tgt/navigation/trackball.h"
+
+#include "core/properties/numericproperty.h"
 
 #include <vector>
 
@@ -71,17 +75,22 @@ namespace campvis {
     };
 
     /**
-     * EventHandler implementing a trackball navigation for a CameraProperty.
+     * EventListener implementing a trackball navigation for a CameraProperty.
      * Implementation inspired by http://www.opengl.org/wiki/Trackball
+     * 
+     * \note    Also takes care of automatically adjusting the window ratio for the wrapped
+     *          camera when the viewport size changes.
      */
-    class TrackballNavigationEventListener : public tgt::EventListener {
+    class TrackballNavigationEventListener : public tgt::EventListener, public sigslot::has_slots<> {
     public:
         /**
          * Creates a TrackballNavigationEventListener.
-         * \param   cameraProperty  The CameraProperty to apply the navigation to.
-         * \param   viewportSize    Initial viewport size
+         * \note    TrackballNavigationEventListener keeps and accesses \a viewportSizeProp during the whole
+         *          lifetime. Hence make sure the pointer is valid at all times.
+         * \param   cameraProperty      Pointer to the CameraProperty to apply the navigation to, must not be 0.
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          */
-        TrackballNavigationEventListener(CameraProperty* cameraProperty, const tgt::ivec2& viewportSize);
+        TrackballNavigationEventListener(CameraProperty* cameraProperty, IVec2Property* viewportSizeProp);
 
         /**
          * Virtual Destructor
@@ -91,13 +100,7 @@ namespace campvis {
 
         /// \see tgt::EventListener::onEvent()
         virtual void onEvent(tgt::Event* e);
-
-        /**
-         * Sets the viewport size to \a viewportSize.
-         * \param viewportSize  The new viewport size.
-         */
-        void setViewportSize(const tgt::ivec2& viewportSize);
-
+        
         /**
          * Reinitalizes the camera by the given parameters.
          * \param   position    New camera position
@@ -140,7 +143,11 @@ namespace campvis {
         void removeLqModeProcessor(VisualizationProcessor* vp);
 
     protected:
+        /// Slot called when _viewportSizeProp changes 
+        void onViewportSizePropChanged(const AbstractProperty* p);
+
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
+        IVec2Property* _viewportSizeProp;       ///< Pointer to the property defining the viewport size
         CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
         tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
         tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)

@@ -62,8 +62,6 @@ namespace campvis {
         virtual const std::string getName() const;
         
     protected:
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
         void onBoundingBoxChanged(tgt::Bounds b);
 
         CameraProperty p_camera;

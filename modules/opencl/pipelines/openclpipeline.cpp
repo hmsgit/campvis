@@ -51,7 +51,7 @@ namespace campvis {
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballEH->addLqModeProcessor(&_clRaycaster);
         addEventListenerToBack(_trackballEH);
 
@@ -94,9 +94,6 @@ namespace campvis {
 
         _eepGenerator.p_entryImageID.connect(&_clRaycaster._entryImageID);
         _eepGenerator.p_exitImageID.connect(&_clRaycaster._exitImageID);
-
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        _canvasSize.s_changed.connect<OpenCLPipeline>(this, &OpenCLPipeline::onRenderTargetSizeChanged);
     }
 
     void OpenCLPipeline::deinit() {
@@ -106,12 +103,6 @@ namespace campvis {
 
     const std::string OpenCLPipeline::getName() const {
         return "OpenCLPipeline";
-    }
-
-    void OpenCLPipeline::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
-        _camera.setWindowRatio(ratio);
     }
 
     void OpenCLPipeline::onProcessorValidated(AbstractProcessor* processor) {

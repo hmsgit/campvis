@@ -48,7 +48,7 @@ namespace campvis {
     {
         addProperty(&_camera);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballEH->addLqModeProcessor(&_vr);
         addEventListenerToBack(_trackballEH);
 
@@ -77,9 +77,6 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_vr.getProperty("TransferFunction"))->replaceTF(dvrTF);
-
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        _canvasSize.s_changed.connect<VolumeRendererDemo>(this, &VolumeRendererDemo::onRenderTargetSizeChanged);
     }
 
     void VolumeRendererDemo::deinit() {
@@ -89,12 +86,6 @@ namespace campvis {
 
     const std::string VolumeRendererDemo::getName() const {
         return "VolumeRendererDemo";
-    }
-
-    void VolumeRendererDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
-        _camera.setWindowRatio(ratio);
     }
 
     void VolumeRendererDemo::onProcessorValidated(AbstractProcessor* processor) {

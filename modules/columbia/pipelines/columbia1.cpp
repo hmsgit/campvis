@@ -58,7 +58,7 @@ namespace campvis {
         addProperty(&_camera);
         addProperty(&_boundsData);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballEH->addLqModeProcessor(&_vr);
         _trackballEH->addLqModeProcessor(&_src);
         _trackballEH->addLqModeProcessor(&_sfr);
@@ -144,9 +144,6 @@ namespace campvis {
         _sfr.p_renderTargetID.setValue("sfr");
         _sfr.p_renderTargetID.connect(static_cast<DataNameProperty*>(_vr.getProperty("GeometryImageId")));
         _sfr.p_renderTargetID.connect(&_compositor.p_firstImageId);
-
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        _canvasSize.s_changed.connect<Columbia1>(this, &Columbia1::onRenderTargetSizeChanged);
     }
 
     void Columbia1::deinit() {
@@ -156,12 +153,6 @@ namespace campvis {
 
     const std::string Columbia1::getName() const {
         return "Columbia1";
-    }
-
-    void Columbia1::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
-        _camera.setWindowRatio(ratio);
     }
 
     void Columbia1::onProcessorValidated(AbstractProcessor* processor) {

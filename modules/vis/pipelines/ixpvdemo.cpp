@@ -76,7 +76,7 @@ namespace campvis {
 
         addProperty(&_camera);
 
-        _trackballHandler = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballHandler = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         addEventListenerToBack(&_wheelHandler);
         addEventListenerToBack(_trackballHandler);
     }
@@ -183,18 +183,10 @@ namespace campvis {
         _ixpvCompositor.p_targetImageId.setValue("ixpv");
 
         _renderTargetID.setValue("ixpv");
-
-        _trackballHandler->setViewportSize(_canvasSize.getValue());
     }
     
     const std::string IxpvDemo::getName() const {
         return "IXPV Demo";
-    }
-
-    void IxpvDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballHandler->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
-        _camera.setWindowRatio(ratio);
     }
 
     void IxpvDemo::onProcessorValidated(AbstractProcessor* processor) {

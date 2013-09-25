@@ -70,8 +70,6 @@ namespace campvis {
         virtual const std::string getName() const;
 
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.

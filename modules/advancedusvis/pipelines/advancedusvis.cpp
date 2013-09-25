@@ -79,7 +79,7 @@ namespace campvis {
         addEventListenerToBack(&_wheelHandler);
         //addEventHandler(&_tfWindowingHandler);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, _canvasSize.getValue());
+        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);
     }
 
@@ -193,9 +193,6 @@ namespace campvis {
         _usDVR.p_targetImageID.setValue("us.dvr");
 
         _renderTargetID.setValue("quadview.output");
-
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        _canvasSize.s_changed.connect<AdvancedUsVis>(this, &AdvancedUsVis::onRenderTargetSizeChanged);
     }
 
     void AdvancedUsVis::deinit() {
@@ -237,12 +234,6 @@ namespace campvis {
 
     const std::string AdvancedUsVis::getName() const {
         return "AdvancedUsVis";
-    }
-
-    void AdvancedUsVis::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackballEH->setViewportSize(_canvasSize.getValue());
-        float ratio = static_cast<float>(_canvasSize.getValue().x) / static_cast<float>(_canvasSize.getValue().y);
-        _camera.setWindowRatio(ratio);
     }
 
     void AdvancedUsVis::onProcessorValidated(AbstractProcessor* processor) {
