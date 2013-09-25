@@ -58,7 +58,7 @@ namespace campvis {
         , _targetImageID("targetImageID", "Target image ID", "", DataNameProperty::WRITE)
         , _camera("camera", "Camera")
         , _transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f)
+        , _samplingStepSize("samplingStepSize", "Sampling Step Size", .1f, 0.001f, 1.f, 0.001f)
         , _jitterEntryPoints("jitterEntryPoints", "Jitter Entry Points", true)
         , _clContext(0)
         , _clProgram(0)

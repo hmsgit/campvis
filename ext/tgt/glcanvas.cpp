@@ -65,7 +65,7 @@ void GLCanvas::sizeChanged(const ivec2& size) {
 void GLCanvas::paint() {
     GLContextScopedLock lock(getContext());
     if (painter_)
-        painter_->paint();
+        painter_->repaint();
     if (autoFlush_) {
         if (doubleBuffered_) {
             swap();

@@ -107,6 +107,7 @@ namespace campvis {
          * \param value     Initial value of the property
          * \param minValue  Minimum value for this property
          * \param maxValue  Maximum value for this property
+         * \param stepValue Step value for this property
          * \param invalidationLevel  Invalidation level that this property triggers
          */
         NumericProperty(
@@ -115,6 +116,7 @@ namespace campvis {
             const T& value,
             const T& minValue,
             const T& maxValue,
+            const T& stepValue = T(1),
             int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
@@ -144,16 +146,28 @@ namespace campvis {
         const T& getMaxValue() const;
 
         /**
-         * Sets the minimum value if this property.
+         * Returns the step value of this property.
+         * \return _stepValue
+         */
+        const T& getStepValue() const;
+
+        /**
+         * Sets the minimum value of this property.
          * \param   value   New minimum value for this property.
          */
         virtual void setMinValue(const T& value);
 
         /**
-         * Sets the minimum value if this property.
+         * Sets the minimum value of this property.
          * \param   value   New minimum value for this property.
          */
         virtual void setMaxValue(const T& value);
+
+        /**
+         * Sets the step value of this property.
+         * \param   value   New step value for this property.
+         */
+        virtual void setStepValue(const T& value);
 
         /**
          * Increments the value of this property.
@@ -168,6 +182,9 @@ namespace campvis {
         /// Signal emitted, when the property's minimum or maximum value changes.
         sigslot::signal1<const AbstractProperty*> s_minMaxChanged;
 
+        /// Signal emitted, when the property's step value changes.
+        sigslot::signal1<const AbstractProperty*> s_stepChanged;
+
     protected:
 
         /**
@@ -180,6 +197,7 @@ namespace campvis {
 
         T _minValue;                            ///< Minimum value for this property
         T _maxValue;                            ///< Maximum value for this property
+        T _stepValue;                           ///< Step value for this property
 
         static const std::string loggerCat_;
     };
@@ -190,22 +208,21 @@ namespace campvis {
 // = Typedefs =====================================================================================
 
     typedef NumericProperty<int> IntProperty;
-    typedef NumericProperty<float> FloatProperty;
 
     typedef NumericProperty<tgt::ivec2> IVec2Property;
-    typedef NumericProperty<tgt::vec2> Vec2Property;
     typedef NumericProperty<tgt::ivec3> IVec3Property;
-    typedef NumericProperty<tgt::vec3> Vec3Property;
     typedef NumericProperty<tgt::ivec4> IVec4Property;
-    typedef NumericProperty<tgt::vec4> Vec4Property;
 
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value, const T& minValue, const T& maxValue, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
+    campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value,
+                                                 const T& minValue, const T& maxValue, const T& stepValue /*= T(1)*/,
+                                                 int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
         : GenericProperty<T>(name, title, value, invalidationLevel)
         , _minValue(minValue)
         , _maxValue(maxValue)
+        , _stepValue(stepValue)
     {
 
     }
@@ -242,6 +259,11 @@ namespace campvis {
     }
 
     template<typename T>
+    const T& campvis::NumericProperty<T>::getStepValue() const {
+        return _stepValue;
+    }
+
+    template<typename T>
     void campvis::NumericProperty<T>::setMinValue(const T& value) {
         this->_minValue = value;
         this->setValue(validateValue(this->_value));
@@ -272,13 +294,27 @@ namespace campvis {
     }
 
     template<typename T>
+    void campvis::NumericProperty<T>::setStepValue(const T& value) {
+        this->_stepValue = value;
+
+        for (std::set<AbstractProperty*>::iterator it = this->_sharedProperties.begin(); it != this->_sharedProperties.end(); ++it) {
+            // We ensure all shared properties to be of type NumericProperty<T> in the addSharedProperty overload.
+            // Hence, static_cast ist safe.
+            NumericProperty<T>* child = static_cast< NumericProperty<T>* >(*it);
+            child->setStepValue(value);
+        }
+
+        this->s_stepChanged(this);
+    }
+
+    template<typename T>
     void campvis::NumericProperty<T>::increment() {
-        this->setValue(this->_value + T(1));
+        this->setValue(this->_value + this->_stepValue);
     }
 
     template<typename T>
     void campvis::NumericProperty<T>::decrement() {
-        this->setValue(this->_value - T(1));
+        this->setValue(this->_value - this->_stepValue);
     }
 }
 

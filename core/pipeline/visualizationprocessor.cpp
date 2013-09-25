@@ -41,7 +41,7 @@ namespace campvis {
     VisualizationProcessor::VisualizationProcessor(IVec2Property& renderTargetSize)
         : AbstractProcessor()
         , _fbo(0)
-        , _renderTargetSize("renderTargetSize", "Canvas Size", renderTargetSize.getValue(), renderTargetSize.getMinValue(), renderTargetSize.getMaxValue())
+        , _renderTargetSize("renderTargetSize", "Canvas Size", renderTargetSize.getValue(), renderTargetSize.getMinValue(), renderTargetSize.getMaxValue(), renderTargetSize.getStepValue())
     {
         renderTargetSize.addSharedProperty(&_renderTargetSize);
         _renderTargetSize.s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);

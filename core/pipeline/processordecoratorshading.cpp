@@ -38,11 +38,11 @@ namespace campvis {
         : AbstractProcessorDecorator()
         , _enableShading("EnableShading", "Enable Shading", true, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
         , _centralDifferences("CentralDifferences", "Use Central instead of Forward Differences", false, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
-        , _lightPosition("LightPosition", "Light Position", tgt::vec3(-8.f), tgt::vec3(-500.f), tgt::vec3(500.f))
+        , _lightPosition("LightPosition", "Light Position", tgt::vec3(-8.f), tgt::vec3(-500.f), tgt::vec3(500.f), tgt::vec3(0.1f))
         , _ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.5f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _specularColor("SpecularColor", "Specular Light Color", tgt::vec3(0.5f), tgt::vec3(0.f), tgt::vec3(1.f))
-        , _shininess("Shininess", "Specular Shininess", 4.f, 0.f, 64.f)
+        , _shininess("Shininess", "Specular Shininess", 4.f, 0.f, 64.f, 0.5f)
         , _attenuation("Attenuation", "Attenuation Factors", tgt::vec3(0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _lightUniformName(lightUniformName)
     {

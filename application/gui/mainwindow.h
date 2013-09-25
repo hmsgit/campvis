@@ -43,6 +43,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QMdiArea>
+#include <QScrollArea>
 #include <vector>
 
 namespace campvis {
@@ -54,7 +55,7 @@ namespace campvis {
      * Wraps a nice Qt GUI around the CampVisApplication instance given during creation.
      */
     class MainWindow : public QMainWindow, public sigslot::has_slots<> {
-        Q_OBJECT;
+        Q_OBJECT
 
     public:
         /**
@@ -92,10 +93,18 @@ namespace campvis {
 
         /**
          * Adds a widget of a visualization pipeline to the main window.
-         * \param   name       the name of the visualization pipeline.
-         * \param   widget     the pipeline's widget to add to the main window.
+         * \param   name       the name of the visualization pipeline
+         * \param   canvas     the pipeline's canvas
          */
-        void addVisualizationPipelineWidget(const std::string& name, QWidget* widget);
+        void addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
+
+    protected:
+        /**
+         * Listens to resize events on _pipelinePropertiesWidget and resizes _pipelinePropertiesScrollArea accordingly
+         * \param   watched    the object that caused the event
+         * \param   event      the event to be filtered
+         */
+        bool eventFilter(QObject* watched, QEvent* event);
 
     signals:
         /// Qt signal for updating the PipelineWidget.
@@ -144,6 +153,8 @@ namespace campvis {
 
         QMdiArea* _mdiArea;                                 ///< MDI area (the window's central widget)
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
+        QWidget* _pipelinePropertiesWidget;                 ///< Widget showing the selected pipeline's properties
+        QScrollArea* _pipelinePropertiesScrollArea;         ///< Scroll area for _pipelinePropertiesWidget
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
         DataContainerInspectorWidget* _dcInspectorWidget;   ///< Widget for inspecting the DataContainer of the selected pipeline.
         QDockWidget* _dcInspectorDock;                      ///< Dock storing the above DataContainerInspectorWidget instance.

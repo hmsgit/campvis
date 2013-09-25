@@ -36,7 +36,7 @@
 
 namespace campvis {
     DataNamePropertyWidget::DataNamePropertyWidget(DataNameProperty* property, DataContainer* dc, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
         , _lineEdit(0)
         , _combobox(0)
         , _dc(dc)

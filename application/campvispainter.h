@@ -79,9 +79,9 @@ namespace campvis {
         void run();
 
         /**
-         * Performs the actual rendering of the pipeline's render target
+         * Schedule a repaint job for the pipeline's render target
          */
-        virtual void paint();
+        virtual void repaint();
 
         /// \see tgt::Painter::sizeChanged
         virtual void sizeChanged(const tgt::ivec2& size);
@@ -114,6 +114,11 @@ namespace campvis {
         void onRenderTargetChanged();
 
     private:
+        /**
+         * Performs the actual rendering of the pipeline's render target
+         */
+        virtual void paint();
+
         static const std::string loggerCat_;
 
         VisualizationPipeline* _pipeline;                   ///< Pipeline to render

@@ -21,19 +21,7 @@ namespace tgt {
         // override Qt events so that they don't interfere with the threading.
         void resizeEvent(QResizeEvent *event) {
             sizeChanged(ivec2(event->size().width(), event->size().height()));
-        };
-
-        // override Qt events so that they don't interfere with the threading.
-        void paintEvent(QPaintEvent *event) { };
-
-        /**
-         * Called by Qt if there is a paint event; it uses the \a painter_ to paint() something.
-         */
-        virtual void paintGL();
-        /**
-         * Called by Qt if there is a paint event; it uses the \a painter_ to paint() something.
-         */
-        virtual void paint();
+        }
 
         /**
          * If you manually want to cause a paint-event, use this function. It will call paintGL()
@@ -42,6 +30,11 @@ namespace tgt {
         virtual void repaint();
 
     protected:
+        // override Qt events so that they don't interfere with the threading.
+        virtual void paintEvent(QPaintEvent *event);
+
+        // override the paint method so that it doesn't interfere with the threading.
+        virtual void paint();
 
     };
 

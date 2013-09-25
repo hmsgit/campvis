@@ -52,10 +52,15 @@ public:
     virtual ~Painter() {}
 
     /**
-     * This is meant be overridden to do the according openGL paintings
-     * is not meant to be called directly, will be called by GLCanvas object
+     * Repaint the associated canvas
+     *
+     * This method is not meant to be called directly; it will be called by the associated GLCanvas object when it
+     * needs to be redrawn.
+     *
+     * The default implementation simply calls paint() immediately. Some painters, however, may want to override it to
+     * schedule render jobs that would run in a separate thread.
      */
-    virtual void paint() = 0;
+    virtual void repaint();
 
     /// This is meant be overridden to adjust camera settings to new canvas dimensions
     virtual void sizeChanged(const ivec2&) {};
@@ -72,6 +77,13 @@ public:
 
     /// A wrapper to get the camera from the Canvas
     Camera* getCamera() const;
+
+protected:
+    /**
+     * This is meant be overridden to do the according openGL paintings
+     * is not meant to be called directly, will be called by repaint().
+     */
+    virtual void paint() = 0;
 
 private:
     GLCanvas* canvas_;

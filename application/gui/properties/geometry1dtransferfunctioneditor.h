@@ -71,11 +71,10 @@ namespace campvis {
          */
         virtual ~Geometry1DTransferFunctionEditor();
 
-        
         /**
-         * Performs the painting.
+         * Schedule a repaint job for the editor's render target
          */
-        void paint();
+        virtual void repaint();
 
         /// \see tgt::Painter::sizeChanged
         virtual void sizeChanged(const tgt::ivec2&);
@@ -112,6 +111,11 @@ namespace campvis {
         void onCbLogScaleStateChanged(int state);
 
     protected:
+        /**
+         * Performs the painting.
+         */
+        virtual void paint();
+
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */

@@ -48,18 +48,19 @@ namespace campvis {
     public:
         /**
          * Creates a new PropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         *
+         * If displayBoxed is true, the widget is displayed vertically in a QGroupBox.
+         *
+         * \param   property        The property the widget shall handle
+         * \param   displayBoxed    Should the widget be displayed in a group box?
+         * \param   parent          Parent Qt widget
          */
-        AbstractPropertyWidget(AbstractProperty* property, QWidget* parent = 0);
+        AbstractPropertyWidget(AbstractProperty* property, bool displayBoxed = false, QWidget* parent = 0);
 
         /**
          * Destructor
          */
         virtual ~AbstractPropertyWidget();
-
-
-    public slots:
 
     protected:
         /**
@@ -67,15 +68,28 @@ namespace campvis {
          */
         void addWidget(QWidget* widget);
 
+        AbstractProperty* _property;    ///< The property this widget handles
+
+        /// Semaphore acts as flag whether the widget shall ignore incoming signals from properties being updated.
+        tbb::atomic<int> _ignorePropertyUpdates;
+
+    protected slots:
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */
         virtual void updateWidgetFromProperty() = 0;
 
-        AbstractProperty* _property;    ///< The property this widget handles
-
-        /// Semaphore acts as flag whether the widget shall ignore incoming signals from properties being updated.
-        tbb::atomic<int> _ignorePropertyUpdates;
+    signals:
+        /**
+         * Internal signal used to update the property widget in a thread-safe way.
+         *
+         * This class' \ref onPropertyChanged() slot is invoked from non-GUI threads. As a result,
+         * \ref updateWidgetFromProperty() couldn't access any Qt widgets safely if it was called from there directly,
+         * because it would execute in a non-GUI thread. However, if we invoke \ref updateWidgetFromProperty() via
+         * a signal-slot connection with \ref s_propertyChanged(), Qt takes care of queueing slot accesses in the GUI
+         * thread for us.
+         */
+        void s_propertyChanged(const AbstractProperty* property);
 
     private:
         /// Slot getting called when the property has changed, so that the widget can be updated.

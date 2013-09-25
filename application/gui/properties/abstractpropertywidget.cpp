@@ -30,22 +30,35 @@
 #include "abstractpropertywidget.h"
 #include "core/properties/abstractproperty.h"
 
+#include <QGroupBox>
+
 namespace campvis {
 
-    AbstractPropertyWidget::AbstractPropertyWidget(AbstractProperty* property, QWidget* parent /*= 0*/)
+    AbstractPropertyWidget::AbstractPropertyWidget(AbstractProperty* property, bool displayBoxed /*= false*/,
+                                                   QWidget* parent /*= 0*/)
         : QWidget(parent)
         , _property(property)
         , _layout(0)
     {
         _ignorePropertyUpdates = 0;
 
-        _titleLabel = new QLabel(QString::fromStdString(_property->getTitle() + ":"), this);
+        if (displayBoxed) {
+            QBoxLayout* outerLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+            QGroupBox* groupBox = new QGroupBox(QString::fromStdString(_property->getTitle()));
 
-        _layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-        _layout->setSpacing(8);
-        _layout->addWidget(_titleLabel, 0);
+            outerLayout->addWidget(groupBox);
+            _layout = new QBoxLayout(QBoxLayout::TopToBottom, groupBox);
+        }
+        else {
+            _titleLabel = new QLabel(QString::fromStdString(_property->getTitle() + ":"), this);
+
+            _layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+            _layout->setSpacing(8);
+            _layout->addWidget(_titleLabel, 0);
+        }
 
         _property->s_changed.connect(this, &AbstractPropertyWidget::onPropertyChanged);
+        connect(this, SIGNAL(s_propertyChanged(const AbstractProperty*)), this, SLOT(updateWidgetFromProperty()));
     }
 
     AbstractPropertyWidget::~AbstractPropertyWidget() {
@@ -58,6 +71,6 @@ namespace campvis {
 
     void AbstractPropertyWidget::onPropertyChanged(const AbstractProperty* property) {
         if (_ignorePropertyUpdates == 0)
-            updateWidgetFromProperty();
+            emit s_propertyChanged(property);
     }
 }

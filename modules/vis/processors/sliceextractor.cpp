@@ -56,7 +56,7 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", compositingOptions, 3)
-        , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0) 
+        , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0)
         , p_xSliceColor("XSliceColor", "X Slice Color", tgt::vec4(1.f, 0.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_ySliceNumber("YSliceNumber", "Y Slice Number", 0, 0, 0)
         , p_ySliceColor("YSliceColor", "Y Slice Color", tgt::vec4(0.f, 1.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))

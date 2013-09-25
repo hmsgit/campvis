@@ -33,7 +33,7 @@
 
 namespace campvis {
     ButtonPropertyWidget::ButtonPropertyWidget(ButtonProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, parent)
+        : AbstractPropertyWidget(property, false, parent)
         , _button(0)
     {
         _button = new QPushButton(QString::fromStdString(property->getTitle()), this);

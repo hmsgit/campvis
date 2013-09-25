@@ -99,7 +99,7 @@ namespace campvis {
         , p_sourceImageID("sourceFioID", "Input Tracked US File IO", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
-        , p_sweepNumber("sweepNumber", "SweepNumber", 0, 0, 0, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_sweepNumber("sweepNumber", "SweepNumber", 0, 0, 0, 1, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_frameNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_showConfidenceMap("ShowConfidenceMap", "Show Confidence Map", false)
         , p_smoothButton("SmoothButton", "Smooth Tracking")
