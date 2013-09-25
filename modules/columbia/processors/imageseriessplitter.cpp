@@ -53,7 +53,7 @@ namespace campvis {
         DataContainer::ScopedTypedData<ImageSeries> series(data, p_inputID.getValue());
         if (series != 0) {
             if (hasInvalidProperties()) {
-                p_imageIndex.setMaxValue(series->getNumImages());
+                p_imageIndex.setMaxValue(static_cast<int>(series->getNumImages()));
                 validate(INVALID_PROPERTIES);
             }
             if (p_imageIndex.getValue() < static_cast<int>(series->getNumImages())) {

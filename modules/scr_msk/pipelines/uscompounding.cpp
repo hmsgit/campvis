@@ -60,6 +60,7 @@ namespace campvis {
 
         _reader.p_url.setValue("C:/Users/SchuCh01/Documents/Data/Ultrasound/2012-12-12-Test/9l4sweep/content.xml");
         _reader.p_targetImageID.connect(&_renderer.p_sourceImageID);
+
         _renderer.s_boundingBoxChanged.connect(this, &UsCompounding::onBoundingBoxChanged);
         _renderer.p_targetImageID.setValue("us.frame.output");
         _renderTargetID.setValue(_renderer.p_targetImageID.getValue());
@@ -75,11 +76,7 @@ namespace campvis {
     }
 
     void UsCompounding::onBoundingBoxChanged(tgt::Bounds b) {
-        tgt::vec3 pos = b.center() - tgt::vec3(0, 0, tgt::length(b.diagonal()));
-
-        _trackballEH->setSceneBounds(b);
-        _trackballEH->setCenter(b.center());
-        _trackballEH->reinitializeCamera(pos, b.center(), p_camera.getValue().getUpVector());
+        _trackballEH->reinitializeCamera(b);
     }
 
 }

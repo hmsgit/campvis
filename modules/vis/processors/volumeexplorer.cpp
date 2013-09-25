@@ -194,8 +194,8 @@ namespace campvis {
         _shader->activate();
 
         tgt::vec2 rts(_viewportSizeProperty->getValue());
-        const tgt::ivec2& vrs = p_volumeRenderSize.getValue();
-        const tgt::ivec2& srs = p_sliceRenderSize.getValue();
+        tgt::vec2 vrs(p_volumeRenderSize.getValue());
+        tgt::vec2 srs(p_sliceRenderSize.getValue());
 
         _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, rts.x, rts.y, 0, -1, 1));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -264,12 +264,7 @@ namespace campvis {
             p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
 
-        tgt::Bounds volumeExtent = static_cast<const ImageData*>(img.getData())->getWorldBounds();
-        tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-        _trackballEH->setSceneBounds(volumeExtent);
-        _trackballEH->setCenter(volumeExtent.center());
-        _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _raycaster.p_camera.getValue().getUpVector());
+        _trackballEH->reinitializeCamera(static_cast<const ImageData*>(img.getData()));
     }
 
     void VolumeExplorer::onEvent(tgt::Event* e) {

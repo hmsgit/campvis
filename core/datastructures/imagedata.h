@@ -31,7 +31,6 @@
 #define IMAGEDATA_H__
 
 #include "tbb/concurrent_vector.h"
-#include "tgt/bounds.h"
 #include "tgt/logmanager.h"
 #include "tgt/vector.h"
 #include "core/datastructures/abstractdata.h"
@@ -51,7 +50,7 @@ namespace campvis {
      * 
      * \todo 
      */
-    class ImageData : public AbstractData {
+    class ImageData : public AbstractData, public IHasWorldBounds {
     // friend so that it can add itself as representation
     friend class AbstractImageRepresentation;
 
@@ -126,7 +125,7 @@ namespace campvis {
          * Returns the image extent in world coordinates.
          * \return  The image extent in world coordinates.
          */
-        tgt::Bounds getWorldBounds() const;
+        virtual tgt::Bounds getWorldBounds() const;
 
         /**
          * Returns the image extent in world coordinates for the given voxel coordinates.

@@ -30,9 +30,29 @@
 #ifndef ABSTRACTDATA_H__
 #define ABSTRACTDATA_H__
 
+#include "tgt/bounds.h"
 #include "core/tools/referencecounted.h"
 
 namespace campvis {
+
+    /**
+     * Interface class for data which can compute their bounds in world coordinates.
+     */
+    class IHasWorldBounds {
+    public:
+        /// Default empty constructor
+        IHasWorldBounds() {};
+        /// Virtual Destructor
+        virtual ~IHasWorldBounds() {};
+
+        /**
+         * Returns the data extent in world coordinates.
+         * \return  The data extent in world coordinates.
+         */
+        virtual tgt::Bounds getWorldBounds() const = 0;
+    };
+
+
     /**
      * Abstract base class for data handled by a DataHandle and stored in a DataContainer.
      * 

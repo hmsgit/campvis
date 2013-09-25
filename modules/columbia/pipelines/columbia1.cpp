@@ -160,14 +160,7 @@ namespace campvis {
             // update camera
             DataContainer::ScopedTypedData<ImageData> img(_data, _imageSplitter.p_outputID.getValue());
             if (img != 0) {
-                tgt::Bounds volumeExtent = img->getWorldBounds();
-                if (_trackballEH->getSceneBounds() != volumeExtent) {
-                    tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
-                    _trackballEH->setSceneBounds(volumeExtent);
-                    _trackballEH->setCenter(volumeExtent.center());
-                    _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
-                }
             }
         }
     }

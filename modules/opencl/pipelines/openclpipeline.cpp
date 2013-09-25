@@ -118,13 +118,7 @@ namespace campvis {
                 GenericImageRepresentationLocal<float, 1>* imageWithFloats = GenericImageRepresentationLocal<float, 1>::create(id, asFloats);
 
                 DataHandle dh = _data.addData("clr.input", id);
-                
-                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
-
-                _trackballEH->setSceneBounds(volumeExtent);
-                _trackballEH->setCenter(volumeExtent.center());
-                _trackballEH->reinitializeCamera(pos, volumeExtent.center(), _camera.getValue().getUpVector());
+                _trackballEH->reinitializeCamera(img->getParent());
             }
         }
     }

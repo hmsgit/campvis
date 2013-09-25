@@ -37,12 +37,14 @@
 #include "tgt/event/eventlistener.h"
 #include "tgt/navigation/trackball.h"
 
+#include "core/datastructures/datahandle.h"
 #include "core/properties/numericproperty.h"
 
 #include <vector>
 
 namespace campvis {
     class CameraProperty;
+    class IHasWorldBounds;
     class VisualizationProcessor;
 
     /**
@@ -101,6 +103,26 @@ namespace campvis {
         /// \see tgt::EventListener::onEvent()
         virtual void onEvent(tgt::Event* e);
         
+
+
+        /**
+         * Reinitializes the camera using the data in \a hwb.
+         * If the scene bounds have changed, the camera setup is reinitialized positioning the 
+         * camera in front of the data along the z-axis and looking at the center of the data.
+         * 
+         * \param   hwb     Data to use for reinitialization, must not be 0.
+         */
+        void reinitializeCamera(const IHasWorldBounds* hwb);
+
+        /**
+         * Reinitializes the camera using the data in \a hwb.
+         * If the scene bounds have changed, the camera setup is reinitialized positioning the 
+         * camera in front of the data along the z-axis and looking at the center of the data.
+         * 
+         * \param   hwb     Data to use for reinitialization, must not be 0.
+         */
+        void reinitializeCamera(const tgt::Bounds& worldBounds);
+
         /**
          * Reinitalizes the camera by the given parameters.
          * \param   position    New camera position
@@ -127,7 +149,6 @@ namespace campvis {
          */
         const tgt::Bounds& getSceneBounds() const;
 
-
         /**
          * Adds \a vp to the list of LQ mode processors.
          * During interaction, TrackballNavigationEventListener will set the LQ mode flag of all
@@ -143,8 +164,11 @@ namespace campvis {
         void removeLqModeProcessor(VisualizationProcessor* vp);
 
     protected:
+
+
         /// Slot called when _viewportSizeProp changes 
         void onViewportSizePropChanged(const AbstractProperty* p);
+
 
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
         IVec2Property* _viewportSizeProp;       ///< Pointer to the property defining the viewport size

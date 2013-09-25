@@ -30,6 +30,7 @@
 #include "trackballnavigationeventlistener.h"
 #include "tgt/assert.h"
 #include "tgt/event/mouseevent.h"
+#include "core/datastructures/abstractdata.h"
 #include "core/properties/cameraproperty.h"
 #include "core/pipeline/visualizationprocessor.h"
 
@@ -108,6 +109,20 @@ namespace campvis {
 
     void TrackballNavigationEventListener::reinitializeCamera(const tgt::vec3& position, const tgt::vec3& focus, const tgt::vec3& upVector) {
         _trackball->reinitializeCamera(position, focus, upVector);
+    }
+
+    void TrackballNavigationEventListener::reinitializeCamera(const IHasWorldBounds* hwb) {
+        reinitializeCamera(hwb->getWorldBounds());
+    }
+
+    void TrackballNavigationEventListener::reinitializeCamera(const tgt::Bounds& worldBounds) {
+        if (_sceneBounds != worldBounds) {
+            tgt::vec3 pos = worldBounds.center() - tgt::vec3(0, 0, tgt::length(worldBounds.diagonal()));
+
+            setSceneBounds(worldBounds);
+            setCenter(worldBounds.center());
+            reinitializeCamera(pos, worldBounds.center(), _cameraProperty->getValue().getUpVector());
+        }
     }
 
     void TrackballNavigationEventListener::setCenter(const tgt::vec3& center) {
