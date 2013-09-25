@@ -240,14 +240,18 @@ namespace campvis {
     }
 
     void VolumeExplorer::onProcessorInvalidated(AbstractProcessor* processor) {
-        if (processor == &_raycaster) {
-            invalidate(VR_INVALID);
-        }
-        if (processor == &_sliceExtractor) {
-            invalidate(SLICES_INVALID);
-        }
+        // make sure to only invalidate ourself if the invalidation is not triggered by us
+        // => the _locked state is a trustworthy source for this information :)
+        if (! isLocked()) {
+            if (processor == &_raycaster) {
+                invalidate(VR_INVALID);
+            }
+            if (processor == &_sliceExtractor) {
+                invalidate(SLICES_INVALID);
+            }
 
-        invalidate(AbstractProcessor::INVALID_RESULT);
+            invalidate(AbstractProcessor::INVALID_RESULT);
+        }
     }
 
     void VolumeExplorer::updateProperties(DataHandle img) {

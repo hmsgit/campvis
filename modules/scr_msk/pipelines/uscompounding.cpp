@@ -37,7 +37,7 @@ namespace campvis {
         : VisualizationPipeline()
         , p_camera("Camera", "Camera")
         , _reader()
-        , _renderer(_canvasSize)
+        , _renderer(&_canvasSize)
         , _trackballEH(0)
     {
         addProcessor(&_reader);
