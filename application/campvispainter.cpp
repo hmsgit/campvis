@@ -47,9 +47,9 @@
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
-    const std::string TumVisPainter::loggerCat_ = "CAMPVis.core.TumVisPainter";
+    const std::string CampVisPainter::loggerCat_ = "CAMPVis.core.CampVisPainter";
 
-    TumVisPainter::TumVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline)
+    CampVisPainter::CampVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline)
         : Runnable()
         , tgt::Painter(canvas)
         , _pipeline(0)
@@ -60,11 +60,11 @@ namespace campvis {
         setPipeline(pipeline);
     }
 
-    TumVisPainter::~TumVisPainter() {
+    CampVisPainter::~CampVisPainter() {
 
     }
 
-    void TumVisPainter::stop() {
+    void CampVisPainter::stop() {
         // we need to execute run() one more time to ensure correct release of the OpenGL context
         _stopExecution = true;
         _renderCondition.notify_all();
@@ -72,7 +72,7 @@ namespace campvis {
         Runnable::stop();
     }
 
-    void TumVisPainter::run() {
+    void CampVisPainter::run() {
         std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
 
         while (! _stopExecution) {
@@ -89,7 +89,7 @@ namespace campvis {
         CtxtMgr.releaseCurrentContext();
     }
 
-    void TumVisPainter::paint() {
+    void CampVisPainter::paint() {
         if (getCanvas() == 0)
             return;
 
@@ -150,11 +150,11 @@ namespace campvis {
         getCanvas()->swap();
     }
 
-    void TumVisPainter::sizeChanged(const tgt::ivec2& size) {
+    void CampVisPainter::sizeChanged(const tgt::ivec2& size) {
         _pipeline->setRenderTargetSize(size);
     }
 
-    void TumVisPainter::init() {
+    void CampVisPainter::init() {
         try {
             // TODO:    Remove hardcoded paths, and use ShdrMgr.addPath() at some central location
             _copyShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "", false);
@@ -164,7 +164,7 @@ namespace campvis {
         }
     }
 
-    void TumVisPainter::deinit() {
+    void CampVisPainter::deinit() {
         ShdrMgr.dispose(_copyShader);
 
         if (_pipeline != 0) {
@@ -175,7 +175,7 @@ namespace campvis {
         }
     }
 
-    void TumVisPainter::setPipeline(VisualizationPipeline* pipeline) {
+    void CampVisPainter::setPipeline(VisualizationPipeline* pipeline) {
         tgtAssert(pipeline != 0, "The given pipeline must not be 0.");
         if (_pipeline != 0) {
             _pipeline->s_renderTargetChanged.disconnect(this);
@@ -184,21 +184,21 @@ namespace campvis {
         }
 
         _pipeline = pipeline;
-        _pipeline->s_renderTargetChanged.connect(this, &TumVisPainter::onRenderTargetChanged);
+        _pipeline->s_renderTargetChanged.connect(this, &CampVisPainter::onRenderTargetChanged);
         _pipeline->setRenderTargetSize(getCanvas()->getSize());
         if (getCanvas()->getEventHandler() != 0)
             getCanvas()->getEventHandler()->addEventListenerToFront(_pipeline);
     }
 
-    void TumVisPainter::repaint() {
-        GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &TumVisPainter::paint), OpenGLJobProcessor::PaintJob);
+    void CampVisPainter::repaint() {
+        GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &CampVisPainter::paint), OpenGLJobProcessor::PaintJob);
     }
 
-    void TumVisPainter::onRenderTargetChanged() {
+    void CampVisPainter::onRenderTargetChanged() {
         repaint();
     }
 
-    void TumVisPainter::setCanvas(tgt::GLCanvas* canvas) {
+    void CampVisPainter::setCanvas(tgt::GLCanvas* canvas) {
         tgtAssert(dynamic_cast<tgt::QtThreadedCanvas*>(canvas) != 0, "Canvas must be of type QtThreadedCanvas!");
         Painter::setCanvas(canvas);
     }

@@ -55,19 +55,19 @@ namespace campvis {
      * 
      * \sa  Runnable, VisualizationPipeline
      */
-    class TumVisPainter : public Runnable, public tgt::Painter, public sigslot::has_slots<> {
+    class CampVisPainter : public Runnable, public tgt::Painter, public sigslot::has_slots<> {
     public:
         /**
-         * Creates a new TumVisPainter rendering the render target of \a pipeline on \a canvas.
+         * Creates a new CampVisPainter rendering the render target of \a pipeline on \a canvas.
          * \param   canvas      Canvas to render on
          * \param   pipeline    Pipeline to render
          */
-        TumVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline);
+        CampVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline);
 
         /**
          * Destructor, stops and waits for the rendering thread if it's still running.
          */
-        virtual ~TumVisPainter();
+        virtual ~CampVisPainter();
 
         /// \see Runnable::stop
         void stop();

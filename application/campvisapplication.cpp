@@ -78,7 +78,7 @@ namespace campvis {
         tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
         // delete everything in the right order:
-        for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             delete it->second;
         }
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
@@ -167,7 +167,7 @@ namespace campvis {
         }
 
         // Now init painters:
-        for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             it->second->init();
         }
 
@@ -190,7 +190,7 @@ namespace campvis {
             }
 
             // Now deinit painters:
-            for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+            for (std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
                 it->second->deinit();
             }
 
@@ -253,7 +253,7 @@ namespace campvis {
         _mainWindow->addVisualizationPipelineWidget(name, canvas);
         canvas->init();
 
-        TumVisPainter* painter = new TumVisPainter(canvas, vp);
+        CampVisPainter* painter = new CampVisPainter(canvas, vp);
         canvas->setPainter(painter, false);
 
         _visualizations.push_back(std::make_pair(vp, painter));

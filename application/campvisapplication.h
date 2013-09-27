@@ -45,7 +45,7 @@ namespace tgt {
 namespace campvis {
     class AbstractPipeline;
     class MainWindow;
-    class TumVisPainter;
+    class CampVisPainter;
     class VisualizationPipeline;
 
     /**
@@ -132,7 +132,7 @@ namespace campvis {
         /// All pipelines (incuding VisualizationPipelines)
         std::vector<AbstractPipeline*> _pipelines;
         /// All visualisations (i.e. VisualizationPipelines with their corresponding painters/canvases)
-        std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> > _visualizations;
+        std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> > _visualizations;
 
         /// A local OpenGL context used for initialization
         tgt::QtThreadedCanvas* _localContext;
