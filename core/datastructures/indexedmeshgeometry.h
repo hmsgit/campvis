@@ -58,7 +58,7 @@ namespace campvis {
          * \param   colors              The list of vertex colors, may be empty.
          * \param   normals             The list of vertex normals, may be empty.
          */
-        IndexedMeshGeometry(
+        explicit IndexedMeshGeometry(
             const std::vector<uint16_t>& indices,
             const std::vector<tgt::vec3>& vertices,
             const std::vector<tgt::vec3>& textureCoordinates = std::vector<tgt::vec3>(),

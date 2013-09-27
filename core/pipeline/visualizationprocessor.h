@@ -55,9 +55,19 @@ namespace campvis {
      */
     class VisualizationProcessor : public AbstractProcessor {
     public:
+        /**
+         * Utility struct to encapuslate off-screen rendering with this processor using FBOs.
+         * This guard essentially activates the VisualizationProcessor's FBO and sets the OpenGL
+         * viewport size. Upon destruction it detaches all texutres and deactivates the FBO again.
+         */
         struct FramebufferActivationGuard {
         public:
-            FramebufferActivationGuard(VisualizationProcessor* vp)
+            /**
+             * Constructor.
+             * Activates the FBO and sets the OpenGL viewport size to the effective viewport size of \a vp.
+             * \param   vp  This Visualization processor (usually pointer to this).
+             */
+            explicit FramebufferActivationGuard(VisualizationProcessor* vp)
                 : _parentProcessor(vp)
                 , _fbo(vp->_fbo)
             {
@@ -68,6 +78,9 @@ namespace campvis {
                 glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
             }
 
+            /**
+             * Destructor, detaches all textures and deactivates the FBO.
+             */
             ~FramebufferActivationGuard() {
                 _fbo->detachAll();
                 _fbo->deactivate();
@@ -90,7 +103,7 @@ namespace campvis {
          *          
          * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          */
-        VisualizationProcessor(IVec2Property* viewportSizeProp);
+        explicit VisualizationProcessor(IVec2Property* viewportSizeProp);
 
         /**
          * Virtual Destructor

@@ -71,7 +71,7 @@ namespace campvis {
          * Creates a new DataContainerInspectorWidget.
          * \param   parent          Parent Qt widget, may be 0 (default)
          */
-        DataContainerInspectorWidget(QWidget* parent = 0);
+        explicit DataContainerInspectorWidget(QWidget* parent = 0);
 
         /**
          * Destructor.

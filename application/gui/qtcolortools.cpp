@@ -50,6 +50,7 @@ namespace campvis {
         , _color(color)
     {
         setMinimumHeight(16);
+        setMinimumWidth(32);
     }
 
     const QColor& ColorPickerWidget::color() const {

@@ -47,7 +47,7 @@ namespace campvis {
          * Creates a new GenericPointerData and initializes its pointer with \a data.
          * \param   data    The initial pointer for this data, may be 0, GenericPointerData takes ownerwhip.
          */
-        GenericPointerData(T* data)
+        explicit GenericPointerData(T* data)
             : AbstractData()
             , _data(data)
         {};

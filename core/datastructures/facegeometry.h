@@ -60,7 +60,7 @@ namespace campvis {
          * \param   colors              The list of vertex colors, may be empty.
          * \param   normals             The list of vertex normals, may be empty.
          */
-        FaceGeometry(
+        explicit FaceGeometry(
             const std::vector<tgt::vec3>& vertices,
             const std::vector<tgt::vec3>& textureCoordinates = std::vector<tgt::vec3>(),
             const std::vector<tgt::vec4>& colors = std::vector<tgt::vec4>(),

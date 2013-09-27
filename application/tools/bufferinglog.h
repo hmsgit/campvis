@@ -30,7 +30,7 @@ namespace campvis {
          * \param   showCat          should the category be printed along with the messages
          * \param   showLevel        should the LogLevel be printed along with the messages
          */
-        BufferingLog(unsigned int maxSize, QObject* parent = 0, bool dateStamping = true,
+        explicit BufferingLog(unsigned int maxSize, QObject* parent = 0, bool dateStamping = true,
                      bool timeStamping = true, bool showCat = true, bool showLevel = true);
         virtual ~BufferingLog() {}
         bool isOpen() { return true; }

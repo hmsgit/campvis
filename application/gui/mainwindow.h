@@ -62,7 +62,7 @@ namespace campvis {
          * Creates a new TumVis Main window for \a application.
          * \param   application     CampVisApplication to create a GUI for.
          */
-        MainWindow(CampVisApplication* application);
+        explicit MainWindow(CampVisApplication* application);
 
         /**
          * Destructor, make sure to call before destroying the application

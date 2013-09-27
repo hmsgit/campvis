@@ -49,7 +49,7 @@ namespace campvis {
      */
     class PipelineTreeRootItem : public TreeItem {
     public:
-        PipelineTreeRootItem(TreeItem* parent = 0);
+        explicit PipelineTreeRootItem(TreeItem* parent = 0);
         virtual ~PipelineTreeRootItem();
 
         /// \see TreeItem::getData()
@@ -101,7 +101,7 @@ namespace campvis {
         Q_OBJECT
 
     public:
-        PipelineTreeModel(QObject *parent = 0);
+        explicit PipelineTreeModel(QObject *parent = 0);
         ~PipelineTreeModel();
 
         void setData(const std::vector<AbstractPipeline*>& pipelines);
@@ -141,7 +141,7 @@ namespace campvis {
          * Creates a new PipelineTreeWidget.
          * \param   parent  Parent widget
          */
-        PipelineTreeWidget(QWidget* parent = 0);
+        explicit PipelineTreeWidget(QWidget* parent = 0);
 
         /**
          * Destructor

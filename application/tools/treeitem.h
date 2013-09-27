@@ -44,7 +44,7 @@ namespace campvis {
          * Creates a new TreeItem
          * \param   parent  Parent item, will take ownership of this TreeItem.
          */
-        TreeItem(TreeItem* parent = 0);
+        explicit TreeItem(TreeItem* parent = 0);
 
         /**
          * Destuctor, also deletes all child items.

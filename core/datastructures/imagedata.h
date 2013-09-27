@@ -61,7 +61,7 @@ namespace campvis {
          * \param size              Size of this image (number of elements per dimension)
          * \param numChannels       Number of channels per element
          */
-        ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
+        explicit ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
 
         /// Destructor
         virtual ~ImageData();

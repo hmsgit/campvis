@@ -46,7 +46,7 @@ namespace campvis {
          *          counting mechanism. Make sure not to interfere with it or delete \a data yourself!
          * \param   data    Data for the QtDataHandle
          */
-        QtDataHandle(AbstractData* data = 0)
+        explicit QtDataHandle(AbstractData* data = 0)
             : DataHandle(data)
         {}
 
@@ -55,7 +55,7 @@ namespace campvis {
          * \note    If \a rhs is not shareable, this implies a copy of the data!
          * \param   rhs     Source QtDataHandle
          */
-        QtDataHandle(const QtDataHandle& rhs)
+        explicit QtDataHandle(const QtDataHandle& rhs)
             : DataHandle(rhs)
         {}
 
@@ -64,7 +64,7 @@ namespace campvis {
          * \note    If \a rhs is not shareable, this implies a copy of the data!
          * \param   rhs     Source DataHandle
          */
-        explicit QtDataHandle(const DataHandle& rhs)
+        QtDataHandle(const DataHandle& rhs)
             : DataHandle(rhs)
         {}
 

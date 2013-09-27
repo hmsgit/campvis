@@ -49,7 +49,7 @@ namespace campvis {
      */
     class DataContainerTreeRootItem : public TreeItem {
     public:
-        DataContainerTreeRootItem(TreeItem* parent = 0);
+        explicit DataContainerTreeRootItem(TreeItem* parent = 0);
         virtual ~DataContainerTreeRootItem();
 
         /// \see TreeItem::getData()
@@ -98,7 +98,7 @@ namespace campvis {
         Q_OBJECT
 
     public:
-        DataContainerTreeModel(QObject *parent = 0);
+        explicit DataContainerTreeModel(QObject *parent = 0);
         ~DataContainerTreeModel();
 
         void setData(const DataContainer* dataContainer);
@@ -147,7 +147,7 @@ namespace campvis {
          * Creates a new DataContainerTreeWidget.
          * \param   parent  Parent widget
          */
-        DataContainerTreeWidget(QWidget* parent = 0);
+        explicit DataContainerTreeWidget(QWidget* parent = 0);
 
         /**
          * Destructor
