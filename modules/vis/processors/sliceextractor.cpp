@@ -101,12 +101,6 @@ namespace campvis {
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                if (hasInvalidProperties()) {
-                    // source DataHandle has changed
-                    updateProperties(img.getDataHandle());
-                    validate(AbstractProcessor::INVALID_PROPERTIES);
-                }
-
                 tgt::vec3 imgSize(img->getSize());
 
                 // current slices in texture coordinates
@@ -264,9 +258,11 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    void SliceExtractor::updateProperties(DataHandle img) {
-        p_transferFunction.getTF()->setImageHandle(img);
-        const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
+    void SliceExtractor::updateProperties(DataContainer& dc) {
+        DataContainer::ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
+
+        p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+        const tgt::svec3& imgSize = img->getSize();
         if (p_xSliceNumber.getMaxValue() != imgSize.x - 1){
             p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
         }
@@ -276,6 +272,8 @@ namespace campvis {
         if (p_zSliceNumber.getMaxValue() != imgSize.z - 1){
             p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
+
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void SliceExtractor::updateBorderGeometry() {

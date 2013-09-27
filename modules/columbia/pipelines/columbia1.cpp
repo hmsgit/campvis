@@ -133,7 +133,7 @@ namespace campvis {
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
-        static_cast<TransferFunctionProperty*>(_vr.getProperty("transferFunction"))->replaceTF(dvrTF);
+        static_cast<TransferFunctionProperty*>(_vr.getProperty("TransferFunction"))->replaceTF(dvrTF);
         _vr.p_outputImage.connect(&_compositor.p_secondImageId);
 
         _gr.p_renderTargetID.setValue("gr");
@@ -160,7 +160,7 @@ namespace campvis {
             // update camera
             DataContainer::ScopedTypedData<ImageData> img(_data, _imageSplitter.p_outputID.getValue());
             if (img != 0) {
-
+                _trackballEH->reinitializeCamera(img);
             }
         }
     }

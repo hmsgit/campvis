@@ -127,5 +127,9 @@ namespace campvis {
         _clockExecutionTime = value;
     }
 
+    void AbstractProcessor::updateProperties(DataContainer& dc) {
+        validate(INVALID_PROPERTIES);
+    }
+
 
 }

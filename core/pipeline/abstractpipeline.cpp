@@ -83,14 +83,11 @@ namespace campvis {
 
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
         HasPropertyCollection::onPropertyChanged(prop);
-        s_PipelineInvalidated();
     }
 
     void AbstractPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
         if (processor->getEnabled())
             SimpleJobProc.enqueueJob(makeJob(this, &AbstractPipeline::executeProcessor, processor, false));
-
-        s_PipelineInvalidated();
     }
 
     const DataContainer& AbstractPipeline::getDataContainer() const {
@@ -104,31 +101,43 @@ namespace campvis {
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
-        if (processor->getEnabled() && !processor->isLocked() && processor->hasInvalidResult()) {
-            processor->lockProcessor();
-            clock_t startTime = clock();
-
-            try {
-                processor->process(_data);
-            }
-            catch (std::exception& e) {
-                LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": " << e.what());
-            }
-            catch (...) {
-                LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": unknown exception");
+        if (processor->getEnabled() && !processor->isLocked()) {
+            // update properties if they're invalid
+            if (processor->hasInvalidProperties()) {
+                processor->updateProperties(_data);
+#if CAMPVIS_DEBUG
+                if (processor->hasInvalidProperties())
+                    LDEBUG("Processor " << processor->getName() << " still has INVALID_PROPERTIES level. Did you forget to validate the processor in updateProperties()?");
+#endif
             }
 
-            if (processor->getClockExecutionTime()) {
-                clock_t endTime = clock();
-                LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
-            }
+            // execute processor if needed
+            if (processor->hasInvalidResult()) {
+                processor->lockProcessor();
+                clock_t startTime = clock();
 
-            // Unlocking processors might be expensive, since a long chain of invalidations might be started
-            // -> do this in another thread...
-            if (unlockInExtraThred)
-                SimpleJobProc.enqueueJob(makeJob(processor, &AbstractProcessor::unlockProcessor));
-            else
-                processor->unlockProcessor();
+                try {
+                    processor->process(_data);
+                }
+                catch (std::exception& e) {
+                    LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": " << e.what());
+                }
+                catch (...) {
+                    LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": unknown exception");
+                }
+
+                if (processor->getClockExecutionTime()) {
+                    clock_t endTime = clock();
+                    LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+                }
+
+                // Unlocking processors might be expensive, since a long chain of invalidations might be started
+                // -> do this in another thread...
+                if (unlockInExtraThred)
+                    SimpleJobProc.enqueueJob(makeJob(processor, &AbstractProcessor::unlockProcessor));
+                else
+                    processor->unlockProcessor();
+            }
         }
     }
 

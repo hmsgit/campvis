@@ -74,8 +74,6 @@ namespace campvis {
         IntProperty p_kernelSize;
 
     protected:
-        /// \see AbstractProcessor::updateProperties
-        virtual void updateProperties();
 
         static const std::string loggerCat_;
     };

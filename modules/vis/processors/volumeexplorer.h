@@ -116,8 +116,8 @@ namespace campvis {
 
         void composeFinalRendering(DataContainer& data);
 
-        /// adapts the range of the p_xSliceNumber property to the image
-        void updateProperties(DataHandle img);
+        /// \see    AbstractProcessor::updateProperties
+        void updateProperties(DataContainer& dc);
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
         FaceGeometry* _quad;

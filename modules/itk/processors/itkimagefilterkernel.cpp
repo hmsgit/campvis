@@ -230,8 +230,4 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    void ItkImageFilterKernel::updateProperties() {
-
-    }
-
 }

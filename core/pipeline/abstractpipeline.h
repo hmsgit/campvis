@@ -121,9 +121,6 @@ namespace campvis {
          */
         void setEnabled(bool enabled);
 
-        /// Signal being emitted when this pipeline has been invalidated.
-        sigslot::signal0<> s_PipelineInvalidated;
-
     protected:
         /**
          * Locks all processors.

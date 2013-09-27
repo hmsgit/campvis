@@ -260,6 +260,19 @@ namespace campvis {
             validate(static_cast<int>(il));
         }
 
+        /**
+         * Gets called from the pipeline before calling process(), when this processor has an INVALID_PROPERTIES level.
+         * \note    You may overload this method as needed. The default implementation only validates
+         *          the INVALID_PROPERTIES level again.
+         * \note    There is also an overloadable updateProperties() in the HasPropertyCollection super class, 
+         *          which is called from the processor itself. If you do not need access to the DataContainer
+         *          of the parent pipeline, you can also use that method.
+         * \see     HasPropertyCollection::updateProperties()
+         * \param   dc  DataContainer   The DataContainer of the calling pipeline.
+         */
+        virtual void updateProperties(DataContainer& dc);
+
+
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;
 

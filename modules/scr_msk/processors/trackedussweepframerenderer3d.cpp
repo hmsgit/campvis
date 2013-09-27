@@ -139,10 +139,6 @@ namespace campvis {
         DataContainer::ScopedTypedData< TrackedUsFileIoData > fio(data, p_sourceImageID.getValue());
 
         if (fio != 0) {
-            if (hasInvalidProperties()) {
-                updateProperties(const_cast<TrackedUSFileIO*>(fio->getData()));
-            }
-
             if (_currentSweep != 0) {
                 int frameNr = p_frameNumber.getValue();
                 const tgt::Camera& cam = p_camera.getValue();
@@ -228,8 +224,10 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    void TrackedUsSweepFrameRenderer3D::updateProperties(TrackedUSFileIO* fio) {
-        if (fio != 0) {
+    void TrackedUsSweepFrameRenderer3D::updateProperties(DataContainer& dc) {
+        DataContainer::ScopedTypedData<TrackedUsFileIoData> data(dc, p_sourceImageID.getValue());
+        if (data != 0) {
+            TrackedUSFileIO* fio = const_cast<TrackedUSFileIO*>(data->getData());
             const TrackedUSFileXMLHeader::TrackedUSFileStudy *study = fio->getStudyHeader(0);
             p_sweepNumber.setMaxValue(static_cast<int>(study->Series.size()) - 1);
 

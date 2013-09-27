@@ -63,7 +63,7 @@ namespace campvis {
 
     AdvancedUsFusion::AdvancedUsFusion(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ)
+        , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
         , p_blurredImageId("BlurredImageId", "Blurred Ultrasound Image", "", DataNameProperty::READ)
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)
         , p_confidenceImageID("ConfidenceImageId", "Confidence Map Input", "", DataNameProperty::READ)
@@ -120,15 +120,6 @@ namespace campvis {
 
         if (img != 0 && blurred != 0 && confidence != 0) {
             if (img->getDimensionality() >= 2) {
-                if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
-                    // source DataHandle has changed
-                    updateProperties(img.getDataHandle());
-                    _sourceImageTimestamp = img.getDataHandle().getTimestamp();
-                    //p_confidenceTF.getTF()->setImageHandle(confidence.getDataHandle());
-                    //_shader->setHeaders(generateHeader());
-                    //_shader->rebuild();
-                }
-
                 FramebufferActivationGuard fag(this);
                 createAndAttachColorTexture();
                 createAndAttachDepthTexture();
@@ -170,13 +161,17 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    void AdvancedUsFusion::updateProperties(DataHandle img) {
-        p_transferFunction.getTF()->setImageHandle(img);
-        const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
+    void AdvancedUsFusion::updateProperties(DataContainer dc) {
+        DataContainer::ScopedTypedData<ImageData> img(dc, p_usImageId.getValue());
+
+        p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+        const tgt::svec3& imgSize = img->getSize();
         if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
-        p_use3DTexture.setValue(static_cast<const ImageData*>(img.getData())->getDimensionality() == 3);
+        p_use3DTexture.setValue(img->getDimensionality() == 3);
+
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     std::string AdvancedUsFusion::generateHeader() const {

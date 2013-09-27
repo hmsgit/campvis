@@ -105,7 +105,8 @@ namespace campvis {
 
     protected:
         /// adapts the range of the p_xSliceNumber property to the image
-        void updateProperties(DataHandle img);
+        /// \see    AbstractPro#::updateProperties
+        virtual void updateProperties(DataContainer& dc);
 
         void updateBorderGeometry();
 

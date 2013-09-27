@@ -219,9 +219,7 @@ namespace campvis {
             ImageRepresentationLocal::ScopedRepresentation local(_data, _usReader.p_targetImageID.getValue());
             if (local != 0) {
                 Interval<float> ii = local->getNormalizedIntensityRange();
-                _usSliceRenderer.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
                 _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                _usSliceRenderer.updateProperties(local.getImageData());
                 _usSliceRenderer.p_sliceNumber.setValue(125);
             }
         }

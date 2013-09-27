@@ -296,6 +296,8 @@ namespace campvis {
             p_timeStep.setVisible(true);
             p_conductance.setVisible(true);
         }
+
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

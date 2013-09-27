@@ -96,7 +96,7 @@ namespace campvis {
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
         /// adapts the range of the p_frameNumber property to the image
-        void updateProperties(TrackedUSFileIO* fio);
+        virtual void updateProperties(DataContainer& dc);
 
         const TrackedUSSweep* getCurrentSweep() const;
 
