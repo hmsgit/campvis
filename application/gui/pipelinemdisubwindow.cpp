@@ -74,7 +74,7 @@ namespace campvis {
             }
 
             move(newPos);
-            emit s_positionChanged(newPos);
+            emit s_positionChanged(this, newPos);
         }
         else {
             QMdiSubWindow::mouseMoveEvent(event);

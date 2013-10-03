@@ -70,7 +70,7 @@ namespace campvis {
          *
          * \param newPos the subwindow's new position
          */
-        void s_positionChanged(const QPoint& newPos);
+        void s_positionChanged(PipelineMdiSubWindow* mdiSubWindow, const QPoint& newPos);
 
     protected:
         /**

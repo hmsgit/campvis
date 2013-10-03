@@ -75,13 +75,18 @@ namespace campvis {
          */
         void stopWindowDrag();
 
+        /**
+         * Return the canvas this widget wraps.
+         */
+        QWidget* canvas();
+
     signals:
         /**
          * Emitted when the widget's position changes.
          *
          * \param newPos the widget's new position
          */
-        void s_positionChanged(const QPoint& newPos);
+        void s_positionChanged(VisualizationPipelineWidget *pipelineWidget, const QPoint& newPos);
 
     protected:
         /**
@@ -100,6 +105,7 @@ namespace campvis {
         virtual void moveEvent(QMoveEvent* event);
 
     private:
+        QWidget* _canvas;            ///< The canvas this widget wraps
         bool _dragActive;            ///< Is the widget currently being dragged?
         QPoint _lastMousePos;        ///< Last reported mouse position
 

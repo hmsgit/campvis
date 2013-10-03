@@ -32,6 +32,7 @@
 
 #include "sigslot/sigslot.h"
 #include "application/campvisapplication.h"
+#include "application/gui/mdidockarea.h"
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
@@ -43,7 +44,6 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QComboBox>
-#include <QMdiArea>
 #include <QScrollArea>
 #include <vector>
 
@@ -163,7 +163,7 @@ namespace campvis {
 
         CampVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
 
-        QMdiArea* _mdiArea;                                 ///< MDI area (the window's central widget)
+        MdiDockArea* _mdiArea;                              ///< MDI area (the window's central widget)
         QWidget* _containerWidget;                          ///< Widget to manage the app's DataContainers and pipelines
         QComboBox* _cbPipelineFactory;                      ///< Combobox for selecting the Pipelines from the PipelineFactory
         QPushButton* _btnPipelineFactory;                   ///< Button to add a Pipeline from the factory

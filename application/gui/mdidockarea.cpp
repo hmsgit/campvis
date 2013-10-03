@@ -27,71 +27,70 @@
 // 
 // ================================================================================================
 
-#include "visualizationpipelinewrapper.h"
+#include "mdidockarea.h"
 
 namespace campvis {
 
-    VisualizationPipelineWrapper::VisualizationPipelineWrapper(const std::string& name, QWidget* canvas,
-                                                               QMdiArea* mdiArea, QObject* parent /*= 0*/)
-        : QObject(parent)
-        , _mdiArea(mdiArea)
-    {
-        _pipelineWidget = new VisualizationPipelineWidget(canvas);
-        _mdiSubWindow = new PipelineMdiSubWindow();
+    PipelineMdiSubWindow* MdiDockArea::addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags /*= 0*/) {
+        PipelineMdiSubWindow* mdiSubWindow = new PipelineMdiSubWindow;
 
-        _mdiSubWindow->setWidget(_pipelineWidget);
-        mdiArea->addSubWindow(_mdiSubWindow);
+        mdiSubWindow->setWidget(widget);
+        QMdiArea::addSubWindow(mdiSubWindow, windowFlags);
+        widget->show();
+        this->tileSubWindows();
 
-        const QString& windowTitle = QString::fromStdString(name);
-        _mdiSubWindow->setWindowTitle(windowTitle);
-        _pipelineWidget->setWindowTitle(windowTitle);
-        _pipelineWidget->show();
-        _mdiArea->tileSubWindows();
+        connect(mdiSubWindow, SIGNAL(s_positionChanged(PipelineMdiSubWindow*, const QPoint&)),
+                this, SLOT(trackMdiSubWindowsPosition(PipelineMdiSubWindow*, const QPoint&)));
 
-        connect(_mdiSubWindow, SIGNAL(s_positionChanged(const QPoint&)),
-                this, SLOT(trackMdiSubWindowsPosition(const QPoint&)));
-
-        connect(_pipelineWidget, SIGNAL(s_positionChanged(const QPoint&)),
-                this, SLOT(trackFloatingWindowsPosition(const QPoint&)));
+        return mdiSubWindow;
     }
 
-    void VisualizationPipelineWrapper::trackFloatingWindowsPosition(const QPoint& newPos) {
-        const QRect& widgetGeometry = _pipelineWidget->frameGeometry();
-        const QRect& mdiAreaRect = _mdiArea->contentsRect();
-        const QRect mdiAreaGeometry(_mdiArea->mapToGlobal(mdiAreaRect.topLeft()),
-                                    _mdiArea->mapToGlobal(mdiAreaRect.bottomRight()));
+    void MdiDockArea::trackFloatingWindowsPosition(VisualizationPipelineWidget* pipelineWidget, const QPoint& newPos) {
+        const QRect& widgetGeometry = pipelineWidget->frameGeometry();
+        const QRect& mdiAreaRect = this->contentsRect();
+        const QRect mdiAreaGeometry(this->mapToGlobal(mdiAreaRect.topLeft()),
+                                    this->mapToGlobal(mdiAreaRect.bottomRight()));
         const QRect& intersection = widgetGeometry & mdiAreaGeometry;
 
         // Dock the widget if at least 60% of it is over the MDI area
         if (widgetGeometry.width() * widgetGeometry.height() * 3 <
                 intersection.width() * intersection.height() * 5) {
-            _pipelineWidget->stopWindowDrag();
+            pipelineWidget->stopWindowDrag();
 
-            _mdiSubWindow->setWidget(_pipelineWidget);
-            _mdiArea->addSubWindow(_mdiSubWindow);
-            _pipelineWidget->show();
+            QWidget* widget = pipelineWidget->canvas();
+            PipelineMdiSubWindow* mdiSubWindow = this->addSubWindow(widget);
+            mdiSubWindow->setWindowTitle(pipelineWidget->windowTitle());
+            widget->show();
+            pipelineWidget->deleteLater();
 
-            _mdiSubWindow->move(_mdiArea->mapFromGlobal(newPos));
-            _mdiSubWindow->grabMouse();
+            mdiSubWindow->move(this->mapFromGlobal(newPos));
+            mdiSubWindow->grabMouse();
         }
     }
 
-    void VisualizationPipelineWrapper::trackMdiSubWindowsPosition(const QPoint& newPos) {
-        const QRect& subWindowGeometry = _mdiSubWindow->frameGeometry();
-        const QRect& mdiAreaGeometry = _mdiArea->contentsRect();
+    void MdiDockArea::trackMdiSubWindowsPosition(PipelineMdiSubWindow *mdiSubWindow, const QPoint& newPos) {
+        const QRect& subWindowGeometry = mdiSubWindow->frameGeometry();
+        const QRect& mdiAreaGeometry = contentsRect();
         const QRect& intersection = subWindowGeometry & mdiAreaGeometry;
 
         // Detach the subwindow if at least 60% of it has left the MDI area
         if (subWindowGeometry.width() * subWindowGeometry.height() * 2 >
                 intersection.width() * intersection.height() * 5) {
-            _mdiSubWindow->stopWindowDrag();
-            _mdiSubWindow->setWidget(0);
-            _mdiArea->removeSubWindow(_mdiSubWindow);
-            _mdiArea->tileSubWindows();
+            QWidget* widget = mdiSubWindow->widget();
+            mdiSubWindow->stopWindowDrag();
+            mdiSubWindow->setWidget(0);
+            removeSubWindow(mdiSubWindow);
+            mdiSubWindow->deleteLater();
+            tileSubWindows();
 
-            _pipelineWidget->move(_mdiArea->mapToGlobal(newPos));
-            _pipelineWidget->show();
-            _pipelineWidget->forceWindowDrag();
+            VisualizationPipelineWidget* pipelineWidget = new VisualizationPipelineWidget(widget);
+            pipelineWidget->setWindowTitle(mdiSubWindow->windowTitle());
+            pipelineWidget->move(this->mapToGlobal(newPos));
+            pipelineWidget->show();
+            pipelineWidget->forceWindowDrag();
+
+            connect(pipelineWidget, SIGNAL(s_positionChanged(VisualizationPipelineWidget*, const QPoint&)),
+                    this, SLOT(trackFloatingWindowsPosition(VisualizationPipelineWidget*, const QPoint&)));
         }
     }
 

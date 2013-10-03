@@ -37,6 +37,7 @@ namespace campvis {
 
     VisualizationPipelineWidget::VisualizationPipelineWidget(QWidget* canvas, QWidget* parent /*= 0*/)
         : QWidget(parent)
+        , _canvas(canvas)
         , _dragActive(false)
         , _lastMousePos()
     {
@@ -62,6 +63,10 @@ namespace campvis {
         }
     }
 
+    QWidget* VisualizationPipelineWidget::canvas() {
+        return _canvas;
+    }
+
     void VisualizationPipelineWidget::mouseMoveEvent(QMouseEvent* event) {
         const QPoint& mousePos = event->globalPos();
         const QPoint& newPos = pos() + (mousePos - _lastMousePos);
@@ -77,7 +82,7 @@ namespace campvis {
     }
 
     void VisualizationPipelineWidget::moveEvent(QMoveEvent* /*event*/) {
-        emit s_positionChanged(frameGeometry().topLeft());
+        emit s_positionChanged(this, frameGeometry().topLeft());
     }
 
 }
