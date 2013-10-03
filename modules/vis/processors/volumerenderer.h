@@ -32,6 +32,7 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/metaproperty.h"
 #include "core/properties/numericproperty.h"
 
 #include "modules/vis/processors/eepgenerator.h"
@@ -82,6 +83,8 @@ namespace campvis {
         DataNameProperty p_inputVolume;              ///< image ID for first input image
         CameraProperty p_camera;
         DataNameProperty p_outputImage;              ///< image ID for output image
+
+        MetaProperty p_raycasterProps;              ///< MetaProperty for properties of the raycasting processor
 
     protected:
         /// Additional invalidation levels for this processor.

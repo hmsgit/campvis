@@ -45,6 +45,7 @@ namespace campvis {
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
         , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
         , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
+        , p_raycasterProps("RaycasterProps", "Raycaster", AbstractProcessor::VALID)
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
         , _raycaster(viewportSizeProp)
@@ -57,6 +58,9 @@ namespace campvis {
 
         addProperty(_raycaster.getProperty("CentralDifferences"));
         addProperty(_eepGenerator.getProperty("GeometryImageId"));
+
+        p_raycasterProps.addPropertyCollection(_raycaster);
+        addProperty(&p_raycasterProps);
 
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);
