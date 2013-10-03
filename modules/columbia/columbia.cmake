@@ -18,3 +18,5 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 )
 
 SET(ThisModShaderDirectories "modules/columbia/glsl")
+
+ADD_PIPELINE_REGISTRATION("modules/columbia/pipelines/columbia1.h" "Columbia1")

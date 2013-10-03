@@ -15,3 +15,9 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 )
 
 SET(ThisModShaderDirectories "modules/vis/glsl")
+
+ADD_PIPELINE_REGISTRATION("modules/vis/pipelines/dvrvis.h" "DVRVis")
+ADD_PIPELINE_REGISTRATION("modules/vis/pipelines/ixpvdemo.h" "IxpvDemo")
+ADD_PIPELINE_REGISTRATION("modules/vis/pipelines/slicevis.h" "SliceVis")
+ADD_PIPELINE_REGISTRATION("modules/vis/pipelines/volumeexplorerdemo.h" "VolumeExplorerDemo")
+ADD_PIPELINE_REGISTRATION("modules/vis/pipelines/volumerendererdemo.h" "VolumeRendererDemo")
