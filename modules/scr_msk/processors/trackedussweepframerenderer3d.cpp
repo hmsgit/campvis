@@ -213,7 +213,6 @@ namespace campvis {
                     glPopAttrib();
 
                     data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-                    p_targetImageID.issueWrite();
                 }
             }
         }

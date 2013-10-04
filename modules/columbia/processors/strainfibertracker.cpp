@@ -208,7 +208,6 @@ namespace campvis {
                 LDEBUG("done.");
 
                 data.addData(p_outputID.getValue(), fibers);
-                p_outputID.issueWrite();
             }
             else {
                 LERROR("Wrong number of channels.");

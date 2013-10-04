@@ -84,7 +84,6 @@ namespace campvis {
             }
 
             data.addData(p_targetImageID.getValue(), id);
-            p_targetImageID.issueWrite();
         }
         else {
             LDEBUG("No suitable input image found.");

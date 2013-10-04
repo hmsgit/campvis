@@ -32,6 +32,7 @@
 #include "tgt/glcanvas.h"
 #include "tgt/glcontext.h"
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/datanameproperty.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
@@ -90,7 +91,62 @@ namespace campvis {
 
     void AutoEvaluationPipeline::addProcessor(AbstractProcessor* processor) {
         _isVisProcessorMap.insert(std::make_pair(processor, (dynamic_cast<VisualizationProcessor*>(processor) != 0)));
+
+        PropertyCollection pc = processor->getProperties();
+        for (size_t i = 0; i < pc.size(); ++i) {
+            if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(pc[i])) {
+                if (dnp->getAccessInfo() == DataNameProperty::READ) {
+                    tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
+                    std::pair<PortMapType::iterator, bool> result = _portMap.insert(std::make_pair(dnp->getValue(), dnp));
+                    tgtAssert(result.second, "Could not insert Property into port map!");
+                    if (result.second) {
+                        _iteratorMap[dnp] = result.first;
+                        dnp->s_changed.connect(this, &AutoEvaluationPipeline::onDataNamePropertyChanged);
+                    }
+                }
+            }
+        }
+
         AbstractPipeline::addProcessor(processor);
+    }
+
+    void AutoEvaluationPipeline::onDataNamePropertyChanged(const AbstractProperty* prop) {
+        DataNameProperty* dnp = const_cast<DataNameProperty*>(static_cast<const DataNameProperty*>(prop));
+
+        // find string-iterator pair
+        IteratorMapType::iterator it = _iteratorMap.find(dnp);
+        if (it != _iteratorMap.end()) {
+            if (dnp->getValue() != it->second->first) {
+                {
+                    tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, true);
+                    // value of the property has changed
+                    _portMap.unsafe_erase(it->second);
+                }
+
+                tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
+                std::pair<PortMapType::iterator, bool> result = _portMap.insert(std::make_pair(dnp->getValue(), dnp));
+                tgtAssert(result.second, "Could not insert Property into port map!");
+                if (result.second) {
+                    it->second = result.first;
+                }
+            }
+        }
+        else {
+            tgtAssert(false, "Could not find Property in iterator map!");
+        }
+    }
+
+    void AutoEvaluationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
+        {
+            tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
+            PortMapType::const_iterator it = _portMap.find(name);
+            while(it != _portMap.end() && it->first == name) {
+                it->second->s_changed(it->second);
+                ++it;
+            }
+        }
+
+        AbstractPipeline::onDataContainerDataAdded(name, dh);
     }
 
 }

@@ -31,7 +31,9 @@
 #define AUTOEVALUATIONPIPELINE_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/concurrent_hash_map.h"
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <tbb/spin_rw_mutex.h>
 
 #include "core/pipeline/abstractpipeline.h"
 
@@ -74,10 +76,25 @@ namespace campvis {
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
+
+        static const std::string loggerCat_;
+
+    private:
+        void onDataNamePropertyChanged(const AbstractProperty* prop);
+
+        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+
+        /// Hashmap storing for each processor whether it's a VisualizationProcessor or not.
         tbb::concurrent_hash_map<AbstractProcessor*, bool> _isVisProcessorMap;
 
 
-        static const std::string loggerCat_;
+        typedef tbb::concurrent_unordered_multimap<std::string, DataNameProperty*> PortMapType;
+        typedef tbb::concurrent_unordered_map<DataNameProperty*, PortMapType::iterator> IteratorMapType;
+
+        /// Multimap to simulate ports between processors
+        PortMapType _portMap;
+        IteratorMapType _iteratorMap;
+        tbb::spin_rw_mutex _pmMutex;
     };
 
 }

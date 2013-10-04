@@ -211,7 +211,6 @@ namespace campvis {
             ImageData* output = new ImageData(input->getDimensionality(), tgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
             GenericImageRepresentationLocal<float, 1>* confidenceMap = GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
             data.addData(p_targetImageID.getValue(), output);
-            p_targetImageID.issueWrite();
 
             validate(INVALID_RESULT);
         }

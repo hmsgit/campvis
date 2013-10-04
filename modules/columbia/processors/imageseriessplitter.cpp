@@ -58,7 +58,6 @@ namespace campvis {
             }
             if (p_imageIndex.getValue() < static_cast<int>(series->getNumImages())) {
                 data.addDataHandle(p_outputID.getValue(), series->getImage(p_imageIndex.getValue()));
-                p_outputID.issueWrite();
             }
         }
 

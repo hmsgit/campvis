@@ -113,7 +113,6 @@ namespace campvis {
             LGL_ERROR;
 
             data.addData(p_targetImageId.getValue(), new RenderData(_fbo));
-            p_targetImageId.issueWrite();
         }
         else {
             LERROR("No suitable input images found.");

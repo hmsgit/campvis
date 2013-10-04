@@ -209,7 +209,6 @@ namespace campvis {
             // all parsing done - lets create the image:
             image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
             data.addData(p_targetImageID.getValue(), image);
-            p_targetImageID.issueWrite();
         }
         else {
             throw tgt::FileException("Error while parsing the data.", p_url.getValue());
@@ -271,7 +270,6 @@ namespace campvis {
         // all parsing done - lets create the image:
         IndexedMeshGeometry* g = new IndexedMeshGeometry(indices, vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
         data.addData(p_targetImageID.getValue(), g);
-        p_targetImageID.issueWrite();
     }
 
 }

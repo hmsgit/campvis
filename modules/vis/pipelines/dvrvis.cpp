@@ -93,11 +93,11 @@ namespace campvis {
         //_imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.connect(&_eepGenerator.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_vmEepGenerator.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_dvrVM.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_dvrNormal.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_pgGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_eepGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_vmEepGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_dvrVM.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_dvrNormal.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_pgGenerator.p_sourceImageID);
 
         _dvrNormal.p_targetImageID.setValue("drr.output");
         _dvrVM.p_targetImageID.setValue("dvr.output");
@@ -112,7 +112,7 @@ namespace campvis {
          vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
          _dvrVM.p_transferFunction.replaceTF(vmTF);
 
-        _vmRenderer.p_renderTargetID.connect(&_combine.p_mirrorRenderID);
+        _vmRenderer.p_renderTargetID.addSharedProperty(&_combine.p_mirrorRenderID);
         _vmEepGenerator.p_entryImageID.setValue("vm.eep.entry");
         _vmEepGenerator.p_exitImageID.setValue("vm.eep.exit");
         _vmEepGenerator.p_enableMirror.setValue(true);
@@ -120,29 +120,29 @@ namespace campvis {
         // not the most beautiful way... *g*
         // this will all get better with scripting support.
         static_cast<BoolProperty*>(_vmEepGenerator.getProperty("applyMask"))->setValue(true);
-        _vmRenderer.p_renderTargetID.connect(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
+        _vmRenderer.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
 
         _renderTargetID.setValue("combine");
 
-        _pgGenerator.p_geometryID.connect(&_vmEepGenerator.p_geometryID);
-        _pgGenerator.p_geometryID.connect(&_eepGenerator.p_geometryID);
-        _vmgGenerator.p_mirrorID.connect(&_vmEepGenerator.p_mirrorID);
-        _vmgGenerator.p_mirrorID.connect(&_vmRenderer.p_geometryID);
+        _pgGenerator.p_geometryID.addSharedProperty(&_vmEepGenerator.p_geometryID);
+        _pgGenerator.p_geometryID.addSharedProperty(&_eepGenerator.p_geometryID);
+        _vmgGenerator.p_mirrorID.addSharedProperty(&_vmEepGenerator.p_mirrorID);
+        _vmgGenerator.p_mirrorID.addSharedProperty(&_vmRenderer.p_geometryID);
         _vmgGenerator.p_mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));
         _vmgGenerator.p_poi.setValue(tgt::vec3(40.f, 40.f, 40.f));
         _vmgGenerator.p_size.setValue(60.f);
 
-        _eepGenerator.p_entryImageID.connect(&_dvrNormal.p_entryImageID);
-        _vmEepGenerator.p_entryImageID.connect(&_dvrVM.p_entryImageID);
+        _eepGenerator.p_entryImageID.addSharedProperty(&_dvrNormal.p_entryImageID);
+        _vmEepGenerator.p_entryImageID.addSharedProperty(&_dvrVM.p_entryImageID);
 
-        _eepGenerator.p_exitImageID.connect(&_dvrNormal.p_exitImageID);
-        _vmEepGenerator.p_exitImageID.connect(&_dvrVM.p_exitImageID);
+        _eepGenerator.p_exitImageID.addSharedProperty(&_dvrNormal.p_exitImageID);
+        _vmEepGenerator.p_exitImageID.addSharedProperty(&_dvrVM.p_exitImageID);
 
-        _dvrVM.p_targetImageID.connect(&_combine.p_mirrorImageID);
+        _dvrVM.p_targetImageID.addSharedProperty(&_combine.p_mirrorImageID);
         _combine.p_targetImageID.setValue("combine");
 
-        _dvrNormal.p_targetImageID.connect(&_depthDarkening.p_inputImage);
-        _depthDarkening.p_outputImage.connect(&_combine.p_normalImageID);
+        _dvrNormal.p_targetImageID.addSharedProperty(&_depthDarkening.p_inputImage);
+        _depthDarkening.p_outputImage.addSharedProperty(&_combine.p_normalImageID);
     }
 
     void DVRVis::deinit() {

@@ -59,7 +59,7 @@ namespace campvis {
         p_camera.addSharedProperty(&_renderer.p_camera);
 
         _reader.p_url.setValue("C:/Users/SchuCh01/Documents/Data/Ultrasound/2012-12-12-Test/9l4sweep/content.xml");
-        _reader.p_targetImageID.connect(&_renderer.p_sourceImageID);
+        _reader.p_targetImageID.addSharedProperty(&_renderer.p_sourceImageID);
 
         _renderer.s_boundingBoxChanged.connect(this, &UsCompounding::onBoundingBoxChanged);
         _renderer.p_targetImageID.setValue("us.frame.output");

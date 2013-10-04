@@ -91,12 +91,12 @@ namespace campvis {
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\11_niere_re_durch_leber2\\original\\export0000.bmp");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_importType.selectById("localIntensity");
-        _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
-        _usReader.p_targetImageID.connect(&_usFusion.p_usImageId);
-        _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_confidenceGenerator.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_usFusion.p_usImageId);
+        _usReader.p_targetImageID.addSharedProperty(&_usBlurFilter.p_sourceImageID);
 
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
-        _confidenceGenerator.p_targetImageID.connect(&_usFusion.p_confidenceImageID);
+        _confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion.p_confidenceImageID);
         _confidenceGenerator.p_curvilinear.setValue(true);
         _confidenceGenerator.p_origin.setValue(tgt::vec2(340.f, 540.f));
         _confidenceGenerator.p_angles.setValue(tgt::vec2(4.064f, 5.363f));
@@ -110,7 +110,7 @@ namespace campvis {
         _usFusion.p_sliceNumber.setValue(0);
 
         _usBlurFilter.p_targetImageID.setValue("us.blurred");
-        _usBlurFilter.p_targetImageID.connect(&_usFusion.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.addSharedProperty(&_usFusion.p_blurredImageId);
         _usBlurFilter.p_filterMode.selectById("gauss");
         _usBlurFilter.p_sigma.setValue(4.f);
 

@@ -216,6 +216,13 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
+        /**
+         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
+         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
+         * \param   name    Name of the added data.
+         * \param   dh      DataHandle to the newly added data.
+         */
+        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
 
         /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
         DataContainer* _data;
@@ -230,16 +237,6 @@ namespace campvis {
         DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
 
         static const std::string loggerCat_;
-
-        
-    private:
-        /**
-         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
-         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
-         * \param   name    Name of the added data.
-         * \param   dh      DataHandle to the newly added data.
-         */
-        void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
 
     };
 

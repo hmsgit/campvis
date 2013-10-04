@@ -132,7 +132,6 @@ namespace campvis {
             LGL_ERROR;
 
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
-            p_renderTargetID.issueWrite();
         }
         else {
             LERROR("No suitable input geometry found.");

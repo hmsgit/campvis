@@ -76,7 +76,6 @@ namespace campvis {
         LGL_ERROR;
 
         data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-        p_targetImageID.issueWrite();
     }
 
     std::string SimpleRaycaster::generateHeader() const {

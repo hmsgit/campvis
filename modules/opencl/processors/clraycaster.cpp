@@ -267,7 +267,6 @@ namespace campvis {
                     LGL_ERROR;
 
                     data.addData(_targetImageID.getValue(), rd);
-                    _targetImageID.issueWrite();
                 }
                 else {
                     LERROR("Entry-/Exitpoints texture size does not match.");

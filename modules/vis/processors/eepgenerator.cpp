@@ -219,8 +219,6 @@ namespace campvis {
 
                 data.addData(p_entryImageID.getValue(), entrypoints);
                 data.addData(p_exitImageID.getValue(), exitpoints);
-                p_entryImageID.issueWrite();
-                p_exitImageID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

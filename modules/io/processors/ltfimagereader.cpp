@@ -96,7 +96,6 @@ namespace campvis {
             }
 
             data.addData(p_targetImageID.getValue(), series);
-            p_targetImageID.issueWrite();
         }
         else {
             LERROR("Could not deduce counting index.");
