@@ -23,6 +23,20 @@ MACRO(WRITE_PIPELINE_REGISTRATION FileName)
     FILE(WRITE ${FileName} ${PipelineRegistrationSource})
 ENDMACRO(WRITE_PIPELINE_REGISTRATION)
 
+MACRO(PARSE_HEADER_FOR_PIPELINE FileName)
+    FILE(READ ${FileName} content)
+    
+    # Find all class definitions inheriting from a Pipeline
+    STRING(REGEX MATCHALL "class ([A-Za-z0-9_]+) : public [A-Za-z0-9_]+Pipeline {" matches ${content})
+    
+    FOREACH(m ${matches})
+        # Extract class name and register
+        STRING(REGEX REPLACE "(class )([A-Za-z0-9_]+)( : public [A-Za-z0-9_]+Pipeline {)" "\\2" RESULT ${m})
+        ADD_PIPELINE_REGISTRATION(${FileName} ${RESULT})
+    ENDFOREACH()
+ENDMACRO(PARSE_HEADER_FOR_PIPELINE)
+
+
 # copy and pasted from Voreen...
 
 MACRO(LIST_SUBDIRECTORIES Result Directory AbsolutePath)

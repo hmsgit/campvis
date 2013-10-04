@@ -15,6 +15,3 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 )
 
 SET(ThisModShaderDirectories "modules/advancedusvis/glsl")
-
-ADD_PIPELINE_REGISTRATION("modules/advancedusvis/pipelines/advancedusvis.h" "AdvancedUsVis")
-ADD_PIPELINE_REGISTRATION("modules/advancedusvis/pipelines/cmbatchgeneration.h" "CmBatchGeneration")

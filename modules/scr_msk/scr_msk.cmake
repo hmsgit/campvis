@@ -40,5 +40,3 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 )
 
 SET(ThisModShaderDirectories "modules/scr_msk/glsl")
-
-ADD_PIPELINE_REGISTRATION("modules/scr_msk/pipelines/uscompounding.h" "UsCompounding")

@@ -20,4 +20,3 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 LIST(APPEND ThisModExternalLibs kisscl)
 SET(ThisModShaderDirectories "modules/opencl/cl")
 
-ADD_PIPELINE_REGISTRATION("modules/opencl/pipelines/openclpipeline.h" "OpenCLPipeline")
