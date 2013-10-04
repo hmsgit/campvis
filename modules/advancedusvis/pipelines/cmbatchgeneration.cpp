@@ -173,7 +173,7 @@ namespace campvis {
 
     void CmBatchGeneration::save(int path, const std::string& basePath) {
         // get result
-        DataContainer::ScopedTypedData<RenderData> rd(*_data, _usFusion.p_targetImageID.getValue());
+        ScopedTypedData<RenderData> rd(*_data, _usFusion.p_targetImageID.getValue());
         const ImageRepresentationGL* rep = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>(false);
         if (rep != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL

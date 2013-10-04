@@ -79,7 +79,7 @@ namespace campvis {
     }
 
     void GeometryRenderer::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
+        ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
 
         if (proxyGeometry != 0 && _shader != 0) {
             if (hasInvalidShader()) {

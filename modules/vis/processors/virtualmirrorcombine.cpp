@@ -77,9 +77,9 @@ namespace campvis {
     }
 
     void VirtualMirrorCombine::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<RenderData> normalImage(data, p_normalImageID.getValue());
-        DataContainer::ScopedTypedData<RenderData> mirrorImage(data, p_mirrorImageID.getValue());
-        DataContainer::ScopedTypedData<RenderData> mirrorRendered(data, p_mirrorRenderID.getValue());
+        ScopedTypedData<RenderData> normalImage(data, p_normalImageID.getValue());
+        ScopedTypedData<RenderData> mirrorImage(data, p_mirrorImageID.getValue());
+        ScopedTypedData<RenderData> mirrorRendered(data, p_mirrorRenderID.getValue());
 
         if (normalImage != 0 && mirrorImage != 0 && mirrorRendered != 0) {
             glEnable(GL_DEPTH_TEST);

@@ -81,7 +81,7 @@ namespace campvis {
     }
 
     void GeometryStrainRenderer::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
+        ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ImageRepresentationGL::ScopedRepresentation strainData(data, p_strainId.getValue());
 
         if (proxyGeometry != 0 && strainData != 0 && _shader != 0) {

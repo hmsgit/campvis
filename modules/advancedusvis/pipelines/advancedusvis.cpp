@@ -235,7 +235,7 @@ namespace campvis {
     void AdvancedUsVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor = &_usReader) {
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(*_data, _usReader.p_targetImageID.getValue());
+            ScopedTypedData<ImageData> img(*_data, _usReader.p_targetImageID.getValue());
             if (img != 0) {
                 _trackballEH->reinitializeCamera(img);
             }

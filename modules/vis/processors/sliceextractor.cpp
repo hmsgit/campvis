@@ -259,7 +259,7 @@ namespace campvis {
     }
 
     void SliceExtractor::updateProperties(DataContainer& dc) {
-        DataContainer::ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
+        ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
 
         p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
         const tgt::svec3& imgSize = img->getSize();

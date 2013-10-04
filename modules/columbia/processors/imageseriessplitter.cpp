@@ -50,7 +50,7 @@ namespace campvis {
     }
 
     void ImageSeriesSplitter::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageSeries> series(data, p_inputID.getValue());
+        ScopedTypedData<ImageSeries> series(data, p_inputID.getValue());
         if (series != 0) {
             if (hasInvalidProperties()) {
                 p_imageIndex.setMaxValue(static_cast<int>(series->getNumImages()));

@@ -94,7 +94,7 @@ namespace campvis {
 
     void SliceVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
-            DataContainer::ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
+            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
                 _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
             }

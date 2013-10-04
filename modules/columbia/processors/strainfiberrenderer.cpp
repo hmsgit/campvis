@@ -98,7 +98,7 @@ namespace campvis {
             validate(INVALID_SHADER);
         }
         
-        DataContainer::ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
+        ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
         if (strainData != 0 && _shader != 0) {
             const tgt::Camera& camera = p_camera.getValue();
 

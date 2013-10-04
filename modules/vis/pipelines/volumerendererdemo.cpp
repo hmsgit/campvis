@@ -87,7 +87,7 @@ namespace campvis {
     void VolumeRendererDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
-            DataContainer::ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
+            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
                 _trackballEH->reinitializeCamera(img);
             }

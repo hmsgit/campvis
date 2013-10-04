@@ -62,7 +62,7 @@ namespace campvis {
     }
 
     void ProxyGeometryGenerator::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
+        ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {

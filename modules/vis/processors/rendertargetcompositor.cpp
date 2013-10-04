@@ -88,8 +88,8 @@ namespace campvis {
     }
 
     void RenderTargetCompositor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
-        DataContainer::ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
+        ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
+        ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
 
         if (firstImage != 0 && secondImage != 0 ) {
             FramebufferActivationGuard fag(this);

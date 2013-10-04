@@ -169,10 +169,10 @@ namespace campvis {
     }
 
     void VolumeExplorer::composeFinalRendering(DataContainer& data) {
-        DataContainer::ScopedTypedData<RenderData> vrImage(data, p_outputImage.getValue() + ".raycaster");
-        DataContainer::ScopedTypedData<RenderData> xSliceImage(data, p_outputImage.getValue() + ".xSlice");
-        DataContainer::ScopedTypedData<RenderData> ySliceImage(data, p_outputImage.getValue() + ".ySlice");
-        DataContainer::ScopedTypedData<RenderData> zSliceImage(data, p_outputImage.getValue() + ".zSlice");
+        ScopedTypedData<RenderData> vrImage(data, p_outputImage.getValue() + ".raycaster");
+        ScopedTypedData<RenderData> xSliceImage(data, p_outputImage.getValue() + ".xSlice");
+        ScopedTypedData<RenderData> ySliceImage(data, p_outputImage.getValue() + ".ySlice");
+        ScopedTypedData<RenderData> zSliceImage(data, p_outputImage.getValue() + ".zSlice");
 
         if (vrImage == 0 && xSliceImage == 0 && ySliceImage == 0 && zSliceImage == 0)
             return;
@@ -241,7 +241,7 @@ namespace campvis {
     }
 
     void VolumeExplorer::updateProperties(DataContainer& dc) {
-        DataContainer::ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
+        ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
 
         _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
         static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->getTF()->setImageHandle(img.getDataHandle());

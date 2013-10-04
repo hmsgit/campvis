@@ -162,7 +162,7 @@ namespace campvis {
     }
 
     void AdvancedUsFusion::updateProperties(DataContainer dc) {
-        DataContainer::ScopedTypedData<ImageData> img(dc, p_usImageId.getValue());
+        ScopedTypedData<ImageData> img(dc, p_usImageId.getValue());
 
         p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
         const tgt::svec3& imgSize = img->getSize();

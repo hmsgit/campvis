@@ -154,7 +154,7 @@ namespace campvis {
     void Columbia1::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageSplitter) {
             // update camera
-            DataContainer::ScopedTypedData<ImageData> img(*_data, _imageSplitter.p_outputID.getValue());
+            ScopedTypedData<ImageData> img(*_data, _imageSplitter.p_outputID.getValue());
             if (img != 0) {
                 _trackballEH->reinitializeCamera(img);
             }

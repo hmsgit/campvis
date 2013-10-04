@@ -97,7 +97,7 @@ namespace campvis {
         glViewport(0, 0, size.x, size.y);
 
         // try get Data
-        DataContainer::ScopedTypedData<RenderData> rd(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
+        ScopedTypedData<RenderData> rd(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         if (rd != 0) {
             // activate shader
