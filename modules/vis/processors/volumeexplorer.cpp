@@ -242,25 +242,26 @@ namespace campvis {
 
     void VolumeExplorer::updateProperties(DataContainer& dc) {
         DataContainer::ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
-
         _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
         static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->getTF()->setImageHandle(img.getDataHandle());
 
-        const tgt::svec3& imgSize = img->getSize();
-        if (p_xSlice.getMaxValue() != imgSize.x - 1){
-            p_xSlice.setMaxValue(static_cast<int>(imgSize.x) - 1);
-            p_xSlice.setValue(static_cast<int>(imgSize.x) / 2);
-        }
-        if (p_ySlice.getMaxValue() != imgSize.y - 1){
-            p_ySlice.setMaxValue(static_cast<int>(imgSize.y) - 1);
-            p_ySlice.setValue(static_cast<int>(imgSize.y) / 2);
-        }
-        if (p_zSlice.getMaxValue() != imgSize.z - 1){
-            p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
-            p_zSlice.setValue(static_cast<int>(imgSize.z) / 2);
-        }
+        if (img != 0) {
+            const tgt::svec3& imgSize = img->getSize();
+            if (p_xSlice.getMaxValue() != imgSize.x - 1){
+                p_xSlice.setMaxValue(static_cast<int>(imgSize.x) - 1);
+                p_xSlice.setValue(static_cast<int>(imgSize.x) / 2);
+            }
+            if (p_ySlice.getMaxValue() != imgSize.y - 1){
+                p_ySlice.setMaxValue(static_cast<int>(imgSize.y) - 1);
+                p_ySlice.setValue(static_cast<int>(imgSize.y) / 2);
+            }
+            if (p_zSlice.getMaxValue() != imgSize.z - 1){
+                p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
+                p_zSlice.setValue(static_cast<int>(imgSize.z) / 2);
+            }
 
-        _trackballEH->reinitializeCamera(img);
+            _trackballEH->reinitializeCamera(img);
+        }
 
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }
