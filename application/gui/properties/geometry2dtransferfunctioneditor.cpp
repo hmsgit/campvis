@@ -92,7 +92,6 @@ namespace campvis {
 
     void Geometry2DTransferFunctionEditor::paint() {
         Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
-        gtf->lock();
         const std::vector<TFGeometry2D*>& geometries = gtf->getGeometries();
         const tgt::vec2& intensityDomain = gtf->getIntensityDomain();
 
@@ -110,8 +109,11 @@ namespace campvis {
         LGL_ERROR;
 
         // renderIntoEditor TF geometries
-        for (std::vector<TFGeometry2D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
-            (*it)->render();
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            for (std::vector<TFGeometry2D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
+                (*it)->render();
+            }
         }
 
         // render histogram if existent
@@ -173,8 +175,6 @@ namespace campvis {
 
         LGL_ERROR;
         glPopAttrib();
-
-        gtf->unlock();
     }
 
     void Geometry2DTransferFunctionEditor::sizeChanged(const tgt::ivec2& size) {
