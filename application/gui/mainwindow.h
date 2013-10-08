@@ -125,6 +125,9 @@ namespace campvis {
          */
         void onBtnShowDataContainerInspectorClicked();
 
+        /// Slot to be called when _btnPipelineFactory was clicked;
+        void onBtnPipelineFactoryClicked();
+
     private:
 
         /**
@@ -160,6 +163,9 @@ namespace campvis {
         CampVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
 
         QMdiArea* _mdiArea;                                 ///< MDI area (the window's central widget)
+        QWidget* _containerWidget;                          ///< Widget to manage the app's DataContainers and pipelines
+        QComboBox* _cbPipelineFactory;                      ///< Combobox for selecting the Pipelines from the PipelineFactory
+        QPushButton* _btnPipelineFactory;                   ///< Button to add a Pipeline from the factory
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
         QWidget* _pipelinePropertiesWidget;                 ///< Widget showing the selected pipeline's properties
         QScrollArea* _pipelinePropertiesScrollArea;         ///< Scroll area for _pipelinePropertiesWidget
@@ -172,6 +178,8 @@ namespace campvis {
 
         AbstractPipeline* _selectedPipeline;                ///< currently selected pipeline
         AbstractProcessor* _selectedProcessor;              ///< currently selected processor
+        DataContainer* _selectedDataContainer;              ///< currently selected DataContainer
+
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         std::vector<QDockWidget*> _primaryDocks;            ///< Docks located in top docking area of the main window
     };

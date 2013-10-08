@@ -38,9 +38,13 @@
 #include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/tools/stringutils.h"
+#include "modules/pipelinefactory.h"
 
 #include <QMdiSubWindow>
 #include <QScrollBar>
+#include <QPushButton>
+#include <QComboBox>
 
 namespace campvis {
 
@@ -48,6 +52,9 @@ namespace campvis {
         : QMainWindow()
         , _application(application)
         , _mdiArea(0)
+        , _containerWidget(0)
+        , _cbPipelineFactory(0)
+        , _btnPipelineFactory(0)
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
@@ -56,6 +63,7 @@ namespace campvis {
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
         , _selectedProcessor(0)
+        , _selectedDataContainer(0)
         , _logViewer(0)
     {
         tgtAssert(_application != 0, "Application must not be 0.");
@@ -83,9 +91,24 @@ namespace campvis {
         _mdiArea->tileSubWindows();
         setCentralWidget(_mdiArea);
 
+        _containerWidget = new QWidget(this);
+        QGridLayout* _cwLayout = new QGridLayout(_containerWidget);
+
+        _cbPipelineFactory = new QComboBox(_containerWidget);
+        std::vector<std::string> registeredPipelines = PipelineFactory::getRef().getRegisteredPipelines();
+        for (std::vector<std::string>::const_iterator it = registeredPipelines.begin(); it != registeredPipelines.end(); ++it)
+            _cbPipelineFactory->addItem(QString::fromStdString(*it));
+        _cwLayout->addWidget(_cbPipelineFactory, 0, 0);
+
+        _btnPipelineFactory = new QPushButton("Add Pipeline", _containerWidget);
+        _cwLayout->addWidget(_btnPipelineFactory, 0, 1);
+
         _pipelineWidget = new PipelineTreeWidget();
-        _pipelineWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        ui.pipelineTreeDock->setWidget(_pipelineWidget);
+        _containerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+        _cwLayout->addWidget(_pipelineWidget, 1, 0, 1, 2);
+
+        _containerWidget->setLayout(_cwLayout);
+        ui.pipelineTreeDock->setWidget(_containerWidget);
 
         _pipelinePropertiesScrollArea = new QScrollArea();
         _pipelinePropertiesScrollArea->setWidgetResizable(true);
@@ -131,6 +154,10 @@ namespace campvis {
         connect(
             _btnShowDataContainerInspector, SIGNAL(clicked()), 
             this, SLOT(onBtnShowDataContainerInspectorClicked()));
+        connect(
+            _btnPipelineFactory, SIGNAL(clicked()), 
+            this, SLOT(onBtnPipelineFactoryClicked()));
+
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
         _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
     }
@@ -162,6 +189,7 @@ namespace campvis {
                 if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
                     _selectedPipeline = pipeline;
                     _selectedProcessor = 0;
+                    _selectedDataContainer = &pipeline->getDataContainer();
                 }
                 else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
                     _selectedProcessor = processor;
@@ -170,6 +198,7 @@ namespace campvis {
                     HasPropertyCollection* pptr = static_cast<HasPropertyCollection*>(parentItem.value<void*>());
                     if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(pptr)) {
                         _selectedPipeline = pipeline;
+                        _selectedDataContainer = &pipeline->getDataContainer();
                     }
                 }
 
@@ -177,15 +206,17 @@ namespace campvis {
             }
             else {
                 emit updatePropCollectionWidget(0, 0);
+                _selectedDataContainer = 0;
             }
         }
         else {
             emit updatePropCollectionWidget(0, 0);
+            _selectedDataContainer = 0;
         }
     }
 
     QSize MainWindow::sizeHint() const {
-        return QSize(800, 450);
+        return QSize(1000, 600);
     }
 
     void MainWindow::onBtnExecuteClicked() {
@@ -249,6 +280,16 @@ namespace campvis {
 
         _primaryDocks.push_back(dockWidget);
         return dockWidget;
+    }
+
+    void MainWindow::onBtnPipelineFactoryClicked() {
+        std::string name = this->_cbPipelineFactory->currentText().toStdString();
+        DataContainer* dc = _selectedDataContainer;
+        if (dc == 0) {
+            dc = _application->createAndAddDataContainer("DataContainer #" + StringUtils::toString(_application->_dataContainers.size() + 1));
+        }
+        AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, dc);
+        _application->addPipeline(name, p);
     }
 
 }

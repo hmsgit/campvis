@@ -116,6 +116,11 @@ namespace campvis {
         int run();
 
 
+        /**
+         * Creates a new DataContainer with the given name.
+         * \param   name    Name of the new DataContainer
+         * \return  The newly created DataContainer
+         */
         DataContainer* createAndAddDataContainer(const std::string& name);
 
         /// Signal emitted when the collection of pipelines has changed.

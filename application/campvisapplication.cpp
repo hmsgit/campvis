@@ -249,8 +249,15 @@ namespace campvis {
     }
 
     void CampVisApplication::addPipeline(const std::string& name, AbstractPipeline* pipeline) {
-        tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(pipeline != 0, "Pipeline must not be 0.");
+
+        // if CAMPVis is already fully initialized, we need to temporarily shut down its
+        // OpenGL job processor, since we need to create a new context.
+        if (_initialized) {
+            GLJobProc.pause();
+        }
+        
+        _mainWindow->addVisualizationPipelineWidget("foobar", new QWidget());
 
         // create canvas and painter for the pipeline and connect all together
         tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
@@ -264,8 +271,17 @@ namespace campvis {
 
         _visualizations.push_back(std::make_pair(pipeline, painter));
         _pipelines.push_back(pipeline);
-        CtxtMgr.releaseCurrentContext();
 
+        if (_initialized) {
+            pipeline->setEnabled(false);
+            pipeline->init();
+            painter->init();
+            pipeline->setEnabled(true);
+
+            GLJobProc.resume();
+        }
+
+        CtxtMgr.releaseCurrentContext();
         s_PipelinesChanged();
     }
 
