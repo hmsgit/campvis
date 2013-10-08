@@ -37,8 +37,8 @@
 #include "tgt/event/eventhandler.h"
 #include "tgt/event/eventlistener.h"
 
-#include "tbb/spin_mutex.h"
-#include "tbb/mutex.h"
+#include <tbb/spin_mutex.h>
+#include <tbb/mutex.h>
 
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/datanameproperty.h"

@@ -31,8 +31,8 @@
 #define DATACONTAINER_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/concurrent_unordered_map.h"
-#include "tbb/spin_mutex.h"
+#include <tbb/concurrent_unordered_map.h>
+#include <tbb/spin_mutex.h>
 #include "core/datastructures/datahandle.h"
 
 #include <string>

@@ -30,7 +30,7 @@
 #ifndef IMAGEDATA_H__
 #define IMAGEDATA_H__
 
-#include "tbb/concurrent_vector.h"
+#include <tbb/concurrent_vector.h>
 #include "tgt/logmanager.h"
 #include "tgt/vector.h"
 #include "core/datastructures/abstractdata.h"

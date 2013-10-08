@@ -29,8 +29,8 @@
 
 #include "strainfibertracker.h"
 
-#include "tbb/tbb.h"
-#include "tbb/spin_mutex.h"
+#include <tbb/tbb.h>
+#include <tbb/spin_mutex.h>
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "modules/columbia/datastructures/fiberdata.h"

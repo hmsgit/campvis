@@ -33,9 +33,9 @@
 
 #include "tgt/tgt_gl.h"
 #include "tgt/singleton.h"
-#include "tbb/atomic.h"
-#include "tbb/concurrent_vector.h"
-#include "tbb/spin_mutex.h"
+#include <tbb/atomic.h>
+#include <tbb/concurrent_vector.h>
+#include <tbb/spin_mutex.h>
 
 #include <vector>
 

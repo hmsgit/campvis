@@ -3,7 +3,7 @@
 
 #include "tgt/singleton.h"
 #include "tgt/qt/qtthreadedcanvas.h"
-#include "tbb/mutex.h"  // TODO: TBB dependency in TGT is not that beautiful...
+#include <tbb/mutex.h>  // TODO: TBB dependency in TGT is not that beautiful...
 #include <map>
 #include <string>
 

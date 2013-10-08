@@ -31,8 +31,8 @@
 #define RUNNABLE_H__
 
 #include "tgt/logmanager.h"
-#include "tbb/compat/thread"
-#include "tbb/atomic.h"
+#include <tbb/compat/thread>
+#include <tbb/atomic.h>
 
 namespace campvis {
     /**

@@ -31,8 +31,8 @@
 #define PROCESSOR_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/atomic.h"
-#include "tbb/concurrent_queue.h"
+#include <tbb/atomic.h>
+#include <tbb/concurrent_queue.h>
 #include "tgt/logmanager.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"

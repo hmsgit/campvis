@@ -30,8 +30,8 @@
 #include "imagerepresentationlocal.h"
 
 #include "tgt/qt/qtcontextmanager.h"
-#include "tbb/tbb.h"
-#include "tbb/spin_mutex.h"
+#include <tbb/tbb.h>
+#include <tbb/spin_mutex.h>
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"

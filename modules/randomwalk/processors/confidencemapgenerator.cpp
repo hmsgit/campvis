@@ -29,7 +29,7 @@
 
 #include "confidencemapgenerator.h"
 
-#include "tbb/tbb.h"
+#include <tbb/tbb.h>
 #include "tgt/logmanager.h"
 #include "tgt/tgt_math.h"
 #include "tgt/vector.h"
