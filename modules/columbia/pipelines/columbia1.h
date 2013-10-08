@@ -32,6 +32,7 @@
 
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/cameraproperty.h"
 
 
@@ -53,7 +54,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        Columbia1();
+        Columbia1(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -67,7 +68,8 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "Columbia1"; };
 
 
     protected:
@@ -101,6 +103,10 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballEH;
 
     };
+
+    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
+    template class PipelineRegistrar<Columbia1>;
+
 }
 
 #endif // COLUMBIA1_H__

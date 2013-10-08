@@ -38,6 +38,8 @@
 #include <utility>
 #include <vector>
 
+#include "core/datastructures/datacontainer.h"
+
 namespace tgt {
     class QtThreadedCanvas;
 }
@@ -125,10 +127,25 @@ namespace campvis {
          */
         int run();
 
+
+        /**
+         * Gets the DataContainer of this CampvisApplication
+         * \return  _dataContainer
+         */
+        DataContainer* getDataContainer();
+
+        /**
+         * Gets the DataContainer of this CampvisApplication
+         * \return  _dataContainer
+         */
+        const DataContainer* getDataContainer() const;
+
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
     private:
+        /// The (currently) one and only DataContainer in CampvisApplication
+        DataContainer _dataContainer;
         /// All pipelines (incuding VisualizationPipelines)
         std::vector<AbstractPipeline*> _pipelines;
         /// All visualisations (i.e. VisualizationPipelines with their corresponding painters/canvases)

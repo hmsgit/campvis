@@ -30,6 +30,7 @@
 #ifndef SLICEVIS_H__
 #define SLICEVIS_H__
 
+#include "core/pipeline/pipelinefactory.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
@@ -45,7 +46,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        SliceVis();
+        SliceVis(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -56,7 +57,8 @@ namespace campvis {
         virtual void init();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "SliceVis"; };
 
 
         virtual void keyEvent(tgt::KeyEvent* e);
@@ -78,6 +80,10 @@ namespace campvis {
         TransFuncWindowingEventListener _tfWindowingHandler;
 
     };
+
+    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
+    template class PipelineRegistrar<SliceVis>;
+
 }
 
 #endif // SLICEVIS_H__

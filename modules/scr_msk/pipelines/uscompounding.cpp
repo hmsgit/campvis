@@ -33,8 +33,8 @@
 namespace campvis {
 
 
-    UsCompounding::UsCompounding() 
-        : AutoEvaluationPipeline()
+    UsCompounding::UsCompounding(DataContainer* dc) 
+        : AutoEvaluationPipeline(dc)
         , p_camera("Camera", "Camera")
         , _reader()
         , _renderer(&_canvasSize)
@@ -69,10 +69,6 @@ namespace campvis {
     void UsCompounding::deinit() {
         _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
-    }
-
-    const std::string UsCompounding::getName() const {
-        return "UsCompounding";
     }
 
     void UsCompounding::onBoundingBoxChanged(tgt::Bounds b) {

@@ -41,13 +41,16 @@ namespace campvis {
      * Specializtaion of AbstractPipeline performing automatic execution of invalidated processors.
      * AutoEvaluationPipeline connects to the s_(in)validated signals of all of its processors and
      * executes processors with invalid results using the correct threads.
+     * 
+     * \param   dc  Pointer to the DataContainer containing local working set of data for this 
+     *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
      */
     class AutoEvaluationPipeline : public AbstractPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        AutoEvaluationPipeline();
+        AutoEvaluationPipeline(DataContainer* dc);
 
         /**
          * Virtual Destructor

@@ -45,6 +45,7 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/propertycollection.h"
 
+#include <map>
 #include <vector>
 
 namespace tgt {
@@ -63,8 +64,11 @@ namespace campvis {
          * Creates a AbstractPipeline.
          * If you derive from AbstractPipeline, you will have to implement the pipeline evaluation
          * logic yourself. You might want to have a look at AutoEvaluationPipeline.
+         * 
+         * \param   dc  Pointer to the DataContainer containing local working set of data for this 
+         *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
          */
-        AbstractPipeline();
+        AbstractPipeline(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -213,7 +217,8 @@ namespace campvis {
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
 
-        DataContainer _data;                                ///< DataContainer containing local working set of data for this Pipeline
+        /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
+        DataContainer* _data;
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
         tbb::atomic<bool> _enabled;                         ///< flag whether this pipeline is currently enabled

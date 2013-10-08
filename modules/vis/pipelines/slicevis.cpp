@@ -36,8 +36,8 @@
 
 namespace campvis {
 
-    SliceVis::SliceVis()
-        : AutoEvaluationPipeline()
+    SliceVis::SliceVis(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _imageReader()
         , _gvg()
         , _lhh()
@@ -92,13 +92,9 @@ namespace campvis {
         }
     }
 
-    const std::string SliceVis::getName() const {
-        return "SliceVis";
-    }
-
     void SliceVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
-            DataContainer::ScopedTypedData<ImageData> img(_data, _imageReader.p_targetImageID.getValue());
+            DataContainer::ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
                 _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
             }

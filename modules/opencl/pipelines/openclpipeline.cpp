@@ -40,8 +40,8 @@
 
 namespace campvis {
 
-    OpenCLPipeline::OpenCLPipeline()
-        : AutoEvaluationPipeline()
+    OpenCLPipeline::OpenCLPipeline(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
@@ -101,14 +101,10 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
-    const std::string OpenCLPipeline::getName() const {
-        return "OpenCLPipeline";
-    }
-
     void OpenCLPipeline::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
-            ImageRepresentationLocal::ScopedRepresentation img(_data, "reader.output");
+            ImageRepresentationLocal::ScopedRepresentation img(*_data, "reader.output");
             if (img != 0) {
                 size_t numElements = img->getNumElements();
                 float* asFloats = new float[numElements];
@@ -116,8 +112,7 @@ namespace campvis {
                     asFloats[i] = img->getElementNormalized(i, 0);
                 ImageData* id = new ImageData(img->getDimensionality(), img->getSize(), img->getParent()->getNumChannels());
                 GenericImageRepresentationLocal<float, 1>* imageWithFloats = GenericImageRepresentationLocal<float, 1>::create(id, asFloats);
-
-                DataHandle dh = _data.addData("clr.input", id);
+                DataHandle dh = _data->addData("clr.input", id);
                 _trackballEH->reinitializeCamera(img->getParent());
             }
         }

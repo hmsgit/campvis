@@ -32,6 +32,7 @@
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/csvdimagereader.h"
@@ -54,7 +55,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline. 
          */
-        CmBatchGeneration();
+        CmBatchGeneration(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -68,7 +69,8 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "CmBatchGeneration"; };
 
         /**
          * Execute this pipeline.
@@ -100,6 +102,10 @@ namespace campvis {
 
         ButtonProperty p_execute;
     };
+
+    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
+    template class PipelineRegistrar<CmBatchGeneration>;
+
 }
 
 #endif // CMBATCHGENERATION_H__

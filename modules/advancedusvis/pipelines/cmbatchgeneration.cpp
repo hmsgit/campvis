@@ -50,8 +50,8 @@
 
 namespace campvis {
 
-    CmBatchGeneration::CmBatchGeneration()
-        : AutoEvaluationPipeline()
+    CmBatchGeneration::CmBatchGeneration(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _usReader(&_canvasSize)
         , _confidenceGenerator()
         , _usBlurFilter()
@@ -137,10 +137,6 @@ namespace campvis {
         }
     }
 
-    const std::string CmBatchGeneration::getName() const {
-        return "CmBatchGeneration";
-    }
-
     void CmBatchGeneration::onProcessorInvalidated(AbstractProcessor* processor) {
         if (p_autoExecution.getValue())
             AutoEvaluationPipeline::onProcessorInvalidated(processor);
@@ -155,7 +151,7 @@ namespace campvis {
 
         executeProcessor(&_usReader, false);
 
-        DataHandle dh = _data.getData(_usReader.p_targetImageID.getValue());
+        DataHandle dh = _data->getData(_usReader.p_targetImageID.getValue());
         if (dh.getData() != 0) {
             if (const ImageData* tester = dynamic_cast<const ImageData*>(dh.getData())) {
             	_canvasSize.setValue(tester->getSize().xy());
@@ -177,7 +173,7 @@ namespace campvis {
 
     void CmBatchGeneration::save(int path, const std::string& basePath) {
         // get result
-        DataContainer::ScopedTypedData<RenderData> rd(_data, _usFusion.p_targetImageID.getValue());
+        DataContainer::ScopedTypedData<RenderData> rd(*_data, _usFusion.p_targetImageID.getValue());
         const ImageRepresentationGL* rep = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>(false);
         if (rep != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL

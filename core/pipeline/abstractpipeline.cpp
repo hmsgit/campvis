@@ -34,8 +34,8 @@
 #include "tgt/glcontext.h"
 #include "tgt/tgt_gl.h"
 
-#include "core/pipeline/abstractprocessor.h"
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/abstractprocessor.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
@@ -67,15 +67,18 @@ namespace {
 namespace campvis {
     const std::string AbstractPipeline::loggerCat_ = "CAMPVis.core.datastructures.AbstractPipeline";
 
-    AbstractPipeline::AbstractPipeline() 
+    AbstractPipeline::AbstractPipeline(DataContainer* dc) 
         : HasPropertyCollection()
         , tgt::EventHandler()
         , tgt::EventListener()
+        , _data(dc)
         , _canvas(0)
         , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
         , _ignoreCanvasSizeUpdate(false)
         , _renderTargetID("renderTargetID", "Render Target ID", "AbstractPipeline.renderTarget", DataNameProperty::READ)
     {
+        tgtAssert(_data != 0, "Pointer to the DataContainer for this pipeline must not be 0!");
+
         _enabled = true;
 
         addProperty(&_renderTargetID);
@@ -87,7 +90,7 @@ namespace campvis {
 
     void AbstractPipeline::init() {
         _renderTargetID.s_changed.connect<AbstractPipeline>(this, &AbstractPipeline::onPropertyChanged);
-        _data.s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
+        _data->s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
 
         initAllProperties();
 
@@ -116,11 +119,11 @@ namespace campvis {
             }
         }
 
-        _data.s_dataAdded.disconnect(this);
+        _data->s_dataAdded.disconnect(this);
         _renderTargetID.s_changed.disconnect(this);
 
         // clear DataContainer
-        _data.clear();
+        _data->clear();
     }
 
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
@@ -140,11 +143,11 @@ namespace campvis {
     }
 
     const DataContainer& AbstractPipeline::getDataContainer() const {
-        return _data;
+        return *_data;
     }
 
     DataContainer& AbstractPipeline::getDataContainer() {
-        return _data;
+        return *_data;
     }
 
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred) {
@@ -153,7 +156,7 @@ namespace campvis {
         if (processor->getEnabled() && !processor->isLocked()) {
             // update properties if they're invalid
             if (processor->hasInvalidProperties()) {
-                processor->updateProperties(_data);
+                processor->updateProperties(*_data);
 #if CAMPVIS_DEBUG
                 if (processor->hasInvalidProperties())
                     LDEBUG("Processor " << processor->getName() << " still has INVALID_PROPERTIES level. Did you forget to validate the processor in updateProperties()?");
@@ -166,7 +169,7 @@ namespace campvis {
                 clock_t startTime = clock();
 
                 try {
-                    processor->process(_data);
+                    processor->process(*_data);
                 }
                 catch (std::exception& e) {
                     LERROR("Caught unhandled exception while executing processor " << processor->getName() << ": " << e.what());

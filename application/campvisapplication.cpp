@@ -50,6 +50,7 @@
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
 
 namespace campvis {
 
@@ -173,6 +174,8 @@ namespace campvis {
 
         GLJobProc.start();
         _initialized = true;
+
+        LINFO(PipelineFactory::getRef().toString());
     }
 
     void CampVisApplication::deinit() {
@@ -268,6 +271,14 @@ namespace campvis {
         tgtAssert(dock != 0, "Dock widget must not be 0.");
 
         _mainWindow->addDockWidget(area, dock);
+    }
+
+    DataContainer* CampVisApplication::getDataContainer() {
+        return &_dataContainer;
+    }
+
+    const DataContainer* CampVisApplication::getDataContainer() const {
+        return &_dataContainer;
     }
 
 }

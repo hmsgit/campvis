@@ -39,8 +39,8 @@
 
 namespace campvis {
 
-    VolumeExplorerDemo::VolumeExplorerDemo()
-        : AutoEvaluationPipeline()
+    VolumeExplorerDemo::VolumeExplorerDemo(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _imageReader()
         , _ve(&_canvasSize)
@@ -80,10 +80,6 @@ namespace campvis {
     void VolumeExplorerDemo::deinit() {
         _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
-    }
-
-    const std::string VolumeExplorerDemo::getName() const {
-        return "VolumeExplorerDemo";
     }
 
     void VolumeExplorerDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {

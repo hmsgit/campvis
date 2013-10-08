@@ -33,6 +33,7 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -45,7 +46,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        OpenCLPipeline();
+        OpenCLPipeline(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -58,7 +59,8 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "OpenCLPipeline"; };
 
     protected:
         /**
@@ -77,6 +79,10 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballEH;
 
     };
+
+    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
+    template class PipelineRegistrar<OpenCLPipeline>;
+
 }
 
 #endif // OPENCLPIPELINE_H__

@@ -30,6 +30,7 @@
 #ifndef VOLUMERENDERERDEMO_H__
 #define VOLUMERENDERERDEMO_H__
 
+#include "core/pipeline/pipelinefactory.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
@@ -42,7 +43,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        VolumeRendererDemo();
+        VolumeRendererDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -56,7 +57,8 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "VolumeRendererDemo"; };
 
 
     protected:
@@ -74,6 +76,10 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballEH;
 
     };
+
+    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
+    template class PipelineRegistrar<VolumeRendererDemo>;
+
 }
 
 #endif // VOLUMERENDERERDEMO_H__

@@ -39,8 +39,8 @@
 
 namespace campvis {
 
-    VolumeRendererDemo::VolumeRendererDemo()
-        : AutoEvaluationPipeline()
+    VolumeRendererDemo::VolumeRendererDemo(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _imageReader()
         , _vr(&_canvasSize)
@@ -84,14 +84,10 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
-    const std::string VolumeRendererDemo::getName() const {
-        return "VolumeRendererDemo";
-    }
-
     void VolumeRendererDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
-            DataContainer::ScopedTypedData<ImageData> img(_data, _imageReader.p_targetImageID.getValue());
+            DataContainer::ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
                 _trackballEH->reinitializeCamera(img);
             }

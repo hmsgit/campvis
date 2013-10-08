@@ -27,55 +27,22 @@
 // 
 // ================================================================================================
 
-#ifndef VolumeExplorerDemo_H__
-#define VolumeExplorerDemo_H__
+#include "pipelinefactory.h"
 
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "core/pipeline/pipelinefactory.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/volumeexplorer.h"
+#include <sstream>
 
 namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
-    public:
-        /**
-         * Creates a AutoEvaluationPipeline.
-         */
-        VolumeExplorerDemo(DataContainer* dc);
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~VolumeExplorerDemo();
+    // declare one single symbol for the PipelineFactory singleton
+    tbb::atomic<PipelineFactory*> PipelineFactory::_singleton;
 
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
+    std::string PipelineFactory::toString() {
+        std::stringstream ss;
+        ss << _pipelineMap.size() << " Pipelines registered: ";
+        for (std::map< std::string, AbstractPipeline* (*)(DataContainer*) >::iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it) {
+            ss << it->first << ", ";
+        }
+        return ss.str();
+    }
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "VolumeExplorerDemo"; };
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
-    protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        VolumeExplorer _ve;
-    };
-
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<VolumeExplorerDemo>;
 }
-
-#endif // VolumeExplorerDemo_H__

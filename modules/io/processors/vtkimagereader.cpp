@@ -176,9 +176,9 @@ namespace campvis {
         curLine = StringUtils::lowercase(getTrimmedLine(file));
         splitted = StringUtils::split(curLine, " ");
         size_t numTuples = StringUtils::fromString<size_t>(splitted[1]);
-        size_t numComponents = StringUtils::fromString<size_t>(splitted[2]);
+        size_t numProcessors = StringUtils::fromString<size_t>(splitted[2]);
 
-        if (numTuples * numComponents != numPoints)
+        if (numTuples * numProcessors != numPoints)
             throw tgt::FileException("Number of points in dataset doesn't match dimensions of data field", p_url.getValue());
 
         ImageData* image = new ImageData(dimensionality, size, 1);

@@ -39,8 +39,8 @@
 
 namespace campvis {
 
-    DVRVis::DVRVis()
-        : AutoEvaluationPipeline()
+    DVRVis::DVRVis(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
@@ -150,14 +150,10 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
-    const std::string DVRVis::getName() const {
-        return "DVRVis";
-    }
-
     void DVRVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
-            DataContainer::ScopedTypedData<ImageData> img(_data, _imageReader.p_targetImageID.getValue());
+            DataContainer::ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
                 _trackballEH->reinitializeCamera(img);
             }

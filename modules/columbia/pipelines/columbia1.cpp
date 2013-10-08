@@ -39,8 +39,8 @@
 
 namespace campvis {
 
-    Columbia1::Columbia1()
-        : AutoEvaluationPipeline()
+    Columbia1::Columbia1(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _boundsData("BoundsData", "Bounds Data", "sfr", DataNameProperty::READ)
         , _imageReader()
@@ -151,14 +151,10 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
-    const std::string Columbia1::getName() const {
-        return "Columbia1";
-    }
-
     void Columbia1::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageSplitter) {
             // update camera
-            DataContainer::ScopedTypedData<ImageData> img(_data, _imageSplitter.p_outputID.getValue());
+            DataContainer::ScopedTypedData<ImageData> img(*_data, _imageSplitter.p_outputID.getValue());
             if (img != 0) {
                 _trackballEH->reinitializeCamera(img);
             }

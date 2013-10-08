@@ -33,6 +33,7 @@
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
+#include "core/pipeline/pipelinefactory.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
@@ -45,7 +46,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline. 
          */
-        UsCompounding();
+        UsCompounding(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -59,7 +60,8 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "UsCompounding"; };
         
     protected:
         void onBoundingBoxChanged(tgt::Bounds b);
@@ -71,6 +73,10 @@ namespace campvis {
 
         TrackballNavigationEventListener* _trackballEH;
     };
+
+    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
+    template class PipelineRegistrar<UsCompounding>;
+
 }
 
 #endif // USCOMPOUNDING_H__

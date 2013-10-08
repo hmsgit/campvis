@@ -38,8 +38,8 @@
 
 namespace campvis {
 
-    IxpvDemo::IxpvDemo()
-        : AutoEvaluationPipeline()
+    IxpvDemo::IxpvDemo(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _xrayReader(&_canvasSize)
         , _ctReader()
         , _ctProxy()
@@ -184,14 +184,10 @@ namespace campvis {
 
         _renderTargetID.setValue("ixpv");
     }
-    
-    const std::string IxpvDemo::getName() const {
-        return "IXPV Demo";
-    }
 
     void IxpvDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_ctReader) {
-            ImageRepresentationLocal::ScopedRepresentation local(_data, _ctReader.p_targetImageID.getValue());
+            ImageRepresentationLocal::ScopedRepresentation local(*_data, _ctReader.p_targetImageID.getValue());
             if (local != 0) {
                 // set TF handles
                 Interval<float> ii = local->getNormalizedIntensityRange();
@@ -216,7 +212,7 @@ namespace campvis {
         }
         else if (processor == &_usReader) {
             // set TF handles
-            ImageRepresentationLocal::ScopedRepresentation local(_data, _usReader.p_targetImageID.getValue());
+            ImageRepresentationLocal::ScopedRepresentation local(*_data, _usReader.p_targetImageID.getValue());
             if (local != 0) {
                 Interval<float> ii = local->getNormalizedIntensityRange();
                 _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
