@@ -28,24 +28,6 @@
 // ================================================================================================
 
 #include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/volumerendererdemo.h"
-#include "modules/vis/pipelines/volumeexplorerdemo.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-#include "modules/columbia/pipelines/columbia1.h"
-#endif
 
 #ifdef Q_WS_X11
 #include <X11/Xlib.h>

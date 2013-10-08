@@ -49,7 +49,7 @@
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
-#include "core/pipeline/pipelinefactory.h"
+#include "modules/pipelinefactory.h"
 
 namespace campvis {
 

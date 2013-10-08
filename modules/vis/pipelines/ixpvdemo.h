@@ -34,7 +34,6 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/properties/cameraproperty.h"
-#include "core/pipeline/pipelinefactory.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/io/processors/mhdimagereader.h"
@@ -101,9 +100,6 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballHandler;
         MWheelToNumericPropertyEventListener _wheelHandler;
     };
-
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<IxpvDemo>;
 
 }
 

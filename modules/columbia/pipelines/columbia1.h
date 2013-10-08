@@ -32,7 +32,6 @@
 
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/cameraproperty.h"
 
 
@@ -103,9 +102,6 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballEH;
 
     };
-
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<Columbia1>;
 
 }
 

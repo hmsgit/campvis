@@ -30,7 +30,6 @@
 #ifndef VOLUMERENDERERDEMO_H__
 #define VOLUMERENDERERDEMO_H__
 
-#include "core/pipeline/pipelinefactory.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
@@ -76,9 +75,6 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballEH;
 
     };
-
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<VolumeRendererDemo>;
 
 }
 

@@ -32,7 +32,6 @@
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/pipeline/pipelinefactory.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -91,9 +90,6 @@ namespace campvis {
 
         TrackballNavigationEventListener* _trackballEH;
     };
-
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<DVRVis>;
 
 }
 

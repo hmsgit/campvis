@@ -30,7 +30,6 @@
 #ifndef SLICEVIS_H__
 #define SLICEVIS_H__
 
-#include "core/pipeline/pipelinefactory.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
@@ -80,9 +79,6 @@ namespace campvis {
         TransFuncWindowingEventListener _tfWindowingHandler;
 
     };
-
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<SliceVis>;
 
 }
 

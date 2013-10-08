@@ -31,7 +31,6 @@
 #define VolumeExplorerDemo_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -74,8 +73,6 @@ namespace campvis {
         VolumeExplorer _ve;
     };
 
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<VolumeExplorerDemo>;
 }
 
 #endif // VolumeExplorerDemo_H__

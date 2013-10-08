@@ -4,6 +4,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 MESSAGE(STATUS "Configuring Campvis Modules")
 
+LIST(APPEND CampvisModulesHeaders
+    pipelinefactory.h
+)
+LIST(APPEND CampvisModulesSources
+    pipelinefactory.cpp
+)
+
+
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 ADD_LIBRARY(campvis-modules
     ${CampvisModulesSources} ${CampvisModulesHeaders} 

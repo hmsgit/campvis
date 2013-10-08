@@ -33,7 +33,6 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/pipeline/pipelinefactory.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -80,8 +79,6 @@ namespace campvis {
 
     };
 
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<OpenCLPipeline>;
 
 }
 

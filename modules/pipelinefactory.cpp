@@ -28,6 +28,7 @@
 // ================================================================================================
 
 #include "pipelinefactory.h"
+#include "gen_pipelineregistration.h"
 
 #include <sstream>
 

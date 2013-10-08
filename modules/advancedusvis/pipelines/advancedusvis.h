@@ -35,7 +35,6 @@
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/pipeline/pipelinefactory.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/csvdimagereader.h"
@@ -114,9 +113,6 @@ namespace campvis {
 
         TrackballNavigationEventListener* _trackballEH;
     };
-
-    /// Instantiate templated PipelineRegistrar to automatically register this pipeline.
-    template class PipelineRegistrar<AdvancedUsVis>;
 
 }
 
