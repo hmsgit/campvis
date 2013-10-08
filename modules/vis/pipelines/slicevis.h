@@ -33,17 +33,17 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
 
 namespace campvis {
-    class SliceVis : public VisualizationPipeline {
+    class SliceVis : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
         SliceVis();
 
@@ -52,7 +52,7 @@ namespace campvis {
          **/
         virtual ~SliceVis();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
         /// \see AbstractPipeline::getName()

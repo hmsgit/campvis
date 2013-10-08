@@ -37,7 +37,7 @@
 namespace campvis {
 
     SliceVis::SliceVis()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
         , _imageReader()
         , _gvg()
         , _lhh()
@@ -57,7 +57,7 @@ namespace campvis {
     }
 
     void SliceVis::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");

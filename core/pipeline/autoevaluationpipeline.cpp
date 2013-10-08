@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "visualizationpipeline.h"
+#include "autoevaluationpipeline.h"
 #include "tgt/tgt_gl.h"
 #include "tgt/glcanvas.h"
 #include "tgt/glcontext.h"
@@ -57,27 +57,27 @@ namespace {
 }
 
 namespace campvis {
-    const std::string VisualizationPipeline::loggerCat_ = "CAMPVis.core.datastructures.VisualizationPipeline";
+    const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";
 
-    VisualizationPipeline::VisualizationPipeline() 
+    AutoEvaluationPipeline::AutoEvaluationPipeline() 
         : AbstractPipeline()
         , tgt::EventHandler()
         , tgt::EventListener()
         , _ignoreCanvasSizeUpdate(false)
         , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
-        , _renderTargetID("renderTargetID", "Render Target ID", "VisualizationPipeline.renderTarget", DataNameProperty::READ)
+        , _renderTargetID("renderTargetID", "Render Target ID", "AutoEvaluationPipeline.renderTarget", DataNameProperty::READ)
         , _canvas(0)
     {
-        _data.s_dataAdded.connect(this, &VisualizationPipeline::onDataContainerDataAdded);
+        _data.s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
         addProperty(&_renderTargetID);
         addProperty(&_canvasSize);
-        _renderTargetID.s_changed.connect<VisualizationPipeline>(this, &VisualizationPipeline::onPropertyChanged);
+        _renderTargetID.s_changed.connect<AutoEvaluationPipeline>(this, &AutoEvaluationPipeline::onPropertyChanged);
     }
 
-    VisualizationPipeline::~VisualizationPipeline() {
+    AutoEvaluationPipeline::~AutoEvaluationPipeline() {
     }
 
-    void VisualizationPipeline::onEvent(tgt::Event* e) {
+    void AutoEvaluationPipeline::onEvent(tgt::Event* e) {
         // copy and paste from tgt::EventHandler::onEvent() but without deleting e
         for (size_t i = 0 ; i < listeners_.size() ; ++i) {
             // check if current listener listens to the eventType of e
@@ -89,50 +89,50 @@ namespace campvis {
         }
     }
 
-    void VisualizationPipeline::init() {
+    void AutoEvaluationPipeline::init() {
         AbstractPipeline::init();
     }
 
-    void VisualizationPipeline::deinit() {
+    void AutoEvaluationPipeline::deinit() {
         _data.s_dataAdded.disconnect(this);
         _renderTargetID.s_changed.disconnect(this);
 	
         AbstractPipeline::deinit();
     }
 
-    const tgt::ivec2& VisualizationPipeline::getRenderTargetSize() const {
+    const tgt::ivec2& AutoEvaluationPipeline::getRenderTargetSize() const {
         return _canvasSize.getValue();
     }
 
-    void VisualizationPipeline::setRenderTargetSize(const tgt::ivec2& size) {
+    void AutoEvaluationPipeline::setRenderTargetSize(const tgt::ivec2& size) {
         if (_canvasSize.getValue() != size && !_ignoreCanvasSizeUpdate) {
             _canvasSize.setValue(size);
         }
     }
 
-    void VisualizationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
+    void AutoEvaluationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
         if (name == _renderTargetID.getValue()) {
             s_renderTargetChanged();
         }
     }
 
-    const std::string& VisualizationPipeline::getRenderTargetID() const {
+    const std::string& AutoEvaluationPipeline::getRenderTargetID() const {
         return _renderTargetID.getValue();
     }
 
-    void VisualizationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor* processor) {
+    void AutoEvaluationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor* processor) {
         tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         GLJobProc.enqueueJob(
             _canvas, 
-            makeJobOnHeap<VisualizationPipeline, AbstractProcessor*, bool>(this, &VisualizationPipeline::executeProcessor, processor, true),
+            makeJobOnHeap<AutoEvaluationPipeline, AbstractProcessor*, bool>(this, &AutoEvaluationPipeline::executeProcessor, processor, true),
             OpenGLJobProcessor::SerialJob);
     }
 
-    void VisualizationPipeline::setCanvas(tgt::GLCanvas* canvas) {
+    void AutoEvaluationPipeline::setCanvas(tgt::GLCanvas* canvas) {
         _canvas = canvas;
     }
 
-    void VisualizationPipeline::onPropertyChanged(const AbstractProperty* prop) {
+    void AutoEvaluationPipeline::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &_renderTargetID)
             s_renderTargetChanged();
         else if (prop == &_canvasSize && _canvas != 0 && !_ignoreCanvasSizeUpdate) {
@@ -146,7 +146,7 @@ namespace campvis {
             AbstractPipeline::onPropertyChanged(prop);
     }
 
-    void VisualizationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
+    void AutoEvaluationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
         if (_canvas == 0)
             return;
 
@@ -156,11 +156,11 @@ namespace campvis {
                 // is VisualizationProcessor
                 GLJobProc.enqueueJob(
                     _canvas, 
-                    makeJobOnHeap<VisualizationPipeline, AbstractProcessor*>(this, &VisualizationPipeline::executeProcessorAndCheckOpenGLState, processor), 
+                    makeJobOnHeap<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessorAndCheckOpenGLState, processor), 
                     OpenGLJobProcessor::SerialJob);
             }
             else {
-                SimpleJobProc.enqueueJob(makeJob<VisualizationPipeline, AbstractProcessor*, bool>(this, &VisualizationPipeline::executeProcessor, processor, false));
+                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*, bool>(this, &AutoEvaluationPipeline::executeProcessor, processor, false));
             }
         }
         else {
@@ -169,12 +169,12 @@ namespace campvis {
         }
     }
 
-    void VisualizationPipeline::addProcessor(AbstractProcessor* processor) {
+    void AutoEvaluationPipeline::addProcessor(AbstractProcessor* processor) {
         _isVisProcessorMap.insert(std::make_pair(processor, (dynamic_cast<VisualizationProcessor*>(processor) != 0)));
         AbstractPipeline::addProcessor(processor);
     }
     
-    void VisualizationPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
+    void AutoEvaluationPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
         AbstractPipeline::executeProcessor(processor, true);
 
 #ifdef CAMPVIS_DEBUG

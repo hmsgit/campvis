@@ -33,17 +33,17 @@
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
 #include "modules/scr_msk/processors/trackedusfilereader.h"
 #include "modules/scr_msk/processors/trackedussweepframerenderer3d.h"
 
 namespace campvis {
-    class UsCompounding : public VisualizationPipeline {
+    class UsCompounding : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline. 
+         * Creates a AutoEvaluationPipeline. 
          */
         UsCompounding();
 
@@ -52,10 +52,10 @@ namespace campvis {
          **/
         virtual ~UsCompounding();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see VisualizationPipeline::deinit()
+        /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()

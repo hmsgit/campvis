@@ -46,7 +46,7 @@ namespace campvis {
     class AbstractPipeline;
     class MainWindow;
     class CampVisPainter;
-    class VisualizationPipeline;
+    class AutoEvaluationPipeline;
 
     /**
      * The CampVisApplication class wraps Pipelines, Evaluators and Painters all together and takes
@@ -105,9 +105,9 @@ namespace campvis {
          * 
          * \note    You do \b not need to call addPipeline.
          * \param   name    Name of the OpenGL context to create for the pipeline.
-         * \param   vp      VisualizationPipeline to add.
+         * \param   vp      AutoEvaluationPipeline to add.
          */
-        void addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp);
+        void addVisualizationPipeline(const std::string& name, AutoEvaluationPipeline* vp);
 
         /**
          * Adds a dock widget to the main window.
@@ -132,7 +132,7 @@ namespace campvis {
         /// All pipelines (incuding VisualizationPipelines)
         std::vector<AbstractPipeline*> _pipelines;
         /// All visualisations (i.e. VisualizationPipelines with their corresponding painters/canvases)
-        std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> > _visualizations;
+        std::vector< std::pair<AutoEvaluationPipeline*, CampVisPainter*> > _visualizations;
 
         /// A local OpenGL context used for initialization
         tgt::QtThreadedCanvas* _localContext;

@@ -39,7 +39,7 @@
 namespace campvis {
 
     IxpvDemo::IxpvDemo()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
         , _xrayReader(&_canvasSize)
         , _ctReader()
         , _ctProxy()
@@ -86,7 +86,7 @@ namespace campvis {
     }
 
     void IxpvDemo::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         // = Camera Setup =================================================================================
         _camera.addSharedProperty(&_ctFullEEP.p_camera);

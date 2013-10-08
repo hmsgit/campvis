@@ -40,7 +40,7 @@
 namespace campvis {
 
     Columbia1::Columbia1()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
         , _camera("camera", "Camera")
         , _boundsData("BoundsData", "Bounds Data", "sfr", DataNameProperty::READ)
         , _imageReader()
@@ -88,7 +88,7 @@ namespace campvis {
     }
 
     void Columbia1::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
         
         _imageSplitter.s_validated.connect(this, &Columbia1::onProcessorValidated);
 
@@ -148,7 +148,7 @@ namespace campvis {
 
     void Columbia1::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     const std::string Columbia1::getName() const {

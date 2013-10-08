@@ -49,7 +49,7 @@
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 
 namespace campvis {
 
@@ -78,7 +78,7 @@ namespace campvis {
         tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
         // delete everything in the right order:
-        for (std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<AutoEvaluationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             delete it->second;
         }
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
@@ -167,7 +167,7 @@ namespace campvis {
         }
 
         // Now init painters:
-        for (std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<AutoEvaluationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             it->second->init();
         }
 
@@ -190,7 +190,7 @@ namespace campvis {
             }
 
             // Now deinit painters:
-            for (std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+            for (std::vector< std::pair<AutoEvaluationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
                 it->second->deinit();
             }
 
@@ -243,7 +243,7 @@ namespace campvis {
         s_PipelinesChanged();
     }
 
-    void CampVisApplication::addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp) {
+    void CampVisApplication::addVisualizationPipeline(const std::string& name, AutoEvaluationPipeline* vp) {
         tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(vp != 0, "Pipeline must not be 0.");
 

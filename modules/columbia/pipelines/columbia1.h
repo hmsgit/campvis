@@ -31,7 +31,7 @@
 #define COLUMBIA1_H__
 
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
 
@@ -48,10 +48,10 @@
 #include "modules/vis/processors/volumerenderer.h"
 
 namespace campvis {
-    class Columbia1 : public VisualizationPipeline {
+    class Columbia1 : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
         Columbia1();
 
@@ -60,10 +60,10 @@ namespace campvis {
          **/
         virtual ~Columbia1();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see VisualizationPipeline::deinit()
+        /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()

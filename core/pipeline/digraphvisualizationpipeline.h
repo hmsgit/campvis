@@ -33,7 +33,7 @@
 #include "sigslot/sigslot.h"
 #include "tgt/vector.h"
 #include "tgt/event/eventlistener.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/genericproperty.h"
 
 #include <map>
@@ -43,12 +43,12 @@ namespace campvis {
     class VisualizationProcessor;
 
     /**
-     * Specialization of the VisualizationPipeline that performs automatic evaluation based on
+     * Specialization of the AutoEvaluationPipeline that performs automatic evaluation based on
      * an acyclic directed dependency graph.
      * 
      * \todo    Implement thread-safety. The current graph implementation is \b not thread-safe.
      */
-    class DigraphVisualizationPipeline : public VisualizationPipeline {
+    class DigraphVisualizationPipeline : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a DigraphVisualizationPipeline.

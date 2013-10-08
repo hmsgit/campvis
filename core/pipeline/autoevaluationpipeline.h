@@ -52,17 +52,17 @@ namespace campvis {
      * Abstract base class for CAMPVis Pipelines.
      * 
      */
-    class VisualizationPipeline : public AbstractPipeline, public tgt::EventHandler, public tgt::EventListener {
+    class AutoEvaluationPipeline : public AbstractPipeline, public tgt::EventHandler, public tgt::EventListener {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
-        VisualizationPipeline();
+        AutoEvaluationPipeline();
 
         /**
          * Virtual Destructor
          **/
-        virtual ~VisualizationPipeline();
+        virtual ~AutoEvaluationPipeline();
 
 
         /**

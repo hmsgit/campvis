@@ -30,16 +30,16 @@
 #ifndef VolumeExplorerDemo_H__
 #define VolumeExplorerDemo_H__
 
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
-    class VolumeExplorerDemo : public VisualizationPipeline {
+    class VolumeExplorerDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
         VolumeExplorerDemo();
 
@@ -48,10 +48,10 @@ namespace campvis {
          **/
         virtual ~VolumeExplorerDemo();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see VisualizationPipeline::deinit()
+        /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()

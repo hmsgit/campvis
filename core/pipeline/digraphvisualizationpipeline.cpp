@@ -79,7 +79,7 @@ namespace campvis {
 // ================================================================================================
 
     DigraphVisualizationPipeline::DigraphVisualizationPipeline()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
     {
 
     }
@@ -95,7 +95,7 @@ namespace campvis {
         tgtAssert(processor != 0, "Processor must not be 0!");
 
         // add processor to processor list and connect signals
-        VisualizationPipeline::addProcessor(processor);
+        AutoEvaluationPipeline::addProcessor(processor);
         processor->s_invalidated.connect<DigraphVisualizationPipeline>(this, &DigraphVisualizationPipeline::onProcessorInvalidated);
 
         // create DependencyNode

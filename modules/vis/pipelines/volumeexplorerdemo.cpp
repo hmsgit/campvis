@@ -40,7 +40,7 @@
 namespace campvis {
 
     VolumeExplorerDemo::VolumeExplorerDemo()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
         , _ve(&_canvasSize)
@@ -57,7 +57,7 @@ namespace campvis {
     }
 
     void VolumeExplorerDemo::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
         
         _imageReader.s_validated.connect(this, &VolumeExplorerDemo::onProcessorValidated);
 
@@ -79,7 +79,7 @@ namespace campvis {
 
     void VolumeExplorerDemo::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     const std::string VolumeExplorerDemo::getName() const {

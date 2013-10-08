@@ -31,16 +31,16 @@
 #define VOLUMERENDERERDEMO_H__
 
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumerenderer.h"
 
 namespace campvis {
-    class VolumeRendererDemo : public VisualizationPipeline {
+    class VolumeRendererDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
         VolumeRendererDemo();
 
@@ -49,10 +49,10 @@ namespace campvis {
          **/
         virtual ~VolumeRendererDemo();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see VisualizationPipeline::deinit()
+        /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()

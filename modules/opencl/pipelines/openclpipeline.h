@@ -32,7 +32,7 @@
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -40,10 +40,10 @@
 #include "modules/opencl/processors/clraycaster.h"
 
 namespace campvis {
-    class OpenCLPipeline : public VisualizationPipeline {
+    class OpenCLPipeline : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
         OpenCLPipeline();
 
@@ -52,9 +52,9 @@ namespace campvis {
          **/
         virtual ~OpenCLPipeline();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
-        /// \see VisualizationPipeline::deinit()
+        /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()

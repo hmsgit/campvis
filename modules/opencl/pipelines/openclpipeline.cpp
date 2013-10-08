@@ -41,7 +41,7 @@
 namespace campvis {
 
     OpenCLPipeline::OpenCLPipeline()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
@@ -66,7 +66,7 @@ namespace campvis {
     }
 
     void OpenCLPipeline::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         _camera.addSharedProperty(&_eepGenerator.p_camera);
         _camera.addSharedProperty(&_clRaycaster._camera);
@@ -98,7 +98,7 @@ namespace campvis {
 
     void OpenCLPipeline::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     const std::string OpenCLPipeline::getName() const {

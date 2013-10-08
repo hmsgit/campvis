@@ -40,7 +40,7 @@
 namespace campvis {
 
     DVRVis::DVRVis()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
@@ -79,7 +79,7 @@ namespace campvis {
     }
 
     void DVRVis::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
         
         _imageReader.s_validated.connect(this, &DVRVis::onProcessorValidated);
 
@@ -147,7 +147,7 @@ namespace campvis {
 
     void DVRVis::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     const std::string DVRVis::getName() const {

@@ -41,7 +41,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
@@ -49,7 +49,7 @@
 namespace campvis {
     const std::string CampVisPainter::loggerCat_ = "CAMPVis.core.CampVisPainter";
 
-    CampVisPainter::CampVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline)
+    CampVisPainter::CampVisPainter(tgt::GLCanvas* canvas, AutoEvaluationPipeline* pipeline)
         : Runnable()
         , tgt::Painter(canvas)
         , _pipeline(0)
@@ -175,7 +175,7 @@ namespace campvis {
         }
     }
 
-    void CampVisPainter::setPipeline(VisualizationPipeline* pipeline) {
+    void CampVisPainter::setPipeline(AutoEvaluationPipeline* pipeline) {
         tgtAssert(pipeline != 0, "The given pipeline must not be 0.");
         if (_pipeline != 0) {
             _pipeline->s_renderTargetChanged.disconnect(this);

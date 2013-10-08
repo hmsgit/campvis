@@ -34,7 +34,7 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/properties/cameraproperty.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/devil/processors/devilimagereader.h"
@@ -50,10 +50,10 @@
 
 
 namespace campvis {
-    class IxpvDemo : public VisualizationPipeline {
+    class IxpvDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
         IxpvDemo();
 
@@ -62,7 +62,7 @@ namespace campvis {
          **/
         virtual ~IxpvDemo();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
         /// \see AbstractPipeline::getName()

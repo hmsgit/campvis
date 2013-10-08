@@ -51,7 +51,7 @@
 namespace campvis {
 
     CmBatchGeneration::CmBatchGeneration()
-        : VisualizationPipeline()
+        : AutoEvaluationPipeline()
         , _usReader(&_canvasSize)
         , _confidenceGenerator()
         , _usBlurFilter()
@@ -80,7 +80,7 @@ namespace campvis {
     }
 
     void CmBatchGeneration::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         p_sourcePath.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase");
         p_targetPathColor.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\color");
@@ -124,7 +124,7 @@ namespace campvis {
     }
 
     void CmBatchGeneration::deinit() {
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     void CmBatchGeneration::execute() {
@@ -143,7 +143,7 @@ namespace campvis {
 
     void CmBatchGeneration::onProcessorInvalidated(AbstractProcessor* processor) {
         if (p_autoExecution.getValue())
-            VisualizationPipeline::onProcessorInvalidated(processor);
+            AutoEvaluationPipeline::onProcessorInvalidated(processor);
     }
 
     void CmBatchGeneration::executePass(int path) {

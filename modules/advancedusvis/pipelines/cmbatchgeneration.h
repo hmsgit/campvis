@@ -31,7 +31,7 @@
 #define CMBATCHGENERATION_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/csvdimagereader.h"
@@ -49,10 +49,10 @@
 #include "core/properties/genericproperty.h"
 
 namespace campvis {
-    class CmBatchGeneration : public VisualizationPipeline {
+    class CmBatchGeneration : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline. 
+         * Creates a AutoEvaluationPipeline. 
          */
         CmBatchGeneration();
 
@@ -61,10 +61,10 @@ namespace campvis {
          **/
         virtual ~CmBatchGeneration();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see VisualizationPipeline::deinit()
+        /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()

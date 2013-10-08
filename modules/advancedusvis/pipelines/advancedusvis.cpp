@@ -88,7 +88,7 @@ namespace campvis {
     }
 
     void AdvancedUsVis::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         _usReader.s_validated.connect(this, &AdvancedUsVis::onProcessorValidated);
 
@@ -197,7 +197,7 @@ namespace campvis {
 
     void AdvancedUsVis::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     void AdvancedUsVis::execute() {
