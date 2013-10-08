@@ -34,7 +34,7 @@
 #include "tgt/singleton.h"
 
 #include <tbb/atomic.h>
-#include <tbb/mutex.h>
+#include <tbb/spin_mutex.h>
 
 #include <map>
 #include <string>
@@ -58,17 +58,11 @@ namespace campvis {
          * Creates the singleton if necessary
          * \return  *_singleton
          */
-        static PipelineFactory& getRef() {
-            if (_singleton == 0) {
-                std::cout << "creating PipelineFactory...\n";
-                PipelineFactory* tmp = new PipelineFactory();
-                if (_singleton.compare_and_swap(tmp, 0) != 0) {
-                    delete tmp;
-                }
-            }
+        static PipelineFactory& getRef();
 
-            return *_singleton;
-        }
+        std::vector<std::string> getRegisteredPipelines() const;
+
+        AbstractPipeline* createPipeline(const std::string& id, DataContainer* dc) const;
 
         /**
          * Statically registers the pipeline of type T using \a callee as factory method.
@@ -78,19 +72,24 @@ namespace campvis {
          */
         template<typename T>
         size_t registerPipeline(AbstractPipeline* (* callee)(DataContainer*)) {
-            std::cout << "registering pipeline " << T::getId() << "...\n";
-            _pipelineMap[T::getId()] = callee;
-            //_pipelines.push_back(callee);
+            tbb::spin_mutex::scoped_lock lock(_mutex);
+
+            std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::iterator it = _pipelineMap.lower_bound(T::getId());
+            if (it == _pipelineMap.end() || it->first != T::getId()) {
+                _pipelineMap.insert(it, std::make_pair(T::getId(), callee));
+            }
+            else {
+                tgtAssert(false, "Registered two pipelines with the same ID.");
+            }
+            
             return _pipelineMap.size();
         }
 
-        /// just a simple test function
-        std::string toString();
     private:
+        mutable tbb::spin_mutex _mutex;
         static tbb::atomic<PipelineFactory*> _singleton;    ///< the singleton object
 
-        std::vector< AbstractPipeline* (*)(DataContainer*) > _pipelines;
-        std::map< std::string, AbstractPipeline* (*)(DataContainer*) > _pipelineMap;
+        std::map<std::string, AbstractPipeline* (*)(DataContainer*)> _pipelineMap;
     };
 
 

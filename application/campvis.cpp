@@ -66,27 +66,6 @@ int main(int argc, char** argv) {
     #endif
   
     CampVisApplication app(argc, argv);
-//     app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis(app.getDataContainer()));
-//     app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration(app.getDataContainer()));
-//     app.addVisualizationPipeline("IXPV", new IxpvDemo(app.getDataContainer()));
-    app.addVisualizationPipeline("SliceVis", new SliceVis(app.getDataContainer()));
-//     app.addVisualizationPipeline("DVRVis", new DVRVis(app.getDataContainer()));
-//     app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo(app.getDataContainer()));
-    app.addVisualizationPipeline("VolumeExplorerDemo", new VolumeExplorerDemo(app.getDataContainer()));
-#ifdef HAS_KISSCL
-//     app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline(app.getDataContainer()));
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    app.addVisualizationPipeline("US Compounding", new UsCompounding(app.getDataContainer()));
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-    app.addVisualizationPipeline("Columbia", new Columbia1(app.getDataContainer()));
-#endif
-
-
-
     app.init();
     int toReturn = app.run();
     app.deinit();

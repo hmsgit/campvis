@@ -36,13 +36,36 @@ namespace campvis {
     // declare one single symbol for the PipelineFactory singleton
     tbb::atomic<PipelineFactory*> PipelineFactory::_singleton;
 
-    std::string PipelineFactory::toString() {
-        std::stringstream ss;
-        ss << _pipelineMap.size() << " Pipelines registered: ";
-        for (std::map< std::string, AbstractPipeline* (*)(DataContainer*) >::iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it) {
-            ss << it->first << ", ";
+    PipelineFactory& PipelineFactory::getRef() {
+        if (_singleton == 0) {
+            std::cout << "creating PipelineFactory...\n";
+            PipelineFactory* tmp = new PipelineFactory();
+            if (_singleton.compare_and_swap(tmp, 0) != 0) {
+                delete tmp;
+            }
         }
-        return ss.str();
+
+        return *_singleton;
+    }
+
+    std::vector<std::string> PipelineFactory::getRegisteredPipelines() const {
+        tbb::spin_mutex::scoped_lock lock(_mutex);
+
+        std::vector<std::string> toReturn;
+        toReturn.reserve(_pipelineMap.size());
+        for (std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it)
+            toReturn.push_back(it->first);
+        return toReturn;
+    }
+
+    AbstractPipeline* PipelineFactory::createPipeline(const std::string& id, DataContainer* dc) const {
+        tbb::spin_mutex::scoped_lock lock(_mutex);
+
+        std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.find(id);
+        if (it == _pipelineMap.end())
+            return 0;
+        else
+            return (it->second)(dc);
     }
 
 }

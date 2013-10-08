@@ -49,7 +49,6 @@
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
-#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/pipeline/pipelinefactory.h"
 
 namespace campvis {
@@ -79,7 +78,7 @@ namespace campvis {
         tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
         // delete everything in the right order:
-        for (std::vector< std::pair<AutoEvaluationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             delete it->second;
         }
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
@@ -89,6 +88,14 @@ namespace campvis {
 
     void CampVisApplication::init() {
         tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
+
+        // parse argument list and create pipelines
+        QStringList pipelinesToAdd = this->arguments();
+        for (int i = 1; i < pipelinesToAdd.size(); ++i) {
+            AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), &_dataContainer);
+            if (p != 0)
+                addPipeline(pipelinesToAdd[i].toStdString(), p);
+        }
 
         // Init TGT
         tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
@@ -168,14 +175,12 @@ namespace campvis {
         }
 
         // Now init painters:
-        for (std::vector< std::pair<AutoEvaluationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             it->second->init();
         }
 
         GLJobProc.start();
         _initialized = true;
-
-        LINFO(PipelineFactory::getRef().toString());
     }
 
     void CampVisApplication::deinit() {
@@ -193,7 +198,7 @@ namespace campvis {
             }
 
             // Now deinit painters:
-            for (std::vector< std::pair<AutoEvaluationPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+            for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
                 it->second->deinit();
             }
 
@@ -238,33 +243,25 @@ namespace campvis {
         return toReturn;
     }
 
-    void CampVisApplication::addPipeline(AbstractPipeline* pipeline) {
+    void CampVisApplication::addPipeline(const std::string& name, AbstractPipeline* pipeline) {
         tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
         tgtAssert(pipeline != 0, "Pipeline must not be 0.");
-        _pipelines.push_back(pipeline);
 
-        s_PipelinesChanged();
-    }
-
-    void CampVisApplication::addVisualizationPipeline(const std::string& name, AutoEvaluationPipeline* vp) {
-        tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
-        tgtAssert(vp != 0, "Pipeline must not be 0.");
-
-        // create canvas and painter for the VisPipeline and connect all together
+        // create canvas and painter for the pipeline and connect all together
         tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
         GLJobProc.registerContext(canvas);
         _mainWindow->addVisualizationPipelineWidget(name, canvas);
         canvas->init();
 
-        CampVisPainter* painter = new CampVisPainter(canvas, vp);
+        CampVisPainter* painter = new CampVisPainter(canvas, pipeline);
         canvas->setPainter(painter, false);
+        pipeline->setCanvas(canvas);
 
-        _visualizations.push_back(std::make_pair(vp, painter));
-
-        vp->setCanvas(canvas);
-        addPipeline(vp);
-
+        _visualizations.push_back(std::make_pair(pipeline, painter));
+        _pipelines.push_back(pipeline);
         CtxtMgr.releaseCurrentContext();
+
+        s_PipelinesChanged();
     }
 
     void CampVisApplication::registerDockWidget(Qt::DockWidgetArea area, QDockWidget* dock) {
