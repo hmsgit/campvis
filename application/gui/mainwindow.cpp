@@ -43,8 +43,7 @@
 
 #include <QMdiSubWindow>
 #include <QScrollBar>
-#include <QPushButton>
-#include <QComboBox>
+
 
 namespace campvis {
 

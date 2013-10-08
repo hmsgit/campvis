@@ -42,6 +42,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QComboBox>
 #include <QMdiArea>
 #include <QScrollArea>
 #include <vector>
