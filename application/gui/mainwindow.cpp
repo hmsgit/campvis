@@ -35,6 +35,7 @@
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/visualizationpipelinewrapper.h"
+#include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 
@@ -64,6 +65,7 @@ namespace campvis {
 
     MainWindow::~MainWindow() {
         _application->s_PipelinesChanged.disconnect(this);
+        _application->s_DataContainersChanged.disconnect(this);
         delete _dcInspectorWidget;
     }
 
@@ -115,8 +117,8 @@ namespace campvis {
         _dcInspectorWidget = new DataContainerInspectorWidget();
 
         connect(
-            this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), 
-            _pipelineWidget, SLOT(update(const std::vector<AbstractPipeline*>&)));
+            this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
+            _pipelineWidget, SLOT(update(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)));
         connect(
             _pipelineWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onPipelineWidgetItemClicked(const QModelIndex&)));
@@ -130,6 +132,7 @@ namespace campvis {
             _btnShowDataContainerInspector, SIGNAL(clicked()), 
             this, SLOT(onBtnShowDataContainerInspectorClicked()));
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
+        _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
     }
 
     bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
@@ -142,30 +145,39 @@ namespace campvis {
     }
 
     void MainWindow::onPipelinesChanged() {
-        emit updatePipelineWidget(_application->_pipelines);
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
+    }
+
+    void MainWindow::onDataContainersChanged() {
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
     void MainWindow::onPipelineWidgetItemClicked(const QModelIndex& index) {
         if (index.isValid()) {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
-            HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
+            if (item.isValid()) {
+                HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
 
-            if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
-            	_selectedPipeline = pipeline;
-                _selectedProcessor = 0;
-            }
-            else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
-                _selectedProcessor = processor;
-
-                QVariant parentItem = index.parent().data(Qt::UserRole);
-                HasPropertyCollection* pptr = static_cast<HasPropertyCollection*>(parentItem.value<void*>());
-                if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(pptr)) {
+                if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
                     _selectedPipeline = pipeline;
+                    _selectedProcessor = 0;
                 }
-            }
+                else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
+                    _selectedProcessor = processor;
 
-            emit updatePropCollectionWidget(ptr, &_selectedPipeline->getDataContainer());
+                    QVariant parentItem = index.parent().data(Qt::UserRole);
+                    HasPropertyCollection* pptr = static_cast<HasPropertyCollection*>(parentItem.value<void*>());
+                    if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(pptr)) {
+                        _selectedPipeline = pipeline;
+                    }
+                }
+
+                emit updatePropCollectionWidget(ptr, &_selectedPipeline->getDataContainer());
+            }
+            else {
+                emit updatePropCollectionWidget(0, 0);
+            }
         }
         else {
             emit updatePropCollectionWidget(0, 0);

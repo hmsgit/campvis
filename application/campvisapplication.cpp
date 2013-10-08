@@ -47,6 +47,7 @@
 #include "application/gui/mainwindow.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
+#include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "modules/pipelinefactory.h"
@@ -84,6 +85,9 @@ namespace campvis {
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
             delete *it;
         }
+        for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
+            delete *it;
+        }
     }
 
     void CampVisApplication::init() {
@@ -92,7 +96,8 @@ namespace campvis {
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
         for (int i = 1; i < pipelinesToAdd.size(); ++i) {
-            AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), &_dataContainer);
+            DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
+            AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
             if (p != 0)
                 addPipeline(pipelinesToAdd[i].toStdString(), p);
         }
@@ -270,12 +275,12 @@ namespace campvis {
         _mainWindow->addDockWidget(area, dock);
     }
 
-    DataContainer* CampVisApplication::getDataContainer() {
-        return &_dataContainer;
+    DataContainer* CampVisApplication::createAndAddDataContainer(const std::string& name) {
+        DataContainer* dc = new DataContainer(name);
+        _dataContainers.push_back(dc);
+        s_DataContainersChanged();
+        return dc;
     }
 
-    const DataContainer* CampVisApplication::getDataContainer() const {
-        return &_dataContainer;
-    }
 
 }

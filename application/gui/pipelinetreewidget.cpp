@@ -45,6 +45,38 @@ namespace campvis {
 
 // = TreeModel items ==============================================================================
 
+    DataContainerTreeItem::DataContainerTreeItem(DataContainer* dc, TreeItem* parent)
+        : TreeItem(parent)
+        , _dataContainer(dc)
+    {
+        tgtAssert(_dataContainer != 0, "Pipeline must not be 0.");
+    }
+
+    QVariant DataContainerTreeItem::getData(int column, int role) const {
+        switch (role) {
+        case Qt::DisplayRole:
+            if (column == COLUMN_NAME)
+                return QVariant(QString::fromStdString(_dataContainer->getName()));
+            else
+                return QVariant();
+        case Qt::CheckStateRole:
+            return QVariant();
+        case Qt::UserRole:
+            return QVariant();
+        default:
+            return QVariant();
+        }
+    }
+
+    DataContainerTreeItem::~DataContainerTreeItem() {
+    }
+
+    bool DataContainerTreeItem::setData(int column, int role, const QVariant& value) const {
+        return false;
+    }
+
+    // ================================================================================================
+
     PipelineTreeItem::PipelineTreeItem(AbstractPipeline* pipeline, TreeItem* parent)
         : TreeItem(parent)
         , _pipeline(pipeline)
@@ -84,6 +116,7 @@ namespace campvis {
         return false;
     }
 
+// ================================================================================================
 
     ProcessorTreeItem::ProcessorTreeItem(AbstractProcessor* processor, TreeItem* parent)
         : TreeItem(parent)
@@ -258,15 +291,28 @@ namespace campvis {
         return 4;
     }
 
-    void PipelineTreeModel::setData(const std::vector<AbstractPipeline*>& pipelines) {
+    void PipelineTreeModel::setData(const std::vector<DataContainer*>& dataContainers, const std::vector<AbstractPipeline*>& pipelines) {
         delete _rootItem;
         _rootItem = new PipelineTreeRootItem();
 
-        for (std::vector<AbstractPipeline*>::const_iterator pipe = pipelines.begin(); pipe != pipelines.end(); ++pipe) {
-            PipelineTreeItem* pipeti = new PipelineTreeItem(*pipe, _rootItem);
+        std::map<DataContainer*, DataContainerTreeItem*> dcItemMap;
+        for (size_t i = 0; i < dataContainers.size(); ++i) {
+            DataContainerTreeItem* dcti = new DataContainerTreeItem(dataContainers[i], _rootItem);
+            dcItemMap[dataContainers[i]] = dcti;
+        }
 
-            for (std::vector<AbstractProcessor*>::const_iterator proc = (*pipe)->getProcessors().begin(); proc != (*pipe)->getProcessors().end(); ++proc) {
-                ProcessorTreeItem* procti = new ProcessorTreeItem(*proc, pipeti);
+        for (std::vector<AbstractPipeline*>::const_iterator pipe = pipelines.begin(); pipe != pipelines.end(); ++pipe) {
+            std::map<DataContainer*, DataContainerTreeItem*>::iterator it = dcItemMap.find(&(*pipe)->getDataContainer());
+
+            if (it != dcItemMap.end()) {
+                PipelineTreeItem* pipeti = new PipelineTreeItem(*pipe, it->second);
+
+                for (std::vector<AbstractProcessor*>::const_iterator proc = (*pipe)->getProcessors().begin(); proc != (*pipe)->getProcessors().end(); ++proc) {
+                    ProcessorTreeItem* procti = new ProcessorTreeItem(*proc, pipeti);
+                }
+            }
+            else {
+                tgtAssert(false, "The DataContainer of this pipeline is not in the list of DataContainers, cannot add it to GUI!");
             }
         }
     }
@@ -292,23 +338,30 @@ namespace campvis {
             height += sizeHintForRow(i);
 
             if (model()->hasChildren(index)) {
-                height += model()->rowCount(index) * sizeHintForIndex(index.child(0, 0)).height();
+                for (int j = 0; j < model()->rowCount(index); ++j) {
+                    QModelIndex cIndex = index.child(j, 0);
+                    height += sizeHintForIndex(cIndex).height();
+
+                    if (model()->hasChildren(cIndex)) {
+                        height += model()->rowCount(cIndex) * sizeHintForIndex(cIndex.child(0, 0)).height();
+                    }
+                }                
             }
         }
 
         // Next, add the heights of the horizontal scrollbar, header, and frame
         height += horizontalScrollBar()->sizeHint().height();
-        height += header()->sizeHint().height();
+        height += 2 * header()->sizeHint().height();
         height += 2 * frameWidth();
 
         return QSize(QTreeView::sizeHint().width(), height);
     }
 
-    void PipelineTreeWidget::update(const std::vector<AbstractPipeline*>& pipelines) {
+    void PipelineTreeWidget::update(const std::vector<DataContainer*>& dataContainers, const std::vector<AbstractPipeline*>& pipelines) {
         // clear selection before setting the new data or we will encounter random crashes...
         selectionModel()->clear();
 
-        _treeModel->setData(pipelines);
+        _treeModel->setData(dataContainers, pipelines);
         expandAll();
         resizeColumnToContents(0);
         resizeColumnToContents(1);

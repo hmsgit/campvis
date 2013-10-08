@@ -116,28 +116,22 @@ namespace campvis {
         int run();
 
 
-        /**
-         * Gets the DataContainer of this CampvisApplication
-         * \return  _dataContainer
-         */
-        DataContainer* getDataContainer();
-
-        /**
-         * Gets the DataContainer of this CampvisApplication
-         * \return  _dataContainer
-         */
-        const DataContainer* getDataContainer() const;
+        DataContainer* createAndAddDataContainer(const std::string& name);
 
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
+        /// Signal emitted when the collection of DataContainers has changed.
+        sigslot::signal0<> s_DataContainersChanged;
+
     private:
-        /// The (currently) one and only DataContainer in CampvisApplication
-        DataContainer _dataContainer;
         /// All pipelines 
         std::vector<AbstractPipeline*> _pipelines;
         /// All visualisations (i.e. Pipelines with their corresponding painters/canvases)
         std::vector< std::pair<AbstractPipeline*, CampVisPainter*> > _visualizations;
+
+        /// All DataContainers
+        std::vector<DataContainer*> _dataContainers;
 
         /// A local OpenGL context used for initialization
         tgt::QtThreadedCanvas* _localContext;

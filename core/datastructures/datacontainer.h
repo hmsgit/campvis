@@ -59,8 +59,9 @@ namespace campvis {
     public:
         /**
          * Creates a new empty DataContainer
+         * \param   name    The name of the new DataContainer
          */
-        DataContainer();
+        DataContainer(const std::string& name);
 
         /**
          * Destructor of the DataContainer. Will disconnect all DataHandles from this container.
@@ -127,6 +128,18 @@ namespace campvis {
         std::vector< std::pair< std::string, DataHandle> > getDataHandlesCopy() const;
 
         /**
+         * Returns the name of this DataContainer.
+         * \return  _name
+         */
+        const std::string& getName() const;
+
+        /**
+         * Sets the name of this DataContainer.
+         * \param   name    The new name of this DataContainer
+         */
+        void setName(const std::string& name);
+
+        /**
          * Returns a copy of the current map of DataHandles.
          * \note    Use with caution, this method is to be considered as slow, as it includes several 
          *          copies and locks the whole DataContainer during execution.
@@ -149,6 +162,8 @@ namespace campvis {
         mutable tbb::spin_mutex _localMutex;
 
         tbb::concurrent_unordered_map<std::string, DataHandle> _handles;
+
+        std::string _name;
 
         static const std::string loggerCat_;
     };

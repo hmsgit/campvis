@@ -35,7 +35,9 @@
 namespace campvis {
     const std::string DataContainer::loggerCat_ = "CAMPVis.core.datastructures.DataContainer";
 
-    DataContainer::DataContainer() {
+    DataContainer::DataContainer(const std::string& name)
+        : _name(name)
+    {
 
     }
 
@@ -108,6 +110,14 @@ namespace campvis {
     void DataContainer::clear() {
         //tbb::spin_mutex::scoped_lock lock(_localMutex);
         _handles.clear();
+    }
+
+    const std::string& DataContainer::getName() const {
+        return _name;
+    }
+
+    void DataContainer::setName(const std::string& name) {
+        _name = name;
     }
 
 }

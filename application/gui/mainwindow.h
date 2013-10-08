@@ -81,11 +81,6 @@ namespace campvis {
         void deinit();
 
         /**
-         * Slot to be called by the application when its collection of pipelines has changed.
-         */
-        void onPipelinesChanged();
-
-        /**
          * Size hint for the default window size
          * \return QSize(800, 450)
          */
@@ -108,7 +103,8 @@ namespace campvis {
 
     signals:
         /// Qt signal for updating the PipelineWidget.
-        void updatePipelineWidget(const std::vector<AbstractPipeline*>&);
+        void updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&);
+
         /// Qt signal for updating the PropertyCollectionWidget
         void updatePropCollectionWidget(HasPropertyCollection*, DataContainer*);
 
@@ -130,6 +126,18 @@ namespace campvis {
         void onBtnShowDataContainerInspectorClicked();
 
     private:
+
+        /**
+         * Slot to be called by the application when its collection of pipelines has changed.
+         */
+        void onPipelinesChanged();
+
+        /**
+         * Slot to be called by the application when its collection of DataContainers has changed.
+         */
+        void onDataContainersChanged();
+
+
         /**
          * Setup Qt GUI stuff
          */
