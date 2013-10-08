@@ -36,114 +36,33 @@
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 
-namespace {
-    GLboolean getGlBool(GLenum param) {
-        GLboolean toReturn;
-        glGetBooleanv(param, &toReturn);
-        return toReturn;
-    };
-
-    GLint getGlInt(GLenum param) {
-        GLint toReturn;
-        glGetIntegerv(param, &toReturn);
-        return toReturn;
-    };
-
-    GLfloat getGlFloat(GLenum param) {
-        GLfloat toReturn;
-        glGetFloatv(param, &toReturn);
-        return toReturn;
-    }
-}
 
 namespace campvis {
     const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";
 
     AutoEvaluationPipeline::AutoEvaluationPipeline() 
         : AbstractPipeline()
-        , tgt::EventHandler()
-        , tgt::EventListener()
-        , _ignoreCanvasSizeUpdate(false)
-        , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
-        , _renderTargetID("renderTargetID", "Render Target ID", "AutoEvaluationPipeline.renderTarget", DataNameProperty::READ)
-        , _canvas(0)
     {
-        _data.s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
-        addProperty(&_renderTargetID);
-        addProperty(&_canvasSize);
-        _renderTargetID.s_changed.connect<AutoEvaluationPipeline>(this, &AutoEvaluationPipeline::onPropertyChanged);
     }
 
     AutoEvaluationPipeline::~AutoEvaluationPipeline() {
     }
 
-    void AutoEvaluationPipeline::onEvent(tgt::Event* e) {
-        // copy and paste from tgt::EventHandler::onEvent() but without deleting e
-        for (size_t i = 0 ; i < listeners_.size() ; ++i) {
-            // check if current listener listens to the eventType of e
-            if(listeners_[i]->getEventTypes() & e->getEventType() ){
-                listeners_[i]->onEvent(e);
-                if (e->isAccepted())
-                    break;
-            }
-        }
-    }
-
     void AutoEvaluationPipeline::init() {
         AbstractPipeline::init();
+
+        // connect invalidation of each processor
+        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
+            (*it)->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
+        }
     }
 
     void AutoEvaluationPipeline::deinit() {
-        _data.s_dataAdded.disconnect(this);
-        _renderTargetID.s_changed.disconnect(this);
-	
+        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
+            (*it)->s_invalidated.disconnect(this);
+        }
+    
         AbstractPipeline::deinit();
-    }
-
-    const tgt::ivec2& AutoEvaluationPipeline::getRenderTargetSize() const {
-        return _canvasSize.getValue();
-    }
-
-    void AutoEvaluationPipeline::setRenderTargetSize(const tgt::ivec2& size) {
-        if (_canvasSize.getValue() != size && !_ignoreCanvasSizeUpdate) {
-            _canvasSize.setValue(size);
-        }
-    }
-
-    void AutoEvaluationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
-        if (name == _renderTargetID.getValue()) {
-            s_renderTargetChanged();
-        }
-    }
-
-    const std::string& AutoEvaluationPipeline::getRenderTargetID() const {
-        return _renderTargetID.getValue();
-    }
-
-    void AutoEvaluationPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor* processor) {
-        tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
-        GLJobProc.enqueueJob(
-            _canvas, 
-            makeJobOnHeap<AutoEvaluationPipeline, AbstractProcessor*, bool>(this, &AutoEvaluationPipeline::executeProcessor, processor, true),
-            OpenGLJobProcessor::SerialJob);
-    }
-
-    void AutoEvaluationPipeline::setCanvas(tgt::GLCanvas* canvas) {
-        _canvas = canvas;
-    }
-
-    void AutoEvaluationPipeline::onPropertyChanged(const AbstractProperty* prop) {
-        if (prop == &_renderTargetID)
-            s_renderTargetChanged();
-        else if (prop == &_canvasSize && _canvas != 0 && !_ignoreCanvasSizeUpdate) {
-            if (_canvasSize.getValue() != _canvas->getSize()) {
-                _ignoreCanvasSizeUpdate = true;
-                _canvas->setSize(_canvasSize.getValue());
-                _ignoreCanvasSizeUpdate = false;
-            }
-        }
-        else
-            AbstractPipeline::onPropertyChanged(prop);
     }
 
     void AutoEvaluationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
@@ -172,30 +91,6 @@ namespace campvis {
     void AutoEvaluationPipeline::addProcessor(AbstractProcessor* processor) {
         _isVisProcessorMap.insert(std::make_pair(processor, (dynamic_cast<VisualizationProcessor*>(processor) != 0)));
         AbstractPipeline::addProcessor(processor);
-    }
-    
-    void AutoEvaluationPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
-        AbstractPipeline::executeProcessor(processor, true);
-
-#ifdef CAMPVIS_DEBUG
-        tgtAssert(getGlBool(GL_DEPTH_TEST) == false, "Invalid OpenGL state after processor execution, GL_DEPTH_TEST != false.");
-        tgtAssert(getGlBool(GL_SCISSOR_TEST) == false, "Invalid OpenGL state after processor execution, GL_SCISSOR_TEST != false.");
-
-        tgtAssert(getGlInt(GL_CULL_FACE_MODE) == GL_BACK, "Invalid OpenGL state after processor execution, GL_CULL_FACE_MODE != GL_BACk.");
-        tgtAssert(getGlInt(GL_DEPTH_FUNC) == GL_LESS, "Invalid OpenGL state after processor execution, GL_DEPTH_FUNC != GL_LESS.");
-
-        tgtAssert(getGlFloat(GL_DEPTH_CLEAR_VALUE) == 1.f, "Invalid OpenGL state after processor execution, GL_DEPTH_CLEAR_VALUE != 1.f.");
-
-        tgtAssert(getGlFloat(GL_RED_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_RED_SCALE != 1.f.");
-        tgtAssert(getGlFloat(GL_GREEN_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_GREEN_SCALE != 1.f.");
-        tgtAssert(getGlFloat(GL_BLUE_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_BLUE_SCALE != 1.f.");
-        tgtAssert(getGlFloat(GL_ALPHA_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_ALPHA_SCALE != 1.f.");
-
-        tgtAssert(getGlFloat(GL_RED_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_RED_BIAS != 0.f.");
-        tgtAssert(getGlFloat(GL_GREEN_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_GREEN_BIAS != 0.f.");
-        tgtAssert(getGlFloat(GL_BLUE_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_BLUE_BIAS != 0.f.");
-        tgtAssert(getGlFloat(GL_ALPHA_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_ALPHA_BIAS != 0.f.");
-#endif
     }
 
 }

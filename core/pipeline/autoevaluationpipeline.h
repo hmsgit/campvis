@@ -27,32 +27,22 @@
 // 
 // ================================================================================================
 
-#ifndef VISUALIZATIONPIPELINE_H__
-#define VISUALIZATIONPIPELINE_H__
+#ifndef AUTOEVALUATIONPIPELINE_H__
+#define AUTOEVALUATIONPIPELINE_H__
 
 #include "sigslot/sigslot.h"
 #include "tbb/concurrent_hash_map.h"
 
-#include "tgt/vector.h"
-#include "tgt/event/eventhandler.h"
-#include "tgt/event/eventlistener.h"
-
 #include "core/pipeline/abstractpipeline.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
 
-#include <vector>
-
-namespace tgt {
-    class GLCanvas;
-}
 
 namespace campvis {
     /**
-     * Abstract base class for CAMPVis Pipelines.
-     * 
+     * Specializtaion of AbstractPipeline performing automatic execution of invalidated processors.
+     * AutoEvaluationPipeline connects to the s_(in)validated signals of all of its processors and
+     * executes processors with invalid results using the correct threads.
      */
-    class AutoEvaluationPipeline : public AbstractPipeline, public tgt::EventHandler, public tgt::EventListener {
+    class AutoEvaluationPipeline : public AbstractPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -65,87 +55,15 @@ namespace campvis {
         virtual ~AutoEvaluationPipeline();
 
 
-        /**
-         * Initializes the OpenGL context of the pipeline and its processors.
-         * Must be called with a valid and locked OpenGL context.
-         * \note    When overwriting this method, make sure to call the base class version first.
-         */
+        /// \see AbstractPipeline::init()
         virtual void init();
-
-        /**
-         * Deinitializes this pipeline and all of its processors.
-         * Must be called with a valid and locked OpenGL context.
-         * \note    When overwriting this method, make sure to call the base class version first.
-         */
+        /// \see AbstractPipeline::deinit()
         virtual void deinit();
 
-        /**
-         * Adds the processor \a processor to this pipeline's processor list.
-         * \note    The s_invalidated signal of each processor on this list will be automatically 
-         *          connected to onProcessorInvalidated() during initialization and disconnected
-         *          during deinitialization.
-         * \param   processor   The processor to add.
-         */
-        void addProcessor(AbstractProcessor* processor);
-
-        /**
-         * Performs the event handling for the assigned canvas.
-         * Default behaviour is to execute all assigned EventHandlers, may be overwritten by subclasses.
-         * \param e     event parameters
-         */
-        virtual void onEvent(tgt::Event* e);
-
-        /**
-         * Sets the Canvas hosting the OpenGL context for this pipeline.
-         * \param   canvas  Canvas hosting the OpenGL context for this pipeline
-         */
-        void setCanvas(tgt::GLCanvas* canvas);
-
-        /**
-         * Sets the size of the render target
-         * \param size  New viewport dimensions
-         */
-        void setRenderTargetSize(const tgt::ivec2& size);
-
-        /**
-         * Returns the viewport size of the target canvas
-         * \return _canvasSize
-         */
-        const tgt::ivec2& getRenderTargetSize() const;
-
-        /**
-         * Returns the ID of the render target image to be rendered to the canvas
-         * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
-         */
-        const std::string& getRenderTargetID() const;
-
-        /**
-         * Executes \a processor and afterwards checks the OpenGL state to be valid.
-         * \note    Only call from with a valid OpenGL context
-         * \param   processor   Processor to execute
-         */
-        void executeProcessorAndCheckOpenGLState(AbstractProcessor* processor);
-
-
-        /// Signal emitted when the pipeline's render target has changed
-        sigslot::signal0<> s_renderTargetChanged;
+        /// \see AbstractPipeline::addProcessor()
+        virtual void addProcessor(AbstractProcessor* processor);
 
     protected:
-        /**
-         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
-         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
-         * \param   name    Name of the added data.
-         * \param   dh      DataHandle to the newly added data.
-         */
-        void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
-
-        /**
-         * Slot getting called when one of the observed properties changed and notifies its observers.
-         * If \a prop equals _renderTargetID, the s_renderTargetChanged is emitted.
-         * \param   prop    Property that emitted the signal
-         */
-        virtual void onPropertyChanged(const AbstractProperty* prop);
-        
         /**
          * Slot getting called when one of the observed processors got invalidated.
          * The default behaviour is to dispatch a job to execute the invalidated processor and emit the s_invalidated signal.
@@ -153,25 +71,12 @@ namespace campvis {
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
-        /**
-         * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 
-         * and locks its properties meanwhile.
-         * \param   processor   Processor to execute.
-         */
-        void lockGLContextAndExecuteProcessor(AbstractProcessor* processor);
-
         tbb::concurrent_hash_map<AbstractProcessor*, bool> _isVisProcessorMap;
 
-        IVec2Property _canvasSize;                          ///< original canvas size
-        bool _ignoreCanvasSizeUpdate;
-
-        DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
-
-        tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
 
         static const std::string loggerCat_;
     };
 
 }
 
-#endif // VISUALIZATIONPIPELINE_H__
+#endif // AUTOEVALUATIONPIPELINE_H__
