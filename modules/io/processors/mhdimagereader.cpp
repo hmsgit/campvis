@@ -188,7 +188,6 @@ namespace campvis {
             ImageRepresentationDisk::create(image, url, pt, offset, e);
             image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
             data.addData(p_targetImageID.getValue(), image);
-            p_targetImageID.issueWrite();
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());

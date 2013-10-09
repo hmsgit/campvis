@@ -156,7 +156,6 @@ namespace campvis {
                     // all parsing done - lets create the image:
                     image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize + p_voxelSize.getValue()));
                     data.addData(p_targetImageID.getValue(), image);
-                    p_targetImageID.issueWrite();
                 }
                 else {
                     throw tgt::FileException("Error while parsing the data.", p_url.getValue());

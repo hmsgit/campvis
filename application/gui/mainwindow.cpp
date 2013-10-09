@@ -35,11 +35,15 @@
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/visualizationpipelinewrapper.h"
+#include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/tools/stringutils.h"
+#include "modules/pipelinefactory.h"
 
 #include <QMdiSubWindow>
 #include <QScrollBar>
+
 
 namespace campvis {
 
@@ -47,6 +51,9 @@ namespace campvis {
         : QMainWindow()
         , _application(application)
         , _mdiArea(0)
+        , _containerWidget(0)
+        , _cbPipelineFactory(0)
+        , _btnPipelineFactory(0)
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
@@ -55,6 +62,7 @@ namespace campvis {
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
         , _selectedProcessor(0)
+        , _selectedDataContainer(0)
         , _logViewer(0)
     {
         tgtAssert(_application != 0, "Application must not be 0.");
@@ -64,6 +72,7 @@ namespace campvis {
 
     MainWindow::~MainWindow() {
         _application->s_PipelinesChanged.disconnect(this);
+        _application->s_DataContainersChanged.disconnect(this);
         delete _dcInspectorWidget;
     }
 
@@ -81,9 +90,24 @@ namespace campvis {
         _mdiArea->tileSubWindows();
         setCentralWidget(_mdiArea);
 
+        _containerWidget = new QWidget(this);
+        QGridLayout* _cwLayout = new QGridLayout(_containerWidget);
+
+        _cbPipelineFactory = new QComboBox(_containerWidget);
+        std::vector<std::string> registeredPipelines = PipelineFactory::getRef().getRegisteredPipelines();
+        for (std::vector<std::string>::const_iterator it = registeredPipelines.begin(); it != registeredPipelines.end(); ++it)
+            _cbPipelineFactory->addItem(QString::fromStdString(*it));
+        _cwLayout->addWidget(_cbPipelineFactory, 0, 0);
+
+        _btnPipelineFactory = new QPushButton("Add Pipeline", _containerWidget);
+        _cwLayout->addWidget(_btnPipelineFactory, 0, 1);
+
         _pipelineWidget = new PipelineTreeWidget();
-        _pipelineWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        ui.pipelineTreeDock->setWidget(_pipelineWidget);
+        _containerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+        _cwLayout->addWidget(_pipelineWidget, 1, 0, 1, 2);
+
+        _containerWidget->setLayout(_cwLayout);
+        ui.pipelineTreeDock->setWidget(_containerWidget);
 
         _pipelinePropertiesScrollArea = new QScrollArea();
         _pipelinePropertiesScrollArea->setWidgetResizable(true);
@@ -115,8 +139,8 @@ namespace campvis {
         _dcInspectorWidget = new DataContainerInspectorWidget();
 
         connect(
-            this, SIGNAL(updatePipelineWidget(const std::vector<AbstractPipeline*>&)), 
-            _pipelineWidget, SLOT(update(const std::vector<AbstractPipeline*>&)));
+            this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
+            _pipelineWidget, SLOT(update(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)));
         connect(
             _pipelineWidget, SIGNAL(clicked(const QModelIndex&)), 
             this, SLOT(onPipelineWidgetItemClicked(const QModelIndex&)));
@@ -129,7 +153,12 @@ namespace campvis {
         connect(
             _btnShowDataContainerInspector, SIGNAL(clicked()), 
             this, SLOT(onBtnShowDataContainerInspectorClicked()));
+        connect(
+            _btnPipelineFactory, SIGNAL(clicked()), 
+            this, SLOT(onBtnPipelineFactoryClicked()));
+
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
+        _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
     }
 
     bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
@@ -142,38 +171,51 @@ namespace campvis {
     }
 
     void MainWindow::onPipelinesChanged() {
-        emit updatePipelineWidget(_application->_pipelines);
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
+    }
+
+    void MainWindow::onDataContainersChanged() {
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
     void MainWindow::onPipelineWidgetItemClicked(const QModelIndex& index) {
         if (index.isValid()) {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
-            HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
+            if (item.isValid()) {
+                HasPropertyCollection* ptr = static_cast<HasPropertyCollection*>(item.value<void*>());
 
-            if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
-            	_selectedPipeline = pipeline;
-                _selectedProcessor = 0;
-            }
-            else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
-                _selectedProcessor = processor;
-
-                QVariant parentItem = index.parent().data(Qt::UserRole);
-                HasPropertyCollection* pptr = static_cast<HasPropertyCollection*>(parentItem.value<void*>());
-                if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(pptr)) {
+                if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(ptr)) {
                     _selectedPipeline = pipeline;
+                    _selectedProcessor = 0;
+                    _selectedDataContainer = &pipeline->getDataContainer();
                 }
-            }
+                else if (AbstractProcessor* processor = dynamic_cast<AbstractProcessor*>(ptr)) {
+                    _selectedProcessor = processor;
 
-            emit updatePropCollectionWidget(ptr, &_selectedPipeline->getDataContainer());
+                    QVariant parentItem = index.parent().data(Qt::UserRole);
+                    HasPropertyCollection* pptr = static_cast<HasPropertyCollection*>(parentItem.value<void*>());
+                    if (AbstractPipeline* pipeline = dynamic_cast<AbstractPipeline*>(pptr)) {
+                        _selectedPipeline = pipeline;
+                        _selectedDataContainer = &pipeline->getDataContainer();
+                    }
+                }
+
+                emit updatePropCollectionWidget(ptr, &_selectedPipeline->getDataContainer());
+            }
+            else {
+                emit updatePropCollectionWidget(0, 0);
+                _selectedDataContainer = 0;
+            }
         }
         else {
             emit updatePropCollectionWidget(0, 0);
+            _selectedDataContainer = 0;
         }
     }
 
     QSize MainWindow::sizeHint() const {
-        return QSize(800, 450);
+        return QSize(1000, 600);
     }
 
     void MainWindow::onBtnExecuteClicked() {
@@ -237,6 +279,16 @@ namespace campvis {
 
         _primaryDocks.push_back(dockWidget);
         return dockWidget;
+    }
+
+    void MainWindow::onBtnPipelineFactoryClicked() {
+        std::string name = this->_cbPipelineFactory->currentText().toStdString();
+        DataContainer* dc = _selectedDataContainer;
+        if (dc == 0) {
+            dc = _application->createAndAddDataContainer("DataContainer #" + StringUtils::toString(_application->_dataContainers.size() + 1));
+        }
+        AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, dc);
+        _application->addPipeline(name, p);
     }
 
 }

@@ -32,8 +32,8 @@
 
 #include "sigslot/sigslot.h"
 #include "tgt/vector.h"
-#include "tbb/atomic.h"
-#include "tbb/mutex.h"
+#include <tbb/atomic.h>
+#include <tbb/mutex.h>
 
 #include "core/datastructures/datahandle.h"
 #include "core/tools/concurrenthistogram.h"

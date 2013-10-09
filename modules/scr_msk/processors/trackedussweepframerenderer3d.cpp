@@ -136,7 +136,7 @@ namespace campvis {
     }
 
     void TrackedUsSweepFrameRenderer3D::process(DataContainer& data) {
-        DataContainer::ScopedTypedData< TrackedUsFileIoData > fio(data, p_sourceImageID.getValue());
+        ScopedTypedData< TrackedUsFileIoData > fio(data, p_sourceImageID.getValue());
 
         if (fio != 0) {
             if (_currentSweep != 0) {
@@ -213,7 +213,6 @@ namespace campvis {
                     glPopAttrib();
 
                     data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-                    p_targetImageID.issueWrite();
                 }
             }
         }
@@ -225,7 +224,7 @@ namespace campvis {
     }
 
     void TrackedUsSweepFrameRenderer3D::updateProperties(DataContainer& dc) {
-        DataContainer::ScopedTypedData<TrackedUsFileIoData> data(dc, p_sourceImageID.getValue());
+        ScopedTypedData<TrackedUsFileIoData> data(dc, p_sourceImageID.getValue());
         if (data != 0) {
             TrackedUSFileIO* fio = const_cast<TrackedUSFileIO*>(data->getData());
             const TrackedUSFileXMLHeader::TrackedUSFileStudy *study = fio->getStudyHeader(0);

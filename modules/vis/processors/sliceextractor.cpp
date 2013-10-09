@@ -245,7 +245,6 @@ namespace campvis {
                 tgt::TextureUnit::setZeroUnit();
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-                p_targetImageID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");
@@ -259,7 +258,7 @@ namespace campvis {
     }
 
     void SliceExtractor::updateProperties(DataContainer& dc) {
-        DataContainer::ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
+        ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
         p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
 
         if (img != 0) {

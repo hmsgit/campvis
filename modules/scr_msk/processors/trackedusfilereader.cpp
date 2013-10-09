@@ -66,7 +66,6 @@ namespace campvis {
 
             TrackedUsFileIoData* file = new TrackedUsFileIoData(fio);
             data.addData(p_targetImageID.getValue(), file);
-            p_targetImageID.issueWrite();
         }
         catch (std::exception& e) {
             LERROR("Error : " << e.what());

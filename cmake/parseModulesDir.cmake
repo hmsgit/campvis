@@ -45,6 +45,11 @@ FOREACH(ModDir ${ModDirs})
             # add definition that this module is activated
             LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModDirUpper})
             
+            # parse all header files for pipeline classes to add them to the pipeline registration
+            FOREACH(HeaderFile ${ThisModHeaders})
+                PARSE_HEADER_FOR_PIPELINE("modules/${HeaderFile}")
+            ENDFOREACH()
+            
             # unset module settings to avoid duplicates if module cmake file misses sth.
             UNSET(ThisModDefinitions)
             UNSET(ThisModIncludeDirs)

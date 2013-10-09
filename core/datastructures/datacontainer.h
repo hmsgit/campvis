@@ -31,8 +31,8 @@
 #define DATACONTAINER_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/concurrent_unordered_map.h"
-#include "tbb/spin_mutex.h"
+#include <tbb/concurrent_unordered_map.h>
+#include <tbb/spin_mutex.h>
 #include "core/datastructures/datahandle.h"
 
 #include <string>
@@ -58,68 +58,10 @@ namespace campvis {
     class DataContainer {
     public:
         /**
-         * Proxy class for scoped strongly-typed access to the data of a DataContainer.
-         * From the outside DataContainer::ScopedTypedData<T> behaves exactly like a const T*, but internally it preserves the
-         * reference counting of a DataHandle. Use this class when you want temporary access to a strongly-typed
-         * data item in a DataContainer but don't want to to the dynamic_cast yourself.
-         *
-         * \tparam  T   Base class of the DataHandle data to test for
-         */
-        template<typename T>
-        struct ScopedTypedData {
-            /**
-             * Creates a new DataHandle to the data item with the key \a name in \a dc, that behaves like a T*.
-             * \param   dc      DataContainer to grab data from
-             * \param   name    Key of the DataHandle to search for
-             */
-            ScopedTypedData(const DataContainer& dc, const std::string& name)
-                : dh(dc.getData(name))
-                , data(0)
-            {
-                if (dh.getData() != 0) {
-                    data = dynamic_cast<const T*>(dh.getData());
-                }
-            };
-
-            /**
-             * Implicit conversion operator to const T*.
-             * \return  The data in the DataHandle, may be 0 when no DataHandle was found, or the data is of the wrong type.
-             */
-            operator const T*() {
-                return data;
-            }
-
-            /**
-             * Implicit arrow operator to const T*.
-             * \return  The data in the DataHandle, may be 0 when no DataHandle was found, or the data is of the wrong type.
-             */
-            const T* operator->() const {
-                return data;
-            }
-
-            /**
-             * Gets the DataHandle.
-             * \return dh
-             */
-            const DataHandle& getDataHandle() const {
-                return dh;
-            }
-
-        private:
-            /// Not copy-constructable
-            ScopedTypedData(const ScopedTypedData& rhs);
-            /// Not assignable
-            ScopedTypedData& operator=(const ScopedTypedData& rhs);
-
-            DataHandle dh;      ///< DataHandle
-            const T* data;      ///< strongly-typed pointer to data, may be 0
-        };
-
-
-        /**
          * Creates a new empty DataContainer
+         * \param   name    The name of the new DataContainer
          */
-        DataContainer();
+        DataContainer(const std::string& name);
 
         /**
          * Destructor of the DataContainer. Will disconnect all DataHandles from this container.
@@ -186,6 +128,18 @@ namespace campvis {
         std::vector< std::pair< std::string, DataHandle> > getDataHandlesCopy() const;
 
         /**
+         * Returns the name of this DataContainer.
+         * \return  _name
+         */
+        const std::string& getName() const;
+
+        /**
+         * Sets the name of this DataContainer.
+         * \param   name    The new name of this DataContainer
+         */
+        void setName(const std::string& name);
+
+        /**
          * Returns a copy of the current map of DataHandles.
          * \note    Use with caution, this method is to be considered as slow, as it includes several 
          *          copies and locks the whole DataContainer during execution.
@@ -208,6 +162,8 @@ namespace campvis {
         mutable tbb::spin_mutex _localMutex;
 
         tbb::concurrent_unordered_map<std::string, DataHandle> _handles;
+
+        std::string _name;
 
         static const std::string loggerCat_;
     };

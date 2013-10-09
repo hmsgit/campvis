@@ -114,13 +114,11 @@ namespace campvis {
                 LGL_ERROR;
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-                p_targetImageID.issueWrite();
             }
             else if (p_importType.getOptionValue() == "texture") {
                 ImageData* id = new ImageData(2, tex->getDimensions(), tex->getNumChannels());
                 ImageRepresentationGL::create(id, tex);
                 data.addData(p_targetImageID.getValue(), id);
-                p_targetImageID.issueWrite();
             }
             else if (p_importType.getOptionValue() == "localIntensity") {
                 // TODO: Clean up pre-MICCAI mess!
@@ -141,7 +139,6 @@ namespace campvis {
 
                 delete tex;
                 data.addData(p_targetImageID.getValue(), id);
-                p_targetImageID.issueWrite();
             }
         }
         else {

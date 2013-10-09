@@ -43,38 +43,6 @@ namespace campvis {
     DataNameProperty::~DataNameProperty() {
     }
 
-    void DataNameProperty::connect(DataNameProperty* reader) {
-        tgtAssert(reader != 0, "Reader must not be 0");
-        tgtAssert(_accessInfo == WRITE, "Can only connect writing properties to reading properties.");
-        tgtAssert(reader->_accessInfo == READ, "Can only connect writing properties to reading properties.");
-
-        if (_connectedReaders.insert(reader).second)
-            addSharedProperty(reader);
-    }
-
-    void DataNameProperty::disconnect(DataNameProperty* reader) {
-        tgtAssert(reader != 0, "Reader must not be 0");
-
-        if (_connectedReaders.erase(reader) > 0)
-            removeSharedProperty(reader);
-    }
-
-    void DataNameProperty::issueWrite() {
-        tgtAssert(_accessInfo == WRITE, "Write access not specified.");
-
-        for (std::set<DataNameProperty*>::iterator it = _connectedReaders.begin(); it != _connectedReaders.end(); ++it) {
-            (*it)->notifyReaders();
-        }
-    }
-
-    void DataNameProperty::notifyReaders() {
-        for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
-            // static_cast ist safe here since correct type is ensured during add of shared property
-            static_cast<DataNameProperty*>(*it)->notifyReaders();
-        }
-        s_changed(this);
-    }
-
     DataNameProperty::DataAccessInfo DataNameProperty::getAccessInfo() const {
         return _accessInfo;
     }

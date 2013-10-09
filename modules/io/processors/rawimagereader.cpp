@@ -90,7 +90,6 @@ namespace campvis {
         ImageRepresentationDisk::create(image, p_url.getValue(), p_baseType.getOptionValue(), p_offset.getValue(), p_endianness.getOptionValue());
         image->setMappingInformation(ImageMappingInformation(p_size.getValue(), p_imageOffset.getValue(), p_voxelSize.getValue()));
         data.addData(p_targetImageID.getValue(), image);
-        p_targetImageID.issueWrite();
 
         validate(INVALID_RESULT);
     }

@@ -38,6 +38,8 @@
 #include <utility>
 #include <vector>
 
+#include "core/datastructures/datacontainer.h"
+
 namespace tgt {
     class QtThreadedCanvas;
 }
@@ -46,7 +48,6 @@ namespace campvis {
     class AbstractPipeline;
     class MainWindow;
     class CampVisPainter;
-    class VisualizationPipeline;
 
     /**
      * The CampVisApplication class wraps Pipelines, Evaluators and Painters all together and takes
@@ -89,25 +90,14 @@ namespace campvis {
         void deinit();
 
         /**
-         * Adds a pipeline which doesn't need visualization (OpenGL) support.
-         * Each pipeline will automatically get its own evaluator.
+         * Adds a pipeline to this CAMPVis application.
+         * Each pipeline will automatically get its own OpenGL context, the corresponding CampvisPainter
+         * and all necessary connections will be created.
          * 
-         * \note    If you want to add a pipeline that needs a valid OpenGL context, use 
-         *          addVisualizationPipeline() instead.
-         * \param   pipeline    Pipeline to add, must not need OpenGL support.
-         */
-        void addPipeline(AbstractPipeline* pipeline);
-
-        /**
-         * Adds a visualization pipeline (i.e. a pipeline that needs a OpenGL context).
-         * For each added pipeline, an OpenGL context will be created (for the evaluation 
-         * and rendering).
-         * 
-         * \note    You do \b not need to call addPipeline.
          * \param   name    Name of the OpenGL context to create for the pipeline.
-         * \param   vp      VisualizationPipeline to add.
+         * \param   vp      AbstractPipeline to add.
          */
-        void addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp);
+        void addPipeline(const std::string& name, AbstractPipeline* pipeline);
 
         /**
          * Adds a dock widget to the main window.
@@ -125,14 +115,30 @@ namespace campvis {
          */
         int run();
 
+
+        /**
+         * Creates a new DataContainer with the given name.
+         * \param   name    Name of the new DataContainer
+         * \return  The newly created DataContainer
+         */
+        DataContainer* createAndAddDataContainer(const std::string& name);
+
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
+        /// Signal emitted when the collection of DataContainers has changed.
+        sigslot::signal0<> s_DataContainersChanged;
+
     private:
-        /// All pipelines (incuding VisualizationPipelines)
+        void addPipelineImpl(tgt::QtThreadedCanvas* canvas, const std::string& name, AbstractPipeline* pipeline);
+
+        /// All pipelines 
         std::vector<AbstractPipeline*> _pipelines;
-        /// All visualisations (i.e. VisualizationPipelines with their corresponding painters/canvases)
-        std::vector< std::pair<VisualizationPipeline*, CampVisPainter*> > _visualizations;
+        /// All visualisations (i.e. Pipelines with their corresponding painters/canvases)
+        std::vector< std::pair<AbstractPipeline*, CampVisPainter*> > _visualizations;
+
+        /// All DataContainers
+        std::vector<DataContainer*> _dataContainers;
 
         /// A local OpenGL context used for initialization
         tgt::QtThreadedCanvas* _localContext;

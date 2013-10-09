@@ -34,7 +34,7 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/pipeline/digraphvisualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/csvdimagereader.h"
@@ -49,12 +49,12 @@
 #include "modules/randomwalk/processors/confidencemapgenerator.h"
 
 namespace campvis {
-    class AdvancedUsVis : public DigraphVisualizationPipeline {
+    class AdvancedUsVis : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a VisualizationPipeline. 
          */
-        AdvancedUsVis();
+        AdvancedUsVis(DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -68,7 +68,8 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "AdvancedUsVis"; };
 
         /**
          * Execute this pipeline.
@@ -112,6 +113,7 @@ namespace campvis {
 
         TrackballNavigationEventListener* _trackballEH;
     };
+
 }
 
 #endif // ADVANCEDUSVIS_H__

@@ -33,8 +33,8 @@
 namespace campvis {
 
 
-    UsCompounding::UsCompounding() 
-        : VisualizationPipeline()
+    UsCompounding::UsCompounding(DataContainer* dc) 
+        : AutoEvaluationPipeline(dc)
         , p_camera("Camera", "Camera")
         , _reader()
         , _renderer(&_canvasSize)
@@ -54,12 +54,12 @@ namespace campvis {
     }
 
     void UsCompounding::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         p_camera.addSharedProperty(&_renderer.p_camera);
 
         _reader.p_url.setValue("C:/Users/SchuCh01/Documents/Data/Ultrasound/2012-12-12-Test/9l4sweep/content.xml");
-        _reader.p_targetImageID.connect(&_renderer.p_sourceImageID);
+        _reader.p_targetImageID.addSharedProperty(&_renderer.p_sourceImageID);
 
         _renderer.s_boundingBoxChanged.connect(this, &UsCompounding::onBoundingBoxChanged);
         _renderer.p_targetImageID.setValue("us.frame.output");
@@ -68,11 +68,7 @@ namespace campvis {
 
     void UsCompounding::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
-    }
-
-    const std::string UsCompounding::getName() const {
-        return "UsCompounding";
+        AutoEvaluationPipeline::deinit();
     }
 
     void UsCompounding::onBoundingBoxChanged(tgt::Bounds b) {

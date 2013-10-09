@@ -48,7 +48,7 @@ namespace campvis {
         , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-	, _sourceTimestamp(0)
+    , _sourceTimestamp(0)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_geometryID);
@@ -62,7 +62,7 @@ namespace campvis {
     }
 
     void ProxyGeometryGenerator::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
+        ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
@@ -87,7 +87,6 @@ namespace campvis {
 
                 MeshGeometry* cube = MeshGeometry::createCube(volumeExtent, tgt::Bounds(texLLF, texURB)).clone();
                 data.addData(p_geometryID.getValue(), cube);
-                p_geometryID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

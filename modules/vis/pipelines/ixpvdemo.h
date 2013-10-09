@@ -34,7 +34,7 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/properties/cameraproperty.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/devil/processors/devilimagereader.h"
@@ -50,24 +50,24 @@
 
 
 namespace campvis {
-    class IxpvDemo : public VisualizationPipeline {
+    class IxpvDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
-        IxpvDemo();
+        IxpvDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
          **/
         virtual ~IxpvDemo();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
-
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "IxpvDemo"; };
 
         //virtual void keyEvent(tgt::KeyEvent* e);
     protected:
@@ -100,6 +100,7 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballHandler;
         MWheelToNumericPropertyEventListener _wheelHandler;
     };
+
 }
 
 #endif // IXPVDEMO_H__

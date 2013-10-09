@@ -36,8 +36,8 @@
 
 namespace campvis {
 
-    SliceVis::SliceVis()
-        : VisualizationPipeline()
+    SliceVis::SliceVis(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _imageReader()
         , _gvg()
         , _lhh()
@@ -57,13 +57,13 @@ namespace campvis {
     }
 
     void SliceVis::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
-        _imageReader.p_targetImageID.connect(&_sliceExtractor.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_gvg.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_lhh.p_intensitiesId);
+        _imageReader.p_targetImageID.addSharedProperty(&_sliceExtractor.p_sourceImageID);
         _imageReader.s_validated.connect(this, &SliceVis::onProcessorValidated);
 
 //         _gvg._outputGradients.connect(&_lhh._inputGradients);
@@ -92,13 +92,9 @@ namespace campvis {
         }
     }
 
-    const std::string SliceVis::getName() const {
-        return "SliceVis";
-    }
-
     void SliceVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
-            DataContainer::ScopedTypedData<ImageData> img(_data, _imageReader.p_targetImageID.getValue());
+            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
                 _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
             }

@@ -39,8 +39,8 @@
 
 namespace campvis {
 
-    VolumeExplorerDemo::VolumeExplorerDemo()
-        : VisualizationPipeline()
+    VolumeExplorerDemo::VolumeExplorerDemo(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _imageReader()
         , _ve(&_canvasSize)
@@ -57,7 +57,7 @@ namespace campvis {
     }
 
     void VolumeExplorerDemo::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
         
         _imageReader.s_validated.connect(this, &VolumeExplorerDemo::onProcessorValidated);
 
@@ -67,7 +67,7 @@ namespace campvis {
 
         _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.connect(&_ve.p_inputVolume);
+        _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
@@ -79,11 +79,7 @@ namespace campvis {
 
     void VolumeExplorerDemo::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
-    }
-
-    const std::string VolumeExplorerDemo::getName() const {
-        return "VolumeExplorerDemo";
+        AutoEvaluationPipeline::deinit();
     }
 
     void VolumeExplorerDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {

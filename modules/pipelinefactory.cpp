@@ -27,52 +27,46 @@
 // 
 // ================================================================================================
 
-#ifndef VolumeExplorerDemo_H__
-#define VolumeExplorerDemo_H__
+#include "pipelinefactory.h"
+#include "gen_pipelineregistration.h"
 
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/volumeexplorer.h"
+#include <sstream>
 
 namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
-    public:
-        /**
-         * Creates a AutoEvaluationPipeline.
-         */
-        VolumeExplorerDemo(DataContainer* dc);
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~VolumeExplorerDemo();
+    // declare one single symbol for the PipelineFactory singleton
+    tbb::atomic<PipelineFactory*> PipelineFactory::_singleton;
 
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
+    PipelineFactory& PipelineFactory::getRef() {
+        if (_singleton == 0) {
+            std::cout << "creating PipelineFactory...\n";
+            PipelineFactory* tmp = new PipelineFactory();
+            if (_singleton.compare_and_swap(tmp, 0) != 0) {
+                delete tmp;
+            }
+        }
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
+        return *_singleton;
+    }
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "VolumeExplorerDemo"; };
+    std::vector<std::string> PipelineFactory::getRegisteredPipelines() const {
+        tbb::spin_mutex::scoped_lock lock(_mutex);
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+        std::vector<std::string> toReturn;
+        toReturn.reserve(_pipelineMap.size());
+        for (std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it)
+            toReturn.push_back(it->first);
+        return toReturn;
+    }
 
-    protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
+    AbstractPipeline* PipelineFactory::createPipeline(const std::string& id, DataContainer* dc) const {
+        tbb::spin_mutex::scoped_lock lock(_mutex);
 
-        CameraProperty _camera;
-        MhdImageReader _imageReader;
-        VolumeExplorer _ve;
-    };
+        std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.find(id);
+        if (it == _pipelineMap.end())
+            return 0;
+        else
+            return (it->second)(dc);
+    }
 
 }
-
-#endif // VolumeExplorerDemo_H__

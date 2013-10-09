@@ -126,7 +126,6 @@ namespace campvis {
                 glDisable(GL_DEPTH_TEST);
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-                p_targetImageID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");
@@ -140,7 +139,7 @@ namespace campvis {
     }
 
     void SliceRenderer3D::updateProperties(DataContainer& dc) {
-        DataContainer::ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
+        ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
         const tgt::svec3& imgSize = img->getSize();
         if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);

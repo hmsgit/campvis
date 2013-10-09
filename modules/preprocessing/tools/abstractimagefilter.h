@@ -30,7 +30,7 @@
 #ifndef ABSTRACTIMAGEFILTER_H__
 #define ABSTRACTIMAGEFILTER_H__
 
-#include "tbb/tbb.h"
+#include <tbb/tbb.h>
 #include "tgt/assert.h"
 
 #include <vector>

@@ -149,8 +149,8 @@ namespace campvis {
             return;
 
         ImageRepresentationLocal::ScopedRepresentation img(data, _sourceImageID.getValue());
-        DataContainer::ScopedTypedData<RenderData> entryPoints(data, _entryImageID.getValue());
-        DataContainer::ScopedTypedData<RenderData> exitPoints(data, _exitImageID.getValue());
+        ScopedTypedData<RenderData> entryPoints(data, _entryImageID.getValue());
+        ScopedTypedData<RenderData> exitPoints(data, _exitImageID.getValue());
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
@@ -267,7 +267,6 @@ namespace campvis {
                     LGL_ERROR;
 
                     data.addData(_targetImageID.getValue(), rd);
-                    _targetImageID.issueWrite();
                 }
                 else {
                     LERROR("Entry-/Exitpoints texture size does not match.");
