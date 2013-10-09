@@ -40,7 +40,7 @@
 #include <itkCurvatureAnisotropicDiffusionImageFilter.h>
 #include <itkLaplacianSharpeningImageFilter.h>
 
-#include "tbb/tbb.h"
+#include <tbb/tbb.h>
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -257,7 +257,6 @@ namespace campvis {
                 DISPATCH_ITK_FILTER(input, LaplacianSharpeningImageFilter, /* nothing here */);
             }
             data.addData(p_targetImageID.getValue(), id);
-            p_targetImageID.issueWrite();
         }
         else {
             LDEBUG("No suitable input image found.");
@@ -296,6 +295,8 @@ namespace campvis {
             p_timeStep.setVisible(true);
             p_conductance.setVisible(true);
         }
+
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

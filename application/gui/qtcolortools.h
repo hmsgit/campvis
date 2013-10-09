@@ -68,7 +68,7 @@ namespace campvis {
          * \param   parent  Parent Qt widget
          * \param   f       Qt WindowFlags
          */
-        ColorPickerWidget(const QColor& color = QColor::fromRgba(qRgba(0, 0, 0, 255)), QWidget* parent=0, Qt::WindowFlags f=0);
+        explicit ColorPickerWidget(const QColor& color = QColor::fromRgba(qRgba(0, 0, 0, 255)), QWidget* parent=0, Qt::WindowFlags f=0);
 
         /**
          * Returns the current color of the widget.

@@ -33,30 +33,31 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
 
 namespace campvis {
-    class SliceVis : public VisualizationPipeline {
+    class SliceVis : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
-        SliceVis();
+        SliceVis(DataContainer* dc);
 
         /**
          * Virtual Destructor
          **/
         virtual ~SliceVis();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "SliceVis"; };
 
 
         virtual void keyEvent(tgt::KeyEvent* e);
@@ -78,6 +79,7 @@ namespace campvis {
         TransFuncWindowingEventListener _tfWindowingHandler;
 
     };
+
 }
 
 #endif // SLICEVIS_H__

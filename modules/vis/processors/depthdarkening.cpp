@@ -81,7 +81,7 @@ namespace campvis {
     }
 
     void DepthDarkening::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<RenderData> inputImage(data, p_inputImage.getValue());
+        ScopedTypedData<RenderData> inputImage(data, p_inputImage.getValue());
 
         if (inputImage != 0 && inputImage->hasDepthTexture()) {
             if (hasInvalidShader()) {
@@ -147,7 +147,6 @@ namespace campvis {
             LGL_ERROR;
 
             data.addData(p_outputImage.getValue(), new RenderData(_fbo));
-            p_outputImage.issueWrite();
         }
         else {
             LERROR("No suitable input image found.");

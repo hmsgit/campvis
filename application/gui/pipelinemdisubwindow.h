@@ -54,7 +54,7 @@ namespace campvis {
          * \param parent the window's parent
          * \param flags options customizing the frame of the subwindow
          */
-        PipelineMdiSubWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+        explicit PipelineMdiSubWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
         /**
          * Cancel the dragging of the window.

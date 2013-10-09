@@ -67,7 +67,6 @@ namespace campvis {
             LGL_ERROR;
 
             data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-            p_targetImageID.issueWrite();
         }
         else {
             LERROR("Wrong Number of Channels in Input Volume.");

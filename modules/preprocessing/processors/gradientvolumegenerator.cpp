@@ -32,7 +32,7 @@
 #include "tgt/glmath.h"
 #include "tgt/logmanager.h"
 
-#include "tbb/tbb.h"
+#include <tbb/tbb.h>
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -108,7 +108,6 @@ namespace campvis {
             tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), ApplyCentralDifferences(input, output));
 
             data.addData(p_targetImageID.getValue(), id);
-            p_targetImageID.issueWrite();
         }
         else {
             LDEBUG("No suitable input image found.");

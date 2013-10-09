@@ -55,7 +55,7 @@ namespace campvis {
          * \param canvas the pipeline's canvas
          * \param parent the widget's parent
          */
-        VisualizationPipelineWidget(QWidget* canvas, QWidget* parent = 0);
+        explicit VisualizationPipelineWidget(QWidget* canvas, QWidget* parent = 0);
 
         /**
          * Enter the widget into forced drag mode.

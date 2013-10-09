@@ -35,6 +35,7 @@
 #include <QList>
 #include <QVariant>
 
+#include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "application/tools/treeitem.h"
@@ -49,11 +50,29 @@ namespace campvis {
      */
     class PipelineTreeRootItem : public TreeItem {
     public:
-        PipelineTreeRootItem(TreeItem* parent = 0);
+        explicit PipelineTreeRootItem(TreeItem* parent = 0);
         virtual ~PipelineTreeRootItem();
 
         /// \see TreeItem::getData()
         virtual QVariant getData(int column, int role) const;
+    };
+
+    /**
+     * Specialization for TreeItems hosting an AbstracPipeline.
+     */
+    class DataContainerTreeItem : public TreeItem {
+    public:
+        DataContainerTreeItem(DataContainer* dc, TreeItem* parent);
+        virtual ~DataContainerTreeItem();
+
+        /// \see TreeItem::getData()
+        virtual QVariant getData(int column, int role) const;
+
+        /// \see TreeItem::setData()
+        virtual bool setData(int column, int role, const QVariant& value) const;
+
+    private:
+        DataContainer* _dataContainer;        ///< Base DataContainer
     };
 
     /**
@@ -101,10 +120,10 @@ namespace campvis {
         Q_OBJECT
 
     public:
-        PipelineTreeModel(QObject *parent = 0);
+        explicit PipelineTreeModel(QObject *parent = 0);
         ~PipelineTreeModel();
 
-        void setData(const std::vector<AbstractPipeline*>& pipelines);
+        void setData(const std::vector<DataContainer*>& dataContainers, const std::vector<AbstractPipeline*>& pipelines);
 
         QVariant data(const QModelIndex &index, int role) const;
 
@@ -141,7 +160,7 @@ namespace campvis {
          * Creates a new PipelineTreeWidget.
          * \param   parent  Parent widget
          */
-        PipelineTreeWidget(QWidget* parent = 0);
+        explicit PipelineTreeWidget(QWidget* parent = 0);
 
         /**
          * Destructor
@@ -162,7 +181,7 @@ namespace campvis {
          * Updates the data in the tree view by the given collection of pipelines \a pipelines.
          * \param   pipelines   
          */
-        void update(const std::vector<AbstractPipeline*>& pipelines);
+        void update(const std::vector<DataContainer*>& dataContainers, const std::vector<AbstractPipeline*>& pipelines);
 
 
     private:

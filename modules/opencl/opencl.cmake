@@ -19,3 +19,4 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 
 LIST(APPEND ThisModExternalLibs kisscl)
 SET(ThisModShaderDirectories "modules/opencl/cl")
+

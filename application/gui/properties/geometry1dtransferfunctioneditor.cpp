@@ -96,7 +96,6 @@ namespace campvis {
 
     void Geometry1DTransferFunctionEditor::paint() {
         Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
-        gtf->lock();
         const std::vector<TFGeometry1D*>& geometries = gtf->getGeometries();
         const tgt::vec2& intensityDomain = gtf->getIntensityDomain();
 
@@ -114,8 +113,11 @@ namespace campvis {
         LGL_ERROR;
 
         // renderIntoEditor TF geometries
-        for (std::vector<TFGeometry1D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
-            (*it)->renderIntoEditor();
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            for (std::vector<TFGeometry1D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
+                (*it)->renderIntoEditor();
+            }
         }
 
         // render histogram if existent
@@ -186,8 +188,6 @@ namespace campvis {
 
         LGL_ERROR;
         glPopAttrib();
-
-        gtf->unlock();
     }
 
     void Geometry1DTransferFunctionEditor::sizeChanged(const tgt::ivec2& size) {
@@ -246,7 +246,6 @@ namespace campvis {
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
         _canvas = CtxtMgr.createContext("tfcanvas", "", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, 0, false);
-        _canvas->doneCurrent();
         GLJobProc.registerContext(_canvas);
         _canvas->setPainter(this, false);
         _layout->addWidget(_canvas, 1, 1, 3, 3);

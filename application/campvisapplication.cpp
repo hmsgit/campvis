@@ -47,9 +47,10 @@
 #include "application/gui/mainwindow.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
+#include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
-#include "core/pipeline/visualizationpipeline.h"
+#include "modules/pipelinefactory.h"
 
 namespace campvis {
 
@@ -78,16 +79,28 @@ namespace campvis {
         tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
         // delete everything in the right order:
-        for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             delete it->second;
         }
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            delete *it;
+        }
+        for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
             delete *it;
         }
     }
 
     void CampVisApplication::init() {
         tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
+
+        // parse argument list and create pipelines
+        QStringList pipelinesToAdd = this->arguments();
+        for (int i = 1; i < pipelinesToAdd.size(); ++i) {
+            DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
+            AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
+            if (p != 0)
+                addPipeline(pipelinesToAdd[i].toStdString(), p);
+        }
 
         // Init TGT
         tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
@@ -167,7 +180,7 @@ namespace campvis {
         }
 
         // Now init painters:
-        for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+        for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
             it->second->init();
         }
 
@@ -190,7 +203,7 @@ namespace campvis {
             }
 
             // Now deinit painters:
-            for (std::vector< std::pair<VisualizationPipeline*, TumVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
+            for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
                 it->second->deinit();
             }
 
@@ -235,33 +248,57 @@ namespace campvis {
         return toReturn;
     }
 
-    void CampVisApplication::addPipeline(AbstractPipeline* pipeline) {
-        tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
+    void CampVisApplication::addPipeline(const std::string& name, AbstractPipeline* pipeline) {
         tgtAssert(pipeline != 0, "Pipeline must not be 0.");
-        _pipelines.push_back(pipeline);
+
+        // if CAMPVis is already fully initialized, we need to temporarily shut down its
+        // OpenGL job processor, since we need to create a new context.
+        if (_initialized) {
+            GLJobProc.pause();
+            {
+                tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
+                tgt::GLContextScopedLock lock(canvas->getContext());
+                addPipelineImpl(canvas, name, pipeline);
+            }
+            GLJobProc.resume();
+        }
+        else {
+            tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
+            addPipelineImpl(canvas, name, pipeline);
+        }
 
         s_PipelinesChanged();
     }
 
-    void CampVisApplication::addVisualizationPipeline(const std::string& name, VisualizationPipeline* vp) {
-        tgtAssert(_initialized == false, "Adding pipelines after initialization is currently not supported.");
-        tgtAssert(vp != 0, "Pipeline must not be 0.");
-
-        // create canvas and painter for the VisPipeline and connect all together
-        tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
+    void CampVisApplication::addPipelineImpl(tgt::QtThreadedCanvas* canvas, const std::string& name, AbstractPipeline* pipeline) {
+        // create canvas and painter for the pipeline and connect all together
+        
         GLJobProc.registerContext(canvas);
-        _mainWindow->addVisualizationPipelineWidget(name, canvas);
         canvas->init();
 
-        TumVisPainter* painter = new TumVisPainter(canvas, vp);
+        CampVisPainter* painter = new CampVisPainter(canvas, pipeline);
         canvas->setPainter(painter, false);
+        pipeline->setCanvas(canvas);
 
-        _visualizations.push_back(std::make_pair(vp, painter));
+        _visualizations.push_back(std::make_pair(pipeline, painter));
+        _pipelines.push_back(pipeline);
 
-        vp->setCanvas(canvas);
-        addPipeline(vp);
+        if (_initialized) {
+            LGL_ERROR;
+            pipeline->init();
+            LGL_ERROR;
+            painter->init();
+            LGL_ERROR;
+        }
 
         CtxtMgr.releaseCurrentContext();
+        _mainWindow->addVisualizationPipelineWidget(name, canvas);
+
+        // enable pipeline and invalidate all processors
+        pipeline->setEnabled(true);
+        for (std::vector<AbstractProcessor*>::const_iterator it = pipeline->getProcessors().begin(); it != pipeline->getProcessors().end(); ++it) {
+            (*it)->invalidate(AbstractProcessor::INVALID_RESULT);
+        }
     }
 
     void CampVisApplication::registerDockWidget(Qt::DockWidgetArea area, QDockWidget* dock) {
@@ -269,5 +306,13 @@ namespace campvis {
 
         _mainWindow->addDockWidget(area, dock);
     }
+
+    DataContainer* CampVisApplication::createAndAddDataContainer(const std::string& name) {
+        DataContainer* dc = new DataContainer(name);
+        _dataContainers.push_back(dc);
+        s_DataContainersChanged();
+        return dc;
+    }
+
 
 }

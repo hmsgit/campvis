@@ -48,7 +48,7 @@ namespace campvis {
          *
          * \param parent the QTextEdit to install the LogHighlighter on
          */
-        LogHighlighter(QTextEdit* parent);
+        explicit LogHighlighter(QTextEdit* parent);
 
         /**
          * Destructor.

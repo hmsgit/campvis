@@ -31,8 +31,8 @@
 #define ABSTRACTPROPERTY_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/atomic.h"
-#include "tbb/spin_mutex.h"
+#include <tbb/atomic.h>
+#include <tbb/spin_mutex.h>
 #include "tgt/logmanager.h"
 #include "core/pipeline/abstractprocessor.h"
 

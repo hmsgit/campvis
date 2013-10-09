@@ -6,18 +6,39 @@
 # TBB_LICENSE_FILE
 
 IF (WIN32)
-    SET(TbbDirectory "${CampvisHome}/ext/tbb" CACHE PATH "If TBB is not found, set this path")
-   
-    SET(TBB_INCLUDE_DIR "${TbbDirectory}/include")
+    MESSAGE(STATUS ${TbbDirectory})
     
-    IF(CAMPVIS_MSVC2008)
-        SET(TbbCompilerDirectory "vc9")
-    ELSEIF(CAMPVIS_MSVC2010)
+    IF(NOT TbbDirectory)
+        # check environment variables
+        IF(NOT "$ENV{TBB_INSTALL_DIR}" STREQUAL "")
+            SET(TbbDirectory $ENV{TBB_INSTALL_DIR})
+        ENDIF(NOT "$ENV{TBB_INSTALL_DIR}" STREQUAL "")
+        
+        # check default install directory
+        set(_TbbSeachPaths "C:/Program Files/Intel/TBB" "C:/Program Files (x86)/Intel/TBB" "${CampvisHome}/ext/tbb")
+        FIND_PATH( 
+            TbbDirectory 
+            NAMES include/tbb/tbb.h
+            PATHS ${_TbbSeachPaths}
+            DOC "Intel TBB directory with includes, libs and dlls (i.e. where you extracted the binary distribution from threadingbuildingblocks.org.)"
+        )
+    ENDIF()
+   
+    IF(CAMPVIS_MSVC2010)
         SET(TbbCompilerDirectory "vc10")
+    ELSEIF(CAMPVIS_MSVC11)
+        SET(TbbCompilerDirectory "vc11")
     ELSE()
         MESSAGE(WARNING "Compiler not supported by makefile, you might be able to fix that...")
-    ENDIF(CAMPVIS_MSVC2008)
-
+    ENDIF(CAMPVIS_MSVC2010)
+    
+    FIND_PATH( 
+        TBB_INCLUDE_DIR 
+        NAMES tbb/tbb.h
+        PATHS ${TbbDirectory}/include
+        DOC "Intel TBB include directory (i.e. where tbb/tbb.h is)"
+    )
+    
     # set debug and release library
     IF(CAMPVIS_WIN32)
         SET(TBB_LIBRARY_DEBUG      "${TbbDirectory}/lib/ia32/${TbbCompilerDirectory}/tbb_debug.lib")
@@ -57,6 +78,9 @@ ELSE (WIN32)
         DOC "The TBB library"
     )
 ENDIF (WIN32)
+
+    MESSAGE(STATUS ${TBB_INCLUDE_DIR})
+    MESSAGE(STATUS ${TBB_LIBRARY})
 
 IF(TBB_INCLUDE_DIR AND TBB_LIBRARY)
     SET(TBB_FOUND TRUE)

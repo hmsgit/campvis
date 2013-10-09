@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Creates a TransFuncWindowingEventListener.
          */
-        TransFuncWindowingEventListener(TransferFunctionProperty* property);
+        explicit TransFuncWindowingEventListener(TransferFunctionProperty* property);
 
         /**
          * Virtual Destructor

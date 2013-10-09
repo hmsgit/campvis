@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "tbb/compat/thread"
+#include <tbb/compat/thread>
 #include "tgt/assert.h"
 #include "abstractprocessor.h"
 #include "core/properties/abstractproperty.h"
@@ -125,6 +125,10 @@ namespace campvis {
 
     void AbstractProcessor::setClockExecutionTime(bool value) {
         _clockExecutionTime = value;
+    }
+
+    void AbstractProcessor::updateProperties(DataContainer& dc) {
+        validate(INVALID_PROPERTIES);
     }
 
 

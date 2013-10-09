@@ -101,12 +101,6 @@ namespace campvis {
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                if (hasInvalidProperties()) {
-                    // source DataHandle has changed
-                    updateProperties(img.getDataHandle());
-                    validate(AbstractProcessor::INVALID_PROPERTIES);
-                }
-
                 tgt::vec3 imgSize(img->getSize());
 
                 // current slices in texture coordinates
@@ -251,7 +245,6 @@ namespace campvis {
                 tgt::TextureUnit::setZeroUnit();
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
-                p_targetImageID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");
@@ -264,18 +257,24 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    void SliceExtractor::updateProperties(DataHandle img) {
-        p_transferFunction.getTF()->setImageHandle(img);
-        const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
-        if (p_xSliceNumber.getMaxValue() != imgSize.x - 1){
-            p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
+    void SliceExtractor::updateProperties(DataContainer& dc) {
+        ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
+        p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+
+        if (img != 0) {
+            const tgt::svec3& imgSize = img->getSize();
+            if (p_xSliceNumber.getMaxValue() != imgSize.x - 1){
+                p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
+            }
+            if (p_ySliceNumber.getMaxValue() != imgSize.y - 1){
+                p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
+            }
+            if (p_zSliceNumber.getMaxValue() != imgSize.z - 1){
+                p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+            }
         }
-        if (p_ySliceNumber.getMaxValue() != imgSize.y - 1){
-            p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
-        }
-        if (p_zSliceNumber.getMaxValue() != imgSize.z - 1){
-            p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
-        }
+
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void SliceExtractor::updateBorderGeometry() {

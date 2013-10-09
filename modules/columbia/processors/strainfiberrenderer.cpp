@@ -98,7 +98,7 @@ namespace campvis {
             validate(INVALID_SHADER);
         }
         
-        DataContainer::ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
+        ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
         if (strainData != 0 && _shader != 0) {
             const tgt::Camera& camera = p_camera.getValue();
 
@@ -132,7 +132,6 @@ namespace campvis {
             LGL_ERROR;
 
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
-            p_renderTargetID.issueWrite();
         }
         else {
             LERROR("No suitable input geometry found.");

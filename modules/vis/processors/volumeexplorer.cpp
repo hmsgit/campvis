@@ -130,15 +130,6 @@ namespace campvis {
     }
 
     void VolumeExplorer::process(DataContainer& data) {
-        if (hasInvalidProperties()) {
-            DataContainer::ScopedTypedData<ImageData> img(data, p_inputVolume.getValue());
-            if (img != 0) {
-                // source DataHandle has changed
-                updateProperties(img.getDataHandle());
-                validate(AbstractProcessor::INVALID_PROPERTIES);
-            }        
-        }
-        
         // launch sub-renderers if necessary
         if (getInvalidationLevel() & VR_INVALID) {
             _raycaster.process(data);
@@ -178,10 +169,10 @@ namespace campvis {
     }
 
     void VolumeExplorer::composeFinalRendering(DataContainer& data) {
-        DataContainer::ScopedTypedData<RenderData> vrImage(data, p_outputImage.getValue() + ".raycaster");
-        DataContainer::ScopedTypedData<RenderData> xSliceImage(data, p_outputImage.getValue() + ".xSlice");
-        DataContainer::ScopedTypedData<RenderData> ySliceImage(data, p_outputImage.getValue() + ".ySlice");
-        DataContainer::ScopedTypedData<RenderData> zSliceImage(data, p_outputImage.getValue() + ".zSlice");
+        ScopedTypedData<RenderData> vrImage(data, p_outputImage.getValue() + ".raycaster");
+        ScopedTypedData<RenderData> xSliceImage(data, p_outputImage.getValue() + ".xSlice");
+        ScopedTypedData<RenderData> ySliceImage(data, p_outputImage.getValue() + ".ySlice");
+        ScopedTypedData<RenderData> zSliceImage(data, p_outputImage.getValue() + ".zSlice");
 
         if (vrImage == 0 && xSliceImage == 0 && ySliceImage == 0 && zSliceImage == 0)
             return;
@@ -231,7 +222,6 @@ namespace campvis {
         LGL_ERROR;
 
         data.addData(p_outputImage.getValue(), new RenderData(_fbo));
-        p_outputImage.issueWrite();
     }
 
     void VolumeExplorer::onProcessorInvalidated(AbstractProcessor* processor) {
@@ -249,22 +239,30 @@ namespace campvis {
         }
     }
 
-    void VolumeExplorer::updateProperties(DataHandle img) {
-        _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img);
-        static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->getTF()->setImageHandle(img);
+    void VolumeExplorer::updateProperties(DataContainer& dc) {
+        ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
+        _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+        static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->getTF()->setImageHandle(img.getDataHandle());
 
-        const tgt::svec3& imgSize = static_cast<const ImageData*>(img.getData())->getSize();
-        if (p_xSlice.getMaxValue() != imgSize.x - 1){
-            p_xSlice.setMaxValue(static_cast<int>(imgSize.x) - 1);
-        }
-        if (p_ySlice.getMaxValue() != imgSize.y - 1){
-            p_ySlice.setMaxValue(static_cast<int>(imgSize.y) - 1);
-        }
-        if (p_zSlice.getMaxValue() != imgSize.z - 1){
-            p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
+        if (img != 0) {
+            const tgt::svec3& imgSize = img->getSize();
+            if (p_xSlice.getMaxValue() != imgSize.x - 1){
+                p_xSlice.setMaxValue(static_cast<int>(imgSize.x) - 1);
+                p_xSlice.setValue(static_cast<int>(imgSize.x) / 2);
+            }
+            if (p_ySlice.getMaxValue() != imgSize.y - 1){
+                p_ySlice.setMaxValue(static_cast<int>(imgSize.y) - 1);
+                p_ySlice.setValue(static_cast<int>(imgSize.y) / 2);
+            }
+            if (p_zSlice.getMaxValue() != imgSize.z - 1){
+                p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
+                p_zSlice.setValue(static_cast<int>(imgSize.z) / 2);
+            }
+
+            _trackballEH->reinitializeCamera(img);
         }
 
-        _trackballEH->reinitializeCamera(static_cast<const ImageData*>(img.getData()));
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void VolumeExplorer::onEvent(tgt::Event* e) {

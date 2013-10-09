@@ -53,7 +53,7 @@ namespace campvis {
         /**
          * Creates a new MeshGeometry built from the given faces.
          */
-        MeshGeometry(const std::vector<FaceGeometry>& faces);
+        explicit MeshGeometry(const std::vector<FaceGeometry>& faces);
 
         /**
          * Destructor, deletes VBOs/VAO if necessary. Hence, needs a valid OpenGL context

@@ -3,7 +3,7 @@
 
 #include "tgt/singleton.h"
 #include "tgt/qt/qtthreadedcanvas.h"
-#include "tbb/mutex.h"  // TODO: TBB dependency in TGT is not that beautiful...
+#include <tbb/mutex.h>  // TODO: TBB dependency in TGT is not that beautiful...
 #include <map>
 #include <string>
 
@@ -34,7 +34,8 @@ namespace tgt {
         /**
          * Creates a new OpenGL context in a QtThreadedCanvas with the given arguments.
          * Parameters are the same as in QtThreadedCanvas() but context sharing is enables per default.
-         * The newly created context will be active, but the OpenGL mutex not be locked.
+         * 
+         * \note    Must be called with the OpenGL mutex acquired!
          * 
          * \note    The created canvas/context is owned by this ContextManager. Hence, you may not
          *          delete it yourself!

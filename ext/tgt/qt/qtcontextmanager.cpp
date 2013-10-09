@@ -28,6 +28,7 @@ namespace tgt {
         _contexts.insert(std::make_pair(key, toReturn));
 
         toReturn->makeCurrent();
+        _currentContext = toReturn->getContext();
         // Init GLEW for this context
         GLenum err = glewInit();
         if (err != GLEW_OK) {
@@ -36,6 +37,7 @@ namespace tgt {
             std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
             exit(EXIT_FAILURE);
         }
+        releaseCurrentContext();
 
         return toReturn;
     }
@@ -77,11 +79,13 @@ namespace tgt {
     }
 
     void QtContextManager::releaseCurrentContext() {
-        glFlush();
+        glFinish();
         setCurrent(0);
     }
 
     QtCanvas* QtContextManager::getCurrentContext() const {
+        if (_currentContext == 0)
+            return 0;
         return _currentContext->getCanvas();
     }
 

@@ -27,81 +27,76 @@
 // 
 // ================================================================================================
 
-#ifndef CMBATCHGENERATION_H__
-#define CMBATCHGENERATION_H__
+#ifndef AUTOEVALUATIONPIPELINE_H__
+#define AUTOEVALUATIONPIPELINE_H__
 
-#include "core/datastructures/imagerepresentationlocal.h"
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "modules/devil/processors/devilimagereader.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/io/processors/csvdimagereader.h"
-#include "modules/advancedusvis/processors/advancedusfusion.h"
-#include "modules/preprocessing/processors/gradientvolumegenerator.h"
-#include "modules/preprocessing/processors/lhhistogram.h"
-#include "modules/itk/processors/itkimagefilter.h"
-#include "modules/vis/processors/proxygeometrygenerator.h"
-#include "modules/vis/processors/eepgenerator.h"
-#include "modules/vis/processors/simpleraycaster.h"
-#include "modules/vis/processors/quadview.h"
-#include "modules/randomwalk/processors/confidencemapgenerator.h"
+#include "sigslot/sigslot.h"
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <tbb/spin_rw_mutex.h>
 
-#include "core/properties/buttonproperty.h"
-#include "core/properties/genericproperty.h"
+#include "core/pipeline/abstractpipeline.h"
+
 
 namespace campvis {
-    class CmBatchGeneration : public AutoEvaluationPipeline {
+    /**
+     * Specializtaion of AbstractPipeline performing automatic execution of invalidated processors.
+     * AutoEvaluationPipeline connects to the s_(in)validated signals of all of its processors and
+     * executes processors with invalid results using the correct threads.
+     * 
+     * \param   dc  Pointer to the DataContainer containing local working set of data for this 
+     *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
+     */
+    class AutoEvaluationPipeline : public AbstractPipeline {
     public:
         /**
-         * Creates a AutoEvaluationPipeline. 
+         * Creates a AutoEvaluationPipeline.
          */
-        CmBatchGeneration(DataContainer* dc);
+        AutoEvaluationPipeline(DataContainer* dc);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~CmBatchGeneration();
+        virtual ~AutoEvaluationPipeline();
 
-        /// \see AutoEvaluationPipeline::init()
+
+        /// \see AbstractPipeline::init()
         virtual void init();
-
-        /// \see AutoEvaluationPipeline::deinit()
+        /// \see AbstractPipeline::deinit()
         virtual void deinit();
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "CmBatchGeneration"; };
+        /// \see AbstractPipeline::addProcessor()
+        virtual void addProcessor(AbstractProcessor* processor);
 
-        /**
-         * Execute this pipeline.
-         **/
-        void execute();
-        
     protected:
         /**
          * Slot getting called when one of the observed processors got invalidated.
-         * Overwrites the default behaviour to do nothing.
+         * The default behaviour is to dispatch a job to execute the invalidated processor and emit the s_invalidated signal.
+         * \param   processor   The processor that emitted the signal
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
-        void executePass(int path);
 
-        void save(int path, const std::string& basePath);
+        static const std::string loggerCat_;
 
-        DevilImageReader _usReader;
-        ConfidenceMapGenerator _confidenceGenerator;
-        ItkImageFilter _usBlurFilter;
-        AdvancedUsFusion _usFusion;
+    private:
+        void onDataNamePropertyChanged(const AbstractProperty* prop);
 
-        BoolProperty p_autoExecution;
+        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
 
-        StringProperty p_sourcePath;
-        StringProperty p_targetPathColor;
-        StringProperty p_targetPathFuzzy;
-        IVec2Property p_range;
+        /// Hashmap storing for each processor whether it's a VisualizationProcessor or not.
+        tbb::concurrent_hash_map<AbstractProcessor*, bool> _isVisProcessorMap;
 
-        ButtonProperty p_execute;
+
+        typedef tbb::concurrent_unordered_multimap<std::string, DataNameProperty*> PortMapType;
+        typedef tbb::concurrent_unordered_map<DataNameProperty*, PortMapType::iterator> IteratorMapType;
+
+        /// Multimap to simulate ports between processors
+        PortMapType _portMap;
+        IteratorMapType _iteratorMap;
+        tbb::spin_rw_mutex _pmMutex;
     };
 
 }
 
-#endif // CMBATCHGENERATION_H__
+#endif // AUTOEVALUATIONPIPELINE_H__

@@ -79,10 +79,10 @@ namespace campvis {
     }
 
     void IxpvCompositor::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<RenderData> xRayImage(data, p_xRayImageId.getValue());
-        DataContainer::ScopedTypedData<RenderData> sliceImage(data, p_3dSliceImageId.getValue());
-        DataContainer::ScopedTypedData<RenderData> drrFullImage(data, p_drrFullImageId.getValue());
-        DataContainer::ScopedTypedData<RenderData> drrClippedImage(data, p_drrClippedImageId.getValue());
+        ScopedTypedData<RenderData> xRayImage(data, p_xRayImageId.getValue());
+        ScopedTypedData<RenderData> sliceImage(data, p_3dSliceImageId.getValue());
+        ScopedTypedData<RenderData> drrFullImage(data, p_drrFullImageId.getValue());
+        ScopedTypedData<RenderData> drrClippedImage(data, p_drrClippedImageId.getValue());
 
         if (xRayImage != 0 && sliceImage != 0 && drrFullImage != 0 && drrClippedImage != 0) {
             FramebufferActivationGuard fag(this);
@@ -107,7 +107,6 @@ namespace campvis {
             LGL_ERROR;
 
             data.addData(p_targetImageId.getValue(), new RenderData(_fbo));
-            p_targetImageId.issueWrite();
         }
         else {
             LERROR("No suitable input images found.");

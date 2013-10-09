@@ -45,6 +45,8 @@ namespace campvis {
         const QString& windowTitle = QString::fromStdString(name);
         _mdiSubWindow->setWindowTitle(windowTitle);
         _pipelineWidget->setWindowTitle(windowTitle);
+        _pipelineWidget->show();
+        _mdiArea->tileSubWindows();
 
         connect(_mdiSubWindow, SIGNAL(s_positionChanged(const QPoint&)),
                 this, SLOT(trackMdiSubWindowsPosition(const QPoint&)));

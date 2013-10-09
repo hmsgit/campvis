@@ -42,6 +42,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QComboBox>
 #include <QMdiArea>
 #include <QScrollArea>
 #include <vector>
@@ -62,7 +63,7 @@ namespace campvis {
          * Creates a new TumVis Main window for \a application.
          * \param   application     CampVisApplication to create a GUI for.
          */
-        MainWindow(CampVisApplication* application);
+        explicit MainWindow(CampVisApplication* application);
 
         /**
          * Destructor, make sure to call before destroying the application
@@ -79,11 +80,6 @@ namespace campvis {
          * Deinitializes all OpenGL related stuff
          */
         void deinit();
-
-        /**
-         * Slot to be called by the application when its collection of pipelines has changed.
-         */
-        void onPipelinesChanged();
 
         /**
          * Size hint for the default window size
@@ -108,7 +104,8 @@ namespace campvis {
 
     signals:
         /// Qt signal for updating the PipelineWidget.
-        void updatePipelineWidget(const std::vector<AbstractPipeline*>&);
+        void updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&);
+
         /// Qt signal for updating the PropertyCollectionWidget
         void updatePropCollectionWidget(HasPropertyCollection*, DataContainer*);
 
@@ -129,7 +126,22 @@ namespace campvis {
          */
         void onBtnShowDataContainerInspectorClicked();
 
+        /// Slot to be called when _btnPipelineFactory was clicked;
+        void onBtnPipelineFactoryClicked();
+
     private:
+
+        /**
+         * Slot to be called by the application when its collection of pipelines has changed.
+         */
+        void onPipelinesChanged();
+
+        /**
+         * Slot to be called by the application when its collection of DataContainers has changed.
+         */
+        void onDataContainersChanged();
+
+
         /**
          * Setup Qt GUI stuff
          */
@@ -152,6 +164,9 @@ namespace campvis {
         CampVisApplication* _application;                    ///< Pointer to the application hosting the whole stuff
 
         QMdiArea* _mdiArea;                                 ///< MDI area (the window's central widget)
+        QWidget* _containerWidget;                          ///< Widget to manage the app's DataContainers and pipelines
+        QComboBox* _cbPipelineFactory;                      ///< Combobox for selecting the Pipelines from the PipelineFactory
+        QPushButton* _btnPipelineFactory;                   ///< Button to add a Pipeline from the factory
         PipelineTreeWidget* _pipelineWidget;                ///< Widget for browsing the active pipelines
         QWidget* _pipelinePropertiesWidget;                 ///< Widget showing the selected pipeline's properties
         QScrollArea* _pipelinePropertiesScrollArea;         ///< Scroll area for _pipelinePropertiesWidget
@@ -164,6 +179,8 @@ namespace campvis {
 
         AbstractPipeline* _selectedPipeline;                ///< currently selected pipeline
         AbstractProcessor* _selectedProcessor;              ///< currently selected processor
+        DataContainer* _selectedDataContainer;              ///< currently selected DataContainer
+
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         std::vector<QDockWidget*> _primaryDocks;            ///< Docks located in top docking area of the main window
     };

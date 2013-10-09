@@ -59,7 +59,7 @@ namespace campvis {
         Vec4Property _maskColor;            ///< Mask color
 
         tgt::TextureUnit* _texUnit;
-        DataContainer::ScopedTypedData<RenderData>* _maskImage;
+        ScopedTypedData<RenderData>* _maskImage;
     };
 
 }

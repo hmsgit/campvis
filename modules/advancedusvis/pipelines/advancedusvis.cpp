@@ -38,8 +38,8 @@
 
 namespace campvis {
 
-    AdvancedUsVis::AdvancedUsVis()
-        : DigraphVisualizationPipeline()
+    AdvancedUsVis::AdvancedUsVis(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _usReader()
         , _confidenceReader()
@@ -88,7 +88,7 @@ namespace campvis {
     }
 
     void AdvancedUsVis::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         _usReader.s_validated.connect(this, &AdvancedUsVis::onProcessorValidated);
 
@@ -100,40 +100,40 @@ namespace campvis {
         //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel");
         //_usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\us.png");
         _usReader.p_targetImageID.setValue("us.image");
-        _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
-        _usReader.p_targetImageID.connect(&_usFusion1.p_usImageId);
-        _usReader.p_targetImageID.connect(&_usFusion2.p_usImageId);
-        _usReader.p_targetImageID.connect(&_usFusion3.p_usImageId);
-        _usReader.p_targetImageID.connect(&_usFusion4.p_usImageId);
-        _usReader.p_targetImageID.connect(&_gvg.p_sourceImageID);
-        _usReader.p_targetImageID.connect(&_lhh.p_intensitiesId);
-        _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
-        _usReader.p_targetImageID.connect(&_usDenoiseilter.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_confidenceGenerator.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_usFusion1.p_usImageId);
+        _usReader.p_targetImageID.addSharedProperty(&_usFusion2.p_usImageId);
+        _usReader.p_targetImageID.addSharedProperty(&_usFusion3.p_usImageId);
+        _usReader.p_targetImageID.addSharedProperty(&_usFusion4.p_usImageId);
+        _usReader.p_targetImageID.addSharedProperty(&_gvg.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_lhh.p_intensitiesId);
+        _usReader.p_targetImageID.addSharedProperty(&_usBlurFilter.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_usDenoiseilter.p_sourceImageID);
 
         _confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\CurefabCS\\Stent_Patient_ B-Mode_2013-02-11T14.56.46z\\01_cm.mhd");
         //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\01\\Confidence_01.mhd");
         //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\UltrasoundBoneData\\SynthesEvaluationUnterschenkel");
         //_confidenceReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\transcranial\\cm.png");
         _confidenceReader.p_targetImageID.setValue("confidence.image.read");
-        _confidenceReader.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
-        _confidenceReader.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
-        _confidenceReader.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
-        _confidenceReader.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.addSharedProperty(&_usFusion1.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.addSharedProperty(&_usFusion2.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.addSharedProperty(&_usFusion3.p_confidenceImageID);
+        _confidenceReader.p_targetImageID.addSharedProperty(&_usFusion4.p_confidenceImageID);
 
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
-        //_confidenceGenerator.p_targetImageID.connect(&_usFusion1.p_confidenceImageID);
-        //_confidenceGenerator.p_targetImageID.connect(&_usFusion2.p_confidenceImageID);
-        //_confidenceGenerator.p_targetImageID.connect(&_usFusion3.p_confidenceImageID);
-        //_confidenceGenerator.p_targetImageID.connect(&_usFusion4.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion1.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion2.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion3.p_confidenceImageID);
+        //_confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion4.p_confidenceImageID);
 
-        _gvg.p_targetImageID.connect(&_lhh.p_gradientsId);
-        _gvg.p_targetImageID.connect(&_usFusion1.p_gradientImageID);
-        _gvg.p_targetImageID.connect(&_usFusion2.p_gradientImageID);
-        _gvg.p_targetImageID.connect(&_usFusion3.p_gradientImageID);
-        _gvg.p_targetImageID.connect(&_usFusion4.p_gradientImageID);
+        _gvg.p_targetImageID.addSharedProperty(&_lhh.p_gradientsId);
+        _gvg.p_targetImageID.addSharedProperty(&_usFusion1.p_gradientImageID);
+        _gvg.p_targetImageID.addSharedProperty(&_usFusion2.p_gradientImageID);
+        _gvg.p_targetImageID.addSharedProperty(&_usFusion3.p_gradientImageID);
+        _gvg.p_targetImageID.addSharedProperty(&_usFusion4.p_gradientImageID);
 
         _usFusion1.p_targetImageID.setValue("us.fused1");
-        _usFusion1.p_targetImageID.connect(&_quadView.p_inputImage1);
+        _usFusion1.p_targetImageID.addSharedProperty(&_quadView.p_inputImage1);
         _usFusion1.p_view.selectById("us");
         _usFusion1.p_sliceNumber.setValue(0);
         _usFusion1.p_sliceNumber.addSharedProperty(&_usFusion2.p_sliceNumber);
@@ -141,42 +141,42 @@ namespace campvis {
         _usFusion1.p_sliceNumber.addSharedProperty(&_usFusion4.p_sliceNumber);
 
         _usFusion2.p_targetImageID.setValue("us.fused2");
-        _usFusion2.p_targetImageID.connect(&_quadView.p_inputImage2);
+        _usFusion2.p_targetImageID.addSharedProperty(&_quadView.p_inputImage2);
         _usFusion2.p_view.selectById("mappingSaturationHSV");
 
         _usFusion3.p_targetImageID.setValue("us.fused3");
-        _usFusion3.p_targetImageID.connect(&_quadView.p_inputImage3);
+        _usFusion3.p_targetImageID.addSharedProperty(&_quadView.p_inputImage3);
         _usFusion3.p_view.selectById("mappingLAB");
         _usFusion3.p_hue.setValue(0.22f);
 
         _usFusion4.p_targetImageID.setValue("us.fused4");
-        _usFusion4.p_targetImageID.connect(&_quadView.p_inputImage4);
+        _usFusion4.p_targetImageID.addSharedProperty(&_quadView.p_inputImage4);
         _usFusion4.p_view.selectById("mappingSharpness");
 
         _usBlurFilter.p_targetImageID.setValue("us.blurred");
-        _usBlurFilter.p_targetImageID.connect(&_usFusion1.p_blurredImageId);
-        _usBlurFilter.p_targetImageID.connect(&_usFusion2.p_blurredImageId);
-        _usBlurFilter.p_targetImageID.connect(&_usFusion3.p_blurredImageId);
-        _usBlurFilter.p_targetImageID.connect(&_usFusion4.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.addSharedProperty(&_usFusion1.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.addSharedProperty(&_usFusion2.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.addSharedProperty(&_usFusion3.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.addSharedProperty(&_usFusion4.p_blurredImageId);
         _usBlurFilter.p_filterMode.selectById("gauss");
         _usBlurFilter.p_sigma.setValue(4.f);
 
         _quadView.p_outputImage.setValue("quadview.output");
 
         _usDenoiseilter.p_targetImageID.setValue("us.denoised");
-        _usDenoiseilter.p_targetImageID.connect(&_usProxy.p_sourceImageID);
-        _usDenoiseilter.p_targetImageID.connect(&_usEEP.p_sourceImageID);
-        _usDenoiseilter.p_targetImageID.connect(&_usDVR.p_sourceImageID);
+        _usDenoiseilter.p_targetImageID.addSharedProperty(&_usProxy.p_sourceImageID);
+        _usDenoiseilter.p_targetImageID.addSharedProperty(&_usEEP.p_sourceImageID);
+        _usDenoiseilter.p_targetImageID.addSharedProperty(&_usDVR.p_sourceImageID);
         _usDenoiseilter.p_filterMode.selectById("gradientDiffusion");
         _usDenoiseilter.p_numberOfSteps.setValue(3);
 
         _usProxy.p_geometryID.setValue("us.proxy");
-        _usProxy.p_geometryID.connect(&_usEEP.p_geometryID);
+        _usProxy.p_geometryID.addSharedProperty(&_usEEP.p_geometryID);
 
         _usEEP.p_entryImageID.setValue("us.entry");
-        _usEEP.p_entryImageID.connect(&_usDVR.p_entryImageID);
+        _usEEP.p_entryImageID.addSharedProperty(&_usDVR.p_entryImageID);
         _usEEP.p_exitImageID.setValue("us.exit");
-        _usEEP.p_exitImageID.connect(&_usDVR.p_exitImageID);
+        _usEEP.p_exitImageID.addSharedProperty(&_usDVR.p_exitImageID);
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
@@ -197,7 +197,7 @@ namespace campvis {
 
     void AdvancedUsVis::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     void AdvancedUsVis::execute() {
@@ -232,14 +232,10 @@ namespace campvis {
         }
     }
 
-    const std::string AdvancedUsVis::getName() const {
-        return "AdvancedUsVis";
-    }
-
     void AdvancedUsVis::onProcessorValidated(AbstractProcessor* processor) {
         if (processor = &_usReader) {
             // convert data
-            DataContainer::ScopedTypedData<ImageData> img(_data, _usReader.p_targetImageID.getValue());
+            ScopedTypedData<ImageData> img(*_data, _usReader.p_targetImageID.getValue());
             if (img != 0) {
                 _trackballEH->reinitializeCamera(img);
             }

@@ -32,15 +32,15 @@
 
 #include "tgt/assert.h"
 
-#include <itkImage.h>
-#include <itkImportImageFilter.h>
-#include <itkImageRegionConstIterator.h>
-#include <itkRGBPixel.h>
-
 #include "core/tools/typetraits.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
+
+#include <itkImage.h>
+#include <itkImportImageFilter.h>
+#include <itkImageRegionConstIterator.h>
+#include <itkRGBPixel.h>
 
 #include <cstring> // memcpy
 

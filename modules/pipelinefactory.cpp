@@ -27,57 +27,46 @@
 // 
 // ================================================================================================
 
-#ifndef ITKIMAGEFILTERKERNEL_H__
-#define ITKIMAGEFILTERKERNEL_H__
+#include "pipelinefactory.h"
+#include "gen_pipelineregistration.h"
 
-#include <string>
-
-#include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/optionproperty.h"
-
-#include "modules/preprocessing/tools/abstractimagefilter.h"
+#include <sstream>
 
 namespace campvis {
-    /**
-     * Performs different filter operations on images.
-     */
-    class ItkImageFilterKernel : public AbstractProcessor {
-    public:
-        /**
-         * Constructs a new ItkImageFilterKernel Processor
-         **/
-        ItkImageFilterKernel();
 
-        /**
-         * Destructor
-         **/
-        virtual ~ItkImageFilterKernel();
+    // declare one single symbol for the PipelineFactory singleton
+    tbb::atomic<PipelineFactory*> PipelineFactory::_singleton;
 
-        /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ItkImageFilterKernel"; };
-        /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Creates the gradient volume for the given intensity volume."; };
-        /// \see AbstractProcessor::getAuthor()
-        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
-        /// \see AbstractProcessor::getProcessorState()
-        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
+    PipelineFactory& PipelineFactory::getRef() {
+        if (_singleton == 0) {
+            std::cout << "creating PipelineFactory...\n";
+            PipelineFactory* tmp = new PipelineFactory();
+            if (_singleton.compare_and_swap(tmp, 0) != 0) {
+                delete tmp;
+            }
+        }
 
-        virtual void process(DataContainer& data);
+        return *_singleton;
+    }
 
-        DataNameProperty p_sourceImageID;   ///< ID for input volume
-        DataNameProperty p_targetImageID;   ///< ID for output gradient volume
+    std::vector<std::string> PipelineFactory::getRegisteredPipelines() const {
+        tbb::spin_mutex::scoped_lock lock(_mutex);
 
-        GenericOptionProperty<std::string> p_filterMode;    ///< Filter mode
-        IntProperty p_kernelSize;
+        std::vector<std::string> toReturn;
+        toReturn.reserve(_pipelineMap.size());
+        for (std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it)
+            toReturn.push_back(it->first);
+        return toReturn;
+    }
 
-    protected:
+    AbstractPipeline* PipelineFactory::createPipeline(const std::string& id, DataContainer* dc) const {
+        tbb::spin_mutex::scoped_lock lock(_mutex);
 
-        static const std::string loggerCat_;
-    };
+        std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.find(id);
+        if (it == _pipelineMap.end())
+            return 0;
+        else
+            return (it->second)(dc);
+    }
 
 }
-
-#endif // ITKIMAGEFILTERKERNEL_H__

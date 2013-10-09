@@ -30,7 +30,7 @@
 #ifndef IMAGEDATA_H__
 #define IMAGEDATA_H__
 
-#include "tbb/concurrent_vector.h"
+#include <tbb/concurrent_vector.h>
 #include "tgt/logmanager.h"
 #include "tgt/vector.h"
 #include "core/datastructures/abstractdata.h"
@@ -61,7 +61,7 @@ namespace campvis {
          * \param size              Size of this image (number of elements per dimension)
          * \param numChannels       Number of channels per element
          */
-        ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
+        explicit ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
 
         /// Destructor
         virtual ~ImageData();

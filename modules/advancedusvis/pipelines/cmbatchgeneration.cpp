@@ -50,8 +50,8 @@
 
 namespace campvis {
 
-    CmBatchGeneration::CmBatchGeneration()
-        : VisualizationPipeline()
+    CmBatchGeneration::CmBatchGeneration(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _usReader(&_canvasSize)
         , _confidenceGenerator()
         , _usBlurFilter()
@@ -80,7 +80,7 @@ namespace campvis {
     }
 
     void CmBatchGeneration::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         p_sourcePath.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase");
         p_targetPathColor.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\color");
@@ -91,12 +91,12 @@ namespace campvis {
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\11_niere_re_durch_leber2\\original\\export0000.bmp");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_importType.selectById("localIntensity");
-        _usReader.p_targetImageID.connect(&_confidenceGenerator.p_sourceImageID);
-        _usReader.p_targetImageID.connect(&_usFusion.p_usImageId);
-        _usReader.p_targetImageID.connect(&_usBlurFilter.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_confidenceGenerator.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_usFusion.p_usImageId);
+        _usReader.p_targetImageID.addSharedProperty(&_usBlurFilter.p_sourceImageID);
 
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
-        _confidenceGenerator.p_targetImageID.connect(&_usFusion.p_confidenceImageID);
+        _confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion.p_confidenceImageID);
         _confidenceGenerator.p_curvilinear.setValue(true);
         _confidenceGenerator.p_origin.setValue(tgt::vec2(340.f, 540.f));
         _confidenceGenerator.p_angles.setValue(tgt::vec2(4.064f, 5.363f));
@@ -110,7 +110,7 @@ namespace campvis {
         _usFusion.p_sliceNumber.setValue(0);
 
         _usBlurFilter.p_targetImageID.setValue("us.blurred");
-        _usBlurFilter.p_targetImageID.connect(&_usFusion.p_blurredImageId);
+        _usBlurFilter.p_targetImageID.addSharedProperty(&_usFusion.p_blurredImageId);
         _usBlurFilter.p_filterMode.selectById("gauss");
         _usBlurFilter.p_sigma.setValue(4.f);
 
@@ -124,7 +124,7 @@ namespace campvis {
     }
 
     void CmBatchGeneration::deinit() {
-        VisualizationPipeline::deinit();
+        AutoEvaluationPipeline::deinit();
     }
 
     void CmBatchGeneration::execute() {
@@ -137,13 +137,9 @@ namespace campvis {
         }
     }
 
-    const std::string CmBatchGeneration::getName() const {
-        return "CmBatchGeneration";
-    }
-
     void CmBatchGeneration::onProcessorInvalidated(AbstractProcessor* processor) {
         if (p_autoExecution.getValue())
-            VisualizationPipeline::onProcessorInvalidated(processor);
+            AutoEvaluationPipeline::onProcessorInvalidated(processor);
     }
 
     void CmBatchGeneration::executePass(int path) {
@@ -155,7 +151,7 @@ namespace campvis {
 
         executeProcessor(&_usReader, false);
 
-        DataHandle dh = _data.getData(_usReader.p_targetImageID.getValue());
+        DataHandle dh = _data->getData(_usReader.p_targetImageID.getValue());
         if (dh.getData() != 0) {
             if (const ImageData* tester = dynamic_cast<const ImageData*>(dh.getData())) {
             	_canvasSize.setValue(tester->getSize().xy());
@@ -177,7 +173,7 @@ namespace campvis {
 
     void CmBatchGeneration::save(int path, const std::string& basePath) {
         // get result
-        DataContainer::ScopedTypedData<RenderData> rd(_data, _usFusion.p_targetImageID.getValue());
+        ScopedTypedData<RenderData> rd(*_data, _usFusion.p_targetImageID.getValue());
         const ImageRepresentationGL* rep = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>(false);
         if (rep != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL

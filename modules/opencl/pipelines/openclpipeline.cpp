@@ -40,8 +40,8 @@
 
 namespace campvis {
 
-    OpenCLPipeline::OpenCLPipeline()
-        : VisualizationPipeline()
+    OpenCLPipeline::OpenCLPipeline(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _imageReader()
         , _pgGenerator()
@@ -66,7 +66,7 @@ namespace campvis {
     }
 
     void OpenCLPipeline::init() {
-        VisualizationPipeline::init();
+        AutoEvaluationPipeline::init();
 
         _camera.addSharedProperty(&_eepGenerator.p_camera);
         _camera.addSharedProperty(&_clRaycaster._camera);
@@ -74,8 +74,8 @@ namespace campvis {
         //_imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.connect(&_pgGenerator.p_sourceImageID);
-        _imageReader.p_targetImageID.connect(&_eepGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_pgGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_eepGenerator.p_sourceImageID);
         _imageReader.s_validated.connect(this, &OpenCLPipeline::onProcessorValidated);
 
         _clRaycaster._targetImageID.setValue("cl.output");
@@ -90,25 +90,21 @@ namespace campvis {
 
         _renderTargetID.setValue("cl.output");
 
-        _pgGenerator.p_geometryID.connect(&_eepGenerator.p_geometryID);
+        _pgGenerator.p_geometryID.addSharedProperty(&_eepGenerator.p_geometryID);
 
-        _eepGenerator.p_entryImageID.connect(&_clRaycaster._entryImageID);
-        _eepGenerator.p_exitImageID.connect(&_clRaycaster._exitImageID);
+        _eepGenerator.p_entryImageID.addSharedProperty(&_clRaycaster._entryImageID);
+        _eepGenerator.p_exitImageID.addSharedProperty(&_clRaycaster._exitImageID);
     }
 
     void OpenCLPipeline::deinit() {
         _canvasSize.s_changed.disconnect(this);
-        VisualizationPipeline::deinit();
-    }
-
-    const std::string OpenCLPipeline::getName() const {
-        return "OpenCLPipeline";
+        AutoEvaluationPipeline::deinit();
     }
 
     void OpenCLPipeline::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
-            ImageRepresentationLocal::ScopedRepresentation img(_data, "reader.output");
+            ImageRepresentationLocal::ScopedRepresentation img(*_data, "reader.output");
             if (img != 0) {
                 size_t numElements = img->getNumElements();
                 float* asFloats = new float[numElements];
@@ -116,8 +112,7 @@ namespace campvis {
                     asFloats[i] = img->getElementNormalized(i, 0);
                 ImageData* id = new ImageData(img->getDimensionality(), img->getSize(), img->getParent()->getNumChannels());
                 GenericImageRepresentationLocal<float, 1>* imageWithFloats = GenericImageRepresentationLocal<float, 1>::create(id, asFloats);
-
-                DataHandle dh = _data.addData("clr.input", id);
+                DataHandle dh = _data->addData("clr.input", id);
                 _trackballEH->reinitializeCamera(img->getParent());
             }
         }

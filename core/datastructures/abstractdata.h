@@ -31,6 +31,7 @@
 #define ABSTRACTDATA_H__
 
 #include "tgt/bounds.h"
+#include "core/datastructures/scopedtypeddata.h" // not directly needed here but by many classes including AbstractData 
 #include "core/tools/referencecounted.h"
 
 namespace campvis {
@@ -52,6 +53,7 @@ namespace campvis {
         virtual tgt::Bounds getWorldBounds() const = 0;
     };
 
+// ================================================================================================
 
     /**
      * Abstract base class for data handled by a DataHandle and stored in a DataContainer.

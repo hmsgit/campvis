@@ -31,7 +31,7 @@ namespace campvis {
          * \param   showCat          should the category be printed along with the messages
          * \param   showLevel        should the LogLevel be printed along with the messages
          */
-        QTextEditLog(QTextEdit* logDisplay, QObject* parent = 0, bool dateStamping = true,
+        explicit QTextEditLog(QTextEdit* logDisplay, QObject* parent = 0, bool dateStamping = true,
                      bool timeStamping = true, bool showCat = true, bool showLevel = true);
         virtual ~QTextEditLog() {}
         bool isOpen() { return true; }

@@ -65,6 +65,7 @@ namespace campvis {
 
 
         /**
+<<<<<<< HEAD
          * Connects this property with the given DataNameProperty \a reader.
          * \param   reader  DataNameProperty to connect to, must be have read access.
          */
@@ -78,18 +79,16 @@ namespace campvis {
 
         /**
          * Returns the access info of this property defining whether processor will read or write.
+=======
+         * Returns the access info of this property defining whether component will read or write.
+>>>>>>> c4c5899... Refactored DataNameProperty: Got rid of issueWrite() and connect(). Automatic invalidation of connected (shared) DataNameProperties is now delegated to AutoEvaluationPipeline.
          * \return  _accessInfo
          */
         DataAccessInfo getAccessInfo() const;
 
-        void issueWrite();
-
     protected:
 
-        void notifyReaders();
-
         DataAccessInfo _accessInfo;
-        std::set<DataNameProperty*> _connectedReaders;
 
         static const std::string loggerCat_;
     };

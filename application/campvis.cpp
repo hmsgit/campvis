@@ -28,24 +28,6 @@
 // ================================================================================================
 
 #include "application/campvisapplication.h"
-#include "modules/advancedusvis/pipelines/advancedusvis.h"
-#include "modules/advancedusvis/pipelines/cmbatchgeneration.h"
-#include "modules/vis/pipelines/ixpvdemo.h"
-#include "modules/vis/pipelines/dvrvis.h"
-#include "modules/vis/pipelines/volumerendererdemo.h"
-#include "modules/vis/pipelines/volumeexplorerdemo.h"
-#include "modules/vis/pipelines/slicevis.h"
-#ifdef HAS_KISSCL
-#include "modules/opencl/pipelines/openclpipeline.h"
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-#include "modules/scr_msk/pipelines/uscompounding.h"
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-#include "modules/columbia/pipelines/columbia1.h"
-#endif
 
 #ifdef Q_WS_X11
 #include <X11/Xlib.h>
@@ -66,27 +48,6 @@ int main(int argc, char** argv) {
     #endif
   
     CampVisApplication app(argc, argv);
-    //app.addVisualizationPipeline("Advanced Ultrasound Visualization", new AdvancedUsVis());
-    //app.addVisualizationPipeline("Confidence Map Generation", new CmBatchGeneration());
-//    app.addVisualizationPipeline("IXPV", new IxpvDemo());
-    //app.addVisualizationPipeline("SliceVis", new SliceVis());
-    app.addVisualizationPipeline("DVRVis", new DVRVis());
-    //app.addVisualizationPipeline("VolumeRendererDemo", new VolumeRendererDemo());
-    app.addVisualizationPipeline("VolumeExplorerDemo", new VolumeExplorerDemo());
-#ifdef HAS_KISSCL
-    //app.addVisualizationPipeline("DVR with OpenCL", new OpenCLPipeline());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_SCR_MSK
-    //app.addVisualizationPipeline("US Compounding", new UsCompounding());
-#endif
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-    //app.addVisualizationPipeline("Columbia", new Columbia1());
-#endif
-
-
-
     app.init();
     int toReturn = app.run();
     app.deinit();

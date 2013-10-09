@@ -87,7 +87,8 @@ namespace campvis {
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
         /// adapts the range of the p_sliceNumber property to the image
-        void updateProperties(const ImageData* img);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
 
     protected:
         tgt::Shader* _shader;                           ///< Shader for slice rendering

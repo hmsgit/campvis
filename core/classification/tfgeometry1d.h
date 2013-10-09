@@ -47,7 +47,7 @@ namespace campvis {
     class TFGeometry1D {
     public:
         struct KeyPoint {
-            KeyPoint(float position, const tgt::col4& color)
+            explicit KeyPoint(float position, const tgt::col4& color)
                 : _position(position)
                 , _color(color)
             {};
@@ -60,7 +60,7 @@ namespace campvis {
          * Creates a new TFGeometry1D
          * \param   Bounds  Bounds of the position of the geometry in texture coordinates.
          */
-        TFGeometry1D(const std::vector<KeyPoint>& keyPoints);
+        explicit TFGeometry1D(const std::vector<KeyPoint>& keyPoints);
 
         /**
          * Virtual destructor

@@ -34,7 +34,7 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 
-#include "tbb/tbb.h"
+#include <tbb/tbb.h>
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -194,8 +194,6 @@ namespace campvis {
             data.addData("foo", imgTex);
             data.addData(p_outputFH.getValue(), imgFh);
             data.addData(p_outputFL.getValue(), imgFl);
-            p_outputFH.issueWrite();
-            p_outputFL.issueWrite();
         }
         else {
             LDEBUG("No suitable intensities image found.");

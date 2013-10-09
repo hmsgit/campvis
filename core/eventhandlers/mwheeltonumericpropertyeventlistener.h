@@ -44,7 +44,7 @@ namespace campvis {
         /**
          * Creates a MWheelToNumericPropertyEventListener.
          */
-        MWheelToNumericPropertyEventListener(INumericProperty* property);
+        explicit MWheelToNumericPropertyEventListener(INumericProperty* property);
 
         /**
          * Virtual Destructor

@@ -31,8 +31,8 @@
 #define PROCESSOR_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/atomic.h"
-#include "tbb/concurrent_queue.h"
+#include <tbb/atomic.h>
+#include <tbb/concurrent_queue.h>
 #include "tgt/logmanager.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"
@@ -65,8 +65,7 @@ namespace campvis {
             VALID               = 0,        ///< Valid
             INVALID_RESULT      = 1 << 0,   ///< Need to rerun the process() method
             INVALID_SHADER      = 1 << 1,   ///< Need to recompile the shader
-            INVALID_FILE        = 1 << 2,   ///< Need to reread the file
-            INVALID_PROPERTIES  = 1 << 3    ///< Need to update the properties
+            INVALID_PROPERTIES  = 1 << 2    ///< Need to update the properties
         };
 
         /// Current state of a processor in terms of stability.
@@ -210,14 +209,6 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the the INVALID_FILE flag is set.
-         * \return _level & INVALID_FILE
-         */
-        bool hasInvalidFile() const {
-            return (_level & static_cast<int>(INVALID_FILE)) != 0;
-        }
-
-        /**
          * Returns wheter the the INVALID_PROPERTIES flag is set.
          * \return _level & INVALID_PROPERTIES
          */
@@ -259,6 +250,19 @@ namespace campvis {
         void validate(InvalidationLevel il) {
             validate(static_cast<int>(il));
         }
+
+        /**
+         * Gets called from the pipeline before calling process(), when this processor has an INVALID_PROPERTIES level.
+         * \note    You may overload this method as needed. The default implementation only validates
+         *          the INVALID_PROPERTIES level again.
+         * \note    There is also an overloadable updateProperties() in the HasPropertyCollection super class, 
+         *          which is called from the processor itself. If you do not need access to the DataContainer
+         *          of the parent pipeline, you can also use that method.
+         * \see     HasPropertyCollection::updateProperties()
+         * \param   dc  DataContainer   The DataContainer of the calling pipeline.
+         */
+        virtual void updateProperties(DataContainer& dc);
+
 
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;

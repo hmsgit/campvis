@@ -30,32 +30,33 @@
 #ifndef VolumeExplorerDemo_H__
 #define VolumeExplorerDemo_H__
 
-#include "core/pipeline/visualizationpipeline.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
-    class VolumeExplorerDemo : public VisualizationPipeline {
+    class VolumeExplorerDemo : public AutoEvaluationPipeline {
     public:
         /**
-         * Creates a VisualizationPipeline.
+         * Creates a AutoEvaluationPipeline.
          */
-        VolumeExplorerDemo();
+        VolumeExplorerDemo(DataContainer* dc);
 
         /**
          * Virtual Destructor
          **/
         virtual ~VolumeExplorerDemo();
 
-        /// \see VisualizationPipeline::init()
+        /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see VisualizationPipeline::deinit()
+        /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const;
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "VolumeExplorerDemo"; };
 
         void onRenderTargetSizeChanged(const AbstractProperty* prop);
 
@@ -70,9 +71,8 @@ namespace campvis {
         CameraProperty _camera;
         MhdImageReader _imageReader;
         VolumeExplorer _ve;
-
-
     };
+
 }
 
 #endif // VolumeExplorerDemo_H__

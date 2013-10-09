@@ -44,30 +44,30 @@ namespace tgt {
 }
 
 namespace campvis {
-    class VisualizationPipeline;
+    class AbstractPipeline;
 
     /**
-     * Painter class for CAMPVis, rendering the render target of a VisualizationPipeline.
+     * Painter class for CAMPVis, rendering the render target of an AbstractPipeline.
      * This painter implements Runnable, hence, it runs in its own thread and the associated canvas
      * must be of type QtThreadedCanvas.
      * Rendering is implemented using condidional wait - hence the canvas is only updated when
      * \a pipeline emits the s_RenderTargetChanged signal.
      * 
-     * \sa  Runnable, VisualizationPipeline
+     * \sa  Runnable, AbstractPipeline
      */
-    class TumVisPainter : public Runnable, public tgt::Painter, public sigslot::has_slots<> {
+    class CampVisPainter : public Runnable, public tgt::Painter, public sigslot::has_slots<> {
     public:
         /**
-         * Creates a new TumVisPainter rendering the render target of \a pipeline on \a canvas.
+         * Creates a new CampVisPainter rendering the render target of \a pipeline on \a canvas.
          * \param   canvas      Canvas to render on
          * \param   pipeline    Pipeline to render
          */
-        TumVisPainter(tgt::GLCanvas* canvas, VisualizationPipeline* pipeline);
+        CampVisPainter(tgt::GLCanvas* canvas, AbstractPipeline* pipeline);
 
         /**
          * Destructor, stops and waits for the rendering thread if it's still running.
          */
-        virtual ~TumVisPainter();
+        virtual ~CampVisPainter();
 
         /// \see Runnable::stop
         void stop();
@@ -106,7 +106,7 @@ namespace campvis {
          * Pipeline with the render target to render.
          * \param   pipeline    Pipeline to render
          */
-        void setPipeline(VisualizationPipeline* pipeline);
+        void setPipeline(AbstractPipeline* pipeline);
 
         /**
          * Slot being notified when the pipeline's render target changed.
@@ -121,7 +121,7 @@ namespace campvis {
 
         static const std::string loggerCat_;
 
-        VisualizationPipeline* _pipeline;                   ///< Pipeline to render
+        AbstractPipeline* _pipeline;                        ///< Pipeline to render
         tgt::Shader* _copyShader;                           ///< Shader for copying the render target to the framebuffer.
         tbb::atomic<bool> _dirty;                           ///< Flag whether render result is dirty and needs to be rerendered.
         std::condition_variable _renderCondition;           ///< conditional wait condition for rendering

@@ -29,8 +29,8 @@
 
 #include "strainfibertracker.h"
 
-#include "tbb/tbb.h"
-#include "tbb/spin_mutex.h"
+#include <tbb/tbb.h>
+#include <tbb/spin_mutex.h>
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "modules/columbia/datastructures/fiberdata.h"
@@ -208,7 +208,6 @@ namespace campvis {
                 LDEBUG("done.");
 
                 data.addData(p_outputID.getValue(), fibers);
-                p_outputID.issueWrite();
             }
             else {
                 LERROR("Wrong number of channels.");

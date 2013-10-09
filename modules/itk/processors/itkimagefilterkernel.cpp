@@ -37,7 +37,7 @@
 #include <itkBinaryMorphologicalClosingImageFilter.h>
 #include <itkBinaryMorphologicalOpeningImageFilter.h>
 
-#include "tbb/tbb.h"
+#include <tbb/tbb.h>
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -220,7 +220,6 @@ namespace campvis {
             }
 
             data.addData(p_targetImageID.getValue(), id);
-            p_targetImageID.issueWrite();
         }
         else {
             LDEBUG("No suitable input image found.");
@@ -228,10 +227,6 @@ namespace campvis {
 
 
         validate(INVALID_RESULT);
-    }
-
-    void ItkImageFilterKernel::updateProperties() {
-
     }
 
 }

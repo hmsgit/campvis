@@ -91,7 +91,7 @@ namespace campvis {
 
     void EEPGenerator::process(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
-        DataContainer::ScopedTypedData<MeshGeometry> proxyGeometry(data, p_geometryID.getValue());
+        ScopedTypedData<MeshGeometry> proxyGeometry(data, p_geometryID.getValue());
 
         if (img != 0 && proxyGeometry != 0 && _shader != 0) {
             if (img->getDimensionality() == 3) {
@@ -101,7 +101,7 @@ namespace campvis {
                     validate(INVALID_SHADER);
                 }
 
-                DataContainer::ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
+                ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
 
                 tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
@@ -117,7 +117,7 @@ namespace campvis {
                 // setup virtual mirror if necessary
                 tgt::mat4 mirrorMatrix = tgt::mat4::identity;
                 if (p_enableMirror.getValue()) {
-                    DataContainer::ScopedTypedData<FaceGeometry> mirrorGeometry(data, p_mirrorID.getValue());
+                    ScopedTypedData<FaceGeometry> mirrorGeometry(data, p_mirrorID.getValue());
                     if (mirrorGeometry && mirrorGeometry->size() > 0) {
                         const tgt::vec3& p = mirrorGeometry->getVertices()[0];
                         tgt::vec3 n = tgt::normalize(tgt::cross(mirrorGeometry->getVertices()[1] - mirrorGeometry->getVertices()[0], mirrorGeometry->getVertices()[2] - mirrorGeometry->getVertices()[0]));
@@ -219,8 +219,6 @@ namespace campvis {
 
                 data.addData(p_entryImageID.getValue(), entrypoints);
                 data.addData(p_exitImageID.getValue(), exitpoints);
-                p_entryImageID.issueWrite();
-                p_exitImageID.issueWrite();
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

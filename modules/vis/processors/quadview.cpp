@@ -75,10 +75,10 @@ namespace campvis {
     }
 
     void QuadView::process(DataContainer& data) {
-        DataContainer::ScopedTypedData<RenderData> inputImage1(data, p_inputImage1.getValue());
-        DataContainer::ScopedTypedData<RenderData> inputImage2(data, p_inputImage2.getValue());
-        DataContainer::ScopedTypedData<RenderData> inputImage3(data, p_inputImage3.getValue());
-        DataContainer::ScopedTypedData<RenderData> inputImage4(data, p_inputImage4.getValue());
+        ScopedTypedData<RenderData> inputImage1(data, p_inputImage1.getValue());
+        ScopedTypedData<RenderData> inputImage2(data, p_inputImage2.getValue());
+        ScopedTypedData<RenderData> inputImage3(data, p_inputImage3.getValue());
+        ScopedTypedData<RenderData> inputImage4(data, p_inputImage4.getValue());
 
         if (inputImage1 == 0 && inputImage2 == 0 && inputImage3 == 0 && inputImage4 == 0) {
             validate(INVALID_RESULT);
@@ -120,7 +120,6 @@ namespace campvis {
         LGL_ERROR;
 
         data.addData(p_outputImage.getValue(), new RenderData(_fbo));
-        p_outputImage.issueWrite();
         validate(INVALID_RESULT);
     }
 

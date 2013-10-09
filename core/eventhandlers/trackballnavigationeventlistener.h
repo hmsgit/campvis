@@ -56,7 +56,7 @@ namespace campvis {
          * Constructor
          * \param   camProp     The CameraProperty to wrap around.
          */
-        CamPropNavigationWrapper(CameraProperty* camProp);
+        explicit CamPropNavigationWrapper(CameraProperty* camProp);
 
         /// Virtual Destructor
         virtual ~CamPropNavigationWrapper();

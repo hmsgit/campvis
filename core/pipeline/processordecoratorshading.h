@@ -40,7 +40,7 @@ namespace campvis {
 
     class ProcessorDecoratorShading : public AbstractProcessorDecorator {
     public:
-        ProcessorDecoratorShading(const std::string& lightUniformName = "_lightSource");
+        explicit ProcessorDecoratorShading(const std::string& lightUniformName = "_lightSource");
         virtual ~ProcessorDecoratorShading();
 
     protected:
