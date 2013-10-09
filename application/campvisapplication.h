@@ -130,6 +130,8 @@ namespace campvis {
         sigslot::signal0<> s_DataContainersChanged;
 
     private:
+        void addPipelineImpl(tgt::QtThreadedCanvas* canvas, const std::string& name, AbstractPipeline* pipeline);
+
         /// All pipelines 
         std::vector<AbstractPipeline*> _pipelines;
         /// All visualisations (i.e. Pipelines with their corresponding painters/canvases)

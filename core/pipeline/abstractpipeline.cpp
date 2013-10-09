@@ -1,3 +1,4 @@
+
 // ================================================================================================
 // 
 // This file is part of the CAMPVis Software Framework.
@@ -79,7 +80,7 @@ namespace campvis {
     {
         tgtAssert(_data != 0, "Pointer to the DataContainer for this pipeline must not be 0!");
 
-        _enabled = true;
+        _enabled = false;
 
         addProperty(&_renderTargetID);
         addProperty(&_canvasSize);

@@ -255,14 +255,25 @@ namespace campvis {
         // OpenGL job processor, since we need to create a new context.
         if (_initialized) {
             GLJobProc.pause();
+            {
+                tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
+                tgt::GLContextScopedLock lock(canvas->getContext());
+                addPipelineImpl(canvas, name, pipeline);
+            }
+            GLJobProc.resume();
         }
-        
-        _mainWindow->addVisualizationPipelineWidget("foobar", new QWidget());
+        else {
+            tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
+            addPipelineImpl(canvas, name, pipeline);
+        }
 
+        s_PipelinesChanged();
+    }
+
+    void CampVisApplication::addPipelineImpl(tgt::QtThreadedCanvas* canvas, const std::string& name, AbstractPipeline* pipeline) {
         // create canvas and painter for the pipeline and connect all together
-        tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
+        
         GLJobProc.registerContext(canvas);
-        _mainWindow->addVisualizationPipelineWidget(name, canvas);
         canvas->init();
 
         CampVisPainter* painter = new CampVisPainter(canvas, pipeline);
@@ -273,16 +284,21 @@ namespace campvis {
         _pipelines.push_back(pipeline);
 
         if (_initialized) {
-            pipeline->setEnabled(false);
+            LGL_ERROR;
             pipeline->init();
+            LGL_ERROR;
             painter->init();
-            pipeline->setEnabled(true);
-
-            GLJobProc.resume();
+            LGL_ERROR;
         }
 
         CtxtMgr.releaseCurrentContext();
-        s_PipelinesChanged();
+        _mainWindow->addVisualizationPipelineWidget(name, canvas);
+
+        // enable pipeline and invalidate all processors
+        pipeline->setEnabled(true);
+        for (std::vector<AbstractProcessor*>::const_iterator it = pipeline->getProcessors().begin(); it != pipeline->getProcessors().end(); ++it) {
+            (*it)->invalidate(AbstractProcessor::INVALID_RESULT);
+        }
     }
 
     void CampVisApplication::registerDockWidget(Qt::DockWidgetArea area, QDockWidget* dock) {

@@ -130,11 +130,9 @@ namespace campvis {
             ImageRepresentationLocal* toReturn = 0;
             GLJobProc.pause();
             try {
-                tbb::mutex::scoped_lock lock(CtxtMgr.getGlMutex());
-                context->getContext()->acquire();
+                tgt::GLContextScopedLock lock(context->getContext());
                 WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
                 toReturn = convertToGenericLocal(source, wtp);
-                CtxtMgr.releaseCurrentContext();
             }
             catch (...) {
                 LERROR("An unknown error occured during conversion...");

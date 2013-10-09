@@ -67,7 +67,7 @@ namespace campvis {
     }
 
     void AutoEvaluationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
-        if (_canvas == 0)
+        if (_canvas == 0 || _enabled == false)
             return;
 
         tbb::concurrent_hash_map<AbstractProcessor*, bool>::const_accessor a;
