@@ -143,8 +143,10 @@ namespace campvis {
             }
 
             if (! hadWork) {
-                GLGC.deleteGarbage();
-                lastCleanupTime = clock();
+                if (_currentContext != 0) {
+                    GLGC.deleteGarbage();
+                    lastCleanupTime = clock();
+                }
                 tgt::GlContextManager::getRef().releaseCurrentContext();
                 _evaluationCondition.wait(lock);
                 tgt::GlContextManager::getRef().acquireContext(_currentContext);
