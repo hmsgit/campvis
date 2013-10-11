@@ -27,51 +27,53 @@
 // 
 // ================================================================================================
 
-#ifndef VolumeExplorerDemo_H__
-#define VolumeExplorerDemo_H__
+#ifndef METAPROPERTY_H__
+#define METAPROPERTY_H__
 
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/volumeexplorer.h"
+
+#include "core/properties/abstractproperty.h"
+#include "core/properties/propertycollection.h"
 
 namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
+    /**
+     * Property wrapping around a bunch of other properties.
+     * Useful either for grouping properties or for wrapping around entire property collections.
+     * 
+     * \note    ATTENTION: Even though MetaProperty derives from HasPropertyCollection, it does 
+     *                     neither take ownership of its wrapped properties, nor does is (de)initialize
+     *                     or (un)lock them. This has to be done by the owners of the wrapped 
+     *                     properties.
+     */
+    class MetaProperty : public AbstractProperty, public HasPropertyCollection {
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a new MetaProperty
+         * \param name      Property name (unchangable!)
+         * \param title     Property title (e.g. used for GUI)
+         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        VolumeExplorerDemo(DataContainer* dc);
+        MetaProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~VolumeExplorerDemo();
+        virtual ~MetaProperty();
 
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
+        /// \see HasPropertyCollection::onPropertyChanged
+        virtual void onPropertyChanged(const AbstractProperty* prop);
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "VolumeExplorerDemo"; };
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+        /**
+         * Adds all properties in \a pc to this meta property.
+         * \param   pc  PropertyCollection to add
+         */
+        void addPropertyCollection(HasPropertyCollection& pc);
 
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
 
-        MhdImageReader _imageReader;
-        VolumeExplorer _ve;
+        static const std::string loggerCat_;
     };
 
 }
 
-#endif // VolumeExplorerDemo_H__
+#endif // METAPROPERTY_H__

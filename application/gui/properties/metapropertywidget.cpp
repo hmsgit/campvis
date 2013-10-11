@@ -27,51 +27,27 @@
 // 
 // ================================================================================================
 
-#ifndef VolumeExplorerDemo_H__
-#define VolumeExplorerDemo_H__
-
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/volumeexplorer.h"
+#include "tgt/assert.h"
+#include "metapropertywidget.h"
 
 namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
-    public:
-        /**
-         * Creates a AutoEvaluationPipeline.
-         */
-        VolumeExplorerDemo(DataContainer* dc);
+    MetaPropertyWidget::MetaPropertyWidget(MetaProperty* property, DataContainer* dc, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, true, parent)
+        , _pcw(0)
+        , _dc(dc)
+    {
+        tgtAssert(_dc != 0, "Pointer to DataContainer must not be 0.");
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~VolumeExplorerDemo();
+        _pcw = new PropertyCollectionWidget(this);
+        _pcw->updatePropCollection(property, _dc);
+        addWidget(_pcw);
+    }
 
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
+    MetaPropertyWidget::~MetaPropertyWidget() {
+    }
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
+    void MetaPropertyWidget::updateWidgetFromProperty() {
+    }
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "VolumeExplorerDemo"; };
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
-    protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
-        MhdImageReader _imageReader;
-        VolumeExplorer _ve;
-    };
 
 }
-
-#endif // VolumeExplorerDemo_H__
