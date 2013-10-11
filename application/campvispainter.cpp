@@ -35,8 +35,6 @@
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
 #include "tgt/qt/qtthreadedcanvas.h"
-#include "tgt/qt/qtglcontext.h"
-#include "tgt/qt/qtcontextmanager.h"
 
 
 #include "core/datastructures/imagedata.h"
@@ -50,8 +48,7 @@ namespace campvis {
     const std::string CampVisPainter::loggerCat_ = "CAMPVis.core.CampVisPainter";
 
     CampVisPainter::CampVisPainter(tgt::GLCanvas* canvas, AbstractPipeline* pipeline)
-        : Runnable()
-        , tgt::Painter(canvas)
+        : tgt::Painter(canvas)
         , _pipeline(0)
         , _copyShader(0)
     {
@@ -62,31 +59,6 @@ namespace campvis {
 
     CampVisPainter::~CampVisPainter() {
 
-    }
-
-    void CampVisPainter::stop() {
-        // we need to execute run() one more time to ensure correct release of the OpenGL context
-        _stopExecution = true;
-        _renderCondition.notify_all();
-
-        Runnable::stop();
-    }
-
-    void CampVisPainter::run() {
-        std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
-
-        while (! _stopExecution) {
-
-            /*getCanvas()->getContext()->acquire();
-            paint();
-            getCanvas()->swap();*/
-
-            //while (!_stopExecution)
-                _renderCondition.wait(lock);
-        }
-
-        // release OpenGL context, so that other threads can access it
-        CtxtMgr.releaseCurrentContext();
     }
 
     void CampVisPainter::paint() {

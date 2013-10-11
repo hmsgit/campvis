@@ -37,7 +37,7 @@
 
 namespace tgt {
     class BufferObject;
-    class QtCanvas;
+    class GLCanvas;
 }
 
 namespace campvis {
@@ -111,7 +111,7 @@ namespace campvis {
         };
 
     private:
-        mutable tgt::QtCanvas* _context;        ///< OpenGL context the buffers were created in (so that they can be deleted correctly)
+        mutable tgt::GLCanvas* _context;        ///< OpenGL context the buffers were created in (so that they can be deleted correctly)
     };
 
 }

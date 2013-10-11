@@ -29,7 +29,7 @@
 
 #include "imagerepresentationlocal.h"
 
-#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/glcontextmanager.h"
 #include <tbb/tbb.h>
 #include <tbb/spin_mutex.h>
 #include "core/datastructures/imagerepresentationdisk.h"
@@ -130,7 +130,7 @@ namespace campvis {
             ImageRepresentationLocal* toReturn = 0;
             GLJobProc.pause();
             try {
-                tgt::GLContextScopedLock lock(context->getContext());
+                tgt::GLContextScopedLock lock(context);
                 WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
                 toReturn = convertToGenericLocal(source, wtp);
             }

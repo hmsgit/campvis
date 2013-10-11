@@ -19,14 +19,9 @@ ADD_LIBRARY(campvis-modules
     ${CampvisModulesSources} ${CampvisModulesHeaders} 
 )
 
-# TODO: Remove Qt dependency as soon as the pipelines got cleaned up (and thus removed their hard link to tgt/qt/qtcontextmanager.h
-
-FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
-INCLUDE(${QT_USE_FILE})
-
-ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-modules campvis-core tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(campvis-modules campvis-core tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisModulesSources ${CampvisHome} "")

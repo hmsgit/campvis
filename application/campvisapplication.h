@@ -41,6 +41,7 @@
 #include "core/datastructures/datacontainer.h"
 
 namespace tgt {
+    class GLCanvas;
     class QtThreadedCanvas;
 }
 
@@ -141,7 +142,7 @@ namespace campvis {
         std::vector<DataContainer*> _dataContainers;
 
         /// A local OpenGL context used for initialization
-        tgt::QtThreadedCanvas* _localContext;
+        tgt::GLCanvas* _localContext;
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
 
