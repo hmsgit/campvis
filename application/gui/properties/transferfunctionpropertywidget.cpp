@@ -72,11 +72,11 @@ namespace campvis {
         _spinDomainRight->setSingleStep(0.01);
         _gridLayout->addWidget(_spinDomainRight, 0, 2);
 
-        _btnFitDomainToImage = new QPushButton("Fit Intensity Domain to Image", _widget);
-        _gridLayout->addWidget(_btnFitDomainToImage, 1, 0, 1, 3);
+        _btnFitDomainToImage = new QPushButton("Fit", _widget);
+        _gridLayout->addWidget(_btnFitDomainToImage, 0, 3);
 
         _btnEditTF = new QPushButton("Edit Transfer Function", _widget);
-        _gridLayout->addWidget(_btnEditTF, 2, 0, 1, 3);
+        _gridLayout->addWidget(_btnEditTF, 1, 1, 1, 3);
 
         addWidget(_widget);
 

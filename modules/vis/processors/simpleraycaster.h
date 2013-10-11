@@ -75,6 +75,9 @@ namespace campvis {
 
     
     protected:
+        /// \see HasProperyCollection::updateProperties()
+        virtual void updateProperties();
+
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
 

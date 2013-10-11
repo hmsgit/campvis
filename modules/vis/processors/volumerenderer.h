@@ -84,6 +84,8 @@ namespace campvis {
         CameraProperty p_camera;
         DataNameProperty p_outputImage;              ///< image ID for output image
 
+        MetaProperty p_pgProps;                     ///< MetaProperty for properties of the ProxyGeometryGenerator processor
+        MetaProperty p_eepProps;                    ///< MetaProperty for properties of the EEPGenerator processor
         MetaProperty p_raycasterProps;              ///< MetaProperty for properties of the raycasting processor
 
     protected:

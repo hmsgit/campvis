@@ -40,7 +40,7 @@
 
 namespace campvis {
 
-    class ProcessorDecoratorMasking : public AbstractProcessorDecorator {
+    class ProcessorDecoratorMasking : public AbstractProcessorDecorator, public sigslot::has_slots<> {
     public:
         ProcessorDecoratorMasking();
         virtual ~ProcessorDecoratorMasking();
@@ -60,6 +60,10 @@ namespace campvis {
 
         tgt::TextureUnit* _texUnit;
         ScopedTypedData<RenderData>* _maskImage;
+
+    private:
+        void onPropertyChanged(const AbstractProperty* p);
+
     };
 
 }

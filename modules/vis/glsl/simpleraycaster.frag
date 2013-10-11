@@ -39,7 +39,6 @@ layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit no
 #include "tools/transferfunction.frag"
 
 uniform vec2 _viewportSizeRCP;
-uniform bool _jitterEntryPoints;
 uniform float _jitterStepSizeMultiplier;
 
 
@@ -92,8 +91,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     float tend = length(direction);
     direction = normalize(direction);
 
-    if (_jitterEntryPoints)
-        jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
+    jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     while (t < tend) {
         // compute sample position
