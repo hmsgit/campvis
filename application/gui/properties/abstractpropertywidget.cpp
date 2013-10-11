@@ -46,14 +46,19 @@ namespace campvis {
             QBoxLayout* outerLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
             QGroupBox* groupBox = new QGroupBox(QString::fromStdString(_property->getTitle()));
 
+            outerLayout->setMargin(4);
             outerLayout->addWidget(groupBox);
+
             _layout = new QBoxLayout(QBoxLayout::TopToBottom, groupBox);
+            _layout->setSpacing(1);
+            _layout->setMargin(3);
         }
         else {
             _titleLabel = new QLabel(QString::fromStdString(_property->getTitle() + ":"), this);
 
             _layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
             _layout->setSpacing(8);
+            _layout->setMargin(4);
             _layout->addWidget(_titleLabel, 0);
         }
 

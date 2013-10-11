@@ -42,7 +42,7 @@
 
 namespace campvis {
     TransferFunctionPropertyWidget::TransferFunctionPropertyWidget(TransferFunctionProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+        : AbstractPropertyWidget(property, true, parent)
         , _widget(0)
         , _gridLayout(0)
         , _lblDomain(0)

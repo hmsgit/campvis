@@ -32,6 +32,7 @@
 #include <QCheckBox>
 #include <QTimer>
 #include <QGridLayout>
+#include <QPushButton>
 #include <QWidget>
 
 namespace campvis {
@@ -45,6 +46,8 @@ namespace campvis {
 
         QWidget* widget = new QWidget(this);
         QGridLayout* layout = new QGridLayout(widget);
+        layout->setSpacing(2);
+        layout->setMargin(0);
         widget->setLayout(layout);
 
         _adjuster = new IntAdjusterWidget;
@@ -54,14 +57,20 @@ namespace campvis {
         _adjuster->setValue(property->getValue());
         layout->addWidget(_adjuster, 0, 0, 1, 2);
 
+        _btnShowHideTimer = new QPushButton(tr("S"));
+        _btnShowHideTimer->setFixedWidth(16);
+        layout->addWidget(_btnShowHideTimer, 0, 2);
+
         _cbEnableTimer = new QCheckBox("Enable Timer", widget);
+        _cbEnableTimer->setVisible(false);
         layout->addWidget(_cbEnableTimer, 1, 0);
 
         _sbInterval = new QSpinBox(widget);
         _sbInterval->setMinimum(1);
         _sbInterval->setMaximum(2000);
         _sbInterval->setValue(50);
-        layout->addWidget(_sbInterval, 1, 1);
+        _sbInterval->setVisible(false);
+        layout->addWidget(_sbInterval, 1, 1, 1, 2);
 
         addWidget(widget);
 
@@ -69,6 +78,7 @@ namespace campvis {
         connect(_adjuster, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
         connect(_cbEnableTimer, SIGNAL(stateChanged(int)), this, SLOT(onEnableTimerChanged(int)));
         connect(_sbInterval, SIGNAL(valueChanged(int)), this, SLOT(onIntervalValueChanged(int)));
+        connect(_btnShowHideTimer, SIGNAL(clicked()), this, SLOT(onBtnSHTClicked()));
         property->s_minMaxChanged.connect(this, &IntPropertyWidget::onPropertyMinMaxChanged);
         property->s_stepChanged.connect(this, &IntPropertyWidget::onPropertyStepChanged);
     }
@@ -127,6 +137,12 @@ namespace campvis {
             prop->increment();
         else
             prop->setValue(prop->getMinValue());
+    }
+
+    void IntPropertyWidget::onBtnSHTClicked() {
+        _cbEnableTimer->setVisible(! _cbEnableTimer->isVisible());
+        _sbInterval->setVisible(! _sbInterval->isVisible());
+        _btnShowHideTimer->setText(_sbInterval->isVisible() ? tr("H") : tr("S"));
     }
 
 }

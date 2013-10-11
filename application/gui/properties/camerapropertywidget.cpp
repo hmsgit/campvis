@@ -35,7 +35,7 @@
 
 namespace campvis {
     CameraPropertyWidget::CameraPropertyWidget(CameraProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+        : AbstractPropertyWidget(property, true, parent)
         , _lblCameraPosition(0)
         , _lblLookDirection(0)
         , _lblUpVector(0)
