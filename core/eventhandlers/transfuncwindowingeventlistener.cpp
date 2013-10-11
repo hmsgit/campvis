@@ -82,6 +82,10 @@ namespace campvis {
             newIntesityDomain.x -= offset;
             newIntesityDomain.y += offset;
 
+            // triple-check for rock solid safety ;)
+            if (newIntesityDomain.x > newIntesityDomain.y)
+                std::swap(newIntesityDomain.x, newIntesityDomain.y);
+
             _prop->getTF()->setIntensityDomain(tgt::clamp(newIntesityDomain, tgt::vec2(0.f), tgt::vec2(1.f)));
             e->ignore();
         }
