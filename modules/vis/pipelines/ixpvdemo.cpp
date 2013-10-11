@@ -30,7 +30,6 @@
 #include "ixpvdemo.h"
 
 #include "tgt/event/keyevent.h"
-#include "tgt/qt/qtcontextmanager.h"
 #include "core/datastructures/imagedata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"

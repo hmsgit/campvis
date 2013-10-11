@@ -29,7 +29,7 @@
 
 #include "imagerepresentationlocal.h"
 
-#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/glcontextmanager.h"
 #include <tbb/tbb.h>
 #include <tbb/spin_mutex.h>
 #include "core/datastructures/imagerepresentationdisk.h"
