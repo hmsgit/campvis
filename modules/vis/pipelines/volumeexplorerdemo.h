@@ -68,7 +68,6 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
-        CameraProperty _camera;
         MhdImageReader _imageReader;
         VolumeExplorer _ve;
     };

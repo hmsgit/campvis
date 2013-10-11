@@ -41,26 +41,6 @@ namespace campvis {
     MetaProperty::~MetaProperty() {
     }
 
-    void MetaProperty::init() {
-        AbstractProperty::init();
-        initAllProperties();
-    }
-
-    void MetaProperty::deinit() {
-        deinitAllProperties();
-        AbstractProperty::deinit();
-    }
-
-    void MetaProperty::lock() {
-        AbstractProperty::lock();
-        lockAllProperties();
-    }
-
-    void MetaProperty::unlock() {
-        unlockAllProperties();
-        AbstractProperty::unlock();
-    }
-
     void MetaProperty::onPropertyChanged(const AbstractProperty* prop) {
         s_changed(prop);
     }

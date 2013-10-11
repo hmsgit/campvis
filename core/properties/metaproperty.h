@@ -38,6 +38,11 @@ namespace campvis {
     /**
      * Property wrapping around a bunch of other properties.
      * Useful either for grouping properties or for wrapping around entire property collections.
+     * 
+     * \note    ATTENTION: Even though MetaProperty derives from HasPropertyCollection, it does 
+     *                     neither take ownership of its wrapped properties, nor does is (de)initialize
+     *                     or (un)lock them. This has to be done by the owners of the wrapped 
+     *                     properties.
      */
     class MetaProperty : public AbstractProperty, public HasPropertyCollection {
     public:
@@ -54,15 +59,6 @@ namespace campvis {
          **/
         virtual ~MetaProperty();
 
-                
-        /// \see AbstractProperty::init()
-        virtual void init();
-        /// \see AbstractProperty::deinit()
-        virtual void deinit();
-        /// \see AbstractProperty::lock()
-        virtual void lock();
-        /// \see AbstractProperty::unlock()
-        virtual void unlock();
 
         /// \see HasPropertyCollection::onPropertyChanged
         virtual void onPropertyChanged(const AbstractProperty* prop);
