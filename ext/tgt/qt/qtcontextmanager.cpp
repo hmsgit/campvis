@@ -1,34 +1,29 @@
 #include "qtcontextmanager.h"
 
 #include "tgt/assert.h"
-#include "tgt/qt/qtglcontext.h"
 
 namespace tgt {
 
     QtContextManager::QtContextManager()
-        : _currentContext(0)
+        : GlContextManager()
     {
     }
 
     QtContextManager::~QtContextManager()
     {
-        for (std::map<std::string, QtThreadedCanvas*>::iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
-            delete it->second;
-        }
-        _contexts.clear();
     }
 
-    QtThreadedCanvas* QtContextManager::createContext(const std::string& key, const std::string& title /*= ""*/, const ivec2& size /*= ivec2(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)*/, const GLCanvas::Buffers buffers /*= RGBADD*/, QWidget* parent /*= 0*/, bool shared /*= true*/, Qt::WFlags f /*= 0*/, char* name /*= 0*/)
+    GLCanvas* QtContextManager::createContext(const std::string& key, const std::string& title /*= ""*/, const ivec2& size /*= ivec2(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT)*/, const GLCanvas::Buffers buffers /*= RGBADD*/, bool shared /*= true*/)
     {
         // FIXME: rethink this concept of unique IDs
         //tgtAssert(_contexts.find(key) == _contexts.end(), "A context with the same key already exists!");
 
         tbb::mutex::scoped_lock lock(_glMutex);
-        QtThreadedCanvas* toReturn = new QtThreadedCanvas(title, size, buffers, parent, shared, f, name);
+        QtThreadedCanvas* toReturn = new QtThreadedCanvas(title, size, buffers, 0, shared);
         _contexts.insert(std::make_pair(key, toReturn));
 
         toReturn->makeCurrent();
-        _currentContext = toReturn->getContext();
+        _currentContext = toReturn;
         // Init GLEW for this context
         GLenum err = glewInit();
         if (err != GLEW_OK) {
@@ -42,51 +37,30 @@ namespace tgt {
         return toReturn;
     }
 
-    QtGLContext* QtContextManager::getContextByKey(const std::string& key) {
-        std::map<std::string, QtThreadedCanvas*>::iterator it = _contexts.find(key);
-        if (it != _contexts.end())
-            return it->second->getContext();
-        else
-            return 0;
-    }
-
-    void QtContextManager::setCurrent(QtGLContext* context) {
+    void QtContextManager::setCurrent(GLCanvas* context) {
         if (_currentContext != context) {
             if (context == 0) {
                 // explicitely release OpenGL context
-                _currentContext->getCanvas()->doneCurrent();
+                static_cast<QtThreadedCanvas*>(_currentContext)->doneCurrent();
                 _currentContext = 0;
             }
             else {
-                context->getCanvas()->makeCurrent();
+                static_cast<QtThreadedCanvas*>(context)->makeCurrent();
                 LGL_ERROR;
                 _currentContext = context;
             }
         }
     }
 
-    void QtContextManager::lock() {
-        _glMutex.lock();
+    void QtContextManager::init() {
+        tgtAssert( !singletonClass_, "singletonClass_ has already been initialized." );
+        singletonClass_ = new QtContextManager();
     }
 
-    void QtContextManager::unlock() {
-        releaseCurrentContext();
-        _glMutex.unlock();
-    }
-
-    tbb::mutex& QtContextManager::getGlMutex() {
-        return _glMutex;
-    }
-
-    void QtContextManager::releaseCurrentContext() {
-        glFinish();
-        setCurrent(0);
-    }
-
-    QtCanvas* QtContextManager::getCurrentContext() const {
-        if (_currentContext == 0)
-            return 0;
-        return _currentContext->getCanvas();
+    void QtContextManager::deinit() {
+        tgtAssert( singletonClass_ != 0, "singletonClass_ has already been deinitialized." );
+        delete singletonClass_;
+        singletonClass_ = 0;
     }
 
 

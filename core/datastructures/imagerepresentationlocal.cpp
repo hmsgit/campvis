@@ -130,7 +130,7 @@ namespace campvis {
             ImageRepresentationLocal* toReturn = 0;
             GLJobProc.pause();
             try {
-                tgt::GLContextScopedLock lock(context->getContext());
+                tgt::GLContextScopedLock lock(context);
                 WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
                 toReturn = convertToGenericLocal(source, wtp);
             }

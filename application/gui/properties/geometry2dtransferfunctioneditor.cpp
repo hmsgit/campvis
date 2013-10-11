@@ -31,7 +31,7 @@
 
 #include "tgt/assert.h"
 #include "tgt/shadermanager.h"
-#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/glcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 
 #include "application/gui/qtcolortools.h"
@@ -231,7 +231,9 @@ namespace campvis {
         QLabel* lblOpacityBottom = new QLabel(tr("0%"), this);
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
-        _canvas = CtxtMgr.createContext("tfcanvas", "", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, 0, false);
+        _canvas = dynamic_cast<tgt::QtThreadedCanvas*>(tgt::GlContextManager::getRef().createContext("tfcanvas ", "", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, false));
+        tgtAssert(_canvas != 0, "Could not cast to QtThreadedCanvas*, something is wrong here!");
+
         GLJobProc.registerContext(_canvas);
         _canvas->setPainter(this, false);
         _layout->addWidget(_canvas, 1, 1, 3, 3);

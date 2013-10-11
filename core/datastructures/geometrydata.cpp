@@ -30,8 +30,8 @@
 #include "geometrydata.h"
 #include "tgt/buffer.h"
 #include "tgt/vertexarrayobject.h"
+#include "tgt/glcontextmanager.h"
 
-#include "tgt/qt/qtcontextmanager.h"
 #include "core/tools/opengljobprocessor.h"
 
 namespace campvis {
@@ -116,7 +116,7 @@ namespace campvis {
 
     void GeometryData::createGLBuffers() const {
         if (! _buffersInitialized) 
-            _context = CtxtMgr.getCurrentContext();
+            _context = tgt::GlContextManager::getRef().getCurrentContext();
     }
 
     const tgt::BufferObject* GeometryData::getVerticesBuffer() const {

@@ -38,7 +38,7 @@ SET(TGT_SOURCES
 	framebufferobject.cpp
 	frustum.cpp
 	glcanvas.cpp
-	glcontext.cpp
+	glcontextmanager.cpp
 	gpucapabilities.cpp
 	gpucapabilitieswindows.cpp
 	guiapplication.cpp
@@ -74,7 +74,6 @@ SET(TGT_SOURCES
 	qt/qtapplication.cpp
 	qt/qtcanvas.cpp
 	qt/qtcontextmanager.cpp
-	qt/qtglcontext.cpp
 	qt/qtthreadedcanvas.cpp
 	qt/qttimer.cpp
 )
