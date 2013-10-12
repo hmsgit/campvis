@@ -30,8 +30,8 @@
 #ifndef MDIDOCKAREA_H__
 #define MDIDOCKAREA_H__
 
+#include "mdifloatingwindow.h"
 #include "pipelinemdisubwindow.h"
-#include "visualizationpipelinewidget.h"
 
 #include <QMdiArea>
 
@@ -63,16 +63,16 @@ namespace campvis {
 
     private slots:
         /**
-         * Track the position of the pipeline's widget and dock it if necessary.
+         * Track the position of a floating MDI window and dock it if necessary.
          *
-         * This slot is invoked when the pipeline's widget is floating and its position changes.
+         * This slot is invoked when the position of a floating MDI window changes.
          */
-        void trackFloatingWindowsPosition(VisualizationPipelineWidget* pipelineWidget, const QPoint& newPos);
+        void trackFloatingWindowsPosition(MdiFloatingWindow* floatingWindow, const QPoint& newPos);
 
         /**
-         * Track the position of the pipeline's MDI subwindow and detach it if necessary.
+         * Track the position of an MDI subwindow and detach it if necessary.
          *
-         * This slot is invoked when the position of the pipeline's MDI subwindow changes.
+         * This slot is invoked when the position of an MDI subwindow changes.
          */
         void trackMdiSubWindowsPosition(PipelineMdiSubWindow* mdiSubWindow, const QPoint& newPos);
 

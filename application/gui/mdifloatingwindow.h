@@ -27,75 +27,73 @@
 // 
 // ================================================================================================
 
-#ifndef VISUALIZATIONPIPELINEWIDGET_H__
-#define VISUALIZATIONPIPELINEWIDGET_H__
+#ifndef MDIFLOATINGWINDOW_H__
+#define MDIFLOATINGWINDOW_H__
 
 #include <QWidget>
 
 namespace campvis {
 
     /**
-     * Specialised widget for visualization pipelines.
+     * Specialised widget for detached MDI subwindows.
      *
-     * VisualizationPipelineWidget can be seamlessly used with MDI subwindows and as a top-level
-     * floating window. When detached, it reports changes in its position via the s_positionChanged
-     * signal. Higher-level components listen to this signal to decide when to dock the widget in
-     * an MDI area. VisualizationPipelineWidget also implements additional methods (forceWindowDrag,
-     * stopWindowDrag) that should be used to coordinate the docking with respect to
-     * grabbing/releasing the mouse input.
+     * MdiFloatingWindow is a top-level floating window representing an undocked MDI subwindow.
+     * It reports changes in its position via the s_positionChanged signal. The MDI area that
+     * created it listens to this signal to decide when to scrap the floating window and dock back
+     * the widget that it wraps.
+     *
+     * MdiFloatingWindow also implements additional methods (forceWindowDrag, stopWindowDrag)
+     * that should be used to coordinate its creation/disposal with respect to grabbing/releasing
+     * the mouse input.
      */
-    class VisualizationPipelineWidget : public QWidget {
+    class MdiFloatingWindow : public QWidget {
 
         Q_OBJECT
 
     public:
         /**
-         * Construct a widget for a visualization pipeline.
+         * Construct a new MdiFloatingWindow.
          *
-         * \param canvas the pipeline's canvas
-         * \param parent the widget's parent
+         * \param canvas the widget this window is to wrap
+         * \param parent the windows's parent
          */
-        explicit VisualizationPipelineWidget(QWidget* canvas, QWidget* parent = 0);
+        explicit MdiFloatingWindow(QWidget* widget, QWidget* parent = 0);
 
         /**
-         * Enter the widget into forced drag mode.
+         * Enter the window into forced drag mode.
          *
-         * This method is to be invoked after the the widget has been detached from an MDI area and
-         * become a floating window. It causes the widget to grab the mouse input and follow the
-         * cursor. As a result, the user can seamlessly continue dragging the widget after it has
-         * been "pulled out" of the MDI area.
+         * This method causes the window to grab the mouse input and follow the cursor.
          */
         void forceWindowDrag();
 
         /**
-         * Cancel the dragging of the widget.
+         * Cancel the dragging of the window.
          *
-         * This method causes the widget to release the mouse grab and stop following the cursor.
-         * It's supposed to be called when the widget is re-docked in an MDI area.
+         * This method causes the window to release the mouse grab and stop following the cursor.
          */
         void stopWindowDrag();
 
         /**
-         * Return the canvas this widget wraps.
+         * Return the widget this window wraps.
          */
-        QWidget* canvas();
+        QWidget* widget();
 
     signals:
         /**
-         * Emitted when the widget's position changes.
+         * Emitted when the window's position changes.
          *
-         * \param newPos the widget's new position
+         * \param newPos the window's new position
          */
-        void s_positionChanged(VisualizationPipelineWidget *pipelineWidget, const QPoint& newPos);
+        void s_positionChanged(MdiFloatingWindow *pipelineWidget, const QPoint& newPos);
 
     protected:
         /**
-         * Event handler that receives mouse move events for the widget.
+         * Event handler that receives mouse move events for the window.
          */
         virtual void mouseMoveEvent(QMouseEvent* event);
 
         /**
-         * Event handler that receives mouse release events for the widget.
+         * Event handler that receives mouse release events for the window.
          */
         virtual void mouseReleaseEvent(QMouseEvent * event);
 
@@ -105,11 +103,11 @@ namespace campvis {
         virtual void moveEvent(QMoveEvent* event);
 
     private:
-        QWidget* _canvas;            ///< The canvas this widget wraps
-        bool _dragActive;            ///< Is the widget currently being dragged?
+        QWidget* _widget;            ///< The widget this window wraps
+        bool _dragActive;            ///< Is the window currently being dragged?
         QPoint _lastMousePos;        ///< Last reported mouse position
 
     };
 }
 
-#endif // VISUALIZATIONPIPELINEWIDGET_H__
+#endif // MDIFLOATINGWINDOW_H__

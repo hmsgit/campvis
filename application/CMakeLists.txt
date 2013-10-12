@@ -38,7 +38,7 @@ SET(CampvisApplicationToBeMocced
     gui/loghighlighter.h
     gui/mdidockarea.h
     gui/pipelinemdisubwindow.h
-    gui/visualizationpipelinewidget.h
+    gui/mdifloatingwindow.h
     gui/adjusterwidgets/doubleadjusterwidget.h
     gui/adjusterwidgets/intadjusterwidget.h
     gui/properties/abstractpropertywidget.h

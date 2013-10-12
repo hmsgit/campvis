@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "visualizationpipelinewidget.h"
+#include "mdifloatingwindow.h"
 
 #include <QMdiArea>
 #include <QMoveEvent>
@@ -35,20 +35,20 @@
 
 namespace campvis {
 
-    VisualizationPipelineWidget::VisualizationPipelineWidget(QWidget* canvas, QWidget* parent /*= 0*/)
+    MdiFloatingWindow::MdiFloatingWindow(QWidget* widget, QWidget* parent /*= 0*/)
         : QWidget(parent)
-        , _canvas(canvas)
+        , _widget(widget)
         , _dragActive(false)
         , _lastMousePos()
     {
         QLayout* layout = new QHBoxLayout();
         layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(canvas);
+        layout->addWidget(widget);
 
         setLayout(layout);
     }
 
-    void VisualizationPipelineWidget::forceWindowDrag() {
+    void MdiFloatingWindow::forceWindowDrag() {
         if (!_dragActive && parent() == 0) {
             _dragActive = true;
             _lastMousePos = QCursor::pos();
@@ -56,18 +56,18 @@ namespace campvis {
         }
     }
 
-    void VisualizationPipelineWidget::stopWindowDrag() {
+    void MdiFloatingWindow::stopWindowDrag() {
         if (_dragActive) {
             _dragActive = false;
             releaseMouse();
         }
     }
 
-    QWidget* VisualizationPipelineWidget::canvas() {
-        return _canvas;
+    QWidget* MdiFloatingWindow::widget() {
+        return _widget;
     }
 
-    void VisualizationPipelineWidget::mouseMoveEvent(QMouseEvent* event) {
+    void MdiFloatingWindow::mouseMoveEvent(QMouseEvent* event) {
         const QPoint& mousePos = event->globalPos();
         const QPoint& newPos = pos() + (mousePos - _lastMousePos);
 
@@ -75,13 +75,13 @@ namespace campvis {
         _lastMousePos = mousePos;
     }
 
-    void VisualizationPipelineWidget::mouseReleaseEvent(QMouseEvent* event) {
+    void MdiFloatingWindow::mouseReleaseEvent(QMouseEvent* event) {
         if (event->button() == Qt::LeftButton) {
             stopWindowDrag();
         }
     }
 
-    void VisualizationPipelineWidget::moveEvent(QMoveEvent* /*event*/) {
+    void MdiFloatingWindow::moveEvent(QMoveEvent* /*event*/) {
         emit s_positionChanged(this, frameGeometry().topLeft());
     }
 
