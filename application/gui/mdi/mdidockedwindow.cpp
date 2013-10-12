@@ -27,27 +27,27 @@
 // 
 // ================================================================================================
 
-#include "pipelinemdisubwindow.h"
+#include "mdidockedwindow.h"
 
 #include <QMdiArea>
 #include <QMoveEvent>
 
 namespace campvis {
 
-    PipelineMdiSubWindow::PipelineMdiSubWindow(QWidget* parent /*= 0*/, Qt::WindowFlags flags /*= 0*/)
+    MdiDockedWindow::MdiDockedWindow(QWidget* parent /*= 0*/, Qt::WindowFlags flags /*= 0*/)
         : QMdiSubWindow(parent, flags)
         , _dragActive(false)
         , _lastMousePos()
     {}
 
-    void PipelineMdiSubWindow::stopWindowDrag() {
+    void MdiDockedWindow::stopWindowDrag() {
         if (_dragActive) {
             _dragActive = false;
             releaseMouse();
         }
     }
 
-    void PipelineMdiSubWindow::mouseMoveEvent(QMouseEvent* event) {
+    void MdiDockedWindow::mouseMoveEvent(QMouseEvent* event) {
         if (event->buttons().testFlag(Qt::LeftButton)) {
             const QPoint& mousePos = event->globalPos();
 
@@ -81,7 +81,7 @@ namespace campvis {
         }
     }
 
-    void PipelineMdiSubWindow::mouseReleaseEvent(QMouseEvent* event) {
+    void MdiDockedWindow::mouseReleaseEvent(QMouseEvent* event) {
         if (event->button() == Qt::LeftButton) {
             stopWindowDrag();
             mdiArea()->tileSubWindows();

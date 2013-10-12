@@ -27,34 +27,34 @@
 // 
 // ================================================================================================
 
-#ifndef PIPELINEMDISUBWINDOW_H__
-#define PIPELINEMDISUBWINDOW_H__
+#ifndef MDIDOCKEDWINDOW_H__
+#define MDIDOCKEDWINDOW_H__
 
 #include <QMdiSubWindow>
 
 namespace campvis {
 
     /**
-     * QMdiSubWindow subclass for visualization pipeline widgets.
+     * QMdiSubWindow subclass representing a window docked in an MdiDockArea.
      *
-     * PipelineMdiSubWindow reports changes in its position via the s_positionChanged signal.
-     * Higher-level components listen to this signal to decide when to detach the subwindow from
-     * its MDI area. PipelineMdiSubWindow also implements additional methods (stopWindowDrag) that
-     * should be used to coordinate this detaching with respect to grabbing/releasing the mouse
-     * input.
+     * MdiDockedWindow reports changes in its position via the s_positionChanged signal. Its
+     * MdiDockArea listens to this signal to decide when to detach the window.
+     *
+     * MdiDockedWindow implements additional methods (stopWindowDrag) that should be used to
+     * coordinate its detaching with respect to grabbing/releasing the mouse input.
      */
-    class PipelineMdiSubWindow : public QMdiSubWindow {
+    class MdiDockedWindow : public QMdiSubWindow {
 
         Q_OBJECT
 
     public:
         /**
-         * Construct an MDI subwindow for a visualization pipeline.
+         * Construct a new docked MDI window.
          *
          * \param parent the window's parent
          * \param flags options customizing the frame of the subwindow
          */
-        explicit PipelineMdiSubWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+        explicit MdiDockedWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
         /**
          * Cancel the dragging of the window.
@@ -66,20 +66,20 @@ namespace campvis {
 
     signals:
         /**
-         * Emitted when the subwindow's position changes.
+         * Emitted when the window's position changes.
          *
-         * \param newPos the subwindow's new position
+         * \param newPos the window's new position
          */
-        void s_positionChanged(PipelineMdiSubWindow* mdiSubWindow, const QPoint& newPos);
+        void s_positionChanged(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
 
     protected:
         /**
-         * Event handler that receives mouse move events for the widget.
+         * Event handler that receives mouse move events for the window.
          */
         virtual void mouseMoveEvent(QMouseEvent* event);
 
         /**
-         * Event handler that receives mouse release events for the widget.
+         * Event handler that receives mouse release events for the window.
          */
         virtual void mouseReleaseEvent(QMouseEvent * event);
 
@@ -90,4 +90,4 @@ namespace campvis {
     };
 }
 
-#endif // PIPELINEMDISUBWINDOW_H__
+#endif // MDIDOCKEDWINDOW_H__

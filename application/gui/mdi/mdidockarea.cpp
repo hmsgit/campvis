@@ -31,18 +31,18 @@
 
 namespace campvis {
 
-    PipelineMdiSubWindow* MdiDockArea::addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags /*= 0*/) {
-        PipelineMdiSubWindow* mdiSubWindow = new PipelineMdiSubWindow;
+    MdiDockedWindow* MdiDockArea::addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags /*= 0*/) {
+        MdiDockedWindow* dockedWindow = new MdiDockedWindow();
 
-        mdiSubWindow->setWidget(widget);
-        QMdiArea::addSubWindow(mdiSubWindow, windowFlags);
+        dockedWindow->setWidget(widget);
+        QMdiArea::addSubWindow(dockedWindow, windowFlags);
         widget->show();
         this->tileSubWindows();
 
-        connect(mdiSubWindow, SIGNAL(s_positionChanged(PipelineMdiSubWindow*, const QPoint&)),
-                this, SLOT(trackMdiSubWindowsPosition(PipelineMdiSubWindow*, const QPoint&)));
+        connect(dockedWindow, SIGNAL(s_positionChanged(MdiDockedWindow*, const QPoint&)),
+                this, SLOT(trackMdiSubWindowsPosition(MdiDockedWindow*, const QPoint&)));
 
-        return mdiSubWindow;
+        return dockedWindow;
     }
 
     void MdiDockArea::trackFloatingWindowsPosition(MdiFloatingWindow* floatingWindow, const QPoint& newPos) {
@@ -58,33 +58,33 @@ namespace campvis {
             floatingWindow->stopWindowDrag();
 
             QWidget* widget = floatingWindow->widget();
-            PipelineMdiSubWindow* mdiSubWindow = this->addSubWindow(widget);
-            mdiSubWindow->setWindowTitle(floatingWindow->windowTitle());
+            MdiDockedWindow* dockedWindow = this->addSubWindow(widget);
+            dockedWindow->setWindowTitle(floatingWindow->windowTitle());
             widget->show();
             floatingWindow->deleteLater();
 
-            mdiSubWindow->move(this->mapFromGlobal(newPos));
-            mdiSubWindow->grabMouse();
+            dockedWindow->move(this->mapFromGlobal(newPos));
+            dockedWindow->grabMouse();
         }
     }
 
-    void MdiDockArea::trackMdiSubWindowsPosition(PipelineMdiSubWindow *mdiSubWindow, const QPoint& newPos) {
-        const QRect& subWindowGeometry = mdiSubWindow->frameGeometry();
+    void MdiDockArea::trackMdiSubWindowsPosition(MdiDockedWindow *dockedWindow, const QPoint& newPos) {
+        const QRect& subWindowGeometry = dockedWindow->frameGeometry();
         const QRect& mdiAreaGeometry = contentsRect();
         const QRect& intersection = subWindowGeometry & mdiAreaGeometry;
 
-        // Detach the subwindow if at least 60% of it has left the MDI area
+        // Detach the docked window's widget if at least 60% of it has left the MDI area
         if (subWindowGeometry.width() * subWindowGeometry.height() * 2 >
                 intersection.width() * intersection.height() * 5) {
-            QWidget* widget = mdiSubWindow->widget();
-            mdiSubWindow->stopWindowDrag();
-            mdiSubWindow->setWidget(0);
-            removeSubWindow(mdiSubWindow);
-            mdiSubWindow->deleteLater();
+            QWidget* widget = dockedWindow->widget();
+            dockedWindow->stopWindowDrag();
+            dockedWindow->setWidget(0);
+            removeSubWindow(dockedWindow);
+            dockedWindow->deleteLater();
             tileSubWindows();
 
             MdiFloatingWindow* floatingWindow = new MdiFloatingWindow(widget);
-            floatingWindow->setWindowTitle(mdiSubWindow->windowTitle());
+            floatingWindow->setWindowTitle(dockedWindow->windowTitle());
             floatingWindow->move(this->mapToGlobal(newPos));
             floatingWindow->show();
             floatingWindow->forceWindowDrag();
