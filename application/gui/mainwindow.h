@@ -32,7 +32,7 @@
 
 #include "sigslot/sigslot.h"
 #include "application/campvisapplication.h"
-#include "application/gui/mdidockarea.h"
+#include "application/gui/mdi/mdidockarea.h"
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
