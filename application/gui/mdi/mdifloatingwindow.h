@@ -84,7 +84,7 @@ namespace campvis {
          *
          * \param newPos the window's new position
          */
-        void s_positionChanged(MdiFloatingWindow *pipelineWidget, const QPoint& newPos);
+        void s_positionChanged(MdiFloatingWindow* pipelineWidget, const QPoint& newPos);
 
     protected:
         /**
@@ -103,9 +103,13 @@ namespace campvis {
         virtual void moveEvent(QMoveEvent* event);
 
     private:
+        /**
+         * Moves the window so that its title bar is centered around \p cursorPos.
+         */
+        void snapToCursor(const QPoint& cursorPos);
+
         QWidget* _widget;            ///< The widget this window wraps
         bool _dragActive;            ///< Is the window currently being dragged?
-        QPoint _lastMousePos;        ///< Last reported mouse position
 
     };
 }

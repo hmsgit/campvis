@@ -57,6 +57,13 @@ namespace campvis {
         explicit MdiDockedWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
         /**
+         * Enter the window into forced drag mode.
+         *
+         * This method causes the window to grab the mouse input and follow the cursor.
+         */
+        void forceWindowDrag();
+
+        /**
          * Cancel the dragging of the window.
          *
          * This method causes the window to release the mouse grab and stop following the cursor.

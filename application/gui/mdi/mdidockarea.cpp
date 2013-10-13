@@ -63,12 +63,11 @@ namespace campvis {
             widget->show();
             floatingWindow->deleteLater();
 
-            dockedWindow->move(this->mapFromGlobal(newPos));
-            dockedWindow->grabMouse();
+            dockedWindow->forceWindowDrag();
         }
     }
 
-    void MdiDockArea::trackMdiSubWindowsPosition(MdiDockedWindow *dockedWindow, const QPoint& newPos) {
+    void MdiDockArea::trackMdiSubWindowsPosition(MdiDockedWindow *dockedWindow, const QPoint& /*newPos*/) {
         const QRect& subWindowGeometry = dockedWindow->frameGeometry();
         const QRect& mdiAreaGeometry = contentsRect();
         const QRect& intersection = subWindowGeometry & mdiAreaGeometry;
@@ -85,7 +84,6 @@ namespace campvis {
 
             MdiFloatingWindow* floatingWindow = new MdiFloatingWindow(widget);
             floatingWindow->setWindowTitle(dockedWindow->windowTitle());
-            floatingWindow->move(this->mapToGlobal(newPos));
             floatingWindow->show();
             floatingWindow->forceWindowDrag();
 
