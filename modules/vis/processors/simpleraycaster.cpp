@@ -39,7 +39,7 @@ namespace campvis {
     SimpleRaycaster::SimpleRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/simpleraycaster.frag", true)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
+        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
         , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true, AbstractProcessor::INVALID_SHADER)
     {
@@ -92,7 +92,7 @@ namespace campvis {
 
     void SimpleRaycaster::updateProperties() {
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
-        HasPropertyCollection::updateProperties();
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

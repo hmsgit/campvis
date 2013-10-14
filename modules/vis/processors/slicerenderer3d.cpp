@@ -49,7 +49,7 @@ namespace campvis {
 
     SliceRenderer3D::SliceRenderer3D(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
@@ -140,9 +140,12 @@ namespace campvis {
 
     void SliceRenderer3D::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
-        const tgt::svec3& imgSize = img->getSize();
-        if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
-            p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+
+        if (img != 0) {
+            const tgt::svec3& imgSize = img->getSize();
+            if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
+                p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+            }
         }
                         
         validate(AbstractProcessor::INVALID_PROPERTIES);

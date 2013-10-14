@@ -239,7 +239,7 @@ namespace campvis {
 
     void EEPGenerator::updateProperties() {
         p_mirrorID.setVisible(p_enableMirror.getValue());
-        HasPropertyCollection::updateProperties();
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }
