@@ -27,67 +27,55 @@
 // 
 // ================================================================================================
 
-#ifndef PIPELINEMDISUBWINDOW_H__
-#define PIPELINEMDISUBWINDOW_H__
+#ifndef MDIDOCKAREA_H__
+#define MDIDOCKAREA_H__
 
-#include <QMdiSubWindow>
+#include "mdidockedwindow.h"
+#include "mdifloatingwindow.h"
+
+#include <QMdiArea>
 
 namespace campvis {
 
     /**
-     * QMdiSubWindow subclass for visualization pipeline widgets.
+     * MDI area whose subwindows can be docked and undocked.
      *
-     * PipelineMdiSubWindow reports changes in its position via the s_positionChanged signal.
-     * Higher-level components listen to this signal to decide when to detach the subwindow from
-     * its MDI area. PipelineMdiSubWindow also implements additional methods (stopWindowDrag) that
-     * should be used to coordinate this detaching with respect to grabbing/releasing the mouse
-     * input.
+     * MdiDockArea takes care of creating all necessary representations (docked and floating window)
+     * of the widgets passed to \ref addSubWindow and seamlessly switching between them in response
+     * to the user's actions (window dragging, key presses, etc).
      */
-    class PipelineMdiSubWindow : public QMdiSubWindow {
+    class MdiDockArea : public QMdiArea {
 
         Q_OBJECT
 
     public:
         /**
-         * Construct an MDI subwindow for a visualization pipeline.
+         * Wrap \p widget in an MDI window and dock it in the MDI area.
          *
-         * \param parent the window's parent
-         * \param flags options customizing the frame of the subwindow
-         */
-        explicit PipelineMdiSubWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
-
-        /**
-         * Cancel the dragging of the window.
+         * This method creates a MdiDockedWindow wrapping the widget, and adds it to the MDI area.
          *
-         * This method causes the window to release the mouse grab and stop following the cursor.
-         * It's supposed to be called when the window is detached from the MDI area.
+         * \param widget the widget to add to the MDI area
+         * \param windowFlags flags used to customize the frame of the created subwindow
+         * \return the PipelineMdiSubWindow instance that was added to the MDI area
          */
-        void stopWindowDrag();
+        MdiDockedWindow* addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags = 0);
 
-    signals:
+    private slots:
         /**
-         * Emitted when the subwindow's position changes.
+         * Track the position of a floating MDI window and dock it if necessary.
          *
-         * \param newPos the subwindow's new position
+         * This slot is invoked when the position of a floating MDI window changes.
          */
-        void s_positionChanged(const QPoint& newPos);
-
-    protected:
-        /**
-         * Event handler that receives mouse move events for the widget.
-         */
-        virtual void mouseMoveEvent(QMouseEvent* event);
+        void trackFloatingWindowsPosition(MdiFloatingWindow* floatingWindow, const QPoint& newPos);
 
         /**
-         * Event handler that receives mouse release events for the widget.
+         * Track the position of a docked MDI window and detach it if necessary.
+         *
+         * This slot is invoked when the position of an MDI subwindow changes.
          */
-        virtual void mouseReleaseEvent(QMouseEvent * event);
-
-    private:
-        bool _dragActive;            ///< Is the window currently being dragged?
-        QPoint _lastMousePos;        ///< Last reported mouse position
+        void trackMdiSubWindowsPosition(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
 
     };
 }
 
-#endif // PIPELINEMDISUBWINDOW_H__
+#endif // MDIDOCKAREA_H__

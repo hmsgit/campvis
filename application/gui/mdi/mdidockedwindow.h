@@ -27,63 +27,74 @@
 // 
 // ================================================================================================
 
-#ifndef VISUALIZATIONPIPELINEWRAPPER_H__
-#define VISUALIZATIONPIPELINEWRAPPER_H__
+#ifndef MDIDOCKEDWINDOW_H__
+#define MDIDOCKEDWINDOW_H__
 
-#include "pipelinemdisubwindow.h"
-#include "visualizationpipelinewidget.h"
-
-#include <QMdiArea>
+#include <QMdiSubWindow>
 
 namespace campvis {
 
     /**
-     * Display wrapper for visualization pipelines.
+     * QMdiSubWindow subclass representing a window docked in an MdiDockArea.
      *
-     * VisualizationPipelineWrapper takes care of creating all necessary representations (widget,
-     * MDI subwindow) of a visualization pipeline and seamlessly switching between them in
-     * response to the user's actions (window dragging, key presses, etc).
+     * MdiDockedWindow reports changes in its position via the s_positionChanged signal. Its
+     * MdiDockArea listens to this signal to decide when to detach the window.
+     *
+     * MdiDockedWindow implements additional methods (stopWindowDrag) that should be used to
+     * coordinate its detaching with respect to grabbing/releasing the mouse input.
      */
-    class VisualizationPipelineWrapper : public QObject {
+    class MdiDockedWindow : public QMdiSubWindow {
 
         Q_OBJECT
 
     public:
         /**
-         * Construct a wrapper for a visualization pipeline.
+         * Construct a new docked MDI window.
          *
-         * This constructor creates a widget for the visualization pipeline it's passed. It then
-         * adds it to an MDI subwindow, and places it in the specified MDI area.
-         *
-         * \param name the name of the visualization pipeline
-         * \param canvas the pipeline's canvas
-         * \param mdiArea the MDI are to which the widget should be added
-         * \param parent the widget's parent
+         * \param parent the window's parent
+         * \param flags options customizing the frame of the subwindow
          */
-        VisualizationPipelineWrapper(const std::string& name, QWidget* canvas,
-                                     QMdiArea* mdiArea, QObject* parent = 0);
-
-    private slots:
-        /**
-         * Track the position of the pipeline's widget and dock it if necessary.
-         *
-         * This slot is invoked when the pipeline's widget is floating and its position changes.
-         */
-        void trackFloatingWindowsPosition(const QPoint& newPos);
+        explicit MdiDockedWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
         /**
-         * Track the position of the pipeline's MDI subwindow and detach it if necessary.
+         * Enter the window into forced drag mode.
          *
-         * This slot is invoked when the position of the pipeline's MDI subwindow changes.
+         * This method causes the window to grab the mouse input and follow the cursor.
          */
-        void trackMdiSubWindowsPosition(const QPoint& newPos);
+        void forceWindowDrag();
+
+        /**
+         * Cancel the dragging of the window.
+         *
+         * This method causes the window to release the mouse grab and stop following the cursor.
+         * It's supposed to be called when the window is detached from the MDI area.
+         */
+        void stopWindowDrag();
+
+    signals:
+        /**
+         * Emitted when the window's position changes.
+         *
+         * \param newPos the window's new position
+         */
+        void s_positionChanged(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
+
+    protected:
+        /**
+         * Event handler that receives mouse move events for the window.
+         */
+        virtual void mouseMoveEvent(QMouseEvent* event);
+
+        /**
+         * Event handler that receives mouse release events for the window.
+         */
+        virtual void mouseReleaseEvent(QMouseEvent * event);
 
     private:
-        QMdiArea* _mdiArea;                              ///< The MDI area associated with the widget
-        PipelineMdiSubWindow* _mdiSubWindow;             ///< An MDI subwindow for the pipeline
-        VisualizationPipelineWidget* _pipelineWidget;    ///< A widget for the pipeline
+        bool _dragActive;            ///< Is the window currently being dragged?
+        QPoint _lastMousePos;        ///< Last reported mouse position
 
     };
 }
 
-#endif // VISUALIZATIONPIPELINEWRAPPER_H__
+#endif // MDIDOCKEDWINDOW_H__

@@ -27,27 +27,41 @@
 // 
 // ================================================================================================
 
-#include "pipelinemdisubwindow.h"
+#include "mdidockedwindow.h"
 
 #include <QMdiArea>
 #include <QMoveEvent>
+#include <QStyle>
 
 namespace campvis {
 
-    PipelineMdiSubWindow::PipelineMdiSubWindow(QWidget* parent /*= 0*/, Qt::WindowFlags flags /*= 0*/)
+    MdiDockedWindow::MdiDockedWindow(QWidget* parent /*= 0*/, Qt::WindowFlags flags /*= 0*/)
         : QMdiSubWindow(parent, flags)
         , _dragActive(false)
         , _lastMousePos()
     {}
 
-    void PipelineMdiSubWindow::stopWindowDrag() {
+    void MdiDockedWindow::forceWindowDrag() {
+        _dragActive = true;
+        _lastMousePos = QCursor::pos();
+
+        const QPoint& mousePos = this->mapToParent(this->mapFromGlobal(_lastMousePos));
+        int x = mousePos.x() - this->frameSize().width() / 2;
+        int y = mousePos.y() - this->style()->pixelMetric(QStyle::PM_TitleBarHeight) / 2;
+        QPoint newPos = QPoint(x, y);
+
+        move(newPos);
+        this->grabMouse();
+    }
+
+    void MdiDockedWindow::stopWindowDrag() {
         if (_dragActive) {
             _dragActive = false;
-            releaseMouse();
+            this->releaseMouse();
         }
     }
 
-    void PipelineMdiSubWindow::mouseMoveEvent(QMouseEvent* event) {
+    void MdiDockedWindow::mouseMoveEvent(QMouseEvent* event) {
         if (event->buttons().testFlag(Qt::LeftButton)) {
             const QPoint& mousePos = event->globalPos();
 
@@ -61,8 +75,8 @@ namespace campvis {
 
             /*
              * Dragging the subwindow upwards out of the MDI area is blocked for 2 reasons:
-             * - the subwindow can't be detached and focused reliably in such cases, possibly due
-             *   to the main window's title bar being in the way
+             * - the docked window can't be detached and focused reliably in such cases, possibly
+             *   due to the main window's title bar being in the way
              * - that's how moving subwindows in an MDI area works by default
              */
             if (newPos.y() < 0) {
@@ -74,14 +88,14 @@ namespace campvis {
             }
 
             move(newPos);
-            emit s_positionChanged(newPos);
+            emit s_positionChanged(this, newPos);
         }
         else {
             QMdiSubWindow::mouseMoveEvent(event);
         }
     }
 
-    void PipelineMdiSubWindow::mouseReleaseEvent(QMouseEvent* event) {
+    void MdiDockedWindow::mouseReleaseEvent(QMouseEvent* event) {
         if (event->button() == Qt::LeftButton) {
             stopWindowDrag();
             mdiArea()->tileSubWindows();

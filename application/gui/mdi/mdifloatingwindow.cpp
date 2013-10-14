@@ -27,57 +27,65 @@
 // 
 // ================================================================================================
 
-#include "visualizationpipelinewidget.h"
+#include "mdifloatingwindow.h"
 
 #include <QMdiArea>
 #include <QMoveEvent>
 #include <QHBoxLayout>
+#include <QStyle>
 
 namespace campvis {
 
-    VisualizationPipelineWidget::VisualizationPipelineWidget(QWidget* canvas, QWidget* parent /*= 0*/)
+    MdiFloatingWindow::MdiFloatingWindow(QWidget* widget, QWidget* parent /*= 0*/)
         : QWidget(parent)
+        , _widget(widget)
         , _dragActive(false)
-        , _lastMousePos()
     {
         QLayout* layout = new QHBoxLayout();
         layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(canvas);
+        layout->addWidget(widget);
 
         setLayout(layout);
     }
 
-    void VisualizationPipelineWidget::forceWindowDrag() {
+    void MdiFloatingWindow::forceWindowDrag() {
         if (!_dragActive && parent() == 0) {
             _dragActive = true;
-            _lastMousePos = QCursor::pos();
+            this->snapToCursor(QCursor::pos());
             grabMouse();
         }
     }
 
-    void VisualizationPipelineWidget::stopWindowDrag() {
+    void MdiFloatingWindow::stopWindowDrag() {
         if (_dragActive) {
             _dragActive = false;
             releaseMouse();
         }
     }
 
-    void VisualizationPipelineWidget::mouseMoveEvent(QMouseEvent* event) {
-        const QPoint& mousePos = event->globalPos();
-        const QPoint& newPos = pos() + (mousePos - _lastMousePos);
-
-        move(newPos);
-        _lastMousePos = mousePos;
+    QWidget* MdiFloatingWindow::widget() {
+        return _widget;
     }
 
-    void VisualizationPipelineWidget::mouseReleaseEvent(QMouseEvent* event) {
+    void MdiFloatingWindow::mouseMoveEvent(QMouseEvent* event) {
+        this->snapToCursor(event->globalPos());
+    }
+
+    void MdiFloatingWindow::mouseReleaseEvent(QMouseEvent* event) {
         if (event->button() == Qt::LeftButton) {
             stopWindowDrag();
         }
     }
 
-    void VisualizationPipelineWidget::moveEvent(QMoveEvent* /*event*/) {
-        emit s_positionChanged(frameGeometry().topLeft());
+    void MdiFloatingWindow::moveEvent(QMoveEvent* /*event*/) {
+        emit s_positionChanged(this, frameGeometry().topLeft());
+    }
+
+    void MdiFloatingWindow::snapToCursor(const QPoint& cursorPos) {
+        int x = cursorPos.x() - this->frameSize().width() / 2;
+        int y = cursorPos.y() - this->style()->pixelMetric(QStyle::PM_TitleBarHeight) / 2;
+
+        this->move(x, y);
     }
 
 }

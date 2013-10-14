@@ -81,7 +81,6 @@ QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
 QtCanvas::~QtCanvas() {}
 
 void QtCanvas::init() {
-    show();
     GLCanvas::init();
 }
 
