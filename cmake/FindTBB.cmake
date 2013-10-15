@@ -8,7 +8,7 @@
 IF (WIN32)
     MESSAGE(STATUS ${TbbDirectory})
     
-    IF(NOT TbbDirectory)
+    IF(NOT TBB_ROOT)
         # check environment variables
         IF(NOT "$ENV{TBB_INSTALL_DIR}" STREQUAL "")
             SET(TbbDirectory $ENV{TBB_INSTALL_DIR})
@@ -17,12 +17,18 @@ IF (WIN32)
         # check default install directory
         set(_TbbSeachPaths "C:/Program Files/Intel/TBB" "C:/Program Files (x86)/Intel/TBB" "${CampvisHome}/ext/tbb")
         FIND_PATH( 
-            TbbDirectory 
+            TBB_ROOT 
             NAMES include/tbb/tbb.h
             PATHS ${_TbbSeachPaths}
             DOC "Intel TBB directory with includes, libs and dlls (i.e. where you extracted the binary distribution from threadingbuildingblocks.org.)"
         )
+        
+        IF(NOT TBB_ROOT)
+            MESSAGE(FATAL_ERROR "Could not find Intel TBB. Please set TBB_ROOT to the Intel TBB directory with includes, libs and dlls (i.e. where you extracted the binary distribution from threadingbuildingblocks.org.)")
+        ENDIF()
     ENDIF()
+    
+    SET(TbbDirectory ${TBB_ROOT})
    
     IF(CAMPVIS_MSVC2010)
         SET(TbbCompilerDirectory "vc10")
@@ -78,9 +84,6 @@ ELSE (WIN32)
         DOC "The TBB library"
     )
 ENDIF (WIN32)
-
-    MESSAGE(STATUS ${TBB_INCLUDE_DIR})
-    MESSAGE(STATUS ${TBB_LIBRARY})
 
 IF(TBB_INCLUDE_DIR AND TBB_LIBRARY)
     SET(TBB_FOUND TRUE)
