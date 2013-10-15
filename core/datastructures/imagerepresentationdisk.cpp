@@ -151,32 +151,23 @@ namespace campvis {
             if (_endianess != localEndianess) {
                 // This is not the most beautiful design, but unfortunately swapEndian needs to know the number of bytes at compiletime...
                 switch (_type) {
-                    case WeaklyTypedPointer::UINT8:
+                    case WeaklyTypedPointer::UINT8: // fallthrough
                     case WeaklyTypedPointer::INT8:
-                        for (size_t i = 0; i < numElements; ++i)
-                            data[i] = EndianHelper::swapEndian(data[i]);
+                        // nothing to do here.
                         break;
 
-                    case WeaklyTypedPointer::UINT16:
+                    case WeaklyTypedPointer::UINT16: // fallthrough
                     case WeaklyTypedPointer::INT16: {
-                        int16_t* tmp = reinterpret_cast<int16_t*>(data);
                         for (size_t i = 0; i < numElements; ++i)
-                            tmp[i] = EndianHelper::swapEndian(tmp[i]);
+                            EndianHelper::swapEndian<2>(data + (2*i));
                         break;
                         }
 
-                    case WeaklyTypedPointer::UINT32:
-                    case WeaklyTypedPointer::INT32: {
-                        int32_t* tmp = reinterpret_cast<int32_t*>(data);
-                        for (size_t i = 0; i < numElements; ++i)
-                            tmp[i] = EndianHelper::swapEndian(tmp[i]);
-                        break;
-                        }
-
+                    case WeaklyTypedPointer::UINT32: // fallthrough
+                    case WeaklyTypedPointer::INT32: // fallthrough
                     case WeaklyTypedPointer::FLOAT: {
-                        float* tmp = reinterpret_cast<float*>(data);
                         for (size_t i = 0; i < numElements; ++i)
-                            tmp[i] = EndianHelper::swapEndian(tmp[i]);
+                            EndianHelper::swapEndian<4>(data + (4*i));
                         break;
                         }
 
