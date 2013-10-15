@@ -118,8 +118,12 @@ IF(WIN32)
     LIST(APPEND CampvisGlobalExternalLibs netapi32 version)
     
 ELSEIF(UNIX)
-    LIST(APPEND CampvisGlobalDefinitions "-DUNIX")  
+    LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
+    LIST(APPEND CampvisGlobalDefinitions "-Wall")
     LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")  
+    
+    # disable tree-vrp optimization in gcc, which for some strange reason breaks tgt's matrix code...
+    LIST(APPEND CampvisGlobalDefinitions "-fno-tree-vrp")
 ENDIF(WIN32)
 
 # tgt configuration

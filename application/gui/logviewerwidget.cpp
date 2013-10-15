@@ -45,31 +45,32 @@ namespace campvis {
     }
 
     LogViewerWidget::~LogViewerWidget() {
+        delete _logHighlighter;
+        delete _controls_layout;
     }
 
     void LogViewerWidget::setupGUI() {
         setWindowTitle(tr("Log Viewer"));
 
-        _mainLayout = new QVBoxLayout();
-        setLayout(_mainLayout);
+        _mainLayout = new QVBoxLayout(this);
 
         _controls_layout = new QHBoxLayout();
         _mainLayout->addLayout(_controls_layout);
 
-        _filter_label = new QLabel(tr("&Filter:"));
+        _filter_label = new QLabel(tr("&Filter:"), this);
         _controls_layout->addWidget(_filter_label);
 
-        _filter_line_edit = new QLineEdit();
+        _filter_line_edit = new QLineEdit(this);
         _filter_line_edit->setPlaceholderText(tr("Start typing here to filter log messages"));
 
         _filter_label->setBuddy(_filter_line_edit);
         _controls_layout->addWidget(_filter_line_edit);
         _controls_layout->addStretch();
 
-        _clear_button = new QPushButton(tr("&Clear"));
+        _clear_button = new QPushButton(tr("&Clear"), this);
         _controls_layout->addWidget(_clear_button);
 
-        _logDisplay = new QTextEdit();
+        _logDisplay = new QTextEdit(this);
         _logDisplay->setReadOnly(true);
         _mainLayout->addWidget(_logDisplay);
 

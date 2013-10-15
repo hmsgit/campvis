@@ -48,6 +48,11 @@ namespace campvis {
 
         return *_singleton;
     }
+    
+    void PipelineFactory::deinit() {
+	delete _singleton;
+    }
+
 
     std::vector<std::string> PipelineFactory::getRegisteredPipelines() const {
         tbb::spin_mutex::scoped_lock lock(_mutex);

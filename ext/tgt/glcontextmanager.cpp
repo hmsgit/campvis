@@ -41,7 +41,8 @@ namespace tgt {
     }
 
     void GlContextManager::releaseCurrentContext() {
-        glFinish();
+        if (_currentContext != 0)
+	  glFinish();
         setCurrent(0);
     }
 
