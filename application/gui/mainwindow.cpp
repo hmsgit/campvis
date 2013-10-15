@@ -101,38 +101,38 @@ namespace campvis {
         _btnPipelineFactory = new QPushButton("Add Pipeline", _containerWidget);
         _cwLayout->addWidget(_btnPipelineFactory, 0, 1);
 
-        _pipelineWidget = new PipelineTreeWidget();
+        _pipelineWidget = new PipelineTreeWidget(this);
         _containerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
         _cwLayout->addWidget(_pipelineWidget, 1, 0, 1, 2);
 
         _containerWidget->setLayout(_cwLayout);
         ui.pipelineTreeDock->setWidget(_containerWidget);
 
-        _pipelinePropertiesScrollArea = new QScrollArea();
+        _pipelinePropertiesScrollArea = new QScrollArea(this);
         _pipelinePropertiesScrollArea->setWidgetResizable(true);
         _pipelinePropertiesScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         _pipelinePropertiesScrollArea->setFrameStyle(QScrollArea::NoFrame);
 
-        _pipelinePropertiesWidget = new QWidget();
+        _pipelinePropertiesWidget = new QWidget(_pipelinePropertiesScrollArea);
         _pipelinePropertiesWidget->installEventFilter(this);
         _pipelinePropertiesScrollArea->setWidget(_pipelinePropertiesWidget);
         ui.pipelinePropertiesDock->setWidget(_pipelinePropertiesScrollArea);
 
-        QVBoxLayout* rightLayout = new QVBoxLayout();
+        QVBoxLayout* rightLayout = new QVBoxLayout(_pipelinePropertiesWidget);
         rightLayout->setSpacing(4);
         _pipelinePropertiesWidget->setLayout(rightLayout);
 
-        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor");
+        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", _pipelinePropertiesWidget);
         rightLayout->addWidget(_btnExecute);
 
-        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline");
+        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", _pipelinePropertiesWidget);
         rightLayout->addWidget(_btnShowDataContainerInspector);
 
-        _propCollectionWidget = new PropertyCollectionWidget();
+        _propCollectionWidget = new PropertyCollectionWidget(this);
         rightLayout->addWidget(_propCollectionWidget);
         rightLayout->addStretch();
 
-        _logViewer = new LogViewerWidget();
+        _logViewer = new LogViewerWidget(this);
         ui.logViewerDock->setWidget(_logViewer);
 
         _dcInspectorWidget = new DataContainerInspectorWidget();

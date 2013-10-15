@@ -2,7 +2,7 @@
  *                                                                    *
  * tgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
- * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
+ * Copyright (C) 2005-2013 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
@@ -504,12 +504,12 @@ struct Matrix4 {
         return result;
     }
 
-    /// Return the main diagonal of the upper left 3x3-submatrix
+    /// Returns a vector representing the scaling applied to unit vectors by this matrix.
     Vector3<T> getScalingPart() const {
         Vector3<T> result(T(0));
-        result.elem[0] = t00;
-        result.elem[1] = t11;
-        result.elem[2] = t22;
+        result.elem[0] = length(Vector3<T>(t00, t10, t20));
+        result.elem[1] = length(Vector3<T>(t01, t11, t21));
+        result.elem[2] = length(Vector3<T>(t02, t12, t22));
         return result;
     }
 /*
@@ -689,6 +689,10 @@ typedef Matrix4f        Matrix;
 typedef Matrix2f        mat2;
 typedef Matrix3f        mat3;
 typedef Matrix4f        mat4;
+
+typedef Matrix2f        dmat2;
+typedef Matrix3f        dmat3;
+typedef Matrix4f        dmat4;
 
 #ifdef DLL_TEMPLATE_INST
 template struct TGT_API Matrix2<float>;

@@ -224,6 +224,7 @@ namespace campvis {
 
         SimpleJobProcessor::deinit();
         OpenGLJobProcessor::deinit();
+        PipelineFactory::deinit();
 
         tgt::QtContextManager::deinit();
         tgt::deinit();
