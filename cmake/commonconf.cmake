@@ -118,7 +118,8 @@ IF(WIN32)
     LIST(APPEND CampvisGlobalExternalLibs netapi32 version)
     
 ELSEIF(UNIX)
-    LIST(APPEND CampvisGlobalDefinitions "-DUNIX")  
+    LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
+    LIST(APPEND CampvisGlobalDefinitions "-DUNIX -Wall")
     LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")  
 ENDIF(WIN32)
 
