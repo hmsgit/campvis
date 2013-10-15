@@ -88,6 +88,8 @@ namespace campvis {
                 case tgt::KeyEvent::K_DOWN:
                     _sliceExtractor.p_xSliceNumber.decrement();
                     break;
+                default:
+                    break;
             }
         }
     }
