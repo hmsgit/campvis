@@ -33,8 +33,8 @@ QtCanvas::QtCanvas(const std::string& title,
                    const ivec2& size,
                    const Buffers buffers,
                    QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
-    : QGLWidget(getQGLFormat(buffers), parent, (shared ? shareWidget_ : 0), f)
-    , GLCanvas(title, size, buffers)
+    : GLCanvas(title, size, buffers)
+    , QGLWidget(getQGLFormat(buffers), parent, (shared ? shareWidget_ : 0), f)
 {
     resize(size.x, size.y);
     if (shared && shareWidget_ == 0)
@@ -59,8 +59,8 @@ QtCanvas::QtCanvas(const std::string& title,
 }
 
 QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
-    : QGLWidget(parent, (shared ? shareWidget_ : 0), f)
-    , GLCanvas()
+    : GLCanvas()
+    , QGLWidget(parent, (shared ? shareWidget_ : 0), f)
 {
     if (shared && shareWidget_ == 0)
         shareWidget_ = this;
