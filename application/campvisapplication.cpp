@@ -31,7 +31,7 @@
 
 #include "tgt/assert.h"
 #include "tgt/exception.h"
-#include "tgt/glcontext.h"
+#include "tgt/glcanvas.h"
 #include "tgt/gpucapabilities.h"
 #include "tgt/shadermanager.h"
 #include "tgt/qt/qtapplication.h"
@@ -108,10 +108,10 @@ namespace campvis {
         LogMgr.getConsoleLog()->addCat("", true);
 
         // create a local OpenGL context and init GL
-        _localContext = CtxtMgr.createContext("AppContext", "", tgt::ivec2(16, 16));
+        _localContext = tgt::GlContextManager::getRef().createContext("AppContext", "", tgt::ivec2(16, 16));
         tgtAssert(_localContext != 0, "Could not create local OpenGL context");
 
-        tgt::GLContextScopedLock lock(_localContext->getContext());
+        tgt::GLContextScopedLock lock(_localContext);
 
         tgt::initGL(featureset);
         ShdrMgr.setGlobalHeader("#version 330\n");
@@ -195,7 +195,7 @@ namespace campvis {
 
         {
             // Deinit everything OpenGL related using the local context.
-            tgt::GLContextScopedLock lock(_localContext->getContext());
+            tgt::GLContextScopedLock lock(_localContext);
 
             // Deinit pipeline first
             for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
@@ -224,6 +224,7 @@ namespace campvis {
 
         SimpleJobProcessor::deinit();
         OpenGLJobProcessor::deinit();
+        PipelineFactory::deinit();
 
         tgt::QtContextManager::deinit();
         tgt::deinit();
@@ -238,7 +239,7 @@ namespace campvis {
         tgtAssert(_initialized, "Tried to run uninitialized CampVisApplication.");
 
         // disconnect OpenGL context from this thread so that the other threads can acquire an OpenGL context.
-        CtxtMgr.releaseCurrentContext();
+        tgt::GlContextManager::getRef().releaseCurrentContext();
 
         _mainWindow->show();
 
@@ -256,14 +257,16 @@ namespace campvis {
         if (_initialized) {
             GLJobProc.pause();
             {
-                tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
-                tgt::GLContextScopedLock lock(canvas->getContext());
+                tgt::QtThreadedCanvas* canvas = dynamic_cast<tgt::QtThreadedCanvas*>(tgt::GlContextManager::getRef().createContext(name, "CAMPVis", tgt::ivec2(512, 512)));
+                tgtAssert(canvas != 0, "Dynamic cast failed. This should not be the case, since we initialized the GlContextManager singleton with a QtContextManager.");
+                tgt::GLContextScopedLock lock(canvas);
                 addPipelineImpl(canvas, name, pipeline);
             }
             GLJobProc.resume();
         }
         else {
-            tgt::QtThreadedCanvas* canvas = CtxtMgr.createContext(name, "CAMPVis", tgt::ivec2(512, 512));
+            tgt::QtThreadedCanvas* canvas = dynamic_cast<tgt::QtThreadedCanvas*>(tgt::GlContextManager::getRef().createContext(name, "CAMPVis", tgt::ivec2(512, 512)));
+            tgtAssert(canvas != 0, "Dynamic cast failed. This should not be the case, since we initialized the GlContextManager singleton with a QtContextManager.");
             addPipelineImpl(canvas, name, pipeline);
         }
 
@@ -291,7 +294,7 @@ namespace campvis {
             LGL_ERROR;
         }
 
-        CtxtMgr.releaseCurrentContext();
+        tgt::GlContextManager::getRef().releaseCurrentContext();
         _mainWindow->addVisualizationPipelineWidget(name, canvas);
 
         // enable pipeline and invalidate all processors

@@ -32,7 +32,7 @@
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
 #include "tgt/openglgarbagecollector.h"
-#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/glcontextmanager.h"
 #include "core/tools/job.h"
 
 namespace campvis {
@@ -62,7 +62,7 @@ namespace campvis {
     }
 
     void OpenGLJobProcessor::run() {
-        std::unique_lock<tbb::mutex> lock(CtxtMgr.getGlMutex());
+        std::unique_lock<tbb::mutex> lock(tgt::GlContextManager::getRef().getGlMutex());
         clock_t lastCleanupTime = clock() * 1000 / CLOCKS_PER_SEC;
 
         while (! _stopExecution) {
@@ -94,7 +94,7 @@ namespace campvis {
                         glFinish();
                         LGL_ERROR;
                     }
-                    context->getContext()->acquire();
+                    tgt::GlContextManager::getRef().acquireContext(context);
                     _currentContext = context;
                 }
 
@@ -136,23 +136,25 @@ namespace campvis {
             while (_pause > 0) {
                 GLGC.deleteGarbage();
                 lastCleanupTime = clock();
-                CtxtMgr.releaseCurrentContext();
+                tgt::GlContextManager::getRef().releaseCurrentContext();
                 _evaluationCondition.wait(lock);
-                _currentContext->getContext()->acquire();
+                tgt::GlContextManager::getRef().acquireContext(_currentContext);
                 hadWork = true;
             }
 
             if (! hadWork) {
-                GLGC.deleteGarbage();
-                lastCleanupTime = clock();
-                CtxtMgr.releaseCurrentContext();
+                if (_currentContext != 0) {
+                    GLGC.deleteGarbage();
+                    lastCleanupTime = clock();
+                }
+                tgt::GlContextManager::getRef().releaseCurrentContext();
                 _evaluationCondition.wait(lock);
-                _currentContext->getContext()->acquire();
+                tgt::GlContextManager::getRef().acquireContext(_currentContext);
             }
         }
 
         // release OpenGL context, so that other threads can access it
-        CtxtMgr.releaseCurrentContext();
+        tgt::GlContextManager::getRef().releaseCurrentContext();
     }
 
     void OpenGLJobProcessor::pause() {

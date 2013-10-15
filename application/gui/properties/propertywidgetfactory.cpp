@@ -36,6 +36,7 @@
 #include "application/gui/properties/datanamepropertywidget.h"
 #include "application/gui/properties/intpropertywidget.h"
 #include "application/gui/properties/floatpropertywidget.h"
+#include "application/gui/properties/metapropertywidget.h"
 #include "application/gui/properties/optionpropertywidget.h"
 #include "application/gui/properties/stringpropertywidget.h"
 #include "application/gui/properties/transferfunctionpropertywidget.h"
@@ -106,6 +107,10 @@ namespace campvis {
 
         if (TransferFunctionProperty* tester = dynamic_cast<TransferFunctionProperty*>(property)) {
             return new TransferFunctionPropertyWidget(tester);
+        }
+
+        if (MetaProperty* tester = dynamic_cast<MetaProperty*>(property)) {
+            return new MetaPropertyWidget(tester, dc);
         }
 
         return 0;

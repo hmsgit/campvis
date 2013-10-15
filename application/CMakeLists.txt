@@ -7,8 +7,9 @@ MESSAGE(STATUS "Configuring CAMPVis Application")
 FILE(GLOB CampvisApplicationSources
     *.cpp
     gui/*.cpp
-    gui/properties/*.cpp
     gui/adjusterwidgets/*.cpp
+    gui/mdi/*.cpp
+    gui/properties/*.cpp
     tools/*.cpp
 )
 
@@ -36,9 +37,9 @@ SET(CampvisApplicationToBeMocced
     gui/qtdatahandle.h
     gui/logviewerwidget.h
     gui/loghighlighter.h
-    gui/pipelinemdisubwindow.h
-    gui/visualizationpipelinewidget.h
-    gui/visualizationpipelinewrapper.h
+    gui/mdi/mdidockarea.h
+    gui/mdi/mdidockedwindow.h
+    gui/mdi/mdifloatingwindow.h
     gui/adjusterwidgets/doubleadjusterwidget.h
     gui/adjusterwidgets/intadjusterwidget.h
     gui/properties/abstractpropertywidget.h
@@ -51,6 +52,7 @@ SET(CampvisApplicationToBeMocced
     gui/properties/floatpropertywidget.h
     gui/properties/geometry1dtransferfunctioneditor.h
     gui/properties/geometry2dtransferfunctioneditor.h
+    gui/properties/metapropertywidget.h
     gui/properties/optionpropertywidget.h
     gui/properties/propertycollectionwidget.h
     gui/properties/simpletransferfunctioneditor.h

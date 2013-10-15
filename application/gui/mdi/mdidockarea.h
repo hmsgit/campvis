@@ -27,63 +27,55 @@
 // 
 // ================================================================================================
 
-#ifndef VISUALIZATIONPIPELINEWRAPPER_H__
-#define VISUALIZATIONPIPELINEWRAPPER_H__
+#ifndef MDIDOCKAREA_H__
+#define MDIDOCKAREA_H__
 
-#include "pipelinemdisubwindow.h"
-#include "visualizationpipelinewidget.h"
+#include "mdidockedwindow.h"
+#include "mdifloatingwindow.h"
 
 #include <QMdiArea>
 
 namespace campvis {
 
     /**
-     * Display wrapper for visualization pipelines.
+     * MDI area whose subwindows can be docked and undocked.
      *
-     * VisualizationPipelineWrapper takes care of creating all necessary representations (widget,
-     * MDI subwindow) of a visualization pipeline and seamlessly switching between them in
-     * response to the user's actions (window dragging, key presses, etc).
+     * MdiDockArea takes care of creating all necessary representations (docked and floating window)
+     * of the widgets passed to \ref addSubWindow and seamlessly switching between them in response
+     * to the user's actions (window dragging, key presses, etc).
      */
-    class VisualizationPipelineWrapper : public QObject {
+    class MdiDockArea : public QMdiArea {
 
         Q_OBJECT
 
     public:
         /**
-         * Construct a wrapper for a visualization pipeline.
+         * Wrap \p widget in an MDI window and dock it in the MDI area.
          *
-         * This constructor creates a widget for the visualization pipeline it's passed. It then
-         * adds it to an MDI subwindow, and places it in the specified MDI area.
+         * This method creates a MdiDockedWindow wrapping the widget, and adds it to the MDI area.
          *
-         * \param name the name of the visualization pipeline
-         * \param canvas the pipeline's canvas
-         * \param mdiArea the MDI are to which the widget should be added
-         * \param parent the widget's parent
+         * \param widget the widget to add to the MDI area
+         * \param windowFlags flags used to customize the frame of the created subwindow
+         * \return the PipelineMdiSubWindow instance that was added to the MDI area
          */
-        VisualizationPipelineWrapper(const std::string& name, QWidget* canvas,
-                                     QMdiArea* mdiArea, QObject* parent = 0);
+        MdiDockedWindow* addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags = 0);
 
     private slots:
         /**
-         * Track the position of the pipeline's widget and dock it if necessary.
+         * Track the position of a floating MDI window and dock it if necessary.
          *
-         * This slot is invoked when the pipeline's widget is floating and its position changes.
+         * This slot is invoked when the position of a floating MDI window changes.
          */
-        void trackFloatingWindowsPosition(const QPoint& newPos);
+        void trackFloatingWindowsPosition(MdiFloatingWindow* floatingWindow, const QPoint& newPos);
 
         /**
-         * Track the position of the pipeline's MDI subwindow and detach it if necessary.
+         * Track the position of a docked MDI window and detach it if necessary.
          *
-         * This slot is invoked when the position of the pipeline's MDI subwindow changes.
+         * This slot is invoked when the position of an MDI subwindow changes.
          */
-        void trackMdiSubWindowsPosition(const QPoint& newPos);
-
-    private:
-        QMdiArea* _mdiArea;                              ///< The MDI area associated with the widget
-        PipelineMdiSubWindow* _mdiSubWindow;             ///< An MDI subwindow for the pipeline
-        VisualizationPipelineWidget* _pipelineWidget;    ///< A widget for the pipeline
+        void trackMdiSubWindowsPosition(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
 
     };
 }
 
-#endif // VISUALIZATIONPIPELINEWRAPPER_H__
+#endif // MDIDOCKAREA_H__

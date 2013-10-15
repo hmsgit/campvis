@@ -87,6 +87,8 @@ namespace campvis {
     }
 
     LogHighlighter::~LogHighlighter() {
+        delete _filterRegExp;
+        delete _logLevelRegExp;
         setFilterRegExp(0);
     }
 

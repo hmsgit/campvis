@@ -30,8 +30,6 @@
 #include "volumeexplorerdemo.h"
 
 #include "tgt/event/keyevent.h"
-#include "tgt/glcontext.h"
-#include "tgt/qt/qtcontextmanager.h"
 #include "core/datastructures/imagedata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
@@ -41,12 +39,9 @@ namespace campvis {
 
     VolumeExplorerDemo::VolumeExplorerDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
         , _imageReader()
         , _ve(&_canvasSize)
     {
-        addProperty(&_camera);
-
         addProcessor(&_imageReader);
         addProcessor(&_ve);
 
@@ -61,7 +56,6 @@ namespace campvis {
         
         _imageReader.s_validated.connect(this, &VolumeExplorerDemo::onProcessorValidated);
 
-        _camera.addSharedProperty(&_ve.p_camera);
         _ve.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
 

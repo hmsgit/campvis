@@ -59,11 +59,17 @@ namespace campvis {
     }
 
     void ImageMappingInformation::updateMatrices() {
+        tgt::mat4 t = tgt::mat4::createTranslation(_offset);
+//	tgt::mat4 s = tgt::mat4::createScale(_voxelSize * _size);
+//        _textureToWolrdTransformation = t * s;
         _textureToWolrdTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
+//	std::cout << s << t << _textureToWolrdTransformation << "\n";
         if (! _textureToWolrdTransformation.invert(_worldToTextureTransformation))
             tgtAssert(false, "Could not invert texture-to-world matrix. That should not happen!");
 
-        _voxelToWorldTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize);
+	tgt::mat4 s = tgt::mat4::createScale(_voxelSize);
+        _voxelToWorldTransformation = t * s; 
+//	std::cout << s << t << _voxelToWorldTransformation << "\n";
         if (! _voxelToWorldTransformation.invert(_worldToVoxelTransformation))
             tgtAssert(false, "Could not invert voxel-to-world matrix. That should not happen!");
     }

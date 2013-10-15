@@ -30,7 +30,6 @@
 #include "autoevaluationpipeline.h"
 #include "tgt/tgt_gl.h"
 #include "tgt/glcanvas.h"
-#include "tgt/glcontext.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/tools/job.h"

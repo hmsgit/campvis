@@ -5,8 +5,8 @@
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische UniversitÃ¤t MÃ¼nchen
-//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
 // The licensing of this softare is not yet resolved. Until then, redistribution in source or
@@ -27,51 +27,30 @@
 // 
 // ================================================================================================
 
-#ifndef VolumeExplorerDemo_H__
-#define VolumeExplorerDemo_H__
-
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/volumeexplorer.h"
+#include "metaproperty.h"
 
 namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
-    public:
-        /**
-         * Creates a AutoEvaluationPipeline.
-         */
-        VolumeExplorerDemo(DataContainer* dc);
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~VolumeExplorerDemo();
+    const std::string MetaProperty::loggerCat_ = "CAMPVis.core.datastructures.MetaProperty";
 
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
+    MetaProperty::MetaProperty(const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
+        : AbstractProperty(name, title, invalidationLevel)
+    {
+    }
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
+    MetaProperty::~MetaProperty() {
+    }
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "VolumeExplorerDemo"; };
+    void MetaProperty::onPropertyChanged(const AbstractProperty* prop) {
+        s_changed(prop);
+    }
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+    void MetaProperty::addPropertyCollection(HasPropertyCollection& pc) {
+        PropertyCollection& c = pc.getProperties();
+        for (std::vector<AbstractProperty*>::const_iterator it = c.begin(); it != c.end(); ++it) {
+            addProperty(*it);
+        }
+    }
 
-    protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
-        MhdImageReader _imageReader;
-        VolumeExplorer _ve;
-    };
 
 }
-
-#endif // VolumeExplorerDemo_H__

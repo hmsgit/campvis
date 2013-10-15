@@ -45,18 +45,40 @@ namespace campvis {
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
         , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
         , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
+        , p_pgProps("PGGProps", "Proxy Geometry Generator", AbstractProcessor::VALID)
+        , p_eepProps("EEPProps", "Entry/Exit Points Generator", AbstractProcessor::VALID)
+        , p_raycasterProps("RaycasterProps", "Raycaster", AbstractProcessor::VALID)
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
         , _raycaster(viewportSizeProp)
     {
         addProperty(&p_inputVolume);
-        addProperty(&p_camera);
+//         addProperty(&p_camera);
         addProperty(&_raycaster.p_transferFunction);
-        addProperty(&_raycaster.p_samplingRate);
         addProperty(&p_outputImage);
 
-        addProperty(_raycaster.getProperty("CentralDifferences"));
-        addProperty(_eepGenerator.getProperty("GeometryImageId"));
+        p_pgProps.addPropertyCollection(_pgGenerator);
+        _pgGenerator.p_sourceImageID.setVisible(false);
+        _pgGenerator.p_geometryID.setVisible(false);
+        addProperty(&p_pgProps);
+
+        p_eepProps.addPropertyCollection(_eepGenerator);
+        _eepGenerator.p_lqMode.setVisible(false);
+        _eepGenerator.p_camera.setVisible(false);
+        _eepGenerator.p_sourceImageID.setVisible(false);
+        _eepGenerator.p_geometryID.setVisible(false);
+        _eepGenerator.p_entryImageID.setVisible(false);
+        _eepGenerator.p_exitImageID.setVisible(false);
+        addProperty(&p_eepProps);
+
+        p_raycasterProps.addPropertyCollection(_raycaster);
+        _raycaster.p_lqMode.setVisible(false);
+        _raycaster.p_camera.setVisible(false);
+        _raycaster.p_sourceImageID.setVisible(false);
+        _raycaster.p_entryImageID.setVisible(false);
+        _raycaster.p_exitImageID.setVisible(false);
+        _raycaster.p_targetImageID.setVisible(false);
+        addProperty(&p_raycasterProps);
 
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);

@@ -39,6 +39,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
+#include "core/properties/metaproperty.h"
 
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
@@ -86,13 +87,11 @@ namespace campvis {
         virtual void process(DataContainer& data);
 
         DataNameProperty p_inputVolume;              ///< image ID for first input image
-
-        CameraProperty p_camera;
-        IntProperty p_xSlice;
-        IntProperty p_ySlice;
-        IntProperty p_zSlice;
-
         DataNameProperty p_outputImage;              ///< image ID for output image
+
+        MetaProperty p_seProperties;        ///< MetaProperty for SliceExtractor properties
+        MetaProperty p_vrProperties;        ///< MetaProperty for Raycaster properties
+
 
     protected:
         /// Additional invalidation levels for this processor.

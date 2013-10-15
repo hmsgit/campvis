@@ -52,20 +52,12 @@ ENDFOREACH()
 #    application/campvispainter.h
 #)
 
-#
-# Qt related stuff:
-#
-# TODO: remove Qt stuff here!
-FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
-INCLUDE(${QT_USE_FILE})
-
-
 ADD_LIBRARY(campvis-core 
     ${CampvisCoreSources} ${CampvisCoreHeaders} 
 )
-ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-core tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(campvis-core tgt ${CampvisGlobalExternalLibs})
 
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)

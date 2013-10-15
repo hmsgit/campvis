@@ -42,9 +42,13 @@ namespace campvis {
         , _texUnit(0)
         , _maskImage(0)
     {
+        _applyMask.s_changed.connect(this, &ProcessorDecoratorMasking::onPropertyChanged);
+        _maskID.setVisible(false);
+        _maskColor.setVisible(false);
     }
 
     ProcessorDecoratorMasking::~ProcessorDecoratorMasking() {
+        _applyMask.s_changed.disconnect(this);
         delete _texUnit;
         delete _maskImage;
     }
@@ -83,6 +87,13 @@ namespace campvis {
             return "#define APPLY_MASK 1\n";
         else
             return "";
+    }
+
+    void ProcessorDecoratorMasking::onPropertyChanged(const AbstractProperty* p) {
+        if (p == &_applyMask) {
+            _maskID.setVisible(_applyMask.getValue());
+            _maskColor.setVisible(_applyMask.getValue());
+        }
     }
 
 }

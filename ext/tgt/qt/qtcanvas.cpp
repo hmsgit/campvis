@@ -35,9 +35,7 @@ QtCanvas::QtCanvas(const std::string& title,
                    QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
     : GLCanvas(title, size, buffers)
     , QGLWidget(getQGLFormat(buffers), parent, (shared ? shareWidget_ : 0), f)
-    , _context(this)
 {
-    _context = QtGLContext(this);
     resize(size.x, size.y);
     if (shared && shareWidget_ == 0)
         shareWidget_ = this;
@@ -63,7 +61,6 @@ QtCanvas::QtCanvas(const std::string& title,
 QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
     : GLCanvas()
     , QGLWidget(parent, (shared ? shareWidget_ : 0), f)
-    , _context(this)
 {
     if (shared && shareWidget_ == 0)
         shareWidget_ = this;
@@ -84,7 +81,6 @@ QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
 QtCanvas::~QtCanvas() {}
 
 void QtCanvas::init() {
-    show();
     GLCanvas::init();
 }
 
@@ -109,10 +105,6 @@ void QtCanvas::update() {
 
 void QtCanvas::swap() {
     QGLWidget::swapBuffers();
-}
-
-QtGLContext* QtCanvas::getContext() {
-    return &_context;
 }
 
 void QtCanvas::toggleFullScreen() {

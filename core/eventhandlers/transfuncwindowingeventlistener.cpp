@@ -40,6 +40,9 @@ namespace campvis {
     TransFuncWindowingEventListener::TransFuncWindowingEventListener(TransferFunctionProperty* property)
         : tgt::EventListener()
         , _prop(property)
+	, _mousePressed(false)
+	, _mouseDownPosition(0, 0)
+	, _originalIntensityDomain(0.f, 1.f)
     {
         tgtAssert(_prop != 0, "Assigned property must not be 0.");
     }
@@ -81,6 +84,10 @@ namespace campvis {
 
             newIntesityDomain.x -= offset;
             newIntesityDomain.y += offset;
+
+            // triple-check for rock solid safety ;)
+            if (newIntesityDomain.x > newIntesityDomain.y)
+                std::swap(newIntesityDomain.x, newIntesityDomain.y);
 
             _prop->getTF()->setIntensityDomain(tgt::clamp(newIntesityDomain, tgt::vec2(0.f), tgt::vec2(1.f)));
             e->ignore();

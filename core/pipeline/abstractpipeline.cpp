@@ -32,7 +32,6 @@
 
 #include "tgt/exception.h"
 #include "tgt/glcanvas.h"
-#include "tgt/glcontext.h"
 #include "tgt/tgt_gl.h"
 
 #include "core/pipeline/visualizationprocessor.h"

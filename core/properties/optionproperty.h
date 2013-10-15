@@ -50,7 +50,7 @@ namespace campvis {
          * \param invalidationLevel  Invalidation level that this property triggers
          */
         AbstractOptionProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT)
-            : IntProperty(name, title, -1, -1, -1, invalidationLevel)
+            : IntProperty(name, title, -1, -1, -1, 1, invalidationLevel)
         {            
         };
 

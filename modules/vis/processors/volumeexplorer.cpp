@@ -44,39 +44,44 @@ namespace campvis {
     VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
-        , p_camera("Camera", "Camera")
-        , p_xSlice("XSlice", "Slice in YZ Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
-        , p_ySlice("YSlice", "Slice in XZ Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
-        , p_zSlice("ZSlice", "Slice in XY Plane", 0, 0, 0, 1, INVALID_RESULT | SLICES_INVALID)
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
+        , p_seProperties("SliceExtractorProperties", "Slice Extractor Properties", AbstractProcessor::VALID)
+        , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties", AbstractProcessor::VALID)
         , _raycaster(viewportSizeProp)
         , _sliceExtractor(viewportSizeProp)
         , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
         , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
-        , _xSliceHandler(&p_xSlice)
-        , _ySliceHandler(&p_ySlice)
-        , _zSliceHandler(&p_zSlice)
+        , _xSliceHandler(&_sliceExtractor.p_xSliceNumber)
+        , _ySliceHandler(&_sliceExtractor.p_ySliceNumber)
+        , _zSliceHandler(&_sliceExtractor.p_zSliceNumber)
         , _windowingHandler(&_sliceExtractor.p_transferFunction)
         , _trackballEH(0)
         , _mousePressed(false)
     {
         addProperty(&p_inputVolume);
-        addProperty(&p_camera);
-        addProperty(&p_xSlice);
-        addProperty(&p_ySlice);
-        addProperty(&p_zSlice);
         addProperty(&p_outputImage);
+
+        p_seProperties.addPropertyCollection(_sliceExtractor);
+        _sliceExtractor.p_lqMode.setVisible(false);
+        _sliceExtractor.p_sourceImageID.setVisible(false);
+        _sliceExtractor.p_targetImageID.setVisible(false);
+        _sliceExtractor.p_sliceOrientation.setVisible(false);
+        _sliceExtractor.p_xSliceColor.setVisible(false);
+        _sliceExtractor.p_ySliceColor.setVisible(false);
+        _sliceExtractor.p_zSliceColor.setVisible(false);
+        addProperty(&p_seProperties);
+
+        p_vrProperties.addPropertyCollection(_raycaster);
+        _raycaster.p_lqMode.setVisible(false);
+        _raycaster.p_inputVolume.setVisible(false);
+        _raycaster.p_outputImage.setVisible(false);
+        addProperty(&p_vrProperties);
 
         addProperty(&_sliceExtractor.p_transferFunction);
         addProperty(_raycaster.getProperty("TransferFunction"));
 
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
         p_inputVolume.addSharedProperty(&_sliceExtractor.p_sourceImageID);
-        p_camera.addSharedProperty(&_raycaster.p_camera);
-
-        p_xSlice.addSharedProperty(&_sliceExtractor.p_xSliceNumber);
-        p_ySlice.addSharedProperty(&_sliceExtractor.p_ySliceNumber);
-        p_zSlice.addSharedProperty(&_sliceExtractor.p_zSliceNumber);
 
         _sliceExtractor.setViewportSizeProperty(&p_sliceRenderSize);
         _raycaster.setViewportSizeProperty(&p_volumeRenderSize);
@@ -246,18 +251,17 @@ namespace campvis {
 
         if (img != 0) {
             const tgt::svec3& imgSize = img->getSize();
-            unsigned int maxValue = static_cast<unsigned int> (p_xSlice.getMaxValue());
-            if (maxValue != imgSize.x - 1){
-                p_xSlice.setMaxValue(static_cast<int>(imgSize.x) - 1);
-                p_xSlice.setValue(static_cast<int>(imgSize.x) / 2);
+            if (_sliceExtractor.p_xSliceNumber.getMaxValue() != static_cast<int>(imgSize.x) - 1){
+                _sliceExtractor.p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
+                _sliceExtractor.p_xSliceNumber.setValue(static_cast<int>(imgSize.x) / 2);
             }
-            if (maxValue != imgSize.y - 1){
-                p_ySlice.setMaxValue(static_cast<int>(imgSize.y) - 1);
-                p_ySlice.setValue(static_cast<int>(imgSize.y) / 2);
+            if (_sliceExtractor.p_ySliceNumber.getMaxValue() != static_cast<int>(imgSize.y) - 1){
+                _sliceExtractor.p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
+                _sliceExtractor.p_ySliceNumber.setValue(static_cast<int>(imgSize.y) / 2);
             }
-            if (maxValue != imgSize.z - 1){
-                p_zSlice.setMaxValue(static_cast<int>(imgSize.z) - 1);
-                p_zSlice.setValue(static_cast<int>(imgSize.z) / 2);
+            if (_sliceExtractor.p_zSliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
+                _sliceExtractor.p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+                _sliceExtractor.p_zSliceNumber.setValue(static_cast<int>(imgSize.z) / 2);
             }
 
             _trackballEH->reinitializeCamera(img);

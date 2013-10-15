@@ -35,6 +35,7 @@
 #include "core/properties/numericproperty.h"
 
 class QCheckBox;
+class QPushButton;
 class QTimer;
 
 namespace campvis {
@@ -68,6 +69,7 @@ namespace campvis {
         void onIntervalValueChanged(int value);
         void onEnableTimerChanged(int state);
         void onTimer();
+        void onBtnSHTClicked();
 
     private:
         /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
@@ -78,6 +80,7 @@ namespace campvis {
 
         IntAdjusterWidget* _adjuster;
 
+        QPushButton* _btnShowHideTimer;
         QTimer* _timer;
         QCheckBox* _cbEnableTimer;
         QSpinBox* _sbInterval;

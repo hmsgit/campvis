@@ -36,7 +36,6 @@
 
 #include "tgt/logmanager.h"
 #include "tgt/painter.h"
-#include "core/tools/runnable.h"
 
 namespace tgt {
     class Shader;
@@ -48,14 +47,8 @@ namespace campvis {
 
     /**
      * Painter class for CAMPVis, rendering the render target of an AbstractPipeline.
-     * This painter implements Runnable, hence, it runs in its own thread and the associated canvas
-     * must be of type QtThreadedCanvas.
-     * Rendering is implemented using condidional wait - hence the canvas is only updated when
-     * \a pipeline emits the s_RenderTargetChanged signal.
-     * 
-     * \sa  Runnable, AbstractPipeline
      */
-    class CampVisPainter : public Runnable, public tgt::Painter, public sigslot::has_slots<> {
+    class CampVisPainter : public tgt::Painter, public sigslot::has_slots<> {
     public:
         /**
          * Creates a new CampVisPainter rendering the render target of \a pipeline on \a canvas.
@@ -68,15 +61,6 @@ namespace campvis {
          * Destructor, stops and waits for the rendering thread if it's still running.
          */
         virtual ~CampVisPainter();
-
-        /// \see Runnable::stop
-        void stop();
-        
-        /**
-         * Performs the rendering using conditional wait.
-         * \sa Runnable::run
-         */
-        void run();
 
         /**
          * Schedule a repaint job for the pipeline's render target

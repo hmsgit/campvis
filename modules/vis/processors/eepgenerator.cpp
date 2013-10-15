@@ -48,24 +48,26 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Input Proxy Geometry ID", "proxygeometry", DataNameProperty::READ)
-        , p_mirrorID("mirrorID", "Input Mirror ID", "mirror", DataNameProperty::READ)
         , p_geometryImageId("GeometryImageId", "Rendered Geometry to Integrate (optional)", "", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
         , p_exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
-        , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
+        , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_mirrorID("mirrorID", "Input Mirror ID", "", DataNameProperty::READ)
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorMasking());
 
         addProperty(&p_sourceImageID);
         addProperty(&p_geometryID);
-        addProperty(&p_mirrorID);
         addProperty(&p_geometryImageId);
         addProperty(&p_entryImageID);
         addProperty(&p_exitImageID);
         addProperty(&p_camera);
+
         addProperty(&p_enableMirror);
+        addProperty(&p_mirrorID);
+        p_mirrorID.setVisible(false);
 
         decoratePropertyCollection(this);
     }
@@ -233,6 +235,11 @@ namespace campvis {
 
     std::string EEPGenerator::generateHeader() const {
         return getDecoratedHeader();
+    }
+
+    void EEPGenerator::updateProperties() {
+        p_mirrorID.setVisible(p_enableMirror.getValue());
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

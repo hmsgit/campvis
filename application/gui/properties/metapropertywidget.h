@@ -5,8 +5,8 @@
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische UniversitÃ¤t MÃ¼nchen
-//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
 // The licensing of this softare is not yet resolved. Until then, redistribution in source or
@@ -27,51 +27,49 @@
 // 
 // ================================================================================================
 
-#ifndef VolumeExplorerDemo_H__
-#define VolumeExplorerDemo_H__
+#ifndef METAPROPERTYWIDGET_H__
+#define METAPROPERTYWIDGET_H__
 
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/volumeexplorer.h"
+
+#include "application/gui/properties/propertycollectionwidget.h"
+#include "application/gui/properties/abstractpropertywidget.h"
+#include "core/properties/metaproperty.h"
 
 namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
+    class DataContainer;
+
+    /**
+     * Widget for a Camera.
+     * For now just offering read-access.
+     */
+    class MetaPropertyWidget : public AbstractPropertyWidget {
+        Q_OBJECT;
+
     public:
         /**
-         * Creates a AutoEvaluationPipeline.
+         * Creates a new MetaPropertyWidget for the property \a property.
+         * \param   property    The property the widget shall handle
+         * \param   parent      Parent Qt widget
          */
-        VolumeExplorerDemo(DataContainer* dc);
+        MetaPropertyWidget(MetaProperty* property, DataContainer* dc, QWidget* parent = 0);
 
         /**
-         * Virtual Destructor
-         **/
-        virtual ~VolumeExplorerDemo();
-
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
-
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "VolumeExplorerDemo"; };
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+         * Destructor
+         */
+        virtual ~MetaPropertyWidget();
 
     protected:
         /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
+         * Gets called when the property has changed, so that widget can update its state.
          */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
+        virtual void updateWidgetFromProperty();
 
-        MhdImageReader _imageReader;
-        VolumeExplorer _ve;
+
+    private:
+        PropertyCollectionWidget* _pcw;
+        DataContainer* _dc;
+
     };
-
 }
 
-#endif // VolumeExplorerDemo_H__
+#endif // METAPROPERTYWIDGET_H__

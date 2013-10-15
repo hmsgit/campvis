@@ -27,67 +27,91 @@
 // 
 // ================================================================================================
 
-#ifndef PIPELINEMDISUBWINDOW_H__
-#define PIPELINEMDISUBWINDOW_H__
+#ifndef MDIFLOATINGWINDOW_H__
+#define MDIFLOATINGWINDOW_H__
 
-#include <QMdiSubWindow>
+#include <QWidget>
 
 namespace campvis {
 
     /**
-     * QMdiSubWindow subclass for visualization pipeline widgets.
+     * Specialised widget for detached MDI subwindows.
      *
-     * PipelineMdiSubWindow reports changes in its position via the s_positionChanged signal.
-     * Higher-level components listen to this signal to decide when to detach the subwindow from
-     * its MDI area. PipelineMdiSubWindow also implements additional methods (stopWindowDrag) that
-     * should be used to coordinate this detaching with respect to grabbing/releasing the mouse
-     * input.
+     * MdiFloatingWindow is a top-level floating window representing an undocked MDI subwindow.
+     * It reports changes in its position via the s_positionChanged signal. The MDI area that
+     * created it listens to this signal to decide when to scrap the floating window and dock back
+     * the widget that it wraps.
+     *
+     * MdiFloatingWindow also implements additional methods (forceWindowDrag, stopWindowDrag)
+     * that should be used to coordinate its creation/disposal with respect to grabbing/releasing
+     * the mouse input.
      */
-    class PipelineMdiSubWindow : public QMdiSubWindow {
+    class MdiFloatingWindow : public QWidget {
 
         Q_OBJECT
 
     public:
         /**
-         * Construct an MDI subwindow for a visualization pipeline.
+         * Construct a new MdiFloatingWindow.
          *
-         * \param parent the window's parent
-         * \param flags options customizing the frame of the subwindow
+         * \param canvas the widget this window is to wrap
+         * \param parent the windows's parent
          */
-        explicit PipelineMdiSubWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+        explicit MdiFloatingWindow(QWidget* widget, QWidget* parent = 0);
+
+        /**
+         * Enter the window into forced drag mode.
+         *
+         * This method causes the window to grab the mouse input and follow the cursor.
+         */
+        void forceWindowDrag();
 
         /**
          * Cancel the dragging of the window.
          *
          * This method causes the window to release the mouse grab and stop following the cursor.
-         * It's supposed to be called when the window is detached from the MDI area.
          */
         void stopWindowDrag();
 
+        /**
+         * Return the widget this window wraps.
+         */
+        QWidget* widget();
+
     signals:
         /**
-         * Emitted when the subwindow's position changes.
+         * Emitted when the window's position changes.
          *
-         * \param newPos the subwindow's new position
+         * \param newPos the window's new position
          */
-        void s_positionChanged(const QPoint& newPos);
+        void s_positionChanged(MdiFloatingWindow* pipelineWidget, const QPoint& newPos);
 
     protected:
         /**
-         * Event handler that receives mouse move events for the widget.
+         * Event handler that receives mouse move events for the window.
          */
         virtual void mouseMoveEvent(QMouseEvent* event);
 
         /**
-         * Event handler that receives mouse release events for the widget.
+         * Event handler that receives mouse release events for the window.
          */
         virtual void mouseReleaseEvent(QMouseEvent * event);
 
+        /**
+         * Event handler that receives move events for the window.
+         */
+        virtual void moveEvent(QMoveEvent* event);
+
     private:
+        /**
+         * Moves the window so that its title bar is centered around \p cursorPos.
+         */
+        void snapToCursor(const QPoint& cursorPos);
+
+        QWidget* _widget;            ///< The widget this window wraps
         bool _dragActive;            ///< Is the window currently being dragged?
-        QPoint _lastMousePos;        ///< Last reported mouse position
 
     };
 }
 
-#endif // PIPELINEMDISUBWINDOW_H__
+#endif // MDIFLOATINGWINDOW_H__
