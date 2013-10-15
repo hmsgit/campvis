@@ -58,6 +58,8 @@ namespace campvis {
                 _prop->decrement();
                 e->ignore();
                 break;
+            default:
+                break;
         }
     }
 

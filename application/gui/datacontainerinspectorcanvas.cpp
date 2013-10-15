@@ -243,6 +243,8 @@ namespace campvis {
                         --_currentSlice;
                     e->ignore();
                     break;
+                default:
+                    break;
             }
             invalidate();
         }
