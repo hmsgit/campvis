@@ -141,7 +141,8 @@ namespace campvis {
     void SliceRenderer3D::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
         const tgt::svec3& imgSize = img->getSize();
-        if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
+        unsigned int maxValue = static_cast<unsigned int> (p_sliceNumber.getMaxValue());
+        if (maxValue != imgSize.z - 1){
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
                         
