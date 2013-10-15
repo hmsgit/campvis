@@ -5,8 +5,8 @@
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische UniversitÃ¤t MÃ¼nchen
+//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
 // The licensing of this softare is not yet resolved. Until then, redistribution in source or
@@ -107,7 +107,7 @@ namespace campvis {
         _ctReader.p_targetImageID.addSharedProperty(&_ctDVR.p_sourceImageID);
         _ctReader.p_targetImageID.addSharedProperty(&_ctFullDRR.p_sourceImageID);
         _ctReader.p_targetImageID.addSharedProperty(&_ctClippedDRR.p_sourceImageID);
-        _ctReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CT_8007_003_5mm_STD_20110224\\Fantome_20110224_8007_003_6_1_ABD-_portalvenös_X_S___5mm_STD.mhd");
+        _ctReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CT_8007_003_5mm_STD_20110224\\Fantome_20110224_8007_003_6_1_ABD-_portalvenÃ¶s_X_S___5mm_STD.mhd");
         _ctReader.p_targetImageID.setValue("ct.image");
         _ctReader.s_validated.connect(this, &IxpvDemo::onProcessorValidated);
 
