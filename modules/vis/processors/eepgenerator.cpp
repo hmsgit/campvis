@@ -105,7 +105,6 @@ namespace campvis {
 
                 ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
 
-                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
 
                 // clip proxy geometry against near-plane to support camera in volume

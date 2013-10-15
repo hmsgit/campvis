@@ -119,7 +119,7 @@ IF(WIN32)
     
 ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
-    LIST(APPEND CampvisGlobalDefinitions "-Wall")
+    LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable")
     LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")  
     
     # disable tree-vrp optimization in gcc, which for some strange reason breaks tgt's matrix code...

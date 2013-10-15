@@ -75,9 +75,7 @@ namespace campvis {
         if (tgt::sign(tgt::dot(cam.getLook(), n)) == 1)
             n *= -1.f;
 
-        // TODO: the implicit GUI updates randomly crashes the applictation...
         p_mirrorNormal.setValue(n);
-
         std::vector<tgt::vec3> vertices;
 
         tgt::vec3 temp = cam.getUpVector();
@@ -85,7 +83,6 @@ namespace campvis {
             temp = tgt::vec3(0.f, 1.f, 0.f);
 
         tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_size.getValue();
-        tgt::vec3 inPlaneB = tgt::normalize(tgt::cross(n, inPlaneA)) * 0.5f * p_size.getValue();
 
         const tgt::vec3& base = p_mirrorCenter.getValue();
 
