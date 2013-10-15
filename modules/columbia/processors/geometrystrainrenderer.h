@@ -72,7 +72,7 @@ namespace campvis {
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
-        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
 

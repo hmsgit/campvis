@@ -128,7 +128,7 @@ namespace campvis {
          * Gets the current processor state in terms of stability. To be defined by every subclass.
          * \return  The current processor state in terms of stability.
          */
-        virtual const ProcessorState getProcessorState() const = 0;
+        virtual ProcessorState getProcessorState() const = 0;
 
         /**
          * Gets the flag whether this processor is currently enabled.
