@@ -51,7 +51,7 @@ namespace campvis {
         : AbstractData()
         , _depthTexture(0)
     {
-        tgt::Texture *const *const attachments = fbo->getAttachments();
+        tgt::Texture* const * attachments = fbo->getAttachments();
         for (size_t i = 0; i < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
             if (attachments[i] != 0) {
                 ImageData* img = new ImageData(2, attachments[i]->getDimensions(), attachments[i]->getNumChannels());
