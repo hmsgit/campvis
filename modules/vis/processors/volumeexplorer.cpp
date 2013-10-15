@@ -251,15 +251,15 @@ namespace campvis {
 
         if (img != 0) {
             const tgt::svec3& imgSize = img->getSize();
-            if (_sliceExtractor.p_xSliceNumber.getMaxValue() != imgSize.x - 1){
+            if (_sliceExtractor.p_xSliceNumber.getMaxValue() != static_cast<int>(imgSize.x) - 1){
                 _sliceExtractor.p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
                 _sliceExtractor.p_xSliceNumber.setValue(static_cast<int>(imgSize.x) / 2);
             }
-            if (_sliceExtractor.p_ySliceNumber.getMaxValue() != imgSize.y - 1){
+            if (_sliceExtractor.p_ySliceNumber.getMaxValue() != static_cast<int>(imgSize.y) - 1){
                 _sliceExtractor.p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
                 _sliceExtractor.p_ySliceNumber.setValue(static_cast<int>(imgSize.y) / 2);
             }
-            if (_sliceExtractor.p_zSliceNumber.getMaxValue() != imgSize.z - 1){
+            if (_sliceExtractor.p_zSliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
                 _sliceExtractor.p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
                 _sliceExtractor.p_zSliceNumber.setValue(static_cast<int>(imgSize.z) / 2);
             }

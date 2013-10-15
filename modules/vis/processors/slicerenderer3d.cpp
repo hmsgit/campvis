@@ -143,7 +143,7 @@ namespace campvis {
 
         if (img != 0) {
             const tgt::svec3& imgSize = img->getSize();
-            if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
+            if (p_sliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
                 p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
             }
         }
