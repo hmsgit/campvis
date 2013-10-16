@@ -160,7 +160,7 @@ GLuint FramebufferObject::generateId() {
     return id_;
 }
 
-Texture*const *const FramebufferObject::getAttachments() const {
+Texture* const * FramebufferObject::getAttachments() const {
     return attachments_;
 }
 
