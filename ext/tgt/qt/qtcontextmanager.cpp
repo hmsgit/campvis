@@ -18,6 +18,7 @@ namespace tgt {
         // FIXME: rethink this concept of unique IDs
         //tgtAssert(_contexts.find(key) == _contexts.end(), "A context with the same key already exists!");
 
+        tbb::mutex::scoped_lock localLock(_localMutex);
         tbb::mutex::scoped_lock lock(_glMutex);
         QtThreadedCanvas* toReturn = new QtThreadedCanvas(title, size, buffers, 0, shared);
         _contexts.insert(std::make_pair(key, toReturn));

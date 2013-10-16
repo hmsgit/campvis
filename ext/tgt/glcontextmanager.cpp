@@ -21,6 +21,7 @@ namespace tgt {
 
 
     GLCanvas* GlContextManager::getContextByKey(const std::string& key) {
+        tbb::mutex::scoped_lock lock(_localMutex);
         std::map<std::string, GLCanvas*>::iterator it = _contexts.find(key);
         if (it != _contexts.end())
             return it->second;
@@ -42,7 +43,7 @@ namespace tgt {
 
     void GlContextManager::releaseCurrentContext() {
         if (_currentContext != 0)
-	  glFinish();
+            glFinish();
         setCurrent(0);
     }
 
@@ -78,5 +79,16 @@ namespace tgt {
         setCurrent(context);
     }
 
+    void GlContextManager::removeContext(GLCanvas* context) {
+        _currentContext = 0;
+
+        tbb::mutex::scoped_lock lock(_localMutex);
+        for (std::map<std::string, GLCanvas*>::iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
+            if (it->second == context) {
+                _contexts.erase(it);
+                break;
+            }
+        }
+    }
 
 }

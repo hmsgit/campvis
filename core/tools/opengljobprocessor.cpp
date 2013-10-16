@@ -38,9 +38,9 @@
 namespace campvis {
 
     OpenGLJobProcessor::OpenGLJobProcessor()
-        : _currentContext(0)
     {
         _pause = 0;
+        _currentContext = 0;
     }
 
     OpenGLJobProcessor::~OpenGLJobProcessor() {
@@ -77,8 +77,8 @@ namespace campvis {
 
                 tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
                 if (!_contextQueueMap.find(a, context)) {
-                    tgtAssert(false, "Should not reach this: Did not find context in contextQueueMap!");
-                    break;
+                    //tgtAssert(false, "Should not reach this: Did not find context in contextQueueMap!");
+                    continue;
                 }
 
                 // avoid expensive context-switches for contexts without pending jobs.
@@ -214,11 +214,14 @@ namespace campvis {
     }
 
     void OpenGLJobProcessor::deregisterContext(tgt::GLCanvas* context) {
-        tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
+        tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::accessor a;
         if (_contextQueueMap.find(a, context)) {
             delete a->second;
             _contextQueueMap.erase(a);
         }
+
+        if (_currentContext == context)
+            _currentContext.compare_and_swap(0, context);
     }
 
     tgt::GLCanvas* OpenGLJobProcessor::iKnowWhatImDoingGetArbitraryContext() {

@@ -79,8 +79,11 @@ namespace campvis {
 
         Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
         gtf->s_geometryCollectionChanged.disconnect(this);
-        // TODO: this needs to be done, but we can not ensure that GLJobProc is still existant during deconstruction...
-        //GLJobProc.deregisterContext(_canvas);
+
+        if (OpenGLJobProcessor::isInited())
+            GLJobProc.deregisterContext(_canvas);
+        if (tgt::GlContextManager::isInited())
+            tgt::GlContextManager::getRef().removeContext(_canvas);
     }
 
     void Geometry2DTransferFunctionEditor::updateWidgetFromProperty() {
