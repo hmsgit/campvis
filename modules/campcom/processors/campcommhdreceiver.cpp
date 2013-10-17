@@ -27,10 +27,13 @@
 // 
 // ================================================================================================
 
+#define CAMPCOM_FAST_SERIALIZATION
+
 #include "campcommhdreceiver.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
     const std::string CampcomMhdReceiver::loggerCat_ = "CAMPVis.modules.io.CampcomMhdReceiver";
@@ -44,6 +47,8 @@ namespace campvis {
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
         , _ccclient(0)
     {
+        _incomingMhd = 0;
+
         addProperty(&p_address);
         addProperty(&p_targetImageID);
         addProperty(&p_connect);
@@ -62,17 +67,58 @@ namespace campvis {
 
     void CampcomMhdReceiver::deinit() {
         p_connect.s_clicked.disconnect(this);
-        _ccclient->disconnect();
-        delete _ccclient;
+        if (_ccclient) {
+            _ccclient->disconnect();
+            delete _ccclient;
+        }
         _ccclient = 0;
     }
 
     void CampcomMhdReceiver::process(DataContainer& data) {
+        validate(INVALID_RESULT);
+
+        campcom::MHDImageData* mid = _incomingMhd.fetch_and_store(0);
+        if (mid == 0)
+            return;
+
+        int numChannels = 1;
+        size_t dimensionality = mid->NDims;
+        tgt::svec3 size(1);
+        for (int i = 0; i < mid->DimSize.size(); ++i)
+            size.elem[i] = mid->DimSize[i];
+
+        WeaklyTypedPointer wtp;
+        wtp._pointer = &(mid->imageData.front().front());
+        wtp._numChannels = numChannels;
+
+        std::string et = StringUtils::uppercase(mid->elementType);
+        if (et == "MET_UCHAR")
+            wtp._baseType = WeaklyTypedPointer::UINT8;
+        else if (et == "MET_CHAR")
+            wtp._baseType = WeaklyTypedPointer::INT8;
+        else if (et == "MET_USHORT")
+            wtp._baseType = WeaklyTypedPointer::UINT16;
+        else if (et == "MET_SHORT")
+            wtp._baseType = WeaklyTypedPointer::INT16;
+        else if (et == "MET_UINT")
+            wtp._baseType = WeaklyTypedPointer::UINT32;
+        else if (et == "MET_INT")
+            wtp._baseType = WeaklyTypedPointer::INT32;
+        else if (et == "MET_FLOAT")
+            wtp._baseType = WeaklyTypedPointer::FLOAT;
+        else {
+            LERROR("Error while parsing MHD header: Unsupported element type: " << et);
+            return;
+        }
+
+        tgt::vec3 imageOffset(0.f);
+        tgt::vec3 voxelSize(1.f);
+
         // all parsing done - lets create the image:
-//         ImageData* image = new ImageData(dimensionality, size, numChannels);
-//         ImageRepresentationDisk::create(image, url, pt, offset, e);
-//         image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
-//         data.addData(p_targetImageID.getValue(), image);
+        ImageData* image = new ImageData(dimensionality, size, numChannels);
+        ImageRepresentationLocal::create(image, wtp);
+        image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
+        data.addData(p_targetImageID.getValue(), image);
 
         validate(INVALID_RESULT);
     }
@@ -84,7 +130,7 @@ namespace campvis {
             _ccclient = 0;
         }
 
-        _ccclient = new campcom::CAMPComClient("Campvis", campcom::Device_CAMPVis, p_address.getValue());
+        _ccclient = new campcom::CAMPComClient("Campvis", campcom::Device_TestDevice, p_address.getValue());
         _ccclient->connect();
         if (_ccclient->isConnected()) {
             campcom::DataCallback dc;
@@ -94,12 +140,27 @@ namespace campvis {
         }
         else {
             LWARNING("Could not connect to CAMPCom server.");
-            delete _ccclient;
+//            delete _ccclient;
             _ccclient = 0;
         }
     }
 
     void CampcomMhdReceiver::ccReceiveImage(std::vector<campcom::Byte>& msg) {
+        campcom::MHDImageData return_payload;
+        campcom::Header header;
+
+        campcom::TypeHandler<campcom::MHDImageData>::deserializePayload(&msg[0], msg.size(), return_payload);
+        if (campcom::MHDImageData::isValid(return_payload)) {
+            LINFO("New valid MHDImageData received! Pushing it to the DataContainer...");
+            campcom::MHDImageData* copy = new campcom::MHDImageData(return_payload);
+            campcom::MHDImageData* toDelete = _incomingMhd.fetch_and_store(copy);
+            delete toDelete;
+
+            invalidate(INVALID_RESULT);
+        }
+        else {
+            LWARNING("New MHDImageData received but it isn't valid!");
+        }
 
     }
 

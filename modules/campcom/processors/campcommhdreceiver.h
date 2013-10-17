@@ -36,6 +36,8 @@
 #include <CommonLib/DataTypes/MHDImageData.hpp>
 #include <ClientLib/src/CAMPComClient.hpp>
 
+#include <tbb/atomic.h>
+
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/buttonproperty.h"
 #include "core/properties/datanameproperty.h"
@@ -95,6 +97,7 @@ namespace campvis {
         void ccSuccessCalback(bool b);
 
         campcom::CAMPComClient* _ccclient;
+        tbb::atomic<campcom::MHDImageData*> _incomingMhd;
 
         static const std::string loggerCat_;
     };

@@ -106,6 +106,11 @@ namespace campvis {
         WeaklyTypedPointer(BaseType pt, size_t numChannels, void* ptr);
 
         /**
+         * Empty default constructor, you have to initialize everything yourself.
+         */
+        WeaklyTypedPointer();
+
+        /**
          * Destructor, does _not_ delete the handled pointer!
          */
         virtual ~WeaklyTypedPointer();

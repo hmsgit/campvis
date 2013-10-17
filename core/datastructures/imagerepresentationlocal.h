@@ -63,6 +63,8 @@ namespace campvis {
          */
         static ImageRepresentationLocal* tryConvertFrom(const AbstractImageRepresentation* source);
 
+        static ImageRepresentationLocal* create(const ImageData* parent, WeaklyTypedPointer wtp);
+
         /// \see AbstractData::clone()
         virtual ImageRepresentationLocal* clone(ImageData* newParent) const = 0;
 
@@ -209,9 +211,6 @@ namespace campvis {
         static const std::string loggerCat_;
 
     private:
-
-
-        static ImageRepresentationLocal* convertToGenericLocal(const AbstractImageRepresentation* source, const WeaklyTypedPointer& wtp);
 
         // We don't want this data to be copied - clone() must be enough
         // (read: We are too lazy to implement a correct copy constructor / assignment-operator)

@@ -40,6 +40,13 @@ namespace campvis {
         tgtAssert(_numChannels > 0 && _numChannels <= 4, "Number of channels out of bounds!");
     };
 
+    WeaklyTypedPointer::WeaklyTypedPointer()
+        : _baseType(UINT8)
+        , _numChannels(0)
+        , _pointer(0)
+    {
+    }
+
     WeaklyTypedPointer::~WeaklyTypedPointer() {
         // We do _not_ own the pointer, so we don't need to delete it.
     }
