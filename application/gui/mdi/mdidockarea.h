@@ -35,6 +35,8 @@
 
 #include <QMdiArea>
 
+class QSignalMapper;
+
 namespace campvis {
 
     /**
@@ -50,6 +52,13 @@ namespace campvis {
 
     public:
         /**
+         * Constructs an empty MDI area.
+         *
+         * \param parent the area's parent widget (passed to QMdiArea's constructor)
+         */
+        explicit MdiDockArea(QWidget* parent = 0);
+
+        /**
          * Wrap \p widget in an MDI window and dock it in the MDI area.
          *
          * This method creates a MdiDockedWindow wrapping the widget, and adds it to the MDI area.
@@ -59,6 +68,8 @@ namespace campvis {
          * \return the PipelineMdiSubWindow instance that was added to the MDI area
          */
         MdiDockedWindow* addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags = 0);
+
+        QMenu* menu();
 
     private slots:
         /**
@@ -74,6 +85,34 @@ namespace campvis {
          * This slot is invoked when the position of an MDI subwindow changes.
          */
         void trackMdiSubWindowsPosition(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
+
+        /**
+         * Display docked windows as sub-windows with window frames.
+         */
+        void switchToTiledDisplay();
+
+        /**
+         * Display docked windows with tabs in a tab bar.
+         */
+        void switchToTabbedDisplay();
+
+        /**
+         * Depending on the state of \p actionObject, show or hide its associated sub-window.
+         *
+         * \param actionObject the visibility action whose corresponding sub-window should be shown or hidden
+         */
+        void toggleSubWindowVisibility(QObject* actionObject);
+
+    private:
+        /**
+         * Add the given MdiDockedWindow to the MDI area.
+         *
+         * \param dockedWindow the docked window to add
+         */
+        void addDockedWindow(MdiDockedWindow* dockedWindow);
+
+        QMenu* _menu;                   ///< Menu with actions for controlling the MDI area and its subwindows.
+        QSignalMapper* _signalMapper;   ///< Helper used to pass extra information to toggleSubWindowVisibility.
 
     };
 }

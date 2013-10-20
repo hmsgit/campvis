@@ -136,6 +136,7 @@ namespace campvis {
         ui.logViewerDock->setWidget(_logViewer);
 
         _dcInspectorWidget = new DataContainerInspectorWidget();
+        this->populateMainMenu();
 
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
@@ -158,6 +159,14 @@ namespace campvis {
 
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
         _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
+    }
+
+    void MainWindow::populateMainMenu() {
+        QMenuBar* menuBar = this->menuBar();
+        QMenu* fileMenu = menuBar->addMenu(tr("&File"));
+        fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()), QKeySequence(Qt::CTRL + Qt::Key_Q));
+
+        menuBar->addMenu(_mdiArea->menu());
     }
 
     bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
