@@ -141,6 +141,9 @@ namespace campvis {
         _lblSize = new QLabel(tr("Size: "), _infoWidget);
         _infoWidgetLayout->addWidget(_lblSize);
 
+		_lblColor = new QLabel(tr("Color: n/a"), _infoWidget);
+		_infoWidgetLayout->addWidget(_lblColor);
+
         _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
         _infoWidgetLayout->addWidget(_lblBounds);
 
@@ -186,7 +189,6 @@ namespace campvis {
         for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
             if (! index->isValid())
                 continue;
-
             // get DataHandle and Handle name
             QVariant item = index->data(Qt::UserRole);
             QtDataHandle handle = item.value<QtDataHandle>();
@@ -215,11 +217,12 @@ namespace campvis {
                 ss.str("");
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+
             }
             else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
                 _lblSize->setText(tr("Size: n/a"));
 
-                std::ostringstream ss;
+				std::ostringstream ss;
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
             }
@@ -235,6 +238,18 @@ namespace campvis {
             }
 #endif
             else {
+
+				char bufferR[10];
+				char bufferG[10];
+				char bufferB[10];
+				tgt::Color color = _canvas->getCapturedColor();
+
+				itoa((int)(color.r * 255), bufferR, 10);
+				itoa((int)(color.g * 255), bufferG, 10);
+				itoa((int)(color.b * 255), bufferB, 10);
+
+				_lblColor->setText(QString("Color: ") + QString(bufferR) + QString(" ") + QString(bufferG) + QString(" ") + QString(bufferB));
+
                 _lblSize->setText(tr("Size: n/a"));
                 _lblBounds->setText(tr("World Bounds: n/a")); 
             }
@@ -271,7 +286,7 @@ namespace campvis {
 
     void DataContainerInspectorWidget::init() {
         if (_canvas != 0)
-            _canvas->init();
+            _canvas->init(this);
 
         _inited = true;
     }
