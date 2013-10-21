@@ -245,19 +245,23 @@ namespace campvis {
         e->ignore();
         invalidate();*/
 
-		tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);	
+		if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT)
+		{
 
-		if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y)
-			return;
+			tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);	
 
-		int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
+			if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y)
+				return;
+
+			int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
 		
-		int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * _textures[texIndx]->getWidth();
-		int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * _textures[texIndx]->getHeight();
+			int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * _textures[texIndx]->getWidth();
+			int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * _textures[texIndx]->getHeight();
 
-		_color = _textures[texIndx]->texelAsFloat(cursorPosX, cursorPosY);
+			_color = _textures[texIndx]->texelAsFloat(cursorPosX, cursorPosY);
 
-		_widget->updateInfoWidget();
+			_widget->updateInfoWidget();
+		}
     }
 
     void DataContainerInspectorCanvas::wheelEvent(tgt::MouseEvent* e) {
