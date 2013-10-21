@@ -57,6 +57,7 @@ namespace campvis {
     class DataContainerTreeWidget;
     class DataHandle;
     class FaceGeometry;
+	class DataContainerInspectorWidget;
 
     class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public tgt::EventListener, public HasPropertyCollection {
         Q_OBJECT;
@@ -77,7 +78,7 @@ namespace campvis {
          * Initializes the OpenGL stuff (e.g. shaders).
          * Must be called with a valid and locked OpenGL context.
          */
-        virtual void init();
+		virtual void init(DataContainerInspectorWidget* _pWidget);
 
         /**
          * Deinitializes the OpenGL stuff (e.g. shaders).
@@ -86,6 +87,7 @@ namespace campvis {
         void deinit();
 
         void setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles);
+		tgt::Color getCapturedColor();
 
         /**
          * Size hint for the default window size
@@ -106,6 +108,12 @@ namespace campvis {
          * \param   e   Mouse event arguments
          */
         virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
+
+		/**
+         * Called on mouse move event on this canvas
+         * \param   e   Mouse event arguments
+         */
+		virtual void mousePressEvent(tgt::MouseEvent* e);
 
         /**
          * Called on mouse wheel even on this canvas.
@@ -176,6 +184,9 @@ namespace campvis {
 
         tgt::Shader* _paintShader;                      ///< GLSL shader for rendering the textures
         FaceGeometry* _quad;                            ///< Quad used for rendering
+
+		tgt::Color _color;								///< Color under the mouse cursor
+		DataContainerInspectorWidget* _widget;			///< Pointer to the widget which has access to this canvas
 
         tgt::ivec2 _numTiles;                           ///< number of tiles on texture overview
         tgt::ivec2 _quadSize;                           ///< size in pixels for each tile in overview

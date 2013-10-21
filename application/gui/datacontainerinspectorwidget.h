@@ -89,6 +89,11 @@ namespace campvis {
          */
         void onDataContainerDataAdded(const std::string&, const DataHandle&);
 
+		void mousePressEvent(QMouseEvent*)
+		{
+			updateInfoWidget();
+		}
+
         /**
          * Size hint for the default window size
          * \return QSize(640, 480)
@@ -106,6 +111,11 @@ namespace campvis {
          * Must be called with a valid and locked OpenGL context.
          */
         void deinit();
+
+		/**
+         * Updates _infoWidget
+         */
+        void updateInfoWidget();
 
     signals:
         void dataContainerChanged(const QString&, QtDataHandle);
@@ -129,11 +139,6 @@ namespace campvis {
          * Setup the GUI stuff
          */
         void setupGUI();
-
-        /**
-         * Updates _infoWidget
-         */
-        void updateInfoWidget();
 
         /**
          * Saves the Image in \a handle to the file \a filename.
@@ -168,6 +173,7 @@ namespace campvis {
         QLabel* _lblTimestamp;
         QLabel* _lblSize;
         QLabel* _lblBounds;
+		QLabel* _lblColor;
         QPushButton* _btnSaveToFile;
 
         static const std::string loggerCat_;

@@ -42,6 +42,8 @@
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
 
+#include "datacontainerinspectorwidget.h"
+
 
 namespace campvis {
 
@@ -57,6 +59,7 @@ namespace campvis {
         , _selectedTexture(0)
         , _renderFullscreen(false)
         , _currentSlice(-1)
+		, _color(0.0f, 0.0f, 0.0f, 0.0f)
     {
         static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
 
@@ -78,8 +81,10 @@ namespace campvis {
 
     }
 
-    void DataContainerInspectorCanvas::init() {
+    void DataContainerInspectorCanvas::init(DataContainerInspectorWidget* _pWidget) {
         initAllProperties();
+
+		_widget = _pWidget;
 
         GLJobProc.registerContext(this);
         _paintShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "", false);
@@ -231,6 +236,34 @@ namespace campvis {
         invalidate();
     }
 
+	void DataContainerInspectorCanvas::mousePressEvent(tgt::MouseEvent* e)
+	{
+        /*if (_renderFullscreen) {
+            _renderFullscreen = false;
+        }
+        else {
+            tgt::ivec2 selectedIndex(e->x() / _quadSize.x, e->y() / _quadSize.y);
+            _selectedTexture = (selectedIndex.y * _numTiles.x) + selectedIndex.x;
+            _renderFullscreen = true;
+        }
+        e->ignore();
+        invalidate();*/
+
+		tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);	
+
+		if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y)
+			return;
+
+		int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
+		
+		int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * _textures[texIndx]->getWidth();
+		int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * _textures[texIndx]->getHeight();
+
+		_color = _textures[texIndx]->texelAsFloat(cursorPosX, cursorPosY);
+
+		_widget->updateInfoWidget();
+    }
+
     void DataContainerInspectorCanvas::wheelEvent(tgt::MouseEvent* e) {
         if (_renderFullscreen) {
             switch (e->button()) {
@@ -284,8 +317,16 @@ namespace campvis {
         invalidate();
     }
 
+	tgt::Color DataContainerInspectorCanvas::getCapturedColor()
+	{
+		return _color;
+	}
+
     void DataContainerInspectorCanvas::updateTextures() {
+		/// Clear the textures Array
         _textures.clear();
+
+		/// Calculate the maximum slices of the textures and fill the textures array
         int maxSlices = 1;
         for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
             if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {

@@ -261,6 +261,9 @@ namespace campvis {
     }
 
     const tgt::Texture* ImageRepresentationGL::getTexture() const {
+
+		_texture->downloadTexture();
+
         return _texture;
     }
 
