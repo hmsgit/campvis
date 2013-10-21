@@ -236,7 +236,7 @@ namespace campvis {
         invalidate();
     }
 
-	void DataContainerInspectorCanvas::mousePressEvent(tgt::MouseEvent* e)
+	void DataContainerInspectorCanvas::mouseMoveEvent(tgt::MouseEvent* e)
 	{
         /*if (_renderFullscreen) {
             _renderFullscreen = false;
@@ -248,6 +248,12 @@ namespace campvis {
         }
         e->ignore();
         invalidate();*/
+		static clock_t lastRunTime = clock();
+		if(!(clock() - lastRunTime > 0))
+		{
+			return;
+		}
+		lastRunTime = clock();
 
 		if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT)
 		{
@@ -258,13 +264,21 @@ namespace campvis {
 				return;
 
 			int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
-		
-			int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * _textures[texIndx]->getWidth();
-			int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * _textures[texIndx]->getHeight();
+			
+			const tgt::Texture* test = _textures[texIndx];
+
+			int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * test->getWidth();
+			int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * test->getHeight();
+
+			int a = 0;
+			if(texIndx > 1)
+			{
+				 a= 1;
+			}
 
 			_color = _textures[texIndx]->texelAsFloat(cursorPosX, cursorPosY);
-
-			_widget->updateInfoWidget();
+			
+			_widget->updateColor();
 		}
     }
 
