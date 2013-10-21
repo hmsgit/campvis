@@ -175,6 +175,20 @@ namespace campvis {
             this, SLOT(onBtnSaveToFileClicked()));
     }
 
+	void DataContainerInspectorWidget::updateColor(){
+
+		char bufferR[10];
+		char bufferG[10];
+		char bufferB[10];
+		tgt::Color color = _canvas->getCapturedColor();
+
+		itoa((int)(color.r * 255), bufferR, 10);
+		itoa((int)(color.g * 255), bufferG, 10);
+		itoa((int)(color.b * 255), bufferB, 10);
+
+		_lblColor->setText(QString("Color: ") + QString(bufferR) + QString(" ") + QString(bufferG) + QString(" ") + QString(bufferB));
+	}
+
     void DataContainerInspectorWidget::updateInfoWidget() {
         if (!_inited)
             return;
@@ -225,6 +239,8 @@ namespace campvis {
 				std::ostringstream ss;
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+
+				//tester->render();
             }
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
             else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
@@ -239,18 +255,7 @@ namespace campvis {
 #endif
             else {
 
-				char bufferR[10];
-				char bufferG[10];
-				char bufferB[10];
-				tgt::Color color = _canvas->getCapturedColor();
-
-				itoa((int)(color.r * 255), bufferR, 10);
-				itoa((int)(color.g * 255), bufferG, 10);
-				itoa((int)(color.b * 255), bufferB, 10);
-
-				_lblColor->setText(QString("Color: ") + QString(bufferR) + QString(" ") + QString(bufferG) + QString(" ") + QString(bufferB));
-
-                _lblSize->setText(tr("Size: n/a"));
+				_lblSize->setText(tr("Size: n/a"));
                 _lblBounds->setText(tr("World Bounds: n/a")); 
             }
         }

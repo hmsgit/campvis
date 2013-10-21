@@ -113,9 +113,9 @@ namespace campvis {
         void deinit();
 
 		/**
-         * Updates _infoWidget
+         * Updates color of the info widget
          */
-        void updateInfoWidget();
+        void updateColor();
 
     signals:
         void dataContainerChanged(const QString&, QtDataHandle);
@@ -154,6 +154,11 @@ namespace campvis {
          * \return  "numBytes/1024^n [KMG]Bytes
          */
         QString humanizeBytes(size_t numBytes) const;
+
+		/**
+         * Updates _infoWidget
+         */
+        void updateInfoWidget();
 
         bool _inited;
 

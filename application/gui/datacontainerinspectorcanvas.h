@@ -113,7 +113,7 @@ namespace campvis {
          * Called on mouse move event on this canvas
          * \param   e   Mouse event arguments
          */
-		virtual void mousePressEvent(tgt::MouseEvent* e);
+		virtual void mouseMoveEvent(tgt::MouseEvent* e);
 
         /**
          * Called on mouse wheel even on this canvas.
