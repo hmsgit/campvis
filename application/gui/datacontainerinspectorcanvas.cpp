@@ -60,7 +60,7 @@ namespace campvis {
         , _selectedTexture(0)
         , _renderFullscreen(false)
         , _currentSlice(-1)
-		, _color(0.0f, 0.0f, 0.0f, 0.0f)
+        , _color(0.0f, 0.0f, 0.0f, 0.0f)
     {
         static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
 
@@ -85,7 +85,7 @@ namespace campvis {
     void DataContainerInspectorCanvas::init(DataContainerInspectorWidget* _pWidget) {
         initAllProperties();
 
-		_widget = _pWidget;
+        _widget = _pWidget;
 
         GLJobProc.registerContext(this);
         _paintShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "", false);
@@ -237,8 +237,8 @@ namespace campvis {
         invalidate();
     }
 
-	void DataContainerInspectorCanvas::mouseMoveEvent(tgt::MouseEvent* e)
-	{
+    void DataContainerInspectorCanvas::mouseMoveEvent(tgt::MouseEvent* e)
+    {
         /*if (_renderFullscreen) {
             _renderFullscreen = false;
         }
@@ -249,33 +249,24 @@ namespace campvis {
         }
         e->ignore();
         invalidate();*/
-		static clock_t lastRunTime = clock();
-		if(!(clock() - lastRunTime > 0))
-		{
-			return;
-		}
-		
-		if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT)
-		{
+        
+        if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT)
+        {
 
-			tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);	
+            tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);    
+            if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y || e->x() < 0 || e->y() < 0)
+                return;
 
-			if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y || e->x() < 0 || e->y() < 0)
-				return;
-
-			int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
-			
-			const tgt::Texture* texturePtr = _textures[texIndx];
-			const int texWidth  = texturePtr->getWidth();
-			const int texHeight = texturePtr->getHeight();
-
-			int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * texWidth;
-			int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * texHeight;
-
-			_color = _textures[texIndx]->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1);
-			
-			_widget->updateColor();
-		}
+            int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
+            const tgt::Texture* texturePtr = _textures[texIndx];
+            const int texWidth  = texturePtr->getWidth();
+            const int texHeight = texturePtr->getHeight();
+            int cursorPosX = static_cast<int>(static_cast<float>(e->x() % _quadSize.x) / _quadSize.x * texWidth);
+            int cursorPosY = static_cast<int>(static_cast<float>(e->y() % _quadSize.y) / _quadSize.y * texHeight);
+            _color = _textures[texIndx]->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1);
+            
+            _widget->updateColor();
+        }
     }
 
     void DataContainerInspectorCanvas::wheelEvent(tgt::MouseEvent* e) {
@@ -331,16 +322,16 @@ namespace campvis {
         invalidate();
     }
 
-	tgt::Color DataContainerInspectorCanvas::getCapturedColor()
-	{
-		return _color;
-	}
+    const tgt::Color& DataContainerInspectorCanvas::getCapturedColor()
+    {
+        return _color;
+    }
 
     void DataContainerInspectorCanvas::updateTextures() {
-		/// Clear the textures Array
+        /// Clear the textures Array
         _textures.clear();
 
-		/// Calculate the maximum slices of the textures and fill the textures array
+        /// Calculate the maximum slices of the textures and fill the textures array
         int maxSlices = 1;
         for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
             if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
@@ -353,22 +344,28 @@ namespace campvis {
                 for (size_t i = 0; i < rd->getNumColorTextures(); ++i) {
                     const ImageRepresentationGL* imgGL = rd->getColorTexture(i)->getRepresentation<ImageRepresentationGL>();
                     if (imgGL)
+                    {
+                        imgGL->downloadTexture();
                         _textures.push_back(imgGL->getTexture());
+                    }
                 }
                 if (rd->hasDepthTexture()) {
                     const ImageRepresentationGL* imgGL = rd->getDepthTexture()->getRepresentation<ImageRepresentationGL>();
                     if (imgGL)
+                    {
+                        imgGL->downloadTexture();
                         _textures.push_back(imgGL->getTexture());
+                    }
 
                 }
             }
-			else if(const campvis::MeshGeometry* mg = dynamic_cast<const campvis::MeshGeometry*>(it->second.getData())){
+            else if(const campvis::MeshGeometry* mg = dynamic_cast<const campvis::MeshGeometry*>(it->second.getData())){
 
-				// Here the object will be rendered into a texture and the texture will be shown on the output buffer.
+                // Here the object will be rendered into a texture and the texture will be shown on the output buffer.
 
-				//mg->render(GL_POLYGON);
-				//const tgt::BufferObject* buffer = mg->getColorsBuffer();
-			}
+                //mg->render(GL_POLYGON);
+                //const tgt::BufferObject* buffer = mg->getColorsBuffer();
+            }
         }
 
         if (maxSlices == 1)

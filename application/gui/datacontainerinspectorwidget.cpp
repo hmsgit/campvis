@@ -141,32 +141,27 @@ namespace campvis {
         _lblSize = new QLabel(tr("Size: "), _infoWidget);
         _infoWidgetLayout->addWidget(_lblSize);
 
-		
-		_wdgtColor = new QWidget(this);
-		//_lblColor = new QLabel(tr("Color:"), _wdgtColor);
-		_lblColorVal = new QLabel(tr("Color: n/a"), _wdgtColor);
-		
-		_wdgtColorVal = new QWidget(this);
-		_wdgtColorVal->setAutoFillBackground(true);
-		_wdgtColorVal->setFixedSize(16, 16);
-		
-		_wdgtColorValPalette = new QPalette(palette());
-		_wdgtColorValPalette->setColor(QPalette::ColorRole::Background, Qt::gray);
-		_wdgtColorVal->setPalette(*(_wdgtColorValPalette));
-		
-		
-		_wdgtColorLayout = new QHBoxLayout();
-		_wdgtColorLayout->setSpacing(0);
-		_wdgtColorLayout->setMargin(0);
-		//_wdgtColorLayout->setAlignment(Qt::Alignment::enum_type::AlignLeft);
-		_wdgtColor->setLayout(_wdgtColorLayout);
-		
-		//_wdgtColorLayout->addWidget(_lblColor);
-		_wdgtColorLayout->addWidget(_lblColorVal);
-		_wdgtColorLayout->addWidget(_wdgtColorVal);
+        _colorWidget = new QWidget(this);
+        _lblColorVal = new QLabel(tr("Color: n/a"), _colorWidget);
+        
+        _colorValWidget = new QWidget(_colorWidget);
+        _colorValWidget->setAutoFillBackground(true);
+        _colorValWidget->setFixedSize(16, 16);
+        
+        _ColorValWidgetPalette = new QPalette(palette());
+        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, Qt::gray);
+        _colorValWidget->setPalette(*(_ColorValWidgetPalette));
+        
+        _colorWidgetLayout = new QHBoxLayout();
+        _colorWidgetLayout->setSpacing(0);
+        _colorWidgetLayout->setMargin(0);
+        _colorWidget->setLayout(_colorWidgetLayout);
+        
+        _colorWidgetLayout->addWidget(_lblColorVal);
+        _colorWidgetLayout->addWidget(_colorValWidget);
 
-		_infoWidgetLayout->addWidget(_wdgtColor);
-		
+        _infoWidgetLayout->addWidget(_colorWidget);
+        
         _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
         _infoWidgetLayout->addWidget(_lblBounds);
 
@@ -198,24 +193,15 @@ namespace campvis {
             this, SLOT(onBtnSaveToFileClicked()));
     }
 
-	void DataContainerInspectorWidget::updateColor(){
+    void DataContainerInspectorWidget::updateColor(){
 
-		char bufferR[10];
-		char bufferG[10];
-		char bufferB[10];
-		tgt::Color color = _canvas->getCapturedColor();
+        const tgt::Color color = _canvas->getCapturedColor();
 
-		itoa((int)(color.r * 255), bufferR, 10);
-		itoa((int)(color.g * 255), bufferG, 10);
-		itoa((int)(color.b * 255), bufferB, 10);
-
-		_lblColorVal->setText(QString("Color: R = ") + QString(bufferR) + QString(" G = ") + QString(bufferG) + QString(" B = ") + QString(bufferB));
-		QColor qtColor;
-		qtColor.setRgb(color.r * 255, color.g * 255, color.b * 255);
-		
-		_wdgtColorValPalette->setColor(QPalette::ColorRole::Background, qtColor);
-		_wdgtColorVal->setPalette(*_wdgtColorValPalette);
-	}
+        _lblColorVal->setText(QString("Color: R = %1 G = %2 B = %3").arg(QString::number(static_cast<int>(color.r * 255)), QString::number(static_cast<int>(color.g * 255)), QString::number(static_cast<int>(color.b * 255))));
+        
+        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, QColor(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255), static_cast<int>(color.b * 255)));
+        _colorValWidget->setPalette(*_ColorValWidgetPalette);
+    }
 
     void DataContainerInspectorWidget::updateInfoWidget() {
         if (!_inited)
@@ -264,11 +250,11 @@ namespace campvis {
             else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
                 _lblSize->setText(tr("Size: n/a"));
 
-				std::ostringstream ss;
+                std::ostringstream ss;
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
 
-				//tester->render();
+                //tester->render();
             }
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
@@ -299,7 +285,7 @@ namespace campvis {
 #endif
             else {
 
-				_lblSize->setText(tr("Size: n/a"));
+                _lblSize->setText(tr("Size: n/a"));
                 _lblBounds->setText(tr("World Bounds: n/a")); 
             }
         }
