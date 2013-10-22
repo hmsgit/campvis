@@ -89,10 +89,10 @@ namespace campvis {
          */
         void onDataContainerDataAdded(const std::string&, const DataHandle&);
 
-		void mousePressEvent(QMouseEvent*)
-		{
-			updateInfoWidget();
-		}
+        void mousePressEvent(QMouseEvent*)
+        {
+            updateInfoWidget();
+        }
 
         /**
          * Size hint for the default window size
@@ -112,7 +112,7 @@ namespace campvis {
          */
         void deinit();
 
-		/**
+        /**
          * Updates color of the info widget
          */
         void updateColor();
@@ -155,7 +155,7 @@ namespace campvis {
          */
         QString humanizeBytes(size_t numBytes) const;
 
-		/**
+        /**
          * Updates _infoWidget
          */
         void updateInfoWidget();
@@ -178,11 +178,11 @@ namespace campvis {
         QLabel*  _lblTimestamp;
         QLabel*  _lblSize;
         QLabel*  _lblBounds;
-		QWidget* _wdgtColor;							///< The widget use to show the color value and the color in a single window
-		QHBoxLayout* _wdgtColorLayout;					///< Layout for the following widget
-		QLabel*  _lblColorVal;							///< Color Label Value in text
-		QWidget* _wdgtColorVal;							///< Widget that shows the color value in color
-		QPalette* _wdgtColorValPalette;					///< Palette which will be used to colorize the color widget
+        QWidget* _colorWidget;                            ///< The widget use to show the color value and the color in a single window
+        QHBoxLayout* _colorWidgetLayout;                ///< Layout for the following widget
+        QLabel*  _lblColorVal;                            ///< Color Label Value in text
+        QWidget* _colorValWidget;                        ///< Widget that shows the color value in color
+        QPalette* _ColorValWidgetPalette;                ///< Palette which will be used to colorize the color widget
         QPushButton* _btnSaveToFile;
 
         static const std::string loggerCat_;
