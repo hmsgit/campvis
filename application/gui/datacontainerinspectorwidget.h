@@ -172,13 +172,17 @@ namespace campvis {
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
         QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
 
-        QLabel* _lblName;
-        QLabel* _lblLocalMemoryFootprint;
-        QLabel* _lblVideoMemoryFootprint;
-        QLabel* _lblTimestamp;
-        QLabel* _lblSize;
-        QLabel* _lblBounds;
-		QLabel* _lblColor;
+        QLabel*  _lblName;
+        QLabel*  _lblLocalMemoryFootprint;
+        QLabel*  _lblVideoMemoryFootprint;
+        QLabel*  _lblTimestamp;
+        QLabel*  _lblSize;
+        QLabel*  _lblBounds;
+		QWidget* _wdgtColor;							///< The widget use to show the color value and the color in a single window
+		QHBoxLayout* _wdgtColorLayout;					///< Layout for the following widget
+		QLabel*  _lblColorVal;							///< Color Label Value in text
+		QWidget* _wdgtColorVal;							///< Widget that shows the color value in color
+		QPalette* _wdgtColorValPalette;					///< Palette which will be used to colorize the color widget
         QPushButton* _btnSaveToFile;
 
         static const std::string loggerCat_;

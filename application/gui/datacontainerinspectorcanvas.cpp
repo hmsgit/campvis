@@ -38,6 +38,7 @@
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
+#include "core/datastructures/meshgeometry.h"
 #include "core/tools/job.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
@@ -249,30 +250,25 @@ namespace campvis {
 		{
 			return;
 		}
-		lastRunTime = clock();
-
+		
 		if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT)
 		{
 
 			tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);	
 
-			if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y)
+			if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y || e->x() < 0 || e->y() < 0)
 				return;
 
 			int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
 			
-			const tgt::Texture* test = _textures[texIndx];
+			const tgt::Texture* texturePtr = _textures[texIndx];
+			const int texWidth  = texturePtr->getWidth();
+			const int texHeight = texturePtr->getHeight();
 
-			int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * test->getWidth();
-			int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * test->getHeight();
+			int cursorPosX = (float)(e->x() % _quadSize.x) / _quadSize.x * texWidth;
+			int cursorPosY = (float)(e->y() % _quadSize.y) / _quadSize.y * texHeight;
 
-			int a = 0;
-			if(texIndx > 1)
-			{
-				 a= 1;
-			}
-
-			_color = _textures[texIndx]->texelAsFloat(cursorPosX, cursorPosY);
+			_color = _textures[texIndx]->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1);
 			
 			_widget->updateColor();
 		}
@@ -360,6 +356,13 @@ namespace campvis {
 
                 }
             }
+			else if(const campvis::MeshGeometry* mg = dynamic_cast<const campvis::MeshGeometry*>(it->second.getData())){
+
+				// Here the object will be rendered into a texture and the texture will be shown on the output buffer.
+
+				//mg->render(GL_POLYGON);
+				//const tgt::BufferObject* buffer = mg->getColorsBuffer();
+			}
         }
 
         if (maxSlices == 1)
