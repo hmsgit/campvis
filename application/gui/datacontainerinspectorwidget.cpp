@@ -141,9 +141,32 @@ namespace campvis {
         _lblSize = new QLabel(tr("Size: "), _infoWidget);
         _infoWidgetLayout->addWidget(_lblSize);
 
-		_lblColor = new QLabel(tr("Color: n/a"), _infoWidget);
-		_infoWidgetLayout->addWidget(_lblColor);
+		
+		_wdgtColor = new QWidget(this);
+		//_lblColor = new QLabel(tr("Color:"), _wdgtColor);
+		_lblColorVal = new QLabel(tr("Color: n/a"), _wdgtColor);
+		
+		_wdgtColorVal = new QWidget(this);
+		_wdgtColorVal->setAutoFillBackground(true);
+		_wdgtColorVal->setFixedSize(16, 16);
+		
+		_wdgtColorValPalette = new QPalette(palette());
+		_wdgtColorValPalette->setColor(QPalette::ColorRole::Background, Qt::gray);
+		_wdgtColorVal->setPalette(*(_wdgtColorValPalette));
+		
+		
+		_wdgtColorLayout = new QHBoxLayout();
+		_wdgtColorLayout->setSpacing(0);
+		_wdgtColorLayout->setMargin(0);
+		//_wdgtColorLayout->setAlignment(Qt::Alignment::enum_type::AlignLeft);
+		_wdgtColor->setLayout(_wdgtColorLayout);
+		
+		//_wdgtColorLayout->addWidget(_lblColor);
+		_wdgtColorLayout->addWidget(_lblColorVal);
+		_wdgtColorLayout->addWidget(_wdgtColorVal);
 
+		_infoWidgetLayout->addWidget(_wdgtColor);
+		
         _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
         _infoWidgetLayout->addWidget(_lblBounds);
 
@@ -186,7 +209,12 @@ namespace campvis {
 		itoa((int)(color.g * 255), bufferG, 10);
 		itoa((int)(color.b * 255), bufferB, 10);
 
-		_lblColor->setText(QString("Color: ") + QString(bufferR) + QString(" ") + QString(bufferG) + QString(" ") + QString(bufferB));
+		_lblColorVal->setText(QString("Color: R = ") + QString(bufferR) + QString(" G = ") + QString(bufferG) + QString(" B = ") + QString(bufferB));
+		QColor qtColor;
+		qtColor.setRgb(color.r * 255, color.g * 255, color.b * 255);
+		
+		_wdgtColorValPalette->setColor(QPalette::ColorRole::Background, qtColor);
+		_wdgtColorVal->setPalette(*_wdgtColorValPalette);
 	}
 
     void DataContainerInspectorWidget::updateInfoWidget() {
