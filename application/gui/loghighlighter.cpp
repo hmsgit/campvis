@@ -89,7 +89,6 @@ namespace campvis {
     LogHighlighter::~LogHighlighter() {
         delete _filterRegExp;
         delete _logLevelRegExp;
-        setFilterRegExp(0);
     }
 
     void LogHighlighter::setFilterRegExp(const QRegExp* filterRegExp) {
