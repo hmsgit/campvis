@@ -68,12 +68,12 @@ namespace campvis {
         std::vector<KeyPoint>::const_iterator a = _keyPoints.begin();
         std::vector<KeyPoint>::const_iterator b = _keyPoints.begin()+1;
         for (/* already inited */; b != _keyPoints.end(); ++a, ++b) {
-            glColor4ubv(a->_color.elem);
+            glColor4ub(a->_color.r, a->_color.g, a->_color.b, 144);
             float y = static_cast<float>(a->_color.a) / 255.f;
             glVertex2f(a->_position, 0.f);
             glVertex2f(a->_position, y);
 
-            glColor4ubv(b->_color.elem);
+            glColor4ub(b->_color.r, b->_color.g, b->_color.b, 144);
             y = static_cast<float>(b->_color.a) / 255.f;
             glVertex2f(b->_position, y);
             glVertex2f(b->_position, 0.f);

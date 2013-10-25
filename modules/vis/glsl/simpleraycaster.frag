@@ -84,6 +84,9 @@ const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
     float firstHitT = -1.0;
+#ifdef ENABLE_ADAPTIVE_STEPSIZE
+    float samplingRateCompensationMultiplier = 1.0;
+#endif
 
     // calculate ray parameters
     vec3 direction = exitPoint.rgb - entryPoint.rgb;
@@ -169,8 +172,13 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
             color.rgb = calculatePhongShading(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
 #endif
+
             // accomodate for variable sampling rates
+#ifdef ENABLE_ADAPTIVE_STEPSIZE
+            color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * samplingRateCompensationMultiplier * SAMPLING_BASE_INTERVAL_RCP);
+#else
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
+#endif
             result.rgb = mix(color.rgb, result.rgb, result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
         }
@@ -188,8 +196,11 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             t = tend;
         }
 
+        // advance to the next evaluation point along the ray
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
+        samplingRateCompensationMultiplier = (_inVoid ? 1.0 : 0.25);
         t += _samplingStepSize * (_inVoid ? 1.0 : 0.125);
+        
 #else
         t += _samplingStepSize;
 #endif

@@ -67,6 +67,7 @@ namespace campvis {
 
         tbb::spin_mutex::scoped_lock lock(_localMutex);
         _sharedProperties.insert(prop);
+        s_changed.connect(this, &AbstractProperty::onChanged);
     }
 
     void AbstractProperty::removeSharedProperty(AbstractProperty* prop) {
@@ -102,6 +103,13 @@ namespace campvis {
     void AbstractProperty::setVisible(bool isVisible) {
         _isVisible = isVisible;
         s_visibilityChanged(this);
+    }
+
+    void AbstractProperty::onChanged(const AbstractProperty* prop) {
+        //tbb::spin_mutex::scoped_lock lock(_localMutex);
+        for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
+            (*it)->s_changed(prop);
+        }
     }
 
 }

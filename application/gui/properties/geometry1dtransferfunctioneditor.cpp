@@ -114,15 +114,7 @@ namespace campvis {
         glClearColor(1.f, 1.f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         LGL_ERROR;
-
-        // renderIntoEditor TF geometries
-        {
-            tbb::mutex::scoped_lock lock(_localMutex);
-            for (std::vector<TFGeometry1D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
-                (*it)->renderIntoEditor();
-            }
-        }
-
+        
         // render histogram if existent
         const AbstractTransferFunction::IntensityHistogramType* ih = gtf->getIntensityHistogram();
         if (ih != 0) {
@@ -157,6 +149,14 @@ namespace campvis {
                     yl = yr;
                 }
                 glEnd();
+            }
+        }
+
+        // render TF geometries
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            for (std::vector<TFGeometry1D*>::const_iterator it = geometries.begin(); it != geometries.end(); ++it) {
+                (*it)->renderIntoEditor();
             }
         }
 
@@ -203,6 +203,8 @@ namespace campvis {
 
     void Geometry1DTransferFunctionEditor::mousePressEvent(tgt::MouseEvent* e) {
         if (_selectedGeometry != 0 && e->modifiers() & tgt::Event::CTRL) {
+            tbb::mutex::scoped_lock lock(_localMutex);
+
             // add a control point on CTRL+Click
             TFGeometry1D* g = _selectedGeometry->getGeometry();
             std::vector<TFGeometry1D::KeyPoint>& kpts = g->getKeyPoints();
@@ -218,6 +220,7 @@ namespace campvis {
             kp._color.a = static_cast<uint8_t>(alpha * 255.f);
             kpts.insert(lb, kp);
             updateManipulators();
+
             g->s_changed();
         }
         else {

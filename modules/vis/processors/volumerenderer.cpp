@@ -53,7 +53,6 @@ namespace campvis {
         , _raycaster(viewportSizeProp)
     {
         addProperty(&p_inputVolume);
-//         addProperty(&p_camera);
         addProperty(&_raycaster.p_transferFunction);
         addProperty(&p_outputImage);
 
@@ -117,10 +116,6 @@ namespace campvis {
         _pgGenerator.deinit();
         _eepGenerator.deinit();
         _raycaster.deinit();
-
-        removeProperty(&_raycaster.p_transferFunction);
-        removeProperty(&_raycaster.p_samplingRate);
-        removeProperty(_raycaster.getProperty("CentralDifferences"));
 
         VisualizationProcessor::deinit();
     }

@@ -32,14 +32,21 @@
 
 #include "tgt/textureunit.h"
 #include "core/pipeline/abstractprocessordecorator.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
 #include "core/properties/floatingpointproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/optionproperty.h"
 
 namespace campvis {
 
     class ProcessorDecoratorShading : public AbstractProcessorDecorator {
     public:
+        /// Method for online-calculating gradients
+        enum GradientMethod {
+            ForwardDifferences,
+            CentralDifferences,
+            FilteredCentralDifferences
+        };
+
         explicit ProcessorDecoratorShading(const std::string& lightUniformName = "_lightSource");
         virtual ~ProcessorDecoratorShading();
 
@@ -51,7 +58,7 @@ namespace campvis {
         std::string generateHeader() const;
 
         BoolProperty _enableShading;        ///< Flag whether to enable shading;
-        BoolProperty _centralDifferences;   ///< Use central instead of forward-differences for gradient calculation
+        GenericOptionProperty<GradientMethod> _gradientMethod;  ///< Method for calculating the gradients
         Vec3Property _lightPosition;        ///< Light position
         Vec3Property _ambientColor;         ///< Ambient light color
         Vec3Property _diffuseColor;         ///< Diffuse light color
