@@ -162,11 +162,21 @@ namespace campvis {
     }
 
     void MainWindow::populateMainMenu() {
+        // Populate the file menu
         QMenuBar* menuBar = this->menuBar();
         QMenu* fileMenu = menuBar->addMenu(tr("&File"));
         fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()), QKeySequence(Qt::CTRL + Qt::Key_Q));
 
-        menuBar->addMenu(_mdiArea->menu());
+        // Populate the visualizations menu
+        QMenu* visualizationsMenu = _mdiArea->menu();
+        visualizationsMenu->setTitle(tr("&Visualizations"));
+        menuBar->addMenu(visualizationsMenu);
+
+        // Populate the tools menu
+        QMenu* toolsMenu = menuBar->addMenu(tr("&Tools"));
+        toolsMenu->addAction(ui.pipelineTreeDock->toggleViewAction());
+        toolsMenu->addAction(ui.pipelinePropertiesDock->toggleViewAction());
+        toolsMenu->addAction(ui.logViewerDock->toggleViewAction());
     }
 
     bool MainWindow::eventFilter(QObject* watched, QEvent* event) {

@@ -46,7 +46,7 @@ namespace campvis {
         this->setDocumentMode(true);
 
         // Menu setup
-        _menu = new QMenu(tr("&Visualizations"));
+        _menu = new QMenu(this);
         QActionGroup* displayStyleActions = new QActionGroup(this);
 
         QAction* displayTiledAction = displayStyleActions->addAction(tr("Display tiled"));
