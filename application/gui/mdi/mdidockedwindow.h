@@ -79,6 +79,11 @@ namespace campvis {
          */
         void s_positionChanged(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
 
+        /**
+         * Emitted when the window gets closed.
+         */
+        void s_closed(MdiDockedWindow* mdiSubWindow);
+
     protected:
         /**
          * Event handler that receives mouse move events for the window.
@@ -89,6 +94,11 @@ namespace campvis {
          * Event handler that receives mouse release events for the window.
          */
         virtual void mouseReleaseEvent(QMouseEvent * event);
+
+        /**
+         * Event handler called when Qt receives a window close request for the window.
+         */
+        virtual void closeEvent(QCloseEvent* event);
 
     private:
         bool _dragActive;            ///< Is the window currently being dragged?

@@ -41,6 +41,8 @@ namespace campvis {
         , _signalMapper(0)
     {
         _signalMapper = new QSignalMapper(this);
+        connect(_signalMapper, SIGNAL(mapped(QObject*)), SLOT(toggleSubWindowVisibility(QObject*)));
+
         this->setTabsClosable(true);
         this->setTabsMovable(true);
         this->setDocumentMode(true);
@@ -80,7 +82,6 @@ namespace campvis {
 
         connect(visibilityAction, SIGNAL(triggered()), _signalMapper, SLOT(map()));
         _signalMapper->setMapping(visibilityAction, visibilityAction);
-        connect(_signalMapper, SIGNAL(mapped(QObject*)), SLOT(toggleSubWindowVisibility(QObject*)));
 
         return dockedWindow;
     }
@@ -95,6 +96,7 @@ namespace campvis {
 
         connect(dockedWindow, SIGNAL(s_positionChanged(MdiDockedWindow*, const QPoint&)),
                 SLOT(trackMdiSubWindowsPosition(MdiDockedWindow*, const QPoint&)));
+        connect(dockedWindow, SIGNAL(s_closed(MdiDockedWindow*)), SLOT(handleDockedWindowClosing(MdiDockedWindow*)));
     }
 
     void MdiDockArea::toggleSubWindowVisibility(QObject* actionObject) {
@@ -108,8 +110,12 @@ namespace campvis {
         if (MdiDockedWindow* dockedWindow = dynamic_cast<MdiDockedWindow*>(windowWidget)) {
             if (visibilityAction->isChecked())
                 this->addDockedWindow(dockedWindow);
-            else
+            else {
+                if (this->activeSubWindow() == dockedWindow)
+                    this->activateNextSubWindow();
+
                 this->removeSubWindow(dockedWindow);
+            }
 
             // Calling tileSubWindows() in TabbedView mode breaks the tabbed display
             if (this->viewMode() == QMdiArea::SubWindowView)
@@ -122,6 +128,13 @@ namespace campvis {
         }
         else
             tgtAssert(false, "Widget's parent is of unsupported type.");
+    }
+
+    void MdiDockArea::handleDockedWindowClosing(MdiDockedWindow* dockedWindow) {
+        if (this->activeSubWindow() == dockedWindow)
+            this->activateNextSubWindow();
+
+        this->removeSubWindow(dockedWindow);
     }
 
     void MdiDockArea::switchToTiledDisplay() {

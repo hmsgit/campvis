@@ -69,6 +69,12 @@ namespace campvis {
          */
         MdiDockedWindow* addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags = 0);
 
+        /**
+         * Return a menu that lets the user control how the area's contents are displayed.
+         *
+         * The menu contains actions that make it possible to change the layout and visibility of
+         * the area's subwindows.
+         */
         QMenu* menu();
 
     private slots:
@@ -102,6 +108,13 @@ namespace campvis {
          * \param actionObject the visibility action whose corresponding sub-window should be shown or hidden
          */
         void toggleSubWindowVisibility(QObject* actionObject);
+
+        /**
+         * Remove the closed MdiDockedWindow from the area and update its visibility action.
+         *
+         * \param mdiSubWindow the MdiDockedWindow that has been closed
+         */
+        void handleDockedWindowClosing(MdiDockedWindow* dockedWindow);
 
     private:
         /**
