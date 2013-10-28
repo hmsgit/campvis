@@ -40,27 +40,6 @@
 
 namespace campvis {
     
-    class IntensityHistogramGenerator {
-    public:
-        IntensityHistogramGenerator(const ImageRepresentationLocal* intensityData, AbstractTransferFunction::IntensityHistogramType* histogram)
-            : _intensityData(intensityData)
-            , _histogram(histogram)
-        {}
-
-        void operator() (const tbb::blocked_range<size_t>& range) const {
-            for (size_t i = range.begin(); i != range.end(); ++i) {
-                float value = _intensityData->getElementNormalized(i, 0);
-                _histogram->addSample(&value);
-            }
-        }
-
-    protected:
-        const ImageRepresentationLocal* _intensityData;
-        AbstractTransferFunction::IntensityHistogramType* _histogram;
-    };
-
-// ================================================================================================
-
     const std::string AbstractTransferFunction::loggerCat_ = "CAMPVis.core.classification.AbstractTransferFunction";
 
     AbstractTransferFunction::AbstractTransferFunction(const tgt::svec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
@@ -178,7 +157,12 @@ namespace campvis {
             float maxs = _intensityDomain.y;
             size_t numBuckets = std::min(WeaklyTypedPointer::numBytes(repLocal->getWeaklyTypedPointer()._baseType) << 8, static_cast<size_t>(512));
             _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, repLocal->getNumElements()), IntensityHistogramGenerator(repLocal, _intensityHistogram));
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, repLocal->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
+                for (size_t i = range.begin(); i != range.end(); ++i) {
+                    float value = repLocal->getElementNormalized(i, 0);
+                    _intensityHistogram->addSample(&value);
+                }
+            });
         }
 
         _dirtyHistogram = false;

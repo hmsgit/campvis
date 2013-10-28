@@ -46,62 +46,6 @@
 
 namespace campvis {
     
-    class NormalizedIntensityRangeGenerator {
-    public:
-        NormalizedIntensityRangeGenerator(const ImageRepresentationLocal* intensityData, Interval<float>* interval)
-            : _intensityData(intensityData)
-            , _interval(interval)
-        {
-            *_interval = Interval<float>();
-        }
-
-        void operator() (const tbb::blocked_range<size_t>& range) const {
-            float localMin = std::numeric_limits<float>::max();
-            float localMax = -std::numeric_limits<float>::max();
-
-            for (size_t i = range.begin(); i != range.end(); ++i) {
-                float value = _intensityData->getElementNormalized(i, 0);
-                localMax = std::max(localMax, value);
-                localMin = std::min(localMin, value);
-            }
-
-            {
-                // TODO: there is probably a more elegant method...
-                tbb::spin_mutex::scoped_lock(_mutex);
-                _interval->nibble(localMin);
-                _interval->nibble(localMax);
-            }
-        }
-
-    protected:
-        const ImageRepresentationLocal* _intensityData;
-        Interval<float>* _interval;
-        tbb::spin_mutex _mutex;
-    };
-
-    // ================================================================================================
-
-    class IntensityHistogramGenerator {
-    public:
-        IntensityHistogramGenerator(const ImageRepresentationLocal* intensityData, ImageRepresentationLocal::IntensityHistogramType* histogram)
-            : _intensityData(intensityData)
-            , _histogram(histogram)
-        {}
-
-        void operator() (const tbb::blocked_range<size_t>& range) const {
-            for (size_t i = range.begin(); i != range.end(); ++i) {
-                float value = _intensityData->getElementNormalized(i, 0);
-                _histogram->addSample(&value);
-            }
-        }
-
-    protected:
-        const ImageRepresentationLocal* _intensityData;
-        ImageRepresentationLocal::IntensityHistogramType* _histogram;
-    };
-
-// ================================================================================================
-
     const std::string ImageRepresentationLocal::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationLocal";
 
     ImageRepresentationLocal::ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType)
@@ -202,7 +146,27 @@ namespace campvis {
     }
 
     void ImageRepresentationLocal::computeNormalizedIntensityRange() const {
-        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), NormalizedIntensityRangeGenerator(this, &_normalizedIntensityRange));
+        _normalizedIntensityRange = Interval<float>(); // reset interval to empty one
+        tbb::spin_mutex _mutex; // mutex to protect for concurrent access
+
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
+            float localMin = std::numeric_limits<float>::max();
+            float localMax = -std::numeric_limits<float>::max();
+
+            for (size_t i = range.begin(); i != range.end(); ++i) {
+                float value = this->getElementNormalized(i, 0);
+                localMax = std::max(localMax, value);
+                localMin = std::min(localMin, value);
+            }
+
+            {
+                // TODO: there is probably a more elegant method...
+                tbb::spin_mutex::scoped_lock(mutex);
+                _normalizedIntensityRange.nibble(localMin);
+                _normalizedIntensityRange.nibble(localMax);
+            }
+        });
+
         _intensityRangeDirty = false;
     }
 
@@ -214,7 +178,12 @@ namespace campvis {
         float maxs = i.getRight();
         size_t numBuckets = 1024;
         _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
-        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), IntensityHistogramGenerator(this, _intensityHistogram));
+        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
+            for (size_t i = range.begin(); i != range.end(); ++i) {
+                float value = this->getElementNormalized(i, 0);
+                _intensityHistogram->addSample(&value);
+            }
+        });
     }
 
     ImageRepresentationLocal* ImageRepresentationLocal::convertToGenericLocal(const AbstractImageRepresentation* source, const WeaklyTypedPointer& wtp) {
