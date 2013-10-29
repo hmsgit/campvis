@@ -154,8 +154,6 @@ namespace campvis {
         sigslot::signal1<const AbstractProperty*> s_visibilityChanged;
 
     protected:
-
-        void onChanged(const AbstractProperty* prop);
         
         // DO NOT REMOVE THE CONSTNESS OF _name. PropertyCollection relies on it!
         const std::string _name;                ///< Property name (unchangable on purpose!)

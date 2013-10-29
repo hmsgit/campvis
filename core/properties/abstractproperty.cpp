@@ -43,6 +43,7 @@ namespace campvis {
     }
 
     AbstractProperty::~AbstractProperty() {
+
     }
 
     const std::string& AbstractProperty::getName() {
@@ -63,11 +64,11 @@ namespace campvis {
 
     void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
         tgtAssert(prop != 0, "Shared property must not be 0!");
+        tgtAssert(prop != this, "Shared property must not be this!");
         tgtAssert(typeid(this) == typeid(prop), "Shared property must be of the same type as this property.");
 
         tbb::spin_mutex::scoped_lock lock(_localMutex);
         _sharedProperties.insert(prop);
-        s_changed.connect(this, &AbstractProperty::onChanged);
     }
 
     void AbstractProperty::removeSharedProperty(AbstractProperty* prop) {
@@ -103,13 +104,6 @@ namespace campvis {
     void AbstractProperty::setVisible(bool isVisible) {
         _isVisible = isVisible;
         s_visibilityChanged(this);
-    }
-
-    void AbstractProperty::onChanged(const AbstractProperty* prop) {
-        //tbb::spin_mutex::scoped_lock lock(_localMutex);
-        for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
-            (*it)->s_changed(prop);
-        }
     }
 
 }
