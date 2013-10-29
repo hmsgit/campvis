@@ -33,6 +33,8 @@
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorshading.h"
 
+#include <tbb/tbb.h>
+
 namespace campvis {
     const std::string SimpleRaycaster::loggerCat_ = "CAMPVis.modules.vis.SimpleRaycaster";
 
@@ -42,6 +44,7 @@ namespace campvis {
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
         , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
+        , _bbv(0)
     {
         addDecorator(new ProcessorDecoratorShading());
 
@@ -56,10 +59,24 @@ namespace campvis {
     }
 
     SimpleRaycaster::~SimpleRaycaster() {
+        delete _bbv;
+    }
 
+    void SimpleRaycaster::init() {
+        RaycastingProcessor::init();
+    }
+
+    void SimpleRaycaster::deinit() {
+        RaycastingProcessor::deinit();
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        DataHandle dh = DataHandle(const_cast<ImageData*>(image->getParent())); // HACK HACK HACK
+        generateBbv(dh);
+        if (_bbv != 0) {
+            data.addData("nanananana BATMAN!", _bbv->exportToImageData());
+        }
+
         FramebufferActivationGuard fag(this);
         createAndAttachTexture(GL_RGBA8);
         createAndAttachTexture(GL_RGBA32F);
@@ -94,5 +111,60 @@ namespace campvis {
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }
+
+    void SimpleRaycaster::generateBbv(DataHandle dh) {
+        delete _bbv;
+
+        if (dh.getData() == 0) {
+            _bbv = 0;
+            return;
+        }
+        else {
+            if (const ImageData* id = dynamic_cast<const ImageData*>(dh.getData())) {
+                if (const ImageRepresentationLocal* rep = id->getRepresentation<ImageRepresentationLocal>(true)) {
+            	    _bbv = new BinaryBrickedVolume(rep->getParent(), 2);
+
+                    GLubyte* tfBuffer = p_transferFunction.getTF()->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_BYTE);
+                    size_t tfNumElements = p_transferFunction.getTF()->getTexture()->getDimensions().x;
+
+                    // parallelly traverse the bricks
+                    tbb::parallel_for(tbb::blocked_range<size_t>(0, _bbv->getNumBrickIndices()), [&] (const tbb::blocked_range<size_t>& range) {
+                        const tgt::vec2& tfIntensityDomain = p_transferFunction.getTF()->getIntensityDomain();
+
+                        for (size_t i = range.begin(); i != range.end(); ++i) {
+                            // for each brick, get all corresponding voxels in the reference volume
+                            std::vector<tgt::svec3> voxels = _bbv->getAllVoxelsForBrick(i);
+
+                            // traverse the voxels to check whether their intensities are mapped to some opacity
+                            for (size_t v = 0; v < voxels.size(); ++v) {
+                                // apply same TF lookup as in shader...
+                                float intensity = rep->getElementNormalized(voxels[v], 0);
+                                if (intensity >= tfIntensityDomain.x || intensity <= tfIntensityDomain.y) {
+                                    float mappedIntensity = (intensity - tfIntensityDomain.x) / (tfIntensityDomain.y - tfIntensityDomain.x);
+                                    tgtAssert(mappedIntensity >= 0.f && mappedIntensity <= 1.f, "Mapped intensity out of bounds!");
+
+                                    // ...but with nearest neighbour interpolation
+                                    size_t scaled = static_cast<size_t>(mappedIntensity * static_cast<float>(tfNumElements - 1));
+                                    tgtAssert(scaled < tfNumElements, "Somebody did the math wrong...");
+                                    GLubyte opacity = tfBuffer[(4 * (scaled)) + 3];
+                                    if (opacity != 0) {
+                                        _bbv->setValueForIndex(i, true);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                else {
+                    LERROR("Could not convert to a local representation.");
+                }
+            }
+            else {
+                tgtAssert(false, "The data type in the given DataHandle is WRONG!");
+            }
+        }
+    }
+
 
 }
