@@ -50,6 +50,14 @@ namespace campvis {
      */
     class VolumeRenderer : public VisualizationProcessor {
     public:
+        /// Additional invalidation levels for this processor.
+        /// Not the most beautiful design though.
+        enum ProcessorInvalidationLevel {
+            PG_INVALID = 1 << 4,
+            EEP_INVALID = 1 << 5,
+            RAYCASTER_INVALID = 1 << 6
+        };
+
         /**
          * Constructs a new VolumeRenderer Processor
          **/
@@ -89,14 +97,6 @@ namespace campvis {
         MetaProperty p_raycasterProps;              ///< MetaProperty for properties of the raycasting processor
 
     protected:
-        /// Additional invalidation levels for this processor.
-        /// Not the most beautiful design though.
-        enum ProcessorInvalidationLevel {
-            PG_INVALID = 1 << 4,
-            EEP_INVALID = 1 << 5,
-            RAYCASTER_INVALID = 1 << 6
-        };
-
         /**
          * Slot getting called when one of the observed processors got invalidated.
          * Invalidates this meta-processor with the corresponding level.
