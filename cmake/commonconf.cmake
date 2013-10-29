@@ -120,8 +120,15 @@ IF(WIN32)
 ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
     LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable")
-    LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")  
+    LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")
 ENDIF(WIN32)
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+    # enable C++11 support in GCC
+    LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+    # however: we want to use the TBB implementation of threads
+    LIST(APPEND CampvisGlobalDefinitions "-DTBB_IMPLEMENT_CPP0X")
+ENDIF()
 
 # tgt configuration
 LIST(APPEND CampvisGlobalDefinitions "-DTGT_WITHOUT_DEFINES") # don't use tgt's build system
