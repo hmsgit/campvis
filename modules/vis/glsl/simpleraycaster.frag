@@ -61,6 +61,13 @@ uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
 
+// BBV Lookup volume
+uniform usampler3D _bbvTexture;
+uniform TextureParameters3D _bbvTextureParams;
+uniform int _bbvBrickSize;
+uniform bool _hasBbv;
+
+
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
@@ -77,6 +84,25 @@ uniform float _shadowIntensity;
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
+ivec3 voxelToBrick(in vec3 voxel) {
+    return ivec3(floor(voxel / _bbvBrickSize));
+}
+
+int brickToIndex(in ivec3 brick) {
+    return int(brick.x + (_bbvTextureParams._size.x * brick.y) + (_bbvTextureParams._size.x * _bbvTextureParams._size.y * brick.z));
+}
+
+// samplePosition is in texture coordiantes [0, 1]
+bool lookupInBbv(in vec3 samplePosition) {
+    ivec3 brick = voxelToBrick(samplePosition * _volumeTextureParams._size);
+
+    ivec3 byte = brick;
+    byte.x /= 8;
+    uint bit = uint(brick.x % 8);
+    uint texel = texelFetch(_bbvTexture, byte, 0).r;
+
+    return (texel & (1U << bit)) != 0U;
+}
 
 /**
  * Performs the raycasting and returns the final fragment color.
@@ -99,6 +125,19 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     while (t < tend) {
         // compute sample position
         vec3 samplePosition = entryPoint.rgb + t * direction;
+
+        if (_hasBbv) {
+            if (lookupInBbv(samplePosition)) {
+        // advance to the next evaluation point along the ray
+#ifdef ENABLE_ADAPTIVE_STEPSIZE
+            samplingRateCompensationMultiplier = 1.0;
+            t += _samplingStepSize;
+#else
+            t += _samplingStepSize;
+#endif
+            continue;
+            }
+        }
 
         // lookup intensity and TF
         float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).a;

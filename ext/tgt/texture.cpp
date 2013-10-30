@@ -219,6 +219,7 @@ int Texture::calcNumChannels(GLint format) {
     case 1:
     case GL_COLOR_INDEX:
     case GL_RED:
+    case GL_RED_INTEGER:
     case GL_GREEN:
     case GL_BLUE:
     case GL_ALPHA:

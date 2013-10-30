@@ -44,12 +44,15 @@ namespace campvis {
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
         , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
+        , p_useEmptySpaceSkipping("EnableEmptySpaceSkipping", "Enable Empty Space Skipping", false, AbstractProcessor::INVALID_RESULT | INVALID_BBV)
         , _bbv(0)
+        , _t(0)
     {
         addDecorator(new ProcessorDecoratorShading());
 
         addProperty(&p_targetImageID);
         addProperty(&p_enableAdaptiveStepsize);
+        addProperty(&p_useEmptySpaceSkipping);
 
         addProperty(&p_enableShadowing);
         addProperty(&p_shadowIntensity);
@@ -60,6 +63,7 @@ namespace campvis {
 
     SimpleRaycaster::~SimpleRaycaster() {
         delete _bbv;
+        delete _t;
     }
 
     void SimpleRaycaster::init() {
@@ -71,20 +75,42 @@ namespace campvis {
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
-        DataHandle dh = DataHandle(const_cast<ImageData*>(image->getParent())); // HACK HACK HACK
-        generateBbv(dh);
-        if (_bbv != 0) {
-            data.addData("nanananana BATMAN!", _bbv->exportToImageData());
+        tgt::TextureUnit bbvUnit;
+
+        if (getInvalidationLevel() & INVALID_BBV) {
+            DataHandle dh = DataHandle(const_cast<ImageData*>(image->getParent())); // HACK HACK HACK
+            generateBbv(dh);
+            validate(INVALID_BBV);
+        }
+
+        if (_t != 0 && p_useEmptySpaceSkipping.getValue()) {
+            
+
+            // bind
+            bbvUnit.activate();
+            _t->bind();
+            _shader->setIgnoreUniformLocationError(true);
+            _shader->setUniform("_bbvTexture", bbvUnit.getUnitNumber());
+            _shader->setUniform("_bbvTextureParams._size", tgt::vec3(_t->getDimensions()));
+            _shader->setUniform("_bbvTextureParams._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_t->getDimensions()));
+            _shader->setUniform("_bbvTextureParams._numChannels", static_cast<int>(1));
+
+            _shader->setUniform("_bbvBrickSize", 2);
+            _shader->setUniform("_hasBbv", true);
+            _shader->setIgnoreUniformLocationError(false);
+        }
+        else {
+            _shader->setUniform("_hasBbv", false);
         }
 
         FramebufferActivationGuard fag(this);
         createAndAttachTexture(GL_RGBA8);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachTexture(GL_RGBA32F);
+//         createAndAttachTexture(GL_RGBA32F);
+//         createAndAttachTexture(GL_RGBA32F);
         createAndAttachDepthTexture();
 
-        static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-        glDrawBuffers(3, buffers);
+//         static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+//         glDrawBuffers(3, buffers);
 
         if (p_enableShadowing.getValue())
             _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
@@ -114,9 +140,11 @@ namespace campvis {
 
     void SimpleRaycaster::generateBbv(DataHandle dh) {
         delete _bbv;
+        _bbv = 0;
+        delete _t;
+        _t = 0;
 
         if (dh.getData() == 0) {
-            _bbv = 0;
             return;
         }
         else {
@@ -128,7 +156,8 @@ namespace campvis {
                     size_t tfNumElements = p_transferFunction.getTF()->getTexture()->getDimensions().x;
 
                     // parallelly traverse the bricks
-                    tbb::parallel_for(tbb::blocked_range<size_t>(0, _bbv->getNumBrickIndices()), [&] (const tbb::blocked_range<size_t>& range) {
+                    // have minimum group size 8 to avoid race conditions (every 8 neighbor bricks write to the same byte)!
+                    tbb::parallel_for(tbb::blocked_range<size_t>(0, _bbv->getNumBrickIndices(), 8), [&] (const tbb::blocked_range<size_t>& range) {
                         const tgt::vec2& tfIntensityDomain = p_transferFunction.getTF()->getIntensityDomain();
 
                         for (size_t i = range.begin(); i != range.end(); ++i) {
@@ -155,6 +184,9 @@ namespace campvis {
                             }
                         }
                     });
+
+                    // export to texture:
+                    _t = _bbv->exportToImageData();
                 }
                 else {
                     LERROR("Could not convert to a local representation.");

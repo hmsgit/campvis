@@ -31,6 +31,8 @@
 
 #include "tgt/assert.h"
 #include "tgt/glmath.h"
+#include "tgt/texture.h"
+#include "tgt/textureunit.h"
 
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
@@ -49,12 +51,19 @@ namespace campvis {
         tgtAssert(_referenceImage != 0, "Reference Image must not be 0!");
 
         // perform ceiling integer division:
-        _numBricks = referenceImage->getSize();
+        _dimBricks = referenceImage->getSize();
         for (int i = 0; i < 3; ++i)
-            _numBricks.elem[i] = DIV_CEIL(_numBricks.elem[i], _brickSize);
+            _dimBricks.elem[i] = DIV_CEIL(_dimBricks.elem[i], _brickSize);
 
-        _numBrickIndices = tgt::hmul(_numBricks);
-        _numElementsInBricksArray = DIV_CEIL(_numBrickIndices, 8);
+        // since we will pack eight values along the x axis into one byte, the _dimBricks.x must be congruent 0 mod 8.
+        if (_dimBricks.x % 8 != 0)
+            _dimBricks.x += 8 - (_dimBricks.x % 8);
+        _numBrickIndices = tgt::hmul(_dimBricks);
+
+        _dimPackedBricks = _dimBricks;
+        _dimPackedBricks.x = _dimPackedBricks.x / 8;
+
+        _numElementsInBricksArray = tgt::hmul(_dimPackedBricks);
         _bricks = new uint8_t[_numElementsInBricksArray];
         memset(_bricks, 0, _numElementsInBricksArray);
     }
@@ -82,14 +91,14 @@ namespace campvis {
     }
 
     tgt::svec3 BinaryBrickedVolume::indexToBrick(size_t brickIndex) const {
-        size_t z = brickIndex / (_numBricks.x * _numBricks.y);
-        size_t y = (brickIndex % (_numBricks.x * _numBricks.y)) / _numBricks.x;
-        size_t x = brickIndex % _numBricks.x;
+        size_t z = brickIndex / (_dimBricks.x * _dimBricks.y);
+        size_t y = (brickIndex % (_dimBricks.x * _dimBricks.y)) / _dimBricks.x;
+        size_t x = brickIndex % _dimBricks.x;
         return tgt::svec3(x, y, z);
     }
 
     size_t BinaryBrickedVolume::brickToIndex(const tgt::svec3& brick) const {
-        return brick.x + (_numBricks.x * brick.y) + (_numBricks.x * _numBricks.y * brick.z);
+        return brick.x + (_dimBricks.x * brick.y) + (_dimBricks.x * _dimBricks.y * brick.z);
     }
 
     bool BinaryBrickedVolume::getValueForIndex(size_t brickIndex) const {
@@ -111,22 +120,33 @@ namespace campvis {
             _bricks[byte] &= ~(1 << bit);
     }
 
-    ImageData* BinaryBrickedVolume::exportToImageData() const {
-        tgt::svec3 size = _numBricks; 
-        size.z = DIV_CEIL(size.z, 8);
-        size_t numElementsInCopy = tgt::hmul(size);
+    tgt::Texture* BinaryBrickedVolume::exportToImageData() const {
+        tgt::Texture* toReturn = new tgt::Texture(_bricks, _dimPackedBricks, GL_RED_INTEGER, GL_R8UI, GL_UNSIGNED_BYTE, tgt::Texture::NEAREST);
+        LGL_ERROR;
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        uint8_t* copy = new uint8_t[numElementsInCopy];
-        memset(copy, 0, numElementsInCopy);
-        memcpy(copy, _bricks, _numElementsInBricksArray);
+        tgt::TextureUnit tempUnit;
+        tempUnit.activate();
+        toReturn->bind();
+        toReturn->uploadTexture();
+        LGL_ERROR;
+        toReturn->setWrapping(tgt::Texture::CLAMP);
+        toReturn->setPixelData(0);
+        tgt::TextureUnit::setZeroUnit();
+        LGL_ERROR;
 
-        ImageData* toReturn = new ImageData(_referenceImage->getDimensionality(), size, 1);
-        GenericImageRepresentationLocal<uint8_t, 1>::create(toReturn, copy);
         return toReturn;
+
+//         uint8_t* copy = new uint8_t[_numElementsInBricksArray];
+//         memcpy(copy, _bricks, _numElementsInBricksArray);
+// 
+//         ImageData* toReturn = new ImageData(_referenceImage->getDimensionality(), _dimPackedBricks, 1);
+//         GenericImageRepresentationLocal<uint8_t, 1>::create(toReturn, copy);
+//         return toReturn;
     }
 
     const tgt::svec3& BinaryBrickedVolume::getNumBricks() const {
-        return _numBricks;
+        return _dimBricks;
     }
 
     size_t BinaryBrickedVolume::getNumBrickIndices() const {

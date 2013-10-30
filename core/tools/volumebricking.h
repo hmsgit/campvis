@@ -7,6 +7,10 @@
 
 #include <vector>
 
+namespace tgt {
+    class Texture;
+}
+
 namespace campvis {
 
     class BinaryBrickedVolume {
@@ -18,12 +22,12 @@ namespace campvis {
 
         /**
          * Gets the number of bricks in each dimension.
-         * \return  _numBricks
+         * \return  _dimBricks
          */
         const tgt::svec3& getNumBricks() const;
 
         /**
-         * Gets the number of brick indices (= hmul(_numBricks)).
+         * Gets the number of brick indices (= hmul(_dimBricks)).
          * \return  _numBrickIndices
          */
         size_t getNumBrickIndices() const;
@@ -51,7 +55,7 @@ namespace campvis {
         std::vector<tgt::svec3> getAllVoxelsForBrick(size_t brickIndex) const;
 
 
-        ImageData* exportToImageData() const;
+        tgt::Texture* exportToImageData() const;
 
     private:
         /**
@@ -73,10 +77,11 @@ namespace campvis {
         const ImageData* _referenceImage;       ///< the reference image
         size_t _brickSize;                      ///< number of voxels a brick is covering in each dimension
 
-        tgt::svec3 _numBricks;                  ///< number of bricks in each dimension
-        size_t _numBrickIndices;                ///< number of brick indices (= hmul(_numBricks))
+        tgt::svec3 _dimBricks;                  ///< number of bricks in each dimension
+        size_t _numBrickIndices;                ///< number of brick indices (= hmul(_dimPackedBricks))
 
         uint8_t* _bricks;                       ///< the densly packed bricks
+        tgt::svec3 _dimPackedBricks;            ///< number of elements when bricks are tightly packed
         size_t _numElementsInBricksArray;       ///< number of elements in _bricks
        
     };

@@ -48,6 +48,10 @@ namespace campvis {
      */
     class SimpleRaycaster : public RaycastingProcessor {
     public:
+        enum AdditionalInvalidationLevels {
+            INVALID_BBV = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL
+        };
+
         /**
          * Constructs a new SimpleRaycaster Processor
          **/
@@ -77,6 +81,7 @@ namespace campvis {
         FloatProperty p_shadowIntensity;
         BoolProperty p_enableAdaptiveStepsize;
 
+        BoolProperty p_useEmptySpaceSkipping;
     
     protected:
         /// \see HasProperyCollection::updateProperties()
@@ -92,6 +97,7 @@ namespace campvis {
         void generateBbv(DataHandle dh);
 
         BinaryBrickedVolume* _bbv;
+        tgt::Texture* _t;
 
         static const std::string loggerCat_;
     };
