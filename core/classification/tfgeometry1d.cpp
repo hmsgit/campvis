@@ -33,6 +33,8 @@
 #include "tgt/texture.h"
 #include "tgt/tgt_math.h"
 
+#include "core/datastructures/facegeometry.h"
+
 #include <algorithm>
 
 namespace campvis {
@@ -86,19 +88,20 @@ namespace campvis {
         if (_keyPoints.size() < 2)
             return;
 
-        glBegin(GL_QUADS);
-        std::vector<KeyPoint>::const_iterator a = _keyPoints.begin();
-        std::vector<KeyPoint>::const_iterator b = _keyPoints.begin()+1;
-        for (/* already inited */; b != _keyPoints.end(); ++a, ++b) {
-            glColor4ubv(a->_color.elem);
-            glVertex2f(a->_position, 0.f);
-            glVertex2f(a->_position, 1.f);
+        // TODO: regenerating these buffers each time is slow as hell
+        std::vector<tgt::vec3> vertices;
+        std::vector<tgt::vec4> colors;
 
-            glColor4ubv(b->_color.elem);
-            glVertex2f(b->_position, 1.f);
-            glVertex2f(b->_position, 0.f);
+        for (std::vector<KeyPoint>::const_iterator a = _keyPoints.begin(); a != _keyPoints.end(); ++a) {
+            vertices.push_back(tgt::vec3(a->_position, 0.f, 0.f));
+            vertices.push_back(tgt::vec3(a->_position, 1.f, 0.f));
+
+            colors.push_back(tgt::vec4(a->_color) / 255.f);
+            colors.push_back(tgt::vec4(a->_color) / 255.f);
         }
-        glEnd();
+
+        FaceGeometry fg(vertices, vertices, colors);
+        fg.render(GL_TRIANGLE_STRIP);
     }
     TFGeometry1D* TFGeometry1D::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor) {
         tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
