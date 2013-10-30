@@ -73,16 +73,34 @@ namespace campvis {
     }
 
     std::vector<tgt::svec3> BinaryBrickedVolume::getAllVoxelsForBrick(size_t brickIndex) const {
-        const tgt::svec3& refImageSize = _referenceImage->getSize();
+        tgt::ivec3 refImageSize = _referenceImage->getSize();
         std::vector<tgt::svec3> toReturn;
-        toReturn.reserve(_brickSize * _brickSize * _brickSize);
+        toReturn.reserve((_brickSize+2) * (_brickSize+2) * (_brickSize+2));
 
         // traverse each dimension, check that voxel is within reference image size
-        tgt::svec3 startVoxel = indexToBrick(brickIndex) * _brickSize;
-        for (size_t x = 0; x < _brickSize && startVoxel.x + x < refImageSize.x; ++x) {
-            for (size_t y = 0; y < _brickSize && startVoxel.y + y < refImageSize.y; ++y) {
-                for (size_t z = 0; z < _brickSize && startVoxel.z + z < refImageSize.z; ++z) {
-                    toReturn.push_back(tgt::svec3(startVoxel.x + x, startVoxel.y + y, startVoxel.z + z));
+        tgt::ivec3 startVoxel = indexToBrick(brickIndex) * _brickSize;
+        for (int x = -1; x < static_cast<int>(_brickSize + 1); ++x) {
+            int xx = startVoxel.x + x;
+            if (xx < 0)
+                continue;
+            else if (xx >= refImageSize.x)
+                break;
+
+            for (int y = -1; y < static_cast<int>(_brickSize + 1); ++y) {
+                int yy = startVoxel.y + y;
+                if (yy < 0)
+                    continue;
+                else if (yy >= refImageSize.y)
+                    break;
+
+                for (int z = -1; z < static_cast<int>(_brickSize + 1); ++z) {
+                    int zz = startVoxel.z + z;
+                    if (zz < 0)
+                        continue;
+                    else if (zz >= refImageSize.z)
+                        break;
+
+                    toReturn.push_back(tgt::svec3(xx, yy, zz));
                 }
             }
         }
@@ -151,6 +169,10 @@ namespace campvis {
 
     size_t BinaryBrickedVolume::getNumBrickIndices() const {
         return _numBrickIndices;
+    }
+
+    size_t BinaryBrickedVolume::getBrickSize() const {
+        return _brickSize;
     }
 
 

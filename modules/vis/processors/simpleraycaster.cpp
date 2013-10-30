@@ -58,12 +58,13 @@ namespace campvis {
         addProperty(&p_shadowIntensity);
         p_shadowIntensity.setVisible(false);
 
+//         p_transferFunction.setInvalidationLevel(p_transferFunction.getInvalidationLevel() | INVALID_BBV);
+//         p_sourceImageID.setInvalidationLevel(p_sourceImageID.getInvalidationLevel() | INVALID_BBV);
+
         decoratePropertyCollection(this);
     }
 
     SimpleRaycaster::~SimpleRaycaster() {
-        delete _bbv;
-        delete _t;
     }
 
     void SimpleRaycaster::init() {
@@ -71,6 +72,8 @@ namespace campvis {
     }
 
     void SimpleRaycaster::deinit() {
+        delete _bbv;
+        delete _t;
         RaycastingProcessor::deinit();
     }
 
@@ -80,12 +83,16 @@ namespace campvis {
         if (getInvalidationLevel() & INVALID_BBV) {
             DataHandle dh = DataHandle(const_cast<ImageData*>(image->getParent())); // HACK HACK HACK
             generateBbv(dh);
+
+//             tgt::Texture* batman = _bbv->exportToImageData();
+//             ImageData* robin = new ImageData(3, batman->getDimensions(), 1);
+//             ImageRepresentationGL::create(robin, batman);
+//             data.addData("All glory to the HYPNOTOAD!", robin);
+
             validate(INVALID_BBV);
         }
 
         if (_t != 0 && p_useEmptySpaceSkipping.getValue()) {
-            
-
             // bind
             bbvUnit.activate();
             _t->bind();
@@ -95,7 +102,7 @@ namespace campvis {
             _shader->setUniform("_bbvTextureParams._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_t->getDimensions()));
             _shader->setUniform("_bbvTextureParams._numChannels", static_cast<int>(1));
 
-            _shader->setUniform("_bbvBrickSize", 2);
+            _shader->setUniform("_bbvBrickSize", static_cast<int>(_bbv->getBrickSize()));
             _shader->setUniform("_hasBbv", true);
             _shader->setIgnoreUniformLocationError(false);
         }
@@ -155,6 +162,7 @@ namespace campvis {
                     GLubyte* tfBuffer = p_transferFunction.getTF()->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_BYTE);
                     size_t tfNumElements = p_transferFunction.getTF()->getTexture()->getDimensions().x;
 
+                    LDEBUG("Start computing brick visibilities...");
                     // parallelly traverse the bricks
                     // have minimum group size 8 to avoid race conditions (every 8 neighbor bricks write to the same byte)!
                     tbb::parallel_for(tbb::blocked_range<size_t>(0, _bbv->getNumBrickIndices(), 8), [&] (const tbb::blocked_range<size_t>& range) {
@@ -184,6 +192,8 @@ namespace campvis {
                             }
                         }
                     });
+
+                    LDEBUG("...finished computing brick visibilities.");
 
                     // export to texture:
                     _t = _bbv->exportToImageData();

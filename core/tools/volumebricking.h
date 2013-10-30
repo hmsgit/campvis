@@ -32,6 +32,8 @@ namespace campvis {
          */
         size_t getNumBrickIndices() const;
 
+        size_t getBrickSize() const;
+
 
         /**
          * Returns the boolean value for the brick with index \a brickIndex.

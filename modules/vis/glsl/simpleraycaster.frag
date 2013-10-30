@@ -88,17 +88,12 @@ ivec3 voxelToBrick(in vec3 voxel) {
     return ivec3(floor(voxel / _bbvBrickSize));
 }
 
-int brickToIndex(in ivec3 brick) {
-    return int(brick.x + (_bbvTextureParams._size.x * brick.y) + (_bbvTextureParams._size.x * _bbvTextureParams._size.y * brick.z));
-}
-
 // samplePosition is in texture coordiantes [0, 1]
 bool lookupInBbv(in vec3 samplePosition) {
-    ivec3 brick = voxelToBrick(samplePosition * _volumeTextureParams._size);
-
-    ivec3 byte = brick;
+    ivec3 byte = voxelToBrick(samplePosition * _volumeTextureParams._size);
+    uint bit = uint(byte.x % 8);
     byte.x /= 8;
-    uint bit = uint(brick.x % 8);
+
     uint texel = texelFetch(_bbvTexture, byte, 0).r;
 
     return (texel & (1U << bit)) != 0U;
@@ -127,13 +122,14 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         if (_hasBbv) {
-            if (lookupInBbv(samplePosition)) {
-        // advance to the next evaluation point along the ray
+            if (! lookupInBbv(samplePosition)) {
+
+                // advance to the next evaluation point along the ray
+                t += 4.0*_samplingStepSize;
+
+
 #ifdef ENABLE_ADAPTIVE_STEPSIZE
-            samplingRateCompensationMultiplier = 1.0;
-            t += _samplingStepSize;
-#else
-            t += _samplingStepSize;
+                samplingRateCompensationMultiplier = 1.0;
 #endif
             continue;
             }
