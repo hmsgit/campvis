@@ -203,6 +203,16 @@ namespace campvis {
         _colorValWidget->setPalette(*_ColorValWidgetPalette);
     }
 
+	void DataContainerInspectorWidget::updateDepth(){
+
+        float depth = _canvas->getCapturedDepth();
+
+        _lblColorVal->setText(QString("Depth: %1").arg(QString::number(depth)));
+        
+        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, QColor(static_cast<int>(depth * 255), static_cast<int>(depth * 255), static_cast<int>(depth * 255)));
+        _colorValWidget->setPalette(*_ColorValWidgetPalette);
+    }
+
     void DataContainerInspectorWidget::updateInfoWidget() {
         if (!_inited)
             return;
@@ -254,7 +264,9 @@ namespace campvis {
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
 
-                //tester->render();
+				
+
+				//tester->render();
             }
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();

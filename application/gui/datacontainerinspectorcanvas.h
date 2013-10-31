@@ -44,6 +44,7 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"
+#include "modules/vis/processors/geometryrenderer.h"
 
 namespace tgt {
     class Shader;
@@ -87,7 +88,16 @@ namespace campvis {
         void deinit();
 
         void setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles);
-        const tgt::Color& getCapturedColor();
+        
+		/**
+         * returns the color value which is captured with the mouse.
+         */
+		const tgt::Color& getCapturedColor();
+
+		/**
+         * returns the depth value which is captured with the mouse.
+         */
+		const float& getCapturedDepth();
 
         /**
          * Size hint for the default window size
@@ -170,6 +180,13 @@ namespace campvis {
          */
         void paintTexture(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
 
+		/**
+         * Renders the given 2D texture.
+         * Binds the texture to the shader, sets the uniforms and renders the quad.
+         * \param   texture     The texture to render.
+         */
+		void drawGeomtery();
+
         /**
          * Creates the quad used for rendering the textures.
          */
@@ -185,16 +202,18 @@ namespace campvis {
         tgt::Shader* _paintShader;                      ///< GLSL shader for rendering the textures
         FaceGeometry* _quad;                            ///< Quad used for rendering
 
-        tgt::Color _color;                                ///< Color under the mouse cursor
-        DataContainerInspectorWidget* _widget;            ///< Pointer to the widget which has access to this canvas
+        tgt::Color _color;                              ///< Color under the mouse cursor
+		float      _depth;								///< Depth under the mouse cursor
+        DataContainerInspectorWidget* _widget;          ///< Pointer to the widget which has access to this canvas
 
         tgt::ivec2 _numTiles;                           ///< number of tiles on texture overview
         tgt::ivec2 _quadSize;                           ///< size in pixels for each tile in overview
         size_t _selectedTexture;                        ///< index of selected texture for fullscreen view
         bool _renderFullscreen;                         ///< flag whether to render in full screen
 
-        int _currentSlice;                           ///< current slice if rendering a 3D image fullscreen, render MIP if negative
+        int _currentSlice;								///< current slice if rendering a 3D image fullscreen, render MIP if negative
 
+		tgt::Shader* _geomteryRenderingShader;			///< GLSL shader for rendering the geomtery
     };
 }
 

@@ -119,6 +119,12 @@ namespace campvis {
             const std::string& texParamsUniform = "_textureParams") const;
 
         /**
+         * Download the OpenGL texture from the GPU memory to the texture cpu buffer.
+         * \return  _texture
+         */
+        void downloadTexture() const;
+
+        /**
          * Gets the OpenGL texture.
          * \return  _texture
          */

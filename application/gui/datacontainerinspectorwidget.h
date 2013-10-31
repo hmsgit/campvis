@@ -117,6 +117,11 @@ namespace campvis {
          */
         void updateColor();
 
+		/**
+         * Updates depth of the info widget
+         */
+        void updateDepth();
+
     signals:
         void dataContainerChanged(const QString&, QtDataHandle);
 
@@ -146,6 +151,9 @@ namespace campvis {
          * \param handle    DataHandle containing the image to save. Must contain ImageData or RenderData!
          * \param filename  Filename for the file to save.
          */
+
+	//protected:
+	public:				// Only for Debuggin
         static void saveToFile(DataHandle handle, std::string filename);
 
         /**
@@ -178,11 +186,11 @@ namespace campvis {
         QLabel*  _lblTimestamp;
         QLabel*  _lblSize;
         QLabel*  _lblBounds;
-        QWidget* _colorWidget;                            ///< The widget use to show the color value and the color in a single window
+		QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
         QHBoxLayout* _colorWidgetLayout;                ///< Layout for the following widget
-        QLabel*  _lblColorVal;                            ///< Color Label Value in text
-        QWidget* _colorValWidget;                        ///< Widget that shows the color value in color
-        QPalette* _ColorValWidgetPalette;                ///< Palette which will be used to colorize the color widget
+        QLabel*  _lblColorVal;                          ///< Color Label Value in text
+        QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
+        QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
         QPushButton* _btnSaveToFile;
 
         static const std::string loggerCat_;
