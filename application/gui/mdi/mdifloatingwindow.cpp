@@ -78,7 +78,7 @@ namespace campvis {
     }
 
     void MdiFloatingWindow::moveEvent(QMoveEvent* /*event*/) {
-        emit s_positionChanged(this, frameGeometry().topLeft());
+        emit s_positionChanged(frameGeometry().topLeft());
     }
 
     void MdiFloatingWindow::snapToCursor(const QPoint& cursorPos) {
@@ -86,6 +86,10 @@ namespace campvis {
         int y = cursorPos.y() - this->style()->pixelMetric(QStyle::PM_TitleBarHeight) / 2;
 
         this->move(x, y);
+    }
+
+    void MdiFloatingWindow::closeEvent(QCloseEvent* /*event*/) {
+        emit s_closed();
     }
 
 }

@@ -77,12 +77,12 @@ namespace campvis {
          *
          * \param newPos the window's new position
          */
-        void s_positionChanged(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
+        void s_positionChanged(const QPoint& newPos);
 
         /**
          * Emitted when the window gets closed.
          */
-        void s_closed(MdiDockedWindow* mdiSubWindow);
+        void s_closed();
 
     protected:
         /**

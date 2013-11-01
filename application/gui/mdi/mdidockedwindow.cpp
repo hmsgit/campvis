@@ -89,7 +89,7 @@ namespace campvis {
             }
 
             move(newPos);
-            emit s_positionChanged(this, newPos);
+            emit s_positionChanged(newPos);
         }
         else {
             QMdiSubWindow::mouseMoveEvent(event);
@@ -108,7 +108,7 @@ namespace campvis {
     }
 
     void MdiDockedWindow::closeEvent(QCloseEvent* /*event*/) {
-        emit s_closed(this);
+        emit s_closed();
     }
 
 }

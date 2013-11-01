@@ -33,6 +33,7 @@
 #include "application/campvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
+#include "application/gui/mdi/mdidockablewindow.h"
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
@@ -40,7 +41,6 @@
 #include "core/tools/stringutils.h"
 #include "modules/pipelinefactory.h"
 
-#include <QMdiSubWindow>
 #include <QScrollBar>
 
 
@@ -278,9 +278,10 @@ namespace campvis {
     }
 
     void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
-        QMdiSubWindow* mdiSubWindow = _mdiArea->addSubWindow(canvas);
+        MdiDockableWindow* dockableWindow = _mdiArea->addWidget(canvas);
         const QString& windowTitle = QString::fromStdString(name);
-        mdiSubWindow->setWindowTitle(windowTitle);
+        dockableWindow->setWindowTitle(windowTitle);
+        dockableWindow->show();
     }
 
     QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {

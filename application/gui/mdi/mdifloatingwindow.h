@@ -54,7 +54,7 @@ namespace campvis {
         /**
          * Construct a new MdiFloatingWindow.
          *
-         * \param canvas the widget this window is to wrap
+         * \param widget the widget this window is to wrap
          * \param parent the windows's parent
          */
         explicit MdiFloatingWindow(QWidget* widget, QWidget* parent = 0);
@@ -84,7 +84,12 @@ namespace campvis {
          *
          * \param newPos the window's new position
          */
-        void s_positionChanged(MdiFloatingWindow* pipelineWidget, const QPoint& newPos);
+        void s_positionChanged(const QPoint& newPos);
+
+        /**
+         * Emitted when the window gets closed.
+         */
+        void s_closed();
 
     protected:
         /**
@@ -101,6 +106,11 @@ namespace campvis {
          * Event handler that receives move events for the window.
          */
         virtual void moveEvent(QMoveEvent* event);
+
+        /**
+         * Event handler called when Qt receives a window close request for the window.
+         */
+        virtual void closeEvent(QCloseEvent* event);
 
     private:
         /**

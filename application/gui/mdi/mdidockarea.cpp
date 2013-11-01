@@ -28,21 +28,15 @@
 // ================================================================================================
 
 #include "mdidockarea.h"
-#include "tgt/assert.h"
 
 #include <QMenu>
-#include <QSignalMapper>
 
 namespace campvis {
 
     MdiDockArea::MdiDockArea(QWidget* parent /*= 0*/)
         : QMdiArea(parent)
         , _menu(0)
-        , _signalMapper(0)
     {
-        _signalMapper = new QSignalMapper(this);
-        connect(_signalMapper, SIGNAL(mapped(QObject*)), SLOT(toggleSubWindowVisibility(QObject*)));
-
         this->setTabsClosable(true);
         this->setTabsMovable(true);
         this->setDocumentMode(true);
@@ -65,76 +59,37 @@ namespace campvis {
         _menu->addSeparator();
     }
 
-    MdiDockedWindow* MdiDockArea::addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags /*= 0*/) {
-        MdiDockedWindow* dockedWindow = new MdiDockedWindow(this, windowFlags);
+    MdiDockableWindow* MdiDockArea::addWidget(QWidget* widget, Qt::WindowFlags windowFlags /*= 0*/) {
+        MdiDockableWindow* dockableWindow = new MdiDockableWindow(widget, this, windowFlags);
+        _menu->addAction(dockableWindow->toggleViewAction());
 
-        dockedWindow->setWidget(widget);
-        this->addDockedWindow(dockedWindow);
+        return dockableWindow;
+    }
+
+    QMdiSubWindow* MdiDockArea::addSubWindow(QMdiSubWindow* mdiSubWindow) {
+        QMdiArea::addSubWindow(mdiSubWindow);
+        mdiSubWindow->show();
 
         // Calling tileSubWindows() in TabbedView mode breaks the tabbed display
         if (this->viewMode() == QMdiArea::SubWindowView)
             this->tileSubWindows();
 
-        QAction* visibilityAction = _menu->addAction(widget->windowTitle());
-        visibilityAction->setCheckable(true);
-        visibilityAction->setChecked(true);
-        visibilityAction->setData(QVariant::fromValue(dynamic_cast<QWidget*>(widget)));
-
-        connect(visibilityAction, SIGNAL(triggered()), _signalMapper, SLOT(map()));
-        _signalMapper->setMapping(visibilityAction, visibilityAction);
-
-        return dockedWindow;
+        return mdiSubWindow;
     }
 
-    QMenu* MdiDockArea::menu() {
-        return _menu;
-    }
-
-    void MdiDockArea::addDockedWindow(MdiDockedWindow* dockedWindow) {
-        QMdiArea::addSubWindow(dockedWindow);
-        dockedWindow->show();
-
-        connect(dockedWindow, SIGNAL(s_positionChanged(MdiDockedWindow*, const QPoint&)),
-                SLOT(trackMdiSubWindowsPosition(MdiDockedWindow*, const QPoint&)));
-        connect(dockedWindow, SIGNAL(s_closed(MdiDockedWindow*)), SLOT(handleDockedWindowClosing(MdiDockedWindow*)));
-    }
-
-    void MdiDockArea::toggleSubWindowVisibility(QObject* actionObject) {
-        /*
-         * This static_cast is safe as toggleSubWindowVisibility() is a private slot to which only
-         * MdiDockArea creates connections, always passing a QAction instance.
-         */
-        QAction* visibilityAction = static_cast<QAction*>(actionObject);
-        QWidget* windowWidget = visibilityAction->data().value<QWidget*>()->parentWidget();
-
-        if (MdiDockedWindow* dockedWindow = dynamic_cast<MdiDockedWindow*>(windowWidget)) {
-            if (visibilityAction->isChecked())
-                this->addDockedWindow(dockedWindow);
-            else {
-                if (this->activeSubWindow() == dockedWindow)
-                    this->activateNextSubWindow();
-
-                this->removeSubWindow(dockedWindow);
-            }
-
-            // Calling tileSubWindows() in TabbedView mode breaks the tabbed display
-            if (this->viewMode() == QMdiArea::SubWindowView)
-                this->tileSubWindows();
-        } else if (MdiFloatingWindow* floatingWindow = dynamic_cast<MdiFloatingWindow*>(windowWidget)) {
-            if (visibilityAction->isChecked())
-                floatingWindow->show();
-            else
-                floatingWindow->hide();
-        }
-        else
-            tgtAssert(false, "Widget's parent is of unsupported type.");
-    }
-
-    void MdiDockArea::handleDockedWindowClosing(MdiDockedWindow* dockedWindow) {
-        if (this->activeSubWindow() == dockedWindow)
+    void MdiDockArea::removeSubWindow(QMdiSubWindow* mdiSubWindow) {
+        if (this->activeSubWindow() == mdiSubWindow)
             this->activateNextSubWindow();
 
-        this->removeSubWindow(dockedWindow);
+        QMdiArea::removeSubWindow(mdiSubWindow);
+
+        // Calling tileSubWindows() in TabbedView mode breaks the tabbed display
+        if (this->viewMode() == QMdiArea::SubWindowView)
+            this->tileSubWindows();
+    }
+
+    QMenu* MdiDockArea::menu() const {
+        return _menu;
     }
 
     void MdiDockArea::switchToTiledDisplay() {
@@ -144,56 +99,6 @@ namespace campvis {
 
     void MdiDockArea::switchToTabbedDisplay() {
         this->setViewMode(QMdiArea::TabbedView);
-    }
-
-    void MdiDockArea::trackFloatingWindowsPosition(MdiFloatingWindow* floatingWindow, const QPoint& newPos) {
-        const QRect& widgetGeometry = floatingWindow->frameGeometry();
-        const QRect& mdiAreaRect = this->contentsRect();
-        const QRect mdiAreaGeometry(this->mapToGlobal(mdiAreaRect.topLeft()),
-                                    this->mapToGlobal(mdiAreaRect.bottomRight()));
-        const QRect& intersection = widgetGeometry & mdiAreaGeometry;
-
-        // Dock the floating window's widget if at least 60% of it is over the MDI area
-        if (widgetGeometry.width() * widgetGeometry.height() * 3 <
-                intersection.width() * intersection.height() * 5) {
-            floatingWindow->stopWindowDrag();
-            floatingWindow->hide();
-
-            QWidget* widget = floatingWindow->widget();
-            MdiDockedWindow* dockedWindow = new MdiDockedWindow();
-            dockedWindow->setWidget(widget);
-            dockedWindow->setWindowTitle(floatingWindow->windowTitle());
-
-            this->addDockedWindow(dockedWindow);
-            widget->show();
-            floatingWindow->deleteLater();
-            dockedWindow->forceWindowDrag();
-        }
-    }
-
-    void MdiDockArea::trackMdiSubWindowsPosition(MdiDockedWindow *dockedWindow, const QPoint& /*newPos*/) {
-        const QRect& subWindowGeometry = dockedWindow->frameGeometry();
-        const QRect& mdiAreaGeometry = contentsRect();
-        const QRect& intersection = subWindowGeometry & mdiAreaGeometry;
-
-        // Detach the docked window's widget if at least 60% of it has left the MDI area
-        if (subWindowGeometry.width() * subWindowGeometry.height() * 2 >
-                intersection.width() * intersection.height() * 5) {
-            QWidget* widget = dockedWindow->widget();
-            dockedWindow->stopWindowDrag();
-            dockedWindow->setWidget(0);
-            removeSubWindow(dockedWindow);
-
-            MdiFloatingWindow* floatingWindow = new MdiFloatingWindow(widget);
-            floatingWindow->setWindowTitle(dockedWindow->windowTitle());
-            floatingWindow->forceWindowDrag();
-            connect(floatingWindow, SIGNAL(s_positionChanged(MdiFloatingWindow*, const QPoint&)),
-                    this, SLOT(trackFloatingWindowsPosition(MdiFloatingWindow*, const QPoint&)));
-
-            dockedWindow->deleteLater();
-            tileSubWindows();
-            floatingWindow->show();
-        }
     }
 
 }
