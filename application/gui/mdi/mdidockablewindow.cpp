@@ -42,8 +42,8 @@ namespace campvis {
         , _floatingWindow(0)
         , _toggleViewAction(0)
     {
+        this->setWindowFlags(windowFlags);
         _dockedWindow = this->newDockedWindow(widget);
-        _dockedWindow->setWindowFlags(windowFlags);
 
         _toggleViewAction = new QAction(this);
         _toggleViewAction->setCheckable(true);
@@ -70,7 +70,7 @@ namespace campvis {
     }
 
     MdiDockedWindow* MdiDockableWindow::newDockedWindow(QWidget* widget) {
-        MdiDockedWindow* dockedWindow = new MdiDockedWindow(_mdiArea);
+        MdiDockedWindow* dockedWindow = new MdiDockedWindow(_mdiArea, this->windowFlags());
         dockedWindow->setWidget(widget);
 
         this->connect(dockedWindow, SIGNAL(s_positionChanged(const QPoint&)), SLOT(trackDockedWindowPosition(QPoint)));
@@ -139,9 +139,8 @@ namespace campvis {
             _dockedWindow->setWidget(0);
             _mdiArea->removeSubWindow(_dockedWindow);
 
-            _floatingWindow = new MdiFloatingWindow(widget);
+            _floatingWindow = new MdiFloatingWindow(widget, this);
             _floatingWindow->setWindowTitle(this->windowTitle());
-            _floatingWindow->forceWindowDrag();
             this->connect(_floatingWindow, SIGNAL(s_positionChanged(const QPoint&)),
                           SLOT(trackFloatingWindowPosition(const QPoint&)));
             this->connect(_floatingWindow, SIGNAL(s_closed()), SLOT(handleWindowClosing()));
@@ -149,7 +148,10 @@ namespace campvis {
             _dockedWindow->deleteLater();
             _dockedWindow = 0;
             _docked = false;
+
             _floatingWindow->show();
+            _floatingWindow->activateWindow();
+            _floatingWindow->forceWindowDrag();
         }
     }
 

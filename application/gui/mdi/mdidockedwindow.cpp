@@ -36,10 +36,12 @@
 namespace campvis {
 
     MdiDockedWindow::MdiDockedWindow(QWidget* parent /*= 0*/, Qt::WindowFlags flags /*= 0*/)
-        : QMdiSubWindow(parent, flags)
+        : QMdiSubWindow(parent)
         , _dragActive(false)
         , _lastMousePos()
-    {}
+    {
+        this->setWindowFlags(flags | Qt::Tool);
+    }
 
     void MdiDockedWindow::forceWindowDrag() {
         _dragActive = true;
