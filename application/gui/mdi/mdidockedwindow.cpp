@@ -65,7 +65,9 @@ namespace campvis {
     }
 
     void MdiDockedWindow::mouseMoveEvent(QMouseEvent* event) {
-        if (event->buttons().testFlag(Qt::LeftButton)) {
+        // Only intercept non-resize (the window's current cursor is the default one) drag (the
+        // left mouse button is pressed) events
+        if (event->buttons().testFlag(Qt::LeftButton) && this->cursor().shape() == Qt::ArrowCursor) {
             const QPoint& mousePos = event->globalPos();
 
             if (!_dragActive) {
@@ -93,16 +95,13 @@ namespace campvis {
             move(newPos);
             emit s_positionChanged(newPos);
         }
-        else {
+        else
             QMdiSubWindow::mouseMoveEvent(event);
-        }
     }
 
     void MdiDockedWindow::mouseReleaseEvent(QMouseEvent* event) {
-        if (event->button() == Qt::LeftButton) {
+        if (event->button() == Qt::LeftButton)
             stopWindowDrag();
-            mdiArea()->tileSubWindows();
-        }
 
         // The default implementation detects clicks on the close, maximize and minimize buttons,
         // among other things
