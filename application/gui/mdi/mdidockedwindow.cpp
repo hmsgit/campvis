@@ -45,6 +45,7 @@ namespace campvis {
         _dragActive = true;
         _lastMousePos = QCursor::pos();
 
+        // Position the window so that the centre of its title bar is under the cursor
         const QPoint& mousePos = this->mapToParent(this->mapFromGlobal(_lastMousePos));
         int x = mousePos.x() - this->frameSize().width() / 2;
         int y = mousePos.y() - this->style()->pixelMetric(QStyle::PM_TitleBarHeight) / 2;
@@ -88,7 +89,7 @@ namespace campvis {
             }
 
             move(newPos);
-            emit s_positionChanged(this, newPos);
+            emit s_positionChanged(newPos);
         }
         else {
             QMdiSubWindow::mouseMoveEvent(event);
@@ -104,6 +105,10 @@ namespace campvis {
         // The default implementation detects clicks on the close, maximize and minimize buttons,
         // among other things
         QMdiSubWindow::mouseReleaseEvent(event);
+    }
+
+    void MdiDockedWindow::closeEvent(QCloseEvent* /*event*/) {
+        emit s_closed();
     }
 
 }

@@ -141,11 +141,15 @@ namespace campvis {
          */
         void onDataContainersChanged();
 
-
         /**
          * Setup Qt GUI stuff
          */
         void setup();
+
+        /**
+         * Create and populate the application's main menu.
+         */
+        void populateMainMenu();
 
         /**
          * Adds a widget to the top docking area of the main window.

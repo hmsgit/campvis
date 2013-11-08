@@ -30,8 +30,7 @@
 #ifndef MDIDOCKAREA_H__
 #define MDIDOCKAREA_H__
 
-#include "mdidockedwindow.h"
-#include "mdifloatingwindow.h"
+#include "mdidockablewindow.h"
 
 #include <QMdiArea>
 
@@ -40,9 +39,12 @@ namespace campvis {
     /**
      * MDI area whose subwindows can be docked and undocked.
      *
-     * MdiDockArea takes care of creating all necessary representations (docked and floating window)
-     * of the widgets passed to \ref addSubWindow and seamlessly switching between them in response
-     * to the user's actions (window dragging, key presses, etc).
+     * MdiDockArea extends QMdiArea's functionality by adding support for dockable MDI windows. It
+     * provides 2 APIs:
+     * - addSubWindow and removeSubWindow are much like their QMdiArea's counterparts; they operate
+     *   on MDI sub-windows only, which don't support docking/undocking
+     * - dockable windows can be created using the addWidget method, which returns an
+     *   MdiDockableWindow instance
      */
     class MdiDockArea : public QMdiArea {
 
@@ -50,30 +52,59 @@ namespace campvis {
 
     public:
         /**
-         * Wrap \p widget in an MDI window and dock it in the MDI area.
+         * Constructs an empty MDI area.
          *
-         * This method creates a MdiDockedWindow wrapping the widget, and adds it to the MDI area.
+         * \param parent the area's parent widget (passed to QMdiArea's constructor)
+         */
+        explicit MdiDockArea(QWidget* parent = 0);
+
+        /**
+         * Wrap \p widget in a dockable MDI window and add it to the MDI area.
+         *
+         * This method creates a MdiDockableWindow wrapping the widget, and adds it to the MDI area.
          *
          * \param widget the widget to add to the MDI area
          * \param windowFlags flags used to customize the frame of the created subwindow
-         * \return the PipelineMdiSubWindow instance that was added to the MDI area
+         * \return the MdiDockableWindow instance that was added to the MDI area
          */
-        MdiDockedWindow* addSubWindow(QWidget* widget, Qt::WindowFlags windowFlags = 0);
+        MdiDockableWindow* addWidget(QWidget* widget, Qt::WindowFlags windowFlags = 0);
+
+        /**
+         * Add \p mdiSubWindow to the MDI area.
+         *
+         * \param mdiSubWindow the MDI sub-window to be added to the MDI area
+         * \return the MDI sub-window that was passed in
+         */
+        QMdiSubWindow* addSubWindow(QMdiSubWindow* mdiSubWindow);
+
+        /**
+         * Remove \p mdiSubWindow from the MDI area.
+         *
+         * \param mdiSubWindow the MDI sub-window to be removed from the MDI area
+         */
+        void removeSubWindow(QMdiSubWindow* mdiSubWindow);
+
+        /**
+         * Return a menu that lets the user control how the area's contents are displayed.
+         *
+         * The menu contains actions that make it possible to change the layout and visibility of
+         * the area's subwindows.
+         */
+        QMenu* menu() const;
 
     private slots:
         /**
-         * Track the position of a floating MDI window and dock it if necessary.
-         *
-         * This slot is invoked when the position of a floating MDI window changes.
+         * Display docked windows as sub-windows with window frames.
          */
-        void trackFloatingWindowsPosition(MdiFloatingWindow* floatingWindow, const QPoint& newPos);
+        void switchToTiledDisplay();
 
         /**
-         * Track the position of a docked MDI window and detach it if necessary.
-         *
-         * This slot is invoked when the position of an MDI subwindow changes.
+         * Display docked windows with tabs in a tab bar.
          */
-        void trackMdiSubWindowsPosition(MdiDockedWindow* mdiSubWindow, const QPoint& newPos);
+        void switchToTabbedDisplay();
+
+    private:
+        QMenu* _menu;                   ///< Menu with actions for controlling the MDI area and its subwindows.
 
     };
 }
