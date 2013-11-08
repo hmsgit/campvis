@@ -173,7 +173,9 @@ namespace campvis {
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
         IVec2Property* _viewportSizeProp;       ///< Pointer to the property defining the viewport size
         CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
+    public:
         tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
+    protected:
         tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
 
         /// List of processors for which to enable LQ mode during interaction

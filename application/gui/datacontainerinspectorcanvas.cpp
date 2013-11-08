@@ -38,12 +38,13 @@
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
-#include "core/datastructures/meshgeometry.h"
 #include "core/tools/job.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
 
 #include "datacontainerinspectorwidget.h"
+
+#include "ext/tgt/navigation/trackball.h"
 
 
 namespace campvis {
@@ -51,6 +52,7 @@ namespace campvis {
     DataContainerInspectorCanvas::DataContainerInspectorCanvas(QWidget* parent /*= 0*/) 
         : tgt::QtThreadedCanvas("DataContainer Inspector", tgt::ivec2(640, 480), tgt::GLCanvas::RGBA_BUFFER, parent, true)
         , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
+        , p_meshSolidColor("MeshSolidColor", "Mesh Solid Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(255.f))
         , p_transferFunction("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f)))
         , _dataContainer(0)
         , _paintShader(0)
@@ -61,6 +63,8 @@ namespace campvis {
         , _renderFullscreen(false)
         , _currentSlice(-1)
         , _color(0.0f, 0.0f, 0.0f, 0.0f)
+        , _geomteryRendering_ColorBuffer(0)
+        , _geomteryRendering_DepthBuffer(0)
     {
 		static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
 
@@ -73,9 +77,16 @@ namespace campvis {
             std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
             exit(EXIT_FAILURE);
         }
-
+        
         addProperty(&p_currentSlice);
         addProperty(&p_transferFunction);
+        addProperty(&p_meshSolidColor);
+        //addProperty(&_camera);
+
+        _trackballCamera = new tgt::Camera(tgt::vec3(0.0f, 0.0f, 100.0f), tgt::vec3(0, 0, -1));
+        _trackballCameraProperty = new campvis::CameraProperty("camera", "Camera", *_trackballCamera);
+        _canvasSizeProperty = new campvis::IVec2Property("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096));
+        _trackballEH = new TrackballNavigationEventListener(_trackballCameraProperty, _canvasSizeProperty);
     }
 
     DataContainerInspectorCanvas::~DataContainerInspectorCanvas() {
@@ -89,7 +100,7 @@ namespace campvis {
 
         GLJobProc.registerContext(this);
         _paintShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "", false);
-		_geomteryRenderingShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/geometryrenderer.frag", "", false);
+		_geomteryRenderingShader = ShdrMgr.loadSeparate("core/glsl/meshgeomteryrenderer.vert", "modules/vis/glsl/meshgeometryrenderer.frag", "", false);
 
         _paintShader->setAttributeLocation(0, "in_Position");
         _paintShader->setAttributeLocation(1, "in_TexCoords");
@@ -120,6 +131,7 @@ namespace campvis {
 
 
     void DataContainerInspectorCanvas::paint() {
+        LGL_ERROR;
         tbb::mutex::scoped_lock lock(_localMutex);
         if (_texturesDirty)
             updateTextures();
@@ -193,6 +205,95 @@ namespace campvis {
         _paintShader->setIgnoreUniformLocationError(false);
 
         _quad->render(GL_POLYGON);
+        LGL_ERROR;
+    }
+
+    void DataContainerInspectorCanvas::drawMeshGeomtery(const campvis::MeshGeometry* mg)
+    {
+        LGL_ERROR;
+        // Here the object will be rendered into a texture and the texture will be shown on the output buffer
+		glPushAttrib(GL_ALL_ATTRIB_BITS);
+		_geomteryRenderingShader->activate();
+		LGL_ERROR;
+		_geomteryRenderingShader->setIgnoreUniformLocationError(true);
+		LGL_ERROR;
+		//decorateRenderProlog(data, _shader);
+				
+        //_trackballCamera->setPosition(tgt::vec3(0.0f, 0.0f, dist));
+        //_trackballCamera->setFocus(tgt::vec3(0, 0, -1));
+        //_trackballCamera->setFarDist(1000.0f);
+
+        _trackballEH->setSceneBounds(mg->getWorldBounds());
+				
+		campvis::IVec4Property* p_color = new campvis::IVec4Property("myColor", "MyRenderingColor", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f));
+					
+        _geomteryRenderingShader->setUniform("_projectionMatrix", _trackballEH->_trackball->getCamera()->getProjectionMatrix()/*_trackballCameraProperty->getValue().getProjectionMatrix()*/);
+										LGL_ERROR;
+        tgt::Matrix4f mat = _trackballCamera->getProjectionMatrix();
+        _geomteryRenderingShader->setUniform("_viewMatrix", _trackballEH->_trackball->getCamera()->getViewMatrix());
+        
+		LGL_ERROR;
+		LGL_ERROR;
+
+		_geomteryRenderingShader->setUniform("_colormory", p_color->getValue());
+
+		LGL_ERROR;
+        _geomteryRenderingShader->setUniform("_cameraPosition", _trackballEH->_trackball->getCamera()->getPosition());
+										LGL_ERROR;
+		_geomteryRenderingShader->setIgnoreUniformLocationError(false);
+						LGL_ERROR;
+		tgt::FramebufferObject* frameBuffer = new tgt::FramebufferObject();
+						LGL_ERROR;
+		frameBuffer->activate();
+		LGL_ERROR;
+
+		// acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
+		//tgt::TextureUnit rtUnit;
+		//rtUnit.activate();
+
+		// Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        _geomteryRendering_ColorBuffer->uploadTexture();
+		_geomteryRendering_ColorBuffer->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+
+		_geomteryRendering_DepthBuffer->uploadTexture();
+		_geomteryRendering_DepthBuffer->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+		LGL_ERROR;
+		frameBuffer->attachTexture(_geomteryRendering_ColorBuffer, GL_COLOR_ATTACHMENT0);
+		frameBuffer->attachTexture(_geomteryRendering_DepthBuffer, GL_DEPTH_ATTACHMENT);
+		frameBuffer->isComplete();
+		LGL_ERROR;
+
+		glViewport(0, 0, 400, 100);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		glClearDepth(1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		LGL_ERROR;
+
+        //for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
+        //    if (const campvis::MeshGeometry* mg = dynamic_cast<const campvis::MeshGeometry*>(it->second.getData())) {
+                //mg->render(GL_POLYGON);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        mg->render(GL_POLYGON);
+       //     }
+      //  }
+		
+		
+        
+        LGL_ERROR;
+
+		_geomteryRendering_ColorBuffer->downloadTexture();
+		frameBuffer->deactivate();
+		LGL_ERROR;
+
+		_geomteryRenderingShader->deactivate();
+
+        glPopAttrib();
+
+        //delete frameBuffer;
     }
 
     void DataContainerInspectorCanvas::invalidate() {
@@ -241,6 +342,7 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::mouseMoveEvent(tgt::MouseEvent* e)
     {
+        LGL_ERROR;
         /*if (_renderFullscreen) {
             _renderFullscreen = false;
         }
@@ -251,10 +353,25 @@ namespace campvis {
         }
         e->ignore();
         invalidate();*/
-        
-        if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT)
+        if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT)
         {
+            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
 
+            tgt::MouseEvent adjustedMe(
+                me->x(),
+                me->y(),
+                me->action(),
+                me->modifiers(),
+                me->button(),
+                me->viewport() 
+                );
+            _trackballEH->onEvent(&adjustedMe);
+
+            _texturesDirty = true;
+            invalidate();
+        }
+        else if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT)
+        {
             tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);    
             if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y || e->x() < 0 || e->y() < 0)
                 return;
@@ -292,6 +409,38 @@ namespace campvis {
                         --_currentSlice;
                     e->ignore();
                     break;
+                default:
+                    break;
+            }
+            invalidate();
+        }
+    }
+
+    void DataContainerInspectorCanvas::mousePressEvent(tgt::MouseEvent* e) {
+        LGL_ERROR;
+        //if (_renderFullscreen) {
+            switch (e->button()) {
+            case tgt::MouseEvent::MOUSE_BUTTON_LEFT:
+                    //++_currentSlice; // we cant clamp the value here to the number of slices - we do this during rendering
+                _trackballEH->_trackball->startMouseDrag(e);
+                   // e->ignore();
+                    break;
+                
+                default:
+                    break;
+            }
+        //}
+    }
+
+    void DataContainerInspectorCanvas::mouseReleaseEvent(tgt::MouseEvent* e) {
+        if (_renderFullscreen) {
+            switch (e->button()) {
+            case tgt::MouseEvent::MOUSE_BUTTON_LEFT:
+                    //++_currentSlice; // we cant clamp the value here to the number of slices - we do this during rendering
+                _trackballEH->_trackball->endMouseDrag(e);
+                   // e->ignore();
+                    break;
+                
                 default:
                     break;
             }
@@ -376,85 +525,32 @@ namespace campvis {
                 }
             }
             else if(const campvis::MeshGeometry* mg = dynamic_cast<const campvis::MeshGeometry*>(it->second.getData())){
-												LGL_ERROR;
-                // Here the object will be rendered into a texture and the texture will be shown on the output buffer
-				glPushAttrib(GL_ALL_ATTRIB_BITS);
-				_geomteryRenderingShader->activate();
-				LGL_ERROR;
-				_geomteryRenderingShader->setIgnoreUniformLocationError(true);
-				LGL_ERROR;
-				//decorateRenderProlog(data, _shader);
 				
-				float dist = 3 * fabs(mg->getWorldBounds().getLLF().z - mg->getWorldBounds().getURB().z);
-				tgt::Camera cameraInfo(tgt::vec3(0.0f, 0.0f, dist), tgt::vec3(0, 0, -1));
-				cameraInfo.setFarDist(1000.0f);
-				campvis::CameraProperty* p_camera = new campvis::CameraProperty("camera", "Camera", cameraInfo);
-				campvis::IVec4Property* p_color = new campvis::IVec4Property("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f));
-					
-				_geomteryRenderingShader->setUniform("_projectionMatrix", p_camera->getValue().getProjectionMatrix());
-												LGL_ERROR;
-				_geomteryRenderingShader->setUniform("_viewMatrix", p_camera->getValue().getViewMatrix());
-												LGL_ERROR;
-												LGL_ERROR;
+                LGL_ERROR;
+                
+                static bool flag = false;
 
+                if(!flag)
+                {
+                    float dist = 3 * fabs(mg->getWorldBounds().getLLF().z - mg->getWorldBounds().getURB().z);
+                    _trackballEH->reinitializeCamera(mg->getWorldBounds());
+                    _trackballEH->_trackball->moveCameraBackward(dist);
+                    flag = true;
+                }
 
+                if(_geomteryRendering_ColorBuffer)
+                    delete _geomteryRendering_ColorBuffer;
 
-				_geomteryRenderingShader->setUniform("_modelMatrix", tgt::mat4::createTranslation(-mg->getWorldBounds().center()));
-												LGL_ERROR;
-												LGL_ERROR;
+                if(_geomteryRendering_DepthBuffer)
+                    delete _geomteryRendering_DepthBuffer;
 
-				//_geomteryRenderingShader->setUniform("_color", p_color->getValue());
-				//								LGL_ERROR;
-				_geomteryRenderingShader->setUniform("_cameraPosition", p_camera->getValue().getPosition());
-												LGL_ERROR;
-				_geomteryRenderingShader->setIgnoreUniformLocationError(false);
-								LGL_ERROR;
-				tgt::FramebufferObject* frameBuffer = new tgt::FramebufferObject();
-								LGL_ERROR;
-				frameBuffer->activate();
-				LGL_ERROR;
+                _geomteryRendering_ColorBuffer = new tgt::Texture(0, tgt::ivec3(400, 100, 1), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
+                _geomteryRendering_DepthBuffer  = new tgt::Texture(0, tgt::ivec3(400, 100, 1), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
 
-				// acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
-				//tgt::TextureUnit rtUnit;
-				//rtUnit.activate();
-
-				// Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
-				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-				tgt::Texture* colorBuff = new tgt::Texture(0, tgt::ivec3(400, 100, 1), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-				tgt::Texture* depthBuff  = new tgt::Texture(0, tgt::ivec3(400, 100, 1), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
-
-				colorBuff->uploadTexture();
-				colorBuff->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
-
-				depthBuff->uploadTexture();
-				depthBuff->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
-				LGL_ERROR;
-				frameBuffer->attachTexture(colorBuff, GL_COLOR_ATTACHMENT0);
-				frameBuffer->attachTexture(depthBuff, GL_DEPTH_ATTACHMENT);
-				frameBuffer->isComplete();
-				LGL_ERROR;
-
-				glViewport(0, 0, 400, 100);
-				glEnable(GL_DEPTH_TEST);
-				glDepthFunc(GL_LESS);
-				glClearDepth(1.0f);
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				LGL_ERROR;
-				mg->render(GL_POLYGON);
-				LGL_ERROR;
-
-				colorBuff->downloadTexture();
-				frameBuffer->deactivate();
-				LGL_ERROR;
-
-				_geomteryRenderingShader->deactivate();
-
-				_textures.push_back(colorBuff);
-
-				glPopAttrib();
-
-				
+                _meshGeomteryPtr = mg;
+                drawMeshGeomtery(mg);
+                
+				_textures.push_back(_geomteryRendering_ColorBuffer);				
 
             }else if(const campvis::FaceGeometry* fg = dynamic_cast<const campvis::FaceGeometry*>(it->second.getData())){
 

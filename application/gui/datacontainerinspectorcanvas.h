@@ -46,6 +46,9 @@
 #include "core/tools/opengljobprocessor.h"
 #include "modules/vis/processors/geometryrenderer.h"
 
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
+#include "core/datastructures/meshgeometry.h"
+
 namespace tgt {
     class Shader;
     class Texture;
@@ -126,10 +129,22 @@ namespace campvis {
         virtual void mouseMoveEvent(tgt::MouseEvent* e);
 
         /**
-         * Called on mouse wheel even on this canvas.
+         * Called on mouse wheel event on this canvas.
          * \param   e   Mouse event arguments
          */
         virtual void wheelEvent(tgt::MouseEvent* e);
+        
+        /**
+         * Called on mouse press button event on this canvas.
+         * \param   e   Mouse event arguments
+         */
+        virtual void mousePressEvent(tgt::MouseEvent* e);
+        
+        /**
+         * Called on mouse release button event on this canvas.
+         * \param   e   Mouse event arguments
+         */
+        virtual void mouseReleaseEvent(tgt::MouseEvent* e);
         
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
@@ -138,6 +153,7 @@ namespace campvis {
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
         IntProperty p_currentSlice;
+        IVec4Property p_meshSolidColor;                 ///< Color used to render the mesh object
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
     private slots:
@@ -181,11 +197,11 @@ namespace campvis {
         void paintTexture(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
 
 		/**
-         * Renders the given 2D texture.
+         * Renders the MeshGeomtery into the geomtery renderer color buffer and depth buffer
          * Binds the texture to the shader, sets the uniforms and renders the quad.
-         * \param   texture     The texture to render.
+         * \param   meshGeomtery     The mesh to be rendered.
          */
-		void drawGeomtery();
+		void drawMeshGeomtery(const campvis::MeshGeometry* meshGeomtery);
 
         /**
          * Creates the quad used for rendering the textures.
@@ -214,6 +230,14 @@ namespace campvis {
         int _currentSlice;								///< current slice if rendering a 3D image fullscreen, render MIP if negative
 
 		tgt::Shader* _geomteryRenderingShader;			///< GLSL shader for rendering the geomtery
+        tgt::Texture* _geomteryRendering_ColorBuffer;   ///< Color Buffer used to render the Geomtery for the debugging mode
+        tgt::Texture* _geomteryRendering_DepthBuffer;   ///< Depth Buffer used to render the Geomtery for the debugging mode
+        const campvis::MeshGeometry* _meshGeomteryPtr;
+
+        campvis::IVec2Property* _canvasSizeProperty;    ///< The property of the size of the canvas
+        tgt::Camera* _trackballCamera;                  ///< Trackball camera
+        campvis::CameraProperty* _trackballCameraProperty;  ///< The property of the trackball camera. Used to pass the trackball camera to the shader.
+        TrackballNavigationEventListener* _trackballEH; ///< TrackBall Event Handler for the camera rotating around the object in the canvas
     };
 }
 
