@@ -18,3 +18,6 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 
 SET(ThisModShaderDirectories "modules/registration/glsl")
 
+LIST(APPEND ThisModIncludeDirs "C:/Users/Christian/Documents/code/ext/nlopt-2.4/api")
+LIST(APPEND ThisModExternalLibs nlopt)
+LIST(APPEND ThisModLinkDirectories "C:/Users/Christian/Documents/code/ext/nlopt-2.4/build-x64/Debug" "C:/Users/Christian/Documents/code/ext/nlopt-2.4/build-x64/Release")

@@ -45,6 +45,8 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include <nlopt.hpp>
+
 namespace tgt {
     class Shader;
 }
@@ -52,12 +54,18 @@ namespace tgt {
 namespace campvis {
     class FaceGeometry;
     class ImageData;
+    class ImageRepresentationGL;
+    class GlReduction;
 
     /**
      * Computes a Similarity Measure using OpenGL
      */
     class SimilarityMeasure : public VisualizationProcessor {
     public:
+        enum AdditionalInvalidationLevels {
+            PERFORM_OPTIMIZATION = 1U << 6
+        };
+
         /**
          * Constructs a new SimilarityMeasure Processor
          **/
@@ -91,15 +99,33 @@ namespace campvis {
         Vec3Property p_translation;                     ///< Moving image translation
         Vec3Property p_rotation;                        ///< Moving image rotation
 
-        ButtonProperty p_compute;
+        ButtonProperty p_computeSimilarity;
 
-    protected:
+        GenericOptionProperty<nlopt::algorithm> p_optimizer;
+        ButtonProperty p_performOptimization;
+
+    private:
+        struct MyFuncData_t {
+            SimilarityMeasure* _object;
+            const ImageRepresentationGL* _reference;
+            const ImageRepresentationGL* _moving;
+            size_t _count;
+        };
+
         /// \see AbstractProcessor::updateProperties
         void updateProperties(DataContainer& dc);
+
+        void performOptimization(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage);
+
+        float computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
+
+
+        static double optimizerFunc(const std::vector<double>& x, std::vector<double>& grad, void* my_func_data);
 
         IVec2Property p_viewportSize;
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
+        GlReduction* _glr;
 
         static const std::string loggerCat_;
     };
