@@ -206,6 +206,7 @@ int Texture::calcBpp(GLint internalformat) {
         case GL_RGB10:
         case GL_R11F_G11F_B10F:
         case GL_RGB9_E5:
+        case GL_R32F:
         case GL_RGBA:
         case GL_RGBA8:
         case GL_RGBA8_SNORM:

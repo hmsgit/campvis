@@ -60,6 +60,8 @@ namespace campvis {
 
         float reduce(const ImageData* image);
 
+        float reduce(const tgt::Texture* texture);
+
 
     private:
         /**

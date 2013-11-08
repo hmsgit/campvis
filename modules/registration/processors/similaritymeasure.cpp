@@ -40,6 +40,7 @@
 
 #include "core/classification/simpletransferfunction.h"
 
+#include "core/tools/glreduction.h"
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
@@ -48,17 +49,19 @@ namespace campvis {
 
     SimilarityMeasure::SimilarityMeasure()
         : VisualizationProcessor(0)
-        , p_referenceId("ReferenceId", "Reference Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
-        , p_movingId("MovingId", "Moving Image", "", DataNameProperty::READ)
-        , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-1000.f), tgt::vec3(1000.f))
-        , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-90.f), tgt::vec3(90.f))
-        , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000))
+        , p_referenceId("ReferenceId", "Reference Image", "", DataNameProperty::READ, AbstractProcessor::VALID)
+        , p_movingId("MovingId", "Moving Image", "", DataNameProperty::READ, AbstractProcessor::VALID)
+        , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-1000.f), tgt::vec3(1000.f), tgt::vec3(1.f), tgt::vec3(1.f))
+        , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.1f), tgt::vec3(2.f))
+        , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
+        , p_compute("ComputeSimilarity", "Compute Similarity")
         , _shader(0)
     {
         addProperty(&p_referenceId);
         addProperty(&p_movingId);
         addProperty(&p_translation);
         addProperty(&p_rotation);
+        addProperty(&p_compute);
 
         _viewportSizeProperty = &p_viewportSize;
     }
@@ -84,25 +87,64 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation movingImage(data, p_movingId.getValue());
 
         if (referenceImage != 0 && movingImage != 0) {
-            FramebufferActivationGuard fag(this);
-            createAndAttachColorTexture();
-            createAndAttachDepthTexture();
+            const tgt::svec3& size = referenceImage->getSize();
+            p_viewportSize.setValue(size.xy());
+            
+            // reserve texture units
+            tgt::TextureUnit referenceUnit, movingUnit;
+            referenceUnit.activate();
 
+            // create temporary texture for result
+            tgt::Texture* similarityTex = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
+            similarityTex->uploadTexture();
+            similarityTex->setWrapping(tgt::Texture::CLAMP);
+
+            // activate FBO and attach texture
+            _fbo->activate();
+            const tgt::ivec2& windowSize = p_viewportSize.getValue();
+            glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
+            _fbo->attachTexture(similarityTex);
+            //_fbo->attachTexture(&similarityTex);
+            LGL_ERROR;
+
+            // bind input images
             _shader->activate();
-            tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
+            referenceImage->bind(_shader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
+            movingImage->bind(_shader, movingUnit, "_movingTexture", "_movingTextureParams");
 
-//             firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
-//             secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
-//             _shader->setUniform("_compositingMethod", p_compositingMethod.getOptionValue());
-//             _shader->setUniform("_alpha", p_alphaValue.getValue());
-// 
-//             decorateRenderProlog(data, _shader);
-//             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//             QuadRdr.renderQuad();
+            tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(p_translation.getValue()) 
+                                         * tgt::mat4::createRotationZ(p_rotation.getValue().z)
+                                         * tgt::mat4::createRotationY(p_rotation.getValue().y)
+                                         * tgt::mat4::createRotationX(p_rotation.getValue().x);
 
+            const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
+            const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
+            registrationMatrix = w2t * registrationMatrix * t2w;
+
+            tgt::mat4 registrationInverse;
+            if (! registrationMatrix.invert(registrationInverse))
+                tgtAssert(false, "Could not invert registration matrix. This should not happen!");
+
+            // render quad to compute similarity measure by shader
+            //_shader->setUniform("_registrationMatrix", registrationMatrix);
+            _shader->setUniform("_registrationInverse", registrationInverse);
+            QuadRdr.renderQuad();
             _shader->deactivate();
+
+            // detach texture and reduce it
+            data.addData("All glory to the HYPNOTOAD!", new RenderData(_fbo));
+            _fbo->detachAll();
+            _fbo->deactivate();
+
+            // reduce the juice
+            GlReduction reducer;
+            float similarity = reducer.reduce(similarityTex);
+
+            LDEBUG("Similarity Measure: " << similarity);
+
             tgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
+
 
         }
         else {

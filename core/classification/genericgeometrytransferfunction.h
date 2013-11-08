@@ -257,6 +257,7 @@ namespace campvis {
         // deactivate Shader and FBO
         _shader->deactivate();
         _fbo->detachTexture(GL_COLOR_ATTACHMENT0);
+        _fbo->detachAll();
         _fbo->deactivate();
         LGL_ERROR;
 

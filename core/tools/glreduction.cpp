@@ -53,7 +53,7 @@ namespace campvis {
         , _fbo(0)
         , _renderQuad(0)
     {
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/glsl/glreduction.frag", "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", "", false);
         if (_shader == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;
@@ -84,9 +84,25 @@ namespace campvis {
             return 0.f;
         }
 
-        tgtAssert(image->getNumChannels() == 1, "Reduction of images with more than one channel currently not implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
+        return reduce(repGl->getTexture());
+    }
+    
+    float GlReduction::reduce(const tgt::Texture* texture) {
+        tgtAssert(texture != 0, "Image must not be 0!");
+        if (_shader == 0) {
+            LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
+            return 0.f;
+        }
+        if (texture == 0) {
+            LERROR("Empty texture received - nothing to reduce!");
+            return 0.f;
+        }
 
-        const tgt::svec3& size = image->getSize();
+        //tgtAssert(texture->getNumChannels() == 1, "Reduction of images with more than one channel currently not implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
+        tgtAssert(texture->getDimensions().z == 1, "Reduction of 3D images not yet implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
+
+        std::vector<float> readBackBuffer;
+        const tgt::ivec3& size = texture->getDimensions();
         tgt::vec2 texCoordMultiplier(1.f);
         tgt::ivec2 currentSize = size.xy();
         reduceSizes(currentSize, texCoordMultiplier);
@@ -99,8 +115,8 @@ namespace campvis {
 
         // create temporary textures
         for (size_t i = 0; i < 2; ++i) {
-            _tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RED, GL_R32F, GL_FLOAT, tgt::Texture::NEAREST);
-            //_tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RGBA, GL_RGBA8, GL_FLOAT, tgt::Texture::NEAREST);
+            //_tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RED, GL_R32F, GL_FLOAT, tgt::Texture::NEAREST);
+            _tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
             _tempTextures[i]->uploadTexture();
             _tempTextures[i]->setWrapping(tgt::Texture::CLAMP);
         }
@@ -114,8 +130,16 @@ namespace campvis {
 
         // perform first reduction step outside:
         _shader->activate();
-        repGl->bind(_shader, inputUnit);
         _fbo->attachTexture(_tempTextures[_readTex]);
+
+        _shader->setIgnoreUniformLocationError(true);
+        inputUnit.activate();
+        texture->bind();
+        _shader->setUniform("_texture", inputUnit.getUnitNumber());
+        _shader->setUniform("_textureParams._size", tgt::vec2(size.xy()));
+        _shader->setUniform("_textureParams._sizeRCP", tgt::vec2(1.f) / tgt::vec2(size.xy()));
+        _shader->setUniform("_textureParams._numChannels", static_cast<int>(texture->getNumChannels()));
+        _shader->setIgnoreUniformLocationError(false);
 
         glViewport(0, 0, currentSize.x, currentSize.y);
         _shader->setUniform("_texCoordsMultiplier", texCoordMultiplier);
@@ -144,8 +168,6 @@ namespace campvis {
         // read back stuff
         GLenum readBackFormat = _tempTextures[_readTex]->getFormat();
         size_t channels = _tempTextures[_readTex]->getNumChannels();
-
-        std::vector<float> readBackBuffer;
         readBackBuffer.resize(currentSize.x * currentSize.y * channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
         glReadPixels(0, 0, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &readBackBuffer.front());
@@ -173,7 +195,7 @@ namespace campvis {
             currentSize.y = DIV_CEIL(currentSize.y, 2);
             texCoordMultiplier.y /= 2.f;
         }
-        
+
     }
 
 }

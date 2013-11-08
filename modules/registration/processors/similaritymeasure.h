@@ -38,6 +38,7 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/buttonproperty.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/optionproperty.h"
@@ -89,6 +90,8 @@ namespace campvis {
 
         Vec3Property p_translation;                     ///< Moving image translation
         Vec3Property p_rotation;                        ///< Moving image rotation
+
+        ButtonProperty p_compute;
 
     protected:
         /// \see AbstractProcessor::updateProperties

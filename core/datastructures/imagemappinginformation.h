@@ -71,7 +71,7 @@ namespace campvis {
 
         /**
          * Gets the transformation matrix from texture to world coordinates.
-         * \return  _textureToWolrdTransformation
+         * \return  _textureToWorldTransformation
          */
         const tgt::mat4& getTextureToWorldMatrix() const;
 
@@ -117,7 +117,7 @@ namespace campvis {
 
         LinearMapping<float> _realWorldValueMapping;     ///< Linear mapping for mapping element values to real world values
 
-        tgt::mat4 _textureToWolrdTransformation;        ///< Transformation matrix from texture to world coordinates
+        tgt::mat4 _textureToWorldTransformation;        ///< Transformation matrix from texture to world coordinates
         tgt::mat4 _worldToTextureTransformation;        ///< Transformation matrix from world to texture coordinates
 
         tgt::mat4 _voxelToWorldTransformation;        ///< Transformation matrix from voxel to world coordinates

@@ -59,8 +59,8 @@ namespace campvis {
     }
 
     void ImageMappingInformation::updateMatrices() {
-        _textureToWolrdTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
-        if (! _textureToWolrdTransformation.invert(_worldToTextureTransformation))
+        _textureToWorldTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
+        if (! _textureToWorldTransformation.invert(_worldToTextureTransformation))
             tgtAssert(false, "Could not invert texture-to-world matrix. That should not happen!");
 
         _voxelToWorldTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize);
@@ -69,7 +69,7 @@ namespace campvis {
     }
 
     const tgt::mat4& ImageMappingInformation::getTextureToWorldMatrix() const {
-        return _textureToWolrdTransformation;
+        return _textureToWorldTransformation;
     }
 
     const tgt::mat4& ImageMappingInformation::getWorldToTextureMatrix() const {

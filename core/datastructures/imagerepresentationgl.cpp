@@ -249,6 +249,7 @@ namespace campvis {
                 shader->setUniform(texParamsUniform + "._voxelSize", _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texParamsUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texParamsUniform + "._textureToWorldMatrix", _parent->getMappingInformation().getTextureToWorldMatrix());
+                shader->setUniform(texParamsUniform + "._worldToTextureMatrix", _parent->getMappingInformation().getWorldToTextureMatrix());
                 shader->setUniform(texParamsUniform + "._realWorldMapping", tgt::vec2(_parent->getMappingInformation().getRealWorldMapping()._shift, _parent->getMappingInformation().getRealWorldMapping()._scale));
                 break;
 
@@ -290,6 +291,10 @@ namespace campvis {
             _texture->downloadTexture();
         }
         return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), _texture->getPixelData());
+    }
+
+    void ImageRepresentationGL::unbind() const {
+        _texture->unbind();
     }
 
 
