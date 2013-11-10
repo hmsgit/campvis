@@ -41,20 +41,33 @@ uniform TextureParameters3D _movingTextureParams;
 uniform float _zTex;
 uniform mat4 _registrationInverse;
 
+uniform bool _applyMask;
+uniform vec2 _xClampRange;
+uniform vec2 _yClampRange;
+
 void main() {
-    // compute lookup coordinates
-    vec3 referenceLookupTexCoord = vec3(ex_TexCoord.xy, _zTex);
-    vec4 movingLookupTexCoord = _registrationInverse * vec4(referenceLookupTexCoord, 1.0);
+    float sad = 0.0;
 
-    // fetch texels
-    float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).a;
-    float movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
+    if (   ex_TexCoord.x >= _xClampRange.x && ex_TexCoord.x <= _xClampRange.y 
+        && ex_TexCoord.y >= _yClampRange.x && ex_TexCoord.y <= _yClampRange.y
+        && _zTex >= _zClampRange.x         && _zTex <= _zClampRange.y) {
+        // compute lookup coordinates
+        vec3 referenceLookupTexCoord = vec3(ex_TexCoord.xy, _zTex);
+        vec4 movingLookupTexCoord = _registrationInverse * vec4(referenceLookupTexCoord, 1.0);
 
-    // compute differences
-    float difference = referenceValue - movingValue;
-    float sad = abs(difference);
-    //float ssd = difference * difference;
+        // fetch texels
+        float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).a;
+        float movingValue = 0.0;
+        
+        if (!_applyMask || referenceValue > 0.0)
+            movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
 
+        // compute differences
+        float difference = referenceValue - movingValue;
+        sad = abs(difference);
+        //float ssd = difference * difference;
+    }
+    
     // write output color
     out_Color = vec4(sad, sad, sad, sad);
 }

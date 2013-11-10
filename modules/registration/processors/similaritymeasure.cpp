@@ -55,8 +55,12 @@ namespace campvis {
 
     SimilarityMeasure::SimilarityMeasure()
         : VisualizationProcessor(0)
-        , p_referenceId("ReferenceId", "Reference Image", "", DataNameProperty::READ, AbstractProcessor::VALID)
+        , p_referenceId("ReferenceId", "Reference Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
         , p_movingId("MovingId", "Moving Image", "", DataNameProperty::READ, AbstractProcessor::VALID)
+        , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_applyMask("ApplyMask", "Apply Mask", true)
         , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-1000.f), tgt::vec3(1000.f), tgt::vec3(1.f), tgt::vec3(1.f))
         , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.1f), tgt::vec3(2.f))
         , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
@@ -65,18 +69,31 @@ namespace campvis {
         , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT | PERFORM_OPTIMIZATION)
         , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image", AbstractProcessor::INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE)
+        , p_forceStop("Force Stop", "Force Stop", AbstractProcessor::VALID)
         , _costFunctionShader(0)
         , _glr(0)
+        , _opt(0)
     {
         addProperty(&p_referenceId);
         addProperty(&p_movingId);
+
+        addProperty(&p_clipX);
+        addProperty(&p_clipY);
+        addProperty(&p_clipZ);
+        addProperty(&p_applyMask);
+
         addProperty(&p_translation);
         addProperty(&p_rotation);
         addProperty(&p_computeSimilarity);
+
         addProperty(&p_differenceImageId);
         addProperty(&p_computeDifferenceImage);
+
         addProperty(&p_optimizer);
         addProperty(&p_performOptimization);
+        addProperty(&p_forceStop);
+
+        p_forceStop.s_clicked.connect(this, &SimilarityMeasure::forceStop);
 
         _viewportSizeProperty = &p_viewportSize;
     }
@@ -104,6 +121,9 @@ namespace campvis {
 
         delete _glr;
         _glr = 0;
+
+        delete _opt;
+        _opt = 0;
     }
 
     void SimilarityMeasure::process(DataContainer& data) {
@@ -132,6 +152,14 @@ namespace campvis {
         ScopedTypedData<ImageData> referenceImage(dc, p_referenceId.getValue());
         if (referenceImage != 0) {
             p_viewportSize.setValue(referenceImage->getSize().xy());
+
+            p_clipX.setMaxValue(tgt::ivec2(static_cast<int>(referenceImage->getSize().x), static_cast<int>(referenceImage->getSize().x)));
+            p_clipY.setMaxValue(tgt::ivec2(static_cast<int>(referenceImage->getSize().y), static_cast<int>(referenceImage->getSize().y)));
+            p_clipZ.setMaxValue(tgt::ivec2(static_cast<int>(referenceImage->getSize().z), static_cast<int>(referenceImage->getSize().z)));
+
+            p_clipX.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().x)));
+            p_clipY.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().y)));
+            p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().z)));
         }
 
         validate(AbstractProcessor::INVALID_PROPERTIES);
@@ -143,9 +171,9 @@ namespace campvis {
 
         MyFuncData_t mfd = { this, referenceImage, movingImage, 0 };
 
-        nlopt::opt opt(p_optimizer.getOptionValue(), 6);
-        opt.set_min_objective(&SimilarityMeasure::optimizerFunc, &mfd);
-        opt.set_xtol_rel(1e-4);
+        _opt = new nlopt::opt(p_optimizer.getOptionValue(), 6);
+        _opt->set_min_objective(&SimilarityMeasure::optimizerFunc, &mfd);
+        _opt->set_xtol_rel(1e-4);
 
         std::vector<double> x(6);
         x[0] = p_translation.getValue().x;
@@ -162,16 +190,26 @@ namespace campvis {
         stepSize[3] = 0.5;
         stepSize[4] = 0.5;
         stepSize[5] = 0.5;
-        opt.set_initial_step(stepSize);
+        _opt->set_initial_step(stepSize);
 
         double minf;
-        nlopt::result result = opt.optimize(x, minf);
 
-        if (result >= nlopt::SUCCESS) {
+        nlopt::result result = nlopt::SUCCESS;
+        try {
+            result = _opt->optimize(x, minf);
+        }
+        catch (std::exception& e) {
+            LERROR("Excpetion during optimization: " << e.what());
+        }
+        
+        if (result >= nlopt::SUCCESS || result <= nlopt::ROUNDOFF_LIMITED) {
             LDEBUG("Optimization successful, took " << mfd._count << " steps.");
             p_translation.setValue(tgt::vec3(x[0], x[1], x[2]));
             p_rotation.setValue(tgt::vec3(x[3], x[4], x[5]));
         }
+
+        delete _opt;
+        _opt = 0;
 
         validate(PERFORM_OPTIMIZATION);
     }
@@ -202,18 +240,22 @@ namespace campvis {
 
         // bind input images
         _costFunctionShader->activate();
+        _costFunctionShader->setUniform("_applyMask", p_applyMask.getValue());
+        _costFunctionShader->setUniform("_xClampRange", tgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
+        _costFunctionShader->setUniform("_yClampRange", tgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
+        _costFunctionShader->setUniform("_zClampRange", tgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
         referenceImage->bind(_costFunctionShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
         movingImage->bind(_costFunctionShader, movingUnit, "_movingTexture", "_movingTextureParams");
 
         tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
-
-        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
-        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
-        registrationMatrix = w2t * registrationMatrix * t2w;
-
         tgt::mat4 registrationInverse;
         if (! registrationMatrix.invert(registrationInverse))
             tgtAssert(false, "Could not invert registration matrix. This should not happen!");
+
+        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
+        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
+        registrationInverse = w2t * registrationInverse * t2w;
+
 
         // render quad to compute similarity measure by shader
         _costFunctionShader->setUniform("_registrationInverse", registrationInverse);
@@ -253,16 +295,16 @@ namespace campvis {
     }
 
     tgt::mat4 SimilarityMeasure::euleranglesToMat4(const tgt::vec3& eulerAngles) {
-	    float sinX = sin(eulerAngles.x);
-	    float cosX = cos(eulerAngles.x);
-	    float sinY = sin(eulerAngles.y);
-	    float cosY = cos(eulerAngles.y);
-	    float sinZ = sin(eulerAngles.z);
-	    float cosZ = cos(eulerAngles.z);
+        float sinX = sin(eulerAngles.x);
+        float cosX = cos(eulerAngles.x);
+        float sinY = sin(eulerAngles.y);
+        float cosY = cos(eulerAngles.y);
+        float sinZ = sin(eulerAngles.z);
+        float cosZ = cos(eulerAngles.z);
 
         tgt::mat4 toReturn(cosY * cosZ,   cosZ * sinX * sinY - cosX * sinZ,   sinX * sinZ + cosX * cosZ * sinY,   0.f,
-	                       cosY * sinZ,   sinX * sinY * sinZ + cosX * cosZ,   cosX * sinY * sinZ - cosZ * sinX,   0.f,
-	                       (-1) * sinY,   cosY * sinX,                        cosX * cosY,                        0.f,
+                           cosY * sinZ,   sinX * sinY * sinZ + cosX * cosZ,   cosX * sinY * sinZ - cosZ * sinX,   0.f,
+                           (-1) * sinY,   cosY * sinX,                        cosX * cosY,                        0.f,
                            0.f,           0.f,                                0.f,                                1.f);
         return toReturn;
     }
@@ -291,18 +333,22 @@ namespace campvis {
 
         // bind input images
         _differenceShader->activate();
+        _differenceShader->setUniform("_applyMask", p_applyMask.getValue());
+        _differenceShader->setUniform("_xClampRange", tgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
+        _differenceShader->setUniform("_yClampRange", tgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
+        _differenceShader->setUniform("_zClampRange", tgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
         referenceImage->bind(_differenceShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
         movingImage->bind(_differenceShader, movingUnit, "_movingTexture", "_movingTextureParams");
 
         tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
-
-        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
-        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
-        registrationMatrix = w2t * registrationMatrix * t2w;
-
         tgt::mat4 registrationInverse;
         if (! registrationMatrix.invert(registrationInverse))
             tgtAssert(false, "Could not invert registration matrix. This should not happen!");
+
+        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
+        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
+        registrationInverse = w2t * registrationInverse * t2w;
+
 
         // render quad to compute similarity measure by shader
         _differenceShader->setUniform("_registrationInverse", registrationInverse);
@@ -326,6 +372,13 @@ namespace campvis {
         LGL_ERROR;
 
         validate(COMPUTE_DIFFERENCE_IMAGE);
+    }
+
+    void SimilarityMeasure::forceStop() {
+        if (_opt != 0)
+            _opt->force_stop();
+
+        validate(PERFORM_OPTIMIZATION);
     }
 
 

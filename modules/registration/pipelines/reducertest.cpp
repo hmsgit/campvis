@@ -60,14 +60,13 @@ namespace campvis {
     void ReducerTest::init() {
         AutoEvaluationPipeline::init();
 
-        _referenceReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S3/Volume_0.mhd");
+        _referenceReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S3median/Volume_0.mhd");
         _referenceReader.p_targetImageID.setValue("Reference Image");
         _referenceReader.p_targetImageID.addSharedProperty(&_sm.p_referenceId);
 
-        _movingReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S3/Volume_1.mhd");
+        _movingReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S3median/Volume_1.mhd");
         _movingReader.p_targetImageID.setValue("Moving Image");
         _movingReader.p_targetImageID.addSharedProperty(&_sm.p_movingId);
-
 
         _sm.p_differenceImageId.addSharedProperty(&_ve.p_inputVolume);
 

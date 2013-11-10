@@ -39,30 +39,45 @@ uniform TextureParameters3D _referenceTextureParams;
 uniform sampler3D _movingTexture;
 uniform TextureParameters3D _movingTextureParams;
 
-//uniform mat4 _registrationMatrix;
 uniform mat4 _registrationInverse;
 
+uniform bool _applyMask = false;
+uniform vec2 _xClampRange = vec2(0.0, 1.0);
+uniform vec2 _yClampRange = vec2(0.0, 1.0);
+uniform vec2 _zClampRange = vec2(0.0, 1.0);
+
 void main() {
-    ivec2 texel = ivec2(ex_TexCoord.xy * _referenceTextureParams._size.xy);
-    float depth = _referenceTextureParams._size.z;
     float sad = 0.0;
     float ssd = 0.0;
 
-    for (float z = _referenceTextureParams._sizeRCP.z / 2.0; z < 1.0; z += _referenceTextureParams._sizeRCP.z) {
-        vec3 referenceLookupTexCoord = vec3(ex_TexCoord.xy, z);
-        vec4 movingLookupTexCoord = _registrationInverse * vec4(referenceLookupTexCoord, 1.0);
-        //movingLookupTexCoord.xyz /= movingLookupTexCoord.z;
+    if (ex_TexCoord.x >= _xClampRange.x && ex_TexCoord.x <= _xClampRange.y && ex_TexCoord.y >= _yClampRange.x && ex_TexCoord.y <= _yClampRange.y) {
+        float zStart = min(_referenceTextureParams._sizeRCP.z / 2.0, _zClampRange.x);
+        float zEnd = min(1.0, _zClampRange.y);
 
-//        if (all(greaterThanEqual(movingLookupTexCoord.xyz, vec3(0.0))) && all(lessThanEqual(movingLookupTexCoord.xyz, vec3(1.0)))) {
+        for (float z = zStart; z < zEnd; z += _referenceTextureParams._sizeRCP.z) {
+            // fetch value from reference volume
+            vec3 referenceLookupTexCoord = vec3(ex_TexCoord.xy, z);
             float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).a;
-            float movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
 
-            float difference = referenceValue - movingValue;
-            sad += abs(difference);
-            ssd += difference * difference;
-//        }
+            // apply mask if requested
+            if (!_applyMask || referenceValue > 0.0) {
+                // compute moving lookup texture coordinates
+                vec4 movingLookupTexCoord = _registrationInverse * vec4(referenceLookupTexCoord, 1.0);
+                //movingLookupTexCoord.xyz /= movingLookupTexCoord.z;
+
+                // fetch value from moving volume
+                float movingValue = 0.0;
+                if (all(greaterThanEqual(movingLookupTexCoord.xyz, vec3(0.0))) && all(lessThanEqual(movingLookupTexCoord.xyz, vec3(1.0)))) {
+                   movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
+                }
+
+                // compute difference metrics
+                float difference = referenceValue - movingValue;
+                sad += abs(difference);
+                ssd += difference * difference;
+            }
+        }
     }
 
-    //out_Value = toReturn;
     out_Color = vec4(ssd, sad, 0.0, 1.0);
 }

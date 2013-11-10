@@ -98,6 +98,11 @@ namespace campvis {
         DataNameProperty p_referenceId;                 ///< image ID for reference image
         DataNameProperty p_movingId;                    ///< image ID for moving image
 
+        IVec2Property p_clipX;                          ///< clip coordinates for x axis
+        IVec2Property p_clipY;                          ///< clip coordinates for y axis
+        IVec2Property p_clipZ;                          ///< clip coordinates for z axis
+
+        BoolProperty p_applyMask;
         Vec3Property p_translation;                     ///< Moving image translation
         Vec3Property p_rotation;                        ///< Moving image rotation
 
@@ -108,6 +113,7 @@ namespace campvis {
 
         GenericOptionProperty<nlopt::algorithm> p_optimizer;
         ButtonProperty p_performOptimization;
+        ButtonProperty p_forceStop;
 
     private:
         struct MyFuncData_t {
@@ -122,6 +128,8 @@ namespace campvis {
 
         void performOptimization(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage);
 
+        void forceStop();
+
         float computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
 
         void generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
@@ -135,6 +143,7 @@ namespace campvis {
         tgt::Shader* _costFunctionShader;                           ///< Shader for slice rendering
         tgt::Shader* _differenceShader;                 ///< Shader for computing the difference image
         GlReduction* _glr;
+        nlopt::opt* _opt;
 
         static const std::string loggerCat_;
     };
