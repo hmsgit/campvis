@@ -61,6 +61,13 @@ namespace campvis {
             _floatingWindow->setWindowTitle(title);
     }
 
+    void MdiDockableWindow::activateWindow() {
+        if (_docked)
+            _dockedWindow->setFocus();
+        else
+            _floatingWindow->activateWindow();
+    }
+
     QAction* MdiDockableWindow::toggleViewAction() const {
         return _toggleViewAction;
     }
