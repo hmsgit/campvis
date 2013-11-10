@@ -31,6 +31,7 @@
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
+#include "tgt/openglgarbagecollector.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"
@@ -62,7 +63,9 @@ namespace campvis {
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
         , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
         , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT | PERFORM_OPTIMIZATION)
-        , _shader(0)
+        , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE, AbstractProcessor::VALID)
+        , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image", AbstractProcessor::INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE)
+        , _costFunctionShader(0)
         , _glr(0)
     {
         addProperty(&p_referenceId);
@@ -70,6 +73,8 @@ namespace campvis {
         addProperty(&p_translation);
         addProperty(&p_rotation);
         addProperty(&p_computeSimilarity);
+        addProperty(&p_differenceImageId);
+        addProperty(&p_computeDifferenceImage);
         addProperty(&p_optimizer);
         addProperty(&p_performOptimization);
 
@@ -82,16 +87,20 @@ namespace campvis {
 
     void SimilarityMeasure::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasure.frag", "", false);
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
+        _costFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasure.frag", "", false);
+        _costFunctionShader->setAttributeLocation(0, "in_Position");
+        _costFunctionShader->setAttributeLocation(1, "in_TexCoord");
+
+        _differenceShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "", false);
+        _differenceShader->setAttributeLocation(0, "in_Position");
+        _differenceShader->setAttributeLocation(1, "in_TexCoord");
 
         _glr = new GlReduction();
     }
 
     void SimilarityMeasure::deinit() {
         VisualizationProcessor::deinit();
-        ShdrMgr.dispose(_shader);
+        ShdrMgr.dispose(_costFunctionShader);
 
         delete _glr;
         _glr = 0;
@@ -108,6 +117,9 @@ namespace campvis {
 
             float similarity = computeSimilarity(referenceImage, movingImage, p_translation.getValue(), p_rotation.getValue());
             LDEBUG("Similarity Measure: " << similarity);
+
+            if (getInvalidationLevel() & COMPUTE_DIFFERENCE_IMAGE) 
+                generateDifferenceImage(&data, referenceImage, movingImage, p_translation.getValue(), p_rotation.getValue());
         }
         else {
             LERROR("No suitable input image found.");
@@ -189,14 +201,11 @@ namespace campvis {
         LGL_ERROR;
 
         // bind input images
-        _shader->activate();
-        referenceImage->bind(_shader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
-        movingImage->bind(_shader, movingUnit, "_movingTexture", "_movingTextureParams");
+        _costFunctionShader->activate();
+        referenceImage->bind(_costFunctionShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
+        movingImage->bind(_costFunctionShader, movingUnit, "_movingTexture", "_movingTextureParams");
 
-        tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) 
-            * tgt::mat4::createRotationZ(rotation.z)
-            * tgt::mat4::createRotationY(rotation.y)
-            * tgt::mat4::createRotationX(rotation.x);
+        tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
 
         const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
         const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
@@ -207,10 +216,9 @@ namespace campvis {
             tgtAssert(false, "Could not invert registration matrix. This should not happen!");
 
         // render quad to compute similarity measure by shader
-        //_shader->setUniform("_registrationMatrix", registrationMatrix);
-        _shader->setUniform("_registrationInverse", registrationInverse);
+        _costFunctionShader->setUniform("_registrationInverse", registrationInverse);
         QuadRdr.renderQuad();
-        _shader->deactivate();
+        _costFunctionShader->deactivate();
 
         // detach texture and reduce it
         //data.addData("All glory to the HYPNOTOAD!", new RenderData(_fbo));
@@ -237,10 +245,87 @@ namespace campvis {
         tgt::vec3 translation(x[0], x[1], x[2]);
         tgt::vec3 rotation(x[3], x[4], x[5]);
         float similarity = mfd->_object->computeSimilarity(mfd->_reference, mfd->_moving, translation, rotation);
+        GLGC.deleteGarbage();
 
         LDEBUG(translation << rotation << " : " << similarity);
 
         return similarity;
+    }
+
+    tgt::mat4 SimilarityMeasure::euleranglesToMat4(const tgt::vec3& eulerAngles) {
+	    float sinX = sin(eulerAngles.x);
+	    float cosX = cos(eulerAngles.x);
+	    float sinY = sin(eulerAngles.y);
+	    float cosY = cos(eulerAngles.y);
+	    float sinZ = sin(eulerAngles.z);
+	    float cosZ = cos(eulerAngles.z);
+
+        tgt::mat4 toReturn(cosY * cosZ,   cosZ * sinX * sinY - cosX * sinZ,   sinX * sinZ + cosX * cosZ * sinY,   0.f,
+	                       cosY * sinZ,   sinX * sinY * sinZ + cosX * cosZ,   cosX * sinY * sinZ - cosZ * sinX,   0.f,
+	                       (-1) * sinY,   cosY * sinX,                        cosX * cosY,                        0.f,
+                           0.f,           0.f,                                0.f,                                1.f);
+        return toReturn;
+    }
+
+    void SimilarityMeasure::generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation) {
+        tgtAssert(dc != 0, "DataContainer must not be 0.");
+        tgtAssert(referenceImage != 0, "Reference Image must not be 0.");
+        tgtAssert(movingImage != 0, "Moving Image must not be 0.");
+
+        const tgt::svec3& size = referenceImage->getSize();
+        tgt::ivec2 viewportSize = size.xy();
+
+        // reserve texture units
+        tgt::TextureUnit referenceUnit, movingUnit;
+        referenceUnit.activate();
+
+        // create temporary texture for result
+        tgt::Texture* similarityTex = new tgt::Texture(0, tgt::ivec3(size), GL_ALPHA, GL_ALPHA32F_ARB, GL_FLOAT, tgt::Texture::NEAREST);
+        similarityTex->uploadTexture();
+        similarityTex->setWrapping(tgt::Texture::CLAMP);
+
+        // activate FBO and attach texture
+        _fbo->activate();
+        glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
+        LGL_ERROR;
+
+        // bind input images
+        _differenceShader->activate();
+        referenceImage->bind(_differenceShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
+        movingImage->bind(_differenceShader, movingUnit, "_movingTexture", "_movingTextureParams");
+
+        tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
+
+        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
+        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
+        registrationMatrix = w2t * registrationMatrix * t2w;
+
+        tgt::mat4 registrationInverse;
+        if (! registrationMatrix.invert(registrationInverse))
+            tgtAssert(false, "Could not invert registration matrix. This should not happen!");
+
+        // render quad to compute similarity measure by shader
+        _differenceShader->setUniform("_registrationInverse", registrationInverse);
+
+        for (int z = 0; z < size.z; ++z) {
+            float texZ = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
+            _differenceShader->setUniform("_zTex", texZ);
+            _fbo->attachTexture(similarityTex, GL_COLOR_ATTACHMENT0, 0, z);
+            QuadRdr.renderQuad();
+        }
+        _differenceShader->deactivate();
+
+        // detach texture and reduce it
+        ImageData* id = new ImageData(3, size, 1);
+        ImageRepresentationGL::create(id, similarityTex);
+        id->setMappingInformation(referenceImage->getParent()->getMappingInformation());
+        dc->addData(p_differenceImageId.getValue(), id);
+        _fbo->deactivate();
+
+        tgt::TextureUnit::setZeroUnit();
+        LGL_ERROR;
+
+        validate(COMPUTE_DIFFERENCE_IMAGE);
     }
 
 

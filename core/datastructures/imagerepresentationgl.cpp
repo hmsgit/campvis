@@ -62,6 +62,8 @@ namespace campvis {
         , _texture(texture)
     {
         tgtAssert(texture != 0, "Given texture must not be 0.");
+        tgtAssert(parent->getDimensionality() >= 3 || texture->getDimensions().z == 1, "Dimensionality of Parent and texture mismatch!");
+        tgtAssert(parent->getDimensionality() >= 2 || texture->getDimensions().y == 1, "Dimensionality of Parent and texture mismatch!");
     }
 
     ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp) 

@@ -35,7 +35,7 @@
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/sliceextractor.h"
+#include "modules/vis/processors/volumeexplorer.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
 
@@ -62,8 +62,6 @@ namespace campvis {
         static const std::string getId() { return "ReducerTest"; };
 
 
-        virtual void keyEvent(tgt::KeyEvent* e);
-
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -72,12 +70,11 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
-        MhdImageReader _imageReader;
-        SliceExtractor _sliceExtractor;
+        MhdImageReader _referenceReader;
+        MhdImageReader _movingReader;
         SimilarityMeasure _sm;
 
-        MWheelToNumericPropertyEventListener _wheelHandler;
-        TransFuncWindowingEventListener _tfWindowingHandler;
+        VolumeExplorer _ve;
 
     };
 

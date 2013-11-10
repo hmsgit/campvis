@@ -33,6 +33,7 @@
 #include <string>
 
 #include "tgt/buffer.h"
+#include "tgt/matrix.h"
 #include "tgt/vertexarrayobject.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
@@ -63,7 +64,8 @@ namespace campvis {
     class SimilarityMeasure : public VisualizationProcessor {
     public:
         enum AdditionalInvalidationLevels {
-            PERFORM_OPTIMIZATION = 1U << 6
+            PERFORM_OPTIMIZATION = 1U << 6,
+            COMPUTE_DIFFERENCE_IMAGE = 1U << 7
         };
 
         /**
@@ -101,6 +103,9 @@ namespace campvis {
 
         ButtonProperty p_computeSimilarity;
 
+        DataNameProperty p_differenceImageId;
+        ButtonProperty p_computeDifferenceImage;
+
         GenericOptionProperty<nlopt::algorithm> p_optimizer;
         ButtonProperty p_performOptimization;
 
@@ -119,12 +124,16 @@ namespace campvis {
 
         float computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
 
+        void generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
+
+        static tgt::mat4 euleranglesToMat4(const tgt::vec3& eulerAngles);
 
         static double optimizerFunc(const std::vector<double>& x, std::vector<double>& grad, void* my_func_data);
 
         IVec2Property p_viewportSize;
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        tgt::Shader* _costFunctionShader;                           ///< Shader for slice rendering
+        tgt::Shader* _differenceShader;                 ///< Shader for computing the difference image
         GlReduction* _glr;
 
         static const std::string loggerCat_;

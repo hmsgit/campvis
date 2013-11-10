@@ -5,8 +5,8 @@
 // If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische UniversitÃ¤t MÃ¼nchen
-//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
 // The licensing of this softare is not yet resolved. Until then, redistribution in source or
@@ -27,56 +27,34 @@
 // 
 // ================================================================================================
 
-#include "reducertest.h"
+in vec3 ex_TexCoord;
+out vec4 out_Color;
 
-#include "tgt/event/keyevent.h"
+#include "tools/texture3d.frag"
 
-#include "core/classification/geometry1dtransferfunction.h"
-#include "core/classification/tfgeometry1d.h"
-#include "core/datastructures/renderdata.h"
+uniform sampler3D _referenceTexture;
+uniform TextureParameters3D _referenceTextureParams;
 
-#include "core/tools/glreduction.h"
+uniform sampler3D _movingTexture;
+uniform TextureParameters3D _movingTextureParams;
 
-namespace campvis {
+uniform float _zTex;
+uniform mat4 _registrationInverse;
 
-    ReducerTest::ReducerTest(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
-        , _referenceReader()
-        , _movingReader()
-        , _sm()
-        , _ve(&_canvasSize)
-    {
-        addProcessor(&_referenceReader);
-        addProcessor(&_movingReader);
-        addProcessor(&_sm);
-        addProcessor(&_ve);
+void main() {
+    // compute lookup coordinates
+    vec3 referenceLookupTexCoord = vec3(ex_TexCoord.xy, _zTex);
+    vec4 movingLookupTexCoord = _registrationInverse * vec4(referenceLookupTexCoord, 1.0);
 
-        addEventListenerToBack(&_ve);
-    }
+    // fetch texels
+    float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).a;
+    float movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
 
-    ReducerTest::~ReducerTest() {
-    }
+    // compute differences
+    float difference = referenceValue - movingValue;
+    float sad = abs(difference);
+    //float ssd = difference * difference;
 
-    void ReducerTest::init() {
-        AutoEvaluationPipeline::init();
-
-        _referenceReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S3/Volume_0.mhd");
-        _referenceReader.p_targetImageID.setValue("Reference Image");
-        _referenceReader.p_targetImageID.addSharedProperty(&_sm.p_referenceId);
-
-        _movingReader.p_url.setValue("D:/Medical Data/SCR/Data/RegSweeps_phantom_cropped/-1S3/Volume_1.mhd");
-        _movingReader.p_targetImageID.setValue("Moving Image");
-        _movingReader.p_targetImageID.addSharedProperty(&_sm.p_movingId);
-
-
-        _sm.p_differenceImageId.addSharedProperty(&_ve.p_inputVolume);
-
-        _ve.p_outputImage.setValue("renderTarget");
-        _renderTargetID.setValue("renderTarget");
-    }
-
-    void ReducerTest::onProcessorValidated(AbstractProcessor* processor) {
-
-    }
-
+    // write output color
+    out_Color = vec4(sad, sad, sad, sad);
 }
