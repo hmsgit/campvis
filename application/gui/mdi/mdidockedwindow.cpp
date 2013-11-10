@@ -65,9 +65,14 @@ namespace campvis {
     }
 
     void MdiDockedWindow::mouseMoveEvent(QMouseEvent* event) {
-        // Only intercept non-resize (the window's current cursor is the default one) drag (the
-        // left mouse button is pressed) events
-        if (event->buttons().testFlag(Qt::LeftButton) && this->cursor().shape() == Qt::ArrowCursor) {
+        const QPoint& widgetPos = this->widget()->mapFromParent(event->pos());
+
+        /*
+         * Only intercept non-resize (the window's current cursor is the default one) drag (the
+         * left mouse button is pressed) events; additionally, the mouse pointer has to be on the
+         * title bar.
+         */
+        if (event->buttons().testFlag(Qt::LeftButton) && widgetPos.y() < 0 && this->cursor().shape() == Qt::ArrowCursor) {
             const QPoint& mousePos = event->globalPos();
 
             if (!_dragActive) {

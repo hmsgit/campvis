@@ -76,7 +76,7 @@ namespace campvis {
         /**
          * Return the widget this window wraps.
          */
-        QWidget* widget();
+        QWidget* widget() const;
 
     signals:
         /**

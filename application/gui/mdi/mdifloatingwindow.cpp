@@ -63,12 +63,15 @@ namespace campvis {
         }
     }
 
-    QWidget* MdiFloatingWindow::widget() {
+    QWidget* MdiFloatingWindow::widget() const {
         return _widget;
     }
 
     void MdiFloatingWindow::mouseMoveEvent(QMouseEvent* event) {
-        this->snapToCursor(event->globalPos());
+        if (_dragActive)
+            this->snapToCursor(event->globalPos());
+        else
+            QWidget::mouseMoveEvent(event);
     }
 
     void MdiFloatingWindow::mouseReleaseEvent(QMouseEvent* event) {
