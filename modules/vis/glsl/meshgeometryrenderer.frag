@@ -27,23 +27,18 @@
 // 
 // ================================================================================================
 
-#include "tools/shading.frag"
+//#include "tools/shading.frag"
 
 
 in vec3 ex_TexCoord;        ///< incoming texture coordinate
 in vec4 ex_Position;        ///< incoming texture coordinate
-in vec4 ex_Color;          ///< outgoing colorin 
-in vec3 ex_Local_Position;     ///< incoming local coordinate
+in vec4 ex_Color;           ///< outgoing colorin 
+in vec3 ex_Local_Position;  ///< incoming local coordinate
+
 out vec4 out_Color;         ///< outgoing fragment color
 
-
-uniform vec4 _colormory;
-//uniform vec4 _color2;
-uniform LightSource _lightSource;
-uniform vec3 _cameraPosition;
-
 void main() {
-    out_Color = _colormory;
+    out_Color = ex_Color;
     //out_Color = vec4(normalize(ex_Local_Position), 1);
     //out_Color = vec4(0, 1, 0, 1);
     //out_Color = _color;

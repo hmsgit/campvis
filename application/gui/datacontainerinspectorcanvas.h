@@ -170,6 +170,11 @@ namespace campvis {
          */
         virtual void paint();
 
+		/**
+         * Performs the painting.
+         */
+        virtual void paintMeshGeomTextures();
+
         /**
          * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
          * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
@@ -184,12 +189,23 @@ namespace campvis {
          */
         void updateTextures();
 
+		/**
+         * Updates the textures vector elements that belongs to mesh geomteries.
+         * \note Only call with acquired lock and valid OpenGL context!!
+         */
+        void updateMeshGeomRenderedTextures();
+
         /**
          * To be called when the canvas is invalidated, issues new paint job.
          */
         void invalidate();
 
-        /**
+		/**
+         * To be called when the mesh geomtery parts of the scene is invalidated, issues new paint job.
+         */
+        void invalidateMeshGeomTextures();
+
+		/**
          * Renders the given 2D texture.
          * Binds the texture to the shader, sets the uniforms and renders the quad.
          * \param   texture     The texture to render.
@@ -201,7 +217,7 @@ namespace campvis {
          * Binds the texture to the shader, sets the uniforms and renders the quad.
          * \param   meshGeomtery     The mesh to be rendered.
          */
-		void drawMeshGeomtery(const campvis::MeshGeometry* meshGeomtery);
+		void drawMeshGeomtery(const campvis::MeshGeometry* meshGeomtery, tgt::Texture* colorBuffer, tgt::Texture* depthBuffer, const unsigned int& meshIndex);
 
         /**
          * Creates the quad used for rendering the textures.
@@ -211,6 +227,7 @@ namespace campvis {
         std::map<QString, QtDataHandle> _handles;
         std::vector<const tgt::Texture*> _textures;
         bool _texturesDirty;
+		bool _meshGeomTexturesDirty;
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
         tbb::mutex _localMutex;                         ///< Mutex protecting the local members
@@ -224,20 +241,21 @@ namespace campvis {
 
         tgt::ivec2 _numTiles;                           ///< number of tiles on texture overview
         tgt::ivec2 _quadSize;                           ///< size in pixels for each tile in overview
-        size_t _selectedTexture;                        ///< index of selected texture for fullscreen view
+        size_t _selectedTexture;                        ///< index of selected texture by mouse
+		int _selectedTrackball;						///< index of selected trackball which will be updated currently
         bool _renderFullscreen;                         ///< flag whether to render in full screen
 
         int _currentSlice;								///< current slice if rendering a 3D image fullscreen, render MIP if negative
 
 		tgt::Shader* _geomteryRenderingShader;			///< GLSL shader for rendering the geomtery
-        tgt::Texture* _geomteryRendering_ColorBuffer;   ///< Color Buffer used to render the Geomtery for the debugging mode
-        tgt::Texture* _geomteryRendering_DepthBuffer;   ///< Depth Buffer used to render the Geomtery for the debugging mode
-        const campvis::MeshGeometry* _meshGeomteryPtr;
+        std::vector<tgt::Texture*> _geomteryRendering_ColorBuffers;   ///< Color Buffer used to render the Geomtery for the debugging mode
+        std::vector<tgt::Texture*> _geomteryRendering_DepthBuffers;   ///< Depth Buffer used to render the Geomtery for the debugging mode
+        const campvis::MeshGeometry* _meshGeomteryPtr;	///<! Pointer to the mesh Geomtery objects
 
-        campvis::IVec2Property* _canvasSizeProperty;    ///< The property of the size of the canvas
-        tgt::Camera* _trackballCamera;                  ///< Trackball camera
-        campvis::CameraProperty* _trackballCameraProperty;  ///< The property of the trackball camera. Used to pass the trackball camera to the shader.
-        TrackballNavigationEventListener* _trackballEH; ///< TrackBall Event Handler for the camera rotating around the object in the canvas
+		tgt::ivec2 _renderingWndSize;
+		std::vector<campvis::CameraProperty*> _trackballCameraProperties; ///< The property of the trackball camera. Used to pass the trackball camera to the shader.
+		std::vector<TrackballNavigationEventListener*> _trackballEHs; ///< TrackBall Event Handler for the camera rotating around the object in the canvas
+		std::vector<int> _geomTextureIndices;
     };
 }
 
