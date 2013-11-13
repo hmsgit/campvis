@@ -47,6 +47,7 @@ uniform vec2 _yClampRange = vec2(0.0, 1.0);
 uniform vec2 _zClampRange = vec2(0.0, 1.0);
 
 void main() {
+    float sum = 0.0;
     float sad = 0.0;
     float ssd = 0.0;
 
@@ -72,6 +73,7 @@ void main() {
                 }
 
                 // compute difference metrics
+                sum += 1.0;
                 float difference = referenceValue - movingValue;
                 sad += abs(difference);
                 ssd += difference * difference;
@@ -79,5 +81,5 @@ void main() {
         }
     }
 
-    out_Color = vec4(ssd, sad, 0.0, 1.0);
+    out_Color = vec4(sum, sad, ssd, 1.0);
 }

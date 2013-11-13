@@ -51,9 +51,11 @@ namespace campvis {
         GenericOption<nlopt::algorithm>("neldermead", "Nelder-Mead Simplex", nlopt::LN_NELDERMEAD)
     };
 
-    static const GenericOption<std::string> metrics[2] = {
+    static const GenericOption<std::string> metrics[4] = {
+        GenericOption<std::string>("SUM", "Sum"),
         GenericOption<std::string>("SAD", "SAD"),
-        GenericOption<std::string>("SSD", "SSD")
+        GenericOption<std::string>("SSD", "SSD"),
+        GenericOption<std::string>("NCC", "NCC")
     };
 
     const std::string SimilarityMeasure::loggerCat_ = "CAMPVis.modules.vis.SimilarityMeasure";
@@ -69,14 +71,16 @@ namespace campvis {
         , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(1.f), tgt::vec3(5.f))
         , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.01f), tgt::vec3(7.f))
         , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
-        , p_metric("Metric", "Similarity Metric", metrics, 2)
+        , p_metric("Metric", "Similarity Metric", metrics, 4)
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
         , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
         , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT | PERFORM_OPTIMIZATION)
         , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image", AbstractProcessor::INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE)
         , p_forceStop("Force Stop", "Force Stop", AbstractProcessor::VALID)
-        , _costFunctionShader(0)
+        , _sadssdCostFunctionShader(0)
+        , _nccCostFunctionShader(0)
+        , _differenceShader(0)
         , _glr(0)
         , _opt(0)
     {
@@ -111,9 +115,13 @@ namespace campvis {
 
     void SimilarityMeasure::init() {
         VisualizationProcessor::init();
-        _costFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasure.frag", "", false);
-        _costFunctionShader->setAttributeLocation(0, "in_Position");
-        _costFunctionShader->setAttributeLocation(1, "in_TexCoord");
+        _sadssdCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasuresadssd.frag", "", false);
+        _sadssdCostFunctionShader->setAttributeLocation(0, "in_Position");
+        _sadssdCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
+
+        _nccCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurencc.frag", "", false);
+        _nccCostFunctionShader->setAttributeLocation(0, "in_Position");
+        _nccCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
 
         _differenceShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "", false);
         _differenceShader->setAttributeLocation(0, "in_Position");
@@ -124,7 +132,9 @@ namespace campvis {
 
     void SimilarityMeasure::deinit() {
         VisualizationProcessor::deinit();
-        ShdrMgr.dispose(_costFunctionShader);
+        ShdrMgr.dispose(_sadssdCostFunctionShader);
+        ShdrMgr.dispose(_nccCostFunctionShader);
+        ShdrMgr.dispose(_differenceShader);
 
         delete _glr;
         _glr = 0;
@@ -179,7 +189,12 @@ namespace campvis {
         MyFuncData_t mfd = { this, referenceImage, movingImage, 0 };
 
         _opt = new nlopt::opt(p_optimizer.getOptionValue(), 6);
-        _opt->set_min_objective(&SimilarityMeasure::optimizerFunc, &mfd);
+        if (p_metric.getOptionValue() == "NCC") {
+            _opt->set_max_objective(&SimilarityMeasure::optimizerFunc, &mfd);
+        }
+        else {
+            _opt->set_min_objective(&SimilarityMeasure::optimizerFunc, &mfd);
+        }
         _opt->set_xtol_rel(1e-4);
 
         std::vector<double> x(6);
@@ -232,27 +247,37 @@ namespace campvis {
         tgt::TextureUnit referenceUnit, movingUnit;
         referenceUnit.activate();
 
-        // create temporary texture for result
-        tgt::Texture* similarityTex = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
+        // create temporary texture(s) for result
+        tgt::Shader* leShader = _sadssdCostFunctionShader;
+        tgt::Texture* similarityTex = 0;
+        tgt::Texture* similarityTex2 = 0;
+        similarityTex = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
         similarityTex->uploadTexture();
         similarityTex->setWrapping(tgt::Texture::CLAMP);
+        if (p_metric.getOptionValue() == "NCC") {
+            similarityTex2 = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
+            similarityTex2->uploadTexture();
+            similarityTex2->setWrapping(tgt::Texture::CLAMP);
+            leShader = _nccCostFunctionShader;
+        }
 
         // activate FBO and attach texture
         _fbo->activate();
         const tgt::ivec2& windowSize = p_viewportSize.getValue();
         glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
         _fbo->attachTexture(similarityTex);
-        //_fbo->attachTexture(&similarityTex);
+        if (p_metric.getOptionValue() == "NCC")
+            _fbo->attachTexture(similarityTex2, GL_COLOR_ATTACHMENT1);
         LGL_ERROR;
 
         // bind input images
-        _costFunctionShader->activate();
-        _costFunctionShader->setUniform("_applyMask", p_applyMask.getValue());
-        _costFunctionShader->setUniform("_xClampRange", tgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
-        _costFunctionShader->setUniform("_yClampRange", tgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
-        _costFunctionShader->setUniform("_zClampRange", tgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
-        referenceImage->bind(_costFunctionShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
-        movingImage->bind(_costFunctionShader, movingUnit, "_movingTexture", "_movingTextureParams");
+        leShader->activate();
+        leShader->setUniform("_applyMask", p_applyMask.getValue());
+        leShader->setUniform("_xClampRange", tgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
+        leShader->setUniform("_yClampRange", tgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
+        leShader->setUniform("_zClampRange", tgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
+        referenceImage->bind(leShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
+        movingImage->bind(leShader, movingUnit, "_movingTexture", "_movingTextureParams");
 
         tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
         tgt::mat4 registrationInverse;
@@ -265,9 +290,18 @@ namespace campvis {
 
 
         // render quad to compute similarity measure by shader
-        _costFunctionShader->setUniform("_registrationInverse", registrationInverse);
-        QuadRdr.renderQuad();
-        _costFunctionShader->deactivate();
+        leShader->setUniform("_registrationInverse", registrationInverse);
+        if (p_metric.getOptionValue() == "NCC") {
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+            glDrawBuffers(2, buffers);
+            QuadRdr.renderQuad();
+            glDrawBuffers(1, buffers);
+        }
+        else {
+            QuadRdr.renderQuad();
+        }
+        
+        leShader->deactivate();
 
         // detach texture and reduce it
         //data.addData("All glory to the HYPNOTOAD!", new RenderData(_fbo));
@@ -275,19 +309,44 @@ namespace campvis {
         _fbo->deactivate();
 
         // reduce the juice
-        std::vector<float> similarities = _glr->reduce(similarityTex);
+        float toReturn = 0.f;
+        if (p_metric.getOptionValue() == "NCC") {
+            std::vector<float> similarities = _glr->reduce(similarityTex);
+            std::vector<float> similarities2 = _glr->reduce(similarityTex2);
+
+            if (similarities.size() >= 3 && similarities2.size() >= 3) {
+                float countRCP = 1.f / similarities[0];
+                float meanFixed = similarities[1] * countRCP;
+                float meanMoving = similarities[2] * countRCP;
+                float varFixed	= (similarities2[1] - (similarities[2] * similarities[2]) * countRCP) * countRCP;
+                float _varMoving = (similarities2[0] - (similarities[1] * similarities[1]) * countRCP) * countRCP;
+
+                float correlation = 0.0f;
+                if (varFixed > 0.0f && _varMoving > 0.0f)
+                {
+                    correlation = (similarities2[2] - (similarities[1] * similarities[2]) * countRCP) * countRCP;
+                    toReturn =  correlation / sqrt(varFixed * _varMoving);
+                }
+            }
+
+        }
+        else {
+            std::vector<float> similarities = _glr->reduce(similarityTex);
+
+            if (p_metric.getOptionValue() == "SUM")
+                toReturn = similarities[0];
+            else if (p_metric.getOptionValue() == "SAD")
+                toReturn = similarities[1];
+            else if (p_metric.getOptionValue() == "SSD")
+                toReturn = similarities[2];
+        }
 
         delete similarityTex;
-
+        delete similarityTex2;
         tgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
-        if (similarities.empty())
-            return 0.f;
-        if (p_metric.getOptionValue() == "SAD")
-            return similarities[0];
-        if (p_metric.getOptionValue() == "SSD")
-            return similarities[1];
+        return toReturn;
     }
 
     double SimilarityMeasure::optimizerFunc(const std::vector<double>& x, std::vector<double>& grad, void* my_func_data) {
@@ -301,7 +360,7 @@ namespace campvis {
         float similarity = mfd->_object->computeSimilarity(mfd->_reference, mfd->_moving, translation, rotation);
         GLGC.deleteGarbage();
 
-        std::cout << translation << rotation << " : " << similarity << "\n";
+        LDEBUG(translation << rotation << " : " << similarity);
 
         return similarity;
     }

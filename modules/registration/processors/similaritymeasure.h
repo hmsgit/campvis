@@ -141,7 +141,8 @@ namespace campvis {
 
         IVec2Property p_viewportSize;
 
-        tgt::Shader* _costFunctionShader;                           ///< Shader for slice rendering
+        tgt::Shader* _sadssdCostFunctionShader;         ///< Shader for computing SAD/SSD
+        tgt::Shader* _nccCostFunctionShader;            ///< Shader for computing NCC
         tgt::Shader* _differenceShader;                 ///< Shader for computing the difference image
         GlReduction* _glr;
         nlopt::opt* _opt;
