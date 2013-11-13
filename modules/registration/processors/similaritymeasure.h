@@ -106,6 +106,7 @@ namespace campvis {
         Vec3Property p_translation;                     ///< Moving image translation
         Vec3Property p_rotation;                        ///< Moving image rotation
 
+        GenericOptionProperty<std::string> p_metric;
         ButtonProperty p_computeSimilarity;
 
         DataNameProperty p_differenceImageId;

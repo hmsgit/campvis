@@ -67,35 +67,37 @@ namespace campvis {
 
     }
 
-    float GlReduction::reduce(const ImageData* image) {
+    std::vector<float> GlReduction::reduce(const ImageData* image) {
         tgtAssert(image != 0, "Image must not be 0!");
         if (_shader == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
-            return 0.f;
+            return std::vector<float>();
         }
         if (image == 0) {
             LERROR("Empty image received - nothing to reduce!");
-            return 0.f;
+            return std::vector<float>();
         }
 
         const ImageRepresentationGL* repGl = image->getRepresentation<ImageRepresentationGL>();
         if (repGl == 0) {
             LERROR("Could not convert input image to OpenGL texture - no reduction possible!");
-            return 0.f;
+            return std::vector<float>();
         }
 
         return reduce(repGl->getTexture());
     }
     
-    float GlReduction::reduce(const tgt::Texture* texture) {
+    std::vector<float> GlReduction::reduce(const tgt::Texture* texture) {
+        std::vector<float> toReturn;
+
         tgtAssert(texture != 0, "Image must not be 0!");
         if (_shader == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
-            return 0.f;
+            return toReturn;
         }
         if (texture == 0) {
             LERROR("Empty texture received - nothing to reduce!");
-            return 0.f;
+            return toReturn;
         }
 
         //tgtAssert(texture->getNumChannels() == 1, "Reduction of images with more than one channel currently not implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
@@ -168,9 +170,9 @@ namespace campvis {
         // read back stuff
         GLenum readBackFormat = _tempTextures[_readTex]->getFormat();
         size_t channels = _tempTextures[_readTex]->getNumChannels();
-        readBackBuffer.resize(currentSize.x * currentSize.y * channels);
+        toReturn.resize(currentSize.x * currentSize.y * channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glReadPixels(0, 0, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &readBackBuffer.front());
+        glReadPixels(0, 0, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &toReturn.front());
         LGL_ERROR;
 
         // clean up...
@@ -183,7 +185,7 @@ namespace campvis {
         delete _tempTextures[1];
         LGL_ERROR;
 
-        return readBackBuffer.front();
+        return toReturn;
     }
 
     void GlReduction::reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordMultiplier) {

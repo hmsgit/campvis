@@ -44,6 +44,7 @@ uniform mat4 _registrationInverse;
 uniform bool _applyMask;
 uniform vec2 _xClampRange;
 uniform vec2 _yClampRange;
+uniform vec2 _zClampRange;
 
 void main() {
     float sad = 0.0;

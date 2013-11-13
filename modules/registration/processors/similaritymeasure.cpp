@@ -51,6 +51,11 @@ namespace campvis {
         GenericOption<nlopt::algorithm>("neldermead", "Nelder-Mead Simplex", nlopt::LN_NELDERMEAD)
     };
 
+    static const GenericOption<std::string> metrics[2] = {
+        GenericOption<std::string>("SAD", "SAD"),
+        GenericOption<std::string>("SSD", "SSD")
+    };
+
     const std::string SimilarityMeasure::loggerCat_ = "CAMPVis.modules.vis.SimilarityMeasure";
 
     SimilarityMeasure::SimilarityMeasure()
@@ -61,9 +66,10 @@ namespace campvis {
         , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_applyMask("ApplyMask", "Apply Mask", true)
-        , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-1000.f), tgt::vec3(1000.f), tgt::vec3(1.f), tgt::vec3(1.f))
-        , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.1f), tgt::vec3(2.f))
+        , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(1.f), tgt::vec3(5.f))
+        , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.01f), tgt::vec3(7.f))
         , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
+        , p_metric("Metric", "Similarity Metric", metrics, 2)
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
         , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
         , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT | PERFORM_OPTIMIZATION)
@@ -84,6 +90,7 @@ namespace campvis {
 
         addProperty(&p_translation);
         addProperty(&p_rotation);
+        addProperty(&p_metric);
         addProperty(&p_computeSimilarity);
 
         addProperty(&p_differenceImageId);
@@ -268,14 +275,19 @@ namespace campvis {
         _fbo->deactivate();
 
         // reduce the juice
-        float similarity = _glr->reduce(similarityTex);
+        std::vector<float> similarities = _glr->reduce(similarityTex);
 
         delete similarityTex;
 
         tgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
-        return similarity;
+        if (similarities.empty())
+            return 0.f;
+        if (p_metric.getOptionValue() == "SAD")
+            return similarities[0];
+        if (p_metric.getOptionValue() == "SSD")
+            return similarities[1];
     }
 
     double SimilarityMeasure::optimizerFunc(const std::vector<double>& x, std::vector<double>& grad, void* my_func_data) {
@@ -289,7 +301,7 @@ namespace campvis {
         float similarity = mfd->_object->computeSimilarity(mfd->_reference, mfd->_moving, translation, rotation);
         GLGC.deleteGarbage();
 
-        LDEBUG(translation << rotation << " : " << similarity);
+        std::cout << translation << rotation << " : " << similarity << "\n";
 
         return similarity;
     }

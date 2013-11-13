@@ -35,6 +35,7 @@
 #include "tgt/vector.h"
 
 #include <string>
+#include <vector>
 
 namespace tgt {
     class FramebufferObject;
@@ -58,9 +59,9 @@ namespace campvis {
 
 
 
-        float reduce(const ImageData* image);
+        std::vector<float> reduce(const ImageData* image);
 
-        float reduce(const tgt::Texture* texture);
+        std::vector<float> reduce(const tgt::Texture* texture);
 
 
     private:
