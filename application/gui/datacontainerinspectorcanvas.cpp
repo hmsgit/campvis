@@ -52,7 +52,7 @@ namespace campvis {
     DataContainerInspectorCanvas::DataContainerInspectorCanvas(QWidget* parent /*= 0*/) 
         : tgt::QtThreadedCanvas("DataContainer Inspector", tgt::ivec2(640, 480), tgt::GLCanvas::RGBA_BUFFER, parent, true)
         , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
-        , p_meshSolidColor("MeshSolidColor", "Mesh Solid Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(255.f))
+        , p_meshSolidColor("MeshSolidColor", "Mesh Solid Color", tgt::vec4(50.f, 70.0f, 50.0f, 255.f), tgt::vec4(0.0f), tgt::vec4(255.0f))
         , p_transferFunction("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f)))
         , _dataContainer(0)
         , _paintShader(0)
@@ -258,7 +258,7 @@ namespace campvis {
 		glPushAttrib(GL_ALL_ATTRIB_BITS);
 		_geomteryRenderingShader->activate();
 		LGL_ERROR;
-		// _geomteryRenderingShader->setIgnoreUniformLocationError(true);
+		_geomteryRenderingShader->setIgnoreUniformLocationError(true);
 		LGL_ERROR;
 		//decorateRenderProlog(data, _shader);
 				
@@ -270,13 +270,20 @@ namespace campvis {
 				
 		campvis::IVec4Property* p_color = new campvis::IVec4Property("myColor", "MyRenderingColor", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f));
 		
-		tgt::mat4 myMat = _trackballEHs[meshIndex]->_trackball->getCamera()->getProjectionMatrix();
-		myMat = _trackballEHs[meshIndex]->_trackball->getCamera()->getViewMatrix();
-
         _geomteryRenderingShader->setUniform("_projectionMatrix", _trackballEHs[meshIndex]->_trackball->getCamera()->getProjectionMatrix()/*_trackballCameraProperty->getValue().getProjectionMatrix()*/);
+        LGL_ERROR;
         _geomteryRenderingShader->setUniform("_viewMatrix", _trackballEHs[meshIndex]->_trackball->getCamera()->getViewMatrix());
-		//_geomteryRenderingShader->setUniform("_colormory", p_color->getValue());
-        //_geomteryRenderingShader->setUniform("_cameraPosition", _trackballEHs[meshIndex]->_trackball->getCamera()->getPosition());
+        LGL_ERROR;
+
+        tgt::Vector4<float> meshColor = static_cast<tgt::Vector4<float>>(p_meshSolidColor.getValue());
+        meshColor.r /= 255.0f;
+        meshColor.g /= 255.0f;
+        meshColor.b /= 255.0f;
+        meshColor.a /= 255.0f;
+        _geomteryRenderingShader->setUniform("_Color", meshColor);
+        
+        LGL_ERROR;
+        _geomteryRenderingShader->setUniform("_cameraPosition", _trackballEHs[meshIndex]->_trackball->getCamera()->getPosition());
 		_geomteryRenderingShader->setIgnoreUniformLocationError(false);
 						LGL_ERROR;
 		tgt::FramebufferObject* frameBuffer = new tgt::FramebufferObject();
@@ -313,8 +320,10 @@ namespace campvis {
         //    if (const campvis::MeshGeometry* mg = dynamic_cast<const campvis::MeshGeometry*>(it->second.getData())) {
         
 		glPolygonMode(GL_FRONT, GL_POLYGON);
-        //mg->render(GL_POLYGON);
+        mg->render(GL_POLYGON);
 
+
+        _geomteryRenderingShader->setUniform("_Color", 1.0f, 1.0f, 1.0f, 1.0f);
         // Render wireframe around the object
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         mg->render(GL_POLYGON);
@@ -391,7 +400,7 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::mouseMoveEvent(tgt::MouseEvent* e)
     {
-        LGL_ERROR;
+        //LGL_ERROR;
         /*if (_renderFullscreen) {
             _renderFullscreen = false;
         }
@@ -472,7 +481,7 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::mousePressEvent(tgt::MouseEvent* e) {
-        LGL_ERROR;
+        //LGL_ERROR;
         //if (_renderFullscreen) {
 
 			tgt::ivec2 selectedIndex(e->x() / _quadSize.x, e->y() / _quadSize.y);
@@ -632,6 +641,7 @@ namespace campvis {
                     float dist = 3 * fabs(mg->getWorldBounds().getLLF().z - mg->getWorldBounds().getURB().z);
                     trackballEH->reinitializeCamera(mg->getWorldBounds());
                     trackballEH->_trackball->moveCameraBackward(dist);
+                    LGL_ERROR;
                     flag = true;
                 //}
 				_trackballEHs.push_back(trackballEH);
@@ -639,7 +649,9 @@ namespace campvis {
 				tgt::Texture* colorBuffer = new tgt::Texture(0, tgt::ivec3(_renderingWndSize.x, _renderingWndSize.y, 1), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
 				tgt::Texture* depthBuffer  = new tgt::Texture(0, tgt::ivec3(_renderingWndSize.x, _renderingWndSize.y, 1), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
 
+                glewExperimental = true;
                 drawMeshGeomtery(mg, colorBuffer, depthBuffer, nMeshGeometry++);
+                LGL_ERROR;
                 
                 _geomteryRendering_ColorBuffers.push_back(colorBuffer);
                 _geomteryRendering_DepthBuffers.push_back(depthBuffer);
@@ -700,6 +712,7 @@ namespace campvis {
 				_trackballCameraProperties[nMeshGeometry]->getValue();
 				
                 //drawMeshGeomtery(mg, _geomteryRendering_ColorBuffers[nMeshGeometry], _geomteryRendering_DepthBuffers[nMeshGeometry], nMeshGeometry);
+                glewExperimental = true;
                 drawMeshGeomtery(mg, colorBuffer, depthBuffer, nMeshGeometry);
                 nMeshGeometry++;
 				_textures.insert(_textures.begin() + nElement, colorBuffer);
@@ -721,6 +734,14 @@ namespace campvis {
     void DataContainerInspectorCanvas::onPropertyChanged(const AbstractProperty* prop) {
         HasPropertyCollection::onPropertyChanged(prop);
         invalidate();
+
+        /// if the Mesh Solid Color property is changed, update the mesh's color
+        const std::string propertyName = (prop)->getName();
+        if(propertyName == "MeshSolidColor")
+        {
+            _meshGeomTexturesDirty = true;
+            invalidateMeshGeomTextures();
+        }        
     }
 
 }

@@ -78,13 +78,13 @@ namespace campvis {
          * Returns the property name.
          * \return  _name
          */
-        const std::string& getName();
+        const std::string& getName() const;
 
         /**
          * Returns the property title (e.g. used for GUI).
          * \return  _title
          */
-        const std::string& getTitle();
+        const std::string& getTitle() const;
 
         /**
          * Returns the invalidation level that this property triggers.
