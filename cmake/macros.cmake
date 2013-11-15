@@ -25,13 +25,19 @@ ENDMACRO(WRITE_PIPELINE_REGISTRATION)
 
 MACRO(PARSE_HEADER_FOR_PIPELINE FileName)
     FILE(READ ${FileName} content)
-    
+
+    # Build a regex matching pipeline declarations and extracting their names
+    SET(NameRegex "[A-Za-z0-9_]+")
+    SET(FullyQualifiedNameRegex "(::)?(${NameRegex}::)*${NameRegex}")
+    SET(BaseClassListRegex "((public|private|protected)( virtual)? ${FullyQualifiedNameRegex}, )*")
+    SET(ClassRegex "class (${NameRegex}) ?: ${BaseClassListRegex}public ${FullyQualifiedNameRegex}Pipeline")
+
     # Find all class definitions inheriting from a Pipeline
-    STRING(REGEX MATCHALL "class ([A-Za-z0-9_]+) : public [A-Za-z0-9_]+Pipeline {" matches ${content})
+    STRING(REGEX MATCHALL ${ClassRegex} matches ${content})
     
     FOREACH(m ${matches})
         # Extract class name and register
-        STRING(REGEX REPLACE "(class )([A-Za-z0-9_]+)( : public [A-Za-z0-9_]+Pipeline {)" "\\2" RESULT ${m})
+        STRING(REGEX REPLACE ${ClassRegex} "\\1" RESULT ${m})
         ADD_PIPELINE_REGISTRATION(${FileName} ${RESULT})
     ENDFOREACH()
 ENDMACRO(PARSE_HEADER_FOR_PIPELINE)
