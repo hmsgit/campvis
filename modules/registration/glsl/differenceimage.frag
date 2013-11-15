@@ -47,6 +47,8 @@ uniform vec2 _yClampRange;
 uniform vec2 _zClampRange;
 
 void main() {
+    float result = 0.0;
+    float difference = 0.0;
     float sad = 0.0;
 
     if (   ex_TexCoord.x >= _xClampRange.x && ex_TexCoord.x <= _xClampRange.y 
@@ -64,11 +66,12 @@ void main() {
             movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
 
         // compute differences
-        float difference = referenceValue - movingValue;
+        difference = referenceValue - movingValue;
         sad = abs(difference);
         //float ssd = difference * difference;
     }
     
     // write output color
-    out_Color = vec4(sad, sad, sad, sad);
+    result = difference;
+    out_Color = vec4(result, result, result, result);
 }

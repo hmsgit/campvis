@@ -75,6 +75,7 @@ namespace campvis {
         SimilarityMeasure _sm;
 
         VolumeExplorer _ve;
+        SliceExtractor _se;
 
     };
 

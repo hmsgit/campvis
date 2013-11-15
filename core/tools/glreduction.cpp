@@ -64,7 +64,7 @@ namespace campvis {
     }
 
     GlReduction::~GlReduction() {
-
+        ShdrMgr.dispose(_shader);
     }
 
     std::vector<float> GlReduction::reduce(const ImageData* image) {
