@@ -90,6 +90,12 @@ namespace campvis {
          */
         void deinit();
 
+        /**
+         * Reset the content of the canvas.
+         * It will clear the array of textures, rendered geomteries, color buffers, depth buffers and its content.
+         */
+        void resetContent();
+
         void setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles);
         
 		/**
@@ -201,7 +207,7 @@ namespace campvis {
         void invalidate();
 
 		/**
-         * To be called when the mesh geomtery parts of the scene is invalidated, issues new paint job.
+         * To be called when the mesh geometry parts of the scene is invalidated, issues new paint job only for textures that belong to mesh geomteries.
          */
         void invalidateMeshGeomTextures();
 
@@ -209,15 +215,20 @@ namespace campvis {
          * Renders the given 2D texture.
          * Binds the texture to the shader, sets the uniforms and renders the quad.
          * \param   texture     The texture to render.
+         * \param   uint2d      The texture unit that will be attached to rendering pipeline (2D for 2D textures).
+         * \param   uint2d      The texture unit that will be attached to rendering pipeline (3D for 3D textures).
          */
         void paintTexture(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
 
 		/**
-         * Renders the MeshGeomtery into the geomtery renderer color buffer and depth buffer
-         * Binds the texture to the shader, sets the uniforms and renders the quad.
-         * \param   meshGeomtery     The mesh to be rendered.
+         * Renders the Meshgeometry into the geometry renderer color buffer and depth buffer.
+         * Binds the texture to the shader, sets the uniforms and renders the mesh geometry.
+         * \param   meshgeometry        The mesh to be rendered.
+         * \param   colorBuffer         The color buffer that the object will be rendered to.
+         * \param   depthBuffer         The depth buffer that the object will be rendered to.
+         * \param   meshIndex           The index of the rendered mesh in the texture array.
          */
-		void drawMeshGeomtery(const campvis::MeshGeometry* meshGeomtery, tgt::Texture* colorBuffer, tgt::Texture* depthBuffer, const unsigned int& meshIndex);
+		void drawMeshgeometry(const campvis::MeshGeometry* meshgeometry, tgt::Texture* colorBuffer, tgt::Texture* depthBuffer, const unsigned int& meshIndex);
 
         /**
          * Creates the quad used for rendering the textures.
@@ -225,37 +236,37 @@ namespace campvis {
         void createQuad();
 
         std::map<QString, QtDataHandle> _handles;
-        std::vector<const tgt::Texture*> _textures;
-        bool _texturesDirty;
-		bool _meshGeomTexturesDirty;
+        std::vector<const tgt::Texture*> _textures;     ///< vector of textures
+        bool _texturesDirty;                            ///< Flag that shows that the textures need update or not.
+		bool _meshGeomTexturesDirty;                    ///< Flag that shows that the mesh geometry textures need updare or not.
 
-        DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
-        tbb::mutex _localMutex;                         ///< Mutex protecting the local members
+        DataContainer* _dataContainer;              ///< The DataContainer this widget is inspecting
+        tbb::mutex _localMutex;                     ///< Mutex protecting the local members
 
-        tgt::Shader* _paintShader;                      ///< GLSL shader for rendering the textures
-        FaceGeometry* _quad;                            ///< Quad used for rendering
+        tgt::Shader* _paintShader;                  ///< GLSL shader for rendering the textures
+        FaceGeometry* _quad;                        ///< Quad used for rendering
 
-        tgt::Color _color;                              ///< Color under the mouse cursor
-		float      _depth;								///< Depth under the mouse cursor
-        DataContainerInspectorWidget* _widget;          ///< Pointer to the widget which has access to this canvas
+        tgt::Color _color;                          ///< Color under the mouse cursor
+		float      _depth;							///< Depth under the mouse cursor
+        DataContainerInspectorWidget* _widget;      ///< Pointer to the widget which has access to this canvas
 
-        tgt::ivec2 _numTiles;                           ///< number of tiles on texture overview
-        tgt::ivec2 _quadSize;                           ///< size in pixels for each tile in overview
-        size_t _selectedTexture;                        ///< index of selected texture by mouse
+        tgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
+        tgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview
+        size_t _selectedTexture;                    ///< index of selected texture by mouse
 		int _selectedTrackball;						///< index of selected trackball which will be updated currently
-        bool _renderFullscreen;                         ///< flag whether to render in full screen
+        bool _renderFullscreen;                     ///< flag whether to render in full screen
 
-        int _currentSlice;								///< current slice if rendering a 3D image fullscreen, render MIP if negative
+        int _currentSlice;							///< current slice if rendering a 3D image fullscreen, render MIP if negative
 
-		tgt::Shader* _geomteryRenderingShader;			///< GLSL shader for rendering the geomtery
-        std::vector<tgt::Texture*> _geomteryRendering_ColorBuffers;   ///< Color Buffer used to render the Geomtery for the debugging mode
-        std::vector<tgt::Texture*> _geomteryRendering_DepthBuffers;   ///< Depth Buffer used to render the Geomtery for the debugging mode
-        const campvis::MeshGeometry* _meshGeomteryPtr;	///<! Pointer to the mesh Geomtery objects
+		tgt::Shader* _geometryRenderingShader;			                    ///< GLSL shader for rendering the mesh geomteries
+        std::vector<tgt::Texture*> _geometryRendering_ColorBuffers;         ///< Color Buffer used to render the geometry for the debugging mode
+        std::vector<tgt::Texture*> _geometryRendering_DepthBuffers;       ///< Depth Buffer used to render the geometry for the debugging mode
+        const campvis::MeshGeometry* _meshgeometryPtr;	                    ///< Pointer to the mesh geometry objects
 
 		tgt::ivec2 _renderingWndSize;
-		std::vector<campvis::CameraProperty*> _trackballCameraProperties; ///< The property of the trackball camera. Used to pass the trackball camera to the shader.
-		std::vector<TrackballNavigationEventListener*> _trackballEHs; ///< TrackBall Event Handler for the camera rotating around the object in the canvas
-		std::vector<int> _geomTextureIndices;
+		std::vector<campvis::CameraProperty*> _trackballCameraProperties;   ///< The property of the trackball camera. Used to pass the trackball camera to the shader.
+		std::vector<TrackballNavigationEventListener*> _trackballEHs;       ///< TrackBall Event Handler for the camera rotating around the object in the canvas
+		std::vector<int> _geomTextureIndices;                               ///< Array of Indices in the texture which are achieved by rendering a geometry
     };
 }
 
