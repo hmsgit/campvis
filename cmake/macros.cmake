@@ -36,6 +36,53 @@ MACRO(PARSE_HEADER_FOR_PIPELINE FileName)
     ENDFOREACH()
 ENDMACRO(PARSE_HEADER_FOR_PIPELINE)
 
+MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
+    LIST(APPEND CampvisEnabledModules ${ModuleDirectory})
+    SET(ThisModDir ${ModulesDir}/${ModuleDirectory})
+
+    # load .cmake file
+    INCLUDE(${ModuleListFile})
+
+    # merge module settings into global settings
+    LIST(APPEND CampvisModulesDefinitions ${ThisModDefinitions})
+    LIST(APPEND CampvisModulesIncludeDirs ${ThisModIncludeDirs})
+    LIST(APPEND CampvisModulesExternalLibs ${ThisModExternalLibs})
+    LIST(APPEND CampvisModulesLinkDirectories ${ThisModLinkDirectories})
+    LIST(APPEND CampvisModulesSources ${ThisModSources})
+    LIST(APPEND CampvisModulesHeaders ${ThisModHeaders})
+    LIST(APPEND CampvisModulesCoreSources ${ThisModCoreSources})
+    LIST(APPEND CampvisModulesCoreHeaders ${ThisModCoreHeaders})
+    LIST(APPEND CampvisExternalDllsDebug ${ThisModExternalDllsDebug})
+    LIST(APPEND CampvisExternalDllsRelease ${ThisModExternalDllsRelease})
+
+    # save dependencies in a variable to resolve them later
+    SET(${ModuleDirectory}ModDependencies ${ThisModDependencies})
+
+    # add shader directory to deployment list
+    LIST(APPEND CampvisShaderDirectories ${ThisModShaderDirectories})
+
+    # add definition that this module is activated
+    LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModuleDirectoryUpper})
+
+    # parse all header files for pipeline classes to add them to the pipeline registration
+    FOREACH(HeaderFile ${ThisModHeaders})
+        PARSE_HEADER_FOR_PIPELINE("modules/${HeaderFile}")
+    ENDFOREACH()
+
+    # unset module settings to avoid duplicates if module cmake file misses sth.
+    UNSET(ThisModDefinitions)
+    UNSET(ThisModIncludeDirs)
+    UNSET(ThisModExternalLibs)
+    UNSET(ThisModLinkDirectories)
+    UNSET(ThisModSources)
+    UNSET(ThisModHeaders)
+    UNSET(ThisModCoreSources)
+    UNSET(ThisModCoreHeaders)
+    UNSET(ThisModExternalDllsDebug)
+    UNSET(ThisModExternalDllsRelease)
+    UNSET(ThisModShaderDirectories)
+    UNSET(ThisModDependencies)
+ENDMACRO(INCLUDE_MODULE)
 
 # copy and pasted from Voreen...
 
