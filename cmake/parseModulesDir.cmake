@@ -39,31 +39,5 @@ FOREACH(ModDir ${ModDirs})
     
 ENDFOREACH(ModDir ${ModDirs})
 
-# Iterate over all enabled modules and their dependencies.
-# A WHILE loop is used here because FOREACH doesn't see changes to the list it processes.
-# As a result, transitive dependencies would require several CMake runs to be resolved.
-WHILE(CampvisEnabledModules)
-    LIST(GET CampvisEnabledModules 0 Mod)
-    LIST(REMOVE_AT CampvisEnabledModules 0)
-
-    FOREACH(Dep ${${Mod}ModDependencies})
-        # Check if the dependency exists
-        LIST(FIND CampvisModules ${Dep} DepExists)
-        STRING(TOUPPER ${Dep} DepUpper)
-
-        IF(DepExists EQUAL -1)
-            MESSAGE(WARNING "Dependency '${Dep}' of module '${Mod}' not found!")
-        ELSEIF(NOT CAMPVIS_BUILD_MODULE_${DepUpper})
-            # Enable the dependency if required
-            MESSAGE(STATUS "Enabling module '${Dep}' (required by '${Mod}')")
-            SET(CAMPVIS_BUILD_MODULE_${DepUpper} ON CACHE BOOL "Build Module ${Dep} (required by ${Mod})" FORCE)
-            SET(ModFile ${ModulesDir}/${Dep}/${Dep}.cmake)
-            INCLUDE_MODULE(${Dep} ${ModFile})
-        ENDIF(DepExists EQUAL -1)
-    ENDFOREACH(Dep ${${Mod}ModDependencies})
-
-    UNSET(${Mod}ModDependencies)
-ENDWHILE(CampvisEnabledModules)
-
 SET(ModulesDirsParsed TRUE)
 ENDIF(NOT ModulesDirsParsed)

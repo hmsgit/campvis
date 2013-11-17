@@ -84,6 +84,57 @@ MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
     UNSET(ThisModDependencies)
 ENDMACRO(INCLUDE_MODULE)
 
+MACRO(RESOLVE_MODULE_DEPENDENCIES)
+    # Iterate over all enabled modules and their dependencies.
+    # A WHILE loop is used here because FOREACH doesn't see changes to the list it processes.
+    # As a result, transitive dependencies would require several CMake runs to be resolved.
+    WHILE(CampvisEnabledModules)
+        LIST(GET CampvisEnabledModules 0 Mod)
+        LIST(REMOVE_AT CampvisEnabledModules 0)
+
+        FOREACH(Dep ${${Mod}ModDependencies})
+            # Check if the dependency exists
+            LIST(FIND CampvisModules ${Dep} DepExists)
+            STRING(TOUPPER ${Dep} DepUpper)
+
+            IF(DepExists EQUAL -1)
+                MESSAGE(WARNING "Dependency '${Dep}' of module '${Mod}' not found!")
+            ELSEIF(NOT CAMPVIS_BUILD_MODULE_${DepUpper})
+                # Enable the dependency if required
+                MESSAGE(STATUS "Enabling module '${Dep}' (required by '${Mod}')")
+                SET(CAMPVIS_BUILD_MODULE_${DepUpper} ON CACHE BOOL "Build module ${Dep} (required by ${Mod})" FORCE)
+                SET(ModFile ${ModulesDir}/${Dep}/${Dep}.cmake)
+                INCLUDE_MODULE(${Dep} ${ModFile})
+            ENDIF(DepExists EQUAL -1)
+        ENDFOREACH(Dep ${${Mod}ModDependencies})
+
+        UNSET(${Mod}ModDependencies)
+    ENDWHILE(CampvisEnabledModules)
+ENDMACRO(RESOLVE_MODULE_DEPENDENCIES)
+
+MACRO(SET_DEFAULT_MODULES DefaultModules)
+    # Only enable default modules on the first CMake run
+    IF(NOT DEFAULT_CAMPVIS_MODULES_SET)
+        FOREACH(Mod ${DefaultModules})
+            # Check if the module exists
+            LIST(FIND CampvisModules ${Mod} ModExists)
+            STRING(TOUPPER ${Mod} ModUpper)
+
+            IF(ModExists EQUAL -1)
+                MESSAGE(WARNING "Default module '${Mod}' not found!")
+            ELSEIF(NOT CAMPVIS_BUILD_MODULE_${ModUpper})
+                # Enable the module if required
+                MESSAGE(STATUS "Enabling default module '${Mod}'")
+                SET(CAMPVIS_BUILD_MODULE_${ModUpper} ON CACHE BOOL "Build default module ${Mod}" FORCE)
+                SET(ModFile ${ModulesDir}/${Mod}/${Mod}.cmake)
+                INCLUDE_MODULE(${Mod} ${ModFile})
+            ENDIF(ModExists EQUAL -1)
+        ENDFOREACH(Mod ${DefaultModules})
+    ENDIF(NOT DEFAULT_CAMPVIS_MODULES_SET)
+
+    SET(DEFAULT_CAMPVIS_MODULES_SET 1 CACHE INTERNAL "")
+ENDMACRO(SET_DEFAULT_MODULES DefaultModules)
+
 # copy and pasted from Voreen...
 
 MACRO(LIST_SUBDIRECTORIES Result Directory AbsolutePath)

@@ -15,4 +15,4 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 )
 
 SET(ThisModShaderDirectories "modules/vis/glsl")
-SET(ThisModDependencies devil)
+SET(ThisModDependencies devil io preprocessing)
