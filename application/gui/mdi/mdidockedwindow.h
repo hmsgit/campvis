@@ -91,6 +91,11 @@ namespace campvis {
         virtual void mouseMoveEvent(QMouseEvent* event);
 
         /**
+         * Event handler that receives mouse press events for the window.
+         */
+        virtual void mousePressEvent(QMouseEvent * event);
+
+        /**
          * Event handler that receives mouse release events for the window.
          */
         virtual void mouseReleaseEvent(QMouseEvent * event);
