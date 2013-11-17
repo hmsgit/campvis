@@ -73,7 +73,7 @@ uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
 
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
+#ifdef INTERSECTION_REFINEMENT
 bool _inVoid = false;
 #endif
 
@@ -101,15 +101,21 @@ bool lookupInBbv(in vec3 samplePosition) {
     return (texel & (1U << bit)) != 0U;
 }
 
-float rayBoxIntersection(in vec3 rayOrigin, in vec3 rayDirection, in vec3 box[2], in float t) {
-    vec3 rayInverseDirection = 1.f / rayDirection;
-    ivec3 raySign = ivec3(lessThan(rayDirection, vec3(0.0, 0.0, 0.0));
+float rayBoxIntersection(in vec3 rayOrigin, in vec3 rayDirection, in vec3 boxLlf, in vec3 boxUrb, in float t) {
+    vec3 tMin = (boxLlf - rayOrigin) / rayDirection;
+    vec3 tMax = (boxUrb - rayOrigin) / rayDirection;
 
-    vec3 tMin = (box[raySign] - rayOrigin) / rayInverseDirection;
-    vec3 tMax = (box[1 - raySign] - rayOrigin) / rayInverseDirection;
+    // TODO: these many ifs are expensive - the lessThan bvec solution below should be faster but does not work for some reason...
+    if (tMin.x < t) tMin.x = positiveInfinity;
+    if (tMin.y < t) tMin.y = positiveInfinity;
+    if (tMin.z < t) tMin.z = positiveInfinity;
 
-    tMin *= vec3(lessThan(tMin, vec3(t, t, t)) * positiveInfinity;
-    tMax *= vec3(lessThan(tMax, vec3(t, t, t)) * positiveInfinity;
+    if (tMax.x < t) tMax.x = positiveInfinity;
+    if (tMax.y < t) tMax.y = positiveInfinity;
+    if (tMax.z < t) tMax.z = positiveInfinity;
+
+    //tMin += vec3(lessThan(tMin, vec3(t, t, t))) * positiveInfinity;
+    //tMax += vec3(lessThan(tMax, vec3(t, t, t))) * positiveInfinity;
 
     return min(min(tMin.x, min(tMin.y, tMin.z))   ,    min(tMax.x, min(tMax.y, tMax.z)));
 }
@@ -120,9 +126,6 @@ float rayBoxIntersection(in vec3 rayOrigin, in vec3 rayDirection, in vec3 box[2]
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
     float firstHitT = -1.0;
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-    float samplingRateCompensationMultiplier = 1.0;
-#endif
 
     // calculate ray parameters
     vec3 direction = exitPoint.rgb - entryPoint.rgb;
@@ -136,17 +139,15 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // compute sample position
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
+        // check whether we have a lookup volume for empty space skipping
         if (_hasBbv) {
             if (! lookupInBbv(samplePosition)) {
+                // advance the ray to the intersection point with the current brick
+                vec3 brickVoxel = floor((samplePosition * _volumeTextureParams._size) / _bbvBrickSize) * _bbvBrickSize;
+                vec3 boxLlf = brickVoxel * _volumeTextureParams._sizeRCP;
+                vec3 boxUrb = boxLlf + (_volumeTextureParams._sizeRCP * _bbvBrickSize);
 
-                // advance to the next evaluation point along the ray
-                t += 4.0*_samplingStepSize;
-
-
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-                samplingRateCompensationMultiplier = 1.0;
-#endif
-            continue;
+                t = rayBoxIntersection(entryPoint, direction, boxLlf, boxUrb, t);
             }
         }
 
@@ -154,7 +155,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).a;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
+#ifdef INTERSECTION_REFINEMENT
         if (color.a <= 0.0) {
             // we're within void, make the steps bigger
             _inVoid = true;
@@ -189,32 +190,6 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 #endif
 
-#ifdef ENABLE_SHADOWING
-        // simple and expensive implementation of hard shadows
-        if (color.a > 0.1) {
-            // compute direction from sample to light
-            vec3 L = normalize(_lightSource._position - textureToWorld(_volumeTextureParams, samplePosition).xyz) * _samplingStepSize;
-
-            bool finished = false;
-            vec3 position = samplePosition + L;
-            float shadowFactor = 0.0;
-
-            // traverse ray from sample to light
-            while (! finished) {
-                // grab intensity and TF opacity
-                intensity = getElement3DNormalized(_volume, _volumeTextureParams, position).a;
-                shadowFactor += lookupTF(_transferFunction, _transferFunctionParams, intensity).a;
-
-                position += L;
-                finished = (shadowFactor > 0.95)
-                         || any(lessThan(position, vec3(0.0, 0.0, 0.0)))
-                         || any(greaterThan(position, vec3(1.0, 1.0, 1.0)));
-            }
-            // apply shadow to color
-            color.rgb *= (1.0 - shadowFactor * _shadowIntensity);
-        }
-#endif
-
         // perform compositing
         if (color.a > 0.0) {
 #ifdef ENABLE_SHADING
@@ -224,11 +199,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 #endif
 
             // accomodate for variable sampling rates
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-            color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * samplingRateCompensationMultiplier * SAMPLING_BASE_INTERVAL_RCP);
-#else
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-#endif
             result.rgb = mix(color.rgb, result.rgb, result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
         }
@@ -247,13 +218,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // advance to the next evaluation point along the ray
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-        samplingRateCompensationMultiplier = (_inVoid ? 1.0 : 0.25);
-        t += _samplingStepSize * (_inVoid ? 1.0 : 0.125);
-        
-#else
         t += _samplingStepSize;
-#endif
     }
 
     // calculate depth value from ray parameter
@@ -263,6 +228,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         float depthExit = getElement2DNormalized(_exitPointsDepth, _exitParams, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
+
     return result;
 }
 

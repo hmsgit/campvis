@@ -69,7 +69,7 @@ namespace campvis {
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
-        virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         /// \see AbstractProcessor::init
         virtual void init();
@@ -79,7 +79,7 @@ namespace campvis {
         DataNameProperty p_targetImageID;    ///< image ID for output image
         BoolProperty p_enableShadowing;
         FloatProperty p_shadowIntensity;
-        BoolProperty p_enableAdaptiveStepsize;
+        BoolProperty p_enableIntersectionRefinement;
 
         BoolProperty p_useEmptySpaceSkipping;
     

@@ -32,6 +32,10 @@ namespace campvis {
          */
         size_t getNumBrickIndices() const;
 
+        /**
+         * Gets the number of voxels a brick is covering in each dimension.
+         * \return  _brickSize
+         */
         size_t getBrickSize() const;
 
 

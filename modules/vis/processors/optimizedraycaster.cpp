@@ -43,15 +43,15 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
-        , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
-        , p_useEmptySpaceSkipping("EnableEmptySpaceSkipping", "Enable Empty Space Skipping", false, AbstractProcessor::INVALID_RESULT | INVALID_BBV)
+        , p_enableIntersectionRefinement("EnableIntersectionRefinement", "Enable Intersection Refinement", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
+        , p_useEmptySpaceSkipping("EnableEmptySpaceSkipping", "Enable Empty Space Skipping", true, AbstractProcessor::INVALID_RESULT | INVALID_BBV)
         , _bbv(0)
         , _t(0)
     {
         addDecorator(new ProcessorDecoratorShading());
 
         addProperty(&p_targetImageID);
-        addProperty(&p_enableAdaptiveStepsize);
+        addProperty(&p_enableIntersectionRefinement);
         addProperty(&p_useEmptySpaceSkipping);
 
         addProperty(&p_enableShadowing);
@@ -69,6 +69,8 @@ namespace campvis {
 
     void OptimizedRaycaster::init() {
         RaycastingProcessor::init();
+
+        invalidate(INVALID_BBV);
     }
 
     void OptimizedRaycaster::deinit() {
@@ -112,12 +114,12 @@ namespace campvis {
 
         FramebufferActivationGuard fag(this);
         createAndAttachTexture(GL_RGBA8);
-//         createAndAttachTexture(GL_RGBA32F);
-//         createAndAttachTexture(GL_RGBA32F);
+        createAndAttachTexture(GL_RGBA32F);
+        createAndAttachTexture(GL_RGBA32F);
         createAndAttachDepthTexture();
 
-//         static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-//         glDrawBuffers(3, buffers);
+        static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+        glDrawBuffers(3, buffers);
 
         if (p_enableShadowing.getValue())
             _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
@@ -125,6 +127,8 @@ namespace campvis {
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         QuadRdr.renderQuad();
+
+        glDrawBuffers(1, buffers);
         glDisable(GL_DEPTH_TEST);
         LGL_ERROR;
 
@@ -135,8 +139,8 @@ namespace campvis {
         std::string toReturn = RaycastingProcessor::generateHeader();
         if (p_enableShadowing.getValue())
             toReturn += "#define ENABLE_SHADOWING\n";
-        if (p_enableAdaptiveStepsize.getValue())
-            toReturn += "#define ENABLE_ADAPTIVE_STEPSIZE\n";
+        if (p_enableIntersectionRefinement.getValue())
+            toReturn += "#define INTERSECTION_REFINEMENT\n";
         return toReturn;
     }
 
@@ -157,7 +161,7 @@ namespace campvis {
         else {
             if (const ImageData* id = dynamic_cast<const ImageData*>(dh.getData())) {
                 if (const ImageRepresentationLocal* rep = id->getRepresentation<ImageRepresentationLocal>(true)) {
-            	    _bbv = new BinaryBrickedVolume(rep->getParent(), 2);
+            	    _bbv = new BinaryBrickedVolume(rep->getParent(), 4);
 
                     GLubyte* tfBuffer = p_transferFunction.getTF()->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_BYTE);
                     size_t tfNumElements = p_transferFunction.getTF()->getTexture()->getDimensions().x;
