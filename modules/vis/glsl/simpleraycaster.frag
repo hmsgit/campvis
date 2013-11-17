@@ -61,21 +61,10 @@ uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
 
-// BBV Lookup volume
-uniform usampler3D _bbvTexture;
-uniform TextureParameters3D _bbvTextureParams;
-uniform int _bbvBrickSize;
-uniform bool _hasBbv;
-
-
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
-
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-bool _inVoid = false;
-#endif
 
 #ifdef ENABLE_SHADOWING
 uniform float _shadowIntensity;
@@ -84,30 +73,12 @@ uniform float _shadowIntensity;
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
-ivec3 voxelToBrick(in vec3 voxel) {
-    return ivec3(floor(voxel / _bbvBrickSize));
-}
-
-// samplePosition is in texture coordiantes [0, 1]
-bool lookupInBbv(in vec3 samplePosition) {
-    ivec3 byte = voxelToBrick(samplePosition * _volumeTextureParams._size);
-    uint bit = uint(byte.x % 8);
-    byte.x /= 8;
-
-    uint texel = texelFetch(_bbvTexture, byte, 0).r;
-
-    return (texel & (1U << bit)) != 0U;
-}
-
 /**
  * Performs the raycasting and returns the final fragment color.
  */
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
     float firstHitT = -1.0;
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-    float samplingRateCompensationMultiplier = 1.0;
-#endif
 
     // calculate ray parameters
     vec3 direction = exitPoint.rgb - entryPoint.rgb;
@@ -121,58 +92,9 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // compute sample position
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
-        if (_hasBbv) {
-            if (! lookupInBbv(samplePosition)) {
-
-                // advance to the next evaluation point along the ray
-                t += 4.0*_samplingStepSize;
-
-
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-                samplingRateCompensationMultiplier = 1.0;
-#endif
-            continue;
-            }
-        }
-
         // lookup intensity and TF
         float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).a;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
-
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-        if (color.a <= 0.0) {
-            // we're within void, make the steps bigger
-            _inVoid = true;
-        }
-        else {
-            if (_inVoid) {
-                float formerT = t - _samplingStepSize;
-
-                // we just left the void, perform intersection refinement
-                for (float stepPower = 0.5; stepPower > 0.1; stepPower /= 2.0) {
-                    // compute refined sample position
-                    float newT = formerT + _samplingStepSize * stepPower;
-                    vec3 newSamplePosition = entryPoint.rgb + newT * direction;
-
-                    // lookup refined intensity + TF
-                    float newIntensity = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition).a;
-                    vec4 newColor = lookupTF(_transferFunction, _transferFunctionParams, newIntensity);
-
-                    if (newColor.a <= 0.0) {
-                        // we're back in the void - look on the right-hand side
-                        formerT = newT;
-                    }
-                    else {
-                        // we're still in the matter - look on the left-hand side
-                        samplePosition = newSamplePosition;
-                        color = newColor;
-                        t -= _samplingStepSize * stepPower;
-                    }
-                }
-                _inVoid = false;
-            }
-        }
-#endif
 
 #ifdef ENABLE_SHADOWING
         // simple and expensive implementation of hard shadows
@@ -209,11 +131,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 #endif
 
             // accomodate for variable sampling rates
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-            color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * samplingRateCompensationMultiplier * SAMPLING_BASE_INTERVAL_RCP);
-#else
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-#endif
             result.rgb = mix(color.rgb, result.rgb, result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
         }
@@ -232,13 +150,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // advance to the next evaluation point along the ray
-#ifdef ENABLE_ADAPTIVE_STEPSIZE
-        samplingRateCompensationMultiplier = (_inVoid ? 1.0 : 0.25);
-        t += _samplingStepSize * (_inVoid ? 1.0 : 0.125);
-        
-#else
         t += _samplingStepSize;
-#endif
     }
 
     // calculate depth value from ray parameter
