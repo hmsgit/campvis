@@ -124,8 +124,8 @@ namespace campvis {
             reinitializeCamera(pos, worldBounds.center(), _cameraProperty->getValue().getUpVector());
         }
     }
-
-    void TrackballNavigationEventListener::setCenter(const tgt::vec3& center) {
+        
+   void TrackballNavigationEventListener::setCenter(const tgt::vec3& center) {
         _trackball->setCenter(center);
     }
     
@@ -135,6 +135,10 @@ namespace campvis {
 
     const tgt::Bounds& TrackballNavigationEventListener::getSceneBounds() const {
         return _trackball->getSceneBounds();
+    }
+
+    tgt::Trackball* TrackballNavigationEventListener::getTrackball() {
+        return _trackball;
     }
 
     void TrackballNavigationEventListener::addLqModeProcessor(VisualizationProcessor* vp) {
