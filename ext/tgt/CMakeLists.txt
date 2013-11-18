@@ -7,18 +7,13 @@ INCLUDE(../../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring tgt Library")
 
-#
-# Qt related stuff:
-#
-FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
-INCLUDE(${QT_USE_FILE})
-
 # configuration
 IF(TGT_WITH_WMI)
 	ADD_DEFINITIONS("-DTGT_WITH_WMI")
 	ADD_DEFINITIONS("-D_WIN32_DCOM") #< for CoInitializeSecurity() to be defined
 	LIST(APPEND CampvisGlobalExternalLibs "WbemUuid")
 ENDIF(TGT_WITH_WMI)    
+
 
 # headers
 FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h qt/*.h)
@@ -70,13 +65,30 @@ SET(TGT_SOURCES
 #navigation 
 	navigation/navigation.cpp
 	navigation/trackball.cpp
-#qt
-	qt/qtapplication.cpp
-	qt/qtcanvas.cpp
-	qt/qtcontextmanager.cpp
-	qt/qtthreadedcanvas.cpp
-	qt/qttimer.cpp
+
 )
+
+
+# Qt related stuff:
+IF(TGT_WITH_QT)
+	FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
+	INCLUDE(${QT_USE_FILE})
+	
+	LIST(APPEND TGT_HEADERS 
+		qt/qtapplication.h
+		qt/qtcanvas.h
+		qt/qtcontextmanager.h
+		qt/qtthreadedcanvas.h
+		qt/qttimer.h)
+	
+	LIST(APPEND TGT_SOURCES 
+		qt/qtapplication.cpp
+		qt/qtcanvas.cpp
+		qt/qtcontextmanager.cpp
+		qt/qtthreadedcanvas.cpp
+		qt/qttimer.cpp)
+ENDIF(TGT_WITH_QT)
+
 
 ################################################################################
 # define library target
