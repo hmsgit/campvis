@@ -79,7 +79,7 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         // lookup intensity and TF
-        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).a;
+        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).r;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
 #ifdef DEPTH_MAPPING

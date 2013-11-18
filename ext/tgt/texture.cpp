@@ -42,7 +42,7 @@ Texture::Texture(const tgt::ivec3& dimensions, GLint format, GLint internalforma
     , internalformat_(internalformat)
     , dataType_(dataType)
     , filter_(filter)
-    , wrapping_(REPEAT)
+    , wrapping_(CLAMP)
     , priority_(-1.f)
     , pixels_(0)
 {
@@ -56,7 +56,7 @@ Texture::Texture(const tgt::ivec3& dimensions, GLint format,
     , internalformat_(format)
     , dataType_(dataType)
     , filter_(filter)
-    , wrapping_(REPEAT)
+    , wrapping_(CLAMP)
     , priority_(-1.f)
     , pixels_(0)
 {
@@ -70,7 +70,7 @@ Texture::Texture(GLubyte* data, const tgt::ivec3& dimensions, GLint format, GLin
     , internalformat_(internalformat)
     , dataType_(dataType)
     , filter_(filter)
-    , wrapping_(REPEAT)
+    , wrapping_(CLAMP)
     , priority_(-1.f)
     , pixels_(data)
 {
@@ -85,7 +85,7 @@ Texture::Texture(GLubyte* data, const tgt::ivec3& dimensions, GLint format,
     , internalformat_(format)
     , dataType_(dataType)
     , filter_(filter)
-    , wrapping_(REPEAT)
+    , wrapping_(CLAMP)
     , priority_(-1.f)
     , pixels_(data)
 {
@@ -148,60 +148,106 @@ int Texture::calcBpp(GLint format, GLenum dataType) {
 }
 
 int Texture::calcBpp(GLint internalformat) {
+    // supports all formats from http://www.opengl.org/sdk/docs/man/xhtml/glTexImage2D.xml
 
     int bpp = 0;
     switch (internalformat) {
         case 1:
-        case GL_COLOR_INDEX:
-        case GL_RED:
-        case GL_GREEN:
-        case GL_BLUE:
-        case GL_ALPHA8:
-        case GL_INTENSITY:
-        case GL_LUMINANCE:
         case GL_DEPTH_COMPONENT:
+        case GL_RED:
+        case GL_R8:
+        case GL_R8_SNORM:
+        case GL_R8I:
+        case GL_R8UI:
+        case GL_R3_G3_B2:
+        case GL_RGBA2:
             bpp = 1;
             break;
 
         case 2:
-        case GL_LUMINANCE_ALPHA:
-        case GL_INTENSITY16:
-        case GL_ALPHA16:
         case GL_DEPTH_COMPONENT16:
+        case GL_R16_SNORM:
+        case GL_R16F:
+        case GL_R16I:
+        case GL_R16UI:
+        case GL_DEPTH_STENCIL:
+        case GL_RG:
+        case GL_RG8:
+        case GL_RG8_SNORM:
+        case GL_RG8I:
+        case GL_RG8UI:
+        case GL_RGB4:
+        case GL_RGB5:
+        case GL_RGBA4:
+        case GL_RGB5_A1:
             bpp = 2;
             break;
 
+        case GL_DEPTH_COMPONENT24:
         case GL_RGB:
         case GL_RGB8:
-        case GL_BGR:
-        case GL_DEPTH_COMPONENT24:
+        case GL_RGB8_SNORM:
+        case GL_SRGB8:
+        case GL_RGB8I:
+        case GL_RGB8UI:
             bpp = 3;
             break;
 
-        case GL_ALPHA:
-        case GL_ALPHA32F_ARB:
+        case GL_DEPTH_COMPONENT32:
+        case GL_DEPTH_COMPONENT32F:
+        case GL_R32F:
+        case GL_R32I:
+        case GL_R32UI:
+        case GL_RG16:
+        case GL_RG16_SNORM:
+        case GL_RG16F:
+        case GL_RG16I:
+        case GL_RG16UI:
+        case GL_RGB10:
+        case GL_R11F_G11F_B10F:
+        case GL_RGB9_E5:
         case GL_RGBA:
         case GL_RGBA8:
-        case GL_BGRA:
-        case GL_DEPTH_COMPONENT32:
+        case GL_RGBA8_SNORM:
+        case GL_RGB10_A2:
+        case GL_RGB10_A2UI:
+        case GL_SRGB8_ALPHA8:
+        case GL_RGBA8I:
+        case GL_RGBA8UI:
             bpp = 4;
             break;
 
-        case GL_RGB16:
-        case GL_RGB16F_ARB:
+        case GL_RGB12:
+            bpp = 5;
+            break;
+
+        case GL_RGB16_SNORM:
+        case GL_RGB16F:
+        case GL_RGB16I:
+        case GL_RGB16UI:
+        case GL_RGBA12:
             bpp = 6;
             break;
 
+        case GL_RG32F:
+        case GL_RG32I:
+        case GL_RG32UI:
         case GL_RGBA16:
-        case GL_RGBA16F_ARB:
+        case GL_RGBA16F:
+        case GL_RGBA16I:
+        case GL_RGBA16UI:
             bpp = 8;
             break;
 
-        case GL_RGB32F_ARB:
+        case GL_RGB32F:
+        case GL_RGB32I:
+        case GL_RGB32UI:
             bpp = 12;
             break;
 
-        case GL_RGBA32F_ARB:
+        case GL_RGBA32F:
+        case GL_RGBA32I:
+        case GL_RGBA32UI:
             bpp = 16;
             break;
 
@@ -214,45 +260,93 @@ int Texture::calcBpp(GLint internalformat) {
 }
 
 int Texture::calcNumChannels(GLint format) {
-
+    // supports all formats from http://www.opengl.org/sdk/docs/man/xhtml/glTexImage2D.xml
     switch (format) {
-    case 1:
-    case GL_COLOR_INDEX:
-    case GL_RED:
-    case GL_RED_INTEGER:
-    case GL_GREEN:
-    case GL_BLUE:
-    case GL_ALPHA:
-    case GL_INTENSITY:
-    case GL_LUMINANCE:
-    case GL_DEPTH_COMPONENT:
-    case GL_DEPTH_COMPONENT24:
-    case GL_ALPHA_INTEGER_EXT:
-        return 1;
-        break;
+        case 1:
+        case GL_DEPTH_COMPONENT:
+        case GL_RED:
+        case GL_R8:
+        case GL_R8_SNORM:
+        case GL_R16_SNORM:
+        case GL_R16F:
+        case GL_R32F:
+        case GL_R8I:
+        case GL_R8UI:
+        case GL_R16I:
+        case GL_R16UI:
+        case GL_R32I:
+        case GL_R32UI:
+            return 1;
+            break;
 
-    case 2:
-    case GL_LUMINANCE_ALPHA:
-        return 2;
-        break;
+        case 2:
+        case GL_DEPTH_STENCIL:
+        case GL_RG:
+        case GL_RG8:
+        case GL_RG8_SNORM:
+        case GL_RG16:
+        case GL_RG16_SNORM:
+        case GL_RG16F:
+        case GL_RG32F:
+        case GL_RG8I:
+        case GL_RG8UI:
+        case GL_RG16I:
+        case GL_RG16UI:
+        case GL_RG32I:
+        case GL_RG32UI:
+            return 2;
+            break;
 
-    case 3:
-    case GL_RGB:
-    case GL_BGR:
-        return 3;
-        break;
+        case 3:
+        case GL_RGB:
+        case GL_R3_G3_B2:
+        case GL_RGB4:
+        case GL_RGB5:
+        case GL_RGB8:
+        case GL_RGB8_SNORM:
+        case GL_RGB10:
+        case GL_RGB12:
+        case GL_RGB16_SNORM:
+        case GL_SRGB8:
+        case GL_RGB16F:
+        case GL_RGB32F:
+        case GL_R11F_G11F_B10F:
+        case GL_RGB9_E5:
+        case GL_RGB8I:
+        case GL_RGB8UI:
+        case GL_RGB16I:
+        case GL_RGB16UI:
+        case GL_RGB32I:
+        case GL_RGB32UI:
+            return 3;
+            break;
 
-    case 4:
-    case GL_RGBA:
-    case GL_BGRA:
-    case GL_RGBA16:
-    case GL_RGBA16F_ARB:
-        return 4;
-        break;
+        case 4:
+        case GL_RGBA:
+        case GL_RGBA2:
+        case GL_RGBA4:
+        case GL_RGB5_A1:
+        case GL_RGBA8:
+        case GL_RGBA8_SNORM:
+        case GL_RGB10_A2:
+        case GL_RGB10_A2UI:
+        case GL_RGBA12:
+        case GL_RGBA16:
+        case GL_SRGB8_ALPHA8:
+        case GL_RGBA16F:
+        case GL_RGBA32F:
+        case GL_RGBA8I:
+        case GL_RGBA8UI:
+        case GL_RGBA16I:
+        case GL_RGBA16UI:
+        case GL_RGBA32I:
+        case GL_RGBA32UI:
+            return 4;
+            break;
 
-    default:
-        LWARNINGC("tgt.Texture", "unknown format");
-        return 0;
+        default:
+            LWARNINGC("tgt.Texture", "unknown format");
+            return 0;
     }
 }
 

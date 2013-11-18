@@ -60,19 +60,19 @@ void main() {
             // perform MIP
             out_Color = vec4(0.0);
             for (float slice = 0.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
-                out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, vec3(ex_TexCoord.xy, slice)).a));
+                out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, vec3(ex_TexCoord.xy, slice)).r));
             }
         }
         else {
             // render the corresponding slice
             vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_3dTextureParams._size.z));
-            out_Color = lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, coord).a);
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, coord).r);
         }
     }
     else {
         vec4 texel = getElement2DNormalized(_texture2d, _2dTextureParams, ex_TexCoord.xy);
         if (_2dTextureParams._numChannels == 1) {
-            out_Color = lookupTF(_transferFunction, _transferFunctionParams, (_isDepthTexture ? texel.r : texel.a));
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
         }
         else if (_2dTextureParams._numChannels == 3) {
             out_Color = vec4(abs(texel.rgb), 1.0);

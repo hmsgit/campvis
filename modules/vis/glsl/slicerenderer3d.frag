@@ -40,7 +40,7 @@ uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
 void main() {
-    float intensity = getElement3DNormalized(_texture, _textureParams, ex_TexCoord).a;
+    float intensity = getElement3DNormalized(_texture, _textureParams, ex_TexCoord).r;
     out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
     // don't write fragment if fully transparent (in particular don't write to depth buffer!)
