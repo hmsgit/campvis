@@ -77,10 +77,13 @@ namespace campvis {
     void CampcomMhdReceiver::process(DataContainer& data) {
         validate(INVALID_RESULT);
 
+        // Get the last received MHD file:
+        // Use atomic fetch and store because at the same time CAMPCom may receive another file!
         campcom::MHDImageData* mid = _incomingMhd.fetch_and_store(0);
         if (mid == 0)
             return;
 
+        // Transform campcom::MHDImageData to campvis::ImageData
         int numChannels = 1;
         size_t dimensionality = mid->NDims;
         tgt::svec3 size(1);
@@ -119,40 +122,49 @@ namespace campvis {
         ImageRepresentationLocal::create(image, wtp);
         image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
         data.addData(p_targetImageID.getValue(), image);
-
-        validate(INVALID_RESULT);
     }
 
     void CampcomMhdReceiver::onBtnConnectClicked() {
+        // CAMPComClient does not support dis-/reconnect. So we have to delete it and recreate it.
         if (_ccclient) {
             _ccclient->disconnect();
             delete _ccclient;
             _ccclient = 0;
         }
 
+        // create CAMPComClient and subscribe.
         _ccclient = new campcom::CAMPComClient("Campvis", campcom::Device_TestDevice, p_address.getValue());
         _ccclient->connect();
+
         if (_ccclient->isConnected()) {
-            campcom::DataCallback dc;
-            dc = boost::bind(&CampcomMhdReceiver::ccReceiveImage, this, _1);
-            campcom::SuccessCallback sc = std::bind1st(std::mem_fun(&CampcomMhdReceiver::ccSuccessCalback), this);
+            // use ugly boost magic to connect to member function (unfortunately CAMPCom only supports free functions...)
+            campcom::DataCallback dc = boost::bind(&CampcomMhdReceiver::ccReceiveImage, this, _1);
+            campcom::SuccessCallback sc = std::bind1st(std::mem_fun(&CampcomMhdReceiver::ccSuccessCallback), this);
             _ccclient->subscribe(campcom::Type_Image, dc, sc);
         }
         else {
             LWARNING("Could not connect to CAMPCom server.");
-//            delete _ccclient;
+            delete _ccclient;
             _ccclient = 0;
         }
     }
 
     void CampcomMhdReceiver::ccReceiveImage(std::vector<campcom::Byte>& msg) {
+        // Deserialize payload
         campcom::MHDImageData return_payload;
         campcom::Header header;
-
         campcom::TypeHandler<campcom::MHDImageData>::deserializePayload(&msg[0], msg.size(), return_payload);
+
         if (campcom::MHDImageData::isValid(return_payload)) {
             LINFO("New valid MHDImageData received! Pushing it to the DataContainer...");
+
+            // putting the image into the DataContainer has to be done asynchroneously, because we
+            // don't know the DataContainer here... :/
+            // So copy the image one more time, but it into _incomingMhd and invalidate the processor.
+            // Use atomic fetch and store because at the same time we may convert the last received image!
             campcom::MHDImageData* copy = new campcom::MHDImageData(return_payload);
+
+            // delete old image not yet converted (if present)
             campcom::MHDImageData* toDelete = _incomingMhd.fetch_and_store(copy);
             delete toDelete;
 
@@ -164,7 +176,7 @@ namespace campvis {
 
     }
 
-    void CampcomMhdReceiver::ccSuccessCalback(bool b) {
+    void CampcomMhdReceiver::ccSuccessCallback(bool b) {
         LINFO("CAMPCom subscribe callback: " << b);
     }
 

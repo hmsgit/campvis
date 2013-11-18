@@ -29,3 +29,4 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 	modules/campcom/processors/*.h
 )
 
+SET(ThisModDependencies vis)

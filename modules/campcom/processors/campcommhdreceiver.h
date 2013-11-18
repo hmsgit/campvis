@@ -45,9 +45,8 @@
 
 namespace campvis {
     /**
-     * Reads a MHD image file into the pipeline.
-     *
-     * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
+     * Experimental demo implementation how to receive MHD files via CAMPCom, convert it to
+     * CAMPVis ImageData and store it into the DataContainer.
      */
     class CampcomMhdReceiver : public AbstractProcessor {
     public:
@@ -67,19 +66,20 @@ namespace campvis {
         virtual void deinit();
 
         /**
-         * Reads the MHD file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
+         * Transforms the last received MHD image (found in _incomingMhd) into CAMPVis ImageData 
+         * and stores it in \a data.
+         * \param   data    DataContainer to work on
          */
         virtual void process(DataContainer& data);
 
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "CampcomMhdReceiver"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Reads an MHD image into the pipeline."; };
+        virtual const std::string getDescription() const { return "Experimental demo implementation how to receive MHD files via CAMPCom."; };
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
-        virtual const ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         StringProperty p_address;           ///< URL for file to read
         ButtonProperty p_connect;           ///< 
@@ -89,15 +89,23 @@ namespace campvis {
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
-
+        /// Callback slot for connect button
         void onBtnConnectClicked();
 
+        /**
+         * Callback for CAMPCom when receiving an image.
+         * \param   msg     Received CAMPCom message
+         */
         void ccReceiveImage(std::vector<campcom::Byte>& msg);
 
-        void ccSuccessCalback(bool b);
+        /**
+         * Callback for CAMPCom when connection/subscribtion was successful.
+         * \param   b   Flag whether subscription was successful.
+         */
+        void ccSuccessCallback(bool b);
 
-        campcom::CAMPComClient* _ccclient;
-        tbb::atomic<campcom::MHDImageData*> _incomingMhd;
+        campcom::CAMPComClient* _ccclient;                  ///< Pointer to CAMPComClient (!=0 when connected)
+        tbb::atomic<campcom::MHDImageData*> _incomingMhd;   ///< Pointer to last received MHD file
 
         static const std::string loggerCat_;
     };
