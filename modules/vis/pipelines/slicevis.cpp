@@ -39,15 +39,11 @@ namespace campvis {
     SliceVis::SliceVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _imageReader()
-        , _gvg()
-        , _lhh()
         , _sliceExtractor(&_canvasSize)
         , _wheelHandler(&_sliceExtractor.p_zSliceNumber)
         , _tfWindowingHandler(&_sliceExtractor.p_transferFunction)
     {
         addProcessor(&_imageReader);
-//         addProcessor(&_gvg);
-//         addProcessor(&_lhh);
         addProcessor(&_sliceExtractor);
         addEventListenerToBack(&_wheelHandler);
         addEventListenerToBack(&_tfWindowingHandler);
@@ -61,12 +57,8 @@ namespace campvis {
 
         _imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.addSharedProperty(&_gvg.p_sourceImageID);
-        _imageReader.p_targetImageID.addSharedProperty(&_lhh.p_intensitiesId);
         _imageReader.p_targetImageID.addSharedProperty(&_sliceExtractor.p_sourceImageID);
         _imageReader.s_validated.connect(this, &SliceVis::onProcessorValidated);
-
-//         _gvg._outputGradients.connect(&_lhh._inputGradients);
 
         _sliceExtractor.p_xSliceNumber.setValue(0);
 
