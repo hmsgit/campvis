@@ -141,13 +141,14 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
         // check whether we have a lookup volume for empty space skipping
         if (_hasBbv) {
-            if (! lookupInBbv(samplePosition)) {
+            if (!lookupInBbv(samplePosition)) {
                 // advance the ray to the intersection point with the current brick
                 vec3 brickVoxel = floor((samplePosition * _volumeTextureParams._size) / _bbvBrickSize) * _bbvBrickSize;
                 vec3 boxLlf = brickVoxel * _volumeTextureParams._sizeRCP;
                 vec3 boxUrb = boxLlf + (_volumeTextureParams._sizeRCP * _bbvBrickSize);
 
-                t = rayBoxIntersection(entryPoint, direction, boxLlf, boxUrb, t);
+                t = rayBoxIntersection(entryPoint, direction, boxLlf, boxUrb, t) + _samplingStepSize;
+                continue;
             }
         }
 
