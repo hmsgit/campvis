@@ -151,6 +151,7 @@ namespace campvis {
          * \param handle    DataHandle containing the image to save. Must contain ImageData or RenderData!
          * \param filename  Filename for the file to save.
          */
+        
 
 	//protected:
 	public:				// Only for Debuggin

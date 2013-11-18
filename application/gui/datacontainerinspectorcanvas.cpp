@@ -160,6 +160,22 @@ namespace campvis {
 
 
     void DataContainerInspectorCanvas::paint() {
+
+        /// if the window is resized, change the depth buffer size, also!
+        if(_depthBuffer)
+            if(_depthBuffer->getWidth() != width() || _depthBuffer->getHeight() != height()) {
+                delete _depthBuffer;
+                _depthBuffer = new tgt::Texture(0, tgt::ivec3(width(), height(), 1), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);		//, _renderingWndSize(tgt::ivec2(400, 100))
+                _texturesDirty = true;
+            }
+            else {
+                // Do nothing!
+            }
+        else {
+            _depthBuffer = new tgt::Texture(0, tgt::ivec3(width(), height(), 1), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);		//, _renderingWndSize(tgt::ivec2(400, 100))
+            _texturesDirty = true;
+        }
+
         LGL_ERROR;
         tbb::mutex::scoped_lock lock(_localMutex);
         if (_texturesDirty)
@@ -404,7 +420,7 @@ namespace campvis {
         invalidate();
     }
 
-    void DataContainerInspectorCanvas::sizeChanged(const tgt::ivec2&) {
+    void DataContainerInspectorCanvas::sizeChanged(const tgt::ivec2& size) {
         invalidate();
     }
 
