@@ -6,8 +6,6 @@
 # TBB_LICENSE_FILE
 
 IF (WIN32)
-    MESSAGE(STATUS ${TbbDirectory})
-    
     IF(NOT TBB_ROOT)
         # check environment variables
         IF(NOT "$ENV{TBB_INSTALL_DIR}" STREQUAL "")
