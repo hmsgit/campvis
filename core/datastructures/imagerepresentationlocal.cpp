@@ -66,7 +66,7 @@ namespace campvis {
 
         // test source image type via dynamic cast
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
-            return convertToGenericLocal(tester, tester->getImageData());
+            return create(tester->getParent(), tester->getImageData());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
             // FIXME: this here deadlocks, if called from OpenGL context (GLJobProc)!!!
@@ -76,7 +76,7 @@ namespace campvis {
             try {
                 tgt::GLContextScopedLock lock(context);
                 WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
-                toReturn = convertToGenericLocal(source, wtp);
+                toReturn = create(source->getParent(), wtp);
             }
             catch (...) {
                 LERROR("An unknown error occured during conversion...");
@@ -186,14 +186,15 @@ namespace campvis {
         });
     }
 
-    ImageRepresentationLocal* ImageRepresentationLocal::convertToGenericLocal(const AbstractImageRepresentation* source, const WeaklyTypedPointer& wtp) {
+    
+    ImageRepresentationLocal* ImageRepresentationLocal::create(const ImageData* parent, WeaklyTypedPointer wtp) {
 #define CONVERT_DISK_TO_GENERIC_LOCAL(baseType,numChannels) \
         return GenericImageRepresentationLocal<baseType, numChannels>::create( \
-            const_cast<ImageData*>(source->getParent()), \
+            const_cast<ImageData*>(parent), \
             reinterpret_cast< TypeTraits<baseType, numChannels>::ElementType*>(wtp._pointer));
 
 #define DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(numChannels) \
-        if (source->getParent()->getNumChannels() == (numChannels)) { \
+        if (parent->getNumChannels() == (numChannels)) { \
             switch (wtp._baseType) { \
                 case WeaklyTypedPointer::UINT8: \
                     CONVERT_DISK_TO_GENERIC_LOCAL(uint8_t, (numChannels)) \
@@ -223,7 +224,7 @@ namespace campvis {
             tgtAssert(false, "Should not reach this - wrong number of channel!");
             return 0;
         }
-
     }
-    
+
+
 }
