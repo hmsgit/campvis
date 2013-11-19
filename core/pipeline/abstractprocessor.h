@@ -65,7 +65,8 @@ namespace campvis {
             VALID               = 0,        ///< Valid
             INVALID_RESULT      = 1 << 0,   ///< Need to rerun the process() method
             INVALID_SHADER      = 1 << 1,   ///< Need to recompile the shader
-            INVALID_PROPERTIES  = 1 << 2    ///< Need to update the properties
+            INVALID_PROPERTIES  = 1 << 2,   ///< Need to update the properties
+            FIRST_FREE_TO_USE_INVALIDATION_LEVEL = 1 << 3
         };
 
         /// Current state of a processor in terms of stability.

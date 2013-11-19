@@ -96,7 +96,7 @@ namespace campvis {
          * Sets the invalidation level that this property triggers.
          * \param il    New invalidation level that this property triggers.
          */
-        void setInvalidationLevel(AbstractProcessor::InvalidationLevel il);
+        void setInvalidationLevel(int il);
 
         /**
          * Returns whether this proberty shall be visible in the GUI.

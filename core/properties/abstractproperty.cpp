@@ -58,7 +58,7 @@ namespace campvis {
         return _invalidationLevel;
     }
 
-    void AbstractProperty::setInvalidationLevel(AbstractProcessor::InvalidationLevel il) {
+    void AbstractProperty::setInvalidationLevel(int il) {
         _invalidationLevel = il;
     }
 
