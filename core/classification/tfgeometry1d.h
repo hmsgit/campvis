@@ -39,6 +39,7 @@ namespace tgt {
 }
 
 namespace campvis {
+    class FaceGeometry;
 
     /**
      * Defines a single shape for the GeometryTransferFunction class.
@@ -110,6 +111,8 @@ namespace campvis {
     protected:
 
         std::vector<KeyPoint> _keyPoints;       ///< vector of KeyPoints, KeyPoints are sorted by x-coordinate of the position
+        FaceGeometry* _tfRenderFace;            ///< FaceGeometry used to render TF into the TF texture
+        FaceGeometry* _tfEditorFace;            ///< FaceGeometry used to render TF into editor window
     };
 
 // ================================================================================================

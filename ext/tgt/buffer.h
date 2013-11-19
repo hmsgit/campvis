@@ -10,8 +10,6 @@ namespace tgt {
     class VertexAttribute;
 
     class BufferObject {
-        friend class VertexAttribute;
-
     public:
         enum TargetType {
             ARRAY_BUFFER = GL_ARRAY_BUFFER,
@@ -112,18 +110,6 @@ namespace tgt {
 
 
     protected:
-        /**
-         * To be called from VertexAttribute's constructor, to keep track of the VBO-VA bindings.
-         * \param   va  The VertexAttribute this BufferObject was bound to.
-         */
-        void bindToVertexAttribute(const VertexAttribute* va);
-
-        /**
-         * To be called from VertexAttribute destructor, to keep track of the VBO-VA binding.
-         * \param   va  The VertexAttribute this BufferObject is no longer bound to.
-         */
-        void unbindFromVertexAttribute(const VertexAttribute* va);
-
         GLuint _id;                         ///< OpenGL ID of this buffer
 
         TargetType _targetType;             ///< Target type of buffer object
@@ -133,8 +119,6 @@ namespace tgt {
 
         size_t _size;                       ///< Buffer size in bytes
         size_t _numElements;                ///< Number of elements in this buffer
-
-        std::set<const VertexAttribute*> _assignedAttributes;   ///< Set of all VertexAttributes this buffer is assigned to (used for debugging purposes).
     };
 }
 

@@ -153,7 +153,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // lookup intensity and TF
-        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).a;
+        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).r;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
 #ifdef INTERSECTION_REFINEMENT
@@ -172,7 +172,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                     vec3 newSamplePosition = entryPoint.rgb + newT * direction;
 
                     // lookup refined intensity + TF
-                    float newIntensity = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition).a;
+                    float newIntensity = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition).r;
                     vec4 newColor = lookupTF(_transferFunction, _transferFunctionParams, newIntensity);
 
                     if (newColor.a <= 0.0) {

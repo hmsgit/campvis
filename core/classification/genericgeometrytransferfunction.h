@@ -135,7 +135,6 @@ namespace campvis {
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/passthrough.frag", "", false);
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
-            _shader->setAttributeLocation(1, "in_TexCoord");
             _shader->setAttributeLocation(2, "in_Color");
         }
         else {
@@ -152,9 +151,6 @@ namespace campvis {
         _geometries.clear();
 
         if (_fbo != 0) {
-            _fbo->activate();
-            _fbo->detachAll();
-            _fbo->deactivate();
             delete _fbo;
             _fbo = 0;
         }
@@ -260,6 +256,7 @@ namespace campvis {
 
         // deactivate Shader and FBO
         _shader->deactivate();
+        _fbo->detachTexture(GL_COLOR_ATTACHMENT0);
         _fbo->deactivate();
         LGL_ERROR;
 

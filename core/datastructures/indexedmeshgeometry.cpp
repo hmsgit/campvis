@@ -102,13 +102,13 @@ namespace campvis {
 
         tgt::VertexArrayObject vao;
         if (_verticesBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::VerticesAttribute, _verticesBuffer);
+            vao.setVertexAttributePointer(0, _verticesBuffer);
         if (_texCoordsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::TextureCoordinatesAttribute, _texCoordsBuffer);
+            vao.setVertexAttributePointer(1, _texCoordsBuffer);
         if (_colorsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::ColorsAttribute, _colorsBuffer);
+            vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _normalsBuffer);
+            vao.setVertexAttributePointer(3, _normalsBuffer);
         vao.bindIndexBuffer(_indicesBuffer);
 
         glDrawElements(mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_SHORT, 0);

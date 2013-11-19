@@ -84,7 +84,6 @@ namespace campvis {
     }
 
     void TFGeometry1D::render() const {
-        // TODO: get rid of intermediade mode?
         if (_keyPoints.size() < 2)
             return;
 
@@ -100,7 +99,7 @@ namespace campvis {
             colors.push_back(tgt::vec4(a->_color) / 255.f);
         }
 
-        FaceGeometry fg(vertices, vertices, colors);
+        FaceGeometry fg(vertices, std::vector<tgt::vec3>(), colors);
         fg.render(GL_TRIANGLE_STRIP);
     }
     TFGeometry1D* TFGeometry1D::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor) {
