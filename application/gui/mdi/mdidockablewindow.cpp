@@ -148,9 +148,6 @@ namespace campvis {
 
             _floatingWindow = new MdiFloatingWindow(widget, this);
             _floatingWindow->setWindowTitle(this->windowTitle());
-            this->connect(_floatingWindow, SIGNAL(s_positionChanged(const QPoint&)),
-                          SLOT(trackFloatingWindowPosition(const QPoint&)));
-            this->connect(_floatingWindow, SIGNAL(s_closed()), SLOT(handleWindowClosing()));
 
             _dockedWindow->deleteLater();
             _dockedWindow = 0;
@@ -159,6 +156,16 @@ namespace campvis {
             _floatingWindow->show();
             _floatingWindow->activateWindow();
             _floatingWindow->forceWindowDrag();
+
+            /*
+             * Connect signals last so that the floating window's initial move events are ignored.
+             * They mustn't be handled because they may contain outdated position information which
+             * could, in extreme cases, trigger immediate re-docking of the floating window,
+             * leading to all sorts of problems.
+             */
+            this->connect(_floatingWindow, SIGNAL(s_closed()), SLOT(handleWindowClosing()));
+            this->connect(_floatingWindow, SIGNAL(s_positionChanged(const QPoint&)),
+                          SLOT(trackFloatingWindowPosition(const QPoint&)));
         }
     }
 
