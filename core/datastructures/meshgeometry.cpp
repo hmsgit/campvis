@@ -84,7 +84,7 @@ namespace campvis {
 
     void MeshGeometry::render(GLenum mode) const {
         createGLBuffers();
-        if (! _buffersInitialized) {
+        if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
             return;
         }
@@ -113,9 +113,9 @@ namespace campvis {
     }
 
     void MeshGeometry::createGLBuffers() const {
-        GeometryData::createGLBuffers();
+        if (_buffersDirty) {
+            deleteBuffers();
 
-        if (! _buffersInitialized) {
             bool createTexCoordsBuffer = true;
             bool createColorsBuffer = true;
             bool createNormalsBuffer = true;
@@ -131,11 +131,11 @@ namespace campvis {
 
 #ifdef CAMPVIS_DEBUG
                 if (!createTexCoordsBuffer && !(it->getTextureCoordinates().empty()))
-                    LDEBUG("Presence of texture coordinates in faces not consistend, not generating texture coordinates VBO!");
+                    LDEBUG("Presence of texture coordinates in faces not consistent, not generating texture coordinates VBO!");
                 if (!createColorsBuffer && !(it->getColors().empty()))
-                    LDEBUG("Presence of colors in faces not consistend, not generating colors VBO!");
+                    LDEBUG("Presence of colors in faces not consistent, not generating colors VBO!");
                 if (!createNormalsBuffer && !(it->getNormals().empty()))
-                    LDEBUG("Presence of normals in faces not consistend, not generating normals VBO!");
+                    LDEBUG("Presence of normals in faces not consistent, not generating normals VBO!");
 #endif
             }
 
@@ -179,104 +179,13 @@ namespace campvis {
             }
             catch (tgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
-                _buffersInitialized = false;
+                _buffersDirty = true;
                 return;
             }
 
             LGL_ERROR;
-            _buffersInitialized = true;
+            _buffersDirty = false;
         }
-    }
-
-    campvis::MeshGeometry MeshGeometry::createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds) {
-        const tgt::vec3& llf = bounds.getLLF();
-        const tgt::vec3& urb = bounds.getURB();
-        const tgt::vec3& tLlf = texBounds.getLLF();
-        const tgt::vec3& tUrb = texBounds.getURB();
-
-        // not the most elegant method, but it works...
-        std::vector<tgt::vec3> vertices, texCoords;
-        std::vector<FaceGeometry> faces;
-
-        // front
-        texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tLlf.z));
-        vertices.push_back(tgt::vec3(llf.x, urb.y, llf.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tUrb.y, tLlf.z));
-        vertices.push_back(tgt::vec3(urb.x, urb.y, llf.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tLlf.z));
-        vertices.push_back(tgt::vec3(urb.x, llf.y, llf.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tLlf.z));
-        vertices.push_back(tgt::vec3(llf.x, llf.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
-        vertices.clear();
-        texCoords.clear();
-
-        // right
-        texCoords.push_back(tgt::vec3(tUrb.x, tUrb.y, tLlf.z));
-        vertices.push_back(tgt::vec3(urb.x, urb.y, llf.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tUrb.y, tUrb.z));
-        vertices.push_back(tgt::vec3(urb.x, urb.y, urb.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tUrb.z));
-        vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tLlf.z));
-        vertices.push_back(tgt::vec3(urb.x, llf.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
-        vertices.clear();
-        texCoords.clear();
-
-        // top
-        texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tUrb.z));
-        vertices.push_back(tgt::vec3(llf.x, urb.y, urb.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tUrb.y, tUrb.z));
-        vertices.push_back(tgt::vec3(urb.x, urb.y, urb.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tUrb.y, tLlf.z));
-        vertices.push_back(tgt::vec3(urb.x, urb.y, llf.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tLlf.z));
-        vertices.push_back(tgt::vec3(llf.x, urb.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
-        vertices.clear();
-        texCoords.clear();
-
-        // left
-        texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tUrb.z));
-        vertices.push_back(tgt::vec3(llf.x, urb.y, urb.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tLlf.z));
-        vertices.push_back(tgt::vec3(llf.x, urb.y, llf.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tLlf.z));
-        vertices.push_back(tgt::vec3(llf.x, llf.y, llf.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tUrb.z));
-        vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
-        vertices.clear();
-        texCoords.clear();
-
-        // bottom
-        texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tLlf.z));
-        vertices.push_back(tgt::vec3(llf.x, llf.y, llf.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tLlf.z));
-        vertices.push_back(tgt::vec3(urb.x, llf.y, llf.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tUrb.z));
-        vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tUrb.z));
-        vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
-        vertices.clear();
-        texCoords.clear();
-
-        // back
-        texCoords.push_back(tgt::vec3(tUrb.x, tUrb.y, tUrb.z));
-        vertices.push_back(tgt::vec3(urb.x, urb.y, urb.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tUrb.z));
-        vertices.push_back(tgt::vec3(llf.x, urb.y, urb.z));
-        texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tUrb.z));
-        vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
-        texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tUrb.z));
-        vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
-        vertices.clear();
-        texCoords.clear();
-
-        return MeshGeometry(faces);
     }
 
     namespace {

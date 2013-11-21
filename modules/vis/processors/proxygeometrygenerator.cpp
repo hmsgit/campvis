@@ -36,6 +36,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/geometrydatafactory.h"
 #include "core/datastructures/meshgeometry.h"
 
 namespace campvis {
@@ -85,7 +86,7 @@ namespace campvis {
                 tgt::vec3 texURB(static_cast<float>(p_clipX.getValue().y), static_cast<float>(p_clipY.getValue().y), static_cast<float>(p_clipZ.getValue().y));
                 texURB /= numSlices;
 
-                MeshGeometry* cube = MeshGeometry::createCube(volumeExtent, tgt::Bounds(texLLF, texURB)).clone();
+                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, tgt::Bounds(texLLF, texURB));
                 data.addData(p_geometryID.getValue(), cube);
             }
             else {

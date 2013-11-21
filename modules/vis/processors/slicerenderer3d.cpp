@@ -39,6 +39,7 @@
 
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/facegeometry.h"
+#include "core/datastructures/geometrydatafactory.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -92,12 +93,13 @@ namespace campvis {
                 // The closing face is the slice proxy geometry.
                 // This is probably not the fastest, but an elegant solution, which also supports arbitrary slice orientations. :)
                 tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
-                MeshGeometry cube = MeshGeometry::createCube(volumeExtent, tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
+                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
 
                 tgt::vec3 normal(0.f, 0.f, 1.f);
                 float p = img->getParent()->getMappingInformation().getOffset().z + (p_sliceNumber.getValue() * img->getParent()->getMappingInformation().getVoxelSize().z);
-                MeshGeometry clipped = cube.clipAgainstPlane(p, normal, true);
-                FaceGeometry slice = clipped.getFaces().back(); // the last face is the closing face
+                MeshGeometry clipped = cube->clipAgainstPlane(p, normal, true);
+                const FaceGeometry& slice = clipped.getFaces().back(); // the last face is the closing face
+                delete cube;
 
                 FramebufferActivationGuard fag(this);
                 createAndAttachColorTexture();

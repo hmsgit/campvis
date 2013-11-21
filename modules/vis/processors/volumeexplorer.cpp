@@ -33,6 +33,7 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
+#include "core/datastructures/geometrydatafactory.h"
 #include "core/datastructures/renderdata.h"
 
 #include "core/classification/simpletransferfunction.h"
@@ -111,19 +112,7 @@ namespace campvis {
         _sliceExtractor.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
-        std::vector<tgt::vec3> vertices, texCorods;
-
-        vertices.push_back(tgt::vec3( 0.f,  0.f, 0.f));
-        vertices.push_back(tgt::vec3( 1.f,  0.f, 0.f));
-        vertices.push_back(tgt::vec3( 1.f,  1.f, 0.f));
-        vertices.push_back(tgt::vec3( 0.f,  1.f, 0.f));
-        texCorods.push_back(tgt::vec3(0.f, 0.f, 0.f));
-        texCorods.push_back(tgt::vec3(1.f, 0.f, 0.f));
-        texCorods.push_back(tgt::vec3(1.f, 1.f, 0.f));
-        texCorods.push_back(tgt::vec3(0.f, 1.f, 0.f));
-
-        _quad = new FaceGeometry(vertices, texCorods);
-        _quad->createGLBuffers();
+        _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
     }
 
     void VolumeExplorer::deinit() {
