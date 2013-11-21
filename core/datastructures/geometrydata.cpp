@@ -29,27 +29,29 @@
 
 #include "geometrydata.h"
 #include "tgt/buffer.h"
-#include "tgt/vertexarrayobject.h"
+#include "tgt/logmanager.h"
 #include "tgt/glcontextmanager.h"
+#include "tgt/vertexarrayobject.h"
 
 #include "core/tools/opengljobprocessor.h"
 
 namespace campvis {
 
+    const std::string GeometryData::loggerCat_ = "CAMPVis.core.datastructures.GeometryData";;
+
     GeometryData::GeometryData() 
         : AbstractData()
-        , _buffersInitialized(false)
+        , _buffersDirty(true)
         , _verticesBuffer(0)
         , _texCoordsBuffer(0)
         , _colorsBuffer(0)
         , _normalsBuffer(0)
-        , _context(0)
     {
     }
 
     GeometryData::GeometryData(const GeometryData& rhs)
         : AbstractData(rhs)
-        , _buffersInitialized(false)
+        , _buffersDirty(true)
         , _verticesBuffer(0)
         , _texCoordsBuffer(0)
         , _colorsBuffer(0)
@@ -59,12 +61,7 @@ namespace campvis {
     }
 
     GeometryData::~GeometryData() {
-        if (_buffersInitialized) {
-            delete _verticesBuffer;
-            delete _texCoordsBuffer;
-            delete _colorsBuffer;
-            delete _normalsBuffer;
-        }
+        deleteBuffers();
     }
 
     GeometryData& GeometryData::operator=(const GeometryData& rhs) {
@@ -74,25 +71,16 @@ namespace campvis {
         AbstractData::operator=(rhs);
 
         // delete old VBOs and null pointers
-        if (_buffersInitialized) {
-            delete _verticesBuffer;
-            delete _texCoordsBuffer;
-            delete _colorsBuffer;
-            delete _normalsBuffer;
-        }
-
-        _verticesBuffer = 0;
-        _texCoordsBuffer = 0;
-        _colorsBuffer = 0;
-        _normalsBuffer = 0;
-        _buffersInitialized = false;
+        deleteBuffers();
 
         return *this;
     }
 
-    void GeometryData::deleteBuffers(std::vector<tgt::BufferObject*> buffers) {
-        for (std::vector<tgt::BufferObject*>::iterator it = buffers.begin(); it != buffers.end(); ++it)
-            delete *it;
+    void GeometryData::deleteBuffers() const {
+        for (int i = 0; i < NUM_BUFFERS; ++i) {
+            delete _buffers[i];
+            _buffers[i] = 0;
+        }
     }
 
     size_t GeometryData::getVideoMemoryFootprint() const {
@@ -108,11 +96,6 @@ namespace campvis {
             sum += _normalsBuffer->getBufferSize();
 
         return sum;
-    }
-
-    void GeometryData::createGLBuffers() const {
-        if (! _buffersInitialized) 
-            _context = tgt::GlContextManager::getRef().getCurrentContext();
     }
 
     const tgt::BufferObject* GeometryData::getVerticesBuffer() const {

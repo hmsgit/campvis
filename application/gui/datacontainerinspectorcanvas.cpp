@@ -38,6 +38,7 @@
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
+#include "core/datastructures/geometrydatafactory.h"
 #include "core/tools/job.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
@@ -194,20 +195,9 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::createQuad() {
-        std::vector<tgt::vec3> vertices, texCorods;
-
-        vertices.push_back(tgt::vec3( 0.f,  0.f, 0.f));
-        vertices.push_back(tgt::vec3(1.f, 0.f, 0.f));
-        vertices.push_back(tgt::vec3(1.f, 1.f, 0.f));
-        vertices.push_back(tgt::vec3( 0.f,  1.f, 0.f));
-        texCorods.push_back(tgt::vec3(0.f, 1.f, 0.f));
-        texCorods.push_back(tgt::vec3(1.f, 1.f, 0.f));
-        texCorods.push_back(tgt::vec3(1.f, 0.f, 0.f));
-        texCorods.push_back(tgt::vec3(0.f, 0.f, 0.f));
-
         delete _quad;
-        _quad = new FaceGeometry(vertices, texCorods);
-        _quad->createGLBuffers();
+        _quad = 0;
+        _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
     }
 
     void DataContainerInspectorCanvas::repaint() {

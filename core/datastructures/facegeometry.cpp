@@ -39,6 +39,13 @@ namespace campvis {
 
     const std::string FaceGeometry::loggerCat_ = "CAMPVis.core.datastructures.FaceGeometry";
 
+    FaceGeometry::FaceGeometry()
+        : GeometryData()
+        , _faceNormal(0.f)
+    {
+
+    }
+
     FaceGeometry::FaceGeometry(const std::vector<tgt::vec3>& vertices, const std::vector<tgt::vec3>& textureCoordinates /*= std::vector<tgt::vec3>()*/, const std::vector<tgt::vec4>& colors /*= std::vector<tgt::vec4>()*/, const std::vector<tgt::vec3>& normals /*= std::vector<tgt::vec3>() */)
         : GeometryData()
         , _vertices(vertices)
@@ -105,20 +112,20 @@ namespace campvis {
 
     void FaceGeometry::render(GLenum mode) const {
         createGLBuffers();
-        if (! _buffersInitialized) {
+        if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
             return;
         }
 
         tgt::VertexArrayObject vao;
         if (_verticesBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::VerticesAttribute, _verticesBuffer);
+            vao.setVertexAttributePointer(0, _verticesBuffer);
         if (_texCoordsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::TextureCoordinatesAttribute, _texCoordsBuffer);
+            vao.setVertexAttributePointer(1, _texCoordsBuffer);
         if (_colorsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::ColorsAttribute, _colorsBuffer);
+            vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _normalsBuffer);
+            vao.setVertexAttributePointer(3, _normalsBuffer);
         LGL_ERROR;
 
         glDrawArrays(mode, 0, static_cast<GLsizei>(_vertices.size()));
@@ -126,9 +133,9 @@ namespace campvis {
     }
 
     void FaceGeometry::createGLBuffers() const {
-        GeometryData::createGLBuffers();
+        if (_buffersDirty) {
+            deleteBuffers();
 
-        if (! _buffersInitialized) {
             try {
                 _verticesBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
                 _verticesBuffer->data(&_vertices.front(), _vertices.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
@@ -148,12 +155,12 @@ namespace campvis {
             }
             catch (tgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
-                _buffersInitialized = false;
+                _buffersDirty = true;
                 return;
             }
 
             LGL_ERROR;
-            _buffersInitialized = true;
+            _buffersDirty = false;
         }
     }
 
@@ -167,7 +174,7 @@ namespace campvis {
         }
     }
 
-    campvis::FaceGeometry FaceGeometry::clipAgainstPlane(float p, const tgt::vec3& pNormal, float epsilon /*= 1e-8f*/) const {
+    campvis::FaceGeometry FaceGeometry::clipAgainstPlane(float p, const tgt::vec3& pNormal, float epsilon /*= 1e-4f*/) const {
         tgtAssert(epsilon >= 0, "Epsilon must be positive.");
 
         std::vector<tgt::vec3> verts, texCoords, norms;

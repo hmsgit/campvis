@@ -30,32 +30,36 @@
 #ifndef QUADRENDERER_H__
 #define QUADRENDERER_H__
 
-#include "tgt/exception.h"
 #include "tgt/singleton.h"
 #include "tgt/tgt_gl.h"
-
 
 namespace campvis {
     class FaceGeometry;
 
     /**
      * Small helper singleton class for rendering the default [-1, 1]^2 quad.
+     * Texture coordinates are [0, 1]^2.
      */
     class QuadRenderer : public tgt::Singleton<QuadRenderer> {
         friend class tgt::Singleton<QuadRenderer>;
 
     public:
         /**
-         *
+         * Virtual Destructor
          */
         virtual ~QuadRenderer();
 
+        /**
+         * Renders a [-1, 1]^2 quad in the XY plane having texture coordinates [0, 1]^2.
+         * \param   mode    OpenGL rendering mode (defaults to GL_POLYGON).
+         */
         void renderQuad(GLenum mode = GL_POLYGON);
 
     private:
+        /// Private Constructor, must be called from valid OpenGL context.
         QuadRenderer();
 
-        FaceGeometry* _quad;
+        FaceGeometry* _quad;    ///< The FaceGeometry that renders the quad.
     };
 
 #define QuadRdr tgt::Singleton<campvis::QuadRenderer>::getRef()

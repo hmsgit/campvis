@@ -50,7 +50,7 @@ void main() {
         vec4 texel = getElement3DNormalized(_texture, _textureParams, (_texCoordsMatrix * vec4(ex_TexCoord, 1.0)).xyz);
 
         if (_textureParams._numChannels == 1) {
-            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
         }
         else if (_textureParams._numChannels == 3) {
             out_Color = vec4(abs(texel.rgb), 1.0);

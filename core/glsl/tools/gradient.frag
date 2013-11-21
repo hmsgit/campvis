@@ -36,10 +36,10 @@
  */
 vec3 computeGradientForwardDifferences(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
     vec3 offset = texParams._sizeRCP;
-    float v = getElement3DNormalized(tex, texParams, texCoords).a;
-    float dx = getElement3DNormalized(tex, texParams, texCoords + vec3(offset.x, 0.0, 0.0)).a;
-    float dy = getElement3DNormalized(tex, texParams, texCoords + vec3(0, offset.y, 0)).a;
-    float dz = getElement3DNormalized(tex, texParams, texCoords + vec3(0, 0, offset.z)).a;
+    float v = getElement3DNormalized(tex, texParams, texCoords).r;
+    float dx = getElement3DNormalized(tex, texParams, texCoords + vec3(offset.x, 0.0, 0.0)).r;
+    float dy = getElement3DNormalized(tex, texParams, texCoords + vec3(0, offset.y, 0)).r;
+    float dz = getElement3DNormalized(tex, texParams, texCoords + vec3(0, 0, offset.z)).r;
     return vec3(v - dx, v - dy, v - dz) * texParams._voxelSize;
 }
 
@@ -50,12 +50,12 @@ vec3 computeGradientForwardDifferences(in sampler3D tex, in TextureParameters3D 
  */
 vec3 computeGradientCentralDifferences(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
     vec3 offset = texParams._sizeRCP;
-    float dx = getElement3DNormalized(tex, texParams, texCoords + vec3(offset.x, 0.0, 0.0)).a;
-    float dy = getElement3DNormalized(tex, texParams, texCoords + vec3(0, offset.y, 0)).a;
-    float dz = getElement3DNormalized(tex, texParams, texCoords + vec3(0, 0, offset.z)).a;
-    float mdx = getElement3DNormalized(tex, texParams, texCoords + vec3(-offset.x, 0, 0)).a;
-    float mdy = getElement3DNormalized(tex, texParams, texCoords + vec3(0, -offset.y, 0)).a;
-    float mdz = getElement3DNormalized(tex, texParams, texCoords + vec3(0, 0, -offset.z)).a;
+    float dx = getElement3DNormalized(tex, texParams, texCoords + vec3(offset.x, 0.0, 0.0)).r;
+    float dy = getElement3DNormalized(tex, texParams, texCoords + vec3(0, offset.y, 0)).r;
+    float dz = getElement3DNormalized(tex, texParams, texCoords + vec3(0, 0, offset.z)).r;
+    float mdx = getElement3DNormalized(tex, texParams, texCoords + vec3(-offset.x, 0, 0)).r;
+    float mdy = getElement3DNormalized(tex, texParams, texCoords + vec3(0, -offset.y, 0)).r;
+    float mdz = getElement3DNormalized(tex, texParams, texCoords + vec3(0, 0, -offset.z)).r;
     return vec3(mdx - dx, mdy - dy, mdz - dz) * texParams._voxelSize * vec3(0.5);
 }
 

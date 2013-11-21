@@ -43,6 +43,8 @@ MACRO(PARSE_HEADER_FOR_PIPELINE FileName)
 ENDMACRO(PARSE_HEADER_FOR_PIPELINE)
 
 MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
+    STRING(TOUPPER ${ModuleDirectory} ModuleDirectoryUpper)
+    
     LIST(APPEND CampvisEnabledModules ${ModuleDirectory})
     SET(ThisModDir ${ModulesDir}/${ModuleDirectory})
 
