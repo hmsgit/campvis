@@ -68,28 +68,20 @@ IF(WIN32)
     LIST(APPEND CampvisGlobalDefinitions "-DNOMINMAX" "-D_CRT_SECURE_NO_DEPRECATE")
 
     # Disable warnings for Microsoft compiler:
-    # C4305: 'identifier' : truncation from 'type1' to 'type2'
-    # C4800: 'type' : forcing value to bool 'true' or 'false' (performance warning
     # C4290: C++ exception specification ignored except to indicate a function is
     #        not __declspec(nothrow)
-    # C4068: unknown pragma
-    # C4251  class needs to have dll interface (used for std classes)
-    # C4355: 'this' : used in base member initializer list 
-    #        occurs in processors' constructors when initializing event properties, 
-    #        but is safe there, since the 'this' pointer is only stored and not accessed.
     # C4390: ';' : empty controlled statement found; is this the intent?
     #        occurs when OpenGL error logging macros are disabled
-    #LIST(APPEND CampvisGlobalDefinitions /wd4305 /wd4800 /wd4290 /wd4068 /wd4251 /wd4355 /wd4390)
-    LIST(APPEND CampvisGlobalDefinitions /wd4290 /wd4390)
+    # C4503: The decorated name was longer than the compiler limit (4096), and was truncated.
+    #        Occurs in AutoEvaluatePipeline due to some nested nested map-iterator-map. Could
+    #        not be deactivated locally...
+    LIST(APPEND CampvisGlobalDefinitions /wd4290 /wd4390 /wd4503)
     
     # enable parallel builds in Visual Studio
     LIST(APPEND CampvisGlobalDefinitions /MP)
 
     # prevent error: number of sections exceeded object file format limit
     LIST(APPEND CampvisGlobalDefinitions /bigobj)
-    
-    # enable SSE2 instructions for MSVC
-    LIST(APPEND CampvisGlobalDefinitions /arch:SSE2)
     
     # allows 32 Bit builds to use more than 2GB RAM (VC++ only)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
