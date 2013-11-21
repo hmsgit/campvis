@@ -75,81 +75,81 @@ void main() {
 
     vec4 texel = TEXTURE_LOOKUP_FUNC(_usImage, _usTextureParams, texCoord);
     vec4 blurred = TEXTURE_LOOKUP_FUNC(_blurredImage, _blurredTextureParams, texCoord) * _blurredScale;
-    float confidence = clamp(TEXTURE_LOOKUP_FUNC(_confidenceMap, _confidenceTextureParams, texCoord).a * _confidenceScaling, 0.0, 1.0);
+    float confidence = clamp(TEXTURE_LOOKUP_FUNC(_confidenceMap, _confidenceTextureParams, texCoord).r * _confidenceScaling, 0.0, 1.0);
     float uncertainty = lookupTF(_confidenceTF, _confidenceTFParams, confidence).a;
 
     if (confidence <= 0.0) {
-        out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+        out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
     }
     else {
         switch (_viewIndex) {
             case 0:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 break;
             case 1:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, blurred.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, blurred.r);
                 break;
             case 2:
                 out_Color = lookupTF(_transferFunction, _transferFunctionParams, confidence);
                 break;
             case 3:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 vec3 hsv = rgb2hsv(out_Color.xyz);
                 hsv.x = _hue;
                 hsv.y = uncertainty;
                 out_Color.xyz = hsv2rgb(hsv);
                 break;
             case 4:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 vec3 hsl = rgb2hsl(out_Color.xyz);
                 hsl.x = _hue;
                 hsl.y = uncertainty;
                 out_Color.xyz = hsl2rgb(hsl);
                 break;
             case 5:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 vec3 tsl = rgb2tsl(out_Color.xyz);
                 //tsl.x = _hue;
                 //tsl.y = uncertainty;
                 out_Color.xyz = tsl2rgb(tsl);
                 break;
             case 6:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 vec3 hcl = rgb2hcl(out_Color.xyz);
                 hcl.x = _hue;
                 hcl.y = uncertainty;
                 out_Color.xyz = hcl2rgb(hcl);
                 break;
             case 7:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 vec3 hcy = rgb2hcy(out_Color.xyz);
                 hcy.x = _hue;
                 hcy.y = uncertainty;
                 out_Color.xyz = hcy2rgb(hcy);
                 break;
             case 8:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 vec3 lch = rgb2lch(out_Color.xyz);
                 lch.z = 6.2831853 * _hue;
                 lch.y = 100.0 * (uncertainty);
                 out_Color.xyz = lch2rgb(lch);
                 break;
             case 9:
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.a);
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
                 vec3 hlch = lab2lch(xyz2hlab(rgb2xyz(out_Color.xyz)));
                 //hlch.z = 6.2831853 * _hue;
                 //hlch.y = 100.0 * (uncertainty);
                 out_Color.xyz = xyz2rgb(hlab2xyz(lch2lab(hlch)));
                 break;
             case 10:
-                float intensity = mix((2.0 * texel.a - blurred.a), blurred.a, uncertainty);
+                float intensity = mix((2.0 * texel.r - blurred.r), blurred.r, uncertainty);
                 out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
                 break;
             case 11:
                 float lod = max(floor((uncertainty) * 6.0), 0.0);
 
                 vec4 lodTexel = texture(_usImage, texCoord, lod);
-                out_Color = lookupTF(_transferFunction, _transferFunctionParams, lodTexel.a);   
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, lodTexel.r);   
                 break;
         }
     }
