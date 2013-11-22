@@ -262,11 +262,7 @@ namespace campvis {
 
                 std::ostringstream ss;
                 ss << tester->getWorldBounds();
-                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
-
-				
-
-				//tester->render();
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str()));
             }
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();

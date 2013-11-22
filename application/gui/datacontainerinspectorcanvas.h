@@ -63,6 +63,10 @@ namespace campvis {
     class FaceGeometry;
     class DataContainerInspectorWidget;
 
+    /**
+     * Stores information about the textures which store the rendered geomtery.
+     * Note: The object's destroy() function should be called before deleting or releasing the object's memory.
+     */
     struct GeometryTextureInfo {
         campvis::QtDataHandle _geomData;
         tgt::Texture* _texture;
@@ -70,9 +74,9 @@ namespace campvis {
         
         GeometryTextureInfo(): _geomData(0), _texture(0){
         }
-
-        void destroy() {
-            // _texture->destroy();
+        
+        void destroy()
+        {
             delete _texture;
         }
 
@@ -276,12 +280,9 @@ namespace campvis {
         int _currentSlice;							///< current slice if rendering a 3D image fullscreen, render MIP if negative
 
         tgt::Shader* _geometryRenderingShader;			                    ///< GLSL shader for rendering the mesh geomteries
-        //std::vector<tgt::Texture*> _geometryRendering_ColorBuffers;         ///< Color Buffer used to render the geometry for the debugging mode
-        //std::vector<tgt::Texture*> _geometryRendering_DepthBuffers;         ///< Depth Buffer used to render the geometry for the debugging mode
         tgt::FramebufferObject* _frameBuffer;
         tgt::Texture* _depthBuffer;
 
-        // tgt::ivec2 _renderingWndSize;
         std::vector<campvis::CameraProperty*> _trackballCameraProperties;   ///< The property of the trackball camera. Used to pass the trackball camera to the shader.
         std::vector<TrackballNavigationEventListener*> _trackballEHs;       ///< TrackBall Event Handler for the camera rotating around the object in the canvas
         std::vector<GeometryTextureInfo> _geomTextureInfos;                 ///< Array of data regarding the rendered geomteries

@@ -40,9 +40,7 @@ uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
 void main() {
-    out_Color = ex_Position;
-    //out_Color = vec4(1, 1, 0, 1);
-    //out_Color = _color;
+    out_Color = _color;
 
 #ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)

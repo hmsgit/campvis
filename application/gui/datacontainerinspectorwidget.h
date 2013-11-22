@@ -89,8 +89,7 @@ namespace campvis {
          */
         void onDataContainerDataAdded(const std::string&, const DataHandle&);
 
-        void mousePressEvent(QMouseEvent*)
-        {
+        void mousePressEvent(QMouseEvent*) {
             updateInfoWidget();
         }
 
@@ -153,8 +152,7 @@ namespace campvis {
          */
         
 
-	//protected:
-	public:				// Only for Debuggin
+	protected:
         static void saveToFile(DataHandle handle, std::string filename);
 
         /**

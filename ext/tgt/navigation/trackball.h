@@ -286,7 +286,6 @@ class Trackball : public Navigation {
         /// last rotation applied to trackball
         quat lastOrientationChange_;
 
-public:
         /// Stores mouse coordinates to be able to track relative mouse motions.
         /// Should be called when mouse buttons get pressed.
         void startMouseDrag(MouseEvent* e);
@@ -294,7 +293,6 @@ public:
         /// Should be called when mouse buttons get released.
         void endMouseDrag(MouseEvent* e);
 
-protected:
         /// scale screen-coodinates of mouse to intervall [-1, 1]x[-1, 1]
         vec2 scaleMouse(const ivec2& sc) const;
 

@@ -180,7 +180,6 @@ namespace campvis {
         CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
 
         tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
-    protected:
         tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
 
         /// List of processors for which to enable LQ mode during interaction
