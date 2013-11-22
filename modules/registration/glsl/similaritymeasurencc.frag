@@ -51,9 +51,11 @@ void main() {
     float sPixels = 0.0;
     float sFixed = 0.0;
     float sMoving = 0.0;
+    float sFixedMoving = 0.0;
     float ssFixed = 0.0;
     float ssMoving = 0.0;
     float spMovingFixed = 0.0;
+    float sRms = 0.0;
 
     if (ex_TexCoord.x >= _xClampRange.x && ex_TexCoord.x <= _xClampRange.y && ex_TexCoord.y >= _yClampRange.x && ex_TexCoord.y <= _yClampRange.y) {
         float zStart = min(_referenceTextureParams._sizeRCP.z / 2.0, _zClampRange.x);
@@ -76,17 +78,21 @@ void main() {
                    movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
                 }
 
+                float avg = (referenceValue + movingValue) / 2.0;
+
                 // compute difference metrics
                 sPixels += 1.0;
                 sFixed += referenceValue;
                 sMoving += movingValue;
+                sFixedMoving += referenceValue + movingValue;
                 ssFixed += referenceValue * referenceValue;
                 ssMoving += movingValue * movingValue;
                 spMovingFixed += movingValue * referenceValue;
+                sRms += (referenceValue - avg) * (referenceValue - avg) + (movingValue - avg) * (movingValue - avg);
             }
         }
     }
 
-    out_Sums = vec4(sPixels, sFixed, sMoving, 1.0);
-    out_Squares = vec4(ssFixed, ssMoving, spMovingFixed, 1.0);
+    out_Sums = vec4(sPixels, sFixed, sMoving, sFixedMoving);
+    out_Squares = vec4(ssFixed, ssMoving, spMovingFixed, sRms);
 }

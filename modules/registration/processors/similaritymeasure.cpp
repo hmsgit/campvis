@@ -51,11 +51,12 @@ namespace campvis {
         GenericOption<nlopt::algorithm>("neldermead", "Nelder-Mead Simplex", nlopt::LN_NELDERMEAD)
     };
 
-    static const GenericOption<std::string> metrics[4] = {
+    static const GenericOption<std::string> metrics[5] = {
         GenericOption<std::string>("SUM", "Sum"),
         GenericOption<std::string>("SAD", "SAD"),
         GenericOption<std::string>("SSD", "SSD"),
-        GenericOption<std::string>("NCC", "NCC")
+        GenericOption<std::string>("NCC", "NCC"),
+        GenericOption<std::string>("SNR", "SNR")
     };
 
     const std::string SimilarityMeasure::loggerCat_ = "CAMPVis.modules.vis.SimilarityMeasure";
@@ -71,7 +72,7 @@ namespace campvis {
         , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(1.f), tgt::vec3(5.f))
         , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.01f), tgt::vec3(7.f))
         , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
-        , p_metric("Metric", "Similarity Metric", metrics, 4)
+        , p_metric("Metric", "Similarity Metric", metrics, 5)
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
         , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
         , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT | PERFORM_OPTIMIZATION)
@@ -189,7 +190,7 @@ namespace campvis {
         MyFuncData_t mfd = { this, referenceImage, movingImage, 0 };
 
         _opt = new nlopt::opt(p_optimizer.getOptionValue(), 6);
-        if (p_metric.getOptionValue() == "NCC") {
+        if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
             _opt->set_max_objective(&SimilarityMeasure::optimizerFunc, &mfd);
         }
         else {
@@ -254,7 +255,7 @@ namespace campvis {
         similarityTex = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
         similarityTex->uploadTexture();
         similarityTex->setWrapping(tgt::Texture::CLAMP);
-        if (p_metric.getOptionValue() == "NCC") {
+        if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
             similarityTex2 = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
             similarityTex2->uploadTexture();
             similarityTex2->setWrapping(tgt::Texture::CLAMP);
@@ -266,7 +267,7 @@ namespace campvis {
         const tgt::ivec2& windowSize = p_viewportSize.getValue();
         glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
         _fbo->attachTexture(similarityTex);
-        if (p_metric.getOptionValue() == "NCC")
+        if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR")
             _fbo->attachTexture(similarityTex2, GL_COLOR_ATTACHMENT1);
         LGL_ERROR;
 
@@ -291,7 +292,7 @@ namespace campvis {
 
         // render quad to compute similarity measure by shader
         leShader->setUniform("_registrationInverse", registrationInverse);
-        if (p_metric.getOptionValue() == "NCC") {
+        if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
             static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
             glDrawBuffers(2, buffers);
             QuadRdr.renderQuad();
@@ -328,7 +329,18 @@ namespace campvis {
                     toReturn =  correlation / sqrt(varFixed * _varMoving);
                 }
             }
+        }
+        else if (p_metric.getOptionValue() == "SNR") {
+            std::vector<float> similarities = _glr->reduce(similarityTex);
+            std::vector<float> similarities2 = _glr->reduce(similarityTex2);
 
+            if (similarities.size() >= 4 && similarities2.size() >= 4) {
+                float countRCP = 1.f / similarities[0];
+                float signal = similarities[3] * countRCP;
+                float noise = sqrt(similarities2[3] * countRCP);
+
+                toReturn = signal/noise;
+            }
         }
         else {
             std::vector<float> similarities = _glr->reduce(similarityTex);
