@@ -45,13 +45,11 @@ namespace campvis {
         , _movingReader()
         , _sm()
         , _ve(&_canvasSize)
-        , _se(&_canvasSize)
     {
         addProcessor(&_referenceReader);
         addProcessor(&_movingReader);
         addProcessor(&_sm);
         addProcessor(&_ve);
-        addProcessor(&_se);
 
         addEventListenerToBack(&_ve);
     }
@@ -71,23 +69,15 @@ namespace campvis {
         _movingReader.p_targetImageID.addSharedProperty(&_sm.p_movingId);
 
         _sm.p_differenceImageId.addSharedProperty(&_ve.p_inputVolume);
-        _sm.p_differenceImageId.addSharedProperty(&_se.p_sourceImageID);
 
         _ve.p_outputImage.setValue("volumeexplorer");
-        _se.p_targetImageID.setValue("sliceexplorer");
-
-        _renderTargetID.setValue("sliceexplorer");
+        _renderTargetID.setValue("volumeexplorer");
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(-1.f, 1.f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, .5f), tgt::col4(0, 0, 255, 255), tgt::col4(255, 255, 255, 0)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(255, 255, 255, 0), tgt::col4(255, 0, 0, 255)));
         MetaProperty* mp = static_cast<MetaProperty*>(_ve.getProperty("SliceExtractorProperties"));
         static_cast<TransferFunctionProperty*>(mp->getProperty("transferFunction"))->replaceTF(dvrTF);
-
-        Geometry1DTransferFunction* seTF = new Geometry1DTransferFunction(128, tgt::vec2(-1.f, 1.f));
-        seTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, .5f), tgt::col4(0, 0, 255, 255), tgt::col4(255, 255, 255, 255)));
-        seTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(255, 255, 255, 255), tgt::col4(255, 0, 0, 255)));
-        _se.p_transferFunction.replaceTF(seTF);
     }
 
     void ReducerTest::onProcessorValidated(AbstractProcessor* processor) {

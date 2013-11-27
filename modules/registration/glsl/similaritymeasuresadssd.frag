@@ -58,7 +58,7 @@ void main() {
         for (float z = zStart; z < zEnd; z += _referenceTextureParams._sizeRCP.z) {
             // fetch value from reference volume
             vec3 referenceLookupTexCoord = vec3(ex_TexCoord.xy, z);
-            float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).a;
+            float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).r;
 
             // apply mask if requested
             if (!_applyMask || referenceValue > 0.0) {
@@ -69,7 +69,7 @@ void main() {
                 // fetch value from moving volume
                 float movingValue = 0.0;
                 if (all(greaterThanEqual(movingLookupTexCoord.xyz, vec3(0.0))) && all(lessThanEqual(movingLookupTexCoord.xyz, vec3(1.0)))) {
-                   movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
+                   movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).r;
                 }
 
                 // compute difference metrics

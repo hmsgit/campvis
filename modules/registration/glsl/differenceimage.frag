@@ -59,11 +59,11 @@ void main() {
         vec4 movingLookupTexCoord = _registrationInverse * vec4(referenceLookupTexCoord, 1.0);
 
         // fetch texels
-        float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).a;
+        float referenceValue = texture(_referenceTexture, referenceLookupTexCoord).r;
         float movingValue = 0.0;
         
         if (!_applyMask || referenceValue > 0.0)
-            movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).a;
+            movingValue = texture(_movingTexture, movingLookupTexCoord.xyz).r;
 
         // compute differences
         difference = referenceValue - movingValue;

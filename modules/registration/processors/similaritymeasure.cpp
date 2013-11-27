@@ -405,7 +405,7 @@ namespace campvis {
         referenceUnit.activate();
 
         // create temporary texture for result
-        tgt::Texture* similarityTex = new tgt::Texture(0, tgt::ivec3(size), GL_ALPHA, GL_ALPHA32F_ARB, GL_FLOAT, tgt::Texture::NEAREST);
+        tgt::Texture* similarityTex = new tgt::Texture(0, tgt::ivec3(size), GL_RED, GL_R32F, GL_FLOAT, tgt::Texture::NEAREST);
         similarityTex->uploadTexture();
         similarityTex->setWrapping(tgt::Texture::CLAMP);
 

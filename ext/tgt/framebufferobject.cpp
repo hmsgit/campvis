@@ -71,6 +71,7 @@ void FramebufferObject::attachTexture(Texture* texture, GLenum attachment, int m
             glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, texture->getType(), texture->getId(), mipLevel );
             break;
     }
+    LGL_ERROR;
 
     size_t index = decodeAttachment(attachment);
     attachments_[index] = texture;
@@ -100,6 +101,7 @@ void FramebufferObject::detachTexture(GLenum attachment) {
                 break;
         }
         attachments_[index] = 0;
+        LGL_ERROR;
 
         if (index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
             --numColorAttachments_;
