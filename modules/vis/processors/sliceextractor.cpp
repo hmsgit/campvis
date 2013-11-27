@@ -262,16 +262,15 @@ namespace campvis {
         p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
 
         if (img != 0) {
-            const tgt::svec3& imgSize = img->getSize();
-            unsigned int maxValue = static_cast<unsigned int> (p_xSliceNumber.getMaxValue());
-            if (maxValue != imgSize.x - 1){
-                p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
+            tgt::ivec3 imgSize = img->getSize();
+            if (p_xSliceNumber.getMaxValue() != imgSize.x - 1){
+                p_xSliceNumber.setMaxValue(imgSize.x - 1);
             }
-            if (maxValue != imgSize.y - 1){
-                p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
+            if (p_ySliceNumber.getMaxValue() != imgSize.y - 1){
+                p_ySliceNumber.setMaxValue(imgSize.y - 1);
             }
-            if (maxValue != imgSize.z - 1){
-                p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+            if (p_zSliceNumber.getMaxValue() != imgSize.z - 1){
+                p_zSliceNumber.setMaxValue(imgSize.z - 1);
             }
         }
 
