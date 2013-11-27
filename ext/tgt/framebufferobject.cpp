@@ -45,12 +45,14 @@ FramebufferObject::~FramebufferObject()
 
 void FramebufferObject::activate()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, id_);
+    glBindFramebufferEXT(GL_FRAMEBUFFER, id_);
+    LGL_ERROR;
 }
 
 void FramebufferObject::deactivate()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
+    LGL_ERROR;
 }
 
 void FramebufferObject::attachTexture(Texture* texture, GLenum attachment, int mipLevel, int zSlice)
@@ -168,7 +170,8 @@ GLuint FramebufferObject::getActiveObject() {
 
 GLuint FramebufferObject::generateId() {
     id_ = 0;
-    glGenFramebuffers(1, &id_);
+    glGenFramebuffersEXT(1, &id_);
+    LGL_ERROR;
     return id_;
 }
 

@@ -60,7 +60,7 @@ namespace tgt {
 
         // delete FBOs
         if (! _fbosToDelete[backIndex].empty()) {
-            glDeleteFramebuffers(static_cast<GLsizei>(_fbosToDelete[backIndex].size()), &(_fbosToDelete[backIndex].front()));
+            glDeleteFramebuffersEXT(static_cast<GLsizei>(_fbosToDelete[backIndex].size()), &(_fbosToDelete[backIndex].front()));
             _fbosToDelete[backIndex].clear();
         }
 
