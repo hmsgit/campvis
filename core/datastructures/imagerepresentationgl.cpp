@@ -260,7 +260,12 @@ namespace campvis {
         LGL_ERROR;
     }
 
+    void ImageRepresentationGL::downloadTexture() const {
+        _texture->downloadTexture();
+    }
+
     const tgt::Texture* ImageRepresentationGL::getTexture() const {
+
         return _texture;
     }
 

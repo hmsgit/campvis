@@ -556,6 +556,34 @@ tgt::Color Texture::texelAsFloat(size_t x, size_t y) const {
     return ret;
 }
 
+float Texture::depthAsFloat(size_t x, size_t y) const {
+    float ret = 0.0f;
+
+    switch(format_) {
+        case GL_DEPTH_COMPONENT:
+            switch(dataType_) {
+                case GL_UNSIGNED_BYTE: {
+                    ret = (float )(texel<uint8_t>(x,y) / 0xFF);
+                    break;
+                }
+                case GL_UNSIGNED_SHORT: {
+                    ret = (float )(texel<uint16_t>(x,y) / 0xFFFF);
+                    break;
+                }
+                case GL_FLOAT: {
+                    ret = texel<GLfloat>(x,y);
+                    break;
+                }
+                default:
+                    LWARNINGC("tgt.texture", "depthAsFloat: Unknown format!");
+            }
+        default:
+            LWARNINGC("tgt.texture", "depthAsFloat: Unknown format!");
+    }
+
+    return ret;
+}
+
 void Texture::downloadTexture() {
     bind();
 

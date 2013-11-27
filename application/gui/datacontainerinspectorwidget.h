@@ -89,6 +89,10 @@ namespace campvis {
          */
         void onDataContainerDataAdded(const std::string&, const DataHandle&);
 
+        void mousePressEvent(QMouseEvent*) {
+            updateInfoWidget();
+        }
+
         /**
          * Size hint for the default window size
          * \return QSize(640, 480)
@@ -106,6 +110,16 @@ namespace campvis {
          * Must be called with a valid and locked OpenGL context.
          */
         void deinit();
+
+        /**
+         * Updates color of the info widget
+         */
+        void updateColor();
+
+		/**
+         * Updates depth of the info widget
+         */
+        void updateDepth();
 
     signals:
         void dataContainerChanged(const QString&, QtDataHandle);
@@ -131,16 +145,14 @@ namespace campvis {
         void setupGUI();
 
         /**
-         * Updates _infoWidget
-         */
-        void updateInfoWidget();
-
-        /**
          * Saves the Image in \a handle to the file \a filename.
          * \note    This method must be called with a valid OpenGL context!
          * \param handle    DataHandle containing the image to save. Must contain ImageData or RenderData!
          * \param filename  Filename for the file to save.
          */
+        
+
+	protected:
         static void saveToFile(DataHandle handle, std::string filename);
 
         /**
@@ -150,24 +162,34 @@ namespace campvis {
          */
         QString humanizeBytes(size_t numBytes) const;
 
+        /**
+         * Updates _infoWidget
+         */
+        void updateInfoWidget();
+
         bool _inited;
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
 
         DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
-        DataContainerInspectorCanvas* _canvas;                 ///< The OpenGL canvas for rendering the DataContainer's contents
+        DataContainerInspectorCanvas* _canvas;          ///< The OpenGL canvas for rendering the DataContainer's contents
         PropertyCollectionWidget* _pcWidget;
 
         QHBoxLayout* _mainLayout;                       ///< Layout for this widget
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
         QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
 
-        QLabel* _lblName;
-        QLabel* _lblLocalMemoryFootprint;
-        QLabel* _lblVideoMemoryFootprint;
-        QLabel* _lblTimestamp;
-        QLabel* _lblSize;
-        QLabel* _lblBounds;
+        QLabel*  _lblName;
+        QLabel*  _lblLocalMemoryFootprint;
+        QLabel*  _lblVideoMemoryFootprint;
+        QLabel*  _lblTimestamp;
+        QLabel*  _lblSize;
+        QLabel*  _lblBounds;
+		QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
+        QHBoxLayout* _colorWidgetLayout;                ///< Layout for the following widget
+        QLabel*  _lblColorVal;                          ///< Color Label Value in text
+        QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
+        QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
         QPushButton* _btnSaveToFile;
 
         static const std::string loggerCat_;

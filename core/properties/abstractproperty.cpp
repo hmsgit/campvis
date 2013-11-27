@@ -46,11 +46,11 @@ namespace campvis {
 
     }
 
-    const std::string& AbstractProperty::getName() {
+    const std::string& AbstractProperty::getName() const {
         return _name;
     }
 
-    const std::string& AbstractProperty::getTitle() {
+    const std::string& AbstractProperty::getTitle() const {
         return _title;
     }
 

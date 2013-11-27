@@ -141,6 +141,27 @@ namespace campvis {
         _lblSize = new QLabel(tr("Size: "), _infoWidget);
         _infoWidgetLayout->addWidget(_lblSize);
 
+        _colorWidget = new QWidget(this);
+        _lblColorVal = new QLabel(tr("Color: n/a"), _colorWidget);
+        
+        _colorValWidget = new QWidget(_colorWidget);
+        _colorValWidget->setAutoFillBackground(true);
+        _colorValWidget->setFixedSize(16, 16);
+        
+        _ColorValWidgetPalette = new QPalette(palette());
+        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, Qt::gray);
+        _colorValWidget->setPalette(*(_ColorValWidgetPalette));
+        
+        _colorWidgetLayout = new QHBoxLayout();
+        _colorWidgetLayout->setSpacing(0);
+        _colorWidgetLayout->setMargin(0);
+        _colorWidget->setLayout(_colorWidgetLayout);
+        
+        _colorWidgetLayout->addWidget(_lblColorVal);
+        _colorWidgetLayout->addWidget(_colorValWidget);
+
+        _infoWidgetLayout->addWidget(_colorWidget);
+        
         _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
         _infoWidgetLayout->addWidget(_lblBounds);
 
@@ -172,6 +193,26 @@ namespace campvis {
             this, SLOT(onBtnSaveToFileClicked()));
     }
 
+    void DataContainerInspectorWidget::updateColor(){
+
+        const tgt::Color color = _canvas->getCapturedColor();
+
+        _lblColorVal->setText(QString("Color: R = %1 G = %2 B = %3").arg(QString::number(static_cast<int>(color.r * 255)), QString::number(static_cast<int>(color.g * 255)), QString::number(static_cast<int>(color.b * 255))));
+        
+        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, QColor(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255), static_cast<int>(color.b * 255)));
+        _colorValWidget->setPalette(*_ColorValWidgetPalette);
+    }
+
+	void DataContainerInspectorWidget::updateDepth(){
+
+        float depth = _canvas->getCapturedDepth();
+
+        _lblColorVal->setText(QString("Depth: %1").arg(QString::number(depth)));
+        
+        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, QColor(static_cast<int>(depth * 255), static_cast<int>(depth * 255), static_cast<int>(depth * 255)));
+        _colorValWidget->setPalette(*_ColorValWidgetPalette);
+    }
+
     void DataContainerInspectorWidget::updateInfoWidget() {
         if (!_inited)
             return;
@@ -186,7 +227,6 @@ namespace campvis {
         for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
             if (! index->isValid())
                 continue;
-
             // get DataHandle and Handle name
             QVariant item = index->data(Qt::UserRole);
             QtDataHandle handle = item.value<QtDataHandle>();
@@ -215,13 +255,14 @@ namespace campvis {
                 ss.str("");
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+
             }
             else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
                 _lblSize->setText(tr("Size: n/a"));
 
                 std::ostringstream ss;
                 ss << tester->getWorldBounds();
-                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
+                _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str()));
             }
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
@@ -251,6 +292,7 @@ namespace campvis {
             }
 #endif
             else {
+
                 _lblSize->setText(tr("Size: n/a"));
                 _lblBounds->setText(tr("World Bounds: n/a")); 
             }
@@ -287,7 +329,7 @@ namespace campvis {
 
     void DataContainerInspectorWidget::init() {
         if (_canvas != 0)
-            _canvas->init();
+            _canvas->init(this);
 
         _inited = true;
     }
