@@ -101,10 +101,6 @@ namespace campvis {
                 const FaceGeometry& slice = clipped.getFaces().back(); // the last face is the closing face
                 delete cube;
 
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
@@ -120,6 +116,9 @@ namespace campvis {
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 slice.render(GL_POLYGON);
 

@@ -153,20 +153,20 @@ namespace campvis {
                 tgt::mat4 modelMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
 
                 // prepare OpenGL
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
                 tgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                // render slice
                 _shader->setUniform("_texCoordsMatrix", texCoordsMatrix);
                 _shader->setUniform("_modelMatrix", modelMatrix);
                 _shader->setUniform("_useTexturing", true);
+
+                // render slice
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
 
