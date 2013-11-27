@@ -128,7 +128,7 @@ namespace campvis {
         _differenceShader->setAttributeLocation(0, "in_Position");
         _differenceShader->setAttributeLocation(1, "in_TexCoord");
 
-        _glr = new GlReduction();
+        _glr = new GlReduction(GlReduction::PLUS);
     }
 
     void SimilarityMeasure::deinit() {

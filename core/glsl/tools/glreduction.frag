@@ -45,13 +45,5 @@ void main() {
     vec4 c = texelFetch(_texture, texel + ivec2(0, 1), 0);
     vec4 d = texelFetch(_texture, texel + ivec2(1, 1), 0);
 
-    //vec4 a = texture(_texture, tmp);
-    //vec4 b = texture(_texture, texel + vec2(_textureParams._sizeRCP.x, 0));
-    //vec4 c = texture(_texture, texel + vec2(0, _textureParams._sizeRCP.y));
-    //vec4 d = texture(_texture, texel + vec2(_textureParams._sizeRCP.x, _textureParams._sizeRCP.y));
-
-    //out_Color = max(a, max(b, max(c, d)));
-    out_Color = a+b+c+d;
-    //out_Color = vec4(texel, 0.0, 1.0);
-    //out_Color = vec4(ex_TexCoord, 1.0);
+    out_Color = REDUCTION_OP(a, b, c, d);
 }

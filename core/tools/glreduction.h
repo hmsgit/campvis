@@ -49,18 +49,45 @@ namespace campvis {
 
     /**
      * Class performing a reduction of 2D image data using OpenGL.
-     * TODO: implement 3D reduction - shouldn't be that difficult
+     * \note    All methods need to be called from a valid OpenGL context.
      */
     class GlReduction {
     public:
-        GlReduction();
+        /// Operation to be performed by reduction
+        enum ReductionOperator {
+            MIN,                ///< Minimum
+            MAX,                ///< Maximum
+            PLUS,               ///< Sum (plus)
+            MULTIPLICATION      ///< Product (multiplication)
+        };
 
+        /**
+         * Constructor
+         * \param   reductionOperator   Operation to be performed by reduction
+         */
+        GlReduction(ReductionOperator reductionOperator);
+
+        /**
+         * Destructor
+         */
         ~GlReduction();
 
-
-
+        /**
+         * Performs the reduction on the given image.
+         * \note    Image must be two-dimensional!
+         * \note    Reduction will be performed on a copy, \a image will not change.
+         * \param   image   Pointer to ImageData to perform reduction on, must be two-dimensional.
+         * \return  A vector of floats containing the reduction results for each channel of the input image.
+         */
         std::vector<float> reduce(const ImageData* image);
 
+        /**
+         * Performs the reduction on the given OpenGL texture.
+         * \note    Image must be two-dimensional!
+         * \note    Reduction will be performed on a copy, \a texture will not change.
+         * \param   image   Pointer to a texture to perform reduction on, must be two-dimensional.
+         * \return  A vector of floats containing the reduction results for each channel of the input texture.
+         */
         std::vector<float> reduce(const tgt::Texture* texture);
 
 
@@ -72,13 +99,17 @@ namespace campvis {
          */
         static void reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordMultiplier);
 
-        size_t _readTex;
-        size_t _writeTex;
+        /**
+         * Generates the GLSL header corresponding to the given reduction operator.
+         * \param   reductionOperator   Operation to be performed by reduction
+         * \return  A std::string with the corresponding GLSL header.
+         */
+        static std::string generateGlslHeader(ReductionOperator reductionOperator);
 
-        tgt::Shader* _shader;
-        tgt::FramebufferObject* _fbo;
-        tgt::Texture* _tempTextures[2];
-        FaceGeometry* _renderQuad;
+
+        ReductionOperator _reductionOperator;   ///< Operation to be performed by reduction
+        tgt::Shader* _shader;                   ///< OpenGL shader performing the reduction
+        tgt::FramebufferObject* _fbo;           ///< FBO performing the reduction
 
         const static std::string loggerCat_;
     };

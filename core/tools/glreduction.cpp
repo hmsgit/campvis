@@ -48,12 +48,12 @@ namespace campvis {
 
     const std::string GlReduction::loggerCat_ = "CAMPVis.modules.registration.GlReduction";
 
-    GlReduction::GlReduction()
-        : _shader(0)
+    GlReduction::GlReduction(ReductionOperator reductionOperator)
+        : _reductionOperator(reductionOperator)
+        , _shader(0)
         , _fbo(0)
-        , _renderQuad(0)
     {
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", "", false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator), false);
         if (_shader == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;
@@ -100,7 +100,6 @@ namespace campvis {
             return toReturn;
         }
 
-        //tgtAssert(texture->getNumChannels() == 1, "Reduction of images with more than one channel currently not implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
         tgtAssert(texture->getDimensions().z == 1, "Reduction of 3D images not yet implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
 
         std::vector<float> readBackBuffer;
@@ -116,14 +115,14 @@ namespace campvis {
         tgt::TextureUnit inputUnit;
 
         // create temporary textures
+        tgt::Texture* tempTextures[2];
         for (size_t i = 0; i < 2; ++i) {
-            //_tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RED, GL_R32F, GL_FLOAT, tgt::Texture::NEAREST);
-            _tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
-            _tempTextures[i]->uploadTexture();
-            _tempTextures[i]->setWrapping(tgt::Texture::CLAMP);
+            tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
+            tempTextures[i]->uploadTexture();
+            tempTextures[i]->setWrapping(tgt::Texture::CLAMP);
         }
-        _readTex = 0;
-        _writeTex = 1;
+        size_t readTex = 0;
+        size_t writeTex = 1;
 
         // create and initialize FBO
         _fbo = new tgt::FramebufferObject();
@@ -132,7 +131,7 @@ namespace campvis {
 
         // perform first reduction step outside:
         _shader->activate();
-        _fbo->attachTexture(_tempTextures[_readTex]);
+        _fbo->attachTexture(tempTextures[readTex]);
 
         _shader->setIgnoreUniformLocationError(true);
         inputUnit.activate();
@@ -152,8 +151,8 @@ namespace campvis {
         while (currentSize.x > 1 || currentSize.y > 1) {
             reduceSizes(currentSize, texCoordMultiplier);
 
-            _fbo->attachTexture(_tempTextures[_writeTex]);
-            _tempTextures[_readTex]->bind();
+            _fbo->attachTexture(tempTextures[writeTex]);
+            tempTextures[readTex]->bind();
 
             glViewport(0, 0, currentSize.x, currentSize.y);
             _shader->setUniform("_texCoordsMultiplier", texCoordMultiplier);
@@ -161,15 +160,15 @@ namespace campvis {
             LGL_ERROR;
 
             //_fbo->detachTexture(GL_COLOR_ATTACHMENT0);
-            std::swap(_writeTex, _readTex);
+            std::swap(writeTex, readTex);
         }
 
         _shader->deactivate();
 
 
         // read back stuff
-        GLenum readBackFormat = _tempTextures[_readTex]->getFormat();
-        size_t channels = _tempTextures[_readTex]->getNumChannels();
+        GLenum readBackFormat = tempTextures[readTex]->getFormat();
+        size_t channels = tempTextures[readTex]->getNumChannels();
         toReturn.resize(currentSize.x * currentSize.y * channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
         glReadPixels(0, 0, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &toReturn.front());
@@ -181,8 +180,8 @@ namespace campvis {
         delete _fbo;
         _fbo = 0;
 
-        delete _tempTextures[0];
-        delete _tempTextures[1];
+        delete tempTextures[0];
+        delete tempTextures[1];
         LGL_ERROR;
 
         return toReturn;
@@ -198,6 +197,27 @@ namespace campvis {
             texCoordMultiplier.y /= 2.f;
         }
 
+    }
+
+    std::string GlReduction::generateGlslHeader(ReductionOperator reductionOperator) {
+        switch (reductionOperator) {
+        case MIN:
+            return "#define REDUCTION_OP(a, b, c, d) min(a, min(b, min(c, d)))";
+            break;
+        case MAX:
+            return "#define REDUCTION_OP(a, b, c, d) max(a, max(b, max(c, d)))";
+            break;
+        case PLUS:
+            return "#define REDUCTION_OP(a, b, c, d) a+b+c+d";
+            break;
+        case MULTIPLICATION:
+            return "#define REDUCTION_OP(a, b, c, d) a*b*c*d";
+            break;
+        default:
+            tgtAssert(false, "Should not reach this, wrong enum value?");
+            return "";
+            break;
+        }
     }
 
 }
