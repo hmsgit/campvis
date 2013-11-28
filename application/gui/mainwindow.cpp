@@ -56,7 +56,7 @@ namespace campvis {
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
-        , _dcInspectorDock(0)
+        , _dcInspectorWindow(0)
         , _btnExecute(0)
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
@@ -251,15 +251,14 @@ namespace campvis {
 
     void MainWindow::onBtnShowDataContainerInspectorClicked() {
         if (_selectedPipeline != 0) {
-            if (_dcInspectorDock == 0) {
-                _dcInspectorDock = dockPrimaryWidget("Data Container inspector", _dcInspectorWidget);
-            } else {
-                // Activate the dock's tab
-                _dcInspectorDock->setVisible(true);
-                _dcInspectorDock->raise();
+            if (_dcInspectorWindow == 0) {
+                _dcInspectorWindow = _mdiArea->addWidget(_dcInspectorWidget);
+                _dcInspectorWindow->setWindowTitle(tr("Data Container Inspector"));
             }
 
             _dcInspectorWidget->setDataContainer(&(_selectedPipeline->getDataContainer()));
+            _dcInspectorWindow->show();
+            _dcInspectorWindow->activateWindow();
         }
     }
 

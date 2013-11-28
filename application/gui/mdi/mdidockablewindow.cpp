@@ -42,8 +42,8 @@ namespace campvis {
         , _floatingWindow(0)
         , _toggleViewAction(0)
     {
+        this->setWindowFlags(windowFlags);
         _dockedWindow = this->newDockedWindow(widget);
-        _dockedWindow->setWindowFlags(windowFlags);
 
         _toggleViewAction = new QAction(this);
         _toggleViewAction->setCheckable(true);
@@ -61,6 +61,13 @@ namespace campvis {
             _floatingWindow->setWindowTitle(title);
     }
 
+    void MdiDockableWindow::activateWindow() {
+        if (_docked)
+            _dockedWindow->setFocus();
+        else
+            _floatingWindow->activateWindow();
+    }
+
     QAction* MdiDockableWindow::toggleViewAction() const {
         return _toggleViewAction;
     }
@@ -70,7 +77,7 @@ namespace campvis {
     }
 
     MdiDockedWindow* MdiDockableWindow::newDockedWindow(QWidget* widget) {
-        MdiDockedWindow* dockedWindow = new MdiDockedWindow(_mdiArea);
+        MdiDockedWindow* dockedWindow = new MdiDockedWindow(_mdiArea, this->windowFlags());
         dockedWindow->setWidget(widget);
 
         this->connect(dockedWindow, SIGNAL(s_positionChanged(const QPoint&)), SLOT(trackDockedWindowPosition(QPoint)));
@@ -139,17 +146,26 @@ namespace campvis {
             _dockedWindow->setWidget(0);
             _mdiArea->removeSubWindow(_dockedWindow);
 
-            _floatingWindow = new MdiFloatingWindow(widget);
+            _floatingWindow = new MdiFloatingWindow(widget, this);
             _floatingWindow->setWindowTitle(this->windowTitle());
-            _floatingWindow->forceWindowDrag();
-            this->connect(_floatingWindow, SIGNAL(s_positionChanged(const QPoint&)),
-                          SLOT(trackFloatingWindowPosition(const QPoint&)));
-            this->connect(_floatingWindow, SIGNAL(s_closed()), SLOT(handleWindowClosing()));
 
             _dockedWindow->deleteLater();
             _dockedWindow = 0;
             _docked = false;
+
             _floatingWindow->show();
+            _floatingWindow->activateWindow();
+            _floatingWindow->forceWindowDrag();
+
+            /*
+             * Connect signals last so that the floating window's initial move events are ignored.
+             * They mustn't be handled because they may contain outdated position information which
+             * could, in extreme cases, trigger immediate re-docking of the floating window,
+             * leading to all sorts of problems.
+             */
+            this->connect(_floatingWindow, SIGNAL(s_closed()), SLOT(handleWindowClosing()));
+            this->connect(_floatingWindow, SIGNAL(s_positionChanged(const QPoint&)),
+                          SLOT(trackFloatingWindowPosition(const QPoint&)));
         }
     }
 

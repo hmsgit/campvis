@@ -68,6 +68,13 @@ namespace campvis {
         void setWindowTitle(const QString& title);
 
         /**
+         * Set this window to be the active window.
+         *
+         * Calling this function causes the window to get the keyboard input focus.
+         */
+        void activateWindow();
+
+        /**
          * Change the window's visibility.
          *
          * \param visible should the window be visible?

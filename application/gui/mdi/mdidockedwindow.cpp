@@ -36,10 +36,12 @@
 namespace campvis {
 
     MdiDockedWindow::MdiDockedWindow(QWidget* parent /*= 0*/, Qt::WindowFlags flags /*= 0*/)
-        : QMdiSubWindow(parent, flags)
+        : QMdiSubWindow(parent)
         , _dragActive(false)
         , _lastMousePos()
-    {}
+    {
+        this->setWindowFlags(flags | Qt::Tool);
+    }
 
     void MdiDockedWindow::forceWindowDrag() {
         _dragActive = true;
@@ -63,15 +65,12 @@ namespace campvis {
     }
 
     void MdiDockedWindow::mouseMoveEvent(QMouseEvent* event) {
-        if (event->buttons().testFlag(Qt::LeftButton)) {
+        /*
+         * Only intercept mouse move events if the window is being dragged and the left mouse
+         * button is pressed.
+         */
+        if (_dragActive && event->buttons().testFlag(Qt::LeftButton)) {
             const QPoint& mousePos = event->globalPos();
-
-            if (!_dragActive) {
-                _dragActive = true;
-                _lastMousePos = mousePos;
-                return QMdiSubWindow::mouseMoveEvent(event);
-            }
-
             QPoint newPos = pos() + (mousePos - _lastMousePos);
 
             /*
@@ -91,16 +90,29 @@ namespace campvis {
             move(newPos);
             emit s_positionChanged(newPos);
         }
-        else {
+        else
             QMdiSubWindow::mouseMoveEvent(event);
+    }
+
+    void MdiDockedWindow::mousePressEvent(QMouseEvent* event) {
+        const QPoint& widgetPos = this->widget()->mapFromParent(event->pos());
+
+        /*
+         * Mouse drag detection starts only in response to non-resize (the window's current cursor
+         * is the default one) drag (the left mouse button is pressed) events; additionally, the
+         * mouse pointer has to be on the title bar.
+         */
+        if (event->button() == Qt::LeftButton && widgetPos.y() < 0 && this->cursor().shape() == Qt::ArrowCursor) {
+            _dragActive = true;
+            _lastMousePos = event->globalPos();
         }
+
+        QMdiSubWindow::mousePressEvent(event);
     }
 
     void MdiDockedWindow::mouseReleaseEvent(QMouseEvent* event) {
-        if (event->button() == Qt::LeftButton) {
+        if (event->button() == Qt::LeftButton)
             stopWindowDrag();
-            mdiArea()->tileSubWindows();
-        }
 
         // The default implementation detects clicks on the close, maximize and minimize buttons,
         // among other things
