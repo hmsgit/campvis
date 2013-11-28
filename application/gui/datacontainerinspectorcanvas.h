@@ -179,7 +179,7 @@ namespace campvis {
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
         IntProperty p_currentSlice;
-        IVec4Property p_meshSolidColor;                  ///< Color used to render the mesh object
+        Vec4Property p_meshSolidColor;                   ///< Color used to render the mesh object
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
     private slots:

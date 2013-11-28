@@ -53,7 +53,7 @@ namespace campvis {
     DataContainerInspectorCanvas::DataContainerInspectorCanvas(QWidget* parent /*= 0*/) 
         : tgt::QtThreadedCanvas("DataContainer Inspector", tgt::ivec2(640, 480), tgt::GLCanvas::RGBA_BUFFER, parent, true)
         , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
-        , p_meshSolidColor("MeshSolidColor", "Mesh Solid Color", tgt::vec4(50.f, 70.0f, 50.0f, 255.f), tgt::vec4(0.0f), tgt::vec4(255.0f))
+        , p_meshSolidColor("MeshSolidColor", "Mesh Solid Color", tgt::vec4(.5f, .75f, .5f, 1), tgt::vec4(0.0f), tgt::vec4(1.0f))
         , p_transferFunction("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f)))
         , _dataContainer(0)
         , _paintShader(0)
@@ -295,38 +295,22 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::drawGeomteryData(const campvis::GeometryData* mg, tgt::Texture* colorBuffer, const int& trackballndx) {
-        LGL_ERROR;
-        
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         
         /// Activate the shader for geometry Rendering.
         _geometryRenderingShader->activate();
-        LGL_ERROR;
         _geometryRenderingShader->setIgnoreUniformLocationError(true);
-        LGL_ERROR;
         
         _trackballEHs[trackballndx]->setSceneBounds(mg->getWorldBounds());
         
         _geometryRenderingShader->setUniform("_projectionMatrix", _trackballEHs[trackballndx]->getTrackball()->getCamera()->getProjectionMatrix()/*_trackballCameraProperty->getValue().getProjectionMatrix()*/);
-        LGL_ERROR;
         _geometryRenderingShader->setUniform("_viewMatrix", _trackballEHs[trackballndx]->getTrackball()->getCamera()->getViewMatrix());
-        LGL_ERROR;
 
         // The color that will be used for rendering the object
-        tgt::Vector4<float> meshColor = static_cast<tgt::Vector4<float>>(p_meshSolidColor.getValue());
-        meshColor.r /= 255.0f;
-        meshColor.g /= 255.0f;
-        meshColor.b /= 255.0f;
-        meshColor.a /= 255.0f;
-        _geometryRenderingShader->setUniform("_color", meshColor);
-        
-        LGL_ERROR;
+        _geometryRenderingShader->setUniform("_color", p_meshSolidColor.getValue());
         _geometryRenderingShader->setIgnoreUniformLocationError(false);
-                        LGL_ERROR;
         
         _frameBuffer->activate();
-        LGL_ERROR;
-
         // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -335,23 +319,19 @@ namespace campvis {
 
         _depthBuffer->uploadTexture();
         _depthBuffer->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
-        LGL_ERROR;
         
         _frameBuffer->attachTexture(colorBuffer, GL_COLOR_ATTACHMENT0);
         _frameBuffer->attachTexture(_depthBuffer, GL_DEPTH_ATTACHMENT);
         _frameBuffer->isComplete();
-        LGL_ERROR;
 
         glViewport(0, 0, width(), height());
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glClearDepth(1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        LGL_ERROR;
-
         
         // render the geometry into a polygon mesh.
-        glPolygonMode(GL_FRONT, GL_POLYGON);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         mg->render(GL_POLYGON);
 
 
@@ -361,17 +341,13 @@ namespace campvis {
         // Render wireframe around the geometry.
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         mg->render(GL_POLYGON);
-             
-        LGL_ERROR;
 
         colorBuffer->downloadTexture();
-
         _frameBuffer->deactivate();
-        LGL_ERROR;
-
         _geometryRenderingShader->deactivate();
 
         glPopAttrib();
+        LGL_ERROR;
     }
 
     void DataContainerInspectorCanvas::invalidate() {
@@ -389,7 +365,7 @@ namespace campvis {
     void DataContainerInspectorCanvas::createQuad() {
         delete _quad;
         _quad = 0;
-        _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
+        _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(1.f, 0.f, 0.f));
     }
 
     void DataContainerInspectorCanvas::repaint() {

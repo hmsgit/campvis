@@ -149,7 +149,7 @@ namespace campvis {
         _colorValWidget->setFixedSize(16, 16);
         
         _ColorValWidgetPalette = new QPalette(palette());
-        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, Qt::gray);
+        _ColorValWidgetPalette->setColor(QPalette::Background, Qt::gray);
         _colorValWidget->setPalette(*(_ColorValWidgetPalette));
         
         _colorWidgetLayout = new QHBoxLayout();
@@ -199,17 +199,17 @@ namespace campvis {
 
         _lblColorVal->setText(QString("Color: R = %1 G = %2 B = %3").arg(QString::number(static_cast<int>(color.r * 255)), QString::number(static_cast<int>(color.g * 255)), QString::number(static_cast<int>(color.b * 255))));
         
-        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, QColor(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255), static_cast<int>(color.b * 255)));
+        _ColorValWidgetPalette->setColor(QPalette::Background, QColor(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255), static_cast<int>(color.b * 255)));
         _colorValWidget->setPalette(*_ColorValWidgetPalette);
     }
 
-	void DataContainerInspectorWidget::updateDepth(){
+    void DataContainerInspectorWidget::updateDepth(){
 
         float depth = _canvas->getCapturedDepth();
 
         _lblColorVal->setText(QString("Depth: %1").arg(QString::number(depth)));
         
-        _ColorValWidgetPalette->setColor(QPalette::ColorRole::Background, QColor(static_cast<int>(depth * 255), static_cast<int>(depth * 255), static_cast<int>(depth * 255)));
+        _ColorValWidgetPalette->setColor(QPalette::Background, QColor(static_cast<int>(depth * 255), static_cast<int>(depth * 255), static_cast<int>(depth * 255)));
         _colorValWidget->setPalette(*_ColorValWidgetPalette);
     }
 
