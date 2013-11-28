@@ -80,7 +80,7 @@ namespace campvis {
         , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image", AbstractProcessor::INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE)
         , p_forceStop("Force Stop", "Force Stop", AbstractProcessor::VALID)
         , _sadssdCostFunctionShader(0)
-        , _nccCostFunctionShader(0)
+        , _nccsnrCostFunctionShader(0)
         , _differenceShader(0)
         , _glr(0)
         , _opt(0)
@@ -120,9 +120,9 @@ namespace campvis {
         _sadssdCostFunctionShader->setAttributeLocation(0, "in_Position");
         _sadssdCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
 
-        _nccCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurencc.frag", "", false);
-        _nccCostFunctionShader->setAttributeLocation(0, "in_Position");
-        _nccCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
+        _nccsnrCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurenccsnr.frag", "", false);
+        _nccsnrCostFunctionShader->setAttributeLocation(0, "in_Position");
+        _nccsnrCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
 
         _differenceShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "", false);
         _differenceShader->setAttributeLocation(0, "in_Position");
@@ -132,9 +132,8 @@ namespace campvis {
     }
 
     void SimilarityMeasure::deinit() {
-        VisualizationProcessor::deinit();
         ShdrMgr.dispose(_sadssdCostFunctionShader);
-        ShdrMgr.dispose(_nccCostFunctionShader);
+        ShdrMgr.dispose(_nccsnrCostFunctionShader);
         ShdrMgr.dispose(_differenceShader);
 
         delete _glr;
@@ -142,6 +141,8 @@ namespace campvis {
 
         delete _opt;
         _opt = 0;
+
+        VisualizationProcessor::deinit();
     }
 
     void SimilarityMeasure::process(DataContainer& data) {
@@ -187,6 +188,11 @@ namespace campvis {
         tgtAssert(referenceImage != 0, "Reference Image must not be 0.");
         tgtAssert(movingImage != 0, "Moving Image must not be 0.");
 
+        if (_opt != 0) {
+            LWARNING("Optimization is already running...");
+            return;
+        }
+
         MyFuncData_t mfd = { this, referenceImage, movingImage, 0 };
 
         _opt = new nlopt::opt(p_optimizer.getOptionValue(), 6);
@@ -216,7 +222,6 @@ namespace campvis {
         _opt->set_initial_step(stepSize);
 
         double minf;
-
         nlopt::result result = nlopt::SUCCESS;
         try {
             result = _opt->optimize(x, minf);
@@ -259,7 +264,7 @@ namespace campvis {
             similarityTex2 = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
             similarityTex2->uploadTexture();
             similarityTex2->setWrapping(tgt::Texture::CLAMP);
-            leShader = _nccCostFunctionShader;
+            leShader = _nccsnrCostFunctionShader;
         }
 
         // activate FBO and attach texture
