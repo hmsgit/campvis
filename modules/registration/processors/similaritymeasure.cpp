@@ -31,7 +31,6 @@
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
-#include "tgt/openglgarbagecollector.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"
@@ -45,11 +44,6 @@
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
-    static const GenericOption<nlopt::algorithm> optimizers[3] = {
-        GenericOption<nlopt::algorithm>("cobyla", "COBYLA", nlopt::LN_COBYLA),
-        GenericOption<nlopt::algorithm>("newuoa", "NEWUOA", nlopt::LN_NEWUOA),
-        GenericOption<nlopt::algorithm>("neldermead", "Nelder-Mead Simplex", nlopt::LN_NELDERMEAD)
-    };
 
     static const GenericOption<std::string> metrics[5] = {
         GenericOption<std::string>("SUM", "Sum"),
@@ -74,16 +68,12 @@ namespace campvis {
         , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
         , p_metric("Metric", "Similarity Metric", metrics, 5)
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
-        , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
-        , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT | PERFORM_OPTIMIZATION)
         , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image", AbstractProcessor::INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE)
-        , p_forceStop("Force Stop", "Force Stop", AbstractProcessor::VALID)
         , _sadssdCostFunctionShader(0)
         , _nccsnrCostFunctionShader(0)
         , _differenceShader(0)
         , _glr(0)
-        , _opt(0)
     {
         addProperty(&p_referenceId);
         addProperty(&p_movingId);
@@ -101,11 +91,6 @@ namespace campvis {
         addProperty(&p_differenceImageId);
         addProperty(&p_computeDifferenceImage);
 
-        addProperty(&p_optimizer);
-        addProperty(&p_performOptimization);
-        addProperty(&p_forceStop);
-
-        p_forceStop.s_clicked.connect(this, &SimilarityMeasure::forceStop);
 
         _viewportSizeProperty = &p_viewportSize;
     }
@@ -139,9 +124,6 @@ namespace campvis {
         delete _glr;
         _glr = 0;
 
-        delete _opt;
-        _opt = 0;
-
         VisualizationProcessor::deinit();
     }
 
@@ -150,10 +132,6 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation movingImage(data, p_movingId.getValue());
 
         if (referenceImage != 0 && movingImage != 0) {
-            if (getInvalidationLevel() & PERFORM_OPTIMIZATION) {
-                performOptimization(referenceImage, movingImage);
-            }
-
             float similarity = computeSimilarity(referenceImage, movingImage, p_translation.getValue(), p_rotation.getValue());
             LDEBUG("Similarity Measure: " << similarity);
 
@@ -184,64 +162,6 @@ namespace campvis {
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
-    void SimilarityMeasure::performOptimization(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage) {
-        tgtAssert(referenceImage != 0, "Reference Image must not be 0.");
-        tgtAssert(movingImage != 0, "Moving Image must not be 0.");
-
-        if (_opt != 0) {
-            LWARNING("Optimization is already running...");
-            return;
-        }
-
-        MyFuncData_t mfd = { this, referenceImage, movingImage, 0 };
-
-        _opt = new nlopt::opt(p_optimizer.getOptionValue(), 6);
-        if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
-            _opt->set_max_objective(&SimilarityMeasure::optimizerFunc, &mfd);
-        }
-        else {
-            _opt->set_min_objective(&SimilarityMeasure::optimizerFunc, &mfd);
-        }
-        _opt->set_xtol_rel(1e-4);
-
-        std::vector<double> x(6);
-        x[0] = p_translation.getValue().x;
-        x[1] = p_translation.getValue().y;
-        x[2] = p_translation.getValue().z;
-        x[3] = p_rotation.getValue().x;
-        x[4] = p_rotation.getValue().y;
-        x[5] = p_rotation.getValue().z;
-
-        std::vector<double> stepSize(6);
-        stepSize[0] = 8.0;
-        stepSize[1] = 8.0;
-        stepSize[2] = 8.0;
-        stepSize[3] = 0.5;
-        stepSize[4] = 0.5;
-        stepSize[5] = 0.5;
-        _opt->set_initial_step(stepSize);
-
-        double minf;
-        nlopt::result result = nlopt::SUCCESS;
-        try {
-            result = _opt->optimize(x, minf);
-        }
-        catch (std::exception& e) {
-            LERROR("Excpetion during optimization: " << e.what());
-        }
-        
-        if (result >= nlopt::SUCCESS || result <= nlopt::ROUNDOFF_LIMITED) {
-            LDEBUG("Optimization successful, took " << mfd._count << " steps.");
-            p_translation.setValue(tgt::vec3(x[0], x[1], x[2]));
-            p_rotation.setValue(tgt::vec3(x[3], x[4], x[5]));
-        }
-
-        delete _opt;
-        _opt = 0;
-
-        validate(PERFORM_OPTIMIZATION);
-    }
-
     float SimilarityMeasure::computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation) {
         tgtAssert(referenceImage != 0, "Reference Image must not be 0.");
         tgtAssert(movingImage != 0, "Moving Image must not be 0.");
@@ -260,6 +180,7 @@ namespace campvis {
         similarityTex = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
         similarityTex->uploadTexture();
         similarityTex->setWrapping(tgt::Texture::CLAMP);
+        // NCC and SNR need a second texture and a different shader...
         if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
             similarityTex2 = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
             similarityTex2->uploadTexture();
@@ -285,18 +206,8 @@ namespace campvis {
         referenceImage->bind(leShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
         movingImage->bind(leShader, movingUnit, "_movingTexture", "_movingTextureParams");
 
-        tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
-        tgt::mat4 registrationInverse;
-        if (! registrationMatrix.invert(registrationInverse))
-            tgtAssert(false, "Could not invert registration matrix. This should not happen!");
-
-        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
-        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
-        registrationInverse = w2t * registrationInverse * t2w;
-
-
         // render quad to compute similarity measure by shader
-        leShader->setUniform("_registrationInverse", registrationInverse);
+        leShader->setUniform("_registrationInverse", computeRegistrationMatrix(referenceImage, movingImage, translation, rotation));
         if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
             static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
             glDrawBuffers(2, buffers);
@@ -366,21 +277,6 @@ namespace campvis {
         return toReturn;
     }
 
-    double SimilarityMeasure::optimizerFunc(const std::vector<double>& x, std::vector<double>& grad, void* my_func_data) {
-        tgtAssert(x.size() == 6, "Must have 6 values in x.");
-        tgtAssert(my_func_data != 0, "my_func_data must not be 0");
-
-        MyFuncData_t* mfd = static_cast<MyFuncData_t*>(my_func_data);
-        ++mfd->_count;
-        tgt::vec3 translation(x[0], x[1], x[2]);
-        tgt::vec3 rotation(x[3], x[4], x[5]);
-        float similarity = mfd->_object->computeSimilarity(mfd->_reference, mfd->_moving, translation, rotation);
-        GLGC.deleteGarbage();
-
-        LDEBUG(translation << rotation << " : " << similarity);
-
-        return similarity;
-    }
 
     tgt::mat4 SimilarityMeasure::euleranglesToMat4(const tgt::vec3& eulerAngles) {
         float sinX = sin(eulerAngles.x);
@@ -414,11 +310,6 @@ namespace campvis {
         similarityTex->uploadTexture();
         similarityTex->setWrapping(tgt::Texture::CLAMP);
 
-        // activate FBO and attach texture
-        _fbo->activate();
-        glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
-        LGL_ERROR;
-
         // bind input images
         _differenceShader->activate();
         _differenceShader->setUniform("_applyMask", p_applyMask.getValue());
@@ -427,20 +318,13 @@ namespace campvis {
         _differenceShader->setUniform("_zClampRange", tgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
         referenceImage->bind(_differenceShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
         movingImage->bind(_differenceShader, movingUnit, "_movingTexture", "_movingTextureParams");
+        _differenceShader->setUniform("_registrationInverse", computeRegistrationMatrix(referenceImage, movingImage, translation, rotation));
 
-        tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
-        tgt::mat4 registrationInverse;
-        if (! registrationMatrix.invert(registrationInverse))
-            tgtAssert(false, "Could not invert registration matrix. This should not happen!");
+        // activate FBO and attach texture
+        _fbo->activate();
+        glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
 
-        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
-        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
-        registrationInverse = w2t * registrationInverse * t2w;
-
-
-        // render quad to compute similarity measure by shader
-        _differenceShader->setUniform("_registrationInverse", registrationInverse);
-
+        // render quad to compute difference measure by shader
         for (int z = 0; z < size.z; ++z) {
             float texZ = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
             _differenceShader->setUniform("_zTex", texZ);
@@ -448,13 +332,13 @@ namespace campvis {
             QuadRdr.renderQuad();
         }
         _differenceShader->deactivate();
+        _fbo->deactivate();
 
-        // detach texture and reduce it
+        // put difference image into DataContainer
         ImageData* id = new ImageData(3, size, 1);
         ImageRepresentationGL::create(id, similarityTex);
         id->setMappingInformation(referenceImage->getParent()->getMappingInformation());
         dc->addData(p_differenceImageId.getValue(), id);
-        _fbo->deactivate();
 
         tgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
@@ -462,12 +346,19 @@ namespace campvis {
         validate(COMPUTE_DIFFERENCE_IMAGE);
     }
 
-    void SimilarityMeasure::forceStop() {
-        if (_opt != 0)
-            _opt->force_stop();
+    tgt::mat4 SimilarityMeasure::computeRegistrationMatrix(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation) {
+        tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
+        tgt::mat4 registrationInverse;
+        if (! registrationMatrix.invert(registrationInverse))
+            tgtAssert(false, "Could not invert registration matrix. This should not happen!");
 
-        validate(PERFORM_OPTIMIZATION);
+        tgt::Bounds movingBounds = movingImage->getParent()->getWorldBounds();
+        tgt::vec3 halfDiagonal = movingBounds.getLLF() + (movingBounds.diagonal() / 2.f);
+        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
+        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
+        return w2t * tgt::mat4::createTranslation(halfDiagonal) * registrationInverse * tgt::mat4::createTranslation(-halfDiagonal) * t2w;
     }
+
 
 
 }

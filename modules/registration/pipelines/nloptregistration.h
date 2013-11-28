@@ -27,8 +27,8 @@
 // 
 // ================================================================================================
 
-#ifndef REDUCERTEST_H__
-#define REDUCERTEST_H__
+#ifndef NLOPTREGISTRATION_H__
+#define NLOPTREGISTRATION_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
@@ -41,28 +41,47 @@
 
 #include "modules/registration/processors/similaritymeasure.h"
 
+#include <nlopt.hpp>
+
 namespace campvis {
-    class ReducerTest : public AutoEvaluationPipeline {
+    class NloptRegistration : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        ReducerTest(DataContainer* dc);
+        NloptRegistration(DataContainer* dc);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~ReducerTest();
+        virtual ~NloptRegistration();
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
+        /// \see AutoEvaluationPipeline::deinit()
+        virtual void deinit();
 
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "ReducerTest"; };
+        static const std::string getId() { return "NloptRegistration"; };
 
+        GenericOptionProperty<nlopt::algorithm> p_optimizer;    ///< Optimizer Algorithm
+        BoolProperty p_liveUpdate;                              ///< Live Update of the difference image
+        ButtonProperty p_performOptimization;                   ///< Start Optimization
+        ButtonProperty p_forceStop;                             ///< Stop Optimization
+
+        FloatProperty p_translationStepSize;                    ///< Initial Step Size for Translation
+        FloatProperty p_rotationStepSize;                       ///< Initial Step Size for Rotation
 
     protected:
+        /// Auxiliary data structure for nlopt
+        struct MyFuncData_t {
+            NloptRegistration* _object;
+            const ImageRepresentationGL* _reference;
+            const ImageRepresentationGL* _moving;
+            size_t _count;
+        };
+
         /**
          * Slot getting called when one of the observed processors got validated.
          * Updates the camera properties, when the input image has changed.
@@ -70,14 +89,42 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        /**
+         * Callback method called from p_performOptimization.
+         * (Does not need an OpenGL context)
+         */
+        void onPerformOptimizationClicked();
+        
+        /**
+         * Perform optimization to register \a movingImage to \a referenceImage.
+         * \note    Needs to be called from a valid OpenGL context!
+         */
+        void performOptimization();
+
+        /**
+         * Free function to be called by nlopt optimizer computing the similarity.
+         * \note    Needs to be called from a valid OpenGL context!
+         * \param   x               Optimization vector
+         * \param   grad            Gradient vector (currently ignored!)
+         * \param   my_func_data    Auxiliary data structure0
+         * \return  Result of the cost function.
+         */
+        static double optimizerFunc(const std::vector<double>& x, std::vector<double>& grad, void* my_func_data);
+
+        /**
+         * Stop the Optimization process.
+         */
+        void forceStop();
+
+
         MhdImageReader _referenceReader;
         MhdImageReader _movingReader;
         SimilarityMeasure _sm;
-
         VolumeExplorer _ve;
         
+        nlopt::opt* _opt;                               ///< Pointer to nlopt Optimizer object
     };
 
 }
 
-#endif // REDUCERTEST_H__
+#endif // NLOPTREGISTRATION_H__

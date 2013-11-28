@@ -78,7 +78,7 @@ public:
     /// A wrapper to get the camera from the Canvas
     Camera* getCamera() const;
 
-protected:
+
     /**
      * This is meant be overridden to do the according openGL paintings
      * is not meant to be called directly, will be called by repaint().

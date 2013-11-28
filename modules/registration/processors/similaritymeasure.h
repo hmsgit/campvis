@@ -46,8 +46,6 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-#include <nlopt.hpp>
-
 namespace tgt {
     class Shader;
 }
@@ -94,52 +92,7 @@ namespace campvis {
 
         /// \see AbstractProcessor::process()
         virtual void process(DataContainer& data);
-
-        DataNameProperty p_referenceId;                 ///< image ID for reference image
-        DataNameProperty p_movingId;                    ///< image ID for moving image
-
-        IVec2Property p_clipX;                          ///< clip coordinates for x axis
-        IVec2Property p_clipY;                          ///< clip coordinates for y axis
-        IVec2Property p_clipZ;                          ///< clip coordinates for z axis
-
-        BoolProperty p_applyMask;                       ///< Flag whether use reference image as mask
-        Vec3Property p_translation;                     ///< Moving image translation
-        Vec3Property p_rotation;                        ///< Moving image rotation
-
-        GenericOptionProperty<std::string> p_metric;    ///< Similarity metric
-        ButtonProperty p_computeSimilarity;             ///< Compute similarity
-
-        DataNameProperty p_differenceImageId;           ///< Image ID for difference Image
-        ButtonProperty p_computeDifferenceImage;        ///< Generate Difference Image
-
-        GenericOptionProperty<nlopt::algorithm> p_optimizer;    ///< Optimizer Algorithm
-        ButtonProperty p_performOptimization;                   ///< Start Optimization
-        ButtonProperty p_forceStop;                             ///< Stop Optimization
-
-    private:
-        /// Auxiliary data structure for nlopt
-        struct MyFuncData_t {
-            SimilarityMeasure* _object;
-            const ImageRepresentationGL* _reference;
-            const ImageRepresentationGL* _moving;
-            size_t _count;
-        };
-
-        /// \see AbstractProcessor::updateProperties
-        void updateProperties(DataContainer& dc);
-
-        /**
-         * Perform optimization to register \a movingImage to \a referenceImage.
-         * \param   referenceImage  Reference Image
-         * \param   movingImage     Moving Image
-         */
-        void performOptimization(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage);
-
-        /**
-         * Stop the Optimization process.
-         */
-        void forceStop();
-
+        
         /**
          * Computes the similarity between \a movingImage and \a referenceImage using the given 
          * translation and rotation and currently selected similarity metric.
@@ -162,6 +115,27 @@ namespace campvis {
          */
         void generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
 
+        DataNameProperty p_referenceId;                 ///< image ID for reference image
+        DataNameProperty p_movingId;                    ///< image ID for moving image
+
+        IVec2Property p_clipX;                          ///< clip coordinates for x axis
+        IVec2Property p_clipY;                          ///< clip coordinates for y axis
+        IVec2Property p_clipZ;                          ///< clip coordinates for z axis
+
+        BoolProperty p_applyMask;                       ///< Flag whether use reference image as mask
+        Vec3Property p_translation;                     ///< Moving image translation
+        Vec3Property p_rotation;                        ///< Moving image rotation
+
+        GenericOptionProperty<std::string> p_metric;    ///< Similarity metric
+        ButtonProperty p_computeSimilarity;             ///< Compute similarity
+
+        DataNameProperty p_differenceImageId;           ///< Image ID for difference Image
+        ButtonProperty p_computeDifferenceImage;        ///< Generate Difference Image
+
+    private:
+        /// \see AbstractProcessor::updateProperties
+        void updateProperties(DataContainer& dc);
+
         /**
          * Transforms euler angles to a 4x4 rotation matrix.
          * \param   eulerAngles     A vec3 with euler angles
@@ -170,13 +144,17 @@ namespace campvis {
         static tgt::mat4 euleranglesToMat4(const tgt::vec3& eulerAngles);
 
         /**
-         * Free function to be called by nlopt optimizer computing the similarity.
-         * \param   x               Optimization vector
-         * \param   grad            Gradient vector (currently ignored!)
-         * \param   my_func_data    Auxiliary data structure0
-         * \return  Result of the cost function.
+         * Computes the registration matrix to align \a movingImage to \a referenceImage with the 
+         * provided translation and rotation. The resulting registration matrix is from reference
+         * image's texture coordinates to moving image's texture coordinates. Rotation is performed
+         * around the center of \a movingImage.
+         * \param   referenceImage  Reference Image
+         * \param   movingImage     Moving Image
+         * \param   translation     Translation to apply to \a movingImage
+         * \param   rotation        Rotation to apply to \a movingImage
+         * \return  The registration matrix to align \a movingImage to \a referenceImage in texture coordinates.
          */
-        static double optimizerFunc(const std::vector<double>& x, std::vector<double>& grad, void* my_func_data);
+        static tgt::mat4 computeRegistrationMatrix(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
 
         IVec2Property p_viewportSize;
 
@@ -184,7 +162,6 @@ namespace campvis {
         tgt::Shader* _nccsnrCostFunctionShader;         ///< Shader for computing NCC/SNR
         tgt::Shader* _differenceShader;                 ///< Shader for computing the difference image
         GlReduction* _glr;                              ///< Pointer to GlReduction object
-        nlopt::opt* _opt;                               ///< Pointer to nlopt Optimizer object
 
         static const std::string loggerCat_;
     };
