@@ -80,8 +80,30 @@ vec4 getElement3DNormalized(in sampler3D tex, in TextureParameters3D texParams, 
  * \param   texCoords   texture coordinates
  * \return  \a texCoords transformes to woorld coordinates.
  */
+vec4 textureToWorld(in TextureParameters3D texParams, in vec4 texCoords) {
+    return texParams._textureToWorldMatrix * texCoords;
+}
+
+/**
+ * Transforms texture coordinates for texture \a tex to world coordinates using the texture's
+ * texture-to-world matrix.
+ * \param	texParams   TextureParameters3D struct with texture for lookup
+ * \param   texCoords   texture coordinates
+ * \return  \a texCoords transformes to woorld coordinates.
+ */
 vec4 textureToWorld(in TextureParameters3D texParams, in vec3 texCoords) {
-    return texParams._textureToWorldMatrix * vec4(texCoords, 1.0);
+    return textureToWorld(texParams, vec4(texCoords, 1.0));
+}
+
+/**
+ * Transforms world coordinates for texture \a tex to texture coordinates using the texture's
+ * world-to-texture matrix.
+ * \param	texParams   TextureParameters3D struct with texture for lookup
+ * \param   worldCoords world coordinates
+ * \return  \a texCoords transformes to texture coordinates.
+ */
+vec4 worldToTexture(in TextureParameters3D texParams, in vec4 worldCoords) {
+    return texParams._worldToTextureMatrix * worldCoords;
 }
 
 /**
@@ -92,7 +114,7 @@ vec4 textureToWorld(in TextureParameters3D texParams, in vec3 texCoords) {
  * \return  \a texCoords transformes to texture coordinates.
  */
 vec4 worldToTexture(in TextureParameters3D texParams, in vec3 worldCoords) {
-    return texParams._worldToTextureMatrix * vec4(worldCoords, 1.0);
+    return worldToTexture(texParams, vec4(worldCoords, 1.0));
 }
 
 float applyRealWorldMapping(in TextureParameters3D tex, in float value) {

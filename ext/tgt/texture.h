@@ -142,6 +142,14 @@ public:
     }
 
     /**
+     * unbind the current texture from the active texture unit and target.
+     */
+    void unbind() const
+    {
+        glBindTexture(type_, 0);
+    }
+
+    /**
      * Enable texturing on the active texture unit.
      */
     void enable() const

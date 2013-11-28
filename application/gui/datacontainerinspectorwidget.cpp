@@ -315,7 +315,7 @@ namespace campvis {
         size_t index = 0;
         size_t remainder = 0;
 
-        while (numBytes > 1024 && index < 5) {
+        while (numBytes > 1024 && index < 4) {
             remainder = numBytes % 1024;
             numBytes /= 1024;
             ++index;

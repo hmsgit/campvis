@@ -119,6 +119,12 @@ namespace campvis {
             const std::string& texParamsUniform = "_textureParams") const;
 
         /**
+         * Unbinds the currently bound image from the current texture unit.
+         * \note    This is not necessarily this texture but the texture of the same type bound to this texture unit!
+         */ 
+        void unbind() const;
+
+        /**
          * Download the OpenGL texture from the GPU memory to the texture cpu buffer.
          * \return  _texture
          */
