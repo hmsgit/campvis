@@ -68,28 +68,20 @@ IF(WIN32)
     LIST(APPEND CampvisGlobalDefinitions "-DNOMINMAX" "-D_CRT_SECURE_NO_DEPRECATE")
 
     # Disable warnings for Microsoft compiler:
-    # C4305: 'identifier' : truncation from 'type1' to 'type2'
-    # C4800: 'type' : forcing value to bool 'true' or 'false' (performance warning
     # C4290: C++ exception specification ignored except to indicate a function is
     #        not __declspec(nothrow)
-    # C4068: unknown pragma
-    # C4251  class needs to have dll interface (used for std classes)
-    # C4355: 'this' : used in base member initializer list 
-    #        occurs in processors' constructors when initializing event properties, 
-    #        but is safe there, since the 'this' pointer is only stored and not accessed.
     # C4390: ';' : empty controlled statement found; is this the intent?
     #        occurs when OpenGL error logging macros are disabled
-    #LIST(APPEND CampvisGlobalDefinitions /wd4305 /wd4800 /wd4290 /wd4068 /wd4251 /wd4355 /wd4390)
-    LIST(APPEND CampvisGlobalDefinitions /wd4290 /wd4390)
+    # C4503: The decorated name was longer than the compiler limit (4096), and was truncated.
+    #        Occurs in AutoEvaluatePipeline due to some nested nested map-iterator-map. Could
+    #        not be deactivated locally...
+    LIST(APPEND CampvisGlobalDefinitions /wd4290 /wd4390 /wd4503)
     
     # enable parallel builds in Visual Studio
     LIST(APPEND CampvisGlobalDefinitions /MP)
 
     # prevent error: number of sections exceeded object file format limit
     LIST(APPEND CampvisGlobalDefinitions /bigobj)
-    
-    # enable SSE2 instructions for MSVC
-    LIST(APPEND CampvisGlobalDefinitions /arch:SSE2)
     
     # allows 32 Bit builds to use more than 2GB RAM (VC++ only)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
@@ -119,12 +111,16 @@ IF(WIN32)
     
 ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
-    LIST(APPEND CampvisGlobalDefinitions "-Wall")
-    LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")  
-    
-    # disable tree-vrp optimization in gcc, which for some strange reason breaks tgt's matrix code...
-    LIST(APPEND CampvisGlobalDefinitions "-fno-tree-vrp")
+    LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable")
+    LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")
 ENDIF(WIN32)
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+    # enable C++11 support in GCC
+    LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+    # however: we want to use the TBB implementation of threads
+    LIST(APPEND CampvisGlobalDefinitions "-DTBB_IMPLEMENT_CPP0X")
+ENDIF()
 
 # tgt configuration
 LIST(APPEND CampvisGlobalDefinitions "-DTGT_WITHOUT_DEFINES") # don't use tgt's build system
@@ -138,7 +134,10 @@ IF(CAMPVIS_DEBUG)
 ENDIF()
  
 # minimum Qt version
-SET(CampvisRequiredQtVersion "4.8")
+IF(CAMPVIS_BUILD_APPLICATION)
+    SET(TGT_WITH_QT true)
+    SET(CampvisRequiredQtVersion "4.8")
+ENDIF(CAMPVIS_BUILD_APPLICATION)
 
 
 # detect libraries

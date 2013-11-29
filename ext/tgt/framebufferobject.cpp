@@ -45,30 +45,33 @@ FramebufferObject::~FramebufferObject()
 
 void FramebufferObject::activate()
 {
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, id_);
+    glBindFramebufferEXT(GL_FRAMEBUFFER, id_);
+    LGL_ERROR;
 }
 
 void FramebufferObject::deactivate()
 {
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
+    LGL_ERROR;
 }
 
 void FramebufferObject::attachTexture(Texture* texture, GLenum attachment, int mipLevel, int zSlice)
 {
     switch(texture->getType()) {
         case GL_TEXTURE_1D:
-            glFramebufferTexture1DEXT( GL_FRAMEBUFFER_EXT, attachment, GL_TEXTURE_1D, texture->getId(), mipLevel );
+            glFramebufferTexture1D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_1D, texture->getId(), mipLevel );
             break;
         case GL_TEXTURE_3D:
-            glFramebufferTexture3DEXT( GL_FRAMEBUFFER_EXT, attachment, GL_TEXTURE_3D, texture->getId(), mipLevel, zSlice );
+            glFramebufferTexture3D( GL_FRAMEBUFFER, attachment, GL_TEXTURE_3D, texture->getId(), mipLevel, zSlice );
             break;
-        case GL_TEXTURE_2D_ARRAY_EXT:
-            glFramebufferTextureLayerEXT( GL_FRAMEBUFFER_EXT, attachment, texture->getId(), mipLevel, zSlice );
+        case GL_TEXTURE_2D_ARRAY:
+            glFramebufferTextureLayer( GL_FRAMEBUFFER, attachment, texture->getId(), mipLevel, zSlice );
             break;
         default: //GL_TEXTURE_2D, GL_TEXTURE_RECTANGLE
-            glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, attachment, texture->getType(), texture->getId(), mipLevel );
+            glFramebufferTexture2D( GL_FRAMEBUFFER, attachment, texture->getType(), texture->getId(), mipLevel );
             break;
     }
+    LGL_ERROR;
 
     size_t index = decodeAttachment(attachment);
     attachments_[index] = texture;
@@ -83,7 +86,22 @@ Texture* FramebufferObject::getTextureAtAttachment(GLenum attachment) {
 void FramebufferObject::detachTexture(GLenum attachment) {
     size_t index = decodeAttachment(attachment);
     if (attachments_[index] != 0) {
+        switch (attachments_[index]->getType()) {
+            case GL_TEXTURE_1D:
+                glFramebufferTexture1D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_1D, 0, 0);
+                break;
+            case GL_TEXTURE_2D_ARRAY:
+                glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, 0, 0, 0);
+                break;
+            case GL_TEXTURE_3D:
+                glFramebufferTexture3D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_3D, 0, 0, 0);
+                break;
+            default: // GL_TEXTURE_2D, GL_TEXTURE_RECTANGLE
+                glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, 0, 0);
+                break;
+        }
         attachments_[index] = 0;
+        LGL_ERROR;
 
         if (index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
             --numColorAttachments_;
@@ -91,8 +109,6 @@ void FramebufferObject::detachTexture(GLenum attachment) {
     else {
         LWARNING("Trying to detach unknown texture!");
     }
-
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, attachment, GL_TEXTURE_2D, 0, 0);
 }
 
 void FramebufferObject::detachAll() {
@@ -112,31 +128,31 @@ bool FramebufferObject::isComplete() const
 {
   bool complete = false;
 
-  GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   switch(status) {
-      case GL_FRAMEBUFFER_COMPLETE_EXT:
+      case GL_FRAMEBUFFER_COMPLETE:
           complete = true;
           break;
-      case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-          LERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT");
+      case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+          LERROR("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
           break;
-      case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-          LERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT");
+      case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+          LERROR("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
           break;
       case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-          LERROR("GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT");
+          LERROR("GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
           break;
       case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-          LERROR("GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT");
+          LERROR("GL_FRAMEBUFFER_INCOMPLETE_FORMATS");
           break;
-      case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-          LERROR("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT");
+      case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+          LERROR("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
           break;
-      case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-          LERROR("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT");
+      case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+          LERROR("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
           break;
-      case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-          LERROR("GL_FRAMEBUFFER_UNSUPPORTED_EXT");
+      case GL_FRAMEBUFFER_UNSUPPORTED:
+          LERROR("GL_FRAMEBUFFER_UNSUPPORTED");
           break;
       default:
           LERROR("Unknown error!");
@@ -150,17 +166,18 @@ bool FramebufferObject::isActive() const {
 
 GLuint FramebufferObject::getActiveObject() {
     GLint fbo;
-    glGetIntegerv (GL_FRAMEBUFFER_BINDING_EXT, &fbo);
+    glGetIntegerv (GL_FRAMEBUFFER_BINDING, &fbo);
     return static_cast<GLuint>(fbo);
 }
 
 GLuint FramebufferObject::generateId() {
     id_ = 0;
     glGenFramebuffersEXT(1, &id_);
+    LGL_ERROR;
     return id_;
 }
 
-Texture*const *const FramebufferObject::getAttachments() const {
+Texture* const * FramebufferObject::getAttachments() const {
     return attachments_;
 }
 

@@ -140,7 +140,7 @@ namespace campvis {
         _sft.p_outputID.addSharedProperty(&_sfr.p_strainId);
 
         _sfr.p_renderTargetID.setValue("sfr");
-        _sfr.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vr.getProperty("GeometryImageId")));
+     //   _sfr.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vr.getProperty("GeometryImageId")));
         _sfr.p_renderTargetID.addSharedProperty(&_compositor.p_firstImageId);
     }
 

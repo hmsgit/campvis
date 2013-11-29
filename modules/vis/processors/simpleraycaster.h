@@ -44,8 +44,6 @@ namespace tgt {
 namespace campvis {
     /**
      * Performs a simple volume ray casting.
-     * \todo    OpenGL supports up to 4 bound FBO. We can use them to generate multiple images
-     *          in a single pass, e.g. first hit point, normals, MIP, DVR.
      */
     class SimpleRaycaster : public RaycastingProcessor {
     public:
@@ -68,11 +66,14 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
+        /// \see AbstractProcessor::init
+        virtual void init();
+        /// \see AbstractProcessor::deinit
+        virtual void deinit();
+
         DataNameProperty p_targetImageID;    ///< image ID for output image
         BoolProperty p_enableShadowing;
         FloatProperty p_shadowIntensity;
-        BoolProperty p_enableAdaptiveStepsize;
-
     
     protected:
         /// \see HasProperyCollection::updateProperties()

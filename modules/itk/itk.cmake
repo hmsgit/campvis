@@ -1,6 +1,15 @@
 # CMake file for ITK module
 
-FIND_PACKAGE (ITK REQUIRED)# ITKCommon ITKIOImageBase ITKFilters)
+FIND_PACKAGE (ITK REQUIRED 
+    ITKCommon 
+    ITKIOImageBase 
+    ITKSmoothing 
+    ITKImageFeature 
+    ITKAnisotropicSmoothing 
+    ITKMathematicalMorphology
+    ITKBinaryMathematicalMorphology
+    )
+    
 IF(ITK_FOUND)
     #MESSAGE(STATUS ${ITK_INCLUDE_DIRS})
     #MESSAGE(STATUS ${ITK_LIBRARIES})
@@ -11,7 +20,11 @@ IF(ITK_FOUND)
     #SET(ThisModIncludeDirs ${ITK_INCLUDE_DIRS})
     #SET(ThisModExternalLibs ${ITK_LIBRARIES})
     
-    MESSAGE(STATUS "  Found ITK library")
+    IF("${ITK_VERSION_MAJOR}" LESS 4)
+        MESSAGE(FATAL_ERROR "Found ITK Version ${ITK_VERSION_MAJOR} < 4. CAMPVis needs ITK version >= 4.")
+    ELSE()
+        MESSAGE(STATUS "  Found ITK library")
+    ENDIF()
 ELSE(ITK_FOUND)
     MESSAGE(FATAL_ERROR "Could not locate ITK.")
 ENDIF(ITK_FOUND)
@@ -28,8 +41,3 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 	modules/itk/tools/*.h
 	modules/itk/core/*.h
 )
-
-# files for the core
-#FILE(GLOB ThisModCoreHeaders RELATIVE ${ModulesDir}
-#	modules/itk/core/*.h
-#)

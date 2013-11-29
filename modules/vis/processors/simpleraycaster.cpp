@@ -33,6 +33,8 @@
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorshading.h"
 
+#include <tbb/tbb.h>
+
 namespace campvis {
     const std::string SimpleRaycaster::loggerCat_ = "CAMPVis.modules.vis.SimpleRaycaster";
 
@@ -41,13 +43,10 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
-        , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true, AbstractProcessor::INVALID_SHADER)
     {
         addDecorator(new ProcessorDecoratorShading());
 
         addProperty(&p_targetImageID);
-        addProperty(&p_enableAdaptiveStepsize);
-
         addProperty(&p_enableShadowing);
         addProperty(&p_shadowIntensity);
         p_shadowIntensity.setVisible(false);
@@ -56,10 +55,18 @@ namespace campvis {
     }
 
     SimpleRaycaster::~SimpleRaycaster() {
+    }
 
+    void SimpleRaycaster::init() {
+        RaycastingProcessor::init();
+    }
+
+    void SimpleRaycaster::deinit() {
+        RaycastingProcessor::deinit();
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+
         FramebufferActivationGuard fag(this);
         createAndAttachTexture(GL_RGBA8);
         createAndAttachTexture(GL_RGBA32F);
@@ -75,6 +82,9 @@ namespace campvis {
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         QuadRdr.renderQuad();
+
+        // restore state
+        glDrawBuffers(1, buffers);
         glDisable(GL_DEPTH_TEST);
         LGL_ERROR;
 
@@ -85,8 +95,6 @@ namespace campvis {
         std::string toReturn = RaycastingProcessor::generateHeader();
         if (p_enableShadowing.getValue())
             toReturn += "#define ENABLE_SHADOWING\n";
-        if (p_enableAdaptiveStepsize.getValue())
-            toReturn += "#define ENABLE_ADAPTIVE_STEPSIZE\n";
         return toReturn;
     }
 

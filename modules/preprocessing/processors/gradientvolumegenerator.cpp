@@ -39,51 +39,6 @@
 
 namespace campvis {
 
-    class ApplyCentralDifferences {
-    public:
-        ApplyCentralDifferences(const ImageRepresentationLocal* input, GenericImageRepresentationLocal<float, 4>* output)
-            : _input(input)
-            , _output(output)
-        {
-        }
-
-        void operator() (const tbb::blocked_range<size_t>& range) const {
-            for (size_t i = range.begin(); i != range.end(); ++i) {
-                tgt::svec3 pos = _input->getParent()->indexToPosition(i);
-                const tgt::svec3& size = _input->getSize();
-
-                float dx, dy, dz, mdx, mdy, mdz;
-                dx = dy = dz = mdx = mdy = mdz = 0.f;
-
-                if (pos.x != size.x - 1)
-                    dx = _input->getElementNormalized(pos + tgt::svec3(1, 0, 0), 0);
-                if (pos.y != size.y - 1)
-                    dy = _input->getElementNormalized(pos + tgt::svec3(0, 1, 0), 0);
-                if (pos.z != size.z - 1)
-                    dz = _input->getElementNormalized(pos + tgt::svec3(0, 0, 1), 0);
-
-                if (pos.x != 0)
-                    mdx = _input->getElementNormalized(pos + tgt::svec3(-1, 0, 0), 0);
-                if (pos.y != 0)
-                    mdy = _input->getElementNormalized(pos + tgt::svec3(0, -1, 0), 0);
-                if (pos.z != 0)
-                    mdz = _input->getElementNormalized(pos + tgt::svec3(0, 0, -1), 0);
-
-
-                tgt::vec3 gradient(mdx - dx, mdy - dy, mdz - dz);
-                gradient /= _input->getParent()->getMappingInformation().getVoxelSize() * tgt::vec3(2.f);
-                
-                _output->setElement(i, tgt::vec4(gradient, tgt::length(gradient)));
-            }
-        }
-
-    protected:
-        const ImageRepresentationLocal* _input;
-        GenericImageRepresentationLocal<float, 4>* _output;
-    };
-
-// ================================================================================================
-
     const std::string GradientVolumeGenerator::loggerCat_ = "CAMPVis.modules.classification.GradientVolumeGenerator";
 
     GradientVolumeGenerator::GradientVolumeGenerator()
@@ -105,7 +60,36 @@ namespace campvis {
         if (input != 0) {
             ImageData* id = new ImageData(input->getDimensionality(), input->getSize(), 4);
             GenericImageRepresentationLocal<float, 4>* output = GenericImageRepresentationLocal<float, 4>::create(id, 0);
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), ApplyCentralDifferences(input, output));
+
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
+                for (size_t i = range.begin(); i != range.end(); ++i) {
+                    tgt::svec3 pos = input->getParent()->indexToPosition(i);
+                    const tgt::svec3& size = input->getSize();
+
+                    float dx, dy, dz, mdx, mdy, mdz;
+                    dx = dy = dz = mdx = mdy = mdz = 0.f;
+
+                    if (pos.x != size.x - 1)
+                        dx = input->getElementNormalized(pos + tgt::svec3(1, 0, 0), 0);
+                    if (pos.y != size.y - 1)
+                        dy = input->getElementNormalized(pos + tgt::svec3(0, 1, 0), 0);
+                    if (pos.z != size.z - 1)
+                        dz = input->getElementNormalized(pos + tgt::svec3(0, 0, 1), 0);
+
+                    if (pos.x != 0)
+                        mdx = input->getElementNormalized(pos + tgt::svec3(-1, 0, 0), 0);
+                    if (pos.y != 0)
+                        mdy = input->getElementNormalized(pos + tgt::svec3(0, -1, 0), 0);
+                    if (pos.z != 0)
+                        mdz = input->getElementNormalized(pos + tgt::svec3(0, 0, -1), 0);
+
+
+                    tgt::vec3 gradient(mdx - dx, mdy - dy, mdz - dz);
+                    gradient /= input->getParent()->getMappingInformation().getVoxelSize() * tgt::vec3(2.f);
+
+                    output->setElement(i, tgt::vec4(gradient, tgt::length(gradient)));
+                }
+            });
 
             data.addData(p_targetImageID.getValue(), id);
         }

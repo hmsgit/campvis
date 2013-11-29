@@ -64,9 +64,14 @@ namespace campvis {
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
          */
         virtual ~GenericGeometryTransferFunction();
+        
+        /**
+         * Initializes the Shader, hence, this methods has to be called from a thread with a valid OpenGL context!
+         */
+        virtual void initShader();
 
         /**
-         * Deletes the OpenGL texture, hence, this methods has to be called from a thread with a valid OpenGL context!
+         * Deletes the OpenGL texture and shader, hence, this methods has to be called from a thread with a valid OpenGL context!
          */
         virtual void deinit();
 
@@ -107,6 +112,7 @@ namespace campvis {
 
         std::vector<T*> _geometries;        ///< The list of transfer function geometries.
         tgt::FramebufferObject* _fbo;       ///< The FBO used for render into texture.
+        tgt::Shader* _shader;               ///< Shader for rendering the TF into a texture
     };
 
 // ================================================================================================
@@ -115,28 +121,42 @@ namespace campvis {
     campvis::GenericGeometryTransferFunction<T>::GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
         : AbstractTransferFunction(size, intensityDomain)
         , _fbo(0)
+        , _shader(0)
     {
 
     }
 
     template<class T>
     campvis::GenericGeometryTransferFunction<T>::~GenericGeometryTransferFunction() {
-        for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
-            (*it)->s_changed.disconnect(this);
-            delete *it;
+    }
+
+    template<class T>
+    void campvis::GenericGeometryTransferFunction<T>::initShader() {
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/passthrough.frag", "", false);
+        if (_shader != 0) {
+            _shader->setAttributeLocation(0, "in_Position");
+            _shader->setAttributeLocation(2, "in_Color");
+        }
+        else {
+            LERROR("Could not create Shader for Rendering the TF into the lookup texture!");
         }
     }
 
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::deinit() {
+        for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
+            (*it)->s_changed.disconnect(this);
+            delete *it;
+        }
+        _geometries.clear();
+
         if (_fbo != 0) {
-            _fbo->activate();
-            _fbo->detachAll();
-            _fbo->deactivate();
             delete _fbo;
             _fbo = 0;
         }
 
+        ShdrMgr.dispose(_shader);
+        _shader = 0;
         AbstractTransferFunction::deinit();
     }
 
@@ -183,6 +203,10 @@ namespace campvis {
 
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::createTexture() {
+        if (_shader == 0) {
+            initShader();
+        }
+
         // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
         tgt::TextureUnit tfUnit;
         tfUnit.activate();
@@ -218,33 +242,22 @@ namespace campvis {
         LGL_ERROR;
 
         // render TF geometries into texture
-        glPushAttrib(GL_ALL_ATTRIB_BITS);
-        glClearColor(0, 0, 0, 0);
+        glViewport(0, 0, _texture->getWidth(), _texture->getHeight());
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glViewport(0, 0, _texture->getWidth(), _texture->getHeight());
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-        glOrtho(0, 1, 0, 1, -1, 1);
-
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-
+        _shader->activate();
+        _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
+        LGL_ERROR;
 
         for (typename std::vector<T*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
             (*it)->render();
         }
-
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-        glPopAttrib();
         LGL_ERROR;
 
-        // deactivate FBO
+        // deactivate Shader and FBO
+        _shader->deactivate();
+        _fbo->detachTexture(GL_COLOR_ATTACHMENT0);
+        _fbo->detachAll();
         _fbo->deactivate();
         LGL_ERROR;
 

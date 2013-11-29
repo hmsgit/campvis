@@ -63,8 +63,31 @@ namespace campvis {
 
     }
 
-    IndexedMeshGeometry::~IndexedMeshGeometry() {
+    IndexedMeshGeometry::IndexedMeshGeometry(const IndexedMeshGeometry& rhs)
+        : GeometryData(rhs)
+        , _indices(rhs._indices)
+        , _vertices(rhs._vertices)
+        , _textureCoordinates(rhs._textureCoordinates)
+        , _colors(rhs._colors)
+        , _normals(rhs._normals)
+        , _indicesBuffer(0)
+    {
 
+    }
+    IndexedMeshGeometry::~IndexedMeshGeometry() {
+        deleteIndicesBuffer();
+    }
+
+    IndexedMeshGeometry& IndexedMeshGeometry::operator=(const IndexedMeshGeometry& rhs) {
+        if (this == &rhs)
+            return *this;
+
+        GeometryData::operator=(rhs);
+
+        // delete old VBOs and null pointers
+        deleteIndicesBuffer();
+
+        return *this;
     }
 
     IndexedMeshGeometry* IndexedMeshGeometry::clone() const {
@@ -95,20 +118,20 @@ namespace campvis {
 
     void IndexedMeshGeometry::render(GLenum mode) const {
         createGLBuffers();
-        if (! _buffersInitialized) {
+        if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
             return;
         }
 
         tgt::VertexArrayObject vao;
         if (_verticesBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::VerticesAttribute, _verticesBuffer);
+            vao.setVertexAttributePointer(0, _verticesBuffer);
         if (_texCoordsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::TextureCoordinatesAttribute, _texCoordsBuffer);
+            vao.setVertexAttributePointer(1, _texCoordsBuffer);
         if (_colorsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::ColorsAttribute, _colorsBuffer);
+            vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
-            vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _normalsBuffer);
+            vao.setVertexAttributePointer(3, _normalsBuffer);
         vao.bindIndexBuffer(_indicesBuffer);
 
         glDrawElements(mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_SHORT, 0);
@@ -116,9 +139,10 @@ namespace campvis {
     }
 
     void IndexedMeshGeometry::createGLBuffers() const {
-        GeometryData::createGLBuffers();
+        if (_buffersDirty) {
+            deleteBuffers();
+            deleteIndicesBuffer();
 
-        if (! _buffersInitialized) {
             try {
                 _indicesBuffer = new tgt::BufferObject(tgt::BufferObject::ELEMENT_ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
                 _indicesBuffer->data(&_indices.front(), _indices.size() * sizeof(uint16_t), tgt::BufferObject::UNSIGNED_SHORT, 1);
@@ -141,12 +165,12 @@ namespace campvis {
             }
             catch (tgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
-                _buffersInitialized = false;
+                _buffersDirty = true;
                 return;
             }
 
             LGL_ERROR;
-            _buffersInitialized = true;
+            _buffersDirty = false;
         }
     }
 
@@ -155,6 +179,11 @@ namespace campvis {
         for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
             toReturn.addPoint(*it);
         return toReturn;
+    }
+    
+    void IndexedMeshGeometry::deleteIndicesBuffer() const {
+        delete _indicesBuffer;
+        _indicesBuffer = 0;
     }
 
 

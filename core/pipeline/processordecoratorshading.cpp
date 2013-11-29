@@ -33,11 +33,16 @@
 #include "core/properties/propertycollection.h"
 
 namespace campvis {
+    static const GenericOption<ProcessorDecoratorShading::GradientMethod> gradientOptions[3] = {
+        GenericOption<ProcessorDecoratorShading::GradientMethod>("Forward", "Forward Differences", ProcessorDecoratorShading::ForwardDifferences),
+        GenericOption<ProcessorDecoratorShading::GradientMethod>("Central", "Central Differences", ProcessorDecoratorShading::CentralDifferences),
+        GenericOption<ProcessorDecoratorShading::GradientMethod>("FilteredCentral", "Filtered Central Differences", ProcessorDecoratorShading::FilteredCentralDifferences)
+    };
 
     ProcessorDecoratorShading::ProcessorDecoratorShading(const std::string& lightUniformName /*= "_lightSource"*/)
         : AbstractProcessorDecorator()
         , _enableShading("EnableShading", "Enable Shading", true, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
-        , _centralDifferences("CentralDifferences", "Use Central instead of Forward Differences", false, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
+        , _gradientMethod("GradientMethod", "Gradient Computation Method", gradientOptions, 3, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
         , _lightPosition("LightPosition", "Light Position", tgt::vec3(-100.f), tgt::vec3(-500.f), tgt::vec3(500.f), tgt::vec3(1.f))
         , _ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.4f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
@@ -46,6 +51,7 @@ namespace campvis {
         , _attenuation("Attenuation", "Attenuation Factors", tgt::vec3(0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _lightUniformName(lightUniformName)
     {
+        _gradientMethod.setValue(1);
     }
 
     ProcessorDecoratorShading::~ProcessorDecoratorShading() {
@@ -53,7 +59,7 @@ namespace campvis {
 
     void ProcessorDecoratorShading::addProperties(HasPropertyCollection* propCollection) {
         propCollection->addProperty(&_enableShading);
-        propCollection->addProperty(&_centralDifferences);
+        propCollection->addProperty(&_gradientMethod);
         propCollection->addProperty(&_lightPosition);
         propCollection->addProperty(&_ambientColor);
         propCollection->addProperty(&_diffuseColor);
@@ -76,10 +82,21 @@ namespace campvis {
         std::string toReturn;
         if (_enableShading.getValue())
             toReturn.append("#define ENABLE_SHADING\n");
-        if (_centralDifferences.getValue())
-            toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientFilteredCentralDifferences(tex, texParams, texCoords)\n");
-        else
-            toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientForwardDifferences(tex, texParams, texCoords)\n");
+
+        switch (_gradientMethod.getOptionValue()) {
+            case ForwardDifferences :
+                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientForwardDifferences(tex, texParams, texCoords)\n");
+                break;
+            case CentralDifferences :
+                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientCentralDifferences(tex, texParams, texCoords)\n");
+                break;
+            case FilteredCentralDifferences :
+                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientFilteredCentralDifferences(tex, texParams, texCoords)\n");
+                break;
+            default:
+                tgtAssert(false, "Invalid enum!");
+                break;
+        }
 
         return toReturn;
     }

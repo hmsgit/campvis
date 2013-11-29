@@ -40,26 +40,33 @@ namespace campvis {
         tgtAssert(_numChannels > 0 && _numChannels <= 4, "Number of channels out of bounds!");
     };
 
+    WeaklyTypedPointer::WeaklyTypedPointer()
+        : _baseType(UINT8)
+        , _numChannels(0)
+        , _pointer(0)
+    {
+    }
+
     WeaklyTypedPointer::~WeaklyTypedPointer() {
         // We do _not_ own the pointer, so we don't need to delete it.
     }
 
     size_t WeaklyTypedPointer::numBytes(BaseType pt, size_t numChannels) {
         switch (pt) {
-        case WeaklyTypedPointer::UINT8:
-        case WeaklyTypedPointer::INT8:
-            return 1 * numChannels;
-        case WeaklyTypedPointer::UINT16:
-        case WeaklyTypedPointer::INT16:
-            return 2 * numChannels;
-        case WeaklyTypedPointer::UINT32:
-        case WeaklyTypedPointer::INT32:
-            return 4 * numChannels;
-        case WeaklyTypedPointer::FLOAT:
-            return sizeof(float) * numChannels;
-        default:
-            tgtAssert(false, "Should not reach this - called WeaklyTypedPointer::numBytes() with wrong argument!");
-            return 1;
+            case WeaklyTypedPointer::UINT8:
+            case WeaklyTypedPointer::INT8:
+                return 1 * numChannels;
+            case WeaklyTypedPointer::UINT16:
+            case WeaklyTypedPointer::INT16:
+                return 2 * numChannels;
+            case WeaklyTypedPointer::UINT32:
+            case WeaklyTypedPointer::INT32:
+                return 4 * numChannels;
+            case WeaklyTypedPointer::FLOAT:
+                return sizeof(float) * numChannels;
+            default:
+                tgtAssert(false, "Should not reach this - called WeaklyTypedPointer::numBytes() with wrong argument!");
+                return 1;
         }
     };
 
@@ -70,16 +77,16 @@ namespace campvis {
     GLint WeaklyTypedPointer::getGlFormat() const {
         switch (_numChannels) {
             case 1: 
-                return GL_ALPHA;
+                return GL_RED;
             case 2: 
-                return GL_LUMINANCE_ALPHA;
+                return GL_RG;
             case 3:
                 return GL_RGB;
             case 4:
                 return GL_RGBA;
             default:
                 tgtAssert(false, "Should not reach this, wrong number of channels!");
-                return GL_ALPHA;
+                return GL_RED;
         }
     }
 
@@ -110,21 +117,36 @@ namespace campvis {
                 switch (_baseType) {
                     case WeaklyTypedPointer::UINT8:
                     case WeaklyTypedPointer::INT8:
-                        return GL_ALPHA8;
+                        return GL_R8;
                     case WeaklyTypedPointer::UINT16:
                     case WeaklyTypedPointer::INT16:
-                        return GL_ALPHA16;
+                        return GL_R16;
                     case WeaklyTypedPointer::UINT32:
                     case WeaklyTypedPointer::INT32:
-                        return GL_ALPHA;
+                        return GL_R32F;
                     case WeaklyTypedPointer::FLOAT:
-                        return GL_ALPHA32F_ARB;
+                        return GL_R32F;
                     default:
                         tgtAssert(false, "Should not reach this - wrong base data type!");
-                        return GL_BYTE;
+                        return GL_RED;
                 }
             case 2:
-                return GL_LUMINANCE_ALPHA;
+                switch (_baseType) {
+                    case WeaklyTypedPointer::UINT8:
+                    case WeaklyTypedPointer::INT8:
+                        return GL_RG8;
+                    case WeaklyTypedPointer::UINT16:
+                    case WeaklyTypedPointer::INT16:
+                        return GL_RG16;
+                    case WeaklyTypedPointer::UINT32:
+                    case WeaklyTypedPointer::INT32:
+                        return GL_RG32F;
+                    case WeaklyTypedPointer::FLOAT:
+                        return GL_RG32F;
+                    default:
+                        tgtAssert(false, "Should not reach this - wrong base data type!");
+                        return GL_RG;
+                }
             case 3:
                 switch (_baseType) {
                     case WeaklyTypedPointer::UINT8:
@@ -135,12 +157,12 @@ namespace campvis {
                         return GL_RGB16;
                     case WeaklyTypedPointer::UINT32:
                     case WeaklyTypedPointer::INT32:
-                        return GL_RGB;
+                        return GL_RGB32F;
                     case WeaklyTypedPointer::FLOAT:
-                        return GL_RGB32F_ARB;
+                        return GL_RGB32F;
                     default:
                         tgtAssert(false, "Should not reach this - wrong base data type!");
-                        return GL_BYTE;
+                        return GL_RGB;
                 }
             case 4:
                 switch (_baseType) {
@@ -152,52 +174,110 @@ namespace campvis {
                         return GL_RGBA16;
                     case WeaklyTypedPointer::UINT32:
                     case WeaklyTypedPointer::INT32:
-                        return GL_RGBA;
+                        return GL_RGBA32F;
                     case WeaklyTypedPointer::FLOAT:
-                        return GL_RGBA32F_ARB;
+                        return GL_RGBA32F;
                     default:
                         tgtAssert(false, "Should not reach this - wrong base data type!");
-                        return GL_BYTE;
+                        return GL_RGBA;
                 }
             default:
                 tgtAssert(false, "Should not reach hier, wrong number of channels!");
-                return GL_ALPHA;
+                return GL_RED;
         }
     }
 
     size_t WeaklyTypedPointer::numChannels(GLint glFormat) {
+        // supports all formats from http://www.opengl.org/sdk/docs/man/xhtml/glTexImage2D.xml
         switch (glFormat) {
             case 1:
-            case GL_COLOR_INDEX:
-            case GL_RED:
-            case GL_GREEN:
-            case GL_BLUE:
-            case GL_ALPHA:
-            case GL_INTENSITY:
-            case GL_LUMINANCE:
             case GL_DEPTH_COMPONENT:
+            case GL_DEPTH_COMPONENT16:
             case GL_DEPTH_COMPONENT24:
-            case GL_ALPHA_INTEGER_EXT:
+            case GL_DEPTH_COMPONENT32:
+            case GL_DEPTH_COMPONENT32F:
+            case GL_RED:
+            case GL_R8:
+            case GL_R8_SNORM:
+            case GL_R16_SNORM:
+            case GL_R16F:
+            case GL_R32F:
+            case GL_R8I:
+            case GL_R8UI:
+            case GL_R16I:
+            case GL_R16UI:
+            case GL_R32I:
+            case GL_R32UI:
                 return 1;
+                break;
 
             case 2:
-            case GL_LUMINANCE_ALPHA:
+            case GL_DEPTH_STENCIL:
+            case GL_RG:
+            case GL_RG8:
+            case GL_RG8_SNORM:
+            case GL_RG16:
+            case GL_RG16_SNORM:
+            case GL_RG16F:
+            case GL_RG32F:
+            case GL_RG8I:
+            case GL_RG8UI:
+            case GL_RG16I:
+            case GL_RG16UI:
+            case GL_RG32I:
+            case GL_RG32UI:
                 return 2;
+                break;
 
             case 3:
             case GL_RGB:
-            case GL_BGR:
+            case GL_R3_G3_B2:
+            case GL_RGB4:
+            case GL_RGB5:
+            case GL_RGB8:
+            case GL_RGB8_SNORM:
+            case GL_RGB10:
+            case GL_RGB12:
+            case GL_RGB16_SNORM:
+            case GL_SRGB8:
+            case GL_RGB16F:
+            case GL_RGB32F:
+            case GL_R11F_G11F_B10F:
+            case GL_RGB9_E5:
+            case GL_RGB8I:
+            case GL_RGB8UI:
+            case GL_RGB16I:
+            case GL_RGB16UI:
+            case GL_RGB32I:
+            case GL_RGB32UI:
                 return 3;
+                break;
 
             case 4:
             case GL_RGBA:
-            case GL_BGRA:
+            case GL_RGBA2:
+            case GL_RGBA4:
+            case GL_RGB5_A1:
+            case GL_RGBA8:
+            case GL_RGBA8_SNORM:
+            case GL_RGB10_A2:
+            case GL_RGB10_A2UI:
+            case GL_RGBA12:
             case GL_RGBA16:
-            case GL_RGBA16F_ARB:
+            case GL_SRGB8_ALPHA8:
+            case GL_RGBA16F:
+            case GL_RGBA32F:
+            case GL_RGBA8I:
+            case GL_RGBA8UI:
+            case GL_RGBA16I:
+            case GL_RGBA16UI:
+            case GL_RGBA32I:
+            case GL_RGBA32UI:
                 return 4;
+                break;
 
             default:
-                tgtAssert(false, "Unsupported OpenGL data format.");
+                tgtAssert(false, "Should not reach this, wrong number of gl format!");
                 return 0;
         }
     }

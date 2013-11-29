@@ -55,6 +55,8 @@ namespace campvis {
         {
             if (dh.getData() != 0) {
                 data = dynamic_cast<const T*>(dh.getData());
+                if (data == 0)
+                    dh = DataHandle(0);
             }
         };
 

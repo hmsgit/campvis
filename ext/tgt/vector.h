@@ -322,17 +322,17 @@ struct Vector3 {
 /*
     sub-vector getters
 */
-    const Vector2<T>& xy() const {
-        return *((Vector2<T>*) _xy);
+    Vector2<T> xy() const {
+        return Vector2<T>(_xy);
     }
-    Vector2<T>& xy() {
-        return *((Vector2<T>*) _xy);
+    Vector2<T> xy() {
+        return Vector2<T>(_xy);
     }
-    const Vector2<T>& yz() const {
-        return *((Vector2<T>*) (elem + 1));
+    Vector2<T> yz() const {
+        return Vector2<T>(elem + 1);
     }
-    Vector2<T>& yz() {
-        return *((Vector2<T>*) (elem + 1));
+    Vector2<T> yz() {
+        return Vector2<T>(elem + 1);
     }
 
 /*
@@ -467,35 +467,35 @@ struct Vector4 {
     sub-vector getters
 */
 
-    const Vector2<T>& xy() const {
+    Vector2<T> xy() const {
         return xyz().xy();
     }
-    const Vector2<T>& yz() const {
-        return *((Vector2<T>*) (elem + 1));
+    Vector2<T> yz() const {
+        return Vector2<T>(elem + 1);
     }
-    const Vector2<T>& zw() const {
-        return *((Vector2<T>*) (elem + 2));
+    Vector2<T> zw() const {
+        return Vector2<T>(elem + 2);
     }
-    const Vector3<T>& xyz() const {
-        return *((Vector3<T>*) _xyz);
+    Vector3<T> xyz() const {
+        return Vector3<T>(_xyz);
     }
-    const Vector3<T>& yzw() const {
-        return *((Vector3<T>*) (elem + 1));
+    Vector3<T> yzw() const {
+        return Vector3<T>(elem + 1);
     }
-    Vector2<T>& xy() {
+    Vector2<T> xy() {
         return xyz().xy();
     }
-    Vector2<T>& yz() {
-        return *((Vector2<T>*) (elem + 1));
+    Vector2<T> yz() {
+        return Vector2<T>(elem + 1);
     }
-    Vector2<T>& zw() {
-        return *((Vector2<T>*) (elem + 2));
+    Vector2<T> zw() {
+        return Vector2<T>(elem + 2);
     }
-    Vector3<T>& xyz() {
-        return *((Vector3<T>*) _xyz);
+    Vector3<T> xyz() {
+        return Vector3<T>(_xyz);
     }
-    Vector3<T>& yzw() {
-        return *((Vector3<T>*) (elem + 1));
+    Vector3<T> yzw() {
+        return Vector3<T>(elem + 1);
     }
 
 /*

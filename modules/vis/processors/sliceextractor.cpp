@@ -153,20 +153,20 @@ namespace campvis {
                 tgt::mat4 modelMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
 
                 // prepare OpenGL
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
                 tgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-                // render slice
                 _shader->setUniform("_texCoordsMatrix", texCoordsMatrix);
                 _shader->setUniform("_modelMatrix", modelMatrix);
                 _shader->setUniform("_useTexturing", true);
+
+                // render slice
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
 
@@ -262,16 +262,15 @@ namespace campvis {
         p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
 
         if (img != 0) {
-            const tgt::svec3& imgSize = img->getSize();
-            unsigned int maxValue = static_cast<unsigned int> (p_xSliceNumber.getMaxValue());
-            if (maxValue != imgSize.x - 1){
-                p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
+            tgt::ivec3 imgSize = img->getSize();
+            if (p_xSliceNumber.getMaxValue() != imgSize.x - 1){
+                p_xSliceNumber.setMaxValue(imgSize.x - 1);
             }
-            if (maxValue != imgSize.y - 1){
-                p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
+            if (p_ySliceNumber.getMaxValue() != imgSize.y - 1){
+                p_ySliceNumber.setMaxValue(imgSize.y - 1);
             }
-            if (maxValue != imgSize.z - 1){
-                p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+            if (p_zSliceNumber.getMaxValue() != imgSize.z - 1){
+                p_zSliceNumber.setMaxValue(imgSize.z - 1);
             }
         }
 

@@ -183,7 +183,7 @@ namespace campvis {
         tbb::atomic<int> _pause;
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
 
-        tgt::GLCanvas* _currentContext;         ///< current active OpenGL context
+        tbb::atomic<tgt::GLCanvas*> _currentContext;         ///< current active OpenGL context
     };
 
 }

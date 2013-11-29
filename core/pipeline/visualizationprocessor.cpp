@@ -44,9 +44,6 @@ namespace campvis {
         , _fbo(0)
         , _viewportSizeProperty(viewportSizeProp)
     {
-        tgtAssert(_viewportSizeProperty != 0, "Pointer must not be 0!");
-
-        addProperty(&p_lqMode);
     }
 
     VisualizationProcessor::~VisualizationProcessor() {
@@ -55,13 +52,15 @@ namespace campvis {
     void VisualizationProcessor::init() {
         AbstractProcessor::init();
 
+        tgtAssert(_viewportSizeProperty != 0, "The pointer to the viewport size property must not be 0!");
+        addProperty(&p_lqMode);
+
         _fbo = new tgt::FramebufferObject();
         _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
     }
 
     void VisualizationProcessor::deinit() {
         _viewportSizeProperty->s_changed.disconnect(this);
-        _fbo->detachAll();
         delete _fbo;
         AbstractProcessor::deinit();
     }

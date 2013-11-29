@@ -62,6 +62,8 @@ namespace campvis {
         , _texture(texture)
     {
         tgtAssert(texture != 0, "Given texture must not be 0.");
+        tgtAssert(parent->getDimensionality() >= 3 || texture->getDimensions().z == 1, "Dimensionality of Parent and texture mismatch!");
+        tgtAssert(parent->getDimensionality() >= 2 || texture->getDimensions().y == 1, "Dimensionality of Parent and texture mismatch!");
     }
 
     ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp) 
@@ -249,6 +251,7 @@ namespace campvis {
                 shader->setUniform(texParamsUniform + "._voxelSize", _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texParamsUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texParamsUniform + "._textureToWorldMatrix", _parent->getMappingInformation().getTextureToWorldMatrix());
+                shader->setUniform(texParamsUniform + "._worldToTextureMatrix", _parent->getMappingInformation().getWorldToTextureMatrix());
                 shader->setUniform(texParamsUniform + "._realWorldMapping", tgt::vec2(_parent->getMappingInformation().getRealWorldMapping()._shift, _parent->getMappingInformation().getRealWorldMapping()._scale));
                 break;
 
@@ -260,7 +263,12 @@ namespace campvis {
         LGL_ERROR;
     }
 
+    void ImageRepresentationGL::downloadTexture() const {
+        _texture->downloadTexture();
+    }
+
     const tgt::Texture* ImageRepresentationGL::getTexture() const {
+
         return _texture;
     }
 
@@ -285,6 +293,10 @@ namespace campvis {
             _texture->downloadTexture();
         }
         return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), _texture->getPixelData());
+    }
+
+    void ImageRepresentationGL::unbind() const {
+        _texture->unbind();
     }
 
 

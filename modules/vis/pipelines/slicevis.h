@@ -36,8 +36,6 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
-#include "modules/preprocessing/processors/gradientvolumegenerator.h"
-#include "modules/preprocessing/processors/lhhistogram.h"
 
 namespace campvis {
     class SliceVis : public AutoEvaluationPipeline {
@@ -71,8 +69,6 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         MhdImageReader _imageReader;
-        GradientVolumeGenerator _gvg;
-        LHHistogram _lhh;
         SliceExtractor _sliceExtractor;
 
         MWheelToNumericPropertyEventListener _wheelHandler;

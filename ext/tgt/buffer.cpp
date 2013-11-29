@@ -19,8 +19,6 @@ namespace tgt {
     }
 
     BufferObject::~BufferObject() {
-        tgtAssert(_assignedAttributes.empty(), "Destructing a BufferObject, that is still bound to a VertexAttribute.");
-
         if (_id != 0) {
             GLGC.addGarbageBufferObject(_id);
         }
@@ -40,14 +38,6 @@ namespace tgt {
     void BufferObject::subdata(size_t offset, const void* data, size_t numBytes) {
         bind();
         glBufferSubData(_targetType, offset, numBytes, data);
-    }
-
-    void BufferObject::bindToVertexAttribute(const VertexAttribute* va) {
-        _assignedAttributes.insert(va);
-    }
-
-    void BufferObject::unbindFromVertexAttribute(const VertexAttribute* va) {
-        _assignedAttributes.erase(va);
     }
 
     BufferObject::BaseType BufferObject::getBaseType() const {

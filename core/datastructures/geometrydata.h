@@ -42,29 +42,47 @@ namespace tgt {
 
 namespace campvis {
     /**
-     * Abstract base class for data handled by a DataHandle and stored in a DataContainer.
+     * Abstract base class for geometry data in CAMPVis.
      * 
-     * \todo 
-     */
+     * GeometryData consists of a set of vertices (vec3) and optionally colors (vec4), texture 
+     * coordinates (vec3) and/or normals (vec3) for each vertex.
+     * GeometryData stores the geometry on the CPU side (local RAM) and takes care of transparently 
+     * mapping it into GPU memory in order to render it using OpenGL. The mapping of vertex 
+     * information to OpenGL vertex attributes is as follows:
+     *  - Vertex positions: Vertex attribute 0
+     *  - Vertex texture coordinates: Vertex attribute 1
+     *  - Vertex colors: Vertex attribute 2
+     *  - Vertex normals: Vertex attribute 3
+     * 
+     */    
     class GeometryData : public AbstractData, public IHasWorldBounds {
     public:
-        GeometryData();
+        /**
+         * Constructor
+         * \param   vertexFeatures  List of features present for each vertex
+         */
+        explicit GeometryData();
 
+        /**
+         * Copy constructor
+         * \param   rhs GeometryData to copy
+         */
         GeometryData(const GeometryData& rhs);
 
         /**
-         * Destructor, deletes VBOs/VAO if necessary. Hence, needs a valid OpenGL context
+         * Destructor, deletes VBOs/VAO if necessary.
          */
         virtual ~GeometryData();
 
+        /**
+         * Assignment operator.
+         * \param   rhs GeometryData to assign to this.
+         * \return  *this after assignment
+         */
         GeometryData& operator=(const GeometryData& rhs);
 
-        static void deleteBuffers(std::vector<tgt::BufferObject*> buffers);
-
+        /// \see AbstractData::clone()
         virtual AbstractData* clone() const = 0;
-
-        /// \see AbstractData::getVideoMemoryFootprint()
-        virtual size_t getVideoMemoryFootprint() const;
 
         /**
          * Renders this GeometryData.
@@ -79,39 +97,61 @@ namespace campvis {
         virtual tgt::Bounds getWorldBounds() const = 0;
 
         /**
-         * Creates the OpenGL VBOs and the VAO for this geometry.
-         * Must be called from a valid OpenGL context.
-         * \note    When overwriting this method, make sure to call base class method first!
+         * Returns the Pointer to the OpenGL Buffer with the vertex positions.
+         * May be 0 if not yet created.
+         * \return  _verticesBuffer
          */
-        virtual void createGLBuffers() const;
-
         const tgt::BufferObject* getVerticesBuffer() const;
 
+        /**
+         * Returns the Pointer to the OpenGL Buffer with the vertex texture coordinates.
+         * May be 0 if none are present or not yet created.
+         * \return  _texCoordsBuffer
+         */
         const tgt::BufferObject* getTextureCoordinatesBuffer() const;
 
+        /**
+         * Returns the Pointer to the OpenGL Buffer with the vertex colors. 
+         * May be 0 if none are present or not yet created.
+         * \return  _colorsBuffer
+         */
         const tgt::BufferObject* getColorsBuffer() const;
 
+        /**
+         * Returns the Pointer to the OpenGL Buffer with the vertex normals.
+         * May be 0 if none are present or not yet created.
+         * \return  _normalsBuffer
+         */
         const tgt::BufferObject* getNormalsBuffer() const;
 
-    protected:
-        // mutable to support const lazy initialization
-        mutable bool _buffersInitialized;
+        /// \see AbstractData::getVideoMemoryFootprint()
+        virtual size_t getVideoMemoryFootprint() const;
 
-        enum { NUM_BUFFERS = 4 };
+    protected:
+        /**
+         * Deletes all OpenGL BufferObjects.
+         */
+        void deleteBuffers() const;
+
+        // mutable to support const lazy initialization
+        mutable bool _buffersDirty;             ///< Flag whether the buffers are dirty (i.e. need to be (re)initialized)
+
+        enum { NUM_BUFFERS = 4 };               ///< Number of buffers in _buffers array
 
         union {
             struct {
-                mutable tgt::BufferObject* _verticesBuffer;
-                mutable tgt::BufferObject* _texCoordsBuffer;
-                mutable tgt::BufferObject* _colorsBuffer;
-                mutable tgt::BufferObject* _normalsBuffer;
+                mutable tgt::BufferObject* _verticesBuffer;     ///< Pointer to the OpenGL Buffer with the vertex positions
+                mutable tgt::BufferObject* _texCoordsBuffer;    ///< Pointer to the OpenGL Buffer with the vertex texture coordinates
+                mutable tgt::BufferObject* _colorsBuffer;       ///< Pointer to the OpenGL Buffer with the vertex colors
+                mutable tgt::BufferObject* _normalsBuffer;      ///< Pointer to the OpenGL Buffer with the vertex normals
             };
 
-            mutable tgt::BufferObject* _buffers[NUM_BUFFERS];
+            mutable tgt::BufferObject* _buffers[NUM_BUFFERS];   ///< Array of all buffers
         };
 
     private:
-        mutable tgt::GLCanvas* _context;        ///< OpenGL context the buffers were created in (so that they can be deleted correctly)
+
+        static const std::string loggerCat_;
     };
 
 }

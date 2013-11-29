@@ -43,13 +43,14 @@ namespace campvis {
     }
 
     AbstractProperty::~AbstractProperty() {
+
     }
 
-    const std::string& AbstractProperty::getName() {
+    const std::string& AbstractProperty::getName() const {
         return _name;
     }
 
-    const std::string& AbstractProperty::getTitle() {
+    const std::string& AbstractProperty::getTitle() const {
         return _title;
     }
 
@@ -57,12 +58,13 @@ namespace campvis {
         return _invalidationLevel;
     }
 
-    void AbstractProperty::setInvalidationLevel(AbstractProcessor::InvalidationLevel il) {
+    void AbstractProperty::setInvalidationLevel(int il) {
         _invalidationLevel = il;
     }
 
     void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
         tgtAssert(prop != 0, "Shared property must not be 0!");
+        tgtAssert(prop != this, "Shared property must not be this!");
         tgtAssert(typeid(this) == typeid(prop), "Shared property must be of the same type as this property.");
 
         tbb::spin_mutex::scoped_lock lock(_localMutex);

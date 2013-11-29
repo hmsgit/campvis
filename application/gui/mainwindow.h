@@ -50,6 +50,7 @@
 namespace campvis {
     class DataContainerInspectorWidget;
     class DataContainerInspectorCanvas;
+    class MdiDockableWindow;
 
     /**
      * Main Window for the CAMPVis application.
@@ -141,11 +142,15 @@ namespace campvis {
          */
         void onDataContainersChanged();
 
-
         /**
          * Setup Qt GUI stuff
          */
         void setup();
+
+        /**
+         * Create and populate the application's main menu.
+         */
+        void populateMainMenu();
 
         /**
          * Adds a widget to the top docking area of the main window.
@@ -172,7 +177,7 @@ namespace campvis {
         QScrollArea* _pipelinePropertiesScrollArea;         ///< Scroll area for _pipelinePropertiesWidget
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for brosing the PropertyCollection of the selected pipeline/processor
         DataContainerInspectorWidget* _dcInspectorWidget;   ///< Widget for inspecting the DataContainer of the selected pipeline.
-        QDockWidget* _dcInspectorDock;                      ///< Dock storing the above DataContainerInspectorWidget instance.
+        MdiDockableWindow* _dcInspectorWindow;              ///< Window displaying the above DataContainerInspectorWidget instance.
 
         QPushButton* _btnExecute;                           ///< Button to execute the selected pipeline/processor
         QPushButton* _btnShowDataContainerInspector;        ///< Button to show the DataContainerInspector for the selected pipeline

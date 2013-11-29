@@ -25,17 +25,123 @@ ENDMACRO(WRITE_PIPELINE_REGISTRATION)
 
 MACRO(PARSE_HEADER_FOR_PIPELINE FileName)
     FILE(READ ${FileName} content)
-    
+
+    # Build a regex matching pipeline declarations and extracting their names
+    SET(NameRegex "[A-Za-z0-9_]+")
+    SET(FullyQualifiedNameRegex "(::)?(${NameRegex}::)*${NameRegex}")
+    SET(BaseClassListRegex "((public|private|protected)( virtual)? ${FullyQualifiedNameRegex}, )*")
+    SET(ClassRegex "class (${NameRegex}) ?: ${BaseClassListRegex}public ${FullyQualifiedNameRegex}Pipeline")
+
     # Find all class definitions inheriting from a Pipeline
-    STRING(REGEX MATCHALL "class ([A-Za-z0-9_]+) : public [A-Za-z0-9_]+Pipeline {" matches ${content})
+    STRING(REGEX MATCHALL ${ClassRegex} matches ${content})
     
     FOREACH(m ${matches})
         # Extract class name and register
-        STRING(REGEX REPLACE "(class )([A-Za-z0-9_]+)( : public [A-Za-z0-9_]+Pipeline {)" "\\2" RESULT ${m})
+        STRING(REGEX REPLACE ${ClassRegex} "\\1" RESULT ${m})
         ADD_PIPELINE_REGISTRATION(${FileName} ${RESULT})
     ENDFOREACH()
 ENDMACRO(PARSE_HEADER_FOR_PIPELINE)
 
+MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
+    STRING(TOUPPER ${ModuleDirectory} ModuleDirectoryUpper)
+    
+    LIST(APPEND CampvisEnabledModules ${ModuleDirectory})
+    SET(ThisModDir ${ModulesDir}/${ModuleDirectory})
+
+    # load .cmake file
+    INCLUDE(${ModuleListFile})
+
+    # merge module settings into global settings
+    LIST(APPEND CampvisModulesDefinitions ${ThisModDefinitions})
+    LIST(APPEND CampvisModulesIncludeDirs ${ThisModIncludeDirs})
+    LIST(APPEND CampvisModulesExternalLibs ${ThisModExternalLibs})
+    LIST(APPEND CampvisModulesLinkDirectories ${ThisModLinkDirectories})
+    LIST(APPEND CampvisModulesSources ${ThisModSources})
+    LIST(APPEND CampvisModulesHeaders ${ThisModHeaders})
+    LIST(APPEND CampvisModulesCoreSources ${ThisModCoreSources})
+    LIST(APPEND CampvisModulesCoreHeaders ${ThisModCoreHeaders})
+    LIST(APPEND CampvisExternalDllsDebug ${ThisModExternalDllsDebug})
+    LIST(APPEND CampvisExternalDllsRelease ${ThisModExternalDllsRelease})
+
+    # save dependencies in a variable to resolve them later
+    SET(${ModuleDirectory}ModDependencies ${ThisModDependencies})
+
+    # add shader directory to deployment list
+    LIST(APPEND CampvisShaderDirectories ${ThisModShaderDirectories})
+
+    # add definition that this module is activated
+    LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModuleDirectoryUpper})
+
+    # parse all header files for pipeline classes to add them to the pipeline registration
+    FOREACH(HeaderFile ${ThisModHeaders})
+        PARSE_HEADER_FOR_PIPELINE("modules/${HeaderFile}")
+    ENDFOREACH()
+
+    # unset module settings to avoid duplicates if module cmake file misses sth.
+    UNSET(ThisModDefinitions)
+    UNSET(ThisModIncludeDirs)
+    UNSET(ThisModExternalLibs)
+    UNSET(ThisModLinkDirectories)
+    UNSET(ThisModSources)
+    UNSET(ThisModHeaders)
+    UNSET(ThisModCoreSources)
+    UNSET(ThisModCoreHeaders)
+    UNSET(ThisModExternalDllsDebug)
+    UNSET(ThisModExternalDllsRelease)
+    UNSET(ThisModShaderDirectories)
+    UNSET(ThisModDependencies)
+ENDMACRO(INCLUDE_MODULE)
+
+MACRO(RESOLVE_MODULE_DEPENDENCIES)
+    # Iterate over all enabled modules and their dependencies.
+    # A WHILE loop is used here because FOREACH doesn't see changes to the list it processes.
+    # As a result, transitive dependencies would require several CMake runs to be resolved.
+    WHILE(CampvisEnabledModules)
+        LIST(GET CampvisEnabledModules 0 Mod)
+        LIST(REMOVE_AT CampvisEnabledModules 0)
+
+        FOREACH(Dep ${${Mod}ModDependencies})
+            # Check if the dependency exists
+            LIST(FIND CampvisModules ${Dep} DepExists)
+            STRING(TOUPPER ${Dep} DepUpper)
+
+            IF(DepExists EQUAL -1)
+                MESSAGE(WARNING "Dependency '${Dep}' of module '${Mod}' not found!")
+            ELSEIF(NOT CAMPVIS_BUILD_MODULE_${DepUpper})
+                # Enable the dependency if required
+                MESSAGE(STATUS "Enabling module '${Dep}' (required by '${Mod}')")
+                SET(CAMPVIS_BUILD_MODULE_${DepUpper} ON CACHE BOOL "Build module ${Dep} (required by ${Mod})" FORCE)
+                SET(ModFile ${ModulesDir}/${Dep}/${Dep}.cmake)
+                INCLUDE_MODULE(${Dep} ${ModFile})
+            ENDIF(DepExists EQUAL -1)
+        ENDFOREACH(Dep ${${Mod}ModDependencies})
+
+        UNSET(${Mod}ModDependencies)
+    ENDWHILE(CampvisEnabledModules)
+ENDMACRO(RESOLVE_MODULE_DEPENDENCIES)
+
+MACRO(SET_DEFAULT_MODULES DefaultModules)
+    # Only enable default modules on the first CMake run
+    IF(NOT DEFAULT_CAMPVIS_MODULES_SET)
+        FOREACH(Mod ${DefaultModules})
+            # Check if the module exists
+            LIST(FIND CampvisModules ${Mod} ModExists)
+            STRING(TOUPPER ${Mod} ModUpper)
+
+            IF(ModExists EQUAL -1)
+                MESSAGE(WARNING "Default module '${Mod}' not found!")
+            ELSEIF(NOT CAMPVIS_BUILD_MODULE_${ModUpper})
+                # Enable the module if required
+                MESSAGE(STATUS "Enabling default module '${Mod}'")
+                SET(CAMPVIS_BUILD_MODULE_${ModUpper} ON CACHE BOOL "Build default module ${Mod}" FORCE)
+                SET(ModFile ${ModulesDir}/${Mod}/${Mod}.cmake)
+                INCLUDE_MODULE(${Mod} ${ModFile})
+            ENDIF(ModExists EQUAL -1)
+        ENDFOREACH(Mod ${DefaultModules})
+    ENDIF(NOT DEFAULT_CAMPVIS_MODULES_SET)
+
+    SET(DEFAULT_CAMPVIS_MODULES_SET 1 CACHE INTERNAL "")
+ENDMACRO(SET_DEFAULT_MODULES DefaultModules)
 
 # copy and pasted from Voreen...
 

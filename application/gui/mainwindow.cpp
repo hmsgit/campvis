@@ -33,6 +33,7 @@
 #include "application/campvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
+#include "application/gui/mdi/mdidockablewindow.h"
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/pipeline/abstractpipeline.h"
@@ -40,7 +41,6 @@
 #include "core/tools/stringutils.h"
 #include "modules/pipelinefactory.h"
 
-#include <QMdiSubWindow>
 #include <QScrollBar>
 
 
@@ -56,7 +56,7 @@ namespace campvis {
         , _pipelineWidget(0)
         , _propCollectionWidget(0)
         , _dcInspectorWidget(0)
-        , _dcInspectorDock(0)
+        , _dcInspectorWindow(0)
         , _btnExecute(0)
         , _btnShowDataContainerInspector(0)
         , _selectedPipeline(0)
@@ -136,6 +136,7 @@ namespace campvis {
         ui.logViewerDock->setWidget(_logViewer);
 
         _dcInspectorWidget = new DataContainerInspectorWidget();
+        this->populateMainMenu();
 
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
@@ -158,6 +159,24 @@ namespace campvis {
 
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
         _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
+    }
+
+    void MainWindow::populateMainMenu() {
+        // Populate the file menu
+        QMenuBar* menuBar = this->menuBar();
+        QMenu* fileMenu = menuBar->addMenu(tr("&File"));
+        fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()), QKeySequence(Qt::CTRL + Qt::Key_Q));
+
+        // Populate the visualizations menu
+        QMenu* visualizationsMenu = _mdiArea->menu();
+        visualizationsMenu->setTitle(tr("&Visualizations"));
+        menuBar->addMenu(visualizationsMenu);
+
+        // Populate the tools menu
+        QMenu* toolsMenu = menuBar->addMenu(tr("&Tools"));
+        toolsMenu->addAction(ui.pipelineTreeDock->toggleViewAction());
+        toolsMenu->addAction(ui.pipelinePropertiesDock->toggleViewAction());
+        toolsMenu->addAction(ui.logViewerDock->toggleViewAction());
     }
 
     bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
@@ -232,15 +251,14 @@ namespace campvis {
 
     void MainWindow::onBtnShowDataContainerInspectorClicked() {
         if (_selectedPipeline != 0) {
-            if (_dcInspectorDock == 0) {
-                _dcInspectorDock = dockPrimaryWidget("Data Container inspector", _dcInspectorWidget);
-            } else {
-                // Activate the dock's tab
-                _dcInspectorDock->setVisible(true);
-                _dcInspectorDock->raise();
+            if (_dcInspectorWindow == 0) {
+                _dcInspectorWindow = _mdiArea->addWidget(_dcInspectorWidget);
+                _dcInspectorWindow->setWindowTitle(tr("Data Container Inspector"));
             }
 
             _dcInspectorWidget->setDataContainer(&(_selectedPipeline->getDataContainer()));
+            _dcInspectorWindow->show();
+            _dcInspectorWindow->activateWindow();
         }
     }
 
@@ -259,9 +277,10 @@ namespace campvis {
     }
 
     void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
-        QMdiSubWindow* mdiSubWindow = _mdiArea->addSubWindow(canvas);
+        MdiDockableWindow* dockableWindow = _mdiArea->addWidget(canvas);
         const QString& windowTitle = QString::fromStdString(name);
-        mdiSubWindow->setWindowTitle(windowTitle);
+        dockableWindow->setWindowTitle(windowTitle);
+        dockableWindow->show();
     }
 
     QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {

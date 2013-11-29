@@ -65,11 +65,24 @@ namespace campvis {
             const std::vector<tgt::vec4>& colors = std::vector<tgt::vec4>(),
             const std::vector<tgt::vec3>& normals = std::vector<tgt::vec3>()
             );
+        
+        /**
+         * Copy constructor
+         * \param   rhs IndexedMeshGeometry to copy
+         */
+        IndexedMeshGeometry(const IndexedMeshGeometry& rhs);
 
         /**
          * Destructor, deletes VBOs/VAO if necessary. Hence, needs a valid OpenGL context
          */
         virtual ~IndexedMeshGeometry();
+        
+        /**
+         * Assignment operator.
+         * \param   rhs IndexedMeshGeometry to assign to this.
+         * \return  *this after assignment
+         */
+        IndexedMeshGeometry& operator=(const IndexedMeshGeometry& rhs);
 
         /// \see AbstractData::clone()
         virtual IndexedMeshGeometry* clone() const;
@@ -87,16 +100,18 @@ namespace campvis {
          */
         virtual void render(GLenum mode) const;
 
-        /**
-         * Creates the OpenGL VBOs and the VAO for this face's geometry.
-         * Must be called from a valid OpenGL context.
-         */
-        virtual void createGLBuffers() const;
-
         /// \see GeometryData::getWorldBounds
         virtual tgt::Bounds getWorldBounds() const;
 
     protected:
+        /**
+         * Creates the OpenGL VBOs and the VAO for this face's geometry.
+         * Must be called from a valid OpenGL context.
+         */
+        void createGLBuffers() const;
+
+        /// Deletes the OpenGL BufferObject for the indices.
+        void deleteIndicesBuffer() const;
 
         std::vector<uint16_t> _indices;                 ///< Index list defining the faces
         std::vector<tgt::vec3> _vertices;               ///< The list of the vertex positions of the face.

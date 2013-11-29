@@ -48,7 +48,7 @@ namespace campvis {
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , p_camera("camera", "Camera")
         , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(256))
-        , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", .5f, .1f, 1.f)
+        , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", 1.f, 0.f, 1.f)
         , p_samplingRate("SamplingRate", "Sampling Rate", 2.f, 0.1f, 10.f, 0.1f)
         , _fragmentShaderFilename(fragmentShaderFileName)
         , _shader(0)

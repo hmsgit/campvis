@@ -3,6 +3,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 #INCLUDE(../cmake/commonconf.cmake)
 
 MESSAGE(STATUS "Configuring Campvis Modules")
+SET_DEFAULT_MODULES("vis")
+RESOLVE_MODULE_DEPENDENCIES()
 WRITE_PIPELINE_REGISTRATION("gen_pipelineregistration.h")
 
 LIST(APPEND CampvisModulesHeaders

@@ -150,6 +150,11 @@ namespace campvis {
         const tgt::Bounds& getSceneBounds() const;
 
         /**
+         * Returns the trackball of the event handler.
+         */
+        tgt::Trackball* getTrackball();
+
+        /**
          * Adds \a vp to the list of LQ mode processors.
          * During interaction, TrackballNavigationEventListener will set the LQ mode flag of all
          * LQ mode processors.
@@ -173,6 +178,7 @@ namespace campvis {
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
         IVec2Property* _viewportSizeProp;       ///< Pointer to the property defining the viewport size
         CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
+
         tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
         tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
 

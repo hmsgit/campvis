@@ -210,8 +210,8 @@ namespace campvis {
         }
 
         tgt::VertexArrayObject vao;
-        vao.addVertexAttribute(tgt::VertexArrayObject::VerticesAttribute, _vertexBuffer);
-        vao.addVertexAttribute(tgt::VertexArrayObject::NormalsAttribute, _tangentBuffer);
+        vao.setVertexAttributePointer(0, _vertexBuffer);
+        vao.setVertexAttributePointer(1, _tangentBuffer);
         LGL_ERROR;
 
         glMultiDrawArrays(mode, _vboFiberStartIndices, _vboFiberCounts, _vboFiberArraySize);

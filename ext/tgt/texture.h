@@ -142,6 +142,14 @@ public:
     }
 
     /**
+     * unbind the current texture from the active texture unit and target.
+     */
+    void unbind() const
+    {
+        glBindTexture(type_, 0);
+    }
+
+    /**
      * Enable texturing on the active texture unit.
      */
     void enable() const
@@ -390,7 +398,9 @@ public:
 
     ///Return texel as tgt::Color (slow!), downloadTexture() needs to be called first
     tgt::Color texelAsFloat(size_t x, size_t y) const;
+    float depthAsFloat(size_t x, size_t y) const;
     tgt::Color texelAsFloat(tgt::svec2 p) const { return texelAsFloat(p.x, p.y); }
+    float depthAsFloat(tgt::svec2 p) const { return depthAsFloat(p.x, p.y); }
 protected:
     tgt::ivec3 dimensions_;
     GLint format_;          ///< GL_RGB...

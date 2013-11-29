@@ -64,7 +64,7 @@ public:
 
     GLuint getId() const { return id_; };
 
-    Texture *const *const getAttachments() const;
+    Texture* const * getAttachments() const;
 
     size_t getNumColorAttachments() const;
 

@@ -53,7 +53,6 @@ namespace campvis {
         , _raycaster(viewportSizeProp)
     {
         addProperty(&p_inputVolume);
-//         addProperty(&p_camera);
         addProperty(&_raycaster.p_transferFunction);
         addProperty(&p_outputImage);
 
@@ -90,6 +89,7 @@ namespace campvis {
 
         p_outputImage.addSharedProperty(&_raycaster.p_targetImageID);
 
+        p_inputVolume.s_changed.connect(this, &VolumeRenderer::onPropertyChanged);
     }
 
     VolumeRenderer::~VolumeRenderer() {
@@ -117,10 +117,6 @@ namespace campvis {
         _pgGenerator.deinit();
         _eepGenerator.deinit();
         _raycaster.deinit();
-
-        removeProperty(&_raycaster.p_transferFunction);
-        removeProperty(&_raycaster.p_samplingRate);
-        removeProperty(_raycaster.getProperty("CentralDifferences"));
 
         VisualizationProcessor::deinit();
     }
@@ -166,6 +162,9 @@ namespace campvis {
 
             _eepGenerator.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
             _raycaster.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
+        }
+        else if (prop == &p_inputVolume) {
+            invalidate(AbstractProcessor::INVALID_RESULT | PG_INVALID);
         }
         VisualizationProcessor::onPropertyChanged(prop);
     }

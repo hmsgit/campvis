@@ -48,13 +48,16 @@ namespace campvis {
      * 
      * \note    This class expects all vertices lying within one plane. Everything other that that
      *          leads to undefined behavior.
-     * \note    Like all Geometry classes FaceGeometry has value-sematics: Once created, the 
-     *          vertices/colors/etc. cannot be altered anymore.
      */
     class FaceGeometry : public GeometryData {
     public:
         /**
-         * Creates a new FaceGeometry.
+         * Creates a new empty FaceGeometry.
+         */
+        explicit FaceGeometry();
+
+        /**
+         * Creates a new FaceGeometry initialized from the given data.
          * \param   vertices            The list of the vertex positions of the face.
          * \param   textureCoordinates  The list of vertex texture coordinates, may be empty.
          * \param   colors              The list of vertex colors, may be empty.
@@ -68,7 +71,7 @@ namespace campvis {
             );
 
         /**
-         * Destructor, deletes VBOs/VAO if necessary. Hence, needs a valid OpenGL context
+         * Destructor, deletes VBOs/VAO if necessary.
          */
         virtual ~FaceGeometry();
 
@@ -131,18 +134,18 @@ namespace campvis {
          * \param   mode    OpenGL rendering mode for this face
          */
         virtual void render(GLenum mode) const;
-
-        /**
-         * Creates the OpenGL VBOs and the VAO for this face's geometry.
-         * Must be called from a valid OpenGL context.
-         */
-        virtual void createGLBuffers() const;
                 
         /// \see GeometryData::getWorldBounds
         virtual tgt::Bounds getWorldBounds() const;
 
 
     protected:
+        /**
+         * Creates the OpenGL VBOs and the VAO for this face's geometry.
+         * Must be called from a valid OpenGL context.
+         */
+        void createGLBuffers() const;
+
         std::vector<tgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
         std::vector<tgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
         std::vector<tgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.

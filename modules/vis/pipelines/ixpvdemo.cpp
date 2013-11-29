@@ -199,7 +199,6 @@ namespace campvis {
 
                 // update camera
                 tgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
-                tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
 
                 _trackballHandler->setSceneBounds(volumeExtent);
                 _trackballHandler->setCenter(volumeExtent.center());

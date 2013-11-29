@@ -65,6 +65,13 @@ namespace tgt {
             const ivec2& size = ivec2(GLCanvas::DEFAULT_WINDOW_WIDTH, GLCanvas::DEFAULT_WINDOW_HEIGHT),
             const GLCanvas::Buffers buffers = GLCanvas::RGBADD,
             bool shared = true) = 0;
+
+
+        /**
+         * Removes the OpenGL context \a context from the list of managed contexts.
+         * \param   context Context to remove.
+         */
+        virtual void removeContext(GLCanvas* context);
         
         /**
          * Returns the OpenGL context with the given key \a key, 0 if no such context exists.
@@ -109,7 +116,9 @@ namespace tgt {
 
         std::map<std::string, GLCanvas*> _contexts;  ///< Map of all OpenGL contexts
         GLCanvas* _currentContext;                   ///< Current active OpenGL context
-        tbb::mutex _glMutex;                                ///< Mutex protecting OpenGL for multi-threaded access
+        tbb::mutex _glMutex;                         ///< Mutex protecting OpenGL for multi-threaded access
+
+        tbb::mutex _localMutex;                      ///< local mutex to prodect _contexts
 
         static GlContextManager* singletonClass_;
     };

@@ -46,7 +46,7 @@ namespace campvis {
      * \todo    Add PropertyWidgets, add clone()?
      *          Think about a reasonable locking mechanism and implement that
      */
-    class AbstractProperty {
+    class AbstractProperty : public sigslot::has_slots<> {
     public:
         /**
          * Creates a new AbstractProperty
@@ -78,13 +78,13 @@ namespace campvis {
          * Returns the property name.
          * \return  _name
          */
-        const std::string& getName();
+        const std::string& getName() const;
 
         /**
          * Returns the property title (e.g. used for GUI).
          * \return  _title
          */
-        const std::string& getTitle();
+        const std::string& getTitle() const;
 
         /**
          * Returns the invalidation level that this property triggers.
@@ -96,7 +96,7 @@ namespace campvis {
          * Sets the invalidation level that this property triggers.
          * \param il    New invalidation level that this property triggers.
          */
-        void setInvalidationLevel(AbstractProcessor::InvalidationLevel il);
+        void setInvalidationLevel(int il);
 
         /**
          * Returns whether this proberty shall be visible in the GUI.

@@ -37,7 +37,7 @@
 namespace campvis {
 
     MdiFloatingWindow::MdiFloatingWindow(QWidget* widget, QWidget* parent /*= 0*/)
-        : QWidget(parent)
+        : QWidget(parent, Qt::Tool)
         , _widget(widget)
         , _dragActive(false)
     {
@@ -49,7 +49,7 @@ namespace campvis {
     }
 
     void MdiFloatingWindow::forceWindowDrag() {
-        if (!_dragActive && parent() == 0) {
+        if (!_dragActive) {
             _dragActive = true;
             this->snapToCursor(QCursor::pos());
             grabMouse();
@@ -63,12 +63,15 @@ namespace campvis {
         }
     }
 
-    QWidget* MdiFloatingWindow::widget() {
+    QWidget* MdiFloatingWindow::widget() const {
         return _widget;
     }
 
     void MdiFloatingWindow::mouseMoveEvent(QMouseEvent* event) {
-        this->snapToCursor(event->globalPos());
+        if (_dragActive)
+            this->snapToCursor(event->globalPos());
+        else
+            QWidget::mouseMoveEvent(event);
     }
 
     void MdiFloatingWindow::mouseReleaseEvent(QMouseEvent* event) {
@@ -78,7 +81,7 @@ namespace campvis {
     }
 
     void MdiFloatingWindow::moveEvent(QMoveEvent* /*event*/) {
-        emit s_positionChanged(this, frameGeometry().topLeft());
+        emit s_positionChanged(frameGeometry().topLeft());
     }
 
     void MdiFloatingWindow::snapToCursor(const QPoint& cursorPos) {
@@ -86,6 +89,10 @@ namespace campvis {
         int y = cursorPos.y() - this->style()->pixelMetric(QStyle::PM_TitleBarHeight) / 2;
 
         this->move(x, y);
+    }
+
+    void MdiFloatingWindow::closeEvent(QCloseEvent* /*event*/) {
+        emit s_closed();
     }
 
 }

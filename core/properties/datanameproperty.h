@@ -38,6 +38,10 @@
 
 namespace campvis {
 
+    /**
+     * Specialization of a StringProperty to specify the keys (string IDs) for DataHandles to read/write.
+     * Offers an additional DataAccessInfo flag whether processor will read or write from/to that ID.
+     */
     class DataNameProperty : public GenericProperty<std::string> {
     public:
         /**
@@ -65,23 +69,7 @@ namespace campvis {
 
 
         /**
-<<<<<<< HEAD
-         * Connects this property with the given DataNameProperty \a reader.
-         * \param   reader  DataNameProperty to connect to, must be have read access.
-         */
-        void connect(DataNameProperty* reader);
-
-        /**
-         * Disconnects this property from the given DataNameProperty \a reader.
-         * \param   reader  DataNameProperty to disconnect from, must be have read access.
-         */
-        void disconnect(DataNameProperty* reader);
-
-        /**
-         * Returns the access info of this property defining whether processor will read or write.
-=======
          * Returns the access info of this property defining whether component will read or write.
->>>>>>> c4c5899... Refactored DataNameProperty: Got rid of issueWrite() and connect(). Automatic invalidation of connected (shared) DataNameProperties is now delegated to AutoEvaluationPipeline.
          * \return  _accessInfo
          */
         DataAccessInfo getAccessInfo() const;

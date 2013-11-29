@@ -6,36 +6,10 @@
 
 namespace tgt {
 
-    const std::string VertexAttribute::loggerCat_ = "tgt.VertexAttribute";
-
-    VertexAttribute::VertexAttribute(GLuint index, BufferObject* bufferObject, GLsizei stride, size_t offset)
-        : _index(index)
-        , _stride(stride)
-        , _offset(offset)
-        , _bufferObject(bufferObject)
-    {
-        tgtAssert(_bufferObject != 0, "BufferObject must not be 0.");
-
-        _bufferObject->bindToVertexAttribute(this);
-        // Todo: implement normalized flag if needed
-        _bufferObject->bind();
-        glVertexAttribPointer(_index, static_cast<GLint>(_bufferObject->getElementSize()), _bufferObject->getBaseType(), false, _stride, reinterpret_cast<void*>(_offset));
-    }
-
-    VertexAttribute::~VertexAttribute() {
-        _bufferObject->unbindFromVertexAttribute(this);
-    }
-
-// ================================================================================================
-
-    size_t VertexArrayObject::_currentlyBoundVertexArray = 0;
-    bool VertexArrayObject::_initialized = true;
-
     const std::string VertexArrayObject::loggerCat_ = "tgt.VertexArrayObject";
 
     VertexArrayObject::VertexArrayObject(bool autoBind) throw (tgt::Exception)
         : _id(0)
-        , _enabledAttributes(16, false)
     {
         glGenVertexArrays(1, &_id);
         if (_id == 0) {
@@ -51,23 +25,11 @@ namespace tgt {
     }
 
     void VertexArrayObject::bind() {
-        if (!_initialized)
-            initStaticMembers();
-
-        //if (_currentlyBoundVertexArray != _id) {
-            glBindVertexArray(_id);
-//             _currentlyBoundVertexArray = _id;
-//         }
+        glBindVertexArray(_id);
     }
 
     void VertexArrayObject::unbind() {
-        if (!_initialized)
-            initStaticMembers();
-
-//        if (_currentlyBoundVertexArray != 0) {
-            glBindVertexArray(0);
-//             _currentlyBoundVertexArray = 0;
-//         }
+        glBindVertexArray(0);
     }
 
     void VertexArrayObject::bindIndexBuffer(BufferObject* bufferObject) {
@@ -77,88 +39,45 @@ namespace tgt {
         bufferObject->bind();
     }
 
-    size_t VertexArrayObject::addVertexAttribute(AttributeType attributeType, BufferObject* bufferObject, GLsizei stride /*= 0*/, size_t offset /*= 0*/, bool enableNow /*= true*/) {
-        if (_attributes.size() > 16) {
-            // TODO:    The better way would be to check glGet(GL_MAX_VERTEX_ATTRIBS), but the standard says 16 is the minimum
-            //          number to be supported and that should be enough and I currently feel lazy. If you're reading this, 
-            //          feel free to improve this check...
-            LERROR("Could not add VertexAttribute: Tried to add more Vertex Attributes than supported.");
-            return 0;
-        }
+    void VertexArrayObject::setVertexAttributePointer(GLuint location, BufferObject* bufferObject, GLsizei stride /*= 0*/, size_t offset /*= 0*/, bool enableNow /*= true*/) {
+        tgtAssert(bufferObject != 0, "Pointer to buffer object must not be 0.");
+        tgtAssert(bufferObject->getTargetType() == BufferObject::ARRAY_BUFFER, "Buffer must be bound to the ARRAY_BUFFER target!");
 
-        tgtAssert(
-            attributeType != UnspecifiedAttribute || _attributeTypeMap.find(attributeType) != _attributeTypeMap.end(), 
-            "Tried to add two VertexAttributes with the same type. This is currently not supported.");
-
-        // bind and create VertexAttribute
+        // Todo: implement normalized flag if needed
         bind();
-        size_t index = _attributes.size();
-        _attributes.push_back(VertexAttribute(static_cast<GLuint>(index), bufferObject, stride, offset));
-
-        // add to attribute-type map
-        if (attributeType != UnspecifiedAttribute)
-            _attributeTypeMap.insert(std::make_pair(attributeType, index));
+        bufferObject->bind();
+        glVertexAttribPointer(location, static_cast<GLint>(bufferObject->getElementSize()), bufferObject->getBaseType(), false, stride, reinterpret_cast<void*>(offset));
+        _locationMap.insert(std::make_pair(bufferObject, location));
 
         // enable if wanted
         if (enableNow)
-            enableVertexAttribute(index);
-
-        return index;
+            enableVertexAttribute(location);
     }
 
-    void VertexArrayObject::updateVertexAttribute(size_t index, BufferObject* bufferObject, GLsizei stride /*= 0*/, size_t offset /*= 0*/) {
-        tgtAssert(index < _attributes.size(), "Index out of bounds.");
-
+    void VertexArrayObject::enableVertexAttribute(GLuint location) {
         bind();
-        _attributes[index] = VertexAttribute(static_cast<GLuint>(index), bufferObject, stride, offset);
+        glEnableVertexAttribArray(location);
     }
 
-    void VertexArrayObject::enableVertexAttribute(size_t index) {
-        tgtAssert(index < _enabledAttributes.size(), "Index out of bounds.");
+    void VertexArrayObject::enableVertexAttribute(BufferObject* bufferObject) {
+        std::map<BufferObject*, GLuint>::const_iterator it = _locationMap.find(bufferObject);
+        if (it != _locationMap.end())
+            enableVertexAttribute(it->second);
+        else
+            tgtAssert(false, "Could not find Vertex Attribute location for this BufferObject. You have to add it first using setVertexAttributePointer()!");
+    }
 
+    void VertexArrayObject::disableVertexAttribute(GLuint location) {
         bind();
-        glEnableVertexAttribArray(static_cast<GLuint>(index));
-        _enabledAttributes[index] = true;
+        glDisableVertexAttribArray(location);
     }
 
-    void VertexArrayObject::enableAllVertexAttributes() {
-        for (size_t i = 0; i < _attributes.size(); ++i)
-            enableVertexAttribute(i);
+    void VertexArrayObject::disableVertexAttribute(BufferObject* bufferObject) {
+        std::map<BufferObject*, GLuint>::const_iterator it = _locationMap.find(bufferObject);
+        if (it != _locationMap.end())
+            disableVertexAttribute(it->second);
+        else
+            tgtAssert(false, "Could not find Vertex Attribute location for this BufferObject. You have to add it first using setVertexAttributePointer()!");
     }
-
-    void VertexArrayObject::disableVertexAttribute(size_t index) {
-        tgtAssert(index < _enabledAttributes.size(), "Index out of bounds.");
-
-        bind();
-        glDisableVertexAttribArray(static_cast<GLuint>(index));
-        _enabledAttributes[index] = false;
-    }
-
-    void VertexArrayObject::disableAllVertexAttributes() {
-        for (size_t i = 0; i < _attributes.size(); ++i)
-            disableVertexAttribute(i);
-    }
-
-    void VertexArrayObject::initStaticMembers() {
-        // TODO:    The better way would be to us glGet(GL_MAX_VERTEX_ATTRIBS) as dimension, but the standard says 16 
-        //          is the minimum number to be supported and that should be enough and I currently feel lazy. If 
-        //          you're reading this, feel free to improve this allocation...
-        _currentlyBoundVertexArray = 0;
-        _initialized = true;
-    }
-
-    size_t VertexArrayObject::getVertexAttributeIndexByType(AttributeType type) const {
-        tgtAssert(type != UnspecifiedAttribute, "Type most not be UnspecifiedAttribute, those attributes are not tracked.");
-
-        std::map<AttributeType, size_t>::const_iterator it = _attributeTypeMap.find(type);
-        if (it == _attributeTypeMap.end()) {
-            tgtAssert(false, "Could not find a VertexAttribute with the given type. Returning 0 as default value.");
-            LERROR("Could not find a VertexAttribute with the given type. Returning 0 as default value.");
-            return 0;
-        }
-        return it->second;
-    }
-
-
 
 }

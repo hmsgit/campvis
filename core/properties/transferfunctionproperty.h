@@ -39,7 +39,7 @@ namespace campvis {
     /**
      * \todo    Implement correct behavior if the TF changes during locked property state.
      */
-    class TransferFunctionProperty : public AbstractProperty, public sigslot::has_slots<> {
+    class TransferFunctionProperty : public AbstractProperty {
     public:
         /**
          * Creates a new TransferFunctionProperty

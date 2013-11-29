@@ -64,6 +64,9 @@ namespace campvis {
                     if (data != 0) {
                         representation = data->getRepresentation<T>();
                     }
+                    if (data == 0 || representation == 0) {
+                        dh = DataHandle(0);
+                    }
                 }
             };
 
@@ -80,6 +83,9 @@ namespace campvis {
                     data = dynamic_cast<const ImageData*>(dh.getData());
                     if (data != 0) {
                         representation = data->getRepresentation<T>();
+                    }
+                    if (data == 0 || representation == 0) {
+                        dh = DataHandle(0);
                     }
                 }
             };
