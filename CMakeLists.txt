@@ -18,10 +18,10 @@ OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                        
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
 OPTION(CAMPVIS_BUILD_LIB_KISSCL     "Build KissCL Library"                                          OFF)
-OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   ON)
+OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   OFF)
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
-OPTION(CAMPVIS_GROUP_SOURCE_FILES   "Group source files by directory"                               OFF)
+OPTION(CAMPVIS_GROUP_SOURCE_FILES   "Group source files by directory"                               ON)
 
 IF(WIN32)
     OPTION(CAMPVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON)

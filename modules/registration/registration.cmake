@@ -1,5 +1,12 @@
 # CMake file for registration module
 
+# add NLOPT project as external dependency
+ADD_SUBDIRECTORY(modules/registration/ext/nlopt-stripped)
+
+LIST(APPEND ThisModIncludeDirs "registration/ext/nlopt-stripped/api")
+SET(ThisModExternalLibs "nlopt")
+
+
 # Source files:
 FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 	modules/registration/pipelines/*.cpp
@@ -17,7 +24,5 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 )
 
 SET(ThisModShaderDirectories "modules/registration/glsl")
+SET(ThisModDependencies vis io)
 
-LIST(APPEND ThisModIncludeDirs "C:/Users/Christian/Documents/code/ext/nlopt-2.4/api")
-LIST(APPEND ThisModExternalLibs nlopt)
-LIST(APPEND ThisModLinkDirectories "C:/Users/Christian/Documents/code/ext/nlopt-2.4/build-x64/Debug" "C:/Users/Christian/Documents/code/ext/nlopt-2.4/build-x64/Release")

@@ -135,6 +135,8 @@ ENDIF()
  
 # minimum Qt version
 IF(CAMPVIS_BUILD_APPLICATION)
+    FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
+    INCLUDE(${QT_USE_FILE})
     SET(TGT_WITH_QT true)
     SET(CampvisRequiredQtVersion "4.8")
 ENDIF(CAMPVIS_BUILD_APPLICATION)
