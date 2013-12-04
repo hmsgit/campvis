@@ -138,9 +138,6 @@ namespace campvis {
                         LERROR("No suitable virtual mirror geometry found.");
                     }
                 }
-
-                FramebufferActivationGuard fag(this);
-                decorateRenderProlog(data, _shader);
                 
                 const tgt::Camera& cam = p_camera.getValue();
                 tgt::TextureUnit geometryDepthUnit, entryDepthUnit;
@@ -174,6 +171,8 @@ namespace campvis {
 
                 _shader->setIgnoreUniformLocationError(false);
 
+                FramebufferActivationGuard fag(this);
+                decorateRenderProlog(data, _shader);
                 glEnable(GL_CULL_FACE);
                 glEnable(GL_DEPTH_TEST);
 

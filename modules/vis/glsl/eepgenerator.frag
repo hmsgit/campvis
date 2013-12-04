@@ -57,7 +57,7 @@ void main() {
     float fragDepth = gl_FragCoord.z;
 
     if (_integrateGeometry) {
-        float geometryDepth = getElement2DNormalized(_geometryDepthTexture, _geometryDepthTexParams, fragCoordNormalized).z;
+        float geometryDepth = getElement2DNormalized(_geometryDepthTexture, _geometryDepthTexParams, fragCoordNormalized).r;
 
         if (_isEntrypoint) {
             // integrating geometry into Entrypoints
@@ -76,13 +76,13 @@ void main() {
         }
         else {
             // integrating geometry into Exitpoints
-            float entryDepth = getElement2DNormalized(_entryDepthTexture, _entryDepthTexParams, fragCoordNormalized).z;
+            float entryDepth = getElement2DNormalized(_entryDepthTexture, _entryDepthTexParams, fragCoordNormalized).r;
             float exitDepth = gl_FragCoord.z;
 
             if (geometryDepth <= entryDepth) {
                 // geometry before Entrypoint
                 out_Color = vec4(0.0);
-                fragDepth = exitDepth;
+                fragDepth = geometryDepth;
             }
             else if (geometryDepth <= exitDepth) {
                 // geometry between entrypoint and exitpoint
