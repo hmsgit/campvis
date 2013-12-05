@@ -108,6 +108,7 @@ namespace campvis {
                 break;
 #ifdef GL_DEPTH_COMPONENT32F
             case GL_DEPTH_COMPONENT32F:
+                tex = new tgt::Texture(0, getRenderTargetSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
                 break;
 #endif
 

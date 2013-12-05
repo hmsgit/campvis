@@ -102,11 +102,11 @@ namespace campvis {
 
         tgtAssert(texture->getDimensions().z == 1, "Reduction of 3D images not yet implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
 
-        std::vector<float> readBackBuffer;
         const tgt::ivec3& size = texture->getDimensions();
-        tgt::vec2 texCoordMultiplier(1.f);
+        tgt::vec2 texCoordShift = tgt::vec2(.5f) / tgt::vec2(size.xy());
         tgt::ivec2 currentSize = size.xy();
-        reduceSizes(currentSize, texCoordMultiplier);
+        reduceSizes(currentSize, texCoordShift);
+        tgt::ivec2 startSize = currentSize;
 
         // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -119,7 +119,7 @@ namespace campvis {
         for (size_t i = 0; i < 2; ++i) {
             tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
             tempTextures[i]->uploadTexture();
-            tempTextures[i]->setWrapping(tgt::Texture::CLAMP);
+            tempTextures[i]->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
         }
         size_t readTex = 0;
         size_t writeTex = 1;
@@ -133,33 +133,27 @@ namespace campvis {
         _shader->activate();
         _fbo->attachTexture(tempTextures[readTex]);
 
-        _shader->setIgnoreUniformLocationError(true);
         inputUnit.activate();
         texture->bind();
         _shader->setUniform("_texture", inputUnit.getUnitNumber());
-        _shader->setUniform("_textureParams._size", tgt::vec2(size.xy()));
-        _shader->setUniform("_textureParams._sizeRCP", tgt::vec2(1.f) / tgt::vec2(size.xy()));
-        _shader->setUniform("_textureParams._numChannels", static_cast<int>(texture->getNumChannels()));
-        _shader->setIgnoreUniformLocationError(false);
-
-        glViewport(0, 0, currentSize.x, currentSize.y);
-        _shader->setUniform("_texCoordsMultiplier", texCoordMultiplier);
+        _shader->setUniform("_texCoordsShift", texCoordShift);
+        glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
         QuadRdr.renderQuad();
         LGL_ERROR;
 
+        reduceSizes(currentSize, texCoordShift);
+        glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
+
         // perform reduction until 1x1 texture remains
         while (currentSize.x > 1 || currentSize.y > 1) {
-            reduceSizes(currentSize, texCoordMultiplier);
-
             _fbo->attachTexture(tempTextures[writeTex]);
             tempTextures[readTex]->bind();
 
-            glViewport(0, 0, currentSize.x, currentSize.y);
-            _shader->setUniform("_texCoordsMultiplier", texCoordMultiplier);
+            _shader->setUniform("_texCoordsShift", texCoordShift);
             QuadRdr.renderQuad();
             LGL_ERROR;
 
-            //_fbo->detachTexture(GL_COLOR_ATTACHMENT0);
+            reduceSizes(currentSize, texCoordShift);
             std::swap(writeTex, readTex);
         }
 
@@ -171,7 +165,7 @@ namespace campvis {
         size_t channels = tempTextures[readTex]->getNumChannels();
         toReturn.resize(currentSize.x * currentSize.y * channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glReadPixels(0, 0, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &toReturn.front());
+        glReadPixels(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &toReturn.front());
         LGL_ERROR;
 
         // clean up...
@@ -187,14 +181,16 @@ namespace campvis {
         return toReturn;
     }
 
-    void GlReduction::reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordMultiplier) {
+    void GlReduction::reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordShift) {
         if (currentSize.x > 1) {
             currentSize.x = DIV_CEIL(currentSize.x, 2);
-            texCoordMultiplier.x /= 2.f;
+            if (currentSize.x == 1)
+                texCoordShift.x *= -1.f;
         }
         if (currentSize.y > 1) {
             currentSize.y = DIV_CEIL(currentSize.y, 2);
-            texCoordMultiplier.y /= 2.f;
+            if (currentSize.y == 1)
+                texCoordShift.y *= -1.f;
         }
 
     }
@@ -212,6 +208,9 @@ namespace campvis {
             break;
         case MULTIPLICATION:
             return "#define REDUCTION_OP(a, b, c, d) a*b*c*d";
+            break;
+        case MIN_MAX:
+            return "#define REDUCTION_OP(a, b, c, d) vec4(min(a.r, min(b.r, min(c.r, d.r))), max(a.g, max(b.g, max(c.g, d.g))), 0.0, 0.0)";
             break;
         default:
             tgtAssert(false, "Should not reach this, wrong enum value?");

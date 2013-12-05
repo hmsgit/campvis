@@ -33,17 +33,15 @@ out vec4 out_Color;
 #include "tools/texture2d.frag"
 
 uniform sampler2D _texture;
-uniform TextureParameters2D _textureParams;
-uniform vec2 _texCoordsMultiplier;
+uniform vec2 _texCoordsShift;
 
 void main() {
-    vec2 tmp = ex_TexCoord.xy * _texCoordsMultiplier * 2.0;
-    ivec2 texel = ivec2((tmp * _textureParams._size));
+    vec2 tmp = ex_TexCoord.xy - _texCoordsShift;
 
-    vec4 a = texelFetch(_texture, texel, 0);
-    vec4 b = texelFetch(_texture, texel + ivec2(1, 0), 0);
-    vec4 c = texelFetch(_texture, texel + ivec2(0, 1), 0);
-    vec4 d = texelFetch(_texture, texel + ivec2(1, 1), 0);
+    vec4 a = texture(_texture, tmp);
+    vec4 b = textureOffset(_texture, tmp, ivec2(1, 0));
+    vec4 c = textureOffset(_texture, tmp, ivec2(0, 1));
+    vec4 d = textureOffset(_texture, tmp, ivec2(1, 1));
 
     out_Color = REDUCTION_OP(a, b, c, d);
 }

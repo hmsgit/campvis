@@ -58,7 +58,8 @@ namespace campvis {
             MIN,                ///< Minimum
             MAX,                ///< Maximum
             PLUS,               ///< Sum (plus)
-            MULTIPLICATION      ///< Product (multiplication)
+            MULTIPLICATION,     ///< Product (multiplication)
+            MIN_MAX             ///< Minimum/Maximum (WORKS ONLY with single channel images!)
         };
 
         /**

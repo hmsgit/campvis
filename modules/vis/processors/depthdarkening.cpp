@@ -35,7 +35,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
-
+#include "core/tools/glreduction.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -50,10 +50,11 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f, 0.1f)
         , p_lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f, 0.1f)
-        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, AbstractProcessor::INVALID_SHADER)
+        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
         , p_coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , p_warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _shader(0)
+        , _glReduction(0)
     {
         addProperty(&p_inputImage);
         addProperty(&p_outputImage);
@@ -73,11 +74,14 @@ namespace campvis {
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/depthdarkening.frag", generateHeader(), false);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
+
+        _glReduction = new GlReduction(GlReduction::MIN_MAX);
     }
 
     void DepthDarkening::deinit() {
-        VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
+        delete _glReduction;
+        VisualizationProcessor::deinit();
     }
 
     void DepthDarkening::process(DataContainer& data) {
@@ -90,19 +94,10 @@ namespace campvis {
                 validate(INVALID_SHADER);
             }
 
-            // TODO: const cast is ugly...
             const tgt::Texture* tex = inputImage->getDepthTexture()->getRepresentation<ImageRepresentationGL>()->getTexture();
-            const_cast<tgt::Texture*>(tex)->downloadTexture();
-            const float* pixels = reinterpret_cast<const float*>(tex->getPixelData());
-            float curDepth = *(pixels);
-            float minDepth = curDepth;
-            float maxDepth = curDepth;
-            size_t numPixels = inputImage->getDepthTexture()->getNumElements();
-            for (size_t i = 1; i < numPixels; ++i) {
-                curDepth = pixels[i];
-                minDepth = std::min(minDepth, curDepth);
-                maxDepth = std::max(maxDepth, curDepth);
-            }
+            std::vector<float> tmp = _glReduction->reduce(tex);
+            float minDepth = tmp[0];
+            float maxDepth = tmp[1];
 
             FramebufferActivationGuard fag(this);
             glEnable(GL_DEPTH_TEST);

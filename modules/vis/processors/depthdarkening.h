@@ -42,6 +42,7 @@ namespace tgt {
 
 namespace campvis {
     class ImageData;
+    class GlReduction;
 
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
@@ -93,6 +94,7 @@ namespace campvis {
         std::string generateHeader() const;
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
+        GlReduction* _glReduction;
 
         static const std::string loggerCat_;
     };
