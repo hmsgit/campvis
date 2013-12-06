@@ -45,16 +45,16 @@ uniform sampler2D _mirrorRenderedDepth;
 uniform TextureParameters2D _mirrorRenderedTexParams;
 
 void main() {
-    float normalDepth = getElement2DNormalized(_normalDepth, _normalTexParams, ex_TexCoord.xy).r;
-    float mirrorRenderedDepth = getElement2DNormalized(_mirrorRenderedDepth, _mirrorRenderedTexParams, ex_TexCoord.xy).r;
+    float normalDepth = texture(_normalDepth, ex_TexCoord.xy).r;
+    float mirrorRenderedDepth = texture(_mirrorRenderedDepth, ex_TexCoord.xy).r;
 
     if (normalDepth <= mirrorRenderedDepth) {
-        out_Color = getElement2DNormalized(_normalColor, _normalTexParams, ex_TexCoord.xy);
+        out_Color = texture(_normalColor, ex_TexCoord.xy);
         gl_FragDepth = normalDepth;
     }
     else {
-        out_Color = getElement2DNormalized(_mirrorColor, _mirrorTexParams, ex_TexCoord.xy);
-        gl_FragDepth = getElement2DNormalized(_mirrorDepth, _mirrorTexParams, ex_TexCoord.xy).r;
+        out_Color = texture(_mirrorColor, ex_TexCoord.xy);
+        gl_FragDepth = texture(_mirrorDepth, ex_TexCoord.xy).r;
     }
 
     if (out_Color.a == 0) {

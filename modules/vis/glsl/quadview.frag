@@ -37,6 +37,6 @@ uniform sampler2D _depthTexture;
 uniform TextureParameters2D _texParams;
 
 void main() {
-    out_Color = getElement2DNormalized(_colorTexture, _texParams, ex_TexCoord.xy);
-    gl_FragDepth = getElement2DNormalized(_depthTexture, _texParams, ex_TexCoord.xy).r;
+    out_Color = texture(_colorTexture, ex_TexCoord.xy);
+    gl_FragDepth = texture(_depthTexture, ex_TexCoord.xy).r;
 }

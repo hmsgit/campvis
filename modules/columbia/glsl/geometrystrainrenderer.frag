@@ -47,12 +47,12 @@ void main() {
 
     vec3 worldCoords = ex_Position.xyz / ex_Position.z;
     vec3 texCoords = worldToTexture(_textureParameters, worldCoords);
-    out_Color = getElement3DNormalized(_strainTexture, _textureParameters, texCoords);
+    out_Color = texture(_strainTexture, texCoords);
 
     while (length(out_Color) == 0.0) {
         worldCoords -= normalize(ex_TexCoord) * 0.1;
         texCoords = worldToTexture(_textureParameters, worldCoords);
-        out_Color = getElement3DNormalized(_strainTexture, _textureParameters, texCoords);
+        out_Color = texture(_strainTexture, texCoords);
     }
 
 #ifdef ENABLE_SHADING

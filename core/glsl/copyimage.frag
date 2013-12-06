@@ -42,9 +42,9 @@ uniform sampler2D _depthTexture;
 
 void main() {
     vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
-    out_Color = getElement2DNormalized(_colorTexture, _texParams, fragCoord);
+    out_Color = texture(_colorTexture, fragCoord);
 
 #ifndef NO_DEPTH
-    gl_FragDepth = getElement2DNormalized(_depthTexture, _texParams, fragCoord).r;
+    gl_FragDepth = texture(_depthTexture, fragCoord).r;
 #endif
 }

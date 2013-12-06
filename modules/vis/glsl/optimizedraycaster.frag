@@ -153,7 +153,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         }
 
         // lookup intensity and TF
-        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).r;
+        float intensity = texture(_volume, samplePosition).r;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
 #ifdef INTERSECTION_REFINEMENT
@@ -172,7 +172,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                     vec3 newSamplePosition = entryPoint.rgb + newT * direction;
 
                     // lookup refined intensity + TF
-                    float newIntensity = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition).r;
+                    float newIntensity = texture(_volume, newSamplePosition).r;
                     vec4 newColor = lookupTF(_transferFunction, _transferFunctionParams, newIntensity);
 
                     if (newColor.a <= 0.0) {
@@ -225,8 +225,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     // calculate depth value from ray parameter
     gl_FragDepth = 1.0;
     if (firstHitT >= 0.0) {
-        float depthEntry = getElement2DNormalized(_entryPointsDepth, _entryParams, texCoords).z;
-        float depthExit = getElement2DNormalized(_exitPointsDepth, _exitParams, texCoords).z;
+        float depthEntry = texture(_entryPointsDepth, texCoords).z;
+        float depthExit = texture(_exitPointsDepth, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
 
@@ -238,8 +238,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
  ***/
 void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
-    vec3 frontPos = getElement2DNormalized(_entryPoints, _entryParams, p).rgb;
-    vec3 backPos = getElement2DNormalized(_exitPoints, _exitParams, p).rgb;
+    vec3 frontPos = texture(_entryPoints, p).rgb;
+    vec3 backPos = texture(_exitPoints, p).rgb;
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {

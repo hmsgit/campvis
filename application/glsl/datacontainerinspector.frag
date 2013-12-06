@@ -60,17 +60,17 @@ void main() {
             // perform MIP
             out_Color = vec4(0.0);
             for (float slice = 0.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
-                out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, vec3(ex_TexCoord.xy, slice)).r));
+                out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, vec3(ex_TexCoord.xy, slice)).r));
             }
         }
         else {
             // render the corresponding slice
             vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_3dTextureParams._size.z));
-            out_Color = lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, coord).r);
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, coord).r);
         }
     }
     else {
-        vec4 texel = getElement2DNormalized(_texture2d, _2dTextureParams, ex_TexCoord.xy);
+        vec4 texel = texture(_texture2d, ex_TexCoord.xy);
         if (_2dTextureParams._numChannels == 1) {
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
         }

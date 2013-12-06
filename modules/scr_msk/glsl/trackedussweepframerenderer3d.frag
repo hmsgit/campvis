@@ -44,7 +44,7 @@ void main() {
         out_Color = vec4(1.0);
     }
     else  {
-        float intensity = getElement2DNormalized(_texture, _textureParameters, ex_TexCoord.xy).a;
+        float intensity = texture(_texture, ex_TexCoord.xy).a;
         out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
         // don't write fragment if fully transparent (in particular don't write to depth buffer!)

@@ -49,31 +49,6 @@ struct TextureParameters3D {
 };
 
 /**
- * Texture lookup function for 3D textures using voxel coordinates, i.e [(0,0) , textureSize].
- * \param	tex			Sampler to texture
- * \param	texParams   TextureParameters3D struct with texture for lookup
- * \param	texCoords	Lookup coordinates in pixel coordinates
- * \return	The texel at the given coordinates.
- */
-vec4 getElement3D(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
-    vec3 texCoordsNormalized = texCoords * texParams._sizeRCP;
-    //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoordsNormalized, 0.0, 1.0)).xy;
-    return texture(tex, texCoordsNormalized);
-}
-
-/**
- * Texture lookup function for 3D textures using normalized texture coordinates, i.e. [0,1].
- * \param	tex			Sampler to texture
- * \param	texParams   TextureParameters3D struct with texture for lookup
- * \param	texCoords	Lookup coordinates in normlized texture coordinates
- * \return	The texel at the given coordinates.
- */
-vec4 getElement3DNormalized(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
-    //vec2 texCoordsTransformed = (texParams.matrix_ * vec4(texCoords, 0.0, 1.0)).xy;
-    return texture(tex, texCoords);
-}
-
-/**
  * Transforms texture coordinates for texture \a tex to world coordinates using the texture's
  * texture-to-world matrix.
  * \param	texParams   TextureParameters3D struct with texture for lookup

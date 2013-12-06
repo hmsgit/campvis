@@ -52,13 +52,13 @@ uniform TextureParameters2D _drrClippedTexParams;
  ***/
 void main() {
     // fetch input textures
-    vec4 xRayColor = getElement2DNormalized(_xRayColor, _xRayTexParams, ex_TexCoord.xy);
-    float xRayDepth = getElement2DNormalized(_xRayDepth, _xRayTexParams, ex_TexCoord.xy).r;
-    vec4 sliceColor = getElement2DNormalized(_sliceColor, _sliceTexParams, ex_TexCoord.xy);
-    float sliceDepth = getElement2DNormalized(_sliceDepth, _sliceTexParams, ex_TexCoord.xy).r;
+    vec4 xRayColor = texture(_xRayColor, ex_TexCoord.xy);
+    float xRayDepth = texture(_xRayDepth, ex_TexCoord.xy).r;
+    vec4 sliceColor = texture(_sliceColor, ex_TexCoord.xy);
+    float sliceDepth = texture(_sliceDepth, ex_TexCoord.xy).r;
     
-    float drrFull = getElement2DNormalized(_drrFullColor, _drrFullTexParams, ex_TexCoord.xy).r;
-    float drrClipped = getElement2DNormalized(_drrClippedColor, _drrClippedTexParams, ex_TexCoord.xy).r;
+    float drrFull = texture(_drrFullColor, ex_TexCoord.xy).r;
+    float drrClipped = texture(_drrClippedColor, ex_TexCoord.xy).r;
     
     float weightingFactor = 0.0;
     if (drrClipped > 0)

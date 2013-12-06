@@ -47,7 +47,7 @@ uniform vec4 _color;
 
 void main() {
     if (_useTexturing) {
-        vec4 texel = getElement3DNormalized(_texture, _textureParams, (_texCoordsMatrix * vec4(ex_TexCoord, 1.0)).xyz);
+        vec4 texel = texture(_texture, (_texCoordsMatrix * vec4(ex_TexCoord, 1.0)).xyz);
 
         if (_textureParams._numChannels == 1) {
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);

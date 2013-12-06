@@ -79,7 +79,7 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         // lookup intensity and TF
-        float intensity = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition).r;
+        float intensity = texture(_volume, samplePosition).r;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
 #ifdef DEPTH_MAPPING
@@ -130,8 +130,8 @@ vec4 raycastDRR(in vec3 entryPoint, in vec3 exitPoint) {
  ***/
 void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
-    vec3 frontPos = getElement2DNormalized(_entryPoints, _entryParams, p).rgb;
-    vec3 backPos = getElement2DNormalized(_exitPoints, _exitParams, p).rgb;
+    vec3 frontPos = texture(_entryPoints, p).rgb;
+    vec3 backPos = texture(_exitPoints, p).rgb;
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {

@@ -38,11 +38,11 @@ out vec4 out_Color;
 #ifdef USE_3D_TEX
 #define SAMPLER_TYPE sampler3D
 #define TEXPARAMS_TYPE TextureParameters3D
-#define TEXTURE_LOOKUP_FUNC getElement3DNormalized
+#define TEXTURE_LOOKUP_FUNC texture
 #else
 #define SAMPLER_TYPE sampler2D
 #define TEXPARAMS_TYPE TextureParameters2D
-#define TEXTURE_LOOKUP_FUNC getElement2DNormalized
+#define TEXTURE_LOOKUP_FUNC texture
 #endif
 
 uniform SAMPLER_TYPE _usImage;
@@ -73,9 +73,9 @@ void main() {
     vec2 texCoord = ex_TexCoord.xy;
 #endif
 
-    vec4 texel = TEXTURE_LOOKUP_FUNC(_usImage, _usTextureParams, texCoord);
-    vec4 blurred = TEXTURE_LOOKUP_FUNC(_blurredImage, _blurredTextureParams, texCoord) * _blurredScale;
-    float confidence = clamp(TEXTURE_LOOKUP_FUNC(_confidenceMap, _confidenceTextureParams, texCoord).r * _confidenceScaling, 0.0, 1.0);
+    vec4 texel = TEXTURE_LOOKUP_FUNC(_usImage, texCoord);
+    vec4 blurred = TEXTURE_LOOKUP_FUNC(_blurredImage, texCoord) * _blurredScale;
+    float confidence = clamp(TEXTURE_LOOKUP_FUNC(_confidenceMap, texCoord).r * _confidenceScaling, 0.0, 1.0);
     float uncertainty = lookupTF(_confidenceTF, _confidenceTFParams, confidence).a;
 
     if (confidence <= 0.0) {

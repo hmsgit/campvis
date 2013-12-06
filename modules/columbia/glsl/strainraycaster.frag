@@ -94,7 +94,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         // lookup intensity and TF
-        vec4 strain = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition);
+        vec4 strain = texture(_volume, samplePosition);
         vec4 color = (_volumeTextureParams._numChannels == 4) ? strain : vec4(strain.xyz, 0.0);
         color.a = clamp(length(strain.xyz)/1.0, 0.0, 1.0);
 
@@ -114,7 +114,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                     vec3 newSamplePosition = entryPoint.rgb + newT * direction;
 
                     // lookup refined intensity + TF
-                    vec4 newStrain = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition);
+                    vec4 newStrain = texture(_volume, newSamplePosition);
                     vec4 newColor = (_volumeTextureParams._numChannels == 4) ? newStrain : vec4(newStrain.xyz, 0.0);
                     newColor.a = clamp(length(newColor.xyz)/1.0, 0.0, 1.0);
 
@@ -168,8 +168,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     // calculate depth value from ray parameter
     gl_FragDepth = 1.0;
     if (firstHitT >= 0.0) {
-        float depthEntry = getElement2DNormalized(_entryPointsDepth, _entryParams, texCoords).z;
-        float depthExit = getElement2DNormalized(_exitPointsDepth, _exitParams, texCoords).z;
+        float depthEntry = texture(_entryPointsDepth, texCoords).z;
+        float depthExit = texture(_exitPointsDepth, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
     return result;
@@ -180,8 +180,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
  ***/
 void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
-    vec3 frontPos = getElement2DNormalized(_entryPoints, _entryParams, p).rgb;
-    vec3 backPos = getElement2DNormalized(_exitPoints, _exitParams, p).rgb;
+    vec3 frontPos = texture(_entryPoints, p).rgb;
+    vec3 backPos = texture(_exitPoints, p).rgb;
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {
