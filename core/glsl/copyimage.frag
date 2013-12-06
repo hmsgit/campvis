@@ -45,6 +45,6 @@ void main() {
     out_Color = getElement2DNormalized(_colorTexture, _texParams, fragCoord);
 
 #ifndef NO_DEPTH
-    gl_FragDepth = getElement2DNormalized(_depthTexture, _texParams, fragCoord).z;
+    gl_FragDepth = getElement2DNormalized(_depthTexture, _texParams, fragCoord).r;
 #endif
 }
