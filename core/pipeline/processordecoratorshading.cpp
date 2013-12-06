@@ -33,16 +33,17 @@
 #include "core/properties/propertycollection.h"
 
 namespace campvis {
-    static const GenericOption<ProcessorDecoratorShading::GradientMethod> gradientOptions[3] = {
+    static const GenericOption<ProcessorDecoratorShading::GradientMethod> gradientOptions[4] = {
         GenericOption<ProcessorDecoratorShading::GradientMethod>("Forward", "Forward Differences", ProcessorDecoratorShading::ForwardDifferences),
         GenericOption<ProcessorDecoratorShading::GradientMethod>("Central", "Central Differences", ProcessorDecoratorShading::CentralDifferences),
+        GenericOption<ProcessorDecoratorShading::GradientMethod>("Sobel", "Sobel Filter", ProcessorDecoratorShading::SobelFilter),
         GenericOption<ProcessorDecoratorShading::GradientMethod>("FilteredCentral", "Filtered Central Differences", ProcessorDecoratorShading::FilteredCentralDifferences)
     };
 
     ProcessorDecoratorShading::ProcessorDecoratorShading(const std::string& lightUniformName /*= "_lightSource"*/)
         : AbstractProcessorDecorator()
         , _enableShading("EnableShading", "Enable Shading", true, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
-        , _gradientMethod("GradientMethod", "Gradient Computation Method", gradientOptions, 3, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
+        , _gradientMethod("GradientMethod", "Gradient Computation Method", gradientOptions, 4, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
         , _lightPosition("LightPosition", "Light Position", tgt::vec3(-100.f), tgt::vec3(-500.f), tgt::vec3(500.f), tgt::vec3(1.f))
         , _ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.4f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
@@ -85,13 +86,16 @@ namespace campvis {
 
         switch (_gradientMethod.getOptionValue()) {
             case ForwardDifferences :
-                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientForwardDifferences(tex, texParams, texCoords)\n");
+                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientForwardDifferences(tex, texParams, texCoords)\n");
                 break;
             case CentralDifferences :
-                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientCentralDifferences(tex, texParams, texCoords)\n");
+                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientCentralDifferences(tex, texParams, texCoords)\n");
                 break;
             case FilteredCentralDifferences :
-                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientFilteredCentralDifferences(tex, texParams, texCoords)\n");
+                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientFilteredCentralDifferences(tex, texParams, texCoords)\n");
+                break;
+            case SobelFilter :
+                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientSobel(tex, texCoords)\n");
                 break;
             default:
                 tgtAssert(false, "Invalid enum!");

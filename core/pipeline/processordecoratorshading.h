@@ -44,7 +44,8 @@ namespace campvis {
         enum GradientMethod {
             ForwardDifferences,
             CentralDifferences,
-            FilteredCentralDifferences
+            FilteredCentralDifferences,
+            SobelFilter
         };
 
         explicit ProcessorDecoratorShading(const std::string& lightUniformName = "_lightSource");
