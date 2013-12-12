@@ -99,15 +99,38 @@ namespace campvis {
         virtual ~HasProcessorDecorators();
 
     protected:
+        /**
+         * Adds \a decorator to the list of processor decorators.
+         * \param   decorator   Processor decorator to add
+         */
         void addDecorator(AbstractProcessorDecorator* decorator);
 
+        /**
+         * Decorates \a propCollection with the properties of all held decorators.
+         * \param   propCollection  PropertyCollection to decorate (usually your processor)
+         */
         void decoratePropertyCollection(HasPropertyCollection* propCollection) const;
 
+        /**
+         * Calls renderProlog() on each held decorator.
+         * To be called before rendering to decorate \a shader.
+         * \param   dataContainer   DataContainer to work on
+         * \param   shader          Shader to decorate
+         */
         void decorateRenderProlog(const DataContainer& dataContainer, tgt::Shader* shader) const;
 
+        /**
+         * Calls renderProlog() on each held decorator.
+         * To be called after rendering to decorate \a shader.
+         * \param   shader          Shader to decorate
+         */
         void decorateRenderEpilog(tgt::Shader* shader) const;
 
+        /**
+         * Concatenates and returns the GLSL headers of all held decorators.
+         */
         std::string getDecoratedHeader() const;
+
 
         std::vector<AbstractProcessorDecorator*> _decorators;   ///< List of all processor decorators
     };

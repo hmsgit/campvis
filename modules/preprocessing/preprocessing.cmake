@@ -8,6 +8,9 @@ FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 
 # Header files
 FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
+	modules/preprocessing/glsl/*.frag
 	modules/preprocessing/processors/*.h
 	modules/preprocessing/tools/*.h
 )
+
+SET(ThisModShaderDirectories "modules/preprocessing/glsl")
