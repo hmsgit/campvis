@@ -59,7 +59,7 @@ namespace campvis {
             MAX,                ///< Maximum
             PLUS,               ///< Sum (plus)
             MULTIPLICATION,     ///< Product (multiplication)
-            MIN_MAX             ///< Minimum/Maximum (WORKS ONLY with single channel images!)
+            MIN_MAX_DEPTH_ONLY  ///< Minimum/Maximum (CAUTION: WORKS ONLY with depth images!!!)
         };
 
         /**
@@ -109,7 +109,8 @@ namespace campvis {
 
 
         ReductionOperator _reductionOperator;   ///< Operation to be performed by reduction
-        tgt::Shader* _shader;                   ///< OpenGL shader performing the reduction
+        tgt::Shader* _shader2d;                 ///< OpenGL shader performing 2D reduction
+        tgt::Shader* _shader3d;                 ///< OpenGL shader performing 3D reduction
         tgt::FramebufferObject* _fbo;           ///< FBO performing the reduction
 
         const static std::string loggerCat_;

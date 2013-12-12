@@ -50,26 +50,31 @@ namespace campvis {
 
     GlReduction::GlReduction(ReductionOperator reductionOperator)
         : _reductionOperator(reductionOperator)
-        , _shader(0)
+        , _shader2d(0)
+        , _shader3d(0)
         , _fbo(0)
     {
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator), false);
-        if (_shader == 0) {
+        _shader2d = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n", false);
+        _shader3d = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n", false);
+        if (_shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;
         }
 
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
+        _shader2d->setAttributeLocation(0, "in_Position");
+        _shader2d->setAttributeLocation(1, "in_TexCoord");
+        _shader3d->setAttributeLocation(0, "in_Position");
+        _shader3d->setAttributeLocation(1, "in_TexCoord");
     }
 
     GlReduction::~GlReduction() {
-        ShdrMgr.dispose(_shader);
+        ShdrMgr.dispose(_shader2d);
+        ShdrMgr.dispose(_shader3d);
     }
 
     std::vector<float> GlReduction::reduce(const ImageData* image) {
         tgtAssert(image != 0, "Image must not be 0!");
-        if (_shader == 0) {
+        if (_shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return std::vector<float>();
         }
@@ -91,7 +96,7 @@ namespace campvis {
         std::vector<float> toReturn;
 
         tgtAssert(texture != 0, "Image must not be 0!");
-        if (_shader == 0) {
+        if (_shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return toReturn;
         }
@@ -99,8 +104,6 @@ namespace campvis {
             LERROR("Empty texture received - nothing to reduce!");
             return toReturn;
         }
-
-        tgtAssert(texture->getDimensions().z == 1, "Reduction of 3D images not yet implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
 
         const tgt::ivec3& size = texture->getDimensions();
         tgt::vec2 texCoordShift = tgt::vec2(.5f) / tgt::vec2(size.xy());
@@ -130,17 +133,24 @@ namespace campvis {
         LGL_ERROR;
 
         // perform first reduction step outside:
-        _shader->activate();
+        tgt::Shader* leShader = (texture->getDimensions().z == 1) ? _shader2d : _shader3d;
+        leShader->activate();
         _fbo->attachTexture(tempTextures[readTex]);
 
         inputUnit.activate();
         texture->bind();
-        _shader->setUniform("_texture", inputUnit.getUnitNumber());
-        _shader->setUniform("_texCoordsShift", texCoordShift);
+        leShader->setUniform("_texture", inputUnit.getUnitNumber());
+        leShader->setUniform("_texCoordsShift", texCoordShift);
+        if (leShader == _shader3d)
+            leShader->setUniform("_textureDepth", texture->getDimensions().z);
+
         glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
         QuadRdr.renderQuad();
+        leShader->deactivate();
         LGL_ERROR;
 
+        _shader2d->activate();
+        _shader2d->setUniform("_texture", inputUnit.getUnitNumber());
         reduceSizes(currentSize, texCoordShift);
         glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
 
@@ -149,7 +159,7 @@ namespace campvis {
             _fbo->attachTexture(tempTextures[writeTex]);
             tempTextures[readTex]->bind();
 
-            _shader->setUniform("_texCoordsShift", texCoordShift);
+            _shader2d->setUniform("_texCoordsShift", texCoordShift);
             QuadRdr.renderQuad();
             LGL_ERROR;
 
@@ -157,7 +167,7 @@ namespace campvis {
             std::swap(writeTex, readTex);
         }
 
-        _shader->deactivate();
+        _shader2d->deactivate();
 
 
         // read back stuff
@@ -197,25 +207,35 @@ namespace campvis {
 
     std::string GlReduction::generateGlslHeader(ReductionOperator reductionOperator) {
         switch (reductionOperator) {
-        case MIN:
-            return "#define REDUCTION_OP(a, b, c, d) min(a, min(b, min(c, d)))";
-            break;
-        case MAX:
-            return "#define REDUCTION_OP(a, b, c, d) max(a, max(b, max(c, d)))";
-            break;
-        case PLUS:
-            return "#define REDUCTION_OP(a, b, c, d) a+b+c+d";
-            break;
-        case MULTIPLICATION:
-            return "#define REDUCTION_OP(a, b, c, d) a*b*c*d";
-            break;
-        case MIN_MAX:
-            return "#define REDUCTION_OP(a, b, c, d) vec4(min(a.r, min(b.r, min(c.r, d.r))), max(a.g, max(b.g, max(c.g, d.g))), 0.0, 0.0)";
-            break;
-        default:
-            tgtAssert(false, "Should not reach this, wrong enum value?");
-            return "";
-            break;
+            case MIN:
+                return 
+                    "#define REDUCTION_OP_2(a, b) min(a, b)\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) min(a, min(b, min(c, d)))\n";
+                break;
+            case MAX:
+                return 
+                    "#define REDUCTION_OP_2(a, b) max(a, b)\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) max(a, max(b, max(c, d)))\n";
+                break;
+            case PLUS:
+                return 
+                    "#define REDUCTION_OP_2(a, b) a+b\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) a+b+c+d\n";
+                break;
+            case MULTIPLICATION:
+                return 
+                    "#define REDUCTION_OP_2(a, b) a*b\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) a*b*c*d\n";
+                break;
+            case MIN_MAX_DEPTH_ONLY:
+                return 
+                    "#define REDUCTION_OP_2(a, b) vec4(min(a.r, b.r), max(a.g, b.g), 0.0, 0.0)\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) vec4(min(a.r, min(b.r, min(c.r, d.r))), max(a.g, max(b.g, max(c.g, d.g))), 0.0, 0.0)\n";
+                break;
+            default:
+                tgtAssert(false, "Should not reach this, wrong enum value?");
+                return "";
+                break;
         }
     }
 

@@ -306,9 +306,9 @@ namespace campvis {
         referenceUnit.activate();
 
         // create temporary texture for result
-        tgt::Texture* similarityTex = new tgt::Texture(0, tgt::ivec3(size), GL_RED, GL_R32F, GL_FLOAT, tgt::Texture::NEAREST);
-        similarityTex->uploadTexture();
-        similarityTex->setWrapping(tgt::Texture::CLAMP);
+        tgt::Texture* differenceImage = new tgt::Texture(0, tgt::ivec3(size), GL_RED, GL_R32F, GL_FLOAT, tgt::Texture::LINEAR);
+        differenceImage->uploadTexture();
+        differenceImage->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
 
         // bind input images
         _differenceShader->activate();
@@ -328,7 +328,7 @@ namespace campvis {
         for (int z = 0; z < size.z; ++z) {
             float texZ = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
             _differenceShader->setUniform("_zTex", texZ);
-            _fbo->attachTexture(similarityTex, GL_COLOR_ATTACHMENT0, 0, z);
+            _fbo->attachTexture(differenceImage, GL_COLOR_ATTACHMENT0, 0, z);
             QuadRdr.renderQuad();
         }
         _differenceShader->deactivate();
@@ -336,7 +336,7 @@ namespace campvis {
 
         // put difference image into DataContainer
         ImageData* id = new ImageData(3, size, 1);
-        ImageRepresentationGL::create(id, similarityTex);
+        ImageRepresentationGL::create(id, differenceImage);
         id->setMappingInformation(referenceImage->getParent()->getMappingInformation());
         dc->addData(p_differenceImageId.getValue(), id);
 

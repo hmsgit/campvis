@@ -32,16 +32,45 @@ out vec4 out_Color;
 
 #include "tools/texture2d.frag"
 
-uniform sampler2D _texture;
-uniform vec2 _texCoordsShift;
+#ifdef REDUCTION_2D
+    uniform sampler2D _texture;
+    uniform vec2 _texCoordsShift;
+#endif
+
+#ifdef REDUCTION_3D
+    uniform sampler3D _texture;
+    uniform vec2 _texCoordsShift;
+    uniform int _textureDepth;
+#endif
 
 void main() {
     vec2 tmp = ex_TexCoord.xy - _texCoordsShift;
 
+#ifdef REDUCTION_2D
+    // 2D reduction:
     vec4 a = texture(_texture, tmp);
     vec4 b = textureOffset(_texture, tmp, ivec2(1, 0));
     vec4 c = textureOffset(_texture, tmp, ivec2(0, 1));
     vec4 d = textureOffset(_texture, tmp, ivec2(1, 1));
+#endif
 
-    out_Color = REDUCTION_OP(a, b, c, d);
+#ifdef REDUCTION_3D
+    // 3D reduction along depth:
+    float textureDepthRCP = 1.0 / _textureDepth;
+
+    vec4 a = texture(_texture, vec3(tmp, textureDepthRCP/2.0));
+    vec4 b = textureOffset(_texture, vec3(tmp, textureDepthRCP/2.0), ivec3(1, 0, 0));
+    vec4 c = textureOffset(_texture, vec3(tmp, textureDepthRCP/2.0), ivec3(0, 1, 0));
+    vec4 d = textureOffset(_texture, vec3(tmp, textureDepthRCP/2.0), ivec3(1, 1, 0));
+
+    for (float z = 3.0 * textureDepthRCP / 2.0; z < 1.0; z += textureDepthRCP) {
+        a = REDUCTION_OP_2(a, texture(_texture, vec3(tmp, z)));
+        b = REDUCTION_OP_2(b, textureOffset(_texture, vec3(tmp, z), ivec3(1, 0, 0)));
+        c = REDUCTION_OP_2(c, textureOffset(_texture, vec3(tmp, z), ivec3(0, 1, 0)));
+        d = REDUCTION_OP_2(d, textureOffset(_texture, vec3(tmp, z), ivec3(1, 1, 0)));
+    }
+#endif
+
+    // final reduction of the four pixels
+    out_Color = REDUCTION_OP_4(a, b, c, d);
 }
