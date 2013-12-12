@@ -27,74 +27,64 @@
 // 
 // ================================================================================================
 
-#include "glgradientvolumegenerator.h"
+#include "glimageresampler.h"
 
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
+#include "tgt/texture.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/processordecoratorgradient.h"
-
-#include "core/classification/simpletransferfunction.h"
-#include "core/classification/geometry1dtransferfunction.h"
-#include "core/classification/tfgeometry1d.h"
 
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
 
-    const std::string GlGradientVolumeGenerator::loggerCat_ = "CAMPVis.modules.classification.GlGradientVolumeGenerator";
+    const std::string GlImageResampler::loggerCat_ = "CAMPVis.modules.classification.GlImageResampler";
 
-    GlGradientVolumeGenerator::GlGradientVolumeGenerator(IVec2Property* viewportSizeProp)
+    GlImageResampler::GlImageResampler(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
-        , p_outputImage("OutputImage", "Output Image", "GlGradientVolumeGenerator.out", DataNameProperty::WRITE)
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
+        , p_outputImage("OutputImage", "Output Image", "GlImageResampler.out", DataNameProperty::WRITE)
+        , p_resampleScale("ResampleScale", "Resampling Scale", .5f, .01f, 10.f)
         , _shader(0)
     {
-        addDecorator(new ProcessorDecoratorGradient());
-
         addProperty(&p_inputImage);
         addProperty(&p_outputImage);
-        decoratePropertyCollection(this);
+        addProperty(&p_resampleScale);
     }
 
-    GlGradientVolumeGenerator::~GlGradientVolumeGenerator() {
+    GlImageResampler::~GlImageResampler() {
 
     }
 
-    void GlGradientVolumeGenerator::init() {
+    void GlImageResampler::init() {
         VisualizationProcessor::init();
 
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glgradientvolumegenerator.frag", generateHeader(), false);
+        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "", false);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
-    void GlGradientVolumeGenerator::deinit() {
+    void GlImageResampler::deinit() {
         ShdrMgr.dispose(_shader);
         VisualizationProcessor::deinit();
     }
 
-    void GlGradientVolumeGenerator::process(DataContainer& data) {
+    void GlImageResampler::process(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
-
-            const tgt::svec3& size = img->getSize();
+            tgt::vec3 originalSize(img->getSize());
+            tgt::ivec3 resampledSize(originalSize * p_resampleScale.getValue());
 
             tgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            tgt::Texture* resultTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RGB, GL_RGB32F, GL_FLOAT, tgt::Texture::LINEAR);
+            tgt::Texture* resultTexture = new tgt::Texture(0, resampledSize, img->getTexture()->getFormat(), img->getTexture()->getInternalFormat(), img->getTexture()->getDataType(), tgt::Texture::LINEAR);
             resultTexture->uploadTexture();
 
             // activate shader and bind textures
@@ -103,11 +93,11 @@ namespace campvis {
 
             // activate FBO and attach texture
             _fbo->activate();
-            glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
+            glViewport(0, 0, static_cast<GLsizei>(resampledSize.x), static_cast<GLsizei>(resampledSize.y));
 
             // render quad to compute difference measure by shader
-            for (int z = 0; z < size.z; ++z) {
-                float zTexCoord = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
+            for (int z = 0; z < resampledSize.z; ++z) {
+                float zTexCoord = static_cast<float>(z)/static_cast<float>(resampledSize.z) + .5f/static_cast<float>(resampledSize.z);
                 _shader->setUniform("_zTexCoord", zTexCoord);
                 _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, z);
                 QuadRdr.renderQuad();
@@ -117,7 +107,7 @@ namespace campvis {
             _shader->deactivate();
 
             // put resulting image into DataContainer
-            ImageData* id = new ImageData(3, size, 1);
+            ImageData* id = new ImageData(3, resampledSize, 1);
             ImageRepresentationGL::create(id, resultTexture);
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputImage.getValue(), id);
@@ -130,10 +120,6 @@ namespace campvis {
         }
 
         validate(INVALID_RESULT);
-    }
-
-    std::string GlGradientVolumeGenerator::generateHeader() const {
-        return getDecoratedHeader();
     }
 
 }
