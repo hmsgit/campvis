@@ -17,6 +17,7 @@ OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                 
 OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                                            ON)
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
+OPTION(CAMPVIS_BUILD_LIB_LUA        "Build Lua Library"                                             OFF)
 OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   OFF)
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
@@ -43,6 +44,10 @@ MESSAGE(STATUS "----------------------------------------------------------------
 
 IF(CAMPVIS_BUILD_LIB_TGT)
     ADD_SUBDIRECTORY(ext/tgt)
+ENDIF()
+
+IF(CAMPVIS_BUILD_LIB_LUA)
+    ADD_SUBDIRECTORY(ext/lua)
 ENDIF()
 
 IF(CAMPVIS_BUILD_CORE)
