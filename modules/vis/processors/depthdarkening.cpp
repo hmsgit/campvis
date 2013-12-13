@@ -114,6 +114,7 @@ namespace campvis {
                 _shader->setUniform("_warmColor", p_warmColor.getValue());
             }
 
+            createAndAttachColorTexture();
             createAndAttachDepthTexture();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
