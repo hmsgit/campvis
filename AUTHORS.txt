@@ -3,10 +3,11 @@ Authors and Contributors of the CAMPVis Software Framework:
 CAMPVis originally devoloped by:
   Christian Schulte zu Berge <christian.szb@in.tum.de>
   Chair for Computer Aided Medical Procedures
-  Technische Universität München
-  Boltzmannstr. 3, 85748 Garching b. München, Germany
+  Technische UniversitÃ¤t MÃ¼nchen
+  Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
 
 
 Further Developers and Contributors:
+ * Qt GUI: Artur Grunau <artur.grunau@uj.edu.pl>
  * Diffusion Tensor Imaging Plugin: Tobias Brachert <brachert@mytum.de>
  
