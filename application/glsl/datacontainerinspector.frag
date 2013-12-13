@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische UniversitÃ¤t MÃ¼nchen
+//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -60,17 +55,17 @@ void main() {
             // perform MIP
             out_Color = vec4(0.0);
             for (float slice = 0.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
-                out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, vec3(ex_TexCoord.xy, slice)).r));
+                out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, vec3(ex_TexCoord.xy, slice)).r));
             }
         }
         else {
             // render the corresponding slice
             vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_3dTextureParams._size.z));
-            out_Color = lookupTF(_transferFunction, _transferFunctionParams, getElement3DNormalized(_texture3d, _3dTextureParams, coord).r);
+            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, coord).r);
         }
     }
     else {
-        vec4 texel = getElement2DNormalized(_texture2d, _2dTextureParams, ex_TexCoord.xy);
+        vec4 texel = texture(_texture2d, ex_TexCoord.xy);
         if (_2dTextureParams._numChannels == 1) {
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
         }

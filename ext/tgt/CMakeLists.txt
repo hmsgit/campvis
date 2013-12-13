@@ -16,7 +16,7 @@ ENDIF(TGT_WITH_WMI)
 
 
 # headers
-FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h qt/*.h)
+FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h)
 
 # sources
 SET(TGT_SOURCES
@@ -71,9 +71,6 @@ SET(TGT_SOURCES
 
 # Qt related stuff:
 IF(TGT_WITH_QT)
-	FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
-	INCLUDE(${QT_USE_FILE})
-	
 	LIST(APPEND TGT_HEADERS 
 		qt/qtapplication.h
 		qt/qtcanvas.h

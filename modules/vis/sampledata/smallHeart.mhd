@@ -1,0 +1,8 @@
+ObjectType = Image
+NDims = 3
+DimSize = 128 128 114
+ElementSpacing = 1.421876 1.421876 1.400024
+Position = 0 0 0
+ElementByteOrderMSB = False
+ElementType = MET_USHORT
+ElementDataFile = smallHeart.raw

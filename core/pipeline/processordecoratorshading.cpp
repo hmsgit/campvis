@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
 //      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -33,16 +28,9 @@
 #include "core/properties/propertycollection.h"
 
 namespace campvis {
-    static const GenericOption<ProcessorDecoratorShading::GradientMethod> gradientOptions[3] = {
-        GenericOption<ProcessorDecoratorShading::GradientMethod>("Forward", "Forward Differences", ProcessorDecoratorShading::ForwardDifferences),
-        GenericOption<ProcessorDecoratorShading::GradientMethod>("Central", "Central Differences", ProcessorDecoratorShading::CentralDifferences),
-        GenericOption<ProcessorDecoratorShading::GradientMethod>("FilteredCentral", "Filtered Central Differences", ProcessorDecoratorShading::FilteredCentralDifferences)
-    };
-
     ProcessorDecoratorShading::ProcessorDecoratorShading(const std::string& lightUniformName /*= "_lightSource"*/)
-        : AbstractProcessorDecorator()
+        : ProcessorDecoratorGradient()
         , _enableShading("EnableShading", "Enable Shading", true, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
-        , _gradientMethod("GradientMethod", "Gradient Computation Method", gradientOptions, 3, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
         , _lightPosition("LightPosition", "Light Position", tgt::vec3(-100.f), tgt::vec3(-500.f), tgt::vec3(500.f), tgt::vec3(1.f))
         , _ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.4f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
@@ -51,7 +39,6 @@ namespace campvis {
         , _attenuation("Attenuation", "Attenuation Factors", tgt::vec3(0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _lightUniformName(lightUniformName)
     {
-        _gradientMethod.setValue(1);
     }
 
     ProcessorDecoratorShading::~ProcessorDecoratorShading() {
@@ -59,7 +46,8 @@ namespace campvis {
 
     void ProcessorDecoratorShading::addProperties(HasPropertyCollection* propCollection) {
         propCollection->addProperty(&_enableShading);
-        propCollection->addProperty(&_gradientMethod);
+
+        ProcessorDecoratorGradient::addProperties(propCollection);
         propCollection->addProperty(&_lightPosition);
         propCollection->addProperty(&_ambientColor);
         propCollection->addProperty(&_diffuseColor);
@@ -69,6 +57,8 @@ namespace campvis {
     }
 
     void ProcessorDecoratorShading::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
+        ProcessorDecoratorGradient::renderProlog(dataContainer, shader);
+
         shader->setUniform(_lightUniformName + "._position", _lightPosition.getValue());
         shader->setUniform(_lightUniformName + "._ambientColor", _ambientColor.getValue());
         shader->setUniform(_lightUniformName + "._diffuseColor", _diffuseColor.getValue());
@@ -79,25 +69,10 @@ namespace campvis {
 
 
     std::string ProcessorDecoratorShading::generateHeader() const {
-        std::string toReturn;
+        std::string toReturn = ProcessorDecoratorGradient::generateHeader();
+
         if (_enableShading.getValue())
             toReturn.append("#define ENABLE_SHADING\n");
-
-        switch (_gradientMethod.getOptionValue()) {
-            case ForwardDifferences :
-                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientForwardDifferences(tex, texParams, texCoords)\n");
-                break;
-            case CentralDifferences :
-                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientCentralDifferences(tex, texParams, texCoords)\n");
-                break;
-            case FilteredCentralDifferences :
-                toReturn.append("#define computeGradient(tex, texParams,texCoords) computeGradientFilteredCentralDifferences(tex, texParams, texCoords)\n");
-                break;
-            default:
-                tgtAssert(false, "Invalid enum!");
-                break;
-        }
-
         return toReturn;
     }
 

@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische UniversitÃ¤t MÃ¼nchen
+//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -94,7 +89,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
         // lookup intensity and TF
-        vec4 strain = getElement3DNormalized(_volume, _volumeTextureParams, samplePosition);
+        vec4 strain = texture(_volume, samplePosition);
         vec4 color = (_volumeTextureParams._numChannels == 4) ? strain : vec4(strain.xyz, 0.0);
         color.a = clamp(length(strain.xyz)/1.0, 0.0, 1.0);
 
@@ -114,7 +109,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                     vec3 newSamplePosition = entryPoint.rgb + newT * direction;
 
                     // lookup refined intensity + TF
-                    vec4 newStrain = getElement3DNormalized(_volume, _volumeTextureParams, newSamplePosition);
+                    vec4 newStrain = texture(_volume, newSamplePosition);
                     vec4 newColor = (_volumeTextureParams._numChannels == 4) ? newStrain : vec4(newStrain.xyz, 0.0);
                     newColor.a = clamp(length(newColor.xyz)/1.0, 0.0, 1.0);
 
@@ -168,8 +163,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     // calculate depth value from ray parameter
     gl_FragDepth = 1.0;
     if (firstHitT >= 0.0) {
-        float depthEntry = getElement2DNormalized(_entryPointsDepth, _entryParams, texCoords).z;
-        float depthExit = getElement2DNormalized(_exitPointsDepth, _exitParams, texCoords).z;
+        float depthEntry = texture(_entryPointsDepth, texCoords).z;
+        float depthExit = texture(_exitPointsDepth, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
     return result;
@@ -180,8 +175,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
  ***/
 void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
-    vec3 frontPos = getElement2DNormalized(_entryPoints, _entryParams, p).rgb;
-    vec3 backPos = getElement2DNormalized(_exitPoints, _exitParams, p).rgb;
+    vec3 frontPos = texture(_entryPoints, p).rgb;
+    vec3 backPos = texture(_exitPoints, p).rgb;
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {

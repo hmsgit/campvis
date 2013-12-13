@@ -63,17 +63,14 @@ SET(CampvisApplicationToBeMocced
     tools/bufferinglog.h
 )
 
-LIST(APPEND CampvisApplicationDefinitions "-DCAMPVIS_SOURCE_DIR=\"${CampvisHome}\"")
-
 #
 # Qt related stuff:
 #
-FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
 QT4_WRAP_CPP(CampvisApplicationMoc ${CampvisApplicationToBeMocced})
 LIST(APPEND CampvisApplicationSources ${CampvisApplicationMoc})
+
 QT4_WRAP_UI(CampvisApplicationFormsHeaders ${CampvisApplicationForms})
 LIST(APPEND CampvisApplicationSources ${CampvisApplicationFormsHeaders})
-INCLUDE(${QT_USE_FILE})
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 

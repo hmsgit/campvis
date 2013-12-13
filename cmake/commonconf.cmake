@@ -63,6 +63,8 @@ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 LIST(APPEND CampvisGlobalIncludeDirs "${CampvisHome}/ext")
 LIST(APPEND CampvisGlobalIncludeDirs ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}) 
 
+LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_SOURCE_DIR=\"${CampvisHome}\"")
+
 # platform-dependent configuration
 IF(WIN32)
     LIST(APPEND CampvisGlobalDefinitions "-DNOMINMAX" "-D_CRT_SECURE_NO_DEPRECATE")
@@ -135,6 +137,8 @@ ENDIF()
  
 # minimum Qt version
 IF(CAMPVIS_BUILD_APPLICATION)
+    FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
+    INCLUDE(${QT_USE_FILE})
     SET(TGT_WITH_QT true)
     SET(CampvisRequiredQtVersion "4.8")
 ENDIF(CAMPVIS_BUILD_APPLICATION)

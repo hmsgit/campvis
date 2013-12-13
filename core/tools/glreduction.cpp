@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
 //      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -50,26 +45,31 @@ namespace campvis {
 
     GlReduction::GlReduction(ReductionOperator reductionOperator)
         : _reductionOperator(reductionOperator)
-        , _shader(0)
+        , _shader2d(0)
+        , _shader3d(0)
         , _fbo(0)
     {
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator), false);
-        if (_shader == 0) {
+        _shader2d = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n", false);
+        _shader3d = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n", false);
+        if (_shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;
         }
 
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
+        _shader2d->setAttributeLocation(0, "in_Position");
+        _shader2d->setAttributeLocation(1, "in_TexCoord");
+        _shader3d->setAttributeLocation(0, "in_Position");
+        _shader3d->setAttributeLocation(1, "in_TexCoord");
     }
 
     GlReduction::~GlReduction() {
-        ShdrMgr.dispose(_shader);
+        ShdrMgr.dispose(_shader2d);
+        ShdrMgr.dispose(_shader3d);
     }
 
     std::vector<float> GlReduction::reduce(const ImageData* image) {
         tgtAssert(image != 0, "Image must not be 0!");
-        if (_shader == 0) {
+        if (_shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return std::vector<float>();
         }
@@ -91,7 +91,7 @@ namespace campvis {
         std::vector<float> toReturn;
 
         tgtAssert(texture != 0, "Image must not be 0!");
-        if (_shader == 0) {
+        if (_shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return toReturn;
         }
@@ -100,13 +100,11 @@ namespace campvis {
             return toReturn;
         }
 
-        tgtAssert(texture->getDimensions().z == 1, "Reduction of 3D images not yet implemented! Somebody was too lazy (or stressed - deadline was close) to do that...");
-
-        std::vector<float> readBackBuffer;
         const tgt::ivec3& size = texture->getDimensions();
-        tgt::vec2 texCoordMultiplier(1.f);
+        tgt::vec2 texCoordShift = tgt::vec2(.5f) / tgt::vec2(size.xy());
         tgt::ivec2 currentSize = size.xy();
-        reduceSizes(currentSize, texCoordMultiplier);
+        reduceSizes(currentSize, texCoordShift);
+        tgt::ivec2 startSize = currentSize;
 
         // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -119,7 +117,7 @@ namespace campvis {
         for (size_t i = 0; i < 2; ++i) {
             tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
             tempTextures[i]->uploadTexture();
-            tempTextures[i]->setWrapping(tgt::Texture::CLAMP);
+            tempTextures[i]->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
         }
         size_t readTex = 0;
         size_t writeTex = 1;
@@ -130,40 +128,41 @@ namespace campvis {
         LGL_ERROR;
 
         // perform first reduction step outside:
-        _shader->activate();
+        tgt::Shader* leShader = (texture->getDimensions().z == 1) ? _shader2d : _shader3d;
+        leShader->activate();
         _fbo->attachTexture(tempTextures[readTex]);
 
-        _shader->setIgnoreUniformLocationError(true);
         inputUnit.activate();
         texture->bind();
-        _shader->setUniform("_texture", inputUnit.getUnitNumber());
-        _shader->setUniform("_textureParams._size", tgt::vec2(size.xy()));
-        _shader->setUniform("_textureParams._sizeRCP", tgt::vec2(1.f) / tgt::vec2(size.xy()));
-        _shader->setUniform("_textureParams._numChannels", static_cast<int>(texture->getNumChannels()));
-        _shader->setIgnoreUniformLocationError(false);
+        leShader->setUniform("_texture", inputUnit.getUnitNumber());
+        leShader->setUniform("_texCoordsShift", texCoordShift);
+        if (leShader == _shader3d)
+            leShader->setUniform("_textureDepth", texture->getDimensions().z);
 
-        glViewport(0, 0, currentSize.x, currentSize.y);
-        _shader->setUniform("_texCoordsMultiplier", texCoordMultiplier);
+        glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
         QuadRdr.renderQuad();
+        leShader->deactivate();
         LGL_ERROR;
+
+        _shader2d->activate();
+        _shader2d->setUniform("_texture", inputUnit.getUnitNumber());
+        reduceSizes(currentSize, texCoordShift);
+        glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
 
         // perform reduction until 1x1 texture remains
         while (currentSize.x > 1 || currentSize.y > 1) {
-            reduceSizes(currentSize, texCoordMultiplier);
-
             _fbo->attachTexture(tempTextures[writeTex]);
             tempTextures[readTex]->bind();
 
-            glViewport(0, 0, currentSize.x, currentSize.y);
-            _shader->setUniform("_texCoordsMultiplier", texCoordMultiplier);
+            _shader2d->setUniform("_texCoordsShift", texCoordShift);
             QuadRdr.renderQuad();
             LGL_ERROR;
 
-            //_fbo->detachTexture(GL_COLOR_ATTACHMENT0);
+            reduceSizes(currentSize, texCoordShift);
             std::swap(writeTex, readTex);
         }
 
-        _shader->deactivate();
+        _shader2d->deactivate();
 
 
         // read back stuff
@@ -171,7 +170,7 @@ namespace campvis {
         size_t channels = tempTextures[readTex]->getNumChannels();
         toReturn.resize(currentSize.x * currentSize.y * channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glReadPixels(0, 0, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &toReturn.front());
+        glReadPixels(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &toReturn.front());
         LGL_ERROR;
 
         // clean up...
@@ -187,36 +186,51 @@ namespace campvis {
         return toReturn;
     }
 
-    void GlReduction::reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordMultiplier) {
+    void GlReduction::reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordShift) {
         if (currentSize.x > 1) {
             currentSize.x = DIV_CEIL(currentSize.x, 2);
-            texCoordMultiplier.x /= 2.f;
+            if (currentSize.x == 1)
+                texCoordShift.x *= -1.f;
         }
         if (currentSize.y > 1) {
             currentSize.y = DIV_CEIL(currentSize.y, 2);
-            texCoordMultiplier.y /= 2.f;
+            if (currentSize.y == 1)
+                texCoordShift.y *= -1.f;
         }
 
     }
 
     std::string GlReduction::generateGlslHeader(ReductionOperator reductionOperator) {
         switch (reductionOperator) {
-        case MIN:
-            return "#define REDUCTION_OP(a, b, c, d) min(a, min(b, min(c, d)))";
-            break;
-        case MAX:
-            return "#define REDUCTION_OP(a, b, c, d) max(a, max(b, max(c, d)))";
-            break;
-        case PLUS:
-            return "#define REDUCTION_OP(a, b, c, d) a+b+c+d";
-            break;
-        case MULTIPLICATION:
-            return "#define REDUCTION_OP(a, b, c, d) a*b*c*d";
-            break;
-        default:
-            tgtAssert(false, "Should not reach this, wrong enum value?");
-            return "";
-            break;
+            case MIN:
+                return 
+                    "#define REDUCTION_OP_2(a, b) min(a, b)\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) min(a, min(b, min(c, d)))\n";
+                break;
+            case MAX:
+                return 
+                    "#define REDUCTION_OP_2(a, b) max(a, b)\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) max(a, max(b, max(c, d)))\n";
+                break;
+            case PLUS:
+                return 
+                    "#define REDUCTION_OP_2(a, b) a+b\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) a+b+c+d\n";
+                break;
+            case MULTIPLICATION:
+                return 
+                    "#define REDUCTION_OP_2(a, b) a*b\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) a*b*c*d\n";
+                break;
+            case MIN_MAX_DEPTH_ONLY:
+                return 
+                    "#define REDUCTION_OP_2(a, b) vec4(min(a.r, b.r), max(a.g, b.g), 0.0, 0.0)\n"
+                    "#define REDUCTION_OP_4(a, b, c, d) vec4(min(a.r, min(b.r, min(c.r, d.r))), max(a.g, max(b.g, max(c.g, d.g))), 0.0, 0.0)\n";
+                break;
+            default:
+                tgtAssert(false, "Should not reach this, wrong enum value?");
+                return "";
+                break;
         }
     }
 

@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
 //      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -35,7 +30,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
-
+#include "core/tools/glreduction.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -50,10 +45,11 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f, 0.1f)
         , p_lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f, 0.1f)
-        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, AbstractProcessor::INVALID_SHADER)
+        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
         , p_coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , p_warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _shader(0)
+        , _glReduction(0)
     {
         addProperty(&p_inputImage);
         addProperty(&p_outputImage);
@@ -73,11 +69,14 @@ namespace campvis {
         _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/depthdarkening.frag", generateHeader(), false);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
+
+        _glReduction = new GlReduction(GlReduction::MIN_MAX_DEPTH_ONLY);
     }
 
     void DepthDarkening::deinit() {
-        VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
+        delete _glReduction;
+        VisualizationProcessor::deinit();
     }
 
     void DepthDarkening::process(DataContainer& data) {
@@ -90,19 +89,10 @@ namespace campvis {
                 validate(INVALID_SHADER);
             }
 
-            // TODO: const cast is ugly...
             const tgt::Texture* tex = inputImage->getDepthTexture()->getRepresentation<ImageRepresentationGL>()->getTexture();
-            const_cast<tgt::Texture*>(tex)->downloadTexture();
-            const float* pixels = reinterpret_cast<const float*>(tex->getPixelData());
-            float curDepth = *(pixels);
-            float minDepth = curDepth;
-            float maxDepth = curDepth;
-            size_t numPixels = inputImage->getDepthTexture()->getNumElements();
-            for (size_t i = 1; i < numPixels; ++i) {
-                curDepth = pixels[i];
-                minDepth = std::min(minDepth, curDepth);
-                maxDepth = std::max(maxDepth, curDepth);
-            }
+            std::vector<float> tmp = _glReduction->reduce(tex);
+            float minDepth = tmp[0];
+            float maxDepth = tmp[1];
 
             FramebufferActivationGuard fag(this);
             glEnable(GL_DEPTH_TEST);
@@ -124,6 +114,7 @@ namespace campvis {
                 _shader->setUniform("_warmColor", p_warmColor.getValue());
             }
 
+            createAndAttachColorTexture();
             createAndAttachDepthTexture();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             QuadRdr.renderQuad();
