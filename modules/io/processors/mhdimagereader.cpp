@@ -45,12 +45,12 @@ namespace campvis {
     const std::string MhdImageReader::loggerCat_ = "CAMPVis.modules.io.MhdImageReader";
 
     MhdImageReader::MhdImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
-        , p_targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output", DataNameProperty::WRITE)
+        : AbstractImageReader()
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
+		this->_ext = "mhd";
+		this->p_targetImageID.setValue("MhdImageReader.output");
         addProperty(&p_url);
         addProperty(&p_targetImageID);
         addProperty(&p_imageOffset);
@@ -202,4 +202,9 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
+
+	PropertyCollection& MhdImageReader::getMetaProperties() {
+		PropertyCollection dummy;
+		return dummy;
+	}
 }

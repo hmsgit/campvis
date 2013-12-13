@@ -30,6 +30,8 @@
 #ifndef LTFIMAGEREADER_H__
 #define LTFIMAGEREADER_H__
 
+#include "AbstractImageReader.h"
+
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Reads raw images into the pipeline.
      */
-    class LtfImageReader : public AbstractProcessor {
+    class LtfImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new LtfImageReader Processor
@@ -69,13 +71,15 @@ namespace campvis {
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
+		
+        /// \see AbstractProcessor::getExtension()
+		virtual const std::string getExtension() { return _ext;};
+        /// \see AbstractProcessor::getMetaProperties()
+		PropertyCollection& getMetaProperties();
 
-        StringProperty p_url;               ///< URL for file to read
         IVec3Property p_size;               ///< Image size
         IntProperty p_numChannels;          ///< Number of channels per element
         GenericOptionProperty<WeaklyTypedPointer::BaseType> p_baseType; ///< Base type
-
-        DataNameProperty p_targetImageID;   ///< image ID for read image
 
         Vec3Property p_imageOffset;         ///< Image Offset in mm
         Vec3Property p_voxelSize;           ///< Voxel Size in mm

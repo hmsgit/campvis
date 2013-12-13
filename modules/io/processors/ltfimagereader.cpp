@@ -51,15 +51,16 @@ namespace campvis {
     const std::string LtfImageReader::loggerCat_ = "CAMPVis.modules.io.LtfImageReader";
 
     LtfImageReader::LtfImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
+        : AbstractImageReader()
         , p_size("Size", "Image Size", tgt::ivec3(1), tgt::ivec3(1), tgt::ivec3(2048))
         , p_numChannels("NumChannels", "Number of Channels per Element", 1, 1, 9)
         , p_baseType("BaseType", "Base Type", baseTypeOptions, 7)
-        , p_targetImageID("targetImageName", "Target Image ID", "LtfImageReader.output", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
+		this->_ext = "ltf";
+		this->p_targetImageID.setValue("LtfImageReader.output");
+
         addProperty(&p_url);
         addProperty(&p_size);
         addProperty(&p_numChannels);
@@ -103,4 +104,9 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
+	
+	PropertyCollection& LtfImageReader::getMetaProperties() {
+		PropertyCollection dummy;
+		return dummy;
+	}
 }
