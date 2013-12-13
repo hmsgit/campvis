@@ -44,12 +44,13 @@ namespace campvis {
     const std::string VtkImageReader::loggerCat_ = "CAMPVis.modules.io.VtkImageReader";
 
     VtkImageReader::VtkImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
-        , p_targetImageID("targetImageName", "Target Image ID", "VtkImageReader.output", DataNameProperty::WRITE)
+        : AbstractImageReader()
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
+		this->_ext = "vtk";
+		this->p_targetImageID.setValue("VtkImageReader.output");
+
         addProperty(&p_url);
         addProperty(&p_targetImageID);
         addProperty(&p_imageOffset);
@@ -266,5 +267,9 @@ namespace campvis {
         IndexedMeshGeometry* g = new IndexedMeshGeometry(indices, vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
         data.addData(p_targetImageID.getValue(), g);
     }
-
+	
+	PropertyCollection& VtkImageReader::getMetaProperties() {
+		PropertyCollection dummy;
+		return dummy;
+	}
 }
