@@ -63,8 +63,6 @@ SET(CampvisApplicationToBeMocced
     tools/bufferinglog.h
 )
 
-LIST(APPEND CampvisApplicationDefinitions "-DCAMPVIS_SOURCE_DIR=\"${CampvisHome}\"")
-
 #
 # Qt related stuff:
 #

@@ -62,7 +62,7 @@ namespace campvis {
         _vr.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
 
-        _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
+        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_vr.p_inputVolume);
 
