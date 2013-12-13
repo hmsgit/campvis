@@ -198,24 +198,26 @@ namespace campvis {
 
     void Geometry1DTransferFunctionEditor::mousePressEvent(tgt::MouseEvent* e) {
         if (_selectedGeometry != 0 && e->modifiers() & tgt::Event::CTRL) {
-            tbb::mutex::scoped_lock lock(_localMutex);
-
-            // add a control point on CTRL+Click
             TFGeometry1D* g = _selectedGeometry->getGeometry();
-            std::vector<TFGeometry1D::KeyPoint>& kpts = g->getKeyPoints();
-            TFGeometry1D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
-            std::vector<TFGeometry1D::KeyPoint>::iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
-            if (lb != kpts.end()) {
-                kp._color = lb->_color;
-            }
-            else {
-                kp._color = kpts.back()._color;
-            }
-            float alpha = tgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
-            kp._color.a = static_cast<uint8_t>(alpha * 255.f);
-            kpts.insert(lb, kp);
-            updateManipulators();
+            {
+                tbb::mutex::scoped_lock lock(_localMutex);
 
+                // add a control point on CTRL+Click
+                std::vector<TFGeometry1D::KeyPoint>& kpts = g->getKeyPoints();
+                TFGeometry1D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
+                std::vector<TFGeometry1D::KeyPoint>::iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
+                if (lb != kpts.end()) {
+                    kp._color = lb->_color;
+                }
+                else {
+                    kp._color = kpts.back()._color;
+                }
+                float alpha = tgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
+                kp._color.a = static_cast<uint8_t>(alpha * 255.f);
+                kpts.insert(lb, kp);
+            }
+
+            updateManipulators();
             g->s_changed();
         }
         else {
