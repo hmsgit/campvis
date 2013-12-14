@@ -33,6 +33,7 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
+#include "modules/io/processors/genericimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
@@ -68,7 +69,8 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
-        MhdImageReader _imageReader;
+        //MhdImageReader _imageReader;
+		GenericImageReader _imageReader;
         VolumeExplorer _ve;
     };
 

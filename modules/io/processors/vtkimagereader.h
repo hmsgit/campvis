@@ -75,7 +75,7 @@ namespace campvis {
         /// \see AbstractProcessor::getExtension()
 		virtual const std::string getExtension() { return _ext;};
         /// \see AbstractProcessor::getMetaProperties()
-		PropertyCollection& getMetaProperties();
+		//PropertyCollection& getMetaProperties();
 
         Vec3Property p_imageOffset;         ///< Image Offset in mm
         Vec3Property p_voxelSize;           ///< Voxel Size in mm

@@ -75,7 +75,7 @@ namespace campvis {
         /// \see AbstractProcessor::getExtension()
 		virtual const std::string getExtension() { return _ext;};
         /// \see AbstractProcessor::getMetaProperties()
-		PropertyCollection& getMetaProperties();
+		//PropertyCollection& getMetaProperties();
 
         IVec3Property p_size;               ///< Image size
         IntProperty p_numChannels;          ///< Number of channels per element

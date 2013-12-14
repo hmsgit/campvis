@@ -64,28 +64,10 @@ namespace campvis {
          **/
         virtual ~AbstractImageReader();
 
-
-        /**
-         * Provides the interface for the classes that reads images from different types
-		 * of files into ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-
-        //virtual void process(DataContainer& data);
-
-        ///// \see AbstractProcessor::getName()
-        //virtual const std::string getName() = 0;
-        ///// \see AbstractProcessor::getDescription()
-        //virtual const std::string getDescription() = 0;
-        ///// \see AbstractProcessor::getAuthor()
-        //virtual const std::string getAuthor() = 0;
-        ///// \see AbstractProcessor::getProcessorState()
-        //virtual ProcessorState getProcessorState() = 0;
-
         /// \see AbstractProcessor::getExtension()
         virtual const std::string getExtension() = 0;
         /// \see AbstractProcessor::getMetaProperties()
-		virtual PropertyCollection& getMetaProperties() = 0;
+		//virtual PropertyCollection& getMetaProperties() = 0;
 
 		/// functions to set the property of the readers
 		virtual void setURL(StringProperty p_url);

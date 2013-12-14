@@ -58,10 +58,14 @@ namespace campvis {
 
         _ve.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
+		
+        //_imageReader.p_url.setValue("D:\\hiwi\\CAMPVis Datasets\\smallHeart.mhd");
+        //_imageReader.p_targetImageID.setValue("reader.output");
+        //_imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
 
-        _imageReader.p_url.setValue("D:\\Medical Data\\smallHeart.mhd");
-        _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
+		_imageReader.setURL("D:\\hiwi\\CAMPVis Datasets\\smallHeart.mhd");
+		_imageReader.setTargetImageId("reader.output");
+		_imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
