@@ -45,76 +45,105 @@ namespace campvis {
         : AbstractProcessor()
         , p_url("url", "Image URL", "")
 	{
-		//CsvdImageReader *_csvdImageReader = new CsvdImageReader();
-		//this->_readers.push_back(_csvdImageReader);
-		//LtfImageReader *_ltfImageReader = new LtfImageReader();
-		//this->_readers.push_back(_ltfImageReader);
-		//MhdImageReader *_mhdImageReader = new MhdImageReader();
-		//this->_readers.push_back(_mhdImageReader);
-		//RawImageReader *_rawImageReader = new RawImageReader();
-		//this->_readers.push_back(_rawImageReader);
-		//VtkImageReader *_vtkImageReader = new VtkImageReader();
-		//this->_readers.push_back(_vtkImageReader);
 
-		this->_readers.push_back(new CsvdImageReader());
-		this->_readers.push_back(new LtfImageReader());
-		this->_readers.push_back(new MhdImageReader());
-		this->_readers.push_back(new RawImageReader());
-		this->_readers.push_back(new VtkImageReader());
+		//MhdImageReader* reader = new MhdImageReader();
+		//MetaProperty* meta = new MetaProperty(reader->getName()+"MetaProp", reader->getName());
+		//meta->addPropertyCollection(*reader);
+		//this->addProperty(meta);		
+		//this->_readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
+		
+		this->addReader(new CsvdImageReader());		
+		this->addReader(new LtfImageReader());
+		this->addReader(new MhdImageReader());
+		this->addReader(new RawImageReader());
+		this->addReader(new VtkImageReader());
+
+		this->_ext = "";
+		this->_currentlyVisible = nullptr;
+
+		//this->_readers.push_back(new CsvdImageReader());
+		//this->_readers.push_back(new LtfImageReader());
+		//this->_readers.push_back(new MhdImageReader());
+		//this->_readers.push_back(new RawImageReader());
+		//this->_readers.push_back(new VtkImageReader());
 	}
 
     GenericImageReader::~GenericImageReader() {
-		for(std::vector<AbstractImageReader*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-			delete *it;
+		for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
+			if (nullptr != it->first) delete it->first;
+			if (nullptr != it->second) delete it->second;
+			this->_readers.erase(it);
 		}
-
     }
 
     void GenericImageReader::process(DataContainer& data) {
-		for(std::vector<AbstractImageReader*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-			if((*it)->getExtension() == this->_ext) {
-				(*it)->process(data);
+		for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
+			if((it->first)->getExtension() == this->_ext) {
+				if(nullptr != this->_currentlyVisible) {
+					this->_currentlyVisible->setVisible(false);
+				}
+				(it->second)->setVisible(true);
+				this->_currentlyVisible = it->second;
+				(it->first)->process(data);
 				break;
 			}
 		}
 		return;
     }
-
-	void GenericImageReader::setURL(StringProperty p_url) {
-		this->p_url.setValue(p_url.getValue());
-		for(std::vector<AbstractImageReader*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-			if((*it)->getExtension() == this->_ext) {
-				(*it)->p_url.setValue(this->p_url.getValue());
-				break;
-			}
-		}
+	void GenericImageReader::setURL(std::string p_url) {
+		this->p_url.setValue(p_url);
 
 		std::string url = this->p_url.getValue();
 		unsigned extPos = (unsigned) url.rfind('.');
 		if (extPos != std::string::npos) {
 			this->_ext = url.substr(extPos);
 		}
-		return;
-	}
 
-	void GenericImageReader::setTargetImageId(DataNameProperty& targetImageId) {
-		for(std::vector<AbstractImageReader*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-			if((*it)->getExtension() == this->_ext) {
-				(*it)->p_targetImageID.setValue(targetImageId.getValue());
-				std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
-				for(std::set<AbstractProperty*>::iterator jt = sharedProperties.begin(); jt != sharedProperties.end(); jt++) {
-					(*it)->p_targetImageID.addSharedProperty(*jt);
+		for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
+			if((it->first)->getExtension() == this->_ext) {
+				(it->first)->p_url.setValue(this->p_url.getValue());
+
+			/*	if(nullptr != this->_currentlyVisible) {
+					this->_currentlyVisible->setVisible(false);
 				}
+				(it->second)->setVisible(true);
+				this->_currentlyVisible = it->second;*/
+
 				break;
 			}
 		}
 		return;
 	}
 
+	void GenericImageReader::setURL(StringProperty p_url) {
+		return this->setURL(p_url.getValue());
+	}
+	
+	void GenericImageReader::setURL(const char* p_url) {
+		return this->setURL(std::string(p_url));
+	}
+
+	void GenericImageReader::setTargetImageId(DataNameProperty& targetImageId) {
+		for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
+			if((it->first)->getExtension() == this->_ext) {
+				(it->first)->p_targetImageID.setValue(targetImageId.getValue());
+				std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
+				for(std::set<AbstractProperty*>::iterator jt = sharedProperties.begin(); jt != sharedProperties.end(); jt++) {
+					(it->first)->p_targetImageID.addSharedProperty(*jt);
+				}
+				break;
+			}
+		}
+		return;
+	}
+	
+	void GenericImageReader::setTargetImageId(const char* imageId) {
+		return this->setTargetImageId(std::string(imageId));
+	}
 	void GenericImageReader::setTargetImageId(std::string imageId) {
-		for(std::vector<AbstractImageReader*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-			if((*it)->getExtension() == this->_ext) {
-				(*it)->p_targetImageID.setValue(imageId);
+		for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
+			if((it->first)->getExtension() == this->_ext) {
+				(it->first)->p_targetImageID.setValue(imageId);
 				break;
 			}
 		}
@@ -122,17 +151,26 @@ namespace campvis {
 	}
 
 	void GenericImageReader::setTargetImageIdSharedProperty(DataNameProperty* sharedProperty) {
-		for(std::vector<AbstractImageReader*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-			if((*it)->getExtension() == this->_ext) {
-				(*it)->p_targetImageID.addSharedProperty(sharedProperty);
+		for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
+			if((it->first)->getExtension() == this->_ext) {
+				(it->first)->p_targetImageID.addSharedProperty(sharedProperty);
 				break;
 			}
 		}
 		return;
 	}
 
-	void GenericImageReader::setMetaProperties(PropertyCollection &metaProperties) {
-		return;
+	//void GenericImageReader::setMetaProperties(PropertyCollection &metaProperties) {
+	//	return;
+	//}
+
+	int GenericImageReader::addReader(AbstractImageReader* reader) {
+		MetaProperty* meta = new MetaProperty(reader->getName()+"MetaProp", reader->getName());
+		meta->addPropertyCollection(*reader);
+		meta->setVisible(false);
+		this->addProperty(meta);
+		this->_readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
+		return 0;
 	}
 
 }

@@ -44,7 +44,7 @@ namespace campvis {
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-		this->_ext = "mhd";
+		this->_ext = ".mhd";
 		this->p_targetImageID.setValue("MhdImageReader.output");
         addProperty(&p_url);
         addProperty(&p_targetImageID);
@@ -198,8 +198,8 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-	PropertyCollection& MhdImageReader::getMetaProperties() {
-		PropertyCollection dummy;
-		return dummy;
-	}
+	//PropertyCollection& MhdImageReader::getMetaProperties() {
+	//	PropertyCollection dummy;
+	//	return dummy;
+	//}
 }

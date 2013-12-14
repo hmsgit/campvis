@@ -35,6 +35,7 @@
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
+#include "core/properties/metaproperty.h"
 
 #include "modules/io/processors/csvdimagereader.h"
 #include "modules/io/processors/ltfimagereader.h"
@@ -77,29 +78,36 @@ namespace campvis {
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
 		/// functions to set the property of the readers
+		void setURL(std::string p_url);
 		void setURL(StringProperty p_url);
+		void setURL(const char* p_url);
 		void setTargetImageId(DataNameProperty& targetImageId);
 		void setTargetImageId(std::string imageId);
+		void setTargetImageId(const char* imageId);
 		void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
 
-		void setMetaProperties(PropertyCollection &metaProperties);
+		//void setMetaProperties(PropertyCollection &metaProperties);
 
     protected:
 
         static const std::string loggerCat_;
 		
 	private:
-		std::vector<AbstractImageReader*> _readers;
+		//std::vector<AbstractImageReader*> _readers;
+		std::map<AbstractImageReader*, MetaProperty*> _readers;
         StringProperty p_url;
 		std::string _ext;
+		MetaProperty* _currentlyVisible;
 
-		CsvdImageReader _csvdImageReader;
-		LtfImageReader _ltfImageReader;
-		MhdImageReader _mhdImageReader;
-		RawImageReader _rawImageReader;
-		VtkImageReader _vtkImageReader;
+		/**
+		* Adds a particular reader to the generic reader
+		* Creates MetaProperty wrapper for the added reader, that
+		* is freed from the destructor of the class
+		* 
+		* /param reader	pointer to the reader to be added
+		*/
+		int addReader(AbstractImageReader* reader);
 
-		//std::map<std::string, std::string> _extMap;
     };
 
 }
