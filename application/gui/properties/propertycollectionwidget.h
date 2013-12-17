@@ -67,6 +67,15 @@ namespace campvis {
          * \param prop  Property that emitted the signal
          */
         void onPropertyVisibilityChanged(const AbstractProperty* prop);
+        
+    protected slots:
+        /**
+         * Gets called when the property has changed, so that widget can update its state.
+         */
+        virtual void onWidgetVisibilityChanged(QWidget* widget, bool visibility);
+
+    signals:
+        void s_widgetVisibilityChanged(QWidget* widget, bool visibility);
 
     private:
         /**

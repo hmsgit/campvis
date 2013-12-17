@@ -71,6 +71,7 @@ namespace campvis {
         _layout->setSpacing(8);
         _layout->setMargin(0);
         setLayout(_layout);
+        connect(this, SIGNAL(s_widgetVisibilityChanged(QWidget*, bool)), this, SLOT(onWidgetVisibilityChanged(QWidget*, bool)));
     }
 
     void PropertyCollectionWidget::clearWidgetMap() {
@@ -87,7 +88,11 @@ namespace campvis {
         // const_cast does not harm anything.
         std::map<AbstractProperty*, QWidget*>::iterator item = _widgetMap.find(const_cast<AbstractProperty*>(prop));
         if (item != _widgetMap.end())
-            item->second->setVisible(item->first->isVisible());
+            emit s_widgetVisibilityChanged(item->second, item->first->isVisible());
+    }
+
+    void PropertyCollectionWidget::onWidgetVisibilityChanged(QWidget* widget, bool visibility) {
+        widget->setVisible(visibility);
     }
 
 }
