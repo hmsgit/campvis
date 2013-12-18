@@ -130,6 +130,11 @@ namespace campvis {
          */
         tgt::GLCanvas* iKnowWhatImDoingGetArbitraryContext();
 
+        /**
+         * Checks whether calling thread is OpenGL thread.
+         * \return  std::this_thread::get_id() == _this_thread_id
+         */
+        bool isCurrentThreadOpenGlThread() const;
 
     protected:
         /**
@@ -179,6 +184,9 @@ namespace campvis {
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
 
         tbb::atomic<tgt::GLCanvas*> _currentContext;         ///< current active OpenGL context
+
+    private:
+        static std::thread::id _this_thread_id;
     };
 
 }

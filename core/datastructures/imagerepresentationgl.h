@@ -135,10 +135,20 @@ namespace campvis {
         /**
          * Returns a WeaklyTypedPointer to the data of this representation.
          * You do \b not own the pointer - do \b not modify its content!
+         * \see     ImageRepresentationGL::getWeaklyTypedPointerCopy()
          * \note    Make sure to call this method from a valid OpenGL context.
          * \return  A WeaklyTypedPointer to the data of this representation. Neither you own nor you may modify its data!
          */
         const WeaklyTypedPointer getWeaklyTypedPointer() const;
+
+        /**
+         * Returns a WeaklyTypedPointer to the data of this representation.
+         * Caller will own the pointer - take care to eventually delete it!
+         * \see     ImageRepresentationGL::getWeaklyTypedPointer()
+         * \note    Make sure to call this method from a valid OpenGL context.
+         * \return  A WeaklyTypedPointer to the data of this representation. Caller takes ownership!
+         */
+        const WeaklyTypedPointer getWeaklyTypedPointerCopy() const;
 
 
     protected:

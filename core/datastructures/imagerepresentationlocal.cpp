@@ -64,19 +64,31 @@ namespace campvis {
             return create(tester->getParent(), tester->getImageData());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
-            // FIXME: this here deadlocks, if called from OpenGL context (GLJobProc)!!!
-            tgt::GLCanvas* context = GLJobProc.iKnowWhatImDoingGetArbitraryContext();
             ImageRepresentationLocal* toReturn = 0;
-            GLJobProc.pause();
-            try {
-                tgt::GLContextScopedLock lock(context);
-                WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
-                toReturn = create(source->getParent(), wtp);
+
+            if (GLJobProc.isCurrentThreadOpenGlThread()) {
+                try {
+                    WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
+                    toReturn = create(source->getParent(), wtp);
+                }
+                catch (...) {
+                    LERROR("An unknown error occured during conversion...");
+                }
+
             }
-            catch (...) {
-                LERROR("An unknown error occured during conversion...");
+            else {
+                tgt::GLCanvas* context = GLJobProc.iKnowWhatImDoingGetArbitraryContext();
+                GLJobProc.pause();
+                try {
+                    tgt::GLContextScopedLock lock(context);
+                    WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
+                    toReturn = create(source->getParent(), wtp);
+                }
+                catch (...) {
+                    LERROR("An unknown error occured during conversion...");
+                }
+                GLJobProc.resume();
             }
-            GLJobProc.resume();
             return toReturn;
         }
 

@@ -33,6 +33,10 @@ namespace tgt {
             std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
             exit(EXIT_FAILURE);
         }
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
         releaseCurrentContext();
 
         return toReturn;

@@ -611,6 +611,7 @@ void Texture::downloadTextureToBuffer(GLubyte* pixels, size_t numBytesAllocated)
         LWARNINGC("tgt.texture", "downloadTextureToBuffer: allocated buffer is too small");
     }
     else {
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glGetTexImage(type_, 0, format_, dataType_, pixels);
     }
 }
@@ -621,6 +622,7 @@ GLubyte* Texture::downloadTextureToBuffer(GLint format, GLenum dataType) const {
     int arraySize = hmul(dimensions_) * calcBpp(format, dataType);
     GLubyte* pixels = new GLubyte[arraySize];
 
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glGetTexImage(type_, 0, format, dataType, pixels);
     return pixels;
 }

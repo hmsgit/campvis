@@ -294,5 +294,10 @@ namespace campvis {
         _texture->unbind();
     }
 
+    const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointerCopy() const {
+        void* ptr = _texture->downloadTextureToBuffer(_texture->getFormat(), _texture->getDataType());
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), ptr);
+    }
+
 
 }

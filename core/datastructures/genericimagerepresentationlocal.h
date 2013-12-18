@@ -301,7 +301,7 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::~GenericImageRepresentationLocal() {
-        delete _data;
+        delete [] _data;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
