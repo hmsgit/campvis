@@ -37,19 +37,19 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
-//#include "modules/io/processors/csvdimagereader.h"
-//#include "modules/io/processors/ltfimagereader.h"
-//#include "modules/io/processors/mhdimagereader.h"
-//#include "modules/io/processors/rawimagereader.h"
-//#include "modules/io/processors/vtkimagereader.h"
+#define EXT_MHD_FILE ".mhd"
+#define EXT_CSV_FILE ".csv"
+#define EXT_LTF_FILE ".ltf"
+#define EXT_VTK_FILE ".vtk"
+#define EXT_RQW_FILE ".raw"
 
 namespace campvis {
     /**
      * Reads an image file into the pipeline. This is mainly a wrapper class. It uses
-	 * the other image reader implemented for its tasks.
+     * the other image reader implemented for its tasks.
      *
      * Provides the interface for the classes that reads images from different types
-	 * of files into ImageRepresentationDisk representation
+     * of files into ImageRepresentationDisk representation
      *
      */
     class AbstractImageReader : public AbstractProcessor {
@@ -66,25 +66,23 @@ namespace campvis {
 
         /// \see AbstractProcessor::getExtension()
         virtual const std::string getExtension() = 0;
-        /// \see AbstractProcessor::getMetaProperties()
-		//virtual PropertyCollection& getMetaProperties() = 0;
 
-		/// functions to set the property of the readers
-		virtual void setURL(StringProperty p_url);
-		virtual void setTargetImageId(DataNameProperty& targetImageId);
-		virtual void setTargetImageId(std::string imageId);
-		virtual void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
-		
-	public:
+        /// functions to set the property of the readers
+        virtual void setURL(StringProperty p_url);
+        virtual void setTargetImageId(DataNameProperty& targetImageId);
+        virtual void setTargetImageId(std::string imageId);
+        virtual void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
+        
+    public:
         StringProperty p_url;               ///< URL for file to read
-		DataNameProperty p_targetImageID;   ///< image ID for read image
+        DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:
-		std::string _ext;
+        std::string _ext;
 
         static const std::string loggerCat_;
-		
-	private:
+        
+    private:
 
     };
 

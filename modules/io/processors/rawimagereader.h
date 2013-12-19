@@ -67,11 +67,9 @@ namespace campvis {
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
-		
+        
         /// \see AbstractProcessor::getExtension()
-		virtual const std::string getExtension() { return _ext;};
-        /// \see AbstractProcessor::getMetaProperties()
-		//PropertyCollection& getMetaProperties();
+        virtual const std::string getExtension() { return _ext;};
 
         IVec3Property p_size;               ///< Image size
         IntProperty p_numChannels;          ///< Number of channels per element

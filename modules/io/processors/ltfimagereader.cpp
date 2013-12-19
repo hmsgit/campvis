@@ -53,8 +53,8 @@ namespace campvis {
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-		this->_ext = ".ltf";
-		this->p_targetImageID.setValue("LtfImageReader.output");
+        this->_ext = EXT_LTF_FILE;
+        this->p_targetImageID.setValue("LtfImageReader.output");
 
         addProperty(&p_url);
         addProperty(&p_size);
@@ -99,9 +99,5 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
-	
-	//PropertyCollection& LtfImageReader::getMetaProperties() {
-	//	PropertyCollection dummy;
-	//	return dummy;
-	//}
+    
 }

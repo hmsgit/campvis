@@ -29,49 +29,41 @@
 
 #include "abstractimagereader.h"
 
-//#include <fstream>
-//
-//#include "tgt/filesystem.h"
-//#include "core/datastructures/imagedata.h"
-//#include "core/datastructures/imagerepresentationdisk.h"
-//#include "core/datastructures/genericimagerepresentationlocal.h"
-//#include "core/tools/textfileparser.h"
-
 namespace campvis {
-	AbstractImageReader::AbstractImageReader() 
-		: p_url("url", "Image URL", "")
-		, p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
+    AbstractImageReader::AbstractImageReader() 
+        : p_url("url", "Image URL", "")
+        , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
     {
-	}
+    }
 
-	AbstractImageReader::~AbstractImageReader() {
-	}
+    AbstractImageReader::~AbstractImageReader() {
+    }
 
-	void AbstractImageReader::setURL(StringProperty p_url) {
-		this->p_url.setValue(p_url.getValue());
+    void AbstractImageReader::setURL(StringProperty p_url) {
+        this->p_url.setValue(p_url.getValue());
 
-		std::string url = this->p_url.getValue();
+        std::string url = this->p_url.getValue();
 
-		unsigned extPos = (unsigned) url.rfind('.');
-		if (extPos != std::string::npos) {
-			this->_ext = url.substr(extPos);
-		}
-	}
+        unsigned extPos = (unsigned) url.rfind('.');
+        if (extPos != std::string::npos) {
+            this->_ext = url.substr(extPos);
+        }
+    }
 
-	void AbstractImageReader::setTargetImageId(DataNameProperty& targetImageId) {
-		this->p_targetImageID.setValue(targetImageId.getValue());
-		std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
-		for(std::set<AbstractProperty*>::iterator it = sharedProperties.begin(); it != sharedProperties.end(); it++) {
-			this->p_targetImageID.addSharedProperty(*it);
-		}
-	}
+    void AbstractImageReader::setTargetImageId(DataNameProperty& targetImageId) {
+        this->p_targetImageID.setValue(targetImageId.getValue());
+        std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
+        for(std::set<AbstractProperty*>::iterator it = sharedProperties.begin(); it != sharedProperties.end(); it++) {
+            this->p_targetImageID.addSharedProperty(*it);
+        }
+    }
 
-	void AbstractImageReader::setTargetImageId(std::string imageId) {
-			this->p_targetImageID.setValue(imageId);
-	}
+    void AbstractImageReader::setTargetImageId(std::string imageId) {
+            this->p_targetImageID.setValue(imageId);
+    }
 
-	void AbstractImageReader::setTargetImageIdSharedProperty(DataNameProperty* sharedProperty) {
-			this->p_targetImageID.addSharedProperty(sharedProperty);
-	}
+    void AbstractImageReader::setTargetImageIdSharedProperty(DataNameProperty* sharedProperty) {
+            this->p_targetImageID.addSharedProperty(sharedProperty);
+    }
 
 }

@@ -46,7 +46,7 @@
 namespace campvis {
     /**
      * Reads an image file into the pipeline. This is mainly a wrapper class. It uses
-	 * the other image reader implemented for its tasks.
+     * the other image reader implemented for its tasks.
      *
      */
     class GenericImageReader : public AbstractProcessor {
@@ -61,6 +61,11 @@ namespace campvis {
          **/
         virtual ~GenericImageReader();
 
+        /// \see AutoEvaluationPipeline::init()
+        virtual void init();
+
+        /// \see AutoEvaluationPipeline::deinit()
+        virtual void deinit();
 
         /**
          * Reads the MHD file into an ImageRepresentationDisk representation
@@ -77,36 +82,36 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-		/// functions to set the property of the readers
-		void setURL(std::string p_url);
-		void setURL(StringProperty p_url);
-		void setURL(const char* p_url);
-		void setTargetImageId(DataNameProperty& targetImageId);
-		void setTargetImageId(std::string imageId);
-		void setTargetImageId(const char* imageId);
-		void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
+        /// functions to set the property of the readers
+        void setURL(std::string p_url);
+        void setURL(StringProperty p_url);
+        void setURL(const char* p_url);
+        void setTargetImageId(DataNameProperty& targetImageId);
+        void setTargetImageId(std::string imageId);
+        void setTargetImageId(const char* imageId);
+        void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
 
-		//void setMetaProperties(PropertyCollection &metaProperties);
+        //void setMetaProperties(PropertyCollection &metaProperties);
 
     protected:
 
         static const std::string loggerCat_;
-		
-	private:
-		//std::vector<AbstractImageReader*> _readers;
-		std::map<AbstractImageReader*, MetaProperty*> _readers;
+        
+    private:
+        //std::vector<AbstractImageReader*> _readers;
+        std::map<AbstractImageReader*, MetaProperty*> _readers;
         StringProperty p_url;
-		std::string _ext;
-		MetaProperty* _currentlyVisible;
+        std::string _ext;
+        MetaProperty* _currentlyVisible;
 
-		/**
-		* Adds a particular reader to the generic reader
-		* Creates MetaProperty wrapper for the added reader, that
-		* is freed from the destructor of the class
-		* 
-		* /param reader	pointer to the reader to be added
-		*/
-		int addReader(AbstractImageReader* reader);
+        /**
+        * Adds a particular reader to the generic reader
+        * Creates MetaProperty wrapper for the added reader, that
+        * is freed from the destructor of the class
+        * 
+        * /param reader    pointer to the reader to be added
+        */
+        int addReader(AbstractImageReader* reader);
 
     };
 
