@@ -66,7 +66,7 @@ namespace campvis {
         for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
             if (nullptr != it->first) delete it->first;
             if (nullptr != it->second) delete it->second;
-            this->_readers.erase(it);
+            // this->_readers.erase(it);
         }
     }
     void GenericImageReader::process(DataContainer& data) {
