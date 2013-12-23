@@ -40,12 +40,10 @@ namespace campvis {
 
     CsvdImageReader::CsvdImageReader() 
         : AbstractImageReader()
-        //, p_url("url", "Image URL", "")
-        //, p_targetImageID("targetImageName", "Target Image ID", "CsvdImageReader.output", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-        this->_ext = EXT_CSV_FILE;
+        this->_ext.push_back(".csv");
         this->p_targetImageID.setValue("CsvdImageReader.output");
 
         addProperty(&p_url);

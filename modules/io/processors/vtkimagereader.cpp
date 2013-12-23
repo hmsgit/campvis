@@ -48,7 +48,7 @@ namespace campvis {
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-        this->_ext = EXT_VTK_FILE;
+        this->_ext.push_back(".vtk");
         this->p_targetImageID.setValue("VtkImageReader.output");
 
         addProperty(&p_url);

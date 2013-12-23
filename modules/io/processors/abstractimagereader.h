@@ -37,12 +37,6 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
-#define EXT_MHD_FILE ".mhd"
-#define EXT_CSV_FILE ".csv"
-#define EXT_LTF_FILE ".ltf"
-#define EXT_VTK_FILE ".vtk"
-#define EXT_RQW_FILE ".raw"
-
 namespace campvis {
     /**
      * Reads an image file into the pipeline. This is mainly a wrapper class. It uses
@@ -64,8 +58,8 @@ namespace campvis {
          **/
         virtual ~AbstractImageReader();
 
-        /// \see AbstractProcessor::getExtension()
-        virtual const std::string getExtension() = 0;
+        /// \see AbstractProcessor::acceptsExtension()
+        virtual bool acceptsExtension(const std::string& extenstion);
 
         /// functions to set the property of the readers
         virtual void setURL(StringProperty p_url);
@@ -78,7 +72,7 @@ namespace campvis {
         DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:
-        std::string _ext;
+        std::vector<std::string> _ext;
 
         static const std::string loggerCat_;
         

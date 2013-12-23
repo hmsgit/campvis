@@ -91,14 +91,10 @@ namespace campvis {
         void setTargetImageId(const char* imageId);
         void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
 
-        //void setMetaProperties(PropertyCollection &metaProperties);
-
     protected:
-
         static const std::string loggerCat_;
         
     private:
-        //std::vector<AbstractImageReader*> _readers;
         std::map<AbstractImageReader*, MetaProperty*> _readers;
         StringProperty p_url;
         std::string _ext;

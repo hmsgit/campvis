@@ -67,9 +67,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
         
-        /// \see AbstractProcessor::getExtension()
-        virtual const std::string getExtension() { return _ext;};
-
         IVec3Property p_size;               ///< Image size
         IntProperty p_numChannels;          ///< Number of channels per element
         GenericOptionProperty<WeaklyTypedPointer::BaseType> p_baseType; ///< Base type
@@ -81,7 +78,6 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // LTFIMAGEREADER_H__
