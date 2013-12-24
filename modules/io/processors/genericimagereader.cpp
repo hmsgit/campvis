@@ -69,16 +69,14 @@ namespace campvis {
         }
     }
     void GenericImageReader::process(DataContainer& data) {
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-            if((it->first)->acceptsExtension(this->_ext)) {
-                if(nullptr != this->_currentlyVisible) {
-                    this->_currentlyVisible->setVisible(false);
-                }
-                (it->second)->setVisible(true);
-                this->_currentlyVisible = it->second;
-                (it->first)->process(data);
-                break;
+        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
+        if(it != this->_readers.end()) {
+            if(nullptr != this->_currentlyVisible) {
+                this->_currentlyVisible->setVisible(false);
             }
+            (it->second)->setVisible(true);
+            this->_currentlyVisible = it->second;
+            (it->first)->process(data);
         }
         return;
     }
@@ -91,11 +89,9 @@ namespace campvis {
             this->_ext = url.substr(extPos);
         }
 
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-            if((it->first)->acceptsExtension(this->_ext)) {
-                (it->first)->p_url.setValue(this->p_url.getValue());
-                break;
-            }
+        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
+        if(it != this->_readers.end()) {
+            (it->first)->p_url.setValue(this->p_url.getValue());
         }
         return;
     }
@@ -109,14 +105,12 @@ namespace campvis {
     }
 
     void GenericImageReader::setTargetImageId(DataNameProperty& targetImageId) {
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-            if((it->first)->acceptsExtension(this->_ext)) {
-                (it->first)->p_targetImageID.setValue(targetImageId.getValue());
-                std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
-                for(std::set<AbstractProperty*>::iterator jt = sharedProperties.begin(); jt != sharedProperties.end(); jt++) {
-                    (it->first)->p_targetImageID.addSharedProperty(*jt);
-                }
-                break;
+        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
+        if(it != this->_readers.end()) {
+            (it->first)->p_targetImageID.setValue(targetImageId.getValue());
+            std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
+            for(std::set<AbstractProperty*>::iterator jt = sharedProperties.begin(); jt != sharedProperties.end(); jt++) {
+                (it->first)->p_targetImageID.addSharedProperty(*jt);
             }
         }
         return;
@@ -126,21 +120,17 @@ namespace campvis {
         return this->setTargetImageId(std::string(imageId));
     }
     void GenericImageReader::setTargetImageId(std::string imageId) {
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-            if((it->first)->acceptsExtension(this->_ext)) {
-                (it->first)->p_targetImageID.setValue(imageId);
-                break;
-            }
+        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
+        if(it != this->_readers.end()) {
+            (it->first)->p_targetImageID.setValue(imageId);
         }
         return;
     }
 
     void GenericImageReader::setTargetImageIdSharedProperty(DataNameProperty* sharedProperty) {
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
-            if((it->first)->acceptsExtension(this->_ext)) {
-                (it->first)->p_targetImageID.addSharedProperty(sharedProperty);
-                break;
-            }
+        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
+        if(it != this->_readers.end()) {
+            (it->first)->p_targetImageID.addSharedProperty(sharedProperty);
         }
         return;
     }

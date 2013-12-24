@@ -111,6 +111,15 @@ namespace campvis {
 
     };
 
+
+    struct checkExt {
+        checkExt( std::string str ) : _str(str) {}
+        bool operator()( const std::pair<AbstractImageReader*, MetaProperty*>& v ) const { 
+            return v.first->acceptsExtension(this->_str); 
+        }
+    private:
+        std::string _str;
+    };
 }
 
 #endif // GENERICIMAGEREADER_H__

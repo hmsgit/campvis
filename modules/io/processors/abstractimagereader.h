@@ -58,8 +58,13 @@ namespace campvis {
          **/
         virtual ~AbstractImageReader();
 
-        /// \see AbstractProcessor::acceptsExtension()
-        virtual bool acceptsExtension(const std::string& extenstion);
+        /**
+         * Checks whether an extension is handled by the current reader.
+         * returns true is the extension is handled, false otherwise
+         *
+         * \param extension  The extension to be checked
+         **/
+        virtual bool acceptsExtension(const std::string& extension);
 
         /// functions to set the property of the readers
         virtual void setURL(StringProperty p_url);
