@@ -118,16 +118,19 @@ namespace campvis {
 
     void VolumeRenderer::process(DataContainer& data) {
         if (getInvalidationLevel() & PG_INVALID) {
+            _pgGenerator.lockProcessor();
             _pgGenerator.process(data);
-            _eepGenerator.process(data);
-            _raycaster.process(data);
+            _pgGenerator.unlockProcessor();
         }
-        else if (getInvalidationLevel() & EEP_INVALID) {
+        if (getInvalidationLevel() & EEP_INVALID) {
+            _eepGenerator.lockProcessor();
             _eepGenerator.process(data);
-            _raycaster.process(data);
+            _eepGenerator.unlockProcessor();
         }
-        else if (getInvalidationLevel() & RAYCASTER_INVALID) {
+        if (getInvalidationLevel() & RAYCASTER_INVALID) {
+            _raycaster.lockProcessor();
             _raycaster.process(data);
+            _raycaster.unlockProcessor();
         }
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
@@ -135,10 +138,10 @@ namespace campvis {
 
     void VolumeRenderer::onProcessorInvalidated(AbstractProcessor* processor) {
         if (processor == &_pgGenerator) {
-            invalidate(PG_INVALID);
+            invalidate(PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
         }
         else if (processor == &_eepGenerator) {
-            invalidate(EEP_INVALID);
+            invalidate(EEP_INVALID | RAYCASTER_INVALID);
         }
         else if (processor == &_raycaster) {
             invalidate(RAYCASTER_INVALID);

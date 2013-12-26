@@ -59,11 +59,7 @@ namespace campvis {
         _ve.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
         
-        //_imageReader.p_url.setValue("D:\\hiwi\\CAMPVis Datasets\\smallHeart.mhd");
-        //_imageReader.p_targetImageID.setValue("reader.output");
-        //_imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
-        
-        _imageReader.setURL("D:\\hiwi\\CAMPVis Datasets\\smallHeart.mhd");
+        _imageReader.setURL(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
         _imageReader.setTargetImageId("reader.output");
         _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
         

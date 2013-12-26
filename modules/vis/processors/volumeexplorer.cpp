@@ -121,20 +121,28 @@ namespace campvis {
     void VolumeExplorer::process(DataContainer& data) {
         // launch sub-renderers if necessary
         if (getInvalidationLevel() & VR_INVALID) {
+            _raycaster.lockProcessor();
             _raycaster.process(data);
+            _raycaster.unlockProcessor();
         }
         if (getInvalidationLevel() & SLICES_INVALID) {
             _sliceExtractor.p_sliceOrientation.selectById("x");
             _sliceExtractor.p_targetImageID.setValue(p_outputImage.getValue() + ".xSlice");
+            _sliceExtractor.lockProcessor();
             _sliceExtractor.process(data);
+            _sliceExtractor.unlockProcessor();
 
             _sliceExtractor.p_sliceOrientation.selectById("y");
             _sliceExtractor.p_targetImageID.setValue(p_outputImage.getValue() + ".ySlice");
+            _sliceExtractor.lockProcessor();
             _sliceExtractor.process(data);
+            _sliceExtractor.unlockProcessor();
 
             _sliceExtractor.p_sliceOrientation.selectById("z");
             _sliceExtractor.p_targetImageID.setValue(p_outputImage.getValue() + ".zSlice");
+            _sliceExtractor.lockProcessor();
             _sliceExtractor.process(data);
+            _sliceExtractor.unlockProcessor();
         }
 
         // compose rendering
