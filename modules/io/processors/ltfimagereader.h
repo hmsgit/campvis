@@ -25,7 +25,7 @@
 #ifndef LTFIMAGEREADER_H__
 #define LTFIMAGEREADER_H__
 
-#include "AbstractImageReader.h"
+#include "abstractimagereader.h"
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"

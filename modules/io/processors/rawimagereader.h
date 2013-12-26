@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include "abstractImagereader.h"
+#include "abstractimagereader.h"
 
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
