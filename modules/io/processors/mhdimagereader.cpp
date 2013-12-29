@@ -76,8 +76,14 @@ namespace campvis {
 
             // image type
             if (tfp.hasKey("ObjectType")) {
-                if (tfp.getString("ObjectType") != "Image") {
-                    LERROR("Error while parsing MHD header: ObjectType = Image expected");
+                if (tfp.getString("ObjectType") == "Image") {
+                    numChannels = 1;
+                }
+                else if (tfp.getString("ObjectType") == "TensorImage") {
+                    numChannels = 6;
+                }
+                else {
+                    LERROR("Error while parsing MHD header: ObjectType = Image or ObjectType = TensorImage expected");
                     return;
                 }
             }

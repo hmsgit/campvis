@@ -227,6 +227,7 @@ namespace campvis {
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(2)
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(3)
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(4)
+        else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(6)
         else {
             tgtAssert(false, "Should not reach this - wrong number of channel!");
             return 0;
