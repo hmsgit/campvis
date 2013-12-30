@@ -29,6 +29,7 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/buttonproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/numericproperty.h"
@@ -49,6 +50,14 @@ namespace campvis {
         /// Eigenvalue handling of degenerated tensors (i.e. having (partially) negative eigenvalues)
         enum DegeneratedEvHandling {
             NONE, MASK, INVERT, SHIFT
+        };
+
+        // Pair of DataNameProperty for output image ID and OptionProperty for image type
+        struct OutputPropertyPair {
+            OutputPropertyPair(size_t index);;
+
+            DataNameProperty _imageId;
+            GenericOptionProperty<std::string> _imageType;
         };
 
         /**
@@ -79,6 +88,9 @@ namespace campvis {
         GenericOptionProperty<DegeneratedEvHandling> p_degeneratedHandling; ///< Handling of degenerated tensors
         BoolProperty p_maskMixedTensors;
 
+        ButtonProperty p_addOutputButton;
+        std::vector<OutputPropertyPair*> p_outputProperties;
+
     protected:
 
         /**
@@ -87,6 +99,18 @@ namespace campvis {
          * \param   data    DataContainer to work on.
          */
         void computeEigensystem(DataContainer& data);
+
+        /**
+         * Computes the derived measurement for output number \a index.
+         * \param   data    DataContainer to store output image in.
+         * \param   index   Index of output to compute.
+         */
+        void computeOutput(DataContainer& data, size_t index);
+
+        /**
+         * Adds another output for this processor (i.e. adds another OutputPropertyPair).
+         */
+        void addOutput();
 
         DataHandle _eigenvalues;    ///< Current eigenvalues cached
         DataHandle _eigenvectors;   ///< Current eigenvectors cached
