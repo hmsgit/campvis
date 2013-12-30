@@ -27,6 +27,7 @@
 
 #include "tgt/tgt_gl.h"
 #include "tgt/tgt_math.h"
+#include "tgt/matrix.h"
 #include "tgt/vector.h"
 #include "core/datastructures/tensor.h"
 #include "core/tools/weaklytypedpointer.h"
@@ -69,6 +70,11 @@ namespace {
 
     template<>
     struct TypeTraitsHelperPerChannel<6> {
+        static const GLint glFormat = GL_RGB;
+    };
+
+    template<>
+    struct TypeTraitsHelperPerChannel<9> {
         static const GLint glFormat = GL_RGB;
     };
 
@@ -129,6 +135,14 @@ namespace {
     SPCIALIZE_TTIF(uint32_t,6, GL_RGB32F)
     SPCIALIZE_TTIF(int32_t, 6, GL_RGB32F)
     SPCIALIZE_TTIF(float,   6, GL_RGB32F)
+
+    SPCIALIZE_TTIF(uint8_t, 9, GL_RGB8)
+    SPCIALIZE_TTIF(int8_t,  9, GL_RGB8)
+    SPCIALIZE_TTIF(uint16_t,9, GL_RGB16)
+    SPCIALIZE_TTIF(int16_t, 9, GL_RGB16)
+    SPCIALIZE_TTIF(uint32_t,9, GL_RGB32F)
+    SPCIALIZE_TTIF(int32_t, 9, GL_RGB32F)
+    SPCIALIZE_TTIF(float,   9, GL_RGB32F)
 
 // ================================================================================================
 // ================================================================================================
@@ -285,6 +299,21 @@ namespace {
         static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
             tgtAssert(channel >= 0 && channel <= 5, "Channel out of bounds!");
             element[channel] = value;
+        }
+    };
+
+    template<typename BASETYPE>
+    struct TypeTraitsHelperOfBasetypePerChannel<BASETYPE, 9> {
+        typedef tgt::Matrix3< BASETYPE > ElementType;
+
+        static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
+            tgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
+            return element.elem[channel];
+        }
+
+        static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
+            tgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
+            element.elem[channel] = value;
         }
     };
 
