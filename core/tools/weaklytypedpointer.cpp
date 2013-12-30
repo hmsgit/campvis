@@ -32,7 +32,7 @@ namespace campvis {
         , _numChannels(numChannels)
         , _pointer(ptr)
     {
-        tgtAssert(_numChannels > 0 && _numChannels <= 4, "Number of channels out of bounds!");
+        tgtAssert(_numChannels > 0, "Number of channels out of bounds!");
     };
 
     WeaklyTypedPointer::WeaklyTypedPointer()

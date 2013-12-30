@@ -26,6 +26,7 @@
 #define GENERICIMAGEREPRESENTATIONLOCAL_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
+#include "core/datastructures/imagerepresentationdisk.h"
 #include "core/tools/typetraits.h"
 
 #include <cstring>  // needed for memcpy
@@ -150,7 +151,7 @@ namespace campvis {
          * \param   data    Pointer to the image data, must not be 0, GenericImageRepresentationLocal takes ownership of this pointer!
          * \return  A pointer to the newly created ImageRepresentationDisk, you do \b not own this pointer!
          */
-        static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* create(ImageData* parent, ElementType* data);
+        static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* create(const ImageData* parent, ElementType* data);
 
         /**
          * Destructor
@@ -280,8 +281,8 @@ namespace campvis {
 // = Template implementation ======================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(ImageData* parent, ElementType* data) {
-        ThisType* toReturn = new ThisType(parent, data);
+    campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(const ImageData* parent, ElementType* data) {
+        ThisType* toReturn = new ThisType(const_cast<ImageData*>(parent), data);
         toReturn->addToParent();
         return toReturn;
     }
@@ -306,6 +307,12 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::tryConvertFrom(const AbstractImageRepresentation* source) {
+        if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
+            if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
+                WeaklyTypedPointer wtp = tester->getImageData();
+                return create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
+            }            
+        }
         return 0;
     }
 
