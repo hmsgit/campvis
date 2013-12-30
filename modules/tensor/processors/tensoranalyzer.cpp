@@ -72,8 +72,8 @@ namespace campvis {
     TensorAnalyzer::TensorAnalyzer()
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Tensor Image", "tensors", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | EIGENSYSTEM_INVALID)
-        , p_evalsImage("EvalsImage", "Output Eigenvalues Image", "eigenvalues", DataNameProperty::WRITE)
-        , p_evecsImage("EvecsImage", "Output Eigenvectors Image", "eigenvectors", DataNameProperty::WRITE)
+        , p_evalsImage("EvalsImage", "Output Eigenvalues Image", "TensorAnalyzer.eigenvalues", DataNameProperty::WRITE)
+        , p_evecsImage("EvecsImage", "Output Eigenvectors Image", "TensorAnalyzer.eigenvectors", DataNameProperty::WRITE)
         , p_degeneratedHandling("DegeneratedHandling", "Handling of Degenerated Tensors", handlingModes, 4)
         , p_maskMixedTensors("MaskMixedTensors", "Mask Mixed Tensors", true)
         , p_addOutputButton("AddOutputButton", "Add Output", AbstractProcessor::VALID)
@@ -122,7 +122,7 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 3>* evalRep = GenericImageRepresentationLocal<float, 3>::create(evals, 0);
 
             ImageData* evecs = new ImageData(input->getDimensionality(), input->getSize(), 9);
-            GenericImageRepresentationLocal<float, 9>* evecRep = GenericImageRepresentationLocal<float, 9>::create(evals, 0);
+            GenericImageRepresentationLocal<float, 9>* evecRep = GenericImageRepresentationLocal<float, 9>::create(evecs, 0);
 
             tbb::atomic<size_t> countDiscarded;
             countDiscarded = 0;
