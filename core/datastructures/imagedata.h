@@ -40,7 +40,7 @@ namespace campvis {
 
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.
-     * Different representations (e.g. local memory, OpenGL texture, OpenCL buffer) are
+     * Different representations (e.g. local memory, OpenGL texture) are
      * to be defined by inheritance.
      * 
      * \todo 

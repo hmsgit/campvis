@@ -42,16 +42,6 @@ FOREACH(CampvisModulesCoreHeader ${CampvisModulesCoreHeaders})
     LIST(APPEND CampvisCoreHeaders ${ModHeaderFile})
 ENDFOREACH()
 
-#SET(CampvisCoreSources
-#    application/campvis.cpp
-#    application/campvispainter.cpp
-#    datastructures/
-#)
-
-#SET(CampvisCoreHeaders 
-#    application/campvispainter.h
-#)
-
 ADD_LIBRARY(campvis-core 
     ${CampvisCoreSources} ${CampvisCoreHeaders} 
 )

@@ -34,10 +34,6 @@
 #include "tgt/qt/qtcontextmanager.h"
 #include "tbb/compat/thread"
 
-#ifdef HAS_KISSCL
-#include "kisscl/clruntime.h"
-#endif
-
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
 #include "core/tools/opengljobprocessor.h"
@@ -51,12 +47,11 @@ namespace campvis {
 
     const std::string CampVisApplication::loggerCat_ = "CAMPVis.application.CampVisApplication";
 
-    CampVisApplication::CampVisApplication(int& argc, char** argv, bool useOpenCL) 
+    CampVisApplication::CampVisApplication(int& argc, char** argv) 
         : QApplication(argc, argv)
         , _localContext(0)
         , _mainWindow(0)
         , _initialized(false)
-        , _useOpenCL(useOpenCL)
         , _argc(argc)
         , _argv(argv)
     {
@@ -124,13 +119,7 @@ namespace campvis {
         }
 
         QuadRenderer::init();
-
-#ifdef HAS_KISSCL
-        if (_useOpenCL) {
-            kisscl::CLRuntime::init();
-        }
-#endif
-
+        
         if (_argc > 0) {
             // ugly hack
             std::string basePath(_argv[0]);
@@ -148,22 +137,6 @@ namespace campvis {
                 ShdrMgr.addPath(sourcePath);
                 ShdrMgr.addPath(sourcePath + "/core/glsl");
             }
-#endif
-
-#ifdef HAS_KISSCL
-            if (_useOpenCL) {
-                CLRtm.addPath(basePath);
-                CLRtm.addPath(basePath + "/core/cl");
-            }
-
-#ifdef CAMPVIS_SOURCE_DIR
-            {
-                std::string sourcePath = CAMPVIS_SOURCE_DIR;
-                CLRtm.addPath(sourcePath);
-                CLRtm.addPath(sourcePath + "/core/glsl");
-            }
-#endif
-
 #endif
         }
 
@@ -203,15 +176,7 @@ namespace campvis {
             }
 
             _mainWindow->deinit();
-
             QuadRenderer::deinit();
-
-#ifdef HAS_KISSCL
-            if (_useOpenCL) {
-                kisscl::CLRuntime::deinit();
-            }
-#endif
-
 
             // deinit OpenGL and tgt
             tgt::deinitGL();

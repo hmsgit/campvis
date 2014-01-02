@@ -65,9 +65,8 @@ namespace campvis {
          * Creates a new CampVisApplication.
          * \param   argc        number of passed arguments
          * \param   argv        vector of arguments
-         * \param   useOpenCL   Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
          */
-        CampVisApplication(int& argc, char** argv, bool useOpenCL = true);
+        CampVisApplication(int& argc, char** argv);
 
         /**
          * Destructor, make sure to call deinit() first.
@@ -143,9 +142,6 @@ namespace campvis {
 
         /// Flag, whether CampVisApplication was correctly initialized
         bool _initialized;
-
-        /// Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
-        bool _useOpenCL;
 
         int _argc;
         char** _argv;

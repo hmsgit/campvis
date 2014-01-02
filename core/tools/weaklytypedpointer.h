@@ -31,10 +31,6 @@
 #include "tgt/tgt_gl.h"
 #include "tgt/types.h"
 
-#ifdef HAS_KISSCL
-#include "kisscl/kisscl.h"
-#endif
-
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -135,11 +131,6 @@ namespace campvis {
         ILenum getIlDataType() const;
 #endif
 
-#ifdef HAS_KISSCL
-        cl_channel_type getClChannelType() const;
-
-        cl_channel_order getClChannelOrder() const;
-#endif
 
         BaseType _baseType;         ///< Base data type of the pointer
         size_t _numChannels;        ///< Number of channels, must be in [1, 4]!

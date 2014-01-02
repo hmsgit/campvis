@@ -196,20 +196,6 @@ IF(EXISTS "${CampvisHome}/ext/eigen/Eigen/Eigen")
 ELSE()
     MESSAGE(WARNING "Did not find Eigen - Eigen library must be placed in ext/eigen/!")
 ENDIF()
-
-# detect libraries
-MESSAGE(STATUS "--------------------------------------------------------------------------------")
-MESSAGE(STATUS "Detecting Optional External Libraries:")
-
-# OpenCL
-FIND_PACKAGE(CL)
-IF (OPENCL_FOUND)
-    MESSAGE(STATUS "* Found OpenCL")
-    LIST(APPEND CampvisGlobalIncludeDirs ${OPENCL_INCLUDE_DIR})
-    LIST(APPEND CampvisGlobalExternalLibs ${OPENCL_LIBRARY})
-ELSE(OPENCL_FOUND)
-    MESSAGE(STATUS "* Did NOT find OpenCL!")
-ENDIF(OPENCL_FOUND)
-
 SET(CommonconfProcessed TRUE)
+
 ENDIF(NOT CommonconfProcessed)
