@@ -23,6 +23,8 @@
 // ================================================================================================
 
 #include "transferfunctionproperty.h"
+#include "core/datastructures/imagedata.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 
 namespace campvis {
 
@@ -31,6 +33,8 @@ namespace campvis {
     TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
         : AbstractProperty(name, title, invalidationLevel)
         , _transferFunction(tf)
+        , _imageHandle(0)
+        , _autoFitWindowToData(true)
     {
         tgtAssert(tf != 0, "Assigned transfer function must not be 0.");
         tf->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
@@ -51,6 +55,7 @@ namespace campvis {
 
     void TransferFunctionProperty::deinit() {
         _transferFunction->deinit();
+        _imageHandle = DataHandle(0);
     }
 
     void TransferFunctionProperty::replaceTF(AbstractTransferFunction* tf) {
@@ -73,6 +78,38 @@ namespace campvis {
 
     void TransferFunctionProperty::addSharedProperty(AbstractProperty* prop) {
         tgtAssert(false, "Sharing of TF properties not supported!");
+    }
+
+    campvis::DataHandle TransferFunctionProperty::getImageHandle() const {
+        return _imageHandle;
+    }
+
+    void TransferFunctionProperty::setImageHandle(DataHandle imageHandle) {
+        tgtAssert(
+            imageHandle.getData() == 0 || dynamic_cast<const ImageData*>(imageHandle.getData()) != 0, 
+            "The data in the image handle must either be 0 or point to a valid ImageData object!");
+
+        if (_autoFitWindowToData && imageHandle.getData() != 0) {
+            if (const ImageData* id = dynamic_cast<const ImageData*>(imageHandle.getData())) {
+            	const ImageRepresentationLocal* localRep = id->getRepresentation<ImageRepresentationLocal>();
+                if (localRep != 0) {
+                    const Interval<float>& ii = localRep->getNormalizedIntensityRange();
+                    _transferFunction->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                }
+            }
+        }
+
+        _imageHandle = imageHandle;
+        s_imageHandleChanged();
+    }
+
+    void TransferFunctionProperty::setAutoFitWindowToData(bool newValue) {
+        _autoFitWindowToData = newValue;
+        s_autoFitWindowToDataChanged();
+    }
+
+    bool TransferFunctionProperty::getAutoFitWindowToData() const {
+        return _autoFitWindowToData;
     }
 
 }

@@ -34,6 +34,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QCheckBox>
 
 namespace campvis {
     TransferFunctionPropertyWidget::TransferFunctionPropertyWidget(TransferFunctionProperty* property, QWidget* parent /*= 0*/)
@@ -43,6 +44,8 @@ namespace campvis {
         , _lblDomain(0)
         , _spinDomainLeft(0)
         , _spinDomainRight(0)
+        , _cbAutoFitDomainToImage(0)
+        , _btnFitDomainToImage(0)
         , _btnEditTF(0)
         , _dockWidget(0)
         , _editor(0)
@@ -51,7 +54,7 @@ namespace campvis {
         _gridLayout = new QGridLayout(_widget);
         _widget->setLayout(_gridLayout);
 
-        _lblDomain = new QLabel("Intensity Domain: ", _widget);
+        _lblDomain = new QLabel("Window:", _widget);
         _gridLayout->addWidget(_lblDomain, 0, 0);
 
 
@@ -70,36 +73,28 @@ namespace campvis {
         _btnFitDomainToImage = new QPushButton("Fit", _widget);
         _gridLayout->addWidget(_btnFitDomainToImage, 0, 3);
 
+        _cbAutoFitDomainToImage = new QCheckBox("Auto", _widget);
+        _gridLayout->addWidget(_cbAutoFitDomainToImage, 0, 4);
+
         _btnEditTF = new QPushButton("Edit Transfer Function", _widget);
-        _gridLayout->addWidget(_btnEditTF, 1, 1, 1, 3);
+        _gridLayout->addWidget(_btnEditTF, 1, 1, 1, 4);
 
         addWidget(_widget);
 
-        onTransferFunctionImageHandleChanged();
         updateWidgetFromProperty();
-        property->getTF()->s_imageHandleChanged.connect(this, &TransferFunctionPropertyWidget::onTransferFunctionImageHandleChanged);
 
         connect(_spinDomainLeft, SIGNAL(valueChanged(double)), this, SLOT(onDomainChanged(double)));
         connect(_spinDomainRight, SIGNAL(valueChanged(double)), this, SLOT(onDomainChanged(double)));
         connect(_btnEditTF, SIGNAL(clicked(bool)), this, SLOT(onEditClicked(bool)));
         connect(_btnFitDomainToImage, SIGNAL(clicked(bool)), this, SLOT(onFitClicked(bool)));
+        connect(_cbAutoFitDomainToImage, SIGNAL(stateChanged(int)), this, SLOT(onAutoFitDomainToImageChanged(int)));
+
+        property->s_autoFitWindowToDataChanged.connect(this, &TransferFunctionPropertyWidget::onTransferFunctionAutoFitWindowToDataChanged);
     }
 
     TransferFunctionPropertyWidget::~TransferFunctionPropertyWidget() {
-        static_cast<TransferFunctionProperty*>(_property)->getTF()->s_imageHandleChanged.disconnect(this);
+        static_cast<TransferFunctionProperty*>(_property)->s_autoFitWindowToDataChanged.disconnect(this);
         delete _dockWidget;
-    }
-
-    void TransferFunctionPropertyWidget::onTransferFunctionImageHandleChanged() {
-        DataHandle dh = static_cast<TransferFunctionProperty*>(_property)->getTF()->getImageHandle();
-        if (dh.getData() != 0) {
-            const ImageRepresentationLocal* idl = dynamic_cast<const ImageRepresentationLocal*>(dh.getData());
-            if (idl != 0) {
-                Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
-//                 _spinDomainLeft->setMinimum(intensityInterval.getLeft());
-//                 _spinDomainRight->setMaximum(intensityInterval.getRight());
-            }
-        }
     }
 
     void TransferFunctionPropertyWidget::updateWidgetFromProperty() {
@@ -116,6 +111,10 @@ namespace campvis {
         _spinDomainRight->setMinimum(domain.x);
         _spinDomainRight->setValue(domain.y);
         _spinDomainRight->blockSignals(false);
+
+        _cbAutoFitDomainToImage->blockSignals(true);
+        _cbAutoFitDomainToImage->setChecked(prop->getAutoFitWindowToData());
+        _cbAutoFitDomainToImage->blockSignals(false);
     }
 
     void TransferFunctionPropertyWidget::onDomainChanged(double value) {
@@ -154,6 +153,15 @@ namespace campvis {
                 tf->setIntensityDomain(tgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));
             }
         }
+    }
+
+    void TransferFunctionPropertyWidget::onAutoFitDomainToImageChanged(int state) {
+        TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
+        prop->setAutoFitWindowToData(state != Qt::Unchecked);
+    }
+
+    void TransferFunctionPropertyWidget::onTransferFunctionAutoFitWindowToDataChanged() {
+        emit s_propertyChanged(_property);
     }
 
 
