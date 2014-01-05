@@ -55,8 +55,6 @@ namespace campvis {
      *          b) All OpenGL-related methods must be called by a thread with a valid and locked OpenGL
      *             context. Even though other internals might be changed meanwhile, this ensures that
      *             the OpenGL stuff (e.g. the texture) stays valid for this time.
-     * 
-     * \todo    Check thread-safety, the private local lock is probably not the best design.
      */
     class AbstractTransferFunction {
     public:
@@ -101,12 +99,6 @@ namespace campvis {
          */
         void bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform = "_transferFunction", const std::string& transFuncParamsUniform = "_transferFunctionParams");
         
-        /**
-         * Creates the OpenGL texture.
-         * \note    Calling thread must have a valid OpenGL context.
-         */
-        void uploadTexture();
-
         /**
          * Sets the intensity domain where the transfer function is mapped to during classification.
          * \param   newDomain   new intensity domain

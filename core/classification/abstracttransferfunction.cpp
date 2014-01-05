@@ -59,7 +59,6 @@ namespace campvis {
         tgtAssert(shader != 0, "Shader must not be 0.");
 
         {
-            // TODO:    lock here or in createTexture?
             tbb::mutex::scoped_lock lock(_localMutex);
             if (_texture == 0 || _dirtyTexture) {
                 shader->deactivate();
@@ -88,16 +87,7 @@ namespace campvis {
         
         shader->setIgnoreUniformLocationError(tmp);
     }
-
-    void AbstractTransferFunction::uploadTexture() {
-        {
-            tbb::mutex::scoped_lock lock(_localMutex);
-            if (_texture == 0 || _dirtyTexture) {
-                createTexture();
-            }
-        }
-    }
-
+    
     void AbstractTransferFunction::setIntensityDomain(const tgt::vec2& newDomain) {
         tgtAssert(newDomain.x <= newDomain.y, "Intensity domain is not a valid interval.");
         {
@@ -113,7 +103,6 @@ namespace campvis {
     }
 
     const tgt::Texture* AbstractTransferFunction::getTexture() {
-        // TODO:    lock here or in createTexture?
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             if (_texture == 0 || _dirtyTexture) {
