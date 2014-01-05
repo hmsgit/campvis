@@ -86,7 +86,7 @@ namespace campvis {
                 if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
                     // source DataHandle has changed
                     _sourceImageTimestamp = img.getDataHandle().getTimestamp();
-                    p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+                    p_transferFunction.setImageHandle(img.getDataHandle());
                 }
 
                 if (hasInvalidShader()) {

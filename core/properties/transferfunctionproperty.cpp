@@ -26,6 +26,8 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 
+#include <tbb/tbb.h>
+
 namespace campvis {
 
     const std::string TransferFunctionProperty::loggerCat_ = "CAMPVis.core.datastructures.TransferFunctionProperty";
@@ -37,12 +39,17 @@ namespace campvis {
         , _autoFitWindowToData(true)
     {
         tgtAssert(tf != 0, "Assigned transfer function must not be 0.");
+        
         tf->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
+        tf->s_intensityDomainChanged.connect(this, &TransferFunctionProperty::onTfIntensityDomainChanged);
+
+        _intensityHistogram = 0;
+        _dirtyHistogram = false;
     }
 
     TransferFunctionProperty::~TransferFunctionProperty() {
-        _transferFunction->s_changed.disconnect(this);
         delete _transferFunction;
+        delete _intensityHistogram;
     }
 
     AbstractTransferFunction* TransferFunctionProperty::getTF() {
@@ -54,6 +61,8 @@ namespace campvis {
     }
 
     void TransferFunctionProperty::deinit() {
+        _transferFunction->s_changed.disconnect(this);
+        _transferFunction->s_intensityDomainChanged.disconnect(this);
         _transferFunction->deinit();
         _imageHandle = DataHandle(0);
     }
@@ -64,14 +73,17 @@ namespace campvis {
 
         if (_transferFunction != 0) {
             _transferFunction->s_changed.disconnect(this);
+            _transferFunction->s_intensityDomainChanged.disconnect(this);
             _transferFunction->deinit();
         }
         delete _transferFunction;
 
 
         _transferFunction = tf;
-        if (_transferFunction != 0)
+        if (_transferFunction != 0) {
             _transferFunction->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
+            _transferFunction->s_intensityDomainChanged.connect(this, &TransferFunctionProperty::onTfIntensityDomainChanged);
+        }
 
         s_AfterTFReplace(_transferFunction);
     }
@@ -100,6 +112,7 @@ namespace campvis {
         }
 
         _imageHandle = imageHandle;
+        _dirtyHistogram = true;
         s_imageHandleChanged();
     }
 
@@ -110,6 +123,42 @@ namespace campvis {
 
     bool TransferFunctionProperty::getAutoFitWindowToData() const {
         return _autoFitWindowToData;
+    }
+
+    void TransferFunctionProperty::computeIntensityHistogram() const {
+        IntensityHistogramType* newHistogram = 0;
+
+        // create new histogram according to the current intensity domain
+        ImageRepresentationLocal::ScopedRepresentation repLocal(_imageHandle);
+        if (repLocal != 0) {
+            float mins = _transferFunction->getIntensityDomain().x;
+            float maxs = _transferFunction->getIntensityDomain().y;
+            size_t numBuckets = std::min(WeaklyTypedPointer::numBytes(repLocal->getWeaklyTypedPointer()._baseType) << 8, static_cast<size_t>(512));
+            newHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
+            tbb::parallel_for(tbb::blocked_range<size_t>(0, repLocal->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
+                for (size_t i = range.begin(); i != range.end(); ++i) {
+                    float value = repLocal->getElementNormalized(i, 0);
+                    newHistogram->addSample(&value);
+                }
+            });
+        }
+
+        // atomically replace old histogram with the new one and delete the old one.
+        IntensityHistogramType* oldHistogram = _intensityHistogram.fetch_and_store(newHistogram);
+        delete oldHistogram;
+        _dirtyHistogram = false;
+    }
+
+    const TransferFunctionProperty::IntensityHistogramType* TransferFunctionProperty::getIntensityHistogram() const {
+        if (_dirtyHistogram) {
+            computeIntensityHistogram();
+        }
+
+        return _intensityHistogram;
+    }
+
+    void TransferFunctionProperty::onTfIntensityDomainChanged() {
+        _dirtyHistogram = true;
     }
 
 }

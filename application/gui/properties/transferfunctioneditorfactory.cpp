@@ -34,21 +34,26 @@
 #include "core/classification/geometry2dtransferfunction.h"
 #include "core/classification/simpletransferfunction.h"
 
+#include "core/properties/transferfunctionproperty.h"
+
 namespace campvis {
 
-    AbstractTransferFunctionEditor* TransferFunctionEditorFactory::createEditor(AbstractTransferFunction* tf) {
+    AbstractTransferFunctionEditor* TransferFunctionEditorFactory::createEditor(TransferFunctionProperty* prop) {
+        tgtAssert(prop != 0, "Property must not be 0.");
+
+        AbstractTransferFunction* tf = prop->getTF();
         tgtAssert(tf != 0, "Transfer function must not be 0.");
 
         if (SimpleTransferFunction* tester = dynamic_cast<SimpleTransferFunction*>(tf)) {
-            return new SimpleTransferFunctionEditor(tester);
+            return new SimpleTransferFunctionEditor(prop, tester);
         }
 
         if (Geometry1DTransferFunction* tester = dynamic_cast<Geometry1DTransferFunction*>(tf)) {
-            return new Geometry1DTransferFunctionEditor(tester);
+            return new Geometry1DTransferFunctionEditor(prop, tester);
         }
 
         if (Geometry2DTransferFunction* tester = dynamic_cast<Geometry2DTransferFunction*>(tf)) {
-            return new Geometry2DTransferFunctionEditor(tester);
+            return new Geometry2DTransferFunctionEditor(prop, tester);
         }
 
         return 0;

@@ -41,23 +41,18 @@ namespace campvis {
         : _size(size)
         , _intensityDomain(intensityDomain)
         , _texture(0)
-        , _imageHandle(0)
-        , _intensityHistogram(0)
     {
         _dirtyTexture = false;
-        _dirtyHistogram = false;
     }
 
     AbstractTransferFunction::~AbstractTransferFunction() {
         if (_texture != 0)
             LWARNING("Called AbstractTransferFunction dtor without proper deinitialization - you just wasted resources!");
-        delete _intensityHistogram;
     }
 
     void AbstractTransferFunction::deinit() {
         delete _texture;
         _texture = 0;
-        _imageHandle = DataHandle(0);
     }
 
     void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/, const std::string& transFuncParamsUniform /*= "_transferFunctionParameters"*/) {
@@ -109,7 +104,7 @@ namespace campvis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _intensityDomain = newDomain;
         }
-        _dirtyHistogram = true;
+        s_intensityDomainChanged();
         s_changed();
     }
 
@@ -127,49 +122,5 @@ namespace campvis {
         }
         return _texture;
     }
-
-    DataHandle AbstractTransferFunction::getImageHandle() const {
-        return _imageHandle;
-    }
-
-    void AbstractTransferFunction::setImageHandle(DataHandle imageHandle) {
-        tgtAssert(
-            imageHandle.getData() == 0 || dynamic_cast<const ImageData*>(imageHandle.getData()) != 0, 
-            "The data in the image handle must either be 0 or point to a valid ImageData object!");
-
-        _imageHandle = imageHandle;
-        _dirtyHistogram = true;
-        s_imageHandleChanged();
-    }
-
-    void AbstractTransferFunction::computeIntensityHistogram() const {
-        delete _intensityHistogram;
-        _intensityHistogram = 0;
-
-        ImageRepresentationLocal::ScopedRepresentation repLocal(_imageHandle);
-        if (repLocal != 0) {
-            float mins = _intensityDomain.x;
-            float maxs = _intensityDomain.y;
-            size_t numBuckets = std::min(WeaklyTypedPointer::numBytes(repLocal->getWeaklyTypedPointer()._baseType) << 8, static_cast<size_t>(512));
-            _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
-            tbb::parallel_for(tbb::blocked_range<size_t>(0, repLocal->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
-                for (size_t i = range.begin(); i != range.end(); ++i) {
-                    float value = repLocal->getElementNormalized(i, 0);
-                    _intensityHistogram->addSample(&value);
-                }
-            });
-        }
-
-        _dirtyHistogram = false;
-    }
-
-    const AbstractTransferFunction::IntensityHistogramType* AbstractTransferFunction::getIntensityHistogram() const {
-        if (_dirtyHistogram) {
-            computeIntensityHistogram();
-        }
-
-        return _intensityHistogram;
-    }
-
-
+    
 }

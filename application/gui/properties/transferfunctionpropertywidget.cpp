@@ -130,7 +130,7 @@ namespace campvis {
     void TransferFunctionPropertyWidget::onEditClicked(bool checked) {
         if (_editor == 0) {
             TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
-            _editor = TransferFunctionEditorFactory::createEditor(prop->getTF());
+            _editor = TransferFunctionEditorFactory::createEditor(prop);
 
             _dockWidget = new QDockWidget("Transfer Function Editor");
             _dockWidget->setWidget(_editor);
@@ -145,7 +145,7 @@ namespace campvis {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         AbstractTransferFunction* tf = prop->getTF();
 
-        DataHandle dh = tf->getImageHandle();
+        DataHandle dh = prop->getImageHandle();
         if (dh.getData() != 0) {
             const ImageRepresentationLocal* idl = static_cast<const ImageData*>(dh.getData())->getRepresentation<ImageRepresentationLocal>();
             if (idl != 0) {

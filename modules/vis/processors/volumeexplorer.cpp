@@ -239,8 +239,8 @@ namespace campvis {
 
     void VolumeExplorer::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
-        _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
-        static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->getTF()->setImageHandle(img.getDataHandle());
+        _sliceExtractor.p_transferFunction.setImageHandle(img.getDataHandle());
+        static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->setImageHandle(img.getDataHandle());
 
         if (img != 0) {
             const tgt::svec3& imgSize = img->getSize();

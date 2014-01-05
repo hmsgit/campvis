@@ -33,8 +33,8 @@
 
 namespace campvis {
 
-    SimpleTransferFunctionEditor::SimpleTransferFunctionEditor(SimpleTransferFunction* tf, QWidget* parent /*= 0*/)
-        : AbstractTransferFunctionEditor(tf, parent)
+    SimpleTransferFunctionEditor::SimpleTransferFunctionEditor(TransferFunctionProperty* prop, SimpleTransferFunction* tf, QWidget* parent /*= 0*/)
+        : AbstractTransferFunctionEditor(prop, tf, parent)
         , _layout(0)
         , _lblColorLeft(0)
         , _lblColorRight(0)

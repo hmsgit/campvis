@@ -241,7 +241,7 @@ namespace campvis {
             _lblTimestamp->setText("Timestamp: " + QString::number(handles.front().second.getTimestamp()));
 
             if (const ImageData* tester = dynamic_cast<const ImageData*>(handles.front().second.getData())) {
-                _canvas->p_transferFunction.getTF()->setImageHandle(handles.front().second);
+                _canvas->p_transferFunction.setImageHandle(handles.front().second);
                 std::ostringstream ss;
 
                 ss << tester->getSize();
@@ -296,7 +296,7 @@ namespace campvis {
             _lblName->setText(QString::number(handles.size()) + " DataHandles selected");
             _lblTimestamp->setText("Timestamp: n/a");
 
-            _canvas->p_transferFunction.getTF()->setImageHandle(DataHandle(0));
+            _canvas->p_transferFunction.setImageHandle(DataHandle(0));
         }
         _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_localFootprint));
         _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_videoFootprint));

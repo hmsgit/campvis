@@ -125,34 +125,11 @@ namespace campvis {
          * \return  _texture
          */
         const tgt::Texture* getTexture();
-
-        /**
-         * Returns a DataHandle to the image for this transfer function, its pointer may be 0.
-         * \note    If the data in \a imageHandle is not 0, it points to a valid ImageData object.
-         * \return  _imageHandle, its pointer may be 0.
-         */
-        DataHandle getImageHandle() const;
-
-        /**
-         * Sets the DataHandle for this transfer function, its pointer may be 0.
-         * \note    If the data in \a imageHandle is not 0, it must point to a valid ImageData object.
-         * \param   imageHandle     The new DataHandle for this transfer function, if its pointer is 
-         *                          not 0 it must point to a valid ImageData object.
-         */
-        void setImageHandle(DataHandle imageHandle);
-
-        /**
-         * Returns the intensity histogram
-         * \todo    This is NOT thread-safe!
-         * \return  _intensityHistogram
-         */
-        const IntensityHistogramType* getIntensityHistogram() const;
-
+        
         /// Signal emitted when transfer function has changed.
         sigslot::signal0<> s_changed;
-
-        /// Signal emitted when the image DataHandle for this TF has changed.
-        sigslot::signal0<> s_imageHandleChanged;
+        /// Signal emitted when the intensity domain has changed
+        sigslot::signal0<> s_intensityDomainChanged;
 
     protected:
         /**
@@ -171,11 +148,7 @@ namespace campvis {
         tgt::Texture* _texture;             ///< OpenGL lookup texture storing the TF
         tbb::atomic<bool> _dirtyTexture;    ///< Flag whether the OpenGL texture has to be updated
 
-        DataHandle _imageHandle;                                ///< DataHandle to the image for this transfer function. May be 0.
-        mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram of the intensity in _imageHandle for the current _intensityDomain
-        mutable tbb::atomic<bool> _dirtyHistogram;              ///< Flag whether the intensity histogram has to be updated.
-
-        mutable tbb::mutex _localMutex; ///< mutex protecting the local members
+        mutable tbb::mutex _localMutex;     ///< mutex protecting the local members
 
         static const std::string loggerCat_;
 
