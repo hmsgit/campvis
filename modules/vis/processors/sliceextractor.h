@@ -83,6 +83,8 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
         /// \see AbstractProcessor::process()
         virtual void process(DataContainer& data);
 
@@ -99,10 +101,6 @@ namespace campvis {
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
     protected:
-        /// adapts the range of the p_xSliceNumber property to the image
-        /// \see    AbstractPro#::updateProperties
-        virtual void updateProperties(DataContainer& dc);
-
         void updateBorderGeometry();
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering

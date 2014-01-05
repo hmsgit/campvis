@@ -85,7 +85,7 @@ namespace campvis {
         if (processor == &_imageReader) {
             ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
             if (img != 0) {
-                _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+                _sliceExtractor.p_transferFunction.setImageHandle(img.getDataHandle());
             }
         }
     }

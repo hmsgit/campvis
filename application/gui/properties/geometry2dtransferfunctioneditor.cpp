@@ -45,8 +45,8 @@
 
 namespace campvis {
 
-    Geometry2DTransferFunctionEditor::Geometry2DTransferFunctionEditor(Geometry2DTransferFunction* tf, QWidget* parent /*= 0*/)
-        : AbstractTransferFunctionEditor(tf, parent)
+    Geometry2DTransferFunctionEditor::Geometry2DTransferFunctionEditor(TransferFunctionProperty* prop, Geometry2DTransferFunction* tf, QWidget* parent /*= 0*/)
+        : AbstractTransferFunctionEditor(prop, tf, parent)
         , _layout(0)
         , _canvas(0)
         , _lblIntensityLeft(0)
@@ -115,7 +115,7 @@ namespace campvis {
         }
 
         // render histogram if existent
-        const AbstractTransferFunction::IntensityHistogramType* ih = gtf->getIntensityHistogram();
+        const TransferFunctionProperty::IntensityHistogramType* ih = getIntensityHistogram();
         if (ih != 0) {
             size_t numBuckets = ih->getNumBuckets(0);
             if (numBuckets > 0) {

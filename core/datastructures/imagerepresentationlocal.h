@@ -42,8 +42,6 @@ namespace campvis {
      */
     class ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
     public:
-        typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
-
         /**
          * Destructor
          */
@@ -169,14 +167,6 @@ namespace campvis {
          */
         const Interval<float>& getNormalizedIntensityRange() const;
 
-        /**
-         * Returns the intensity distribution normalized to float as 1D histogram.
-         * \note    The intensity histogram is computed using lazy evaluation, hence, computation
-         *          may take some time.
-         * \return  _intensityHistogram
-         */
-        const IntensityHistogramType& getIntensityHistogram() const;
-
     protected:
         /**
          * Creates a new ImageData representation in local memory.
@@ -192,16 +182,11 @@ namespace campvis {
          */
         void computeNormalizedIntensityRange() const;
 
-        /**
-         * Computes the intensity histogram.
-         */
-        void computeIntensityHistogram() const;
 
         WeaklyTypedPointer::BaseType _baseType;     ///< Base type of the image data
 
         mutable tbb::atomic<bool> _intensityRangeDirty;         ///< Flag whether _normalizedIntensityRange is dirty and has to be recomputed
         mutable Interval<float> _normalizedIntensityRange;      ///< Range of the normalized intensities, mutable to allow lazy instantiation
-        mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram, mutable to allow lazy instantiation
 
         static const std::string loggerCat_;
 

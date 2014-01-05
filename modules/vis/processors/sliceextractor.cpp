@@ -254,7 +254,7 @@ namespace campvis {
 
     void SliceExtractor::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
-        p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+        p_transferFunction.setImageHandle(img.getDataHandle());
 
         if (img != 0) {
             tgt::ivec3 imgSize = img->getSize();

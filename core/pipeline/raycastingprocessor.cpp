@@ -38,7 +38,7 @@ namespace campvis {
 
     RaycastingProcessor::RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , p_camera("camera", "Camera")
@@ -86,7 +86,7 @@ namespace campvis {
                 if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
                     // source DataHandle has changed
                     _sourceImageTimestamp = img.getDataHandle().getTimestamp();
-                    p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+                    p_transferFunction.setImageHandle(img.getDataHandle());
                 }
 
                 if (hasInvalidShader()) {
@@ -150,6 +150,13 @@ namespace campvis {
     std::string RaycastingProcessor::generateHeader() const {
         std::string toReturn = getDecoratedHeader();
         return toReturn;
+    }
+
+    void RaycastingProcessor::updateProperties(DataContainer& dc) {
+        ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
+        p_transferFunction.setImageHandle(img.getDataHandle());
+
+        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

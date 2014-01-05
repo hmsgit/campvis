@@ -95,6 +95,9 @@ namespace campvis {
          */
         virtual void process(DataContainer& data);
 
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
+
         DataNameProperty p_sourceImageID;                ///< image ID for input image
         DataNameProperty p_entryImageID;                 ///< image ID for output entry points image
         DataNameProperty p_exitImageID;                  ///< image ID for output exit points image

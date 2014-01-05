@@ -46,13 +46,12 @@ namespace campvis {
     ImageRepresentationLocal::ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType)
         : GenericAbstractImageRepresentation<ImageRepresentationLocal>(parent)
         , _baseType(baseType)
-        , _intensityHistogram(0)
     {
         _intensityRangeDirty = true;
     }
 
     ImageRepresentationLocal::~ImageRepresentationLocal() {
-        delete _intensityHistogram;
+
     }
 
     ImageRepresentationLocal* ImageRepresentationLocal::tryConvertFrom(const AbstractImageRepresentation* source) {
@@ -145,13 +144,6 @@ namespace campvis {
         return _normalizedIntensityRange;
     }
 
-    const ConcurrentGenericHistogramND<float, 1>& ImageRepresentationLocal::getIntensityHistogram() const {
-        if (_intensityHistogram == 0)
-            computeIntensityHistogram();
-
-        return *_intensityHistogram;
-    }
-
     void ImageRepresentationLocal::computeNormalizedIntensityRange() const {
         _normalizedIntensityRange = Interval<float>(); // reset interval to empty one
         tbb::spin_mutex _mutex; // mutex to protect for concurrent access
@@ -177,23 +169,6 @@ namespace campvis {
         _intensityRangeDirty = false;
     }
 
-    void ImageRepresentationLocal::computeIntensityHistogram() const {
-        delete _intensityHistogram;
-
-        const Interval<float>& i = getNormalizedIntensityRange();
-        float mins = i.getLeft();
-        float maxs = i.getRight();
-        size_t numBuckets = 1024;
-        _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
-        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
-            for (size_t i = range.begin(); i != range.end(); ++i) {
-                float value = this->getElementNormalized(i, 0);
-                _intensityHistogram->addSample(&value);
-            }
-        });
-    }
-
-    
     ImageRepresentationLocal* ImageRepresentationLocal::create(const ImageData* parent, WeaklyTypedPointer wtp) {
 #define CONVERT_DISK_TO_GENERIC_LOCAL(baseType,numChannels) \
         return GenericImageRepresentationLocal<baseType, numChannels>::create( \

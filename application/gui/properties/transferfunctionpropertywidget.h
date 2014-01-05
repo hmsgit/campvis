@@ -33,6 +33,7 @@ class QDoubleSpinBox;
 class QGridLayout;
 class QLabel;
 class QPushButton;
+class QCheckBox;
 
 namespace campvis {
     class AbstractTransferFunctionEditor;
@@ -56,17 +57,17 @@ namespace campvis {
          */
         virtual ~TransferFunctionPropertyWidget();
 
-        /**
-         * Slot to be called when the propertie's TF changed its image DataHandle.
-         * Resets the intensity domain borders.
-         */
-        void onTransferFunctionImageHandleChanged();
 
     protected:
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */
         virtual void updateWidgetFromProperty();
+        
+        /**
+         * Slot to be called from property when the property's flag whether to auto fit the TF window has changed.
+         */
+        void onTransferFunctionAutoFitWindowToDataChanged();
 
     private slots:
         /// slot called when one of the intensity domain spin edits has changed
@@ -75,6 +76,8 @@ namespace campvis {
         void onEditClicked(bool checked);
         /// slot called when _btnFitDomainToImage clicked
         void onFitClicked(bool checked);
+        /// slot called when _cbAutoFitDomainToImage changed
+        void onAutoFitDomainToImageChanged(int state);
 
     private:
         QWidget* _widget;                   ///< Widget grouping the widgets together
@@ -83,6 +86,7 @@ namespace campvis {
         QLabel* _lblDomain;                 ///< intensity domain label
         QDoubleSpinBox* _spinDomainLeft;    ///< spin edit for intensity domain lower bound
         QDoubleSpinBox* _spinDomainRight;   ///< spin edit for intensity domain upper bound
+        QCheckBox* _cbAutoFitDomainToImage; ///< Checkbox for the flag whether to automatically fit the TF domain to new image data
         QPushButton* _btnFitDomainToImage;  ///< button for fitting the intensity domain to the image 
         QPushButton* _btnEditTF;            ///< button for showing the TF editor widget
 
