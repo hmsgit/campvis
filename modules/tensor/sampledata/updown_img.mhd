@@ -1,0 +1,6 @@
+NDims = 3
+DimSize = 60 60 31
+ElementType = MET_FLOAT
+ElementSpacing = 1.000000 1.000000 1.000000
+ElementByteOrderMSB = False
+ElementDataFile = img_dataset.raw
