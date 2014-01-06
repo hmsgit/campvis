@@ -54,13 +54,6 @@ namespace campvis {
         static const std::string getId() { return "TensorDemo"; };
 
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
         MhdImageReader _imageReader;
         TensorAnalyzer _ta;
         SliceExtractor _sliceExtractor;

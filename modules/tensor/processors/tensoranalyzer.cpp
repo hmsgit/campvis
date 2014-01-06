@@ -475,4 +475,10 @@ namespace campvis {
         addProperty(&opp->_imageType);
     }
 
+    void TensorAnalyzer::deinit() {
+        _eigenvectors = DataHandle(0);
+        _eigenvalues = DataHandle(0);
+        AbstractProcessor::deinit();
+    }
+
 }

@@ -98,10 +98,6 @@ namespace campvis {
                 elem[i] = T(v.elem[i]);
         }
 
-        /// Destructor
-        ~Tensor2() {
-        }
-
         /// Index operator
         const T& operator [] (size_t index) const {
             return elem[index];

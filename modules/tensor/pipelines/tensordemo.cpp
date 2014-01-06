@@ -53,10 +53,9 @@ namespace campvis {
         _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/tensor/sampledata/planar_tensor.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_ta.p_inputImage);
-        
+
         _ta.p_outputProperties[0]->_imageId.addSharedProperty(&_sliceExtractor.p_sourceImageID);
         _ta.p_outputProperties[0]->_imageType.selectById("MainEigenvector");
-        _ta.s_validated.connect(this, &TensorDemo::onProcessorValidated);
 
         _sliceExtractor.p_xSliceNumber.setValue(0);
 
@@ -66,15 +65,6 @@ namespace campvis {
 
         _renderTargetID.setValue("renderTarget");
         _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
-    }
-
-    void TensorDemo::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor == &_imageReader) {
-            ScopedTypedData<ImageData> img(*_data, _sliceExtractor.p_sourceImageID.getValue());
-            if (img != 0) {
-                _sliceExtractor.p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
-            }
-        }
     }
 
 }

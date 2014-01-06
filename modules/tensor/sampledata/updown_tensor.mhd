@@ -4,4 +4,4 @@ DimSize = 60 60 31
 ElementType = MET_FLOAT
 ElementSpacing = 1.000000 1.000000 1.000000
 ElementByteOrderMSB = False
-ElementDataFile = tensor_dataset.raw
+ElementDataFile = updown_tensor.raw

@@ -80,6 +80,7 @@ namespace campvis {
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         virtual void process(DataContainer& data);
+        virtual void deinit();
 
         DataNameProperty p_inputImage;   ///< ID for input volume
         DataNameProperty p_evalsImage;   ///< ID for output gradient volume
