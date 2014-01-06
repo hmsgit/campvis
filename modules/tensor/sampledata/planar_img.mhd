@@ -1,0 +1,6 @@
+NDims = 3
+DimSize = 56 55 12
+ElementType = MET_FLOAT
+ElementSpacing = 1.000000 1.000000 1.000000
+ElementByteOrderMSB = False
+ElementDataFile = planar_img.raw
