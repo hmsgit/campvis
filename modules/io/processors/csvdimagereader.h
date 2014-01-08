@@ -49,13 +49,6 @@ namespace campvis {
          **/
         virtual ~CsvdImageReader();
 
-
-        /**
-         * Reads the MHD file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "CsvdImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -69,6 +62,8 @@ namespace campvis {
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };

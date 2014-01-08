@@ -99,6 +99,7 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(255, 255, 255, 0), tgt::col4(255, 0, 0, 255)));
         MetaProperty* mp = static_cast<MetaProperty*>(_ve.getProperty("SliceExtractorProperties"));
         static_cast<TransferFunctionProperty*>(mp->getProperty("transferFunction"))->replaceTF(dvrTF);
+        static_cast<TransferFunctionProperty*>(mp->getProperty("transferFunction"))->setAutoFitWindowToData(false);
     }
 
     void NloptRegistration::deinit() {

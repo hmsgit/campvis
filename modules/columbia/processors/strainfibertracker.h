@@ -51,13 +51,6 @@ namespace campvis {
          **/
         virtual ~StrainFiberTracker();
 
-
-        /**
-         * Reads the raw file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "StrainFiberTracker"; };
         /// \see AbstractProcessor::getDescription()
@@ -81,6 +74,9 @@ namespace campvis {
         FloatProperty p_maximumAngle;       ///< maximum angle between two adjacent fiber segments
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         /**
          * Creates seed points uniformly spread over volume and writes them to \a seeds.
          * \param   strainData  Input strain data

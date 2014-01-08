@@ -69,8 +69,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_xRayImageId;             ///< image ID for X-Ray input image
         DataNameProperty p_3dSliceImageId;          ///< image ID for the slice input image rendered in 3D world space
         DataNameProperty p_drrFullImageId;          ///< image ID full DRR input image
@@ -78,6 +76,9 @@ namespace campvis {
         DataNameProperty p_targetImageId;           ///< image ID for output image
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;

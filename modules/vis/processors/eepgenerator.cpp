@@ -86,18 +86,12 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void EEPGenerator::process(DataContainer& data) {
+    void EEPGenerator::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
         ScopedTypedData<MeshGeometry> proxyGeometry(data, p_geometryID.getValue());
 
         if (img != 0 && proxyGeometry != 0 && _shader != 0) {
             if (img->getDimensionality() == 3) {
-                if (hasInvalidShader()) {
-                    _shader->setHeaders(generateHeader());
-                    _shader->rebuild();
-                    validate(INVALID_SHADER);
-                }
-
                 ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
 
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
@@ -230,9 +224,15 @@ namespace campvis {
         return getDecoratedHeader();
     }
 
-    void EEPGenerator::updateProperties() {
+    void EEPGenerator::updateProperties(DataContainer& dataContainer) {
         p_mirrorID.setVisible(p_enableMirror.getValue());
         validate(AbstractProcessor::INVALID_PROPERTIES);
+    }
+
+    void EEPGenerator::updateShader() {
+        _shader->setHeaders(generateHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

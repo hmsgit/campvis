@@ -620,7 +620,6 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::onPropertyChanged(const AbstractProperty* prop) {
-        HasPropertyCollection::onPropertyChanged(prop);
         invalidate();
 
         /// if the Mesh Solid Color property is changed, update the mesh's color

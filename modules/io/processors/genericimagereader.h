@@ -67,12 +67,6 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
-        /**
-         * Reads the MHD file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "GenericImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -92,6 +86,9 @@ namespace campvis {
         void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         static const std::string loggerCat_;
         
     private:

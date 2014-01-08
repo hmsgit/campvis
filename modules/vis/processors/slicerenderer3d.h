@@ -71,9 +71,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        /// \see AbstractProcessor::process()
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_sourceImageID;                  ///< image ID for input image
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
@@ -86,6 +83,9 @@ namespace campvis {
         virtual void updateProperties(DataContainer& dc);
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;

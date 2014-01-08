@@ -84,20 +84,6 @@ namespace campvis {
          */
         virtual void deinit();
 
-        /**
-         * Performs sanity checks, sets up the rendering and calls RaycastingProcessor::processImpl().
-         * This method first reads the input image, entry and exit points from \a data and validates them. On sucess
-         * the shader will be rebuild if necessary, the shader will be activated, common uniforms will be set and
-         * the textures and transfer function will be bound before calling processImpl().
-         *
-         * \sa      RaycastingProcessor::processImpl()
-         * \param   data    DataContainer to work on.
-         */
-        virtual void process(DataContainer& data);
-
-        /// \see    AbstractProcessor::updateProperties
-        virtual void updateProperties(DataContainer& dc);
-
         DataNameProperty p_sourceImageID;                ///< image ID for input image
         DataNameProperty p_entryImageID;                 ///< image ID for output entry points image
         DataNameProperty p_exitImageID;                  ///< image ID for output exit points image
@@ -108,6 +94,22 @@ namespace campvis {
         FloatProperty p_samplingRate;                    ///< Ray casting sampling rate
 
     protected:
+        /**
+         * Performs sanity checks, sets up the rendering and calls RaycastingProcessor::processImpl().
+         * This method first reads the input image, entry and exit points from \a data and validates them. On sucess
+         * the shader will be rebuild if necessary, the shader will be activated, common uniforms will be set and
+         * the textures and transfer function will be bound before calling processImpl().
+         *
+         * \sa      RaycastingProcessor::processImpl()
+         * \param   data    DataContainer to work on.
+         */
+        virtual void updateResult(DataContainer& dataContainer);
+
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
+        /// \see    AbstractProcessor::updateShader
+        virtual void updateShader();
+
         /**
          * Gets called by RaycastingProcessor::process().
          * Put additional (processor specific) setup code here, create and activate your render target(s), render
@@ -133,9 +135,6 @@ namespace campvis {
         bool _bindEntryExitDepthTextures;               ///< Flag whether to also bind the depth textures of the entry-/exit points.
 
         static const std::string loggerCat_;
-
-    private:
-        clock_t _sourceImageTimestamp;
     };
 
 }

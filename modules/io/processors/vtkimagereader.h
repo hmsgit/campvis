@@ -51,13 +51,6 @@ namespace campvis {
          **/
         virtual ~VtkImageReader();
 
-
-        /**
-         * Reads the MHD file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "VtkImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -71,6 +64,9 @@ namespace campvis {
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
 
         void parsePolydata(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);

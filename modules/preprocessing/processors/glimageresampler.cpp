@@ -68,7 +68,7 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void GlImageResampler::process(DataContainer& data) {
+    void GlImageResampler::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {

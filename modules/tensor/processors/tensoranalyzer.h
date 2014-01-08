@@ -78,8 +78,7 @@ namespace campvis {
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
-
-        virtual void process(DataContainer& data);
+        /// \see AbstractProcessor::deinit()
         virtual void deinit();
 
         DataNameProperty p_inputImage;   ///< ID for input volume
@@ -93,6 +92,8 @@ namespace campvis {
         std::vector<OutputPropertyPair*> p_outputProperties;
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         /**
          * Computes the eigensystem for the given tensor image \a tensorImage.

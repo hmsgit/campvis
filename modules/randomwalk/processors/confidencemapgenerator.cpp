@@ -191,7 +191,7 @@ namespace campvis {
 
     }
 
-    void ConfidenceMapGenerator::process(DataContainer& data) {
+    void ConfidenceMapGenerator::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
         if (input != 0 && input->getDimensionality() >= 2 && input->getParent()->getNumChannels() >= 1) {

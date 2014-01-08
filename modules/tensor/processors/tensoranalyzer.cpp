@@ -95,7 +95,7 @@ namespace campvis {
 
     }
 
-    void TensorAnalyzer::process(DataContainer& data) {
+    void TensorAnalyzer::updateResult(DataContainer& data) {
         if (getInvalidationLevel() & EIGENSYSTEM_INVALID) {
             computeEigensystem(data);
         }

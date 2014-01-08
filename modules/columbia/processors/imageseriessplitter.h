@@ -45,13 +45,6 @@ namespace campvis {
          **/
         virtual ~ImageSeriesSplitter();
 
-
-        /**
-         * Reads the raw file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "ImageSeriesSplitter"; };
         /// \see AbstractProcessor::getDescription()
@@ -66,6 +59,10 @@ namespace campvis {
         IntProperty p_imageIndex;           ///< index of the image to select
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
 
         static const std::string loggerCat_;
     };

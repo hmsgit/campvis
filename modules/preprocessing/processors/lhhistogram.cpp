@@ -155,7 +155,7 @@ namespace campvis {
 
     }
 
-    void LHHistogram::process(DataContainer& data) {
+    void LHHistogram::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation intensities(data, p_intensitiesId.getValue());
         GenericImageRepresentationLocal<float, 4>::ScopedRepresentation gradients(data, p_gradientsId.getValue());
 

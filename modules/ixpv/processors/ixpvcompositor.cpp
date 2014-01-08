@@ -73,7 +73,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void IxpvCompositor::process(DataContainer& data) {
+    void IxpvCompositor::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> xRayImage(data, p_xRayImageId.getValue());
         ScopedTypedData<RenderData> sliceImage(data, p_3dSliceImageId.getValue());
         ScopedTypedData<RenderData> drrFullImage(data, p_drrFullImageId.getValue());

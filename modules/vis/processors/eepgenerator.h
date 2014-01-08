@@ -71,8 +71,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_sourceImageID;    ///< image ID for input image
         DataNameProperty p_geometryID;       ///< ID for input geometry
         DataNameProperty p_geometryImageId;  ///< image ID for the optional rendered geometry to integrate into the EEP
@@ -86,8 +84,12 @@ namespace campvis {
 
 
     protected:
-        /// \see HasProperyCollection::updateProperties()
-        virtual void updateProperties();
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateShader
+        virtual void updateShader();
 
         /**
          * \see RaycastingProcessor::generateHeader()

@@ -69,7 +69,7 @@ namespace campvis {
 
     }
 
-    void LtfImageReader::process(DataContainer& data) {
+    void LtfImageReader::updateResult(DataContainer& data) {
         size_t dimensionality = 3;
         if (p_size.getValue().z == 1) {
             dimensionality = (p_size.getValue().y == 1) ? 1 : 2;

@@ -122,7 +122,7 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void SimilarityMeasure::process(DataContainer& data) {
+    void SimilarityMeasure::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation referenceImage(data, p_referenceId.getValue());
         ImageRepresentationGL::ScopedRepresentation movingImage(data, p_movingId.getValue());
 

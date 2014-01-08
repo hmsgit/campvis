@@ -48,7 +48,6 @@ namespace campvis {
         , _fragmentShaderFilename(fragmentShaderFileName)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
-        , _sourceImageTimestamp(0)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_entryImageID);
@@ -76,27 +75,14 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void RaycastingProcessor::process(DataContainer& data) {
+    void RaycastingProcessor::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
         ScopedTypedData<RenderData> entryPoints(data, p_entryImageID.getValue());
         ScopedTypedData<RenderData> exitPoints(data, p_exitImageID.getValue());
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
-                if (img.getDataHandle().getTimestamp() != _sourceImageTimestamp) {
-                    // source DataHandle has changed
-                    _sourceImageTimestamp = img.getDataHandle().getTimestamp();
-                    p_transferFunction.setImageHandle(img.getDataHandle());
-                }
-
-                if (hasInvalidShader()) {
-                    _shader->setHeaders(generateHeader());
-                    _shader->rebuild();
-                    validate(INVALID_SHADER);
-                }
-
                 _shader->activate();
-
                 _shader->setIgnoreUniformLocationError(true);
                 decorateRenderProlog(data, _shader);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
@@ -157,6 +143,13 @@ namespace campvis {
         p_transferFunction.setImageHandle(img.getDataHandle());
 
         validate(AbstractProcessor::INVALID_PROPERTIES);
+    }
+
+    void RaycastingProcessor::updateShader() {
+        _shader->setHeaders(generateHeader());
+        _shader->rebuild();
+
+        validate(AbstractProcessor::INVALID_SHADER);
     }
 
 }
