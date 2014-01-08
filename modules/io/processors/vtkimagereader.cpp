@@ -67,7 +67,7 @@ namespace campvis {
         return StringUtils::trim(toReturn);
     }
 
-    void VtkImageReader::process(DataContainer& data) {
+    void VtkImageReader::updateResult(DataContainer& data) {
         try {
             std::ifstream file(p_url.getValue().c_str(), std::ifstream::in);
             if (!file.is_open() || file.bad())

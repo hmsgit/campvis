@@ -56,7 +56,7 @@ namespace campvis {
 
     }
 
-    void MhdImageReader::process(DataContainer& data) {
+    void MhdImageReader::updateResult(DataContainer& data) {
         try {
             // start parsing
             TextFileParser tfp(p_url.getValue(), true, "=");

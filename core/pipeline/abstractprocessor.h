@@ -57,10 +57,10 @@ namespace campvis {
          * Available invalidation levels
          */
         enum InvalidationLevel {
-            VALID               = 0,        ///< Valid
-            INVALID_RESULT      = 1 << 0,   ///< Need to rerun the process() method
-            INVALID_SHADER      = 1 << 1,   ///< Need to recompile the shader
-            INVALID_PROPERTIES  = 1 << 2,   ///< Need to update the properties
+            VALID               = 0,        ///< Valid, no need to run the process() method
+            INVALID_RESULT      = 1 << 0,   ///< Need to run the updateResult() method
+            INVALID_SHADER      = 1 << 1,   ///< Need to run the updateShader() method (e.g. to recompile the shader)
+            INVALID_PROPERTIES  = 1 << 2,   ///< Need to run the updateProperties() method (e.g. to adjust property ranges)
             FIRST_FREE_TO_USE_INVALIDATION_LEVEL = 1 << 3
         };
 
@@ -97,12 +97,6 @@ namespace campvis {
         virtual void deinit();
 
         /**
-         * Execute this processor.
-         * \param data      DataContainer to work on.
-         **/
-        virtual void process(DataContainer& data) = 0;
-
-        /**
          * Gets the name of this very processor. To be defined by every subclass.
          * \return  The name of this processor.
          */
@@ -125,6 +119,16 @@ namespace campvis {
          * \return  The current processor state in terms of stability.
          */
         virtual ProcessorState getProcessorState() const = 0;
+        
+        /**
+         * Execute this processor.
+         * Locks the processor and calls updateShader(), updateProperties() and/or updateResult() 
+         * with respect to the current invalidation level.
+         * 
+         * \param   data                DataContainer to work on.
+         * \param   unlockInExtraThread Flag whether the processor shall be unlockedin an extra thread (since unlock might be expensive).
+         **/
+        void process(DataContainer& data, bool unlockInExtraThread = false);
 
         /**
          * Gets the flag whether this processor is currently enabled.
@@ -149,19 +153,6 @@ namespace campvis {
          * \param   value   The new flag vlaue whether to measure the execution time of this processor.
          */
         void setClockExecutionTime(bool value);
-        
-        /**
-         * 
-         * Locks all properties in the processor's PropertyCollection and marks them as "in use".
-         * \sa  AbstractProcessor::unlockProcessor
-         */
-        void lockProcessor();
-
-        /**
-         * Unlocks all properties in the processor's PropertyCollection and marks them as "not in use".
-         * \sa  AbstractProcessor::lockProcessor
-         */
-        void unlockProcessor();
 
         /**
          * Returns the current lockProcessor status of this processor.
@@ -247,24 +238,75 @@ namespace campvis {
             validate(static_cast<int>(il));
         }
 
-        /**
-         * Gets called from the pipeline before calling process(), when this processor has an INVALID_PROPERTIES level.
-         * \note    You may overload this method as needed. The default implementation only validates
-         *          the INVALID_PROPERTIES level again.
-         * \note    There is also an overloadable updateProperties() in the HasPropertyCollection super class, 
-         *          which is called from the processor itself. If you do not need access to the DataContainer
-         *          of the parent pipeline, you can also use that method.
-         * \see     HasPropertyCollection::updateProperties()
-         * \param   dc  DataContainer   The DataContainer of the calling pipeline.
-         */
-        virtual void updateProperties(DataContainer& dc);
-
-
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;
 
         /// Signal emitted when the processor has been validated.
         sigslot::signal1<AbstractProcessor*> s_validated;
+
+    protected:
+        /**
+         * Scoped lock of an AbstractProcessor that automatically unlocks the processor on destruction.
+         * Useful for exception safety.
+         */
+        struct ScopedLock {
+            /**
+             * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
+             * \param   p                   Processor to lock
+             * \param   unlockInExtraThread Unlock \a p in extra thread (since this might be an expensive operation)
+             */
+            ScopedLock(AbstractProcessor* p, bool unlockInExtraThread);
+
+            /// Destructor, unlocks the processor
+            ~ScopedLock();
+
+            AbstractProcessor* _p;      ///< The processor to lock
+            bool _unlockInExtraThread;  ///< Unlock _p in extra thread (since this might be an expensive operation)
+        };
+
+
+        /**
+         * Gets called from default process() method when having an invalidation level of INVALID_SHADER.
+         * 
+         * Override this method for your needs, for instance if you need to recompile your shaders.
+         * The default implementation only validates the INVALID_SHADER level again.
+         */
+        virtual void updateShader();
+
+        /**
+         * Gets called from default process() method when having an invalidation level of INVALID_PROPERTIES.
+         * 
+         * Override this method for your needs, for instance if you need to adjust your properties
+         * to incoming data or other properties' settings. The default implementation only 
+         * validates the INVALID_PROPERTIES level again.
+         * 
+         * \param   dc  DataContainer   The DataContainer of the calling pipeline.
+         */
+        virtual void updateProperties(DataContainer& dataContainer);
+
+        /**
+         * Implement this method to your needs to compute the result/output of your processor.
+         * This method is considered to contain the actual algorithm each processor realizes. It 
+         * gets called from default process() method when having an invalidation level of 
+         * INVALID_RESULT.
+         * 
+         * \note    The default implementation only validates the INVALID_SHADER level again.
+         * \param   dataContainer   The DataContainer to work on.
+         */
+        virtual void updateResult(DataContainer& dataContainer) = 0;
+                
+        /**
+         * 
+         * Locks all properties in the processor's PropertyCollection and marks them as "in use".
+         * \sa  AbstractProcessor::unlockProcessor
+         */
+        void lockProcessor();
+
+        /**
+         * Unlocks all properties in the processor's PropertyCollection and marks them as "not in use".
+         * \sa  AbstractProcessor::lockProcessor
+         */
+        void unlockProcessor();
 
 // = Slots ========================================================================================
 
@@ -274,7 +316,6 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
-    protected:
         tbb::atomic<bool> _enabled;                 ///< flag whether this processor is currently enabled
         tbb::atomic<bool> _clockExecutionTime;      ///< flag whether to measure the execution time of this processor
 

@@ -60,8 +60,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_sourceImageID;   ///< ID for input volume
         DataNameProperty p_targetImageID;   ///< ID for output gradient volume
 
@@ -69,6 +67,8 @@ namespace campvis {
         IntProperty p_kernelSize;
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };

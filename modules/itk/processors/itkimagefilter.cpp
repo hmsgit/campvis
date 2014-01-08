@@ -212,7 +212,7 @@ namespace campvis {
     }
 
 
-    void ItkImageFilter::process(DataContainer& data) {
+    void ItkImageFilter::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
         
         if (input != 0 && input->getParent()->getNumChannels() == 1) {
@@ -261,7 +261,7 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    void ItkImageFilter::updateProperties() {
+    void ItkImageFilter::updateProperties(DataContainer& /*dataContainer*/) {
         if (p_filterMode.getOptionValue() == "median") {
             p_kernelSize.setVisible(true);
             p_sigma.setVisible(false);

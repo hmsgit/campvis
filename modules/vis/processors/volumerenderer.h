@@ -81,8 +81,6 @@ namespace campvis {
         /// \see VisualizationPipeline::setViewportSizeProperty()
         virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_inputVolume;              ///< image ID for first input image
         CameraProperty p_camera;
         DataNameProperty p_outputImage;              ///< image ID for output image
@@ -92,6 +90,9 @@ namespace campvis {
         MetaProperty p_raycasterProps;              ///< MetaProperty for properties of the raycasting processor
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         /**
          * Slot getting called when one of the observed processors got invalidated.
          * Invalidates this meta-processor with the corresponding level.

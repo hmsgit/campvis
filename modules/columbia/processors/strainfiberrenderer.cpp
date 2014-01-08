@@ -86,13 +86,7 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void StrainFiberRenderer::process(DataContainer& data) {
-        if (hasInvalidShader()) {
-            _shader->setHeaders(generateGlslHeader());
-            _shader->rebuild();
-            validate(INVALID_SHADER);
-        }
-        
+    void StrainFiberRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
         if (strainData != 0 && _shader != 0) {
             const tgt::Camera& camera = p_camera.getValue();
@@ -149,6 +143,12 @@ namespace campvis {
         }
 
         return toReturn;
+    }
+
+    void StrainFiberRenderer::updateShader() {
+        _shader->setHeaders(generateGlslHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

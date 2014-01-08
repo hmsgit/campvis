@@ -65,13 +65,15 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        /// \see AbstractProcessor::process()
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_inputImage;      ///< ID for input volume
         DataNameProperty p_outputImage;     ///< ID for output gradient volume
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateShader
+        virtual void updateShader();
+
         std::string generateHeader() const;
 
         tgt::Shader* _shader;       ///< Shader for gradient volume generation

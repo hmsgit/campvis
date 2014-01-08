@@ -75,17 +75,11 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void GeometryStrainRenderer::process(DataContainer& data) {
+    void GeometryStrainRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ImageRepresentationGL::ScopedRepresentation strainData(data, p_strainId.getValue());
 
         if (proxyGeometry != 0 && strainData != 0 && _shader != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateGlslHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
-
             // set modelview and projection matrices
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
@@ -125,4 +119,10 @@ namespace campvis {
         return toReturn;
     }
 
+    void GeometryStrainRenderer::updateShader() {
+        _shader->setHeaders(generateGlslHeader());
+        _shader->rebuild();
+
+        validate(INVALID_SHADER);
+    }
 }

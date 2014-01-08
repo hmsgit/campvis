@@ -76,7 +76,7 @@ namespace campvis {
 
     }
 
-    void RawImageReader::process(DataContainer& data) {
+    void RawImageReader::updateResult(DataContainer& data) {
         size_t dimensionality = 3;
         if (p_size.getValue().z == 1) {
             dimensionality = (p_size.getValue().y == 1) ? 1 : 2;

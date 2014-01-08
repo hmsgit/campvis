@@ -56,7 +56,7 @@ namespace campvis {
 
     }
 
-    void CsvdImageReader::process(DataContainer& data) {
+    void CsvdImageReader::updateResult(DataContainer& data) {
         try {
             // start parsing
             TextFileParser tfp(p_url.getValue(), true, "=");

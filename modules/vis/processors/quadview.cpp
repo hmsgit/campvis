@@ -69,7 +69,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void QuadView::process(DataContainer& data) {
+    void QuadView::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> inputImage1(data, p_inputImage1.getValue());
         ScopedTypedData<RenderData> inputImage2(data, p_inputImage2.getValue());
         ScopedTypedData<RenderData> inputImage3(data, p_inputImage3.getValue());

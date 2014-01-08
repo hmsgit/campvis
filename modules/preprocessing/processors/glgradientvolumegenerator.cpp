@@ -73,16 +73,10 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void GlGradientVolumeGenerator::process(DataContainer& data) {
+    void GlGradientVolumeGenerator::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
-
             const tgt::svec3& size = img->getSize();
 
             tgt::TextureUnit inputUnit;
@@ -129,6 +123,12 @@ namespace campvis {
 
     std::string GlGradientVolumeGenerator::generateHeader() const {
         return getDecoratedHeader();
+    }
+
+    void GlGradientVolumeGenerator::updateShader() {
+        _shader->setHeaders(generateHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

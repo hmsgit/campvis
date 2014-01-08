@@ -69,8 +69,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_geometryID;       ///< ID for input geometry
         DataNameProperty p_renderTargetID;   ///< image ID for output image
         CameraProperty p_camera;
@@ -78,6 +76,11 @@ namespace campvis {
         Vec4Property p_color;                ///< rendering color
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateShader
+        virtual void updateShader();
+
         /**
          * Generates the GLSL header.
          */

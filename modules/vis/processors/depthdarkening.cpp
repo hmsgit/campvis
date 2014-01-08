@@ -79,16 +79,10 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void DepthDarkening::process(DataContainer& data) {
+    void DepthDarkening::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> inputImage(data, p_inputImage.getValue());
 
         if (inputImage != 0 && inputImage->hasDepthTexture()) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
-
             const tgt::Texture* tex = inputImage->getDepthTexture()->getRepresentation<ImageRepresentationGL>()->getTexture();
             std::vector<float> tmp = _glReduction->reduce(tex);
             float minDepth = tmp[0];
@@ -151,6 +145,12 @@ namespace campvis {
             return "#define USE_COLORCODING\n";
         else
             return "";
+    }
+
+    void DepthDarkening::updateShader() {
+        _shader->setHeaders(generateHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

@@ -49,7 +49,7 @@ namespace campvis {
 
     }
 
-    void GradientVolumeGenerator::process(DataContainer& data) {
+    void GradientVolumeGenerator::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
         if (input != 0) {

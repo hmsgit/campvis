@@ -79,8 +79,6 @@ namespace campvis {
         /// \see tgt::EventListener::onEvent()
         virtual void onEvent(tgt::Event* e);
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_inputVolume;              ///< image ID for first input image
         DataNameProperty p_outputImage;              ///< image ID for output image
 
@@ -95,6 +93,9 @@ namespace campvis {
             VR_INVALID = 1 << 4,
             SLICES_INVALID = 1 << 5,
         };
+
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         /**
          * Slot getting called when one of the observed processors got invalidated.

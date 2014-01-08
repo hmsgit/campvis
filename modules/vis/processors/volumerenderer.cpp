@@ -116,21 +116,15 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void VolumeRenderer::process(DataContainer& data) {
+    void VolumeRenderer::updateResult(DataContainer& data) {
         if (getInvalidationLevel() & PG_INVALID) {
-            _pgGenerator.lockProcessor();
             _pgGenerator.process(data);
-            _pgGenerator.unlockProcessor();
         }
         if (getInvalidationLevel() & EEP_INVALID) {
-            _eepGenerator.lockProcessor();
             _eepGenerator.process(data);
-            _eepGenerator.unlockProcessor();
         }
         if (getInvalidationLevel() & RAYCASTER_INVALID) {
-            _raycaster.lockProcessor();
             _raycaster.process(data);
-            _raycaster.unlockProcessor();
         }
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);

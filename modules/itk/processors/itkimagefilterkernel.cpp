@@ -201,7 +201,7 @@ namespace campvis {
     }
 
 
-    void ItkImageFilterKernel::process(DataContainer& data) {
+    void ItkImageFilterKernel::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
         
         if (input != 0 && input->getParent()->getNumChannels() == 1) {

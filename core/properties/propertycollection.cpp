@@ -111,13 +111,8 @@ namespace campvis {
         }
     }
 
-    void HasPropertyCollection::onPropertyChanged(const AbstractProperty* prop) {
-        if (prop->getInvalidationLevel() & AbstractProcessor::INVALID_PROPERTIES)
-            updateProperties();
-    }
-
-    void HasPropertyCollection::updateProperties() {
-
+    void HasPropertyCollection::onPropertyChanged(const AbstractProperty* /*prop*/) {
+        // nothing to do here, method is just provided as convenience for child classes.
     }
 
 }

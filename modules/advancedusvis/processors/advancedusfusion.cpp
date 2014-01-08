@@ -108,17 +108,13 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void AdvancedUsFusion::process(DataContainer& data) {
+    void AdvancedUsFusion::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_usImageId.getValue());
         ImageRepresentationGL::ScopedRepresentation blurred(data, p_blurredImageId.getValue());
         ImageRepresentationGL::ScopedRepresentation confidence(data, p_confidenceImageID.getValue());
 
         if (img != 0 && blurred != 0 && confidence != 0) {
             if (img->getDimensionality() >= 2) {
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
                 if (p_use3DTexture.getValue())
@@ -134,6 +130,10 @@ namespace campvis {
                 confidence->bind(_shader, confidenceUnit, "_confidenceMap", "_confidenceTextureParams");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
                 p_confidenceTF.getTF()->bind(_shader, tf2Unit, "_confidenceTF", "_confidenceTFParams");
+
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 QuadRdr.renderQuad();
@@ -158,7 +158,7 @@ namespace campvis {
     void AdvancedUsFusion::updateProperties(DataContainer dc) {
         ScopedTypedData<ImageData> img(dc, p_usImageId.getValue());
 
-        p_transferFunction.getTF()->setImageHandle(img.getDataHandle());
+        p_transferFunction.setImageHandle(img.getDataHandle());
         const tgt::svec3& imgSize = img->getSize();
         if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);

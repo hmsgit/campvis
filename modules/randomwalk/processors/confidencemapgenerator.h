@@ -57,8 +57,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_sourceImageID;   ///< ID for input image
         DataNameProperty p_targetImageID;   ///< ID for output confidence map image
 
@@ -74,8 +72,9 @@ namespace campvis {
         Vec2Property p_angles;
         Vec2Property p_lengths;
 
-
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };

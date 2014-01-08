@@ -71,7 +71,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void VirtualMirrorCombine::process(DataContainer& data) {
+    void VirtualMirrorCombine::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> normalImage(data, p_normalImageID.getValue());
         ScopedTypedData<RenderData> mirrorImage(data, p_mirrorImageID.getValue());
         ScopedTypedData<RenderData> mirrorRendered(data, p_mirrorRenderID.getValue());

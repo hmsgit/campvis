@@ -71,8 +71,8 @@ namespace campvis {
         FloatProperty p_shadowIntensity;
     
     protected:
-        /// \see HasProperyCollection::updateProperties()
-        virtual void updateProperties();
+        /// \see AbstractProcessor::updateProperties()
+        virtual void updateProperties(DataContainer& dataContainer);
 
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);

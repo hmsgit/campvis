@@ -82,7 +82,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void RenderTargetCompositor::process(DataContainer& data) {
+    void RenderTargetCompositor::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
         ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
 

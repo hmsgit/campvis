@@ -73,16 +73,10 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void GeometryRenderer::process(DataContainer& data) {
+    void GeometryRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
 
         if (proxyGeometry != 0 && _shader != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateGlslHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
-
             // set modelview and projection matrices
             _shader->activate();
             _shader->setIgnoreUniformLocationError(true);
@@ -121,6 +115,12 @@ namespace campvis {
     std::string GeometryRenderer::generateGlslHeader() const {
         std::string toReturn = getDecoratedHeader();
         return toReturn;
+    }
+
+    void GeometryRenderer::updateShader() {
+        _shader->setHeaders(generateGlslHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

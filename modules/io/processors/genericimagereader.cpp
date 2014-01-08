@@ -68,7 +68,7 @@ namespace campvis {
             if (nullptr != it->second) delete it->second;
         }
     }
-    void GenericImageReader::process(DataContainer& data) {
+    void GenericImageReader::updateResult(DataContainer& data) {
         std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
         if(it != this->_readers.end()) {
             if(nullptr != this->_currentlyVisible) {

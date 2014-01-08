@@ -75,7 +75,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void SliceRenderer3D::process(DataContainer& data) {
+    void SliceRenderer3D::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
 
         if (img != 0) {

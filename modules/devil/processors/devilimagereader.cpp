@@ -81,7 +81,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void DevilImageReader::process(DataContainer& data) {
+    void DevilImageReader::updateResult(DataContainer& data) {
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
         if (tex != 0) {
             if (p_importType.getOptionValue() == "rt") {

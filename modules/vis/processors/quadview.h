@@ -64,8 +64,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_inputImage1;              ///< image ID for first input image
         DataNameProperty p_inputImage2;              ///< image ID for second input image
         DataNameProperty p_inputImage3;              ///< image ID for third input image
@@ -75,6 +73,8 @@ namespace campvis {
 
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 

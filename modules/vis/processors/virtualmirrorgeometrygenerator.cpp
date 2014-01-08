@@ -59,7 +59,7 @@ namespace campvis {
 
     }
 
-    void VirtualMirrorGeometryGenerator::process(DataContainer& data) {
+    void VirtualMirrorGeometryGenerator::updateResult(DataContainer& data) {
         // mirror normal is given by halfway vector between Camera-Mirror and POI-Mirror:
         const tgt::Camera& cam = p_camera.getValue();
         tgt::vec3 v1 = tgt::normalize(p_poi.getValue() - p_mirrorCenter.getValue());

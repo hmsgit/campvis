@@ -52,13 +52,6 @@ namespace campvis {
          **/
         virtual ~RawImageReader();
 
-
-        /**
-         * Reads the raw file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "RawImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -79,6 +72,8 @@ namespace campvis {
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };

@@ -25,11 +25,11 @@
 #ifndef CAMPCOMMHDRECEIVER_H__
 #define CAMPCOMMHDRECEIVER_H__
 
-#include <string>
-
 #include <CommonLib/Main/CAMPComDefinitions.h>
 #include <CommonLib/DataTypes/MHDImageData.hpp>
 #include <ClientLib/src/CAMPComClient.hpp>
+
+#include <string>
 
 #include <tbb/atomic.h>
 
@@ -60,13 +60,6 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
 
-        /**
-         * Transforms the last received MHD image (found in _incomingMhd) into CAMPVis ImageData 
-         * and stores it in \a data.
-         * \param   data    DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "CampcomMhdReceiver"; };
         /// \see AbstractProcessor::getDescription()
@@ -84,6 +77,13 @@ namespace campvis {
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        /**
+         * Transforms the last received MHD image (found in _incomingMhd) into CAMPVis ImageData 
+         * and stores it in \a data.
+         * \param   dataContainer    DataContainer to work on
+         */
+        virtual void updateResult(DataContainer& dataContainer);
+
         /// Callback slot for connect button
         void onBtnConnectClicked();
 

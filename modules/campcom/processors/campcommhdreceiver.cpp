@@ -69,7 +69,7 @@ namespace campvis {
         _ccclient = 0;
     }
 
-    void CampcomMhdReceiver::process(DataContainer& data) {
+    void CampcomMhdReceiver::updateResult(DataContainer& data) {
         validate(INVALID_RESULT);
 
         // Get the last received MHD file:

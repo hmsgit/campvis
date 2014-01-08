@@ -60,7 +60,7 @@ namespace campvis {
 
     }
 
-    void ImageFilter::process(DataContainer& data) {
+    void ImageFilter::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
         if (input != 0 && input->getParent()->getNumChannels() == 1) {

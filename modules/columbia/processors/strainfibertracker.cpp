@@ -185,7 +185,7 @@ namespace campvis {
 
     }
 
-    void StrainFiberTracker::process(DataContainer& data) {
+    void StrainFiberTracker::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation strainData(data, p_strainId.getValue());
 
         if (strainData != 0) {
