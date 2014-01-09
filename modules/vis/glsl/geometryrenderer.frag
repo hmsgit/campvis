@@ -23,23 +23,46 @@
 // ================================================================================================
 
 #include "tools/shading.frag"
+#include "tools/texture3d.frag"
 
+// input from geometry shader
+in vec4 geom_Position;
+in vec3 geom_TexCoord;
+in vec4 geom_Color;
+in vec3 geom_Normal;
+noperspective in vec3 geom_EdgeDistance;
 
-in vec3 ex_TexCoord;        ///< incoming texture coordinate
-in vec4 ex_Position;        ///< incoming texture coordinate
+// output fragment color
+out vec4 out_Color;
 
-out vec4 out_Color;         ///< outgoing fragment color
+// additional uniforms
+uniform bool _useSolidColor;
+uniform vec4 _solidColor;
+uniform vec4 _wireframeColor;
+uniform float _lineWidth;
 
-uniform vec4 _color;
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
+
 void main() {
-    out_Color = _color;
+    out_Color = _useSolidColor ? _solidColor : geom_Color;
 
 #ifdef ENABLE_SHADING
-            // compute gradient (needed for shading and normals)
-            vec3 gradient = ex_TexCoord;
-            out_Color.rgb = calculatePhongShading(ex_Position.xyz / ex_Position.z, _lightSource, _cameraPosition, gradient, _color.rgb, _color.rgb, vec3(1.0, 1.0, 1.0));
+    // perform Phong shading
+    out_Color.rgb = calculatePhongShading(geom_Position.xyz / geom_Position.w, _lightSource, _cameraPosition, geom_Normal, out_Color.rgb, out_Color.rgb, vec3(1.0, 1.0, 1.0));
 #endif
+
+#ifdef WIREFRAME_RENDERING
+    // Find the smallest distance to the edges
+    float d = min(geom_EdgeDistance.x, min(geom_EdgeDistance.y, geom_EdgeDistance.z));
+
+    // Determine the mix factor with the line color
+    float aliasingWidth = min(1.0, (_lineWidth/8.0));
+    float mixVal = smoothstep(_lineWidth - aliasingWidth, _lineWidth + aliasingWidth, d);
+
+    // Mix the surface color with the line color
+    out_Color = mix(_wireframeColor, out_Color, mixVal);    
+#endif
+
 }
