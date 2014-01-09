@@ -111,7 +111,7 @@ namespace campvis {
          */
         void updateColor();
 
-		/**
+        /**
          * Updates depth of the info widget
          */
         void updateDepth();
@@ -133,6 +133,12 @@ namespace campvis {
          */
         void onBtnSaveToFileClicked();
 
+        
+        /**
+         * Slot being called when the user clicks on the "Load File" button.
+         */
+        void onBtnLoadFileClicked();
+
     protected:
         /**
          * Setup the GUI stuff
@@ -147,7 +153,7 @@ namespace campvis {
          */
         
 
-	protected:
+    protected:
         static void saveToFile(DataHandle handle, std::string filename);
 
         /**
@@ -180,12 +186,15 @@ namespace campvis {
         QLabel*  _lblTimestamp;
         QLabel*  _lblSize;
         QLabel*  _lblBounds;
-		QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
+        QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
         QHBoxLayout* _colorWidgetLayout;                ///< Layout for the following widget
         QLabel*  _lblColorVal;                          ///< Color Label Value in text
         QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
         QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
         QPushButton* _btnSaveToFile;
+        // Added by Hossain Mahmud  <mahmud@in.tum.de>
+        // Date: January 02, 2014
+        QPushButton* _btnLoadFile;
 
         static const std::string loggerCat_;
     };

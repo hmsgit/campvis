@@ -53,6 +53,8 @@
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
+#include "application//gui/propertyeditorwidget.h"
+#include "modules/io/processors/genericimagereader.h"
 
 #include <QFileDialog>
 
@@ -163,6 +165,11 @@ namespace campvis {
         _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
         _infoWidgetLayout->addWidget(_btnSaveToFile);
 
+        // Added by Hossain Mahmud <mahmud@in.tum.de>
+        // Date: January 02, 2014
+        _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
+        _infoWidgetLayout->addWidget(_btnLoadFile);
+
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _canvas->setMinimumSize(QSize(100, 100));
         _infoWidgetLayout->addWidget(_canvas, 1);
@@ -186,6 +193,9 @@ namespace campvis {
         connect(
             _btnSaveToFile, SIGNAL(clicked()),
             this, SLOT(onBtnSaveToFileClicked()));
+        connect(
+            _btnLoadFile, SIGNAL(clicked()),
+            this, SLOT(onBtnLoadFileClicked()));
     }
 
     void DataContainerInspectorWidget::updateColor(){
@@ -440,6 +450,39 @@ namespace campvis {
         return;
 #endif
 
+    }
+
+    void DataContainerInspectorWidget::onBtnLoadFileClicked() {
+        QString dialogCaption = QString::fromStdString("Select the file");
+        QString directory;
+        std::string fileTobeRead;
+
+        directory = tr("");
+
+        const QString fileFilter = tr("All files (*)");
+
+        QString filename;
+            filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
+
+        if (! filename.isEmpty()) {
+            fileTobeRead = filename.toStdString();
+            //emit modified();
+        }
+
+        GenericImageReader *imgReader = new GenericImageReader();
+        imgReader->setURL(fileTobeRead);
+
+        PropertyEditorWidget *propEditorWid = new PropertyEditorWidget();
+        propEditorWid->_propCollectionWidget->updatePropCollection(imgReader, _dataContainer);
+        propEditorWid->setDataContainer(_dataContainer);
+        propEditorWid->setVisible(true);
+        imgReader->process(*_dataContainer);
+
+        this->setDataContainer(_dataContainer);
+        //this->show();
+        //this->activateWindow();
+
+        //this->setDataContainer(_dataContainer);
     }
 
 }
