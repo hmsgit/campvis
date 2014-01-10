@@ -34,7 +34,10 @@
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/properties/propertycollectionwidget.h"
+#include "application/gui/properties/stringpropertywidget.h"
 #include "core/tools/opengljobprocessor.h"
+#include "modules/io/processors/genericimagereader.h"
+#include "application/gui/datacontainertreewidget.h"
 
 #include <QLabel>
 #include <QWidget>
@@ -56,6 +59,7 @@ namespace tgt {
 
 namespace campvis {
     class AbstractPipeline;
+    //class DataContainerInspectorWidget;
     //class DataContainer;
     //class DataContainerTreeWidget;
     //class FaceGeometry;
@@ -68,7 +72,7 @@ namespace campvis {
          * Creates a new DataContainerInspectorWidget.
          * \param   parent          Parent Qt widget, may be 0 (default)
          */
-        explicit PropertyEditorWidget(QWidget* parent = nullptr);
+        explicit PropertyEditorWidget(DataContainerTreeModel* treeModel, QWidget* parent = nullptr);
 
         /**
          * Destructor.
@@ -80,11 +84,17 @@ namespace campvis {
          * \param   dataContainer   The DataContainer this widget shall inspect, may be 0.
          */
         void setDataContainer(DataContainer* dataContainer);
+        void setParentx(DataContainerTreeModel* parent);
+
+        void setImageReader (GenericImageReader* imgReader);
+        void updatePropCollection ();
 
         /**
          * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
          */
         void onDataContainerDataAdded(const std::string&, const DataHandle&);
+
+        void updateDataInspector(const std::string&, const DataHandle&);
 
         //void mousePressEvent(QMouseEvent*) {
         //    updateInfoWidget();
@@ -119,7 +129,7 @@ namespace campvis {
         void updateDepth();
 
     signals:
-        void dataContainerChanged(const QString&, QtDataHandle);
+        void dataContainerChanged();
 
     private slots:
         /**
@@ -144,7 +154,7 @@ namespace campvis {
          * \param   numBytes    Number of bytes to be converted.
          * \return  "numBytes/1024^n [KMG]Bytes
          */
-        QString humanizeBytes(size_t numBytes) const;
+        //QString humanizeBytes(size_t numBytes) const;
 
         bool _inited;
 
@@ -161,10 +171,18 @@ namespace campvis {
         //QWidget* _pipelinePropertiesWidget;                 ///< Widget showing the selected pipeline's properties
         QScrollArea* _pipelinePropertiesScrollArea;         ///< Scroll area for _pipelinePropertiesWidget
     public:
-        PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for browsing the PropertyCollection of the selected pipeline/processor
-    protected:
+        protected:
+        //QPushButton* _btnBrowse;
+        StringPropertyWidget* _btnBrowse;
         QPushButton* _btnCancel;
         QPushButton* _btnLoadFile;
+
+        StringProperty _fileName;
+
+        GenericImageReader *_imgReader;
+        PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for browsing the PropertyCollection of the selected pipeline/processor
+        
+        DataContainerTreeModel* _parent;
 
         static const std::string loggerCat_;
     };

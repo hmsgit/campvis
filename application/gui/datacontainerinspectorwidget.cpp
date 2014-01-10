@@ -472,17 +472,24 @@ namespace campvis {
         GenericImageReader *imgReader = new GenericImageReader();
         imgReader->setURL(fileTobeRead);
 
-        PropertyEditorWidget *propEditorWid = new PropertyEditorWidget();
-        propEditorWid->_propCollectionWidget->updatePropCollection(imgReader, _dataContainer);
+        PropertyEditorWidget *propEditorWid = new PropertyEditorWidget(_dctWidget->getTreeModel(), nullptr);
         propEditorWid->setDataContainer(_dataContainer);
+        propEditorWid->setImageReader(imgReader);
+        propEditorWid->updatePropCollection();
+        //propEditorWid->_propCollectionWidget->updatePropCollection(imgReader, _dataContainer);
+        //propEditorWid->setParentx(_dctWidget->getTreeModel());
+
+        imgReader->setVisibibility(".mhd", true);
         propEditorWid->setVisible(true);
-        imgReader->process(*_dataContainer);
+        //imgReader->process(*_dataContainer);
 
-        this->setDataContainer(_dataContainer);
-        //this->show();
-        //this->activateWindow();
 
+        _dctWidget->update(_dataContainer); //use this here. or next statement
         //this->setDataContainer(_dataContainer);
+
     }
 
+    void DataContainerInspectorWidget::onDataContainerUpdated(const QString&, QtDataHandle) {
+        this->_dctWidget->update(_dataContainer);
+    }
 }

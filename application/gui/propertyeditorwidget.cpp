@@ -53,6 +53,7 @@
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
+#include "modules/io/processors/genericimagereader.h"
 
 #include <QFileDialog>
 
@@ -60,7 +61,7 @@ namespace campvis {
 
     const std::string PropertyEditorWidget::loggerCat_ = "CAMPVis.application.PropertyEditorWidget";
 
-    PropertyEditorWidget::PropertyEditorWidget(QWidget* parent) 
+    PropertyEditorWidget::PropertyEditorWidget(DataContainerTreeModel* treeModel, QWidget* parent) 
         : QWidget(parent)
         , _inited(false)
         , _dataContainer(0)
@@ -72,7 +73,9 @@ namespace campvis {
         , _pipelinePropertiesScrollArea(0)
         , _propCollectionWidget(0)
         //, _infoWidgetLayout(0)
+        , _fileName("fileName", "Image URL", "")
     {
+        _parent = treeModel;
         setupGUI();
     }
 
@@ -96,9 +99,21 @@ namespace campvis {
         }
     }
 
+
+    void PropertyEditorWidget::setParentx(DataContainerTreeModel* parent) {
+        this->_parent = parent;
+    }
+    void PropertyEditorWidget::setImageReader (GenericImageReader* imgReader) {
+        this->_imgReader = imgReader;
+    }
+    void PropertyEditorWidget::updatePropCollection () {
+        this->_propCollectionWidget->updatePropCollection(this->_imgReader, this->_dataContainer);
+    }
+
+
     void PropertyEditorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
         // copy QtDataHandle because signal will be handled by a different thread an indefinite amount of time later:
-        emit dataContainerChanged(QString::fromStdString(key), QtDataHandle(dh));
+        emit dataContainerChanged();
     }
 
     QSize PropertyEditorWidget::sizeHint() const {
@@ -119,6 +134,9 @@ namespace campvis {
         _pipelinePropertiesScrollArea->setFrameStyle(QScrollArea::NoFrame);
         
         this->installEventFilter(this);
+
+        _btnBrowse = new StringPropertyWidget(&_fileName, this);
+        _mainLayout->addWidget(_btnBrowse);
         
         _propCollectionWidget = new PropertyCollectionWidget(_pipelinePropertiesScrollArea);
         _mainLayout->addWidget(_propCollectionWidget);
@@ -129,6 +147,8 @@ namespace campvis {
         _btnCancel = new QPushButton(tr("Cancel"), this);
         _mainLayout->addWidget(_btnCancel);
 
+        
+
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
         connect(
             _btnCancel, SIGNAL(clicked()),
@@ -136,6 +156,14 @@ namespace campvis {
         connect(
             _btnLoadFile, SIGNAL(clicked()),
             this, SLOT(onBtnLoadFileClicked()));
+        connect(
+            this, SIGNAL(dataContainerChanged()),
+            this->_parent, SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
+/*
+
+        if (_dataContainer != 0) {
+            _dataContainer->s_dataAdded.connect(this, &PropertyEditorWidget::updateDataInspector);
+        }*/
     }
 
     void PropertyEditorWidget::updateColor(){
@@ -147,22 +175,22 @@ namespace campvis {
         float depth = _canvas->getCapturedDepth();
     }
 
-    QString PropertyEditorWidget::humanizeBytes(size_t numBytes) const {
-        QString units[5] = { tr(" Bytes"), tr(" KB"), tr(" MB"), tr(" GB"), tr(" TB") };
-        size_t index = 0;
-        size_t remainder = 0;
+    //QString PropertyEditorWidget::humanizeBytes(size_t numBytes) const {
+    //    QString units[5] = { tr(" Bytes"), tr(" KB"), tr(" MB"), tr(" GB"), tr(" TB") };
+    //    size_t index = 0;
+    //    size_t remainder = 0;
 
-        while (numBytes > 1024 && index < 4) {
-            remainder = numBytes % 1024;
-            numBytes /= 1024;
-            ++index;
-        }
+    //    while (numBytes > 1024 && index < 4) {
+    //        remainder = numBytes % 1024;
+    //        numBytes /= 1024;
+    //        ++index;
+    //    }
 
-        if (remainder != 0)
-            return QString::number(numBytes) + "." + QString::number(remainder) + units[index];
-        else
-            return QString::number(numBytes) + units[index];
-    }
+    //    if (remainder != 0)
+    //        return QString::number(numBytes) + "." + QString::number(remainder) + units[index];
+    //    else
+    //        return QString::number(numBytes) + units[index];
+    //}
 
     void PropertyEditorWidget::init() {
         //if (_canvas != 0)
@@ -187,26 +215,19 @@ namespace campvis {
     }
 
     void PropertyEditorWidget::onBtnCancelClicked() {
+        this->close();
 
     }
 
+    void PropertyEditorWidget::updateDataInspector(const std::string& key, const DataHandle&dh) {
+        //emit dataContainerChanged(QString::fromStdString(key), QtDataHandle(dh));
+    }
+
     void PropertyEditorWidget::onBtnLoadFileClicked() {
-        QString dialogCaption = QString::fromStdString("Select the file");
-        QString directory;
-        std::string fileTobeRead;
+        _imgReader->process(*_dataContainer);
+        emit dataContainerChanged();
 
-        // use directory of current property value if any, default directory otherwise
-        directory = tr("");
-
-        const QString fileFilter = tr("All files (*)");
-
-        QString filename;
-        filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
-
-        if (! filename.isEmpty()) {
-            fileTobeRead = filename.toStdString();
-            //emit modified();
-        }
+        this->close();
     }
 
 }

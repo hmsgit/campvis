@@ -139,6 +139,8 @@ namespace campvis {
          */
         void onBtnLoadFileClicked();
 
+        void onDataContainerUpdated(const QString&, QtDataHandle);
+
     protected:
         /**
          * Setup the GUI stuff

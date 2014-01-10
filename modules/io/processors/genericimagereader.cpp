@@ -80,6 +80,19 @@ namespace campvis {
         }
         return;
     }
+    void GenericImageReader::setVisibibility(const char* extention, bool visibility) {
+        std::string _ext = std::string(extention);
+        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(_ext));
+        if(it != this->_readers.end()) {
+            if(nullptr != this->_currentlyVisible) {
+                this->_currentlyVisible->setVisible(!visibility);
+            }
+            (it->second)->setVisible(visibility);
+            this->_currentlyVisible = it->second;
+            //(it->first)->process(data);
+        }
+        return;
+    }
     void GenericImageReader::setURL(std::string p_url) {
         this->p_url.setValue(p_url);
 

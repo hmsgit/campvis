@@ -91,6 +91,9 @@ namespace campvis {
         void setTargetImageId(const char* imageId);
         void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
 
+
+        void setVisibibility(const char* extention, bool visibility);
+
     protected:
         static const std::string loggerCat_;
         
