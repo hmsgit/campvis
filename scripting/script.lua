@@ -6,12 +6,22 @@ require("vis")
 print(campvis.StringProperty)
 print(vis.MhdImageReader)
 
+pipeline = {}
+
+function pipeline:init()
+    print("I'm being inited!")
+    self.mir = vis.MhdImageReader()
+end
+
+function pipeline:deinit()
+    print("I'm being deinited!")
+end
+
 local nt = campvis.StringProperty("a", "b", "c", campvis.AbstractProcessor_INVALID_RESULT)
 print(nt:getValue())
 nt:setValue("d")
 print(nt:getValue())
 
-local mir = vis.MhdImageReader()
 local iv = campvis.ivec2(50, 10)
 
 print(vis.first(iv))

@@ -39,7 +39,7 @@ SWIG_LINK_LIBRARIES(vis campvis-core campvis-modules tgt ${CampvisGlobalExternal
 ADD_EXECUTABLE(campvis-scripting ${CampvisScriptingSources} ${CampvisScriptingHeaders})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-scripting campvis-core tgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
 
 # Copy Lua test scripts into the target directory
 ADD_CUSTOM_COMMAND(
