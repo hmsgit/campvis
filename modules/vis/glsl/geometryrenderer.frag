@@ -57,9 +57,8 @@ void main() {
     // Find the smallest distance to the edges
     float d = min(geom_EdgeDistance.x, min(geom_EdgeDistance.y, geom_EdgeDistance.z)) * 2.0;
 
-    // Determine the mix factor with the line color
-    float aliasingWidth = min(1.0, (_lineWidth/8.0));
-    float mixVal = smoothstep(_lineWidth - aliasingWidth, _lineWidth + aliasingWidth, d);
+    // perform anti-aliasing
+    float mixVal = smoothstep(_lineWidth - 1.0, _lineWidth + 1.0, d);
 
     // Mix the surface color with the line color
     out_Color = mix(_wireframeColor, out_Color, mixVal);    
