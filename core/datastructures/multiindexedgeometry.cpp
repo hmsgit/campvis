@@ -22,7 +22,7 @@
 // 
 // ================================================================================================
 
-#include "indexedmeshgeometry.h"
+#include "multiindexedgeometry.h"
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
@@ -35,17 +35,15 @@
 
 namespace campvis {
 
-    const std::string IndexedMeshGeometry::loggerCat_ = "CAMPVis.core.datastructures.IndexedMeshGeometry";
+    const std::string MultiIndexedGeometry::loggerCat_ = "CAMPVis.core.datastructures.MultiIndexedGeometry";
 
 
-    IndexedMeshGeometry::IndexedMeshGeometry(
-        const std::vector<uint16_t>& indices, 
+    MultiIndexedGeometry::MultiIndexedGeometry(
         const std::vector<tgt::vec3>& vertices, 
         const std::vector<tgt::vec3>& textureCoordinates /*= std::vector<tgt::vec3>()*/, 
         const std::vector<tgt::vec4>& colors /*= std::vector<tgt::vec4>()*/, 
         const std::vector<tgt::vec3>& normals /*= std::vector<tgt::vec3>() */)
         : GeometryData()
-        , _indices(indices)
         , _vertices(vertices)
         , _textureCoordinates(textureCoordinates)
         , _colors(colors)
@@ -58,9 +56,11 @@ namespace campvis {
 
     }
 
-    IndexedMeshGeometry::IndexedMeshGeometry(const IndexedMeshGeometry& rhs)
+    MultiIndexedGeometry::MultiIndexedGeometry(const MultiIndexedGeometry& rhs)
         : GeometryData(rhs)
         , _indices(rhs._indices)
+        , _offsets(rhs._offsets)
+        , _counts(rhs._counts)
         , _vertices(rhs._vertices)
         , _textureCoordinates(rhs._textureCoordinates)
         , _colors(rhs._colors)
@@ -70,16 +70,19 @@ namespace campvis {
 
     }
 
-    IndexedMeshGeometry::~IndexedMeshGeometry() {
+    MultiIndexedGeometry::~MultiIndexedGeometry() {
         deleteIndicesBuffer();
     }
 
-    IndexedMeshGeometry& IndexedMeshGeometry::operator=(const IndexedMeshGeometry& rhs) {
+    MultiIndexedGeometry& MultiIndexedGeometry::operator=(const MultiIndexedGeometry& rhs) {
         if (this == &rhs)
             return *this;
 
         GeometryData::operator=(rhs);
         _indices = rhs._indices;
+        _offsets = rhs._offsets;
+        _counts = rhs._counts;
+
         _vertices = rhs._vertices;
         _textureCoordinates = rhs._textureCoordinates;
         _colors = rhs._colors;
@@ -91,11 +94,16 @@ namespace campvis {
         return *this;
     }
 
-    IndexedMeshGeometry* IndexedMeshGeometry::clone() const {
-        return new IndexedMeshGeometry(_indices, _vertices, _textureCoordinates, _colors, _normals);
+    MultiIndexedGeometry* MultiIndexedGeometry::clone() const {
+        MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(_vertices, _textureCoordinates, _colors, _normals);
+        toReturn->_indices = _indices;
+        toReturn->_offsets = _offsets;
+        toReturn->_counts = _counts;
+
+        return toReturn;
     }
 
-    size_t IndexedMeshGeometry::getLocalMemoryFootprint() const {
+    size_t MultiIndexedGeometry::getLocalMemoryFootprint() const {
         size_t sum = 0;
 
         if (_indicesBuffer != 0)
@@ -112,12 +120,20 @@ namespace campvis {
         return sizeof(*this) + sum + (sizeof(size_t) * _indices.size()) + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * _colors.size());
     }
 
-    size_t IndexedMeshGeometry::getVideoMemoryFootprint() const {
+    size_t MultiIndexedGeometry::getVideoMemoryFootprint() const {
         return GeometryData::getVideoMemoryFootprint() + (_indicesBuffer == 0 ? 0 : _indicesBuffer->getBufferSize());
     }
 
+    void MultiIndexedGeometry::addPrimitive(const std::vector<uint16_t>& indices) {
+        _offsets.push_back(reinterpret_cast<void*>(_indices.size() * 2));
+        _counts.push_back(static_cast<GLsizei>(indices.size()));
+        _indices.insert(_indices.end(), indices.begin(), indices.end());
 
-    void IndexedMeshGeometry::render(GLenum mode) const {
+        _buffersDirty = true;
+
+    }
+
+    void MultiIndexedGeometry::render(GLenum mode) const {
         createGLBuffers();
         if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -135,11 +151,13 @@ namespace campvis {
             vao.setVertexAttributePointer(3, _normalsBuffer);
         vao.bindIndexBuffer(_indicesBuffer);
 
-        glDrawElements(mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_SHORT, 0);
+        const GLvoid** ptr = (const GLvoid**)(&_offsets.front()); // <- hidden reinterpret_cast<const GLvoid**> here, ugly OpenGL...
+        glMultiDrawElements(mode, &_counts.front(), GL_UNSIGNED_SHORT, ptr, static_cast<GLsizei>(_offsets.size()));
+
         LGL_ERROR;
     }
 
-    void IndexedMeshGeometry::createGLBuffers() const {
+    void MultiIndexedGeometry::createGLBuffers() const {
         if (_buffersDirty) {
             deleteBuffers();
             deleteIndicesBuffer();
@@ -175,16 +193,25 @@ namespace campvis {
         }
     }
 
-    tgt::Bounds IndexedMeshGeometry::getWorldBounds() const {
+    tgt::Bounds MultiIndexedGeometry::getWorldBounds() const {
         tgt::Bounds toReturn;
         for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
             toReturn.addPoint(*it);
         return toReturn;
     }
     
-    void IndexedMeshGeometry::deleteIndicesBuffer() const {
+    void MultiIndexedGeometry::deleteIndicesBuffer() const {
         delete _indicesBuffer;
         _indicesBuffer = 0;
+    }
+
+    void MultiIndexedGeometry::applyTransformation(const tgt::mat4& t) {
+        for (size_t i = 0; i < _vertices.size(); ++i) {
+            tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
+            _vertices[i] = tmp.xyz() / tmp.w;
+        }
+
+        _buffersDirty = true;
     }
 
 

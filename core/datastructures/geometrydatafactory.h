@@ -30,6 +30,7 @@
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/meshgeometry.h"
+#include "core/datastructures/multiindexedgeometry.h"
 
 #include <vector>
 
@@ -58,6 +59,11 @@ namespace campvis {
          */
         static MeshGeometry* createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
 
+        /**
+         * Creates an MultiIndexedGeometry storing the famous Utah teapot.
+         * \return  MultiIndexedGeometry storing the famous Utah teapot.
+         */
+        static MultiIndexedGeometry* createTeapot();
     };
 
 }
