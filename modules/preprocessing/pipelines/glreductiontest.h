@@ -22,27 +22,28 @@
 // 
 // ================================================================================================
 
-#ifndef RESAMPLINGDEMO_H__
-#define RESAMPLINGDEMO_H__
+#ifndef GLREDUCTIONTEST_H__
+#define GLREDUCTIONTEST_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/vis/processors/volumeexplorer.h"
+#include "core/tools/glreduction.h"
 
 namespace campvis {
-    class ResamplingDemo : public AutoEvaluationPipeline {
+    class GlReductionTest : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        ResamplingDemo(DataContainer* dc);
+        GlReductionTest(DataContainer* dc);
 
         /**
          * Virtual Destructor
          **/
-        virtual ~ResamplingDemo();
+        virtual ~GlReductionTest();
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
@@ -52,10 +53,8 @@ namespace campvis {
 
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "ResamplingDemo"; };
-
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
+        static const std::string getId() { return "GlReductionTest"; };
+        
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -67,8 +66,11 @@ namespace campvis {
         MhdImageReader _imageReader;
         GlImageResampler _resampler;
         VolumeExplorer _ve;
+
+        GlReduction* _glr;
+        GlReduction* _glr2;
     };
 
 }
 
-#endif // RESAMPLINGDEMO_H__
+#endif // GLREDUCTIONTEST_H__

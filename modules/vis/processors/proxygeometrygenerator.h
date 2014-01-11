@@ -68,10 +68,8 @@ namespace campvis {
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
-
-        void updateClipProperties();
-
-        clock_t _sourceTimestamp;
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
 
         static const std::string loggerCat_;
     };

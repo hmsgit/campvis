@@ -48,9 +48,9 @@ namespace campvis {
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.
         enum ProcessorInvalidationLevel {
-            PG_INVALID = 1 << 4,
-            EEP_INVALID = 1 << 5,
-            RAYCASTER_INVALID = 1 << 6
+            PG_INVALID = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
+            EEP_INVALID = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
+            RAYCASTER_INVALID = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 3
         };
 
         /**
@@ -92,6 +92,8 @@ namespace campvis {
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
 
         /**
          * Slot getting called when one of the observed processors got invalidated.

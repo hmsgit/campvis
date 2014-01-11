@@ -54,13 +54,13 @@ void main() {
         if (_sliceNumber < 0) {
             // perform MIP
             out_Color = vec4(0.0);
-            for (float slice = 0.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
+            for (float slice = _3dTextureParams._sizeRCP.z/2.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
                 out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, vec3(ex_TexCoord.xy, slice)).r));
             }
         }
         else {
             // render the corresponding slice
-            vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_3dTextureParams._size.z));
+            vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber * _3dTextureParams._sizeRCP.z) + (_3dTextureParams._sizeRCP.z / 2.0));
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, coord).r);
         }
     }

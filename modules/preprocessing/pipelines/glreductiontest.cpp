@@ -22,17 +22,20 @@
 // 
 // ================================================================================================
 
-#include "resamplingdemo.h"
+#include "glreductiontest.h"
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/renderdata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/tools/glreduction.h"
+
 
 namespace campvis {
 
-    ResamplingDemo::ResamplingDemo(DataContainer* dc)
+    GlReductionTest::GlReductionTest(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _imageReader()
         , _resampler(&_canvasSize)
@@ -45,13 +48,15 @@ namespace campvis {
         addEventListenerToBack(&_ve);
     }
 
-    ResamplingDemo::~ResamplingDemo() {
+    GlReductionTest::~GlReductionTest() {
     }
 
-    void ResamplingDemo::init() {
+    void GlReductionTest::init() {
         AutoEvaluationPipeline::init();
-        
-        _imageReader.s_validated.connect(this, &ResamplingDemo::onProcessorValidated);
+    
+        _glr = new GlReduction(GlReduction::MAX);
+        _glr2 = new GlReduction(GlReduction::MIN);
+        _imageReader.s_validated.connect(this, &GlReductionTest::onProcessorValidated);
 
         _ve.p_outputImage.setValue("result");
         _renderTargetID.setValue("result");
@@ -62,24 +67,51 @@ namespace campvis {
 
         _resampler.p_outputImage.setValue("resampled");
         _resampler.p_outputImage.addSharedProperty(&_ve.p_inputVolume);
+        _resampler.s_validated.connect(this, &GlReductionTest::onProcessorValidated);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_ve.getProperty("TransferFunction"))->replaceTF(dvrTF);
 
-        _canvasSize.s_changed.connect<ResamplingDemo>(this, &ResamplingDemo::onRenderTargetSizeChanged);
     }
 
-    void ResamplingDemo::deinit() {
-        _canvasSize.s_changed.disconnect(this);
+    void GlReductionTest::deinit() {
         AutoEvaluationPipeline::deinit();
+
+        delete _glr;
+        delete _glr2;
     }
 
-    void ResamplingDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-    }
 
-    void ResamplingDemo::onProcessorValidated(AbstractProcessor* processor) {
+    void GlReductionTest::onProcessorValidated(AbstractProcessor* processor) {
+        if (processor == &_resampler) {
+            ImageRepresentationGL::ScopedRepresentation img(getDataContainer(), _resampler.p_outputImage.getValue());
+            if (img != 0) {
+                float* foo = reinterpret_cast<float*>(img->getTexture()->downloadTextureToBuffer(GL_RED, GL_FLOAT));
+                std::vector<float> v(foo, foo + tgt::hmul(img->getTexture()->getDimensions()));
+                float mmm = *std::max_element(v.begin(), v.end());
+
+                float max = _glr->reduce(img->getTexture()).front();
+                LDEBUG("3D: " << mmm << ", " << max << ", DIFF: " << (mmm - max));
+            }
+
+            ScopedTypedData<RenderData> result(getDataContainer(), _ve.p_outputImage.getValue() + ".raycaster");
+            if (result != 0) {
+                const ImageData* depthImg = result->getDepthTexture();
+                if (depthImg != 0) {
+                    const ImageRepresentationGL* depthRep = depthImg->getRepresentation<ImageRepresentationGL>();
+                    if (depthRep != 0) {
+                        float* foo = reinterpret_cast<float*>(depthRep->getTexture()->downloadTextureToBuffer());
+                        std::vector<float> v(foo, foo + depthRep->getNumElements());
+                        float min1 = *std::min_element(v.begin(), v.end());
+
+                        float min2 = _glr2->reduce(depthRep->getTexture()).front();
+                        LDEBUG("2D: " << min1 << ", " << min2 << ", DIFF: " << std::abs(min2 - min1));
+                    }
+                }
+            }
+        }
     }
 
 

@@ -135,7 +135,7 @@ namespace campvis {
             tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
             PortMapType::const_iterator it = _portMap.find(name);
             while(it != _portMap.end() && it->first == name) {
-                it->second->s_changed(it->second);
+                it->second->setValue(it->second->getValue());
                 ++it;
             }
         }

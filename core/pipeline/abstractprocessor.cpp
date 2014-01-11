@@ -129,6 +129,7 @@ namespace campvis {
     void AbstractProcessor::process(DataContainer& data, bool unlockInExtraThread) {
         // use a scoped lock for exception safety
         AbstractProcessor::ScopedLock lock(this, unlockInExtraThread);
+        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
 
         if (hasInvalidShader())
             updateShader();

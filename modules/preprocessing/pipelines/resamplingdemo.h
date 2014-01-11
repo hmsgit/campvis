@@ -22,51 +22,45 @@
 // 
 // ================================================================================================
 
-in vec3 ex_TexCoord;
-out vec4 out_Color;
+#ifndef RESAMPLINGDEMO_H__
+#define RESAMPLINGDEMO_H__
 
-#ifdef REDUCTION_1D
-    uniform sampler2D _texture;
-    uniform ivec2 _textureSize;
-#endif
+#include "core/pipeline/autoevaluationpipeline.h"
+#include "core/properties/cameraproperty.h"
+#include "modules/io/processors/mhdimagereader.h"
+#include "modules/preprocessing/processors/glimageresampler.h"
+#include "modules/vis/processors/volumeexplorer.h"
+#include "core/tools/glreduction.h"
 
-#ifdef REDUCTION_2D
-    uniform sampler2D _texture;
-    uniform ivec2 _textureSize;
-#endif
+namespace campvis {
+    class ResamplingDemo : public AutoEvaluationPipeline {
+    public:
+        /**
+         * Creates a AutoEvaluationPipeline.
+         */
+        ResamplingDemo(DataContainer* dc);
 
-#ifdef REDUCTION_3D
-    uniform sampler3D _texture;
-    uniform ivec3 _textureSize;
-#endif
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~ResamplingDemo();
 
-void main() {
-    ivec2 texel = ivec2(ex_TexCoord.xy * vec2(_textureSize.xy));
+        /// \see AutoEvaluationPipeline::init()
+        virtual void init();
 
-#ifdef REDUCTION_1D
-    // 2D reduction:
-    vec4 v = texelFetch(_texture, ivec2(0, 0), 0);
-    for (int x = 1; x < _textureSize.x; x += 1) {
-        v = REDUCTION_OP_2(v, texelFetch(_texture, ivec2(x, 0), 0));
-    }
-#endif
+        /// \see AutoEvaluationPipeline::deinit()
+        virtual void deinit();
 
-#ifdef REDUCTION_2D
-    // 2D reduction:
-    vec4 v = texelFetch(_texture, ivec2(texel.x, 0), 0);
-    for (int y = 1; y < _textureSize.y; y += 1) {
-        v = REDUCTION_OP_2(v, texelFetch(_texture, ivec2(texel.x, y), 0));
-    }
-#endif
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "ResamplingDemo"; };
 
-#ifdef REDUCTION_3D
-    // 3D reduction along z direction:
-    vec4 v = texelFetch(_texture, ivec3(texel.xy, 0), 0);
-    for (int z = 1; z < _textureSize.z; z += 1) {
-        v = REDUCTION_OP_2(v, texelFetch(_texture, ivec3(texel.xy, z), 0));
-    }
+    protected:
+        MhdImageReader _imageReader;
+        GlImageResampler _resampler;
+        VolumeExplorer _ve;
+    };
 
-#endif
-
-    out_Color = v;
 }
+
+#endif // RESAMPLINGDEMO_H__
