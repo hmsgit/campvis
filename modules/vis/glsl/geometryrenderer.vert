@@ -28,12 +28,12 @@ layout (location = 2) in vec4 in_Color;           ///< incoming color
 layout (location = 3) in vec3 in_Normal;          ///< incoming normals
 
 #ifdef HAS_GEOMETRY_SHADER
-out vec4 vert_Position;       ///< outgoing world coordinates
+out vec3 vert_Position;       ///< outgoing world coordinates
 out vec3 vert_TexCoord;       ///< outgoing texture coordinate
 out vec4 vert_Color;          ///< outgoing color
 out vec3 vert_Normal;         ///< outgoing world normals
 #else
-out vec4 geom_Position;       ///< outgoing texture coordinate
+out vec3 geom_Position;       ///< outgoing texture coordinate
 out vec3 geom_TexCoord;       ///< outgoing color
 out vec4 geom_Color;          ///< outgoing world coordinates
 out vec3 geom_Normal;         ///< outgoing world normals
@@ -66,7 +66,7 @@ void main() {
 #ifdef HAS_GEOMETRY_SHADER
 
     // set outputs for geometry shader
-    vert_Position = vec4(in_Position, 1.0);
+    vert_Position = in_Position;
     gl_Position = _projectionMatrix * (_viewMatrix * (_modelMatrix * vec4(in_Position, 1.0)));
 
     vert_TexCoord = in_TexCoord;
@@ -76,7 +76,7 @@ void main() {
 #else
 
     // set outputs for fragment shader
-    geom_Position = vec4(in_Position, 1.0);
+    geom_Position = in_Position;
     gl_Position = _projectionMatrix * (_viewMatrix * (_modelMatrix * vec4(in_Position, 1.0)));
 
     geom_TexCoord = in_TexCoord;

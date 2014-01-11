@@ -30,6 +30,7 @@
 #include "core/properties/cameraproperty.h"
 #include "modules/io/processors/vtkimagereader.h"
 #include "modules/vis/processors/geometryrenderer.h"
+#include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
     class GeometryRendererDemo : public AutoEvaluationPipeline {
@@ -65,7 +66,9 @@ namespace campvis {
 
         CameraProperty _camera;
         VtkImageReader _geometryReader;
-        GeometryRenderer _gr;
+        GeometryRenderer _lvRenderer;
+        GeometryRenderer _teapotRenderer;
+        RenderTargetCompositor _compositor;
 
         TrackballNavigationEventListener* _trackballEH;
 

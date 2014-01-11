@@ -88,12 +88,15 @@ namespace campvis {
     void GeometryRenderer::init() {
         VisualizationProcessor::init();
         _pointShader = ShdrMgr.loadSeparate("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(false), false);
-        _meshShader = ShdrMgr.loadSeparate("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.geom", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(true), false);
+        _meshShader = ShdrMgr.loadSeparate("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer_faces.geom", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(true), false);
     }
 
     void GeometryRenderer::deinit() {
         ShdrMgr.dispose(_pointShader);
         _pointShader = 0;
+        ShdrMgr.dispose(_meshShader);
+        _meshShader = 0;
+
         VisualizationProcessor::deinit();
     }
 
@@ -138,8 +141,13 @@ namespace campvis {
             glDepthFunc(GL_LESS);
             glClearDepth(1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            if (p_renderMode.getOptionValue() == GL_POINTS)
+                glPointSize(p_pointSize.getValue());
+
             proxyGeometry->render(p_renderMode.getOptionValue());
 
+            if (p_renderMode.getOptionValue() == GL_POINTS)
+                glPointSize(1.f);
             decorateRenderEpilog(leShader);
             leShader->deactivate();
             glDisable(GL_DEPTH_TEST);

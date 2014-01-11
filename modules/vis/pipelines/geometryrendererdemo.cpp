@@ -37,40 +37,63 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _geometryReader()
-        , _gr(&_canvasSize)
+        , _lvRenderer(&_canvasSize)
+        , _teapotRenderer(&_canvasSize)
+        , _compositor(&_canvasSize)
         , _trackballEH(0)
     {
         addProperty(&_camera);
 
         _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballEH->addLqModeProcessor(&_gr);
         addEventListenerToBack(_trackballEH);
 
         addProcessor(&_geometryReader);
-        addProcessor(&_gr);
+        addProcessor(&_teapotRenderer);
+        addProcessor(&_lvRenderer);
+        addProcessor(&_compositor);
     }
 
     GeometryRendererDemo::~GeometryRendererDemo() {
+        _geometryReader.s_validated.disconnect(this);
         delete _trackballEH;
     }
 
     void GeometryRendererDemo::init() {
         AutoEvaluationPipeline::init();
-        
+
+        // connect slots
         _geometryReader.s_validated.connect(this, &GeometryRendererDemo::onProcessorValidated);
 
-        _camera.addSharedProperty(&_gr.p_camera);
-        _gr.p_renderTargetID.setValue("combine");
-        _gr.p_renderMode.selectById("triangles");
-        _renderTargetID.setValue("combine");
+        // create Teapot
+        MultiIndexedGeometry* teapot = GeometryDataFactory::createTeapot();
+        teapot->applyTransformation(tgt::mat4::createTranslation(tgt::vec3(5.f, 10.f, 5.f)) * tgt::mat4::createScale(tgt::vec3(16.f)));
+        getDataContainer().addData("teapot", teapot);
+        _trackballEH->reinitializeCamera(teapot);
+
+        // setup pipeline
+        _camera.addSharedProperty(&_lvRenderer.p_camera);
+        _camera.addSharedProperty(&_teapotRenderer.p_camera);
 
         _geometryReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/left_ventricle_mesh.vtk");
         _geometryReader.p_targetImageID.setValue("reader.output");
-        _geometryReader.p_targetImageID.addSharedProperty(&_gr.p_geometryID);
 
-        MeshGeometry* cube = GeometryDataFactory::createCube(tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)), tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
-        getDataContainer().addData("reader.output", cube);
-        _trackballEH->reinitializeCamera(cube);
+        _lvRenderer.p_geometryID.setValue("reader.output");
+        _lvRenderer.p_renderTargetID.setValue("lv.render");
+        _lvRenderer.p_renderMode.selectById("triangles");
+        _lvRenderer.p_solidColor.setValue(tgt::vec4(0.8f, 0.f, 0.f, 1.f));
+
+        _teapotRenderer.p_geometryID.setValue("teapot");
+        _teapotRenderer.p_renderTargetID.setValue("teapot.render");
+        _teapotRenderer.p_renderMode.selectById("trianglestrip");
+        _teapotRenderer.p_showWireframe.setValue(false);
+        _teapotRenderer.p_solidColor.setValue(tgt::vec4(0.75f, 0.75f, 0.75f, 1.f));
+
+        _compositor.p_firstImageId.setValue("lv.render");
+        _compositor.p_secondImageId.setValue("teapot.render");
+        _compositor.p_compositingMethod.selectById("depth");
+        _compositor.p_targetImageId.setValue("combine");
+
+        _renderTargetID.setValue("combine");
     }
 
     void GeometryRendererDemo::deinit() {
@@ -81,9 +104,14 @@ namespace campvis {
     void GeometryRendererDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_geometryReader) {
             // update camera
-            ScopedTypedData<IHasWorldBounds> img(*_data, _geometryReader.p_targetImageID.getValue());
-            if (img != 0) {
-                _trackballEH->reinitializeCamera(img);
+            ScopedTypedData<IHasWorldBounds> lv(*_data, _geometryReader.p_targetImageID.getValue());
+            ScopedTypedData<IHasWorldBounds> teapot(*_data, "teapot");
+            if (lv != 0 && teapot != 0) {
+                tgt::Bounds unionBounds;
+                unionBounds.addVolume(lv->getWorldBounds());
+                unionBounds.addVolume(teapot->getWorldBounds());
+
+                _trackballEH->reinitializeCamera(unionBounds);
             }
         }
     }

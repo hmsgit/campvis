@@ -28,12 +28,12 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-in vec4 vert_Position[];
+in vec3 vert_Position[];
 in vec3 vert_TexCoord[];           ///< incoming texture coordinate
 in vec4 vert_Color[];
 in vec3 vert_Normal[];
 
-out vec4 geom_Position;
+out vec3 geom_Position;
 out vec3 geom_TexCoord;
 out vec4 geom_Color;         ///< outgoing fragment color
 out vec3 geom_Normal;
@@ -66,6 +66,7 @@ void main() {
     geom_Normal = _computeNormals ? normal : vert_Normal[0];
     geom_Position = vert_Position[0];
     geom_TexCoord = vert_TexCoord[0];
+    geom_Color = vert_Color[0];
     gl_Position = gl_in[0].gl_Position;
     EmitVertex();
 
@@ -73,6 +74,7 @@ void main() {
     geom_Normal = _computeNormals ? normal : vert_Normal[1];
     geom_Position = vert_Position[1];
     geom_TexCoord = vert_TexCoord[1];
+    geom_Color = vert_Color[1];
     gl_Position = gl_in[1].gl_Position;
     EmitVertex();
 
@@ -80,6 +82,7 @@ void main() {
     geom_Normal = _computeNormals ? normal : vert_Normal[2];
     geom_Position = vert_Position[2];
     geom_TexCoord = vert_TexCoord[2];
+    geom_Color = vert_Color[2];
     gl_Position = gl_in[2].gl_Position;
     EmitVertex();
 

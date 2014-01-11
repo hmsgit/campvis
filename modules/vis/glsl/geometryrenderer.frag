@@ -26,7 +26,7 @@
 #include "tools/texture3d.frag"
 
 // input from geometry shader
-in vec4 geom_Position;
+in vec3 geom_Position;
 in vec3 geom_TexCoord;
 in vec4 geom_Color;
 in vec3 geom_Normal;
@@ -50,12 +50,12 @@ void main() {
 
 #ifdef ENABLE_SHADING
     // perform Phong shading
-    out_Color.rgb = calculatePhongShading(geom_Position.xyz / geom_Position.w, _lightSource, _cameraPosition, geom_Normal, out_Color.rgb, out_Color.rgb, vec3(1.0, 1.0, 1.0));
+    out_Color.rgb = calculatePhongShading(geom_Position, _lightSource, _cameraPosition, geom_Normal, out_Color.rgb, out_Color.rgb, vec3(1.0, 1.0, 1.0));
 #endif
 
 #ifdef WIREFRAME_RENDERING
     // Find the smallest distance to the edges
-    float d = min(geom_EdgeDistance.x, min(geom_EdgeDistance.y, geom_EdgeDistance.z));
+    float d = min(geom_EdgeDistance.x, min(geom_EdgeDistance.y, geom_EdgeDistance.z)) * 2.0;
 
     // Determine the mix factor with the line color
     float aliasingWidth = min(1.0, (_lineWidth/8.0));
