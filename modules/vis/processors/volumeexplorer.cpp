@@ -152,7 +152,6 @@ namespace campvis {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
         }
         if (prop == &p_inputVolume) {
-            _raycaster.invalidate(VolumeRenderer::PG_INVALID);
             invalidate(VR_INVALID | SLICES_INVALID);
         }
         VisualizationProcessor::onPropertyChanged(prop);

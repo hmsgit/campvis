@@ -39,12 +39,11 @@ namespace campvis {
 
     ProxyGeometryGenerator::ProxyGeometryGenerator()
         : AbstractProcessor()
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
         , p_geometryID("geometryID", "Output Geometry ID", "proxygeometry", DataNameProperty::WRITE)
         , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-    , _sourceTimestamp(0)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_geometryID);
@@ -58,20 +57,11 @@ namespace campvis {
     }
 
     void ProxyGeometryGenerator::updateResult(DataContainer& data) {
+        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
         ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                if (img.getDataHandle().getTimestamp() != _sourceTimestamp) {
-                    p_clipX.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().x), static_cast<int>(img->getSize().x)));
-                    p_clipY.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().y), static_cast<int>(img->getSize().y)));
-                    p_clipZ.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().z), static_cast<int>(img->getSize().z)));
-
-                    p_clipX.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().x)));
-                    p_clipY.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().y)));
-                    p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().z)));
-                    _sourceTimestamp = img.getDataHandle().getTimestamp();
-                }
                 tgt::Bounds volumeExtent = img->getWorldBounds(tgt::svec3(p_clipX.getValue().x, p_clipY.getValue().x, p_clipZ.getValue().x), tgt::svec3(p_clipX.getValue().y, p_clipY.getValue().y, p_clipZ.getValue().y));
                 tgt::vec3 numSlices = tgt::vec3(img->getSize());
 
@@ -93,6 +83,23 @@ namespace campvis {
         }
 
         validate(INVALID_RESULT);
+    }
+
+    void ProxyGeometryGenerator::updateProperties(DataContainer& dataContainer) {
+        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
+        ScopedTypedData<ImageData> img(dataContainer, p_sourceImageID.getValue());
+
+        if (img != 0) {
+            p_clipX.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().x), static_cast<int>(img->getSize().x)));
+            p_clipY.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().y), static_cast<int>(img->getSize().y)));
+            p_clipZ.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().z), static_cast<int>(img->getSize().z)));
+
+            p_clipX.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().x)));
+            p_clipY.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().y)));
+            p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().z)));
+        }
+
+        validate(INVALID_PROPERTIES);
     }
 
 }

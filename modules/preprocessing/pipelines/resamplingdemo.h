@@ -30,6 +30,7 @@
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/vis/processors/volumeexplorer.h"
+#include "core/tools/glreduction.h"
 
 namespace campvis {
     class ResamplingDemo : public AutoEvaluationPipeline {
@@ -54,16 +55,7 @@ namespace campvis {
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "ResamplingDemo"; };
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
-
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
         MhdImageReader _imageReader;
         GlImageResampler _resampler;
         VolumeExplorer _ve;

@@ -26,9 +26,12 @@
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/renderdata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/tools/glreduction.h"
+
 
 namespace campvis {
 
@@ -50,8 +53,6 @@ namespace campvis {
 
     void ResamplingDemo::init() {
         AutoEvaluationPipeline::init();
-        
-        _imageReader.s_validated.connect(this, &ResamplingDemo::onProcessorValidated);
 
         _ve.p_outputImage.setValue("result");
         _renderTargetID.setValue("result");
@@ -62,24 +63,16 @@ namespace campvis {
 
         _resampler.p_outputImage.setValue("resampled");
         _resampler.p_outputImage.addSharedProperty(&_ve.p_inputVolume);
-
+    
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_ve.getProperty("TransferFunction"))->replaceTF(dvrTF);
-
-        _canvasSize.s_changed.connect<ResamplingDemo>(this, &ResamplingDemo::onRenderTargetSizeChanged);
     }
 
     void ResamplingDemo::deinit() {
         _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
-    }
-
-    void ResamplingDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-    }
-
-    void ResamplingDemo::onProcessorValidated(AbstractProcessor* processor) {
     }
 
 

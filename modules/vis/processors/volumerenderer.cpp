@@ -155,9 +155,6 @@ namespace campvis {
             _eepGenerator.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
             _raycaster.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
         }
-        else if (prop == &p_inputVolume) {
-            invalidate(AbstractProcessor::INVALID_RESULT | PG_INVALID);
-        }
         VisualizationProcessor::onPropertyChanged(prop);
     }
 
@@ -166,6 +163,10 @@ namespace campvis {
         _raycaster.setViewportSizeProperty(viewportSizeProp);
 
         VisualizationProcessor::setViewportSizeProperty(viewportSizeProp);
+    }
+
+    void VolumeRenderer::updateProperties(DataContainer& dataContainer) {
+        // nothing to do here
     }
 
 }
