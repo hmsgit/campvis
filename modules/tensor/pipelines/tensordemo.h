@@ -25,11 +25,14 @@
 #ifndef TENSORDEMO_H__
 #define TENSORDEMO_H__
 
-#include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+
+#include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
 
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/tensor/processors/tensoranalyzer.h"
+#include "modules/tensor/processors/tensorglyphrenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
 
 namespace campvis {
@@ -54,9 +57,20 @@ namespace campvis {
         static const std::string getId() { return "TensorDemo"; };
 
     protected:
+        /**
+         * Slot getting called when one of the observed processors got validated.
+         * Updates the camera properties, when the input image has changed.
+         * \param   processor   The processor that emitted the signal
+         */
+        virtual void onProcessorValidated(AbstractProcessor* processor);
+
         MhdImageReader _imageReader;
         TensorAnalyzer _ta;
+        TensorGlyphRenderer _glyphRenderer;
         SliceExtractor _sliceExtractor;
+
+        CameraProperty p_camera;
+        TrackballNavigationEventListener* _trackballEH;
 
         MWheelToNumericPropertyEventListener _wheelHandler;
     };

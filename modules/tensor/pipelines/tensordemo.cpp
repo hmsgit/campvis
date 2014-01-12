@@ -35,11 +35,21 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _imageReader()
         , _ta()
+        , _glyphRenderer(&_canvasSize)
         , _sliceExtractor(&_canvasSize)
         , _wheelHandler(&_sliceExtractor.p_zSliceNumber)
+        , p_camera("Camera", "Camera", tgt::Camera())
+        , _trackballEH(0)
+
     {
+        addProperty(&p_camera);
+
+        _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
+        addEventListenerToBack(_trackballEH);
+
         addProcessor(&_imageReader);
         addProcessor(&_ta);
+        addProcessor(&_glyphRenderer);
         addProcessor(&_sliceExtractor);
         addEventListenerToBack(&_wheelHandler);
     }
@@ -50,21 +60,37 @@ namespace campvis {
     void TensorDemo::init() {
         AutoEvaluationPipeline::init();
 
+        p_camera.addSharedProperty(&_glyphRenderer.p_camera);
+
         _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/tensor/sampledata/planar_tensor.mhd");
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_ta.p_inputImage);
 
         _ta.p_outputProperties[0]->_imageId.addSharedProperty(&_sliceExtractor.p_sourceImageID);
         _ta.p_outputProperties[0]->_imageType.selectById("MainEigenvector");
+        _ta.p_evalsImage.addSharedProperty(&_glyphRenderer.p_inputEigenvalues);
+        _ta.p_evecsImage.addSharedProperty(&_glyphRenderer.p_inputEigenvectors);
+        _ta.s_validated.connect(this, &TensorDemo::onProcessorValidated);
 
-        _sliceExtractor.p_xSliceNumber.setValue(0);
+        _glyphRenderer.p_renderOutput.setValue("glyphs");
 
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
         _sliceExtractor.p_transferFunction.replaceTF(tf);
+        _sliceExtractor.p_targetImageID.setValue("slice");
 
-        _renderTargetID.setValue("renderTarget");
-        _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
+        _renderTargetID.setValue("glyphs");
+        //_renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
+    }
+
+    void TensorDemo::onProcessorValidated(AbstractProcessor* processor) {
+        if (processor == &_ta) {
+            // update camera
+            ScopedTypedData<IHasWorldBounds> img(*_data, _ta.p_evalsImage.getValue());
+            if (img) {
+                _trackballEH->reinitializeCamera(img);
+            }
+        }
     }
 
 }

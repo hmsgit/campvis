@@ -82,8 +82,8 @@ namespace campvis {
         virtual void deinit();
 
         DataNameProperty p_inputImage;   ///< ID for input volume
-        DataNameProperty p_evalsImage;   ///< ID for output gradient volume
-        DataNameProperty p_evecsImage;   ///< ID for output gradient volume
+        DataNameProperty p_evalsImage;   ///< ID for output eigenvalue volume
+        DataNameProperty p_evecsImage;   ///< ID for output eigenvector volume
 
         GenericOptionProperty<DegeneratedEvHandling> p_degeneratedHandling; ///< Handling of degenerated tensors
         BoolProperty p_maskMixedTensors;

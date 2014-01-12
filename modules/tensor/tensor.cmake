@@ -15,3 +15,4 @@ FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 
 SET(ThisModShaderDirectories "modules/pipelines/glsl")
 SET(ThisModDependencies io vis)
+
