@@ -99,7 +99,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
         /// \see    AbstractProcessor::updateProperties
-        virtual void updateProperties(DataContainer& dc);
+        virtual void updateProperties(DataContainer& dataContainer);
 
         void updateBorderGeometry();
 

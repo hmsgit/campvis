@@ -163,4 +163,74 @@ namespace campvis {
         return toReturn;
     }
 
+    MultiIndexedGeometry* GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/) {
+        tgtAssert(numStacks > 1 && numSlices > 2, "Sphere must have minimum 2 stacks and 3 slices!");
+        std::vector<tgt::vec3> vertices;
+
+        // add top vertex
+        vertices.push_back(tgt::vec3(0.f, 0.f, 1.f));
+
+        // add middle vertices
+        for (int i = 1; i < numStacks; ++i) {
+            float phi = static_cast<float>(i) * tgt::PIf / static_cast<float>(numStacks);
+
+            for (int j = 0; j < numSlices; ++j) {
+                float theta = static_cast<float>(j) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+                vertices.push_back(tgt::vec3(cos(theta) * sin(phi), sin(theta) * sin(phi), cos(phi)));
+            }
+        }
+
+        // add bottom vertex
+        vertices.push_back(tgt::vec3(0.f, 0.f, -1.f));
+
+        // create geometry (in a unit sphere vertices = normals)
+        MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), vertices);
+
+        // add indices for primitives to geometry:
+        {
+            // top stack:
+            std::vector<uint16_t> indices;
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(0);
+                indices.push_back(j+1);
+            }
+            indices.push_back(0);
+            indices.push_back(1);
+
+            toReturn->addPrimitive(indices);
+        }
+        {
+            // middle stacks:
+            std::vector<uint16_t> indices;
+            for (uint16_t i = 1; i < numStacks-1; ++i) {
+                uint16_t startIndex = 1 + (i-1) * numSlices;
+
+                for (uint16_t j = 0; j < numSlices; ++j) {
+                    indices.push_back(startIndex + j);
+                    indices.push_back(startIndex + numSlices + j);
+                }
+                indices.push_back(startIndex);
+                indices.push_back(startIndex + numSlices);
+            }
+
+            toReturn->addPrimitive(indices);
+        }
+        {
+            // bottom stack:
+            std::vector<uint16_t> indices;
+            uint16_t endIndex = static_cast<uint16_t>(vertices.size() - 1);
+
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(endIndex);
+                indices.push_back(endIndex - (j+1));
+            }
+            indices.push_back(endIndex);
+            indices.push_back(endIndex - 1);
+
+            toReturn->addPrimitive(indices);
+        }
+
+        return toReturn;
+    }
+
 }

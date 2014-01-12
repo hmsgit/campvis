@@ -27,6 +27,7 @@
 
 #include "tgt/bounds.h"
 #include "tgt/vector.h"
+
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/meshgeometry.h"
@@ -64,6 +65,14 @@ namespace campvis {
          * \return  MultiIndexedGeometry storing the famous Utah teapot.
          */
         static MultiIndexedGeometry* createTeapot();
+
+        /**
+         * Creates an MultiIndexedGeometry storing a unit sphere around the origin.
+         * \param   llf     Number of stacks in the sphere
+         * \param   urb     Number of slices in the sphere
+         * \return  MultiIndexedGeometry storing a unit sphere around the origin.
+         */
+        static MultiIndexedGeometry* createSphere(uint16_t numStacks = 6, uint16_t numSlices = 12);
     };
 
 }
