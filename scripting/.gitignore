@@ -1,0 +1,5 @@
+# SWIG wrapper code
+/*LUA_wrap.cxx
+
+# Header with SWIG run-time functions
+/swigluarun.h

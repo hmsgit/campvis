@@ -17,7 +17,5 @@ int main()
     p->init();
     p->deinit();
 
-    printf("\nI am done with Lua in C++.\n");
-
     return 0;
 }

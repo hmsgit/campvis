@@ -6,6 +6,8 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/visualizationprocessor.h"
 %}
 
 namespace tgt {
@@ -32,9 +34,22 @@ namespace campvis {
             FIRST_FREE_TO_USE_INVALIDATION_LEVEL = 1 << 3
         };
 
-        virtual const std::string getName() const = 0;
+        const std::string getName() const = 0;
     };
 
+    class VisualizationProcessor : public AbstractProcessor {
+    public:
+        explicit VisualizationProcessor(IVec2Property* viewportSizeProp);
+        ~VisualizationProcessor();
+    };
+
+    %nodefaultctor AutoEvaluationPipeline;
+
+    class AutoEvaluationPipeline {
+    public:
+        virtual void addProcessor(AbstractProcessor* processor);
+        virtual ~AutoEvaluationPipeline();
+    };
 
     class StringProperty {
     public:
@@ -80,4 +95,14 @@ namespace campvis {
 
     %template(IVec2Property) NumericProperty< tgt::Vector2<int> >;
     typedef NumericProperty< tgt::Vector2<int> > IVec2Property;
+}
+
+%luacode {
+  function campvis.newPipeline (o)
+    o = o or {}   -- create object if user does not provide one
+    setmetatable(o, {__index = instance})
+    return o
+  end
+
+  print("Module campvis loaded")
 }

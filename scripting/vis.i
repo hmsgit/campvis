@@ -15,10 +15,18 @@ int first(tgt::ivec2 &v) {
 
 namespace campvis {
 
-    class MhdImageReader {
+    class AbstractImageReader : public AbstractProcessor {
+    public:
+        AbstractImageReader();
+        ~AbstractImageReader();
+    };
+
+    class MhdImageReader : public AbstractImageReader {
     public:
         MhdImageReader();
         ~MhdImageReader();
+
+        const std::string getName() const;
 
         %immutable;
         campvis::StringProperty p_url;
@@ -26,20 +34,24 @@ namespace campvis {
         %mutable;
     };
 
-    class GlImageResampler {
+    class GlImageResampler : public VisualizationProcessor {
     public:
         GlImageResampler(campvis::IVec2Property* viewportSizeProp);
         ~GlImageResampler();
+
+        const std::string getName() const;
 
         %immutable;
         campvis::DataNameProperty p_outputImage;
         %mutable;
     };
 
-    class VolumeExplorer {
+    class VolumeExplorer : public VisualizationProcessor {
     public:
         VolumeExplorer(campvis::IVec2Property* viewportSizeProp);
         ~VolumeExplorer();
+
+        const std::string getName() const;
 
         %immutable;
         campvis::DataNameProperty p_outputImage;

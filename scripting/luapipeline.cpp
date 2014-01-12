@@ -5,6 +5,8 @@ extern "C" {
 #include "lauxlib.h"
 }
 
+#include "swigluarun.h"
+
 
 namespace campvis {
 
@@ -29,6 +31,16 @@ namespace campvis {
 
         // load the libs
         luaL_openlibs(_luaState);
+        luaL_dostring(_luaState, "require(\"campvis\")");
+
+        swig_type_info* autoEvaluationPipelineType = SWIG_TypeQuery(_luaState, "campvis::AutoEvaluationPipeline *");
+
+        if (autoEvaluationPipelineType == nullptr)
+            printf("SWIG wrapper for campvis::AutoEvaluationPipeline not found");
+        else {
+            SWIG_NewPointerObj(_luaState, this, autoEvaluationPipelineType, 0);
+            lua_setglobal(_luaState, "instance");
+        }
 
         // run a Lua script here; true is returned if there were errors
         if (luaL_dofile(_luaState, scriptPath.c_str())) {
@@ -46,7 +58,13 @@ namespace campvis {
 
         if (!lua_istable(_luaState, -1))
             printf("No valid Lua pipeline found (pipeline is %s)\n", lua_typename(_luaState, lua_type(_luaState, -1)));
+        else {
+            lua_getfield(_luaState, -1, "ctor");
+            lua_getglobal(_luaState, "pipeline");
+            callLuaFunc(_luaState, 1, 0);
+        }
 
+        // Pop the pipeline table
         lua_pop(_luaState, 1);
     }
 

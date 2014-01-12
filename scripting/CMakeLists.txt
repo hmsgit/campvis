@@ -41,6 +41,13 @@ ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
 
+# Generate header with SWIG run-time functions
+ADD_CUSTOM_COMMAND(
+   TARGET campvis-scripting
+   PRE_BUILD
+   COMMAND ${SWIG_EXECUTABLE} -c++ -lua -external-runtime "swigluarun.h"
+ )
+
 # Copy Lua test scripts into the target directory
 ADD_CUSTOM_COMMAND(
    TARGET campvis-scripting
