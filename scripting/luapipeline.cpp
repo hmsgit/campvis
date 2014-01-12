@@ -1,5 +1,10 @@
 #include "luapipeline.h"
 
+extern "C" {
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
 
 namespace campvis {
 
@@ -16,16 +21,37 @@ namespace campvis {
         }
     }
 
-    LuaPipeline::LuaPipeline(lua_State* state, DataContainer* dc)
+    LuaPipeline::LuaPipeline(std::string scriptPath, DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _luaState(state)
+        , _scriptPath(scriptPath)
     {
-        lua_getglobal(state, "pipeline");
+        _luaState = luaL_newstate();
 
-        if (!lua_istable(state, -1))
-            printf("No valid Lua pipeline found (pipeline is %s)\n", lua_typename(state, lua_type(state, -1)));
+        // load the libs
+        luaL_openlibs(_luaState);
 
-        lua_pop(state, 1);
+        // run a Lua script here; true is returned if there were errors
+        if (luaL_dofile(_luaState, scriptPath.c_str())) {
+            const char* msg = lua_tostring(_luaState, -1);
+
+            if (msg == nullptr)
+                printf("(error object is not a string)");
+            else
+                printf("%s", msg);
+
+            lua_pop(_luaState, 1);
+        }
+
+        lua_getglobal(_luaState, "pipeline");
+
+        if (!lua_istable(_luaState, -1))
+            printf("No valid Lua pipeline found (pipeline is %s)\n", lua_typename(_luaState, lua_type(_luaState, -1)));
+
+        lua_pop(_luaState, 1);
+    }
+
+    LuaPipeline::~LuaPipeline() {
+        lua_close(_luaState);
     }
 
     void LuaPipeline::init() {

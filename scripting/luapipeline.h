@@ -11,7 +11,18 @@ extern "C" {
 namespace campvis {
     class LuaPipeline : public AutoEvaluationPipeline {
     public:
-        LuaPipeline(lua_State* state, DataContainer* dc);
+        /**
+         * Create a new Lua pipeline.
+         *
+         * \param scriptPath    Path to the Lua script defining the pipeline
+         * \param dc            DataContainer containing local working set of data for this pipeline
+         */
+        LuaPipeline(const std::string scriptPath, DataContainer* dc);
+
+        /**
+         * Virtual Destructor
+         */
+        virtual ~LuaPipeline();
 
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); }
@@ -24,7 +35,8 @@ namespace campvis {
         virtual void deinit();
 
     protected:
-        lua_State* _luaState;
+        const std::string _scriptPath;    ///< path to the Lua script defining the pipeline
+        lua_State* _luaState;             ///< Lua state used to evaluate the pipeline
     };
 }
 
