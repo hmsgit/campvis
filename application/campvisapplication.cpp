@@ -104,7 +104,7 @@ namespace campvis {
         tgt::GLContextScopedLock lock(_localContext);
 
         tgt::initGL(featureset);
-        ShdrMgr.setGlobalHeader("#version 330\n");
+        ShdrMgr.setDefaultGlslVersion("330");
         LGL_ERROR;
 
         // ensure matching OpenGL specs

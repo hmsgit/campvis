@@ -135,9 +135,20 @@ void ShaderPreprocessor::parse() {
     result_.clear();
     includedFilenames_.clear();
 
-    outputComment("BEGIN GLOBAL HEADER");
-    parsePart(ShdrMgr.getGlobalHeader(), "GLOBAL HEADER");
-    outputComment("END GLOBAL HEADER");
+    if (! shd_->customGlslVersion_.empty()) {
+        parsePart("#version " + shd_->customGlslVersion_ + "\n", "Custom per-shader version");
+    }
+    else {
+        if (! ShdrMgr.getDefaultGlslVersion().empty()) {
+            parsePart("#version " + ShdrMgr.getDefaultGlslVersion() + "\n", "Global version");
+        }
+    }
+
+    if (! ShdrMgr.getGlobalHeader().empty()) {
+        outputComment("BEGIN GLOBAL HEADER");
+        parsePart(ShdrMgr.getGlobalHeader(), "GLOBAL HEADER");
+        outputComment("END GLOBAL HEADER");
+    }
 
     if (!shd_->header_.empty()) {
         outputComment("BEGIN HEADER");
@@ -600,7 +611,7 @@ void Shader::load(const string& filename, const string& customHeader) throw (Exc
 }
 
 void Shader::loadSeparate(const string& vert_filename, const string& geom_filename,
-                          const string& frag_filename, const string& customHeader)
+                          const string& frag_filename, const string& customHeader, const std::string& customGlslVersion)
                           throw (Exception)
 {
     ShaderObject* frag = 0;
@@ -612,6 +623,9 @@ void Shader::loadSeparate(const string& vert_filename, const string& geom_filena
 
         if (!customHeader.empty()) {
             vert->setHeader(customHeader);
+        }
+        if (!customGlslVersion.empty()) {
+            vert->setCustomGlslVersion(customGlslVersion);
         }
 
         try {
@@ -639,6 +653,9 @@ void Shader::loadSeparate(const string& vert_filename, const string& geom_filena
         if (!customHeader.empty()) {
             geom->setHeader(customHeader);
         }
+        if (!customGlslVersion.empty()) {
+            geom->setCustomGlslVersion(customGlslVersion);
+        }
 
         try {
             geom->loadSourceFromFile(geom_filename);
@@ -665,6 +682,9 @@ void Shader::loadSeparate(const string& vert_filename, const string& geom_filena
 
         if (!customHeader.empty()) {
             frag->setHeader(customHeader);
+        }
+        if (!customGlslVersion.empty()) {
+            frag->setCustomGlslVersion(customGlslVersion);
         }
 
         try {
@@ -1289,22 +1309,22 @@ ShaderManager::ShaderManager()
 {}
 
 Shader* ShaderManager::load(const string& filename, const string& customHeader,
-                            bool activate)
+                            bool activate, const std::string& customGlslVersion /*= ""*/)
                             throw (Exception)
 {
-    return loadSeparate(filename + ".vert", filename + ".frag", customHeader, activate);
+    return loadSeparate(filename + ".vert", filename + ".frag", customHeader, activate, customGlslVersion);
 }
 
 Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& frag_filename,
-                                    const string& customHeader, bool activate)
+                                    const string& customHeader, bool activate, const std::string& customGlslVersion /*= ""*/)
                                     throw (Exception)
 {
-    return loadSeparate(vert_filename, "", frag_filename, customHeader, activate);
+    return loadSeparate(vert_filename, "", frag_filename, customHeader, activate, customGlslVersion);
 }
 
 Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& geom_filename,
                                     const string& frag_filename,
-                                    const string& customHeader, bool activate)
+                                    const string& customHeader, bool activate, const std::string& customGlslVersion /*= ""*/)
                                     throw (Exception)
 {
     LDEBUG("Loading files " << vert_filename << " and " << frag_filename);

@@ -118,6 +118,10 @@ public:
      */
     void setHeader(const std::string& h);
 
+    void setCustomGlslVersion(const std::string& version) {
+        customGlslVersion_ = version;
+    }
+
     ShaderType getType() { return shaderType_; }
 
     void setSource(std::string source) {
@@ -160,6 +164,7 @@ protected:
     std::string source_;
     std::string unparsedSource_;
     std::string header_;
+    std::string customGlslVersion_;     ///< Optional custom GLSL version, will override global GLSL version if set
     bool isCompiled_;
     GLint inputType_;
     GLint outputType_;
@@ -385,7 +390,7 @@ protected:
      * @throw Exception if loading failed
      */
     void loadSeparate(const std::string& vertFilename, const std::string& geomFilename,
-        const std::string& fragFilename, const std::string& customHeader = "")
+        const std::string& fragFilename, const std::string& customHeader = "", const std::string& customGlslVersion = "")
         throw (Exception);
 
     typedef std::list<ShaderObject*> ShaderObjects;
@@ -430,7 +435,7 @@ public:
      * @throw Exception if loading failed
      */
     Shader* load(const std::string& filename, const std::string& customHeader = "",
-                 bool activate = true)
+                 bool activate = true, const std::string& customGlslVersion = "")
                  throw (Exception);
 
     /**
@@ -447,7 +452,7 @@ public:
      * @throw Exception if loading failed
      */
     Shader* loadSeparate(const std::string& vertFilename, const std::string& fragFilename,
-                         const std::string& customHeader = "", bool activate = true)
+                         const std::string& customHeader = "", bool activate = true, const std::string& customGlslVersion = "")
                          throw (Exception);
 
     /**
@@ -465,7 +470,7 @@ public:
      */
     Shader* loadSeparate(const std::string& vertFilename, const std::string& geomFilename,
                          const std::string& fragFilename,
-                         const std::string& customHeader, bool activate = true)
+                         const std::string& customHeader, bool activate = true, const std::string& customGlslVersion = "")
                          throw(Exception);
 
     bool rebuildAllShadersFromFile();
@@ -486,7 +491,25 @@ public:
         return globalHeader_;
     }
 
+    /**
+     * Sets the default GLSL version string, will be added to the '#version' pragma 
+     * at the beginning of each shader.
+     * \param   version     Default GLSL version string.
+     */
+    void setDefaultGlslVersion(const std::string& version) {
+        defaultGlslVersion_ = version;
+    }
+
+    /**
+     * Gets the default GLSL version string, will be added to the '#version' pragma 
+     * at the beginning of each shader.
+     */
+    const std::string& getDefaultGlslVersion() const {
+        return defaultGlslVersion_;
+    }
+
 protected:
+    std::string defaultGlslVersion_;    ///< Default GLSL version string, will be added to the '#version' pragma at the beginning of each shader
     std::string globalHeader_;      ///< Global header that will be added to all shaders.
 
     static const std::string loggerCat_;
