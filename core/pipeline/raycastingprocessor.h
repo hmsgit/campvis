@@ -62,8 +62,9 @@ namespace campvis {
          * \param   viewportSizeProp            Pointer to the parent pipeline's render target size property.
          * \param   fragmentShaderFileName      Filename for the fragment shader being automatically loaded.
          * \param   bindEntryExitDepthTextures  Flag whether to also bind the depth textures of the entry-/exit points.
+         * \param   customGlslVersion           Custom GLSL version to pass to shader (Optional).
          */
-        RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures);
+        RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures, const std::string& customGlslVersion = "");
 
         /**
          * Destructor
@@ -87,6 +88,7 @@ namespace campvis {
         DataNameProperty p_sourceImageID;                ///< image ID for input image
         DataNameProperty p_entryImageID;                 ///< image ID for output entry points image
         DataNameProperty p_exitImageID;                  ///< image ID for output exit points image
+        DataNameProperty p_targetImageID;                ///< image ID for output image
 
         CameraProperty p_camera;                         ///< Camera used for ray casting
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
@@ -131,6 +133,8 @@ namespace campvis {
         virtual std::string generateHeader() const;
 
         const std::string _fragmentShaderFilename;      ///< Filename for the fragment shader being automatically loaded.
+        const std::string _customGlslVersion;           ///< Custom GLSL version to pass to shader
+        
         tgt::Shader* _shader;                           ///< Shader for raycasting
         bool _bindEntryExitDepthTextures;               ///< Flag whether to also bind the depth textures of the entry-/exit points.
 

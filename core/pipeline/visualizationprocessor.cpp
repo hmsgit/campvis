@@ -169,7 +169,8 @@ namespace campvis {
     void VisualizationProcessor::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
         tgtAssert(viewportSizeProp != 0, "Pointer must not be 0.");
 
-        _viewportSizeProperty->s_changed.disconnect(this);
+        if (_viewportSizeProperty != 0)
+            _viewportSizeProperty->s_changed.disconnect(this);
         _viewportSizeProperty = viewportSizeProp;
         _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
     }

@@ -33,6 +33,7 @@
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
+#include "core/pipeline/raycastingprocessor.h"
 
 namespace tgt {
     class Shader;
@@ -55,8 +56,10 @@ namespace campvis {
 
         /**
          * Constructs a new VolumeRenderer Processor
-         **/
-        VolumeRenderer(IVec2Property* viewportSizeProp);
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
+         * \param   raycaster           Raycaster to use for rendering, must not be 0, VolumeRenderer will take ownership.
+         */
+        VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster = new SimpleRaycaster(0));
 
         /**
          * Destructor
@@ -109,7 +112,7 @@ namespace campvis {
 
         ProxyGeometryGenerator _pgGenerator;
         EEPGenerator _eepGenerator;
-        SimpleRaycaster _raycaster;
+        RaycastingProcessor* _raycaster;
 
         static const std::string loggerCat_;
     };

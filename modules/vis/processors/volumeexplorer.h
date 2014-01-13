@@ -53,8 +53,10 @@ namespace campvis {
     public:
         /**
          * Constructs a new VolumeExplorer Processor
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
+         * \param   raycaster           Raycaster to use for rendering, must not be 0, VolumeRenderer will take ownership.
          **/
-        VolumeExplorer(IVec2Property* viewportSizeProp);
+        VolumeExplorer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster = new SimpleRaycaster(0));
 
         /**
          * Destructor

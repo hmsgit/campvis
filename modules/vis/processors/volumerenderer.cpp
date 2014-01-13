@@ -35,7 +35,7 @@
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
 
-    VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp)
+    VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
         , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
@@ -45,10 +45,12 @@ namespace campvis {
         , p_raycasterProps("RaycasterProps", "Raycaster", AbstractProcessor::VALID)
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
-        , _raycaster(viewportSizeProp)
+        , _raycaster(raycaster)
     {
+        _raycaster->setViewportSizeProperty(viewportSizeProp);
+
         addProperty(&p_inputVolume);
-        addProperty(&_raycaster.p_transferFunction);
+        addProperty(&_raycaster->p_transferFunction);
         addProperty(&p_outputImage);
 
         p_pgProps.addPropertyCollection(_pgGenerator);
@@ -65,24 +67,24 @@ namespace campvis {
         _eepGenerator.p_exitImageID.setVisible(false);
         addProperty(&p_eepProps);
 
-        p_raycasterProps.addPropertyCollection(_raycaster);
-        _raycaster.p_lqMode.setVisible(false);
-        _raycaster.p_camera.setVisible(false);
-        _raycaster.p_sourceImageID.setVisible(false);
-        _raycaster.p_entryImageID.setVisible(false);
-        _raycaster.p_exitImageID.setVisible(false);
-        _raycaster.p_targetImageID.setVisible(false);
+        p_raycasterProps.addPropertyCollection(*_raycaster);
+        _raycaster->p_lqMode.setVisible(false);
+        _raycaster->p_camera.setVisible(false);
+        _raycaster->p_sourceImageID.setVisible(false);
+        _raycaster->p_entryImageID.setVisible(false);
+        _raycaster->p_exitImageID.setVisible(false);
+        _raycaster->p_targetImageID.setVisible(false);
         addProperty(&p_raycasterProps);
 
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);
         p_inputVolume.addSharedProperty(&_eepGenerator.p_sourceImageID);
-        p_inputVolume.addSharedProperty(&_raycaster.p_sourceImageID);
+        p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
 
         p_camera.addSharedProperty(&_eepGenerator.p_camera);
-        p_camera.addSharedProperty(&_raycaster.p_camera);
+        p_camera.addSharedProperty(&_raycaster->p_camera);
 
-        p_outputImage.addSharedProperty(&_raycaster.p_targetImageID);
+        p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
 
         p_inputVolume.s_changed.connect(this, &VolumeRenderer::onPropertyChanged);
     }
@@ -95,23 +97,23 @@ namespace campvis {
         VisualizationProcessor::init();
         _pgGenerator.init();
         _eepGenerator.init();
-        _raycaster.init();
+        _raycaster->init();
 
-        p_lqMode.addSharedProperty(&_raycaster.p_lqMode);
+        p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
 
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
-        _raycaster.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+        _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
     }
 
     void VolumeRenderer::deinit() {
         _pgGenerator.s_invalidated.disconnect(this);
         _eepGenerator.s_invalidated.disconnect(this);
-        _raycaster.s_invalidated.disconnect(this);
+        _raycaster->s_invalidated.disconnect(this);
 
         _pgGenerator.deinit();
         _eepGenerator.deinit();
-        _raycaster.deinit();
+        _raycaster->deinit();
 
         VisualizationProcessor::deinit();
     }
@@ -124,7 +126,7 @@ namespace campvis {
             _eepGenerator.process(data);
         }
         if (getInvalidationLevel() & RAYCASTER_INVALID) {
-            _raycaster.process(data);
+            _raycaster->process(data);
         }
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
@@ -137,7 +139,7 @@ namespace campvis {
         else if (processor == &_eepGenerator) {
             invalidate(EEP_INVALID | RAYCASTER_INVALID);
         }
-        else if (processor == &_raycaster) {
+        else if (processor == _raycaster) {
             invalidate(RAYCASTER_INVALID);
         }
 
@@ -150,17 +152,17 @@ namespace campvis {
             _eepGenerator.p_geometryID.setValue(p_outputImage.getValue() + ".geometry");
 
             _eepGenerator.p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
-            _raycaster.p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
+            _raycaster->p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
 
             _eepGenerator.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
-            _raycaster.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
+            _raycaster->p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
         }
         VisualizationProcessor::onPropertyChanged(prop);
     }
 
     void VolumeRenderer::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
         _eepGenerator.setViewportSizeProperty(viewportSizeProp);
-        _raycaster.setViewportSizeProperty(viewportSizeProp);
+        _raycaster->setViewportSizeProperty(viewportSizeProp);
 
         VisualizationProcessor::setViewportSizeProperty(viewportSizeProp);
     }

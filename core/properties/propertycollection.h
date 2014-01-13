@@ -68,6 +68,15 @@ namespace campvis {
          * \return      The property named \a name, 0 if no such property exists.
          */
         AbstractProperty* getProperty(const std::string& name) const;
+        
+        /**
+         * Returns the property with the given name \a name using nested syntax.
+         * You can search for nested properties in MetaProperties using "::" as delimiter.
+         * If no such property exists, the result will be 0.
+         * \param name  Name of the property to return, use "::" as delimiter for nested properties.
+         * \return      The property named \a name, 0 if no such property exists.
+         */
+        AbstractProperty* getNestedProperty(const std::string& name) const;
 
         /**
          * Returns the PropertyCollection of this processor.

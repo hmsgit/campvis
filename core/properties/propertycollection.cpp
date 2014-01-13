@@ -23,7 +23,10 @@
 // ================================================================================================
 
 #include "propertycollection.h"
+
 #include "core/properties/abstractproperty.h"
+#include "core/properties/metaproperty.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
     HasPropertyCollection::HasPropertyCollection() {
@@ -58,7 +61,26 @@ namespace campvis {
         PropertyCollection::const_iterator it = findProperty(name);
         if (it != _properties.end())
             return *it;
+
         return 0;
+    }
+
+    AbstractProperty* HasPropertyCollection::getNestedProperty(const std::string& name) const {
+        // try to find nested property (use :: as delimiter)
+        std::vector<std::string> levels = StringUtils::split(name, "::");
+        AbstractProperty* toReturn = getProperty(levels[0]);
+        size_t currentLevel = 1;
+        while (toReturn != 0 && currentLevel < levels.size()) {
+            if (MetaProperty* tester = dynamic_cast<MetaProperty*>(toReturn)) {
+            	toReturn = tester->getProperty(levels[currentLevel]);
+                ++currentLevel;
+            }
+            else {
+                toReturn = 0;
+            }
+        }
+
+        return toReturn;
     }
 
     const PropertyCollection& HasPropertyCollection::getProperties() const {

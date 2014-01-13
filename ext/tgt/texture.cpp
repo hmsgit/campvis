@@ -276,6 +276,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_R16UI:
         case GL_R32I:
         case GL_R32UI:
+        case GL_RED_INTEGER:
             return 1;
             break;
 
@@ -294,6 +295,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_RG16UI:
         case GL_RG32I:
         case GL_RG32UI:
+        case GL_RG_INTEGER:
             return 2;
             break;
 
@@ -318,6 +320,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_RGB16UI:
         case GL_RGB32I:
         case GL_RGB32UI:
+        case GL_RGB_INTEGER:
             return 3;
             break;
 
@@ -341,6 +344,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_RGBA16UI:
         case GL_RGBA32I:
         case GL_RGBA32UI:
+        case GL_RGBA_INTEGER:
             return 4;
             break;
 

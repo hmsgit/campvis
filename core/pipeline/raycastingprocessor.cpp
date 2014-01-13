@@ -36,22 +36,25 @@
 namespace campvis {
     const std::string RaycastingProcessor::loggerCat_ = "CAMPVis.modules.vis.RaycastingProcessor";
 
-    RaycastingProcessor::RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures)
+    RaycastingProcessor::RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures, const std::string& customGlslVersion /*= ""*/)
         : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
+        , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
         , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", 1.f, 0.f, 1.f)
         , p_samplingRate("SamplingRate", "Sampling Rate", 2.f, 0.1f, 10.f, 0.1f)
         , _fragmentShaderFilename(fragmentShaderFileName)
+        , _customGlslVersion(customGlslVersion)
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_entryImageID);
         addProperty(&p_exitImageID);
+        addProperty(&p_targetImageID);
         addProperty(&p_camera);  
         addProperty(&p_transferFunction);
         addProperty(&p_jitterStepSizeMultiplier);
@@ -64,7 +67,7 @@ namespace campvis {
 
     void RaycastingProcessor::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.load("core/glsl/passthrough.vert", _fragmentShaderFilename, generateHeader());
+        _shader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", _fragmentShaderFilename, generateHeader(), _customGlslVersion);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }

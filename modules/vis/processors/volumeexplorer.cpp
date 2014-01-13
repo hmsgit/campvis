@@ -37,13 +37,13 @@
 namespace campvis {
     const std::string VolumeExplorer::loggerCat_ = "CAMPVis.modules.vis.VolumeExplorer";
 
-    VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp)
+    VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
         , p_seProperties("SliceExtractorProperties", "Slice Extractor Properties", AbstractProcessor::VALID)
         , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties", AbstractProcessor::VALID)
-        , _raycaster(viewportSizeProp)
+        , _raycaster(viewportSizeProp, raycaster)
         , _sliceExtractor(viewportSizeProp)
         , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
         , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)

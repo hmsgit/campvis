@@ -63,8 +63,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        DataNameProperty p_targetImageID;    ///< image ID for output image
-
         FloatProperty p_shift;
         FloatProperty p_scale;
         BoolProperty p_invertMapping;
