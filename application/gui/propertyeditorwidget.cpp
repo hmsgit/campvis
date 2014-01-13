@@ -51,6 +51,7 @@
 #include "modules/columbia/datastructures/fiberdata.h"
 #endif
 
+#include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
 #include "modules/io/processors/genericimagereader.h"
@@ -61,7 +62,7 @@ namespace campvis {
 
     const std::string PropertyEditorWidget::loggerCat_ = "CAMPVis.application.PropertyEditorWidget";
 
-    PropertyEditorWidget::PropertyEditorWidget(DataContainerTreeModel* treeModel, QWidget* parent) 
+    PropertyEditorWidget::PropertyEditorWidget(DataContainerInspectorWidget* treeModel, QWidget* parent) 
         : QWidget(parent)
         , _inited(false)
         , _dataContainer(0)
@@ -100,7 +101,7 @@ namespace campvis {
     }
 
 
-    void PropertyEditorWidget::setParentx(DataContainerTreeModel* parent) {
+    void PropertyEditorWidget::setParentx(DataContainerInspectorWidget* parent) {
         this->_parent = parent;
     }
     void PropertyEditorWidget::setImageReader (GenericImageReader* imgReader) {
@@ -225,8 +226,8 @@ namespace campvis {
 
     void PropertyEditorWidget::onBtnLoadFileClicked() {
         _imgReader->process(*_dataContainer);
-        emit dataContainerChanged();
-
+        //emit dataContainerChanged();
+        this->_parent->setDataContainer(_dataContainer);
         this->close();
     }
 

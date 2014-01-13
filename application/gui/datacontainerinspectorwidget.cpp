@@ -472,12 +472,12 @@ namespace campvis {
         GenericImageReader *imgReader = new GenericImageReader();
         imgReader->setURL(fileTobeRead);
 
-        PropertyEditorWidget *propEditorWid = new PropertyEditorWidget(_dctWidget->getTreeModel(), nullptr);
+        PropertyEditorWidget *propEditorWid = new PropertyEditorWidget(this, nullptr); //_dctWidget->getTreeModel()
         propEditorWid->setDataContainer(_dataContainer);
         propEditorWid->setImageReader(imgReader);
         propEditorWid->updatePropCollection();
         //propEditorWid->_propCollectionWidget->updatePropCollection(imgReader, _dataContainer);
-        //propEditorWid->setParentx(_dctWidget->getTreeModel());
+        propEditorWid->setParentx(this);
 
         imgReader->setVisibibility(".mhd", true);
         propEditorWid->setVisible(true);

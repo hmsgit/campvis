@@ -37,7 +37,8 @@
 #include "application/gui/properties/stringpropertywidget.h"
 #include "core/tools/opengljobprocessor.h"
 #include "modules/io/processors/genericimagereader.h"
-#include "application/gui/datacontainertreewidget.h"
+//#include "application/gui/datacontainertreewidget.h"
+#include "application/gui/datacontainerinspectorwidget.h"
 
 #include <QLabel>
 #include <QWidget>
@@ -72,7 +73,7 @@ namespace campvis {
          * Creates a new DataContainerInspectorWidget.
          * \param   parent          Parent Qt widget, may be 0 (default)
          */
-        explicit PropertyEditorWidget(DataContainerTreeModel* treeModel, QWidget* parent = nullptr);
+        explicit PropertyEditorWidget(DataContainerInspectorWidget* treeModel, QWidget* parent = nullptr);
 
         /**
          * Destructor.
@@ -84,7 +85,7 @@ namespace campvis {
          * \param   dataContainer   The DataContainer this widget shall inspect, may be 0.
          */
         void setDataContainer(DataContainer* dataContainer);
-        void setParentx(DataContainerTreeModel* parent);
+        void setParentx(DataContainerInspectorWidget* parent);
 
         void setImageReader (GenericImageReader* imgReader);
         void updatePropCollection ();
@@ -182,7 +183,7 @@ namespace campvis {
         GenericImageReader *_imgReader;
         PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for browsing the PropertyCollection of the selected pipeline/processor
         
-        DataContainerTreeModel* _parent;
+        DataContainerInspectorWidget* _parent;
 
         static const std::string loggerCat_;
     };
