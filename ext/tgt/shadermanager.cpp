@@ -1308,33 +1308,23 @@ ShaderManager::ShaderManager()
   : ResourceManager<Shader>(false)
 {}
 
-Shader* ShaderManager::load(const string& filename, const string& customHeader,
-                            bool activate, const std::string& customGlslVersion /*= ""*/)
-                            throw (Exception)
-{
-    return loadSeparate(filename + ".vert", filename + ".frag", customHeader, activate, customGlslVersion);
+Shader* ShaderManager::load(const std::string& vertFilename, const std::string& fragFilename, const std::string& customHeader) throw (Exception) {
+    return loadWithCustomGlslVersion(vertFilename, "", fragFilename, customHeader, "");
 }
 
-Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& frag_filename,
-                                    const string& customHeader, bool activate, const std::string& customGlslVersion /*= ""*/)
-                                    throw (Exception)
-{
-    return loadSeparate(vert_filename, "", frag_filename, customHeader, activate, customGlslVersion);
+Shader* ShaderManager::load(const std::string& vertFilename, const std::string& geomFilename, const std::string& fragFilename, const std::string& customHeader) throw(Exception) {
+    return loadWithCustomGlslVersion(vertFilename, geomFilename, fragFilename, customHeader, "");
 }
 
-Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& geom_filename,
-                                    const string& frag_filename,
-                                    const string& customHeader, bool activate, const std::string& customGlslVersion /*= ""*/)
-                                    throw (Exception)
-{
-    LDEBUG("Loading files " << vert_filename << " and " << frag_filename);
+Shader* ShaderManager::loadWithCustomGlslVersion(const std::string& vertFilename, const std::string& geomFilename, const std::string& fragFilename, const std::string& customHeader, const std::string& customGlslVersion) throw(Exception) {
+    LDEBUG("Loading files " << vertFilename << " and " << fragFilename);
     if (!GpuCaps.areShadersSupported()) {
         LERROR("Shaders are not supported.");
         throw Exception("Shaders are not supported.");
     }
 
     // create a somewhat unique identifier for this shader triple
-    string identifier = vert_filename + "#" +  frag_filename + "#" + geom_filename;
+    string identifier = vertFilename + "#" +  fragFilename + "#" + geomFilename;
 
     if (isLoaded(identifier)) {
         LDEBUG("Shader already loaded. Increase usage count.");
@@ -1346,26 +1336,24 @@ Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& g
 
     // searching in all paths for every shader
     string vert_completeFilename;
-    if (!vert_filename.empty())
-        vert_completeFilename = completePath(vert_filename);
+    if (!vertFilename.empty())
+        vert_completeFilename = completePath(vertFilename);
 
     string geom_completeFilename;
-    if (!geom_filename.empty())
-        geom_completeFilename = completePath(geom_filename);
+    if (!geomFilename.empty())
+        geom_completeFilename = completePath(geomFilename);
 
     string frag_completeFilename;
-    if (!frag_filename.empty())
-        frag_completeFilename = completePath(frag_filename);
+    if (!fragFilename.empty())
+        frag_completeFilename = completePath(fragFilename);
 
     // loading and linking found shaders
     try {
         shdr->loadSeparate(vert_completeFilename, geom_completeFilename,
-                           frag_completeFilename, customHeader);
+            frag_completeFilename, customHeader, customGlslVersion);
+
         // register even when caching is disabled, needed for rebuildFromFile()
         reg(shdr, identifier);
-
-        if (activate)
-            shdr->activate();
 
         return shdr;
     }
@@ -1386,5 +1374,6 @@ bool ShaderManager::rebuildAllShadersFromFile() {
 
     return result;
 }
+
 
 } // namespace

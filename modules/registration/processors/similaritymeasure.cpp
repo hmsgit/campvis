@@ -96,15 +96,15 @@ namespace campvis {
 
     void SimilarityMeasure::init() {
         VisualizationProcessor::init();
-        _sadssdCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasuresadssd.frag", "", false);
+        _sadssdCostFunctionShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasuresadssd.frag", "");
         _sadssdCostFunctionShader->setAttributeLocation(0, "in_Position");
         _sadssdCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
 
-        _nccsnrCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurenccsnr.frag", "", false);
+        _nccsnrCostFunctionShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurenccsnr.frag", "");
         _nccsnrCostFunctionShader->setAttributeLocation(0, "in_Position");
         _nccsnrCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
 
-        _differenceShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "", false);
+        _differenceShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "");
         _differenceShader->setAttributeLocation(0, "in_Position");
         _differenceShader->setAttributeLocation(1, "in_TexCoord");
 

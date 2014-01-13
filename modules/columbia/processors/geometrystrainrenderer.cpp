@@ -63,7 +63,7 @@ namespace campvis {
 
     void GeometryStrainRenderer::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/geometrystrainrenderer.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/geometrystrainrenderer.frag", "");
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
         }

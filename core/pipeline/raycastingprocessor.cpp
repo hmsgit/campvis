@@ -64,7 +64,7 @@ namespace campvis {
 
     void RaycastingProcessor::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", _fragmentShaderFilename, generateHeader(), false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", _fragmentShaderFilename, generateHeader());
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }

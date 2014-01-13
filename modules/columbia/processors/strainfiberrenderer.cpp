@@ -72,7 +72,7 @@ namespace campvis {
 
     void StrainFiberRenderer::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("modules/columbia/glsl/strainfiberrenderer.vert", "modules/columbia/glsl/strainfiberrenderer.geom", "modules/columbia/glsl/strainfiberrenderer.frag", "", false);
+        _shader = ShdrMgr.load("modules/columbia/glsl/strainfiberrenderer.vert", "modules/columbia/glsl/strainfiberrenderer.geom", "modules/columbia/glsl/strainfiberrenderer.frag", "");
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
             _shader->setAttributeLocation(1, "in_TexCoord");

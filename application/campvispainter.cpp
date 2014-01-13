@@ -124,7 +124,7 @@ namespace campvis {
     void CampVisPainter::init() {
         try {
             // TODO:    Remove hardcoded paths, and use ShdrMgr.addPath() at some central location
-            _copyShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "", false);
+            _copyShader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "");
         }
         catch (tgt::Exception& e) {
             LERRORC("main.cpp", "Encountered tgt::Exception: " << e.what());
