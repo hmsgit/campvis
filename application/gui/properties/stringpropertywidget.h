@@ -51,6 +51,8 @@ namespace campvis {
          */
         virtual ~StringPropertyWidget();
 
+        void setButtonLabel(const std::string& btnLabel);
+
     protected:
         /**
          * Gets called when the property has changed, so that widget can update its state.

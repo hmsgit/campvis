@@ -45,15 +45,15 @@ namespace campvis {
         : AbstractProcessor()
         , p_url("url", "Image URL", "")
     {
+        addProperty(&p_url);
+        p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);
+
         this->addReader(new CsvdImageReader());        
         this->addReader(new LtfImageReader());
         this->addReader(new MhdImageReader());
         this->addReader(new RawImageReader());
         this->addReader(new VtkImageReader());
 
-        addProperty(&p_url);
-
-        p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);
 
         this->_ext = "";
         this->_currentlyVisible = nullptr;

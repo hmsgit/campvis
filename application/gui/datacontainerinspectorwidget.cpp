@@ -72,6 +72,7 @@ namespace campvis {
         , _mainLayout(0)
         , _infoWidget(0)
         , _infoWidgetLayout(0)
+        , _propEditorWid(0)
     {
         setupGUI();
     }
@@ -94,6 +95,10 @@ namespace campvis {
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.connect(this, &DataContainerInspectorWidget::onDataContainerDataAdded);
         }
+    }
+
+    DataContainer* DataContainerInspectorWidget::getDataContainer() {
+        return _dataContainer;
     }
 
     void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
@@ -165,8 +170,6 @@ namespace campvis {
         _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
         _infoWidgetLayout->addWidget(_btnSaveToFile);
 
-        // Added by Hossain Mahmud <mahmud@in.tum.de>
-        // Date: January 02, 2014
         _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
         _infoWidgetLayout->addWidget(_btnLoadFile);
 
@@ -352,6 +355,9 @@ namespace campvis {
 
         _dataContainer = 0;
         _dctWidget->update(0);
+
+        if(_propEditorWid != nullptr)
+            _propEditorWid->deinit();
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
@@ -453,43 +459,14 @@ namespace campvis {
     }
 
     void DataContainerInspectorWidget::onBtnLoadFileClicked() {
-        QString dialogCaption = QString::fromStdString("Select the file");
-        QString directory;
-        std::string fileTobeRead;
+        // delete previous PropertyEditor, then create a new one
+        // the final one will be deleted with deinit()
+        if(nullptr != _propEditorWid)
+            delete _propEditorWid;
 
-        directory = tr("");
-
-        const QString fileFilter = tr("All files (*)");
-
-        QString filename;
-            filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
-
-        if (! filename.isEmpty()) {
-            fileTobeRead = filename.toStdString();
-            //emit modified();
-        }
-
-        GenericImageReader *imgReader = new GenericImageReader();
-        imgReader->setURL(fileTobeRead);
-
-        PropertyEditorWidget *propEditorWid = new PropertyEditorWidget(this, nullptr); //_dctWidget->getTreeModel()
-        propEditorWid->setDataContainer(_dataContainer);
-        propEditorWid->setImageReader(imgReader);
-        propEditorWid->updatePropCollection();
-        //propEditorWid->_propCollectionWidget->updatePropCollection(imgReader, _dataContainer);
-        propEditorWid->setParentx(this);
-
-        //imgReader->setVisibibility(".mhd", true);
-        propEditorWid->setVisible(true);
-        //imgReader->process(*_dataContainer);
-
-
-        _dctWidget->update(_dataContainer); //use this here. or next statement
-        //this->setDataContainer(_dataContainer);
-
+        _propEditorWid = new PropertyEditorWidget(this, nullptr);
+        _propEditorWid->setVisible(true);
+        
     }
 
-    void DataContainerInspectorWidget::onDataContainerUpdated(const QString&, QtDataHandle) {
-        this->_dctWidget->update(_dataContainer);
-    }
 }

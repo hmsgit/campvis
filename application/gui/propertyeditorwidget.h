@@ -37,7 +37,6 @@
 #include "application/gui/properties/stringpropertywidget.h"
 #include "core/tools/opengljobprocessor.h"
 #include "modules/io/processors/genericimagereader.h"
-//#include "application/gui/datacontainertreewidget.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 
 #include <QLabel>
@@ -59,11 +58,6 @@ namespace tgt {
 }
 
 namespace campvis {
-    class AbstractPipeline;
-    //class DataContainerInspectorWidget;
-    //class DataContainer;
-    //class DataContainerTreeWidget;
-    //class FaceGeometry;
 
     class PropertyEditorWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -85,21 +79,6 @@ namespace campvis {
          * \param   dataContainer   The DataContainer this widget shall inspect, may be 0.
          */
         void setDataContainer(DataContainer* dataContainer);
-        void setParentx(DataContainerInspectorWidget* parent);
-
-        void setImageReader (GenericImageReader* imgReader);
-        void updatePropCollection ();
-
-        /**
-         * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
-         */
-        void onDataContainerDataAdded(const std::string&, const DataHandle&);
-
-        void updateDataInspector(const std::string&, const DataHandle&);
-
-        //void mousePressEvent(QMouseEvent*) {
-        //    updateInfoWidget();
-        //}
 
         /**
          * Size hint for the default window size
@@ -130,7 +109,6 @@ namespace campvis {
         void updateDepth();
 
     signals:
-        void dataContainerChanged();
 
     private slots:
         /**
@@ -150,42 +128,27 @@ namespace campvis {
         void setupGUI();
 
     protected:
-        /**
-         * Returns a string with \a numBytes humanized (i.e. "numBytes/1024^n [KMG]Byte")
-         * \param   numBytes    Number of bytes to be converted.
-         * \return  "numBytes/1024^n [KMG]Bytes
-         */
-        //QString humanizeBytes(size_t numBytes) const;
 
         bool _inited;
-
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
-
-        //DataContainerTreeWidget* _dctWidget;            ///< The TreeWidget showing the DataHandles in _dataContainer
         DataContainerInspectorCanvas* _canvas;          ///< The OpenGL canvas for rendering the DataContainer's contents
-        //PropertyCollectionWidget* _pcWidget;
-
         QVBoxLayout* _mainLayout;                       ///< Layout for this widget
-        //QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
-        QVBoxLayout* rightLayout;                 ///< Layout for the _infoWidget
+        QVBoxLayout* rightLayout;                       ///< Layout for the _infoWidget
+        QScrollArea* _pipelinePropertiesScrollArea;     ///< Scroll area for _pipelinePropertiesWidget
 
-        //QWidget* _pipelinePropertiesWidget;                 ///< Widget showing the selected pipeline's properties
-        QScrollArea* _pipelinePropertiesScrollArea;         ///< Scroll area for _pipelinePropertiesWidget
-    public:
-        protected:
-        //QPushButton* _btnBrowse;
-        StringPropertyWidget* _btnBrowse;
+    protected:
         QPushButton* _btnCancel;
         QPushButton* _btnLoadFile;
-
         StringProperty _fileName;
+        PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for browsing the PropertyCollection of the selected pipeline/processor
 
         GenericImageReader *_imgReader;
-        PropertyCollectionWidget* _propCollectionWidget;    ///< Widget for browsing the PropertyCollection of the selected pipeline/processor
-        
         DataContainerInspectorWidget* _parent;
-
+        
         static const std::string loggerCat_;
+
+    private:
+
     };
 }
 

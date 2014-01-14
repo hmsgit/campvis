@@ -57,6 +57,7 @@ namespace campvis {
     class DataContainer;
     class DataContainerTreeWidget;
     class FaceGeometry;
+    class PropertyEditorWidget;
 
     class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -72,12 +73,17 @@ namespace campvis {
          * Destructor.
          */
         ~DataContainerInspectorWidget();
-
+        
         /**
          * Set the DataContainer this widget is inspecting.
          * \param   dataContainer   The DataContainer this widget shall inspect, may be 0.
          */
         void setDataContainer(DataContainer* dataContainer);
+
+        /**
+         * Get the DataContainer this widget is inspecting.
+         */
+        DataContainer* getDataContainer();
 
         /**
          * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
@@ -139,8 +145,6 @@ namespace campvis {
          */
         void onBtnLoadFileClicked();
 
-        void onDataContainerUpdated(const QString&, QtDataHandle);
-
     protected:
         /**
          * Setup the GUI stuff
@@ -194,9 +198,11 @@ namespace campvis {
         QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
         QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
         QPushButton* _btnSaveToFile;
+        
         // Added by Hossain Mahmud  <mahmud@in.tum.de>
         // Date: January 02, 2014
         QPushButton* _btnLoadFile;
+        PropertyEditorWidget* _propEditorWid;
 
         static const std::string loggerCat_;
     };

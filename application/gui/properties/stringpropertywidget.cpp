@@ -52,6 +52,9 @@ namespace campvis {
     StringPropertyWidget::~StringPropertyWidget() {
 
     }
+    void StringPropertyWidget::setButtonLabel(const std::string& btnLabel) {
+        this->_btnLoadFile->setText(QString(btnLabel.c_str()));
+    }
 
     void StringPropertyWidget::updateWidgetFromProperty() {
         StringProperty* prop = static_cast<StringProperty*>(_property);
