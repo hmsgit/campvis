@@ -262,6 +262,13 @@ public:
     bool setUniform(const std::string& name, GLint v1, GLint v2, GLint v3, GLint v4);
     bool setUniform(const std::string& name, GLint* v, int count);
 
+    // Unsigned Integers
+    bool setUniform(const std::string& name, GLuint value);
+    bool setUniform(const std::string& name, GLuint v1, GLuint v2);
+    bool setUniform(const std::string& name, GLuint v1, GLuint v2, GLuint v3);
+    bool setUniform(const std::string& name, GLuint v1, GLuint v2, GLuint v3, GLuint v4);
+    bool setUniform(const std::string& name, GLuint* v, int count);
+
     // Booleans
     bool setUniform(const std::string& name, bool value);
     bool setUniform(const std::string& name, bool v1, bool v2);

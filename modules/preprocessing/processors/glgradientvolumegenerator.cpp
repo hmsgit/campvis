@@ -45,7 +45,7 @@ namespace campvis {
 
     GlGradientVolumeGenerator::GlGradientVolumeGenerator(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
         , p_outputImage("OutputImage", "Output Image", "GlGradientVolumeGenerator.out", DataNameProperty::WRITE)
         , _shader(0)
     {

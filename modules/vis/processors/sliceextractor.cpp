@@ -186,7 +186,7 @@ namespace campvis {
                         modelMatrix.t11 = 0.f;
                         modelMatrix.t03 = 0.f;
                         modelMatrix.t13 = 2.f * sliceTexCoord.y - 1.f;
-                        modelMatrix.t13 *= (ratioRatio > 1) ? 1.f : ratioRatio;
+                        modelMatrix.t13 *= (ratioRatio > 1) ? 1.f / ratioRatio : 1.f;
                         _shader->setUniform("_modelMatrix", modelMatrix);
                         _shader->setUniform("_color", p_ySliceColor.getValue());
                         QuadRdr.renderQuad(GL_LINE_STRIP);

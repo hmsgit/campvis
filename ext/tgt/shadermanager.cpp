@@ -863,6 +863,49 @@ bool Shader::setUniform(const string& name, GLint* v, int count) {
 }
 
 
+// Unsigned Integers
+bool Shader::setUniform(const string& name, GLuint value) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform1ui(l, value);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint v1, GLuint v2) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform2ui(l, v1, v2);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint v1, GLuint v2, GLuint v3) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform3ui(l, v1, v2, v3);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint v1, GLuint v2, GLuint v3, GLuint v4) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform4ui(l, v1, v2, v3, v4);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint* v, int count) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform1uiv(l, count, v);
+    return true;
+}
+
+
+
 bool Shader::setUniform(const string& name, bool value) {
     GLint l = getUniformLocation(name);
     if (l == -1)
