@@ -143,11 +143,16 @@ namespace campvis {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             if (p_renderMode.getOptionValue() == GL_POINTS)
                 glPointSize(p_pointSize.getValue());
+            else if (p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
+                glLineWidth(p_lineWidth.getValue());
 
             proxyGeometry->render(p_renderMode.getOptionValue());
 
             if (p_renderMode.getOptionValue() == GL_POINTS)
                 glPointSize(1.f);
+            else if (p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
+                glLineWidth(1.f);
+
             decorateRenderEpilog(leShader);
             leShader->deactivate();
             glDisable(GL_DEPTH_TEST);
@@ -165,7 +170,7 @@ namespace campvis {
     std::string GeometryRenderer::generateGlslHeader(bool hasGeometryShader) const {
         std::string toReturn = getDecoratedHeader();
 
-        if (p_showWireframe.getValue())
+        if (hasGeometryShader && p_showWireframe.getValue())
             toReturn += "#define WIREFRAME_RENDERING\n";
 
         if (hasGeometryShader)
