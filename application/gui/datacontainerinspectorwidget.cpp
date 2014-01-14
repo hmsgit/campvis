@@ -479,7 +479,7 @@ namespace campvis {
         //propEditorWid->_propCollectionWidget->updatePropCollection(imgReader, _dataContainer);
         propEditorWid->setParentx(this);
 
-        imgReader->setVisibibility(".mhd", true);
+        //imgReader->setVisibibility(".mhd", true);
         propEditorWid->setVisible(true);
         //imgReader->process(*_dataContainer);
 

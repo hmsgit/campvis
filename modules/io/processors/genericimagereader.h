@@ -92,14 +92,19 @@ namespace campvis {
         void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
 
 
-        void setVisibibility(const char* extention, bool visibility);
+        void setVisibibility(const std::string& extention, bool visibility);
+
+        StringProperty p_url;
 
     protected:
         static const std::string loggerCat_;
         
     private:
+        void onUrlPropertyChanged(const AbstractProperty*);
+
+        void adjustToNewExtension();
+
         std::map<AbstractImageReader*, MetaProperty*> _readers;
-        StringProperty p_url;
         std::string _ext;
         MetaProperty* _currentlyVisible;
 

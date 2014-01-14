@@ -136,8 +136,8 @@ namespace campvis {
         
         this->installEventFilter(this);
 
-        _btnBrowse = new StringPropertyWidget(&_fileName, this);
-        _mainLayout->addWidget(_btnBrowse);
+//         _btnBrowse = new StringPropertyWidget(&_fileName, this);
+//         _mainLayout->addWidget(_btnBrowse);
         
         _propCollectionWidget = new PropertyCollectionWidget(_pipelinePropertiesScrollArea);
         _mainLayout->addWidget(_propCollectionWidget);
@@ -165,6 +165,8 @@ namespace campvis {
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.connect(this, &PropertyEditorWidget::updateDataInspector);
         }*/
+
+        //_fileName.addSharedProperty(&_imgReader->p_url);
     }
 
     void PropertyEditorWidget::updateColor(){
