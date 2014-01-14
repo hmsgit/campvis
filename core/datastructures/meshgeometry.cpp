@@ -164,9 +164,9 @@ namespace campvis {
                     if (createTexCoordsBuffer)
                         _texCoordsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getTextureCoordinates().front()), numVertices * sizeof(tgt::vec3));
                     if (createColorsBuffer)
-                        _colorsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getColors().front()), numVertices * sizeof(tgt::vec3));
+                        _colorsBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getColors().front()), numVertices * sizeof(tgt::vec4));
                     if (createNormalsBuffer)
-                        _normalsBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getNormals().front()), numVertices * sizeof(tgt::vec4));
+                        _normalsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getNormals().front()), numVertices * sizeof(tgt::vec3));
                 
                     startIndex += numVertices;
                 }

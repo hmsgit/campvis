@@ -68,7 +68,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, llf.y, llf.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tLlf.z));
         vertices.push_back(tgt::vec3(llf.x, llf.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, 0.f, -1.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -81,7 +81,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
         texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tLlf.z));
         vertices.push_back(tgt::vec3(urb.x, llf.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(1.f, 0.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -94,7 +94,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, urb.y, llf.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tLlf.z));
         vertices.push_back(tgt::vec3(llf.x, urb.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, 1.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -107,7 +107,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(llf.x, llf.y, llf.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tUrb.z));
         vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(-1.f, 0.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -120,7 +120,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tUrb.z));
         vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, -1.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -133,7 +133,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
         texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tUrb.z));
         vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, 0.f, 1.f))));
         vertices.clear();
         texCoords.clear();
 
