@@ -71,19 +71,36 @@ namespace campvis {
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
-
         static const std::string loggerCat_;
 
     private:
+        /**
+         * Callback slot called if one of the DataNameProperties in the port map has changed.
+         * \param   prop    DataNameProperty that has changed.
+         */
         void onDataNamePropertyChanged(const AbstractProperty* prop);
 
+        /**
+         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
+         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
+         * \param   name    Name of the added data.
+         * \param   dh      DataHandle to the newly added data.
+         */
         virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+
+        /**
+         * Recursively looks for all DataNameProperties in \a pc and adds them to the port map.
+         * If \a pc contains a MetaProperty, it will be seached recursively.
+         * \param   pc  PropertyCollection to search for DataNameProperties.
+         */
+        void findDataNamePropertiesAndAddToPortMap(const HasPropertyCollection* pc);
 
         /// Hashmap storing for each processor whether it's a VisualizationProcessor or not.
         tbb::concurrent_hash_map<AbstractProcessor*, bool> _isVisProcessorMap;
 
-
+        /// PortMap typedef mapping a string to a set of DataNameProperties using a concurrent unordered multimap
         typedef tbb::concurrent_unordered_multimap<std::string, DataNameProperty*> PortMapType;
+        /// IteratorMap typedef mapping a DataNameProperty to an iterator in a PortMap using a concurrent unordered map
         typedef tbb::concurrent_unordered_map<DataNameProperty*, PortMapType::iterator> IteratorMapType;
 
         /// Multimap to simulate ports between processors
