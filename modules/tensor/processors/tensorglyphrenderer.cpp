@@ -84,10 +84,7 @@ namespace campvis {
     void TensorGlyphRenderer::init() {
         VisualizationProcessor::init();
 
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/tensor/glsl/tensorglyphrenderer.frag", generateGlslHeader(), false);
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(3, "in_TexCoord");
-
+        _shader = ShdrMgr.load("modules/tensor/glsl/tensorglyphrenderer.vert", "modules/tensor/glsl/tensorglyphrenderer.frag", generateGlslHeader());
         _cubeGeometry = GeometryDataFactory::createCube(tgt::Bounds(tgt::vec3(-.5f), tgt::vec3(.5f)), tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
         _ellipsoidGeometry = GeometryDataFactory::createSphere(8, 16);
     }

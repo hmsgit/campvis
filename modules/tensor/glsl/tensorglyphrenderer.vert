@@ -22,26 +22,40 @@
 // 
 // ================================================================================================
 
-#include "tools/shading.frag"
+layout(location = 0) in vec3 in_Position;        ///< incoming vertex position
+layout(location = 3) in vec3 in_Normal;          ///< incoming normal direction
 
+out vec3 ex_Position;       ///< outgoing world coordinates
+out vec3 ex_Normal;         ///< outgoing normal direction
 
-in vec3 ex_Position; ///< incoming texture coordinate
-in vec3 ex_Normal; ///< incoming texture coordinate
+/// Matrix defining model-to-world transformation
+uniform mat4 _modelMatrix = mat4(
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0);
 
-out vec4 out_Color; ///< outgoing fragment color
+/// Matrix defining view transformation
+uniform mat4 _viewMatrix = mat4(
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0);
 
-uniform vec4 _color;
-uniform LightSource _lightSource;
-uniform vec3 _cameraPosition;
+/// Matrix defining projection transformation
+uniform mat4 _projectionMatrix = mat4(
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0);
+
 
 void main() {
-    out_Color = _color;
+    gl_Position = _projectionMatrix * (_viewMatrix * (_modelMatrix * vec4(in_Position, 1.0)));
+    ex_Position = in_Position;
+    
+    mat4 normalMatrix = transpose(inverse(_modelMatrix));
 
-#ifdef ENABLE_SHADING
-    // compute gradient (needed for shading and normals)
-    vec3 gradient = ex_Normal;
-    out_Color.rgb = calculatePhongShading(ex_Position, _lightSource, _cameraPosition, gradient, _color.rgb, _color.rgb, vec3(1.0, 1.0, 1.0));
-#endif
-
-    //out_Color = vec4(ex_Normal, 1.0);
+    vec4 normalTmp = (normalMatrix * vec4(in_Normal, 0.0));
+    ex_Normal = normalize((normalTmp).xyz);
 }
