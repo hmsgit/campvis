@@ -160,6 +160,7 @@ namespace campvis {
         // Populate the file menu
         QMenuBar* menuBar = this->menuBar();
         QMenu* fileMenu = menuBar->addMenu(tr("&File"));
+        fileMenu->addAction(tr("&Rebuild all Shaders from File"), this, SLOT(onRebuildShadersClicked()), QKeySequence(Qt::CTRL + Qt::Key_F5));
         fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()), QKeySequence(Qt::CTRL + Qt::Key_Q));
 
         // Populate the visualizations menu
@@ -304,6 +305,10 @@ namespace campvis {
         }
         AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, dc);
         _application->addPipeline(name, p);
+    }
+
+    void MainWindow::onRebuildShadersClicked() {
+        _application->rebuildAllShadersFromFiles();
     }
 
 }

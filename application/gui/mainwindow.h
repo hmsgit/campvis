@@ -125,6 +125,9 @@ namespace campvis {
         /// Slot to be called when _btnPipelineFactory was clicked;
         void onBtnPipelineFactoryClicked();
 
+        /// Slot to be called when all shaders shall be rebuilt.
+        void onRebuildShadersClicked();
+
     private:
 
         /**

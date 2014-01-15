@@ -118,6 +118,11 @@ namespace campvis {
          */
         DataContainer* createAndAddDataContainer(const std::string& name);
 
+        /**
+         * Reloads all GLSL shaders from file and rebuilds them.
+         */
+        void rebuildAllShadersFromFiles();
+
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
@@ -134,6 +139,12 @@ namespace campvis {
 
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;
+
+        /**
+         * Triggers the ShaderManager to rebuild all shaders from file and then 
+         * invalidates all VisualizationProcessors.
+         */
+        void triggerShaderRebuild();
 
         /// A local OpenGL context used for initialization
         tgt::GLCanvas* _localContext;

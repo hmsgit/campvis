@@ -36,11 +36,13 @@
 
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
+#include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/pipeline/visualizationprocessor.h"
 #include "modules/pipelinefactory.h"
 
 namespace campvis {
@@ -153,6 +155,7 @@ namespace campvis {
         }
 
         GLJobProc.start();
+        GLJobProc.registerContext(_localContext);
         _initialized = true;
     }
 
@@ -275,6 +278,27 @@ namespace campvis {
         _dataContainers.push_back(dc);
         s_DataContainersChanged();
         return dc;
+    }
+
+    void CampVisApplication::rebuildAllShadersFromFiles() {
+        // rebuilding all shaders has to be done from OpenGL context, use the local one.
+        GLJobProc.enqueueJob(_localContext, makeJobOnHeap(this, &CampVisApplication::triggerShaderRebuild), OpenGLJobProcessor::SerialJob);
+    }
+
+    void CampVisApplication::triggerShaderRebuild() {
+
+        if (! ShdrMgr.rebuildAllShadersFromFile()) {
+            LERROR("Could not rebuild all shaders from file.");
+            return;
+        }
+
+        for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            for (std::vector<AbstractProcessor*>::const_iterator pit = (*it)->getProcessors().begin(); pit != (*it)->getProcessors().end(); ++pit) {
+                if (VisualizationProcessor* tester = dynamic_cast<VisualizationProcessor*>(*pit)) {
+                	tester->invalidate(AbstractProcessor::INVALID_RESULT);
+                }
+            }
+        }
     }
 
 
