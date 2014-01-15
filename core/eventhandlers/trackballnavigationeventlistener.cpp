@@ -125,6 +125,7 @@ namespace campvis {
     }
     
     void TrackballNavigationEventListener::setSceneBounds(const tgt::Bounds& bounds) {
+        _sceneBounds = bounds;
         _trackball->setSceneBounds(bounds);
     }
 
