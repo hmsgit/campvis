@@ -189,7 +189,7 @@ namespace campvis {
 
         if (performConversion) {
             tgtAssert(false, "Conversion to AbstractImageRepresentationItk not implemented - is it really needed?");
-            LDEBUG("Could not convert to AbstractImageRepresentationItk");
+            LWARNING("Could not convert to AbstractImageRepresentationItk");
         }
 
         return 0;

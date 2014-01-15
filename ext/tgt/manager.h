@@ -209,7 +209,7 @@ std::string ResourceManager<T>::completePath(std::string filename) {
         std::list<std::string>::iterator iter = pathList_.begin();
         while (iter != pathList_.end() && !foundFile) {
             cplFileName = (!(*iter).empty() ? (*iter) + '/' : "") + filename;
-            LDEBUG("Completed file name to " << cplFileName);
+            //LDEBUG("Completed file name to " << cplFileName);
             if (FileSys.exists(cplFileName))
                 foundFile = true;
             iter++;

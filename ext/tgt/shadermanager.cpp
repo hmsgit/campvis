@@ -276,7 +276,7 @@ ShaderObject::~ShaderObject() {
 }
 
 void ShaderObject::loadSourceFromFile(const string& filename) throw (Exception) {
-    LDEBUG("Loading " << filename);
+    //LDEBUG("Loading " << filename);
     File* file = FileSys.open(filename);
 
     // check if file is open
@@ -1360,7 +1360,7 @@ Shader* ShaderManager::load(const std::string& vertFilename, const std::string& 
 }
 
 Shader* ShaderManager::loadWithCustomGlslVersion(const std::string& vertFilename, const std::string& geomFilename, const std::string& fragFilename, const std::string& customHeader, const std::string& customGlslVersion) throw(Exception) {
-    LDEBUG("Loading files " << vertFilename << " and " << fragFilename);
+    //LDEBUG("Loading files " << vertFilename << " and " << fragFilename);
     if (!GpuCaps.areShadersSupported()) {
         LERROR("Shaders are not supported.");
         throw Exception("Shaders are not supported.");

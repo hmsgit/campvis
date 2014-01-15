@@ -126,11 +126,11 @@ namespace campvis {
 
 #ifdef CAMPVIS_DEBUG
                 if (!createTexCoordsBuffer && !(it->getTextureCoordinates().empty()))
-                    LDEBUG("Presence of texture coordinates in faces not consistent, not generating texture coordinates VBO!");
+                    LWARNING("Presence of texture coordinates in faces not consistent, not generating texture coordinates VBO!");
                 if (!createColorsBuffer && !(it->getColors().empty()))
-                    LDEBUG("Presence of colors in faces not consistent, not generating colors VBO!");
+                    LWARNING("Presence of colors in faces not consistent, not generating colors VBO!");
                 if (!createNormalsBuffer && !(it->getNormals().empty()))
-                    LDEBUG("Presence of normals in faces not consistent, not generating normals VBO!");
+                    LWARNING("Presence of normals in faces not consistent, not generating normals VBO!");
 #endif
             }
 

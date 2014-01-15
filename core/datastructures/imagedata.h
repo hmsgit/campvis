@@ -253,7 +253,7 @@ namespace campvis {
         }
 
         // could not create a suitable representation
-        LDEBUG("Could not create a " + std::string(typeid(T*).name()) + " representation.");
+        LWARNING("Could not create a " + std::string(typeid(T*).name()) + " representation.");
         return 0;
     }
 

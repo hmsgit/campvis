@@ -266,7 +266,7 @@ namespace campvis {
             return 0;
 
         if (source->getDimensionality() != DIMENSIONALITY) {
-            LDEBUGC("campvis.modules.itk.core.GenericImageRepresentationItk<>::tryConvertFrom", "Dimensionality does not match");
+            LWARNINGC("campvis.modules.itk.core.GenericImageRepresentationItk<>::tryConvertFrom", "Dimensionality does not match");
             return 0;
         }
 
