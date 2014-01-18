@@ -35,6 +35,16 @@ namespace campvis {
         virtual void deinit();
 
     protected:
+        /**
+         * Log the most recent Lua error to the console.
+         */
+        void logLuaError();
+
+        /**
+         * Call the Lua function that's at the top of the stack.
+         */
+        void callLuaFunc(lua_State* _luaState, int nargs, int nresults);
+
         const std::string _scriptPath;    ///< path to the Lua script defining the pipeline
         lua_State* _luaState;             ///< Lua state used to evaluate the pipeline
     };

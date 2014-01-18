@@ -9,7 +9,7 @@ int main()
 {
     PipelineFactory& pipelineFactory = PipelineFactory::getRef();
     pipelineFactory.registerPipeline<LuaPipeline>([] (DataContainer* dc) -> AbstractPipeline* {
-        return new LuaPipeline("script.lua", dc);
+        return new LuaPipeline(CAMPVIS_SOURCE_DIR "/scripting/script.lua", dc);
     });
 
     DataContainer* dc = new DataContainer("Test Data Container");

@@ -38,7 +38,7 @@ SWIG_LINK_LIBRARIES(vis campvis-core campvis-modules tgt ${CampvisGlobalExternal
 
 ADD_EXECUTABLE(campvis-scripting ${CampvisScriptingSources} ${CampvisScriptingHeaders})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
-INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
+INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CMAKE_CURRENT_BINARY_DIR})
 TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
 
 # Generate header with SWIG run-time functions
@@ -48,10 +48,11 @@ ADD_CUSTOM_COMMAND(
    COMMAND ${SWIG_EXECUTABLE} -c++ -lua -external-runtime "swigluarun.h"
  )
 
-# Copy Lua test scripts into the target directory
-ADD_CUSTOM_COMMAND(
-   TARGET campvis-scripting
-   POST_BUILD
-   COMMAND ${CMAKE_COMMAND} -E copy "script.lua" ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
- )
-SET_SOURCE_FILES_PROPERTIES(testapp.cpp PROPERTIES OBJECT_DEPENDS "scripting/script.lua")
+# If a multi-config generator is used (e.g. Visual Studio or XCode), CAMPVis Lua modules will be
+# placed in a sub-directory that won't be picked up by Lua automatically. Let the code know via
+# a #define what that sub-directory is so that it can instruct Lua to search it.
+FOREACH(CONFIG_TYPE ${CMAKE_CONFIGURATION_TYPES})
+    STRING(TOUPPER ${CONFIG_TYPE} CONFIG_TYPE_UPPER)
+    SET_DIRECTORY_PROPERTIES(PROPERTIES COMPILE_DEFINITIONS_${CONFIG_TYPE_UPPER}
+        "CAMPVIS_LUA_MODS_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CONFIG_TYPE}/?${CMAKE_SHARED_MODULE_SUFFIX}")
+ENDFOREACH(CONFIG_TYPE CMAKE_CONFIGURATION_TYPES)

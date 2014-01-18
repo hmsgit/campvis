@@ -7,10 +7,10 @@
 IF(WIN32)
     SET(LUA_DIR "${CampvisHome}/ext/lua" CACHE PATH "If Lua is not found, set this path")
 
-    SET(LUA_INCLUDE_DIR "${LUA_DIR}/src" ${LUA_DIR})
+    SET(LUA_INCLUDE_DIR "${LUA_DIR}/src" "${CMAKE_BINARY_DIR}/ext/lua")
 
     IF(LUA_INCLUDE_DIR)
-        SET(LUA_LIBRARY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lua.lib")
+        SET(LUA_LIBRARY liblua)
         SET(LUA_FOUND TRUE)
     ELSE()
         SET(LUA_FOUND FALSE)

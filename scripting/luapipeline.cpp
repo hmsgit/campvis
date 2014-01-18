@@ -10,16 +10,9 @@ extern "C" {
 
 namespace campvis {
 
-    void callLuaFunc(lua_State* _luaState, int nargs, int nresults) {
+    void LuaPipeline::callLuaFunc(lua_State* _luaState, int nargs, int nresults) {
         if (lua_pcall(_luaState, nargs, nresults, 0) != LUA_OK) {
-            const char* errorMsg = lua_tostring(_luaState, -1);
-
-            if (errorMsg == nullptr)
-                std::cout << "(error object is not a string)" << std::endl;
-            else
-                std::cout << errorMsg << std::endl;
-
-            lua_pop(_luaState, 1);
+            this->logLuaError();
         }
     }
 
@@ -31,7 +24,31 @@ namespace campvis {
 
         // load the libs
         luaL_openlibs(_luaState);
-        luaL_dostring(_luaState, "require(\"campvis\")");
+
+/*
+ * Defined if CAMPVis Lua modules are placed in a location that won't be picked up by Lua
+ * automatically
+ */
+#ifdef CAMPVIS_LUA_MODS_PATH
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+        /* Let Lua know where CAMPVis modules are located */
+        if (luaL_dostring(_luaState, "package.cpath = package.cpath .. ';" TOSTRING(CAMPVIS_LUA_MODS_PATH) "'")) {
+            this->logLuaError();
+            return;
+        }
+
+#undef TOSTRING
+#undef STRINGIFY
+
+#endif // CAMPVIS_LUA_MODS_PATH
+
+        if (luaL_dostring(_luaState, "require(\"campvis\")")) {
+            this->logLuaError();
+            return;
+        }
 
         swig_type_info* autoEvaluationPipelineType = SWIG_TypeQuery(_luaState, "campvis::AutoEvaluationPipeline *");
 
@@ -44,14 +61,8 @@ namespace campvis {
 
         // run a Lua script here; true is returned if there were errors
         if (luaL_dofile(_luaState, scriptPath.c_str())) {
-            const char* msg = lua_tostring(_luaState, -1);
-
-            if (msg == nullptr)
-                printf("(error object is not a string)");
-            else
-                printf("%s", msg);
-
-            lua_pop(_luaState, 1);
+            this->logLuaError();
+            return;
         }
 
         lua_getglobal(_luaState, "pipeline");
@@ -70,6 +81,17 @@ namespace campvis {
 
     LuaPipeline::~LuaPipeline() {
         lua_close(_luaState);
+    }
+
+    void LuaPipeline::logLuaError() {
+        const char* errorMsg = lua_tostring(_luaState, -1);
+
+        if (errorMsg == nullptr)
+            std::cerr << "(error object is not a string)" << std::endl;
+        else
+            std::cerr << errorMsg << std::endl;
+
+        lua_pop(_luaState, 1);
     }
 
     void LuaPipeline::init() {
