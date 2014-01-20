@@ -36,17 +36,18 @@ SET_SOURCE_FILES_PROPERTIES(vis.i PROPERTIES CPLUSPLUS ON)
 SWIG_ADD_MODULE(vis lua vis.i)
 SWIG_LINK_LIBRARIES(vis campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
 
+# Generate header with SWIG run-time functions
+ADD_CUSTOM_COMMAND(
+   OUTPUT "swigluarun.h"
+   COMMAND ${SWIG_EXECUTABLE} -c++ -lua -external-runtime "swigluarun.h"
+ )
+
+LIST(APPEND CampvisScriptingHeaders "swigluarun.h")
+
 ADD_EXECUTABLE(campvis-scripting ${CampvisScriptingSources} ${CampvisScriptingHeaders})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CMAKE_CURRENT_BINARY_DIR})
 TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
-
-# Generate header with SWIG run-time functions
-ADD_CUSTOM_COMMAND(
-   TARGET campvis-scripting
-   PRE_BUILD
-   COMMAND ${SWIG_EXECUTABLE} -c++ -lua -external-runtime "swigluarun.h"
- )
 
 # If a multi-config generator is used (e.g. Visual Studio or XCode), CAMPVis Lua modules will be
 # placed in a sub-directory that won't be picked up by Lua automatically. Let the code know via
