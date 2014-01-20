@@ -1,6 +1,6 @@
 %module vis
-%include "std_string.i"
-%include "campvis.i"
+%include std_string.i
+%include campvis.i
 %{
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
@@ -42,6 +42,7 @@ namespace campvis {
         const std::string getName() const;
 
         %immutable;
+        campvis::DataNameProperty p_inputImage;
         campvis::DataNameProperty p_outputImage;
         %mutable;
     };
@@ -54,6 +55,7 @@ namespace campvis {
         const std::string getName() const;
 
         %immutable;
+        campvis::DataNameProperty p_inputVolume;
         campvis::DataNameProperty p_outputImage;
         %mutable;
     };
