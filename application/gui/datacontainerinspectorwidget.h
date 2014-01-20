@@ -185,8 +185,7 @@ namespace campvis {
         QHBoxLayout* _mainLayout;                       ///< Layout for this widget
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
         QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
-        //QGridLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
-
+        
         QLabel*  _lblName;
         QLabel*  _lblLocalMemoryFootprint;
         QLabel*  _lblVideoMemoryFootprint;
