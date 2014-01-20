@@ -22,57 +22,36 @@
 // 
 // ================================================================================================
 
-#ifndef PROPERTYEDITORWIDGET_H_
-#define PROPERTYEDITORWIDGET_H_
+#ifndef DATACONTAINERFILELOADERWIDGET_H
+#define DATACONTAINERFILELOADERWIDGET_H
 
 #include "sigslot/sigslot.h"
-#include "tgt/painter.h"
-#include "tgt/qt/qtcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
-#include "tbb/mutex.h"
 
-#include "application/gui/qtdatahandle.h"
-#include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/properties/propertycollectionwidget.h"
-#include "application/gui/properties/stringpropertywidget.h"
-#include "core/tools/opengljobprocessor.h"
 #include "modules/io/processors/genericimagereader.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 
-#include <QLabel>
-#include <QWidget>
 #include <QScrollArea>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QString>
+#include <QGridLayout>
 #include <QPushButton>
-#include <QMetaObject>
-
-class QModelIndex;
-class QItemSelection;
-
-namespace tgt {
-    class Texture;
-    class TextureUnit;
-    class Shader;
-}
 
 namespace campvis {
 
-    class PropertyEditorWidget : public QWidget, public sigslot::has_slots<> {
+    class DataContainerFileLoaderWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
 
     public:
         /**
-         * Creates a new DataContainerInspectorWidget.
+         * Creates a new DataContainerFileLoaderWidget.
+         * \param   treeModel       Parent DataContainerInspectorWidget. Method Overridden to keep the widget floating.
          * \param   parent          Parent Qt widget, may be 0 (default)
          */
-        explicit PropertyEditorWidget(DataContainerInspectorWidget* treeModel, QWidget* parent = nullptr);
+        explicit DataContainerFileLoaderWidget(DataContainerInspectorWidget* treeModel, QWidget* parent = nullptr);
 
         /**
          * Destructor.
          */
-        ~PropertyEditorWidget();
+        ~DataContainerFileLoaderWidget();
 
         /**
          * Set the DataContainer this widget is inspecting.
@@ -82,7 +61,7 @@ namespace campvis {
 
         /**
          * Size hint for the default window size
-         * \return QSize(640, 480)
+         * \return QSize(300, 350)
          */
         QSize sizeHint() const;
         
@@ -97,18 +76,6 @@ namespace campvis {
          * Must be called with a valid and locked OpenGL context.
          */
         void deinit();
-
-        /**
-         * Updates color of the info widget
-         */
-        void updateColor();
-
-        /**
-         * Updates depth of the info widget
-         */
-        void updateDepth();
-
-    signals:
 
     private slots:
         /**
@@ -129,11 +96,8 @@ namespace campvis {
 
     protected:
 
-        bool _inited;
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting
-        DataContainerInspectorCanvas* _canvas;          ///< The OpenGL canvas for rendering the DataContainer's contents
-        QVBoxLayout* _mainLayout;                       ///< Layout for this widget
-        QVBoxLayout* rightLayout;                       ///< Layout for the _infoWidget
+        QGridLayout* _layout;                       ///< Layout for the _infoWidget
         QScrollArea* _pipelinePropertiesScrollArea;     ///< Scroll area for _pipelinePropertiesWidget
 
     protected:
@@ -152,4 +116,4 @@ namespace campvis {
     };
 }
 
-#endif // PROPERTYEDITORWIDGET_H_
+#endif // DATACONTAINERFILELOADERWIDGET_H

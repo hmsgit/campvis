@@ -53,7 +53,7 @@
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
-#include "application//gui/propertyeditorwidget.h"
+#include "application//gui/datacontainerfileloaderwidget.h"
 #include "modules/io/processors/genericimagereader.h"
 
 #include <QFileDialog>
@@ -462,9 +462,9 @@ namespace campvis {
         // delete previous PropertyEditor, then create a new one
         // the final one will be deleted with deinit()
         if(nullptr != _propEditorWid)
-            delete _propEditorWid;
+            _propEditorWid->deinit();
 
-        _propEditorWid = new PropertyEditorWidget(this, nullptr);
+        _propEditorWid = new DataContainerFileLoaderWidget(this, nullptr);
         _propEditorWid->setVisible(true);
         
     }

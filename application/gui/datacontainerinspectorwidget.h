@@ -57,7 +57,7 @@ namespace campvis {
     class DataContainer;
     class DataContainerTreeWidget;
     class FaceGeometry;
-    class PropertyEditorWidget;
+    class DataContainerFileLoaderWidget;
 
     class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -202,7 +202,7 @@ namespace campvis {
         // Added by Hossain Mahmud  <mahmud@in.tum.de>
         // Date: January 02, 2014
         QPushButton* _btnLoadFile;
-        PropertyEditorWidget* _propEditorWid;
+        DataContainerFileLoaderWidget* _propEditorWid;
 
         static const std::string loggerCat_;
     };

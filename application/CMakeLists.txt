@@ -31,9 +31,9 @@ SET(CampvisApplicationToBeMocced
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
+    gui/datacontainerfileloaderwidget.h
     gui/datacontainertreewidget.h
     gui/pipelinetreewidget.h
-    gui/propertyeditorwidget.h
     gui/qtcolortools.h
     gui/qtdatahandle.h
     gui/logviewerwidget.h
