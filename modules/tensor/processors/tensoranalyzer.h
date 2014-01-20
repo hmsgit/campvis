@@ -81,9 +81,14 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
 
+        /**
+         * Adds another output for this processor (i.e. adds another OutputPropertyPair).
+         */
+        void addOutput();
+
         DataNameProperty p_inputImage;   ///< ID for input volume
-        DataNameProperty p_evalsImage;   ///< ID for output gradient volume
-        DataNameProperty p_evecsImage;   ///< ID for output gradient volume
+        DataNameProperty p_evalsImage;   ///< ID for output eigenvalue volume
+        DataNameProperty p_evecsImage;   ///< ID for output eigenvector volume
 
         GenericOptionProperty<DegeneratedEvHandling> p_degeneratedHandling; ///< Handling of degenerated tensors
         BoolProperty p_maskMixedTensors;
@@ -108,11 +113,6 @@ namespace campvis {
          * \param   index   Index of output to compute.
          */
         void computeOutput(DataContainer& data, size_t index);
-
-        /**
-         * Adds another output for this processor (i.e. adds another OutputPropertyPair).
-         */
-        void addOutput();
 
         DataHandle _eigenvalues;    ///< Current eigenvalues cached
         DataHandle _eigenvectors;   ///< Current eigenvectors cached
