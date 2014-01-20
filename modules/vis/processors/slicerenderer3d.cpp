@@ -104,9 +104,6 @@ namespace campvis {
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
-                tgt::mat4 trafoMatrix = tgt::mat4::createScale(tgt::vec3(-1.f, 1.f, -1.f));
-                _shader->setUniform("_modelMatrix", trafoMatrix);
-
                 tgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);

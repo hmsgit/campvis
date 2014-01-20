@@ -33,7 +33,8 @@
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/tensor/processors/tensoranalyzer.h"
 #include "modules/tensor/processors/tensorglyphrenderer.h"
-#include "modules/vis/processors/sliceextractor.h"
+#include "modules/vis/processors/slicerenderer3d.h"
+#include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
     class TensorDemo : public AutoEvaluationPipeline {
@@ -67,12 +68,12 @@ namespace campvis {
         MhdImageReader _imageReader;
         TensorAnalyzer _ta;
         TensorGlyphRenderer _glyphRenderer;
-        SliceExtractor _sliceExtractor;
+        SliceRenderer3D _sliceRenderer;
+        RenderTargetCompositor _rtc;
 
         CameraProperty p_camera;
+        IntProperty p_sliceNumber;
         TrackballNavigationEventListener* _trackballEH;
-
-        MWheelToNumericPropertyEventListener _wheelHandler;
     };
 
 }
