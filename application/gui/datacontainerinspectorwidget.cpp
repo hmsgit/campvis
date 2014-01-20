@@ -167,11 +167,25 @@ namespace campvis {
         _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
         _infoWidgetLayout->addWidget(_lblBounds);
 
+
+        QWidget* btnWidget = new QWidget(this);
+        QGridLayout* gridLayout = new QGridLayout();
+        btnWidget->setLayout(gridLayout);
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
         _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
-        _infoWidgetLayout->addWidget(_btnSaveToFile);
+        gridLayout->addWidget(_btnSaveToFile, 0, 0);
+        connect(
+            _btnSaveToFile, SIGNAL(clicked()),
+            this, SLOT(onBtnSaveToFileClicked()));
+        _btnSaveToFile->setDisabled(true);
+#endif
 
         _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
-        _infoWidgetLayout->addWidget(_btnLoadFile);
+        gridLayout->addWidget(_btnLoadFile, 0, 1);
+
+        _infoWidgetLayout->addWidget(btnWidget);
+
 
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _canvas->setMinimumSize(QSize(100, 100));
@@ -193,9 +207,6 @@ namespace campvis {
         connect(
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
-        connect(
-            _btnSaveToFile, SIGNAL(clicked()),
-            this, SLOT(onBtnSaveToFileClicked()));
         connect(
             _btnLoadFile, SIGNAL(clicked()),
             this, SLOT(onBtnLoadFileClicked()));
@@ -362,6 +373,18 @@ namespace campvis {
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
         updateInfoWidget();
+
+        // get the selection from the tree widget
+        const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
+
+        // iterate through the indices of the selection
+        for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
+            if (index->isValid()) {
+                _btnSaveToFile->setDisabled(false);
+                return;
+            }
+        }
+        _btnSaveToFile->setDisabled(true);
     }
 
     void DataContainerInspectorWidget::onBtnSaveToFileClicked() {
