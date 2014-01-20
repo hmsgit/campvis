@@ -1,7 +1,7 @@
 %module campvis
-%include "std_string.i"
+%include std_string.i
+%include tgt.i
 %{
-#include "ext/tgt/vector.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/datanameproperty.h"
@@ -10,18 +10,6 @@
 #include "core/pipeline/visualizationprocessor.h"
 %}
 
-namespace tgt {
-    template<class T>
-    struct Vector2 {
-        Vector2(T t);
-        Vector2(T t1, T t2);
-
-        static Vector2<T> zero;
-    };
-
-    %template(ivec2) Vector2<int>;
-    typedef Vector2<int> ivec2;
-}
 
 namespace campvis {
     class AbstractProcessor {
