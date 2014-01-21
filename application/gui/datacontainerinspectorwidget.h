@@ -40,6 +40,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QString>
 #include <QPushButton>
 
@@ -182,9 +183,9 @@ namespace campvis {
         DataContainerInspectorCanvas* _canvas;          ///< The OpenGL canvas for rendering the DataContainer's contents
         PropertyCollectionWidget* _pcWidget;
 
-        QHBoxLayout* _mainLayout;                       ///< Layout for this widget
+        QGridLayout* _mainLayout;                       ///< Layout for this widget
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
-        QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
+        QGridLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
         
         QLabel*  _lblName;
         QLabel*  _lblLocalMemoryFootprint;
@@ -197,11 +198,11 @@ namespace campvis {
         QLabel*  _lblColorVal;                          ///< Color Label Value in text
         QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
         QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
-        QPushButton* _btnSaveToFile;
         
         // Added by Hossain Mahmud  <mahmud@in.tum.de>
         // Date: January 02, 2014
         QPushButton* _btnLoadFile;
+        QPushButton* _btnSaveToFile;
         DataContainerFileLoaderWidget* _propEditorWid;
 
         static const std::string loggerCat_;

@@ -50,6 +50,10 @@ namespace campvis {
         , p_currentSlice("CurrentSlice", "Slice", -1, -1, -1)
         , p_meshSolidColor("MeshSolidColor", "Mesh Solid Color", tgt::vec4(.5f, .75f, .5f, 1), tgt::vec4(0.0f), tgt::vec4(1.0f))
         , p_transferFunction("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(256, tgt::vec2(0.f, 1.f)))
+        , p_renderRChannel("RenderRChannel", "Render Red Channel", true)
+        , p_renderGChannel("RenderGChannel", "Render Green Channel", true)
+        , p_renderBChannel("RenderBChannel", "Render Blue Channel", true)
+        , p_renderAChannel("RenderAChannel", "Render Alpha Channel", true)
         , _dataContainer(0)
         , _paintShader(0)
         , _quad(0)
@@ -76,6 +80,10 @@ namespace campvis {
         addProperty(&p_currentSlice);
         addProperty(&p_transferFunction);
         addProperty(&p_meshSolidColor);
+        addProperty(&p_renderRChannel);
+        addProperty(&p_renderGChannel);
+        addProperty(&p_renderBChannel);
+        addProperty(&p_renderAChannel);
     }
 
     DataContainerInspectorCanvas::~DataContainerInspectorCanvas() {
@@ -193,6 +201,11 @@ namespace campvis {
         _paintShader->setUniform("_texture2d", unit2d.getUnitNumber());
         _paintShader->setUniform("_texture3d", unit3d.getUnitNumber());
 
+        _paintShader->setUniform("_renderRChannel", p_renderRChannel.getValue());
+        _paintShader->setUniform("_renderGChannel", p_renderGChannel.getValue());
+        _paintShader->setUniform("_renderBChannel", p_renderBChannel.getValue());
+        _paintShader->setUniform("_renderAChannel", p_renderAChannel.getValue());
+
         for (int y = 0; y < _numTiles.y; ++y) {
             for (int x = 0; x < _numTiles.x; ++x) {
                 int index = (_numTiles.x * y) + x;
@@ -290,6 +303,10 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::drawGeomteryData(const campvis::GeometryData* mg, tgt::Texture* colorBuffer, const int& trackballndx) {
+        // avoid FRAMEBUFFER_INCOMPLETE_DIMENSIONS error
+        if (colorBuffer->getDimensions() != _depthBuffer->getDimensions())
+            return;
+
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         
         /// Activate the shader for geometry Rendering.
@@ -598,7 +615,6 @@ namespace campvis {
                 tgt::Texture* colorBuffer = new tgt::Texture(0, tgt::ivec3(width(), height(), 1), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
 
                 /// Render the object on the buffers.
-                glewExperimental = true;
                 drawGeomteryData(gd, colorBuffer, nMeshGeometry++);
 
                 geomTexInfo._texture = colorBuffer;

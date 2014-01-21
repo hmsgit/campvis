@@ -72,6 +72,19 @@ namespace campvis {
         , _mainLayout(0)
         , _infoWidget(0)
         , _infoWidgetLayout(0)
+        , _lblName(0)
+        , _lblLocalMemoryFootprint(0)
+        , _lblVideoMemoryFootprint(0)
+        , _lblTimestamp(0)
+        , _lblSize(0)
+        , _lblBounds(0)
+        , _colorWidget(0)
+        , _colorWidgetLayout(0)
+        , _lblColorVal(0)
+        , _colorValWidget(0)
+        , _ColorValWidgetPalette(0)
+        , _btnLoadFile(0)
+        , _btnSaveToFile(0)
         , _propEditorWid(0)
     {
         setupGUI();
@@ -114,34 +127,52 @@ namespace campvis {
     void DataContainerInspectorWidget::setupGUI() {
         setWindowTitle(tr("DataContainer Inspector"));
 
-        _mainLayout = new QHBoxLayout();
+        _mainLayout = new QGridLayout();
         _mainLayout->setSpacing(4);
         setLayout(_mainLayout);
 
+        // left column
         _dctWidget = new DataContainerTreeWidget(this);
         _dctWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
         _dctWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        _mainLayout->addWidget(_dctWidget);
+        _dctWidget->setMinimumWidth(150);
+        _mainLayout->addWidget(_dctWidget, 0, 0);
 
+        _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
+        _mainLayout->addWidget(_btnLoadFile, 1, 0);
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+        _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
+        _btnSaveToFile->setDisabled(true);
+        _mainLayout->addWidget(_btnSaveToFile, 2, 0);
+
+        connect(_btnSaveToFile, SIGNAL(clicked()), this, SLOT(onBtnSaveToFileClicked()));
+#endif
+
+
+        // right column
         _infoWidget = new QWidget(this);
-        _infoWidgetLayout = new QVBoxLayout();
+        _infoWidgetLayout = new QGridLayout();
         _infoWidgetLayout->setSpacing(4);
         _infoWidget->setLayout(_infoWidgetLayout);
 
         _lblName = new QLabel(QString("Name: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblName);
-
-        _lblLocalMemoryFootprint = new QLabel(QString("Local Memory Footprint: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblLocalMemoryFootprint);
-
-        _lblVideoMemoryFootprint = new QLabel(QString("Video Memory Footprint: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblVideoMemoryFootprint);
+        _infoWidgetLayout->addWidget(_lblName, 0, 0);
 
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
-        _infoWidgetLayout->addWidget(_lblTimestamp);
+        _infoWidgetLayout->addWidget(_lblTimestamp, 0, 1);
+
+        _lblLocalMemoryFootprint = new QLabel(QString("Local Memory: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblLocalMemoryFootprint, 1, 0);
+
+        _lblVideoMemoryFootprint = new QLabel(QString("Video Memory: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblVideoMemoryFootprint, 1, 1);
 
         _lblSize = new QLabel(tr("Size: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblSize);
+        _infoWidgetLayout->addWidget(_lblSize, 2, 0);
+
+        _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblBounds, 3, 0, 1, 2);
 
         _colorWidget = new QWidget(this);
         _lblColorVal = new QLabel(tr("Color: n/a"), _colorWidget);
@@ -162,40 +193,17 @@ namespace campvis {
         _colorWidgetLayout->addWidget(_lblColorVal);
         _colorWidgetLayout->addWidget(_colorValWidget);
 
-        _infoWidgetLayout->addWidget(_colorWidget);
-        
-        _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblBounds);
-
-
-        QWidget* btnWidget = new QWidget(this);
-        QGridLayout* gridLayout = new QGridLayout();
-        btnWidget->setLayout(gridLayout);
-
-#ifdef CAMPVIS_HAS_MODULE_DEVIL
-        _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
-        gridLayout->addWidget(_btnSaveToFile, 0, 0);
-        connect(
-            _btnSaveToFile, SIGNAL(clicked()),
-            this, SLOT(onBtnSaveToFileClicked()));
-        _btnSaveToFile->setDisabled(true);
-#endif
-
-        _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
-        gridLayout->addWidget(_btnLoadFile, 0, 1);
-
-        _infoWidgetLayout->addWidget(btnWidget);
-
+        _infoWidgetLayout->addWidget(_colorWidget, 4, 0, 1, 2);
 
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _canvas->setMinimumSize(QSize(100, 100));
-        _infoWidgetLayout->addWidget(_canvas, 1);
+        _infoWidgetLayout->addWidget(_canvas, 5, 0, 1, 2);
 
         _pcWidget = new PropertyCollectionWidget(_infoWidget);
         _pcWidget->updatePropCollection(_canvas, _dataContainer);
-        _infoWidgetLayout->addWidget(_pcWidget);
+        _infoWidgetLayout->addWidget(_pcWidget, 6, 0, 1, 2);
 
-        _mainLayout->addWidget(_infoWidget, 1);
+        _mainLayout->addWidget(_infoWidget, 0, 1, 3, 1);
 
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
         connect(
@@ -275,6 +283,13 @@ namespace campvis {
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
 
+                _canvas->p_currentSlice.setVisible(tester->getDimensionality() == 3);
+                _canvas->p_transferFunction.setVisible(true);
+                _canvas->p_meshSolidColor.setVisible(false);
+                _canvas->p_renderRChannel.setVisible(true);
+                _canvas->p_renderGChannel.setVisible(true);
+                _canvas->p_renderBChannel.setVisible(true);
+                _canvas->p_renderAChannel.setVisible(true);
             }
             else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
                 _lblSize->setText(tr("Size: n/a"));
@@ -282,6 +297,14 @@ namespace campvis {
                 std::ostringstream ss;
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str()));
+
+                _canvas->p_currentSlice.setVisible(false);
+                _canvas->p_transferFunction.setVisible(false);
+                _canvas->p_meshSolidColor.setVisible(true);
+                _canvas->p_renderRChannel.setVisible(false);
+                _canvas->p_renderGChannel.setVisible(false);
+                _canvas->p_renderBChannel.setVisible(false);
+                _canvas->p_renderAChannel.setVisible(false);
             }
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
@@ -298,6 +321,14 @@ namespace campvis {
                     _lblSize->setText(tr("Size: n/a"));
                     _lblBounds->setText(tr("World Bounds: n/a")); 
                 }
+
+                _canvas->p_currentSlice.setVisible(false);
+                _canvas->p_transferFunction.setVisible(true);
+                _canvas->p_meshSolidColor.setVisible(false);
+                _canvas->p_renderRChannel.setVisible(true);
+                _canvas->p_renderGChannel.setVisible(true);
+                _canvas->p_renderBChannel.setVisible(true);
+                _canvas->p_renderAChannel.setVisible(true);
             }
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
             else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
@@ -322,8 +353,8 @@ namespace campvis {
 
             _canvas->p_transferFunction.setImageHandle(DataHandle(0));
         }
-        _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_localFootprint));
-        _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_videoFootprint));
+        _lblLocalMemoryFootprint->setText("Local Memory: " + humanizeBytes(_localFootprint));
+        _lblVideoMemoryFootprint->setText("Video Memory: " + humanizeBytes(_videoFootprint));
 
         // update DataHandles for the DataContainerInspectorCanvas
         _canvas->setDataHandles(handles);

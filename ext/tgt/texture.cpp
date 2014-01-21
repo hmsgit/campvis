@@ -658,9 +658,13 @@ tgt::Color Texture::texelAsFloat(size_t x, size_t y, size_t z) const {
 float Texture::depthAsFloat(size_t x, size_t y) const {
     float ret = 0.0f;
 
-    switch(format_) {
-        case GL_DEPTH_COMPONENT:
-            switch(dataType_) {
+    switch (format_) {
+        case GL_DEPTH_COMPONENT:    // fallthrough
+        case GL_DEPTH_COMPONENT16:  // fallthrough
+        case GL_DEPTH_COMPONENT24:  // fallthrough
+        case GL_DEPTH_COMPONENT32:  // fallthrough
+        case GL_DEPTH_COMPONENT32F:
+            switch (dataType_) {
                 case GL_UNSIGNED_BYTE: {
                     ret = (float )(texel<uint8_t>(x,y) / 0xFF);
                     break;
@@ -676,8 +680,10 @@ float Texture::depthAsFloat(size_t x, size_t y) const {
                 default:
                     LWARNINGC("tgt.texture", "depthAsFloat: Unknown format!");
             }
+            break;
         default:
             LWARNINGC("tgt.texture", "depthAsFloat: Unknown format!");
+            break;
     }
 
     return ret;

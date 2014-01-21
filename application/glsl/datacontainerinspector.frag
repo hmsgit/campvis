@@ -46,6 +46,11 @@ uniform int _sliceNumber;
 uniform vec4 _color;
 uniform bool _isDepthTexture;
 
+uniform bool _renderRChannel;
+uniform bool _renderGChannel;
+uniform bool _renderBChannel;
+uniform bool _renderAChannel;
+
 const vec4 checkerboardColor1 = vec4(0.90, 0.90, 0.90, 1.0);
 const vec4 checkerboardColor2 = vec4(0.50, 0.50, 0.50, 1.0);
 
@@ -93,6 +98,15 @@ void main() {
             out_Color = vec4(0.1, 0.6, 1.0, 0.75);
         }
     }
+
+    if (! _renderRChannel)
+        out_Color.r = 0.0;
+    if (! _renderGChannel)
+        out_Color.g = 0.0;
+    if (! _renderBChannel)
+        out_Color.b = 0.0;
+    if (! _renderAChannel)
+        out_Color.a = 1.0;
 
     // mix with fancy checkerboard pattern:
     if ((mod(ex_TexCoord.x * 10.0, 2.0) > 1.0) ^^ (mod(ex_TexCoord.y * 10.0, 2.0) > 1.0))

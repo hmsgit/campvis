@@ -177,6 +177,11 @@ namespace campvis {
         Vec4Property p_meshSolidColor;                   ///< Color used to render the mesh object
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
+        BoolProperty p_renderRChannel;  /// Flag whether to render Red channel
+        BoolProperty p_renderGChannel;  /// Flag whether to render Green channel
+        BoolProperty p_renderBChannel;  /// Flag whether to render Blue channel
+        BoolProperty p_renderAChannel;  /// Flag whether to render Alpha channel
+
     private slots:
         /**
          * Slot being called when a QtDataHandle has been added to the DataContainer.
