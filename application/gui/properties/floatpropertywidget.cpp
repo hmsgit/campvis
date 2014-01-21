@@ -56,6 +56,10 @@ namespace campvis {
         FloatProperty* prop = static_cast<FloatProperty*>(_property);
         _adjuster->blockSignals(true);
         _adjuster->setValue(prop->getValue());
+        _adjuster->setMinimum(prop->getMinValue());
+        _adjuster->setMaximum(prop->getMaxValue());
+        _adjuster->setSingleStep(prop->getStepValue());
+        _adjuster->setDecimals(prop->getDecimals());
         _adjuster->blockSignals(false);
     }
 
@@ -67,24 +71,17 @@ namespace campvis {
     }
 
     void FloatPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            const FloatProperty* prop = static_cast<const FloatProperty*>(property);
-            _adjuster->setMinimum(prop->getMinValue());
-            _adjuster->setMaximum(prop->getMaxValue());
-        }
+        if (_ignorePropertyUpdates == 0)
+            emit s_propertyChanged(property);
     }
 
     void FloatPropertyWidget::onPropertyStepChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            const FloatProperty* prop = static_cast<const FloatProperty*>(property);
-            _adjuster->setSingleStep(prop->getStepValue());
-        }
+        if (_ignorePropertyUpdates == 0)
+            emit s_propertyChanged(property);
     }
 
     void FloatPropertyWidget::onPropertyDecimalsChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            const FloatProperty* prop = static_cast<const FloatProperty*>(property);
-            _adjuster->setDecimals(prop->getDecimals());
-        }
+        if (_ignorePropertyUpdates == 0)
+            emit s_propertyChanged(property);
     }
 }

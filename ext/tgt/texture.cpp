@@ -522,8 +522,7 @@ tgt::Color Texture::texelAsFloat(size_t x, size_t y) const {
                     LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
             }
             break;
-        case GL_LUMINANCE:
-        case GL_ALPHA:
+        case GL_RED:
             switch(dataType_) {
                 case GL_UNSIGNED_BYTE: {
                     tgt::Vector3<uint8_t> t = tgt::vec3(texel<uint8_t>(x,y));
@@ -543,6 +542,102 @@ tgt::Color Texture::texelAsFloat(size_t x, size_t y) const {
                                         }
                 case GL_FLOAT: {
                     tgt::Vector3f t = tgt::vec3(texel<GLfloat>(x,y));
+                    ret.x = t.x;
+                    ret.y = t.y;
+                    ret.z = t.z;
+                    ret.w = 1.0f;
+                    break;
+                }
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+        }
+        break;
+
+        default:
+            LWARNINGC("tgt.texture", "texelAsFloat: Unknown format!");
+    }
+    return ret;
+}
+
+
+tgt::Color Texture::texelAsFloat(size_t x, size_t y, size_t z) const {
+    tgt::Color ret = tgt::Color(0.0f);
+    switch(format_) {
+        case GL_RGBA:
+            switch(dataType_) {
+                case GL_UNSIGNED_BYTE: {
+                    tgt::Vector4<uint8_t> t = texel< tgt::Vector4<uint8_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFF;
+                    ret.y = (float )t.y / 0xFF;
+                    ret.z = (float )t.z / 0xFF;
+                    ret.w = (float )t.w / 0xFF;
+                    break;
+                }
+                case GL_UNSIGNED_SHORT: {
+                    tgt::Vector4<uint16_t> t = texel< tgt::Vector4<uint16_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFFFF;
+                    ret.y = (float )t.y / 0xFFFF;
+                    ret.z = (float )t.z / 0xFFFF;
+                    ret.w = (float )t.w / 0xFFFF;
+                    break;
+                }
+                case GL_FLOAT:
+                    ret = texel<tgt::Color>(x,y,z);
+                    break;
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+            }
+            break;
+        case GL_RGB:
+            switch(dataType_) {
+                case GL_UNSIGNED_BYTE: {
+                    tgt::Vector3<uint8_t> t = texel< tgt::Vector3<uint8_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFF;
+                    ret.y = (float )t.y / 0xFF;
+                    ret.z = (float )t.z / 0xFF;
+                    ret.w = 1.0f;
+                    break;
+                }
+                case GL_UNSIGNED_SHORT: {
+                    tgt::Vector3<uint16_t> t = texel< tgt::Vector3<uint16_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFFFF;
+                    ret.y = (float )t.y / 0xFFFF;
+                    ret.z = (float )t.z / 0xFFFF;
+                    ret.w = 1.0f;
+                    break;
+                }
+                case GL_FLOAT: {
+                    tgt::Vector3f t = texel<tgt::Vector3f>(x,y,z);
+                    ret.x = t.x;
+                    ret.y = t.y;
+                    ret.z = t.z;
+                    ret.w = 1.0f;
+                    break;
+                }
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+            }
+            break;
+        case GL_RED:
+            switch(dataType_) {
+                case GL_UNSIGNED_BYTE: {
+                    tgt::Vector3<uint8_t> t = tgt::vec3(texel<uint8_t>(x,y,z));
+                    ret.x = (float )t.x / 0xFF;
+                    ret.y = (float )t.y / 0xFF;
+                    ret.z = (float )t.z / 0xFF;
+                    ret.w = 1.0f;
+                    break;
+                                       }
+                case GL_UNSIGNED_SHORT: {
+                    tgt::Vector3<uint16_t> t = tgt::vec3(texel<uint16_t>(x,y,z));
+                    ret.x = (float )t.x / 0xFFFF;
+                    ret.y = (float )t.y / 0xFFFF;
+                    ret.z = (float )t.z / 0xFFFF;
+                    ret.w = 1.0f;
+                    break;
+                                        }
+                case GL_FLOAT: {
+                    tgt::Vector3f t = tgt::vec3(texel<GLfloat>(x,y,z));
                     ret.x = t.x;
                     ret.y = t.y;
                     ret.z = t.z;

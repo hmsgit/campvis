@@ -189,10 +189,10 @@ namespace campvis {
     }
 
     void DataContainerInspectorWidget::updateColor(){
+        const tgt::Color& color = _canvas->getCapturedColor();
 
-        const tgt::Color color = _canvas->getCapturedColor();
 
-        _lblColorVal->setText(QString("Color: R = %1 G = %2 B = %3").arg(QString::number(static_cast<int>(color.r * 255)), QString::number(static_cast<int>(color.g * 255)), QString::number(static_cast<int>(color.b * 255))));
+        _lblColorVal->setText(QString("Color: [%1, %2, %3, %4]").arg(QString::number(color.r), QString::number(color.g), QString::number(color.b), QString::number(color.a)));
         
         _ColorValWidgetPalette->setColor(QPalette::Background, QColor(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255), static_cast<int>(color.b * 255)));
         _colorValWidget->setPalette(*_ColorValWidgetPalette);

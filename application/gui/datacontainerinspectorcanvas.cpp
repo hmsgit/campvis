@@ -386,7 +386,7 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::mouseMoveEvent(tgt::MouseEvent* e)
     {
-        if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT) {
+        if (e->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
 
             tgt::MouseEvent adjustedMe(
@@ -407,7 +407,8 @@ namespace campvis {
             }
             
         }
-        else if(e->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT) {
+
+        {
             tgt::ivec2 dimCanvas = tgt::ivec2(_quadSize.x * _numTiles.x, _quadSize.y * _numTiles.y);    
             if(e->x() >= dimCanvas.x || e->y() >= dimCanvas.y || e->x() < 0 || e->y() < 0)
                 return;
@@ -425,8 +426,16 @@ namespace campvis {
                 _widget->updateDepth();
             }
             else {
-                _color = _textures[texIndx]->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1);
-                _widget->updateColor();
+                if (_textures[texIndx]->getDimensions().z != 1) {
+                    if (p_currentSlice.getValue() >= 0 && p_currentSlice.getValue() < _textures[texIndx]->getDimensions().z) {
+                        _color = _textures[texIndx]->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1, p_currentSlice.getValue());
+                        _widget->updateColor();
+                    }
+                }
+                else if (_textures[texIndx]->getDimensions().y != 1) {
+                    _color = _textures[texIndx]->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1);
+                    _widget->updateColor();
+                }
             }      
         }
     }
@@ -542,6 +551,7 @@ namespace campvis {
         for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
             if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
                 if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
+                    imgGL->downloadTexture();
                     _textures.push_back(imgGL->getTexture());
                     maxSlices = std::max(maxSlices, imgGL->getTexture()->getDimensions().z);
                 }
