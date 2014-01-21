@@ -135,7 +135,7 @@ namespace campvis {
         _dctWidget = new DataContainerTreeWidget(this);
         _dctWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
         _dctWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        _dctWidget->setMinimumWidth(150);
+        _dctWidget->setMinimumWidth(256);
         _mainLayout->addWidget(_dctWidget, 0, 0);
 
         _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
