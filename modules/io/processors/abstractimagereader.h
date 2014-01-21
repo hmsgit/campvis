@@ -73,7 +73,7 @@ namespace campvis {
         virtual void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
         
     public:
-        StringProperty p_url;               ///< URL for file to read
+        StringProperty p_url;             ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:

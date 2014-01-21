@@ -53,6 +53,8 @@
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
+#include "application//gui/datacontainerfileloaderwidget.h"
+#include "modules/io/processors/genericimagereader.h"
 
 #include <QFileDialog>
 
@@ -70,6 +72,7 @@ namespace campvis {
         , _mainLayout(0)
         , _infoWidget(0)
         , _infoWidgetLayout(0)
+        , _propEditorWid(0)
     {
         setupGUI();
     }
@@ -92,6 +95,10 @@ namespace campvis {
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.connect(this, &DataContainerInspectorWidget::onDataContainerDataAdded);
         }
+    }
+
+    DataContainer* DataContainerInspectorWidget::getDataContainer() {
+        return _dataContainer;
     }
 
     void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
@@ -160,8 +167,25 @@ namespace campvis {
         _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
         _infoWidgetLayout->addWidget(_lblBounds);
 
+
+        QWidget* btnWidget = new QWidget(this);
+        QGridLayout* gridLayout = new QGridLayout();
+        btnWidget->setLayout(gridLayout);
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
         _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
-        _infoWidgetLayout->addWidget(_btnSaveToFile);
+        gridLayout->addWidget(_btnSaveToFile, 0, 0);
+        connect(
+            _btnSaveToFile, SIGNAL(clicked()),
+            this, SLOT(onBtnSaveToFileClicked()));
+        _btnSaveToFile->setDisabled(true);
+#endif
+
+        _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
+        gridLayout->addWidget(_btnLoadFile, 0, 1);
+
+        _infoWidgetLayout->addWidget(btnWidget);
+
 
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _canvas->setMinimumSize(QSize(100, 100));
@@ -184,8 +208,8 @@ namespace campvis {
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
         connect(
-            _btnSaveToFile, SIGNAL(clicked()),
-            this, SLOT(onBtnSaveToFileClicked()));
+            _btnLoadFile, SIGNAL(clicked()),
+            this, SLOT(onBtnLoadFileClicked()));
     }
 
     void DataContainerInspectorWidget::updateColor(){
@@ -342,10 +366,25 @@ namespace campvis {
 
         _dataContainer = 0;
         _dctWidget->update(0);
+
+        if(_propEditorWid != nullptr)
+            _propEditorWid->deinit();
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
         updateInfoWidget();
+
+        // get the selection from the tree widget
+        const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
+
+        // iterate through the indices of the selection
+        for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
+            if (index->isValid()) {
+                _btnSaveToFile->setDisabled(false);
+                return;
+            }
+        }
+        _btnSaveToFile->setDisabled(true);
     }
 
     void DataContainerInspectorWidget::onBtnSaveToFileClicked() {
@@ -440,6 +479,17 @@ namespace campvis {
         return;
 #endif
 
+    }
+
+    void DataContainerInspectorWidget::onBtnLoadFileClicked() {
+        // delete previous PropertyEditor, then create a new one
+        // the final one will be deleted with deinit()
+        if(nullptr != _propEditorWid)
+            _propEditorWid->deinit();
+
+        _propEditorWid = new DataContainerFileLoaderWidget(this, nullptr);
+        _propEditorWid->setVisible(true);
+        
     }
 
 }

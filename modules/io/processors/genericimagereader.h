@@ -85,6 +85,11 @@ namespace campvis {
         void setTargetImageId(const char* imageId);
         void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
 
+
+        void setVisibibility(const std::string& extention, bool visibility);
+
+        StringProperty p_url;
+
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
@@ -92,8 +97,11 @@ namespace campvis {
         static const std::string loggerCat_;
         
     private:
+        void onUrlPropertyChanged(const AbstractProperty*);
+
+        void adjustToNewExtension();
+
         std::map<AbstractImageReader*, MetaProperty*> _readers;
-        StringProperty p_url;
         std::string _ext;
         MetaProperty* _currentlyVisible;
 

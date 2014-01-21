@@ -57,6 +57,7 @@ namespace campvis {
     class DataContainer;
     class DataContainerTreeWidget;
     class FaceGeometry;
+    class DataContainerFileLoaderWidget;
 
     class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -72,12 +73,17 @@ namespace campvis {
          * Destructor.
          */
         ~DataContainerInspectorWidget();
-
+        
         /**
          * Set the DataContainer this widget is inspecting.
          * \param   dataContainer   The DataContainer this widget shall inspect, may be 0.
          */
         void setDataContainer(DataContainer* dataContainer);
+
+        /**
+         * Get the DataContainer this widget is inspecting.
+         */
+        DataContainer* getDataContainer();
 
         /**
          * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
@@ -111,7 +117,7 @@ namespace campvis {
          */
         void updateColor();
 
-		/**
+        /**
          * Updates depth of the info widget
          */
         void updateDepth();
@@ -133,6 +139,12 @@ namespace campvis {
          */
         void onBtnSaveToFileClicked();
 
+        
+        /**
+         * Slot being called when the user clicks on the "Load File" button.
+         */
+        void onBtnLoadFileClicked();
+
     protected:
         /**
          * Setup the GUI stuff
@@ -147,7 +159,7 @@ namespace campvis {
          */
         
 
-	protected:
+    protected:
         static void saveToFile(DataHandle handle, std::string filename);
 
         /**
@@ -173,19 +185,24 @@ namespace campvis {
         QHBoxLayout* _mainLayout;                       ///< Layout for this widget
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
         QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
-
+        
         QLabel*  _lblName;
         QLabel*  _lblLocalMemoryFootprint;
         QLabel*  _lblVideoMemoryFootprint;
         QLabel*  _lblTimestamp;
         QLabel*  _lblSize;
         QLabel*  _lblBounds;
-		QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
+        QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
         QHBoxLayout* _colorWidgetLayout;                ///< Layout for the following widget
         QLabel*  _lblColorVal;                          ///< Color Label Value in text
         QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
         QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
         QPushButton* _btnSaveToFile;
+        
+        // Added by Hossain Mahmud  <mahmud@in.tum.de>
+        // Date: January 02, 2014
+        QPushButton* _btnLoadFile;
+        DataContainerFileLoaderWidget* _propEditorWid;
 
         static const std::string loggerCat_;
     };

@@ -45,11 +45,15 @@ namespace campvis {
         : AbstractProcessor()
         , p_url("url", "Image URL", "")
     {
+        addProperty(&p_url);
+        p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);
+
         this->addReader(new CsvdImageReader());        
         this->addReader(new LtfImageReader());
         this->addReader(new MhdImageReader());
         this->addReader(new RawImageReader());
         this->addReader(new VtkImageReader());
+
 
         this->_ext = "";
         this->_currentlyVisible = nullptr;
@@ -71,12 +75,27 @@ namespace campvis {
     void GenericImageReader::updateResult(DataContainer& data) {
         std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
         if(it != this->_readers.end()) {
-            if(nullptr != this->_currentlyVisible) {
-                this->_currentlyVisible->setVisible(false);
+            if (this->_currentlyVisible != it->second) {
+                if(nullptr != this->_currentlyVisible) {
+                    this->_currentlyVisible->setVisible(false);
+                }
+                (it->second)->setVisible(true);
+                this->_currentlyVisible = it->second;
             }
-            (it->second)->setVisible(true);
-            this->_currentlyVisible = it->second;
             (it->first)->process(data);
+        }
+        return;
+    }
+    void GenericImageReader::setVisibibility(const std::string& extention, bool visibility) {
+        std::string _ext = extention;
+        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(_ext));
+        if(it != this->_readers.end()) {
+            if(nullptr != this->_currentlyVisible) {
+                this->_currentlyVisible->setVisible(!visibility);
+            }
+            (it->second)->setVisible(visibility);
+            this->_currentlyVisible = it->second;
+            //(it->first)->process(data);
         }
         return;
     }
@@ -139,9 +158,38 @@ namespace campvis {
         MetaProperty* meta = new MetaProperty(reader->getName()+"MetaProp", reader->getName());
         meta->addPropertyCollection(*reader);
         meta->setVisible(false);
+
+
+        StringProperty* sp = dynamic_cast<StringProperty*>(meta->getProperty("url"));
+        tgtAssert(sp != 0, "This should not happen.");
+        if (sp != 0) {
+            p_url.addSharedProperty(sp);
+            sp->setVisible(false);
+        }
+
         this->addProperty(meta);
         this->_readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
         return 0;
+    }
+
+    void GenericImageReader::onUrlPropertyChanged(const AbstractProperty*) {
+        // first set visibility of old extension to false
+        setVisibibility(_ext, false);
+
+        // now update extension
+        const std::string& url = this->p_url.getValue();
+        size_t extPos = url.rfind('.');
+        if (extPos != std::string::npos) {
+            this->_ext = url.substr(extPos);
+        }
+
+        // set visibility of new extension's properties to true
+        setVisibibility(_ext, true);
+
+    }
+
+    void GenericImageReader::adjustToNewExtension() {
+
     }
 
 }

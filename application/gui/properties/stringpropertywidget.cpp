@@ -41,7 +41,7 @@ namespace campvis {
         addWidget(_lineEdit);
 
         if (! dynamic_cast<DataNameProperty*>(property)) {
-            _btnLoadFile = new QPushButton(tr("Load File"), this);
+            _btnLoadFile = new QPushButton(tr("Browse"), this);
             addWidget(_btnLoadFile);
             connect(_btnLoadFile, SIGNAL(clicked(bool)), this, SLOT(onBtnLoadFileClicked(bool)));
         }
@@ -51,6 +51,9 @@ namespace campvis {
 
     StringPropertyWidget::~StringPropertyWidget() {
 
+    }
+    void StringPropertyWidget::setButtonLabel(const std::string& btnLabel) {
+        this->_btnLoadFile->setText(QString(btnLabel.c_str()));
     }
 
     void StringPropertyWidget::updateWidgetFromProperty() {
