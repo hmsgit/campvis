@@ -299,12 +299,6 @@ void ShaderObject::uploadSource() {
     glShaderSource(id_, 1,  &s, 0);
 }
 
-void ShaderObject::setDirectives(GLuint id) {
-    glProgramParameteriEXT(id, GL_GEOMETRY_INPUT_TYPE_EXT, inputType_);
-    glProgramParameteriEXT(id, GL_GEOMETRY_OUTPUT_TYPE_EXT, outputType_);
-    glProgramParameteriEXT(id, GL_GEOMETRY_VERTICES_OUT_EXT, verticesOut_);
-}
-
 bool ShaderObject::compileShader() {
     isCompiled_ = false;
 
@@ -510,21 +504,6 @@ void Shader::detachObjectsByType(ShaderObject::ShaderType type) {
 }
 
 bool Shader::linkProgram() {
-    if (isLinked_) {
-        // program is already linked: detach and re-attach everything
-        for (ShaderObjects::iterator iter = objects_.begin(); iter != objects_.end(); ++iter) {
-            glDetachShader(id_, (*iter)->id_);
-            glAttachShader(id_, (*iter)->id_);
-            if ((*iter)->getType() == ShaderObject::GEOMETRY_SHADER)
-                (*iter)->setDirectives(id_);
-        }
-    } else {
-        for (ShaderObjects::iterator iter = objects_.begin(); iter != objects_.end(); ++iter) {
-            if ((*iter)->getType() == ShaderObject::GEOMETRY_SHADER)
-                (*iter)->setDirectives(id_);
-        }
-    }
-
     isLinked_ = false;
     glLinkProgram(id_);
     GLint check = 0;

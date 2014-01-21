@@ -98,13 +98,6 @@ public:
     void loadSourceFromFile(const std::string& filename)
         throw (Exception);
 
-    /**
-     * Set directives using glProgramParameteriEXT(...), used for geometry shaders.
-     * Call before compiling.
-     * @param id Set the directives for this shader
-     */
-    void setDirectives(GLuint id);
-
     bool compileShader();
 
     bool isCompiled() const { return isCompiled_; }

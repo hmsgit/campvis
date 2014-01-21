@@ -88,7 +88,7 @@ namespace campvis {
     void GeometryRenderer::init() {
         VisualizationProcessor::init();
         _pointShader = ShdrMgr.load("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(false));
-        _meshShader = ShdrMgr.load("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer_faces.geom", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(true));
+        _meshShader = ShdrMgr.load("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.geom", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(true));
     }
 
     void GeometryRenderer::deinit() {

@@ -39,7 +39,7 @@ out vec4 out_Color;
 uniform bool _useSolidColor;
 uniform vec4 _solidColor;
 uniform vec4 _wireframeColor;
-uniform float _lineWidth;
+uniform float _lineWidth = 1.0;
 
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;

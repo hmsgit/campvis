@@ -62,7 +62,7 @@ void main() {
     float hc = abs(b * sin(alpha));
 
     // Send the triangle along with the edge distances
-    geom_EdgeDistance = vec3(ha, 0, 0);
+    geom_EdgeDistance = vec3(ha, 0.0, 0.0);
     geom_Normal = _computeNormals ? normal : vert_Normal[0];
     geom_Position = vert_Position[0];
     geom_TexCoord = vert_TexCoord[0];
@@ -70,7 +70,7 @@ void main() {
     gl_Position = gl_in[0].gl_Position;
     EmitVertex();
 
-    geom_EdgeDistance = vec3(0, hb, 0);
+    geom_EdgeDistance = vec3(0.0, hb, 0.0);
     geom_Normal = _computeNormals ? normal : vert_Normal[1];
     geom_Position = vert_Position[1];
     geom_TexCoord = vert_TexCoord[1];
@@ -78,7 +78,7 @@ void main() {
     gl_Position = gl_in[1].gl_Position;
     EmitVertex();
 
-    geom_EdgeDistance = vec3(0, 0, hc);
+    geom_EdgeDistance = vec3(0.0, 0.0, hc);
     geom_Normal = _computeNormals ? normal : vert_Normal[2];
     geom_Position = vert_Position[2];
     geom_TexCoord = vert_TexCoord[2];
