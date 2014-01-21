@@ -41,6 +41,10 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
+    GenericOption<std::string> structuringElementOptions[2] = {
+        GenericOption<std::string>("CROSS_ELEMENT", "Cross"),
+        GenericOption<std::string>("CUBE_ELEMENT", "Cube")
+    };
 
     const std::string GlMorphologyFilter::loggerCat_ = "CAMPVis.modules.classification.GlMorphologyFilter";
 
@@ -49,12 +53,14 @@ namespace campvis {
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
         , p_outputImage("OutputImage", "Output Image", "GlMorphologyFilter.out", DataNameProperty::WRITE)
         , p_filterOperation("FilterOperation", "Operations to Apply ([edoc]+)", "ed")
+        , p_structuringElement("StructuringElement", "Structuring Element", structuringElementOptions, 2, INVALID_SHADER | INVALID_RESULT)
         , _erosionFilter(nullptr)
         , _dilationFilter(nullptr)
     {
         addProperty(&p_inputImage);
         addProperty(&p_outputImage);
         addProperty(&p_filterOperation);
+        addProperty(&p_structuringElement);
     }
 
     GlMorphologyFilter::~GlMorphologyFilter() {
@@ -64,11 +70,11 @@ namespace campvis {
     void GlMorphologyFilter::init() {
         VisualizationProcessor::init();
 
-        _erosionFilter = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/GlMorphologyFilter.frag", "#define FILTER_OP min\n");
+        _erosionFilter = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/GlMorphologyFilter.frag", generateGlslHeader("min"));
         _erosionFilter->setAttributeLocation(0, "in_Position");
         _erosionFilter->setAttributeLocation(1, "in_TexCoord");
 
-        _dilationFilter = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/GlMorphologyFilter.frag", "#define FILTER_OP max\n");
+        _dilationFilter = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/GlMorphologyFilter.frag", generateGlslHeader("max"));
         _dilationFilter->setAttributeLocation(0, "in_Position");
         _dilationFilter->setAttributeLocation(1, "in_TexCoord");
     }
@@ -166,6 +172,21 @@ namespace campvis {
         filter->deactivate();
 
         return resultTexture;
+    }
+
+    void GlMorphologyFilter::updateShader() {
+        _erosionFilter->setHeaders(generateGlslHeader("min"));
+        _erosionFilter->rebuild();
+        _dilationFilter->setHeaders(generateGlslHeader("max"));
+        _dilationFilter->rebuild();
+        validate(INVALID_SHADER);
+    }
+
+    std::string GlMorphologyFilter::generateGlslHeader(const std::string& filerOp) const {
+        std::string toReturn =  "#define FILTER_OP " + filerOp + "\n";
+        toReturn += "#define " + p_structuringElement.getOptionValue() + "\n";
+
+        return toReturn;
     }
 
 }

@@ -30,6 +30,7 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
+#include "core/properties/optionproperty.h"
 
 namespace tgt {
     class Shader;
@@ -69,10 +70,15 @@ namespace campvis {
         DataNameProperty p_outputImage;     ///< ID for output gradient volume
 
         StringProperty p_filterOperation;   ///< String-encoded filter operation to apply
+        GenericOptionProperty<std::string> p_structuringElement;    ///< Structuring element to use
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateShader
+        virtual void updateShader();
+        /// generate the GLSL header
+        std::string generateGlslHeader(const std::string& filerOp) const;
 
         /**
          * Applys the morphology filter \a filter to \a inputImage.

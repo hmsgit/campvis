@@ -57,13 +57,51 @@ void main() {
 
     out_Color = texelFetch(_texture, texel, 0);
 
+#ifdef CUBE_ELEMENT
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1, -1, -1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0, -1, -1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1, -1, -1)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1,  0, -1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  0, -1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1,  0, -1)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1,  1, -1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  1, -1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1,  1, -1)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1, -1,  0)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0, -1,  0)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1, -1,  0)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1,  0,  0)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1,  0,  0)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1,  1,  0)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  1,  0)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1,  1,  0)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1, -1,  1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0, -1,  1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1, -1,  1)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1,  0,  1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  0,  1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1,  0,  1)));
+
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1,  1,  1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  1,  1)));
+    out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1,  1,  1)));
+#endif
+
+#ifdef CROSS_ELEMENT
     out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3(-1,  0,  0)));
     out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 1,  0,  0)));
     out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0, -1,  0)));
     out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  1,  0)));
     out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  0, -1)));
     out_Color = FILTER_OP(out_Color, texelFetchOffset(_texture, texel, 0, ivec3( 0,  0,  1)));
-
+#endif
 }
 #endif
 
