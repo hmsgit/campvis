@@ -106,7 +106,7 @@ namespace campvis {
             _shader->deactivate();
 
             // put resulting image into DataContainer
-            ImageData* id = new ImageData(3, size, 1);
+            ImageData* id = new ImageData(3, size, 3);
             ImageRepresentationGL::create(id, resultTexture);
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputImage.getValue(), id);

@@ -59,11 +59,13 @@ namespace campvis {
         tgtAssert(texture != 0, "Given texture must not be 0.");
         tgtAssert(parent->getDimensionality() >= 3 || texture->getDimensions().z == 1, "Dimensionality of Parent and texture mismatch!");
         tgtAssert(parent->getDimensionality() >= 2 || texture->getDimensions().y == 1, "Dimensionality of Parent and texture mismatch!");
+        tgtAssert(parent->getNumChannels() == texture->getNumChannels(), "Number of Channels of parent and texture mismatch!");
     }
 
     ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp) 
         : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
     {
+        tgtAssert(wtp._numChannels == parent->getNumChannels(), "Number of Channels of parent and texture mismatch!");
         createTexture(wtp);
     }
 

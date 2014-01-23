@@ -73,6 +73,7 @@ namespace campvis {
         , _infoWidget(0)
         , _infoWidgetLayout(0)
         , _lblName(0)
+        , _lblNumChannels(0)
         , _lblLocalMemoryFootprint(0)
         , _lblVideoMemoryFootprint(0)
         , _lblTimestamp(0)
@@ -162,14 +163,17 @@ namespace campvis {
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
         _infoWidgetLayout->addWidget(_lblTimestamp, 0, 1);
 
-        _lblLocalMemoryFootprint = new QLabel(QString("Local Memory: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblLocalMemoryFootprint, 1, 0);
+        _lblNumChannels = new QLabel("Number of Channels: ", _infoWidget);
+        _infoWidgetLayout->addWidget(_lblNumChannels, 1, 0);
 
-        _lblVideoMemoryFootprint = new QLabel(QString("Video Memory: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblVideoMemoryFootprint, 1, 1);
+        _lblLocalMemoryFootprint = new QLabel(QString("Local Memory: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblLocalMemoryFootprint, 1, 1);
 
         _lblSize = new QLabel(tr("Size: "), _infoWidget);
         _infoWidgetLayout->addWidget(_lblSize, 2, 0);
+
+        _lblVideoMemoryFootprint = new QLabel(QString("Video Memory: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblVideoMemoryFootprint, 2, 1);
 
         _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
         _infoWidgetLayout->addWidget(_lblBounds, 3, 0, 1, 2);
@@ -274,6 +278,9 @@ namespace campvis {
 
             if (const ImageData* tester = dynamic_cast<const ImageData*>(handles.front().second.getData())) {
                 _canvas->p_transferFunction.setImageHandle(handles.front().second);
+
+                _lblNumChannels->setText(tr("Number of Channels: ") + QString::number(tester->getNumChannels()));
+
                 std::ostringstream ss;
 
                 ss << tester->getSize();
@@ -293,6 +300,7 @@ namespace campvis {
             }
             else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
                 _lblSize->setText(tr("Size: n/a"));
+                _lblNumChannels->setText(tr("Number of Channels: n/a"));
 
                 std::ostringstream ss;
                 ss << tester->getWorldBounds();
@@ -309,6 +317,8 @@ namespace campvis {
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
                 if (id != 0) {
+                    _lblNumChannels->setText(tr("Number of Channels: ") + QString::number(id->getNumChannels()));
+
                     std::ostringstream ss;
                     ss << id->getSize();
                     _lblSize->setText(tr("Size: ") + QString::fromStdString(ss.str()));
@@ -318,6 +328,7 @@ namespace campvis {
                     _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
                 }
                 else {
+                    _lblNumChannels->setText(tr("Number of Channels: n/a"));
                     _lblSize->setText(tr("Size: n/a"));
                     _lblBounds->setText(tr("World Bounds: n/a")); 
                 }
@@ -332,6 +343,7 @@ namespace campvis {
             }
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
             else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
+                _lblNumChannels->setText(tr("Number of Channels: n/a"));
                 std::ostringstream ss;
                 ss << "Size: " << tester->numFibers() << " Fibers with " << tester->numSegments() << " Segments.";
                 _lblSize->setText(QString::fromStdString(ss.str()));
@@ -342,7 +354,7 @@ namespace campvis {
             }
 #endif
             else {
-
+                _lblNumChannels->setText(tr("Number of Channels: n/a"));
                 _lblSize->setText(tr("Size: n/a"));
                 _lblBounds->setText(tr("World Bounds: n/a")); 
             }

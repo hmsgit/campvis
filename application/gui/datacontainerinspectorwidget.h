@@ -188,6 +188,7 @@ namespace campvis {
         QGridLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
         
         QLabel*  _lblName;
+        QLabel*  _lblNumChannels;
         QLabel*  _lblLocalMemoryFootprint;
         QLabel*  _lblVideoMemoryFootprint;
         QLabel*  _lblTimestamp;
