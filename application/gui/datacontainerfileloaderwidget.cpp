@@ -33,8 +33,8 @@ namespace campvis {
         , _dataContainer(0)
         , _layout(0)
         , _pipelinePropertiesScrollArea(0)
-        , _propCollectionWidget(0)
         , _fileName("fileName", "Image URL", "")
+        , _propCollectionWidget(0)
     {
         this->_parent = parentDataInspector;
         this->_dataContainer = this->_parent->getDataContainer();

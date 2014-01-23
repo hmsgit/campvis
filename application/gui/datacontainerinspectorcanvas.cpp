@@ -54,16 +54,16 @@ namespace campvis {
         , p_renderGChannel("RenderGChannel", "Render Green Channel", true)
         , p_renderBChannel("RenderBChannel", "Render Blue Channel", true)
         , p_renderAChannel("RenderAChannel", "Render Alpha Channel", true)
+        , _meshGeomTexturesDirty(false)
         , _dataContainer(0)
         , _paintShader(0)
         , _quad(0)
+        , _color(0.0f, 0.0f, 0.0f, 0.0f)
         , _numTiles(0, 0)
         , _quadSize(0, 0)
         , _selectedTexture(0)
         , _renderFullscreen(false)
         , _currentSlice(-1)
-        , _color(0.0f, 0.0f, 0.0f, 0.0f)
-        , _meshGeomTexturesDirty(false)
     {
         static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
 
