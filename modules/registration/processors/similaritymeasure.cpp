@@ -320,7 +320,7 @@ namespace campvis {
         glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
 
         // render quad to compute difference measure by shader
-        for (int z = 0; z < size.z; ++z) {
+        for (tgt::svec3::ElemType z = 0; z < size.z; ++z) {
             float texZ = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
             _differenceShader->setUniform("_zTex", texZ);
             _fbo->attachTexture(differenceImage, GL_COLOR_ATTACHMENT0, 0, z);

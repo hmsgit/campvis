@@ -486,7 +486,7 @@ namespace campvis {
             _selectedTexture = (selectedIndex.y * _numTiles.x) + selectedIndex.x;
                 
             for(; geomTexInfoIter != _geomTextureInfos.end(); geomTexInfoIter++) {
-                if((*geomTexInfoIter)._trackballIndx == _selectedTexture) {
+                if(static_cast<size_t> ((*geomTexInfoIter)._trackballIndx) == _selectedTexture) {
                     _selectedTrackball = (*geomTexInfoIter)._trackballIndx;
                     break;
                 }

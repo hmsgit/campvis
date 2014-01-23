@@ -160,7 +160,7 @@ namespace campvis {
 
         p_transferFunction.setImageHandle(img.getDataHandle());
         const tgt::svec3& imgSize = img->getSize();
-        if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
+        if (static_cast<tgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
         p_use3DTexture.setValue(img->getDimensionality() == 3);
