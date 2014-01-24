@@ -41,5 +41,5 @@ SET(RandomWalksLibSources ConfidenceMaps2D.cpp
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-ADD_LIBRARY(RandomWalksLib STATIC ${RandomWalksLibSources} ${RandomWalksLibHeaders})
+ADD_LIBRARY(RandomWalksLib ${RandomWalksLibSources} ${RandomWalksLibHeaders})
 TARGET_LINK_LIBRARIES(RandomWalksLib ${RandomWalksLibExternalLibs})
