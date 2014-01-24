@@ -26,10 +26,7 @@
 
 #include "tgt/assert.h"
 
-#pragma warning(push)
-#pragma warning(disable: 4305)  // disable warning in external code
 #include "core/tools/teapot.h"
-#pragma warning(pop)
 
 namespace campvis {
 
@@ -142,21 +139,21 @@ namespace campvis {
 
     MultiIndexedGeometry* GeometryDataFactory::createTeapot() {
         std::vector<tgt::vec3> vertices, normals;
-        vertices.reserve(num_teapot_vertices);
-        normals.reserve(num_teapot_vertices);
+        vertices.reserve(Teapot::num_teapot_vertices);
+        normals.reserve(Teapot::num_teapot_vertices);
 
-        for (size_t i = 0; i < num_teapot_vertices; ++i) {
-            vertices.push_back(tgt::vec3(teapot_vertices + 3*i));
-            normals.push_back(tgt::vec3(teapot_normals + 3*i));
+        for (size_t i = 0; i < Teapot::num_teapot_vertices; ++i) {
+            vertices.push_back(tgt::vec3(Teapot::teapot_vertices + 3*i));
+            normals.push_back(tgt::vec3(Teapot::teapot_normals + 3*i));
         }
 
         MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
 
         // convert indices and add primitives 
         int currentOffset = 0;
-        while (currentOffset < num_teapot_indices) {
-            uint16_t count = new_teapot_indicies[currentOffset];
-            toReturn->addPrimitive(std::vector<uint16_t>(new_teapot_indicies + currentOffset + 1, new_teapot_indicies + count + currentOffset + 1));
+        while (currentOffset < Teapot::num_teapot_indices) {
+            uint16_t count = Teapot::new_teapot_indicies[currentOffset];
+            toReturn->addPrimitive(std::vector<uint16_t>(Teapot::new_teapot_indicies + currentOffset + 1, Teapot::new_teapot_indicies + count + currentOffset + 1));
             currentOffset += count + 1;
         }
 
