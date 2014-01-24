@@ -60,11 +60,11 @@ namespace campvis {
         , p_applyMask("ApplyMask", "Apply Mask", true)
         , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(1.f), tgt::vec3(5.f))
         , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.01f), tgt::vec3(7.f))
-        , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
         , p_metric("Metric", "Similarity Metric", metrics, 5)
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
         , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE, AbstractProcessor::VALID)
         , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image", AbstractProcessor::INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE)
+        , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
         , _sadssdCostFunctionShader(0)
         , _nccsnrCostFunctionShader(0)
         , _differenceShader(0)
@@ -320,7 +320,7 @@ namespace campvis {
         glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
 
         // render quad to compute difference measure by shader
-        for (int z = 0; z < size.z; ++z) {
+        for (tgt::svec3::ElemType z = 0; z < size.z; ++z) {
             float texZ = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
             _differenceShader->setUniform("_zTex", texZ);
             _fbo->attachTexture(differenceImage, GL_COLOR_ATTACHMENT0, 0, z);

@@ -223,6 +223,8 @@ namespace campvis {
                 case tgt::KeyEvent::K_DOWN:
                     _usFusion1.p_sliceNumber.decrement();
                     break;
+                default:
+                    break;
             }
         }
     }

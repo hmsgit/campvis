@@ -67,8 +67,8 @@ namespace campvis {
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
         , p_view("View", "Image to Render", viewOptions, 12)
-        , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f, 0.1f)
+        , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
@@ -160,7 +160,7 @@ namespace campvis {
 
         p_transferFunction.setImageHandle(img.getDataHandle());
         const tgt::svec3& imgSize = img->getSize();
-        if (p_sliceNumber.getMaxValue() != imgSize.z - 1){
+        if (static_cast<tgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
         p_use3DTexture.setValue(img->getDimensionality() == 3);
