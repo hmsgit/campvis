@@ -42,8 +42,8 @@
 
 namespace campvis {
     GenericOption<std::string> structuringElementOptions[2] = {
-        GenericOption<std::string>("CROSS_ELEMENT", "Cross"),
-        GenericOption<std::string>("CUBE_ELEMENT", "Cube")
+        GenericOption<std::string>("cross", "Cross", "CROSS_ELEMENT"),
+        GenericOption<std::string>("cube", "Cube", "CUBE_ELEMENT")
     };
 
     const std::string GlMorphologyFilter::loggerCat_ = "CAMPVis.modules.classification.GlMorphologyFilter";

@@ -228,7 +228,7 @@ namespace campvis {
     }
 
     void AdvancedUsVis::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor = &_usReader) {
+        if (processor == &_usReader) {
             // convert data
             ScopedTypedData<ImageData> img(*_data, _usReader.p_targetImageID.getValue());
             if (img != 0) {

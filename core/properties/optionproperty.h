@@ -78,6 +78,12 @@ namespace campvis {
     template<>
     struct GenericOption<std::string> {
     public:
+        GenericOption(const std::string& id, const std::string& title, const std::string& value)
+            : _id(id)
+            , _title(title)
+            , _value(value)
+        {};
+
         GenericOption(const std::string& id, const std::string& title)
             : _id(id)
             , _title(title)

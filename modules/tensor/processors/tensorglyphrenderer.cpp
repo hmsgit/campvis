@@ -22,7 +22,7 @@
 // 
 // ================================================================================================
 
-#include "TensorGlyphRenderer.h"
+#include "tensorglyphrenderer.h"
 
 #include "tgt/tgt_math.h"
 #include "tgt/logmanager.h"
