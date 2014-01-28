@@ -95,7 +95,7 @@ namespace campvis {
             glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
 
             // render quad to compute difference measure by shader
-            for (tgt::svec3::ElemType z = 0; z < size.z; ++z) {
+            for (int z = 0; z < static_cast<int>(size.z); ++z) {
                 float zTexCoord = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
                 _shader->setUniform("_zTexCoord", zTexCoord);
                 _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, z);

@@ -69,8 +69,8 @@ void RandomWalksCore::setLabeling(const std::vector<int>  * seeds, const std::ve
 
 void RandomWalksCore::assemble_Lu_b()
 {
-	const int n = seeds->size();// # marked nodes
-	const int q = numel-seeds->size(); // # unmarked nodes
+	const int n = static_cast<int>(seeds->size());// # marked nodes
+	const int q = static_cast<int>(numel-seeds->size()); // # unmarked nodes
 
 	// Permutation matrix to get UNMARKED COLUMNS
 	SparseMatrix<double> Cu(numel,q);
@@ -112,8 +112,8 @@ void RandomWalksCore::assemble_Lu_b()
 
 void RandomWalksCore::generateUniqueIndices()
 {
-	const int n = seeds->size();// # marked nodes
-	const int q = numel-seeds->size(); // # unmarked nodes
+	const int n = static_cast<int>(seeds->size());// # marked nodes
+	const int q = static_cast<int>(numel-seeds->size()); // # unmarked nodes
 
 	std::vector<int> uidx_temp(numel);
 
