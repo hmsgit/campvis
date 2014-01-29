@@ -97,7 +97,8 @@ namespace campvis {
         FaceGeometry fg(vertices, std::vector<tgt::vec3>(), colors);
         fg.render(GL_TRIANGLE_STRIP);
     }
-    TFGeometry1D* TFGeometry1D::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor) {
+
+    TFGeometry1D* TFGeometry1D::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor) {
         tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
 
         std::vector<KeyPoint> keyPoints;
@@ -106,5 +107,31 @@ namespace campvis {
         return new TFGeometry1D(keyPoints);
     }
 
+
+    TFGeometry1D* TFGeometry1D::createDivergingColorMap(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor, float bias /*= 0.5f*/) {
+        tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds, must be in [0, 1].");
+        tgtAssert(bias > 0.f && bias < 1.f, "Bias out of bounds, must be in (0, 1).");
+
+        std::vector<KeyPoint> keyPoints;
+        keyPoints.push_back(KeyPoint(interval.x, leftColor));
+        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * bias, tgt::col4(255, 255, 255, 255)));
+        keyPoints.push_back(KeyPoint(interval.y, rightColor));
+        return new TFGeometry1D(keyPoints);
+    }
+
+    TFGeometry1D* TFGeometry1D::createColdHotColorMap(const tgt::vec2& interval /*= tgt::vec2(0.f, 1.f)*/) {
+        return createDivergingColorMap(interval, tgt::col4(0, 0, 255, 255), tgt::col4(255, 0, 0, 255), 0.5f);
+    }
+
+    TFGeometry1D* TFGeometry1D::createHeatedBodyColorMap(const tgt::vec2& interval /*= tgt::vec2(0.f, 1.f)*/) {
+        tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds, must be in [0, 1].");
+
+        std::vector<KeyPoint> keyPoints;
+        keyPoints.push_back(KeyPoint(interval.x, tgt::col4(0, 0, 0, 255)));
+        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * 0.35f, tgt::col4(224, 0, 0, 255)));
+        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * 0.85f, tgt::col4(255, 255, 0, 255)));
+        keyPoints.push_back(KeyPoint(interval.y, tgt::col4(255, 255, 255, 255)));
+        return new TFGeometry1D(keyPoints);
+    }
 
 }
