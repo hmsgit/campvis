@@ -47,6 +47,9 @@ namespace campvis {
     VectorFieldRenderer::VectorFieldRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_renderOutput("RenderOutput", "Output Image", "VectorFieldRenderer.output", DataNameProperty::WRITE)
+		, p_inputVectorX("InputImageX", "Input Image Vector X", "vectorX", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
+		, p_inputVectorY("InputImageY", "Input Image Vector Y", "vectorY", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
+		, p_inputVectorZ("InputImageZ", "Input Image Vector Z", "vectorZ", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
         , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .1f, 5.f)
         , p_camera("Camera", "Camera", tgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3, INVALID_RESULT | INVALID_PROPERTIES)
@@ -90,91 +93,95 @@ namespace campvis {
             return;
         }
 
-		/*
-        if (evals && evecs) {
-            if (evals->getSize() == evecs->getSize()) {
-                const tgt::Camera& cam = p_camera.getValue();
-                const tgt::svec3& imgSize = evals->getSize();
+		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorX(dataContainer, p_inputVectorX.getValue());
+		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorY(dataContainer, p_inputVectorY.getValue());
+		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorZ(dataContainer, p_inputVectorZ.getValue());
 
-                glEnable(GL_DEPTH_TEST);
-                _shader->activate();
+        if (vectorX && vectorY && vectorZ && 
+			vectorX->getSize() == vectorY->getSize() &&
+			vectorX->getSize() == vectorZ->getSize()) {
 
-                _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
-                _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", cam.getViewMatrix());
-                decorateRenderProlog(dataContainer, _shader);
+            const tgt::Camera& cam = p_camera.getValue();
+            const tgt::svec3& imgSize = vectorX->getSize();
+			const int sliceNumber = p_sliceNumber.getValue();
 
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
+            _shader->activate();
 
-                switch (p_sliceOrientation.getOptionValue()) {
-                    case XY_PLANE:
-                        for (size_t x = 0; x < imgSize.x; ++x) {
-                            for (size_t y = 0; y < imgSize.y; ++y) {
-                                renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), p_sliceNumber.getValue()));
-                            }
-                        }
-                        break;
-                    case XZ_PLANE:
-                        for (size_t x = 0; x < imgSize.x; ++x) {
-                            for (size_t z = 0; z < imgSize.z; ++z) {
-                                renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), p_sliceNumber.getValue(), static_cast<int>(z)));
-                            }
-                        }
-                        break;
-                    case YZ_PLANE:
+            _shader->setIgnoreUniformLocationError(true);
+            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+            _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
+            _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+            decorateRenderProlog(dataContainer, _shader);
+
+            FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+            createAndAttachDepthTexture();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            switch (p_sliceOrientation.getOptionValue()) {
+                case XY_PLANE:
+                    for (size_t x = 0; x < imgSize.x; ++x) {
                         for (size_t y = 0; y < imgSize.y; ++y) {
-                            for (size_t z = 0; z < imgSize.z; ++z) {
-                                renderTensorGlyph(evals, evecs, tgt::ivec3(p_sliceNumber.getValue(), static_cast<int>(y), static_cast<int>(z)));
-                            }
+                            renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber));
                         }
-                        break;
-                }
-
-
-                decorateRenderEpilog(_shader);
-                _shader->deactivate();
-                glDisable(GL_DEPTH_TEST);
-
-                dataContainer.addData(p_renderOutput.getValue(), new RenderData(_fbo));
+                    }
+                    break;
+                case XZ_PLANE:
+                    for (size_t x = 0; x < imgSize.x; ++x) {
+                        for (size_t z = 0; z < imgSize.z; ++z) {
+                            renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)));
+                        }
+                    }
+                    break;
+                case YZ_PLANE:
+                    for (size_t y = 0; y < imgSize.y; ++y) {
+                        for (size_t z = 0; z < imgSize.z; ++z) {
+                            renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)));
+                        }
+                    }
+                    break;
             }
+
+
+            decorateRenderEpilog(_shader);
+            _shader->deactivate();
+            glDisable(GL_DEPTH_TEST);
+
+            dataContainer.addData(p_renderOutput.getValue(), new RenderData(_fbo));
         }
         else {
             LERROR("Could not find suitable input data.");
         }
-		*/
         
         validate(INVALID_RESULT);
     }
 
     void VectorFieldRenderer::updateProperties(DataContainer& dataContainer) {
-		/*
-        GenericImageRepresentationLocal<float, 3>::ScopedRepresentation evals(dataContainer, p_inputEigenvalues.getValue());
-        GenericImageRepresentationLocal<float, 9>::ScopedRepresentation evecs(dataContainer, p_inputEigenvectors.getValue());
 
-        if (evals && evecs) {
-            if (evals->getSize() == evecs->getSize()) {
-                switch (p_sliceOrientation.getOptionValue()) {
-                    case XY_PLANE:
-                        p_sliceNumber.setMaxValue(static_cast<int>(evals->getSize().z - 1));
-                        break;
-                    case XZ_PLANE:
-                        p_sliceNumber.setMaxValue(static_cast<int>(evals->getSize().y - 1));
-                        break;
-                    case YZ_PLANE:
-                        p_sliceNumber.setMaxValue(static_cast<int>(evals->getSize().x - 1));
-                        break;
-                }
-            }
-            else {
-                LERROR("Size of eigenvalue image and eigenvector image mismatch!");
-            }
-        }
-		*/
+		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorX(dataContainer, p_inputVectorX.getValue());
+		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorY(dataContainer, p_inputVectorY.getValue());
+		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorZ(dataContainer, p_inputVectorZ.getValue());
 
+        if (vectorX && vectorY && vectorZ && 
+			vectorX->getSize() == vectorY->getSize() &&
+			vectorX->getSize() == vectorZ->getSize()) {
+
+			switch (p_sliceOrientation.getOptionValue()) {
+                case XY_PLANE:
+                    p_sliceNumber.setMaxValue(static_cast<int>(vectorX->getSize().z - 1));
+                    break;
+                case XZ_PLANE:
+                    p_sliceNumber.setMaxValue(static_cast<int>(vectorX->getSize().y - 1));
+                    break;
+                case YZ_PLANE:
+                    p_sliceNumber.setMaxValue(static_cast<int>(vectorX->getSize().x - 1));
+                    break;
+            }
+		}
+        else {
+			LERROR("No suitable input data found or size of images mismatch!");
+		}
         validate(INVALID_PROPERTIES);
     }
 
@@ -190,61 +197,49 @@ namespace campvis {
         return toReturn;
     }
 
-    void VectorFieldRenderer::renderVectorArrow(const tgt::vec3& position) {
+    void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 1>* vectorX,
+			const GenericImageRepresentationLocal<float, 1>* vectorY,
+			const GenericImageRepresentationLocal<float, 1>* vectorZ,
+			const tgt::vec3& position) {
+
         /// minimum scale factor
         const float EPS = .1f;
 
-		/*
+        // gather vector direction
+		tgt::vec3 dir(vectorX->getElement(position), vectorY->getElement(position), vectorZ->getElement(position));
+		float len = tgt::length(dir);
 
-        // gather value
-        const tgt::vec3& eigenvalues = evals->getElement(position);
-        const tgt::mat3& eigenvectors = evecs->getElement(position);
-        if (eigenvalues == tgt::vec3::zero || eigenvectors == tgt::mat3::zero)
-            return;
+		// threshold
+		// TODO: put threshold parameters into properties!
+		if(len < 0.001f || len > 10.f)
+			return;
+
+		tgt::vec3 up(0.f, 0.f, 1.f);
+		tgt::vec3 dirNorm = tgt::normalize(dir);
+		tgt::vec3 axis = tgt::cross(up, dirNorm);
+		float aCos = tgt::dot(up, dirNorm);
+		float aCosI = 1 - aCos;
+		float aSin = sin(acos(aCos));
 
         // compute rotation matrix
-        tgt::vec3 rotx = tgt::normalize(eigenvectors[0]);
-        tgt::vec3 roty = tgt::normalize(eigenvectors[1]);
-        tgt::vec3 rotz = tgt::normalize(eigenvectors[2]);
-        tgt::mat4 rotationMatrix(rotx[0], rotx[1], rotx[2], 0.f,
-            roty[0], roty[1], roty[2], 0.f,
-            rotz[0], rotz[1], rotz[2], 0.f,
+        tgt::mat4 rotationMatrix(
+			axis.x*axis.x*aCosI + aCos, axis.x*axis.y*aCosI - axis.z*aSin, axis.x*axis.z*aCosI + axis.y*aSin, 0.f,
+            axis.x*axis.y+aCosI + axis.z*aSin, axis.y*axis.y*aCosI + aCos, axis.y*axis.z*aCosI - axis.x*aSin, 0.f,
+            axis.x*axis.z*aCosI - axis.y*aSin, axis.y*axis.z*aCosI + axis.x*aSin, axis.z*axis.z*aCosI + aCos, 0.f,
             0.f    , 0.f    , 0.f    , 1.f);
 
-        float divScale = (1.f - 2.f*EPS)/(eigenvalues[0]);
-        const tgt::mat4& voxelToWorldMatrix = evals->getParent()->getMappingInformation().getVoxelToWorldMatrix();
+        const tgt::mat4& voxelToWorldMatrix = vectorX->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 
-        // compute model matrix (without glyph-related transformation
-        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix * tgt::mat4::createScale(tgt::vec3(p_glyphSize.getValue()));
+        // compute model matrix
+        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix * 
+			tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue()));
 
         // setup shader
-        _shader->setUniform("_color", tgt::vec4(rotx, 1.f));
+        _shader->setUniform("_color", tgt::vec4(dirNorm, 1.f));
 
-        switch (p_glyphType.getOptionValue()) {
-            case CUBOID:
-                // render single cuboid
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3((1.f - EPS), (EPS + divScale*eigenvalues[1]), (EPS + divScale*eigenvalues[2]))));
-                _cubeGeometry->render(GL_POLYGON);
-                break;
-
-            case ELLIPSOID:
-                // render single ellipsoid
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3((1.f - EPS), (EPS + divScale*eigenvalues[1]), (EPS + divScale*eigenvalues[2]))));
-                _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
-                break;
-
-            case MULTI:
-                // render three ellipsoids in different shapes
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3(divScale*eigenvalues[2], divScale*eigenvalues[2], divScale*eigenvalues[2])));
-                _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3(divScale*eigenvalues[1], divScale*eigenvalues[1], EPS)));
-                _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3(divScale*eigenvalues[0], EPS, EPS)));
-                _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
-                break;
-        }
-
-		*/
+		// render single ellipsoid
+		_shader->setUniform("_modelMatrix", modelMatrix);
+		_arrowGeometry->render(GL_TRIANGLE_STRIP);
     }
 
 }

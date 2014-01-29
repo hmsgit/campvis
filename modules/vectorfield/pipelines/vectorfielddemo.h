@@ -65,6 +65,9 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         MhdImageReader _imageReader;
+		MhdImageReader _vectorXReader;
+		MhdImageReader _vectorYReader;
+		MhdImageReader _vectorZReader;
         VectorFieldRenderer _vectorFieldRenderer;
         SliceRenderer3D _sliceRenderer;
         RenderTargetCompositor _rtc;
