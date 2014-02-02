@@ -1,6 +1,7 @@
 #include "luapipeline.h"
 
 extern "C" {
+#include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
 }
@@ -10,7 +11,7 @@ extern "C" {
 
 namespace campvis {
 
-    void LuaPipeline::callLuaFunc(lua_State* _luaState, int nargs, int nresults) {
+    void LuaPipeline::callLuaFunc(int nargs, int nresults) {
         if (lua_pcall(_luaState, nargs, nresults, 0) != LUA_OK) {
             this->logLuaError();
         }
@@ -72,7 +73,7 @@ namespace campvis {
         else {
             lua_getfield(_luaState, -1, "ctor");
             lua_getglobal(_luaState, "pipeline");
-            callLuaFunc(_luaState, 1, 0);
+            callLuaFunc(1, 0);
         }
 
         // Pop the pipeline table
@@ -100,7 +101,7 @@ namespace campvis {
         lua_getglobal(_luaState, "pipeline");
         lua_getfield(_luaState, -1, "init");
         lua_getglobal(_luaState, "pipeline");
-        callLuaFunc(_luaState, 1, 0);
+        callLuaFunc(1, 0);
 
         // Pop the pipeline table
         lua_pop(_luaState, 1);
@@ -112,7 +113,7 @@ namespace campvis {
         lua_getglobal(_luaState, "pipeline");
         lua_getfield(_luaState, -1, "deinit");
         lua_getglobal(_luaState, "pipeline");
-        callLuaFunc(_luaState, 1, 0);
+        callLuaFunc(1, 0);
 
         // Pop the pipeline table
         lua_pop(_luaState, 1);

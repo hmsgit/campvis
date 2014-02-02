@@ -1,11 +1,9 @@
 #ifndef LUAPIPELINE_H__
 #define LUAPIPELINE_H__
 
-extern "C" {
-#include "lua.h"
-}
-
 #include "core/pipeline/autoevaluationpipeline.h"
+
+struct lua_State;
 
 
 namespace campvis {
@@ -43,10 +41,10 @@ namespace campvis {
         /**
          * Call the Lua function that's at the top of the stack.
          */
-        void callLuaFunc(lua_State* _luaState, int nargs, int nresults);
+        void callLuaFunc(int nargs, int nresults);
 
         const std::string _scriptPath;    ///< path to the Lua script defining the pipeline
-        lua_State* _luaState;             ///< Lua state used to evaluate the pipeline
+        struct lua_State* _luaState;      ///< Lua state used to evaluate the pipeline
     };
 }
 

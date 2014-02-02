@@ -16,8 +16,8 @@ function pipeline:ctor()
     self.ve = vis.VolumeExplorer(ivp)
     self.resampler = vis.GlImageResampler(ivp)
 
-    --self.addProcessor(instance, self.gir)
-    --self.addProcessor(instance, self.ve)
+    self.addProcessor(instance, self.resampler)
+    self.addProcessor(instance, self.ve)
 end
 
 function pipeline:init()
