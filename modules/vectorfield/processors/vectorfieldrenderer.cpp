@@ -47,10 +47,12 @@ namespace campvis {
     VectorFieldRenderer::VectorFieldRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_renderOutput("RenderOutput", "Output Image", "VectorFieldRenderer.output", DataNameProperty::WRITE)
-		, p_inputVectorX("InputImageX", "Input Image Vector X", "vectorX", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
-		, p_inputVectorY("InputImageY", "Input Image Vector Y", "vectorY", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
-		, p_inputVectorZ("InputImageZ", "Input Image Vector Z", "vectorZ", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
+		, p_inputVectorX("InputImageX", "Input Image Vector X", "vectorX", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
+		, p_inputVectorY("InputImageY", "Input Image Vector Y", "vectorY", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
+		, p_inputVectorZ("InputImageZ", "Input Image Vector Z", "vectorZ", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
         , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .1f, 5.f)
+		, p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1.f, 0.005f)
+		, p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
         , p_camera("Camera", "Camera", tgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3, INVALID_RESULT | INVALID_PROPERTIES)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
@@ -58,8 +60,13 @@ namespace campvis {
     {
         addDecorator(new ProcessorDecoratorShading());
 
+		addProperty(&p_inputVectorX);
+		addProperty(&p_inputVectorY);
+		addProperty(&p_inputVectorZ);
         addProperty(&p_renderOutput);
         addProperty(&p_arrowSize);
+		addProperty(&p_lenThresholdMin);
+		addProperty(&p_lenThresholdMax);
         addProperty(&p_camera);
         addProperty(&p_sliceOrientation);
         addProperty(&p_sliceNumber);
@@ -75,7 +82,7 @@ namespace campvis {
         VisualizationProcessor::init();
 
         _shader = ShdrMgr.load("modules/vectorfield/glsl/vectorfieldrenderer.vert", "modules/vectorfield/glsl/vectorfieldrenderer.frag", generateGlslHeader());
-        _arrowGeometry = GeometryDataFactory::createArrow(12, 0.35f, 0.05f, 0.15f);
+        _arrowGeometry = GeometryDataFactory::createArrow(12, 0.35f, 0.05f, 0.09f);
     }
 
     void VectorFieldRenderer::deinit() {
@@ -210,8 +217,7 @@ namespace campvis {
 		float len = tgt::length(dir);
 
 		// threshold
-		// TODO: put threshold parameters into properties!
-		if(len < 0.001f || len > 10.f)
+		if(len < p_lenThresholdMin.getValue() || len > p_lenThresholdMax.getValue())
 			return;
 
 		tgt::vec3 up(0.f, 0.f, 1.f);

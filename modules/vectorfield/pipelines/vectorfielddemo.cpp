@@ -72,35 +72,33 @@ namespace campvis {
         p_sliceNumber.addSharedProperty(&_vectorFieldRenderer.p_sliceNumber);
         p_sliceNumber.addSharedProperty(&_sliceRenderer.p_sliceNumber);
 
-		// TODO: Replace absolute paths, put demo data into module folder
-
         //_imageReader.p_url.setValue("C:\\Users\\zettinig\\Dropbox\\dopplerReconstruction (1)\\br_run2\\rec1_2D_compounded.mhd");
-		_imageReader.p_url.setValue("C:\\Users\\zettinig\\Dropbox\\dopplerReconstruction (1)\\phantom_data\\phantom_x.mhd");
+		_imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/phantom_x.mhd");
 		
 		_imageReader.p_targetImageID.setValue("reader.output");
 		_imageReader.p_targetImageID.addSharedProperty(&_sliceRenderer.p_sourceImageID);
 		_imageReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
-		_vectorXReader.p_url.setValue("C:\\Users\\zettinig\\Dropbox\\dopplerReconstruction (1)\\phantom_data\\result_x.mhd");
+		_vectorXReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_x.mhd");
 		_vectorXReader.p_targetImageID.setValue("vectorX");
 		_vectorXReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectorX);
 		_vectorXReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
-		_vectorYReader.p_url.setValue("C:\\Users\\zettinig\\Dropbox\\dopplerReconstruction (1)\\phantom_data\\result_y.mhd");
+		_vectorYReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_y.mhd");
 		_vectorYReader.p_targetImageID.setValue("vectorY");
 		_vectorYReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectorY);
 		_vectorYReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
-		_vectorZReader.p_url.setValue("C:\\Users\\zettinig\\Dropbox\\dopplerReconstruction (1)\\phantom_data\\result_z.mhd");
+		_vectorZReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_z.mhd");
 		_vectorZReader.p_targetImageID.setValue("vectorZ");
 		_vectorZReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectorZ);
 		_vectorZReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
         _vectorFieldRenderer.p_renderOutput.addSharedProperty(&_rtc.p_firstImageId);
 		_vectorFieldRenderer.p_sliceOrientation.setValue(0);
-		// TODO: Somehow let VectorFieldRenderer::updateProperties() be called at start-up
+		_vectorFieldRenderer.p_arrowSize.setValue(0.2f);
 
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 5.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
         _sliceRenderer.p_transferFunction.replaceTF(tf);
         _sliceRenderer.p_targetImageID.setValue("slice");

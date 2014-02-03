@@ -88,6 +88,8 @@ namespace campvis {
         DataNameProperty p_renderOutput;        ///< ID for output rendered image
 
         FloatProperty p_arrowSize;                      ///< Arrow size size
+		FloatProperty p_lenThresholdMin;                ///< Threshold minimum
+		FloatProperty p_lenThresholdMax;                ///< Threshold maximum
 
         CameraProperty p_camera;                                    ///< camera
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
