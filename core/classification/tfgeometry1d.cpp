@@ -107,6 +107,9 @@ namespace campvis {
         return new TFGeometry1D(keyPoints);
     }
 
+    TFGeometry1D* TFGeometry1D::crateRamp(const tgt::vec2& interval, const tgt::col4& color) {
+        return createQuad(interval, tgt::col4(color.xyz(), 0), tgt::col4(color.xyz(), 255));
+    }
 
     TFGeometry1D* TFGeometry1D::createDivergingColorMap(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor, float bias /*= 0.5f*/) {
         tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds, must be in [0, 1].");

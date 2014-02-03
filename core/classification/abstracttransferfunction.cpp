@@ -61,9 +61,14 @@ namespace campvis {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             if (_texture == 0 || _dirtyTexture) {
-                shader->deactivate();
-                createTexture();
-                shader->activate();
+                if (shader->isActivated()) {
+                    shader->deactivate();
+                    createTexture();
+                    shader->activate();
+                }
+                else {
+                    createTexture();
+                }
             }
         }
 

@@ -103,6 +103,15 @@ namespace campvis {
          * \return  A TFGeometry1D modelling a quad with two KeyPoints.
          */
         static TFGeometry1D* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor);
+        
+        /**
+         * Creates a ramp geometry for the given interval.
+         * A quad geometry consists of two KeyPoints, the left one having 0 opacity, the right one with full opacity.
+         * \param   interval    Interval the geometry resides in, must be in [0, 1].
+         * \param   color       Color for ramp
+         * \return  A TFGeometry1D modelling a ramp with two KeyPoints.
+         */
+        static TFGeometry1D* crateRamp(const tgt::vec2& interval, const tgt::col4& color);
 
         /**
          * Creates a diverging color map of two diverging colors blending over white.
