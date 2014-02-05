@@ -48,6 +48,13 @@ IF(CAMPVIS_BUILD_LIB_TGT)
 ENDIF()
 
 IF(CAMPVIS_BUILD_LIB_LUA)
+    # Lua's CMakeLists.txt enables BUILD_SHARED_LIBS if it isn't explicitly disabled. This breaks
+    # the build as CMake tries and fails to build all of CAMPVis' libraries as shared libraries.
+    # Disable BUILD_SHARED_LIBS before including `ext/lua` to prevent that.
+    #
+    # TODO: this is a temporary fix; we'd like to eventually build Lua and at least some of CAMPVis'
+    #       libraries as shared libraries
+    SET(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
     ADD_SUBDIRECTORY(ext/lua)
 ENDIF()
 
