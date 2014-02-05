@@ -1,7 +1,7 @@
 %module campvis
 %include factory.i
 %include std_string.i
-%include tgt.i
+%import tgt.i
 %{
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"

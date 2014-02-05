@@ -1,3 +1,4 @@
+require("tgt")
 require("vis")
 
 pipeline = campvis.newPipeline()
@@ -7,12 +8,12 @@ function pipeline:ctor()
     self.image_reader = vis.MhdImageReader()
     self.addProcessor(instance, self.image_reader)
 
-    local iv = campvis.ivec2(50, 10)
+    local iv = tgt.ivec2(50, 10)
 
     print(vis.first(iv))
-    print(vis.first(campvis.ivec2_zero))
+    print(vis.first(tgt.ivec2_zero))
 
-    local ivp = campvis.IVec2Property("a", "b", iv, campvis.ivec2_zero, campvis.ivec2(100, 30))
+    local ivp = campvis.IVec2Property("a", "b", iv, tgt.ivec2_zero, tgt.ivec2(100, 30))
     self.ve = vis.VolumeExplorer(ivp)
     self.resampler = vis.GlImageResampler(ivp)
 

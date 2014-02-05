@@ -26,25 +26,11 @@ namespace campvis {
         // load the libs
         luaL_openlibs(_luaState);
 
-/*
- * Defined if CAMPVis Lua modules are placed in a location that won't be picked up by Lua
- * automatically
- */
-#ifdef CAMPVIS_LUA_MODS_PATH
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
         /* Let Lua know where CAMPVis modules are located */
-        if (luaL_dostring(_luaState, "package.cpath = package.cpath .. ';" TOSTRING(CAMPVIS_LUA_MODS_PATH) "'")) {
+        if (luaL_dostring(_luaState, "package.cpath = '" CAMPVIS_LUA_MODS_PATH "'")) {
             this->logLuaError();
             return;
         }
-
-#undef TOSTRING
-#undef STRINGIFY
-
-#endif // CAMPVIS_LUA_MODS_PATH
 
         if (luaL_dostring(_luaState, "require(\"campvis\")")) {
             this->logLuaError();

@@ -1,6 +1,6 @@
 %module vis
 %include std_string.i
-%include campvis.i
+%import campvis.i
 %{
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
