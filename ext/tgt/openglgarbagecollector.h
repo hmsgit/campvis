@@ -33,6 +33,7 @@
 
 #include "tgt/tgt_gl.h"
 #include "tgt/singleton.h"
+#include "tgt/types.h"
 #include <tbb/atomic.h>
 #include <tbb/concurrent_vector.h>
 #include <tbb/spin_mutex.h>
@@ -45,7 +46,7 @@ namespace tgt {
      * 
      * This class is to be considered as thread-safe.
      */
-    class OpenGLGarbageCollector : public Singleton<OpenGLGarbageCollector> {
+    class TGT_API OpenGLGarbageCollector : public Singleton<OpenGLGarbageCollector> {
         friend class Singleton<OpenGLGarbageCollector>;
 
     public:

@@ -3,6 +3,7 @@
 
 #include "tgt/exception.h"
 #include "tgt/tgt_gl.h"
+#include "tgt/types.h"
 
 #include <string>
 #include <vector>
@@ -20,7 +21,7 @@ namespace tgt {
      * \note    Because all member methods require a valid locked OpenGL context, we have 
      *          implicit thread-safety.
      */
-    class VertexArrayObject {
+    class TGT_API VertexArrayObject {
     public:
         VertexArrayObject(bool autoBind = true) throw (tgt::Exception);
 

@@ -3,6 +3,7 @@
 
 #include "tgt/singleton.h"
 #include "tgt/glcanvas.h"
+#include "tgt/types.h"
 #include <tbb/mutex.h>  // TODO: TBB dependency in TGT is not that beautiful...
 #include <map>
 #include <string>
@@ -15,7 +16,7 @@ namespace tgt {
     /**
      * Manages multiple shared OpenGL contexts and offers methods to ensure that only one context is active at a time.
      */
-    class GlContextManager : public Singleton<GlContextManager> {
+    class TGT_API GlContextManager : public Singleton<GlContextManager> {
     public:
         /**
          * Creates a new QtGLContext for the OpenGL context of \a canvas.
@@ -123,7 +124,7 @@ namespace tgt {
         static GlContextManager* singletonClass_;
     };
 
-    
+
     /**
      * Scoped lockAndAcquire for a GLContext, that automatically unlocks the context on destruction.
      */

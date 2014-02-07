@@ -2,13 +2,14 @@
 #define QTTHREADEDCANVAS_H__
 
 #include "tgt/qt/qtcanvas.h"
+#include "tgt/types.h"
 
 namespace tgt {
 
     /**
      * Subclass of QtCanvas that supports multi-threading.
      */
-    class QtThreadedCanvas : public tgt::QtCanvas {
+    class TGT_API QtThreadedCanvas : public tgt::QtCanvas {
     public:
         QtThreadedCanvas(
             const std::string& title = "",

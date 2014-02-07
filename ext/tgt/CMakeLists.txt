@@ -90,7 +90,7 @@ ENDIF(TGT_WITH_QT)
 ################################################################################
 # define library target
 ################################################################################
-ADD_LIBRARY(tgt ${TGT_SOURCES} ${TGT_HEADERS})
+ADD_LIBRARY(tgt SHARED ${TGT_SOURCES} ${TGT_HEADERS})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
 IF(CAMPVIS_SHARED_LIBS AND MSVC)
 	ADD_DEFINITIONS("-DTGT_BUILD_DLL")

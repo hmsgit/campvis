@@ -92,6 +92,7 @@ IF(WIN32)
     IF(CAMPVIS_SHARED_LIBS)
         # Linking against Windows DLLs requires explicit instantiation of templates
         LIST(APPEND CampvisGlobalDefinitions "-DDLL_TEMPLATE_INST")
+        LIST(APPEND CampvisGlobalDefinitions "-DVRN_DYNAMIC_LIBS")
 
         IF(NOT CAMPVIS_GENERATE_MANIFEST)
             # Do not embed manifest into binaries in debug mode (slows down incremental linking)
