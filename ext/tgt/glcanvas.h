@@ -194,6 +194,11 @@ public:
     /// Getter
     bool isInitialized() const { return initialized_; }
 
+    /// Acqures this canvas as current context
+    virtual void acquireAsCurrentContext() = 0;
+    /// Releases this canvas as current context
+    virtual void releaseAsCurrentContext() = 0;
+
 protected:
 
     /// Use the painter_ to actually paint something on the canvas

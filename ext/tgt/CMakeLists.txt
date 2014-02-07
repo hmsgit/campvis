@@ -74,14 +74,12 @@ IF(TGT_WITH_QT)
 	LIST(APPEND TGT_HEADERS 
 		qt/qtapplication.h
 		qt/qtcanvas.h
-		qt/qtcontextmanager.h
 		qt/qtthreadedcanvas.h
 		qt/qttimer.h)
 	
 	LIST(APPEND TGT_SOURCES 
 		qt/qtapplication.cpp
 		qt/qtcanvas.cpp
-		qt/qtcontextmanager.cpp
 		qt/qtthreadedcanvas.cpp
 		qt/qttimer.cpp)
 ENDIF(TGT_WITH_QT)

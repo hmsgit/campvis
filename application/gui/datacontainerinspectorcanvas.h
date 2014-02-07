@@ -29,7 +29,7 @@
 #include "tgt/painter.h"
 #include "tgt/event/eventlistener.h"
 #include "tgt/event/mouseevent.h"
-#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/glcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 

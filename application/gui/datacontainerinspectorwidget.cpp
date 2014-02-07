@@ -29,8 +29,6 @@
 #include "tgt/filesystem.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
-#include "tgt/qt/qtcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>
@@ -53,7 +51,7 @@
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
-#include "application//gui/datacontainerfileloaderwidget.h"
+#include "application/gui/datacontainerfileloaderwidget.h"
 #include "modules/io/processors/genericimagereader.h"
 
 #include <QFileDialog>

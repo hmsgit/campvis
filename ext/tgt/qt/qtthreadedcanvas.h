@@ -15,7 +15,7 @@ namespace tgt {
             const std::string& title = "",
             const tgt::ivec2& size = tgt::ivec2(tgt::GLCanvas::DEFAULT_WINDOW_WIDTH, tgt::GLCanvas::DEFAULT_WINDOW_HEIGHT),
             const tgt::GLCanvas::Buffers buffers = tgt::GLCanvas::RGBADD,
-            QWidget* parent = 0, bool shared = false, Qt::WFlags f = 0, char* name = 0);
+            QWidget* parent = 0, bool shared = true, Qt::WFlags f = 0, char* name = 0);
 
         virtual ~QtThreadedCanvas();
 

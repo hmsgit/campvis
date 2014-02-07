@@ -5,10 +5,8 @@
 #include "tgt/glcanvas.h"
 #include "tgt/types.h"
 #include <tbb/mutex.h>  // TODO: TBB dependency in TGT is not that beautiful...
-#include <map>
+#include <set>
 #include <string>
-
-class QWidget;
 
 namespace tgt {
     class GLCanvas;
@@ -30,68 +28,50 @@ namespace tgt {
         virtual ~GlContextManager();
 
         /**
-         * Get Pointer of the actual class
-         * @return Pointer of the actual class
+         * Registers \a canvas as new managed OpenGL context and initializes GLEW.
+         * \param   canvas  OpenGL context to register
          */
-        static GlContextManager* getPtr();
-
-        /**
-         * Get reference of the actual class
-         * @return reference of the actual class
-        */
-        static GlContextManager& getRef();
-
-        /**
-         * Has the actual class been inited?
-         */
-        static bool isInited();
-
-        /**
-         * Creates a new OpenGL context in a QtThreadedCanvas with the given arguments.
-         * Parameters are the same as in QtThreadedCanvas() but context sharing is enables per default.
-         * 
-         * \note    Must be called with the OpenGL mutex acquired!
-         * 
-         * \note    The created canvas/context is owned by this ContextManager. Hence, you may not
-         *          delete it yourself!
-         * 
-         * \param   key     Key of the context to create, must be unique.
-         * \param   title   Window title
-         * \param   size    Window size
-         * \return  The newly created QtThreadedCanvas.
-         */
-        virtual GLCanvas* createContext(
-            const std::string& key,
-            const std::string& title = "",
-            const ivec2& size = ivec2(GLCanvas::DEFAULT_WINDOW_WIDTH, GLCanvas::DEFAULT_WINDOW_HEIGHT),
-            const GLCanvas::Buffers buffers = GLCanvas::RGBADD,
-            bool shared = true) = 0;
-
+        void registerContextAndInitGlew(GLCanvas* context);
 
         /**
          * Removes the OpenGL context \a context from the list of managed contexts.
          * \param   context Context to remove.
          */
-        virtual void removeContext(GLCanvas* context);
+        void removeContext(GLCanvas* context);
         
         /**
-         * Returns the OpenGL context with the given key \a key, 0 if no such context exists.
-         * \param   key     Key of the context to return.
-         * \return  The OpenGL context with the given key \a key, 0 if no such context exists.
+         * Returns the currently active OpenGL context.
+         * \return  _currentContext
          */
-        GLCanvas* getContextByKey(const std::string& key);
-
         GLCanvas* getCurrentContext() const;
 
+        /**
+         * Returns the mutex protecting the OpenGL context
+         * \return  _glMutex
+         */
         tbb::mutex& getGlMutex();
 
+        /**
+         * Acquires \a context as current OpenGL context.
+         * \param   context     OpenGL context to acquire.
+         */
         void acquireContext(GLCanvas* context);
 
+        /**
+         * Releases the currently bound OpenGL context.
+         */
         void releaseCurrentContext();
 
 
+        /**
+         * Locks the OpenGL context mutex and acquires \a context as current OpenGl context.
+         * \param   context     OpenGL context to acquire.
+         */
         void lockAndAcquire(GLCanvas* context);
 
+        /**
+         * Releases the currently bound OpenGL context and also releases the OpenGL mutex.
+         */
         void releaseAndUnlock();
         
     protected:
@@ -100,7 +80,7 @@ namespace tgt {
          * If \a context is already the current context, nothing will happen.
          * \param   context     Context to set as current.
          */
-        virtual void setCurrent(GLCanvas* context) = 0;
+        void setCurrent(GLCanvas* context);
 
         /**
          * Locks the OpenGL device for other threads acessing the ContextManager.
@@ -115,13 +95,11 @@ namespace tgt {
         void unlock();
 
 
-        std::map<std::string, GLCanvas*> _contexts;  ///< Map of all OpenGL contexts
+        std::set<GLCanvas*> _contexts;  ///< Map of all OpenGL contexts
         GLCanvas* _currentContext;                   ///< Current active OpenGL context
         tbb::mutex _glMutex;                         ///< Mutex protecting OpenGL for multi-threaded access
 
         tbb::mutex _localMutex;                      ///< local mutex to prodect _contexts
-
-        static GlContextManager* singletonClass_;
     };
 
 

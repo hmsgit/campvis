@@ -111,6 +111,12 @@ public:
      */
     virtual void update();
 
+
+    /// Acqures this canvas as current context
+    virtual void acquireAsCurrentContext();
+    /// Releases this canvas as current context
+    virtual void releaseAsCurrentContext();
+
     /// swap buffers
     virtual void swap();
 

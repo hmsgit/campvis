@@ -574,5 +574,13 @@ QSize QtCanvas::sizeHint() const {
     return QSize(size.x, size.y);
 }
 
+void QtCanvas::acquireAsCurrentContext() {
+    this->makeCurrent();
+}
+
+void QtCanvas::releaseAsCurrentContext() {
+    this->doneCurrent();
+}
+
 
 } // namespace
