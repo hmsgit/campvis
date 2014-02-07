@@ -46,6 +46,7 @@ namespace campvis {
         /**
          * Creates a new PropertyWidget for the property \a property.
          * \param   property    The property the widget shall handle
+         * \param   dc          DataContainer this property uses to populate the combo box (may be 0).
          * \param   parent      Parent Qt widget
          */
         DataNamePropertyWidget(DataNameProperty* property, DataContainer* dc, QWidget* parent = 0);

@@ -120,6 +120,12 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
+        /// Signal emitted when a property was added to the collection.
+        sigslot::signal1<AbstractProperty*> s_propertyAdded;
+
+        /// Signal emitted when a property was removed from the collection.
+        sigslot::signal1<AbstractProperty*> s_propertyRemoved;
+
     protected:
         /**
          * Searches _properties for a property named \a name.

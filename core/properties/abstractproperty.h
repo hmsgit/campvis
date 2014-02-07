@@ -41,7 +41,7 @@ namespace campvis {
      * \todo    Add PropertyWidgets, add clone()?
      *          Think about a reasonable locking mechanism and implement that
      */
-    class AbstractProperty : public sigslot::has_slots<> {
+    class AbstractProperty {
     public:
         /**
          * Creates a new AbstractProperty

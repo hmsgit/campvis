@@ -38,6 +38,7 @@ namespace campvis {
     PropertyCollectionWidget::PropertyCollectionWidget(QWidget* parent /*= 0*/)
         : QWidget(parent)
         , _propCollection(0)
+        , _dataContainer(0)
         , _layout(0)
     {
         setupWidget();
@@ -51,18 +52,17 @@ namespace campvis {
         // remove and delete all widgets of the previous PropertyCollection
         clearWidgetMap();
         
+        _propCollection = propertyCollection;
+        _dataContainer = dc;
+
         // create widgets for the new PropertyCollection
         if (propertyCollection != 0) {
             for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
-                QWidget* propWidget = PropertyWidgetFactory::createWidget(*it, dc);
-                if (propWidget == 0)
-                    propWidget = new QPushButton(QString::fromStdString((*it)->getTitle()));
+                addProperty(*it);
+            } 
 
-                _widgetMap.insert(std::make_pair(*it, propWidget));
-                _layout->addWidget(propWidget);
-                propWidget->setVisible((*it)->isVisible());
-                (*it)->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
-            }
+            propertyCollection->s_propertyAdded.connect(this, &PropertyCollectionWidget::onPropCollectionPropAdded);
+            propertyCollection->s_propertyRemoved.connect(this, &PropertyCollectionWidget::onPropCollectionPropRemoved);
         }
     }
 
@@ -72,16 +72,21 @@ namespace campvis {
         _layout->setMargin(0);
         setLayout(_layout);
         connect(this, SIGNAL(s_widgetVisibilityChanged(QWidget*, bool)), this, SLOT(onWidgetVisibilityChanged(QWidget*, bool)));
+        connect(this, SIGNAL(propertyAdded(AbstractProperty*)), this, SLOT(addProperty(AbstractProperty*)));
+        connect(this, SIGNAL(propertyRemoved(std::map<AbstractProperty*, QWidget*>::iterator)), this, SLOT(removeProperty(std::map<AbstractProperty*, QWidget*>::iterator)));
     }
 
     void PropertyCollectionWidget::clearWidgetMap() {
         for (std::map<AbstractProperty*, QWidget*>::iterator it = _widgetMap.begin(); it != _widgetMap.end(); ++it) {
-            it->first->s_visibilityChanged.disconnect(this);
-            _layout->removeWidget(it->second);
-            delete it->second;
+            removeProperty(it);
         }
 
         _widgetMap.clear();
+
+        if (_propCollection != 0) {
+            _propCollection->s_propertyAdded.disconnect(this);
+            _propCollection->s_propertyRemoved.disconnect(this);
+        }
     }
 
     void PropertyCollectionWidget::onPropertyVisibilityChanged(const AbstractProperty* prop) {
@@ -93,6 +98,33 @@ namespace campvis {
 
     void PropertyCollectionWidget::onWidgetVisibilityChanged(QWidget* widget, bool visibility) {
         widget->setVisible(visibility);
+    }
+
+    void PropertyCollectionWidget::onPropCollectionPropAdded(AbstractProperty* prop) {
+        emit propertyAdded(prop);
+    }
+
+    void PropertyCollectionWidget::onPropCollectionPropRemoved(AbstractProperty* prop) {
+        std::map<AbstractProperty*, QWidget*>::iterator it = _widgetMap.find(prop);
+        if (it != _widgetMap.end())
+            emit propertyRemoved(it);
+    }
+
+    void PropertyCollectionWidget::addProperty(AbstractProperty* prop) {
+        QWidget* propWidget = PropertyWidgetFactory::createWidget(prop, _dataContainer);
+        if (propWidget == 0)
+            propWidget = new QPushButton(QString::fromStdString(prop->getTitle()));
+
+        _widgetMap.insert(std::make_pair(prop, propWidget));
+        _layout->addWidget(propWidget);
+        propWidget->setVisible(prop->isVisible());
+        prop->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
+    }
+
+    void PropertyCollectionWidget::removeProperty(std::map<AbstractProperty*, QWidget*>::iterator it) {
+        it->first->s_visibilityChanged.disconnect(this);
+        _layout->removeWidget(it->second);
+        delete it->second;
     }
 
 }
