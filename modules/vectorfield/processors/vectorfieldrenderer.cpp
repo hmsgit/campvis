@@ -36,10 +36,11 @@
 
 namespace campvis {
 
-    static const GenericOption<VectorFieldRenderer::SliceOrientation> sliceOrientationOptions[3] = {
+    static const GenericOption<VectorFieldRenderer::SliceOrientation> sliceOrientationOptions[4] = {
         GenericOption<VectorFieldRenderer::SliceOrientation>("z", "XY Plane", VectorFieldRenderer::XY_PLANE),
         GenericOption<VectorFieldRenderer::SliceOrientation>("y", "XZ Plane", VectorFieldRenderer::XZ_PLANE),
-        GenericOption<VectorFieldRenderer::SliceOrientation>("x", "YZ Plane", VectorFieldRenderer::YZ_PLANE)
+        GenericOption<VectorFieldRenderer::SliceOrientation>("x", "YZ Plane", VectorFieldRenderer::YZ_PLANE),
+		GenericOption<VectorFieldRenderer::SliceOrientation>("a", "XYZ Volume", VectorFieldRenderer::XYZ_VOLUME)
     };
 
     const std::string VectorFieldRenderer::loggerCat_ = "CAMPVis.modules.classification.VectorFieldRenderer";
@@ -50,11 +51,11 @@ namespace campvis {
 		, p_inputVectorX("InputImageX", "Input Image Vector X", "vectorX", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
 		, p_inputVectorY("InputImageY", "Input Image Vector Y", "vectorY", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
 		, p_inputVectorZ("InputImageZ", "Input Image Vector Z", "vectorZ", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
-        , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .1f, 5.f)
-		, p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1.f, 0.005f)
+        , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .001f, 5.f)
+		, p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 100.f, 0.005f)
 		, p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
         , p_camera("Camera", "Camera", tgt::Camera())
-        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4, INVALID_RESULT | INVALID_PROPERTIES)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _arrowGeometry(0)
     {
@@ -148,8 +149,16 @@ namespace campvis {
                         }
                     }
                     break;
+				case XYZ_VOLUME:
+					for (size_t x = 0; x < imgSize.x; ++x) {
+						for (size_t y = 0; y < imgSize.y; ++y) {
+							for (size_t z = 0; z < imgSize.z; ++z) {
+								renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)));
+							}
+						}
+					}
+					break;
             }
-
 
             decorateRenderEpilog(_shader);
             _shader->deactivate();
@@ -184,6 +193,8 @@ namespace campvis {
                 case YZ_PLANE:
                     p_sliceNumber.setMaxValue(static_cast<int>(vectorX->getSize().x - 1));
                     break;
+				case XYZ_VOLUME:
+					p_sliceNumber.setMaxValue(0);
             }
 		}
         else {
@@ -212,7 +223,13 @@ namespace campvis {
         /// minimum scale factor
         const float EPS = .1f;
 
-        // gather vector direction
+		// avoid overflows
+		if(position.x >= vectorX->getSize().x || position.x < 0 ||
+			position.y >= vectorX->getSize().y || position.y < 0 ||
+			position.z >= vectorX->getSize().z || position.z < 0)
+			return;
+
+		// gather vector direction
 		tgt::vec3 dir(vectorX->getElement(position), vectorY->getElement(position), vectorZ->getElement(position));
 		float len = tgt::length(dir);
 
@@ -223,16 +240,7 @@ namespace campvis {
 		tgt::vec3 up(0.f, 0.f, 1.f);
 		tgt::vec3 dirNorm = tgt::normalize(dir);
 		tgt::vec3 axis = tgt::cross(up, dirNorm);
-		float aCos = tgt::dot(up, dirNorm);
-		float aCosI = 1 - aCos;
-		float aSin = sin(acos(aCos));
-
-        // compute rotation matrix
-        tgt::mat4 rotationMatrix(
-			axis.x*axis.x*aCosI + aCos, axis.x*axis.y*aCosI - axis.z*aSin, axis.x*axis.z*aCosI + axis.y*aSin, 0.f,
-            axis.x*axis.y+aCosI + axis.z*aSin, axis.y*axis.y*aCosI + aCos, axis.y*axis.z*aCosI - axis.x*aSin, 0.f,
-            axis.x*axis.z*aCosI - axis.y*aSin, axis.y*axis.z*aCosI + axis.x*aSin, axis.z*axis.z*aCosI + aCos, 0.f,
-            0.f    , 0.f    , 0.f    , 1.f);
+		tgt::mat4 rotationMatrix = tgt::mat4::createRotation(acos(tgt::dot(up, dirNorm)), axis);
 
         const tgt::mat4& voxelToWorldMatrix = vectorX->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 

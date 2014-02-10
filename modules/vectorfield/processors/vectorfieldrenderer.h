@@ -54,7 +54,8 @@ namespace campvis {
         enum SliceOrientation {
             XY_PLANE = 0,
             XZ_PLANE = 1,
-            YZ_PLANE = 2
+            YZ_PLANE = 2,
+			XYZ_VOLUME = 3
         };
 
         /**
