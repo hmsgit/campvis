@@ -82,9 +82,7 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
         
-		DataNameProperty p_inputVectorX;   ///< ID for input vector image (X-component)
-		DataNameProperty p_inputVectorY;   ///< ID for input vector image (Y-component)
-		DataNameProperty p_inputVectorZ;   ///< ID for input vector image (Z-component)
+		DataNameProperty p_inputVectors;   ///< ID for input vector image
 
         DataNameProperty p_renderOutput;        ///< ID for output rendered image
 
@@ -108,15 +106,10 @@ namespace campvis {
 
         /**
          * Renders a single vector arrow
-		 * \param   vectorX     Input vector image (X component)
-		 * \param   vectorY     Input vector image (Y component)
-		 * \param   vectorZ     Input vector image (Z component)
+		 * \param   vectors     Input vector image
          * \param   position    Position to render
          */
-        void renderVectorArrow(const GenericImageRepresentationLocal<float, 1>* vectorX,
-			const GenericImageRepresentationLocal<float, 1>* vectorY,
-			const GenericImageRepresentationLocal<float, 1>* vectorZ,
-			const tgt::vec3& position);
+        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position);
 
         tgt::Shader* _shader;               ///< Shader for arrow rendering
         GeometryData* _arrowGeometry;		///< Geometry for arrow rendering

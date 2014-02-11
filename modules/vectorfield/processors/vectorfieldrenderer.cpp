@@ -48,11 +48,9 @@ namespace campvis {
     VectorFieldRenderer::VectorFieldRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_renderOutput("RenderOutput", "Output Image", "VectorFieldRenderer.output", DataNameProperty::WRITE)
-		, p_inputVectorX("InputImageX", "Input Image Vector X", "vectorX", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
-		, p_inputVectorY("InputImageY", "Input Image Vector Y", "vectorY", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
-		, p_inputVectorZ("InputImageZ", "Input Image Vector Z", "vectorZ", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
+		, p_inputVectors("InputImage", "Input Image Vectors", "vectors", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
         , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .001f, 5.f)
-		, p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 100.f, 0.005f)
+		, p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1000.f, 0.005f)
 		, p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
         , p_camera("Camera", "Camera", tgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4, INVALID_RESULT | INVALID_PROPERTIES)
@@ -61,9 +59,7 @@ namespace campvis {
     {
         addDecorator(new ProcessorDecoratorShading());
 
-		addProperty(&p_inputVectorX);
-		addProperty(&p_inputVectorY);
-		addProperty(&p_inputVectorZ);
+		addProperty(&p_inputVectors);
         addProperty(&p_renderOutput);
         addProperty(&p_arrowSize);
 		addProperty(&p_lenThresholdMin);
@@ -101,16 +97,11 @@ namespace campvis {
             return;
         }
 
-		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorX(dataContainer, p_inputVectorX.getValue());
-		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorY(dataContainer, p_inputVectorY.getValue());
-		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorZ(dataContainer, p_inputVectorZ.getValue());
+		GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
 
-        if (vectorX && vectorY && vectorZ && 
-			vectorX->getSize() == vectorY->getSize() &&
-			vectorX->getSize() == vectorZ->getSize()) {
-
+        if(vectors) {
             const tgt::Camera& cam = p_camera.getValue();
-            const tgt::svec3& imgSize = vectorX->getSize();
+            const tgt::svec3& imgSize = vectors->getSize();
 			const int sliceNumber = p_sliceNumber.getValue();
 
             glEnable(GL_DEPTH_TEST);
@@ -131,21 +122,21 @@ namespace campvis {
                 case XY_PLANE:
                     for (size_t x = 0; x < imgSize.x; ++x) {
                         for (size_t y = 0; y < imgSize.y; ++y) {
-                            renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber));
+                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber));
                         }
                     }
                     break;
                 case XZ_PLANE:
                     for (size_t x = 0; x < imgSize.x; ++x) {
                         for (size_t z = 0; z < imgSize.z; ++z) {
-                            renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)));
+                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)));
                         }
                     }
                     break;
                 case YZ_PLANE:
                     for (size_t y = 0; y < imgSize.y; ++y) {
                         for (size_t z = 0; z < imgSize.z; ++z) {
-                            renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)));
+                            renderVectorArrow(vectors, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)));
                         }
                     }
                     break;
@@ -153,7 +144,7 @@ namespace campvis {
 					for (size_t x = 0; x < imgSize.x; ++x) {
 						for (size_t y = 0; y < imgSize.y; ++y) {
 							for (size_t z = 0; z < imgSize.z; ++z) {
-								renderVectorArrow(vectorX, vectorY, vectorZ, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)));
+								renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)));
 							}
 						}
 					}
@@ -175,23 +166,18 @@ namespace campvis {
 
     void VectorFieldRenderer::updateProperties(DataContainer& dataContainer) {
 
-		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorX(dataContainer, p_inputVectorX.getValue());
-		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorY(dataContainer, p_inputVectorY.getValue());
-		GenericImageRepresentationLocal<float, 1>::ScopedRepresentation vectorZ(dataContainer, p_inputVectorZ.getValue());
+		GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
 
-        if (vectorX && vectorY && vectorZ && 
-			vectorX->getSize() == vectorY->getSize() &&
-			vectorX->getSize() == vectorZ->getSize()) {
-
+        if(vectors) {
 			switch (p_sliceOrientation.getOptionValue()) {
                 case XY_PLANE:
-                    p_sliceNumber.setMaxValue(static_cast<int>(vectorX->getSize().z - 1));
+                    p_sliceNumber.setMaxValue(static_cast<int>(vectors->getSize().z - 1));
                     break;
                 case XZ_PLANE:
-                    p_sliceNumber.setMaxValue(static_cast<int>(vectorX->getSize().y - 1));
+                    p_sliceNumber.setMaxValue(static_cast<int>(vectors->getSize().y - 1));
                     break;
                 case YZ_PLANE:
-                    p_sliceNumber.setMaxValue(static_cast<int>(vectorX->getSize().x - 1));
+                    p_sliceNumber.setMaxValue(static_cast<int>(vectors->getSize().x - 1));
                     break;
 				case XYZ_VOLUME:
 					p_sliceNumber.setMaxValue(0);
@@ -215,22 +201,19 @@ namespace campvis {
         return toReturn;
     }
 
-    void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 1>* vectorX,
-			const GenericImageRepresentationLocal<float, 1>* vectorY,
-			const GenericImageRepresentationLocal<float, 1>* vectorZ,
-			const tgt::vec3& position) {
+    void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position) {
 
         /// minimum scale factor
         const float EPS = .1f;
 
 		// avoid overflows
-		if(position.x >= vectorX->getSize().x || position.x < 0 ||
-			position.y >= vectorX->getSize().y || position.y < 0 ||
-			position.z >= vectorX->getSize().z || position.z < 0)
+		if(position.x >= vectors->getSize().x || position.x < 0 ||
+			position.y >= vectors->getSize().y || position.y < 0 ||
+			position.z >= vectors->getSize().z || position.z < 0)
 			return;
 
 		// gather vector direction
-		tgt::vec3 dir(vectorX->getElement(position), vectorY->getElement(position), vectorZ->getElement(position));
+		const tgt::vec3& dir = vectors->getElement(position);
 		float len = tgt::length(dir);
 
 		// threshold
@@ -240,12 +223,20 @@ namespace campvis {
 		tgt::vec3 up(0.f, 0.f, 1.f);
 		tgt::vec3 dirNorm = tgt::normalize(dir);
 		tgt::vec3 axis = tgt::cross(up, dirNorm);
-		tgt::mat4 rotationMatrix = tgt::mat4::createRotation(acos(tgt::dot(up, dirNorm)), axis);
+		float dotPr = tgt::dot(up, dirNorm);
+		tgt::mat4 rotationMatrix;
+		if(abs(dotPr-1)<1.e-3f)
+			rotationMatrix = tgt::mat4::identity;
+		else if(abs(dotPr+1)<1.e-3f)
+			rotationMatrix = tgt::mat4::createRotation(tgt::PIf, tgt::vec3(1.f, 0.f, 0.f));
+		else {
+			rotationMatrix = tgt::mat4::createRotation(acos(dotPr), tgt::normalize(axis));
+		}
 
-        const tgt::mat4& voxelToWorldMatrix = vectorX->getParent()->getMappingInformation().getVoxelToWorldMatrix();
+        const tgt::mat4& voxelToWorldMatrix = vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 
         // compute model matrix
-        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix * 
+        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
 			tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue()));
 
         // setup shader
