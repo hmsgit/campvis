@@ -31,7 +31,9 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 
+#include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
+
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/metaproperty.h"
@@ -49,7 +51,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class VolumeExplorer : public VisualizationProcessor, public tgt::EventListener {
+    class VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public tgt::EventListener {
     public:
         /**
          * Constructs a new VolumeExplorer Processor

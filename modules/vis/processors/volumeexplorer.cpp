@@ -32,6 +32,7 @@
 #include "core/datastructures/renderdata.h"
 
 #include "core/classification/simpletransferfunction.h"
+#include "core/pipeline/processordecoratorbackground.h"
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
@@ -57,6 +58,9 @@ namespace campvis {
         addProperty(&p_inputVolume);
         addProperty(&p_outputImage);
 
+        addDecorator(new ProcessorDecoratorBackground());
+        decoratePropertyCollection(this);
+        
         p_seProperties.addPropertyCollection(_sliceExtractor);
         _sliceExtractor.p_lqMode.setVisible(false);
         _sliceExtractor.p_sourceImageID.setVisible(false);
@@ -100,7 +104,7 @@ namespace campvis {
         _raycaster.init();
         _sliceExtractor.init();
 
-        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/quadview.frag", "");
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/volumeexplorer.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
 
@@ -181,14 +185,20 @@ namespace campvis {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (vrImage != 0) {
+            decorateRenderProlog(data, _shader);
+            _shader->setUniform("_renderBackground", true);
+
             vrImage->bind(_shader, colorUnit, depthUnit);
             float ratio = static_cast<float>(vrs.x) / static_cast<float>(rts.x);
             _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
             _quad->render(GL_POLYGON);
+
+            _shader->setUniform("_renderBackground", false);
+            decorateRenderEpilog(_shader);
         }
-        if (xSliceImage != 0) {
-            xSliceImage->bind(_shader, colorUnit, depthUnit);
+        if (zSliceImage != 0) {
+            zSliceImage->bind(_shader, colorUnit, depthUnit);
             _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 2.f * srs.y, 0.f)));
             _quad->render(GL_POLYGON);
@@ -199,8 +209,8 @@ namespace campvis {
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, srs.y, 0.f)));
             _quad->render(GL_POLYGON);
         }
-        if (zSliceImage != 0) {
-            zSliceImage->bind(_shader, colorUnit, depthUnit);
+        if (xSliceImage != 0) {
+            xSliceImage->bind(_shader, colorUnit, depthUnit);
             _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 0.f, 0.f)));
             _quad->render(GL_POLYGON);

@@ -147,6 +147,9 @@ namespace campvis {
                 float ratioRatio = sliceRatio / renderTargetRatio;
                 tgt::mat4 modelMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
 
+                if (p_sliceOrientation.getValue() == XY_PLANE)
+                    modelMatrix.t11 *= -1;
+
                 // prepare OpenGL
                 _shader->activate();
                 decorateRenderProlog(data, _shader);
@@ -186,7 +189,7 @@ namespace campvis {
                         modelMatrix.t11 = 0.f;
                         modelMatrix.t03 = 0.f;
                         modelMatrix.t13 = 2.f * sliceTexCoord.y - 1.f;
-                        modelMatrix.t13 *= (ratioRatio > 1) ? 1.f / ratioRatio : 1.f;
+                        modelMatrix.t13 *= (ratioRatio > 1) ? -1.f / ratioRatio : -1.f;
                         _shader->setUniform("_modelMatrix", modelMatrix);
                         _shader->setUniform("_color", p_ySliceColor.getValue());
                         QuadRdr.renderQuad(GL_LINE_STRIP);
