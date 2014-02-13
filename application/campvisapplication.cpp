@@ -290,6 +290,9 @@ namespace campvis {
             LERROR("Could not rebuild all shaders from file.");
             return;
         }
+        else {
+            LINFO("Rebuilding shaders from file successful.");
+        }
 
         for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
             for (std::vector<AbstractProcessor*>::const_iterator pit = (*it)->getProcessors().begin(); pit != (*it)->getProcessors().end(); ++pit) {
