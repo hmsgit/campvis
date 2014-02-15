@@ -2,6 +2,8 @@
 
 CAMPVis a software platform for medical imaging and visualization. It is targeted for research purposes and has a similar Rapid-Prototyping approach than MeVisLab, Amira or Voreen.
 
+[Screenshot](https://campcloud.informatik.tu-muenchen.de/redmine/attachments/download/150/volumeexplorerdemo.jpg)
+
 ### Resources
 
 * Source Code: [Gitlab](https://campgit.in.tum.de/berge/campvis)
@@ -14,11 +16,12 @@ CAMPVis a software platform for medical imaging and visualization. It is targete
 * C++ Compiler with Partial C++ 11 Support
 * [Intel TBB](https://www.threadingbuildingblocks.org/)
 * OpenGL 3.3+ Capable Video Hardware (and Drivers!)
+* Qt 4.8 for Application Package (Qt 5 Support in Progress)
 * CMake Build System
 
 ### Tested Environments
 
-* MSVC 2010+, gcc 4.8+
+* Windows: MSVC 2010+, Linux: gcc 4.8+
 * nVidia GPUs
 * Intel HD4000+ GPUs (Basically Ivy Bridge and Later)
 
