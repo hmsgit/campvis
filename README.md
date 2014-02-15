@@ -2,7 +2,7 @@
 
 CAMPVis a software platform for medical imaging and visualization. It is targeted for research purposes and has a similar Rapid-Prototyping approach than MeVisLab, Amira or Voreen.
 
-[Screenshot](https://campcloud.informatik.tu-muenchen.de/redmine/attachments/download/150/volumeexplorerdemo.jpg)
+![Screenshot](https://campcloud.informatik.tu-muenchen.de/redmine/attachments/download/150/volumeexplorerdemo.jpg)
 
 ### Resources
 
