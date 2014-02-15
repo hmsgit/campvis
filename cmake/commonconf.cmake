@@ -35,6 +35,16 @@ ELSEIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64")
     MESSAGE("Visual Studio 11 Build (64 Bit) (not actively supported)")
 ELSEIF(${CMAKE_GENERATOR} MATCHES "NMake") 
     SET(CAMPVIS_NMAKE TRUE)
+
+    # NMake-based builds may very well use a Visual Studio compiler
+    IF(MSVC90)
+        SET(CAMPVIS_MSVC2008 TRUE)
+    ELSEIF(MSVC10)
+        SET(CAMPVIS_MSVC2010 TRUE)
+    ELSEIF(MSVC11)
+        SET(CAMPVIS_MSVC11 TRUE)
+    ENDIF(MSVC90)
+
     IF(CMAKE_CL_64)
         SET(CAMPVIS_WIN64 TRUE)
         MESSAGE(STATUS "NMake 64 Bit Build")
@@ -110,7 +120,16 @@ IF(WIN32)
     ENDIF()
     
     LIST(APPEND CampvisGlobalExternalLibs netapi32 version)
-    
+
+    # Append the name of the current build type to the path of the CMake output directory so that
+    # NMake places all build artifacts in the same directories as Visual Studio. This makes NMake
+    # builds compatible with our macro that copies external DLLs into the build directory.
+    IF(CAMPVIS_NMAKE)
+        SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
+        SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
+        SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
+    ENDIF(CAMPVIS_NMAKE)
+
 ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
     LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable")
