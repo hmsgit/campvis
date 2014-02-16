@@ -15,6 +15,7 @@ CAMPVis a software platform for medical imaging and visualization. It is targete
 
 * [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=CAMPVis)](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis/)
 * [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis-cppcheck/cppcheckResult/graph)](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis-cppcheck/cppcheckResult/)
+* [![LOC Trend](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis/sloccountResult/trend)](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis/sloccountResult/)
 
 ### Requirements
 
