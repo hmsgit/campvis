@@ -273,11 +273,11 @@ namespace campvis {
                 // cycle slices
                 if (me->action() == tgt::MouseEvent::WHEEL) {
                     if (me->y() <= p_sliceRenderSize.getValue().y)
-                        _xSliceHandler.onEvent(e);
+                        _zSliceHandler.onEvent(e);
                     else if (me->y() <= 2*p_sliceRenderSize.getValue().y)
                         _ySliceHandler.onEvent(e);
                     else
-                        _zSliceHandler.onEvent(e);
+                        _xSliceHandler.onEvent(e);
                 }
 
                 // adjust slice TF windowing

@@ -33,7 +33,7 @@ namespace campvis {
         setupGUI();
 
         _log = new BufferingLog(100, this);
-        _log->addCat("", true);
+        _log->addCat("", true, tgt::Info);
 
         connect(_log, SIGNAL(s_messageAppended(const QString&)),
                 this, SLOT(appendMessage(const QString&)));
