@@ -212,7 +212,7 @@ void GpuCapabilities::logCapabilities(bool extensionsString, bool osString) {
     features.str("");
     features << "Shaders:             " << (areShadersSupported() ? "yes (OpenGL 2.0)" : "no");
     if (!areShadersSupported()) {
-        LINFO(features);
+        LINFO(features.str());
     }
     else {
         features << ", GLSL Version " << shaderVersion_;

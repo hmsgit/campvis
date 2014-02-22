@@ -13,9 +13,9 @@ CAMPVis a software platform for medical imaging and visualization. It is targete
 
 ### Code & Build Status
 
-* [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=CAMPVis)](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis/)
-* [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis-cppcheck/cppcheckResult/graph)](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis-cppcheck/cppcheckResult/)
-* [![LOC Trend](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis/sloccountResult/trend)](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis/sloccountResult/)
+* [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=campvis-jobs/campvis-gcc)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/)
+* [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-cppcheck/cppcheckResult/graph)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-cppcheck/cppcheckResult/)
+* [![LOC Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/sloccountResult/trend)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/sloccountResult/)
 
 ### Requirements
 
