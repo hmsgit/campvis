@@ -22,6 +22,7 @@
 // 
 // ================================================================================================
 
+#include "tgt/assert.h"
 #include "treeitem.h"
 
 namespace campvis {
@@ -58,6 +59,37 @@ namespace campvis {
 
     bool TreeItem::setData(int column, int role, const QVariant& value) const {
         return false;
+    }
+
+    void TreeItem::insertChild(int row, TreeItem* child) {
+        tgtAssert(row < 0 || row > _children.size(), "Row index out of bounds!");
+
+        _children.insert(row, child);
+        child->_parent = this;
+    }
+
+    void TreeItem::removeChild(int row) {
+        tgtAssert(row < 0 || row > _children.size(), "Row index out of bounds!");
+        delete _children.takeAt(row);
+    }
+
+    void TreeItem::replaceChild(int row, TreeItem* child) {
+        tgtAssert(row < getChildCount(), "Row out of bounds!");
+        delete _children[row];
+        _children[row] = child;
+        child->_parent = this;
+    }
+
+    void TreeItem::clearChildren() {
+        qDeleteAll(_children);
+        _children.clear();
+    }
+
+    void TreeItem::dumpTree(TreeItem* t, int level /*= 0*/) {
+        std::cout << std::string(level, ' ') << t << "\n";
+        for (int i = 0; i < t->getChildCount(); ++i) {
+            TreeItem::dumpTree(t->getChild(i), level + 1);
+        }
     }
 
 }

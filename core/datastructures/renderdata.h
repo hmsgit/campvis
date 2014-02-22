@@ -92,6 +92,13 @@ namespace campvis {
         const ImageData* getColorTexture(size_t index = 0) const;
 
         /**
+         * Gets the DataHandle with the color texture in this RenderData.
+         * \param   index   Index of the color texture to return.
+         * \return  _colorTextures[index], 0 if index out of bounds.
+         */
+        DataHandle getColorDataHandle(size_t index = 0) const;
+
+        /**
          * Returns, whether this RenderData has a depth texture.
          * \return  _depthTexture != 0;
          */
@@ -104,6 +111,12 @@ namespace campvis {
          */
         const ImageData* getDepthTexture() const;
 
+        /**
+         * Gets the DataHandle with the depth texture in this RenderData, if present.
+         * Returns 0 if no depth texture is present.
+         * \return  _depthTexture, may be 0.
+         */
+        DataHandle getDepthDataHandle() const;
 
         /**
          * Adds \a texture to this RenderData.

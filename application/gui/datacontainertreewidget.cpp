@@ -35,10 +35,13 @@
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/indexedmeshgeometry.h"
 #include "core/datastructures/multiindexedgeometry.h"
+#include "core/datastructures/imageseries.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
+
+#include "core/tools/stringutils.h"
 
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
 #include "modules/columbia/datastructures/fiberdata.h"
@@ -84,6 +87,7 @@ namespace campvis {
         , _name(name)
     {
         tgtAssert(_dataHandle.getData() != 0, "WTF - QtDataHandle with empty data?");
+        updateChildren();
     }
 
     QVariant DataHandleTreeItem::getData(int column, int role) const {
@@ -124,6 +128,10 @@ namespace campvis {
                 else if (const RenderData* tester = dynamic_cast<const RenderData*>(data)) {
                     return QVariant(QString("Render Data"));
                 }
+
+                else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
+                    return QVariant(QString("Image Series"));
+                }
             }
             else
                 return QVariant();
@@ -139,6 +147,29 @@ namespace campvis {
 
     void DataHandleTreeItem::setDataHandle(const QtDataHandle& dataHandle) {
         _dataHandle = dataHandle;
+        updateChildren();
+    }
+
+    void DataHandleTreeItem::updateChildren() {
+        qDeleteAll(_children);
+        _children.clear();
+
+        if (const AbstractData* data = _dataHandle.getData()) {
+            if (const RenderData* tester = dynamic_cast<const RenderData*>(data)) {
+                for (size_t i = 0; i < tester->getNumColorTextures(); ++i) {
+                    DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(tester->getColorDataHandle(i)), _name + "::ColorTexture" + StringUtils::toString(i), this);
+                }
+                if (tester->hasDepthTexture()) {
+                    DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(tester->getDepthDataHandle()), _name + "::DepthTexture", this);
+                }
+            }
+            else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
+                for (size_t i = 0; i < tester->getNumImages(); ++i) {
+                    DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(tester->getImage(i)), _name + "::Image" + StringUtils::toString(i), this);
+                }
+            }
+
+        }
     }
 
 // = DataContainerTreeModel ============================================================================
@@ -239,31 +270,52 @@ namespace campvis {
     }
 
     void DataContainerTreeModel::setData(const DataContainer* dataContainer) {
+        beginResetModel();
+
         _itemMap.clear();
         delete _rootItem;
         _rootItem = new DataContainerTreeRootItem();
 
         if (dataContainer != 0) {
             std::vector< std::pair< std::string, DataHandle> > handlesCopy = dataContainer->getDataHandlesCopy();
+            std::sort(handlesCopy.begin(), handlesCopy.end(), [&] (const std::pair<std::string, DataHandle>& a, const std::pair<std::string, DataHandle>& b) -> bool { return a.first < b.first; });
+
             for (std::vector< std::pair< std::string, DataHandle> >::iterator it = handlesCopy.begin(); it != handlesCopy.end(); ++it) {
                 DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(it->second), it->first, _rootItem);
                 _itemMap.insert(std::make_pair(QString::fromStdString(it->first), dhti));
             }
         }
+
+        endResetModel();
     }
 
     void DataContainerTreeModel::onDataContainerChanged(const QString& key, QtDataHandle dh) {
         tgtAssert(dh.getData() != 0, "WTF - QtDataHandle with empty data?");
 
-        std::map<QString, DataHandleTreeItem*>::const_iterator it = _itemMap.lower_bound(key);
+        std::map<QString, DataHandleTreeItem*>::iterator it = _itemMap.lower_bound(key);
         if (it == _itemMap.end() || it->first != key) {
+            // there is no tree item with this key yet => create a new one
             DataHandleTreeItem* dhti = new DataHandleTreeItem(dh, key.toStdString(), _rootItem);
             _itemMap.insert(std::make_pair(key, dhti));
-            emit dataChanged(createIndex(dhti->getRow(), 0, dhti), createIndex(dhti->getRow(), columnCount(), dhti));
+
+            // notify views, that there is new data
+            emit dataChanged(createIndex(dhti->getRow(), 0, dhti), createIndex(dhti->getRow() + dhti->getChildCount(), columnCount(), dhti));
         }
         else {
+            // there is alredy a tree item with this key => update the item and its children
+            QModelIndex keyIndex = createIndex(it->second->getRow(), 0, it->second);
+
+            // by replacing the DataHandle in the tree item, we also replace all of the TreeItem's children
+            // this is effectively a remove followed by an insert
+            beginRemoveRows(keyIndex, 0, it->second->getChildCount());
             it->second->setDataHandle(dh);
-            emit dataChanged(createIndex(it->second->getRow(), 0, it->second), createIndex(it->second->getRow(), columnCount(), it->second));
+            endRemoveRows();
+
+            beginInsertRows(keyIndex, 0, it->second->getChildCount());
+            endInsertRows();
+
+            // notify views, that there is new data
+            emit dataChanged(keyIndex, createIndex(it->second->getRow(), columnCount(), it->second));
         }
     }
 
@@ -287,7 +339,6 @@ namespace campvis {
         _treeModel->setData(dataContainer);
 
         // adjust view
-        expandAll();
         resizeColumnToContents(0);
         resizeColumnToContents(1);
     }

@@ -25,6 +25,8 @@
 #ifndef TREEITEM_H__
 #define TREEITEM_H__
 
+#include <iostream>
+
 #include <QList>
 #include <QVariant>
 
@@ -90,10 +92,43 @@ namespace campvis {
          */
         int getChildCount();
 
-    private:
+        /**
+         * Inserts a child at the given row.
+         * \param   row     Row where to insert the child
+         */
+        void insertChild(int row, TreeItem* child);
+
+        /**
+         * Removes the child at the given row.
+         * \param   row     Row index of the child to remove.
+         */
+        void removeChild(int row);
+
+        /**
+         * Replaces the child with index \a row with the given TreeItem.
+         * \param   row     Child to replace, must be < than getChildCount()
+         * \param   child   New TreeItem for the child
+         */
+        void replaceChild(int row, TreeItem* child);
+
+        /**
+         * Removes all children.
+         */
+        void clearChildren();
+
+        /**
+         * Dumps debug output of the tree hierarchy.
+         * \param t     TreeItem to dump
+         * \param level Starting indentation level
+         */
+        static void dumpTree(TreeItem* t, int level = 0);
+
+    protected:
         TreeItem* _parent;              ///< Parent TreeItem.
         QList<TreeItem*> _children;     ///< Collection of all child items.
     };
+
+
 
 }
 

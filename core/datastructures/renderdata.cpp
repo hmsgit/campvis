@@ -109,6 +109,14 @@ namespace campvis {
         return static_cast<const ImageData*>(_colorTextures[index].getData());
     }
 
+    campvis::DataHandle RenderData::getColorDataHandle(size_t index /*= 0*/) const {
+        tgtAssert(index < _colorTextures.size(), "Index out of bounds.");
+        if (index >= _colorTextures.size())
+            return DataHandle(0);
+
+        return _colorTextures[index];
+    }
+
     bool RenderData::hasDepthTexture() const {
         return _depthTexture.getData() != 0;
     }
@@ -119,6 +127,10 @@ namespace campvis {
             return 0;
 
         return static_cast<const ImageData*>(d);
+    }
+
+    campvis::DataHandle RenderData::getDepthDataHandle() const {
+        return _depthTexture;
     }
 
     void RenderData::addColorTexture(ImageData* texture) {
