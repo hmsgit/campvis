@@ -64,8 +64,9 @@ namespace campvis {
          * Signal invoked when a new message has been appended to the log.
          *
          * \param   message          the new log message
+         * \param   level            Log level
          */
-        void s_messageAppended(const QString& message);
+        void s_messageAppended(const QString& message, int level);
 
     protected:
         unsigned int _maxSize;

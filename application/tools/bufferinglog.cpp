@@ -66,6 +66,6 @@ namespace campvis {
             }
         }
 
-        emit s_messageAppended(QString::fromStdString(output));
+        emit s_messageAppended(QString::fromStdString(output), level);
     }
 }

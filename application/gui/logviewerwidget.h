@@ -34,6 +34,7 @@
 #include "application/tools/bufferinglog.h"
 #include "application/gui/loghighlighter.h"
 
+#include <QComboBox>
 #include <QLabel>
 #include <QWidget>
 #include <QVBoxLayout>
@@ -49,6 +50,11 @@ namespace campvis {
         Q_OBJECT;
 
     public:
+        struct LogEntry {
+            QString _message;
+            int _level;
+        };
+
         /**
          * Creates a new DataContainerInspectorWidget.
          * \param   parent          Parent Qt widget, may be 0 (default)
@@ -85,7 +91,7 @@ namespace campvis {
          *
          * \param message message to append to the log viewer
          */
-        void appendMessage(const QString& message);
+        void appendMessage(const QString& message, int level);
 
     private slots:
         /**
@@ -93,7 +99,7 @@ namespace campvis {
          *
          * \param message message to display in the log viewer
          */
-        void displayMessage(const QString& message);
+        void displayMessage(const LogEntry& message);
 
         /**
          * Delete all messages from the log viewer
@@ -107,6 +113,12 @@ namespace campvis {
          */
         void filterLogMessages(const QString& text);
 
+        /**
+         * Slot when _cbLogLevel has changed
+         * \param int   current index of _cbLogLevel
+         */
+        void onLogLevelChanged(int);
+
     private:
         QVBoxLayout* _mainLayout;                       ///< Main layout of this widget
         QHBoxLayout* _controls_layout;                  ///< Layout storing this widget's controls
@@ -114,10 +126,12 @@ namespace campvis {
         QLineEdit* _filter_line_edit;                   ///< Text field where filter terms are entered
         QLabel* _filter_label;                          ///< Button used for clearing the log display
         BufferingLog* _log;                             ///< Log buffering messages
-        std::deque<QString> _logMessages;               ///< Queue storing a limited number of recent log messages
+        std::deque<LogEntry> _logMessages;              ///< Queue storing a limited number of recent log messages
         QTextEdit* _logDisplay;                         ///< Widget displaying log messages
         const QRegExp* _filterRegExp;                   ///< Current filter regexp
         LogHighlighter* _logHighlighter;                ///< Highlighter for log messages
+
+        QComboBox* _cbLogLevel;                         ///< Minimum Log Level for Log viewer messages
     };
 }
 
