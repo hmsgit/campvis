@@ -21,6 +21,8 @@ OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"               
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
 OPTION(CAMPVIS_GROUP_SOURCE_FILES   "Group source files by directory"                               ON)
+OPTION(CAMPVIS_BUILD_GOOGLETEST     "Build googletest library"                                      ON)
+OPTION(CAMPVIS_BUILD_TEST_SOURCES   "Build Unit Tests of gooogletest"                               ON)
 
 IF(WIN32)
     OPTION(CAMPVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON)
@@ -54,6 +56,14 @@ ENDIF()
 
 IF(CAMPVIS_BUILD_APPLICATION)
     ADD_SUBDIRECTORY(application)
+ENDIF()
+
+IF(CAMPVIS_BUILD_GOOGLETEST)
+    ADD_SUBDIRECTORY(ext/gtest-1.7.0)
+ENDIF()
+
+IF(CAMPVIS_BUILD_TEST_SOURCES)
+    ADD_SUBDIRECTORY(test)
 ENDIF()
 
 IF(CAMPVIS_BUILD_DOXYGEN)

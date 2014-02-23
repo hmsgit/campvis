@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     #ifdef Q_WS_X11
         XInitThreads();
     #endif
-  
+
     CampVisApplication app(argc, argv);
     app.init();
     int toReturn = app.run();
