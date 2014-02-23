@@ -31,7 +31,7 @@
 #include <tbb/atomic.h>
 #include "core/coreapi.h"
 
-namespace campvis {
+namespace tgt {
     /**
      * Abstract base class for objects that shall run in a separate thread.
      * Runnable object manage their own thread, which is created when calling start(). The new Thread starts
