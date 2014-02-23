@@ -45,6 +45,7 @@ MESSAGE(STATUS "----------------------------------------------------------------
 
 IF(CAMPVIS_BUILD_LIB_TGT)
     ADD_SUBDIRECTORY(ext/tgt)
+    ADD_SUBDIRECTORY(ext/sigslot)
 ENDIF()
 
 IF(CAMPVIS_BUILD_LIB_LUA)

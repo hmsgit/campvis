@@ -43,6 +43,7 @@ SET(TGT_SOURCES
 	naturalcubicspline.cpp
 	openglgarbagecollector.cpp
 	painter.cpp
+	runnable.cpp
 	shadermanager.cpp
 	spline.cpp
 	stopwatch.cpp

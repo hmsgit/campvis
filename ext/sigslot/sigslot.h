@@ -92,7 +92,13 @@
 
 #include <set>
 #include <list>
+
+#include <tbb/compat/condition_variable>
+#include <tbb/concurrent_queue.h>
 #include <tbb/spin_rw_mutex.h>
+
+#include "ext/tgt/runnable.h"
+#include "ext/tgt/singleton.h"
 
 #ifndef SIGSLOT_DEFAULT_MT_POLICY
 #	ifdef _SIGSLOT_SINGLE_THREADED
@@ -103,6 +109,53 @@
 #endif
 
 namespace sigslot {
+
+    class _signal_handle_base {
+    public:
+        virtual ~_signal_handle_base() {};
+        virtual void emitSignal() const = 0;
+    };
+
+    class signal_manager : public tgt::Singleton<signal_manager>, public tgt::Runnable {
+        friend class tgt::Singleton<signal_manager>;
+
+    public:
+        /**
+         * Directly dispatches the signal \a signal to all currently registered listeners.
+         * \note    For using threaded signal dispatching use queueSignal()
+         * \param   signal   signal to dispatch
+         */
+        void triggerSignal(_signal_handle_base* signal) const;
+
+        /**
+         * Enqueue \a signal into the list of signals to be dispatched.
+         * \note    Dispatch will be perfomed in signal_mananger thread. For direct dispatch in
+         *          caller thread use triggerSignal().
+         * \param   signal   signal to dispatch
+         * \return  True, if \a signal was successfully enqueued to signal queue.
+         */
+        bool queueSignal(_signal_handle_base* signal);
+
+        /// \see Runnable:run
+        virtual void run();
+        /// \see Runnable:stop
+        virtual void stop();
+
+    private:
+        /// Private constructor only for singleton
+        signal_manager();
+        /// Private destructor only for singleton
+        ~signal_manager();
+
+        typedef tbb::concurrent_queue<_signal_handle_base*> SignalQueue;
+
+        SignalQueue _signalQueue;   ///< Queue for signals to be dispatched
+
+        std::condition_variable _evaluationCondition; ///< conditional wait to be used when there are currently no jobs to process
+        tbb::mutex _ecMutex; ///< Mutex for protecting _evaluationCondition
+
+        static const std::string loggerCat_;
+    };
 
     typedef tbb::spin_rw_mutex tbb_mutex;
 
@@ -181,6 +234,7 @@ namespace sigslot {
         {
         }
     };
+
 
     template<class mt_policy>
     class has_slots;
@@ -1737,7 +1791,33 @@ namespace sigslot {
         typedef _signal_base0<mt_policy> base;
         typedef typename base::connections_list connections_list;
         using base::m_connected_slots;
-        
+
+        class signal_handle0 : public _signal_handle_base {
+        public:
+            signal_handle0(signal0<mt_policy>* sender)
+                : _sender(sender)
+            {};
+
+            ~signal_handle0() {};
+
+            // override
+            void emitSignal() const {
+                lock_block_read<mt_policy> lock(_sender);
+                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    itNext = it;
+                    ++itNext;
+                    (*it)->emitSignal();
+                    it = itNext;
+                }
+            };
+
+            signal0<mt_policy>* _sender;
+        };
+
+
         signal0() {}
         
         signal0(const signal0<mt_policy>& s)
@@ -1755,30 +1835,14 @@ namespace sigslot {
         
         void emitSignal()
         {
-            lock_block_read<mt_policy> lock(this);
-            typename connections_list::const_iterator itNext, it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
-            
-            while (it != itEnd) {
-                itNext = it;
-                ++itNext;
-                (*it)->emitSignal();
-                it = itNext;
-            }
+            signal_handle0* sh = new signal_handle0(this);
+            signal_manager::getRef().triggerSignal(sh);
         }
         
         void operator()()
         {
-            lock_block_read<mt_policy> lock(this);
-            typename connections_list::const_iterator itNext, it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
-            
-            while (it != itEnd) {
-                itNext = it;
-                ++itNext;
-                (*it)->emitSignal();
-                it = itNext;
-            }
+            signal_handle0* sh = new signal_handle0(this);
+            signal_manager::getRef().queueSignal(sh);
         }
     };
     
@@ -1789,7 +1853,34 @@ namespace sigslot {
         typedef _signal_base1<arg1_type, mt_policy> base;
         typedef typename base::connections_list connections_list;
         using base::m_connected_slots;
-        
+
+        class signal_handle1 : public _signal_handle_base {
+        public:
+            signal_handle1(signal1<arg1_type, mt_policy>* sender, arg1_type a1)
+                : _sender(sender)
+                , _a1(a1)
+            {};
+
+            ~signal_handle1() {};
+
+            // override
+            void emitSignal() const {
+                lock_block_read<mt_policy> lock(_sender);
+                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    itNext = it;
+                    ++itNext;
+                    (*it)->emitSignal(_a1);
+                    it = itNext;
+                }
+            };
+
+            signal1<arg1_type, mt_policy>* _sender;
+            arg1_type _a1;
+        };
+
         signal1() {}
         
         signal1(const signal1<arg1_type, mt_policy>& s)
@@ -1807,30 +1898,14 @@ namespace sigslot {
         
         void emitSignal(arg1_type a1)
         {
-            lock_block_read<mt_policy> lock(this);
-            typename connections_list::const_iterator itNext, it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
-            
-            while (it != itEnd) {
-                itNext = it;
-                ++itNext;
-                (*it)->emitSignal(a1);
-                it = itNext;
-            }
+            signal_handle1* sh = new signal_handle1(this, a1);
+            signal_manager::getRef().triggerSignal(sh);
         }
         
         void operator()(arg1_type a1)
         {
-            lock_block_read<mt_policy> lock(this);
-            typename connections_list::const_iterator itNext, it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
-            
-            while (it != itEnd) {
-                itNext = it;
-                ++itNext;
-                (*it)->emitSignal(a1);
-                it = itNext;
-            }
+            signal_handle1* sh = new signal_handle1(this, a1);
+            signal_manager::getRef().queueSignal(sh);
         }
     };
     

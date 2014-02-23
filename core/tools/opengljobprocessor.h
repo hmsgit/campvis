@@ -26,6 +26,8 @@
 #define OPENGLJOBPROCESSOR_H__
 
 #include "sigslot/sigslot.h"
+#include "tgt/runnable.h"
+#include "tgt/singleton.h"
 
 #include <ext/threading.h>
 
@@ -39,7 +41,6 @@
 
 #include "core/coreapi.h"
 #include "core/tools/job.h"
-#include "core/tools/runnable.h"
 
 #include <ctime>
 
@@ -68,7 +69,7 @@ namespace campvis {
      * 
      * This class is to be considered as thread-safe.
      */
-    class CAMPVIS_CORE_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public Runnable, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable, public sigslot::has_slots<> {
         friend class tgt::Singleton<OpenGLJobProcessor>;
 
     public:

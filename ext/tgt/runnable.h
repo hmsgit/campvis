@@ -29,7 +29,6 @@
 
 #include <ext/threading.h>
 #include <tbb/atomic.h>
-
 #include "core/coreapi.h"
 
 namespace campvis {

@@ -24,7 +24,7 @@
 
 #include "runnable.h"
 
-namespace campvis {
+namespace tgt {
     namespace {
         void invokeThread(Runnable* r) {
             r->run();
@@ -43,7 +43,7 @@ namespace campvis {
         if (_running)
             stop();
 
-	    delete _thread;
+        delete _thread;
     }
 
     void Runnable::stop() {
