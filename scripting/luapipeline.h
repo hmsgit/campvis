@@ -1,12 +1,14 @@
 #ifndef LUAPIPELINE_H__
 #define LUAPIPELINE_H__
 
+#include <memory>
 #include "core/pipeline/autoevaluationpipeline.h"
-
-struct lua_State;
 
 
 namespace campvis {
+    class LuaTable;
+    class LuaVmState;
+
     class LuaPipeline : public AutoEvaluationPipeline {
     public:
         /**
@@ -33,18 +35,9 @@ namespace campvis {
         virtual void deinit();
 
     protected:
-        /**
-         * Log the most recent Lua error to the console.
-         */
-        void logLuaError();
-
-        /**
-         * Call the Lua function that's at the top of the stack.
-         */
-        void callLuaFunc(int nargs, int nresults);
-
-        const std::string _scriptPath;    ///< path to the Lua script defining the pipeline
-        struct lua_State* _luaState;      ///< Lua state used to evaluate the pipeline
+        const std::string _scriptPath;               ///< path to the Lua script defining the pipeline
+        LuaVmState* _luaVmState;                     ///< Lua VM state used to evaluate the pipeline
+        std::shared_ptr<LuaTable> _pipelineTable;    ///< Pointer to the Lua table associated with the pipeline
     };
 }
 

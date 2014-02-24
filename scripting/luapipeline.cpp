@@ -6,102 +6,48 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-#include "swigluarun.h"
+#include "glue/globalluatable.h"
+#include "glue/luavmstate.h"
 
 
 namespace campvis {
 
-    void LuaPipeline::callLuaFunc(int nargs, int nresults) {
-        if (lua_pcall(_luaState, nargs, nresults, 0) != LUA_OK) {
-            this->logLuaError();
-        }
-    }
-
     LuaPipeline::LuaPipeline(std::string scriptPath, DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _scriptPath(scriptPath)
+        , _luaVmState(new LuaVmState())
+        , _pipelineTable(_luaVmState->getGlobalTable()->getTable("pipeline"))
     {
-        _luaState = luaL_newstate();
-
-        // load the libs
-        luaL_openlibs(_luaState);
-
-        /* Let Lua know where CAMPVis modules are located */
-        if (luaL_dostring(_luaState, "package.cpath = '" CAMPVIS_LUA_MODS_PATH "'")) {
-            this->logLuaError();
+        // Let Lua know where CAMPVis modules are located
+        if (!_luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
             return;
-        }
 
-        if (luaL_dostring(_luaState, "require(\"campvis\")")) {
-            this->logLuaError();
+        if (!_luaVmState->execString("require(\"campvis\")"))
             return;
-        }
 
-        swig_type_info* autoEvaluationPipelineType = SWIG_TypeQuery(_luaState, "campvis::AutoEvaluationPipeline *");
-
-        if (autoEvaluationPipelineType == nullptr)
-            printf("SWIG wrapper for campvis::AutoEvaluationPipeline not found");
-        else {
-            SWIG_NewPointerObj(_luaState, this, autoEvaluationPipelineType, 0);
-            lua_setglobal(_luaState, "instance");
-        }
-
-        // run a Lua script here; true is returned if there were errors
-        if (luaL_dofile(_luaState, scriptPath.c_str())) {
-            this->logLuaError();
+        if (!_luaVmState->injectObjectPointer(this, "campvis::AutoEvaluationPipeline *", "instance"))
             return;
-        }
 
-        lua_getglobal(_luaState, "pipeline");
+        // Try executing the pipeline's Lua script
+        if (!_luaVmState->execFile(scriptPath))
+            return;
 
-        if (!lua_istable(_luaState, -1))
-            printf("No valid Lua pipeline found (pipeline is %s)\n", lua_typename(_luaState, lua_type(_luaState, -1)));
-        else {
-            lua_getfield(_luaState, -1, "ctor");
-            lua_getglobal(_luaState, "pipeline");
-            callLuaFunc(1, 0);
-        }
-
-        // Pop the pipeline table
-        lua_pop(_luaState, 1);
+        if (!_pipelineTable->isValid())
+            std::cerr << "No valid Lua pipeline found (global variable `pipeline` is not a table)" << std::endl;
+        else
+            _pipelineTable->callInstanceMethod("ctor");
     }
 
     LuaPipeline::~LuaPipeline() {
-        lua_close(_luaState);
-    }
-
-    void LuaPipeline::logLuaError() {
-        const char* errorMsg = lua_tostring(_luaState, -1);
-
-        if (errorMsg == nullptr)
-            std::cerr << "(error object is not a string)" << std::endl;
-        else
-            std::cerr << errorMsg << std::endl;
-
-        lua_pop(_luaState, 1);
     }
 
     void LuaPipeline::init() {
         AutoEvaluationPipeline::init();
-
-        lua_getglobal(_luaState, "pipeline");
-        lua_getfield(_luaState, -1, "init");
-        lua_getglobal(_luaState, "pipeline");
-        callLuaFunc(1, 0);
-
-        // Pop the pipeline table
-        lua_pop(_luaState, 1);
+        _pipelineTable->callInstanceMethod("init");
     }
 
     void LuaPipeline::deinit() {
         AutoEvaluationPipeline::deinit();
-
-        lua_getglobal(_luaState, "pipeline");
-        lua_getfield(_luaState, -1, "deinit");
-        lua_getglobal(_luaState, "pipeline");
-        callLuaFunc(1, 0);
-
-        // Pop the pipeline table
-        lua_pop(_luaState, 1);
+        _pipelineTable->callInstanceMethod("deinit");
     }
 }

@@ -37,7 +37,7 @@ function pipeline:init()
     local geometry2 = campvis.TFGeometry1D_createQuad(tgt.vec2(.4, .5), tgt.col4(0, 255, 0, 128),
                                                       tgt.vec4(0, 255, 0, 128))
 
-    local dvrTF = campvis.Geometry1DTransferFunction(128, campvis.vec2(0, 0.05))
+    local dvrTF = campvis.Geometry1DTransferFunction(128, tgt.vec2(0, 0.05))
     dvrTF:addGeometry(geometry1)
     dvrTF:addGeometry(geometry2)
 

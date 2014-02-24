@@ -22,11 +22,12 @@ INCLUDE(${SWIG_USE_FILE})
 
 FILE(GLOB CampvisScriptingSources
     *.cpp
-    *.c
+    glue/*.cpp
 )
 
 FILE(GLOB CampvisScriptingHeaders
     *.h
+    glue/*.h
 )
 
 
