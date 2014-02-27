@@ -22,6 +22,11 @@
 // 
 // ================================================================================================
 
+
+// disable known false-positive warning in ITK code when using GCC:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
 #include "itkimagefilterkernel.h"
 
 #include "tgt/glmath.h"
@@ -36,6 +41,8 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
+
+#pragma GCC diagnostic pop
 
 // In this class we want to use various ITK filters. Each filter needs the same ITK boilerplate
 // code to be written before and after calling the filter. Futhermore, we need to distinguish 
@@ -73,12 +80,10 @@
     } \
     }
 
+// Multi-channel images not supported by most ITK processors...
 #define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     switch (MA_WTP._numChannels) { \
         case 1 : PERFORM_ITK_FILTER_KERNEL(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 2 : PERFORM_ITK_FILTER_KERNEL(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 3 : PERFORM_ITK_FILTER_KERNEL(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 4 : PERFORM_ITK_FILTER_KERNEL(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
     }
 
 #define DISPATCH_ITK_FILTER_RD(MA_WTP, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
@@ -207,12 +212,18 @@ namespace campvis {
         if (input != 0 && input->getParent()->getNumChannels() == 1) {
             ImageData* id = new ImageData(input->getDimensionality(), input->getSize(), 1);
 
+// disable known false-positive warning in ITK code when using GCC:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
             if (p_filterMode.getOptionValue() == "opening") {
                 DISPATCH_ITK_FILTER(input, BinaryMorphologicalOpeningImageFilter, /* nothing here */);
             }
             else if (p_filterMode.getOptionValue() == "closing") {
                 DISPATCH_ITK_FILTER(input, BinaryMorphologicalClosingImageFilter, /* nothing here */);
             }
+
+#pragma GCC diagnostic pop
 
             data.addData(p_targetImageID.getValue(), id);
         }

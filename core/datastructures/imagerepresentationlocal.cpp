@@ -5,8 +5,8 @@
 // If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische UniversitÃ¤t MÃ¼nchen
-//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -97,20 +97,25 @@ namespace campvis {
         // what source could be. Thank god, there exists macro magic to create the 56
         // different templated conversion codes.
 #define CONVERT_ITK_TO_GENERIC_LOCAL(basetype, numchannels, dimensionality) \
-        if (const GenericImageRepresentationItk<basetype, 1, 3>* tester = dynamic_cast< const GenericImageRepresentationItk<basetype, 1, 3>* >(source)) { \
-            typedef GenericImageRepresentationItk<basetype, 1, 3>::ItkImageType ImageType; \
-            typedef ImageType::PixelType PixelType; \
-            const PixelType* pixelData = tester->getItkImage()->GetBufferPointer(); \
+        if (const GenericImageRepresentationItk<basetype, numchannels, dimensionality>* tester = dynamic_cast< const GenericImageRepresentationItk<basetype, numchannels, dimensionality>* >(source)) { \
+            typedef typename GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ItkImageType ItkImageType; \
+            typedef typename ItkImageType::PixelType ItkElementType; \
+            typedef typename GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ElementType ElementType; \
+            const ItkElementType* pixelData = tester->getItkImage()->GetBufferPointer(); \
             \
-            ImageType::RegionType region; \
+            ItkImageType::RegionType region; \
             region = tester->getItkImage()->GetBufferedRegion(); \
             \
-            ImageType::SizeType s = region.GetSize(); \
-            tgt::svec3 size(s[0], s[1], s[2]); \
+            ItkImageType::SizeType s = region.GetSize(); \
+            tgt::svec3 size(s[0], 1, 1); \
+            if (dimensionality >= 2) \
+                size.y = s[1]; \
+            if (dimensionality == 3) \
+                size.z = s[2]; \
             \
-            PixelType* pixelDataCopy = new PixelType[tgt::hmul(size)]; \
-            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<basetype, 1>::elementSize); \
-            return GenericImageRepresentationLocal<PixelType, 1>::create(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
+            ElementType* pixelDataCopy = new ElementType[tgt::hmul(size)]; \
+            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<basetype, numchannels>::elementSize); \
+            return GenericImageRepresentationLocal<basetype, numchannels>::create(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
         }
 
 #define DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(numchannels, dimensionality) \
