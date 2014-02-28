@@ -149,7 +149,7 @@ namespace campvis {
         sigslot::signal2<const std::string&, const DataHandle&> s_dataAdded;
 
         /// Signal emitted when list of DataHandles has changed.
-        sigslot::signal0<> s_changed;
+        sigslot::signal0 s_changed;
 
     private:
         /// Map of the DataHandles in this collection and their IDs. The DataHandles contain valid data.

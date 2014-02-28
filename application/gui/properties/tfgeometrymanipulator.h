@@ -125,7 +125,7 @@ namespace campvis {
     /**
      * Class for manipulating the whole TFGeometry1D at once.
      */
-    class WholeTFGeometryManipulator : public AbstractTFGeometryManipulator, public sigslot::has_slots<> {
+    class WholeTFGeometryManipulator : public AbstractTFGeometryManipulator, public sigslot::has_slots {
     public:
         /**
          * Creates a new KeyPointManipulator

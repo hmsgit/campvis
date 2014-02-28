@@ -116,22 +116,163 @@
 #include <set>
 #include <list>
 
+#include "tgt/assert.h"
 #include <tbb/compat/condition_variable>
 #include <tbb/concurrent_queue.h>
-#include <tbb/spin_rw_mutex.h>
+#include <tbb/concurrent_vector.h>
 
 #include "ext/tgt/runnable.h"
 #include "ext/tgt/singleton.h"
 
-#ifndef SIGSLOT_DEFAULT_MT_POLICY
-#	ifdef _SIGSLOT_SINGLE_THREADED
-#		define SIGSLOT_DEFAULT_MT_POLICY single_threaded
-#	else
-#		define SIGSLOT_DEFAULT_MT_POLICY multi_threaded_local
-#	endif
-#endif
-
 namespace sigslot {
+    
+    /**
+     * List-like container allowing thread-safe bidirectional iteration, insertion and removal of elements. 
+     * ATTENTION: Since removed items are internally stored as nullptr, the element type is constrained 
+     * to be a pointer type (or at least have pointer semantics) and never be 0. Use with caution!
+     */
+    template<typename T>
+    class concurrent_pointer_list {
+    public:
+        /// Typedef for internal storage of elements
+        typedef tbb::concurrent_vector<T*> StorageType;
+
+        /// Iterator for concurrent_pointer_list
+        class concurrent_pointer_list_iterator : public std::iterator<std::bidirectional_iterator_tag, T*> {
+        public:
+            concurrent_pointer_list_iterator() {};
+
+            concurrent_pointer_list_iterator(StorageType& storage, typename StorageType::iterator position)
+                : _begin(storage.begin())
+                , _position(position)
+                , _end(storage.end())
+            {
+                if (_position != _end && *_position == nullptr)
+                    operator++();
+            }
+
+            concurrent_pointer_list_iterator& operator++() {
+                tgtAssert(_position != _end, "Trying to advance an iterator past the end!");
+                do {
+                    ++_position;
+                } while (_position != _end && *_position == nullptr);
+                return *this;
+            }
+
+            concurrent_pointer_list_iterator operator++(int) {
+                concurrent_pointer_list_iterator toReturn = *this;
+                operator++();
+                return toReturn;
+            }
+
+            concurrent_pointer_list_iterator& operator--() {
+                tgtAssert(_position != _begin, "Trying to advance an iterator befor the begin!");
+                do {
+                    --_position;
+                } while (_position != _begin && *_position == nullptr);
+                return *this;
+            }
+
+            concurrent_pointer_list_iterator operator--(int) {
+                concurrent_pointer_list_iterator toReturn = *this;
+                operator--();
+                return toReturn;
+            }
+
+            reference operator*() const {
+                return *_position;
+            }
+
+            pointer operator->() const {
+                return &*_position;
+            }
+
+            bool operator==(const concurrent_pointer_list_iterator& rhs) const {
+                return (_begin == rhs._begin && _position == rhs._position && _end == rhs._end);
+            }
+
+            bool operator!=(const concurrent_pointer_list_iterator& rhs) const {
+                return (_begin != rhs._begin || _position != rhs._position || _end != rhs._end);
+            }
+
+        protected:
+            typename StorageType::iterator _begin;
+            typename StorageType::iterator _position;
+            typename StorageType::iterator _end;
+        };
+
+        // TODO: As I am currently too lazy to correctly implement const_iterator: I hacked this collection to have a standard iterator as const_iterator.
+        typedef concurrent_pointer_list_iterator iterator; ///< iterator typedef
+        typedef concurrent_pointer_list_iterator const_iterator; ///< const_iterator typedef 
+
+        /**
+         * Creates a new concurrent_pointer_list object of default size
+         */
+        concurrent_pointer_list() {};
+
+        /**
+         * Creates a new concurrent_pointer_list object of default size
+         * \param   initalSize  Initial size fo the internal storage
+         */
+        concurrent_pointer_list(typename StorageType::size_type initalSize) 
+            : _storage(initalSize)
+        {};
+
+
+        /// Return an iterator to the beginning of the collection
+        iterator begin() { return iterator(_storage, _storage.begin()); };
+        /// Return an iterator to the beginning of the collection
+        const_iterator begin() const { 
+            StorageType& s = const_cast<StorageType&>(_storage);  // const_cast neccessary, because we did not implement const_iterator
+            return const_iterator(s, s.begin()); 
+        };
+
+        /// Return an iterator to the end of the collection
+        iterator end() { return iterator(_storage, _storage.end()); };
+        /// Return an iterator to the end of the collection
+        const_iterator end() const  { 
+            StorageType& s = const_cast<StorageType&>(_storage);  // const_cast neccessary, because we did not implement const_iterator
+            return const_iterator(s, s.end()); 
+        };
+
+        void push_back(T* element) { _storage.push_back(element); };
+        void insert(T* element) { _storage.push_back(element); };
+
+        size_t erase(T* element);
+        void erase(const const_iterator& it) { *it = nullptr; };
+        void erase(const const_iterator& begin, const const_iterator& end);
+
+
+    protected:
+        StorageType _storage;
+    };
+
+// ================================================================================================
+    
+    template<typename T>
+    size_t concurrent_pointer_list<T>::erase(T* element) {
+        size_t count = 0;
+        iterator it = begin();
+        iterator itEnd = end();
+
+        for (/* nothing here */; it != itEnd; ++it) {
+            if (*it == element) {
+                *it = nullptr;
+                ++count;
+            }
+        }
+
+        return count;
+    }
+
+    template<typename T>
+    void concurrent_pointer_list<T>::erase(const typename concurrent_pointer_list<T>::const_iterator& begin, const typename concurrent_pointer_list<T>::const_iterator& end) {
+        for (const_iterator it = begin; it != end; ++it) {
+            *it = nullptr;
+        }
+    }
+
+// ================================================================================================
 
     /// Base class for signal handles that provides an interface to emit the signal.
     class _signal_handle_base {
@@ -208,179 +349,96 @@ namespace sigslot {
 
 // ================================================================================================
 
-    typedef tbb::spin_rw_mutex tbb_mutex;
-
-    // The multi threading policies only get compiled in if they are enabled.
-    class multi_threaded_global
-    {
-    public:
-        multi_threaded_global()
-        {
-            ;
-        }
-
-        multi_threaded_global(const multi_threaded_global&)
-        {
-            ;
-        }
-
-        virtual ~multi_threaded_global()
-        {
-            ;
-        }
-
-        tbb_mutex& get_mutex()
-        {
-            static tbb_mutex g_mutex;
-            return g_mutex;
-        }
-    };
-
-    class multi_threaded_local
-    {
-    public:
-        multi_threaded_local()
-        {
-            ;
-        }
-
-        multi_threaded_local(const multi_threaded_local&)
-        {
-            ;
-        }
-
-        virtual ~multi_threaded_local()
-        {
-            ;
-        }
-
-        tbb_mutex& get_mutex() { return m_mutex; }
-
-    private:
-        tbb_mutex m_mutex;
-    };
     
-    template<class mt_policy>
-    class lock_block_write : tbb_mutex::scoped_lock
-    {
-    public:
-        lock_block_write(mt_policy *mtx) : tbb_mutex::scoped_lock(mtx->get_mutex(), true)
-        {
-        }
-        
-        ~lock_block_write()
-        {
-        }
-    };
-
-    template<class mt_policy>
-    class lock_block_read : tbb_mutex::scoped_lock
-    {
-    public:
-        lock_block_read(mt_policy *mtx) : tbb_mutex::scoped_lock(mtx->get_mutex(), false)
-        {
-        }
-
-        ~lock_block_read()
-        {
-        }
-    };
-
-// ================================================================================================
-
-    template<class mt_policy>
     class has_slots;
     
-    template<class mt_policy>
+    
     class _connection_base0
     {
     public:
         virtual ~_connection_base0() {}
-        virtual has_slots<mt_policy>* getdest() const = 0;
+        virtual has_slots* getdest() const = 0;
         virtual void emitSignal() = 0;
         virtual _connection_base0* clone() = 0;
-        virtual _connection_base0* duplicate(has_slots<mt_policy>* pnewdest) = 0;
+        virtual _connection_base0* duplicate(has_slots* pnewdest) = 0;
     };
     
-    template<class arg1_type, class mt_policy>
+    template<class arg1_type>
     class _connection_base1
     {
     public:
         virtual ~_connection_base1() {}
-        virtual has_slots<mt_policy>* getdest() const = 0;
+        virtual has_slots* getdest() const = 0;
         virtual void emitSignal(arg1_type) = 0;
-        virtual _connection_base1<arg1_type, mt_policy>* clone() = 0;
-        virtual _connection_base1<arg1_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest) = 0;
+        virtual _connection_base1<arg1_type>* clone() = 0;
+        virtual _connection_base1<arg1_type>* duplicate(has_slots* pnewdest) = 0;
     };
     
-    template<class arg1_type, class arg2_type, class mt_policy>
+    template<class arg1_type, class arg2_type>
     class _connection_base2
     {
     public:
         virtual ~_connection_base2() {}
-        virtual has_slots<mt_policy>* getdest() const = 0;
+        virtual has_slots* getdest() const = 0;
         virtual void emitSignal(arg1_type, arg2_type) = 0;
-        virtual _connection_base2<arg1_type, arg2_type, mt_policy>* clone() = 0;
-        virtual _connection_base2<arg1_type, arg2_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest) = 0;
+        virtual _connection_base2<arg1_type, arg2_type>* clone() = 0;
+        virtual _connection_base2<arg1_type, arg2_type>* duplicate(has_slots* pnewdest) = 0;
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type>
     class _connection_base3
     {
     public:
         virtual ~_connection_base3() {}
-        virtual has_slots<mt_policy>* getdest() const = 0;
+        virtual has_slots* getdest() const = 0;
         virtual void emitSignal(arg1_type, arg2_type, arg3_type) = 0;
-        virtual _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>* clone() = 0;
-        virtual _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest) = 0;
+        virtual _connection_base3<arg1_type, arg2_type, arg3_type>* clone() = 0;
+        virtual _connection_base3<arg1_type, arg2_type, arg3_type>* duplicate(has_slots* pnewdest) = 0;
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type>
     class _connection_base4
     {
     public:
         virtual ~_connection_base4() {}
-        virtual has_slots<mt_policy>* getdest() const = 0;
+        virtual has_slots* getdest() const = 0;
         virtual void emitSignal(arg1_type, arg2_type, arg3_type, arg4_type) = 0;
-        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* clone() = 0;
-        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest) = 0;
+        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* clone() = 0;
+        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* duplicate(has_slots* pnewdest) = 0;
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type,
-    class arg5_type, class mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
     class _connection_base5
     {
     public:
         virtual ~_connection_base5() {}
-        virtual has_slots<mt_policy>* getdest() const = 0;
+        virtual has_slots* getdest() const = 0;
         virtual void emitSignal(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type) = 0;
-        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* clone() = 0;
-        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest) = 0;
+        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* clone() = 0;
+        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* duplicate(has_slots* pnewdest) = 0;
     };
     
 // ================================================================================================
     
-    template<class mt_policy>
-    class _signal_base : public mt_policy
+    
+    class _signal_base
     {
     public:
-        virtual void slot_disconnect(has_slots<mt_policy>* pslot) = 0;
-        virtual void slot_duplicate(has_slots<mt_policy> const* poldslot, has_slots<mt_policy>* pnewslot) = 0;
+        virtual void slot_disconnect(has_slots* pslot) = 0;
+        virtual void slot_duplicate(has_slots const* poldslot, has_slots* pnewslot) = 0;
     };
     
-    template<class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
-    class has_slots : public mt_policy 
+    class has_slots
     {
     private:
-        typedef typename std::set<_signal_base<mt_policy> *> sender_set;
-        typedef typename sender_set::const_iterator const_iterator;
+        typedef concurrent_pointer_list<_signal_base> sender_set;
+        typedef sender_set::const_iterator const_iterator;
         
     public:
         has_slots() {}
         
-        has_slots(has_slots const& hs) : mt_policy(hs)
+        has_slots(has_slots const& hs)
         {
-            lock_block_write<mt_policy> lock(this);
             const_iterator it = hs.m_senders.begin();
             const_iterator itEnd = hs.m_senders.end();
             
@@ -391,15 +449,13 @@ namespace sigslot {
             }
         } 
         
-        void signal_connect(_signal_base<mt_policy>* sender)
+        void signal_connect(_signal_base* sender)
         {
-            lock_block_write<mt_policy> lock(this);
             m_senders.insert(sender);
         }
         
-        void signal_disconnect(_signal_base<mt_policy>* sender)
+        void signal_disconnect(_signal_base* sender)
         {
-            lock_block_write<mt_policy> lock(this);
             m_senders.erase(sender);
         }
         
@@ -410,7 +466,6 @@ namespace sigslot {
         
         void disconnect_all()
         {
-            lock_block_write<mt_policy> lock(this);
             const_iterator it = m_senders.begin();
             const_iterator itEnd = m_senders.end();
             
@@ -426,19 +481,18 @@ namespace sigslot {
         sender_set m_senders;
     };
     
-    template<class mt_policy>
-    class _signal_base0 : public _signal_base<mt_policy>
+    
+    class _signal_base0 : public _signal_base
     {
     public:
-        typedef std::list<_connection_base0<mt_policy> *>  connections_list;
+        typedef concurrent_pointer_list<_connection_base0 >  connections_list;
         
         _signal_base0() {}
         
-        _signal_base0(_signal_base0 const& s) : _signal_base<mt_policy>(s)
+        _signal_base0(_signal_base0 const& s) : _signal_base(s)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = s.m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
+            connections_list::const_iterator it = s.m_connected_slots.begin();
+            connections_list::const_iterator itEnd = s.m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_connect(this);
@@ -454,9 +508,8 @@ namespace sigslot {
         
         void disconnect_all()
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
+            connections_list::const_iterator it = m_connected_slots.begin();
+            connections_list::const_iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_disconnect(this);
@@ -467,11 +520,10 @@ namespace sigslot {
             m_connected_slots.erase(m_connected_slots.begin(), m_connected_slots.end());
         }
         
-        void disconnect(has_slots<mt_policy>* pclass)
+        void disconnect(has_slots* pclass)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == pclass) {
@@ -485,14 +537,13 @@ namespace sigslot {
             }
         }
         
-        void slot_disconnect(has_slots<mt_policy>* pslot)
+        void slot_disconnect(has_slots* pslot)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
-                typename connections_list::iterator itNext = it;
+                connections_list::iterator itNext = it;
                 ++itNext;
                 
                 if ((*it)->getdest() == pslot) {
@@ -504,11 +555,10 @@ namespace sigslot {
             }
         }
         
-        void slot_duplicate(has_slots<mt_policy> const* oldtarget, has_slots<mt_policy>* newtarget)
+        void slot_duplicate(has_slots const* oldtarget, has_slots* newtarget)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == oldtarget) {
@@ -528,19 +578,18 @@ namespace sigslot {
         connections_list m_connected_slots;   
     };
     
-    template<class arg1_type, class mt_policy>
-    class _signal_base1 : public _signal_base<mt_policy>
+    template<class arg1_type>
+    class _signal_base1 : public _signal_base
     {
     public:
-        typedef std::list<_connection_base1<arg1_type, mt_policy> *>  connections_list;
+        typedef concurrent_pointer_list<_connection_base1<arg1_type> >  connections_list;
         
         _signal_base1() {}
         
-        _signal_base1(_signal_base1<arg1_type, mt_policy> const& s) : _signal_base<mt_policy>(s)
+        _signal_base1(_signal_base1<arg1_type> const& s) : _signal_base(s)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = s.m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
+            connections_list::const_iterator it = s.m_connected_slots.begin();
+            connections_list::const_iterator itEnd = s.m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_connect(this);
@@ -549,11 +598,10 @@ namespace sigslot {
             }
         }
         
-        void slot_duplicate(has_slots<mt_policy> const* oldtarget, has_slots<mt_policy>* newtarget)
+        void slot_duplicate(has_slots const* oldtarget, has_slots* newtarget)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == oldtarget) {
@@ -571,9 +619,8 @@ namespace sigslot {
         
         void disconnect_all()
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
+            connections_list::const_iterator it = m_connected_slots.begin();
+            connections_list::const_iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_disconnect(this);
@@ -584,11 +631,10 @@ namespace sigslot {
             m_connected_slots.erase(m_connected_slots.begin(), m_connected_slots.end());
         }
         
-        void disconnect(has_slots<mt_policy>* pclass)
+        void disconnect(has_slots* pclass)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == pclass) {
@@ -602,14 +648,13 @@ namespace sigslot {
             }
         }
         
-        void slot_disconnect(has_slots<mt_policy>* pslot)
+        void slot_disconnect(has_slots* pslot)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
-                typename connections_list::iterator itNext = it;
+                connections_list::iterator itNext = it;
                 ++itNext;
                 
                 if ((*it)->getdest() == pslot) {
@@ -631,20 +676,18 @@ namespace sigslot {
         connections_list m_connected_slots;   
     };
     
-    template<class arg1_type, class arg2_type, class mt_policy>
-    class _signal_base2 : public _signal_base<mt_policy>
+    template<class arg1_type, class arg2_type>
+    class _signal_base2 : public _signal_base
     {
     public:
-        typedef std::list<_connection_base2<arg1_type, arg2_type, mt_policy> *>
-        connections_list;
+        typedef concurrent_pointer_list<_connection_base2<arg1_type, arg2_type> >  connections_list;
         
         _signal_base2() {}
         
-        _signal_base2(_signal_base2<arg1_type, arg2_type, mt_policy> const& s) : _signal_base<mt_policy>(s)
+        _signal_base2(_signal_base2<arg1_type, arg2_type> const& s) : _signal_base(s)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = s.m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
+            connections_list::const_iterator it = s.m_connected_slots.begin();
+            connections_list::const_iterator itEnd = s.m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_connect(this);
@@ -653,11 +696,10 @@ namespace sigslot {
             }
         }
         
-        void slot_duplicate(has_slots<mt_policy> const* oldtarget, has_slots<mt_policy>* newtarget)
+        void slot_duplicate(has_slots const* oldtarget, has_slots* newtarget)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == oldtarget) {
@@ -675,9 +717,8 @@ namespace sigslot {
         
         void disconnect_all()
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
+            connections_list::const_iterator it = m_connected_slots.begin();
+            connections_list::const_iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_disconnect(this);
@@ -688,11 +729,10 @@ namespace sigslot {
             m_connected_slots.erase(m_connected_slots.begin(), m_connected_slots.end());
         }
         
-        void disconnect(has_slots<mt_policy>* pclass)
+        void disconnect(has_slots* pclass)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == pclass) {
@@ -706,14 +746,13 @@ namespace sigslot {
             }
         }
         
-        void slot_disconnect(has_slots<mt_policy>* pslot)
+        void slot_disconnect(has_slots* pslot)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
-                typename connections_list::iterator itNext = it;
+                connections_list::iterator itNext = it;
                 ++itNext;
                 
                 if ((*it)->getdest() == pslot) {
@@ -734,21 +773,19 @@ namespace sigslot {
         connections_list m_connected_slots;   
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class mt_policy>
-    class _signal_base3 : public _signal_base<mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type>
+    class _signal_base3 : public _signal_base
     {
     public:
-        typedef std::list<_connection_base3<arg1_type, arg2_type, arg3_type, mt_policy> *>
-        connections_list;
-        
+        typedef concurrent_pointer_list<_connection_base3<arg1_type, arg2_type, arg3_type> >  connections_list;
+         
         _signal_base3() {}
         
-        _signal_base3(_signal_base3<arg1_type, arg2_type, arg3_type, mt_policy> const& s)
-        : _signal_base<mt_policy>(s)
+        _signal_base3(_signal_base3<arg1_type, arg2_type, arg3_type> const& s)
+        : _signal_base(s)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = s.m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
+            connections_list::const_iterator it = s.m_connected_slots.begin();
+            connections_list::const_iterator itEnd = s.m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_connect(this);
@@ -757,11 +794,10 @@ namespace sigslot {
             }
         }
         
-        void slot_duplicate(has_slots<mt_policy> const* oldtarget, has_slots<mt_policy>* newtarget)
+        void slot_duplicate(has_slots const* oldtarget, has_slots* newtarget)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == oldtarget) {
@@ -779,9 +815,8 @@ namespace sigslot {
         
         void disconnect_all()
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
+            connections_list::const_iterator it = m_connected_slots.begin();
+            connections_list::const_iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_disconnect(this);
@@ -792,11 +827,10 @@ namespace sigslot {
             m_connected_slots.erase(m_connected_slots.begin(), m_connected_slots.end());
         }
         
-        void disconnect(has_slots<mt_policy>* pclass)
+        void disconnect(has_slots* pclass)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == pclass) {
@@ -810,14 +844,13 @@ namespace sigslot {
             }
         }
         
-        void slot_disconnect(has_slots<mt_policy>* pslot)
+        void slot_disconnect(has_slots* pslot)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
-                typename connections_list::iterator itNext = it;
+                connections_list::iterator itNext = it;
                 ++itNext;
                 
                 if ((*it)->getdest() == pslot) {
@@ -838,21 +871,19 @@ namespace sigslot {
         connections_list m_connected_slots;   
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class mt_policy>
-    class _signal_base4 : public _signal_base<mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type>
+    class _signal_base4 : public _signal_base
     {
     public:
-        typedef std::list<_connection_base4<arg1_type, arg2_type, arg3_type,
-        arg4_type, mt_policy> *>  connections_list;
+        typedef concurrent_pointer_list<_connection_base4<arg1_type, arg2_type, arg3_type, arg4_type> >  connections_list;
         
         _signal_base4() {}
         
-        _signal_base4(const _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>& s)
-        : _signal_base<mt_policy>(s)
+        _signal_base4(const _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>& s)
+        : _signal_base(s)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = s.m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
+            connections_list::const_iterator it = s.m_connected_slots.begin();
+            connections_list::const_iterator itEnd = s.m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_connect(this);
@@ -862,11 +893,10 @@ namespace sigslot {
             }
         }
         
-        void slot_duplicate(const has_slots<mt_policy>* oldtarget, has_slots<mt_policy>* newtarget)
+        void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == oldtarget) {
@@ -884,9 +914,8 @@ namespace sigslot {
         
         void disconnect_all()
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
+            connections_list::const_iterator it = m_connected_slots.begin();
+            connections_list::const_iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_disconnect(this);
@@ -898,11 +927,10 @@ namespace sigslot {
             m_connected_slots.erase(m_connected_slots.begin(), m_connected_slots.end());
         }
         
-        void disconnect(has_slots<mt_policy>* pclass)
+        void disconnect(has_slots* pclass)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == pclass) {
@@ -916,14 +944,13 @@ namespace sigslot {
             }
         }
         
-        void slot_disconnect(has_slots<mt_policy>* pslot)
+        void slot_disconnect(has_slots* pslot)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
-                typename connections_list::iterator itNext = it;
+                connections_list::iterator itNext = it;
                 ++itNext;
                 
                 if ((*it)->getdest() == pslot) {
@@ -944,20 +971,19 @@ namespace sigslot {
         connections_list m_connected_slots;   
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class mt_policy>
-    class _signal_base5 : public _signal_base<mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
+    class _signal_base5 : public _signal_base
     {
     public:
-        typedef std::list<_connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy> *>  connections_list;
+        typedef concurrent_pointer_list<_connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type> >  connections_list;
         
         _signal_base5() {}
         
-        _signal_base5(const _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>& s)
-        : _signal_base<mt_policy>(s)
+        _signal_base5(const _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& s)
+        : _signal_base(s)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = s.m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = s.m_connected_slots.end();
+            connections_list::const_iterator it = s.m_connected_slots.begin();
+            connections_list::const_iterator itEnd = s.m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_connect(this);
@@ -967,11 +993,10 @@ namespace sigslot {
             }
         }
         
-        void slot_duplicate(const has_slots<mt_policy>* oldtarget, has_slots<mt_policy>* newtarget)
+        void slot_duplicate(const has_slots* oldtarget, has_slots* newtarget)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == oldtarget) {
@@ -989,9 +1014,8 @@ namespace sigslot {
         
         void disconnect_all()
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::const_iterator it = m_connected_slots.begin();
-            typename connections_list::const_iterator itEnd = m_connected_slots.end();
+            connections_list::const_iterator it = m_connected_slots.begin();
+            connections_list::const_iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 (*it)->getdest()->signal_disconnect(this);
@@ -1003,11 +1027,10 @@ namespace sigslot {
             m_connected_slots.erase(m_connected_slots.begin(), m_connected_slots.end());
         }
         
-        void disconnect(has_slots<mt_policy>* pclass)
+        void disconnect(has_slots* pclass)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
                 if ((*it)->getdest() == pclass) {
@@ -1021,14 +1044,13 @@ namespace sigslot {
             }
         }
         
-        void slot_disconnect(has_slots<mt_policy>* pslot)
+        void slot_disconnect(has_slots* pslot)
         {
-            lock_block_write<mt_policy> lock(this);
-            typename connections_list::iterator it = m_connected_slots.begin();
-            typename connections_list::iterator itEnd = m_connected_slots.end();
+            connections_list::iterator it = m_connected_slots.begin();
+            connections_list::iterator itEnd = m_connected_slots.end();
             
             while (it != itEnd) {
-                typename connections_list::iterator itNext = it;
+                connections_list::iterator itNext = it;
                 ++itNext;
                 
                 if ((*it)->getdest() == pslot) {
@@ -1051,8 +1073,8 @@ namespace sigslot {
     
 // ================================================================================================
 
-    template<class dest_type, class mt_policy>
-    class _connection0 : public _connection_base0<mt_policy>
+    template<class dest_type>
+    class _connection0 : public _connection_base0
     {
     public:
         _connection0()
@@ -1067,14 +1089,14 @@ namespace sigslot {
             m_pmemfun = pmemfun;
         }
         
-        virtual _connection_base0<mt_policy>* clone()
+        virtual _connection_base0* clone()
         {
-            return new _connection0<dest_type, mt_policy>(*this);
+            return new _connection0<dest_type>(*this);
         }
         
-        virtual _connection_base0<mt_policy>* duplicate(has_slots<mt_policy>* pnewdest)
+        virtual _connection_base0* duplicate(has_slots* pnewdest)
         {
-            return new _connection0<dest_type, mt_policy>((dest_type *)pnewdest, m_pmemfun);
+            return new _connection0<dest_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
         virtual void emitSignal()
@@ -1082,7 +1104,7 @@ namespace sigslot {
             (m_pobject->*m_pmemfun)();
         }
         
-        virtual has_slots<mt_policy>* getdest() const
+        virtual has_slots* getdest() const
         {
             return m_pobject;
         }
@@ -1092,8 +1114,8 @@ namespace sigslot {
         void (dest_type::* m_pmemfun)();
     };
     
-    template<class dest_type, class arg1_type, class mt_policy>
-    class _connection1 : public _connection_base1<arg1_type, mt_policy>
+    template<class dest_type, class arg1_type>
+    class _connection1 : public _connection_base1<arg1_type>
     {
     public:
         _connection1()
@@ -1108,14 +1130,14 @@ namespace sigslot {
             m_pmemfun = pmemfun;
         }
         
-        virtual _connection_base1<arg1_type, mt_policy>* clone()
+        virtual _connection_base1<arg1_type>* clone()
         {
-            return new _connection1<dest_type, arg1_type, mt_policy>(*this);
+            return new _connection1<dest_type, arg1_type>(*this);
         }
         
-        virtual _connection_base1<arg1_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest)
+        virtual _connection_base1<arg1_type>* duplicate(has_slots* pnewdest)
         {
-            return new _connection1<dest_type, arg1_type, mt_policy>((dest_type *)pnewdest, m_pmemfun);
+            return new _connection1<dest_type, arg1_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
         virtual void emitSignal(arg1_type a1)
@@ -1123,7 +1145,7 @@ namespace sigslot {
             (m_pobject->*m_pmemfun)(a1);
         }
         
-        virtual has_slots<mt_policy>* getdest() const
+        virtual has_slots* getdest() const
         {
             return m_pobject;
         }
@@ -1133,8 +1155,8 @@ namespace sigslot {
         void (dest_type::* m_pmemfun)(arg1_type);
     };
     
-    template<class dest_type, class arg1_type, class arg2_type, class mt_policy>
-    class _connection2 : public _connection_base2<arg1_type, arg2_type, mt_policy>
+    template<class dest_type, class arg1_type, class arg2_type>
+    class _connection2 : public _connection_base2<arg1_type, arg2_type>
     {
     public:
         _connection2()
@@ -1150,14 +1172,14 @@ namespace sigslot {
             m_pmemfun = pmemfun;
         }
         
-        virtual _connection_base2<arg1_type, arg2_type, mt_policy>* clone()
+        virtual _connection_base2<arg1_type, arg2_type>* clone()
         {
-            return new _connection2<dest_type, arg1_type, arg2_type, mt_policy>(*this);
+            return new _connection2<dest_type, arg1_type, arg2_type>(*this);
         }
         
-        virtual _connection_base2<arg1_type, arg2_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest)
+        virtual _connection_base2<arg1_type, arg2_type>* duplicate(has_slots* pnewdest)
         {
-            return new _connection2<dest_type, arg1_type, arg2_type, mt_policy>((dest_type *)pnewdest, m_pmemfun);
+            return new _connection2<dest_type, arg1_type, arg2_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
         virtual void emitSignal(arg1_type a1, arg2_type a2)
@@ -1165,7 +1187,7 @@ namespace sigslot {
             (m_pobject->*m_pmemfun)(a1, a2);
         }
         
-        virtual has_slots<mt_policy>* getdest() const
+        virtual has_slots* getdest() const
         {
             return m_pobject;
         }
@@ -1175,8 +1197,8 @@ namespace sigslot {
         void (dest_type::* m_pmemfun)(arg1_type, arg2_type);
     };
     
-    template<class dest_type, class arg1_type, class arg2_type, class arg3_type, class mt_policy>
-    class _connection3 : public _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>
+    template<class dest_type, class arg1_type, class arg2_type, class arg3_type>
+    class _connection3 : public _connection_base3<arg1_type, arg2_type, arg3_type>
     {
     public:
         _connection3()
@@ -1192,14 +1214,14 @@ namespace sigslot {
             m_pmemfun = pmemfun;
         }
         
-        virtual _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>* clone()
+        virtual _connection_base3<arg1_type, arg2_type, arg3_type>* clone()
         {
-            return new _connection3<dest_type, arg1_type, arg2_type, arg3_type, mt_policy>(*this);
+            return new _connection3<dest_type, arg1_type, arg2_type, arg3_type>(*this);
         }
         
-        virtual _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest)
+        virtual _connection_base3<arg1_type, arg2_type, arg3_type>* duplicate(has_slots* pnewdest)
         {
-            return new _connection3<dest_type, arg1_type, arg2_type, arg3_type, mt_policy>((dest_type *)pnewdest, m_pmemfun);
+            return new _connection3<dest_type, arg1_type, arg2_type, arg3_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
         virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3)
@@ -1207,7 +1229,7 @@ namespace sigslot {
             (m_pobject->*m_pmemfun)(a1, a2, a3);
         }
         
-        virtual has_slots<mt_policy>* getdest() const
+        virtual has_slots* getdest() const
         {
             return m_pobject;
         }
@@ -1217,8 +1239,8 @@ namespace sigslot {
         void (dest_type::* m_pmemfun)(arg1_type, arg2_type, arg3_type);
     };
     
-    template<class dest_type, class arg1_type, class arg2_type, class arg3_type, class arg4_type, class mt_policy>
-    class _connection4 : public _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>
+    template<class dest_type, class arg1_type, class arg2_type, class arg3_type, class arg4_type>
+    class _connection4 : public _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>
     {
     public:
         _connection4()
@@ -1233,14 +1255,14 @@ namespace sigslot {
             m_pmemfun = pmemfun;
         }
         
-        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* clone()
+        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* clone()
         {
-            return new _connection4<dest_type, arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>(*this);
+            return new _connection4<dest_type, arg1_type, arg2_type, arg3_type, arg4_type>(*this);
         }
         
-        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest)
+        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* duplicate(has_slots* pnewdest)
         {
-            return new _connection4<dest_type, arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>((dest_type *)pnewdest, m_pmemfun);
+            return new _connection4<dest_type, arg1_type, arg2_type, arg3_type, arg4_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
         virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
@@ -1248,7 +1270,7 @@ namespace sigslot {
             (m_pobject->*m_pmemfun)(a1, a2, a3, a4);
         }
         
-        virtual has_slots<mt_policy>* getdest() const
+        virtual has_slots* getdest() const
         {
             return m_pobject;
         }
@@ -1258,8 +1280,8 @@ namespace sigslot {
         void (dest_type::* m_pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type);
     };
     
-    template<class dest_type, class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class mt_policy>
-    class _connection5 : public _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>
+    template<class dest_type, class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
+    class _connection5 : public _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>
     {
     public:
         _connection5()
@@ -1274,14 +1296,14 @@ namespace sigslot {
             m_pmemfun = pmemfun;
         }
         
-        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* clone()
+        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* clone()
         {
-            return new _connection5<dest_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>(*this);
+            return new _connection5<dest_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(*this);
         }
         
-        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* duplicate(has_slots<mt_policy>* pnewdest)
+        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* duplicate(has_slots* pnewdest)
         {
-            return new _connection5<dest_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>((dest_type *)pnewdest, m_pmemfun);
+            return new _connection5<dest_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
         virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
@@ -1289,7 +1311,7 @@ namespace sigslot {
             (m_pobject->*m_pmemfun)(a1, a2, a3, a4, a5);
         }
         
-        virtual has_slots<mt_policy>* getdest() const
+        virtual has_slots* getdest() const
         {
             return m_pobject;
         }
@@ -1301,17 +1323,17 @@ namespace sigslot {
     
 // ================================================================================================
 
-    template<class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
-    class signal0 : public _signal_base0<mt_policy>
+    
+    class signal0 : public _signal_base0
     {
     public:
-        typedef _signal_base0<mt_policy> base;
-        typedef typename base::connections_list connections_list;
+        typedef _signal_base0 base;
+        typedef base::connections_list connections_list;
         using base::m_connected_slots;
 
         class signal_handle0 : public _signal_handle_base {
         public:
-            signal_handle0(signal0<mt_policy>* sender)
+            signal_handle0(signal0* sender)
                 : _sender(sender)
             {};
 
@@ -1319,9 +1341,8 @@ namespace sigslot {
 
             // override
             void emitSignal() const {
-                lock_block_read<mt_policy> lock(_sender);
-                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
-                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+                connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
@@ -1331,21 +1352,19 @@ namespace sigslot {
                 }
             };
 
-            signal0<mt_policy>* _sender;
+            signal0* _sender;
         };
 
 
         signal0() {}
         
-        signal0(const signal0<mt_policy>& s)
-        : _signal_base0<mt_policy>(s) {}
+        signal0(const signal0& s)
+        : _signal_base0(s) {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)())
         {
-            lock_block_write<mt_policy> lock(this);
-            _connection0<desttype, mt_policy>* conn = 
-            new _connection0<desttype, mt_policy>(pclass, pmemfun);
+            _connection0<desttype>* conn = new _connection0<desttype>(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1371,17 +1390,17 @@ namespace sigslot {
         }
     };
     
-    template<class arg1_type, class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
-    class signal1 : public _signal_base1<arg1_type, mt_policy>
+    template<class arg1_type>
+    class signal1 : public _signal_base1<arg1_type>
     {
     public:
-        typedef _signal_base1<arg1_type, mt_policy> base;
+        typedef _signal_base1<arg1_type> base;
         typedef typename base::connections_list connections_list;
         using base::m_connected_slots;
 
         class signal_handle1 : public _signal_handle_base {
         public:
-            signal_handle1(signal1<arg1_type, mt_policy>* sender, arg1_type a1)
+            signal_handle1(signal1<arg1_type>* sender, arg1_type a1)
                 : _sender(sender)
                 , _a1(a1)
             {};
@@ -1390,9 +1409,8 @@ namespace sigslot {
 
             // override
             void emitSignal() const {
-                lock_block_read<mt_policy> lock(_sender);
-                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
-                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+                connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
@@ -1402,21 +1420,19 @@ namespace sigslot {
                 }
             };
 
-            signal1<arg1_type, mt_policy>* _sender;
+            signal1<arg1_type>* _sender;
             arg1_type _a1;
         };
 
         signal1() {}
         
-        signal1(const signal1<arg1_type, mt_policy>& s)
-        : _signal_base1<arg1_type, mt_policy>(s) {}
+        signal1(const signal1<arg1_type>& s)
+        : _signal_base1<arg1_type>(s) {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type))
         {
-            lock_block_write<mt_policy> lock(this);
-            _connection1<desttype, arg1_type, mt_policy>* conn = 
-            new _connection1<desttype, arg1_type, mt_policy>(pclass, pmemfun);
+            _connection1<desttype, arg1_type>* conn = new _connection1<desttype, arg1_type>(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1442,17 +1458,17 @@ namespace sigslot {
         }
     };
     
-    template<class arg1_type, class arg2_type, class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
-    class signal2 : public _signal_base2<arg1_type, arg2_type, mt_policy>
+    template<class arg1_type, class arg2_type>
+    class signal2 : public _signal_base2<arg1_type, arg2_type>
     {
     public:
-        typedef _signal_base2<arg1_type, arg2_type, mt_policy> base;
+        typedef _signal_base2<arg1_type, arg2_type> base;
         typedef typename base::connections_list connections_list;
         using base::m_connected_slots;
 
         class signal_handle2 : public _signal_handle_base {
         public:
-            signal_handle2(signal2<arg1_type, arg2_type, mt_policy>* sender, arg1_type a1, arg2_type a2)
+            signal_handle2(signal2<arg1_type, arg2_type>* sender, arg1_type a1, arg2_type a2)
                 : _sender(sender)
                 , _a1(a1)
                 , _a2(a2)
@@ -1462,9 +1478,8 @@ namespace sigslot {
 
             // override
             void emitSignal() const {
-                lock_block_read<mt_policy> lock(_sender);
-                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
-                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+                connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
@@ -1474,23 +1489,21 @@ namespace sigslot {
                 }
             };
 
-            signal2<arg1_type, arg2_type, mt_policy>* _sender;
+            signal2<arg1_type, arg2_type>* _sender;
             arg1_type _a1;
             arg2_type _a2;
         };
 
         signal2() {}
         
-        signal2(const signal2<arg1_type, arg2_type, mt_policy>& s)
-        : _signal_base2<arg1_type, arg2_type, mt_policy>(s) {}
+        signal2(const signal2<arg1_type, arg2_type>& s)
+        : _signal_base2<arg1_type, arg2_type>(s) {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type,
                                                                  arg2_type))
         {
-            lock_block_write<mt_policy> lock(this);
-            _connection2<desttype, arg1_type, arg2_type, mt_policy>* conn = new
-            _connection2<desttype, arg1_type, arg2_type, mt_policy>(pclass, pmemfun);
+            _connection2<desttype, arg1_type, arg2_type>* conn = new _connection2<desttype, arg1_type, arg2_type>(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1516,17 +1529,17 @@ namespace sigslot {
         }
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
-    class signal3 : public _signal_base3<arg1_type, arg2_type, arg3_type, mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type>
+    class signal3 : public _signal_base3<arg1_type, arg2_type, arg3_type>
     {
     public:
-        typedef _signal_base3<arg1_type, arg2_type, arg3_type, mt_policy> base;
+        typedef _signal_base3<arg1_type, arg2_type, arg3_type> base;
         typedef typename base::connections_list connections_list;
         using base::m_connected_slots;
 
         class signal_handle3 : public _signal_handle_base {
         public:
-            signal_handle3(signal3<arg1_type, arg2_type, arg3_type, mt_policy>* sender, arg1_type a1, arg2_type a2, arg3_type a3)
+            signal_handle3(signal3<arg1_type, arg2_type, arg3_type>* sender, arg1_type a1, arg2_type a2, arg3_type a3)
                 : _sender(sender)
                 , _a1(a1)
                 , _a2(a2)
@@ -1537,9 +1550,8 @@ namespace sigslot {
 
             // override
             void emitSignal() const {
-                lock_block_read<mt_policy> lock(_sender);
-                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
-                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+                connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
@@ -1549,7 +1561,7 @@ namespace sigslot {
                 }
             };
 
-            signal3<arg1_type, arg2_type, arg3_type, mt_policy>* _sender;
+            signal3<arg1_type, arg2_type, arg3_type>* _sender;
             arg1_type _a1;
             arg2_type _a2;
             arg3_type _a3;
@@ -1557,16 +1569,14 @@ namespace sigslot {
 
         signal3() {}
         
-        signal3(const signal3<arg1_type, arg2_type, arg3_type, mt_policy>& s)
-        : _signal_base3<arg1_type, arg2_type, arg3_type, mt_policy>(s) {}
+        signal3(const signal3<arg1_type, arg2_type, arg3_type>& s)
+        : _signal_base3<arg1_type, arg2_type, arg3_type>(s) {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type,
                                                                  arg2_type, arg3_type))
         {
-            lock_block_write<mt_policy> lock(this);
-            _connection3<desttype, arg1_type, arg2_type, arg3_type, mt_policy>* conn = 
-            new _connection3<desttype, arg1_type, arg2_type, arg3_type, mt_policy>(pclass, pmemfun);
+            _connection3<desttype, arg1_type, arg2_type, arg3_type>* conn = new _connection3<desttype, arg1_type, arg2_type, arg3_type>(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1592,17 +1602,17 @@ namespace sigslot {
         }
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
-    class signal4 : public _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type>
+    class signal4 : public _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>
     {
     public:
-        typedef _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy> base;
+        typedef _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type> base;
         typedef typename base::connections_list connections_list;
         using base::m_connected_slots;
 
         class signal_handle4 : public _signal_handle_base {
         public:
-            signal_handle4(signal4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* sender, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+            signal_handle4(signal4<arg1_type, arg2_type, arg3_type, arg4_type>* sender, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
                 : _sender(sender)
                 , _a1(a1)
                 , _a2(a2)
@@ -1614,9 +1624,8 @@ namespace sigslot {
 
             // override
             void emitSignal() const {
-                lock_block_read<mt_policy> lock(_sender);
-                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
-                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+                connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
@@ -1626,7 +1635,7 @@ namespace sigslot {
                 }
             };
 
-            signal4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* _sender;
+            signal4<arg1_type, arg2_type, arg3_type, arg4_type>* _sender;
             arg1_type _a1;
             arg2_type _a2;
             arg3_type _a3;
@@ -1635,16 +1644,13 @@ namespace sigslot {
 
         signal4() {}
         
-        signal4(const signal4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>& s)
-        : _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>(s) {}
+        signal4(const signal4<arg1_type, arg2_type, arg3_type, arg4_type>& s)
+        : _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>(s) {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type))
         {
-            lock_block_write<mt_policy> lock(this);
-            _connection4<desttype, arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>*
-            conn = new _connection4<desttype, arg1_type, arg2_type, arg3_type,
-            arg4_type, mt_policy>(pclass, pmemfun);
+            _connection4<desttype, arg1_type, arg2_type, arg3_type, arg4_type>* conn = new _connection4<desttype, arg1_type, arg2_type, arg3_type, arg4_type>(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1670,17 +1676,17 @@ namespace sigslot {
         }
     };
     
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class mt_policy = SIGSLOT_DEFAULT_MT_POLICY>
-    class signal5 : public _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
+    class signal5 : public _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>
     {
     public:
-        typedef _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy> base;
+        typedef _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type> base;
         typedef typename base::connections_list connections_list;
         using base::m_connected_slots;
 
         class signal_handle5 : public _signal_handle_base {
         public:
-            signal_handle5(signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* sender, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+            signal_handle5(signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* sender, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
                 : _sender(sender)
                 , _a1(a1)
                 , _a2(a2)
@@ -1693,9 +1699,8 @@ namespace sigslot {
 
             // override
             void emitSignal() const {
-                lock_block_read<mt_policy> lock(_sender);
-                typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
-                typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
+                connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
+                connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
@@ -1705,7 +1710,7 @@ namespace sigslot {
                 }
             };
 
-            signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* _sender;
+            signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* _sender;
             arg1_type _a1;
             arg2_type _a2;
             arg3_type _a3;
@@ -1715,16 +1720,13 @@ namespace sigslot {
 
         signal5() {}
         
-        signal5(const signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>& s)
-        : _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>(s) {}
+        signal5(const signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& s)
+        : _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(s) {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type))
         {
-            lock_block_write<mt_policy> lock(this);
-            _connection5<desttype, arg1_type, arg2_type, arg3_type, arg4_type,
-            arg5_type, mt_policy>* conn = new _connection5<desttype, arg1_type, arg2_type,
-            arg3_type, arg4_type, arg5_type, mt_policy>(pclass, pmemfun);
+            _connection5<desttype, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* conn = new _connection5<desttype, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }

@@ -145,10 +145,10 @@ namespace campvis {
 
 
         /// Signal emitted when the collection of pipelines has changed.
-        sigslot::signal0<> s_PipelinesChanged;
+        sigslot::signal0 s_PipelinesChanged;
 
         /// Signal emitted when the collection of DataContainers has changed.
-        sigslot::signal0<> s_DataContainersChanged;
+        sigslot::signal0 s_DataContainersChanged;
 
     private:
         void initGlContextAndPipeline(tgt::GLCanvas* canvas, AbstractPipeline* pipeline);

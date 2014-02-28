@@ -52,7 +52,7 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the CampVisApplication instance given during creation.
      */
-    class MainWindow : public QMainWindow, public sigslot::has_slots<> {
+    class MainWindow : public QMainWindow, public sigslot::has_slots {
         Q_OBJECT
 
     public:

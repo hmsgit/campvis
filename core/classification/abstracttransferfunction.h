@@ -120,9 +120,9 @@ namespace campvis {
         const tgt::Texture* getTexture();
         
         /// Signal emitted when transfer function has changed.
-        sigslot::signal0<> s_changed;
+        sigslot::signal0 s_changed;
         /// Signal emitted when the intensity domain has changed
-        sigslot::signal0<> s_intensityDomainChanged;
+        sigslot::signal0 s_intensityDomainChanged;
 
     protected:
         /**

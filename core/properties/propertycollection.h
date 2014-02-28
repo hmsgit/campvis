@@ -41,7 +41,7 @@ namespace campvis {
     /**
      * Abstract base class for classes having a PropertyCollection.
      */
-    class CAMPVIS_CORE_API HasPropertyCollection : public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API HasPropertyCollection : public sigslot::has_slots {
     public:
         HasPropertyCollection();
 

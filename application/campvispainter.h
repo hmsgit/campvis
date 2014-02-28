@@ -45,7 +45,7 @@ namespace campvis {
     /**
      * Painter class for CAMPVis, rendering the render target of an AbstractPipeline.
      */
-    class CampVisPainter : public tgt::Painter, public sigslot::has_slots<> {
+    class CampVisPainter : public tgt::Painter, public sigslot::has_slots {
     public:
         /**
          * Creates a new CampVisPainter rendering the render target of \a pipeline on \a canvas.

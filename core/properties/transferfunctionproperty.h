@@ -38,7 +38,7 @@ namespace campvis {
     /**
      * \todo    Implement correct behavior if the TF changes during locked property state.
      */
-    class CAMPVIS_CORE_API TransferFunctionProperty : public AbstractProperty , public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API TransferFunctionProperty : public AbstractProperty , public sigslot::has_slots {
     public:
         typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
 
@@ -122,9 +122,9 @@ namespace campvis {
         sigslot::signal1<AbstractTransferFunction*> s_AfterTFReplace;
 
         /// Signal emitted when the image DataHandle for this TF has changed.
-        sigslot::signal0<> s_imageHandleChanged;
+        sigslot::signal0 s_imageHandleChanged;
         /// Signal emitted when the flag whether to automatically fit the TF window to the data in the image handle.
-        sigslot::signal0<> s_autoFitWindowToDataChanged;
+        sigslot::signal0 s_autoFitWindowToDataChanged;
 
     protected:
         /**

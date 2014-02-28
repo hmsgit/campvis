@@ -79,7 +79,7 @@ namespace campvis {
      * \note    Also takes care of automatically adjusting the window ratio for the wrapped
      *          camera when the viewport size changes.
      */
-    class CAMPVIS_CORE_API TrackballNavigationEventListener : public tgt::EventListener, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API TrackballNavigationEventListener : public tgt::EventListener, public sigslot::has_slots {
     public:
         /**
          * Creates a TrackballNavigationEventListener.

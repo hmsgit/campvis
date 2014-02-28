@@ -58,7 +58,7 @@ namespace campvis {
     class FaceGeometry;
     class DataContainerFileLoaderWidget;
 
-    class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
+    class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:

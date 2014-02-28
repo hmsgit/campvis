@@ -171,7 +171,7 @@ namespace campvis {
 
 
         /// Signal emitted when the pipeline's render target has changed
-        sigslot::signal0<> s_renderTargetChanged;
+        sigslot::signal0 s_renderTargetChanged;
 
     protected:
         /**

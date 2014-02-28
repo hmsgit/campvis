@@ -53,7 +53,7 @@ namespace campvis {
         /**
          * Signal emitted when button was clicked.
          */
-        sigslot::signal0<> s_clicked;
+        sigslot::signal0 s_clicked;
 
     protected:
 

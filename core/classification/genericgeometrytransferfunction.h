@@ -43,7 +43,7 @@ namespace campvis {
      * \tparam  T   Type of the base geometry class.
      */
     template<class T>
-    class  GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
+    class GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots {
     public:
         /// Typedef for the geometry class this transfer function is built from.
         typedef T GeometryType;
@@ -96,7 +96,7 @@ namespace campvis {
         void onGeometryChanged();
 
         /// Signal to be emitted when the vector of T objects (_geometries) changed (The collection, not the actual geometry).
-        sigslot::signal0<> s_geometryCollectionChanged;
+        sigslot::signal0 s_geometryCollectionChanged;
 
     protected:
         /**

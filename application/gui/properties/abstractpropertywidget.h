@@ -38,7 +38,7 @@ namespace campvis {
     /**
      * Abstract base class for property widgets.
      */
-    class AbstractPropertyWidget : public QWidget, public sigslot::has_slots<> {
+    class AbstractPropertyWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:
