@@ -12,7 +12,14 @@ IF(TGT_WITH_WMI)
 	ADD_DEFINITIONS("-DTGT_WITH_WMI")
 	ADD_DEFINITIONS("-D_WIN32_DCOM") #< for CoInitializeSecurity() to be defined
 	LIST(APPEND CampvisGlobalExternalLibs "WbemUuid")
-ENDIF(TGT_WITH_WMI)    
+ENDIF(TGT_WITH_WMI)
+
+IF(CAMPVIS_SHARED_LIBS)
+    SET(BUILD_SHARED_LIBS TRUE)
+	IF(MSVC)
+		ADD_DEFINITIONS("-DTGT_BUILD_DLL")
+	ENDIF()	
+ENDIF()
 
 
 # headers
@@ -88,11 +95,8 @@ ENDIF(TGT_WITH_QT)
 ################################################################################
 # define library target
 ################################################################################
-ADD_LIBRARY(tgt SHARED ${TGT_SOURCES} ${TGT_HEADERS})
+ADD_LIBRARY(tgt ${TGT_SOURCES} ${TGT_HEADERS})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
-IF(CAMPVIS_SHARED_LIBS AND MSVC)
-	ADD_DEFINITIONS("-DTGT_BUILD_DLL")
-ENDIF()
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
 
