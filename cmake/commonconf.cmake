@@ -70,6 +70,7 @@ IF(WIN32)
     LIST(APPEND CampvisGlobalDefinitions "-DNOMINMAX" "-D_CRT_SECURE_NO_DEPRECATE")
 
     # Disable warnings for Microsoft compiler:
+    # C4251  class needs to have dll interface (used for std classes)
     # C4290: C++ exception specification ignored except to indicate a function is
     #        not __declspec(nothrow)
     # C4390: ';' : empty controlled statement found; is this the intent?
@@ -77,7 +78,7 @@ IF(WIN32)
     # C4503: The decorated name was longer than the compiler limit (4096), and was truncated.
     #        Occurs in AutoEvaluatePipeline due to some nested nested map-iterator-map. Could
     #        not be deactivated locally...
-    LIST(APPEND CampvisGlobalDefinitions /wd4290 /wd4390 /wd4503)
+    LIST(APPEND CampvisGlobalDefinitions /wd4251 /wd4290 /wd4390 /wd4503)
     
     # enable parallel builds in Visual Studio
     LIST(APPEND CampvisGlobalDefinitions /MP)
@@ -92,7 +93,7 @@ IF(WIN32)
     IF(CAMPVIS_SHARED_LIBS)
         # Linking against Windows DLLs requires explicit instantiation of templates
         LIST(APPEND CampvisGlobalDefinitions "-DDLL_TEMPLATE_INST")
-        LIST(APPEND CampvisGlobalDefinitions "-DVRN_DYNAMIC_LIBS")
+        LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_DYNAMIC_LIBS")
 
         IF(NOT CAMPVIS_GENERATE_MANIFEST)
             # Do not embed manifest into binaries in debug mode (slows down incremental linking)
