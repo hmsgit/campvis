@@ -35,7 +35,7 @@
 
 namespace campvis {
 
-    class ProcessorDecoratorMasking : public AbstractProcessorDecorator, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API ProcessorDecoratorMasking : public AbstractProcessorDecorator, public sigslot::has_slots<> {
     public:
         ProcessorDecoratorMasking();
         virtual ~ProcessorDecoratorMasking();

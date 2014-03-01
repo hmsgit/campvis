@@ -27,6 +27,8 @@
 
 #include "tgt/bounds.h"
 #include "tgt/vector.h"
+
+#include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
 
 namespace campvis {
@@ -38,7 +40,7 @@ namespace campvis {
      * the semantically same image but have their data at different locations (e.g. disk,
      * RAM, OpenGL texture, ...)
      */
-    class AbstractImageRepresentation {
+    class CAMPVIS_CORE_API AbstractImageRepresentation {
     public:
         /**
          * Creates a new abstract representation for the image \a parent.
@@ -111,12 +113,13 @@ namespace campvis {
          */
         void addToParent() const;
 
+        const ImageData* _parent;       ///< Image this representation represents, must not be 0.
+
+    private:
         /// Not copy-constructable
         AbstractImageRepresentation(const AbstractImageRepresentation& rhs);
         /// Not assignable
         AbstractImageRepresentation& operator=(const AbstractImageRepresentation& rhs);
-
-        const ImageData* _parent;       ///< Image this representation represents, must not be 0.
 
         static const std::string loggerCat_;
     };

@@ -26,13 +26,14 @@
 #define ALGORITHMICGEOMETRY_H__
 
 #include "tgt/vector.h"
+#include "core/coreapi.h"
 
 namespace campvis {
 
     /**
      * Implements various algorithms from algorithmic geometry 
      */
-    struct AlgorithmicGeometry {
+    struct CAMPVIS_CORE_API AlgorithmicGeometry {
     public:
         /**
          * Computes the orientation2D of the three points a, b, c in 2D.

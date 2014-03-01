@@ -50,7 +50,7 @@ namespace campvis {
      *  - Vertex normals: Vertex attribute 3
      * 
      */    
-    class GeometryData : public AbstractData, public IHasWorldBounds {
+    class CAMPVIS_CORE_API GeometryData : public AbstractData, public IHasWorldBounds {
     public:
         /**
          * Constructor

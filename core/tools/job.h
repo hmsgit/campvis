@@ -28,12 +28,14 @@
 #include "sigslot/sigslot.h"
 #include "tgt/assert.h"
 
+#include "core/coreapi.h"
+
 namespace campvis {
 
     /**
      * Abstract base class for a job that can be executed.
      */
-    class AbstractJob {
+    class CAMPVIS_CORE_API AbstractJob {
     public:
         /**
          * Pure virtual destructor.

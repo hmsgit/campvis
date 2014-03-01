@@ -29,6 +29,8 @@
 #include "tgt/tgt_gl.h"
 #include "tgt/vector.h"
 
+#include "core/coreapi.h"
+
 #include <string>
 #include <vector>
 
@@ -46,7 +48,7 @@ namespace campvis {
      * Class performing a reduction of 2D image data using OpenGL.
      * \note    All methods need to be called from a valid OpenGL context.
      */
-    class GlReduction {
+    class CAMPVIS_CORE_API GlReduction {
     public:
         /// Operation to be performed by reduction
         enum ReductionOperator {

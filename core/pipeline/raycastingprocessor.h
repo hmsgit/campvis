@@ -52,7 +52,7 @@ namespace campvis {
      *          Of course you can also directly overwrite process() yourself, but then you will need to to the
      *          sanity checks yourself.
      */
-    class RaycastingProcessor : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_CORE_API RaycastingProcessor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Creates a RaycastingProcessor.

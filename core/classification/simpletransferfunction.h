@@ -32,7 +32,7 @@ namespace campvis {
     /**
      * A very simple ramp transfer function, just for testing purposes...
      */
-    class SimpleTransferFunction : public AbstractTransferFunction {
+    class CAMPVIS_CORE_API SimpleTransferFunction : public AbstractTransferFunction {
     public:
         /**
          * Creates a new SimpleTransferFunction.

@@ -40,7 +40,7 @@ namespace campvis {
      * 
      * The internal OpenGL buffers are lazy-instantiated.
      */
-    class MeshGeometry : public GeometryData {
+    class CAMPVIS_CORE_API MeshGeometry : public GeometryData {
     public:
         /**
          * Creates a new MeshGeometry built from the given faces.

@@ -29,6 +29,7 @@
 #include "tgt/filesystem.h"
 #include "tgt/vector.h"
 
+#include "core/coreapi.h"
 #include "core/tools/stringutils.h"
 
 #include <map>
@@ -46,13 +47,13 @@ namespace campvis {
      * \todo    Better vector support (e.g. "x,y,z" format)
      *          Test and debug o_O
      */
-    class TextFileParser {
+    class CAMPVIS_CORE_API TextFileParser {
     public:
         /**
          * Item separator for letting each line in the file result in one key-value pair item.
          * \note    The behaviour is not implemented as functor but by template specialization!
          */
-        struct ItemSeparatorLines {
+        struct CAMPVIS_CORE_API ItemSeparatorLines {
             // no operator() to implement due to template specialization
         };
 
@@ -265,7 +266,7 @@ namespace campvis {
 
     /// Template specialization for avoiding redundant split-join-split of lines.
     template<>
-    inline std::vector<std::string> campvis::TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (tgt::FileException, tgt::CorruptedFileException) {
+    CAMPVIS_CORE_API std::vector<std::string> campvis::TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (tgt::FileException, tgt::CorruptedFileException) {
         tgt::File* file = FileSys.open(_url);
         if (!file || !file->isOpen())
             throw tgt::FileException("Could not open file " + _url + " for reading.", _url);

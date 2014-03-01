@@ -44,7 +44,7 @@ namespace campvis {
      * \note    This class expects all vertices lying within one plane. Everything other that that
      *          leads to undefined behavior.
      */
-    class FaceGeometry : public GeometryData {
+    class CAMPVIS_CORE_API FaceGeometry : public GeometryData {
     public:
         /**
          * Creates a new empty FaceGeometry.

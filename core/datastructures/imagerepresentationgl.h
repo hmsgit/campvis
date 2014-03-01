@@ -42,7 +42,7 @@ namespace campvis {
      * Stores image data as OpenGL texture.
      * Can bei instantiated either by a WeaklyTypedPointer or strongly typed by an GenericImageRepresentationLocal.
      */
-    class ImageRepresentationGL : public GenericAbstractImageRepresentation<ImageRepresentationGL> {
+    class CAMPVIS_CORE_API ImageRepresentationGL : public GenericAbstractImageRepresentation<ImageRepresentationGL> {
     public:
         /**
          * Creates a new ImageRepresentationGL representation from a tgt::Texture and automatically

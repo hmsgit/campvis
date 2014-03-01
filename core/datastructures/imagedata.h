@@ -28,6 +28,8 @@
 #include <tbb/concurrent_vector.h>
 #include "tgt/logmanager.h"
 #include "tgt/vector.h"
+
+#include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/abstractimagerepresentation.h"
 #include "core/datastructures/imagemappinginformation.h"
@@ -45,7 +47,7 @@ namespace campvis {
      * 
      * \todo 
      */
-    class ImageData : public AbstractData, public IHasWorldBounds {
+    class CAMPVIS_CORE_API ImageData : public AbstractData, public IHasWorldBounds {
     // friend so that it can add itself as representation
     friend class AbstractImageRepresentation;
 
@@ -231,13 +233,13 @@ namespace campvis {
     }
 
     template<>
-    const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
+    CAMPVIS_CORE_API const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
 
 #ifdef CAMPVIS_HAS_MODULE_ITK
     class AbstractImageRepresentationItk;
 
     template<>
-    const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
+    CAMPVIS_CORE_API const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
 #endif
 
     template<typename T>

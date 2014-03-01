@@ -28,13 +28,15 @@
 #include "tgt/singleton.h"
 #include <tbb/task_group.h>
 
+#include "core/coreapi.h"
+
 namespace campvis {
     /**
      * Singleton class for managing and executing work items (jobs) in an asynchronous way.
      * Enqueued jobs are dispatched via the tbb::task_group interface as single tasks.
      * No priority schemes are implemented by now.
      */
-    class SimpleJobProcessor : public tgt::Singleton<SimpleJobProcessor> {
+    class CAMPVIS_CORE_API SimpleJobProcessor : public tgt::Singleton<SimpleJobProcessor> {
         friend class tgt::Singleton<SimpleJobProcessor>;
 
     public:

@@ -37,7 +37,7 @@
 
 namespace campvis {
 
-    class GeometryDataFactory {
+    class CAMPVIS_CORE_API GeometryDataFactory {
     public:
         /**
          * Creates a FaceGeometry building an axis-aligned rectangle face in the YX plane (quad) 

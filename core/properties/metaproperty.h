@@ -39,7 +39,7 @@ namespace campvis {
      *                     or (un)lock them. This has to be done by the owners of the wrapped 
      *                     properties.
      */
-    class MetaProperty : public AbstractProperty, public HasPropertyCollection {
+    class CAMPVIS_CORE_API MetaProperty : public AbstractProperty, public HasPropertyCollection {
     public:
         /**
          * Creates a new MetaProperty

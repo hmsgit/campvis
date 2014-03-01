@@ -26,9 +26,11 @@
 #define PROPERTYCOLLECTION_H__
 
 #include "sigslot/sigslot.h"
+
 #include <vector>
 #include <string>
 
+#include "core/coreapi.h"
 
 namespace campvis {
     class AbstractProperty;
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Abstract base class for classes having a PropertyCollection.
      */
-    class HasPropertyCollection : public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API HasPropertyCollection : public sigslot::has_slots<> {
     public:
         HasPropertyCollection();
 

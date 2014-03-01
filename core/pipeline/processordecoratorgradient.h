@@ -39,7 +39,7 @@ namespace campvis {
      * generateHeader() to define computeGradient(tex, texParams, texCoords) in GLSL calling
      * the selected function.
      */
-    class ProcessorDecoratorGradient : public AbstractProcessorDecorator {
+    class CAMPVIS_CORE_API ProcessorDecoratorGradient : public AbstractProcessorDecorator {
     public:
         /// Method for online-calculating gradients
         enum GradientMethod {

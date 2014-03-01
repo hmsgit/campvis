@@ -32,6 +32,8 @@
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_vector.h>
 #include <tbb/compat/condition_variable>
+
+#include "core/coreapi.h"
 #include "core/tools/job.h"
 #include "core/tools/runnable.h"
 
@@ -62,7 +64,7 @@ namespace campvis {
      * 
      * This class is to be considered as thread-safe.
      */
-    class OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public Runnable, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public Runnable, public sigslot::has_slots<> {
         friend class tgt::Singleton<OpenGLJobProcessor>;
 
     public:
@@ -140,7 +142,7 @@ namespace campvis {
         /**
          * Struct encapsulating the job queue for a single OpenGL context.
          */
-        struct PerContextJobQueue {
+        struct CAMPVIS_CORE_API PerContextJobQueue {
             /**
              * Creates an empty PerContextJobQueue.
              */

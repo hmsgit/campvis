@@ -26,6 +26,8 @@
 #define NUMERICPROPERTY_H__
 
 #include "tgt/vector.h"
+
+#include "core/coreapi.h"
 #include "core/properties/genericproperty.h"
 
 #include <limits>
@@ -77,7 +79,7 @@ namespace campvis {
      * Interface for numeric properties.
      * Defines methods for incrementing and decrementing the property's value.
      */
-    class INumericProperty {
+    class CAMPVIS_CORE_API INumericProperty {
     public:
         /// Increments the value of the property.
         virtual void increment() = 0;

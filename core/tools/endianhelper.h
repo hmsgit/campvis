@@ -28,6 +28,8 @@
 #include "tgt/logmanager.h"
 #include "tgt/types.h"
 
+#include "core/coreapi.h"
+
 #include <utility>
 
 namespace campvis {
@@ -35,7 +37,7 @@ namespace campvis {
     /**
      * Helper struct for handling endianess.
      **/
-    struct EndianHelper {
+    struct CAMPVIS_CORE_API EndianHelper {
         /// Type of Endianness
         enum Endianness {
             IS_LITTLE_ENDIAN,  ///< little endian

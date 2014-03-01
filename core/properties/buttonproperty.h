@@ -31,7 +31,7 @@ namespace campvis {
     /**
      * Property that simply offers a single button.
      */
-    class ButtonProperty : public AbstractProperty {
+    class CAMPVIS_CORE_API ButtonProperty : public AbstractProperty {
     public:
         /**
          * Creates a new ButtonProperty
