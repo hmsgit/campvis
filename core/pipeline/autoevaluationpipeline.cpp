@@ -75,7 +75,7 @@ namespace campvis {
                     OpenGLJobProcessor::SerialJob);
             }
             else {
-                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*, bool>(this, &AutoEvaluationPipeline::executeProcessor, processor, false));
+                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessor, processor));
             }
         }
         else {

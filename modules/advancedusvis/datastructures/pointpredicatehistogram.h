@@ -35,7 +35,7 @@ namespace campvis {
     /**
      * Data object storing information about selected predicates and their settings.
      */
-    class PointPredicateHistogram : public sigslot::has_slots<> {
+    class PointPredicateHistogram : public sigslot::has_slots {
     public:
 
         /**

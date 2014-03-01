@@ -142,7 +142,7 @@ namespace campvis {
         return *_data;
     }
 
-    void AbstractPipeline::executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred) {
+    void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
         // execute processor if needed
@@ -219,12 +219,12 @@ namespace campvis {
         tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         GLJobProc.enqueueJob(
             _canvas, 
-            makeJobOnHeap<AbstractPipeline, AbstractProcessor*, bool>(this, &AbstractPipeline::executeProcessor, processor, true),
+            makeJobOnHeap<AbstractPipeline, AbstractProcessor*>(this, &AbstractPipeline::executeProcessor, processor),
             OpenGLJobProcessor::SerialJob);
     }
 
     void AbstractPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
-        AbstractPipeline::executeProcessor(processor, true);
+        AbstractPipeline::executeProcessor(processor);
 
 #ifdef CAMPVIS_DEBUG
         tgtAssert(getGlBool(GL_DEPTH_TEST) == false, "Invalid OpenGL state after processor execution, GL_DEPTH_TEST != false.");

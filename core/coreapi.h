@@ -43,11 +43,6 @@
             #define CAMPVIS_CORE_API
         #endif
     #endif
-    #ifdef DLL_TEMPLATE_INST
-        // declare and instantiate sigslot templates for symbol ex-/import
-        class CAMPVIS_CORE_API sigslot::SIGSLOT_DEFAULT_MT_POLICY;
-        template class CAMPVIS_CORE_API sigslot::has_slots<sigslot::SIGSLOT_DEFAULT_MT_POLICY>;
-    #endif
 #else
     // building/including static library -> do nothing
     #define CAMPVIS_CORE_API

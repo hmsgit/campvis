@@ -177,9 +177,8 @@ namespace campvis {
         /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
-         * \param   unlockInExtraThred  If true, the call to processor->unlock() will be done in an extra thread.
          */
-        void executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred);
+        void executeProcessor(AbstractProcessor* processor);
         
         /**
          * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 

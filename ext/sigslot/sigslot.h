@@ -242,6 +242,7 @@ namespace sigslot {
         void erase(const const_iterator& it) { *it = nullptr; };
         void erase(const const_iterator& begin, const const_iterator& end);
 
+        bool empty() const;
 
     protected:
         StorageType _storage;
@@ -270,6 +271,20 @@ namespace sigslot {
         for (const_iterator it = begin; it != end; ++it) {
             *it = nullptr;
         }
+    }
+
+    template<typename T>
+    bool sigslot::concurrent_pointer_list<T>::empty() const {
+        iterator it = begin();
+        iterator itEnd = end();
+
+        for (/* nothing here */; it != itEnd; ++it) {
+            if (*it != nullptr) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 // ================================================================================================
@@ -421,14 +436,14 @@ namespace sigslot {
 // ================================================================================================
     
     
-    class _signal_base
+    class SIGSLOT_API _signal_base
     {
     public:
         virtual void slot_disconnect(has_slots* pslot) = 0;
         virtual void slot_duplicate(has_slots const* poldslot, has_slots* pnewslot) = 0;
     };
     
-    class has_slots
+    class SIGSLOT_API has_slots
     {
     private:
         typedef concurrent_pointer_list<_signal_base> sender_set;
