@@ -87,7 +87,7 @@
 /**
  * This is needed for .dll or .so support respectively
  */
-#ifdef VRN_DYNAMIC_LIBS
+#ifdef CAMPVIS_DYNAMIC_LIBS
     #ifdef TGT_BUILD_DLL
         #ifdef WIN32
             #define TGT_API __declspec(dllexport)

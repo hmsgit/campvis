@@ -26,6 +26,7 @@
 #define TGT_QTCANVAS_H
 
 #include "tgt/glcanvas.h"
+#include "tgt/types.h"
 
 #include <QGLWidget>
 #include <QGLFormat>
@@ -39,7 +40,7 @@ namespace tgt {
 /**
  * Qt implementation of GLCanvas. Inherits QGLWidget and combines the Qt methods and tgt methods.
  */
-class QtCanvas : public GLCanvas, public QGLWidget {
+class TGT_API QtCanvas : public GLCanvas, public QGLWidget {
 public:
     /**
      * The constructor. Allows the user to specify a shared widget that this canvas will share
@@ -109,6 +110,12 @@ public:
      * and repaint when entering main loop next time.
      */
     virtual void update();
+
+
+    /// Acqures this canvas as current context
+    virtual void acquireAsCurrentContext();
+    /// Releases this canvas as current context
+    virtual void releaseAsCurrentContext();
 
     /// swap buffers
     virtual void swap();

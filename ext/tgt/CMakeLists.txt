@@ -12,7 +12,14 @@ IF(TGT_WITH_WMI)
 	ADD_DEFINITIONS("-DTGT_WITH_WMI")
 	ADD_DEFINITIONS("-D_WIN32_DCOM") #< for CoInitializeSecurity() to be defined
 	LIST(APPEND CampvisGlobalExternalLibs "WbemUuid")
-ENDIF(TGT_WITH_WMI)    
+ENDIF(TGT_WITH_WMI)
+
+IF(CAMPVIS_SHARED_LIBS)
+    SET(BUILD_SHARED_LIBS TRUE)
+	IF(MSVC)
+		ADD_DEFINITIONS("-DTGT_BUILD_DLL")
+	ENDIF()	
+ENDIF()
 
 
 # headers
@@ -74,14 +81,12 @@ IF(TGT_WITH_QT)
 	LIST(APPEND TGT_HEADERS 
 		qt/qtapplication.h
 		qt/qtcanvas.h
-		qt/qtcontextmanager.h
 		qt/qtthreadedcanvas.h
 		qt/qttimer.h)
 	
 	LIST(APPEND TGT_SOURCES 
 		qt/qtapplication.cpp
 		qt/qtcanvas.cpp
-		qt/qtcontextmanager.cpp
 		qt/qtthreadedcanvas.cpp
 		qt/qttimer.cpp)
 ENDIF(TGT_WITH_QT)
@@ -92,9 +97,6 @@ ENDIF(TGT_WITH_QT)
 ################################################################################
 ADD_LIBRARY(tgt ${TGT_SOURCES} ${TGT_HEADERS})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
-IF(CAMPVIS_SHARED_LIBS AND MSVC)
-	ADD_DEFINITIONS("-DTGT_BUILD_DLL")
-ENDIF()
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
 

@@ -248,8 +248,8 @@ namespace campvis {
         QLabel* lblOpacityBottom = new QLabel(tr("0%"), this);
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
-        _canvas = dynamic_cast<tgt::QtThreadedCanvas*>(tgt::GlContextManager::getRef().createContext("tfcanvas", "", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, false));
-        tgtAssert(_canvas != 0, "Could not cast to QtThreadedCanvas*, something is wrong here!");
+        _canvas = new tgt::QtThreadedCanvas("", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, false);
+        tgt::GlContextManager::getRef().registerContextAndInitGlew(_canvas);
 
         GLJobProc.registerContext(_canvas);
         _canvas->setPainter(this, false);

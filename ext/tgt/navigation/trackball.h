@@ -44,7 +44,7 @@ namespace tgt {
     around a given center (or, if you will, to rotate the camera around and focus it
     on that center while it is continuously moving on a sphere).
 */
-class Trackball : public Navigation {
+class TGT_API Trackball : public Navigation {
     public:
 
         /// Constructor
