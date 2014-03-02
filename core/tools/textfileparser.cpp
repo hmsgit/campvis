@@ -181,4 +181,22 @@ namespace campvis {
             throw tgt::CorruptedFileException("Error parsing key " + key + " to vec4: " + e.what(), _url);
         }        
     }
+
+// ================================================================================================
+
+    template<>
+    std::vector<std::string> TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (tgt::FileException, tgt::CorruptedFileException) {
+        tgt::File* file = FileSys.open(_url);
+        if (!file || !file->isOpen())
+            throw tgt::FileException("Could not open file " + _url + " for reading.", _url);
+
+        std::vector<std::string> lines;
+        while (!file->eof()) {
+            lines.push_back(file->getLine());
+        }
+        file->close();
+        delete file;
+        return lines;
+    }
+
 }
