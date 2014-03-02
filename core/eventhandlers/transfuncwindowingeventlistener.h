@@ -29,6 +29,8 @@
 #include "tgt/vector.h"
 #include "tgt/event/eventlistener.h"
 
+#include "core/coreapi.h"
+
 namespace campvis {
     class TransferFunctionProperty;
 
@@ -36,7 +38,7 @@ namespace campvis {
      * Event handler that maps mouse click-and-drag events to the windowing of a transfer function.
      * 
      */
-    class TransFuncWindowingEventListener : public tgt::EventListener {
+    class CAMPVIS_CORE_API TransFuncWindowingEventListener : public tgt::EventListener {
     public:
         /**
          * Creates a TransFuncWindowingEventListener.

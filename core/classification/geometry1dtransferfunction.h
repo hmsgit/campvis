@@ -36,7 +36,7 @@ namespace campvis {
     /**
      * A 1D transfer function built from multiple geometries.
      */
-    class Geometry1DTransferFunction : public GenericGeometryTransferFunction<TFGeometry1D> {
+    class CAMPVIS_CORE_API Geometry1DTransferFunction : public GenericGeometryTransferFunction<TFGeometry1D> {
     public:
         /**
          * Creates a new Geometry1DTransferFunction.

@@ -29,6 +29,8 @@
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
 #include "tgt/logmanager.h"
+
+#include "core/coreapi.h"
 #include "core/pipeline/abstractprocessor.h"
 
 #include <set>
@@ -41,7 +43,7 @@ namespace campvis {
      * \todo    Add PropertyWidgets, add clone()?
      *          Think about a reasonable locking mechanism and implement that
      */
-    class AbstractProperty {
+    class CAMPVIS_CORE_API AbstractProperty {
     public:
         /**
          * Creates a new AbstractProperty

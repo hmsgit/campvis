@@ -36,6 +36,8 @@
 #include <IL/ilu.h>
 #endif
 
+#include "core/coreapi.h"
+
 namespace campvis {
 
     /**
@@ -43,7 +45,7 @@ namespace campvis {
      * Therfore it stores an enum value together with the pointer for deducing its data type.
      * \note    WeaklyTypedPointer takes _not_ take ownership of its pointer, hence it won't take care of deleting it!
      */
-    struct WeaklyTypedPointer {
+    struct CAMPVIS_CORE_API WeaklyTypedPointer {
         /**
          * Base data type.
          **/

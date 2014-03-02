@@ -26,6 +26,8 @@
 #define TRANSFERFUNCTIONPROPERTY_H__
 
 #include "sigslot/sigslot.h"
+
+#include "core/coreapi.h"
 #include "core/properties/abstractproperty.h"
 #include "core/classification/abstracttransferfunction.h"
 
@@ -36,7 +38,7 @@ namespace campvis {
     /**
      * \todo    Implement correct behavior if the TF changes during locked property state.
      */
-    class TransferFunctionProperty : public AbstractProperty , public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API TransferFunctionProperty : public AbstractProperty , public sigslot::has_slots<> {
     public:
         typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
 

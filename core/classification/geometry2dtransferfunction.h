@@ -36,7 +36,7 @@ namespace campvis {
     /**
      * A 2D transfer function built from multiple geometries.
      */
-    class Geometry2DTransferFunction : public GenericGeometryTransferFunction<TFGeometry2D> {
+    class CAMPVIS_CORE_API Geometry2DTransferFunction : public GenericGeometryTransferFunction<TFGeometry2D> {
     public:
         /**
          * Creates a new Geometry2DTransferFunction.

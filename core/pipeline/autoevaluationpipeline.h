@@ -42,7 +42,7 @@ namespace campvis {
      * \param   dc  Pointer to the DataContainer containing local working set of data for this 
      *              pipeline, must not be 0, must be valid the whole lifetime of this pipeline.
      */
-    class AutoEvaluationPipeline : public AbstractPipeline {
+    class CAMPVIS_CORE_API AutoEvaluationPipeline : public AbstractPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.

@@ -40,7 +40,7 @@ namespace campvis {
      * 
      * \todo    implement padding, add some kind of cool iterators
      */
-    class ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
+    class CAMPVIS_CORE_API ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
     public:
         /**
          * Destructor

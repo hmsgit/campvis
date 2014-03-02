@@ -27,6 +27,8 @@
 
 #include <tbb/atomic.h>
 
+#include "core/coreapi.h"
+
 namespace campvis {
     /**
      * Base class for reference counted objects.
@@ -34,7 +36,7 @@ namespace campvis {
      * \note    Implementation inspired from Scott Meyers: More Effective C++, Item 29
      * \todo    Check thread-safety
      */
-    class ReferenceCounted {
+    class CAMPVIS_CORE_API ReferenceCounted {
     public:
         /**
          * Create a new reference counted object.

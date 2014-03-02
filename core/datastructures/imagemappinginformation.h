@@ -27,6 +27,8 @@
 
 #include "tgt/matrix.h"
 #include "tgt/vector.h"
+
+#include "core/coreapi.h"
 #include "core/tools/mapping.h"
 
 namespace campvis {
@@ -37,7 +39,7 @@ namespace campvis {
      * \todo    Make a full list of fields that belong in this class. Then check
      *          which of them belong together and which are derived measures.
      */
-    class ImageMappingInformation {
+    class CAMPVIS_CORE_API ImageMappingInformation {
     public:
         /**
          * Creates a new default ImageMappingInformation.

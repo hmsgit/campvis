@@ -28,6 +28,8 @@
 #include "sigslot/sigslot.h"
 #include <tbb/concurrent_unordered_map.h>
 #include <tbb/spin_mutex.h>
+
+#include "core/coreapi.h"
 #include "core/datastructures/datahandle.h"
 
 #include <string>
@@ -50,7 +52,7 @@ namespace campvis {
      * 
      * \todo    Check thread-safety
      */
-    class DataContainer {
+    class CAMPVIS_CORE_API DataContainer {
     public:
         /**
          * Creates a new empty DataContainer

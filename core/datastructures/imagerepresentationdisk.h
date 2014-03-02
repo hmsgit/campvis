@@ -37,7 +37,7 @@ namespace campvis {
      * 
      * \todo    Number of channels
      */
-    class ImageRepresentationDisk : public GenericAbstractImageRepresentation<ImageRepresentationDisk> {
+    class CAMPVIS_CORE_API ImageRepresentationDisk : public GenericAbstractImageRepresentation<ImageRepresentationDisk> {
     public:
         /**
          * Creates a new ImageRepresentationDisk with the given parameters and automatically

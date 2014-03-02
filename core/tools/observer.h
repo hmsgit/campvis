@@ -28,6 +28,8 @@
 #include <tbb/spin_mutex.h>
 #include <set>
 
+#include "core/coreapi.h"
+
 namespace campvis {
 
     /**
@@ -35,7 +37,7 @@ namespace campvis {
      * \sa Observable
      * \todo    Add more advanced version supporting arguments during notification.
      */
-    class Observer {
+    class CAMPVIS_CORE_API Observer {
     public:
         Observer();
         virtual ~Observer();
@@ -52,7 +54,7 @@ namespace campvis {
      * Minimal implementation of the observer pattern.
      * \sa Observer
      */
-    class Observable {
+    class CAMPVIS_CORE_API Observable {
     public:
         Observable();
         virtual ~Observable();

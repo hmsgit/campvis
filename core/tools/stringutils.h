@@ -31,6 +31,8 @@
 #include <string>
 #include <vector>
 
+#include "core/coreapi.h"
+
 namespace campvis {
 
     /**
@@ -40,7 +42,7 @@ namespace campvis {
      * 
      * \todo    Test, test, test!
      */
-    class StringUtils {
+    class CAMPVIS_CORE_API StringUtils {
     public:
         /**
          * Converts the string \a str to lowercase.

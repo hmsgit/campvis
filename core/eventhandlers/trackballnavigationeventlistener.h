@@ -32,6 +32,7 @@
 #include "tgt/event/eventlistener.h"
 #include "tgt/navigation/trackball.h"
 
+#include "core/coreapi.h"
 #include "core/datastructures/datahandle.h"
 #include "core/properties/numericproperty.h"
 
@@ -45,7 +46,7 @@ namespace campvis {
     /**
      * Wrapper to adapt a CameraProperty to the tgt::Trackball interface.
      */
-    class CamPropNavigationWrapper : public tgt::IHasCamera {
+    class CAMPVIS_CORE_API CamPropNavigationWrapper : public tgt::IHasCamera {
     public:
         /**
          * Constructor
@@ -78,7 +79,7 @@ namespace campvis {
      * \note    Also takes care of automatically adjusting the window ratio for the wrapped
      *          camera when the viewport size changes.
      */
-    class TrackballNavigationEventListener : public tgt::EventListener, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API TrackballNavigationEventListener : public tgt::EventListener, public sigslot::has_slots<> {
     public:
         /**
          * Creates a TrackballNavigationEventListener.

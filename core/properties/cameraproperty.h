@@ -30,7 +30,7 @@
 
 namespace campvis {
 
-    class CameraProperty : public GenericProperty<tgt::Camera> {
+    class CAMPVIS_CORE_API CameraProperty : public GenericProperty<tgt::Camera> {
     public:
         /**
          * Creates a new CameraProperty

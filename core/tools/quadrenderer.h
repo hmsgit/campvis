@@ -28,6 +28,8 @@
 #include "tgt/singleton.h"
 #include "tgt/tgt_gl.h"
 
+#include "core/coreapi.h"
+
 namespace campvis {
     class FaceGeometry;
 
@@ -35,7 +37,7 @@ namespace campvis {
      * Small helper singleton class for rendering the default [-1, 1]^2 quad.
      * Texture coordinates are [0, 1]^2.
      */
-    class QuadRenderer : public tgt::Singleton<QuadRenderer> {
+    class CAMPVIS_CORE_API QuadRenderer : public tgt::Singleton<QuadRenderer> {
         friend class tgt::Singleton<QuadRenderer>;
 
     public:

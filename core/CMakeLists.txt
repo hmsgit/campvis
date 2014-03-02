@@ -4,6 +4,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 MESSAGE(STATUS "Configuring CAMPVis Core")
 
+# configuration
+IF(CAMPVIS_SHARED_LIBS)
+    SET(BUILD_SHARED_LIBS TRUE)
+	IF(MSVC)
+		ADD_DEFINITIONS("-DCAMPVIS_CORE_BUILD_DLL")
+	ENDIF()	
+ENDIF()
+
 # glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     classification/*.cpp
@@ -23,6 +31,7 @@ ENDFOREACH()
 
 
 FILE(GLOB CampvisCoreHeaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.h
     classification/*.h
     datastructures/*.h
     eventhandlers/*.h

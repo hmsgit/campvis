@@ -42,7 +42,7 @@ namespace campvis {
      * 
      * The internal OpenGL buffers are lazy-instantiated.
      */
-    class MultiIndexedGeometry : public GeometryData {
+    class CAMPVIS_CORE_API MultiIndexedGeometry : public GeometryData {
     public:
         /**
          * Creates a new MultiIndexedGeometry using the given geometry. Indices are to be provided later.

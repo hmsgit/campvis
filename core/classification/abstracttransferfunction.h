@@ -30,6 +30,7 @@
 #include <tbb/atomic.h>
 #include <tbb/mutex.h>
 
+#include "core/coreapi.h"
 #include "core/datastructures/datahandle.h"
 #include "core/tools/concurrenthistogram.h"
 
@@ -56,7 +57,7 @@ namespace campvis {
      *             context. Even though other internals might be changed meanwhile, this ensures that
      *             the OpenGL stuff (e.g. the texture) stays valid for this time.
      */
-    class AbstractTransferFunction {
+    class CAMPVIS_CORE_API AbstractTransferFunction {
     public:
         typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
 

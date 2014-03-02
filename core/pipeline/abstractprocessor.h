@@ -29,6 +29,8 @@
 #include <tbb/atomic.h>
 #include <tbb/concurrent_queue.h>
 #include "tgt/logmanager.h"
+
+#include "core/coreapi.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"
 
@@ -51,7 +53,7 @@ namespace campvis {
      * 
      * \sa AbstractPipeline
      */
-    class AbstractProcessor : public HasPropertyCollection {
+    class CAMPVIS_CORE_API AbstractProcessor : public HasPropertyCollection {
     public:
         /**
          * Available invalidation levels
@@ -249,7 +251,7 @@ namespace campvis {
          * Scoped lock of an AbstractProcessor that automatically unlocks the processor on destruction.
          * Useful for exception safety.
          */
-        struct ScopedLock {
+        struct CAMPVIS_CORE_API ScopedLock {
             /**
              * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
              * \param   p                   Processor to lock

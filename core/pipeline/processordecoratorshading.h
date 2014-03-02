@@ -33,7 +33,7 @@
 
 namespace campvis {
 
-    class ProcessorDecoratorShading : public ProcessorDecoratorGradient {
+    class CAMPVIS_CORE_API ProcessorDecoratorShading : public ProcessorDecoratorGradient {
     public:
         explicit ProcessorDecoratorShading(const std::string& lightUniformName = "_lightSource");
 

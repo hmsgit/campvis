@@ -28,6 +28,8 @@
 #include <vector>
 #include <string>
 
+#include "core/coreapi.h"
+
 namespace tgt {
     class Shader;
 }
@@ -41,7 +43,7 @@ namespace campvis {
      * ProcessorDecorators are created and assigned to a processor during its construction. The
      * virtual methods are then calles at an appropriate time.
      */
-    class AbstractProcessorDecorator {
+    class CAMPVIS_CORE_API AbstractProcessorDecorator {
     public:
         /**
          * Pure virtual Destructor
@@ -86,7 +88,7 @@ namespace campvis {
     /**
      * Pure virtual base class for processors using decorators.
      */
-    class HasProcessorDecorators {
+    class CAMPVIS_CORE_API HasProcessorDecorators {
     public:
         /**
          * Virtual Destructor, deletes all Decorators

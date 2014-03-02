@@ -49,7 +49,7 @@ namespace campvis {
      * \note    RenderData does not care whether its textures have the same size and their formats
      *          make sense.
      */
-    class RenderData : public AbstractData {
+    class CAMPVIS_CORE_API RenderData : public AbstractData {
     public:
         /**
          * Constructor, creates empty RenderData.
