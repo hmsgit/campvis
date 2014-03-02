@@ -303,7 +303,7 @@ namespace campvis {
                 PipelineTreeItem* pipeti = new PipelineTreeItem(*pipe, it->second);
 
                 for (std::vector<AbstractProcessor*>::const_iterator proc = (*pipe)->getProcessors().begin(); proc != (*pipe)->getProcessors().end(); ++proc) {
-                    ProcessorTreeItem* procti = new ProcessorTreeItem(*proc, pipeti);
+                    new ProcessorTreeItem(*proc, pipeti);
                 }
             }
             else {

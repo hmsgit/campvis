@@ -81,7 +81,6 @@ namespace campvis {
         if (img != 0) {
             if (img->getDimensionality() == 3) {
                 const tgt::Camera& cam = p_camera.getValue();
-                const tgt::svec3& imgSize = img->getSize();
 
                 // Creating the slice proxy geometry works as follows:
                 // Create the cube proxy geometry for the volume, then clip the cube against the slice plane.

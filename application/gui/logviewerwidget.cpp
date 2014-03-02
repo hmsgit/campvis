@@ -138,7 +138,7 @@ namespace campvis {
         _logDisplay->clear();
         _logHighlighter->setFilterRegExp(_filterRegExp);
 
-        for (std::deque<LogEntry>::iterator it = _logMessages.begin(); it != _logMessages.end(); it++) {
+        for (std::deque<LogEntry>::iterator it = _logMessages.begin(); it != _logMessages.end(); ++it) {
             displayMessage(*it);
         }
     }

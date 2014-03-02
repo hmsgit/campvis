@@ -66,7 +66,6 @@ namespace campvis {
             size_t dimensionality = 3;
             tgt::svec3 size;
             WeaklyTypedPointer::BaseType pt;
-            size_t numChannels = 1;
 
             tgt::vec3 voxelSize(1.f);
             tgt::vec3 imageOffset(0.f);
@@ -138,6 +137,8 @@ namespace campvis {
             file.close(); \
         } \
         rep = GenericImageRepresentationLocal<C_TYPE, 1>::create(image, dataArray); \
+        if (rep == 0) \
+            delete [] dataArray; \
     }
 
                 DISPATCH_PARSING(WeaklyTypedPointer::UINT8      , uint8_t, uint16_t)

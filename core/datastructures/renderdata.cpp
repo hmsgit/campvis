@@ -50,13 +50,13 @@ namespace campvis {
         for (size_t i = 0; i < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
             if (attachments[i] != 0) {
                 ImageData* img = new ImageData(2, attachments[i]->getDimensions(), attachments[i]->getNumChannels());
-                ImageRepresentationGL* rep = ImageRepresentationGL::create(img, attachments[i]);
+                ImageRepresentationGL::create(img, attachments[i]);
                 _colorTextures.push_back(DataHandle(img));
             }
         }
         if (attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS] != 0) {
             ImageData* img = new ImageData(2, attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getDimensions(), attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getNumChannels());
-            ImageRepresentationGL* rep = ImageRepresentationGL::create(img, attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]);
+            ImageRepresentationGL::create(img, attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]);
             _depthTexture = DataHandle(img);
         }
     }

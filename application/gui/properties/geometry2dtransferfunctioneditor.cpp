@@ -91,7 +91,6 @@ namespace campvis {
     void Geometry2DTransferFunctionEditor::paint() {
         Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
         const std::vector<TFGeometry2D*>& geometries = gtf->getGeometries();
-        const tgt::vec2& intensityDomain = gtf->getIntensityDomain();
 
         // TODO: get rid of intermediate mode?
         glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -122,15 +121,13 @@ namespace campvis {
                 float maxFilling = static_cast<float>(ih->getMaxFilling());
 
                 float xl = static_cast<float>(0.f) / static_cast<float>(numBuckets);
-                float xr = 0.f;
                 float yl = static_cast<float>(ih->getNumElements(0)) / maxFilling;
-                float yr = 0.f;
 
                 glBegin(GL_QUADS);
                 glColor4f(1.f, .75f, 0.f, .5f);
                 for (size_t i = 1; i < numBuckets; ++i) {
-                    xr = static_cast<float>(i) / static_cast<float>(numBuckets);
-                    yr = static_cast<float>(ih->getNumElements(i)) / maxFilling;
+                    float xr = static_cast<float>(i) / static_cast<float>(numBuckets);
+                    float yr = static_cast<float>(ih->getNumElements(i)) / maxFilling;
 
                     glVertex2f(xl, 0.f);
                     glVertex2f(xl, yl);
@@ -229,7 +226,7 @@ namespace campvis {
         QLabel* lblOpacityBottom = new QLabel(tr("0%"), this);
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
-        _canvas = new tgt::QtThreadedCanvas("", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, false);
+        _canvas = new tgt::QtThreadedCanvas("", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, 0, false);
         tgt::GlContextManager::getRef().registerContextAndInitGlew(_canvas);
 
         GLJobProc.registerContext(_canvas);

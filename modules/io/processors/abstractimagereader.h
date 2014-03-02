@@ -78,8 +78,6 @@ namespace campvis {
 
     protected:
         std::vector<std::string> _ext;
-
-        static const std::string loggerCat_;
         
     private:
 

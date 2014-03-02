@@ -121,10 +121,9 @@ int NaturalCubicSpline::lookup(float x) const {
     else {
         int i1 = 0;
         int i2 = size - 2;
-        int i3 = 0;
 
         while (i2 - i1 > 1) {
-            i3 = i1 + ((i2 - i1) >> 1);
+            int i3 = i1 + ((i2 - i1) >> 1);
             if (points_[i3].x > x)
                 i2 = i3;
             else

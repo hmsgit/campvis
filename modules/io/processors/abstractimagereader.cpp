@@ -46,7 +46,7 @@ namespace campvis {
     void AbstractImageReader::setTargetImageId(DataNameProperty& targetImageId) {
         this->p_targetImageID.setValue(targetImageId.getValue());
         std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
-        for(std::set<AbstractProperty*>::iterator it = sharedProperties.begin(); it != sharedProperties.end(); it++) {
+        for(std::set<AbstractProperty*>::iterator it = sharedProperties.begin(); it != sharedProperties.end(); ++it) {
             this->p_targetImageID.addSharedProperty(*it);
         }
     }
@@ -60,7 +60,7 @@ namespace campvis {
     }
 
     bool AbstractImageReader::acceptsExtension(const std::string& extension) {
-        for(std::vector<std::string>::iterator it = this->_ext.begin(); it != this->_ext.end(); it++) {
+        for(std::vector<std::string>::iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
             if(*it == extension) {
                 return true;
             }

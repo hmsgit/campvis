@@ -157,15 +157,15 @@ namespace campvis {
         if (const AbstractData* data = _dataHandle.getData()) {
             if (const RenderData* tester = dynamic_cast<const RenderData*>(data)) {
                 for (size_t i = 0; i < tester->getNumColorTextures(); ++i) {
-                    DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(tester->getColorDataHandle(i)), _name + "::ColorTexture" + StringUtils::toString(i), this);
+                    new DataHandleTreeItem(QtDataHandle(tester->getColorDataHandle(i)), _name + "::ColorTexture" + StringUtils::toString(i), this);
                 }
                 if (tester->hasDepthTexture()) {
-                    DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(tester->getDepthDataHandle()), _name + "::DepthTexture", this);
+                    new DataHandleTreeItem(QtDataHandle(tester->getDepthDataHandle()), _name + "::DepthTexture", this);
                 }
             }
             else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
                 for (size_t i = 0; i < tester->getNumImages(); ++i) {
-                    DataHandleTreeItem* dhti = new DataHandleTreeItem(QtDataHandle(tester->getImage(i)), _name + "::Image" + StringUtils::toString(i), this);
+                    new DataHandleTreeItem(QtDataHandle(tester->getImage(i)), _name + "::Image" + StringUtils::toString(i), this);
                 }
             }
 

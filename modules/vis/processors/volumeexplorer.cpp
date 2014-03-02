@@ -189,7 +189,6 @@ namespace campvis {
             _shader->setUniform("_renderBackground", true);
 
             vrImage->bind(_shader, colorUnit, depthUnit);
-            float ratio = static_cast<float>(vrs.x) / static_cast<float>(rts.x);
             _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
             _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
             _quad->render(GL_POLYGON);

@@ -297,7 +297,7 @@ LogManager::LogManager(const std::string& logDir)
 
 LogManager::~LogManager() {
     vector<Log*>::iterator it;
-     for (it = logs_.begin(); it != logs_.end(); it++)
+     for (it = logs_.begin(); it != logs_.end(); ++it)
         delete (*it);
 
     delete consoleLog_;
@@ -311,7 +311,7 @@ void LogManager::log(const std::string &cat, LogLevel level, const std::string &
                      const std::string &extendedInfo)
 {
     vector<Log*>::iterator it;
-    for (it = logs_.begin(); it != logs_.end(); it++) {
+    for (it = logs_.begin(); it != logs_.end(); ++it) {
         if (*it != 0)
             (*it)->log(cat, level, msg, extendedInfo);
     }

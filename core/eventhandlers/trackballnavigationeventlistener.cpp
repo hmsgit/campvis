@@ -146,8 +146,10 @@ namespace campvis {
 
     void TrackballNavigationEventListener::removeLqModeProcessor(VisualizationProcessor* vp) {
         for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it) {
-            if (*it == vp)
+            if (*it == vp) {
                 _lqModeProcessors.erase(it);
+                return;
+            }
         }
     }
 
