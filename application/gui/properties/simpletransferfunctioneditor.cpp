@@ -65,8 +65,8 @@ namespace campvis {
         SimpleTransferFunction* stf = static_cast<SimpleTransferFunction*>(_transferFunction);
         _cpwColorLeft->blockSignals(true);
         _cpwColorRight->blockSignals(true);
-        _cpwColorLeft->setColor(QtColorTools::toQColor(static_cast<SimpleTransferFunction*>(_transferFunction)->getLeftColor()));
-        _cpwColorRight->setColor(QtColorTools::toQColor(static_cast<SimpleTransferFunction*>(_transferFunction)->getRightColor()));
+        _cpwColorLeft->setColor(QtColorTools::toQColor(stf->getLeftColor()));
+        _cpwColorRight->setColor(QtColorTools::toQColor(stf->getRightColor()));
         _cpwColorLeft->blockSignals(false);
         _cpwColorRight->blockSignals(false);
     }

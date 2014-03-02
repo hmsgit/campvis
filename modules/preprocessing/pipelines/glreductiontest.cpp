@@ -40,6 +40,8 @@ namespace campvis {
         , _imageReader()
         , _resampler(&_canvasSize)
         , _ve(&_canvasSize)
+        , _glr(nullptr)
+        , _glr2(nullptr)
     {
         addProcessor(&_imageReader);
         addProcessor(&_resampler);

@@ -568,7 +568,7 @@ std::vector<std::string> TarFileFactory::getFilenames() {
     std::vector<std::string> files;
 
     std::map<std::string, ArchivedFile>::iterator theIterator;
-    for (theIterator = files_.begin(); theIterator != files_.end(); theIterator++)
+    for (theIterator = files_.begin(); theIterator != files_.end(); ++theIterator)
         files.push_back((*theIterator).first);
 
     return files;
@@ -627,7 +627,7 @@ bool FileSystem::exists(const std::string& filename) {
 void FileSystem::addFactory(FileFactory* ff) {
     std::vector<std::string> files = ff->getFilenames();
     std::vector<std::string>::iterator theIterator;
-    for (theIterator = files.begin(); theIterator != files.end(); theIterator++)
+    for (theIterator = files.begin(); theIterator != files.end(); ++theIterator)
         virtualFS_[*theIterator] = ff;
 
     factories_.push_back(ff);
@@ -1156,7 +1156,6 @@ std::vector<std::string> FileSystem::listFiles(const std::string& directory, con
     WIN32_FIND_DATA findFileData = {0};
     HANDLE hFind = 0;
 
-    std::stack<std::string> stackDirs;
     std::string dir(converted + "\\*");
 
     hFind = FindFirstFile(dir.c_str(), &findFileData);

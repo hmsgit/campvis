@@ -67,7 +67,7 @@ namespace campvis {
     }
 
     void GenericImageReader::deinit() {
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); it++) {
+        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); ++it) {
             if (nullptr != it->first) delete it->first;
             if (nullptr != it->second) delete it->second;
         }
@@ -128,7 +128,7 @@ namespace campvis {
         if(it != this->_readers.end()) {
             (it->first)->p_targetImageID.setValue(targetImageId.getValue());
             std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
-            for(std::set<AbstractProperty*>::iterator jt = sharedProperties.begin(); jt != sharedProperties.end(); jt++) {
+            for(std::set<AbstractProperty*>::iterator jt = sharedProperties.begin(); jt != sharedProperties.end(); ++jt) {
                 (it->first)->p_targetImageID.addSharedProperty(*jt);
             }
         }

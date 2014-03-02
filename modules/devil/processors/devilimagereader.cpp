@@ -56,7 +56,8 @@ namespace campvis {
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
         , p_importType("ImportType", "Import Type", importOptions, 3)
-        , _devilTextureReader(0)
+        , _shader(nullptr)
+        , _devilTextureReader(nullptr)
     {
         addProperty(&p_url);
         addProperty(&p_targetImageID);

@@ -53,7 +53,6 @@ namespace campvis {
         void operator() (const tbb::blocked_range<size_t>& range) const {
             for (size_t i = range.begin(); i != range.end(); ++i) {
                 tgt::svec3 pos = _intensities->getParent()->indexToPosition(i);
-                const tgt::svec3& size = _intensities->getSize();
 
                 const tgt::vec4& gradient = _gradients->getElement(i);
                 float fl = _intensities->getElementNormalized(i, 0);
@@ -183,7 +182,7 @@ namespace campvis {
 
             WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
             ImageData* imgTex = new ImageData(2, tgt::svec3(256, 256, 1), 1);
-            ImageRepresentationGL* tex = ImageRepresentationGL::create(imgTex, wtp);
+            ImageRepresentationGL::create(imgTex, wtp);
             delete [] tmp;
 
             data.addData("foo", imgTex);

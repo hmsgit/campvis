@@ -78,7 +78,7 @@ namespace campvis {
                 throw tgt::FileException("Unknown identifier in vtk file.", p_url.getValue());
 
             // next line is the header - contains only unimportant data
-            curLine = getTrimmedLine(file);
+            getTrimmedLine(file);
 
             // this line is the format
             curLine = StringUtils::lowercase(getTrimmedLine(file));
@@ -117,7 +117,6 @@ namespace campvis {
 
     void VtkImageReader::parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception) {
         // init optional parameters with sane default values
-        std::string url;
         size_t dimensionality = 3;
         tgt::svec3 size(static_cast<size_t>(0));
 

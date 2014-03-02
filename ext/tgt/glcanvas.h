@@ -150,10 +150,6 @@ public:
     /// wheater canvas automatically calls glFlush or swap
     bool getAutoFlush();
 
-    ///Take a screenshot and save it as TGA file.
-    ///@param fname Target filename
-    bool takeScreenshot(std::string fname);
-
     /// Getter
     const ivec4& getRgbaSize() const;
 
