@@ -1233,7 +1233,6 @@ std::vector<std::string> FileSystem::listSubDirectories(const std::string& direc
     WIN32_FIND_DATA findFileData = {0};
     HANDLE hFind = 0;
 
-    std::stack<std::string> stackDirs;
     std::string dir(converted + "\\*");
 
     hFind = FindFirstFile(dir.c_str(), &findFileData);

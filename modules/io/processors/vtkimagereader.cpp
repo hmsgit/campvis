@@ -74,6 +74,7 @@ namespace campvis {
                 throw tgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
 
             std::string curLine = getTrimmedLine(file);
+            // cppcheck-suppress stlIfStrFind
             if (curLine.find("# vtk DataFile Version") != 0)
                 throw tgt::FileException("Unknown identifier in vtk file.", p_url.getValue());
 

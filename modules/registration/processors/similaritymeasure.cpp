@@ -228,15 +228,11 @@ namespace campvis {
 
             if (similarities.size() >= 3 && similarities2.size() >= 3) {
                 float countRCP = 1.f / similarities[0];
-                float meanFixed = similarities[1] * countRCP;
-                float meanMoving = similarities[2] * countRCP;
                 float varFixed	= (similarities2[1] - (similarities[2] * similarities[2]) * countRCP) * countRCP;
                 float _varMoving = (similarities2[0] - (similarities[1] * similarities[1]) * countRCP) * countRCP;
 
-                float correlation = 0.0f;
-                if (varFixed > 0.0f && _varMoving > 0.0f)
-                {
-                    correlation = (similarities2[2] - (similarities[1] * similarities[2]) * countRCP) * countRCP;
+                if (varFixed > 0.0f && _varMoving > 0.0f) {
+                    float correlation = (similarities2[2] - (similarities[1] * similarities[2]) * countRCP) * countRCP;
                     toReturn =  correlation / sqrt(varFixed * _varMoving);
                 }
             }

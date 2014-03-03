@@ -63,7 +63,6 @@ namespace campvis {
             tfp.parse<TextFileParser::ItemSeparatorLines>();
 
             // init optional parameters with sane default values
-            size_t dimensionality = 3;
             tgt::svec3 size;
             WeaklyTypedPointer::BaseType pt;
 
@@ -104,6 +103,7 @@ namespace campvis {
 
             // dimensionality and size
             if (tfp.hasKey("CsvFileBaseName")) {
+                size_t dimensionality = 3;
                 ImageData* image = new ImageData(dimensionality, size, 1);
                 ImageRepresentationLocal* rep = 0;
                 size_t index = 0;
