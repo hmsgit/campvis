@@ -30,7 +30,6 @@
 #include "core/tools/typetraits.h"
 #include "core/tools/weaklytypedpointer.h"
 #include "modules/itk/core/itktypetraits.h"
-#include <../voreen-4.3/voreen-snapshot/ext/boost/include/boost/mpl/aux_/na_fwd.hpp>
 
 #include <itkImage.h>
 #include <itkImportImageFilter.h>
