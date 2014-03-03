@@ -380,6 +380,9 @@ void GpuCapabilities::detectOS() {
     ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
+#pragma warning(push)
+#pragma warning(disable:4996) // newer MSVC versions report GetVersionEx() to be deprecated, however the alternative is so poor design, I refuse to implement it... http://msdn.microsoft.com/en-us/library/windows/desktop/dn302074.aspx
+
     if (!GetVersionEx((OSVERSIONINFO*)&osvi)) {
         oss << "unknown: GetVersionEx() failed";
     }
@@ -418,6 +421,7 @@ void GpuCapabilities::detectOS() {
     }
     oss << " (build " <<  osvi.dwBuildNumber << ")";
     osVersionString_ = oss.str();
+#pragma warning(pop)
 
 #else // WIN32 -> must be UNIX/POSIX
     osVersion_ = OS_POSIX;

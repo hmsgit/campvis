@@ -155,9 +155,9 @@ namespace campvis {
         stepSize[5] = p_rotationStepSize.getValue();
         _opt->set_initial_step(stepSize);
 
-        double minf;
         nlopt::result result = nlopt::SUCCESS;
         try {
+            double minf;
             result = _opt->optimize(x, minf);
         }
         catch (std::exception& e) {
