@@ -40,6 +40,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
+
 // In this class we want to use various ITK filters. Each filter needs the same ITK boilerplate
 // code to be written before and after calling the filter. Futhermore, we need to distinguish 
 // between the different input base types, since ITK doesn't  know runtime type inference.
@@ -59,8 +60,8 @@
     { \
     GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue()); \
     if (itkRep != 0) { \
-        typedef GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
-        typedef GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
+        typedef typename GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
+        typedef typename GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
         itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
         \
         MD_filterBody \
@@ -71,13 +72,10 @@
     } \
     }
 
+// Multi-channel images not supported by most ITK processors...
 #define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
-    switch (MA_WTP._numChannels) { \
-        case 1 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 2 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 3 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 4 : PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-    }
+    tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
+    PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 #define DISPATCH_ITK_FILTER_RD(MA_WTP, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     switch (MA_WTP._baseType) { \
@@ -146,9 +144,9 @@
     do { \
         WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
         switch (MA_localRep->getDimensionality()) { \
-            case 1: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 1, MA_filterType, MD_filterBody) break; \
             case 2: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 2, MA_filterType, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 3, MA_filterType, MD_filterBody) break; \
+            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -162,9 +160,9 @@
     do { \
         WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
         switch (MA_localRep->getDimensionality()) { \
-            case 1: DISPATCH_ITK_FILTER_D(wtp, 1, MA_filterType, MD_filterBody) break; \
             case 2: DISPATCH_ITK_FILTER_D(wtp, 2, MA_filterType, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_D(wtp, 3, MA_filterType, MD_filterBody) break; \
+            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -215,7 +213,7 @@ namespace campvis {
     void ItkImageFilter::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
         
-        if (input != 0 && input->getParent()->getNumChannels() == 1) {
+        if (input != 0 && input->getParent()->getNumChannels() == 1 && (input->getDimensionality() == 2 || input->getDimensionality() == 3)) {
             ImageData* id = new ImageData(input->getDimensionality(), input->getSize(), 1);
 
             if (p_filterMode.getOptionValue() == "median") {
@@ -226,6 +224,8 @@ namespace campvis {
                     );
             }
             else if (p_filterMode.getOptionValue() == "gauss") {
+// disable known false-positive warning in ITK code when using GCC:
+#pragma GCC diagnostic ignored "-Warray-bounds"
                 DISPATCH_ITK_FILTER(input, DiscreteGaussianImageFilter, \
                     filter->SetUseImageSpacing(false); \
                     filter->SetVariance(p_sigma.getValue()); \
@@ -248,9 +248,10 @@ namespace campvis {
                     filter->SetConductanceParameter(p_conductance.getValue()); \
                     );
             }
-            else if (p_filterMode.getOptionValue() == "laplacianSharpening") {
+            if (p_filterMode.getOptionValue() == "laplacianSharpening") {
                 DISPATCH_ITK_FILTER(input, LaplacianSharpeningImageFilter, /* nothing here */);
             }
+            
             data.addData(p_targetImageID.getValue(), id);
         }
         else {

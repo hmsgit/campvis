@@ -30,6 +30,7 @@
 #include "core/tools/typetraits.h"
 #include "core/tools/weaklytypedpointer.h"
 #include "modules/itk/core/itktypetraits.h"
+#include <../voreen-4.3/voreen-snapshot/ext/boost/include/boost/mpl/aux_/na_fwd.hpp>
 
 #include <itkImage.h>
 #include <itkImportImageFilter.h>
@@ -270,20 +271,20 @@ namespace campvis {
             return 0;
         }
 
-        if (const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tester = dynamic_cast< const GenericImageRepresentationLocal<BASETYPE, 1>* >(source)) {
-            typename itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::Pointer importer = itk::ImportImageFilter<BASETYPE, DIMENSIONALITY>::New();
+        if (const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tester = dynamic_cast< const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* >(source)) {
+            typename itk::ImportImageFilter<ItkElementType, DIMENSIONALITY>::Pointer importer = itk::ImportImageFilter<ItkElementType, DIMENSIONALITY>::New();
 
-            typename itk::Image<BASETYPE, DIMENSIONALITY>::SizeType size;
+            typename ItkImageType::SizeType size;
             size[0] = tester->getSize().x;
-            if (source->getDimensionality() >= 2)
+            if (DIMENSIONALITY >= 2)
                 size[1] = tester->getSize().y;
-            if (source->getDimensionality() >= 3)
+            if (DIMENSIONALITY >= 3)
                 size[2] = tester->getSize().z;
-
-            typename itk::Image<BASETYPE, DIMENSIONALITY>::IndexType start;
+            
+            typename ItkImageType::IndexType start;
             start.Fill(0);
 
-            typename itk::Image<BASETYPE, DIMENSIONALITY>::RegionType region;
+            typename ItkImageType::RegionType region;
             region.SetSize(size);
             region.SetIndex(start);
             importer->SetRegion(region);
@@ -291,8 +292,8 @@ namespace campvis {
             importer->SetSpacing(tester->getParent()->getMappingInformation().getVoxelSize().elem);
             importer->SetOrigin(tester->getParent()->getMappingInformation().getOffset().elem);
 
-            typedef typename itk::Image<BASETYPE, DIMENSIONALITY>::PixelType PixelType;
-            const PixelType* pixelData = tester->getImageData();
+            typedef typename ItkImageType::PixelType PixelType;
+            const PixelType* pixelData = reinterpret_cast<const PixelType*>(tester->getImageData());
             importer->SetImportPointer(const_cast<PixelType*>(pixelData), tester->getNumElements(), false);
             importer->Update();
 
