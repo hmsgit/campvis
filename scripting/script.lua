@@ -10,22 +10,22 @@ function pipeline:ctor()
     self.image_reader = cvio.MhdImageReader()
     self.addProcessor(instance, self.image_reader)
 
-    local iv = tgt.ivec2(50, 10)
-
-    local ivp = campvis.IVec2Property("a", "b", iv, tgt.ivec2_zero, tgt.ivec2(100, 30))
-    self.ve = vis.VolumeExplorer(ivp)
-    self.resampler = preprocessing.GlImageResampler(ivp)
+    self.ve = vis.VolumeExplorer(self.getCanvasSizeProperty(instance))
+    self.resampler = preprocessing.GlImageResampler(self.getCanvasSizeProperty(instance))
 
     self.addProcessor(instance, self.resampler)
     self.addProcessor(instance, self.ve)
+
+    self.addEventListenerToBack(instance, self.ve)
 end
 
 function pipeline:init()
     print("I'm being inited!")
 
     self.ve.p_outputImage:setValue("result")
+    self.getRenderTargetIDProperty(instance):setValue("result")
 
-    self.image_reader.p_url:setValue("CAMPVIS_SOURCE_DIR/modules/vis/sampledata/smallHeart.mhd")
+    self.image_reader.p_url:setValue(campvis.SOURCE_DIR .. "/modules/vis/sampledata/smallHeart.mhd")
     self.image_reader.p_targetImageID:setValue("reader.output")
     self.image_reader.p_targetImageID:addSharedProperty(self.resampler.p_inputImage)
 
@@ -47,8 +47,3 @@ end
 function pipeline:deinit()
     print("I'm being deinited!")
 end
-
-local nt = campvis.StringProperty("a", "b", "c", campvis.AbstractProcessor_INVALID_RESULT)
-print(nt:getValue())
-nt:setValue("d")
-print(nt:getValue())

@@ -7,7 +7,7 @@
 
 namespace campvis {
 
-    class VolumeExplorer : public VisualizationProcessor {
+    class VolumeExplorer : public VisualizationProcessor, public tgt::EventListener {
     public:
         VolumeExplorer(campvis::IVec2Property* viewportSizeProp);
         ~VolumeExplorer();

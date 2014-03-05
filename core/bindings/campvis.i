@@ -103,14 +103,23 @@ namespace campvis {
         const std::string getName() const = 0;
     };
 
+    /* AbstractPipeline */
+
+    class AbstractPipeline {
+    public:
+        AbstractPipeline(DataContainer* dc);
+        virtual ~AbstractPipeline();
+
+        virtual const std::string getName() const = 0;
+    };
+
     /* AutoEvaluationPipeline */
 
-    %nodefaultctor AutoEvaluationPipeline;
-
-    class AutoEvaluationPipeline {
+    class AutoEvaluationPipeline : public AbstractPipeline {
     public:
         virtual void addProcessor(AbstractProcessor* processor);
-        virtual ~AutoEvaluationPipeline();
+
+        void addEventListenerToBack(tgt::EventListener* e);
     };
 
     /* TFGeometry1D */
@@ -181,6 +190,29 @@ namespace campvis {
 
         AbstractProperty* getProperty(const std::string& name) const;
     };
+}
+
+%inline {
+static const char* const SOURCE_DIR = CAMPVIS_SOURCE_DIR;
+
+namespace campvis {
+    /*
+     * Lua pipelines need to access certain protected properties of AbstractPipeline but can't
+     * reference them directly as they don't actually inherit from any class. This subclass exposes
+     * public getters for the properties in question. LuaPipeline instances can then be cast to
+     * ExtendedAutoEvaluationPipeline to give Lua code access to these new methods.
+     */
+    class ExtendedAutoEvaluationPipeline : public AutoEvaluationPipeline {
+    public:
+        const IVec2Property& ExtendedAutoEvaluationPipeline::getCanvasSizeProperty() const {
+            return _canvasSize;
+        }
+
+        const DataNameProperty& ExtendedAutoEvaluationPipeline::getRenderTargetIDProperty() const {
+            return _renderTargetID;
+        }
+    };
+}
 }
 
 %luacode {

@@ -2,6 +2,7 @@
 %include "stdint.i"
 %{
 #include "ext/tgt/vector.h"
+#include "ext/tgt/event/eventlistener.h"
 %}
 
 
@@ -41,4 +42,12 @@ namespace tgt {
 
     %template(col4) Vector4<uint8_t>;
     typedef Vector4<uint8_t> col4;
+
+    /* EventListener */
+
+    class EventListener {
+    public:
+        EventListener();
+        virtual ~EventListener();
+    };
 }
