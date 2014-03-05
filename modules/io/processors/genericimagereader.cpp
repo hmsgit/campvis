@@ -72,6 +72,7 @@ namespace campvis {
             if (nullptr != it->second) delete it->second;
         }
     }
+
     void GenericImageReader::updateResult(DataContainer& data) {
         std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
         if(it != this->_readers.end()) {
@@ -84,8 +85,10 @@ namespace campvis {
             }
             (it->first)->process(data);
         }
-        return;
+        
+        validate(INVALID_RESULT);
     }
+
     void GenericImageReader::setVisibibility(const std::string& extention, bool visibility) {
         std::string _ext = extention;
         std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(_ext));
@@ -97,8 +100,8 @@ namespace campvis {
             this->_currentlyVisible = it->second;
             //(it->first)->process(data);
         }
-        return;
     }
+
     void GenericImageReader::setURL(std::string p_url) {
         this->p_url.setValue(p_url);
 
