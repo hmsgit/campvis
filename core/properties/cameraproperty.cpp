@@ -37,14 +37,4 @@ namespace campvis {
     CameraProperty::~CameraProperty() {
     }
 
-    void CameraProperty::setWindowRatio(float r) {
-        if (r == 0) {
-            LERROR("Window ratio must not be 0.");
-            return;
-        }
-        tgt::Camera c = getValue();
-        c.setWindowRatio(r);
-        setValue(c);
-    }
-
 }
