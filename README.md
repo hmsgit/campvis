@@ -13,9 +13,11 @@ CAMPVis a software platform for medical imaging and visualization. It is targete
 
 ### Code & Build Status
 
-* [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=campvis-jobs/campvis-gcc)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/)
-* [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-cppcheck/cppcheckResult/graph)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-cppcheck/cppcheckResult/)
-* [![LOC Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/sloccountResult/trend)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/sloccountResult/)
+* Linux/GCC 4.8: [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=campvis-jobs/campvis-gcc)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/)
+* Windows/MSVC 2013: [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=campvis-jobs/campvis-msvc12)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-msvc12/)
+* Open Points: [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/tasks/trendGraph/png)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/tasks/)
+* CppCheck: [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/cppcheckResult/graph)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/cppcheckResult/)
+* Lines of Code: [![LOC Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/sloccountResult/trend)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/sloccountResult/)
 
 ### Requirements
 
