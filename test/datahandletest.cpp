@@ -13,20 +13,14 @@ protected:
     DataHandleTest() {
         _data1 = new campvis::ImageData(2, tgt::svec3(1,2,3), 4);
 
-        _dh0 = new campvis::DataHandle();
-        _dh1 = new campvis::DataHandle(_data1);
-        _dh2 = new campvis::DataHandle(*_dh1);
-        _dh3 = *_dh2;
+        _dh0 = campvis::DataHandle();
+        _dh1 = campvis::DataHandle(_data1);
+        _dh2 = campvis::DataHandle(_dh1);
+        _dh3 = _dh2;
     }
 
     ~DataHandleTest() {
-        // Note: Can't explicitely delete them, there's a note on the constructor
-        // tgt::Singleton<campvis::SimpleJobProcessor>>::getRef() assertions fails
-        // in the second delete!
-        //delete _dh1;
-        //delete _dh2;
-
-        delete _data1;
+        //delete _data1;
     }
 
     // If the constructor and destructor are not enough for setting up
@@ -39,26 +33,26 @@ protected:
 
 
 protected:
-    campvis::DataHandle *_dh0, *_dh1, *_dh2, _dh3, _dh4;
+    campvis::DataHandle _dh0, _dh1, _dh2, _dh3, _dh4;
     campvis::AbstractData * _data1;
 
 };
 
 TEST_F(DataHandleTest, getDataTest) {
-    ASSERT_TRUE(nullptr == _dh0->getData());
-    EXPECT_EQ(_dh1->getData(), _dh2->getData());
-    EXPECT_EQ(_dh1->getData(), _dh3.getData());
+    ASSERT_TRUE(nullptr == _dh0.getData());
+    EXPECT_EQ(_dh1.getData(), _dh2.getData());
+    EXPECT_EQ(_dh1.getData(), _dh3.getData());
 
     EXPECT_EQ(nullptr, _dh4.getData());
 }
 
 TEST_F(DataHandleTest, getTimestampTest) {
-    EXPECT_NE(-1, _dh0->getTimestamp());
-    EXPECT_NE(-1, _dh1->getTimestamp());
-    EXPECT_NE(-1, _dh2->getTimestamp());
+    EXPECT_NE(-1, _dh0.getTimestamp());
+    EXPECT_NE(-1, _dh1.getTimestamp());
+    EXPECT_NE(-1, _dh2.getTimestamp());
     EXPECT_NE(-1, _dh3.getTimestamp());
     EXPECT_NE(-1, _dh4.getTimestamp());
 
-    EXPECT_EQ(_dh1->getTimestamp(), _dh2->getTimestamp());
-    EXPECT_EQ(_dh1->getTimestamp(), _dh3.getTimestamp());
+    EXPECT_EQ(_dh1.getTimestamp(), _dh2.getTimestamp());
+    EXPECT_EQ(_dh1.getTimestamp(), _dh3.getTimestamp());
 }

@@ -19,7 +19,7 @@ protected:
     }
 
     ~ImageSeriesTest() {
-        delete _image;
+        //delete _image;
     }
 
     // If the constructor and destructor are not enough for setting up
