@@ -137,7 +137,7 @@ namespace campvis {
         /// Clear the trackball navigation event listener array
         /// - First delete the data that it contains
         std::vector<TrackballNavigationEventListener*>::iterator trackballNavEHIterator = _trackballEHs.begin();
-        for(; trackballNavEHIterator != _trackballEHs.end(); trackballNavEHIterator++) {
+        for(; trackballNavEHIterator != _trackballEHs.end(); ++trackballNavEHIterator) {
             delete (*trackballNavEHIterator);
         }
         _trackballEHs.clear();
@@ -145,13 +145,13 @@ namespace campvis {
         /// Clear the Camera properties related to the trackballs array
         /// - First delete the data that it contains
         std::vector<campvis::CameraProperty*>::iterator camPropertyIterator = _trackballCameraProperties.begin();
-        for(; camPropertyIterator != _trackballCameraProperties.end(); camPropertyIterator++) {
+        for(; camPropertyIterator != _trackballCameraProperties.end(); ++camPropertyIterator) {
             delete (*camPropertyIterator);
         }
         _trackballCameraProperties.clear();
 
         std::vector<GeometryTextureInfo>::iterator geomTexInfoIter = _geomTextureInfos.begin();
-        for(; geomTexInfoIter != _geomTextureInfos.end(); geomTexInfoIter++) {
+        for(; geomTexInfoIter != _geomTextureInfos.end(); ++geomTexInfoIter) {
             (*geomTexInfoIter).destroy();
         }
         _geomTextureInfos.clear();
@@ -437,7 +437,6 @@ namespace campvis {
             int cursorPosX = static_cast<int>(static_cast<float>(e->x() % _quadSize.x) / _quadSize.x * texWidth);
             int cursorPosY = static_cast<int>(static_cast<float>(e->y() % _quadSize.y) / _quadSize.y * texHeight);
 
-            float f = 0.0;
             if(_textures[texIndx]->isDepthTexture()) {
                 _depth = _textures[texIndx]->depthAsFloat(cursorPosX, texHeight - cursorPosY - 1);
                 _widget->updateDepth();
@@ -485,7 +484,7 @@ namespace campvis {
         case tgt::MouseEvent::MOUSE_BUTTON_LEFT:
             _selectedTexture = (selectedIndex.y * _numTiles.x) + selectedIndex.x;
                 
-            for(; geomTexInfoIter != _geomTextureInfos.end(); geomTexInfoIter++) {
+            for(; geomTexInfoIter != _geomTextureInfos.end(); ++geomTexInfoIter) {
                 if(static_cast<size_t> ((*geomTexInfoIter)._trackballIndx) == _selectedTexture) {
                     _selectedTrackball = (*geomTexInfoIter)._trackballIndx;
                     break;
@@ -638,7 +637,7 @@ namespace campvis {
     void DataContainerInspectorCanvas::updateMeshGeomRenderedTextures() {
         
         std::vector<GeometryTextureInfo>::iterator geomTexInfosIter = _geomTextureInfos.begin();
-        for(;geomTexInfosIter != _geomTextureInfos.end(); geomTexInfosIter++) {
+        for(;geomTexInfosIter != _geomTextureInfos.end(); ++geomTexInfosIter) {
             drawGeomteryData(dynamic_cast<const campvis::GeometryData*>((*geomTexInfosIter)._geomData.getData()), (*geomTexInfosIter)._texture, (*geomTexInfosIter)._trackballIndx);
         }
 
