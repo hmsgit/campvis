@@ -5,6 +5,7 @@
 %{
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
+#include "core/properties/floatingpointproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/pipeline/abstractprocessor.h"
@@ -71,7 +72,7 @@ namespace campvis {
     };
 
     template<typename T>
-    class NumericProperty {
+    class NumericProperty : public GenericProperty<T> {
     public:
         NumericProperty(
             const std::string& name,
@@ -85,8 +86,43 @@ namespace campvis {
         virtual ~NumericProperty();
     };
 
+    %template(Ivec2GenericProperty) GenericProperty< tgt::Vector2<int> >;
     %template(IVec2Property) NumericProperty< tgt::Vector2<int> >;
     typedef NumericProperty< tgt::Vector2<int> > IVec2Property;
+
+
+    template<typename T>
+    struct FloatingPointPropertyTraits {};
+
+    template<>
+    struct FloatingPointPropertyTraits<float> {
+        typedef int DecimalsType;
+    };
+
+    %template() FloatingPointPropertyTraits<float>;
+
+    template<typename T>
+    class FloatingPointProperty : public NumericProperty<T> {
+    public:
+        typedef typename FloatingPointPropertyTraits<T>::DecimalsType DecimalsType;
+
+        FloatingPointProperty(
+            const std::string& name,
+            const std::string& title,
+            const T& value,
+            const T& minValue,
+            const T& maxValue,
+            const T& stepValue = T(0.01f),
+            const DecimalsType& decimals = DecimalsType(3),
+            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+
+        virtual ~FloatingPointProperty();
+    };
+
+    %template(FloatGenericProperty) GenericProperty<float>;
+    %template(FloatNumericProperty) NumericProperty<float>;
+    %template(FloatProperty) FloatingPointProperty<float>;
+    typedef FloatingPointProperty< float > FloatProperty;
 
     /* AbstractProcessor */
 

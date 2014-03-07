@@ -17,6 +17,7 @@ namespace campvis {
         %immutable;
         campvis::DataNameProperty p_inputImage;
         campvis::DataNameProperty p_outputImage;
+        campvis::FloatProperty p_resampleScale;
         %mutable;
     };
 }
