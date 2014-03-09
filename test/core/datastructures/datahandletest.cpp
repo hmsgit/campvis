@@ -1,10 +1,7 @@
-// include gtest library
 #include "gtest/gtest.h"
 
-// include(s) for class to be tested
 #include "core/datastructures/datahandle.h"
 
-// additional dependency includes
 #include "core/datastructures/imagedata.h"
 
 

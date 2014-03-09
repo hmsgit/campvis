@@ -7,11 +7,16 @@ MESSAGE(STATUS "Configuring googletest for campvis Modules")
 #RESOLVE_MODULE_DEPENDENCIES()
 #WRITE_PIPELINE_REGISTRATION("gen_pipelineregistration.h")
 
-FILE(GLOB TestCampvisHeaders
+FILE(GLOB TestCampvisHeaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     *.h
 )
-FILE(GLOB TestCampvisSources
+FILE(GLOB TestCampvisSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     *.cpp
+    core/datastructures/*.cpp
+    core/properties/*.cpp
+    #classification/*.cpp
+    #eventhandlers/*.cpp
+    #pipeline/*.cpp
 )
 
 # Summary of tuple support for Microsoft Visual Studio:
@@ -35,6 +40,6 @@ INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs} ${C
 TARGET_LINK_LIBRARIES(test-campvis campvis-modules campvis-core tgt gtest ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
-    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisSources ${CampvisHome} "")
-    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisHeaders ${CampvisHome} "")
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisSources ${CampvisHome}/test "")
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisHeaders ${CampvisHome}/test "")
 ENDIF()

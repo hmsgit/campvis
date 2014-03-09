@@ -50,13 +50,13 @@ TEST_F(ImageSeriesTest, addImageTest) {
 }
 
 TEST_F(ImageSeriesTest, getImageTest) {
-    //EXPECT_EQ(_dh.getData(), &_imgSeries2.getImage(_imgSeries2.getNumImages()-1).getData());
-    EXPECT_EQ(_dh.getTimestamp(), _imgSeries2.getImage(_imgSeries2.getNumImages()-1).getTimestamp());
+    EXPECT_EQ(_dh.getData(), _imgSeries3.getImage(_imgSeries3.getNumImages()-1).getData());
 }
 
 TEST_F(ImageSeriesTest, getLocalMemoryFootprintTest) {
     SUCCEED();
 }
+
 TEST_F(ImageSeriesTest, getVideoMemoryFootprintTest) {
     SUCCEED();
 }
