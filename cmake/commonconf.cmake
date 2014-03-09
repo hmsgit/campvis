@@ -110,7 +110,7 @@ IF(WIN32)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
     SET(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
 
-    IF(CAMPVIS_SHARED_LIBS)
+    IF(BUILD_SHARED_LIBS)
         # Linking against Windows DLLs requires explicit instantiation of templates
         LIST(APPEND CampvisGlobalDefinitions "-DDLL_TEMPLATE_INST")
         LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_DYNAMIC_LIBS")
