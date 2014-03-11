@@ -3,7 +3,7 @@ require("cvio")
 require("vis")
 require("preprocessing")
 
-pipeline = campvis.newPipeline()
+pipeline = campvis.newPipeline("ResamplingDemoLua")
 
 function pipeline:ctor()
     print("I'm being constructed!")

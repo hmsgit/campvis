@@ -12,8 +12,9 @@ extern "C" {
 
 namespace campvis {
 
-    LuaPipeline::LuaPipeline(std::string scriptPath, DataContainer* dc)
+    LuaPipeline::LuaPipeline(const std::string name, std::string scriptPath, DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _name(name)
         , _scriptPath(scriptPath)
         , _luaVmState(new LuaVmState())
         , _pipelineTable(_luaVmState->getGlobalTable()->getTable("pipeline"))

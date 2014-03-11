@@ -47,6 +47,9 @@ FOREACH(ModName ${CampvisModules})
 
     IF(CAMPVIS_BUILD_MODULE_${ModNameUpper})
         LIST(APPEND CampvisBindingDirs "modules/${ModName}")
+
+        FILE(GLOB ModLuaPipelines "${CampvisHome}/modules/${ModName}/pipelines/*.lua")
+        LIST(APPEND CampvisLuaPipelines ${ModLuaPipelines})
     ENDIF(CAMPVIS_BUILD_MODULE_${ModNameUpper})
 ENDFOREACH(ModName ${CampvisModules})
 
@@ -96,6 +99,14 @@ FOREACH(BindingDir ${CampvisBindingDirs})
         DECLARE_LUA_MODULE(${InterfaceFileRelativePath})
     ENDFOREACH(InterfaceFile ${InterfaceFiles})
 ENDFOREACH(BindingDir ${CampvisBindingDirs})
+
+
+# Generate a registration header for Lua pipelines
+FOREACH(LuaPipeline ${CampvisLuaPipelines})
+    PARSE_SCRIPT_FOR_PIPELINE(${LuaPipeline})
+ENDFOREACH(LuaPipeline ${CampvisBindingDirs})
+
+WRITE_SCRIPTED_PIPELINE_REGISTRATION("gen_pipelineregistration.h")
 
 
 # Generate header with SWIG run-time functions

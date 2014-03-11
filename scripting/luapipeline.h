@@ -17,7 +17,7 @@ namespace campvis {
          * \param scriptPath    Path to the Lua script defining the pipeline
          * \param dc            DataContainer containing local working set of data for this pipeline
          */
-        LuaPipeline(const std::string scriptPath, DataContainer* dc);
+        LuaPipeline(const std::string name, const std::string scriptPath, DataContainer* dc);
 
         /**
          * Virtual Destructor
@@ -25,8 +25,7 @@ namespace campvis {
         virtual ~LuaPipeline();
 
         /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); }
-        static const std::string getId() { return "LuaPipeline"; }
+        virtual const std::string getName() const { return _name; }
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
@@ -35,6 +34,7 @@ namespace campvis {
         virtual void deinit();
 
     protected:
+        const std::string _name;                     ///< the name of this pipeline
         const std::string _scriptPath;               ///< path to the Lua script defining the pipeline
         LuaVmState* _luaVmState;                     ///< Lua VM state used to evaluate the pipeline
         std::shared_ptr<LuaTable> _pipelineTable;    ///< Pointer to the Lua table associated with the pipeline

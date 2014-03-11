@@ -47,7 +47,7 @@
 #include "modules/pipelinefactory.h"
 
 #ifdef CAMPVIS_HAS_SCRIPTING
-#include "scripting/scriptedpipelineregistrar.h"
+#include "scripting/gen_pipelineregistration.h"
 #endif
 
 namespace campvis {

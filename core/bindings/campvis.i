@@ -252,7 +252,11 @@ namespace campvis {
 }
 
 %luacode {
-  function campvis.newPipeline (o)
+  function campvis.newPipeline (name, o)
+    if not name then
+      error("A name must be provided when creating a new pipeline!")
+    end
+
     o = o or {}   -- create object if user does not provide one
     setmetatable(o, {__index = instance})
     return o
