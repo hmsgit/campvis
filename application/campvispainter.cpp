@@ -34,6 +34,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
@@ -65,8 +66,9 @@ namespace campvis {
 
         // try get Data
         ScopedTypedData<RenderData> rd(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
+        ImageRepresentationGL::ScopedRepresentation repGL(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        if (rd != 0) {
+        if (rd != 0 || (repGL != 0 && repGL->getDimensionality() == 2)) {
             // activate shader
             _copyShader->activate();
             _copyShader->setIgnoreUniformLocationError(true);
@@ -75,8 +77,11 @@ namespace campvis {
             _copyShader->setIgnoreUniformLocationError(false);
 
             // bind input textures
-            tgt::TextureUnit colorUnit, depthUnit;
-            rd->bind(_copyShader, colorUnit, depthUnit);
+            tgt::TextureUnit colorUnit;
+            if (rd)
+                rd->bindColorTexture(_copyShader, colorUnit);
+            else if (repGL)
+                repGL->bind(_copyShader, colorUnit);
             LGL_ERROR;
 
             // execute the shader
