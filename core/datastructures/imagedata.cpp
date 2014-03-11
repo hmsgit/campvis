@@ -42,6 +42,8 @@ namespace campvis {
         , _mappingInformation(size, tgt::vec3(0.f), tgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
     {
         tgtAssert(numChannels > 0, "Number of channels must be greater than 0!");
+        tgtAssert(_dimensionality >= 3 || _size.z == 1, "Dimensionality and size mismatch: A 2D image must have size.z = 1!");
+        tgtAssert(_dimensionality >= 2 || _size.y == 1, "Dimensionality and size mismatch: A 1D image must have size.y = 1!");
     }
 
     ImageData::~ImageData() {
