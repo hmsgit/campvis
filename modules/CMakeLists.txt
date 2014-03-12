@@ -17,7 +17,7 @@ LIST(APPEND CampvisModulesSources
 
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
-ADD_LIBRARY(campvis-modules
+ADD_LIBRARY(campvis-modules STATIC
     ${CampvisModulesSources} ${CampvisModulesHeaders} 
 )
 

@@ -14,13 +14,6 @@ IF(TGT_WITH_WMI)
 	LIST(APPEND CampvisGlobalExternalLibs "WbemUuid")
 ENDIF(TGT_WITH_WMI)
 
-IF(CAMPVIS_SHARED_LIBS)
-    SET(BUILD_SHARED_LIBS TRUE)
-	IF(MSVC)
-		ADD_DEFINITIONS("-DTGT_BUILD_DLL")
-	ENDIF()	
-ENDIF()
-
 
 # headers
 FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h)
@@ -99,6 +92,11 @@ ADD_LIBRARY(tgt ${TGT_SOURCES} ${TGT_HEADERS})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
 TARGET_LINK_LIBRARIES(tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
+
+# if TGT is built as a shared library, CMake will define the following flag to instruct the code to
+# export DLL symbols
+SET_TARGET_PROPERTIES(tgt PROPERTIES DEFINE_SYMBOL "TGT_BUILD_DLL")
+
 
 ################################################################################
 # deployment
