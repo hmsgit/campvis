@@ -61,8 +61,8 @@
     { \
     GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue()); \
     if (itkRep != 0) { \
-        typedef typename GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
-        typedef typename GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
+        typedef GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
+        typedef GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
         itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
         \
         MD_filterBody \
@@ -73,7 +73,6 @@
     } \
     }
 
-// Multi-channel images not supported by most ITK processors...
 /**
  * Executes the specified filter on the data specified filter (in-place filter)
  * \param MA_baseType       base type of input and output image
@@ -97,17 +96,15 @@
     } \
     }
 
+// Multi-channel images not supported by most ITK processors...
 #define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
     PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 #define DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, MA_baseType, MA_dimensionality, MA_filterType, MD_filterBody) \
-    switch (MA_WTP._numChannels) { \
-        case 1 : PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 2 : PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 3 : PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-        case 4 : PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody) break; \
-    }
+	tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
+    PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
+
 
 #define DISPATCH_ITK_FILTER_RD(MA_WTP, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     switch (MA_WTP._baseType) { \
@@ -234,9 +231,9 @@
     do { \
         WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
         switch (MA_localRep->getDimensionality()) { \
-            case 1: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 1, MA_filterType, MD_filterBody) break; \
             case 2: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 2, MA_filterType, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 3, MA_filterType, MD_filterBody) break; \
+			default: tgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
