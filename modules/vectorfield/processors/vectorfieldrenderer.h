@@ -90,11 +90,12 @@ namespace campvis {
 		FloatProperty p_lenThresholdMin;                ///< Threshold minimum
 		FloatProperty p_lenThresholdMax;                ///< Threshold maximum
 
-		IntProperty p_Time;
+		FloatProperty p_flowProfile1;
+		FloatProperty p_flowProfile2;
+		FloatProperty p_flowProfile3;
+		FloatProperty p_flowProfile4;
 
-		FloatProperty p_offsetX;
-		FloatProperty p_offsetY;
-		FloatProperty p_offsetZ;
+		IntProperty p_Time;
 
         CameraProperty p_camera;                                    ///< camera
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract

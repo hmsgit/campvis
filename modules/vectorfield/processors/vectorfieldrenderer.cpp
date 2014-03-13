@@ -56,9 +56,10 @@ namespace campvis {
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4, INVALID_RESULT | INVALID_PROPERTIES)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
 		, p_Time("time", "Time", 0, 0, 100)
-		, p_offsetX("OffsetX", "Offset X", 0.f, -10.f, 10.f, 0.1f, INVALID_RESULT | INVALID_PROPERTIES)
-		, p_offsetY("OffsetY", "Offset Y", 0.f, -10.f, 10.f, 0.1f, INVALID_RESULT | INVALID_PROPERTIES)
-		, p_offsetZ("OffsetZ", "Offset Z", 0.f, -10.f, 10.f, 0.1f, INVALID_RESULT | INVALID_PROPERTIES)
+		, p_flowProfile1("FlowSpline1", "Flow Profile - Spline 1", 1.f, .0f, 2.f)
+		, p_flowProfile2("FlowSpline2", "Flow Profile - Spline 2", 1.f, .0f, 2.f)
+		, p_flowProfile3("FlowSpline3", "Flow Profile - Spline 3", 1.f, .0f, 2.f)
+		, p_flowProfile4("FlowSpline4", "Flow Profile - Spline 4", 1.f, .0f, 2.f)
         , _arrowGeometry(0)
     {
         addDecorator(new ProcessorDecoratorShading());
@@ -72,9 +73,10 @@ namespace campvis {
         addProperty(&p_sliceOrientation);
         addProperty(&p_sliceNumber);
 		addProperty(&p_Time);
-		addProperty(&p_offsetX);
-		addProperty(&p_offsetY);
-		addProperty(&p_offsetZ);
+		addProperty(&p_flowProfile1);
+		addProperty(&p_flowProfile2);
+		addProperty(&p_flowProfile3);
+		addProperty(&p_flowProfile4);
 
         decoratePropertyCollection(this);
     }
@@ -127,10 +129,10 @@ namespace campvis {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
-				//0.221892f, 0.216767f, 0.0176888f, 0.352578f);
-				//0.3434614745686622, 0.1318631152182719, -0.0037494409917590, 0.3250012194996164);
-				//0.3341148180545890f, 0.2054856121554975f, -0.0048339177018019f, 0.2761340869991109f);
-				0.4716088614374652f, 0.0638348311845516f, 0.1713471562960614f, 0.1019371804834016f);
+				p_flowProfile1.getValue(),
+				p_flowProfile2.getValue(),
+				p_flowProfile3.getValue(),
+				p_flowProfile4.getValue());
 
             switch (p_sliceOrientation.getOptionValue()) {
                 case XY_PLANE:
@@ -195,7 +197,7 @@ namespace campvis {
                     p_sliceNumber.setMaxValue(static_cast<int>(vectors->getSize().x - 1));
                     break;
 				case XYZ_VOLUME:
-					p_sliceNumber.setMaxValue(100);
+					p_sliceNumber.setMaxValue(0);
             }
 		}
         else {
@@ -250,10 +252,8 @@ namespace campvis {
 
         const tgt::mat4& voxelToWorldMatrix = vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 
-		tgt::vec3 offset(p_offsetX.getValue(), p_offsetY.getValue(), p_offsetZ.getValue());
-
         // compute model matrix
-        tgt::mat4 modelMatrix = tgt::mat4::createTranslation(offset) * voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
+        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
 			tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue())) * tgt::mat4::createScale(tgt::vec3(scale));
 
         // setup shader

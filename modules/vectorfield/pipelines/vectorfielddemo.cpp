@@ -39,7 +39,7 @@ namespace campvis {
         , _sliceRenderer(&_canvasSize)
         , _rtc(&_canvasSize)
         , p_camera("Camera", "Camera", tgt::Camera())
-        , p_sliceNumber("SliceNuber", "Slice Number", 0, 0, 256)
+        , p_sliceNumber("SliceNuber", "Slice Number", 0, 0, 1024)
         , _trackballEH(0)
 
     {
@@ -68,19 +68,23 @@ namespace campvis {
         p_sliceNumber.addSharedProperty(&_vectorFieldRenderer.p_sliceNumber);
         p_sliceNumber.addSharedProperty(&_sliceRenderer.p_sliceNumber);
 
-        _imageReader.p_url.setValue("X:\\Zettinig\\data\\ifl_philipp_new\\philipp_rec4_2D_compounded.mhd");
+        _imageReader.p_url.setValue("D:\\data\\carotid_data\\recon_20140205\\oliver_run1_rec1_2D_compounded.mhd");
 		
 		_imageReader.p_targetImageID.setValue("reader.output");
 		_imageReader.p_targetImageID.addSharedProperty(&_sliceRenderer.p_sourceImageID);
 		_imageReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
-		_vectorFieldReader.p_url.setValue("X:\\Zettinig\\data\\ifl_philipp_new\\result_vec.mhd");
+		_vectorFieldReader.p_url.setValue("D:\\data\\carotid_data\\recon_20140205\\result_reg_spacing1\\result_vec.mhd");
 		_vectorFieldReader.p_targetImageID.setValue("vectors");
 		_vectorFieldReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectors);
 
         _vectorFieldRenderer.p_renderOutput.addSharedProperty(&_rtc.p_firstImageId);
-		_vectorFieldRenderer.p_arrowSize.setValue(0.01f);
+		_vectorFieldRenderer.p_arrowSize.setValue(0.03f);
 		_vectorFieldRenderer.p_lenThresholdMin.setValue(100.f);
+		_vectorFieldRenderer.p_flowProfile1.setValue(0.4716088614374652f);
+		_vectorFieldRenderer.p_flowProfile2.setValue(0.0638348311845516f);
+		_vectorFieldRenderer.p_flowProfile3.setValue(0.1713471562960614f);
+		_vectorFieldRenderer.p_flowProfile4.setValue(0.1019371804834016f);
 		_vectorFieldRenderer.p_lenThresholdMax.setValue(400.f);
 		_vectorFieldRenderer.p_sliceOrientation.setValue(3);
 
