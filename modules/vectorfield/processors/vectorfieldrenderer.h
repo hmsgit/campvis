@@ -122,9 +122,9 @@ namespace campvis {
          */
         void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale);
 
+		GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
         tgt::Shader* _shader;               ///< Shader for arrow rendering
-        GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
-
+        
         static const std::string loggerCat_;
     };
 

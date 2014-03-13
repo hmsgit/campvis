@@ -233,7 +233,8 @@ namespace campvis {
 	MultiIndexedGeometry* GeometryDataFactory::createArrow(uint16_t numSlices, float tipLen, float cylRadius, float tipRadius) {
         tgtAssert(numSlices > 2, "Arrow shaft must have minimum 3 slices!");
 		tgtAssert(tipRadius > cylRadius, "Tip radius must exceed cyclinder radius (for correct normals)!");
-		tgtAssert(tipLen > 0 && tipLen < 1, "Tip length must be between 0 and 1!");
+		tgtAssert(tipLen > 0, "Tip length must be between 0 and 1!");
+		tgtAssert(tipLen < 1, "Tip length must be between 0 and 1!");
         std::vector<tgt::vec3> vertices;
 		std::vector<tgt::vec3> normals;
 

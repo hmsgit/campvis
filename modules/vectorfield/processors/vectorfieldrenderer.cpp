@@ -47,19 +47,19 @@ namespace campvis {
 
     VectorFieldRenderer::VectorFieldRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_renderOutput("RenderOutput", "Output Image", "VectorFieldRenderer.output", DataNameProperty::WRITE)
 		, p_inputVectors("InputImage", "Input Image Vectors", "vectors", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_renderOutput("RenderOutput", "Output Image", "VectorFieldRenderer.output", DataNameProperty::WRITE)
         , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .001f, 5.f)
 		, p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1000.f, 0.005f)
 		, p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
-        , p_camera("Camera", "Camera", tgt::Camera())
-        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4, INVALID_RESULT | INVALID_PROPERTIES)
-        , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
-		, p_Time("time", "Time", 0, 0, 100)
 		, p_flowProfile1("FlowSpline1", "Flow Profile - Spline 1", 1.f, .0f, 2.f)
 		, p_flowProfile2("FlowSpline2", "Flow Profile - Spline 2", 1.f, .0f, 2.f)
 		, p_flowProfile3("FlowSpline3", "Flow Profile - Spline 3", 1.f, .0f, 2.f)
 		, p_flowProfile4("FlowSpline4", "Flow Profile - Spline 4", 1.f, .0f, 2.f)
+		, p_Time("time", "Time", 0, 0, 100)
+        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _arrowGeometry(0)
     {
         addDecorator(new ProcessorDecoratorShading());
@@ -159,7 +159,6 @@ namespace campvis {
 				case XYZ_VOLUME:
 					for (size_t x = 0; x < imgSize.x; ++x) {
 						for (size_t y = 0; y < imgSize.y; ++y) {
-							if(y < sliceNumber) continue;
 							for (size_t z = 0; z < imgSize.z; ++z) {
 								renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
 							}
@@ -219,9 +218,6 @@ namespace campvis {
     }
 
     void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale) {
-
-        /// minimum scale factor
-        const float EPS = .1f;
 
 		// avoid overflows
 		if(position.x >= vectors->getSize().x || position.x < 0 ||
