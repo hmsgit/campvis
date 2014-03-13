@@ -98,9 +98,9 @@ namespace campvis {
         // different templated conversion codes.
 #define CONVERT_ITK_TO_GENERIC_LOCAL(basetype, numchannels, dimensionality) \
         if (const GenericImageRepresentationItk<basetype, numchannels, dimensionality>* tester = dynamic_cast< const GenericImageRepresentationItk<basetype, numchannels, dimensionality>* >(source)) { \
-            typedef typename GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ItkImageType ItkImageType; \
-            typedef typename ItkImageType::PixelType ItkElementType; \
-            typedef typename GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ElementType ElementType; \
+            typedef /*typename*/ GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ItkImageType ItkImageType; \
+            typedef /*typename*/ ItkImageType::PixelType ItkElementType; \
+            typedef /*typename*/ GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ElementType ElementType; \
             const ItkElementType* pixelData = tester->getItkImage()->GetBufferPointer(); \
             \
             ItkImageType::RegionType region; \
