@@ -68,13 +68,13 @@ namespace campvis {
         p_sliceNumber.addSharedProperty(&_vectorFieldRenderer.p_sliceNumber);
         p_sliceNumber.addSharedProperty(&_sliceRenderer.p_sliceNumber);
 
-        _imageReader.p_url.setValue("D:\\data\\carotid_data\\recon_20140205\\oliver_run1_rec1_2D_compounded.mhd");
+        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/rec1_2D_comp.mhd");
 		
 		_imageReader.p_targetImageID.setValue("reader.output");
 		_imageReader.p_targetImageID.addSharedProperty(&_sliceRenderer.p_sourceImageID);
 		_imageReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
-		_vectorFieldReader.p_url.setValue("D:\\data\\carotid_data\\recon_20140205\\result_reg_spacing1\\result_vec.mhd");
+		_vectorFieldReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_vec.mhd");
 		_vectorFieldReader.p_targetImageID.setValue("vectors");
 		_vectorFieldReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectors);
 

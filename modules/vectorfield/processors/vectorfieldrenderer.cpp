@@ -293,7 +293,7 @@ namespace campvis {
 	float VectorFieldRenderer::evaluateCubicBSpline(float t)
 	{
 		t += 2; // t is given zero-centered => shift peak from 2 to 0
-		if(t <= 0 || t >= 4)
+		if(t <= 0 || t >= 4) 
 			return 0;
 		else if(t <= 1)
 			return t*t*t / 6.0f;

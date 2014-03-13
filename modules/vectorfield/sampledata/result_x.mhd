@@ -1,6 +1,0 @@
-NDims = 3
-DimSize = 36 36 36
-ElementType = MET_FLOAT
-ElementSpacing = 1 1 1
-ElementByteOrderMSB = False
-ElementDataFile = result_x.raw
