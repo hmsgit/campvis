@@ -1,0 +1,8 @@
+NDims = 3
+DimSize = 29 37 45
+ElementType = MET_FLOAT
+ElementNumberOfChannels = 3
+ElementSpacing = 1 1 1
+Position = -1.03666 -6.69913 -17.9103
+ElementByteOrderMSB = False
+ElementDataFile = result_vec.raw
