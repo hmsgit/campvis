@@ -55,6 +55,10 @@ namespace campvis {
         , p_camera("Camera", "Camera", tgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4, INVALID_RESULT | INVALID_PROPERTIES)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
+		, p_Time("time", "Time", 0, 0, 100)
+		, p_offsetX("OffsetX", "Offset X", 0.f, -10.f, 10.f, 0.1f, INVALID_RESULT | INVALID_PROPERTIES)
+		, p_offsetY("OffsetY", "Offset Y", 0.f, -10.f, 10.f, 0.1f, INVALID_RESULT | INVALID_PROPERTIES)
+		, p_offsetZ("OffsetZ", "Offset Z", 0.f, -10.f, 10.f, 0.1f, INVALID_RESULT | INVALID_PROPERTIES)
         , _arrowGeometry(0)
     {
         addDecorator(new ProcessorDecoratorShading());
@@ -67,6 +71,10 @@ namespace campvis {
         addProperty(&p_camera);
         addProperty(&p_sliceOrientation);
         addProperty(&p_sliceNumber);
+		addProperty(&p_Time);
+		addProperty(&p_offsetX);
+		addProperty(&p_offsetY);
+		addProperty(&p_offsetZ);
 
         decoratePropertyCollection(this);
     }
@@ -118,33 +126,40 @@ namespace campvis {
             createAndAttachDepthTexture();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
+				//0.221892f, 0.216767f, 0.0176888f, 0.352578f);
+				//0.3434614745686622, 0.1318631152182719, -0.0037494409917590, 0.3250012194996164);
+				//0.3341148180545890f, 0.2054856121554975f, -0.0048339177018019f, 0.2761340869991109f);
+				0.4716088614374652f, 0.0638348311845516f, 0.1713471562960614f, 0.1019371804834016f);
+
             switch (p_sliceOrientation.getOptionValue()) {
                 case XY_PLANE:
                     for (size_t x = 0; x < imgSize.x; ++x) {
                         for (size_t y = 0; y < imgSize.y; ++y) {
-                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber));
+                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber), scale);
                         }
                     }
                     break;
                 case XZ_PLANE:
                     for (size_t x = 0; x < imgSize.x; ++x) {
                         for (size_t z = 0; z < imgSize.z; ++z) {
-                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)));
+                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)), scale);
                         }
                     }
                     break;
                 case YZ_PLANE:
                     for (size_t y = 0; y < imgSize.y; ++y) {
                         for (size_t z = 0; z < imgSize.z; ++z) {
-                            renderVectorArrow(vectors, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)));
+                            renderVectorArrow(vectors, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)), scale);
                         }
                     }
                     break;
 				case XYZ_VOLUME:
 					for (size_t x = 0; x < imgSize.x; ++x) {
 						for (size_t y = 0; y < imgSize.y; ++y) {
+							if(y < sliceNumber) continue;
 							for (size_t z = 0; z < imgSize.z; ++z) {
-								renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)));
+								renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
 							}
 						}
 					}
@@ -180,7 +195,7 @@ namespace campvis {
                     p_sliceNumber.setMaxValue(static_cast<int>(vectors->getSize().x - 1));
                     break;
 				case XYZ_VOLUME:
-					p_sliceNumber.setMaxValue(0);
+					p_sliceNumber.setMaxValue(100);
             }
 		}
         else {
@@ -201,7 +216,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position) {
+    void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale) {
 
         /// minimum scale factor
         const float EPS = .1f;
@@ -235,16 +250,65 @@ namespace campvis {
 
         const tgt::mat4& voxelToWorldMatrix = vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 
+		tgt::vec3 offset(p_offsetX.getValue(), p_offsetY.getValue(), p_offsetZ.getValue());
+
         // compute model matrix
-        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
-			tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue()));
+        tgt::mat4 modelMatrix = tgt::mat4::createTranslation(offset) * voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
+			tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue())) * tgt::mat4::createScale(tgt::vec3(scale));
 
         // setup shader
-        _shader->setUniform("_color", tgt::vec4(dirNorm, 1.f));
+        //_shader->setUniform("_color", tgt::vec4(dirNorm, 1.f));
+		float color = (len - p_lenThresholdMin.getValue()) / (p_lenThresholdMax.getValue() - p_lenThresholdMin.getValue());
+		_shader->setUniform("_color", tgt::vec4(1.f, 1-color, 1-color, 1.f));
 
 		// render single ellipsoid
 		_shader->setUniform("_modelMatrix", modelMatrix);
 		_arrowGeometry->render(GL_TRIANGLE_STRIP);
     }
+
+
+	float VectorFieldRenderer::getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3)
+	{
+		const float halfPeriod = 0.5f;
+		const float spacing = 0.25f;
+
+		float St[4];
+
+		for(int j = 0; j < 4; ++j) { // iterate over spline positions
+			float splinePos = spacing * (j+1);
+
+			// periodic alignment of samples -> contribution to all splines => dense sampling matrix
+			if(t > splinePos + halfPeriod)
+				t -= 1;
+			else if(t < splinePos - halfPeriod)
+				t += 1;
+
+			float p = (splinePos - t) / spacing;
+			St[j] = evaluateCubicBSpline(p);
+		}
+
+		return St[0]*Ct0 + St[1]*Ct1 + St[2]*Ct2 + St[3]*Ct3;
+	}
+
+	float VectorFieldRenderer::evaluateCubicBSpline(float t)
+	{
+		t += 2; // t is given zero-centered => shift peak from 2 to 0
+		if(t <= 0 || t >= 4)
+			return 0;
+		else if(t <= 1)
+			return t*t*t / 6.0f;
+		else if(t <= 2) {
+			t -= 1;
+			return (-3*t*t*t + 3*t*t + 3*t + 1) / 6.0f;
+		}
+		else if(t <= 3) {
+			t -= 2;
+			return (3*t*t*t - 6*t*t + 4) / 6.0f;
+		}
+		else {
+			t -= 3;
+			return (1-t)*(1-t)*(1-t) / 6.0f;
+		}
+	}
 
 }

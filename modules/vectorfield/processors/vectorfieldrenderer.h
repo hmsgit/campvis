@@ -90,6 +90,12 @@ namespace campvis {
 		FloatProperty p_lenThresholdMin;                ///< Threshold minimum
 		FloatProperty p_lenThresholdMax;                ///< Threshold maximum
 
+		IntProperty p_Time;
+
+		FloatProperty p_offsetX;
+		FloatProperty p_offsetY;
+		FloatProperty p_offsetZ;
+
         CameraProperty p_camera;                                    ///< camera
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
         IntProperty p_sliceNumber;                                  ///< slice number
@@ -104,12 +110,16 @@ namespace campvis {
 
         std::string generateGlslHeader() const;
 
+		// for B-Spline evaluation
+		float getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3);
+		float evaluateCubicBSpline(float t);
+
         /**
          * Renders a single vector arrow
 		 * \param   vectors     Input vector image
          * \param   position    Position to render
          */
-        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position);
+        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale);
 
         tgt::Shader* _shader;               ///< Shader for arrow rendering
         GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
