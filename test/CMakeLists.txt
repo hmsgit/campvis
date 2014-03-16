@@ -14,7 +14,7 @@ FILE(GLOB TestCampvisSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     *.cpp
     core/datastructures/*.cpp
     core/properties/*.cpp
-    #classification/*.cpp
+    core/tools/*.cpp
     #eventhandlers/*.cpp
     #pipeline/*.cpp
 )

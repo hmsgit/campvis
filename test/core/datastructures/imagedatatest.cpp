@@ -1,13 +1,41 @@
-// include gtest library
+// ================================================================================================
+// 
+// This file is part of the CAMPVis Software Framework.
+// 
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+//      Christian Schulte zu Berge <christian.szb@in.tum.de>
+//      Chair for Computer Aided Medical Procedures
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
+// For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
+// 
+// ================================================================================================
+
+/**
+ * Author: Hossain Mahmud <mahmud@in.tum.de>
+ * Date: March 2014
+ */
+
 #include "gtest/gtest.h"
 
-// include(s) for class to be tested
 #include "core/datastructures/imagedata.h"
 
-// additional dependency includes
 #include "core/datastructures/imagedata.h"
 
-
+/**
+ * Test class for ImageData class.
+ */
 class ImageDataTest : public testing::Test {
 protected:
     ImageDataTest() {
@@ -36,15 +64,45 @@ protected:
 
 };
 
-TEST_F(ImageDataTest, initTest) {
+/**
+ * Tests the trivial operations of the class.
+ * initialization
+ * getDimensionality()
+ * getNumChannels()
+ * getNumElements()
+ * getWorldBounds()
+ * get/setMappingInformation()
+ * positionToIndex()/indexToPosition()
+ */
+TEST_F(ImageDataTest, miscellaneousTest) {
     ASSERT_TRUE(nullptr != _imgData1);
 
     EXPECT_EQ(2, _imgData0->getDimensionality());
     EXPECT_EQ(4, _imgData0->getNumChannels());
     EXPECT_EQ(tgt::hmul(tgt::svec3(1,2,3)), _imgData0->getNumElements());
     EXPECT_EQ(tgt::svec3(1,2,3).size, _imgData0->getSize().size);
+
+    tgt::Bounds bound0 = _imgData0->getWorldBounds();
+    tgt::Bounds bound1 = _imgData1->getWorldBounds();
+    EXPECT_EQ(bound0, bound1);
+
+    campvis::ImageData temp = campvis::ImageData(3, tgt::svec3(3,2,1), 5);
+    temp.setMappingInformation(_imgData0->getMappingInformation());
+
+    EXPECT_TRUE(temp.getMappingInformation() == _imgData0->getMappingInformation());
+
+    tgt::svec3 vec(1, 2, 3);
+    _imgData0->positionToIndex(vec);
+    EXPECT_EQ(1, 1);
+
+    size_t sz = 3;
+    _imgData0->indexToPosition(sz);
+    EXPECT_EQ(1, 1);
 }
 
+/**
+ * Tests the clone() function.
+ */
 TEST_F(ImageDataTest, cloneTest) {
     ASSERT_TRUE(nullptr != _imgData1);
 
@@ -59,19 +117,11 @@ TEST_F(ImageDataTest, cloneTest) {
     EXPECT_EQ(_imgData0->getVideoMemoryFootprint(), _imgData1->getVideoMemoryFootprint());
 }
 
-TEST_F(ImageDataTest, getSetMappingInformationTest) {
-    campvis::ImageData temp = campvis::ImageData(3, tgt::svec3(3,2,1), 5);
-    temp.setMappingInformation(_imgData0->getMappingInformation());
-
-    EXPECT_TRUE(temp.getMappingInformation() == _imgData0->getMappingInformation());
-}
-
-TEST_F(ImageDataTest, getWorldBoundsTest) {
-    tgt::Bounds bound0 = _imgData0->getWorldBounds();
-    tgt::Bounds bound1 = _imgData1->getWorldBounds();
-    EXPECT_EQ(bound0, bound1);
-}
-
+/**
+ * Tests getSubImage() method.
+ *
+ * For test cases 1. whole image and 2. images of size (1,1,1) were checked
+ */
 TEST_F(ImageDataTest, getSubImageTest) {
     campvis::ImageData *cloned = _imgData0->getSubImage(tgt::svec3(0,0,0), _imgData0->getSize());
 
@@ -91,16 +141,4 @@ TEST_F(ImageDataTest, getSubImageTest) {
 
     cloned = _imgData0->getSubImage(_imgData0->getSize()-tgt::svec3(1,1,1), _imgData0->getSize());
     EXPECT_EQ(tgt::svec3(1,1,1), cloned->getSize());
-}
-
-TEST_F(ImageDataTest, positionToIndexTest) {
-    tgt::svec3 vec(1, 2, 3);
-    size_t sz = _imgData0->positionToIndex(vec);
-    EXPECT_EQ(1, 1);
-}
-
-TEST_F(ImageDataTest, indexToPositionTest) {
-    size_t sz = 3;
-    tgt::svec3 vec = _imgData0->indexToPosition(sz);
-    EXPECT_EQ(1, 1);
 }

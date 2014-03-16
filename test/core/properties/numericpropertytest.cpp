@@ -1,3 +1,32 @@
+// ================================================================================================
+// 
+// This file is part of the CAMPVis Software Framework.
+// 
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+//      Christian Schulte zu Berge <christian.szb@in.tum.de>
+//      Chair for Computer Aided Medical Procedures
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
+// For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
+// 
+// ================================================================================================
+
+/**
+ * Author: Hossain Mahmud <mahmud@in.tum.de>
+ * Date: March 2014
+ */
+
 #include "gtest/gtest.h"
 
 #include "core/properties//numericproperty.h"
@@ -7,6 +36,12 @@
 #include "core/pipeline/abstractprocessor.h"
 
 using namespace campvis;
+
+
+/**
+ * Test class for NumericProperty. The units from GenericProperty and AbstractProperty are
+ * are being tested at StringPropertyTest. Here are the additional max/min related tests. 
+ */
 
 class NumericPropertyTest : public ::testing::Test {
 protected:
@@ -30,15 +65,17 @@ protected:
     }
 
 protected:
+    int imax, imin, istep;
     NumericProperty<int> _intProp;
     NumericProperty<int> _intProp2;
+    double dmax, dmin, dstep;
     NumericProperty<double> _doubleProp;
 
-protected:
-    int imax, imin, istep;
-    double dmax, dmin, dstep;
 };
 
+/** 
+ * Checks whether the value get clamped at the max limit.
+ */
 TEST_F(NumericPropertyTest, maxTest) {
     this->_intProp.setValue(imax);
     EXPECT_EQ(imax, this->_intProp.getValue());
@@ -51,6 +88,9 @@ TEST_F(NumericPropertyTest, maxTest) {
     EXPECT_DOUBLE_EQ(dmax, this->_doubleProp.getValue());
 }
 
+/** 
+ * Checks whether the value get clamped at the min limit.
+ */
 TEST_F(NumericPropertyTest, minTest) {
     this->_intProp.setValue(imin);
     EXPECT_EQ(imin, this->_intProp.getValue());
@@ -63,6 +103,9 @@ TEST_F(NumericPropertyTest, minTest) {
     EXPECT_DOUBLE_EQ(dmin, this->_doubleProp.getValue());
 }
 
+/** 
+ * Checks whether the value is clamped at the max limit. It should.
+ */
 TEST_F(NumericPropertyTest, increaseTest) {
     EXPECT_EQ(0, this->_intProp.getValue());
     this->_intProp.increment();
@@ -83,6 +126,10 @@ TEST_F(NumericPropertyTest, increaseTest) {
     EXPECT_EQ(dmax, this->_doubleProp.getValue());
 }
 
+
+/** 
+ * Checks whether the value is clamped at the min limit. It should.
+ */
 TEST_F(NumericPropertyTest, decreaseTest) {
     EXPECT_EQ(0, this->_intProp.getValue());
     this->_intProp.decrement();
@@ -101,77 +148,4 @@ TEST_F(NumericPropertyTest, decreaseTest) {
     EXPECT_EQ(dmin, this->_doubleProp.getValue());
     this->_doubleProp.decrement();
     EXPECT_EQ(dmin, this->_doubleProp.getValue());
-}
-
-/**
- * Other Generic Tests
- */
-TEST_F(NumericPropertyTest, getValueTest) {
-    EXPECT_EQ(0, this->_intProp.getValue());
-}
-
-TEST_F(NumericPropertyTest, setValueTest) {
-    this->_intProp.setValue(5);
-    EXPECT_EQ(5, this->_intProp.getValue());
-}
-
-TEST_F(NumericPropertyTest, addSharedPropertyTest) {
-    this->_intProp.addSharedProperty(&this->_intProp2);
-    EXPECT_EQ(this->_intProp.getValue(), this->_intProp2.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-}
-
-TEST_F(NumericPropertyTest, getSharedPropertiesTest) {
-    std::set<AbstractProperty*> sharedProps = this->_intProp.getSharedProperties();
-    EXPECT_EQ(0, sharedProps.size());
-    this->_intProp.addSharedProperty(&this->_intProp2);
-    sharedProps = this->_intProp.getSharedProperties();
-    EXPECT_EQ(1, sharedProps.size());
-    AbstractProperty *prop = *sharedProps.begin();
-    EXPECT_EQ(this->_intProp2.getName(), prop->getName());
-}
-
-TEST_F(NumericPropertyTest, removeSharedPropertyTest) {
-    this->_intProp.addSharedProperty(&this->_intProp2);
-    EXPECT_EQ(this->_intProp.getValue(), this->_intProp2.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-
-    this->_intProp.removeSharedProperty(&this->_intProp2);
-    EXPECT_EQ(this->_intProp.getValue(), this->_intProp2.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-
-    this->_intProp.setValue(1);
-    EXPECT_EQ(1, this->_intProp.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-}
-
-
-TEST_F(NumericPropertyTest, lockTest) {
-    this->_intProp.addSharedProperty(&this->_intProp2);
-    this->_intProp.setValue(0);
-    EXPECT_EQ(this->_intProp.getValue(), this->_intProp2.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-
-    this->_intProp.lock();
-
-    EXPECT_EQ(this->_intProp.getValue(), this->_intProp2.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-
-    this->_intProp.setValue(1);
-    EXPECT_EQ(0, this->_intProp.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-
-}
-TEST_F(NumericPropertyTest, unlockTest) {
-    this->_intProp.addSharedProperty(&this->_intProp2);
-    this->_intProp.setValue(0);
-    this->_intProp.lock();
-
-    this->_intProp.setValue(1);
-    EXPECT_EQ(0, this->_intProp.getValue());
-    EXPECT_EQ(0, this->_intProp2.getValue());
-
-    this->_intProp.unlock();
-    EXPECT_EQ(1, this->_intProp.getValue());
-    EXPECT_EQ(1, this->_intProp2.getValue());
 }
