@@ -28,6 +28,9 @@ IF(WIN32)
     OPTION(CAMPVIS_GENERATE_MANIFEST    "Generate manifest in Visual Studio debug builds (switch on when encountering errors using incremental linking)?"          OFF)
 ENDIF()
 
+SET(CAMPVIS_DEFAULT_ENABLED_MODULES "STABLE_NO_DEPENDENCIES" CACHE STRING "Default CAMPVis modules to activate")
+SET_PROPERTY(CACHE CAMPVIS_DEFAULT_ENABLED_MODULES PROPERTY STRINGS "NONE" "STABLE_NO_DEPENDENCIES" "STABLE_WITH_EXTERNAL_DEPENDENCIES" "TESTING" "ALL")
+
 #
 # Further Build Configurations
 #
