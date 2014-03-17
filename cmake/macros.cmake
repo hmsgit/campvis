@@ -53,6 +53,10 @@ MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
         
         SET(ModuleEnabled FALSE)
         INCLUDE(${ModuleListFile})
+        
+        IF(NOT DEFINED ThisModExternalDependencies)
+            SET(ThisModExternalDependencies FALSE)
+        ENDIF(NOT DEFINED ThisModExternalDependencies)
             
         # enable module if module status matches CAMPVIS_DEFAULT_ENABLED_MODULES
         IF(${CAMPVIS_DEFAULT_ENABLED_MODULES} STREQUAL "STABLE_NO_DEPENDENCIES" AND ThisModStatus STREQUAL STABLE AND NOT ThisModExternalDependencies)
