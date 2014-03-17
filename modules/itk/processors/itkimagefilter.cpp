@@ -102,7 +102,7 @@
     PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 #define DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, MA_baseType, MA_dimensionality, MA_filterType, MD_filterBody) \
-	tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
+    tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
     PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 
@@ -233,7 +233,7 @@
         switch (MA_localRep->getDimensionality()) { \
             case 2: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 2, MA_filterType, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 3, MA_filterType, MD_filterBody) break; \
-			default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -251,7 +251,7 @@ namespace campvis {
         GenericOption<std::string>("gradientDiffusion", "Gradient Anisotropic Diffusion"),
         GenericOption<std::string>("curvatureDiffusion", "Curvature Anisotropic Diffusion"),
         GenericOption<std::string>("laplacianSharpening", "Laplacian Sharpening"),
-		GenericOption<std::string>("thresholding", "Thresholding")
+        GenericOption<std::string>("thresholding", "Thresholding")
     };
 
     const std::string ItkImageFilter::loggerCat_ = "CAMPVis.modules.classification.ItkImageFilter";
@@ -266,8 +266,8 @@ namespace campvis {
         , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
         , p_timeStep("TimeStep", "Time Step", .0625, .001f, .12499f, 0.001f)
         , p_conductance("Conductance", "Conductance", 1.f, .1f, 5.f, 0.1f)
-		, p_thresMin("ThresholdMin", "Threshold Minimum", 0.1f, 0.0f, 1.0f, 0.05f)
-		, p_thresMax("ThresholdMax", "Threshold Maximum", 0.9f, 0.0f, 1.0f, 0.05f)
+        , p_thresMin("ThresholdMin", "Threshold Minimum", 0.1f, 0.0f, 1.0f, 0.05f)
+        , p_thresMax("ThresholdMax", "Threshold Maximum", 0.9f, 0.0f, 1.0f, 0.05f)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_targetImageID);
@@ -277,8 +277,8 @@ namespace campvis {
         addProperty(&p_numberOfSteps);
         addProperty(&p_timeStep);
         addProperty(&p_conductance);
-		addProperty(&p_thresMin);
-		addProperty(&p_thresMax);
+        addProperty(&p_thresMin);
+        addProperty(&p_thresMax);
     }
 
     ItkImageFilter::~ItkImageFilter() {
@@ -327,7 +327,7 @@ namespace campvis {
             if (p_filterMode.getOptionValue() == "laplacianSharpening") {
                 DISPATCH_ITK_FILTER(input, LaplacianSharpeningImageFilter, /* nothing here */);
             }
-			else if (p_filterMode.getOptionValue() == "thresholding") {
+            else if (p_filterMode.getOptionValue() == "thresholding") {
                 DISPATCH_ITK_FILTER_INPLACE(input, ThresholdImageFilter, \
                     filter->ThresholdOutside(p_thresMin.getValue(), p_thresMax.getValue()); \
                     );
@@ -349,6 +349,8 @@ namespace campvis {
             p_numberOfSteps.setVisible(false);
             p_timeStep.setVisible(false);
             p_conductance.setVisible(false);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
         }
         else if (p_filterMode.getOptionValue() == "gauss") {
             p_kernelSize.setVisible(false);
@@ -356,6 +358,8 @@ namespace campvis {
             p_numberOfSteps.setVisible(false);
             p_timeStep.setVisible(false);
             p_conductance.setVisible(false);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
         }
         else if (p_filterMode.getOptionValue() == "sobel" || p_filterMode.getOptionValue() == "laplacianSharpening") {
             p_kernelSize.setVisible(false);
@@ -363,6 +367,8 @@ namespace campvis {
             p_numberOfSteps.setVisible(false);
             p_timeStep.setVisible(false);
             p_conductance.setVisible(false);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
         }
         else if (p_filterMode.getOptionValue() == "gradientDiffusion" || p_filterMode.getOptionValue() == "curvatureDiffusion") {
             p_kernelSize.setVisible(false);
@@ -370,10 +376,18 @@ namespace campvis {
             p_numberOfSteps.setVisible(true);
             p_timeStep.setVisible(true);
             p_conductance.setVisible(true);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
         }
-		else if(p_filterMode.getOptionValue() == "") {
-			// TODO
-		}
+        else if(p_filterMode.getOptionValue() == "thresholding") {
+            p_kernelSize.setVisible(false);
+            p_sigma.setVisible(false);
+            p_numberOfSteps.setVisible(false);
+            p_timeStep.setVisible(false);
+            p_conductance.setVisible(false);
+            p_thresMin.setVisible(true);
+            p_thresMax.setVisible(true);
+        }
 
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }

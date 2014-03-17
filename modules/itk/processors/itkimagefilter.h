@@ -69,9 +69,9 @@ namespace campvis {
         FloatProperty p_sigma;
         IntProperty p_numberOfSteps;
         FloatProperty p_timeStep;
-		FloatProperty p_thresMin;
-		FloatProperty p_thresMax;
         FloatProperty p_conductance;
+        FloatProperty p_thresMin;
+        FloatProperty p_thresMax;
 
     protected:
         /// \see AbstractProcessor::updateResult
