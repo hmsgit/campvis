@@ -34,6 +34,7 @@
 #include <itkGradientAnisotropicDiffusionImageFilter.h>
 #include <itkCurvatureAnisotropicDiffusionImageFilter.h>
 #include <itkLaplacianSharpeningImageFilter.h>
+#include <itkThresholdImageFilter.h>
 
 #include <tbb/tbb.h>
 
@@ -48,7 +49,7 @@
 // corresponding ITK filters within this processor. Good luck!
 
 /**
- * Executes the specified filter on the data specified filter.
+ * Executes the specified filter on the data specified filter (in-out-filter).
  * \param MA_baseType       base type of input image
  * \param MA_returnType     base type of ouput image
  * \param MA_numChannels    number of channels of input image
@@ -60,8 +61,8 @@
     { \
     GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue()); \
     if (itkRep != 0) { \
-        typedef typename GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
-        typedef typename GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
+        typedef GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
+        typedef GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
         itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
         \
         MD_filterBody \
@@ -72,10 +73,38 @@
     } \
     }
 
+/**
+ * Executes the specified filter on the data specified filter (in-place filter)
+ * \param MA_baseType       base type of input and output image
+ * \param MA_numChannels    number of channels of input image
+ * \param MA_dimensionality dimensionality of images
+ * \param MA_filterType     type name if the ITK filter to use (within itk:: namespace)
+ * \param MD_filterBody     additional stuff to execute between filter definition and execution
+ */
+#define PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, MA_numChannels, MA_dimensionality, MA_filterType, MD_filterBody) \
+    { \
+    GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue()); \
+    if (itkRep != 0) { \
+        typedef GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType ImageType; \
+        itk::MA_filterType<ImageType>::Pointer filter = itk::MA_filterType<ImageType>::New(); \
+        \
+        MD_filterBody \
+        \
+        filter->SetInput(itkRep->getItkImage()); \
+        filter->Update(); \
+        GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::create(id, filter->GetOutput()); \
+    } \
+    }
+
 // Multi-channel images not supported by most ITK processors...
 #define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
     PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
+
+#define DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, MA_baseType, MA_dimensionality, MA_filterType, MD_filterBody) \
+    tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
+    PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
+
 
 #define DISPATCH_ITK_FILTER_RD(MA_WTP, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     switch (MA_WTP._baseType) { \
@@ -131,6 +160,32 @@
             tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
+#define DISPATCH_ITK_FILTER_INPLACE_D(MA_WTP, MA_dimensionality, MA_filterType, MD_filterBody) \
+    switch (MA_WTP._baseType) { \
+        case WeaklyTypedPointer::UINT8: \
+            DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, uint8_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT8: \
+            DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, int8_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::UINT16: \
+            DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, uint16_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT16: \
+            DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, int16_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::UINT32: \
+            DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, uint32_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::INT32: \
+            DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, int32_t, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        case WeaklyTypedPointer::FLOAT: \
+            DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, float, MA_dimensionality, MA_filterType, MD_filterBody) \
+            break; \
+        default: \
+            tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+    } \
 
 /**
  * Dispatches the execution for the ITK filter \a MA_filterType with the output base type
@@ -166,6 +221,22 @@
         } \
     } while (0)
 
+/**
+ * Dispatches the execution for the in-place ITK filter \a MA_filterType for the image \a MA_localRep.
+ * \param MA_localRep       local representation of the image to apply the filter to
+ * \param MA_filterType     type name if the ITK filter to use (within itk:: namespace)
+ * \param MD_filterBody     additional stuff to execute between filter definition and execution
+ */
+#define DISPATCH_ITK_FILTER_INPLACE(MA_localRep, MA_filterType, MD_filterBody) \
+    do { \
+        WeaklyTypedPointer wtp = MA_localRep->getWeaklyTypedPointer(); \
+        switch (MA_localRep->getDimensionality()) { \
+            case 2: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 2, MA_filterType, MD_filterBody) break; \
+            case 3: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 3, MA_filterType, MD_filterBody) break; \
+            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+        } \
+    } while (0)
+
 
 // ================================================================================================
 // = Macros defined, let the party begin!                                                         =
@@ -173,13 +244,14 @@
 
 namespace campvis {
 
-    static const GenericOption<std::string> filterModes[6] = {
+    static const GenericOption<std::string> filterModes[7] = {
         GenericOption<std::string>("median", "Median"),
         GenericOption<std::string>("gauss", "Gauss"),
         GenericOption<std::string>("sobel", "Sobel"),
         GenericOption<std::string>("gradientDiffusion", "Gradient Anisotropic Diffusion"),
         GenericOption<std::string>("curvatureDiffusion", "Curvature Anisotropic Diffusion"),
-        GenericOption<std::string>("laplacianSharpening", "Laplacian Sharpening")
+        GenericOption<std::string>("laplacianSharpening", "Laplacian Sharpening"),
+        GenericOption<std::string>("thresholding", "Thresholding")
     };
 
     const std::string ItkImageFilter::loggerCat_ = "CAMPVis.modules.classification.ItkImageFilter";
@@ -188,12 +260,14 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
-        , p_filterMode("FilterMode", "Filter Mode", filterModes, 6, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_filterMode("FilterMode", "Filter Mode", filterModes, 7, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f, 0.1f)
         , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
         , p_timeStep("TimeStep", "Time Step", .0625, .001f, .12499f, 0.001f)
         , p_conductance("Conductance", "Conductance", 1.f, .1f, 5.f, 0.1f)
+        , p_thresMin("ThresholdMin", "Threshold Minimum", 0.1f, 0.0f, 1.0f, 0.05f)
+        , p_thresMax("ThresholdMax", "Threshold Maximum", 0.9f, 0.0f, 1.0f, 0.05f)
     {
         addProperty(&p_sourceImageID);
         addProperty(&p_targetImageID);
@@ -203,6 +277,8 @@ namespace campvis {
         addProperty(&p_numberOfSteps);
         addProperty(&p_timeStep);
         addProperty(&p_conductance);
+        addProperty(&p_thresMin);
+        addProperty(&p_thresMax);
     }
 
     ItkImageFilter::~ItkImageFilter() {
@@ -251,7 +327,11 @@ namespace campvis {
             if (p_filterMode.getOptionValue() == "laplacianSharpening") {
                 DISPATCH_ITK_FILTER(input, LaplacianSharpeningImageFilter, /* nothing here */);
             }
-            
+            else if (p_filterMode.getOptionValue() == "thresholding") {
+                DISPATCH_ITK_FILTER_INPLACE(input, ThresholdImageFilter, \
+                    filter->ThresholdOutside(p_thresMin.getValue(), p_thresMax.getValue()); \
+                    );
+            }
             data.addData(p_targetImageID.getValue(), id);
         }
         else {
@@ -269,6 +349,8 @@ namespace campvis {
             p_numberOfSteps.setVisible(false);
             p_timeStep.setVisible(false);
             p_conductance.setVisible(false);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
         }
         else if (p_filterMode.getOptionValue() == "gauss") {
             p_kernelSize.setVisible(false);
@@ -276,6 +358,8 @@ namespace campvis {
             p_numberOfSteps.setVisible(false);
             p_timeStep.setVisible(false);
             p_conductance.setVisible(false);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
         }
         else if (p_filterMode.getOptionValue() == "sobel" || p_filterMode.getOptionValue() == "laplacianSharpening") {
             p_kernelSize.setVisible(false);
@@ -283,6 +367,8 @@ namespace campvis {
             p_numberOfSteps.setVisible(false);
             p_timeStep.setVisible(false);
             p_conductance.setVisible(false);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
         }
         else if (p_filterMode.getOptionValue() == "gradientDiffusion" || p_filterMode.getOptionValue() == "curvatureDiffusion") {
             p_kernelSize.setVisible(false);
@@ -290,6 +376,17 @@ namespace campvis {
             p_numberOfSteps.setVisible(true);
             p_timeStep.setVisible(true);
             p_conductance.setVisible(true);
+            p_thresMin.setVisible(false);
+            p_thresMax.setVisible(false);
+        }
+        else if(p_filterMode.getOptionValue() == "thresholding") {
+            p_kernelSize.setVisible(false);
+            p_sigma.setVisible(false);
+            p_numberOfSteps.setVisible(false);
+            p_timeStep.setVisible(false);
+            p_conductance.setVisible(false);
+            p_thresMin.setVisible(true);
+            p_thresMax.setVisible(true);
         }
 
         validate(AbstractProcessor::INVALID_PROPERTIES);

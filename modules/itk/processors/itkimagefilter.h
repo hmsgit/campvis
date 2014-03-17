@@ -70,6 +70,8 @@ namespace campvis {
         IntProperty p_numberOfSteps;
         FloatProperty p_timeStep;
         FloatProperty p_conductance;
+        FloatProperty p_thresMin;
+        FloatProperty p_thresMax;
 
     protected:
         /// \see AbstractProcessor::updateResult
