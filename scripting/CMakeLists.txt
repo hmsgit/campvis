@@ -122,7 +122,7 @@ ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CMAKE_CURRENT_BINARY_DIR})
 TARGET_LINK_LIBRARIES(campvis-scripting-test campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
 
-ADD_LIBRARY(campvis-scripting
+ADD_LIBRARY(campvis-scripting STATIC
     ${CampvisScriptingSources} ${CampvisScriptingHeaders}
 )
 ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
