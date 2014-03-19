@@ -2,6 +2,7 @@
 %include factory.i
 %include std_string.i
 %import "ext/tgt/bindings/tgt.i"
+%include "scripting/sigslot.i"
 %{
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/imagedata.h"
@@ -18,6 +19,24 @@
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
 %}
+
+
+%inline {
+static const char* const SOURCE_DIR = CAMPVIS_SOURCE_DIR;
+
+// Template specialisations and instantiations required to get signals to work in Lua
+namespace sigslot {
+    template<>
+    struct LuaConnectionArgTraits<campvis::AbstractProcessor*> {
+        static const char* const typeName;
+    };
+
+    const char* const LuaConnectionArgTraits<campvis::AbstractProcessor*>::typeName = "campvis::AbstractProcessor *";
+}
+}
+
+
+%template(sigslot_signal1_AbstractProcessor) sigslot::signal1<campvis::AbstractProcessor*>;
 
 
 namespace campvis {
@@ -288,6 +307,10 @@ namespace campvis {
         };
 
         const std::string getName() const = 0;
+
+        %immutable;
+        sigslot::signal1<AbstractProcessor*> s_validated;
+        %mutable;
     };
 
     /* AbstractPipeline */
@@ -333,10 +356,6 @@ namespace campvis {
         void reinitializeCamera(const IHasWorldBounds* hwb);
         void reinitializeCamera(const tgt::Bounds& worldBounds);
     };
-}
-
-%inline {
-static const char* const SOURCE_DIR = CAMPVIS_SOURCE_DIR;
 }
 
 
