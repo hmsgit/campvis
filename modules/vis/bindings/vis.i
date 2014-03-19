@@ -2,8 +2,10 @@
 %include std_string.i
 %import "core/bindings/campvis.i"
 %{
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/vis/processors/volumeexplorer.h"
 %}
+
 
 namespace campvis {
 

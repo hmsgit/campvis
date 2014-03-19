@@ -3,6 +3,10 @@
 %include std_string.i
 %import "ext/tgt/bindings/tgt.i"
 %{
+#include "core/datastructures/abstractdata.h"
+#include "core/datastructures/imagedata.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
+#include "core/properties/cameraproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/floatingpointproperty.h"
@@ -53,6 +57,8 @@ namespace campvis {
     %template(StringProperty) GenericProperty<std::string>;
     typedef GenericProperty<std::string> StringProperty;
 
+    /* DataNameProperty */
+
     class DataNameProperty : public StringProperty {
     public:
         enum DataAccessInfo {
@@ -65,11 +71,7 @@ namespace campvis {
         virtual ~DataNameProperty();
     };
 
-    class DataContainer {
-    public:
-        DataContainer(const std::string& name);
-        ~DataContainer();
-    };
+    /* NumericProperty */
 
     template<typename T>
     class NumericProperty : public GenericProperty<T> {
@@ -89,7 +91,6 @@ namespace campvis {
     %template(Ivec2GenericProperty) GenericProperty< tgt::Vector2<int> >;
     %template(IVec2Property) NumericProperty< tgt::Vector2<int> >;
     typedef NumericProperty< tgt::Vector2<int> > IVec2Property;
-
 
     template<typename T>
     struct FloatingPointPropertyTraits {};
@@ -124,38 +125,15 @@ namespace campvis {
     %template(FloatProperty) FloatingPointProperty<float>;
     typedef FloatingPointProperty< float > FloatProperty;
 
-    /* AbstractProcessor */
+    /* CameraProperty */
 
-    class AbstractProcessor {
+    %template(GenericProperty_Camera) GenericProperty<tgt::Camera>;
+
+    class CameraProperty : public GenericProperty<tgt::Camera> {
     public:
-        enum InvalidationLevel {
-            VALID               = 0,
-            INVALID_RESULT      = 1 << 0,
-            INVALID_SHADER      = 1 << 1,
-            INVALID_PROPERTIES  = 1 << 2,
-            FIRST_FREE_TO_USE_INVALIDATION_LEVEL = 1 << 3
-        };
-
-        const std::string getName() const = 0;
-    };
-
-    /* AbstractPipeline */
-
-    class AbstractPipeline {
-    public:
-        AbstractPipeline(DataContainer* dc);
-        virtual ~AbstractPipeline();
-
-        virtual const std::string getName() const = 0;
-    };
-
-    /* AutoEvaluationPipeline */
-
-    class AutoEvaluationPipeline : public AbstractPipeline {
-    public:
-        virtual void addProcessor(AbstractProcessor* processor);
-
-        void addEventListenerToBack(tgt::EventListener* e);
+        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera(),
+                       int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        virtual ~CameraProperty();
     };
 
     /* TFGeometry1D */
@@ -213,9 +191,126 @@ namespace campvis {
         void replaceTF(AbstractTransferFunction* tf);
     };
 
-    /* Downcast the return value of VisualizationProcessor::getProperty to appropriate subclass */
-    %factory(AbstractProperty* campvis::VisualizationProcessor::getProperty,
-             campvis::TransferFunctionProperty, campvis::DataNameProperty, campvis::StringProperty);
+    /* IHasWorldBounds */
+
+    class IHasWorldBounds {
+    public:
+        IHasWorldBounds();
+        virtual ~IHasWorldBounds();
+
+        virtual tgt::Bounds getWorldBounds() const = 0;
+    };
+
+    /* AbstractData */
+
+    class AbstractData {
+    public:
+        AbstractData();
+        virtual ~AbstractData();
+
+        virtual AbstractData* clone() const = 0;
+    };
+
+    /* ImageData */
+
+    class ImageData : public AbstractData, public IHasWorldBounds {
+    public:
+        ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
+        virtual ~ImageData();
+
+        virtual ImageData* clone() const;
+        virtual tgt::Bounds getWorldBounds() const;
+    };
+
+    /* Downcast the return value of DataHandle::getData to appropriate subclass */
+    %factory(AbstractData* campvis::DataHandle::getData, campvis::ImageData);
+
+    /* DataHandle */
+
+    class DataHandle {
+    public:
+        explicit DataHandle(AbstractData* data = 0);
+        DataHandle(const DataHandle& rhs);
+        DataHandle& operator=(const DataHandle& rhs);
+        virtual ~DataHandle();
+
+        const AbstractData* getData() const;
+    };
+
+    /* DataContainer */
+
+    class DataContainer {
+    public:
+        DataContainer(const std::string& name);
+        ~DataContainer();
+
+        DataHandle addData(const std::string& name, AbstractData* data);
+        void addDataHandle(const std::string& name, const DataHandle& dh);
+        bool hasData(const std::string& name) const;
+        DataHandle getData(const std::string& name) const;
+        void removeData(const std::string& name);
+        void clear();
+    };
+
+    /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
+    %factory(AbstractProperty* campvis::HasPropertyCollection::getProperty,
+             campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
+             campvis::DataNameProperty, campvis::StringProperty, campvis::CameraProperty);
+
+    /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
+    %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
+             campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
+             campvis::DataNameProperty, campvis::StringProperty, campvis::CameraProperty);
+
+    /* HasPropertyCollection */
+
+    class HasPropertyCollection  {
+    public:
+        HasPropertyCollection();
+        virtual ~HasPropertyCollection() = 0;
+
+        void addProperty(AbstractProperty* prop);
+        void removeProperty(AbstractProperty* prop);
+        AbstractProperty* getProperty(const std::string& name) const;
+        AbstractProperty* getNestedProperty(const std::string& name) const;
+    };
+
+    /* AbstractProcessor */
+
+    class AbstractProcessor : public HasPropertyCollection {
+    public:
+        enum InvalidationLevel {
+            VALID               = 0,
+            INVALID_RESULT      = 1 << 0,
+            INVALID_SHADER      = 1 << 1,
+            INVALID_PROPERTIES  = 1 << 2,
+            FIRST_FREE_TO_USE_INVALIDATION_LEVEL = 1 << 3
+        };
+
+        const std::string getName() const = 0;
+    };
+
+    /* AbstractPipeline */
+
+    class AbstractPipeline : public HasPropertyCollection {
+    public:
+        AbstractPipeline(DataContainer* dc);
+        virtual ~AbstractPipeline();
+
+        virtual const std::string getName() const = 0;
+
+        const DataContainer& getDataContainer() const;
+        DataContainer& getDataContainer();
+    };
+
+    /* AutoEvaluationPipeline */
+
+    class AutoEvaluationPipeline : public AbstractPipeline {
+    public:
+        virtual void addProcessor(AbstractProcessor* processor);
+
+        void addEventListenerToBack(tgt::EventListener* e);
+    };
 
     /* VisualizationProcessor */
 
@@ -223,8 +318,20 @@ namespace campvis {
     public:
         explicit VisualizationProcessor(IVec2Property* viewportSizeProp);
         ~VisualizationProcessor();
+    };
 
-        AbstractProperty* getProperty(const std::string& name) const;
+    /* TrackballNavigationEventListener */
+
+    class TrackballNavigationEventListener : public tgt::EventListener {
+    public:
+        TrackballNavigationEventListener(CameraProperty* cameraProperty, IVec2Property* viewportSizeProp);
+        virtual ~TrackballNavigationEventListener();
+
+        void addLqModeProcessor(VisualizationProcessor* vp);
+        void removeLqModeProcessor(VisualizationProcessor* vp);
+
+        void reinitializeCamera(const IHasWorldBounds* hwb);
+        void reinitializeCamera(const tgt::Bounds& worldBounds);
     };
 }
 

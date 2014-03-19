@@ -3,8 +3,10 @@
 %import "core/bindings/campvis.i"
 %{
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
 %}
+
 
 namespace campvis {
 
