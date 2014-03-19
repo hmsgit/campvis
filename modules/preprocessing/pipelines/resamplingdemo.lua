@@ -10,8 +10,9 @@ function pipeline:ctor()
     self.image_reader = cvio.MhdImageReader()
     self.addProcessor(instance, self.image_reader)
 
-    self.ve = vis.VolumeExplorer(self.getCanvasSizeProperty(instance))
-    self.resampler = preprocessing.GlImageResampler(self.getCanvasSizeProperty(instance))
+    local canvas_size = self.getProperty(instance, "CanvasSize")
+    self.ve = vis.VolumeExplorer(canvas_size)
+    self.resampler = preprocessing.GlImageResampler(canvas_size)
 
     self.addProcessor(instance, self.resampler)
     self.addProcessor(instance, self.ve)
@@ -23,7 +24,7 @@ function pipeline:init()
     print("I'm being inited!")
 
     self.ve.p_outputImage:setValue("result")
-    self.getRenderTargetIDProperty(instance):setValue("result")
+    self.getProperty(instance, "renderTargetID"):setValue("result")
 
     self.image_reader.p_url:setValue(campvis.SOURCE_DIR .. "/modules/vis/sampledata/smallHeart.mhd")
     self.image_reader.p_targetImageID:setValue("reader.output")

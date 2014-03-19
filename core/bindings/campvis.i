@@ -337,26 +337,8 @@ namespace campvis {
 
 %inline {
 static const char* const SOURCE_DIR = CAMPVIS_SOURCE_DIR;
-
-namespace campvis {
-    /*
-     * Lua pipelines need to access certain protected properties of AbstractPipeline but can't
-     * reference them directly as they don't actually inherit from any class. This subclass exposes
-     * public getters for the properties in question. LuaPipeline instances can then be cast to
-     * ExtendedAutoEvaluationPipeline to give Lua code access to these new methods.
-     */
-    class ExtendedAutoEvaluationPipeline : public AutoEvaluationPipeline {
-    public:
-        const IVec2Property& ExtendedAutoEvaluationPipeline::getCanvasSizeProperty() const {
-            return _canvasSize;
-        }
-
-        const DataNameProperty& ExtendedAutoEvaluationPipeline::getRenderTargetIDProperty() const {
-            return _renderTargetID;
-        }
-    };
 }
-}
+
 
 %luacode {
   function campvis.newPipeline (name, o)

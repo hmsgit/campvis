@@ -26,7 +26,7 @@ namespace campvis {
         if (!_luaVmState->execString("require(\"campvis\")"))
             return;
 
-        if (!_luaVmState->injectObjectPointer(this, "campvis::ExtendedAutoEvaluationPipeline *", "instance"))
+        if (!_luaVmState->injectObjectPointer(this, "campvis::AutoEvaluationPipeline *", "instance"))
             return;
 
         // Try executing the pipeline's Lua script
