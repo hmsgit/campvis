@@ -1,6 +1,7 @@
 %module tgt
 %include "stdint.i"
 %{
+#include "ext/tgt/camera.h"
 #include "ext/tgt/vector.h"
 #include "ext/tgt/event/eventlistener.h"
 %}
@@ -24,13 +25,31 @@ namespace tgt {
     %template(vec2) Vector2<float>;
     typedef Vector2<float> vec2;
 
+    /* Vector3 */
+
+    template<class T>
+    struct Vector3 {
+        Vector3();
+        explicit Vector3(T v);
+        Vector3(T t1, T t2, T t3);
+        Vector3(const Vector2<T>& vec, T z_);
+        Vector3(T _x, const Vector2<T>& v);
+
+        static Vector3<T> zero;
+    };
+
+    %template(vec3) Vector3<float>;
+    typedef Vector3<float> vec3;
+
+    %template(svec3) Vector3<size_t>;
+    typedef Vector3<size_t> svec3;
+
     /* Vector4 */
 
     template<class T>
     struct Vector4 {
         Vector4() {}
         explicit Vector4(T init);
-        explicit Vector4(const T* init);
         Vector4(T t1, T t2, T t3, T t4);
         Vector4(const Vector2<T>& v1, const Vector2<T>& v2);
         Vector4(const Vector2<T>& vec, T z_, T w_);
@@ -49,5 +68,28 @@ namespace tgt {
     public:
         EventListener();
         virtual ~EventListener();
+    };
+
+    /* Camera */
+
+    class Camera {
+    public:
+        enum ProjectionMode {
+            ORTHOGRAPHIC,
+            PERSPECTIVE,
+            FRUSTUM
+        };
+
+        Camera(const vec3& position =  vec3(0.f, 0.f,  0.f),
+               const vec3& focus    =  vec3(0.f, 0.f, -1.f),
+               const vec3& up       =  vec3(0.f, 1.f,  0.f),
+               float fovy           =  45.f,
+               float ratio          =  static_cast<float>(GLCanvas::DEFAULT_WINDOW_WIDTH) /
+                                       GLCanvas::DEFAULT_WINDOW_HEIGHT,
+               float distn          =  0.1f,
+               float distf          =  50.f,
+               ProjectionMode pm    =  PERSPECTIVE);
+
+        virtual ~Camera();
     };
 }
