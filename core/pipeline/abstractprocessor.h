@@ -202,7 +202,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the invalidation level is valid (i.e. no invalid flag is set).
+         * Returns whether the invalidation level is valid (i.e. no invalid flag is set).
          * \return _level == VALID
          */
         bool isValid() const {
@@ -210,7 +210,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the the INVALID_RESULT flag is set.
+         * Returns whether the the INVALID_RESULT flag is set.
          * \return _level & INVALID_RESULT
          */
         bool hasInvalidResult() const {
@@ -218,7 +218,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the the INVALID_SHADER flag is set.
+         * Returns whether the the INVALID_SHADER flag is set.
          * \return _level & INVALID_SHADER
          */
         bool hasInvalidShader() const {
@@ -226,7 +226,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the the INVALID_PROPERTIES flag is set.
+         * Returns whether the the INVALID_PROPERTIES flag is set.
          * \return _level & INVALID_PROPERTIES
          */
         bool hasInvalidProperties() const {

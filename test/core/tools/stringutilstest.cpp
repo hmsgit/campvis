@@ -78,7 +78,7 @@ TEST_F(StringUtilTest, parseFloatsTest) {
     std::vector<std::string> parsed = StringUtils::parseFloats(
         "-0.0 xyz +.12  123.zx0 --0.14 xyz");
     static const float value[] = 
-        { 0.0,     .12, 123.0,0.0};
+        { 0.0f,    .12f,123.0f,0.0f};
     std::vector<float> expected (value, value + sizeof(value) / sizeof(float) );
     //std::vector<float> expected = {0, .12, 123, 0}; // You may use this if your compiler supports, C++11
     
