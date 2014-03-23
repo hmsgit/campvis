@@ -227,9 +227,9 @@ namespace campvis {
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
         _canvas = new tgt::QtThreadedCanvas("", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, 0, false);
-        tgt::GlContextManager::getRef().registerContextAndInitGlew(_canvas);
-
         GLJobProc.registerContext(_canvas);
+        GLJobProc.enqueueJob(_canvas, makeJobOnHeap<tgt::GlContextManager, tgt::GLCanvas*>(tgt::GlContextManager::getPtr(), &tgt::GlContextManager::registerContextAndInitGlew, _canvas), OpenGLJobProcessor::SerialJob);
+
         _canvas->setPainter(this, false);
         _layout->addWidget(_canvas, 1, 1, 3, 3);
 
