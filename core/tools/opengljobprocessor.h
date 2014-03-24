@@ -193,6 +193,6 @@ namespace campvis {
 
 }
 
-#define GLJobProc tgt::Singleton<OpenGLJobProcessor>::getRef()
+#define GLJobProc tgt::Singleton<campvis::OpenGLJobProcessor>::getRef()
 
 #endif // OPENGLJOBPROCESSOR_H__
