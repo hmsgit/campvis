@@ -185,9 +185,9 @@ namespace campvis {
         mutable tbb::atomic<bool> _intensityRangeDirty;         ///< Flag whether _normalizedIntensityRange is dirty and has to be recomputed
         mutable Interval<float> _normalizedIntensityRange;      ///< Range of the normalized intensities, mutable to allow lazy instantiation
 
-        static const std::string loggerCat_;
-
     private:
+
+        static const std::string loggerCat_;
 
         // We don't want this data to be copied - clone() must be enough
         // (read: We are too lazy to implement a correct copy constructor / assignment-operator)

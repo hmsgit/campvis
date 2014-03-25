@@ -25,8 +25,8 @@
 #ifndef GENERICIMAGEREPRESENTATIONLOCAL_H__
 #define GENERICIMAGEREPRESENTATIONLOCAL_H__
 
-#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/imagerepresentationdisk.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/tools/typetraits.h"
 
 #include <cstring>  // needed for memcpy
@@ -140,7 +140,7 @@ namespace campvis {
             const ImageData* data;          ///< strongly-typed pointer to data, may be 0
             const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* representation;        ///< strongly-typed pointer to the image representation, may be 0
         };
-        
+
         /**
          * Creates a new GenericImageRepresentationLocal with the given parameters and automatically
          * adds it to \a parent which will take ownerwhip.
@@ -273,10 +273,15 @@ namespace campvis {
 
         ElementType* _data;
 
+        static const std::string loggerCat_;
+
     };
 
 // = Template implementation ======================================================================
 
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    const std::string campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::loggerCat_ = "CAMPVis.core.datastructures.GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>";
+    
     template<typename BASETYPE, size_t NUMCHANNELS>
     campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(const ImageData* parent, ElementType* data) {
         ThisType* toReturn = new ThisType(const_cast<ImageData*>(parent), data);
@@ -305,10 +310,54 @@ namespace campvis {
     template<typename BASETYPE, size_t NUMCHANNELS>
     GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::tryConvertFrom(const AbstractImageRepresentation* source) {
         if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
+            // converting from disk representation
             if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
                 WeaklyTypedPointer wtp = tester->getImageData();
                 return create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
-            }            
+            }
+            else {
+                LWARNING("Could not convert since base type or number of channels mismatch.");
+            }
+        }
+        if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
+            // converting from disk representation
+            if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
+                WeaklyTypedPointer wtp = tester->getImageData();
+                return create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
+            }
+            else {
+                LWARNING("Could not convert since base type or number of channels mismatch.");
+            }
+        }
+        else if (const ThisType* tester = dynamic_cast<const ThisType*>(source)) {
+            // just to ensure that the following else if case is really a conversion
+            LDEBUG("Trying to convert into the same type - this should not happen, since it there is no conversion needed...");
+            return tester->clone(const_cast<ImageData*>(tester->getParent()));
+        }
+        else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
+            // converting from other local representation of different data type
+            // (we ensured with the else if above that at least one of the template parameters does not match)
+            if (tester->getParent()->getNumChannels() == NUMCHANNELS) {
+                LDEBUG("Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");
+
+                size_t numElements = tester->getNumElements();
+                ElementType* newData = new ElementType[numElements];
+
+                // traverse each channel of each element and convert the value
+                for (size_t i = 0; i < numElements; ++i) {
+                    for (size_t channel = 0; channel < NUMCHANNELS; ++channel) {
+                        // get original value normalized to float
+                        float tmp = tester->getElementNormalized(i, channel);
+                        // save new value denormalized from float
+                        TypeTraits<BASETYPE, NUMCHANNELS>::setChannel(newData[i], channel, TypeNormalizer::denormalizeFromFloat<BASETYPE>(tmp));
+                    }                    
+                }
+
+                return create(tester->getParent(), newData);
+            }
+            else {
+                LWARNING("Could not convert since number of channels mismatch.");
+            }
         }
         return 0;
     }
