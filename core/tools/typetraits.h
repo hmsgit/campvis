@@ -364,7 +364,7 @@ namespace {
     };
 
     /**
-     * Template specialization for unsigned integer types, map from [min, max] to [0.0, 1.0]
+     * Template specialization for signed integer types, map from [min, max] to [0.0, 1.0]
      */
     template<typename T>
     struct TypeNormalizerHelper<T, false, true> {

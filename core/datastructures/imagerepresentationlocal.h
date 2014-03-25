@@ -61,9 +61,6 @@ namespace campvis {
         /// \see AbstractData::clone()
         virtual ImageRepresentationLocal* clone(ImageData* newParent) const = 0;
 
-        /// \see ImageData::getSubImage()
-        virtual ImageRepresentationLocal* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
-
         /**
          * Returns a WeaklyTypedPointer to the image data.
          * \note    The pointer is still owned by this ImageRepresentationLocal. If you want a copy, use clone().

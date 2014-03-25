@@ -139,12 +139,6 @@ namespace campvis {
         return toReturn;
     }
 
-    ImageRepresentationGL* ImageRepresentationGL::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
-        // TODO: implement
-        //LWARNING("ImageRepresentationGL::getSubImage() not implemented!");
-        return 0;
-    }
-
     void ImageRepresentationGL::createTexture(const WeaklyTypedPointer& wtp) {
         tgtAssert(wtp._pointer != 0, "Pointer to image data must not be 0!");
 

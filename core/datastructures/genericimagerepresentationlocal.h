@@ -177,9 +177,6 @@ namespace campvis {
         /// \see AbstractImageRepresentation::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
-        /// \see AbstractImageRepresentation::getSubImage
-        virtual ThisType* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
-
         /**
          * Returns a WeaklyTypedPointer to the image data.
          * \note    The pointer is still owned by this ImageRepresentationLocal. If you want a copy, use clone().
@@ -333,41 +330,6 @@ namespace campvis {
     template<typename BASETYPE, size_t NUMCHANNELS>
     size_t campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getVideoMemoryFootprint() const {
         return 0;
-    }
-
-    template<typename BASETYPE, size_t NUMCHANNELS>
-    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
-
-        const tgt::svec3& size = getSize();
-        tgt::svec3 newSize = urb - llf;
-        if (newSize == size) {
-            // nothing has changed, just provide a copy:
-            return clone(parent);
-        }
-
-        tgt::bvec3 tmp(tgt::greaterThan(newSize, tgt::svec3(1)));
-        size_t newDimensionality = 0;
-        for (size_t i = 0; i < 3; ++i) {
-            if (tmp[i] == true)
-                ++newDimensionality;
-        }
-
-        size_t numBytesPerElement = sizeof(ElementType);
-        size_t numElements = tgt::hmul(newSize);
-        ElementType* newData = new ElementType[numElements];
-
-        // slice image data into new array
-        size_t index = 0;
-        for (size_t z = llf.z; z < urb.z; ++z) {
-            for (size_t y = llf.y; y < urb.y; ++y) {
-                size_t offset = llf.x + (y * size.x) + (z * size.y * size.x);
-                memcpy(newData + index, _data + offset, newSize.x * numBytesPerElement);
-                index += newSize.x;
-            }
-        }        
-
-        return new ThisType(parent, newData);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>

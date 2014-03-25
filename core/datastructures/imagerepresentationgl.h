@@ -94,11 +94,6 @@ namespace campvis {
         /// \see AbstractImageRepresentation::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
-        /**
-         * \see AbstractImageRepresentation::getSubImage
-         */
-        virtual ImageRepresentationGL* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
-
 
         /**
          * Binds the image to the given shader using \a texUnit as texture unit and \a texUniform as shader uniform.

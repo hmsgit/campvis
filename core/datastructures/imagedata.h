@@ -133,17 +133,6 @@ namespace campvis {
         tgt::Bounds getWorldBounds(const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
-         * Returns the subimage of this image given by \a llf and \a urb.
-         * TODO: Check whether it is necessary to adjust image mapping!
-         * 
-         * \note    Creates sub-images of all representations.
-         * \param   llf     Lower-Left-Front coordinates of subimage
-         * \param   urb     Upper-Right-Back coordinates of subimage
-         * \return  An image containing the sub-image of this image with the given coordinates.
-         */
-        virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
-
-        /**
          * Transforms a vector based position to the corresponding array index.
          * \note    Caution, this method might return wrong results for non-continuous storage.
          *          In this case you should provide an appropriate overload.

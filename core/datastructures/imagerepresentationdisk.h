@@ -88,9 +88,6 @@ namespace campvis {
         /// \see AbstractImageRepresentation::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
-        /// \see AbstractImageRepresentation::getSubImage
-        virtual ImageRepresentationDisk* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
-
 
         /**
          * Downloads the whole image data to local memory.

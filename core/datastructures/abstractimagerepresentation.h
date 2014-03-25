@@ -96,17 +96,6 @@ namespace campvis {
          */
         virtual size_t getVideoMemoryFootprint() const = 0;
 
-        /**
-         * Returns the subimage representation of this representation given by \a llf and \a urb.
-         * TODO: Check whether it is necessary to adjust image mapping!
-         *
-         * \param   newParent   Parent image of the newly created subimage
-         * \param   llf         Lower-Left-Front coordinates of subimage
-         * \param   urb         Upper-Right-Back coordinates of subimage
-         * \return  An image representation containing the subimage of this with the given coordinates.
-         */
-        virtual AbstractImageRepresentation* getSubImage(ImageData* newParent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
-
     protected:
         /**
          * Adds this image representations to the newParent image data.
