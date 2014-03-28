@@ -37,19 +37,33 @@ namespace sigslot {
     class _lua_connection1 : public _connection_base1<arg1_type, mt_policy>
     {
     public:
-        _lua_connection1() : _slot_fn() {}
-        _lua_connection1(SWIGLUA_REF slot_fn) : _slot_fn(slot_fn) {}
+        _lua_connection1() : _slot_fn(), _dummy_dest(nullptr)  {}
+        _lua_connection1(SWIGLUA_REF slot_fn) : _slot_fn(slot_fn), _dummy_dest(nullptr) {}
 
         virtual ~_lua_connection1() {
             swiglua_ref_clear(&_slot_fn);
+
+            if (_dummy_dest != nullptr)
+                delete _dummy_dest;
         }
 
         virtual _connection_base1<arg1_type, mt_policy>* clone() {
-            return nullptr;
+            SWIGLUA_REF slot_fn;
+
+            swiglua_ref_get(&_slot_fn);
+            swiglua_ref_set(&slot_fn, _slot_fn.L, -1);
+            lua_pop(_slot_fn.L, 1);
+
+            return new _lua_connection1(slot_fn);
         }
 
         virtual _connection_base1<arg1_type, mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
-            return clone();
+            /*
+             * Because Lua connections do not have any external destination objects that could be
+             * copied (which in turn would require duplicating the connections for the copy), this
+             * method should never be invoked.
+             */
+            return nullptr;
         }
 
         virtual void emitSignal(arg1_type a1) {
@@ -78,11 +92,19 @@ namespace sigslot {
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return nullptr;
+            /*
+             * Because Lua connections do not have any destination objects, a dummy one has to be
+             * created here and returned to comply with sigslot's API.
+             */
+            if (_dummy_dest == nullptr)
+                _dummy_dest = new has_slots<mt_policy>();
+
+            return _dummy_dest;
         }
 
     private:
-        SWIGLUA_REF _slot_fn;
+        SWIGLUA_REF _slot_fn;                          ///< Reference to a Lua function acting as a slot
+        mutable has_slots<mt_policy>* _dummy_dest;     ///< Dummy destination object needed to support getdest()
     };
 }
 }
