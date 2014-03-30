@@ -130,6 +130,25 @@ namespace sigslot {
             return _dummy_dest;
         }
 
+        /**
+         * Check if this connection's slot function is the same as the given Lua function.
+         *
+         * @param slot_fn reference to a Lua function acting as a slot
+         * @return true if this connection wraps the given Lua function, false otherwise
+         */
+        bool wrapsSlotFunction(SWIGLUA_REF slot_fn) {
+            if (slot_fn.L != _slot_fn.L)
+                return false;
+
+            swiglua_ref_get(&_slot_fn);
+            swiglua_ref_get(&slot_fn);
+
+            bool result = lua_rawequal(slot_fn.L, -1, -2) == 1;
+            lua_pop(_slot_fn.L, 2);
+
+            return result;
+        }
+
     private:
         SWIGLUA_REF _slot_fn;                          ///< Reference to a Lua function acting as a slot
         mutable has_slots<mt_policy>* _dummy_dest;     ///< Dummy destination object needed to support getdest()
@@ -157,6 +176,32 @@ namespace sigslot {
                 sigslot::_lua_connection1<arg1_type, mt_policy>* conn =
                     new sigslot::_lua_connection1<arg1_type, mt_policy>(slot_fn);
                 $self->m_connected_slots.push_back(conn);
+            }
+
+            /**
+             * Disconnect a Lua function from this signal.
+             *
+             * @param slot_fn reference to a Lua function acting as a slot
+             */
+            void disconnect(SWIGLUA_REF slot_fn) {
+                typedef sigslot::_signal_base1<arg1_type, mt_policy>::connections_list connections_list;
+
+                sigslot::lock_block_write<mt_policy> lock($self);
+                connections_list::iterator it = $self->m_connected_slots.begin();
+                connections_list::iterator itEnd = $self->m_connected_slots.end();
+
+                while (it != itEnd) {
+                    sigslot::_lua_connection1<arg1_type, mt_policy>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection1<arg1_type, mt_policy>*>(*it);
+
+                    if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
+                        delete lua_connection;
+                        $self->m_connected_slots.erase(it);
+                        return;
+                    }
+
+                    ++it;
+                }
             }
         }
     };
