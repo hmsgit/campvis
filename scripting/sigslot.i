@@ -3,6 +3,7 @@
 %include lua_fnptr.i
 
 %{
+#include "tbb/recursive_mutex.h"
 #include "ext/sigslot/sigslot.h"
 %}
 
@@ -27,6 +28,8 @@ namespace sigslot {
     template<typename T>
     struct LuaConnectionArgTraits {};
 
+    typedef tbb::recursive_mutex LuaStateMutexType;
+
     /**
      * Custom signal-slot connection type that accepts Lua functions as slots.
      *
@@ -37,8 +40,25 @@ namespace sigslot {
     class _lua_connection1 : public _connection_base1<arg1_type, mt_policy>
     {
     public:
-        _lua_connection1() : _slot_fn(), _dummy_dest(nullptr)  {}
-        _lua_connection1(SWIGLUA_REF slot_fn) : _slot_fn(slot_fn), _dummy_dest(nullptr) {}
+        _lua_connection1(SWIGLUA_REF slot_fn)
+            : _slot_fn(slot_fn)
+            , _dummy_dest(nullptr)
+        {
+            // Retrieve from the registry the mutex associated with the function's Lua state
+            lua_pushlightuserdata(slot_fn.L, static_cast<void*>(slot_fn.L));
+            lua_gettable(slot_fn.L, LUA_REGISTRYINDEX);
+
+            // The mutex should be stored as light userdata
+            assert(lua_islightuserdata(slot_fn.L, -1));
+            _lua_state_mutex = static_cast<LuaStateMutexType*>(lua_touserdata(slot_fn.L, -1));
+            lua_pop(slot_fn.L, 1);
+        }
+
+        _lua_connection1(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
+            : _slot_fn(slot_fn)
+            , _dummy_dest(nullptr)
+            , _lua_state_mutex(lua_state_mutex)
+        {}
 
         virtual ~_lua_connection1() {
             swiglua_ref_clear(&_slot_fn);
@@ -50,11 +70,15 @@ namespace sigslot {
         virtual _connection_base1<arg1_type, mt_policy>* clone() {
             SWIGLUA_REF slot_fn;
 
-            swiglua_ref_get(&_slot_fn);
-            swiglua_ref_set(&slot_fn, _slot_fn.L, -1);
-            lua_pop(_slot_fn.L, 1);
+            {
+                LuaStateMutexType::scoped_lock lock(*_lua_state_mutex);
 
-            return new _lua_connection1(slot_fn);
+                swiglua_ref_get(&_slot_fn);
+                swiglua_ref_set(&slot_fn, _slot_fn.L, -1);
+                lua_pop(_slot_fn.L, 1);
+            }
+
+            return new _lua_connection1(slot_fn, _lua_state_mutex);
         }
 
         virtual _connection_base1<arg1_type, mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
@@ -75,19 +99,23 @@ namespace sigslot {
                 return;
             }
 
-            // Put this connection's slot and all arguments on Lua's stack
-            swiglua_ref_get(&_slot_fn);
-            SWIG_NewPointerObj(_slot_fn.L, a1, argTypeInfo, 0);
+            {
+                LuaStateMutexType::scoped_lock lock(*_lua_state_mutex);
 
-            if (lua_pcall(_slot_fn.L, 1, 0, 0) != LUA_OK) {
-                const char* errorMsg = lua_tostring(_slot_fn.L, -1);
+                // Put this connection's slot and all arguments on Lua's stack
+                swiglua_ref_get(&_slot_fn);
+                SWIG_NewPointerObj(_slot_fn.L, a1, argTypeInfo, 0);
 
-                if (errorMsg == nullptr)
-                    std::cerr << "(error object is not a string)" << std::endl;
-                else
-                    std::cerr << "An error occured while calling a Lua slot function: " << errorMsg << std::endl;
+                if (lua_pcall(_slot_fn.L, 1, 0, 0) != LUA_OK) {
+                    const char* errorMsg = lua_tostring(_slot_fn.L, -1);
 
-                lua_pop(_slot_fn.L, 1);
+                    if (errorMsg == nullptr)
+                        std::cerr << "(error object is not a string)" << std::endl;
+                    else
+                        std::cerr << "An error occured while calling a Lua slot function: " << errorMsg << std::endl;
+
+                    lua_pop(_slot_fn.L, 1);
+                }
             }
         }
 
@@ -105,6 +133,7 @@ namespace sigslot {
     private:
         SWIGLUA_REF _slot_fn;                          ///< Reference to a Lua function acting as a slot
         mutable has_slots<mt_policy>* _dummy_dest;     ///< Dummy destination object needed to support getdest()
+        LuaStateMutexType* _lua_state_mutex;           ///< Mutex guarding access to the above function's Lua state
     };
 }
 }

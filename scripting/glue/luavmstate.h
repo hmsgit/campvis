@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "swigluarun.h"
+#include "tbb/recursive_mutex.h"
 
 extern "C" {
 #include "lua.h"
@@ -11,12 +12,22 @@ extern "C" {
 #include "lauxlib.h"
 }
 
-struct lua_State;
-
 
 namespace campvis {
 
     class GlobalLuaTable;
+
+    /**
+     * The Lua state managed by LuaVmState has to be protected with a mutex because it's not
+     * thread-safe and different threads (running LuaPipeline or a processor attached to it) may try
+     * to access it simultaneously.
+     *
+     * The mutex needs to be recursive due to the fact that Lua code can trigger the emission (or
+     * copying) of signals that have slots defined it Lua connected to them. This in turn causes the
+     * state to be accessed from a thread that, unbeknownst to it, already holds a lock on the
+     * mutex.
+     */
+    typedef tbb::recursive_mutex LuaStateMutexType;
 
     class LuaVmState
     {
@@ -31,7 +42,19 @@ namespace campvis {
 
         template<typename T>
         bool injectObjectPointer(T* objPointer, const std::string& typeName, const std::string& luaVarName);
-        struct lua_State* rawState() const;
+
+        /**
+         * Return the Lua state managed by LuaVmState.
+         *
+         * \note The mutex returned by getMutex() must be locked before accessing the state in any
+         *       way.
+         */
+        lua_State* rawState() const;
+
+        /**
+         * Return the mutex guarding access to the Lua state managed by LuaVmState.
+         */
+        LuaStateMutexType& getMutex();
 
         /**
          * Call the Lua function that's at the top of the stack.
@@ -41,11 +64,13 @@ namespace campvis {
     private:
         void logLuaError();
 
-        struct lua_State* _luaState;      ///< Lua state managed by LuaVmState
+        lua_State* _luaState;               ///< Lua state managed by LuaVmState
+        LuaStateMutexType _luaStateMutex;   ///< Mutex guarding access to the above Lua state
     };
 
     template<typename T>
     bool LuaVmState::injectObjectPointer(T* objPointer, const std::string& typeName, const std::string& luaVarName) {
+        LuaStateMutexType::scoped_lock lock(_luaStateMutex);
         swig_type_info* objTypeInfo = SWIG_TypeQuery(_luaState, typeName.c_str());
 
         if (objTypeInfo == nullptr) {

@@ -26,6 +26,7 @@ namespace campvis {
     }
 
     void GlobalLuaTable::pushField(const std::string& name) {
+        LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
         lua_getglobal(_luaVmState.rawState(), name.c_str());
     }
 }

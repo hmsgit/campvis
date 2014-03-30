@@ -15,11 +15,15 @@ namespace campvis {
         bool result = false;
         _parent->pushField(_name);
 
-        if (lua_istable(_luaVmState.rawState(), -1) == 1)
-            result = true;
+        {
+            LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
 
-        // Pop the table
-        lua_pop(_luaVmState.rawState(), 1);
+            if (lua_istable(_luaVmState.rawState(), -1) == 1)
+                result = true;
+
+            // Pop the table
+            lua_pop(_luaVmState.rawState(), 1);
+        }
 
         return result;
     }
@@ -30,16 +34,28 @@ namespace campvis {
 
     void RegularLuaTable::callInstanceMethod(const std::string& name) {
         _parent->pushField(_name);
-        lua_getfield(_luaVmState.rawState(), -1, name.c_str());
+
+        {
+            LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
+            lua_getfield(_luaVmState.rawState(), -1, name.c_str());
+        }
+
         _parent->pushField(_name);
         _luaVmState.callLuaFunc(1, 0);
 
-        // Pop the table
-        lua_pop(_luaVmState.rawState(), 1);
+        {
+            LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
+            // Pop the table
+            lua_pop(_luaVmState.rawState(), 1);
+        }
     }
 
     void RegularLuaTable::pushField(const std::string& name) {
         _parent->pushField(_name);
-        lua_getfield(_luaVmState.rawState(), -1, name.c_str());
+
+        {
+            LuaStateMutexType::scoped_lock lock(_luaVmState.getMutex());
+            lua_getfield(_luaVmState.rawState(), -1, name.c_str());
+        }
     }
 }
