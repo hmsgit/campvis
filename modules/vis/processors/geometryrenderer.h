@@ -45,6 +45,13 @@ namespace campvis {
      */
     class GeometryRenderer : public VisualizationProcessor, public HasProcessorDecorators {
     public:
+        /// Coloring mode for fragments used during rendering
+        enum ColoringMode {
+            GEOMETRY_COLOR = 0,     ///< Original color as stored in geometry
+            SOLID_COLOR = 1,        ///< Solid color set by property
+            TEXTURE_COLOR = 2       ///< Color determined from texture lookup
+        };
+
         /**
          * Constructs a new GeometryRenderer Processor
          **/
@@ -70,20 +77,21 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        DataNameProperty p_geometryID;       ///< ID for input geometry
-        DataNameProperty p_renderTargetID;   ///< image ID for output image
+        DataNameProperty p_geometryID;              ///< ID for input geometry
+        DataNameProperty p_textureID;               ///< ID for input texture (optional)
+        DataNameProperty p_renderTargetID;          ///< image ID for output image
         CameraProperty p_camera;
 
-        GenericOptionProperty<GLenum> p_renderMode;     ///< Render mode for the geometry
+        GenericOptionProperty<GLenum> p_renderMode;         ///< Render mode for the geometry
+        GenericOptionProperty<ColoringMode> p_coloringMode; ///< Coloring mode for fragments used during rendering
 
-        BoolProperty p_useSolidColor;       ///< Use solid color for rendering
-        Vec4Property p_solidColor;               ///< rendering color
+        Vec4Property p_solidColor;                  ///< rendering color
 
-        FloatProperty p_pointSize;          ///< Point Size when rendering points
-        FloatProperty p_lineWidth;          ///< Line Width when rendering lines
+        FloatProperty p_pointSize;                  ///< Point Size when rendering points
+        FloatProperty p_lineWidth;                  ///< Line Width when rendering lines
 
-        BoolProperty p_showWireframe;       ///< Show wire frame
-        Vec4Property p_wireframeColor;      ///< Wireframe color
+        BoolProperty p_showWireframe;               ///< Show wire frame
+        Vec4Property p_wireframeColor;              ///< Wireframe color
         
 
     protected:
@@ -102,6 +110,7 @@ namespace campvis {
         tgt::Shader* _pointShader;
         tgt::Shader* _meshShader;
 
+    private:
         static const std::string loggerCat_;
     };
 

@@ -85,6 +85,8 @@ namespace campvis {
         GenericOptionProperty<CompositingMode> p_compositingMethod;
         FloatProperty p_alphaValue;
 
+        BoolProperty p_enableBackground;
+
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);

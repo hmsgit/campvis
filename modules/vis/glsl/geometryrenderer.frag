@@ -23,7 +23,7 @@
 // ================================================================================================
 
 #include "tools/shading.frag"
-#include "tools/texture3d.frag"
+#include "tools/texture2d.frag"
 
 // input from geometry shader
 in vec3 geom_Position;
@@ -36,7 +36,7 @@ noperspective in vec3 geom_EdgeDistance;
 out vec4 out_Color;
 
 // additional uniforms
-uniform bool _useSolidColor;
+uniform int _coloringMode;
 uniform vec4 _solidColor;
 uniform vec4 _wireframeColor;
 uniform float _lineWidth = 1.0;
@@ -44,9 +44,22 @@ uniform float _lineWidth = 1.0;
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
+#ifdef ENABLE_TEXTURING
+uniform sampler2D _texture;
+uniform TextureParameters2D _textureParams;
+#endif
 
 void main() {
-    out_Color = _useSolidColor ? _solidColor : geom_Color;
+    out_Color = vec4(1.0, 0.5, 0.0, 1.0);
+
+#ifdef ENABLE_TEXTURING
+    out_Color = texture(_texture, geom_TexCoord.xy);
+#else
+    if (_coloringMode == 0)
+        out_Color = geom_Color;
+    else if (_coloringMode == 1)
+        out_Color = _solidColor;
+#endif        
 
 #ifdef ENABLE_SHADING
     // perform Phong shading

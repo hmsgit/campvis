@@ -68,7 +68,9 @@ namespace campvis {
         VtkImageReader _geometryReader;
         GeometryRenderer _lvRenderer;
         GeometryRenderer _teapotRenderer;
-        RenderTargetCompositor _compositor;
+        GeometryRenderer _cubeRenderer;
+        RenderTargetCompositor _compositor1;
+        RenderTargetCompositor _compositor2;
 
         TrackballNavigationEventListener* _trackballEH;
 

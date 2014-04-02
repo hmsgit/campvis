@@ -31,6 +31,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratorshading.h"
 
@@ -45,32 +46,41 @@ namespace campvis {
         GenericOption<GLenum>("polygon", "GL_POLYGON", GL_POLYGON)
     };
 
+    static const GenericOption<GeometryRenderer::ColoringMode> coloringOptions[3] = {
+        GenericOption<GeometryRenderer::ColoringMode>("GeometryColor", "Original Geometry Color", GeometryRenderer::GEOMETRY_COLOR),
+        GenericOption<GeometryRenderer::ColoringMode>("SolidColor", "Solid Color", GeometryRenderer::SOLID_COLOR),
+        GenericOption<GeometryRenderer::ColoringMode>("TextureColor", "Color from Texture Lookup", GeometryRenderer::TEXTURE_COLOR),
+    };
+
     const std::string GeometryRenderer::loggerCat_ = "CAMPVis.modules.vis.GeometryRenderer";
 
     GeometryRenderer::GeometryRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
+        , p_textureID("TextureId", "Input Texture ID (optional)", "gr.inputtexture", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
-        , p_renderMode("RenderMode", "Render Mode", renderOptions, 7, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
-        , p_useSolidColor("UseSolidColor", "Use Solid Color", true, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_renderMode("RenderMode", "Render Mode", renderOptions, 7, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_coloringMode("ColoringMode", "ColoringMode", coloringOptions, 3, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES)
         , p_solidColor("SolidColor", "Solid Color", tgt::vec4(1.f, .5f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_pointSize("PointSize", "Point Size", 3.f, .1f, 10.f)
         , p_lineWidth("LineWidth", "Line Width", 1.f, .1f, 10.f)
-        , p_showWireframe("ShowWireframe", "Show Wireframe", true, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
+        , p_showWireframe("ShowWireframe", "Show Wireframe", true, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES)
         , p_wireframeColor("WireframeColor", "Wireframe Color", tgt::vec4(1.f, 1.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _pointShader(0)
         , _meshShader(0)
     {
+        p_coloringMode.selectByOption(SOLID_COLOR);
+
         addDecorator(new ProcessorDecoratorShading());
 
         addProperty(&p_geometryID);
+        addProperty(&p_textureID);
         addProperty(&p_renderTargetID);
         addProperty(&p_camera);
 
         addProperty(&p_renderMode);
-
-        addProperty(&p_useSolidColor);
+        addProperty(&p_coloringMode);
         addProperty(&p_solidColor);
 
         addProperty(&p_pointSize);
@@ -102,8 +112,23 @@ namespace campvis {
 
     void GeometryRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
+        ScopedTypedData<RenderData> rd(data, p_textureID.getValue());
+        ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue());
 
-        if (proxyGeometry != 0 && _pointShader != 0 && _meshShader != 0) {
+        const ImageRepresentationGL* texture = nullptr;
+        if (p_coloringMode.getOptionValue() == TEXTURE_COLOR) {
+            if (proxyGeometry->hasTextureCoordinates()) {
+                if (rd != nullptr && rd->getNumColorTextures() > 0)
+                    texture = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>();
+                else if (repGl != nullptr)
+                    texture = repGl;
+            }
+            else {
+                LERROR("Cannot use textured rendering since input geometry has no texture coordinates!");
+            }
+        }
+
+        if (proxyGeometry != 0 && (p_coloringMode.getOptionValue() != TEXTURE_COLOR || texture != nullptr) && _pointShader != 0 && _meshShader != 0) {
             // select correct shader
             tgt::Shader* leShader = 0;
             if (p_renderMode.getOptionValue() == GL_POINTS || p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
@@ -115,8 +140,15 @@ namespace campvis {
             tgt::vec2 halfViewport = tgt::vec2(getEffectiveViewportSize()) / 2.f;
             tgt::mat4 viewportMatrix = tgt::mat4::createTranslation(tgt::vec3(halfViewport, 0.f)) * tgt::mat4::createScale(tgt::vec3(halfViewport, 1.f));
 
-            // set modelview and projection matrices
             leShader->activate();
+
+            // bind texture if needed
+            tgt::TextureUnit tut, narf, blub, textureUnit;
+            tut.activate();
+            if (texture != nullptr)
+                texture->bind(leShader, textureUnit, "_texture", "_textureParams");
+
+            // set modelview and projection matrices
             leShader->setIgnoreUniformLocationError(true);
             decorateRenderProlog(data, leShader);
             leShader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
@@ -125,7 +157,7 @@ namespace campvis {
 
             leShader->setUniform("_computeNormals", proxyGeometry->getNormalsBuffer() == 0);
 
-            leShader->setUniform("_useSolidColor", p_useSolidColor.getValue());
+            leShader->setUniform("_coloringMode", p_coloringMode.getValue());
             leShader->setUniform("_solidColor", p_solidColor.getValue());
             leShader->setUniform("_wireframeColor", p_wireframeColor.getValue());
             leShader->setUniform("_lineWidth", p_lineWidth.getValue());
@@ -137,6 +169,8 @@ namespace campvis {
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
 
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             glClearDepth(1.0f);
@@ -155,7 +189,9 @@ namespace campvis {
 
             decorateRenderEpilog(leShader);
             leShader->deactivate();
+            glDepthFunc(GL_LESS);
             glDisable(GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
             LGL_ERROR;
 
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
@@ -176,6 +212,9 @@ namespace campvis {
         if (hasGeometryShader)
             toReturn += "#define HAS_GEOMETRY_SHADER\n";
 
+        if (p_coloringMode.getOptionValue() == TEXTURE_COLOR)
+            toReturn += "#define ENABLE_TEXTURING\n";
+
         return toReturn;
     }
 
@@ -188,7 +227,7 @@ namespace campvis {
     }
 
     void GeometryRenderer::updateProperties(DataContainer& dataContainer) {
-        p_solidColor.setVisible(p_useSolidColor.getValue());
+        p_solidColor.setVisible(p_coloringMode.getOptionValue() == SOLID_COLOR);
 
         switch (p_renderMode.getOptionValue()) {
             case GL_POINTS:
