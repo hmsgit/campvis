@@ -93,6 +93,10 @@ namespace campvis {
 
         /// \see GeometryData::getWorldBounds
         virtual tgt::Bounds getWorldBounds() const;
+        /// \see GeometryData::hasTextureCoordinates
+        virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::applyTransformationToVertices
+        virtual void applyTransformationToVertices(const tgt::mat4& t);
 
     protected:
         /**

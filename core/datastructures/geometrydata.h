@@ -92,6 +92,18 @@ namespace campvis {
         virtual tgt::Bounds getWorldBounds() const = 0;
 
         /**
+         * Returns whether the geometry has texture coordinates.
+         * \return  True if this geometry sets texture coordinates during rendering.
+         */
+        virtual bool hasTextureCoordinates() const = 0;
+
+        /**
+         * Applies the transformation matrix \a t to each vertex of this geometry.
+         * \param   t   Transformation matrix to apply
+         */
+        virtual void applyTransformationToVertices(const tgt::mat4& t) = 0;
+
+        /**
          * Returns the Pointer to the OpenGL Buffer with the vertex positions.
          * May be 0 if not yet created.
          * \return  _verticesBuffer

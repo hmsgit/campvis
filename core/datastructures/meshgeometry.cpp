@@ -304,4 +304,18 @@ namespace campvis {
         return toReturn;
     }
 
+    bool MeshGeometry::hasTextureCoordinates() const {
+        bool toReturn = true;
+        for (size_t i = 0; i < _faces.size(); ++i) {
+            toReturn &= _faces[i].hasTextureCoordinates();
+        }
+        return toReturn;
+    }
+
+    void MeshGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+        for (size_t i = 0; i < _faces.size(); ++i) {
+            _faces[i].applyTransformationToVertices(t);
+        }
+    }
+
 }

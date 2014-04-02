@@ -187,5 +187,18 @@ namespace campvis {
         _indicesBuffer = 0;
     }
 
+    bool IndexedMeshGeometry::hasTextureCoordinates() const {
+        return ! _textureCoordinates.empty();
+    }
+
+    void IndexedMeshGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+        for (size_t i = 0; i < _vertices.size(); ++i) {
+            tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
+            _vertices[i] = tmp.xyz() / tmp.w;
+        }
+
+        _buffersDirty = true;
+    }
+
 
 }

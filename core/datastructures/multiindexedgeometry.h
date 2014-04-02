@@ -100,12 +100,10 @@ namespace campvis {
 
         /// \see GeometryData::getWorldBounds
         virtual tgt::Bounds getWorldBounds() const;
-
-        /**
-         * Applies the transformation matrix \a t to each vertex of this geometry.
-         * \param   t   Transformation matrix to apply
-         */
-        void applyTransformation(const tgt::mat4& t);
+        /// \see GeometryData::hasTextureCoordinates
+        virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::applyTransformationToVertices
+        virtual void applyTransformationToVertices(const tgt::mat4& t);
 
     protected:
         /**

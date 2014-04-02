@@ -163,9 +163,11 @@ namespace campvis {
     MultiIndexedGeometry* GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/) {
         tgtAssert(numStacks > 1 && numSlices > 2, "Sphere must have minimum 2 stacks and 3 slices!");
         std::vector<tgt::vec3> vertices;
+        std::vector<tgt::vec3> textureCoordinates;
 
         // add top vertex
         vertices.push_back(tgt::vec3(0.f, 0.f, 1.f));
+        textureCoordinates.push_back(tgt::vec3(0.f));
 
         // add middle vertices
         for (int i = 1; i < numStacks; ++i) {
@@ -174,14 +176,16 @@ namespace campvis {
             for (int j = 0; j < numSlices; ++j) {
                 float theta = static_cast<float>(j) * 2.f*tgt::PIf / static_cast<float>(numSlices);
                 vertices.push_back(tgt::vec3(cos(theta) * sin(phi), sin(theta) * sin(phi), cos(phi)));
+                textureCoordinates.push_back(tgt::vec3(theta / (2.f * tgt::PIf), phi / tgt::PIf, 0.f));
             }
         }
 
         // add bottom vertex
         vertices.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        textureCoordinates.push_back(tgt::vec3(1.f, 0.f, 0.f));
 
         // create geometry (in a unit sphere vertices = normals)
-        MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), vertices);
+        MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, textureCoordinates, std::vector<tgt::vec4>(), vertices);
 
         // add indices for primitives to geometry:
         {
@@ -230,58 +234,58 @@ namespace campvis {
         return toReturn;
     }
 
-	MultiIndexedGeometry* GeometryDataFactory::createArrow(uint16_t numSlices, float tipLen, float cylRadius, float tipRadius) {
+    MultiIndexedGeometry* GeometryDataFactory::createArrow(uint16_t numSlices, float tipLen, float cylRadius, float tipRadius) {
         tgtAssert(numSlices > 2, "Arrow shaft must have minimum 3 slices!");
-		tgtAssert(tipRadius > cylRadius, "Tip radius must exceed cyclinder radius (for correct normals)!");
-		tgtAssert(tipLen > 0, "Tip length must be between 0 and 1!");
-		tgtAssert(tipLen < 1, "Tip length must be between 0 and 1!");
+        tgtAssert(tipRadius > cylRadius, "Tip radius must exceed cyclinder radius (for correct normals)!");
+        tgtAssert(tipLen > 0, "Tip length must be between 0 and 1!");
+        tgtAssert(tipLen < 1, "Tip length must be between 0 and 1!");
         std::vector<tgt::vec3> vertices;
-		std::vector<tgt::vec3> normals;
+        std::vector<tgt::vec3> normals;
 
-		// add bottom vertex
+        // add bottom vertex
         vertices.push_back(tgt::vec3(0.f, 0.f, 0.f));
-		normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
 
-		// add shaft floor vertices
-		for (int i = 0; i < numSlices; ++i) {
+        // add shaft floor vertices
+        for (int i = 0; i < numSlices; ++i) {
             float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
             vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 0.f));
-			normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
-		}
-		for (int i = 0; i < numSlices; ++i) {
+            normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        }
+        for (int i = 0; i < numSlices; ++i) {
             float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
             vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 0.f));
-			normals.push_back(tgt::vec3(cos(theta), sin(theta), 0.f));
-		}
+            normals.push_back(tgt::vec3(cos(theta), sin(theta), 0.f));
+        }
 
-		// add shaft top vertices
-		for (int i = 0; i < numSlices; ++i) {
+        // add shaft top vertices
+        for (int i = 0; i < numSlices; ++i) {
             float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
             vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 1.f - tipLen));
-			normals.push_back(tgt::vec3(cos(theta), sin(theta), 0.f));
-		}
-		for (int i = 0; i < numSlices; ++i) {
+            normals.push_back(tgt::vec3(cos(theta), sin(theta), 0.f));
+        }
+        for (int i = 0; i < numSlices; ++i) {
             float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
             vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 1.f - tipLen));
-			normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
-		}
+            normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        }
 
-		// add arrow tip outer cone vertices
-		for (int i = 0; i < numSlices; ++i) {
+        // add arrow tip outer cone vertices
+        for (int i = 0; i < numSlices; ++i) {
             float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
             vertices.push_back(tgt::vec3(tipRadius * cos(theta), tipRadius * sin(theta), 1.f - tipLen));
-			normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
-		}
-		float phi = atan2f(tipRadius, tipLen);
-		for (int i = 0; i < numSlices; ++i) {
+            normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        }
+        float phi = atan2f(tipRadius, tipLen);
+        for (int i = 0; i < numSlices; ++i) {
             float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
             vertices.push_back(tgt::vec3(tipRadius * cos(theta), tipRadius * sin(theta), 1.f - tipLen));
-			normals.push_back(tgt::vec3(cos(theta) * cos(phi), sin(theta) * cos(phi), sin(phi)));
-		}
+            normals.push_back(tgt::vec3(cos(theta) * cos(phi), sin(theta) * cos(phi), sin(phi)));
+        }
 
-		// add top vertex
+        // add top vertex
         vertices.push_back(tgt::vec3(0.f, 0.f, 1.f));
-		normals.push_back(tgt::vec3(0.f, 0.f, 1.f));
+        normals.push_back(tgt::vec3(0.f, 0.f, 1.f));
 
         // create geometry
         MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
@@ -299,7 +303,7 @@ namespace campvis {
 
             toReturn->addPrimitive(indices);
         }
-		{
+        {
             // cylinder shaft
             std::vector<uint16_t> indices;
             for (uint16_t j = 0; j < numSlices; ++j) {
@@ -311,7 +315,7 @@ namespace campvis {
 
             toReturn->addPrimitive(indices);
         }
-		{
+        {
             // arrow tip bottom area
             std::vector<uint16_t> indices;
             for (uint16_t j = 0; j < numSlices; ++j) {
@@ -323,13 +327,13 @@ namespace campvis {
 
             toReturn->addPrimitive(indices);
         }
-		{
+        {
             // arrow tip cone
-			uint16_t m = (uint16_t)vertices.size() - 1;
+            uint16_t m = static_cast<uint16_t>(vertices.size() - 1);
             std::vector<uint16_t> indices;
             for (uint16_t j = 0; j < numSlices; ++j) {
                 indices.push_back(j+1+numSlices*5);
-				indices.push_back(m);
+                indices.push_back(m);
             }
             indices.push_back(1+numSlices*5);
             indices.push_back(m);
@@ -337,7 +341,7 @@ namespace campvis {
             toReturn->addPrimitive(indices);
         }
 
-		return toReturn;
-	}
+        return toReturn;
+    }
 
 }

@@ -199,13 +199,17 @@ namespace campvis {
             toReturn.addPoint(*it);
         return toReturn;
     }
-    
+
+    bool MultiIndexedGeometry::hasTextureCoordinates() const {
+        return ! _textureCoordinates.empty();
+    }
+
     void MultiIndexedGeometry::deleteIndicesBuffer() const {
         delete _indicesBuffer;
         _indicesBuffer = 0;
     }
 
-    void MultiIndexedGeometry::applyTransformation(const tgt::mat4& t) {
+    void MultiIndexedGeometry::applyTransformationToVertices(const tgt::mat4& t) {
         for (size_t i = 0; i < _vertices.size(); ++i) {
             tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
             _vertices[i] = tmp.xyz() / tmp.w;
