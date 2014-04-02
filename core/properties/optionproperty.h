@@ -158,6 +158,12 @@ namespace campvis {
          */
         void selectByIndex(int index);
 
+        /**
+         * Sets the selected option to \a option.
+         * \param   option  Option to set.
+         */
+        void selectByOption(T option);
+
     protected:
         std::vector< GenericOption<T> > _options;
     };
@@ -221,6 +227,17 @@ namespace campvis {
     void campvis::GenericOptionProperty<T>::selectByIndex(int index) {
         tgtAssert(index > 0 && index < _options.size(), "Index out of bounds.");
         setValue(index);
+    }
+
+    template<typename T>
+    void campvis::GenericOptionProperty<T>::selectByOption(T option) {
+        for (size_t i = 0; i < _options.size(); ++i) {
+            if (_options[i]._value == option) {
+                setValue(static_cast<int>(i));
+                return;
+            }
+        }
+        LERROR("Could not find specified option.");
     }
 
 }
