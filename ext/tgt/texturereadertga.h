@@ -31,7 +31,7 @@ namespace tgt {
 
 ///Texturereader to read compressed and uncompressed RGB and RGBA tga files.
 ///No external dependencies!
-class TextureReaderTga : public TextureReader {
+class TGT_API TextureReaderTga : public TextureReader {
     static const std::string loggerCat_;
 public:
     TextureReaderTga();
