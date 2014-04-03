@@ -37,26 +37,32 @@ namespace campvis {
 
     ProcessorDecoratorGradient::ProcessorDecoratorGradient()
         : AbstractProcessorDecorator()
-        , _gradientMethod("GradientMethod", "Gradient Computation Method", gradientOptions, 4, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
+        , p_gradientMethod("GradientMethod", "Gradient Computation Method", gradientOptions, 4, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
+        , p_lod("GradientLod", "LOD for Gradient Computation", 0.5f, 0.f, 5.f, .1f, 1)
     {
-        _gradientMethod.setValue(1);
+        p_gradientMethod.setValue(1);
+        p_gradientMethod.s_changed.connect(this, &ProcessorDecoratorGradient::onGradientMethodChanged);
     }
 
     ProcessorDecoratorGradient::~ProcessorDecoratorGradient() {
+        p_gradientMethod.s_changed.disconnect(this);
     }
 
     void ProcessorDecoratorGradient::addProperties(HasPropertyCollection* propCollection) {
-        propCollection->addProperty(&_gradientMethod);
+        propCollection->addProperty(&p_gradientMethod);
+        propCollection->addProperty(&p_lod);
     }
 
     std::string ProcessorDecoratorGradient::generateHeader() const {
         std::string toReturn;
-        switch (_gradientMethod.getOptionValue()) {
+        switch (p_gradientMethod.getOptionValue()) {
             case ForwardDifferences:
-                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientForwardDifferences(tex, texParams, texCoords)\n");
+                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientForwardDifferencesLod(tex, texParams, texCoords, _gradientLod)\n");
+                toReturn.append("uniform float _gradientLod = 0.0;\n");
                 break;
             case CentralDifferences:
-                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientCentralDifferences(tex, texParams, texCoords)\n");
+                toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientCentralDifferencesLod(tex, texParams, texCoords, _gradientLod)\n");
+                toReturn.append("uniform float _gradientLod = 0.0;\n");
                 break;
             case FilteredCentralDifferences:
                 toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientFilteredCentralDifferences(tex, texParams, texCoords)\n");
@@ -70,6 +76,16 @@ namespace campvis {
         }
 
         return toReturn;
+    }
+
+    void ProcessorDecoratorGradient::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
+        if (p_gradientMethod.getOptionValue() == ForwardDifferences || p_gradientMethod.getOptionValue() == CentralDifferences) {
+            shader->setUniform("_gradientLod", p_lod.getValue());
+        }
+    }
+
+    void ProcessorDecoratorGradient::onGradientMethodChanged(const AbstractProperty* prop) {
+        p_lod.setVisible(p_gradientMethod.getOptionValue() == ForwardDifferences || p_gradientMethod.getOptionValue() == CentralDifferences);
     }
 
 }

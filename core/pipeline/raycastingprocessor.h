@@ -42,6 +42,8 @@ namespace tgt {
 }
 
 namespace campvis {
+    class GlReduction;
+
     /**
      * Base class for raycasting processors.
      * Offfers properties various common properties and automatic shader loading/linking.
@@ -137,6 +139,9 @@ namespace campvis {
         
         tgt::Shader* _shader;                           ///< Shader for raycasting
         bool _bindEntryExitDepthTextures;               ///< Flag whether to also bind the depth textures of the entry-/exit points.
+
+        GlReduction* _minReduction;
+        GlReduction* _maxReduction;
 
         static const std::string loggerCat_;
     };
