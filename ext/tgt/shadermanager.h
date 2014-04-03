@@ -179,6 +179,35 @@ class TGT_API Shader {
     friend class ShaderManager;
 
 public:
+    /**
+     * Guard to enable ignoring uniform location errors and ensuring to disable it again upon destruction.
+     */
+    struct IgnoreUniformLocationErrorGuard {
+    public:
+        /**
+         * Creates a new IgnoreUniformLocationErrorGuard for the given shader.
+         * Sets the shader's ignoreError_ to true.
+         * \param   shader  Shader to enable ignoring uniform location errors.
+         */
+        IgnoreUniformLocationErrorGuard(tgt::Shader* shader)
+            : _shader(shader)
+            , _stateToRestore(shader->getIgnoreUniformLocationError())
+        {
+            _shader->setIgnoreUniformLocationError(true);
+        };
+
+        /**
+         * Destructor, restores the shader's original ignoreError_ state.
+         */
+        ~IgnoreUniformLocationErrorGuard() {
+            _shader->setIgnoreUniformLocationError(_stateToRestore);
+        }
+
+    private:
+        tgt::Shader* _shader;   ///< Shader to modify
+        bool _stateToRestore;   ///< Original state
+    };
+
     Shader();
 
     /**

@@ -118,6 +118,9 @@ namespace campvis {
 
 
     void IndexedMeshGeometry::render(GLenum mode) const {
+        if (_indices.empty())
+            return;
+
         createGLBuffers();
         if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");

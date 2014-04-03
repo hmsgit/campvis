@@ -76,8 +76,6 @@ bool _inVoid = false;
 uniform float _shadowIntensity;
 #endif
 
-const float positiveInfinity = 1.0 / 0.0;
-
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
@@ -94,25 +92,6 @@ bool lookupInBbv(in vec3 samplePosition) {
     uint texel = texelFetch(_bbvTexture, byte, 0).r;
 
     return (texel & (1U << bit)) != 0U;
-}
-
-float rayBoxIntersection(in vec3 rayOrigin, in vec3 rayDirection, in vec3 boxLlf, in vec3 boxUrb, in float t) {
-    vec3 tMin = (boxLlf - rayOrigin) / rayDirection;
-    vec3 tMax = (boxUrb - rayOrigin) / rayDirection;
-
-    // TODO: these many ifs are expensive - the lessThan bvec solution below should be faster but does not work for some reason...
-    if (tMin.x < t) tMin.x = positiveInfinity;
-    if (tMin.y < t) tMin.y = positiveInfinity;
-    if (tMin.z < t) tMin.z = positiveInfinity;
-
-    if (tMax.x < t) tMax.x = positiveInfinity;
-    if (tMax.y < t) tMax.y = positiveInfinity;
-    if (tMax.z < t) tMax.z = positiveInfinity;
-
-    //tMin += vec3(lessThan(tMin, vec3(t, t, t))) * positiveInfinity;
-    //tMax += vec3(lessThan(tMax, vec3(t, t, t))) * positiveInfinity;
-
-    return min(min(tMin.x, min(tMin.y, tMin.z))   ,    min(tMax.x, min(tMax.y, tMax.z)));
 }
 
 /**
