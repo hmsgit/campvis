@@ -76,10 +76,6 @@ namespace campvis {
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
-        /// \see AbstractProcessor::updateShader
-        virtual void updateShader();
-        /// generate the GLSL header
-        std::string generateGlslHeader() const;
 
         /**
          * Applys the morphology filter \a filter to \a inputImage.
@@ -90,7 +86,8 @@ namespace campvis {
         tgt::Texture* applyFilter(const tgt::Texture* inputTexture, tgt::Shader* filter) const;
 
 
-        tgt::Shader* _shader;       ///< Shader for performing Gaussian filter
+        tgt::Shader* _shader2D;             ///< Shader for performing 2D Gaussian blur
+        tgt::Shader* _shader3D;             ///< Shader for performing 3D Gaussian blur
         tgt::BufferObject* _kernelBuffer;   ///< Texture Buffer ID storing the kernel
         GLuint _kernelBufferTexture;
 
