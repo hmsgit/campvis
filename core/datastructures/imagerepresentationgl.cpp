@@ -186,7 +186,7 @@ namespace campvis {
         }
 
         _texture->uploadTexture();
-        _texture->setWrapping(tgt::Texture::CLAMP);
+        _texture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
 
         if (isInteger && isSigned) {
             // restore default
