@@ -157,6 +157,8 @@ namespace campvis {
         if (input != 0 && input->getParent()->getNumChannels() == 1) {
             ImageData* id = new ImageData(input->getDimensionality(), input->getSize(), 1);
 
+            // disable known false-positive warning in ITK code when using GCC:
+#pragma GCC diagnostic ignored "-Warray-bounds"
             DISPATCH_ITK_FILTER(input, \
                 filter->SetLevel(p_level.getValue()); \
                 filter->SetThreshold(p_threshold.getValue()); \

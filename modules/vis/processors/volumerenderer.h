@@ -84,9 +84,18 @@ namespace campvis {
         /// \see VisualizationPipeline::setViewportSizeProperty()
         virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
-        DataNameProperty p_inputVolume;              ///< image ID for first input image
-        CameraProperty p_camera;
-        DataNameProperty p_outputImage;              ///< image ID for output image
+        /**
+         * Returns the used RaycastingProcessor.
+         * \return  _raycaster
+         */
+        RaycastingProcessor* getRaycastingProcessor();
+
+        DataNameProperty p_inputVolume;             ///< image ID for first input image
+        CameraProperty p_camera;                    ///< Camera 
+        DataNameProperty p_outputImage;             ///< image ID for output image
+
+        BoolProperty p_profileRaycaster;            ///< Flag whether the raycaster's execution time shall be profiled
+        GLuint _timerQueryRaycaster;                ///< OpenGL timer query for raycaster
 
         MetaProperty p_pgProps;                     ///< MetaProperty for properties of the ProxyGeometryGenerator processor
         MetaProperty p_eepProps;                    ///< MetaProperty for properties of the EEPGenerator processor
