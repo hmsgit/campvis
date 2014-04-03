@@ -54,8 +54,6 @@ namespace campvis {
     void VolumeExplorerDemo::init() {
         AutoEvaluationPipeline::init();
         
-        _imageReader.s_validated.connect(this, &VolumeExplorerDemo::onProcessorValidated);
-        
         _ve.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
         
@@ -70,19 +68,10 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.41f, .51f), tgt::col4(170, 170, 128, 64), tgt::col4(192, 192, 128, 64)));
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
-        
-        _canvasSize.s_changed.connect<VolumeExplorerDemo>(this, &VolumeExplorerDemo::onRenderTargetSizeChanged);
     }
 
     void VolumeExplorerDemo::deinit() {
-        _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
-    }
-
-    void VolumeExplorerDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-    }
-
-    void VolumeExplorerDemo::onProcessorValidated(AbstractProcessor* processor) {
     }
 
 

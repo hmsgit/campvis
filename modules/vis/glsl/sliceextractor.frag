@@ -23,6 +23,7 @@
 // ================================================================================================
 
 in vec3 ex_TexCoord;
+in vec4 ex_Color;
 out vec4 out_Color;
 
 //#include "tools/background.frag"
@@ -37,8 +38,9 @@ uniform TFParameters1D _transferFunctionParams;
 
 uniform mat4 _texCoordsMatrix;
 
-uniform bool _useTexturing;
-uniform vec4 _color;
+uniform bool _useTexturing = true;
+uniform bool _useSolidColor = true;
+uniform vec4 _color = vec4(1.0, 1.0, 1.0, 1.0);
 
 void main() {
     if (_useTexturing) {
@@ -54,7 +56,10 @@ void main() {
             out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
         }
     }
-    else {
+    else if (_useSolidColor) {
         out_Color = _color;
-    }    
+    }
+    else {
+        out_Color = ex_Color;
+    }
 }
