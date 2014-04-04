@@ -154,11 +154,6 @@ namespace campvis {
         DoubleAdjusterWidget* _adjusters[size];
     };
 
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<VecPropertyWidget<2>, typename VecPropertyWidgetTraits<2>::PropertyType>;
-    template class PropertyWidgetRegistrar<VecPropertyWidget<3>, typename VecPropertyWidgetTraits<3>::PropertyType>;
-    template class PropertyWidgetRegistrar<VecPropertyWidget<4>, typename VecPropertyWidgetTraits<4>::PropertyType>;
-
 // ================================================================================================
 
     template<size_t SIZE>
@@ -291,6 +286,13 @@ namespace campvis {
         private slots:
             void onValueChanged(double value) { onValueChangedImpl(); };
     }; 
+
+// ================================================================================================
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<Vec2PropertyWidget, typename VecPropertyWidgetTraits<2>::PropertyType, 5>;
+    template class PropertyWidgetRegistrar<Vec3PropertyWidget, typename VecPropertyWidgetTraits<3>::PropertyType, 5>;
+    template class PropertyWidgetRegistrar<Vec4PropertyWidget, typename VecPropertyWidgetTraits<4>::PropertyType, 5>;
 
 }
 

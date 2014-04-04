@@ -157,7 +157,7 @@ namespace campvis {
     template<typename WidgetType, typename PropertyType, int PRIORITY>
     const size_t PropertyWidgetRegistrar<WidgetType, PropertyType, PRIORITY>::_factoryId 
         = PropertyWidgetFactory::getRef().registerPropertyWidget(
-            typeid(PropertyType*), 
+            typeid(PropertyType), 
             &PropertyWidgetRegistrar<WidgetType, PropertyType, PRIORITY>::create, 
             &PropertyWidgetRegistrar<WidgetType, PropertyType, PRIORITY>::tryCreate,
             PRIORITY

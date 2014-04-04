@@ -26,6 +26,8 @@
 
 #include <functional>
 
+#include "core/properties/abstractproperty.h"
+
 namespace campvis {
 
     tbb::atomic<PropertyWidgetFactory*> PropertyWidgetFactory::_singleton;
@@ -54,7 +56,7 @@ namespace campvis {
         if (ptr != nullptr) {
             PropertyWidgetMapType::iterator it = _propertyWidgetMap.lower_bound(typeIndex);
             if (it == _propertyWidgetMap.end() || it->first != typeIndex) {
-                //_propertyWidgetMap.insert(it, std::make_pair(typeIndex, ptr));
+                _propertyWidgetMap.insert(it, std::make_pair(typeIndex, ptr));
             }
             else {
                 tgtAssert(false, "Double-registered a property widget for the same type.");
@@ -67,16 +69,17 @@ namespace campvis {
         return _propertyWidgetMap.size() + _fallbackCreatorMap.size();
     }
 
-    AbstractPropertyWidget* PropertyWidgetFactory::createWidget(AbstractProperty* property, DataContainer* dc /*= 0*/, QWidget* parent /*= 0*/) {
+    AbstractPropertyWidget* PropertyWidgetFactory::createWidget(AbstractProperty* prop, DataContainer* dc /*= 0*/, QWidget* parent /*= 0*/) {
         // look if we find a direct a direct match
-        PropertyWidgetMapType::iterator it = _propertyWidgetMap.find(std::type_index(typeid(property)));
-        if (it != _propertyWidgetMap.end())
-            return it->second(property, dc, parent);
+        PropertyWidgetMapType::iterator it = _propertyWidgetMap.find(std::type_index(typeid(*prop)));
+        if (it != _propertyWidgetMap.end()) {
+            return it->second(prop, dc, parent);
+        }
 
         // otherwise we have to do this kind of slow search
         for (std::multimap<int, FallbackPropertyWidgetCreateFunctionPointer>::iterator it = _fallbackCreatorMap.begin(); it != _fallbackCreatorMap.end(); ++it) {
             // let each registered widget try to create a widget for the property
-            AbstractPropertyWidget* toReturn = it->second(property, dc, parent);
+            AbstractPropertyWidget* toReturn = it->second(prop, dc, parent);
             if (toReturn != nullptr)
                 return toReturn;
         }

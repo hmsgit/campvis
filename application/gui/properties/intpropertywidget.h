@@ -154,11 +154,6 @@ namespace campvis {
         IntAdjusterWidget* _adjusters[size];
     };
 
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<IVecPropertyWidget<2>, typename IVecPropertyWidgetTraits<2>::PropertyType>;
-    template class PropertyWidgetRegistrar<IVecPropertyWidget<3>, typename IVecPropertyWidgetTraits<3>::PropertyType>;
-    template class PropertyWidgetRegistrar<IVecPropertyWidget<4>, typename IVecPropertyWidgetTraits<4>::PropertyType>;
-
 // ================================================================================================
 
     template<size_t SIZE>
@@ -276,6 +271,13 @@ namespace campvis {
         private slots:
             void onValueChanged(int value) { onValueChangedImpl(); };
     }; 
+
+// ================================================================================================
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<IVec2PropertyWidget, typename IVecPropertyWidgetTraits<2>::PropertyType, 5>;
+    template class PropertyWidgetRegistrar<IVec3PropertyWidget, typename IVecPropertyWidgetTraits<3>::PropertyType, 5>;
+    template class PropertyWidgetRegistrar<IVec4PropertyWidget, typename IVecPropertyWidgetTraits<4>::PropertyType, 5>;
 
 }
 #endif // INTPROPERTYWIDGET_H__
