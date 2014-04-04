@@ -37,8 +37,8 @@
 #include <QCheckBox>
 
 namespace campvis {
-    TransferFunctionPropertyWidget::TransferFunctionPropertyWidget(TransferFunctionProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, true, parent)
+    TransferFunctionPropertyWidget::TransferFunctionPropertyWidget(TransferFunctionProperty* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, true, dataContainer, parent)
         , _widget(0)
         , _gridLayout(0)
         , _lblDomain(0)

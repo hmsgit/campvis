@@ -111,7 +111,7 @@ namespace campvis {
     }
 
     void PropertyCollectionWidget::addProperty(AbstractProperty* prop) {
-        QWidget* propWidget = PropertyWidgetFactory::createWidget(prop, _dataContainer);
+        QWidget* propWidget = PropertyWidgetFactory::getRef().createWidget(prop, _dataContainer);
         if (propWidget == 0)
             propWidget = new QPushButton(QString::fromStdString(prop->getTitle()));
 

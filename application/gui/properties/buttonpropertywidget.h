@@ -26,6 +26,7 @@
 #define BUTTONPROPERTYWIDGET_H__
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/buttonproperty.h"
 
 class QPushButton;
@@ -44,7 +45,7 @@ namespace campvis {
          * \param   property    The property the widget shall handle
          * \param   parent      Parent Qt widget
          */
-        ButtonPropertyWidget(ButtonProperty* property, QWidget* parent = 0);
+        ButtonPropertyWidget(ButtonProperty* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         /**
          * Destructor
@@ -64,6 +65,9 @@ namespace campvis {
         QPushButton* _button;
 
     };
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<ButtonPropertyWidget, ButtonProperty>;
 }
 
 #endif // BUTTONPROPERTYWIDGET_H__

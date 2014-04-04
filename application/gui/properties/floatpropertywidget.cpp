@@ -25,8 +25,8 @@
 #include "floatpropertywidget.h"
 
 namespace campvis {
-    FloatPropertyWidget::FloatPropertyWidget(FloatProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+    FloatPropertyWidget::FloatPropertyWidget(FloatProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _adjuster(0)
     {
         _adjuster = new DoubleAdjusterWidget();

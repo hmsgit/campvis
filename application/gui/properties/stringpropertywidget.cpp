@@ -31,8 +31,8 @@
 #include <QFileDialog>
 
 namespace campvis {
-    StringPropertyWidget::StringPropertyWidget(StringProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+    StringPropertyWidget::StringPropertyWidget(StringProperty* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _lineEdit(0)
         , _btnLoadFile(0)
     {
