@@ -33,12 +33,9 @@
 
 #include <map>
 #include <string>
+#include <typeindex>
 #include <typeinfo>
 #include <vector>
-
-#if (_MSC_VER == 1600)
-#include <typeindex> // MSVC 2010 defines std::type_index in its own header
-#endif
 
 class QWidget;
 
