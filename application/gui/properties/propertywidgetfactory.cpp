@@ -24,91 +24,64 @@
 
 #include "propertywidgetfactory.h"
 
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/buttonpropertywidget.h"
-#include "application/gui/properties/boolpropertywidget.h"
-#include "application/gui/properties/camerapropertywidget.h"
-#include "application/gui/properties/datanamepropertywidget.h"
-#include "application/gui/properties/intpropertywidget.h"
-#include "application/gui/properties/floatpropertywidget.h"
-#include "application/gui/properties/metapropertywidget.h"
-#include "application/gui/properties/optionpropertywidget.h"
-#include "application/gui/properties/stringpropertywidget.h"
-#include "application/gui/properties/transferfunctionpropertywidget.h"
-
-#include "core/datastructures/datacontainer.h"
-#include "core/properties/abstractproperty.h"
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-
+#include <functional>
 
 namespace campvis {
 
-    AbstractPropertyWidget* PropertyWidgetFactory::createWidget(AbstractProperty* property, DataContainer* dc) {
-        tgtAssert(property != 0, "Property must not be 0.");
+    tbb::atomic<PropertyWidgetFactory*> PropertyWidgetFactory::_singleton;
 
-        if (BoolProperty* tester = dynamic_cast<BoolProperty*>(property)) {
-            return new BoolPropertyWidget(tester);
-        }
-        if (ButtonProperty* tester = dynamic_cast<ButtonProperty*>(property)) {
-            return new ButtonPropertyWidget(tester);
-        }
-
-        // OptionProperty must test before IntProperty
-        if (AbstractOptionProperty* tester = dynamic_cast<AbstractOptionProperty*>(property)) {
-            return new OptionPropertyWidget(tester);
+    PropertyWidgetFactory& PropertyWidgetFactory::getRef() {
+        if (_singleton == 0) {
+            std::cout << "creating PropertyWidgetFactory...\n";
+            PropertyWidgetFactory* tmp = new PropertyWidgetFactory();
+            if (_singleton.compare_and_swap(tmp, 0) != 0) {
+                delete tmp;
+            }
         }
 
-        if (IntProperty* tester = dynamic_cast<IntProperty*>(property)) {
-            return new IntPropertyWidget(tester);
+        return *_singleton;
+    }
+
+    void PropertyWidgetFactory::deinit() {
+        delete _singleton;
+        _singleton = nullptr;
+    }
+
+    size_t PropertyWidgetFactory::registerPropertyWidget(const std::type_info& type, PropertyWidgetCreateFunctionPointer ptr, FallbackPropertyWidgetCreateFunctionPointer fallbackPtr, int priority) {
+        tbb::spin_mutex::scoped_lock lock(_mutex);
+        std::type_index typeIndex(type);
+
+        if (ptr != nullptr) {
+            PropertyWidgetMapType::iterator it = _propertyWidgetMap.lower_bound(typeIndex);
+            if (it == _propertyWidgetMap.end() || it->first != typeIndex) {
+                //_propertyWidgetMap.insert(it, std::make_pair(typeIndex, ptr));
+            }
+            else {
+                tgtAssert(false, "Double-registered a property widget for the same type.");
+            }
         }
-        if (IVec2Property* tester = dynamic_cast<IVec2Property*>(property)) {
-            return new IVec2PropertyWidget(tester);
-        }
-        if (IVec3Property* tester = dynamic_cast<IVec3Property*>(property)) {
-            return new IVec3PropertyWidget(tester);
-        }
-        if (IVec4Property* tester = dynamic_cast<IVec4Property*>(property)) {
-            return new IVec4PropertyWidget(tester);
+        if (fallbackPtr != nullptr) {
+            _fallbackCreatorMap.insert(std::make_pair(-priority, fallbackPtr));
         }
 
-        if (FloatProperty* tester = dynamic_cast<FloatProperty*>(property)) {
-            return new FloatPropertyWidget(tester);
-        }
-        if (Vec2Property* tester = dynamic_cast<Vec2Property*>(property)) {
-            return new Vec2PropertyWidget(tester);
-        }
-        if (Vec3Property* tester = dynamic_cast<Vec3Property*>(property)) {
-            return new Vec3PropertyWidget(tester);
-        }
-        if (Vec4Property* tester = dynamic_cast<Vec4Property*>(property)) {
-            return new Vec4PropertyWidget(tester);
+        return _propertyWidgetMap.size() + _fallbackCreatorMap.size();
+    }
+
+    AbstractPropertyWidget* PropertyWidgetFactory::createWidget(AbstractProperty* property, DataContainer* dc /*= 0*/, QWidget* parent /*= 0*/) {
+        // look if we find a direct a direct match
+        PropertyWidgetMapType::iterator it = _propertyWidgetMap.find(std::type_index(typeid(property)));
+        if (it != _propertyWidgetMap.end())
+            return it->second(property, dc, parent);
+
+        // otherwise we have to do this kind of slow search
+        for (std::multimap<int, FallbackPropertyWidgetCreateFunctionPointer>::iterator it = _fallbackCreatorMap.begin(); it != _fallbackCreatorMap.end(); ++it) {
+            // let each registered widget try to create a widget for the property
+            AbstractPropertyWidget* toReturn = it->second(property, dc, parent);
+            if (toReturn != nullptr)
+                return toReturn;
         }
 
-        // DataNameProperty must test before StringProperty
-        if (DataNameProperty* tester = dynamic_cast<DataNameProperty*>(property)) {
-            return new DataNamePropertyWidget(tester, dc);
-        }
-        if (StringProperty* tester = dynamic_cast<StringProperty*>(property)) {
-            return new StringPropertyWidget(tester);
-        }
-
-        if (CameraProperty* tester = dynamic_cast<CameraProperty*>(property)) {
-            return new CameraPropertyWidget(tester);
-        }
-
-        if (TransferFunctionProperty* tester = dynamic_cast<TransferFunctionProperty*>(property)) {
-            return new TransferFunctionPropertyWidget(tester);
-        }
-
-        if (MetaProperty* tester = dynamic_cast<MetaProperty*>(property)) {
-            return new MetaPropertyWidget(tester, dc);
-        }
-
-        return 0;
+        return nullptr;
     }
 
 }

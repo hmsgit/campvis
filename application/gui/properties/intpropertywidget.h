@@ -27,6 +27,7 @@
 
 #include "application/gui/adjusterwidgets/intadjusterwidget.h"
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/numericproperty.h"
 
 class QCheckBox;
@@ -43,10 +44,11 @@ namespace campvis {
     public:
         /**
          * Creates a new IntPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         * \param   property        The property the widget shall handle
+         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * \param   parent          Parent Qt widget
          */
-        IntPropertyWidget(IntProperty* property, QWidget* parent = 0);
+        IntPropertyWidget(IntProperty* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         /**
          * Destructor
@@ -81,6 +83,9 @@ namespace campvis {
         QSpinBox* _sbInterval;
 
     };
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<IntPropertyWidget, IntProperty>;
 
 // ================================================================================================
 
@@ -125,7 +130,7 @@ namespace campvis {
          * \param   property    The property the widget shall handle
          * \param   parent      Parent Qt widget
          */
-        IVecPropertyWidget(PropertyType* property, QWidget* parent = 0);
+        IVecPropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         /**
          * Destructor
@@ -149,11 +154,16 @@ namespace campvis {
         IntAdjusterWidget* _adjusters[size];
     };
 
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<IVecPropertyWidget<2>, typename IVecPropertyWidgetTraits<2>::PropertyType>;
+    template class PropertyWidgetRegistrar<IVecPropertyWidget<3>, typename IVecPropertyWidgetTraits<3>::PropertyType>;
+    template class PropertyWidgetRegistrar<IVecPropertyWidget<4>, typename IVecPropertyWidgetTraits<4>::PropertyType>;
+
 // ================================================================================================
 
     template<size_t SIZE>
-    campvis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, true, parent)
+    campvis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, true, dataContainer, parent)
     {
         for (size_t i = 0; i < size; ++i) {
             _adjusters[i] = new IntAdjusterWidget;
@@ -221,8 +231,8 @@ namespace campvis {
     class IVec2PropertyWidget : public IVecPropertyWidget<2> {
         Q_OBJECT
     public:
-        IVec2PropertyWidget(PropertyType* property, QWidget* parent = 0)
-            : IVecPropertyWidget<2>(property, parent)
+        IVec2PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
+            : IVecPropertyWidget<2>(property, dataContainer, parent)
         {
             for (size_t i = 0; i < size; ++i) {
                 connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
@@ -238,8 +248,8 @@ namespace campvis {
     class IVec3PropertyWidget : public IVecPropertyWidget<3> {
         Q_OBJECT
     public:
-        IVec3PropertyWidget(PropertyType* property, QWidget* parent = 0)
-            : IVecPropertyWidget<3>(property, parent)
+        IVec3PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
+            : IVecPropertyWidget<3>(property, dataContainer, parent)
         {
             for (size_t i = 0; i < size; ++i) {
                 connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
@@ -255,8 +265,8 @@ namespace campvis {
     class IVec4PropertyWidget : public IVecPropertyWidget<4> {
         Q_OBJECT
     public:
-        IVec4PropertyWidget(PropertyType* property, QWidget* parent = 0)
-            : IVecPropertyWidget<4>(property, parent)
+        IVec4PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
+            : IVecPropertyWidget<4>(property, dataContainer, parent)
         {
             for (size_t i = 0; i < size; ++i) {
                 connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));

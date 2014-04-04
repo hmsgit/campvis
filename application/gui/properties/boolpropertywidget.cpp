@@ -27,8 +27,8 @@
 #include <QCheckBox>
 
 namespace campvis {
-    BoolPropertyWidget::BoolPropertyWidget(BoolProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+    BoolPropertyWidget::BoolPropertyWidget(BoolProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _spinBox(0)
     {
         _spinBox = new QCheckBox(this);

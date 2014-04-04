@@ -28,8 +28,8 @@
 #include "core/properties/optionproperty.h"
 
 namespace campvis {
-    OptionPropertyWidget::OptionPropertyWidget(AbstractOptionProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+    OptionPropertyWidget::OptionPropertyWidget(AbstractOptionProperty* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _comboBox(0)
     {
         _comboBox = new QComboBox(this);

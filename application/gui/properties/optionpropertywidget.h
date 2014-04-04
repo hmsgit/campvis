@@ -26,6 +26,7 @@
 #define OPTIONPROPERTYWIDGET_H__
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/optionproperty.h"
 
 class QComboBox;
@@ -42,10 +43,11 @@ namespace campvis {
     public:
         /**
          * Creates a new OptionPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         * \param   property        The property the widget shall handle
+         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * \param   parent          Parent Qt widget
          */
-        OptionPropertyWidget(AbstractOptionProperty* property, QWidget* parent = 0);
+        OptionPropertyWidget(AbstractOptionProperty* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         /**
          * Destructor
@@ -66,5 +68,7 @@ namespace campvis {
 
     };
 
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<OptionPropertyWidget, AbstractOptionProperty, 10>;
 }
 #endif // OPTIONPROPERTYWIDGET_H__

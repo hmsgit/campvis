@@ -31,10 +31,9 @@
 
 namespace campvis {
     DataNamePropertyWidget::DataNamePropertyWidget(DataNameProperty* property, DataContainer* dc, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+        : AbstractPropertyWidget(property, false, dc, parent)
         , _lineEdit(0)
         , _combobox(0)
-        , _dc(dc)
     {
         if (property->getAccessInfo() == DataNameProperty::READ) {
             _combobox = new QComboBox(this);
@@ -63,8 +62,8 @@ namespace campvis {
     }
 
     DataNamePropertyWidget::~DataNamePropertyWidget() {
-        if (_dc != 0 && static_cast<DataNameProperty*>(_property)->getAccessInfo() == DataNameProperty::READ)
-            _dc->s_dataAdded.disconnect(this);
+        if (_dataContainer != 0 && static_cast<DataNameProperty*>(_property)->getAccessInfo() == DataNameProperty::READ)
+            _dataContainer->s_dataAdded.disconnect(this);
     }
 
     void DataNamePropertyWidget::updateWidgetFromProperty() {

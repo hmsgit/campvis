@@ -30,9 +30,10 @@
 namespace campvis {
 
     AbstractPropertyWidget::AbstractPropertyWidget(AbstractProperty* property, bool displayBoxed /*= false*/,
-                                                   QWidget* parent /*= 0*/)
+                                                   DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/)
         : QWidget(parent)
         , _property(property)
+        , _dataContainer(dataContainer)
         , _layout(0)
     {
         _ignorePropertyUpdates = 0;
