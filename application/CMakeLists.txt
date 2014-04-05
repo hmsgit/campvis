@@ -64,6 +64,24 @@ SET(CampvisApplicationToBeMocced
     tools/bufferinglog.h
 )
 
+
+# add additional sources from the activated modules
+FOREACH(ModFile ${CampvisModulesApplicationSources})
+    # adjust relative path
+    SET(ModFileRelative ../modules/${ModFile})
+    LIST(APPEND CampvisApplicationSources ${ModFileRelative})
+ENDFOREACH()
+FOREACH(ModFile ${CampvisModulesApplicationHeaders})
+    # adjust relative path
+    SET(ModFileRelative ../modules/${ModFile})
+    LIST(APPEND CampvisApplicationHeaders ${ModFileRelative})
+ENDFOREACH()
+FOREACH(ModFile ${CampvisModulesApplicationToBeMocced})
+    # adjust relative path
+    SET(ModFileRelative ../modules/${ModFile})
+    LIST(APPEND CampvisApplicationToBeMocced ${ModFileRelative})
+ENDFOREACH()
+
 #
 # Qt related stuff:
 #

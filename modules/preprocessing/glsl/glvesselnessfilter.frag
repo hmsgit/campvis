@@ -103,7 +103,7 @@ void main() {
 
     if (true || bitfieldExtract(l, 4, 1) != 0U) {
         for (float lod = _lod.x; lod < _lod.y; lod += 0.5) {
-            float level_vesselness = computeVesselness(texCoords, lod);
+            vec4 level_vesselness = computeVesselness(texCoords, lod);
             out_vesselness = max(out_vesselness, level_vesselness.x);
         }
     }
