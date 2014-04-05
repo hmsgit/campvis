@@ -2,7 +2,7 @@
 %include factory.i
 %include std_string.i
 %import "ext/tgt/bindings/tgt.i"
-%include "scripting/sigslot.i"
+%include "ext/sigslot/sigslot.i"
 %{
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/imagedata.h"
