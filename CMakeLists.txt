@@ -51,10 +51,7 @@ IF(CAMPVIS_BUILD_LIB_LUA)
     # Keep LUA_BUILD_AS_DLL in sync with BUILD_SHARED_LIBS
     SET(LUA_BUILD_AS_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "Build Lua library as DLL" FORCE)
 
-    # Disable features we don't need
-    SET(LUA_BUILD_WLUA OFF CACHE BOOL "Build wLua interpreter without console output")
-
-    ADD_SUBDIRECTORY(ext/lua)
+    ADD_SUBDIRECTORY(ext/lua EXCLUDE_FROM_ALL)
 
     # If the above command failed, provide a hint how to fix the problem
     IF(NOT TARGET liblua)
