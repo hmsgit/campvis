@@ -16,7 +16,7 @@ OPTION(CAMPVIS_DEBUG                "Activate debug code?"                      
 OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                                     ON)
 OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                                            ON)
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
-OPTION(CAMPVIS_ENABLE_SCRIPTING     "Add support for scripting CAMPVis using Lua"                   ON)
+OPTION(CAMPVIS_ENABLE_SCRIPTING     "Add support for scripting CAMPVis using Lua"                   OFF)
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
 OPTION(CAMPVIS_BUILD_LIB_LUA        "Build Lua Library"                                             OFF)
 OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   OFF)
