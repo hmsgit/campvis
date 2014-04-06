@@ -5,16 +5,19 @@
 # LUA_LIBRARY
 
 IF(WIN32)
-    SET(LUA_DIR "${CampvisHome}/ext/lua" CACHE PATH "If Lua is not found, set this path")
+    # For now Lua needs to be built as part of CAMPVis on Windows
+    IF(CAMPVIS_BUILD_LIB_LUA)
+        SET(LUA_DIR "${CampvisHome}/ext/lua" CACHE PATH "If Lua is not found, set this path")
 
-    SET(LUA_INCLUDE_DIR "${LUA_DIR}/src" "${CMAKE_BINARY_DIR}/ext/lua")
+        SET(LUA_INCLUDE_DIR "${LUA_DIR}/src" "${CMAKE_BINARY_DIR}/ext/lua")
 
-    IF(LUA_INCLUDE_DIR)
-        SET(LUA_LIBRARY liblua)
-        SET(LUA_FOUND TRUE)
-    ELSE()
-        SET(LUA_FOUND FALSE)
-    ENDIF()
+        IF(LUA_INCLUDE_DIR)
+            SET(LUA_LIBRARY liblua)
+            SET(LUA_FOUND TRUE)
+        ELSE()
+            SET(LUA_FOUND FALSE)
+        ENDIF()
+    ENDIF(CAMPVIS_BUILD_LIB_LUA)
 
 ELSE(WIN32)
     # TODO: not tested
