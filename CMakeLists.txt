@@ -55,6 +55,11 @@ IF(CAMPVIS_BUILD_LIB_LUA)
     SET(LUA_BUILD_WLUA OFF CACHE BOOL "Build wLua interpreter without console output")
 
     ADD_SUBDIRECTORY(ext/lua)
+
+    # If the above command failed, provide a hint how to fix the problem
+    IF(NOT TARGET liblua)
+        MESSAGE(SEND_ERROR "Did you forget to run `git submodule update --init`?")
+    ENDIF(NOT TARGET liblua)
 ENDIF()
 
 IF(CAMPVIS_BUILD_CORE)
