@@ -178,6 +178,7 @@ namespace campvis {
         }
         if (prop == &p_outputImage) {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
+            _sliceExtractor.p_geometryID.setValue(p_outputImage.getValue() + ".scribbles");
         }
         if (prop == &p_inputVolume) {
             invalidate(VR_INVALID | SLICES_INVALID);

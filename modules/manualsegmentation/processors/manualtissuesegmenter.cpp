@@ -539,7 +539,7 @@ namespace campvis {
             _splines[p_frameNumber.getValue()] = tmp;
 
         }
-        catch (itk::ExceptionObject e) {
+        catch (itk::ExceptionObject& e) {
             LERROR(e.what());
         }
 
@@ -654,7 +654,7 @@ namespace campvis {
                 }
                 _segmentation.setLayer(layer, l);
             }
-            catch (itk::ExceptionObject e) {
+            catch (itk::ExceptionObject& e) {
                 LERROR(e.what());
             }
         }

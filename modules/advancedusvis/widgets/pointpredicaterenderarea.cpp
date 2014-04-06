@@ -128,8 +128,6 @@ namespace campvis {
 
     void PointPredicateRenderArea::mouseMoveEvent(QMouseEvent* e) {
         if (_movingPredicate >= 0) {
-            AbstractPointPredicate* daPredicate = getPredicate(_movingPredicate);
-
             int hh = height() - MARGIN_TOP - MARGIN_BOTTOM;
             double y = height() - e->y() - MARGIN_BOTTOM;
             float newValue = tgt::clamp(y/hh, 0.0, 1.0);
@@ -209,8 +207,6 @@ namespace campvis {
     }
 
     QPoint PointPredicateRenderArea::transformToGraphSpace(int x, int y) {
-        int hw = width() - MARGIN_LEFT - MARGIN_RIGHT;
-        int hh = height() - MARGIN_TOP - MARGIN_BOTTOM;
         return QPoint(x - MARGIN_LEFT, height() - y - MARGIN_BOTTOM);
     }
 
@@ -219,8 +215,6 @@ namespace campvis {
         int hh = height() - MARGIN_TOP - MARGIN_BOTTOM;
 
         std::vector<AbstractPointPredicate*> preds = _prop->getPredicateHistogram()->getPredicates();
-        double w = static_cast<double>(hw) / preds.size();
-
         if (preds.empty())
             return -1;
 
@@ -246,8 +240,6 @@ namespace campvis {
         int hh = height() - MARGIN_TOP - MARGIN_BOTTOM;
 
         std::vector<AbstractPointPredicate*> preds = _prop->getPredicateHistogram()->getPredicates();
-        double w = static_cast<double>(hw) / preds.size();
-
         if (preds.empty())
             return -1;
 
@@ -276,8 +268,6 @@ namespace campvis {
         int hh = height() - MARGIN_TOP - MARGIN_BOTTOM;
 
         std::vector<AbstractPointPredicate*> preds = _prop->getPredicateHistogram()->getPredicates();
-        double w = static_cast<double>(hw) / preds.size();
-
         if (preds.empty())
             return -1;
 

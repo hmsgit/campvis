@@ -81,8 +81,7 @@ namespace campvis {
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.
         enum ProcessorInvalidationLevel {
-            BITSET_INVALID = SLICES_INVALID << 1,
-            SCRIBBLE_INVALID = SLICES_INVALID << 2,
+            BITSET_INVALID = SCRIBBLE_INVALID << 1
         };
 
         /// \see AbstractProcessor::updateResult
@@ -95,27 +94,25 @@ namespace campvis {
          */
         virtual void onProcessorInvalidated(AbstractProcessor* processor);
 
-        /**
-         * \see VisualizationProcessor::onPropertyChanged
-         */
+        /// \see VisualizationProcessor::onPropertyChanged
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
+        /**
+         * Updates the point predicate histogram from the current scribble geometry.
+         */
         void updatePredicateHistogramFromScribbles();
 
-        std::vector<int> computeBitHistogram(const std::vector<tgt::svec3>& bitmasks);
+        /**
+         * Returns the predicate bit histogram of the given vector of voxels.
+         * \param   voxels  List of voxels to compute the bit histogram for.
+         * \return  A histogram where each bit corresponds to the number of voxels in \a voxels where the corresponding predicate yields true.
+         */
+        std::vector<int> computeBitHistogram(const std::vector<tgt::vec3>& voxels);
 
-        std::vector<tgt::vec3> createScribbleGeometryVertices(const std::vector<tgt::svec3>& scribble) const;
-
-        FaceGeometry* createScribbleGeometry() const;
-
-        PointPredicateEvaluator _predicateEvaluation;
-
+        PointPredicateEvaluator _predicateEvaluation;   ///< Processor to perform the point predicate evaluation on.
         DataHandle _bitmaskHandle;                      ///< DataHandle storing the predicate bitmask
-        std::vector<tgt::svec3>* _mousePressedPointer;  ///< Pointer encoding whether the mouse was pressed (!= nullptr) and whether we have yes-scribbles or no-scribbles.
 
-        std::vector<tgt::svec3> _yesScribbles;          ///< All voxels of the current yes-scribbles
-        std::vector<tgt::svec3> _noScribbles;           ///< All voxels of the current no-scribbles
-
+    private:
         static const std::string loggerCat_;
     };
 
