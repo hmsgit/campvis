@@ -117,10 +117,8 @@ ADD_CUSTOM_COMMAND(
 
 LIST(APPEND CampvisScriptingHeaders "swigluarun.h")
 
-ADD_EXECUTABLE(campvis-scripting-test ${CampvisScriptingSources} ${CampvisScriptingHeaders})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CMAKE_CURRENT_BINARY_DIR})
-TARGET_LINK_LIBRARIES(campvis-scripting-test campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
 
 ADD_LIBRARY(campvis-scripting STATIC
     ${CampvisScriptingSources} ${CampvisScriptingHeaders}
