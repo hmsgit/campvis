@@ -49,7 +49,7 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _usReader(&_canvasSize)
         , _confidenceGenerator()
-        , _usBlurFilter()
+        , _usBlurFilter(&_canvasSize)
         , _usFusion(&_canvasSize)
         , p_autoExecution("AutoExecution", "Automatic Execution", false)
         , p_sourcePath("SourcePath", "Source Files Path", "")
@@ -88,7 +88,7 @@ namespace campvis {
         _usReader.p_importType.selectById("localIntensity");
         _usReader.p_targetImageID.addSharedProperty(&_confidenceGenerator.p_sourceImageID);
         _usReader.p_targetImageID.addSharedProperty(&_usFusion.p_usImageId);
-        _usReader.p_targetImageID.addSharedProperty(&_usBlurFilter.p_sourceImageID);
+        _usReader.p_targetImageID.addSharedProperty(&_usBlurFilter.p_inputImage);
 
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
         _confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion.p_confidenceImageID);
@@ -104,10 +104,9 @@ namespace campvis {
         _usFusion.p_view.selectById("mappingSharpness");
         _usFusion.p_sliceNumber.setValue(0);
 
-        _usBlurFilter.p_targetImageID.setValue("us.blurred");
-        _usBlurFilter.p_targetImageID.addSharedProperty(&_usFusion.p_blurredImageId);
-        _usBlurFilter.p_filterMode.selectById("gauss");
-        _usBlurFilter.p_sigma.setValue(4.f);
+        _usBlurFilter.p_outputImage.setValue("us.blurred");
+        _usBlurFilter.p_outputImage.addSharedProperty(&_usFusion.p_blurredImageId);
+        _usBlurFilter.p_sigma.setValue(2.f);
 
 
         // TODO: replace this hardcoded domain by automatically determined from image min/max values

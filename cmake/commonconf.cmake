@@ -98,7 +98,8 @@ IF(WIN32)
     # C4503: The decorated name was longer than the compiler limit (4096), and was truncated.
     #        Occurs in AutoEvaluatePipeline due to some nested nested map-iterator-map. Could
     #        not be deactivated locally...
-    LIST(APPEND CampvisGlobalDefinitions /wd4251 /wd4290 /wd4390 /wd4503)
+    # C4068: Unknown Pragma since we use some GCC pragmas in the code.
+    LIST(APPEND CampvisGlobalDefinitions /wd4251 /wd4290 /wd4390 /wd4503 /wd4068)
     
     # enable parallel builds in Visual Studio
     LIST(APPEND CampvisGlobalDefinitions /MP)

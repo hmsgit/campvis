@@ -16,7 +16,8 @@ IF(ModuleEnabled)
 	)
 
 	SET(ThisModShaderDirectories "modules/advancedusvis/glsl")
+	SET(ThisModDependencies vis io preprocessing)
 ENDIF(ModuleEnabled)
 
-SET(ThisModStatus EXPERIMENTAL)
+SET(ThisModStatus TESTING)
 SET(ThisModExternalDependencies FALSE)
