@@ -20,13 +20,11 @@ IF(ModuleEnabled)
     # Source files:
     FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
         modules/itk/processors/*.cpp
-        modules/itk/tools/*.cpp
     )
 
     # Header files
     FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
         modules/itk/processors/*.h
-        modules/itk/tools/*.h
         modules/itk/core/*.h
     )
 ENDIF(ModuleEnabled)
