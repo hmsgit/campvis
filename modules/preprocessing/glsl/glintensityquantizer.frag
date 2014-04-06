@@ -22,45 +22,29 @@
 // 
 // ================================================================================================
 
-#ifndef VolumeExplorerDemo_H__
-#define VolumeExplorerDemo_H__
+in vec3 ex_TexCoord;
+out vec4 out_Color;
 
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/io/processors/genericimagereader.h"
-#include "modules/vis/processors/volumeexplorer.h"
+#include "tools/gradient.frag"
+#include "tools/texture3d.frag"
+#include "tools/transferfunction.frag"
 
-namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
-    public:
-        /**
-         * Creates a AutoEvaluationPipeline.
-         */
-        VolumeExplorerDemo(DataContainer* dc);
+uniform sampler3D _texture;
+uniform TextureParameters3D _textureParams;
 
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~VolumeExplorerDemo();
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
 
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
+uniform float _zTexCoord;
+uniform int _numberOfBins;
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
+void main() {
+     vec4 intensity = texture(_texture, vec3(ex_TexCoord.xy, _zTexCoord));
 
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        /// \see AbstractPipeline::getId()
-        static const std::string getId() { return "VolumeExplorerDemo"; };
+     intensity.x = lookupTF(_transferFunction, _transferFunctionParams, intensity.x).a;
+     intensity.y = lookupTF(_transferFunction, _transferFunctionParams, intensity.y).a;
+     intensity.z = lookupTF(_transferFunction, _transferFunctionParams, intensity.z).a;
+     intensity.w = lookupTF(_transferFunction, _transferFunctionParams, intensity.w).a;
 
-    protected:
-
-        GenericImageReader _imageReader;
-        VolumeExplorer _ve;
-    };
-
+     out_Color = floor(intensity * float(_numberOfBins + 1)) / float(_numberOfBins);
 }
-
-#endif // VolumeExplorerDemo_H__

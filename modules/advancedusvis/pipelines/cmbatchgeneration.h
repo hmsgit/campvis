@@ -28,16 +28,8 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/devil/processors/devilimagereader.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/io/processors/csvdimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
-#include "modules/preprocessing/processors/gradientvolumegenerator.h"
-#include "modules/preprocessing/processors/lhhistogram.h"
-#include "modules/itk/processors/itkimagefilter.h"
-#include "modules/vis/processors/proxygeometrygenerator.h"
-#include "modules/vis/processors/eepgenerator.h"
-#include "modules/vis/processors/simpleraycaster.h"
-#include "modules/vis/processors/quadview.h"
+#include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/randomwalk/processors/confidencemapgenerator.h"
 
 #include "core/properties/buttonproperty.h"
@@ -84,7 +76,7 @@ namespace campvis {
 
         DevilImageReader _usReader;
         ConfidenceMapGenerator _confidenceGenerator;
-        ItkImageFilter _usBlurFilter;
+        GlGaussianFilter _usBlurFilter;
         AdvancedUsFusion _usFusion;
 
         BoolProperty p_autoExecution;

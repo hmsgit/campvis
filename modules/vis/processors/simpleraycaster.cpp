@@ -91,7 +91,8 @@ namespace campvis {
         return toReturn;
     }
 
-    void SimpleRaycaster::updateProperties(DataContainer& /*dataContainer*/) {
+    void SimpleRaycaster::updateProperties(DataContainer& dataContainer) {
+        RaycastingProcessor::updateProperties(dataContainer);
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }

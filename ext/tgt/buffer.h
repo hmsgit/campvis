@@ -14,7 +14,8 @@ namespace tgt {
     public:
         enum TargetType {
             ARRAY_BUFFER = GL_ARRAY_BUFFER,
-            ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER
+            ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER,
+            TEXTURE_BUFFER = GL_TEXTURE_BUFFER
         };
 
         enum UsageType {

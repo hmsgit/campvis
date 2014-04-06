@@ -40,6 +40,8 @@ namespace campvis {
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
         , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
         , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
+        , p_profileRaycaster("ProfileRaycaster", "Profile Raycaster's Execution Time", false)
+        , _timerQueryRaycaster(0)
         , p_pgProps("PGGProps", "Proxy Geometry Generator", AbstractProcessor::VALID)
         , p_eepProps("EEPProps", "Entry/Exit Points Generator", AbstractProcessor::VALID)
         , p_raycasterProps("RaycasterProps", "Raycaster", AbstractProcessor::VALID)
@@ -52,6 +54,7 @@ namespace campvis {
         addProperty(&p_inputVolume);
         addProperty(&_raycaster->p_transferFunction);
         addProperty(&p_outputImage);
+        addProperty(&p_profileRaycaster);
 
         p_pgProps.addPropertyCollection(_pgGenerator);
         _pgGenerator.p_sourceImageID.setVisible(false);
@@ -104,9 +107,13 @@ namespace campvis {
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+
+        glGenQueries(1, &_timerQueryRaycaster);
     }
 
     void VolumeRenderer::deinit() {
+        glDeleteQueries(1, &_timerQueryRaycaster);
+
         _pgGenerator.s_invalidated.disconnect(this);
         _eepGenerator.s_invalidated.disconnect(this);
         _raycaster->s_invalidated.disconnect(this);
@@ -126,7 +133,18 @@ namespace campvis {
             _eepGenerator.process(data);
         }
         if (getInvalidationLevel() & RAYCASTER_INVALID) {
-            _raycaster->process(data);
+            if (p_profileRaycaster.getValue()) {
+                glBeginQuery(GL_TIME_ELAPSED, _timerQueryRaycaster);
+                _raycaster->process(data);
+                glEndQuery(GL_TIME_ELAPSED);
+
+                GLuint64 timer_result;
+                glGetQueryObjectui64v(_timerQueryRaycaster, GL_QUERY_RESULT, &timer_result);
+                LINFO("Raycaster Execution time: " << static_cast<double>(timer_result) / 1e06 << "ms.");
+            }
+            else {
+                _raycaster->process(data);
+            }            
         }
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
@@ -171,5 +189,8 @@ namespace campvis {
         // nothing to do here
     }
 
+    RaycastingProcessor* VolumeRenderer::getRaycastingProcessor() {
+        return _raycaster;
+    }
 }
 

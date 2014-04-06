@@ -106,6 +106,9 @@ namespace campvis {
     }
 
     void FaceGeometry::render(GLenum mode) const {
+        if (_vertices.empty())
+            return;
+
         createGLBuffers();
         if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");

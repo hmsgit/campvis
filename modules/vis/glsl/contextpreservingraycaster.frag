@@ -56,49 +56,26 @@ uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
 
-// BBV Lookup volume
-uniform usampler3D _bbvTexture;
-uniform TextureParameters3D _bbvTextureParams;
-uniform int _bbvBrickSize;
-uniform bool _hasBbv;
-
-
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
 
-#ifdef INTERSECTION_REFINEMENT
-bool _inVoid = false;
-#endif
+uniform float _minDepth;    ///< Minimum depth of entry points
+uniform float _maxDepth;    ///< Maximum depth of exit points
 
-#ifdef ENABLE_SHADOWING
-uniform float _shadowIntensity;
-#endif
+uniform float _kappaS;      ///< k_s parameter from the paper
+uniform float _kappaT;      ///< l_t parameter from the paper
 
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
-
-ivec3 voxelToBrick(in vec3 voxel) {
-    return ivec3(floor(voxel / _bbvBrickSize));
-}
-
-// samplePosition is in texture coordiantes [0, 1]
-bool lookupInBbv(in vec3 samplePosition) {
-    ivec3 byte = voxelToBrick(samplePosition * _volumeTextureParams._size);
-    uint bit = uint(byte.x % 8);
-    byte.x /= 8;
-
-    uint texel = texelFetch(_bbvTexture, byte, 0).r;
-
-    return (texel & (1U << bit)) != 0U;
-}
 
 /**
  * Performs the raycasting and returns the final fragment color.
  */
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
+    out_FHP = vec4(0.0);
     float firstHitT = -1.0;
 
     // calculate ray parameters
@@ -113,68 +90,29 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // compute sample position
         vec3 samplePosition = entryPoint.rgb + t * direction;
 
-        // check whether we have a lookup volume for empty space skipping
-        if (_hasBbv) {
-            if (!lookupInBbv(samplePosition)) {
-                // advance the ray to the intersection point with the current brick
-                vec3 brickVoxel = floor((samplePosition * _volumeTextureParams._size) / _bbvBrickSize) * _bbvBrickSize;
-                vec3 boxLlf = brickVoxel * _volumeTextureParams._sizeRCP;
-                vec3 boxUrb = boxLlf + (_volumeTextureParams._sizeRCP * _bbvBrickSize);
-
-                t = rayBoxIntersection(entryPoint, direction, boxLlf, boxUrb, t) + _samplingStepSize;
-                continue;
-            }
-        }
-
         // lookup intensity and TF
         float intensity = texture(_volume, samplePosition).r;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
-#ifdef INTERSECTION_REFINEMENT
-        if (color.a <= 0.0) {
-            // we're within void, make the steps bigger
-            _inVoid = true;
-        }
-        else {
-            if (_inVoid) {
-                float formerT = t - _samplingStepSize;
-
-                // we just left the void, perform intersection refinement
-                for (float stepPower = 0.5; stepPower > 0.1; stepPower /= 2.0) {
-                    // compute refined sample position
-                    float newT = formerT + _samplingStepSize * stepPower;
-                    vec3 newSamplePosition = entryPoint.rgb + newT * direction;
-
-                    // lookup refined intensity + TF
-                    float newIntensity = texture(_volume, newSamplePosition).r;
-                    vec4 newColor = lookupTF(_transferFunction, _transferFunctionParams, newIntensity);
-
-                    if (newColor.a <= 0.0) {
-                        // we're back in the void - look on the right-hand side
-                        formerT = newT;
-                    }
-                    else {
-                        // we're still in the matter - look on the left-hand side
-                        samplePosition = newSamplePosition;
-                        color = newColor;
-                        t -= _samplingStepSize * stepPower;
-                    }
-                }
-                _inVoid = false;
-            }
-        }
-#endif
+        float depthEntry = texture(_entryPointsDepth, texCoords).z;
+        float depthExit = texture(_exitPointsDepth, texCoords).z;
+        float D = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
 
         // perform compositing
         if (color.a > 0.0) {
-#ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)
-            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
+            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition) * 10;
+
             color.rgb = calculatePhongShading(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
-#endif
+            float SI = getPhongShadingIntensity(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient);
 
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
+
+            // perform context-preserving rendering (the meat is modifying the alpha value of each sample)
+            float pwr = pow(_kappaT * SI * (1 - D) * (1 - result.a), _kappaS);
+            color.a *= pow(length(gradient), pwr);
+
             result.rgb = mix(color.rgb, result.rgb, result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
         }
@@ -203,7 +141,6 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         float depthExit = texture(_exitPointsDepth, texCoords).z;
         gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
     }
-
     return result;
 }
 

@@ -30,6 +30,7 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
+#include "core/tools/glreduction.h"
 
 #include "core/classification/simpletransferfunction.h"
 
@@ -70,11 +71,18 @@ namespace campvis {
         _shader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", _fragmentShaderFilename, generateHeader(), _customGlslVersion);
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
+
+        _minReduction = new GlReduction(GlReduction::MIN);
+        _maxReduction = new GlReduction(GlReduction::MAX);
     }
 
     void RaycastingProcessor::deinit() {
         ShdrMgr.dispose(_shader);
         _shader = 0;
+
+        delete _minReduction;
+        delete _maxReduction;
+
         VisualizationProcessor::deinit();
     }
 
@@ -85,15 +93,45 @@ namespace campvis {
 
         if (img != 0 && entryPoints != 0 && exitPoints != 0) {
             if (img->getDimensionality() == 3) {
+                // little hack to support LOD texture lookup for the gradients:
+                // if texture does not yet have mipmaps, create them.
+                const tgt::Texture* tex = img->getTexture();
+                if (tex->getFilter() != tgt::Texture::MIPMAP) {
+                    const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+                    glGenerateMipmap(GL_TEXTURE_3D);
+                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                    LGL_ERROR;
+                }
+
                 _shader->activate();
                 _shader->setIgnoreUniformLocationError(true);
+
+                // Compute min/max depth if needed by shader
+                if (_shader->getUniformLocation("_minDepth") != -1) {
+                    _shader->deactivate();
+                    float minDepth = _minReduction->reduce(entryPoints->getDepthTexture()).front();
+                    _shader->activate();
+
+                    _shader->setUniform("_minDepth", minDepth);
+                }
+                if (_shader->getUniformLocation("_maxDepth") != -1) {
+                    _shader->deactivate();
+                    float maxDepth = _maxReduction->reduce(exitPoints->getDepthTexture()).front();
+                    _shader->activate();
+
+                    _shader->setUniform("_maxDepth", maxDepth);
+                }
+
                 decorateRenderProlog(data, _shader);
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
 
+                // compute sampling step size relative to volume size
                 float samplingStepSize = 1.f / (p_samplingRate.getValue() * tgt::max(img->getSize()));
                 _shader->setUniform("_samplingStepSize", samplingStepSize);
 
+                // compute and set camera parameters
                 const tgt::Camera& cam = p_camera.getValue();
                 float n = cam.getNearDist();
                 float f = cam.getFarDist();
@@ -104,6 +142,7 @@ namespace campvis {
                 _shader->setUniform("const_to_z_w_2", 0.5f*((f+n)/(f-n))+0.5f);
                 _shader->setIgnoreUniformLocationError(false);
 
+                // bind input textures
                 tgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
                 img->bind(_shader, volumeUnit, "_volume", "_volumeTextureParams");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);

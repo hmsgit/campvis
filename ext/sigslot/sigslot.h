@@ -458,6 +458,11 @@ namespace sigslot {
                 ++it;
             }
         }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
+        }
         
     protected:
         connections_list m_connected_slots;   
@@ -554,6 +559,11 @@ namespace sigslot {
                 
                 it = itNext;
             }
+        }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
         }
         
         
@@ -654,6 +664,11 @@ namespace sigslot {
                 it = itNext;
             }
         }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
+        }
         
     protected:
         connections_list m_connected_slots;   
@@ -752,6 +767,11 @@ namespace sigslot {
                 
                 it = itNext;
             }
+        }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
         }
         
     protected:
@@ -853,6 +873,11 @@ namespace sigslot {
                 
                 it = itNext;
             }
+        }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
         }
         
     protected:
@@ -957,6 +982,11 @@ namespace sigslot {
                 it = itNext;
             }
         }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
+        }
         
     protected:
         connections_list m_connected_slots;   
@@ -1060,6 +1090,11 @@ namespace sigslot {
                 it = itNext;
             }
         }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
+        }
         
     protected:
         connections_list m_connected_slots;   
@@ -1161,6 +1196,11 @@ namespace sigslot {
                 
                 it = itNext;
             }
+        }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
         }
         
     protected:
@@ -1264,6 +1304,11 @@ namespace sigslot {
                 
                 it = itNext;
             }
+        }
+
+        bool has_connections() const
+        {
+            return !m_connected_slots.empty();
         }
         
     protected:

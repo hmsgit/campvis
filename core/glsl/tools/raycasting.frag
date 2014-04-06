@@ -22,12 +22,42 @@
 // 
 // ================================================================================================
 
+const float positiveInfinity = 1.0 / 0.0;
+
 /**
  * Code adapted from: https://www.marcusbannerman.co.uk/index.php/component/content/article/42-articles/97-vol-render-optimizations.htm
  */
 void jitterEntryPoint(inout vec3 position, in vec3 direction, in float stepSize) {
     float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453);
     position = position + direction * (stepSize * random);
+}
+
+/**
+ * Computes the intersection of the given ray with the given axis-aligned box.
+ * \param   rayOrigin       Origin of ray
+ * \param   rayDirection    Direction of ray
+ * \param   boxLlf          Lower-Left-front corner of box
+ * \param   boxUrb          Upper-right-back corner of box
+ * \param   t               Starting point for ray-box intersection (as fraction origin/(origin+direction)), 
+ *                          set to 0 to start at origin
+ */
+float rayBoxIntersection(in vec3 rayOrigin, in vec3 rayDirection, in vec3 boxLlf, in vec3 boxUrb, in float t) {
+    vec3 tMin = (boxLlf - rayOrigin) / rayDirection;
+    vec3 tMax = (boxUrb - rayOrigin) / rayDirection;
+
+    // TODO: these many ifs are expensive - the lessThan bvec solution below should be faster but does not work for some reason...
+    if (tMin.x < t) tMin.x = positiveInfinity;
+    if (tMin.y < t) tMin.y = positiveInfinity;
+    if (tMin.z < t) tMin.z = positiveInfinity;
+
+    if (tMax.x < t) tMax.x = positiveInfinity;
+    if (tMax.y < t) tMax.y = positiveInfinity;
+    if (tMax.z < t) tMax.z = positiveInfinity;
+
+    //tMin += vec3(lessThan(tMin, vec3(t, t, t))) * positiveInfinity;
+    //tMax += vec3(lessThan(tMax, vec3(t, t, t))) * positiveInfinity;
+
+    return min(min(tMin.x, min(tMin.y, tMin.z))   ,    min(tMax.x, min(tMax.y, tMax.z)));
 }
 
 /**

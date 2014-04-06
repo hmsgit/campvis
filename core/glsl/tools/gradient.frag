@@ -27,29 +27,53 @@
 /**
  * Compute the gradient using forward differences on the texture's red channel.
  * \param   tex         3D texture to calculate gradients for
+ * \param   texParams   Texture parameters struct (needs texParams._voxelSize)
+ * \param   texCoords   Lookup position in texture coordinates
+ * \param   lod         Explicit LOD in texture to look up
+ */
+vec3 computeGradientForwardDifferencesLod(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords, in float lod) {
+    float v = textureLod(tex, texCoords, lod).r;
+    float dx = textureLodOffset(tex, texCoords, lod, ivec3(1, 0, 0)).r;
+    float dy = textureLodOffset(tex, texCoords, lod, ivec3(0, 1, 0)).r;
+    float dz = textureLodOffset(tex, texCoords, lod, ivec3(0, 0, 1)).r;
+    return vec3(v - dx, v - dy, v - dz) * texParams._voxelSize;
+}
+
+/**
+ * Compute the gradient using forward differences on the texture's red channel.
+ * \param   tex         3D texture to calculate gradients for
+ * \param   texParams   Texture parameters struct (needs texParams._voxelSize)
  * \param   texCoords   Lookup position in texture coordinates
  */
 vec3 computeGradientForwardDifferences(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
-    float v = texture(tex, texCoords).r;
-    float dx = textureOffset(tex, texCoords, ivec3(1, 0, 0)).r;
-    float dy = textureOffset(tex, texCoords, ivec3(0, 1, 0)).r;
-    float dz = textureOffset(tex, texCoords, ivec3(0, 0, 1)).r;
-    return vec3(v - dx, v - dy, v - dz) * texParams._voxelSize;
+    return computeGradientForwardDifferencesLod(tex, texParams, texCoords, 0.0);
 }
 
 /**
  * Compute the gradient using central differences on the texture's red channel.
  * \param   tex         3D texture to calculate gradients for
+ * \param   texParams   Texture parameters struct (needs texParams._voxelSize)
+ * \param   texCoords   Lookup position in texture coordinates
+ * \param   lod         Explicit LOD in texture to look up
+ */
+vec3 computeGradientCentralDifferencesLod(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords, in float lod) {
+    float dx = textureLodOffset(tex, texCoords, lod, ivec3(1, 0, 0)).r;
+    float dy = textureLodOffset(tex, texCoords, lod, ivec3(0, 1, 0)).r;
+    float dz = textureLodOffset(tex, texCoords, lod, ivec3(0, 0, 1)).r;
+    float mdx = textureLodOffset(tex, texCoords, lod, ivec3(-1, 0, 0)).r;
+    float mdy = textureLodOffset(tex, texCoords, lod, ivec3(0, -1, 0)).r;
+    float mdz = textureLodOffset(tex, texCoords, lod, ivec3(0, 0, -1)).r;
+    return vec3(mdx - dx, mdy - dy, mdz - dz) * texParams._voxelSize * 0.5;
+}
+
+/**
+ * Compute the gradient using central differences on the texture's red channel.
+ * \param   tex         3D texture to calculate gradients for
+ * \param   texParams   Texture parameters struct (needs texParams._voxelSize)
  * \param   texCoords   Lookup position in texture coordinates
  */
 vec3 computeGradientCentralDifferences(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
-    float dx = textureOffset(tex, texCoords, ivec3(1, 0, 0)).r;
-    float dy = textureOffset(tex, texCoords, ivec3(0, 1, 0)).r;
-    float dz = textureOffset(tex, texCoords, ivec3(0, 0, 1)).r;
-    float mdx = textureOffset(tex, texCoords, ivec3(-1, 0, 0)).r;
-    float mdy = textureOffset(tex, texCoords, ivec3(0, -1, 0)).r;
-    float mdz = textureOffset(tex, texCoords, ivec3(0, 0, -1)).r;
-    return vec3(mdx - dx, mdy - dy, mdz - dz) * texParams._voxelSize * 0.5;
+    return computeGradientCentralDifferencesLod(tex, texParams, texCoords, 0.0);
 }
 
 
@@ -177,4 +201,101 @@ vec3 computeGradientSobel(in sampler3D tex, in vec3 texCoords) {
     sobel.z += value; 
    
     return -sobelScale * sobel;
+}
+
+
+/**
+ * Compute the Hessian matrix of the input image using central differences twice.
+ * \param   tex         3D gradient texture to calculate Hessian for
+ * \param   texCoords   Lookup position in texture coordinates
+ */
+mat3 computeHessianCentralDifferencesLod(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords, in float lod) {
+    vec3 offset = texParams._sizeRCP * pow(2.0, lod);
+
+    // compute first derivatives using central differences
+    vec3 dx  = computeGradientCentralDifferencesLod(tex, texParams, texCoords + vec3(offset.x, 0.0, 0.0), lod);
+    vec3 dy  = computeGradientCentralDifferencesLod(tex, texParams, texCoords + vec3(0.0, offset.y, 0.0), lod);
+    vec3 dz  = computeGradientCentralDifferencesLod(tex, texParams, texCoords + vec3(0.0, 0.0, offset.z), lod);
+    vec3 mdx = computeGradientCentralDifferencesLod(tex, texParams, texCoords - vec3(offset.x, 0.0, 0.0), lod);
+    vec3 mdy = computeGradientCentralDifferencesLod(tex, texParams, texCoords - vec3(0.0, offset.y, 0.0), lod);
+    vec3 mdz = computeGradientCentralDifferencesLod(tex, texParams, texCoords - vec3(0.0, 0.0, offset.z), lod);
+
+    // compute hessian matrix columns (second order derivatives) using central differences of gradients
+    vec3 vdx = (dx - mdx) * texParams._voxelSize * 0.5;
+    vec3 vdy = (dy - mdy) * texParams._voxelSize * 0.5;
+    vec3 vdz = (dz - mdz) * texParams._voxelSize * 0.5;
+
+    return mat3(vdx, vdy, vdz);
+}
+
+/**
+ * Compute the Hessian matrix using central differences on the gradient texture's RGB channel.
+ * \param   tex         3D gradient texture to calculate Hessian for
+ * \param   texCoords   Lookup position in texture coordinates
+ */
+mat3 computeGradientHessianCentralDifferencesLod(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords, in float lod) {
+    vec3 offset = texParams._sizeRCP * pow(2.0, lod);
+
+    vec3 dx = textureLod(tex, texCoords + vec3(offset.x, 0.0, 0.0), lod).rgb;
+    vec3 dy = textureLod(tex, texCoords + vec3(0.0, offset.y, 0.0), lod).rgb;
+    vec3 dz = textureLod(tex, texCoords + vec3(0.0, 0.0, offset.z), lod).rgb;
+    vec3 mdx = textureLod(tex, texCoords - vec3(offset.x, 0.0, 0.0), lod).rgb;
+    vec3 mdy = textureLod(tex, texCoords - vec3(0.0, offset.y, 0.0), lod).rgb;
+    vec3 mdz = textureLod(tex, texCoords - vec3(0.0, 0.0, offset.z), lod).rgb;
+
+    float dxx = dx.x - mdx.x;
+    float dxy = dx.y - mdx.y;
+    float dxz = dx.z - mdx.z;
+
+    float dyx = dy.x - mdy.x;
+    float dyy = dy.y - mdy.y;
+    float dyz = dy.z - mdy.z;
+
+    float dzx = dz.x - mdz.x;
+    float dzy = dz.y - mdz.y;
+    float dzz = dz.z - mdz.z;
+
+    mat3 hessian = mat3(dxx, (dyx + dxy) / 2.0, (dzx + dxz) / 2.0,
+                        (dxy + dyx) / 2.0, dyy, (dzy + dyz) / 2.0,
+                        (dxz + dzx) / 2.0, (dyz + dzy) / 2.0, dzz);
+    //hessian *= (texParams._voxelSize * 0.5;
+    return hessian;
+}
+
+
+/**
+ * Compute the Hessian matrix using central differences on the gradient texture's RGB channel.
+ * \param   tex         3D gradient texture to calculate Hessian for
+ * \param   texCoords   Lookup position in texture coordinates
+ */
+mat3 computeHessianCentralDifferences(in sampler3D tex, in TextureParameters3D texParams, in vec3 texCoords) {
+    return computeHessianCentralDifferencesLod(tex, texParams, texCoords, 0.0);
+}
+
+// code inspiured by http://en.wikipedia.org/wiki/Eigenvalue_algorithm#3.C3.973_matrices
+vec3 computeEigenvalues(in mat3 hessian) {
+    const float PI = 3.1415926535897932384626433832795;
+    vec3 toReturn;
+    float p1 = (hessian[1][0] * hessian[1][0]) + (hessian[2][0] * hessian[2][0]) + (hessian[2][1] * hessian[2][1]);
+
+    if (p1 == 0.0) {
+        toReturn.x = hessian[0][0];
+        toReturn.y = hessian[1][1];
+        toReturn.z = hessian[2][2];
+    }
+    else {
+        float q = (hessian[0][0] + hessian[1][1] + hessian[2][2]) / 3.0;
+        float p2 = (hessian[0][0] - q) * (hessian[0][0] - q)   +   (hessian[1][1] - q) * (hessian[1][1] - q)   +   (hessian[2][2] - q) * (hessian[2][2] - q)   +   2.0 * p1;
+        float p = sqrt(p2 / 6.0);
+        mat3 B = (1.0 - p) * (hessian - mat3(q));
+        float r = determinant(B) / 2.0;
+
+        float phi = acos(clamp(r, -1.0, 1.0)) / 3.0;
+
+        toReturn.x = q + (2.0 * p * cos(phi));
+        toReturn.z = q + (2.0 * p * cos(phi + (2.0 * PI / 3.0)));
+        toReturn.y = 3.0 * q - toReturn.x - toReturn.z;
+    }
+
+    return toReturn;
 }

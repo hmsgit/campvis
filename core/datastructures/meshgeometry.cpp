@@ -78,6 +78,9 @@ namespace campvis {
 
 
     void MeshGeometry::render(GLenum mode) const {
+        if (_faces.empty())
+            return;
+
         createGLBuffers();
         if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
