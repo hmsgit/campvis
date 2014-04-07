@@ -49,9 +49,8 @@ namespace campvis {
          * Creates a new AbstractProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        AbstractProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        AbstractProperty(const std::string& name, const std::string& title);
 
         /**
          * Virtual Destructor
@@ -82,19 +81,7 @@ namespace campvis {
          * \return  _title
          */
         const std::string& getTitle() const;
-
-        /**
-         * Returns the invalidation level that this property triggers.
-         * \return  _invalidationLevel
-         */
-        int getInvalidationLevel() const;
-
-        /**
-         * Sets the invalidation level that this property triggers.
-         * \param il    New invalidation level that this property triggers.
-         */
-        void setInvalidationLevel(int il);
-
+        
         /**
          * Returns whether this proberty shall be visible in the GUI.
          * \return  _isVisible
@@ -155,7 +142,6 @@ namespace campvis {
         // DO NOT REMOVE THE CONSTNESS OF _name. PropertyCollection relies on it!
         const std::string _name;                ///< Property name (unchangable on purpose!)
         std::string _title;                     ///< Property title (e.g. used for GUI)
-        int _invalidationLevel;                 ///< Invalidation level that this property triggers
         tbb::atomic<bool> _isVisible;           ///< Flag whether this property shall be visible in the GUI
 
         tbb::atomic<int> _inUse;                ///< flag whether property is currently in use and values are written to back buffer
@@ -168,6 +154,7 @@ namespace campvis {
          */
         std::set<AbstractProperty*> _sharedProperties;
 
+    private:
         static const std::string loggerCat_;
     };
 

@@ -39,7 +39,7 @@ namespace campvis {
 
     class AbstractPointPredicate : public MetaProperty {
     public:
-        AbstractPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        AbstractPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
         virtual ~AbstractPointPredicate();
 
@@ -138,7 +138,7 @@ namespace campvis {
 
     class RangePointPredicate : public AbstractPointPredicate {
     public:
-        RangePointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        RangePointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
         virtual ~RangePointPredicate();
 
@@ -158,7 +158,7 @@ namespace campvis {
 
     class LabelBitPointPredicate : public AbstractPointPredicate {
     public:
-        LabelBitPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        LabelBitPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
         virtual ~LabelBitPointPredicate();
 

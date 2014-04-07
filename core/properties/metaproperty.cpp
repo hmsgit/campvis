@@ -28,8 +28,8 @@ namespace campvis {
 
     const std::string MetaProperty::loggerCat_ = "CAMPVis.core.datastructures.MetaProperty";
 
-    MetaProperty::MetaProperty(const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractProperty(name, title, invalidationLevel)
+    MetaProperty::MetaProperty(const std::string& name, const std::string& title)
+        : AbstractProperty(name, title)
     {
     }
 
@@ -37,13 +37,13 @@ namespace campvis {
     }
 
     void MetaProperty::onPropertyChanged(const AbstractProperty* prop) {
-        s_changed(prop);
+        s_changed(this);
     }
 
     void MetaProperty::addPropertyCollection(HasPropertyCollection& pc) {
         PropertyCollection& c = pc.getProperties();
         for (std::vector<AbstractProperty*>::const_iterator it = c.begin(); it != c.end(); ++it) {
-            addProperty(*it);
+            addProperty(**it);
         }
     }
 

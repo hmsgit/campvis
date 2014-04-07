@@ -39,17 +39,17 @@ namespace campvis {
 
     ProxyGeometryGenerator::ProxyGeometryGenerator()
         : AbstractProcessor()
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Output Geometry ID", "proxygeometry", DataNameProperty::WRITE)
         , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_geometryID);
-        addProperty(&p_clipX);
-        addProperty(&p_clipY);
-        addProperty(&p_clipZ);
+        addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_geometryID);
+        addProperty(p_clipX);
+        addProperty(p_clipY);
+        addProperty(p_clipZ);
     }
 
     ProxyGeometryGenerator::~ProxyGeometryGenerator() {

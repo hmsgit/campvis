@@ -76,8 +76,8 @@ namespace campvis {
 
         _enabled = false;
 
-        addProperty(&_renderTargetID);
-        addProperty(&_canvasSize);
+        addProperty(_renderTargetID);
+        addProperty(_canvasSize);
     }
 
     AbstractPipeline::~AbstractPipeline() {

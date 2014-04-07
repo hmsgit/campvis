@@ -46,9 +46,9 @@ namespace campvis {
         , p_resampleScale("ResampleScale", "Resampling Scale", .5f, .01f, 10.f)
         , _shader(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
-        addProperty(&p_resampleScale);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
+        addProperty(p_resampleScale);
     }
 
     GlImageResampler::~GlImageResampler() {

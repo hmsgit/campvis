@@ -31,8 +31,8 @@
 namespace campvis {
 
 
-    AbstractPointPredicate::AbstractPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/) 
-        : MetaProperty(name, title, invalidationLevel)
+    AbstractPointPredicate::AbstractPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title) 
+        : MetaProperty(name, title)
         , p_enable("Enable", "Enable Predicate", true)
         , p_importance("Importance", "Importance", 1.f, 0.f, 5.f, .1f, 1)
         , p_color("Color", "Predicate-Specific Color", tgt::vec2(0.f), tgt::vec2(0.f), tgt::vec2(1.f), tgt::vec2(.01f, .1f), tgt::ivec2(2, 1))
@@ -50,10 +50,10 @@ namespace campvis {
         p_color.setVisible(false);
         p_intensityHack.setVisible(false);
 
-        addProperty(&p_enable);
-        addProperty(&p_importance);
-        addProperty(&p_color);
-        addProperty(&p_intensityHack);
+        addProperty(p_enable);
+        addProperty(p_importance);
+        addProperty(p_color);
+        addProperty(p_intensityHack);
     }
 
     AbstractPointPredicate::~AbstractPointPredicate() {
@@ -124,7 +124,7 @@ namespace campvis {
         , _predicates(predicates)
     {
         for (size_t i = 0; i < _predicates.size(); ++i) {
-            addProperty(_predicates[i]);
+            addProperty(*_predicates[i]);
         }
     }
 
@@ -160,12 +160,12 @@ namespace campvis {
 
 // ================================================================================================
 
-    RangePointPredicate::RangePointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractPointPredicate(inputVariable, name, title, invalidationLevel)
+    RangePointPredicate::RangePointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title)
+        : AbstractPointPredicate(inputVariable, name, title)
         , p_range("Range", "Range", tgt::vec2(0.f, 1.f), tgt::vec2(0.f), tgt::vec2(1.f), tgt::vec2(.01f), tgt::ivec2(2))
         , _rangeUniformName("_vpRange" + _name)
     {
-        addProperty(&p_range);
+        addProperty(p_range);
     }
 
     RangePointPredicate::~RangePointPredicate() {
@@ -190,12 +190,12 @@ namespace campvis {
 
 // ================================================================================================
 
-    LabelBitPointPredicate::LabelBitPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractPointPredicate(inputVariable, name, title, invalidationLevel)
+    LabelBitPointPredicate::LabelBitPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title)
+        : AbstractPointPredicate(inputVariable, name, title)
         , p_bit("Bit", "Bit in Label Image", 0, 0, 16)
         , _bitUniformName("_vpBit" + _name)
     {
-        addProperty(&p_bit);
+        addProperty(p_bit);
     }
 
     LabelBitPointPredicate::~LabelBitPointPredicate() {

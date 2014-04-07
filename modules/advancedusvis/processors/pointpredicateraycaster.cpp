@@ -35,7 +35,7 @@ namespace campvis {
 
     PointPredicateRaycaster::PointPredicateRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/advancedusvis/glsl/pointpredicateraycaster.frag", true, "400")
-        , p_inputLabels("InputLabels", "Input Label Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
+        , p_inputLabels("InputLabels", "Input Label Image", "", DataNameProperty::READ)
         , p_inputSnr("InputSnr", "Input SNR", "", DataNameProperty::READ)
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
         , p_inputConfidence("InputConfidence", "Input Confidence", "", DataNameProperty::READ)
@@ -43,11 +43,11 @@ namespace campvis {
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_inputLabels);
-        addProperty(&p_inputSnr);
-        addProperty(&p_inputVesselness);
-        addProperty(&p_inputConfidence);
-        addProperty(&p_predicateHistogram);
+        addProperty(p_inputLabels, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_inputSnr);
+        addProperty(p_inputVesselness);
+        addProperty(p_inputConfidence);
+        addProperty(p_predicateHistogram);
 
         decoratePropertyCollection(this);
     }

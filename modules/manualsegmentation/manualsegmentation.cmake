@@ -1,6 +1,6 @@
 # CMake file for manualsegmentation module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/manualsegmentation/pipelines/*.cpp
@@ -15,7 +15,7 @@ IF(ModuleEnabled)
 		modules/manualsegmentation/tools/*.h
 	)
 	SET(ThisModDependencies io itk vis)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus EXPERIMENTAL)
 SET(ThisModExternalDependencies FALSE)

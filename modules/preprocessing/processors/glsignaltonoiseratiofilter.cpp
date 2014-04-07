@@ -44,14 +44,14 @@ namespace campvis {
 
     GlSignalToNoiseRatioFilter::GlSignalToNoiseRatioFilter(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "GlSignalToNoiseRatioFilter.out", DataNameProperty::WRITE)
         , p_halfPrecisionOutput("HalfPrecisionOutput", "Use Half Precision (16 Bit) Output", true)
         , _shader(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
-        addProperty(&p_halfPrecisionOutput);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
+        addProperty(p_halfPrecisionOutput);
     }
 
     GlSignalToNoiseRatioFilter::~GlSignalToNoiseRatioFilter() {

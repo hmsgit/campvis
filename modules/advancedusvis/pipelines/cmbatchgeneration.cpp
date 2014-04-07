@@ -63,12 +63,12 @@ namespace campvis {
         addProcessor(&_usFusion);
         addProcessor(&_usBlurFilter);
 
-        addProperty(&p_autoExecution);
-        addProperty(&p_sourcePath);
-        addProperty(&p_targetPathColor);
-        addProperty(&p_targetPathFuzzy);
-        addProperty(&p_range);
-        addProperty(&p_execute);
+        addProperty(p_autoExecution);
+        addProperty(p_sourcePath);
+        addProperty(p_targetPathColor);
+        addProperty(p_targetPathFuzzy);
+        addProperty(p_range);
+        addProperty(p_execute);
     }
 
     CmBatchGeneration::~CmBatchGeneration() {

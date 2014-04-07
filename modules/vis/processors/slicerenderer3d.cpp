@@ -45,18 +45,18 @@ namespace campvis {
 
     SliceRenderer3D::SliceRenderer3D(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_camera);
-        addProperty(&p_sliceNumber);
-        addProperty(&p_transferFunction);
+        addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_targetImageID);
+        addProperty(p_camera);
+        addProperty(p_sliceNumber);
+        addProperty(p_transferFunction);
     }
 
     SliceRenderer3D::~SliceRenderer3D() {

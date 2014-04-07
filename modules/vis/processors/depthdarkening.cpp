@@ -45,19 +45,19 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , p_sigma("Sigma", "Sigma of Gaussian Filter", 2.f, 0.f, 10.f, 0.1f)
         , p_lambda("Lambda", "Strength of Depth Darkening Effect", 10.f, 0.f, 50.f, 0.1f)
-        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
+        , p_useColorCoding("UseColorCoding", "Cold/Warm Color Coding", false)
         , p_coldColor("ColdColor", "Cold Color (Far Objects)", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , p_warmColor("WarmColor", "Warm Color (Near Objects)", tgt::vec3(1.f, 0.f, 0.f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _shader(0)
         , _glReduction(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
-        addProperty(&p_sigma);
-        addProperty(&p_lambda);
-        addProperty(&p_useColorCoding);
-        addProperty(&p_coldColor);
-        addProperty(&p_warmColor);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
+        addProperty(p_sigma);
+        addProperty(p_lambda);
+        addProperty(p_useColorCoding, INVALID_RESULT | INVALID_SHADER);
+        addProperty(p_coldColor);
+        addProperty(p_warmColor);
     }
 
     DepthDarkening::~DepthDarkening() {

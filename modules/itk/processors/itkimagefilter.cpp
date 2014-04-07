@@ -260,7 +260,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
-        , p_filterMode("FilterMode", "Filter Mode", filterModes, 7, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_filterMode("FilterMode", "Filter Mode", filterModes, 7)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f, 0.1f)
         , p_numberOfSteps("NumberOfSteps", "Number of Steps", 5, 1, 15)
@@ -269,16 +269,16 @@ namespace campvis {
         , p_thresMin("ThresholdMin", "Threshold Minimum", 0.1f, 0.0f, 1.0f, 0.05f)
         , p_thresMax("ThresholdMax", "Threshold Maximum", 0.9f, 0.0f, 1.0f, 0.05f)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_filterMode);
-        addProperty(&p_kernelSize);
-        addProperty(&p_sigma);
-        addProperty(&p_numberOfSteps);
-        addProperty(&p_timeStep);
-        addProperty(&p_conductance);
-        addProperty(&p_thresMin);
-        addProperty(&p_thresMax);
+        addProperty(p_sourceImageID);
+        addProperty(p_targetImageID);
+        addProperty(p_filterMode, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_kernelSize);
+        addProperty(p_sigma);
+        addProperty(p_numberOfSteps);
+        addProperty(p_timeStep);
+        addProperty(p_conductance);
+        addProperty(p_thresMin);
+        addProperty(p_thresMax);
     }
 
     ItkImageFilter::~ItkImageFilter() {

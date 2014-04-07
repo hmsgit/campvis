@@ -54,14 +54,14 @@ namespace campvis {
          *              unregister the property before destroying/deleting it.
          * \param prop  Property to register
          */
-        void addProperty(AbstractProperty* prop);
+        virtual void addProperty(AbstractProperty& prop);
 
         /**
          * Unregisters \a prop from this processor.
          * \sa      HasPropertyCollection::addProperty
          * \param   prop  Property to unregister.
          */
-        void removeProperty(AbstractProperty* prop);
+        void removeProperty(AbstractProperty& prop);
 
         /**
          * Returns the property with the given name \a name.

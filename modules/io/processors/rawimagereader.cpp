@@ -61,15 +61,15 @@ namespace campvis {
         this->_ext.push_back(".raw");
         this->p_targetImageID.setValue("RawImageReader.output");
         
-        addProperty(&p_url);
-        addProperty(&p_size);
-        addProperty(&p_numChannels);
-        addProperty(&p_baseType);
-        addProperty(&p_offset);
-        addProperty(&p_endianness);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        addProperty(p_url);
+        addProperty(p_size);
+        addProperty(p_numChannels);
+        addProperty(p_baseType);
+        addProperty(p_offset);
+        addProperty(p_endianness);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     RawImageReader::~RawImageReader() {

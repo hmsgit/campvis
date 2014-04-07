@@ -37,9 +37,8 @@ namespace campvis {
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
          * \param cam       Camera to initialize the property with
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera(), int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera());
 
         /**
          * Virtual Destructor

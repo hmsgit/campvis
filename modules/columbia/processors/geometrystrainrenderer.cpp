@@ -49,10 +49,10 @@ namespace campvis {
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_geometryID);
-        addProperty(&p_renderTargetID);
-        addProperty(&p_camera);
-        addProperty(&p_color);
+        addProperty(p_geometryID);
+        addProperty(p_renderTargetID);
+        addProperty(p_camera);
+        addProperty(p_color);
 
         decoratePropertyCollection(this);
     }

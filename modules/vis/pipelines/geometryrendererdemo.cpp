@@ -47,7 +47,7 @@ namespace campvis {
         , _compositor2(&_canvasSize)
         , _trackballEH(0)
     {
-        addProperty(&_camera);
+        addProperty(_camera);
 
         _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);

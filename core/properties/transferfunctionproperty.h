@@ -47,9 +47,8 @@ namespace campvis {
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
          * \param tf        Transfer function to initialize the property with.
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf);
 
         /**
          * Virtual Destructor

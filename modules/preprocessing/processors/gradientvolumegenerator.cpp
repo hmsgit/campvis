@@ -41,8 +41,8 @@ namespace campvis {
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
+        addProperty(p_sourceImageID);
+        addProperty(p_targetImageID);
     }
 
     GradientVolumeGenerator::~GradientVolumeGenerator() {

@@ -46,10 +46,10 @@ namespace campvis {
         this->_ext.push_back(".csv");
         this->p_targetImageID.setValue("CsvdImageReader.output");
 
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     CsvdImageReader::~CsvdImageReader() {

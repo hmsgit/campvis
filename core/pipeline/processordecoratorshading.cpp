@@ -25,12 +25,12 @@
 #include "processordecoratorshading.h"
 
 #include "tgt/shadermanager.h"
-#include "core/properties/propertycollection.h"
+#include "core/pipeline/abstractprocessor.h"
 
 namespace campvis {
     ProcessorDecoratorShading::ProcessorDecoratorShading(const std::string& lightUniformName /*= "_lightSource"*/)
         : ProcessorDecoratorGradient()
-        , _enableShading("EnableShading", "Enable Shading", true, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT)
+        , _enableShading("EnableShading", "Enable Shading", true)
         , _lightPosition("LightPosition", "Light Position", tgt::vec3(-100.f), tgt::vec3(-500.f), tgt::vec3(500.f), tgt::vec3(1.f))
         , _ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.4f), tgt::vec3(0.f), tgt::vec3(1.f))
         , _diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
@@ -44,16 +44,16 @@ namespace campvis {
     ProcessorDecoratorShading::~ProcessorDecoratorShading() {
     }
 
-    void ProcessorDecoratorShading::addProperties(HasPropertyCollection* propCollection) {
-        propCollection->addProperty(&_enableShading);
+    void ProcessorDecoratorShading::addProperties(AbstractProcessor* propCollection) {
+        propCollection->addProperty(_enableShading, AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_RESULT);
 
         ProcessorDecoratorGradient::addProperties(propCollection);
-        propCollection->addProperty(&_lightPosition);
-        propCollection->addProperty(&_ambientColor);
-        propCollection->addProperty(&_diffuseColor);
-        propCollection->addProperty(&_specularColor);
-        propCollection->addProperty(&_shininess);
-        propCollection->addProperty(&_attenuation);
+        propCollection->addProperty(_lightPosition);
+        propCollection->addProperty(_ambientColor);
+        propCollection->addProperty(_diffuseColor);
+        propCollection->addProperty(_specularColor);
+        propCollection->addProperty(_shininess);
+        propCollection->addProperty(_attenuation);
     }
 
     void ProcessorDecoratorShading::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {

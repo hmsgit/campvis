@@ -49,7 +49,7 @@ namespace campvis {
 
     SliceExtractor::SliceExtractor(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("GeometryId", "Optional Input Geometry", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3)
@@ -64,17 +64,17 @@ namespace campvis {
         , _currentImage(nullptr)
         , _inScribbleMode(false)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_geometryID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_sliceOrientation);
-        addProperty(&p_xSliceNumber);
-        addProperty(&p_xSliceColor);
-        addProperty(&p_ySliceNumber);
-        addProperty(&p_ySliceColor);
-        addProperty(&p_zSliceNumber);
-        addProperty(&p_zSliceColor);
-        addProperty(&p_transferFunction);
+        addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_geometryID);
+        addProperty(p_targetImageID);
+        addProperty(p_sliceOrientation);
+        addProperty(p_xSliceNumber);
+        addProperty(p_xSliceColor);
+        addProperty(p_ySliceNumber);
+        addProperty(p_ySliceColor);
+        addProperty(p_zSliceNumber);
+        addProperty(p_zSliceColor);
+        addProperty(p_transferFunction);
     }
 
     SliceExtractor::~SliceExtractor() {

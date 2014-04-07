@@ -1,6 +1,6 @@
 # CMake file for IXPV module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/ixpv/pipelines/*.cpp
@@ -17,7 +17,7 @@ IF(ModuleEnabled)
 
 	SET(ThisModShaderDirectories "modules/ixpv/glsl")
 	SET(ThisModDependencies vis devil io)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus TESTING)
 SET(ThisModExternalDependencies FALSE)

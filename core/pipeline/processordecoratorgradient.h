@@ -58,7 +58,7 @@ namespace campvis {
 
     protected:
         /// \see AbstractProcessorDecorator::addProperties()
-        void addProperties(HasPropertyCollection* propCollection);
+        void addProperties(AbstractProcessor* propCollection);
         /// \see AbstractProcessorDecorator::renderProlog()
         virtual void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
         /// \see AbstractProcessorDecorator::generateHeader()

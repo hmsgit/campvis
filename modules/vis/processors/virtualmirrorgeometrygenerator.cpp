@@ -40,19 +40,19 @@ namespace campvis {
         , p_mirrorID("geometryID", "Output Geometry ID", "mirror", DataNameProperty::WRITE)
         , p_mirrorCenter("mirrorCenter", "Mirror Center", tgt::vec3(1.f), tgt::vec3(-1000.f), tgt::vec3(1000.f), tgt::vec3(0.1f))
         , p_mirrorNormal("mirrorNormal", "Mirror Normal", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f),
-                         tgt::vec3(0.001f), tgt::ivec3(3), AbstractProcessor::VALID)
+                         tgt::vec3(0.001f), tgt::ivec3(3))
         , p_size("mirrorSize", "Mirror Size", 4.0f, 0.1f, 1000.0f, 0.1f)
         , p_numVertices("Roundness", "Roundness", 16, 4, 128)
         , p_poi("poi", "Point of Interest", tgt::vec3::zero, tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
         , p_camera("camera", "Camera")
     {
-        addProperty(&p_mirrorID);
-        addProperty(&p_mirrorCenter);
-        addProperty(&p_mirrorNormal);
-        addProperty(&p_size);
-        addProperty(&p_numVertices);
-        addProperty(&p_poi);
-        addProperty(&p_camera);
+        addProperty(p_mirrorID);
+        addProperty(p_mirrorCenter);
+        addProperty(p_mirrorNormal, VALID);
+        addProperty(p_size);
+        addProperty(p_numVertices);
+        addProperty(p_poi);
+        addProperty(p_camera);
     }
 
     VirtualMirrorGeometryGenerator::~VirtualMirrorGeometryGenerator() {

@@ -1,6 +1,6 @@
 # CMake file for vis module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/vis/pipelines/*.cpp
@@ -18,7 +18,7 @@ IF(ModuleEnabled)
 
 	SET(ThisModShaderDirectories "modules/vis/glsl")
 	SET(ThisModDependencies io)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies FALSE)

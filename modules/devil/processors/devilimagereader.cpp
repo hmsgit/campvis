@@ -59,9 +59,9 @@ namespace campvis {
         , _shader(nullptr)
         , _devilTextureReader(nullptr)
     {
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_importType);
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_importType);
 
         _devilTextureReader = new tgt::TextureReaderDevil();
     }

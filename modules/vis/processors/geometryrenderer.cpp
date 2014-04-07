@@ -60,12 +60,12 @@ namespace campvis {
         , p_textureID("TextureId", "Input Texture ID (optional)", "gr.inputtexture", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
-        , p_renderMode("RenderMode", "Render Mode", renderOptions, 7, INVALID_RESULT | INVALID_PROPERTIES)
-        , p_coloringMode("ColoringMode", "ColoringMode", coloringOptions, 3, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES)
+        , p_renderMode("RenderMode", "Render Mode", renderOptions, 7)
+        , p_coloringMode("ColoringMode", "ColoringMode", coloringOptions, 3)
         , p_solidColor("SolidColor", "Solid Color", tgt::vec4(1.f, .5f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_pointSize("PointSize", "Point Size", 3.f, .1f, 10.f)
         , p_lineWidth("LineWidth", "Line Width", 1.f, .1f, 10.f)
-        , p_showWireframe("ShowWireframe", "Show Wireframe", true, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES)
+        , p_showWireframe("ShowWireframe", "Show Wireframe", true)
         , p_wireframeColor("WireframeColor", "Wireframe Color", tgt::vec4(1.f, 1.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _pointShader(0)
         , _meshShader(0)
@@ -74,19 +74,19 @@ namespace campvis {
 
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_geometryID);
-        addProperty(&p_textureID);
-        addProperty(&p_renderTargetID);
-        addProperty(&p_camera);
+        addProperty(p_geometryID);
+        addProperty(p_textureID);
+        addProperty(p_renderTargetID);
+        addProperty(p_camera);
 
-        addProperty(&p_renderMode);
-        addProperty(&p_coloringMode);
-        addProperty(&p_solidColor);
+        addProperty(p_renderMode, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_coloringMode, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES);
+        addProperty(p_solidColor);
 
-        addProperty(&p_pointSize);
-        addProperty(&p_lineWidth);
-        addProperty(&p_showWireframe);
-        addProperty(&p_wireframeColor);
+        addProperty(p_pointSize);
+        addProperty(p_lineWidth);
+        addProperty(p_showWireframe, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES);
+        addProperty(p_wireframeColor);
 
         decoratePropertyCollection(this);
     }

@@ -50,17 +50,17 @@ namespace campvis {
 
     GlMorphologyFilter::GlMorphologyFilter(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "GlMorphologyFilter.out", DataNameProperty::WRITE)
         , p_filterOperation("FilterOperation", "Operations to Apply ([edoc]+)", "ed")
-        , p_structuringElement("StructuringElement", "Structuring Element", structuringElementOptions, 2, INVALID_SHADER | INVALID_RESULT)
+        , p_structuringElement("StructuringElement", "Structuring Element", structuringElementOptions, 2)
         , _erosionFilter(nullptr)
         , _dilationFilter(nullptr)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
-        addProperty(&p_filterOperation);
-        addProperty(&p_structuringElement);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
+        addProperty(p_filterOperation);
+        addProperty(p_structuringElement, INVALID_SHADER | INVALID_RESULT);
     }
 
     GlMorphologyFilter::~GlMorphologyFilter() {

@@ -47,11 +47,11 @@ namespace campvis {
         , p_targetImageId("TargetImageId", "Output Image", "", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&p_xRayImageId);
-        addProperty(&p_3dSliceImageId);
-        addProperty(&p_drrFullImageId);
-        addProperty(&p_drrClippedImageId);
-        addProperty(&p_targetImageId);
+        addProperty(p_xRayImageId);
+        addProperty(p_3dSliceImageId);
+        addProperty(p_drrFullImageId);
+        addProperty(p_drrClippedImageId);
+        addProperty(p_targetImageId);
 
         addDecorator(new ProcessorDecoratorBackground());
         decoratePropertyCollection(this);

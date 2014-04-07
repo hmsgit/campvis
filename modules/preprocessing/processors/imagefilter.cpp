@@ -49,11 +49,11 @@ namespace campvis {
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f, 0.1f)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_filterMode);
-        addProperty(&p_kernelSize);
-        addProperty(&p_sigma);
+        addProperty(p_sourceImageID);
+        addProperty(p_targetImageID);
+        addProperty(p_filterMode);
+        addProperty(p_kernelSize);
+        addProperty(p_sigma);
     }
 
     ImageFilter::~ImageFilter() {

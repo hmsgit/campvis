@@ -1,6 +1,6 @@
 # CMake file for Randomwalk module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# build RadomWalksLib library
 	ADD_SUBDIRECTORY(modules/randomwalk/ext/RandomWalksLib)
 
@@ -16,7 +16,7 @@ IF(ModuleEnabled)
 	FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 		modules/randomwalk/processors/*.h
 	)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies FALSE)

@@ -1,6 +1,6 @@
 # CMake file for Preprocessing module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/preprocessing/pipelines/*.cpp
@@ -18,7 +18,7 @@ IF(ModuleEnabled)
 
 	SET(ThisModShaderDirectories "modules/preprocessing/glsl")
 	SET(ThisModDependencies vis)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies FALSE)

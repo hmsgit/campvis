@@ -1,6 +1,6 @@
 # CMake file for columbia module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/columbia/datastructures/*.cpp
@@ -19,7 +19,7 @@ IF(ModuleEnabled)
 	)
 
 	SET(ThisModShaderDirectories "modules/columbia/glsl")
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus EXPERIMENTAL)
 SET(ThisModExternalDependencies FALSE)

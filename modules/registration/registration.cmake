@@ -1,6 +1,6 @@
 # CMake file for registration module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# add NLOPT project as external dependency
 	ADD_SUBDIRECTORY(modules/registration/ext/nlopt-stripped)
 
@@ -26,7 +26,7 @@ IF(ModuleEnabled)
 
 	SET(ThisModShaderDirectories "modules/registration/glsl")
 	SET(ThisModDependencies vis io)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus EXPERIMENTAL)
 SET(ThisModExternalDependencies FALSE)

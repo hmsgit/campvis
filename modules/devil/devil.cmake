@@ -1,6 +1,6 @@
 # CMake file for DevIL module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
     # Tell TGT that we have the DevIL module
     LIST(APPEND ThisModDefinitions -DTGT_HAS_DEVIL)
 
@@ -61,7 +61,7 @@ IF(ModuleEnabled)
     FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
         modules/devil/processors/*.h
     )
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)
 IF(WIN32)

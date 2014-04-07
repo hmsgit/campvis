@@ -47,7 +47,7 @@ namespace campvis {
         , _combine(&_canvasSize)
         , _trackballEH(0)
     {
-        addProperty(&_camera);
+        addProperty(_camera);
 
         _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballEH->addLqModeProcessor(&_dvrNormal);
@@ -113,6 +113,7 @@ namespace campvis {
         // this will all get better with scripting support.
         static_cast<BoolProperty*>(_vmEepGenerator.getProperty("applyMask"))->setValue(true);
         _vmRenderer.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
+        _vmRenderer.p_renderMode.selectByOption(GL_POLYGON);
 
         _renderTargetID.setValue("combine");
 

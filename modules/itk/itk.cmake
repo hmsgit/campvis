@@ -1,6 +1,6 @@
 # CMake file for ITK module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
     FIND_PACKAGE (ITK REQUIRED)
         
     IF(ITK_FOUND)
@@ -27,7 +27,7 @@ IF(ModuleEnabled)
         modules/itk/processors/*.h
         modules/itk/core/*.h
     )
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies TRUE)

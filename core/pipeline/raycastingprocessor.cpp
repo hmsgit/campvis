@@ -39,7 +39,7 @@ namespace campvis {
 
     RaycastingProcessor::RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures, const std::string& customGlslVersion /*= ""*/)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
@@ -52,14 +52,14 @@ namespace campvis {
         , _shader(0)
         , _bindEntryExitDepthTextures(bindEntryExitDepthTextures)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_entryImageID);
-        addProperty(&p_exitImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_camera);  
-        addProperty(&p_transferFunction);
-        addProperty(&p_jitterStepSizeMultiplier);
-        addProperty(&p_samplingRate);
+        addProperty(p_sourceImageID, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES);
+        addProperty(p_entryImageID);
+        addProperty(p_exitImageID);
+        addProperty(p_targetImageID);
+        addProperty(p_camera);  
+        addProperty(p_transferFunction);
+        addProperty(p_jitterStepSizeMultiplier);
+        addProperty(p_samplingRate);
     }
 
     RaycastingProcessor::~RaycastingProcessor() {

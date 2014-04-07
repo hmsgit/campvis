@@ -140,10 +140,10 @@ namespace campvis {
         , p_threshold("Threshold", "Threshold", .005f, .001f, 1.f, .01f)
         , p_level("Level", "Level", .5f, .1f, 10.f, 1.f)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_threshold);
-        addProperty(&p_level);
+        addProperty(p_sourceImageID);
+        addProperty(p_targetImageID);
+        addProperty(p_threshold);
+        addProperty(p_level);
     }
 
     ItkWatershedFilter::~ItkWatershedFilter() {

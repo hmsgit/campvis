@@ -22,7 +22,7 @@
 // 
 // ================================================================================================
 
-#include "PredicateVolumeExplorer.h"
+#include "predicatevolumeexplorer.h"
 #include "tgt/logmanager.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
@@ -48,31 +48,31 @@ namespace campvis {
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
         , p_inputConfidence("InputConfidence", "Input Confidence", "", DataNameProperty::READ)
         , p_histogram("PredicateHistogram", "Point Predicate Histogram")
-        , p_pbProperties("PredicateBitsetProperties", "Predicate Bitset Properties", VALID)
+        , p_pbProperties("PredicateBitsetProperties", "Predicate Bitset Properties")
         , _predicateEvaluation(_viewportSizeProperty)
         , _bitmaskHandle(nullptr)
     {
         p_inputVolume.addSharedProperty(&_predicateEvaluation.p_inputImage);
 
-        addProperty(&p_inputLabels);
+        addProperty(p_inputLabels);
         p_inputLabels.addSharedProperty(&(static_cast<PointPredicateRaycaster*>(_raycaster.getRaycastingProcessor()))->p_inputLabels);
         p_inputLabels.addSharedProperty(&_predicateEvaluation.p_inputLabels);
 
-        addProperty(&p_inputSnr);
+        addProperty(p_inputSnr);
         p_inputSnr.addSharedProperty(&(static_cast<PointPredicateRaycaster*>(_raycaster.getRaycastingProcessor()))->p_inputSnr);
         p_inputSnr.addSharedProperty(&_predicateEvaluation.p_inputSnr);
 
-        addProperty(&p_inputVesselness);
+        addProperty(p_inputVesselness);
         p_inputVesselness.addSharedProperty(&(static_cast<PointPredicateRaycaster*>(_raycaster.getRaycastingProcessor()))->p_inputVesselness);
         p_inputVesselness.addSharedProperty(&_predicateEvaluation.p_inputVesselness);
 
-        addProperty(&p_inputConfidence);
+        addProperty(p_inputConfidence);
         p_inputConfidence.addSharedProperty(&(static_cast<PointPredicateRaycaster*>(_raycaster.getRaycastingProcessor()))->p_inputConfidence);
         p_inputConfidence.addSharedProperty(&_predicateEvaluation.p_inputConfidence);
 
-        addProperty(&p_histogram);
+        addProperty(p_histogram);
         p_pbProperties.addPropertyCollection(_predicateEvaluation);
-        addProperty(&p_pbProperties);
+        addProperty(p_pbProperties, VALID);
 
         p_histogram.addSharedProperty(&(static_cast<PointPredicateRaycaster*>(_raycaster.getRaycastingProcessor())->p_predicateHistogram));
         p_histogram.addSharedProperty(&_predicateEvaluation.p_histogram);

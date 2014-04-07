@@ -42,10 +42,9 @@ namespace campvis {
          * Creates a new AbstractOptionProperty.
          * \param name      Property name
          * \param title     Property title (e.g. used for GUI)
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        AbstractOptionProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT)
-            : IntProperty(name, title, -1, -1, -1, 1, invalidationLevel)
+        AbstractOptionProperty(const std::string& name, const std::string& title)
+            : IntProperty(name, title, -1, -1, -1, 1)
         {            
         };
 
@@ -108,14 +107,13 @@ namespace campvis {
          * \param title     Property title (e.g. used for GUI)
          * \param options   Array of the options for this property, must not be 0, must not be empty.
          * \param count     Number of items in \a options (number of options), must be greater 0.
-         * \param invalidationLevel  Invalidation level that this property triggers
+
          */
         GenericOptionProperty(
             const std::string& name, 
             const std::string& title, 
             const GenericOption<T>* options,
-            int count,
-            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+            int count);
 
         /**
          * Destructor
@@ -171,8 +169,8 @@ namespace campvis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, int count, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractOptionProperty(name, title, invalidationLevel)
+    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, int count)
+        : AbstractOptionProperty(name, title)
     {
         tgtAssert(options != 0, "Pointer to options array must not be 0.")
         tgtAssert(count > 0, "The number of options must be greater 0.");

@@ -37,29 +37,28 @@ namespace campvis {
 
     VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
-        , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
-        , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
+        , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ)
+        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE)
         , p_profileRaycaster("ProfileRaycaster", "Profile Raycaster's Execution Time", false)
         , _timerQueryRaycaster(0)
-        , p_pgProps("PGGProps", "Proxy Geometry Generator", AbstractProcessor::VALID)
-        , p_eepProps("EEPProps", "Entry/Exit Points Generator", AbstractProcessor::VALID)
-        , p_raycasterProps("RaycasterProps", "Raycaster", AbstractProcessor::VALID)
+        , p_pgProps("PGGProps", "Proxy Geometry Generator")
+        , p_eepProps("EEPProps", "Entry/Exit Points Generator")
+        , p_raycasterProps("RaycasterProps", "Raycaster")
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
         , _raycaster(raycaster)
     {
         _raycaster->setViewportSizeProperty(viewportSizeProp);
 
-        addProperty(&p_inputVolume);
-        addProperty(&_raycaster->p_transferFunction);
-        addProperty(&p_outputImage);
-        addProperty(&p_profileRaycaster);
+        addProperty(p_inputVolume, AbstractProcessor::VALID);
+        addProperty(p_outputImage, AbstractProcessor::VALID);
+        addProperty(p_profileRaycaster, AbstractProcessor::VALID);
 
         p_pgProps.addPropertyCollection(_pgGenerator);
         _pgGenerator.p_sourceImageID.setVisible(false);
         _pgGenerator.p_geometryID.setVisible(false);
-        addProperty(&p_pgProps);
+        addProperty(p_pgProps, AbstractProcessor::VALID);
 
         p_eepProps.addPropertyCollection(_eepGenerator);
         _eepGenerator.p_lqMode.setVisible(false);
@@ -68,7 +67,7 @@ namespace campvis {
         _eepGenerator.p_geometryID.setVisible(false);
         _eepGenerator.p_entryImageID.setVisible(false);
         _eepGenerator.p_exitImageID.setVisible(false);
-        addProperty(&p_eepProps);
+        addProperty(p_eepProps, AbstractProcessor::VALID);
 
         p_raycasterProps.addPropertyCollection(*_raycaster);
         _raycaster->p_lqMode.setVisible(false);
@@ -77,7 +76,7 @@ namespace campvis {
         _raycaster->p_entryImageID.setVisible(false);
         _raycaster->p_exitImageID.setVisible(false);
         _raycaster->p_targetImageID.setVisible(false);
-        addProperty(&p_raycasterProps);
+        addProperty(p_raycasterProps, AbstractProcessor::VALID);
 
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);

@@ -47,7 +47,7 @@ MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
     SET(ThisModDir ${ModulesDir}/${ModuleDirectory})
 
     # if module is not enabled, load .cmake file for the first time to gather module status and other meta information
-    IF(NOT CAMPVIS_BUILD_MODULE_${ModDirUpper})
+    IF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
         # add a CMake option for building this module
         OPTION(CAMPVIS_BUILD_MODULE_${ModDirUpper}  "Build Module ${ModDir} (${ThisModStatus})" OFF)
         
@@ -71,10 +71,10 @@ MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
         IF(${CAMPVIS_DEFAULT_ENABLED_MODULES} STREQUAL "ALL")
             SET(CAMPVIS_BUILD_MODULE_${ModDirUpper} ON CACHE BOOL "Build Module ${ModDir} (${ThisModStatus})" FORCE)
         ENDIF()
-    ENDIF(NOT CAMPVIS_BUILD_MODULE_${ModDirUpper})
+    ENDIF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
     
     # if module is enabled, load .cmake file for the second time, this time also parsing its build instructions
-    IF(CAMPVIS_BUILD_MODULE_${ModDirUpper})
+    IF(${CAMPVIS_BUILD_MODULE_${ModDirUpper}})
         SET(ModuleEnabled TRUE)
         INCLUDE(${ModuleListFile})
         
@@ -108,7 +108,7 @@ MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
         FOREACH(HeaderFile ${ThisModHeaders})
             PARSE_HEADER_FOR_PIPELINE("modules/${HeaderFile}")
         ENDFOREACH()
-    ENDIF(CAMPVIS_BUILD_MODULE_${ModDirUpper})
+    ENDIF(${CAMPVIS_BUILD_MODULE_${ModDirUpper}})
 
     # unset module settings to avoid duplicates if module cmake file misses sth.
     UNSET(ThisModDefinitions)

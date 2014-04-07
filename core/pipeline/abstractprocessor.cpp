@@ -84,7 +84,12 @@ namespace campvis {
     }
 
     void AbstractProcessor::onPropertyChanged(const AbstractProperty* prop) {
-        invalidate(prop->getInvalidationLevel());
+        tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, false);
+        auto it = _invalidationMap.find(prop);
+        if (it != _invalidationMap.end())
+            invalidate(it->second);
+        else
+            LDEBUG("Caught an property changed signal that was not registered with an invalidation level. Did you forget to call addProperty()?");
     }
 
     bool AbstractProcessor::getEnabled() const {
@@ -147,6 +152,20 @@ namespace campvis {
     void AbstractProcessor::updateProperties(DataContainer& dc) {
         LDEBUG("Called non-overriden updateProperties() in " << getName() << ". Did you forget to override your method?");
         validate(INVALID_PROPERTIES);
+    }
+
+    void AbstractProcessor::addProperty(AbstractProperty& prop) {
+        this->addProperty(prop, INVALID_RESULT);
+    }
+
+    void AbstractProcessor::addProperty(AbstractProperty& prop, int invalidationLevel) {
+        HasPropertyCollection::addProperty(prop);
+        setPropertyInvalidationLevel(prop, invalidationLevel);
+    }
+
+    void AbstractProcessor::setPropertyInvalidationLevel(AbstractProperty& prop, int invalidationLevel) {
+        tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, true);
+        _invalidationMap[&prop] = invalidationLevel;
     }
 
 // ================================================================================================

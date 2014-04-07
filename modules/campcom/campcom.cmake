@@ -1,6 +1,6 @@
 # CMake file for campcom module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	LIST(APPEND CMAKE_MODULE_PATH "${ModulesDir}/campcom")
 	FIND_PACKAGE(CAMPCom REQUIRED)
 
@@ -31,7 +31,7 @@ IF(ModuleEnabled)
 	)
 
 	SET(ThisModDependencies vis)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus TESTING)
 SET(ThisModExternalDependencies TRUE)

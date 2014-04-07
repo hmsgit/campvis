@@ -56,12 +56,12 @@ namespace campvis {
         , p_enableBackground("EnableBackground", "Enable Background", true)
         , _shader(0)
     {
-        addProperty(&p_firstImageId);
-        addProperty(&p_secondImageId);
-        addProperty(&p_targetImageId);
-        addProperty(&p_compositingMethod);
-        addProperty(&p_alphaValue);
-        addProperty(&p_enableBackground);
+        addProperty(p_firstImageId);
+        addProperty(p_secondImageId);
+        addProperty(p_targetImageId);
+        addProperty(p_compositingMethod);
+        addProperty(p_alphaValue);
+        addProperty(p_enableBackground);
 
         addDecorator(new ProcessorDecoratorBackground());
         

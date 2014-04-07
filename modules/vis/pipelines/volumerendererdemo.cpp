@@ -39,7 +39,7 @@ namespace campvis {
         , _vr(&_canvasSize)
         , _trackballEH(0)
     {
-        addProperty(&_camera);
+        addProperty(_camera);
 
         _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballEH->addLqModeProcessor(&_vr);

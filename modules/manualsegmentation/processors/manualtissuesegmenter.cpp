@@ -63,7 +63,7 @@ namespace campvis {
 
     ManualTissueSegmenter::ManualTissueSegmenter(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImageID("sourceFioID", "Input Tracked US File IO", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_sourceImageID("sourceFioID", "Input Tracked US File IO", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_frameNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
@@ -71,16 +71,16 @@ namespace campvis {
         , p_splineOrder("SplineOrder", "Spline Order", 3, 1, 9)
         , p_NumControlPoints("NumControlPoints", "Number of Control Points", 4, 1, 10)
         , p_NumLevels("NumLevels", "Number of Levels", 10, 1, 15)
-        , p_computeSamples("ComputeSamples", "Compute Samples", AbstractProcessor::VALID)
+        , p_computeSamples("ComputeSamples", "Compute Samples")
         , p_showSamples("ShowSamples", "Show Samples", false)
-        , p_sampleFile("SampleFile", "Sample File", "", AbstractProcessor::VALID)
-        , p_saveSamples("SaveSamples", "Save Samples", AbstractProcessor::VALID)
-        , p_controlpointFile("ControlpointFile", "Control Point File", "C:\\temp\\us_small.cps", AbstractProcessor::VALID)
-        , p_saveCPs("SaveCPs", "Save Control Points", AbstractProcessor::VALID)
-        , p_loadCPs("LoadCPs", "Load Control Points", AbstractProcessor::VALID)
+        , p_sampleFile("SampleFile", "Sample File", "")
+        , p_saveSamples("SaveSamples", "Save Samples")
+        , p_controlpointFile("ControlpointFile", "Control Point File", "C:\\temp\\us_small.cps")
+        , p_saveCPs("SaveCPs", "Save Control Points")
+        , p_loadCPs("LoadCPs", "Load Control Points")
         , p_activeLayer("ActiveLayer", "Active Layer", 0, 0, 0)
-        , p_addLayer("AddLayer", "Add Layer", AbstractProcessor::VALID)
-        , p_exportToLabelImage("ExportToLabelImage", "Export to Label Image", INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL)
+        , p_addLayer("AddLayer", "Add Layer")
+        , p_exportToLabelImage("ExportToLabelImage", "Export to Label Image")
         , _shader(0)
         , _currentImage(0)
         , _mousePressed(false)
@@ -88,29 +88,29 @@ namespace campvis {
         , _currentControlPoint(0)
         , _currentBounds(0)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_frameNumber);
-        addProperty(&p_transferFunction);
+        addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_targetImageID);
+        addProperty(p_frameNumber);
+        addProperty(p_transferFunction);
 
-        addProperty(&p_fullWidth);
-        addProperty(&p_splineOrder);
-        addProperty(&p_NumControlPoints);
-        addProperty(&p_NumLevels);
+        addProperty(p_fullWidth);
+        addProperty(p_splineOrder);
+        addProperty(p_NumControlPoints);
+        addProperty(p_NumLevels);
 
-        addProperty(&p_computeSamples);
-        addProperty(&p_showSamples);
-        addProperty(&p_sampleFile);
-        addProperty(&p_saveSamples);
+        addProperty(p_computeSamples, VALID);
+        addProperty(p_showSamples);
+        addProperty(p_sampleFile, VALID);
+        addProperty(p_saveSamples, VALID);
 
-        addProperty(&p_controlpointFile);
-        addProperty(&p_saveCPs);
-        addProperty(&p_loadCPs);
+        addProperty(p_controlpointFile, VALID);
+        addProperty(p_saveCPs, VALID);
+        addProperty(p_loadCPs, VALID);
 
-        addProperty(&p_activeLayer);
-        addProperty(&p_addLayer);
+        addProperty(p_activeLayer);
+        addProperty(p_addLayer, VALID);
 
-        addProperty(&p_exportToLabelImage);
+        addProperty(p_exportToLabelImage, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
 
         p_computeSamples.s_clicked.connect(this, &ManualTissueSegmenter::computeSamples);
         p_saveSamples.s_clicked.connect(this, &ManualTissueSegmenter::saveSamples);
