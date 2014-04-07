@@ -47,21 +47,21 @@ namespace campvis {
         , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
         , p_exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
-        , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
         , p_mirrorID("mirrorID", "Input Mirror ID", "", DataNameProperty::READ)
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorMasking());
 
-        addProperty(&p_sourceImageID);
-        addProperty(&p_geometryID);
-        addProperty(&p_geometryImageId);
-        addProperty(&p_entryImageID);
-        addProperty(&p_exitImageID);
-        addProperty(&p_camera);
+        addProperty(p_sourceImageID);
+        addProperty(p_geometryID);
+        addProperty(p_geometryImageId);
+        addProperty(p_entryImageID);
+        addProperty(p_exitImageID);
+        addProperty(p_camera);
 
-        addProperty(&p_enableMirror);
-        addProperty(&p_mirrorID);
+        addProperty(p_enableMirror, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_mirrorID);
         p_mirrorID.setVisible(false);
 
         decoratePropertyCollection(this);

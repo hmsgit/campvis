@@ -144,10 +144,10 @@ namespace campvis {
         , p_outputFL("OutputFL", "FL Output Volume", "fl", DataNameProperty::WRITE)
         , p_outputFH("OutputFH", "FH Output Volume", "fh", DataNameProperty::WRITE)
     {
-        addProperty(&p_intensitiesId);
-        addProperty(&p_gradientsId);
-        addProperty(&p_outputFL);
-        addProperty(&p_outputFH);
+        addProperty(p_intensitiesId);
+        addProperty(p_gradientsId);
+        addProperty(p_outputFL);
+        addProperty(p_outputFH);
     }
 
     LHHistogram::~LHHistogram() {

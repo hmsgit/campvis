@@ -29,7 +29,7 @@
 
 namespace campvis {
 
-    void AbstractProcessorDecorator::addProperties(HasPropertyCollection* propCollection) {
+    void AbstractProcessorDecorator::addProperties(AbstractProcessor* propCollection) {
     }
 
     void AbstractProcessorDecorator::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
@@ -57,7 +57,7 @@ namespace campvis {
         _decorators.push_back(decorator);
     }
 
-    void HasProcessorDecorators::decoratePropertyCollection(HasPropertyCollection* propCollection) const {
+    void HasProcessorDecorators::decoratePropertyCollection(AbstractProcessor* propCollection) const {
         for (std::vector<AbstractProcessorDecorator*>::const_iterator it = _decorators.begin(); it != _decorators.end(); ++it)
             (*it)->addProperties(propCollection);
     }

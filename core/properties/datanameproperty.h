@@ -53,9 +53,8 @@ namespace campvis {
          * \param title     Property title (e.g. used for GUI)
          * \param value     Initial value
          * \param access    DataAccessInfo flag defining whether processor will read or write from/to the DataHandle with the given ID.
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access);
 
         /**
          * Virtual Destructor

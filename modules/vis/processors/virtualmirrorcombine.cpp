@@ -45,10 +45,10 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&p_normalImageID);
-        addProperty(&p_mirrorImageID);
-        addProperty(&p_mirrorRenderID);
-        addProperty(&p_targetImageID);
+        addProperty(p_normalImageID);
+        addProperty(p_mirrorImageID);
+        addProperty(p_mirrorRenderID);
+        addProperty(p_targetImageID);
 
         addDecorator(new ProcessorDecoratorBackground());
         

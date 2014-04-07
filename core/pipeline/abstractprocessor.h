@@ -25,15 +25,18 @@
 #ifndef PROCESSOR_H__
 #define PROCESSOR_H__
 
-#include "sigslot/sigslot.h"
 #include <tbb/atomic.h>
 #include <tbb/concurrent_queue.h>
+#include <tbb/spin_rw_mutex.h>
+
+#include "sigslot/sigslot.h"
 #include "tgt/logmanager.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/propertycollection.h"
 
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -122,6 +125,31 @@ namespace campvis {
          */
         virtual ProcessorState getProcessorState() const = 0;
         
+        /**
+         * Registers \a prop as property with the default invalidation level of INVALID_RESULT.
+         * \see HasPropertyCollection::addProperty()
+         * \param prop  Property to register
+         */
+        virtual void addProperty(AbstractProperty& prop);
+
+        /**
+         * Registers \a prop as property with the provided invalidation level. Registered properties 
+         * can be accessed from the outside, e.g. via getProperty(), and will automatically invalidate
+         * this processor on change. An already existing property with the same name will be replaced.
+         *
+         * \param   prop                Property to add
+         * \param   invalidationLevel   Invalidation level of this property
+         */
+        void addProperty(AbstractProperty& prop, int invalidationLevel);
+
+        /**
+         * Sets the property invalidation level to the specified value.
+         *
+         * \param   prop                Property whose invalidation level is to change.
+         * \param   invalidationLevel   New invalidation level of this property
+         */
+        void setPropertyInvalidationLevel(AbstractProperty& prop, int invalidationLevel);
+
         /**
          * Execute this processor.
          * Locks the processor and calls updateShader(), updateProperties() and/or updateResult() 
@@ -324,6 +352,10 @@ namespace campvis {
         /// Flag whether this processor is currently locked
         /// (This implies, that all properties are locked and it is not valid to call process())
         tbb::atomic<bool> _locked;
+
+        tbb::spin_rw_mutex _mtxInvalidationMap;     ///< Mutex protecting _invalidationMap
+        /// Hash map storing the invalidation levels for each registered property
+        std::unordered_map<const AbstractProperty*, int> _invalidationMap;
 
     private:
         tbb::atomic<int> _level;            ///< current invalidation level

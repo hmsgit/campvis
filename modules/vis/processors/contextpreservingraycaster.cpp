@@ -40,8 +40,8 @@ namespace campvis {
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_kappaS);
-        addProperty(&p_kappaT);
+        addProperty(p_kappaS);
+        addProperty(p_kappaT);
 
         decoratePropertyCollection(this);
     }

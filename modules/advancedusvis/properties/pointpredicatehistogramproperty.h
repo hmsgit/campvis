@@ -51,9 +51,8 @@ namespace campvis {
          * Creates a new PointPredicateHistogramProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        PointPredicateHistogramProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        PointPredicateHistogramProperty(const std::string& name, const std::string& title);
 
         /**
          * Virtual Destructor

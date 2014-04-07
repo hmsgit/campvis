@@ -46,8 +46,8 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
         , p_liveUpdate("LiveUpdate", "Live Update of Difference Image", false)
-        , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT)
-        , p_forceStop("Force Stop", "Force Stop", AbstractProcessor::VALID)
+        , p_performOptimization("PerformOptimization", "Perform Optimization")
+        , p_forceStop("Force Stop", "Force Stop")
         , p_translationStepSize("TranslationStepSize", "Initial Step Size Translation", 8.f, .1f, 100.f)
         , p_rotationStepSize("RotationStepSize", "Initial Step Size Rotation", .5f, .01f, tgt::PIf)
         , _referenceReader()
@@ -61,12 +61,12 @@ namespace campvis {
         addProcessor(&_sm);
         addProcessor(&_ve);
 
-        addProperty(&p_optimizer);
-        addProperty(&p_liveUpdate);
-        addProperty(&p_performOptimization);
-        addProperty(&p_forceStop);
-        addProperty(&p_translationStepSize);
-        addProperty(&p_rotationStepSize);
+        addProperty(p_optimizer);
+        addProperty(p_liveUpdate);
+        addProperty(p_performOptimization);
+        addProperty(p_forceStop);
+        addProperty(p_translationStepSize);
+        addProperty(p_rotationStepSize);
 
         p_performOptimization.s_clicked.connect(this, &NloptRegistration::onPerformOptimizationClicked);
         p_forceStop.s_clicked.connect(this, &NloptRegistration::forceStop);

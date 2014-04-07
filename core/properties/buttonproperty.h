@@ -37,9 +37,8 @@ namespace campvis {
          * Creates a new ButtonProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        ButtonProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        ButtonProperty(const std::string& name, const std::string& title);
 
         /**
          * Virtual Destructor

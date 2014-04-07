@@ -54,9 +54,9 @@ namespace campvis {
         , _kernelBuffer(0)
         , _kernelBufferTexture(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
-        addProperty(&p_sigma);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
+        addProperty(p_sigma);
     }
 
     GlGaussianFilter::~GlGaussianFilter() {

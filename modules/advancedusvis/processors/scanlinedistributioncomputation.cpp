@@ -49,19 +49,19 @@ namespace campvis {
 
     ScanlineDistributionComputation::ScanlineDistributionComputation(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "predicatemask", DataNameProperty::WRITE)
         , p_scanningDirection("ScanningDirection", "US Scanning Direction", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f))
         , p_threshold("Threshold", "Threshold", .1f, .01f, 1.f)
         , p_stepSize("StepSize", "Step Size", 2.f, 1.f, 16.f, 1.f, 1)
         , _shader(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
+        addProperty(p_inputImage, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_outputImage);
 
-        addProperty(&p_scanningDirection);
-        addProperty(&p_threshold);
-        addProperty(&p_stepSize);
+        addProperty(p_scanningDirection);
+        addProperty(p_threshold);
+        addProperty(p_stepSize);
     }
 
     ScanlineDistributionComputation::~ScanlineDistributionComputation() {
@@ -76,7 +76,7 @@ namespace campvis {
         _shader->setAttributeLocation(1, "in_TexCoord");
 
         _viewportSizeProperty->s_changed.disconnect(this);
-        _viewportSizeProperty->setInvalidationLevel(AbstractProcessor::VALID);
+        setPropertyInvalidationLevel(*_viewportSizeProperty, VALID);
     }
 
     void ScanlineDistributionComputation::deinit() {
@@ -112,7 +112,7 @@ namespace campvis {
             glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
 
             // render quad to compute difference measure by shader
-            for (int z = 0; z < size.z; ++z) {
+            for (int z = 0; z < static_cast<int>(size.z); ++z) {
                 float zTexCoord = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
                 _shader->setUniform("_zTexCoord", zTexCoord);
                 _fbo->attachTexture(distanceTexture, GL_COLOR_ATTACHMENT0, 0, z);

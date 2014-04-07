@@ -45,7 +45,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_url("url", "Image URL", "")
     {
-        addProperty(&p_url);
+        addProperty(p_url);
         p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);
 
         this->addReader(new CsvdImageReader());        
@@ -170,7 +170,7 @@ namespace campvis {
             sp->setVisible(false);
         }
 
-        this->addProperty(meta);
+        this->addProperty(*meta);
         this->_readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
         return 0;
     }

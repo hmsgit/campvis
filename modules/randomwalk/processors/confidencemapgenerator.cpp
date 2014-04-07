@@ -173,18 +173,18 @@ namespace campvis {
         , p_lengths("PolarLengths", "Polar Lengths", tgt::vec2(0.f, 100.f), tgt::vec2(0.f), tgt::vec2(1000.f), tgt::vec2(0.1f))
         
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_alpha);
-        addProperty(&p_beta);
-        addProperty(&p_gamma);
-        addProperty(&p_normalizeValues);
-        addProperty(&p_solver);
-        addProperty(&p_numSteps);
-        addProperty(&p_curvilinear);
-        addProperty(&p_origin);
-        addProperty(&p_angles);
-        addProperty(&p_lengths);
+        addProperty(p_sourceImageID);
+        addProperty(p_targetImageID);
+        addProperty(p_alpha);
+        addProperty(p_beta);
+        addProperty(p_gamma);
+        addProperty(p_normalizeValues);
+        addProperty(p_solver);
+        addProperty(p_numSteps);
+        addProperty(p_curvilinear);
+        addProperty(p_origin);
+        addProperty(p_angles);
+        addProperty(p_lengths);
     }
 
     ConfidenceMapGenerator::~ConfidenceMapGenerator() {

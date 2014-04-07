@@ -28,8 +28,8 @@ namespace campvis {
 
     const std::string ButtonProperty::loggerCat_ = "CAMPVis.core.datastructures.ButtonProperty";
 
-    ButtonProperty::ButtonProperty(const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractProperty(name, title, invalidationLevel)
+    ButtonProperty::ButtonProperty(const std::string& name, const std::string& title)
+        : AbstractProperty(name, title)
     {
     }
 

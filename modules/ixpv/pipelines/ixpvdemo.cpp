@@ -68,7 +68,7 @@ namespace campvis {
         addProcessor(&_compositor2);
         addProcessor(&_ixpvCompositor);
 
-        addProperty(&_camera);
+        addProperty(_camera);
 
         _trackballHandler = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballHandler->addLqModeProcessor(&_ctDVR);

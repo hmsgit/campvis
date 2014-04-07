@@ -49,8 +49,8 @@ namespace campvis {
 
     PointPredicateEvaluator::PointPredicateEvaluator(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
-        , p_inputLabels("InputLabels", "Input Label Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
+        , p_inputLabels("InputLabels", "Input Label Image", "", DataNameProperty::READ)
         , p_inputSnr("InputSnr", "Input SNR", "", DataNameProperty::READ)
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
         , p_inputConfidence("InputConfidence", "Input Confidence", "", DataNameProperty::READ)
@@ -59,15 +59,15 @@ namespace campvis {
         , p_histogram("PredicateHistogram", "Point Predicate Histogram")
         , _shader(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_inputLabels);
-        addProperty(&p_inputSnr);
-        addProperty(&p_inputVesselness);
-        addProperty(&p_inputConfidence);
-        addProperty(&p_outputImage);
+        addProperty(p_inputImage, INVALID_PROPERTIES | INVALID_RESULT);
+        addProperty(p_inputLabels, INVALID_PROPERTIES | INVALID_RESULT);
+        addProperty(p_inputSnr);
+        addProperty(p_inputVesselness);
+        addProperty(p_inputConfidence);
+        addProperty(p_outputImage);
 
-        addProperty(&p_camera);
-        addProperty(&p_histogram);
+        addProperty(p_camera);
+        addProperty(p_histogram);
     }
 
     PointPredicateEvaluator::~PointPredicateEvaluator() {
@@ -137,7 +137,7 @@ namespace campvis {
             glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
 
             // render quad to compute difference measure by shader
-            for (int z = 0; z < size.z; ++z) {
+            for (int z = 0; z < static_cast<int>(size.z); ++z) {
                 float zTexCoord = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
                 _shader->setUniform("_zTexCoord", zTexCoord);
                 _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, z);

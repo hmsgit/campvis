@@ -52,27 +52,27 @@ namespace campvis {
 
     TensorGlyphRenderer::TensorGlyphRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputEigenvalues("InputEigenvalues", "Input Eigenvalues Image", "eigenvalues", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
-        , p_inputEigenvectors("InputEigenvectors", "Input Eigenvectors Image", "eigenvectors", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_inputEigenvalues("InputEigenvalues", "Input Eigenvalues Image", "eigenvalues", DataNameProperty::READ)
+        , p_inputEigenvectors("InputEigenvectors", "Input Eigenvectors Image", "eigenvectors", DataNameProperty::READ)
         , p_renderOutput("RenderOutput", "Output Image", "TensorGlyphRenderer.output", DataNameProperty::WRITE)
         , p_glyphType("GlyphType", "Glyph Type to Render", glyphTypes, 3)
         , p_glyphSize("GlyphSize", "Glyph Size", 1.f, .1f, 5.f)
         , p_camera("Camera", "Camera", tgt::Camera())
-        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _ellipsoidGeometry(0)
         , _cubeGeometry(0)
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_inputEigenvalues);
-        addProperty(&p_inputEigenvectors);
-        addProperty(&p_renderOutput);
-        addProperty(&p_glyphType);
-        addProperty(&p_glyphSize);
-        addProperty(&p_camera);
-        addProperty(&p_sliceOrientation);
-        addProperty(&p_sliceNumber);
+        addProperty(p_inputEigenvalues, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_inputEigenvectors, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_renderOutput);
+        addProperty(p_glyphType);
+        addProperty(p_glyphSize);
+        addProperty(p_camera);
+        addProperty(p_sliceOrientation, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_sliceNumber);
 
         decoratePropertyCollection(this);
     }

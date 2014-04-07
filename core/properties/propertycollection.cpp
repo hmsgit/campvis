@@ -35,28 +35,26 @@ namespace campvis {
     HasPropertyCollection::~HasPropertyCollection() {
     }
 
-    void HasPropertyCollection::addProperty(AbstractProperty* prop) {
-        tgtAssert(prop != 0, "Property must not be 0!");
-        PropertyCollection::iterator it = findProperty(prop->getName());
+    void HasPropertyCollection::addProperty(AbstractProperty& prop) {
+        PropertyCollection::iterator it = findProperty(prop.getName());
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
             s_propertyRemoved(*it);
-            *it = prop;
+            *it = &prop;
         }
         else {
-            _properties.push_back(prop);
+            _properties.push_back(&prop);
         }
-        prop->s_changed.connect(this, &HasPropertyCollection::onPropertyChanged);
-        s_propertyAdded(prop);
+        prop.s_changed.connect(this, &HasPropertyCollection::onPropertyChanged);
+        s_propertyAdded(&prop);
     }
 
-    void HasPropertyCollection::removeProperty(AbstractProperty* prop) {
-        tgtAssert(prop != 0, "Property must not be 0!");
-        PropertyCollection::iterator it = findProperty(prop->getName());
+    void HasPropertyCollection::removeProperty(AbstractProperty& prop) {
+        PropertyCollection::iterator it = findProperty(prop.getName());
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
             _properties.erase(it);
-            s_propertyRemoved(prop);
+            s_propertyRemoved(&prop);
         }
     }
 

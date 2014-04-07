@@ -46,11 +46,11 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&p_inputImage1);
-        addProperty(&p_inputImage2);
-        addProperty(&p_inputImage3);
-        addProperty(&p_inputImage4);
-        addProperty(&p_outputImage);
+        addProperty(p_inputImage1);
+        addProperty(p_inputImage2);
+        addProperty(p_inputImage3);
+        addProperty(p_inputImage4);
+        addProperty(p_outputImage);
     }
 
     QuadView::~QuadView() {

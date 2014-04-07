@@ -51,10 +51,10 @@ namespace campvis {
         this->_ext.push_back(".vtk");
         this->p_targetImageID.setValue("VtkImageReader.output");
 
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     VtkImageReader::~VtkImageReader() {

@@ -41,8 +41,8 @@ namespace campvis {
     }
 
     void ProcessorDecoratorBackground::addProperties(HasPropertyCollection* propCollection) {
-        propCollection->addProperty(&_backgroundColor1);
-        propCollection->addProperty(&_backgroundColor2);
+        propCollection->addProperty(_backgroundColor1);
+        propCollection->addProperty(_backgroundColor2);
     }
 
     void ProcessorDecoratorBackground::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {

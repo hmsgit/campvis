@@ -32,8 +32,8 @@ namespace campvis {
 
     const std::string TransferFunctionProperty::loggerCat_ = "CAMPVis.core.datastructures.TransferFunctionProperty";
 
-    TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractProperty(name, title, invalidationLevel)
+    TransferFunctionProperty::TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf)
+        : AbstractProperty(name, title)
         , _transferFunction(tf)
         , _imageHandle(0)
         , _autoFitWindowToData(true)

@@ -83,7 +83,6 @@ namespace campvis {
          * \param maxValue  Maximum value for this property
          * \param stepValue Step value for this property
          * \param decimals  Number of significant decimal places
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
         FloatingPointProperty(
             const std::string& name,
@@ -92,8 +91,7 @@ namespace campvis {
             const T& minValue,
             const T& maxValue,
             const T& stepValue = T(0.01f),
-            const DecimalsType& decimals = DecimalsType(3),
-            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+            const DecimalsType& decimals = DecimalsType(3));
 
         /**
          * Adds the given property \a prop to the set of shared properties.
@@ -141,9 +139,8 @@ namespace campvis {
     campvis::FloatingPointProperty<T>::FloatingPointProperty(const std::string& name, const std::string& title,
                                                              const T& value, const T& minValue, const T& maxValue,
                                                              const T& stepValue,
-                                                             const DecimalsType& decimals /*= DecimalsType(3)*/,
-                                                             int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : NumericProperty<T>(name, title, value, minValue, maxValue, stepValue, invalidationLevel)
+                                                             const DecimalsType& decimals /*= DecimalsType(3)*/)
+        : NumericProperty<T>(name, title, value, minValue, maxValue, stepValue)
         , _decimals(decimals)
     {
 

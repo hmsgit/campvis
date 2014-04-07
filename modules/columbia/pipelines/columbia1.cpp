@@ -48,8 +48,8 @@ namespace campvis {
         , _compositor(&_canvasSize)
         , _trackballEH(0)
     {
-        addProperty(&_camera);
-        addProperty(&_boundsData);
+        addProperty(_camera);
+        addProperty(_boundsData);
 
         _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballEH->addLqModeProcessor(&_vr);
@@ -126,7 +126,7 @@ namespace campvis {
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
-        static_cast<TransferFunctionProperty*>(_vr.getProperty("TransferFunction"))->replaceTF(dvrTF);
+        static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         _vr.p_outputImage.addSharedProperty(&_compositor.p_secondImageId);
 
         _gr.p_renderTargetID.setValue("gr");

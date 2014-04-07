@@ -58,7 +58,7 @@ namespace campvis {
 
     AdvancedUsFusion::AdvancedUsFusion(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
+        , p_usImageId("UsImageId", "Ultrasound Input Image", "", DataNameProperty::READ)
         , p_blurredImageId("BlurredImageId", "Blurred Ultrasound Image", "", DataNameProperty::READ)
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)
         , p_confidenceImageID("ConfidenceImageId", "Confidence Map Input", "", DataNameProperty::READ)
@@ -73,18 +73,18 @@ namespace campvis {
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
     {
-        addProperty(&p_usImageId);
-        addProperty(&p_blurredImageId);
-        addProperty(&p_gradientImageID);
-        addProperty(&p_confidenceImageID);
-        addProperty(&p_blurredScaling);
-        addProperty(&p_targetImageID);
-        addProperty(&p_sliceNumber);
-        addProperty(&p_transferFunction);
-        addProperty(&p_confidenceTF);
-        addProperty(&p_view);
-        addProperty(&p_confidenceScaling);
-        addProperty(&p_hue);
+        addProperty(p_usImageId, INVALID_PROPERTIES | INVALID_RESULT);
+        addProperty(p_blurredImageId);
+        addProperty(p_gradientImageID);
+        addProperty(p_confidenceImageID);
+        addProperty(p_blurredScaling);
+        addProperty(p_targetImageID);
+        addProperty(p_sliceNumber);
+        addProperty(p_transferFunction);
+        addProperty(p_confidenceTF);
+        addProperty(p_view);
+        addProperty(p_confidenceScaling);
+        addProperty(p_hue);
 
         Geometry1DTransferFunction* tf = static_cast<Geometry1DTransferFunction*>(p_confidenceTF.getTF());
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 96), tgt::col4(0, 0, 0, 0)));

@@ -56,13 +56,13 @@ namespace campvis {
         this->_ext.push_back(".ltf");
         this->p_targetImageID.setValue("LtfImageReader.output");
 
-        addProperty(&p_url);
-        addProperty(&p_size);
-        addProperty(&p_numChannels);
-        addProperty(&p_baseType);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        addProperty(p_url);
+        addProperty(p_size);
+        addProperty(p_numChannels);
+        addProperty(p_baseType);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     LtfImageReader::~LtfImageReader() {

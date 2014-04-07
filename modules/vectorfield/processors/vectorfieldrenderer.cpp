@@ -40,43 +40,43 @@ namespace campvis {
         GenericOption<VectorFieldRenderer::SliceOrientation>("z", "XY Plane", VectorFieldRenderer::XY_PLANE),
         GenericOption<VectorFieldRenderer::SliceOrientation>("y", "XZ Plane", VectorFieldRenderer::XZ_PLANE),
         GenericOption<VectorFieldRenderer::SliceOrientation>("x", "YZ Plane", VectorFieldRenderer::YZ_PLANE),
-		GenericOption<VectorFieldRenderer::SliceOrientation>("a", "XYZ Volume", VectorFieldRenderer::XYZ_VOLUME)
+        GenericOption<VectorFieldRenderer::SliceOrientation>("a", "XYZ Volume", VectorFieldRenderer::XYZ_VOLUME)
     };
 
     const std::string VectorFieldRenderer::loggerCat_ = "CAMPVis.modules.classification.VectorFieldRenderer";
 
     VectorFieldRenderer::VectorFieldRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-		, p_inputVectors("InputImage", "Input Image Vectors", "vectors", DataNameProperty::READ, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_inputVectors("InputImage", "Input Image Vectors", "vectors", DataNameProperty::READ)
         , p_renderOutput("RenderOutput", "Output Image", "VectorFieldRenderer.output", DataNameProperty::WRITE)
         , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .001f, 5.f)
-		, p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1000.f, 0.005f)
-		, p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
-		, p_flowProfile1("FlowSpline1", "Flow Profile - Spline 1", 1.f, .0f, 2.f)
-		, p_flowProfile2("FlowSpline2", "Flow Profile - Spline 2", 1.f, .0f, 2.f)
-		, p_flowProfile3("FlowSpline3", "Flow Profile - Spline 3", 1.f, .0f, 2.f)
-		, p_flowProfile4("FlowSpline4", "Flow Profile - Spline 4", 1.f, .0f, 2.f)
-		, p_Time("time", "Time", 0, 0, 100)
+        , p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1000.f, 0.005f)
+        , p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
+        , p_flowProfile1("FlowSpline1", "Flow Profile - Spline 1", 1.f, .0f, 2.f)
+        , p_flowProfile2("FlowSpline2", "Flow Profile - Spline 2", 1.f, .0f, 2.f)
+        , p_flowProfile3("FlowSpline3", "Flow Profile - Spline 3", 1.f, .0f, 2.f)
+        , p_flowProfile4("FlowSpline4", "Flow Profile - Spline 4", 1.f, .0f, 2.f)
+        , p_Time("time", "Time", 0, 0, 100)
         , p_camera("Camera", "Camera", tgt::Camera())
-        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4, INVALID_RESULT | INVALID_PROPERTIES)
+        , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _arrowGeometry(0)
     {
         addDecorator(new ProcessorDecoratorShading());
 
-		addProperty(&p_inputVectors);
-        addProperty(&p_renderOutput);
-        addProperty(&p_arrowSize);
-		addProperty(&p_lenThresholdMin);
-		addProperty(&p_lenThresholdMax);
-        addProperty(&p_camera);
-        addProperty(&p_sliceOrientation);
-        addProperty(&p_sliceNumber);
-		addProperty(&p_Time);
-		addProperty(&p_flowProfile1);
-		addProperty(&p_flowProfile2);
-		addProperty(&p_flowProfile3);
-		addProperty(&p_flowProfile4);
+        addProperty(p_inputVectors, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_renderOutput);
+        addProperty(p_arrowSize);
+        addProperty(p_lenThresholdMin);
+        addProperty(p_lenThresholdMax);
+        addProperty(p_camera);
+        addProperty(p_sliceOrientation, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_sliceNumber);
+        addProperty(p_Time);
+        addProperty(p_flowProfile1);
+        addProperty(p_flowProfile2);
+        addProperty(p_flowProfile3);
+        addProperty(p_flowProfile4);
 
         decoratePropertyCollection(this);
     }
@@ -107,12 +107,12 @@ namespace campvis {
             return;
         }
 
-		GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
+        GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
 
         if(vectors) {
             const tgt::Camera& cam = p_camera.getValue();
             const tgt::svec3& imgSize = vectors->getSize();
-			const int sliceNumber = p_sliceNumber.getValue();
+            const int sliceNumber = p_sliceNumber.getValue();
 
             glEnable(GL_DEPTH_TEST);
             _shader->activate();
@@ -128,11 +128,11 @@ namespace campvis {
             createAndAttachDepthTexture();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
-				p_flowProfile1.getValue(),
-				p_flowProfile2.getValue(),
-				p_flowProfile3.getValue(),
-				p_flowProfile4.getValue());
+            float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
+                p_flowProfile1.getValue(),
+                p_flowProfile2.getValue(),
+                p_flowProfile3.getValue(),
+                p_flowProfile4.getValue());
 
             switch (p_sliceOrientation.getOptionValue()) {
                 case XY_PLANE:
@@ -156,15 +156,15 @@ namespace campvis {
                         }
                     }
                     break;
-				case XYZ_VOLUME:
-					for (size_t x = 0; x < imgSize.x; ++x) {
-						for (size_t y = 0; y < imgSize.y; ++y) {
-							for (size_t z = 0; z < imgSize.z; ++z) {
-								renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
-							}
-						}
-					}
-					break;
+                case XYZ_VOLUME:
+                    for (size_t x = 0; x < imgSize.x; ++x) {
+                        for (size_t y = 0; y < imgSize.y; ++y) {
+                            for (size_t z = 0; z < imgSize.z; ++z) {
+                                renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
+                            }
+                        }
+                    }
+                    break;
             }
 
             decorateRenderEpilog(_shader);
@@ -182,10 +182,10 @@ namespace campvis {
 
     void VectorFieldRenderer::updateProperties(DataContainer& dataContainer) {
 
-		GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
+        GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
 
         if(vectors) {
-			switch (p_sliceOrientation.getOptionValue()) {
+            switch (p_sliceOrientation.getOptionValue()) {
                 case XY_PLANE:
                     p_sliceNumber.setMaxValue(static_cast<int>(vectors->getSize().z - 1));
                     break;
@@ -195,13 +195,13 @@ namespace campvis {
                 case YZ_PLANE:
                     p_sliceNumber.setMaxValue(static_cast<int>(vectors->getSize().x - 1));
                     break;
-				case XYZ_VOLUME:
-					p_sliceNumber.setMaxValue(0);
+                case XYZ_VOLUME:
+                    p_sliceNumber.setMaxValue(0);
             }
-		}
+        }
         else {
-			LERROR("No suitable input data found or size of images mismatch!");
-		}
+            LERROR("No suitable input data found or size of images mismatch!");
+        }
         validate(INVALID_PROPERTIES);
     }
 
@@ -219,92 +219,92 @@ namespace campvis {
 
     void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale) {
 
-		// avoid overflows
-		if(position.x >= vectors->getSize().x || position.x < 0 ||
-			position.y >= vectors->getSize().y || position.y < 0 ||
-			position.z >= vectors->getSize().z || position.z < 0)
-			return;
+        // avoid overflows
+        if(position.x >= vectors->getSize().x || position.x < 0 ||
+            position.y >= vectors->getSize().y || position.y < 0 ||
+            position.z >= vectors->getSize().z || position.z < 0)
+            return;
 
-		// gather vector direction
-		const tgt::vec3& dir = vectors->getElement(position);
-		float len = tgt::length(dir);
+        // gather vector direction
+        const tgt::vec3& dir = vectors->getElement(position);
+        float len = tgt::length(dir);
 
-		// threshold
-		if(len < p_lenThresholdMin.getValue() || len > p_lenThresholdMax.getValue())
-			return;
+        // threshold
+        if(len < p_lenThresholdMin.getValue() || len > p_lenThresholdMax.getValue())
+            return;
 
-		tgt::vec3 up(0.f, 0.f, 1.f);
-		tgt::vec3 dirNorm = tgt::normalize(dir);
-		tgt::vec3 axis = tgt::cross(up, dirNorm);
-		float dotPr = tgt::dot(up, dirNorm);
-		tgt::mat4 rotationMatrix;
-		if(abs(dotPr-1)<1.e-3f)
-			rotationMatrix = tgt::mat4::identity;
-		else if(abs(dotPr+1)<1.e-3f)
-			rotationMatrix = tgt::mat4::createRotation(tgt::PIf, tgt::vec3(1.f, 0.f, 0.f));
-		else {
-			rotationMatrix = tgt::mat4::createRotation(acos(dotPr), tgt::normalize(axis));
-		}
+        tgt::vec3 up(0.f, 0.f, 1.f);
+        tgt::vec3 dirNorm = tgt::normalize(dir);
+        tgt::vec3 axis = tgt::cross(up, dirNorm);
+        float dotPr = tgt::dot(up, dirNorm);
+        tgt::mat4 rotationMatrix;
+        if(abs(dotPr-1)<1.e-3f)
+            rotationMatrix = tgt::mat4::identity;
+        else if(abs(dotPr+1)<1.e-3f)
+            rotationMatrix = tgt::mat4::createRotation(tgt::PIf, tgt::vec3(1.f, 0.f, 0.f));
+        else {
+            rotationMatrix = tgt::mat4::createRotation(acos(dotPr), tgt::normalize(axis));
+        }
 
         const tgt::mat4& voxelToWorldMatrix = vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 
         // compute model matrix
         tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
-			tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue())) * tgt::mat4::createScale(tgt::vec3(scale));
+            tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue())) * tgt::mat4::createScale(tgt::vec3(scale));
 
         // setup shader
         //_shader->setUniform("_color", tgt::vec4(dirNorm, 1.f));
-		float color = (len - p_lenThresholdMin.getValue()) / (p_lenThresholdMax.getValue() - p_lenThresholdMin.getValue());
-		_shader->setUniform("_color", tgt::vec4(1.f, 1-color, 1-color, 1.f));
+        float color = (len - p_lenThresholdMin.getValue()) / (p_lenThresholdMax.getValue() - p_lenThresholdMin.getValue());
+        _shader->setUniform("_color", tgt::vec4(1.f, 1-color, 1-color, 1.f));
 
-		// render single ellipsoid
-		_shader->setUniform("_modelMatrix", modelMatrix);
-		_arrowGeometry->render(GL_TRIANGLE_STRIP);
+        // render single ellipsoid
+        _shader->setUniform("_modelMatrix", modelMatrix);
+        _arrowGeometry->render(GL_TRIANGLE_STRIP);
     }
 
 
-	float VectorFieldRenderer::getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3)
-	{
-		const float halfPeriod = 0.5f;
-		const float spacing = 0.25f;
+    float VectorFieldRenderer::getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3)
+    {
+        const float halfPeriod = 0.5f;
+        const float spacing = 0.25f;
 
-		float St[4];
+        float St[4];
 
-		for(int j = 0; j < 4; ++j) { // iterate over spline positions
-			float splinePos = spacing * (j+1);
+        for(int j = 0; j < 4; ++j) { // iterate over spline positions
+            float splinePos = spacing * (j+1);
 
-			// periodic alignment of samples -> contribution to all splines => dense sampling matrix
-			if(t > splinePos + halfPeriod)
-				t -= 1;
-			else if(t < splinePos - halfPeriod)
-				t += 1;
+            // periodic alignment of samples -> contribution to all splines => dense sampling matrix
+            if(t > splinePos + halfPeriod)
+                t -= 1;
+            else if(t < splinePos - halfPeriod)
+                t += 1;
 
-			float p = (splinePos - t) / spacing;
-			St[j] = evaluateCubicBSpline(p);
-		}
+            float p = (splinePos - t) / spacing;
+            St[j] = evaluateCubicBSpline(p);
+        }
 
-		return St[0]*Ct0 + St[1]*Ct1 + St[2]*Ct2 + St[3]*Ct3;
-	}
+        return St[0]*Ct0 + St[1]*Ct1 + St[2]*Ct2 + St[3]*Ct3;
+    }
 
-	float VectorFieldRenderer::evaluateCubicBSpline(float t)
-	{
-		t += 2; // t is given zero-centered => shift peak from 2 to 0
-		if(t <= 0 || t >= 4) 
-			return 0;
-		else if(t <= 1)
-			return t*t*t / 6.0f;
-		else if(t <= 2) {
-			t -= 1;
-			return (-3*t*t*t + 3*t*t + 3*t + 1) / 6.0f;
-		}
-		else if(t <= 3) {
-			t -= 2;
-			return (3*t*t*t - 6*t*t + 4) / 6.0f;
-		}
-		else {
-			t -= 3;
-			return (1-t)*(1-t)*(1-t) / 6.0f;
-		}
-	}
+    float VectorFieldRenderer::evaluateCubicBSpline(float t)
+    {
+        t += 2; // t is given zero-centered => shift peak from 2 to 0
+        if(t <= 0 || t >= 4) 
+            return 0;
+        else if(t <= 1)
+            return t*t*t / 6.0f;
+        else if(t <= 2) {
+            t -= 1;
+            return (-3*t*t*t + 3*t*t + 3*t + 1) / 6.0f;
+        }
+        else if(t <= 3) {
+            t -= 2;
+            return (3*t*t*t - 6*t*t + 4) / 6.0f;
+        }
+        else {
+            t -= 3;
+            return (1-t)*(1-t)*(1-t) / 6.0f;
+        }
+    }
 
 }

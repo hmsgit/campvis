@@ -44,7 +44,7 @@ namespace campvis {
 
     GlVesselnessFilter::GlVesselnessFilter(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input (Gaussian Filtered) Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT)
+        , p_inputImage("InputImage", "Input (Gaussian Filtered) Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Eigenvector Image", "GlVesselnessFilter.out", DataNameProperty::WRITE)
         , p_lod("Lod", "Min/Max LOD for Multi-Level Texture Lookup", tgt::vec2(1.f, 3.f), tgt::vec2(0.f), tgt::vec2(10.f), tgt::vec2(.5f), tgt::ivec2(1))
         , p_alpha("Alpha", "Alpha Value for Vesselness", .5f, .01f, 1.f, .1f, 2)
@@ -54,16 +54,16 @@ namespace campvis {
         , p_halfPrecisionOutput("HalfPrecisionOutput", "Use Half Precision (16 Bit) Output", true)
         , _shader(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
 
-        addProperty(&p_lod);
-        addProperty(&p_alpha);
-        addProperty(&p_beta);
-        addProperty(&p_gamma);
-        addProperty(&p_theta);
+        addProperty(p_lod);
+        addProperty(p_alpha);
+        addProperty(p_beta);
+        addProperty(p_gamma);
+        addProperty(p_theta);
 
-        addProperty(&p_halfPrecisionOutput);
+        addProperty(p_halfPrecisionOutput);
     }
 
     GlVesselnessFilter::~GlVesselnessFilter() {

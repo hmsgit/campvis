@@ -40,15 +40,15 @@ namespace campvis {
 
     VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
+        , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
         , p_enableScribbling("EnableScribbling", "Enable Scribbling in Slice Views", false)
-        , p_seProperties("SliceExtractorProperties", "Slice Extractor Properties", AbstractProcessor::VALID)
-        , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties", AbstractProcessor::VALID)
+        , p_seProperties("SliceExtractorProperties", "Slice Extractor Properties")
+        , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties")
         , _raycaster(viewportSizeProp, raycaster)
         , _sliceExtractor(viewportSizeProp)
-        , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
-        , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1), AbstractProcessor::VALID)
+        , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
+        , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
         , _xSliceHandler(&_sliceExtractor.p_xSliceNumber)
         , _ySliceHandler(&_sliceExtractor.p_ySliceNumber)
         , _zSliceHandler(&_sliceExtractor.p_zSliceNumber)
@@ -57,9 +57,9 @@ namespace campvis {
         , _mousePressedInRaycaster(false)
         , _scribblePointer(nullptr)
     {
-        addProperty(&p_inputVolume);
-        addProperty(&p_outputImage);
-        addProperty(&p_enableScribbling);
+        addProperty(p_inputVolume, INVALID_PROPERTIES);
+        addProperty(p_outputImage);
+        addProperty(p_enableScribbling, VALID);
 
         addDecorator(new ProcessorDecoratorBackground());
         decoratePropertyCollection(this);
@@ -72,16 +72,13 @@ namespace campvis {
         _sliceExtractor.p_xSliceColor.setVisible(false);
         _sliceExtractor.p_ySliceColor.setVisible(false);
         _sliceExtractor.p_zSliceColor.setVisible(false);
-        addProperty(&p_seProperties);
+        addProperty(p_seProperties, VALID);
 
         p_vrProperties.addPropertyCollection(_raycaster);
         _raycaster.p_lqMode.setVisible(false);
         _raycaster.p_inputVolume.setVisible(false);
         _raycaster.p_outputImage.setVisible(false);
-        addProperty(&p_vrProperties);
-
-        addProperty(&_sliceExtractor.p_transferFunction);
-        addProperty(_raycaster.getProperty("TransferFunction"));
+        addProperty(p_vrProperties, VALID);
 
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
         p_inputVolume.addSharedProperty(&_sliceExtractor.p_sourceImageID);
@@ -89,9 +86,8 @@ namespace campvis {
         _sliceExtractor.setViewportSizeProperty(&p_sliceRenderSize);
         _raycaster.setViewportSizeProperty(&p_volumeRenderSize);
 
-        addProperty(&p_sliceRenderSize);
-        addProperty(&p_volumeRenderSize);
-
+        addProperty(p_sliceRenderSize, VALID);
+        addProperty(p_volumeRenderSize, VALID);
 
         // Event-Handlers
         _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, &p_volumeRenderSize);
@@ -276,7 +272,7 @@ namespace campvis {
     void VolumeExplorer::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
         _sliceExtractor.p_transferFunction.setImageHandle(img.getDataHandle());
-        static_cast<TransferFunctionProperty*>(_raycaster.getProperty("TransferFunction"))->setImageHandle(img.getDataHandle());
+        static_cast<TransferFunctionProperty*>(_raycaster.getNestedProperty("RaycasterProps::TransferFunction"))->setImageHandle(img.getDataHandle());
 
         if (img != 0) {
             const tgt::svec3& imgSize = img->getSize();

@@ -31,13 +31,13 @@ namespace campvis {
 
     ImageSeriesSplitter::ImageSeriesSplitter() 
         : AbstractProcessor()
-        , p_inputID("InputID", "Input Image Series ID", "input", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_inputID("InputID", "Input Image Series ID", "input", DataNameProperty::READ)
         , p_outputID("OutputID", "Output Image ID", "output", DataNameProperty::WRITE)
         , p_imageIndex("ImageIndex", "Image to Select", 0, 0, 0)
     {
-        addProperty(&p_inputID);
-        addProperty(&p_outputID);
-        addProperty(&p_imageIndex);
+        addProperty(p_inputID, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_outputID);
+        addProperty(p_imageIndex);
     }
 
     ImageSeriesSplitter::~ImageSeriesSplitter() {

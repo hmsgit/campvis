@@ -77,13 +77,13 @@ namespace campvis {
             exit(EXIT_FAILURE);
         }
         
-        addProperty(&p_currentSlice);
-        addProperty(&p_transferFunction);
-        addProperty(&p_meshSolidColor);
-        addProperty(&p_renderRChannel);
-        addProperty(&p_renderGChannel);
-        addProperty(&p_renderBChannel);
-        addProperty(&p_renderAChannel);
+        addProperty(p_currentSlice);
+        addProperty(p_transferFunction);
+        addProperty(p_meshSolidColor);
+        addProperty(p_renderRChannel);
+        addProperty(p_renderGChannel);
+        addProperty(p_renderBChannel);
+        addProperty(p_renderAChannel);
     }
 
     DataContainerInspectorCanvas::~DataContainerInspectorCanvas() {

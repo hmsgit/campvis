@@ -40,7 +40,7 @@ namespace campvis {
         virtual ~ProcessorDecoratorShading();
 
     protected:
-        void addProperties(HasPropertyCollection* propCollection);
+        void addProperties(AbstractProcessor* propCollection);
 
         void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
 

@@ -48,8 +48,8 @@ namespace campvis {
         , p_inputImage("InputImage", "Input Image ID", "DevilImageWriter.input", DataNameProperty::READ)
         , p_url("url", "Image URL", "")
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_url);
+        addProperty(p_inputImage);
+        addProperty(p_url);
     }
 
     DevilImageWriter::~DevilImageWriter() {

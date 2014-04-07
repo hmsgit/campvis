@@ -25,13 +25,13 @@
 #include "processordecoratormasking.h"
 
 #include "tgt/shadermanager.h"
-#include "core/properties/propertycollection.h"
+#include "core/pipeline/abstractprocessor.h"
 
 namespace campvis {
 
     ProcessorDecoratorMasking::ProcessorDecoratorMasking()
         : AbstractProcessorDecorator()
-        , _applyMask("applyMask", "Apply Mask to image", false, AbstractProcessor::INVALID_SHADER)
+        , _applyMask("applyMask", "Apply Mask to image", false)
         , _maskID("maskID", "Mask Image ID", "mask", DataNameProperty::READ)
         , _maskColor("maskColor", "Mask Color", tgt::vec4(0.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _texUnit(0)
@@ -48,10 +48,10 @@ namespace campvis {
         delete _maskImage;
     }
 
-    void ProcessorDecoratorMasking::addProperties(HasPropertyCollection* propCollection) {
-        propCollection->addProperty(&_applyMask);
-        propCollection->addProperty(&_maskID);
-        propCollection->addProperty(&_maskColor);
+    void ProcessorDecoratorMasking::addProperties(AbstractProcessor* propCollection) {
+        propCollection->addProperty(_applyMask, AbstractProcessor::INVALID_SHADER);
+        propCollection->addProperty(_maskID);
+        propCollection->addProperty(_maskColor);
     }
 
     void ProcessorDecoratorMasking::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {

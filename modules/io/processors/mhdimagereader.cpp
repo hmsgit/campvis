@@ -46,10 +46,10 @@ namespace campvis {
     {
         this->_ext.push_back(".mhd");
         this->p_targetImageID.setValue("MhdImageReader.output");
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     MhdImageReader::~MhdImageReader() {

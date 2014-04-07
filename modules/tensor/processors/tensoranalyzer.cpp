@@ -71,21 +71,21 @@ namespace campvis {
 
     TensorAnalyzer::TensorAnalyzer()
         : AbstractProcessor()
-        , p_inputImage("InputImage", "Input Tensor Image", "tensors", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | EIGENSYSTEM_INVALID)
+        , p_inputImage("InputImage", "Input Tensor Image", "tensors", DataNameProperty::READ)
         , p_evalsImage("EvalsImage", "Output Eigenvalues Image", "TensorAnalyzer.eigenvalues", DataNameProperty::WRITE)
         , p_evecsImage("EvecsImage", "Output Eigenvectors Image", "TensorAnalyzer.eigenvectors", DataNameProperty::WRITE)
         , p_degeneratedHandling("DegeneratedHandling", "Handling of Degenerated Tensors", handlingModes, 4)
         , p_maskMixedTensors("MaskMixedTensors", "Mask Mixed Tensors", true)
-        , p_addOutputButton("AddOutputButton", "Add Output", AbstractProcessor::VALID)
+        , p_addOutputButton("AddOutputButton", "Add Output")
         , _eigenvalues(0)
         , _eigenvectors(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_evalsImage);
-        addProperty(&p_evecsImage);
-        addProperty(&p_degeneratedHandling);
-        addProperty(&p_maskMixedTensors);
-        addProperty(&p_addOutputButton);
+        addProperty(p_inputImage, INVALID_RESULT | EIGENSYSTEM_INVALID);
+        addProperty(p_evalsImage);
+        addProperty(p_evecsImage);
+        addProperty(p_degeneratedHandling);
+        addProperty(p_maskMixedTensors);
+        addProperty(p_addOutputButton, VALID);
         addOutput();
 
         p_addOutputButton.s_clicked.connect(this, &TensorAnalyzer::addOutput);
@@ -471,8 +471,8 @@ namespace campvis {
     void TensorAnalyzer::addOutput() {
         OutputPropertyPair* opp = new OutputPropertyPair(p_outputProperties.size() + 1);
         p_outputProperties.push_back(opp);
-        addProperty(&opp->_imageId);
-        addProperty(&opp->_imageType);
+        addProperty(opp->_imageId);
+        addProperty(opp->_imageType);
     }
 
     void TensorAnalyzer::deinit() {

@@ -32,8 +32,8 @@ namespace campvis {
     const std::string PointPredicateHistogramProperty::loggerCat_ = "CAMPVis.modules.advancedusvis.PointPredicateHistogramProperty";
 
 
-    PointPredicateHistogramProperty::PointPredicateHistogramProperty(const std::string& name, const std::string& title, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractProperty(name, title, invalidationLevel)
+    PointPredicateHistogramProperty::PointPredicateHistogramProperty(const std::string& name, const std::string& title)
+        : AbstractProperty(name, title)
     {
         _ignoreSignals = 0;
         std::shared_ptr<PointPredicateHistogram> ptr(new PointPredicateHistogram());

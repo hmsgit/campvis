@@ -36,7 +36,7 @@ namespace tgt {
 
 namespace campvis {
     class DataContainer;
-    class HasPropertyCollection;
+    class AbstractProcessor;
 
     /**
      * Abstract base class for processor decorators.
@@ -55,7 +55,7 @@ namespace campvis {
          * add its properties to the processor.
          * \param   propCollection  PropertyCollection defining where to add the properties (usually the owning processor).
          */
-        virtual void addProperties(HasPropertyCollection* propCollection);
+        virtual void addProperties(AbstractProcessor* propCollection);
 
         /**
          * Gets called by the processor with an active OpenGL context having \a shader activated before the
@@ -106,7 +106,7 @@ namespace campvis {
          * Decorates \a propCollection with the properties of all held decorators.
          * \param   propCollection  PropertyCollection to decorate (usually your processor)
          */
-        void decoratePropertyCollection(HasPropertyCollection* propCollection) const;
+        void decoratePropertyCollection(AbstractProcessor* propCollection) const;
 
         /**
          * Calls renderProlog() on each held decorator.

@@ -28,8 +28,8 @@ namespace campvis {
 
     const std::string DataNameProperty::loggerCat_ = "CAMPVis.core.datastructures.DataNameProperty";
 
-    DataNameProperty::DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : GenericProperty<std::string>(name, title, value, invalidationLevel)
+    DataNameProperty::DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access)
+        : GenericProperty<std::string>(name, title, value)
         , _accessInfo(access)
     {
 

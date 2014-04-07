@@ -43,8 +43,8 @@ namespace campvis {
         , _trackballEH(0)
 
     {
-        addProperty(&p_camera);
-        addProperty(&p_sliceNumber);
+        addProperty(p_camera);
+        addProperty(p_sliceNumber);
 
         _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);
@@ -89,7 +89,7 @@ namespace campvis {
 		_vectorFieldRenderer.p_sliceOrientation.setValue(3);
 
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _sliceRenderer.p_transferFunction.replaceTF(tf);
         _sliceRenderer.p_targetImageID.setValue("slice");
         _sliceRenderer.p_targetImageID.addSharedProperty(&_rtc.p_secondImageId);

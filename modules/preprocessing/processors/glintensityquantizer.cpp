@@ -50,10 +50,10 @@ namespace campvis {
         , p_transferFunction("TransferFunction", "Transfer Function", new Geometry1DTransferFunction(256))
         , _shader(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
-        addProperty(&p_numberOfBins);
-        addProperty(&p_transferFunction);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
+        addProperty(p_numberOfBins);
+        addProperty(p_transferFunction);
 
         Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF());
         gtf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
