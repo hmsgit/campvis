@@ -79,7 +79,6 @@ struct Matrix2 {
         };
         T elemRowCol[2][2];
         T elem[4];
-        Vector2<T> columns[cols];
     };
 
 /*
@@ -163,15 +162,15 @@ struct Matrix2 {
     */
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
-    const Vector2<T>& operator [] (size_t i) const {
-        tgtAssert(i < cols, "i must be less than size");
-        return columns[i];
+    Vector2<T> operator [] (size_t i) const {
+        tgtAssert(i < size, "i must be less than size");
+        return Vector2<T>(elemRowCol[i]);
     }
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
-    Vector2<T>& operator [] (size_t i) {
-        tgtAssert(i < cols, "i must be less than size");
-        return columns[i];
+    Vector2<T> operator [] (size_t i) {
+        tgtAssert(i < size, "i must be less than size");
+        return Vector2<T>(elemRowCol[i]);
     }
 };
 
@@ -219,7 +218,6 @@ struct Matrix3 {
         };
         T elemRowCol[3][3];
         T elem[9];
-        Vector3<T> columns[cols];
     };
 
 /*
@@ -363,15 +361,15 @@ struct Matrix3 {
     */
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
-    const Vector3<T>& operator [] (size_t i) const {
-        tgtAssert(i < cols, "i must be less than size");
-        return columns[i];
+    Vector3<T> operator [] (size_t i) const {
+        tgtAssert(i < size, "i must be less than size");
+        return Vector3<T>(elemRowCol[i]);
     }
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
-    Vector3<T>& operator [] (size_t i) {
-        tgtAssert(i < cols, "i must be less than size");
-        return columns[i];
+    Vector3<T> operator [] (size_t i) {
+        tgtAssert(i < size, "i must be less than size");
+        return Vector3<T>(elemRowCol[i]);
     }
 };
 
@@ -450,7 +448,6 @@ struct Matrix4 {
         };
         T elemRowCol[4][4];
         T elem[16];
-        Vector4<T> columns[cols];
     };
 
 /*
@@ -633,15 +630,15 @@ struct Matrix4 {
     */
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
-    const Vector4<T>& operator [] (size_t i) const {
-        tgtAssert(i < cols, "i must be less than size");
-        return columns[i];
+    Vector4<T> operator [] (size_t i) const {
+        tgtAssert(i < size, "i must be less than size");
+        return Vector4<T>(elemRowCol[i]);
     }
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
-    Vector4<T>& operator [] (size_t i) {
-        tgtAssert(i < cols, "i must be less than size");
-        return columns[i];
+    Vector4<T> operator [] (size_t i) {
+        tgtAssert(i < size, "i must be less than size");
+        return Vector4<T>(elemRowCol[i]);
     }
 
     /**
