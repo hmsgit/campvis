@@ -213,6 +213,9 @@ struct Vector2 {
         for (size_t i = 0; i < v.size; ++i)
             elem[i] = T(v.elem[i]);
     }
+    
+    static Vector2<T> createAsReference(T* v) {
+    }
 
     /// Index operator
     const T& operator [] (size_t index) const {
@@ -263,8 +266,12 @@ struct Vector3 {
         // workaround to prevent "dereferencing type-punned pointer will break strict-aliasing
         // rules" warning with gcc and -fstrict-aliasing.
         struct {
-            T _xy[size-1];
+            Vector2<T> _xy;
             T _z;
+        };
+        struct {
+            T _x;
+            Vector2<T> _yz;
         };
         T elem[size];
     };
@@ -322,17 +329,17 @@ struct Vector3 {
 /*
     sub-vector getters
 */
-    Vector2<T> xy() const {
-        return Vector2<T>(_xy);
+    const Vector2<T>& xy() const {
+        return _xy;
     }
-    Vector2<T> xy() {
-        return Vector2<T>(_xy);
+    Vector2<T>& xy() {
+        return _xy;
     }
-    Vector2<T> yz() const {
-        return Vector2<T>(elem + 1);
+    const Vector2<T>& yz() const {
+        return _yz;
     }
-    Vector2<T> yz() {
-        return Vector2<T>(elem + 1);
+    Vector2<T>& yz() {
+        return _yz;
     }
 
 /*
@@ -380,8 +387,21 @@ struct Vector4 {
         // workaround to prevent "dereferencing type-punned pointer will break strict-aliasing
         // rules" warning with gcc and -fstrict-aliasing.
         struct {
-            T _xyz[size-1];
+            Vector3<T> _xyz;
             T _w;
+        };
+        struct {
+            T _x;
+            Vector3<T> _yzw;
+        };
+        struct {
+            Vector2<T> _xy;
+            Vector2<T> _zw;
+        };
+        struct {
+            T __x;
+            Vector2<T> _yz;
+            T __w;
         };
         T elem[size];
     };
@@ -467,35 +487,35 @@ struct Vector4 {
     sub-vector getters
 */
 
-    Vector2<T> xy() const {
-        return xyz().xy();
+    const Vector2<T>& xy() const {
+        return _xy;
     }
-    Vector2<T> yz() const {
-        return Vector2<T>(elem + 1);
+    const Vector2<T>& yz() const {
+        return _yz;
     }
-    Vector2<T> zw() const {
-        return Vector2<T>(elem + 2);
+    const Vector2<T>& zw() const {
+        return _zw;
     }
-    Vector3<T> xyz() const {
-        return Vector3<T>(_xyz);
+    const Vector3<T>& xyz() const {
+        return _xyz;
     }
-    Vector3<T> yzw() const {
-        return Vector3<T>(elem + 1);
+    const Vector3<T>& yzw() const {
+        return _yzw;
     }
     Vector2<T> xy() {
-        return xyz().xy();
+        return _xy;
     }
     Vector2<T> yz() {
-        return Vector2<T>(elem + 1);
+        return _yz;
     }
     Vector2<T> zw() {
-        return Vector2<T>(elem + 2);
+        return _zw;
     }
     Vector3<T> xyz() {
-        return Vector3<T>(_xyz);
+        return _xyz;
     }
     Vector3<T> yzw() {
-        return Vector3<T>(elem + 1);
+        return _yzw;
     }
 
 /*
