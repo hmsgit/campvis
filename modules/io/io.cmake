@@ -1,6 +1,6 @@
 # CMake file for IO module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/io/processors/*.cpp
@@ -10,7 +10,7 @@ IF(ModuleEnabled)
 	FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
 		modules/io/processors/*.h
 	)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies FALSE)

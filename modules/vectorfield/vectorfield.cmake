@@ -1,6 +1,6 @@
 # CMake file for Velocity Field module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/vectorfield/processors/*.cpp
@@ -17,7 +17,7 @@ IF(ModuleEnabled)
 
 	SET(ThisModShaderDirectories "modules/vectorfield/glsl")
 	SET(ThisModDependencies io vis)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies FALSE)

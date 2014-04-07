@@ -91,7 +91,7 @@ namespace campvis {
         std::vector<AbstractPointPredicate*> preds = _prop->getPredicateHistogram()->getPredicates();
         double w = static_cast<double>(hw) / preds.size();
 
-        for (size_t i = 0; i < preds.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(preds.size()); ++i) {
             if (i == _selectedPredicate)
                 painter.setPen(QPen(Qt::black, 2.f, Qt::DashDotDotLine));
             else
@@ -285,7 +285,7 @@ namespace campvis {
     }
     AbstractPointPredicate* PointPredicateRenderArea::getPredicate(int i) {
         std::vector<AbstractPointPredicate*> preds = _prop->getPredicateHistogram()->getPredicates();
-        tgtAssert(i >= 0 && i < preds.size(), "Index out of bounds!");
+        tgtAssert(i >= 0 && i < static_cast<int>(preds.size()), "Index out of bounds!");
         
         return preds[i];
     }

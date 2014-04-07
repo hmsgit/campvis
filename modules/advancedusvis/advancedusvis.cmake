@@ -1,6 +1,6 @@
 # CMake file for AdvancedUsVis module
 
-IF(ModuleEnabled)
+IF(${ModuleEnabled})
 	# Source files:
 	FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
 		modules/advancedusvis/datastructures/*.cpp
@@ -26,7 +26,7 @@ IF(ModuleEnabled)
 
 	SET(ThisModShaderDirectories "modules/advancedusvis/glsl")
 	SET(ThisModDependencies vis io preprocessing)
-ENDIF(ModuleEnabled)
+ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus TESTING)
 SET(ThisModExternalDependencies FALSE)
