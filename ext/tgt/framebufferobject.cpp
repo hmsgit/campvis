@@ -77,6 +77,10 @@ void FramebufferObject::attachTexture(Texture* texture, GLenum attachment, int m
     attachments_[index] = texture;
     if (index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
         ++numColorAttachments_;
+
+#ifdef CAMPVIS_DEBUG
+    this->isComplete();
+#endif
 }
 
 Texture* FramebufferObject::getTextureAtAttachment(GLenum attachment) {
