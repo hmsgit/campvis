@@ -207,7 +207,7 @@ namespace campvis {
          * \param   name    Name of the added data.
          * \param   dh      DataHandle to the newly added data.
          */
-        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+        virtual void onDataContainerDataAdded(const std::string& name, DataHandle dh);
 
         /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
         DataContainer* _data;

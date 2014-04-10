@@ -82,7 +82,7 @@ namespace campvis {
          * \param   name    Key for accessing the DataHandle within this DataContainer
          * \param   data    DataHandle to add.
          */
-        void addDataHandle(const std::string& name, const DataHandle& dh);
+        void addDataHandle(const std::string& name, DataHandle dh);
 
         /**
          * Checks whether this DataContainer contains a DataHandle with the given name.
@@ -146,7 +146,7 @@ namespace campvis {
          * Signal emitted when data has been added to this DataContainer (this includes also data being replaced).
          * First parameter is the name of the added data, second parameter contains a DataHandle to the new data.
          */
-        sigslot::signal2<const std::string&, const DataHandle&> s_dataAdded;
+        sigslot::signal2<const std::string&, DataHandle> s_dataAdded;
 
         /// Signal emitted when list of DataHandles has changed.
         sigslot::signal0 s_changed;

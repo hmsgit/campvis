@@ -86,7 +86,7 @@ namespace campvis {
          * \param   name    Name of the added data.
          * \param   dh      DataHandle to the newly added data.
          */
-        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+        virtual void onDataContainerDataAdded(const std::string& name, DataHandle dh);
 
         /**
          * Recursively looks for all DataNameProperties in \a pc and adds them to the port map.

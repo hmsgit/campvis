@@ -55,7 +55,7 @@ namespace campvis {
         return dh;
     }
 
-    void DataContainer::addDataHandle(const std::string& name, const DataHandle& dh) {
+    void DataContainer::addDataHandle(const std::string& name, DataHandle dh) {
         if (name.empty()) {
             LERROR("Tried to add data with empty name to DataContainer.");
             return;

@@ -150,7 +150,7 @@ namespace campvis {
          * \param   name    Name of the added data.
          * \param   dh      DataHandle to the newly added data.
          */
-        void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+        void onDataContainerDataAdded(const std::string& name, DataHandle dh);
 
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.

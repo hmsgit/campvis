@@ -46,6 +46,7 @@ namespace campvis {
                     sl.append(QString::fromStdString(tmp[i].first));
                 _combobox->addItems(sl);
                 dc->s_dataAdded.connect(this, &DataNamePropertyWidget::onDataAdded);
+                connect(this, SIGNAL(s_dataAddedQt(const QString&, QtDataHandle)), this, SLOT(onDataAddedQt(const QString&, QtDataHandle)));
 
                 setCurrentComboBoxText(QString::fromStdString(property->getValue()));
             }
@@ -98,9 +99,13 @@ namespace campvis {
         --_ignorePropertyUpdates;
     }
 
-    void DataNamePropertyWidget::onDataAdded(const std::string& key, const DataHandle& /*dh*/) {
-        if (_combobox->findText(QString::fromStdString(key)) == -1) {
-            _combobox->addItem(QString::fromStdString(key));
+    void DataNamePropertyWidget::onDataAdded(const std::string& key, DataHandle dh) {
+        emit s_dataAddedQt(QString::fromStdString(key), dh);
+    }
+
+    void DataNamePropertyWidget::onDataAddedQt(const QString& key, QtDataHandle dh) {
+        if (_combobox->findText(key) == -1) {
+            _combobox->addItem(key);
         }
     }
 

@@ -82,7 +82,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    DataHandleTreeItem::DataHandleTreeItem(const QtDataHandle& dataHandle, const std::string& name, TreeItem* parent)
+    DataHandleTreeItem::DataHandleTreeItem(QtDataHandle dataHandle, const std::string& name, TreeItem* parent)
         : TreeItem(parent)
         , _dataHandle(dataHandle)
         , _name(name)
@@ -150,7 +150,7 @@ namespace campvis {
     DataHandleTreeItem::~DataHandleTreeItem() {
     }
 
-    void DataHandleTreeItem::setDataHandle(const QtDataHandle& dataHandle) {
+    void DataHandleTreeItem::setDataHandle(QtDataHandle dataHandle) {
         _dataHandle = dataHandle;
         updateChildren();
     }

@@ -27,6 +27,7 @@
 
 #include "sigslot/sigslot.h"
 #include "core/properties/datanameproperty.h"
+#include "application/gui/qtdatahandle.h"
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
 
@@ -64,10 +65,14 @@ namespace campvis {
          */
         virtual void updateWidgetFromProperty();
 
-        void onDataAdded(const std::string& key, const DataHandle& dh);
+        void onDataAdded(const std::string& key, DataHandle dh);
 
     private slots:
         void onTextChanged(const QString& text);
+        void onDataAddedQt(const QString& key, QtDataHandle dh);
+
+    signals:
+        void s_dataAddedQt(const QString& key, QtDataHandle dh);
 
     private:
         /**
