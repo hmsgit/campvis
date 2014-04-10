@@ -115,7 +115,7 @@ namespace campvis {
 
 
         /// Signal emitted when this predicate histogram's GLSL header has changed
-        sigslot::signal0<> s_headerChanged;
+        sigslot::signal0 s_headerChanged;
 
     private:
         /// Slot called when a predicate histogram's configuration has changed
