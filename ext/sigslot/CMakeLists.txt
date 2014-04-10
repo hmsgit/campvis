@@ -27,6 +27,10 @@ ENDIF()
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
 TARGET_LINK_LIBRARIES(sigslot tgt)
 
+# if campvis-core is built as a shared library, CMake will define the following flag to instruct
+# the code to export DLL symbols
+SET_TARGET_PROPERTIES(sigslot PROPERTIES DEFINE_SYMBOL "SIGSLOT_BUILD_DLL")
+
 ################################################################################
 # deployment
 ################################################################################

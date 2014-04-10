@@ -90,6 +90,29 @@
 #ifndef SIGSLOT_H
 #define SIGSLOT_H
 
+
+#ifdef CAMPVIS_DYNAMIC_LIBS
+    #ifdef SIGSLOT_BUILD_DLL
+        // building library -> export symbols
+        #ifdef WIN32
+            #define SIGSLOT_API __declspec(dllexport)
+        #else
+            #define SIGSLOT_API
+        #endif
+    #else
+        // including library -> import symbols
+        #ifdef WIN32
+            #define SIGSLOT_API __declspec(dllimport)
+        #else
+            #define SIGSLOT_API
+        #endif
+    #endif
+#else
+    // building/including static library -> do nothing
+    #define SIGSLOT_API
+#endif
+
+
 #include <set>
 #include <list>
 
@@ -110,15 +133,30 @@
 
 namespace sigslot {
 
+    /// Base class for signal handles that provides an interface to emit the signal.
     class _signal_handle_base {
     public:
+        /// Virtual destructor
         virtual ~_signal_handle_base() {};
+        /// Emits the signal of this signal handle.
         virtual void emitSignal() const = 0;
     };
 
 // ================================================================================================
 
-    class signal_manager : public tgt::Singleton<signal_manager>, public tgt::Runnable {
+    /**
+     * Singleton class that takes care of queuing and asynchronously dispatching signals.
+     * 
+     * The signal_manager implements the Runnable interface, i.e. runs in it's own thread once it
+     * was launched. The signal_manager takes care of dispatching signals to their connections.
+     * This is either done synchrnously by using triggerSignal() or asynchronously by using 
+     * queueSignal(). Furthermore it allows to check, whether the current thread is the 
+     * signal_manager thread. This allows the default signal emitting method operator() to 
+     * automatically decide on the dispatch type based on the emitting thread.
+     * 
+     * signal_manager can be considered as thread-safe.
+     */
+    class SIGSLOT_API signal_manager : public tgt::Singleton<signal_manager>, public tgt::Runnable {
         friend class tgt::Singleton<signal_manager>;
 
     public:
@@ -138,6 +176,12 @@ namespace sigslot {
          */
         bool queueSignal(_signal_handle_base* signal);
 
+        /**
+         * Checks whether calling thread is signal_manager thread.
+         * \return  std::this_thread::get_id() == _this_thread_id
+         */
+        bool isCurrentThreadSignalManagerThread() const;
+
         /// \see Runnable:run
         virtual void run();
         /// \see Runnable:stop
@@ -149,12 +193,15 @@ namespace sigslot {
         /// Private destructor only for singleton
         ~signal_manager();
 
+        /// Typedef for the signal queue
         typedef tbb::concurrent_queue<_signal_handle_base*> SignalQueue;
 
         SignalQueue _signalQueue;   ///< Queue for signals to be dispatched
 
         std::condition_variable _evaluationCondition; ///< conditional wait to be used when there are currently no jobs to process
         tbb::mutex _ecMutex; ///< Mutex for protecting _evaluationCondition
+
+        std::thread::id _this_thread_id;
 
         static const std::string loggerCat_;
     };
@@ -1303,16 +1350,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void emitSignal()
+        void trigger()
         {
             signal_handle0* sh = new signal_handle0(this);
             signal_manager::getRef().triggerSignal(sh);
         }
         
-        void operator()()
+        void queue()
         {
             signal_handle0* sh = new signal_handle0(this);
             signal_manager::getRef().queueSignal(sh);
+        }
+
+        void operator()()
+        {
+            if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
+                trigger();
+            else
+                queue();
         }
     };
     
@@ -1366,16 +1421,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void emitSignal(arg1_type a1)
+        void trigger(arg1_type a1)
         {
             signal_handle1* sh = new signal_handle1(this, a1);
             signal_manager::getRef().triggerSignal(sh);
         }
-        
-        void operator()(arg1_type a1)
+
+        void queue(arg1_type a1)
         {
             signal_handle1* sh = new signal_handle1(this, a1);
             signal_manager::getRef().queueSignal(sh);
+        }
+
+        void operator()(arg1_type a1)
+        {
+            if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
+                trigger(a1);
+            else
+                queue(a1);
         }
     };
     
@@ -1432,16 +1495,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void emitSignal(arg1_type a1, arg2_type a2)
+        void trigger(arg1_type a1, arg2_type a2)
         {
             signal_handle2* sh = new signal_handle2(this, a1, a2);
             signal_manager::getRef().triggerSignal(sh);
         }
-        
-        void operator()(arg1_type a1, arg2_type a2)
+
+        void queue(arg1_type a1, arg2_type a2)
         {
             signal_handle2* sh = new signal_handle2(this, a1, a2);
             signal_manager::getRef().queueSignal(sh);
+        }
+        
+        void operator()(arg1_type a1, arg2_type a2)
+        {
+            if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
+                trigger(a1, a2);
+            else
+                queue(a1, a2);
         }
     };
     
@@ -1500,16 +1571,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3)
+        void trigger(arg1_type a1, arg2_type a2, arg3_type a3)
         {
             signal_handle3* sh = new signal_handle3(this, a1, a2, a3);
             signal_manager::getRef().triggerSignal(sh);
         }
-        
-        void operator()(arg1_type a1, arg2_type a2, arg3_type a3)
+
+        void queue(arg1_type a1, arg2_type a2, arg3_type a3)
         {
             signal_handle3* sh = new signal_handle3(this, a1, a2, a3);
             signal_manager::getRef().queueSignal(sh);
+        }
+        
+        void operator()(arg1_type a1, arg2_type a2, arg3_type a3)
+        {
+            if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
+                trigger(a1, a2, a3);
+            else
+                queue(a1, a2, a3);
         }
     };
     
@@ -1570,16 +1649,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+        void trigger(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
         {
             signal_handle4* sh = new signal_handle4(this, a1, a2, a3, a4);
             signal_manager::getRef().triggerSignal(sh);
         }
-        
-        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+
+        void queue(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
         {
             signal_handle4* sh = new signal_handle4(this, a1, a2, a3, a4);
             signal_manager::getRef().queueSignal(sh);
+        }
+        
+        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+        {
+            if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
+                trigger(a1, a2, a3, a4);
+            else
+                queue(a1, a2, a3, a4);
         }
     };
     
@@ -1642,16 +1729,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+        void trigger(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
         {
             signal_handle5* sh = new signal_handle5(this, a1, a2, a3, a4, a5);
             signal_manager::getRef().triggerSignal(sh);
         }
-        
-        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+
+        void queue(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
         {
             signal_handle5* sh = new signal_handle5(this, a1, a2, a3, a4, a5);
             signal_manager::getRef().queueSignal(sh);
+        }
+        
+        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+        {
+            if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
+                trigger(a1, a2, a3, a4, a5);
+            else
+                queue(a1, a2, a3, a4, a5);
         }
     };
     

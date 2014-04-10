@@ -29,7 +29,6 @@
 
 #include <ext/threading.h>
 #include <tbb/atomic.h>
-#include "core/coreapi.h"
 
 namespace tgt {
     /**
@@ -38,7 +37,7 @@ namespace tgt {
      * in the run() method which has to be overwritten in subclasses. Calling stop() sets _stopExecution to true
      * and waits for the thread to finish. Hence, you should test for _stopExecution in your run() method.
      */
-    class CAMPVIS_CORE_API Runnable {
+    class TGT_API Runnable {
     public:
         /**
          * Creates a new Runnable object

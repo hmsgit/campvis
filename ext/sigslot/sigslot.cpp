@@ -26,6 +26,7 @@ namespace sigslot {
     }
 
     void signal_manager::run() {
+        _this_thread_id = std::this_thread::get_id();
         std::unique_lock<tbb::mutex> lock(_ecMutex);
 
         while (! _stopExecution) {
@@ -45,6 +46,10 @@ namespace sigslot {
     void signal_manager::stop() {
         _evaluationCondition.notify_all(); 
         tgt::Runnable::stop();
+    }
+
+    bool signal_manager::isCurrentThreadSignalManagerThread() const {
+        return std::this_thread::get_id() == _this_thread_id;
     }
 
 
