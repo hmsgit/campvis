@@ -142,7 +142,7 @@ namespace campvis {
         ss << p_sourcePath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
         _usReader.p_url.setValue(ss.str());
 
-        executeProcessor(&_usReader, false);
+        executeProcessor(&_usReader);
 
         DataHandle dh = _data->getData(_usReader.p_targetImageID.getValue());
         if (dh.getData() != 0) {
@@ -151,11 +151,11 @@ namespace campvis {
             }
         }
 
-        executeProcessor(&_confidenceGenerator, false);
-        executeProcessor(&_usBlurFilter, false);
+        executeProcessor(&_confidenceGenerator);
+        executeProcessor(&_usBlurFilter);
 
         _usFusion.p_view.selectById("mappingLAB");
-        executeProcessor(&_usFusion, false);
+        executeProcessor(&_usFusion);
         save(path, p_targetPathColor.getValue());
 
 //         _usFusion.p_view.selectById("mappingSharpness");

@@ -45,7 +45,7 @@ namespace campvis {
      * others, they will share the pointer (instead of copying around as with other properties)!
      * Therefore, we use a std::shared_ptr.
      */
-    class PointPredicateHistogramProperty : public AbstractProperty, public sigslot::has_slot {
+    class PointPredicateHistogramProperty : public AbstractProperty, public sigslot::has_slots {
     public:
         /**
          * Creates a new PointPredicateHistogramProperty
