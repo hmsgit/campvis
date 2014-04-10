@@ -69,6 +69,7 @@ namespace campvis {
     {
 
     }
+
     IndexedMeshGeometry::~IndexedMeshGeometry() {
         deleteIndicesBuffer();
     }
@@ -78,6 +79,11 @@ namespace campvis {
             return *this;
 
         GeometryData::operator=(rhs);
+        _indices = rhs._indices;
+        _vertices = rhs._vertices;
+        _textureCoordinates = rhs._textureCoordinates;
+        _colors = rhs._colors;
+        _normals = rhs._normals;
 
         // delete old VBOs and null pointers
         deleteIndicesBuffer();
@@ -112,6 +118,9 @@ namespace campvis {
 
 
     void IndexedMeshGeometry::render(GLenum mode) const {
+        if (_indices.empty())
+            return;
+
         createGLBuffers();
         if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -179,6 +188,19 @@ namespace campvis {
     void IndexedMeshGeometry::deleteIndicesBuffer() const {
         delete _indicesBuffer;
         _indicesBuffer = 0;
+    }
+
+    bool IndexedMeshGeometry::hasTextureCoordinates() const {
+        return ! _textureCoordinates.empty();
+    }
+
+    void IndexedMeshGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+        for (size_t i = 0; i < _vertices.size(); ++i) {
+            tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
+            _vertices[i] = tmp.xyz() / tmp.w;
+        }
+
+        _buffersDirty = true;
     }
 
 

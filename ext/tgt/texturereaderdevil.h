@@ -30,7 +30,7 @@
 
 namespace tgt {
 
-class TextureReaderDevil : public TextureReader {
+class TGT_API TextureReaderDevil : public TextureReader {
     static const std::string loggerCat_;
 public:
     TextureReaderDevil();

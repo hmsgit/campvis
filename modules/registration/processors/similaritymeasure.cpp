@@ -52,39 +52,39 @@ namespace campvis {
 
     SimilarityMeasure::SimilarityMeasure()
         : VisualizationProcessor(0)
-        , p_referenceId("ReferenceId", "Reference Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES)
-        , p_movingId("MovingId", "Moving Image", "", DataNameProperty::READ, AbstractProcessor::VALID)
+        , p_referenceId("ReferenceId", "Reference Image", "", DataNameProperty::READ)
+        , p_movingId("MovingId", "Moving Image", "", DataNameProperty::READ)
         , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
         , p_applyMask("ApplyMask", "Apply Mask", true)
         , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(1.f), tgt::vec3(5.f))
         , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.01f), tgt::vec3(7.f))
-        , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1), AbstractProcessor::VALID)
         , p_metric("Metric", "Similarity Metric", metrics, 5)
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
-        , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE, AbstractProcessor::VALID)
-        , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image", AbstractProcessor::INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE)
+        , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE)
+        , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image")
+        , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1))
         , _sadssdCostFunctionShader(0)
         , _nccsnrCostFunctionShader(0)
         , _differenceShader(0)
         , _glr(0)
     {
-        addProperty(&p_referenceId);
-        addProperty(&p_movingId);
+        addProperty(p_referenceId, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_movingId, VALID);
 
-        addProperty(&p_clipX);
-        addProperty(&p_clipY);
-        addProperty(&p_clipZ);
-        addProperty(&p_applyMask);
+        addProperty(p_clipX);
+        addProperty(p_clipY);
+        addProperty(p_clipZ);
+        addProperty(p_applyMask);
 
-        addProperty(&p_translation);
-        addProperty(&p_rotation);
-        addProperty(&p_metric);
-        addProperty(&p_computeSimilarity);
+        addProperty(p_translation);
+        addProperty(p_rotation);
+        addProperty(p_metric);
+        addProperty(p_computeSimilarity);
 
-        addProperty(&p_differenceImageId);
-        addProperty(&p_computeDifferenceImage);
+        addProperty(p_differenceImageId, VALID);
+        addProperty(p_computeDifferenceImage, INVALID_RESULT | COMPUTE_DIFFERENCE_IMAGE);
 
 
         _viewportSizeProperty = &p_viewportSize;
@@ -96,15 +96,15 @@ namespace campvis {
 
     void SimilarityMeasure::init() {
         VisualizationProcessor::init();
-        _sadssdCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasuresadssd.frag", "", false);
+        _sadssdCostFunctionShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasuresadssd.frag", "");
         _sadssdCostFunctionShader->setAttributeLocation(0, "in_Position");
         _sadssdCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
 
-        _nccsnrCostFunctionShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurenccsnr.frag", "", false);
+        _nccsnrCostFunctionShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurenccsnr.frag", "");
         _nccsnrCostFunctionShader->setAttributeLocation(0, "in_Position");
         _nccsnrCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
 
-        _differenceShader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "", false);
+        _differenceShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "");
         _differenceShader->setAttributeLocation(0, "in_Position");
         _differenceShader->setAttributeLocation(1, "in_TexCoord");
 
@@ -122,7 +122,7 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void SimilarityMeasure::process(DataContainer& data) {
+    void SimilarityMeasure::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation referenceImage(data, p_referenceId.getValue());
         ImageRepresentationGL::ScopedRepresentation movingImage(data, p_movingId.getValue());
 
@@ -228,15 +228,11 @@ namespace campvis {
 
             if (similarities.size() >= 3 && similarities2.size() >= 3) {
                 float countRCP = 1.f / similarities[0];
-                float meanFixed = similarities[1] * countRCP;
-                float meanMoving = similarities[2] * countRCP;
                 float varFixed	= (similarities2[1] - (similarities[2] * similarities[2]) * countRCP) * countRCP;
                 float _varMoving = (similarities2[0] - (similarities[1] * similarities[1]) * countRCP) * countRCP;
 
-                float correlation = 0.0f;
-                if (varFixed > 0.0f && _varMoving > 0.0f)
-                {
-                    correlation = (similarities2[2] - (similarities[1] * similarities[2]) * countRCP) * countRCP;
+                if (varFixed > 0.0f && _varMoving > 0.0f) {
+                    float correlation = (similarities2[2] - (similarities[1] * similarities[2]) * countRCP) * countRCP;
                     toReturn =  correlation / sqrt(varFixed * _varMoving);
                 }
             }
@@ -320,7 +316,7 @@ namespace campvis {
         glViewport(0, 0, static_cast<GLsizei>(viewportSize.x), static_cast<GLsizei>(viewportSize.y));
 
         // render quad to compute difference measure by shader
-        for (int z = 0; z < size.z; ++z) {
+        for (int z = 0; z < static_cast<int>(size.z); ++z) {
             float texZ = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
             _differenceShader->setUniform("_zTex", texZ);
             _fbo->attachTexture(differenceImage, GL_COLOR_ATTACHMENT0, 0, z);

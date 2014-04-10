@@ -35,26 +35,30 @@
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
 
-    VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp)
+    VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ, AbstractProcessor::VALID)
-        , p_camera("Camera", "Camera", tgt::Camera(), AbstractProcessor::VALID)
-        , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE, AbstractProcessor::VALID)
-        , p_pgProps("PGGProps", "Proxy Geometry Generator", AbstractProcessor::VALID)
-        , p_eepProps("EEPProps", "Entry/Exit Points Generator", AbstractProcessor::VALID)
-        , p_raycasterProps("RaycasterProps", "Raycaster", AbstractProcessor::VALID)
+        , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ)
+        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE)
+        , p_profileRaycaster("ProfileRaycaster", "Profile Raycaster's Execution Time", false)
+        , _timerQueryRaycaster(0)
+        , p_pgProps("PGGProps", "Proxy Geometry Generator")
+        , p_eepProps("EEPProps", "Entry/Exit Points Generator")
+        , p_raycasterProps("RaycasterProps", "Raycaster")
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
-        , _raycaster(viewportSizeProp)
+        , _raycaster(raycaster)
     {
-        addProperty(&p_inputVolume);
-        addProperty(&_raycaster.p_transferFunction);
-        addProperty(&p_outputImage);
+        _raycaster->setViewportSizeProperty(viewportSizeProp);
+
+        addProperty(p_inputVolume, AbstractProcessor::VALID);
+        addProperty(p_outputImage, AbstractProcessor::VALID);
+        addProperty(p_profileRaycaster, AbstractProcessor::VALID);
 
         p_pgProps.addPropertyCollection(_pgGenerator);
         _pgGenerator.p_sourceImageID.setVisible(false);
         _pgGenerator.p_geometryID.setVisible(false);
-        addProperty(&p_pgProps);
+        addProperty(p_pgProps, AbstractProcessor::VALID);
 
         p_eepProps.addPropertyCollection(_eepGenerator);
         _eepGenerator.p_lqMode.setVisible(false);
@@ -63,26 +67,26 @@ namespace campvis {
         _eepGenerator.p_geometryID.setVisible(false);
         _eepGenerator.p_entryImageID.setVisible(false);
         _eepGenerator.p_exitImageID.setVisible(false);
-        addProperty(&p_eepProps);
+        addProperty(p_eepProps, AbstractProcessor::VALID);
 
-        p_raycasterProps.addPropertyCollection(_raycaster);
-        _raycaster.p_lqMode.setVisible(false);
-        _raycaster.p_camera.setVisible(false);
-        _raycaster.p_sourceImageID.setVisible(false);
-        _raycaster.p_entryImageID.setVisible(false);
-        _raycaster.p_exitImageID.setVisible(false);
-        _raycaster.p_targetImageID.setVisible(false);
-        addProperty(&p_raycasterProps);
+        p_raycasterProps.addPropertyCollection(*_raycaster);
+        _raycaster->p_lqMode.setVisible(false);
+        _raycaster->p_camera.setVisible(false);
+        _raycaster->p_sourceImageID.setVisible(false);
+        _raycaster->p_entryImageID.setVisible(false);
+        _raycaster->p_exitImageID.setVisible(false);
+        _raycaster->p_targetImageID.setVisible(false);
+        addProperty(p_raycasterProps, AbstractProcessor::VALID);
 
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);
         p_inputVolume.addSharedProperty(&_eepGenerator.p_sourceImageID);
-        p_inputVolume.addSharedProperty(&_raycaster.p_sourceImageID);
+        p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
 
         p_camera.addSharedProperty(&_eepGenerator.p_camera);
-        p_camera.addSharedProperty(&_raycaster.p_camera);
+        p_camera.addSharedProperty(&_raycaster->p_camera);
 
-        p_outputImage.addSharedProperty(&_raycaster.p_targetImageID);
+        p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
 
         p_inputVolume.s_changed.connect(this, &VolumeRenderer::onPropertyChanged);
     }
@@ -95,39 +99,51 @@ namespace campvis {
         VisualizationProcessor::init();
         _pgGenerator.init();
         _eepGenerator.init();
-        _raycaster.init();
+        _raycaster->init();
 
-        p_lqMode.addSharedProperty(&_raycaster.p_lqMode);
+        p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
 
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
-        _raycaster.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+        _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+
+        glGenQueries(1, &_timerQueryRaycaster);
     }
 
     void VolumeRenderer::deinit() {
+        glDeleteQueries(1, &_timerQueryRaycaster);
+
         _pgGenerator.s_invalidated.disconnect(this);
         _eepGenerator.s_invalidated.disconnect(this);
-        _raycaster.s_invalidated.disconnect(this);
+        _raycaster->s_invalidated.disconnect(this);
 
         _pgGenerator.deinit();
         _eepGenerator.deinit();
-        _raycaster.deinit();
+        _raycaster->deinit();
 
         VisualizationProcessor::deinit();
     }
 
-    void VolumeRenderer::process(DataContainer& data) {
+    void VolumeRenderer::updateResult(DataContainer& data) {
         if (getInvalidationLevel() & PG_INVALID) {
             _pgGenerator.process(data);
-            _eepGenerator.process(data);
-            _raycaster.process(data);
         }
-        else if (getInvalidationLevel() & EEP_INVALID) {
+        if (getInvalidationLevel() & EEP_INVALID) {
             _eepGenerator.process(data);
-            _raycaster.process(data);
         }
-        else if (getInvalidationLevel() & RAYCASTER_INVALID) {
-            _raycaster.process(data);
+        if (getInvalidationLevel() & RAYCASTER_INVALID) {
+            if (p_profileRaycaster.getValue()) {
+                glBeginQuery(GL_TIME_ELAPSED, _timerQueryRaycaster);
+                _raycaster->process(data);
+                glEndQuery(GL_TIME_ELAPSED);
+
+                GLuint64 timer_result;
+                glGetQueryObjectui64v(_timerQueryRaycaster, GL_QUERY_RESULT, &timer_result);
+                LINFO("Raycaster Execution time: " << static_cast<double>(timer_result) / 1e06 << "ms.");
+            }
+            else {
+                _raycaster->process(data);
+            }            
         }
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
@@ -135,12 +151,12 @@ namespace campvis {
 
     void VolumeRenderer::onProcessorInvalidated(AbstractProcessor* processor) {
         if (processor == &_pgGenerator) {
-            invalidate(PG_INVALID);
+            invalidate(PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
         }
         else if (processor == &_eepGenerator) {
-            invalidate(EEP_INVALID);
+            invalidate(EEP_INVALID | RAYCASTER_INVALID);
         }
-        else if (processor == &_raycaster) {
+        else if (processor == _raycaster) {
             invalidate(RAYCASTER_INVALID);
         }
 
@@ -153,23 +169,27 @@ namespace campvis {
             _eepGenerator.p_geometryID.setValue(p_outputImage.getValue() + ".geometry");
 
             _eepGenerator.p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
-            _raycaster.p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
+            _raycaster->p_entryImageID.setValue(p_outputImage.getValue() + ".entrypoints");
 
             _eepGenerator.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
-            _raycaster.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
-        }
-        else if (prop == &p_inputVolume) {
-            invalidate(AbstractProcessor::INVALID_RESULT | PG_INVALID);
+            _raycaster->p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
         }
         VisualizationProcessor::onPropertyChanged(prop);
     }
 
     void VolumeRenderer::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
         _eepGenerator.setViewportSizeProperty(viewportSizeProp);
-        _raycaster.setViewportSizeProperty(viewportSizeProp);
+        _raycaster->setViewportSizeProperty(viewportSizeProp);
 
         VisualizationProcessor::setViewportSizeProperty(viewportSizeProp);
     }
 
+    void VolumeRenderer::updateProperties(DataContainer& dataContainer) {
+        // nothing to do here
+    }
+
+    RaycastingProcessor* VolumeRenderer::getRaycastingProcessor() {
+        return _raycaster;
+    }
 }
 

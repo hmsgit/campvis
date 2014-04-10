@@ -5,8 +5,8 @@
 // If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische UniversitÃ¤t MÃ¼nchen
-//      Boltzmannstr. 3, 85748 Garching b. MÃ¼nchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -46,13 +46,12 @@ namespace campvis {
     ImageRepresentationLocal::ImageRepresentationLocal(ImageData* parent, WeaklyTypedPointer::BaseType baseType)
         : GenericAbstractImageRepresentation<ImageRepresentationLocal>(parent)
         , _baseType(baseType)
-        , _intensityHistogram(0)
     {
         _intensityRangeDirty = true;
     }
 
     ImageRepresentationLocal::~ImageRepresentationLocal() {
-        delete _intensityHistogram;
+
     }
 
     ImageRepresentationLocal* ImageRepresentationLocal::tryConvertFrom(const AbstractImageRepresentation* source) {
@@ -64,19 +63,31 @@ namespace campvis {
             return create(tester->getParent(), tester->getImageData());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
-            // FIXME: this here deadlocks, if called from OpenGL context (GLJobProc)!!!
-            tgt::GLCanvas* context = GLJobProc.iKnowWhatImDoingGetArbitraryContext();
             ImageRepresentationLocal* toReturn = 0;
-            GLJobProc.pause();
-            try {
-                tgt::GLContextScopedLock lock(context);
-                WeaklyTypedPointer wtp = tester->getWeaklyTypedPointer();
-                toReturn = create(source->getParent(), wtp);
+
+            if (GLJobProc.isCurrentThreadOpenGlThread()) {
+                try {
+                    WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
+                    toReturn = create(source->getParent(), wtp);
+                }
+                catch (...) {
+                    LERROR("An unknown error occured during conversion...");
+                }
+
             }
-            catch (...) {
-                LERROR("An unknown error occured during conversion...");
+            else {
+                tgt::GLCanvas* context = GLJobProc.iKnowWhatImDoingGetArbitraryContext();
+                GLJobProc.pause();
+                try {
+                    tgt::GLContextScopedLock lock(context);
+                    WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
+                    toReturn = create(source->getParent(), wtp);
+                }
+                catch (...) {
+                    LERROR("An unknown error occured during conversion...");
+                }
+                GLJobProc.resume();
             }
-            GLJobProc.resume();
             return toReturn;
         }
 
@@ -86,20 +97,25 @@ namespace campvis {
         // what source could be. Thank god, there exists macro magic to create the 56
         // different templated conversion codes.
 #define CONVERT_ITK_TO_GENERIC_LOCAL(basetype, numchannels, dimensionality) \
-        if (const GenericImageRepresentationItk<basetype, 1, 3>* tester = dynamic_cast< const GenericImageRepresentationItk<basetype, 1, 3>* >(source)) { \
-            typedef GenericImageRepresentationItk<basetype, 1, 3>::ItkImageType ImageType; \
-            typedef ImageType::PixelType PixelType; \
-            const PixelType* pixelData = tester->getItkImage()->GetBufferPointer(); \
+        if (const GenericImageRepresentationItk<basetype, numchannels, dimensionality>* tester = dynamic_cast< const GenericImageRepresentationItk<basetype, numchannels, dimensionality>* >(source)) { \
+            typedef GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ItkImageType ItkImageType; \
+            typedef ItkImageType::PixelType ItkElementType; \
+            typedef GenericImageRepresentationItk<basetype, numchannels, dimensionality>::ElementType ElementType; \
+            const ItkElementType* pixelData = tester->getItkImage()->GetBufferPointer(); \
             \
-            ImageType::RegionType region; \
+            ItkImageType::RegionType region; \
             region = tester->getItkImage()->GetBufferedRegion(); \
             \
-            ImageType::SizeType s = region.GetSize(); \
-            tgt::svec3 size(s[0], s[1], s[2]); \
+            ItkImageType::SizeType s = region.GetSize(); \
+            tgt::svec3 size(s[0], 1, 1); \
+            if (dimensionality >= 2) \
+                size.y = s[1]; \
+            if (dimensionality == 3) \
+                size.z = s[2]; \
             \
-            PixelType* pixelDataCopy = new PixelType[tgt::hmul(size)]; \
-            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<basetype, 1>::elementSize); \
-            return GenericImageRepresentationLocal<PixelType, 1>::create(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
+            ElementType* pixelDataCopy = new ElementType[tgt::hmul(size)]; \
+            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<basetype, numchannels>::elementSize); \
+            return GenericImageRepresentationLocal<basetype, numchannels>::create(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
         }
 
 #define DISPATCH_ITK_TO_GENERIC_LOCAL_CONVERSION_ND(numchannels, dimensionality) \
@@ -133,13 +149,6 @@ namespace campvis {
         return _normalizedIntensityRange;
     }
 
-    const ConcurrentGenericHistogramND<float, 1>& ImageRepresentationLocal::getIntensityHistogram() const {
-        if (_intensityHistogram == 0)
-            computeIntensityHistogram();
-
-        return *_intensityHistogram;
-    }
-
     void ImageRepresentationLocal::computeNormalizedIntensityRange() const {
         _normalizedIntensityRange = Interval<float>(); // reset interval to empty one
         tbb::spin_mutex _mutex; // mutex to protect for concurrent access
@@ -165,23 +174,6 @@ namespace campvis {
         _intensityRangeDirty = false;
     }
 
-    void ImageRepresentationLocal::computeIntensityHistogram() const {
-        delete _intensityHistogram;
-
-        const Interval<float>& i = getNormalizedIntensityRange();
-        float mins = i.getLeft();
-        float maxs = i.getRight();
-        size_t numBuckets = 1024;
-        _intensityHistogram = new IntensityHistogramType(&mins, &maxs, &numBuckets);
-        tbb::parallel_for(tbb::blocked_range<size_t>(0, getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
-            for (size_t i = range.begin(); i != range.end(); ++i) {
-                float value = this->getElementNormalized(i, 0);
-                _intensityHistogram->addSample(&value);
-            }
-        });
-    }
-
-    
     ImageRepresentationLocal* ImageRepresentationLocal::create(const ImageData* parent, WeaklyTypedPointer wtp) {
 #define CONVERT_DISK_TO_GENERIC_LOCAL(baseType,numChannels) \
         return GenericImageRepresentationLocal<baseType, numChannels>::create( \
@@ -215,6 +207,7 @@ namespace campvis {
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(2)
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(3)
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(4)
+        else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(6)
         else {
             tgtAssert(false, "Should not reach this - wrong number of channel!");
             return 0;

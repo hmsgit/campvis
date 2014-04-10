@@ -80,6 +80,13 @@ namespace campvis {
         void setDataHandle(const QtDataHandle& dataHandle);
 
     private:
+        /**
+         * Updates this item's children.
+         * In case of having a ImageSeries or RenderData as DataHandle, we are a collection of 
+         * DataHandles ourself. Hence, we create child items for us.
+         */
+        void updateChildren();
+
         QtDataHandle _dataHandle;         ///< Base QtDataHandle
         std::string _name;              ///< Name of that QtDataHandle
     };

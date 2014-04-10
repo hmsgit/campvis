@@ -42,6 +42,8 @@ namespace tgt {
 }
 
 namespace campvis {
+    class GlReduction;
+
     /**
      * Base class for raycasting processors.
      * Offfers properties various common properties and automatic shader loading/linking.
@@ -52,7 +54,7 @@ namespace campvis {
      *          Of course you can also directly overwrite process() yourself, but then you will need to to the
      *          sanity checks yourself.
      */
-    class RaycastingProcessor : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_CORE_API RaycastingProcessor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Creates a RaycastingProcessor.
@@ -62,8 +64,9 @@ namespace campvis {
          * \param   viewportSizeProp            Pointer to the parent pipeline's render target size property.
          * \param   fragmentShaderFileName      Filename for the fragment shader being automatically loaded.
          * \param   bindEntryExitDepthTextures  Flag whether to also bind the depth textures of the entry-/exit points.
+         * \param   customGlslVersion           Custom GLSL version to pass to shader (Optional).
          */
-        RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures);
+        RaycastingProcessor(IVec2Property* viewportSizeProp, const std::string& fragmentShaderFileName, bool bindEntryExitDepthTextures, const std::string& customGlslVersion = "");
 
         /**
          * Destructor
@@ -84,6 +87,17 @@ namespace campvis {
          */
         virtual void deinit();
 
+        DataNameProperty p_sourceImageID;                ///< image ID for input image
+        DataNameProperty p_entryImageID;                 ///< image ID for output entry points image
+        DataNameProperty p_exitImageID;                  ///< image ID for output exit points image
+        DataNameProperty p_targetImageID;                ///< image ID for output image
+
+        CameraProperty p_camera;                         ///< Camera used for ray casting
+        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+        FloatProperty p_jitterStepSizeMultiplier;        ///< Step size multiplier for entry points jitter
+        FloatProperty p_samplingRate;                    ///< Ray casting sampling rate
+
+    protected:
         /**
          * Performs sanity checks, sets up the rendering and calls RaycastingProcessor::processImpl().
          * This method first reads the input image, entry and exit points from \a data and validates them. On sucess
@@ -93,18 +107,13 @@ namespace campvis {
          * \sa      RaycastingProcessor::processImpl()
          * \param   data    DataContainer to work on.
          */
-        virtual void process(DataContainer& data);
+        virtual void updateResult(DataContainer& dataContainer);
 
-        DataNameProperty p_sourceImageID;                ///< image ID for input image
-        DataNameProperty p_entryImageID;                 ///< image ID for output entry points image
-        DataNameProperty p_exitImageID;                  ///< image ID for output exit points image
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
+        /// \see    AbstractProcessor::updateShader
+        virtual void updateShader();
 
-        CameraProperty p_camera;                         ///< Camera used for ray casting
-        TransferFunctionProperty p_transferFunction;     ///< Transfer function
-        FloatProperty p_jitterStepSizeMultiplier;        ///< Step size multiplier for entry points jitter
-        FloatProperty p_samplingRate;                    ///< Ray casting sampling rate
-
-    protected:
         /**
          * Gets called by RaycastingProcessor::process().
          * Put additional (processor specific) setup code here, create and activate your render target(s), render
@@ -126,13 +135,15 @@ namespace campvis {
         virtual std::string generateHeader() const;
 
         const std::string _fragmentShaderFilename;      ///< Filename for the fragment shader being automatically loaded.
+        const std::string _customGlslVersion;           ///< Custom GLSL version to pass to shader
+        
         tgt::Shader* _shader;                           ///< Shader for raycasting
         bool _bindEntryExitDepthTextures;               ///< Flag whether to also bind the depth textures of the entry-/exit points.
 
-        static const std::string loggerCat_;
+        GlReduction* _minReduction;
+        GlReduction* _maxReduction;
 
-    private:
-        clock_t _sourceImageTimestamp;
+        static const std::string loggerCat_;
     };
 
 }

@@ -30,7 +30,7 @@
 
 namespace campvis {
 
-    class ProcessorDecoratorBackground : public AbstractProcessorDecorator {
+    class CAMPVIS_CORE_API ProcessorDecoratorBackground : public AbstractProcessorDecorator {
     public:
         ProcessorDecoratorBackground();
         virtual ~ProcessorDecoratorBackground();

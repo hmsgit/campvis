@@ -27,8 +27,8 @@
 #include <QPushButton>
 
 namespace campvis {
-    ButtonPropertyWidget::ButtonPropertyWidget(ButtonProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+    ButtonPropertyWidget::ButtonPropertyWidget(ButtonProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _button(0)
     {
         _button = new QPushButton(QString::fromStdString(property->getTitle()), this);

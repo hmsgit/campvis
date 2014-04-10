@@ -2,19 +2,20 @@
 #define QTTHREADEDCANVAS_H__
 
 #include "tgt/qt/qtcanvas.h"
+#include "tgt/types.h"
 
 namespace tgt {
 
     /**
      * Subclass of QtCanvas that supports multi-threading.
      */
-    class QtThreadedCanvas : public tgt::QtCanvas {
+    class TGT_API QtThreadedCanvas : public tgt::QtCanvas {
     public:
         QtThreadedCanvas(
             const std::string& title = "",
             const tgt::ivec2& size = tgt::ivec2(tgt::GLCanvas::DEFAULT_WINDOW_WIDTH, tgt::GLCanvas::DEFAULT_WINDOW_HEIGHT),
             const tgt::GLCanvas::Buffers buffers = tgt::GLCanvas::RGBADD,
-            QWidget* parent = 0, bool shared = false, Qt::WFlags f = 0, char* name = 0);
+            QWidget* parent = 0, bool shared = true, Qt::WFlags f = 0, char* name = 0);
 
         virtual ~QtThreadedCanvas();
 

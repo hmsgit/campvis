@@ -32,6 +32,8 @@
 
 namespace campvis {
 
+    std::thread::id OpenGLJobProcessor::_this_thread_id;
+
     OpenGLJobProcessor::OpenGLJobProcessor()
     {
         _pause = 0;
@@ -57,6 +59,8 @@ namespace campvis {
     }
 
     void OpenGLJobProcessor::run() {
+        _this_thread_id = std::this_thread::get_id();
+
         std::unique_lock<tbb::mutex> lock(tgt::GlContextManager::getRef().getGlMutex());
         clock_t lastCleanupTime = clock() * 1000 / CLOCKS_PER_SEC;
 
@@ -228,6 +232,10 @@ namespace campvis {
             tgtAssert(false, "No Contexts registered!");
             return 0;
         }
+    }
+
+    bool OpenGLJobProcessor::isCurrentThreadOpenGlThread() const {
+        return std::this_thread::get_id() == _this_thread_id;
     }
 
 }

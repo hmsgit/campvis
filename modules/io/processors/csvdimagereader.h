@@ -26,6 +26,7 @@
 #define CSVDIMAGEREADER_H__
 
 #include <string>
+#include "abstractimagereader.h"
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
@@ -36,7 +37,7 @@ namespace campvis {
      * Reads a CSVD to read multiple CSV image files into the pipeline.
      * This YANF (yet another neat format) is proudly provided by Christian Schulte zu Berge.
      */
-    class CsvdImageReader : public AbstractProcessor {
+    class CsvdImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new CsvdImageReader Processor
@@ -48,13 +49,6 @@ namespace campvis {
          **/
         virtual ~CsvdImageReader();
 
-
-        /**
-         * Reads the MHD file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "CsvdImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -63,14 +57,13 @@ namespace campvis {
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
-
-        StringProperty p_url;               ///< URL for file to read
-        DataNameProperty p_targetImageID;   ///< image ID for read image
-
+        
         Vec3Property p_imageOffset;         ///< Image Offset in mm
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };

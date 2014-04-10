@@ -34,6 +34,10 @@ namespace campvis {
         tgtAssert(parent != 0, "Parent ImageData must not be 0!");
     }
 
+    AbstractImageRepresentation::AbstractImageRepresentation(const AbstractImageRepresentation& rhs) {
+
+    }
+
     AbstractImageRepresentation::~AbstractImageRepresentation() {
     }
 
@@ -55,6 +59,10 @@ namespace campvis {
 
     void AbstractImageRepresentation::addToParent() const {
         const_cast<ImageData*>(_parent)->addRepresentation(this);
+    }
+
+    AbstractImageRepresentation& AbstractImageRepresentation::operator=(const AbstractImageRepresentation& rhs) {
+        return *this;
     }
 
 

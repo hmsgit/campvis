@@ -48,14 +48,14 @@ namespace campvis {
      * 
      * \sa VisualizationPipeline
      */
-    class VisualizationProcessor : public AbstractProcessor {
+    class CAMPVIS_CORE_API VisualizationProcessor : public AbstractProcessor {
     public:
         /**
          * Utility struct to encapuslate off-screen rendering with this processor using FBOs.
          * This guard essentially activates the VisualizationProcessor's FBO and sets the OpenGL
          * viewport size. Upon destruction it detaches all texutres and deactivates the FBO again.
          */
-        struct FramebufferActivationGuard {
+        struct CAMPVIS_CORE_API FramebufferActivationGuard {
         public:
             /**
              * Constructor.

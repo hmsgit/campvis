@@ -31,6 +31,7 @@ SET(CampvisApplicationToBeMocced
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
+    gui/datacontainerfileloaderwidget.h
     gui/datacontainertreewidget.h
     gui/pipelinetreewidget.h
     gui/qtcolortools.h
@@ -62,6 +63,24 @@ SET(CampvisApplicationToBeMocced
     tools/qtexteditlog.h
     tools/bufferinglog.h
 )
+
+
+# add additional sources from the activated modules
+FOREACH(ModFile ${CampvisModulesApplicationSources})
+    # adjust relative path
+    SET(ModFileRelative ../modules/${ModFile})
+    LIST(APPEND CampvisApplicationSources ${ModFileRelative})
+ENDFOREACH()
+FOREACH(ModFile ${CampvisModulesApplicationHeaders})
+    # adjust relative path
+    SET(ModFileRelative ../modules/${ModFile})
+    LIST(APPEND CampvisApplicationHeaders ${ModFileRelative})
+ENDFOREACH()
+FOREACH(ModFile ${CampvisModulesApplicationToBeMocced})
+    # adjust relative path
+    SET(ModFileRelative ../modules/${ModFile})
+    LIST(APPEND CampvisApplicationToBeMocced ${ModFileRelative})
+ENDFOREACH()
 
 #
 # Qt related stuff:

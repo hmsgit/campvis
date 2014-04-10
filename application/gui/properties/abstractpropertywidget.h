@@ -33,6 +33,7 @@
 
 namespace campvis {
     class AbstractProperty;
+    class DataContainer;
 
     /**
      * Abstract base class for property widgets.
@@ -46,11 +47,12 @@ namespace campvis {
          *
          * If displayBoxed is true, the widget is displayed vertically in a QGroupBox.
          *
-         * \param   property        The property the widget shall handle
+         * \param   property        The property the widget shall handle.
          * \param   displayBoxed    Should the widget be displayed in a group box?
-         * \param   parent          Parent Qt widget
+         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
+         * \param   parent          Parent Qt widget, defaults to nullptr.
          */
-        AbstractPropertyWidget(AbstractProperty* property, bool displayBoxed = false, QWidget* parent = 0);
+        AbstractPropertyWidget(AbstractProperty* property, bool displayBoxed = false, DataContainer* dataContainer = nullptr, QWidget* parent = nullptr);
 
         /**
          * Destructor
@@ -64,6 +66,7 @@ namespace campvis {
         void addWidget(QWidget* widget);
 
         AbstractProperty* _property;    ///< The property this widget handles
+        DataContainer* _dataContainer;  ///< DataContainer to use (e.g. to populate GUI), may be 0!
 
         /// Semaphore acts as flag whether the widget shall ignore incoming signals from properties being updated.
         tbb::atomic<int> _ignorePropertyUpdates;

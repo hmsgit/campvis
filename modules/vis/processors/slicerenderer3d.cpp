@@ -45,18 +45,18 @@ namespace campvis {
 
     SliceRenderer3D::SliceRenderer3D(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_camera);
-        addProperty(&p_sliceNumber);
-        addProperty(&p_transferFunction);
+        addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_targetImageID);
+        addProperty(p_camera);
+        addProperty(p_sliceNumber);
+        addProperty(p_transferFunction);
     }
 
     SliceRenderer3D::~SliceRenderer3D() {
@@ -65,7 +65,7 @@ namespace campvis {
 
     void SliceRenderer3D::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/slicerenderer3d.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/slicerenderer3d.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -75,13 +75,12 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void SliceRenderer3D::process(DataContainer& data) {
+    void SliceRenderer3D::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
                 const tgt::Camera& cam = p_camera.getValue();
-                const tgt::svec3& imgSize = img->getSize();
 
                 // Creating the slice proxy geometry works as follows:
                 // Create the cube proxy geometry for the volume, then clip the cube against the slice plane.
@@ -103,9 +102,6 @@ namespace campvis {
                 _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
-
-                tgt::mat4 trafoMatrix = tgt::mat4::createScale(tgt::vec3(-1.f, 1.f, -1.f));
-                _shader->setUniform("_modelMatrix", trafoMatrix);
 
                 tgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);

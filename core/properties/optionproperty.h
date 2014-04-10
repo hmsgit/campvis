@@ -42,10 +42,9 @@ namespace campvis {
          * Creates a new AbstractOptionProperty.
          * \param name      Property name
          * \param title     Property title (e.g. used for GUI)
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        AbstractOptionProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT)
-            : IntProperty(name, title, -1, -1, -1, 1, invalidationLevel)
+        AbstractOptionProperty(const std::string& name, const std::string& title)
+            : IntProperty(name, title, -1, -1, -1, 1)
         {            
         };
 
@@ -78,6 +77,12 @@ namespace campvis {
     template<>
     struct GenericOption<std::string> {
     public:
+        GenericOption(const std::string& id, const std::string& title, const std::string& value)
+            : _id(id)
+            , _title(title)
+            , _value(value)
+        {};
+
         GenericOption(const std::string& id, const std::string& title)
             : _id(id)
             , _title(title)
@@ -102,14 +107,13 @@ namespace campvis {
          * \param title     Property title (e.g. used for GUI)
          * \param options   Array of the options for this property, must not be 0, must not be empty.
          * \param count     Number of items in \a options (number of options), must be greater 0.
-         * \param invalidationLevel  Invalidation level that this property triggers
+
          */
         GenericOptionProperty(
             const std::string& name, 
             const std::string& title, 
             const GenericOption<T>* options,
-            int count,
-            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+            int count);
 
         /**
          * Destructor
@@ -152,6 +156,12 @@ namespace campvis {
          */
         void selectByIndex(int index);
 
+        /**
+         * Sets the selected option to \a option.
+         * \param   option  Option to set.
+         */
+        void selectByOption(T option);
+
     protected:
         std::vector< GenericOption<T> > _options;
     };
@@ -159,8 +169,8 @@ namespace campvis {
 // = Template Implementation ======================================================================
 
     template<typename T>
-    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, int count, int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : AbstractOptionProperty(name, title, invalidationLevel)
+    campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, int count)
+        : AbstractOptionProperty(name, title)
     {
         tgtAssert(options != 0, "Pointer to options array must not be 0.")
         tgtAssert(count > 0, "The number of options must be greater 0.");
@@ -215,6 +225,17 @@ namespace campvis {
     void campvis::GenericOptionProperty<T>::selectByIndex(int index) {
         tgtAssert(index > 0 && index < _options.size(), "Index out of bounds.");
         setValue(index);
+    }
+
+    template<typename T>
+    void campvis::GenericOptionProperty<T>::selectByOption(T option) {
+        for (size_t i = 0; i < _options.size(); ++i) {
+            if (_options[i]._value == option) {
+                setValue(static_cast<int>(i));
+                return;
+            }
+        }
+        LERROR("Could not find specified option.");
     }
 
 }

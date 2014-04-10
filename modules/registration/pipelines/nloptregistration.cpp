@@ -46,8 +46,8 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , p_optimizer("Optimizer", "Optimizer", optimizers, 3)
         , p_liveUpdate("LiveUpdate", "Live Update of Difference Image", false)
-        , p_performOptimization("PerformOptimization", "Perform Optimization", AbstractProcessor::INVALID_RESULT)
-        , p_forceStop("Force Stop", "Force Stop", AbstractProcessor::VALID)
+        , p_performOptimization("PerformOptimization", "Perform Optimization")
+        , p_forceStop("Force Stop", "Force Stop")
         , p_translationStepSize("TranslationStepSize", "Initial Step Size Translation", 8.f, .1f, 100.f)
         , p_rotationStepSize("RotationStepSize", "Initial Step Size Rotation", .5f, .01f, tgt::PIf)
         , _referenceReader()
@@ -61,12 +61,12 @@ namespace campvis {
         addProcessor(&_sm);
         addProcessor(&_ve);
 
-        addProperty(&p_optimizer);
-        addProperty(&p_liveUpdate);
-        addProperty(&p_performOptimization);
-        addProperty(&p_forceStop);
-        addProperty(&p_translationStepSize);
-        addProperty(&p_rotationStepSize);
+        addProperty(p_optimizer);
+        addProperty(p_liveUpdate);
+        addProperty(p_performOptimization);
+        addProperty(p_forceStop);
+        addProperty(p_translationStepSize);
+        addProperty(p_rotationStepSize);
 
         p_performOptimization.s_clicked.connect(this, &NloptRegistration::onPerformOptimizationClicked);
         p_forceStop.s_clicked.connect(this, &NloptRegistration::forceStop);
@@ -99,6 +99,7 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(255, 255, 255, 0), tgt::col4(255, 0, 0, 255)));
         MetaProperty* mp = static_cast<MetaProperty*>(_ve.getProperty("SliceExtractorProperties"));
         static_cast<TransferFunctionProperty*>(mp->getProperty("transferFunction"))->replaceTF(dvrTF);
+        static_cast<TransferFunctionProperty*>(mp->getProperty("transferFunction"))->setAutoFitWindowToData(false);
     }
 
     void NloptRegistration::deinit() {
@@ -154,9 +155,9 @@ namespace campvis {
         stepSize[5] = p_rotationStepSize.getValue();
         _opt->set_initial_step(stepSize);
 
-        double minf;
         nlopt::result result = nlopt::SUCCESS;
         try {
+            double minf;
             result = _opt->optimize(x, minf);
         }
         catch (std::exception& e) {

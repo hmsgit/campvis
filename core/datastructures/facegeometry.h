@@ -44,7 +44,7 @@ namespace campvis {
      * \note    This class expects all vertices lying within one plane. Everything other that that
      *          leads to undefined behavior.
      */
-    class FaceGeometry : public GeometryData {
+    class CAMPVIS_CORE_API FaceGeometry : public GeometryData {
     public:
         /**
          * Creates a new empty FaceGeometry.
@@ -132,7 +132,10 @@ namespace campvis {
                 
         /// \see GeometryData::getWorldBounds
         virtual tgt::Bounds getWorldBounds() const;
-
+        /// \see GeometryData::hasTextureCoordinates
+        virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::applyTransformationToVertices
+        virtual void applyTransformationToVertices(const tgt::mat4& t);
 
     protected:
         /**

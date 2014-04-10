@@ -39,33 +39,32 @@ namespace campvis {
     const std::string CsvdImageReader::loggerCat_ = "CAMPVis.modules.io.CsvdImageReader";
 
     CsvdImageReader::CsvdImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
-        , p_targetImageID("targetImageName", "Target Image ID", "CsvdImageReader.output", DataNameProperty::WRITE)
+        : AbstractImageReader()
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        this->_ext.push_back(".csv");
+        this->p_targetImageID.setValue("CsvdImageReader.output");
+
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     CsvdImageReader::~CsvdImageReader() {
 
     }
 
-    void CsvdImageReader::process(DataContainer& data) {
+    void CsvdImageReader::updateResult(DataContainer& data) {
         try {
             // start parsing
             TextFileParser tfp(p_url.getValue(), true, "=");
             tfp.parse<TextFileParser::ItemSeparatorLines>();
 
             // init optional parameters with sane default values
-            size_t dimensionality = 3;
             tgt::svec3 size;
             WeaklyTypedPointer::BaseType pt;
-            size_t numChannels = 1;
 
             tgt::vec3 voxelSize(1.f);
             tgt::vec3 imageOffset(0.f);
@@ -104,6 +103,7 @@ namespace campvis {
 
             // dimensionality and size
             if (tfp.hasKey("CsvFileBaseName")) {
+                size_t dimensionality = 3;
                 ImageData* image = new ImageData(dimensionality, size, 1);
                 ImageRepresentationLocal* rep = 0;
                 size_t index = 0;
@@ -137,6 +137,8 @@ namespace campvis {
             file.close(); \
         } \
         rep = GenericImageRepresentationLocal<C_TYPE, 1>::create(image, dataArray); \
+        if (rep == 0) \
+            delete [] dataArray; \
     }
 
                 DISPATCH_PARSING(WeaklyTypedPointer::UINT8      , uint8_t, uint16_t)
@@ -175,4 +177,5 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
+
 }

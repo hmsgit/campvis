@@ -58,8 +58,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_sourceImageID;      ///< image ID for input image
         DataNameProperty p_geometryID;         ///< ID for output geometry
 
@@ -68,9 +66,10 @@ namespace campvis {
         IVec2Property p_clipZ;               ///< clip coordinates for z axis
 
     protected:
-        void updateClipProperties();
-
-        clock_t _sourceTimestamp;
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
 
         static const std::string loggerCat_;
     };

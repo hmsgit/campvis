@@ -42,6 +42,8 @@ namespace campvis {
         , _mappingInformation(size, tgt::vec3(0.f), tgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
     {
         tgtAssert(numChannels > 0, "Number of channels must be greater than 0!");
+        tgtAssert(_dimensionality >= 3 || _size.z == 1, "Dimensionality and size mismatch: A 2D image must have size.z = 1!");
+        tgtAssert(_dimensionality >= 2 || _size.y == 1, "Dimensionality and size mismatch: A 1D image must have size.y = 1!");
     }
 
     ImageData::~ImageData() {
@@ -103,35 +105,6 @@ namespace campvis {
             _mappingInformation.getOffset() + (tgt::vec3(urb) * _mappingInformation.getVoxelSize()));
     }
 
-    ImageData* ImageData::getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
-
-        tgt::svec3 newSize = urb - llf;
-        if (newSize == getSize()) {
-            // nothing has changed, just provide a copy:
-            return clone();
-        }
-
-        // compute new dimensionality
-        size_t newDimensionality = 1;
-        if (newSize.y > 1)
-            newDimensionality = 2;
-        if (newSize.z > 1)
-            newDimensionality = 3;
-
-        // create new ImageData object and assign mapping information
-        ImageData* toReturn = new ImageData(newDimensionality, newSize, _numChannels);
-        toReturn->_mappingInformation = ImageMappingInformation(newSize, _mappingInformation.getOffset(), _mappingInformation.getVoxelSize(), _mappingInformation.getRealWorldMapping());
-        
-        // create sub-image of every image representation
-        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            AbstractImageRepresentation* si = (*it)->getSubImage(toReturn, llf, urb);
-            toReturn->addRepresentation(si);
-        }
-
-        return toReturn;
-    }
-
     size_t ImageData::getNumElements() const {
         return _numElements;
     }
@@ -189,7 +162,7 @@ namespace campvis {
 
         if (performConversion) {
             tgtAssert(false, "Conversion to AbstractImageRepresentationItk not implemented - is it really needed?");
-            LDEBUG("Could not convert to AbstractImageRepresentationItk");
+            LWARNING("Could not convert to AbstractImageRepresentationItk");
         }
 
         return 0;

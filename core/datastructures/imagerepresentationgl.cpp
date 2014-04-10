@@ -59,11 +59,13 @@ namespace campvis {
         tgtAssert(texture != 0, "Given texture must not be 0.");
         tgtAssert(parent->getDimensionality() >= 3 || texture->getDimensions().z == 1, "Dimensionality of Parent and texture mismatch!");
         tgtAssert(parent->getDimensionality() >= 2 || texture->getDimensions().y == 1, "Dimensionality of Parent and texture mismatch!");
+        tgtAssert(parent->getNumChannels() == texture->getNumChannels(), "Number of Channels of parent and texture mismatch!");
     }
 
     ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp) 
         : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
     {
+        tgtAssert(wtp._numChannels == parent->getNumChannels(), "Number of Channels of parent and texture mismatch!");
         createTexture(wtp);
     }
 
@@ -135,12 +137,6 @@ namespace campvis {
         ImageRepresentationGL* toReturn = ImageRepresentationGL::create(newParent, wtp);
         delete data;
         return toReturn;
-    }
-
-    ImageRepresentationGL* ImageRepresentationGL::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
-        // TODO: implement
-        //LWARNING("ImageRepresentationGL::getSubImage() not implemented!");
-        return 0;
     }
 
     void ImageRepresentationGL::createTexture(const WeaklyTypedPointer& wtp) {
@@ -292,6 +288,11 @@ namespace campvis {
 
     void ImageRepresentationGL::unbind() const {
         _texture->unbind();
+    }
+
+    const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointerCopy() const {
+        void* ptr = _texture->downloadTextureToBuffer(_texture->getFormat(), _texture->getDataType());
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), ptr);
     }
 
 

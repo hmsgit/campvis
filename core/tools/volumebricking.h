@@ -27,6 +27,7 @@
 
 #include "tgt/vector.h"
 
+#include "core/coreapi.h"
 #include "core/datastructures/imagedata.h"
 
 #include <vector>
@@ -37,7 +38,7 @@ namespace tgt {
 
 namespace campvis {
 
-    class BinaryBrickedVolume {
+    class CAMPVIS_CORE_API BinaryBrickedVolume {
     public:
         BinaryBrickedVolume(const ImageData* referenceImage, size_t brickSize);
 

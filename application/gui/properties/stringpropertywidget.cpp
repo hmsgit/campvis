@@ -31,8 +31,8 @@
 #include <QFileDialog>
 
 namespace campvis {
-    StringPropertyWidget::StringPropertyWidget(StringProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+    StringPropertyWidget::StringPropertyWidget(StringProperty* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _lineEdit(0)
         , _btnLoadFile(0)
     {
@@ -41,7 +41,7 @@ namespace campvis {
         addWidget(_lineEdit);
 
         if (! dynamic_cast<DataNameProperty*>(property)) {
-            _btnLoadFile = new QPushButton(tr("Load File"), this);
+            _btnLoadFile = new QPushButton(tr("Browse"), this);
             addWidget(_btnLoadFile);
             connect(_btnLoadFile, SIGNAL(clicked(bool)), this, SLOT(onBtnLoadFileClicked(bool)));
         }
@@ -51,6 +51,9 @@ namespace campvis {
 
     StringPropertyWidget::~StringPropertyWidget() {
 
+    }
+    void StringPropertyWidget::setButtonLabel(const std::string& btnLabel) {
+        this->_btnLoadFile->setText(QString(btnLabel.c_str()));
     }
 
     void StringPropertyWidget::updateWidgetFromProperty() {

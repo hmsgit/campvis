@@ -173,25 +173,25 @@ namespace campvis {
         , p_lengths("PolarLengths", "Polar Lengths", tgt::vec2(0.f, 100.f), tgt::vec2(0.f), tgt::vec2(1000.f), tgt::vec2(0.1f))
         
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_alpha);
-        addProperty(&p_beta);
-        addProperty(&p_gamma);
-        addProperty(&p_normalizeValues);
-        addProperty(&p_solver);
-        addProperty(&p_numSteps);
-        addProperty(&p_curvilinear);
-        addProperty(&p_origin);
-        addProperty(&p_angles);
-        addProperty(&p_lengths);
+        addProperty(p_sourceImageID);
+        addProperty(p_targetImageID);
+        addProperty(p_alpha);
+        addProperty(p_beta);
+        addProperty(p_gamma);
+        addProperty(p_normalizeValues);
+        addProperty(p_solver);
+        addProperty(p_numSteps);
+        addProperty(p_curvilinear);
+        addProperty(p_origin);
+        addProperty(p_angles);
+        addProperty(p_lengths);
     }
 
     ConfidenceMapGenerator::~ConfidenceMapGenerator() {
 
     }
 
-    void ConfidenceMapGenerator::process(DataContainer& data) {
+    void ConfidenceMapGenerator::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
         if (input != 0 && input->getDimensionality() >= 2 && input->getParent()->getNumChannels() >= 1) {
@@ -204,7 +204,7 @@ namespace campvis {
                 CMGenerator(input, outputValues, this));
 
             ImageData* output = new ImageData(input->getDimensionality(), tgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
-            GenericImageRepresentationLocal<float, 1>* confidenceMap = GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
+            GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
             data.addData(p_targetImageID.getValue(), output);
 
             validate(INVALID_RESULT);

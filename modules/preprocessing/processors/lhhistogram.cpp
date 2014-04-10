@@ -53,7 +53,6 @@ namespace campvis {
         void operator() (const tbb::blocked_range<size_t>& range) const {
             for (size_t i = range.begin(); i != range.end(); ++i) {
                 tgt::svec3 pos = _intensities->getParent()->indexToPosition(i);
-                const tgt::svec3& size = _intensities->getSize();
 
                 const tgt::vec4& gradient = _gradients->getElement(i);
                 float fl = _intensities->getElementNormalized(i, 0);
@@ -145,17 +144,17 @@ namespace campvis {
         , p_outputFL("OutputFL", "FL Output Volume", "fl", DataNameProperty::WRITE)
         , p_outputFH("OutputFH", "FH Output Volume", "fh", DataNameProperty::WRITE)
     {
-        addProperty(&p_intensitiesId);
-        addProperty(&p_gradientsId);
-        addProperty(&p_outputFL);
-        addProperty(&p_outputFH);
+        addProperty(p_intensitiesId);
+        addProperty(p_gradientsId);
+        addProperty(p_outputFL);
+        addProperty(p_outputFH);
     }
 
     LHHistogram::~LHHistogram() {
 
     }
 
-    void LHHistogram::process(DataContainer& data) {
+    void LHHistogram::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation intensities(data, p_intensitiesId.getValue());
         GenericImageRepresentationLocal<float, 4>::ScopedRepresentation gradients(data, p_gradientsId.getValue());
 
@@ -183,7 +182,7 @@ namespace campvis {
 
             WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
             ImageData* imgTex = new ImageData(2, tgt::svec3(256, 256, 1), 1);
-            ImageRepresentationGL* tex = ImageRepresentationGL::create(imgTex, wtp);
+            ImageRepresentationGL::create(imgTex, wtp);
             delete [] tmp;
 
             data.addData("foo", imgTex);

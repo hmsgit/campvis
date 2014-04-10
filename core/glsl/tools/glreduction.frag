@@ -25,47 +25,48 @@
 in vec3 ex_TexCoord;
 out vec4 out_Color;
 
-#include "tools/texture2d.frag"
+#ifdef REDUCTION_1D
+    uniform sampler2D _texture;
+    uniform ivec2 _textureSize;
+#endif
 
 #ifdef REDUCTION_2D
     uniform sampler2D _texture;
-    uniform vec2 _texCoordsShift;
+    uniform ivec2 _textureSize;
 #endif
 
 #ifdef REDUCTION_3D
     uniform sampler3D _texture;
-    uniform vec2 _texCoordsShift;
-    uniform int _textureDepth;
+    uniform ivec3 _textureSize;
 #endif
 
 void main() {
-    vec2 tmp = ex_TexCoord.xy - _texCoordsShift;
+    ivec2 texel = ivec2(ex_TexCoord.xy * vec2(_textureSize.xy));
 
-#ifdef REDUCTION_2D
+#ifdef REDUCTION_1D
     // 2D reduction:
-    vec4 a = texture(_texture, tmp);
-    vec4 b = textureOffset(_texture, tmp, ivec2(1, 0));
-    vec4 c = textureOffset(_texture, tmp, ivec2(0, 1));
-    vec4 d = textureOffset(_texture, tmp, ivec2(1, 1));
-#endif
-
-#ifdef REDUCTION_3D
-    // 3D reduction along depth:
-    float textureDepthRCP = 1.0 / _textureDepth;
-
-    vec4 a = texture(_texture, vec3(tmp, textureDepthRCP/2.0));
-    vec4 b = textureOffset(_texture, vec3(tmp, textureDepthRCP/2.0), ivec3(1, 0, 0));
-    vec4 c = textureOffset(_texture, vec3(tmp, textureDepthRCP/2.0), ivec3(0, 1, 0));
-    vec4 d = textureOffset(_texture, vec3(tmp, textureDepthRCP/2.0), ivec3(1, 1, 0));
-
-    for (float z = 3.0 * textureDepthRCP / 2.0; z < 1.0; z += textureDepthRCP) {
-        a = REDUCTION_OP_2(a, texture(_texture, vec3(tmp, z)));
-        b = REDUCTION_OP_2(b, textureOffset(_texture, vec3(tmp, z), ivec3(1, 0, 0)));
-        c = REDUCTION_OP_2(c, textureOffset(_texture, vec3(tmp, z), ivec3(0, 1, 0)));
-        d = REDUCTION_OP_2(d, textureOffset(_texture, vec3(tmp, z), ivec3(1, 1, 0)));
+    vec4 v = texelFetch(_texture, ivec2(0, 0), 0);
+    for (int x = 1; x < _textureSize.x; x += 1) {
+        v = REDUCTION_OP_2(v, texelFetch(_texture, ivec2(x, 0), 0));
     }
 #endif
 
-    // final reduction of the four pixels
-    out_Color = REDUCTION_OP_4(a, b, c, d);
+#ifdef REDUCTION_2D
+    // 2D reduction:
+    vec4 v = texelFetch(_texture, ivec2(texel.x, 0), 0);
+    for (int y = 1; y < _textureSize.y; y += 1) {
+        v = REDUCTION_OP_2(v, texelFetch(_texture, ivec2(texel.x, y), 0));
+    }
+#endif
+
+#ifdef REDUCTION_3D
+    // 3D reduction along z direction:
+    vec4 v = texelFetch(_texture, ivec3(texel.xy, 0), 0);
+    for (int z = 1; z < _textureSize.z; z += 1) {
+        v = REDUCTION_OP_2(v, texelFetch(_texture, ivec3(texel.xy, z), 0));
+    }
+
+#endif
+
+    out_Color = v;
 }

@@ -31,7 +31,9 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 
+#include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
+
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/metaproperty.h"
@@ -49,12 +51,14 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class VolumeExplorer : public VisualizationProcessor, public tgt::EventListener {
+    class VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public tgt::EventListener {
     public:
         /**
          * Constructs a new VolumeExplorer Processor
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
+         * \param   raycaster           Raycaster to use for rendering, must not be 0, VolumeRenderer will take ownership.
          **/
-        VolumeExplorer(IVec2Property* viewportSizeProp);
+        VolumeExplorer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster = new SimpleRaycaster(0));
 
         /**
          * Destructor
@@ -79,10 +83,10 @@ namespace campvis {
         /// \see tgt::EventListener::onEvent()
         virtual void onEvent(tgt::Event* e);
 
-        virtual void process(DataContainer& data);
+        DataNameProperty p_inputVolume;     ///< image ID for first input image
+        DataNameProperty p_outputImage;     ///< image ID for output image
 
-        DataNameProperty p_inputVolume;              ///< image ID for first input image
-        DataNameProperty p_outputImage;              ///< image ID for output image
+        BoolProperty p_enableScribbling;    ///< Enable Scribbling in Slice Views
 
         MetaProperty p_seProperties;        ///< MetaProperty for SliceExtractor properties
         MetaProperty p_vrProperties;        ///< MetaProperty for Raycaster properties
@@ -92,9 +96,13 @@ namespace campvis {
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.
         enum ProcessorInvalidationLevel {
-            VR_INVALID = 1 << 4,
-            SLICES_INVALID = 1 << 5,
+            VR_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
+            SLICES_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
+            SCRIBBLE_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
         };
+
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         /**
          * Slot getting called when one of the observed processors got invalidated.
@@ -107,6 +115,12 @@ namespace campvis {
          * \see VisualizationProcessor::onPropertyChanged
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
+
+        /**
+         * Callback called from SliceExtractor when a scribble has been painted.
+         * \param   voxel   Voxel position of scribble
+         */
+        void onSliceExtractorScribblePainted(tgt::vec3 voxel);
 
         void composeFinalRendering(DataContainer& data);
 
@@ -128,7 +142,11 @@ namespace campvis {
         MWheelToNumericPropertyEventListener _zSliceHandler;
         TransFuncWindowingEventListener _windowingHandler;
         TrackballNavigationEventListener* _trackballEH;
-        bool _mousePressed;
+        bool _mousePressedInRaycaster;                  ///< Flag whether mouse was pressed in raycaster
+
+        std::vector<tgt::vec3>* _scribblePointer;       ///< Pointer encoding whether the mouse was pressed (!= nullptr) and whether we have yes-scribbles or no-scribbles.
+        std::vector<tgt::vec3> _yesScribbles;           ///< All voxels of the current yes-scribbles
+        std::vector<tgt::vec3> _noScribbles;            ///< All voxels of the current no-scribbles
 
         static const std::string loggerCat_;
     };

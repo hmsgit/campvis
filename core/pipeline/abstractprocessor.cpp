@@ -24,8 +24,12 @@
 
 #include <tbb/compat/thread>
 #include "tgt/assert.h"
+
 #include "abstractprocessor.h"
 #include "core/properties/abstractproperty.h"
+#include "core/tools/job.h"
+#include "core/tools/opengljobprocessor.h"
+#include "core/tools/simplejobprocessor.h"
 
 namespace campvis {
 
@@ -80,8 +84,12 @@ namespace campvis {
     }
 
     void AbstractProcessor::onPropertyChanged(const AbstractProperty* prop) {
-        HasPropertyCollection::onPropertyChanged(prop);
-        invalidate(prop->getInvalidationLevel());
+        tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, false);
+        auto it = _invalidationMap.find(prop);
+        if (it != _invalidationMap.end())
+            invalidate(it->second);
+        else
+            LDEBUG("Caught an property changed signal that was not registered with an invalidation level. Did you forget to call addProperty()?");
     }
 
     bool AbstractProcessor::getEnabled() const {
@@ -122,9 +130,60 @@ namespace campvis {
         _clockExecutionTime = value;
     }
 
+
+    void AbstractProcessor::process(DataContainer& data, bool unlockInExtraThread) {
+        // use a scoped lock for exception safety
+        AbstractProcessor::ScopedLock lock(this, unlockInExtraThread);
+        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
+
+        if (hasInvalidShader())
+            updateShader();
+        if (hasInvalidProperties())
+            updateProperties(data);
+        if (hasInvalidResult())
+            updateResult(data);
+    }
+
+    void AbstractProcessor::updateShader() {
+        LDEBUG("Called non-overriden updateShader() in " << getName() << ". Did you forget to override your method?");
+        validate(INVALID_SHADER);
+    }
+
     void AbstractProcessor::updateProperties(DataContainer& dc) {
+        LDEBUG("Called non-overriden updateProperties() in " << getName() << ". Did you forget to override your method?");
         validate(INVALID_PROPERTIES);
     }
 
+    void AbstractProcessor::addProperty(AbstractProperty& prop) {
+        this->addProperty(prop, INVALID_RESULT);
+    }
+
+    void AbstractProcessor::addProperty(AbstractProperty& prop, int invalidationLevel) {
+        HasPropertyCollection::addProperty(prop);
+        setPropertyInvalidationLevel(prop, invalidationLevel);
+    }
+
+    void AbstractProcessor::setPropertyInvalidationLevel(AbstractProperty& prop, int invalidationLevel) {
+        tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, true);
+        _invalidationMap[&prop] = invalidationLevel;
+    }
+
+// ================================================================================================
+
+    AbstractProcessor::ScopedLock::ScopedLock(AbstractProcessor* p, bool unlockInExtraThread)
+        : _p(p)
+        , _unlockInExtraThread(unlockInExtraThread) 
+    {
+        _p->lockProcessor();
+    }
+
+    AbstractProcessor::ScopedLock::~ScopedLock() {
+        // Unlocking processors might be expensive, since a long chain of invalidations might be started
+        // -> do this in another thread...
+        if (_unlockInExtraThread)
+            SimpleJobProc.enqueueJob(makeJob(_p, &AbstractProcessor::unlockProcessor));
+        else
+            _p->unlockProcessor();    
+    }
 
 }

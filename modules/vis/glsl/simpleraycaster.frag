@@ -127,7 +127,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-            result.rgb = mix(color.rgb, result.rgb, result.a);
+            result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
             result.a = result.a + (1.0 -result.a) * color.a;
         }
 

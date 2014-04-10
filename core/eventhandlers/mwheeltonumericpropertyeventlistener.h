@@ -28,13 +28,15 @@
 #include "tgt/logmanager.h"
 #include "tgt/event/eventlistener.h"
 
+#include "core/coreapi.h"
+
 namespace campvis {
     class INumericProperty;
 
     /**
      * Event handler that maps mouse wheel events to a numeric property.
      */
-    class MWheelToNumericPropertyEventListener : public tgt::EventListener {
+    class CAMPVIS_CORE_API MWheelToNumericPropertyEventListener : public tgt::EventListener {
     public:
         /**
          * Creates a MWheelToNumericPropertyEventListener.

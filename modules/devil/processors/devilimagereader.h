@@ -63,12 +63,6 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
-        /**
-         * Reads the image file into an ImageRepresentationRenderTarget
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "DevilImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -83,6 +77,9 @@ namespace campvis {
         GenericOptionProperty<std::string> p_importType;
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         tgt::Shader* _shader;
         tgt::TextureReaderDevil* _devilTextureReader;
 

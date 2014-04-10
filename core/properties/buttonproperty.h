@@ -31,15 +31,14 @@ namespace campvis {
     /**
      * Property that simply offers a single button.
      */
-    class ButtonProperty : public AbstractProperty {
+    class CAMPVIS_CORE_API ButtonProperty : public AbstractProperty {
     public:
         /**
          * Creates a new ButtonProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        ButtonProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        ButtonProperty(const std::string& name, const std::string& title);
 
         /**
          * Virtual Destructor

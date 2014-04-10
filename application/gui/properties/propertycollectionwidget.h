@@ -63,10 +63,34 @@ namespace campvis {
         void updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc);
 
         /**
-         * Slot to be called when one of the propertie's visibility has changed.
+         * Slot to be called when one of the properties' visibility has changed.
          * \param prop  Property that emitted the signal
          */
         void onPropertyVisibilityChanged(const AbstractProperty* prop);
+        
+    protected slots:
+        /**
+         * Gets called when the property has changed, so that widget can update its state.
+         */
+        virtual void onWidgetVisibilityChanged(QWidget* widget, bool visibility);
+
+        /**
+         * Creates the property widget for \a prop, connects all neccesary signals, etc.
+         * \param   prop    Property to add
+         */
+        void addProperty(AbstractProperty* prop);
+
+        /**
+         * Removes the property widget for \a prop, disconnects all neccesary signals, etc.
+         * \param   prop    Iterator to widget map for the property to remove.
+         */
+        void removeProperty(std::map<AbstractProperty*, QWidget*>::iterator prop);
+
+    signals:
+        void s_widgetVisibilityChanged(QWidget* widget, bool visibility);
+
+        void propertyAdded(AbstractProperty* prop);
+        void propertyRemoved(std::map<AbstractProperty*, QWidget*>::iterator prop);
 
     private:
         /**
@@ -79,11 +103,23 @@ namespace campvis {
          */
         void clearWidgetMap();
 
-        HasPropertyCollection* _propCollection;    ///< The HasPropertyCollection instance this widget is currently working on.
+        /**
+         * Slot called from PropertyCollection a property was added.
+         */
+        void onPropCollectionPropAdded(AbstractProperty* prop);
+
+        /**
+         * Slot called from PropertyCollection a property was removed.
+         */
+        void onPropCollectionPropRemoved(AbstractProperty* prop);
+
+        HasPropertyCollection* _propCollection; ///< The HasPropertyCollection instance this widget is currently working on.
+        DataContainer* _dataContainer;          ///< The DataContainer the properties shall work on
+
         QVBoxLayout* _layout;
         std::map<AbstractProperty*, QWidget*> _widgetMap;
-        //QList<QWidget*> _widgetList;
     };
 }
+
 
 #endif // PROPERTYCOLLECTIONWIDGET_H__

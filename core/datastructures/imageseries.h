@@ -35,7 +35,7 @@ namespace campvis {
     /**
      * Class encapsulating a series of images.
      */
-    class ImageSeries : public AbstractData {
+    class CAMPVIS_CORE_API ImageSeries : public AbstractData {
     public:
         /**
          * Constructor

@@ -49,18 +49,18 @@ namespace campvis {
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f, 0.1f)
     {
-        addProperty(&p_sourceImageID);
-        addProperty(&p_targetImageID);
-        addProperty(&p_filterMode);
-        addProperty(&p_kernelSize);
-        addProperty(&p_sigma);
+        addProperty(p_sourceImageID);
+        addProperty(p_targetImageID);
+        addProperty(p_filterMode);
+        addProperty(p_kernelSize);
+        addProperty(p_sigma);
     }
 
     ImageFilter::~ImageFilter() {
 
     }
 
-    void ImageFilter::process(DataContainer& data) {
+    void ImageFilter::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
         if (input != 0 && input->getParent()->getNumChannels() == 1) {

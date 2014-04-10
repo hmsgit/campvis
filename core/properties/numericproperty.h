@@ -26,6 +26,8 @@
 #define NUMERICPROPERTY_H__
 
 #include "tgt/vector.h"
+
+#include "core/coreapi.h"
 #include "core/properties/genericproperty.h"
 
 #include <limits>
@@ -77,7 +79,7 @@ namespace campvis {
      * Interface for numeric properties.
      * Defines methods for incrementing and decrementing the property's value.
      */
-    class INumericProperty {
+    class CAMPVIS_CORE_API INumericProperty {
     public:
         /// Increments the value of the property.
         virtual void increment() = 0;
@@ -103,7 +105,6 @@ namespace campvis {
          * \param minValue  Minimum value for this property
          * \param maxValue  Maximum value for this property
          * \param stepValue Step value for this property
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
         NumericProperty(
             const std::string& name,
@@ -111,8 +112,7 @@ namespace campvis {
             const T& value,
             const T& minValue,
             const T& maxValue,
-            const T& stepValue = T(1),
-            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+            const T& stepValue = T(1));
 
         /**
          * Virtual Destructor
@@ -212,9 +212,8 @@ namespace campvis {
 
     template<typename T>
     campvis::NumericProperty<T>::NumericProperty(const std::string& name, const std::string& title, const T& value,
-                                                 const T& minValue, const T& maxValue, const T& stepValue /*= T(1)*/,
-                                                 int invalidationLevel /*= AbstractProcessor::INVALID_RESULT*/)
-        : GenericProperty<T>(name, title, value, invalidationLevel)
+                                                 const T& minValue, const T& maxValue, const T& stepValue /*= T(1)*/)
+        : GenericProperty<T>(name, title, value)
         , _minValue(minValue)
         , _maxValue(maxValue)
         , _stepValue(stepValue)

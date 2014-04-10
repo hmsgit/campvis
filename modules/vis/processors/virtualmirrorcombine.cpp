@@ -45,10 +45,10 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&p_normalImageID);
-        addProperty(&p_mirrorImageID);
-        addProperty(&p_mirrorRenderID);
-        addProperty(&p_targetImageID);
+        addProperty(p_normalImageID);
+        addProperty(p_mirrorImageID);
+        addProperty(p_mirrorRenderID);
+        addProperty(p_targetImageID);
 
         addDecorator(new ProcessorDecoratorBackground());
         
@@ -61,7 +61,7 @@ namespace campvis {
 
     void VirtualMirrorCombine::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/virtualmirrorcombine.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/virtualmirrorcombine.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -71,7 +71,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void VirtualMirrorCombine::process(DataContainer& data) {
+    void VirtualMirrorCombine::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> normalImage(data, p_normalImageID.getValue());
         ScopedTypedData<RenderData> mirrorImage(data, p_mirrorImageID.getValue());
         ScopedTypedData<RenderData> mirrorRendered(data, p_mirrorRenderID.getValue());

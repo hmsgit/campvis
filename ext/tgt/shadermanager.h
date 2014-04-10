@@ -98,13 +98,6 @@ public:
     void loadSourceFromFile(const std::string& filename)
         throw (Exception);
 
-    /**
-     * Set directives using glProgramParameteriEXT(...), used for geometry shaders.
-     * Call before compiling.
-     * @param id Set the directives for this shader
-     */
-    void setDirectives(GLuint id);
-
     bool compileShader();
 
     bool isCompiled() const { return isCompiled_; }
@@ -117,6 +110,10 @@ public:
      * Use h as header for shadersource (copies h)
      */
     void setHeader(const std::string& h);
+
+    void setCustomGlslVersion(const std::string& version) {
+        customGlslVersion_ = version;
+    }
 
     ShaderType getType() { return shaderType_; }
 
@@ -160,6 +157,7 @@ protected:
     std::string source_;
     std::string unparsedSource_;
     std::string header_;
+    std::string customGlslVersion_;     ///< Optional custom GLSL version, will override global GLSL version if set
     bool isCompiled_;
     GLint inputType_;
     GLint outputType_;
@@ -181,6 +179,35 @@ class TGT_API Shader {
     friend class ShaderManager;
 
 public:
+    /**
+     * Guard to enable ignoring uniform location errors and ensuring to disable it again upon destruction.
+     */
+    struct IgnoreUniformLocationErrorGuard {
+    public:
+        /**
+         * Creates a new IgnoreUniformLocationErrorGuard for the given shader.
+         * Sets the shader's ignoreError_ to true.
+         * \param   shader  Shader to enable ignoring uniform location errors.
+         */
+        IgnoreUniformLocationErrorGuard(tgt::Shader* shader)
+            : _shader(shader)
+            , _stateToRestore(shader->getIgnoreUniformLocationError())
+        {
+            _shader->setIgnoreUniformLocationError(true);
+        };
+
+        /**
+         * Destructor, restores the shader's original ignoreError_ state.
+         */
+        ~IgnoreUniformLocationErrorGuard() {
+            _shader->setIgnoreUniformLocationError(_stateToRestore);
+        }
+
+    private:
+        tgt::Shader* _shader;   ///< Shader to modify
+        bool _stateToRestore;   ///< Original state
+    };
+
     Shader();
 
     /**
@@ -256,6 +283,13 @@ public:
     bool setUniform(const std::string& name, GLint v1, GLint v2, GLint v3);
     bool setUniform(const std::string& name, GLint v1, GLint v2, GLint v3, GLint v4);
     bool setUniform(const std::string& name, GLint* v, int count);
+
+    // Unsigned Integers
+    bool setUniform(const std::string& name, GLuint value);
+    bool setUniform(const std::string& name, GLuint v1, GLuint v2);
+    bool setUniform(const std::string& name, GLuint v1, GLuint v2, GLuint v3);
+    bool setUniform(const std::string& name, GLuint v1, GLuint v2, GLuint v3, GLuint v4);
+    bool setUniform(const std::string& name, GLuint* v, int count);
 
     // Booleans
     bool setUniform(const std::string& name, bool value);
@@ -385,7 +419,7 @@ protected:
      * @throw Exception if loading failed
      */
     void loadSeparate(const std::string& vertFilename, const std::string& geomFilename,
-        const std::string& fragFilename, const std::string& customHeader = "")
+        const std::string& fragFilename, const std::string& customHeader = "", const std::string& customGlslVersion = "")
         throw (Exception);
 
     typedef std::list<ShaderObject*> ShaderObjects;
@@ -419,54 +453,52 @@ public:
     ShaderManager();
 
     /**
-     * Load filename.vert and filename.frag (vertex and fragment shader), link shader and
-     * activate it by default.
-     *
-     * @param customHeader Header to be put in front of the shader source
-     * @param activate activate the shader after loading
-     *
-     * @return The loaded shader
-     *
-     * @throw Exception if loading failed
+     * Load given shaders from file and link them.
+     * Empty file names will be ignored (not loaded and linked). You have to pass the complete 
+     * file names, inclusive file extensions (".vert", ".geom", frag").
+     * 
+     * \param   vertFilename        Vertex shader file name
+     * \param   fragFilename        Fragment shader file name
+     * \param   customHeader        Custom header to add to all shaders (may be empty)
+     * \throw   Exception if loading failed.
+     * \return  The newly created shader.
      */
-    Shader* load(const std::string& filename, const std::string& customHeader = "",
-                 bool activate = true)
+    Shader* load(const std::string& vertFilename, const std::string& fragFilename,
+                 const std::string& customHeader)
                  throw (Exception);
 
     /**
-     * Load vertex shader \p vertFilename and fragment shader \p fragFilename,
-     * link shader and activate it by default.
-     *
-     * You have to pass the complete filenames, inclusive file extensions (".vert", ".frag").
-     *
-     * @param customHeader header to be put in front of the shader source
-     * @param activate activate the shader after loading
-     *
-     * @return The loaded shader
-     *
-     * @throw Exception if loading failed
+     * Load given shaders from file and link them.
+     * Empty file names will be ignored (not loaded and linked). You have to pass the complete 
+     * file names, inclusive file extensions (".vert", ".geom", frag").
+     * 
+     * \param   vertFilename        Vertex shader file name
+     * \param   geomFilename        Geometry shader file name (leave empty to disable geometry shader)
+     * \param   fragFilename        Fragment shader file name
+     * \param   customHeader        Custom header to add to all shaders (may be empty)
+     * \throw   Exception if loading failed.
+     * \return  The newly created shader.
      */
-    Shader* loadSeparate(const std::string& vertFilename, const std::string& fragFilename,
-                         const std::string& customHeader = "", bool activate = true)
-                         throw (Exception);
+    Shader* load(const std::string& vertFilename, const std::string& geomFilename, const std::string& fragFilename,
+                 const std::string& customHeader)
+                 throw(Exception);
 
     /**
-     * Load vertex shader \p vertFilename, geometry shader \p geomFilename,
-     * fragment shader \p fragFilename, link shader and activate it by default.
-     *
-     * You have to pass the complete filenames, inclusive file extensions (".vert", ".geom", frag").
-     *
-     * @param customHeader header to be put in front of the shader source
-     * @param activate activate the shader after loading
-     *
-     * @return The loaded shader
-     *
-     * @throw Exception if loading failed
+     * Load given shaders from file and link them.
+     * Empty file names will be ignored (not loaded and linked). You have to pass the complete 
+     * file names, inclusive file extensions (".vert", ".geom", frag").
+     * 
+     * \param   vertFilename        Vertex shader file name
+     * \param   geomFilename        Geometry shader file name (leave empty to disable geometry shader)
+     * \param   fragFilename        Fragment shader file name
+     * \param   customHeader        Custom header to add to all shaders (may be empty)
+     * \param   customGlslVersion   Custom GLSL version for all shaders (leave empty to use default GLSL version from ShaderManager).
+     * \throw   Exception if loading failed.
+     * \return  The newly created shader.
      */
-    Shader* loadSeparate(const std::string& vertFilename, const std::string& geomFilename,
-                         const std::string& fragFilename,
-                         const std::string& customHeader, bool activate = true)
-                         throw(Exception);
+    Shader* loadWithCustomGlslVersion(const std::string& vertFilename, const std::string& geomFilename, const std::string& fragFilename, 
+                                      const std::string& customHeader, const std::string& customGlslVersion)
+                                      throw(Exception);
 
     bool rebuildAllShadersFromFile();
 
@@ -486,7 +518,25 @@ public:
         return globalHeader_;
     }
 
+    /**
+     * Sets the default GLSL version string, will be added to the '#version' pragma 
+     * at the beginning of each shader.
+     * \param   version     Default GLSL version string.
+     */
+    void setDefaultGlslVersion(const std::string& version) {
+        defaultGlslVersion_ = version;
+    }
+
+    /**
+     * Gets the default GLSL version string, will be added to the '#version' pragma 
+     * at the beginning of each shader.
+     */
+    const std::string& getDefaultGlslVersion() const {
+        return defaultGlslVersion_;
+    }
+
 protected:
+    std::string defaultGlslVersion_;    ///< Default GLSL version string, will be added to the '#version' pragma at the beginning of each shader
     std::string globalHeader_;      ///< Global header that will be added to all shaders.
 
     static const std::string loggerCat_;

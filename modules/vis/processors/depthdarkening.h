@@ -69,8 +69,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_inputImage;               ///< image ID for input image
         DataNameProperty p_outputImage;              ///< image ID for output image
 
@@ -82,6 +80,11 @@ namespace campvis {
         Vec3Property p_warmColor;                    ///< Warm color (color for near objects)
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateShader
+        virtual void updateShader();
+
         /**
          * Generates the GLSL Header
          * \return  #define uSE_COLORCODING if p_useColorCoding is set

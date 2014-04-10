@@ -31,26 +31,62 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
+#include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
+    static const GenericOption<GLenum> renderOptions[7] = {
+        GenericOption<GLenum>("points", "GL_POINTS", GL_POINTS),
+        GenericOption<GLenum>("lines", "GL_LINES", GL_LINES),
+        GenericOption<GLenum>("linestrip", "GL_LINE_STRIP", GL_LINE_STRIP),
+        GenericOption<GLenum>("triangles", "GL_TRIANGLES", GL_TRIANGLES),
+        GenericOption<GLenum>("trianglefan", "GL_TRIANGLE_FAN", GL_TRIANGLE_FAN),
+        GenericOption<GLenum>("trianglestrip", "GL_TRIANGLE_STRIP", GL_TRIANGLE_STRIP),
+        GenericOption<GLenum>("polygon", "GL_POLYGON", GL_POLYGON)
+    };
+
+    static const GenericOption<GeometryRenderer::ColoringMode> coloringOptions[3] = {
+        GenericOption<GeometryRenderer::ColoringMode>("GeometryColor", "Original Geometry Color", GeometryRenderer::GEOMETRY_COLOR),
+        GenericOption<GeometryRenderer::ColoringMode>("SolidColor", "Solid Color", GeometryRenderer::SOLID_COLOR),
+        GenericOption<GeometryRenderer::ColoringMode>("TextureColor", "Color from Texture Lookup", GeometryRenderer::TEXTURE_COLOR),
+    };
+
     const std::string GeometryRenderer::loggerCat_ = "CAMPVis.modules.vis.GeometryRenderer";
 
     GeometryRenderer::GeometryRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
+        , p_textureID("TextureId", "Input Texture ID (optional)", "gr.inputtexture", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
-        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
-        , _shader(0)
+        , p_renderMode("RenderMode", "Render Mode", renderOptions, 7)
+        , p_coloringMode("ColoringMode", "ColoringMode", coloringOptions, 3)
+        , p_solidColor("SolidColor", "Solid Color", tgt::vec4(1.f, .5f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_pointSize("PointSize", "Point Size", 3.f, .1f, 10.f)
+        , p_lineWidth("LineWidth", "Line Width", 1.f, .1f, 10.f)
+        , p_showWireframe("ShowWireframe", "Show Wireframe", true)
+        , p_wireframeColor("WireframeColor", "Wireframe Color", tgt::vec4(1.f, 1.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , _pointShader(0)
+        , _meshShader(0)
     {
+        p_coloringMode.selectByOption(SOLID_COLOR);
+
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_geometryID);
-        addProperty(&p_renderTargetID);
-        addProperty(&p_camera);
-        addProperty(&p_color);
+        addProperty(p_geometryID);
+        addProperty(p_textureID);
+        addProperty(p_renderTargetID);
+        addProperty(p_camera);
+
+        addProperty(p_renderMode, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_coloringMode, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES);
+        addProperty(p_solidColor);
+
+        addProperty(p_pointSize);
+        addProperty(p_lineWidth);
+        addProperty(p_showWireframe, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES);
+        addProperty(p_wireframeColor);
 
         decoratePropertyCollection(this);
     }
@@ -61,52 +97,101 @@ namespace campvis {
 
     void GeometryRenderer::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/geometryrenderer.frag", "", false);
-        if (_shader != 0) {
-            _shader->setAttributeLocation(0, "in_Position");
-        }
+        _pointShader = ShdrMgr.load("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(false));
+        _meshShader = ShdrMgr.load("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.geom", "modules/vis/glsl/geometryrenderer.frag", generateGlslHeader(true));
     }
 
     void GeometryRenderer::deinit() {
-        ShdrMgr.dispose(_shader);
-        _shader = 0;
+        ShdrMgr.dispose(_pointShader);
+        _pointShader = 0;
+        ShdrMgr.dispose(_meshShader);
+        _meshShader = 0;
+
         VisualizationProcessor::deinit();
     }
 
-    void GeometryRenderer::process(DataContainer& data) {
+    void GeometryRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
+        ScopedTypedData<RenderData> rd(data, p_textureID.getValue());
+        ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue());
 
-        if (proxyGeometry != 0 && _shader != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateGlslHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
+        const ImageRepresentationGL* texture = nullptr;
+        if (p_coloringMode.getOptionValue() == TEXTURE_COLOR) {
+            if (proxyGeometry->hasTextureCoordinates()) {
+                if (rd != nullptr && rd->getNumColorTextures() > 0)
+                    texture = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>();
+                else if (repGl != nullptr)
+                    texture = repGl;
             }
+            else {
+                LERROR("Cannot use textured rendering since input geometry has no texture coordinates!");
+            }
+        }
+
+        if (proxyGeometry != 0 && (p_coloringMode.getOptionValue() != TEXTURE_COLOR || texture != nullptr) && _pointShader != 0 && _meshShader != 0) {
+            // select correct shader
+            tgt::Shader* leShader = 0;
+            if (p_renderMode.getOptionValue() == GL_POINTS || p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
+                leShader = _pointShader;
+            else
+                leShader = _meshShader;
+
+            // calculate viewport matrix for NDC -> viewport conversion
+            tgt::vec2 halfViewport = tgt::vec2(getEffectiveViewportSize()) / 2.f;
+            tgt::mat4 viewportMatrix = tgt::mat4::createTranslation(tgt::vec3(halfViewport, 0.f)) * tgt::mat4::createScale(tgt::vec3(halfViewport, 1.f));
+
+            leShader->activate();
+
+            // bind texture if needed
+            tgt::TextureUnit tut, narf, blub, textureUnit;
+            tut.activate();
+            if (texture != nullptr)
+                texture->bind(leShader, textureUnit, "_texture", "_textureParams");
 
             // set modelview and projection matrices
-            _shader->activate();
-            _shader->setIgnoreUniformLocationError(true);
-            decorateRenderProlog(data, _shader);
-            _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
-            _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
-            _shader->setUniform("_color", p_color.getValue());
-            _shader->setUniform("_cameraPosition", p_camera.getValue().getPosition());
-            _shader->setIgnoreUniformLocationError(false);
+            leShader->setIgnoreUniformLocationError(true);
+            decorateRenderProlog(data, leShader);
+            leShader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
+            leShader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
+            leShader->setUniform("_viewportMatrix", viewportMatrix);
 
-            // create entry points texture
+            leShader->setUniform("_computeNormals", proxyGeometry->getNormalsBuffer() == 0);
+
+            leShader->setUniform("_coloringMode", p_coloringMode.getValue());
+            leShader->setUniform("_solidColor", p_solidColor.getValue());
+            leShader->setUniform("_wireframeColor", p_wireframeColor.getValue());
+            leShader->setUniform("_lineWidth", p_lineWidth.getValue());
+
+            leShader->setUniform("_cameraPosition", p_camera.getValue().getPosition());
+            leShader->setIgnoreUniformLocationError(false);
+
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
 
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             glClearDepth(1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            proxyGeometry->render();
+            if (p_renderMode.getOptionValue() == GL_POINTS)
+                glPointSize(p_pointSize.getValue());
+            else if (p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
+                glLineWidth(p_lineWidth.getValue());
 
-            decorateRenderEpilog(_shader);
-            _shader->deactivate();
+            proxyGeometry->render(p_renderMode.getOptionValue());
+
+            if (p_renderMode.getOptionValue() == GL_POINTS)
+                glPointSize(1.f);
+            else if (p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
+                glLineWidth(1.f);
+
+            decorateRenderEpilog(leShader);
+            leShader->deactivate();
+            glDepthFunc(GL_LESS);
             glDisable(GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
             LGL_ERROR;
 
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
@@ -118,9 +203,55 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    std::string GeometryRenderer::generateGlslHeader() const {
+    std::string GeometryRenderer::generateGlslHeader(bool hasGeometryShader) const {
         std::string toReturn = getDecoratedHeader();
+
+        if (hasGeometryShader && p_showWireframe.getValue())
+            toReturn += "#define WIREFRAME_RENDERING\n";
+
+        if (hasGeometryShader)
+            toReturn += "#define HAS_GEOMETRY_SHADER\n";
+
+        if (p_coloringMode.getOptionValue() == TEXTURE_COLOR)
+            toReturn += "#define ENABLE_TEXTURING\n";
+
         return toReturn;
+    }
+
+    void GeometryRenderer::updateShader() {
+        _pointShader->setHeaders(generateGlslHeader(false));
+        _pointShader->rebuild();
+        _meshShader->setHeaders(generateGlslHeader(true));
+        _meshShader->rebuild();
+        validate(INVALID_SHADER);
+    }
+
+    void GeometryRenderer::updateProperties(DataContainer& dataContainer) {
+        p_solidColor.setVisible(p_coloringMode.getOptionValue() == SOLID_COLOR);
+
+        switch (p_renderMode.getOptionValue()) {
+            case GL_POINTS:
+                p_pointSize.setVisible(true);
+                p_lineWidth.setVisible(false);
+                p_showWireframe.setVisible(false);
+                break;
+            case GL_LINES: // fallthrough
+            case GL_LINE_STRIP:
+                p_pointSize.setVisible(false);
+                p_lineWidth.setVisible(true);
+                p_showWireframe.setVisible(false);
+                break;
+            case GL_TRIANGLES: // fallthrough
+            case GL_TRIANGLE_FAN: // fallthrough
+            case GL_TRIANGLE_STRIP: // fallthrough
+            case GL_POLYGON:
+                p_pointSize.setVisible(false);
+                p_lineWidth.setVisible(p_showWireframe.getValue());
+                p_showWireframe.setVisible(true);
+                break;
+        }
+
+        p_wireframeColor.setVisible(p_showWireframe.getValue());
     }
 
 }

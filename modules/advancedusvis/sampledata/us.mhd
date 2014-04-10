@@ -1,0 +1,9 @@
+ObjectType = Image
+NDims = 2
+DimSize = 720 500
+ElementSpacing = 1 1
+Position = 0 0
+ElementType = MET_UCHAR
+ElementNumberOfChannels = 1
+ElementByteOrderMSB = False
+ElementDataFile = us.raw

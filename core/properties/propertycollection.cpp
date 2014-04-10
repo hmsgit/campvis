@@ -23,7 +23,10 @@
 // ================================================================================================
 
 #include "propertycollection.h"
+
 #include "core/properties/abstractproperty.h"
+#include "core/properties/metaproperty.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
     HasPropertyCollection::HasPropertyCollection() {
@@ -32,25 +35,26 @@ namespace campvis {
     HasPropertyCollection::~HasPropertyCollection() {
     }
 
-    void HasPropertyCollection::addProperty(AbstractProperty* prop) {
-        tgtAssert(prop != 0, "Property must not be 0!");
-        PropertyCollection::iterator it = findProperty(prop->getName());
+    void HasPropertyCollection::addProperty(AbstractProperty& prop) {
+        PropertyCollection::iterator it = findProperty(prop.getName());
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
-            *it = prop;
+            s_propertyRemoved(*it);
+            *it = &prop;
         }
         else {
-            _properties.push_back(prop);
+            _properties.push_back(&prop);
         }
-        prop->s_changed.connect(this, &HasPropertyCollection::onPropertyChanged);
+        prop.s_changed.connect(this, &HasPropertyCollection::onPropertyChanged);
+        s_propertyAdded(&prop);
     }
 
-    void HasPropertyCollection::removeProperty(AbstractProperty* prop) {
-        tgtAssert(prop != 0, "Property must not be 0!");
-        PropertyCollection::iterator it = findProperty(prop->getName());
+    void HasPropertyCollection::removeProperty(AbstractProperty& prop) {
+        PropertyCollection::iterator it = findProperty(prop.getName());
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
             _properties.erase(it);
+            s_propertyRemoved(&prop);
         }
     }
 
@@ -58,7 +62,26 @@ namespace campvis {
         PropertyCollection::const_iterator it = findProperty(name);
         if (it != _properties.end())
             return *it;
+
         return 0;
+    }
+
+    AbstractProperty* HasPropertyCollection::getNestedProperty(const std::string& name) const {
+        // try to find nested property (use :: as delimiter)
+        std::vector<std::string> levels = StringUtils::split(name, "::");
+        AbstractProperty* toReturn = getProperty(levels[0]);
+        size_t currentLevel = 1;
+        while (toReturn != 0 && currentLevel < levels.size()) {
+            if (MetaProperty* tester = dynamic_cast<MetaProperty*>(toReturn)) {
+            	toReturn = tester->getProperty(levels[currentLevel]);
+                ++currentLevel;
+            }
+            else {
+                toReturn = 0;
+            }
+        }
+
+        return toReturn;
     }
 
     const PropertyCollection& HasPropertyCollection::getProperties() const {
@@ -111,13 +134,8 @@ namespace campvis {
         }
     }
 
-    void HasPropertyCollection::onPropertyChanged(const AbstractProperty* prop) {
-        if (prop->getInvalidationLevel() & AbstractProcessor::INVALID_PROPERTIES)
-            updateProperties();
-    }
-
-    void HasPropertyCollection::updateProperties() {
-
+    void HasPropertyCollection::onPropertyChanged(const AbstractProperty* /*prop*/) {
+        // nothing to do here, method is just provided as convenience for child classes.
     }
 
 }

@@ -29,7 +29,7 @@
 #include "tgt/tgt_math.h"
 #include "tgt/vector.h"
 
-#include <itkCovariantVector.h>
+#include <itkVector.h>
 
 #include "core/tools/typetraits.h"
 
@@ -60,19 +60,19 @@ namespace {
 
     template<typename BASETYPE>
     struct ItkTypeTraitsHelperOfBasetypePerChannel<BASETYPE, 2> {
-        typedef itk::CovariantVector< BASETYPE, 2 > ItkElementType;
+        typedef itk::Vector< BASETYPE, 2 > ItkElementType;
 
     };
 
     template<typename BASETYPE>
     struct ItkTypeTraitsHelperOfBasetypePerChannel<BASETYPE, 3> {
-        typedef itk::CovariantVector< BASETYPE, 3 > ItkElementType;
+        typedef itk::Vector< BASETYPE, 3 > ItkElementType;
 
     };
 
     template<typename BASETYPE>
     struct ItkTypeTraitsHelperOfBasetypePerChannel<BASETYPE, 4> {
-        typedef itk::CovariantVector< BASETYPE, 4 > ItkElementType;
+        typedef itk::Vector< BASETYPE, 4 > ItkElementType;
 
     };
 

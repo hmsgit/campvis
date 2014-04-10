@@ -26,7 +26,9 @@
 #define DATANAMEPROPERTYWIDGET_H__
 
 #include "sigslot/sigslot.h"
+#include "core/properties/datanameproperty.h"
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 
 class QComboBox;
 class QLineEdit;
@@ -46,6 +48,7 @@ namespace campvis {
         /**
          * Creates a new PropertyWidget for the property \a property.
          * \param   property    The property the widget shall handle
+         * \param   dc          DataContainer this property uses to populate the combo box (may be 0).
          * \param   parent      Parent Qt widget
          */
         DataNamePropertyWidget(DataNameProperty* property, DataContainer* dc, QWidget* parent = 0);
@@ -79,9 +82,11 @@ namespace campvis {
 
         QLineEdit* _lineEdit;
         QComboBox* _combobox;
-        DataContainer* _dc;
 
     };
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<DataNamePropertyWidget, DataNameProperty, 10>;
 }
 
 #endif // DATANAMEPROPERTYWIDGET_H__

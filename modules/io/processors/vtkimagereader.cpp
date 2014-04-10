@@ -44,16 +44,17 @@ namespace campvis {
     const std::string VtkImageReader::loggerCat_ = "CAMPVis.modules.io.VtkImageReader";
 
     VtkImageReader::VtkImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
-        , p_targetImageID("targetImageName", "Target Image ID", "VtkImageReader.output", DataNameProperty::WRITE)
+        : AbstractImageReader()
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        this->_ext.push_back(".vtk");
+        this->p_targetImageID.setValue("VtkImageReader.output");
+
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     VtkImageReader::~VtkImageReader() {
@@ -66,18 +67,19 @@ namespace campvis {
         return StringUtils::trim(toReturn);
     }
 
-    void VtkImageReader::process(DataContainer& data) {
+    void VtkImageReader::updateResult(DataContainer& data) {
         try {
             std::ifstream file(p_url.getValue().c_str(), std::ifstream::in);
             if (!file.is_open() || file.bad())
                 throw tgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
 
             std::string curLine = getTrimmedLine(file);
+            // cppcheck-suppress stlIfStrFind
             if (curLine.find("# vtk DataFile Version") != 0)
                 throw tgt::FileException("Unknown identifier in vtk file.", p_url.getValue());
 
             // next line is the header - contains only unimportant data
-            curLine = getTrimmedLine(file);
+            getTrimmedLine(file);
 
             // this line is the format
             curLine = StringUtils::lowercase(getTrimmedLine(file));
@@ -116,7 +118,6 @@ namespace campvis {
 
     void VtkImageReader::parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception) {
         // init optional parameters with sane default values
-        std::string url;
         size_t dimensionality = 3;
         tgt::svec3 size(static_cast<size_t>(0));
 
@@ -266,5 +267,5 @@ namespace campvis {
         IndexedMeshGeometry* g = new IndexedMeshGeometry(indices, vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
         data.addData(p_targetImageID.getValue(), g);
     }
-
+    
 }

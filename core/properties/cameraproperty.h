@@ -30,16 +30,15 @@
 
 namespace campvis {
 
-    class CameraProperty : public GenericProperty<tgt::Camera> {
+    class CAMPVIS_CORE_API CameraProperty : public GenericProperty<tgt::Camera> {
     public:
         /**
          * Creates a new CameraProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
          * \param cam       Camera to initialize the property with
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera(), int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera());
 
         /**
          * Virtual Destructor
@@ -47,11 +46,6 @@ namespace campvis {
         virtual ~CameraProperty();
 
 
-        /**
-         * Sets the camera's window ratio.
-         * \param r     The new camera's window ratio (viewport.x / viewport.y)
-         */
-        void setWindowRatio(float r);
 
     protected:
 

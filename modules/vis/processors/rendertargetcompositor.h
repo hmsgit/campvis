@@ -79,15 +79,18 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_firstImageId;             ///< image ID for the first image to combine
         DataNameProperty p_secondImageId;            ///< image ID for the second image to combine
         DataNameProperty p_targetImageId;            ///< image ID for combined output image
         GenericOptionProperty<CompositingMode> p_compositingMethod;
         FloatProperty p_alphaValue;
 
+        BoolProperty p_enableBackground;
+
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         tgt::Shader* _shader;                           ///< Shader for composition
 
         static const std::string loggerCat_;

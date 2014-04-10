@@ -29,6 +29,7 @@
 
 #include "tgt/buffer.h"
 #include "tgt/vertexarrayobject.h"
+#include "tgt/event/eventlistener.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
@@ -50,8 +51,9 @@ namespace campvis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class SliceExtractor : public VisualizationProcessor, public HasProcessorDecorators {
+    class SliceExtractor : public VisualizationProcessor, public tgt::EventListener {
     public:
+        /// Slice Orientation to render
         enum SliceOrientation {
             XY_PLANE = 0,
             XZ_PLANE = 1,
@@ -81,12 +83,16 @@ namespace campvis {
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
-        virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        /// \see AbstractProcessor::process()
-        virtual void process(DataContainer& data);
+        /// \see tgt::EventListener::onEvent()
+        virtual void onEvent(tgt::Event* e);
+
+        /// Signal emitted when a scribble was painted, parameter gives the position in image coordinates.
+        sigslot::signal1<tgt::vec3> s_scribblePainted;
 
         DataNameProperty p_sourceImageID;                  ///< image ID for input image
+        DataNameProperty p_geometryID;                     ///< ID for input geometry
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
@@ -99,13 +105,15 @@ namespace campvis {
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
 
     protected:
-        /// adapts the range of the p_xSliceNumber property to the image
-        /// \see    AbstractPro#::updateProperties
-        virtual void updateProperties(DataContainer& dc);
-
-        void updateBorderGeometry();
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
 
         tgt::Shader* _shader;                           ///< Shader for slice rendering
+
+        DataHandle _currentImage;                       ///< cached DataHandle to shown image (needed for scribbles)
+        bool _inScribbleMode;                           ///< Flag whether processor is in scribble mode (i.e. mouse is pressed)
 
         static const std::string loggerCat_;
 

@@ -46,11 +46,11 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&p_inputImage1);
-        addProperty(&p_inputImage2);
-        addProperty(&p_inputImage3);
-        addProperty(&p_inputImage4);
-        addProperty(&p_outputImage);
+        addProperty(p_inputImage1);
+        addProperty(p_inputImage2);
+        addProperty(p_inputImage3);
+        addProperty(p_inputImage4);
+        addProperty(p_outputImage);
     }
 
     QuadView::~QuadView() {
@@ -59,7 +59,7 @@ namespace campvis {
 
     void QuadView::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/quadview.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/quadview.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -69,7 +69,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void QuadView::process(DataContainer& data) {
+    void QuadView::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> inputImage1(data, p_inputImage1.getValue());
         ScopedTypedData<RenderData> inputImage2(data, p_inputImage2.getValue());
         ScopedTypedData<RenderData> inputImage3(data, p_inputImage3.getValue());

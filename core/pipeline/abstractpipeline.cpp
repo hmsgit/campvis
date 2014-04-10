@@ -76,8 +76,8 @@ namespace campvis {
 
         _enabled = false;
 
-        addProperty(&_renderTargetID);
-        addProperty(&_canvasSize);
+        addProperty(_renderTargetID);
+        addProperty(_canvasSize);
     }
 
     AbstractPipeline::~AbstractPipeline() {
@@ -132,9 +132,6 @@ namespace campvis {
                 _ignoreCanvasSizeUpdate = false;
             }
         }
-        else {
-            HasPropertyCollection::onPropertyChanged(prop);
-        }
     }
 
     const DataContainer& AbstractPipeline::getDataContainer() const {
@@ -148,19 +145,9 @@ namespace campvis {
     void AbstractPipeline::executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
+        // execute processor if needed
         if (processor->getEnabled() && !processor->isLocked()) {
-            // update properties if they're invalid
-            if (processor->hasInvalidProperties()) {
-                processor->updateProperties(*_data);
-#if CAMPVIS_DEBUG
-                if (processor->hasInvalidProperties())
-                    LDEBUG("Processor " << processor->getName() << " still has INVALID_PROPERTIES level. Did you forget to validate the processor in updateProperties()?");
-#endif
-            }
-
-            // execute processor if needed
-            if (processor->hasInvalidResult()) {
-                processor->lockProcessor();
+            if (! processor->isValid()) {
                 clock_t startTime = clock();
 
                 try {
@@ -175,15 +162,8 @@ namespace campvis {
 
                 if (processor->getClockExecutionTime()) {
                     clock_t endTime = clock();
-                    LDEBUG("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+                    LINFO("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
                 }
-
-                // Unlocking processors might be expensive, since a long chain of invalidations might be started
-                // -> do this in another thread...
-                if (unlockInExtraThred)
-                    SimpleJobProc.enqueueJob(makeJob(processor, &AbstractProcessor::unlockProcessor));
-                else
-                    processor->unlockProcessor();
             }
         }
     }
@@ -233,16 +213,6 @@ namespace campvis {
     void AbstractPipeline::addProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.")
         _processors.push_back(processor);
-    }
-
-    void AbstractPipeline::lockAllProcessors() {
-        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it)
-            (*it)->lockProcessor();
-    }
-
-    void AbstractPipeline::unlockAllProcessors() {
-        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it)
-            (*it)->unlockProcessor();
     }
 
     void AbstractPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor* processor) {

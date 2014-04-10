@@ -26,24 +26,29 @@
 #define TRANSFERFUNCTIONPROPERTY_H__
 
 #include "sigslot/sigslot.h"
+
+#include "core/coreapi.h"
 #include "core/properties/abstractproperty.h"
 #include "core/classification/abstracttransferfunction.h"
+
+#include <tbb/atomic.h>
 
 namespace campvis {
 
     /**
      * \todo    Implement correct behavior if the TF changes during locked property state.
      */
-    class TransferFunctionProperty : public AbstractProperty {
+    class CAMPVIS_CORE_API TransferFunctionProperty : public AbstractProperty , public sigslot::has_slots<> {
     public:
+        typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
+
         /**
          * Creates a new TransferFunctionProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
          * \param tf        Transfer function to initialize the property with.
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf);
 
         /**
          * Virtual Destructor
@@ -76,13 +81,65 @@ namespace campvis {
          * Slot being called when \a _transferFunction has changed.
          */
         void onTFChanged();
+        
+        /**
+         * Returns a DataHandle to the image for this transfer function, its pointer may be 0.
+         * \note    If the data in \a imageHandle is not 0, it points to a valid ImageData object.
+         * \return  _imageHandle, its pointer may be 0.
+         */
+        DataHandle getImageHandle() const;
+
+        /**
+         * Sets the DataHandle for this transfer function, its pointer may be 0.
+         * \note    If the data in \a imageHandle is not 0, it must point to a valid ImageData object.
+         * \param   imageHandle     The new DataHandle for this transfer function, if its pointer is 
+         *                          not 0 it must point to a valid ImageData object.
+         */
+        void setImageHandle(DataHandle imageHandle);
+
+        /**
+         * Returns the flag whether to automatically fit the TF window to the data in the image handle.
+         * \return  _autoFitWindowToData
+         */
+        bool getAutoFitWindowToData() const;
+
+        /**
+         * Sets the flag whether to automatically fit the TF window to the data in the image handle.
+         * \param   newValue    New value of the flag whether to automatically fit the TF window to the data in the image handle.
+         */
+        void setAutoFitWindowToData(bool newValue);
+        
+        /**
+         * Returns the intensity histogram
+         * \return  _intensityHistogram
+         */
+        const IntensityHistogramType* getIntensityHistogram() const;
 
 
+        /// Signal emmitted directly before replacing the entire transfer function
         sigslot::signal1<AbstractTransferFunction*> s_BeforeTFReplace;
+        /// Signal emmitted directly after replacing the entire transfer function
         sigslot::signal1<AbstractTransferFunction*> s_AfterTFReplace;
 
+        /// Signal emitted when the image DataHandle for this TF has changed.
+        sigslot::signal0<> s_imageHandleChanged;
+        /// Signal emitted when the flag whether to automatically fit the TF window to the data in the image handle.
+        sigslot::signal0<> s_autoFitWindowToDataChanged;
+
     protected:
-        AbstractTransferFunction* _transferFunction;    ///< Transfer function of this property
+        /**
+         * Computes the intensity histogram, you may override this method if needed.
+         */
+        virtual void computeIntensityHistogram() const;
+
+        /// Slot called from TF when its intensity domain has changed
+        void onTfIntensityDomainChanged();
+
+        AbstractTransferFunction* _transferFunction;            ///< Transfer function of this property
+        DataHandle _imageHandle;                                ///< DataHandle to the image for this transfer function. May be 0.
+        mutable tbb::atomic<IntensityHistogramType*> _intensityHistogram;   ///< Intensity histogram of the intensity in _imageHandle for the current _intensityDomain
+        mutable tbb::atomic<bool> _dirtyHistogram;              ///< Flag whether the intensity histogram has to be updated.
+        bool _autoFitWindowToData;                              ///< Flag whether to automatically fit the TF window to the data in the image handle.
 
         static const std::string loggerCat_;
     };

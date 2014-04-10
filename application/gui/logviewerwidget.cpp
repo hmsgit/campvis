@@ -33,10 +33,10 @@ namespace campvis {
         setupGUI();
 
         _log = new BufferingLog(100, this);
-        _log->addCat("", true);
+        _log->addCat("", true, tgt::Debug);
 
-        connect(_log, SIGNAL(s_messageAppended(const QString&)),
-                this, SLOT(appendMessage(const QString&)));
+        connect(_log, SIGNAL(s_messageAppended(const QString&, int)),
+                this, SLOT(appendMessage(const QString&, int)));
     }
 
     LogViewerWidget::~LogViewerWidget() {
@@ -60,6 +60,21 @@ namespace campvis {
 
         _filter_label->setBuddy(_filter_line_edit);
         _controls_layout->addWidget(_filter_line_edit);
+
+        _cbLogLevel = new QComboBox(this);
+        _cbLogLevel->addItem("Debug",   static_cast<int>(tgt::Debug));
+        _cbLogLevel->addItem("Info",    static_cast<int>(tgt::Info));
+        _cbLogLevel->addItem("Warning", static_cast<int>(tgt::Warning));
+        _cbLogLevel->addItem("Error",   static_cast<int>(tgt::Error));
+        _cbLogLevel->addItem("Fatal",   static_cast<int>(tgt::Fatal));
+        _cbLogLevel->setCurrentIndex(1);
+
+        QLabel* lblLogLevel = new QLabel("Minimum Log Level:");
+        lblLogLevel->setBuddy(_cbLogLevel);
+
+        _controls_layout->addWidget(lblLogLevel);
+        _controls_layout->addWidget(_cbLogLevel);
+
         _controls_layout->addStretch();
 
         _clear_button = new QPushButton(tr("&Clear"), this);
@@ -79,6 +94,7 @@ namespace campvis {
 
         connect(_clear_button, SIGNAL(clicked()), this, SLOT(clearMessages()));
         connect(_filter_line_edit, SIGNAL(textEdited(const QString&)), this, SLOT(filterLogMessages(const QString&)));
+        connect(_cbLogLevel, SIGNAL(currentIndexChanged(int)), this, SLOT(onLogLevelChanged(int)));
     }
 
     void LogViewerWidget::init() {
@@ -89,16 +105,19 @@ namespace campvis {
         LogMgr.removeLog(_log);
     }
 
-    void LogViewerWidget::appendMessage(const QString& message)
+    void LogViewerWidget::appendMessage(const QString& message, int level)
     {
-        _logMessages.push_back(message);
-        displayMessage(message);
+        LogEntry entry = { message, level };
+        _logMessages.push_back(entry);
+        displayMessage(entry);
     }
 
-    void LogViewerWidget::displayMessage(const QString& message)
+    void LogViewerWidget::displayMessage(const LogViewerWidget::LogEntry& message)
     {
-        if (_filterRegExp == 0 || _filterRegExp->indexIn(message) != -1) {
-            _logDisplay->append(message);
+        int filterLevel = _cbLogLevel->itemData(_cbLogLevel->currentIndex()).toInt();
+        
+        if ((message._level >= filterLevel) && (_filterRegExp == 0 || _filterRegExp->indexIn(message._message) != -1)) {
+            _logDisplay->append(message._message);
         }
     }
 
@@ -119,9 +138,13 @@ namespace campvis {
         _logDisplay->clear();
         _logHighlighter->setFilterRegExp(_filterRegExp);
 
-        for (std::deque<QString>::iterator it = _logMessages.begin(); it != _logMessages.end(); it++) {
+        for (std::deque<LogEntry>::iterator it = _logMessages.begin(); it != _logMessages.end(); ++it) {
             displayMessage(*it);
         }
+    }
+
+    void LogViewerWidget::onLogLevelChanged(int) {
+        filterLogMessages(_filter_line_edit->text());
     }
 
 }

@@ -87,7 +87,7 @@ namespace campvis {
         while (endpos != std::string::npos) {
             endpos = line.find_first_of(delimiter, linepos);
             toReturn.push_back(line.substr(linepos, endpos - linepos));
-            linepos = endpos + 1;
+            linepos = endpos + delimiter.length();
         }
         return toReturn;
     }
@@ -124,7 +124,7 @@ namespace campvis {
                 endpos = str.find_first_of(delimiter, strpos);
                 toReturn.push_back(StringUtils::trim(str.substr(strpos, endpos - strpos), whitespace));
             }
-            strpos = endpos + 1;
+            strpos = endpos + delimiter.length();
         }
         return toReturn;
     }

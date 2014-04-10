@@ -49,10 +49,10 @@ namespace campvis {
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_geometryID);
-        addProperty(&p_renderTargetID);
-        addProperty(&p_camera);
-        addProperty(&p_color);
+        addProperty(p_geometryID);
+        addProperty(p_renderTargetID);
+        addProperty(p_camera);
+        addProperty(p_color);
 
         decoratePropertyCollection(this);
     }
@@ -63,7 +63,7 @@ namespace campvis {
 
     void GeometryStrainRenderer::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/geometrystrainrenderer.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/geometrystrainrenderer.frag", "");
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
         }
@@ -75,17 +75,11 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void GeometryStrainRenderer::process(DataContainer& data) {
+    void GeometryStrainRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ImageRepresentationGL::ScopedRepresentation strainData(data, p_strainId.getValue());
 
         if (proxyGeometry != 0 && strainData != 0 && _shader != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateGlslHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
-
             // set modelview and projection matrices
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
@@ -125,4 +119,10 @@ namespace campvis {
         return toReturn;
     }
 
+    void GeometryStrainRenderer::updateShader() {
+        _shader->setHeaders(generateGlslHeader());
+        _shader->rebuild();
+
+        validate(INVALID_SHADER);
+    }
 }

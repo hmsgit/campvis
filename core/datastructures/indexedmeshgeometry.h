@@ -43,7 +43,7 @@ namespace campvis {
      * \note    Like all Geometry classes IndexedMeshGeometry has value-sematics: Once created, the 
      *          faces cannot be altered anymore.
      */
-    class IndexedMeshGeometry : public GeometryData {
+    class CAMPVIS_CORE_API IndexedMeshGeometry : public GeometryData {
     public:
         /**
          * Creates a new IndexedMeshGeometry built from the given faces.
@@ -97,6 +97,10 @@ namespace campvis {
 
         /// \see GeometryData::getWorldBounds
         virtual tgt::Bounds getWorldBounds() const;
+        /// \see GeometryData::hasTextureCoordinates
+        virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::applyTransformationToVertices
+        virtual void applyTransformationToVertices(const tgt::mat4& t);
 
     protected:
         /**

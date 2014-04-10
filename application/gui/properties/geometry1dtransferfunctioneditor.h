@@ -56,10 +56,11 @@ namespace campvis {
     public:
         /**
          * Creates a new editor widget for the for the TransferFunctionProperty \a property.
+         * \param   prop        TransferFunctionProperty to generate the editor for.
          * \param   tf          The transfer function the editor shall handle.
          * \param   parent      Parent Qt widget
          */
-        Geometry1DTransferFunctionEditor(Geometry1DTransferFunction* tf, QWidget* parent = 0);
+        Geometry1DTransferFunctionEditor(TransferFunctionProperty* prop, Geometry1DTransferFunction* tf, QWidget* parent = 0);
 
         /**
          * Destructor

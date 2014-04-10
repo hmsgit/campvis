@@ -25,6 +25,8 @@
 #ifndef LTFIMAGEREADER_H__
 #define LTFIMAGEREADER_H__
 
+#include "abstractimagereader.h"
+
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
@@ -37,7 +39,7 @@ namespace campvis {
     /**
      * Reads raw images into the pipeline.
      */
-    class LtfImageReader : public AbstractProcessor {
+    class LtfImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new LtfImageReader Processor
@@ -49,13 +51,6 @@ namespace campvis {
          **/
         virtual ~LtfImageReader();
 
-
-        /**
-         * Reads the raw file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "LtfImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -64,22 +59,20 @@ namespace campvis {
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
-
-        StringProperty p_url;               ///< URL for file to read
+        
         IVec3Property p_size;               ///< Image size
         IntProperty p_numChannels;          ///< Number of channels per element
         GenericOptionProperty<WeaklyTypedPointer::BaseType> p_baseType; ///< Base type
-
-        DataNameProperty p_targetImageID;   ///< image ID for read image
 
         Vec3Property p_imageOffset;         ///< Image Offset in mm
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };
-
 }
 
 #endif // LTFIMAGEREADER_H__

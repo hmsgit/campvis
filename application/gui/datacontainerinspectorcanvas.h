@@ -29,7 +29,7 @@
 #include "tgt/painter.h"
 #include "tgt/event/eventlistener.h"
 #include "tgt/event/mouseevent.h"
-#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/glcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 
@@ -176,6 +176,11 @@ namespace campvis {
         IntProperty p_currentSlice;
         Vec4Property p_meshSolidColor;                   ///< Color used to render the mesh object
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
+
+        BoolProperty p_renderRChannel;  /// Flag whether to render Red channel
+        BoolProperty p_renderGChannel;  /// Flag whether to render Green channel
+        BoolProperty p_renderBChannel;  /// Flag whether to render Blue channel
+        BoolProperty p_renderAChannel;  /// Flag whether to render Alpha channel
 
     private slots:
         /**

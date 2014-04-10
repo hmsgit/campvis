@@ -46,29 +46,30 @@ namespace campvis {
     const std::string LtfImageReader::loggerCat_ = "CAMPVis.modules.io.LtfImageReader";
 
     LtfImageReader::LtfImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
+        : AbstractImageReader()
         , p_size("Size", "Image Size", tgt::ivec3(1), tgt::ivec3(1), tgt::ivec3(2048))
         , p_numChannels("NumChannels", "Number of Channels per Element", 1, 1, 9)
         , p_baseType("BaseType", "Base Type", baseTypeOptions, 7)
-        , p_targetImageID("targetImageName", "Target Image ID", "LtfImageReader.output", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-        addProperty(&p_url);
-        addProperty(&p_size);
-        addProperty(&p_numChannels);
-        addProperty(&p_baseType);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        this->_ext.push_back(".ltf");
+        this->p_targetImageID.setValue("LtfImageReader.output");
+
+        addProperty(p_url);
+        addProperty(p_size);
+        addProperty(p_numChannels);
+        addProperty(p_baseType);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     LtfImageReader::~LtfImageReader() {
 
     }
 
-    void LtfImageReader::process(DataContainer& data) {
+    void LtfImageReader::updateResult(DataContainer& data) {
         size_t dimensionality = 3;
         if (p_size.getValue().z == 1) {
             dimensionality = (p_size.getValue().y == 1) ? 1 : 2;
@@ -98,4 +99,5 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
+    
 }

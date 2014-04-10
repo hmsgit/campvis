@@ -35,6 +35,7 @@
 #include <tbb/spin_mutex.h>
 #include <tbb/mutex.h>
 
+#include "core/coreapi.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
@@ -53,7 +54,7 @@ namespace campvis {
     /**
      * Abstract base class for CAMPVis Pipelines.
      */
-    class AbstractPipeline : public HasPropertyCollection, public tgt::EventHandler, public tgt::EventListener {
+    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public tgt::EventHandler, public tgt::EventListener {
     public:
         /**
          * Creates a AbstractPipeline.
@@ -173,16 +174,6 @@ namespace campvis {
         sigslot::signal0<> s_renderTargetChanged;
 
     protected:
-        /**
-         * Locks all processors.
-         */
-        void lockAllProcessors();
-
-        /**
-         * Unlocks all processors.
-         */
-        void unlockAllProcessors();
-
         /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.

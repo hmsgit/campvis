@@ -35,15 +35,13 @@ namespace campvis {
 
     SimpleRaycaster::SimpleRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/simpleraycaster.frag", true)
-        , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
+        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_targetImageID);
-        addProperty(&p_enableShadowing);
-        addProperty(&p_shadowIntensity);
+        addProperty(p_enableShadowing, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_shadowIntensity);
         p_shadowIntensity.setVisible(false);
 
         decoratePropertyCollection(this);
@@ -93,7 +91,8 @@ namespace campvis {
         return toReturn;
     }
 
-    void SimpleRaycaster::updateProperties() {
+    void SimpleRaycaster::updateProperties(DataContainer& dataContainer) {
+        RaycastingProcessor::updateProperties(dataContainer);
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }

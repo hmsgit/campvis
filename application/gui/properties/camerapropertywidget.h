@@ -26,6 +26,7 @@
 #define CAMERAPROPERTYWIDGET_H__
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/cameraproperty.h"
 
 class QLabel;
@@ -42,9 +43,10 @@ namespace campvis {
         /**
          * Creates a new CameraPropertyWidget for the property \a property.
          * \param   property    The property the widget shall handle
+         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          * \param   parent      Parent Qt widget
          */
-        CameraPropertyWidget(CameraProperty* property, QWidget* parent = 0);
+        CameraPropertyWidget(CameraProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
 
         /**
          * Destructor
@@ -65,6 +67,9 @@ namespace campvis {
         QLabel* _lblUpVector;
 
     };
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<CameraPropertyWidget, CameraProperty>;
 }
 
 #endif // CAMERAPROPERTYWIDGET_H__

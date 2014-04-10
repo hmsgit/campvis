@@ -150,10 +150,6 @@ public:
     /// wheater canvas automatically calls glFlush or swap
     bool getAutoFlush();
 
-    ///Take a screenshot and save it as TGA file.
-    ///@param fname Target filename
-    bool takeScreenshot(std::string fname);
-
     /// Getter
     const ivec4& getRgbaSize() const;
 
@@ -193,6 +189,11 @@ public:
 
     /// Getter
     bool isInitialized() const { return initialized_; }
+
+    /// Acqures this canvas as current context
+    virtual void acquireAsCurrentContext() = 0;
+    /// Releases this canvas as current context
+    virtual void releaseAsCurrentContext() = 0;
 
 protected:
 

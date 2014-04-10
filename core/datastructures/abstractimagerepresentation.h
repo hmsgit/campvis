@@ -27,6 +27,8 @@
 
 #include "tgt/bounds.h"
 #include "tgt/vector.h"
+
+#include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
 
 namespace campvis {
@@ -38,7 +40,7 @@ namespace campvis {
      * the semantically same image but have their data at different locations (e.g. disk,
      * RAM, OpenGL texture, ...)
      */
-    class AbstractImageRepresentation {
+    class CAMPVIS_CORE_API AbstractImageRepresentation {
     public:
         /**
          * Creates a new abstract representation for the image \a parent.
@@ -94,29 +96,19 @@ namespace campvis {
          */
         virtual size_t getVideoMemoryFootprint() const = 0;
 
-        /**
-         * Returns the subimage representation of this representation given by \a llf and \a urb.
-         * TODO: Check whether it is necessary to adjust image mapping!
-         *
-         * \param   newParent   Parent image of the newly created subimage
-         * \param   llf         Lower-Left-Front coordinates of subimage
-         * \param   urb         Upper-Right-Back coordinates of subimage
-         * \return  An image representation containing the subimage of this with the given coordinates.
-         */
-        virtual AbstractImageRepresentation* getSubImage(ImageData* newParent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
-
     protected:
         /**
          * Adds this image representations to the newParent image data.
          */
         void addToParent() const;
 
+        const ImageData* _parent;       ///< Image this representation represents, must not be 0.
+
+    private:
         /// Not copy-constructable
         AbstractImageRepresentation(const AbstractImageRepresentation& rhs);
         /// Not assignable
         AbstractImageRepresentation& operator=(const AbstractImageRepresentation& rhs);
-
-        const ImageData* _parent;       ///< Image this representation represents, must not be 0.
 
         static const std::string loggerCat_;
     };

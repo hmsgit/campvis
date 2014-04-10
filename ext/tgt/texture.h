@@ -398,6 +398,7 @@ public:
 
     ///Return texel as tgt::Color (slow!), downloadTexture() needs to be called first
     tgt::Color texelAsFloat(size_t x, size_t y) const;
+    tgt::Color texelAsFloat(size_t x, size_t y, size_t z) const;
     float depthAsFloat(size_t x, size_t y) const;
     tgt::Color texelAsFloat(tgt::svec2 p) const { return texelAsFloat(p.x, p.y); }
     float depthAsFloat(tgt::svec2 p) const { return depthAsFloat(p.x, p.y); }

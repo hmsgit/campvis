@@ -33,6 +33,7 @@
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
+#include "core/pipeline/raycastingprocessor.h"
 
 namespace tgt {
     class Shader;
@@ -48,15 +49,17 @@ namespace campvis {
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.
         enum ProcessorInvalidationLevel {
-            PG_INVALID = 1 << 4,
-            EEP_INVALID = 1 << 5,
-            RAYCASTER_INVALID = 1 << 6
+            PG_INVALID = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
+            EEP_INVALID = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
+            RAYCASTER_INVALID = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 3
         };
 
         /**
          * Constructs a new VolumeRenderer Processor
-         **/
-        VolumeRenderer(IVec2Property* viewportSizeProp);
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
+         * \param   raycaster           Raycaster to use for rendering, must not be 0, VolumeRenderer will take ownership.
+         */
+        VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster = new SimpleRaycaster(0));
 
         /**
          * Destructor
@@ -81,17 +84,29 @@ namespace campvis {
         /// \see VisualizationPipeline::setViewportSizeProperty()
         virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
-        virtual void process(DataContainer& data);
+        /**
+         * Returns the used RaycastingProcessor.
+         * \return  _raycaster
+         */
+        RaycastingProcessor* getRaycastingProcessor();
 
-        DataNameProperty p_inputVolume;              ///< image ID for first input image
-        CameraProperty p_camera;
-        DataNameProperty p_outputImage;              ///< image ID for output image
+        DataNameProperty p_inputVolume;             ///< image ID for first input image
+        CameraProperty p_camera;                    ///< Camera 
+        DataNameProperty p_outputImage;             ///< image ID for output image
+
+        BoolProperty p_profileRaycaster;            ///< Flag whether the raycaster's execution time shall be profiled
+        GLuint _timerQueryRaycaster;                ///< OpenGL timer query for raycaster
 
         MetaProperty p_pgProps;                     ///< MetaProperty for properties of the ProxyGeometryGenerator processor
         MetaProperty p_eepProps;                    ///< MetaProperty for properties of the EEPGenerator processor
         MetaProperty p_raycasterProps;              ///< MetaProperty for properties of the raycasting processor
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
+
         /**
          * Slot getting called when one of the observed processors got invalidated.
          * Invalidates this meta-processor with the corresponding level.
@@ -106,7 +121,7 @@ namespace campvis {
 
         ProxyGeometryGenerator _pgGenerator;
         EEPGenerator _eepGenerator;
-        SimpleRaycaster _raycaster;
+        RaycastingProcessor* _raycaster;
 
         static const std::string loggerCat_;
     };

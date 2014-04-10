@@ -52,9 +52,9 @@ void GUIApplication::removeCanvas(GLCanvas* canvas) {
 }
 
 void GUIApplication::initCanvases() {
-    std::list<GLCanvas*>::iterator iter;
-    for ( iter = canvases_.begin(); iter != canvases_.end(); iter++ ) {
-        if (!(*iter)->isInitialized()) (*iter)->init();
+    for (std::list<GLCanvas*>::iterator iter = canvases_.begin(); iter != canvases_.end(); ++iter) {
+        if (! (*iter)->isInitialized())
+            (*iter)->init();
     }
 }
 

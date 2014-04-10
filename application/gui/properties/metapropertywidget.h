@@ -26,9 +26,10 @@
 #define METAPROPERTYWIDGET_H__
 
 
-#include "application/gui/properties/propertycollectionwidget.h"
-#include "application/gui/properties/abstractpropertywidget.h"
 #include "core/properties/metaproperty.h"
+#include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertycollectionwidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 
 namespace campvis {
     class DataContainer;
@@ -43,10 +44,11 @@ namespace campvis {
     public:
         /**
          * Creates a new MetaPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         * \param   property        The property the widget shall handle
+         * \param   dataContainer   DataContainer to use, must not be 0.
+         * \param   parent          Parent Qt widget
          */
-        MetaPropertyWidget(MetaProperty* property, DataContainer* dc, QWidget* parent = 0);
+        MetaPropertyWidget(MetaProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
 
         /**
          * Destructor
@@ -62,9 +64,11 @@ namespace campvis {
 
     private:
         PropertyCollectionWidget* _pcw;
-        DataContainer* _dc;
 
     };
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<MetaPropertyWidget, MetaProperty>;
 }
 
 #endif // METAPROPERTYWIDGET_H__

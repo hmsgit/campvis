@@ -28,13 +28,33 @@ ELSEIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 10 Win64")
 ELSEIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 11")
     SET(CAMPVIS_MSVC11 TRUE)
     SET(CAMPVIS_WIN32 TRUE)
-    MESSAGE("Visual Studio 11 Build (32 Bit) (not actively supported)")
+    MESSAGE("Visual Studio 11 Build (32 Bit)")
 ELSEIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 11 Win64")
     SET(CAMPVIS_MSVC11 TRUE)
     SET(CAMPVIS_WIN64 TRUE)
-    MESSAGE("Visual Studio 11 Build (64 Bit) (not actively supported)")
+    MESSAGE("Visual Studio 11 Build (64 Bit)")
+ELSEIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 12")
+    SET(CAMPVIS_MSVC12 TRUE)
+    SET(CAMPVIS_WIN32 TRUE)
+    MESSAGE("Visual Studio 12 Build (32 Bit)")
+ELSEIF(${CMAKE_GENERATOR} STREQUAL "Visual Studio 12 Win64")
+    SET(CAMPVIS_MSVC12 TRUE)
+    SET(CAMPVIS_WIN64 TRUE)
+    MESSAGE("Visual Studio 12 Build (64 Bit)")
 ELSEIF(${CMAKE_GENERATOR} MATCHES "NMake") 
     SET(CAMPVIS_NMAKE TRUE)
+
+    # NMake-based builds may very well use a Visual Studio compiler
+    IF(MSVC90)
+        SET(CAMPVIS_MSVC2008 TRUE)
+    ELSEIF(MSVC10)
+        SET(CAMPVIS_MSVC2010 TRUE)
+    ELSEIF(MSVC11)
+        SET(CAMPVIS_MSVC11 TRUE)
+    ELSEIF(MSVC12)
+        SET(CAMPVIS_MSVC12 TRUE)
+    ENDIF(MSVC90)
+
     IF(CMAKE_CL_64)
         SET(CAMPVIS_WIN64 TRUE)
         MESSAGE(STATUS "NMake 64 Bit Build")
@@ -70,6 +90,7 @@ IF(WIN32)
     LIST(APPEND CampvisGlobalDefinitions "-DNOMINMAX" "-D_CRT_SECURE_NO_DEPRECATE")
 
     # Disable warnings for Microsoft compiler:
+    # C4251  class needs to have dll interface (used for std classes)
     # C4290: C++ exception specification ignored except to indicate a function is
     #        not __declspec(nothrow)
     # C4390: ';' : empty controlled statement found; is this the intent?
@@ -77,7 +98,8 @@ IF(WIN32)
     # C4503: The decorated name was longer than the compiler limit (4096), and was truncated.
     #        Occurs in AutoEvaluatePipeline due to some nested nested map-iterator-map. Could
     #        not be deactivated locally...
-    LIST(APPEND CampvisGlobalDefinitions /wd4290 /wd4390 /wd4503)
+    # C4068: Unknown Pragma since we use some GCC pragmas in the code.
+    LIST(APPEND CampvisGlobalDefinitions /wd4251 /wd4290 /wd4390 /wd4503 /wd4068)
     
     # enable parallel builds in Visual Studio
     LIST(APPEND CampvisGlobalDefinitions /MP)
@@ -89,9 +111,10 @@ IF(WIN32)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /LARGEADDRESSAWARE")
     SET(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
 
-    IF(CAMPVIS_SHARED_LIBS)
+    IF(BUILD_SHARED_LIBS)
         # Linking against Windows DLLs requires explicit instantiation of templates
         LIST(APPEND CampvisGlobalDefinitions "-DDLL_TEMPLATE_INST")
+        LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_DYNAMIC_LIBS")
 
         IF(NOT CAMPVIS_GENERATE_MANIFEST)
             # Do not embed manifest into binaries in debug mode (slows down incremental linking)
@@ -110,7 +133,16 @@ IF(WIN32)
     ENDIF()
     
     LIST(APPEND CampvisGlobalExternalLibs netapi32 version)
-    
+
+    # Append the name of the current build type to the path of the CMake output directory so that
+    # NMake places all build artifacts in the same directories as Visual Studio. This makes NMake
+    # builds compatible with our macro that copies external DLLs into the build directory.
+    IF(CAMPVIS_NMAKE)
+        SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
+        SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
+        SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
+    ENDIF(CAMPVIS_NMAKE)
+
 ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
     LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable")
@@ -196,20 +228,6 @@ IF(EXISTS "${CampvisHome}/ext/eigen/Eigen/Eigen")
 ELSE()
     MESSAGE(WARNING "Did not find Eigen - Eigen library must be placed in ext/eigen/!")
 ENDIF()
-
-# detect libraries
-MESSAGE(STATUS "--------------------------------------------------------------------------------")
-MESSAGE(STATUS "Detecting Optional External Libraries:")
-
-# OpenCL
-FIND_PACKAGE(CL)
-IF (OPENCL_FOUND)
-    MESSAGE(STATUS "* Found OpenCL")
-    LIST(APPEND CampvisGlobalIncludeDirs ${OPENCL_INCLUDE_DIR})
-    LIST(APPEND CampvisGlobalExternalLibs ${OPENCL_LIBRARY})
-ELSE(OPENCL_FOUND)
-    MESSAGE(STATUS "* Did NOT find OpenCL!")
-ENDIF(OPENCL_FOUND)
-
 SET(CommonconfProcessed TRUE)
+
 ENDIF(NOT CommonconfProcessed)

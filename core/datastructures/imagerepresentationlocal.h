@@ -40,10 +40,8 @@ namespace campvis {
      * 
      * \todo    implement padding, add some kind of cool iterators
      */
-    class ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
+    class CAMPVIS_CORE_API ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
     public:
-        typedef ConcurrentGenericHistogramND<float, 1> IntensityHistogramType;
-
         /**
          * Destructor
          */
@@ -62,9 +60,6 @@ namespace campvis {
 
         /// \see AbstractData::clone()
         virtual ImageRepresentationLocal* clone(ImageData* newParent) const = 0;
-
-        /// \see ImageData::getSubImage()
-        virtual ImageRepresentationLocal* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const = 0;
 
         /**
          * Returns a WeaklyTypedPointer to the image data.
@@ -169,14 +164,6 @@ namespace campvis {
          */
         const Interval<float>& getNormalizedIntensityRange() const;
 
-        /**
-         * Returns the intensity distribution normalized to float as 1D histogram.
-         * \note    The intensity histogram is computed using lazy evaluation, hence, computation
-         *          may take some time.
-         * \return  _intensityHistogram
-         */
-        const IntensityHistogramType& getIntensityHistogram() const;
-
     protected:
         /**
          * Creates a new ImageData representation in local memory.
@@ -192,20 +179,15 @@ namespace campvis {
          */
         void computeNormalizedIntensityRange() const;
 
-        /**
-         * Computes the intensity histogram.
-         */
-        void computeIntensityHistogram() const;
 
         WeaklyTypedPointer::BaseType _baseType;     ///< Base type of the image data
 
         mutable tbb::atomic<bool> _intensityRangeDirty;         ///< Flag whether _normalizedIntensityRange is dirty and has to be recomputed
         mutable Interval<float> _normalizedIntensityRange;      ///< Range of the normalized intensities, mutable to allow lazy instantiation
-        mutable IntensityHistogramType* _intensityHistogram;    ///< Intensity histogram, mutable to allow lazy instantiation
-
-        static const std::string loggerCat_;
 
     private:
+
+        static const std::string loggerCat_;
 
         // We don't want this data to be copied - clone() must be enough
         // (read: We are too lazy to implement a correct copy constructor / assignment-operator)

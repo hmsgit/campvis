@@ -32,7 +32,7 @@ namespace campvis {
         , _numChannels(numChannels)
         , _pointer(ptr)
     {
-        tgtAssert(_numChannels > 0 && _numChannels <= 4, "Number of channels out of bounds!");
+        tgtAssert(_numChannels > 0, "Number of channels out of bounds!");
     };
 
     WeaklyTypedPointer::WeaklyTypedPointer()
@@ -310,44 +310,6 @@ namespace campvis {
     bool WeaklyTypedPointer::isSigned() const {
         return (_baseType == INT8) || (_baseType == INT16) || (_baseType == INT32);
     }
-
-#ifdef HAS_KISSCL
-    cl_channel_type WeaklyTypedPointer::getClChannelType() const {
-        switch (_baseType) {
-            case WeaklyTypedPointer::UINT8:
-                return CL_UNORM_INT8;
-            case WeaklyTypedPointer::INT8:
-                return CL_SNORM_INT8;
-            case WeaklyTypedPointer::UINT16:
-                return CL_UNORM_INT16;
-            case WeaklyTypedPointer::INT16:
-                return CL_SNORM_INT16;
-            case WeaklyTypedPointer::UINT32:
-                return CL_UNSIGNED_INT32;
-            case WeaklyTypedPointer::INT32:
-                return CL_SIGNED_INT32;
-            case WeaklyTypedPointer::FLOAT:
-                return CL_FLOAT;
-            default:
-                tgtAssert(false, "Should not reach this - wrong base data type!");
-                return CL_SIGNED_INT8;
-        }
-    }
-
-    cl_channel_order WeaklyTypedPointer::getClChannelOrder() const {
-        switch (_numChannels) {
-            case 1: 
-                return CL_INTENSITY;
-            case 2: 
-                return CL_RA;
-            case 4:
-                return CL_RGBA;
-            default:
-                LERROR("Unsupported number of channels.");
-                return CL_A;
-        }
-    }
-#endif
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
     ILenum WeaklyTypedPointer::getIlFormat() const {

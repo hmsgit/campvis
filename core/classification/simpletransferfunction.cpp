@@ -36,7 +36,7 @@ namespace campvis {
 
     SimpleTransferFunction::SimpleTransferFunction(size_t size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
         : AbstractTransferFunction(tgt::svec3(size, 1, 1), intensityDomain)
-        , _leftColor(0, 0, 0, 0)
+        , _leftColor(0, 0, 0, 255)
         , _rightColor(255)
     {
     }

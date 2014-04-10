@@ -106,6 +106,9 @@ namespace campvis {
     }
 
     void FaceGeometry::render(GLenum mode) const {
+        if (_vertices.empty())
+            return;
+
         createGLBuffers();
         if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -229,6 +232,19 @@ namespace campvis {
         for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
             toReturn.addPoint(*it);
         return toReturn;
+    }
+
+    bool FaceGeometry::hasTextureCoordinates() const {
+        return ! _textureCoordinates.empty();
+    }
+
+    void FaceGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+        for (size_t i = 0; i < _vertices.size(); ++i) {
+            tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
+            _vertices[i] = tmp.xyz() / tmp.w;
+        }
+
+        _buffersDirty = true;
     }
 
 }

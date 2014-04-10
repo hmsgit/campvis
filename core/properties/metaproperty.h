@@ -39,15 +39,14 @@ namespace campvis {
      *                     or (un)lock them. This has to be done by the owners of the wrapped 
      *                     properties.
      */
-    class MetaProperty : public AbstractProperty, public HasPropertyCollection {
+    class CAMPVIS_CORE_API MetaProperty : public AbstractProperty, public HasPropertyCollection {
     public:
         /**
          * Creates a new MetaProperty
          * \param name      Property name (unchangable!)
          * \param title     Property title (e.g. used for GUI)
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        MetaProperty(const std::string& name, const std::string& title, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        MetaProperty(const std::string& name, const std::string& title);
 
         /**
          * Virtual Destructor

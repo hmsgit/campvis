@@ -4,6 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 MESSAGE(STATUS "Configuring CAMPVis Core")
 
+
 # glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     classification/*.cpp
@@ -23,6 +24,7 @@ ENDFOREACH()
 
 
 FILE(GLOB CampvisCoreHeaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.h
     classification/*.h
     datastructures/*.h
     eventhandlers/*.h
@@ -42,22 +44,16 @@ FOREACH(CampvisModulesCoreHeader ${CampvisModulesCoreHeaders})
     LIST(APPEND CampvisCoreHeaders ${ModHeaderFile})
 ENDFOREACH()
 
-#SET(CampvisCoreSources
-#    application/campvis.cpp
-#    application/campvispainter.cpp
-#    datastructures/
-#)
-
-#SET(CampvisCoreHeaders 
-#    application/campvispainter.h
-#)
-
 ADD_LIBRARY(campvis-core 
     ${CampvisCoreSources} ${CampvisCoreHeaders} 
 )
 ADD_DEFINITIONS(${CampvisGlobalDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
 TARGET_LINK_LIBRARIES(campvis-core tgt ${CampvisGlobalExternalLibs})
+
+# if campvis-core is built as a shared library, CMake will define the following flag to instruct
+# the code to export DLL symbols
+SET_TARGET_PROPERTIES(campvis-core PROPERTIES DEFINE_SYMBOL "CAMPVIS_CORE_BUILD_DLL")
 
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)

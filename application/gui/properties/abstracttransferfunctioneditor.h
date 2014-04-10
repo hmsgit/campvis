@@ -26,6 +26,9 @@
 #define ABSTRACTTRANSFERFUNCTIONEDITOR_H__
 
 #include "sigslot/sigslot.h"
+
+#include "core/properties/transferfunctionproperty.h"
+
 #include <QBoxLayout>
 #include <QLabel>
 #include <QWidget>
@@ -43,10 +46,11 @@ namespace campvis {
     public:
         /**
          * Creates a new editor widget for the for the AbstractTransferFunction \a tf.
+         * \param   prop        TransferFunctionProperty to generate the editor for.
          * \param   tf          The transfer function the editor shall handle.
          * \param   parent      Parent Qt widget
          */
-        AbstractTransferFunctionEditor(AbstractTransferFunction* tf, QWidget* parent = 0);
+        AbstractTransferFunctionEditor(TransferFunctionProperty* prop, AbstractTransferFunction* tf, QWidget* parent = 0);
 
         /**
          * Destructor
@@ -59,6 +63,13 @@ namespace campvis {
          */
         virtual void updateWidgetFromProperty() = 0;
 
+        /**
+         * Tries to get the intensity histogram of the image stored in the Tf's property. May return 0.
+         * \return  The intensity histogram of the image stored in the TF's property's data handle.
+         */
+        const TransferFunctionProperty::IntensityHistogramType* getIntensityHistogram() const;
+
+        TransferFunctionProperty* _tfProperty;          ///< The parent TransferFunctionProperty of this editor
         AbstractTransferFunction* _transferFunction;    ///< The transfer function this widget handles
 
         /// Semaphore acts as flag whether the widget shall ignore incoming signals from properties being updated.

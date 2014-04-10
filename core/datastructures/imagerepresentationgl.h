@@ -42,7 +42,7 @@ namespace campvis {
      * Stores image data as OpenGL texture.
      * Can bei instantiated either by a WeaklyTypedPointer or strongly typed by an GenericImageRepresentationLocal.
      */
-    class ImageRepresentationGL : public GenericAbstractImageRepresentation<ImageRepresentationGL> {
+    class CAMPVIS_CORE_API ImageRepresentationGL : public GenericAbstractImageRepresentation<ImageRepresentationGL> {
     public:
         /**
          * Creates a new ImageRepresentationGL representation from a tgt::Texture and automatically
@@ -94,11 +94,6 @@ namespace campvis {
         /// \see AbstractImageRepresentation::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
-        /**
-         * \see AbstractImageRepresentation::getSubImage
-         */
-        virtual ImageRepresentationGL* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
-
 
         /**
          * Binds the image to the given shader using \a texUnit as texture unit and \a texUniform as shader uniform.
@@ -135,10 +130,20 @@ namespace campvis {
         /**
          * Returns a WeaklyTypedPointer to the data of this representation.
          * You do \b not own the pointer - do \b not modify its content!
+         * \see     ImageRepresentationGL::getWeaklyTypedPointerCopy()
          * \note    Make sure to call this method from a valid OpenGL context.
          * \return  A WeaklyTypedPointer to the data of this representation. Neither you own nor you may modify its data!
          */
         const WeaklyTypedPointer getWeaklyTypedPointer() const;
+
+        /**
+         * Returns a WeaklyTypedPointer to the data of this representation.
+         * Caller will own the pointer - take care to eventually delete it!
+         * \see     ImageRepresentationGL::getWeaklyTypedPointer()
+         * \note    Make sure to call this method from a valid OpenGL context.
+         * \return  A WeaklyTypedPointer to the data of this representation. Caller takes ownership!
+         */
+        const WeaklyTypedPointer getWeaklyTypedPointerCopy() const;
 
 
     protected:

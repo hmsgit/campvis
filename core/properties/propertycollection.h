@@ -26,9 +26,11 @@
 #define PROPERTYCOLLECTION_H__
 
 #include "sigslot/sigslot.h"
+
 #include <vector>
 #include <string>
 
+#include "core/coreapi.h"
 
 namespace campvis {
     class AbstractProperty;
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Abstract base class for classes having a PropertyCollection.
      */
-    class HasPropertyCollection : public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API HasPropertyCollection : public sigslot::has_slots<> {
     public:
         HasPropertyCollection();
 
@@ -52,14 +54,14 @@ namespace campvis {
          *              unregister the property before destroying/deleting it.
          * \param prop  Property to register
          */
-        void addProperty(AbstractProperty* prop);
+        virtual void addProperty(AbstractProperty& prop);
 
         /**
          * Unregisters \a prop from this processor.
          * \sa      HasPropertyCollection::addProperty
          * \param   prop  Property to unregister.
          */
-        void removeProperty(AbstractProperty* prop);
+        void removeProperty(AbstractProperty& prop);
 
         /**
          * Returns the property with the given name \a name.
@@ -68,6 +70,15 @@ namespace campvis {
          * \return      The property named \a name, 0 if no such property exists.
          */
         AbstractProperty* getProperty(const std::string& name) const;
+        
+        /**
+         * Returns the property with the given name \a name using nested syntax.
+         * You can search for nested properties in MetaProperties using "::" as delimiter.
+         * If no such property exists, the result will be 0.
+         * \param name  Name of the property to return, use "::" as delimiter for nested properties.
+         * \return      The property named \a name, 0 if no such property exists.
+         */
+        AbstractProperty* getNestedProperty(const std::string& name) const;
 
         /**
          * Returns the PropertyCollection of this processor.
@@ -111,13 +122,13 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
-    protected:
-        /**
-         * Gets called, when one of the properties invalidates with an INVALID_PROPERTIES level.
-         * \note    You may overload this method as needed.
-         */
-        virtual void updateProperties();
+        /// Signal emitted when a property was added to the collection.
+        sigslot::signal1<AbstractProperty*> s_propertyAdded;
 
+        /// Signal emitted when a property was removed from the collection.
+        sigslot::signal1<AbstractProperty*> s_propertyRemoved;
+
+    protected:
         /**
          * Searches _properties for a property named \a name.
          * \param name  Property name to search for.

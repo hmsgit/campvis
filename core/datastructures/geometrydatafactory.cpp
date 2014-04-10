@@ -26,6 +26,8 @@
 
 #include "tgt/assert.h"
 
+#include "core/tools/teapot.h"
+
 namespace campvis {
 
     FaceGeometry* GeometryDataFactory::createQuad(const tgt::vec3& llf, const tgt::vec3& urb, const tgt::vec3& texLlf, const tgt::vec3& texUrb) {
@@ -63,7 +65,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, llf.y, llf.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tLlf.z));
         vertices.push_back(tgt::vec3(llf.x, llf.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, 0.f, -1.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -76,7 +78,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
         texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tLlf.z));
         vertices.push_back(tgt::vec3(urb.x, llf.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(1.f, 0.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -89,7 +91,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, urb.y, llf.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tUrb.y, tLlf.z));
         vertices.push_back(tgt::vec3(llf.x, urb.y, llf.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, 1.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -102,7 +104,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(llf.x, llf.y, llf.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tUrb.z));
         vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(-1.f, 0.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -115,7 +117,7 @@ namespace campvis {
         vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
         texCoords.push_back(tgt::vec3(tLlf.x, tLlf.y, tUrb.z));
         vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, -1.f, 0.f))));
         vertices.clear();
         texCoords.clear();
 
@@ -128,11 +130,218 @@ namespace campvis {
         vertices.push_back(tgt::vec3(llf.x, llf.y, urb.z));
         texCoords.push_back(tgt::vec3(tUrb.x, tLlf.y, tUrb.z));
         vertices.push_back(tgt::vec3(urb.x, llf.y, urb.z));
-        faces.push_back(FaceGeometry(vertices, texCoords));
+        faces.push_back(FaceGeometry(vertices, texCoords, std::vector<tgt::vec4>(), std::vector<tgt::vec3>(4, tgt::vec3(0.f, 0.f, 1.f))));
         vertices.clear();
         texCoords.clear();
 
         return new MeshGeometry(faces);
+    }
+
+    MultiIndexedGeometry* GeometryDataFactory::createTeapot() {
+        std::vector<tgt::vec3> vertices, normals;
+        vertices.reserve(Teapot::num_teapot_vertices);
+        normals.reserve(Teapot::num_teapot_vertices);
+
+        for (size_t i = 0; i < Teapot::num_teapot_vertices; ++i) {
+            vertices.push_back(tgt::vec3(Teapot::teapot_vertices + 3*i));
+            normals.push_back(tgt::vec3(Teapot::teapot_normals + 3*i));
+        }
+
+        MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
+
+        // convert indices and add primitives 
+        int currentOffset = 0;
+        while (currentOffset < Teapot::num_teapot_indices) {
+            uint16_t count = Teapot::new_teapot_indicies[currentOffset];
+            toReturn->addPrimitive(std::vector<uint16_t>(Teapot::new_teapot_indicies + currentOffset + 1, Teapot::new_teapot_indicies + count + currentOffset + 1));
+            currentOffset += count + 1;
+        }
+
+        return toReturn;
+    }
+
+    MultiIndexedGeometry* GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/) {
+        tgtAssert(numStacks > 1 && numSlices > 2, "Sphere must have minimum 2 stacks and 3 slices!");
+        std::vector<tgt::vec3> vertices;
+        std::vector<tgt::vec3> textureCoordinates;
+
+        // add top vertex
+        vertices.push_back(tgt::vec3(0.f, 0.f, 1.f));
+        textureCoordinates.push_back(tgt::vec3(0.f));
+
+        // add middle vertices
+        for (int i = 1; i < numStacks; ++i) {
+            float phi = static_cast<float>(i) * tgt::PIf / static_cast<float>(numStacks);
+
+            for (int j = 0; j < numSlices; ++j) {
+                float theta = static_cast<float>(j) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+                vertices.push_back(tgt::vec3(cos(theta) * sin(phi), sin(theta) * sin(phi), cos(phi)));
+                textureCoordinates.push_back(tgt::vec3(theta / (2.f * tgt::PIf), phi / tgt::PIf, 0.f));
+            }
+        }
+
+        // add bottom vertex
+        vertices.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        textureCoordinates.push_back(tgt::vec3(1.f, 0.f, 0.f));
+
+        // create geometry (in a unit sphere vertices = normals)
+        MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, textureCoordinates, std::vector<tgt::vec4>(), vertices);
+
+        // add indices for primitives to geometry:
+        {
+            // top stack:
+            std::vector<uint16_t> indices;
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(0);
+                indices.push_back(j+1);
+            }
+            indices.push_back(0);
+            indices.push_back(1);
+
+            toReturn->addPrimitive(indices);
+        }
+        {
+            // middle stacks:
+            std::vector<uint16_t> indices;
+            for (uint16_t i = 1; i < numStacks-1; ++i) {
+                uint16_t startIndex = 1 + (i-1) * numSlices;
+
+                for (uint16_t j = 0; j < numSlices; ++j) {
+                    indices.push_back(startIndex + j);
+                    indices.push_back(startIndex + numSlices + j);
+                }
+                indices.push_back(startIndex);
+                indices.push_back(startIndex + numSlices);
+            }
+
+            toReturn->addPrimitive(indices);
+        }
+        {
+            // bottom stack:
+            std::vector<uint16_t> indices;
+            uint16_t endIndex = static_cast<uint16_t>(vertices.size() - 1);
+
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(endIndex);
+                indices.push_back(endIndex - (j+1));
+            }
+            indices.push_back(endIndex);
+            indices.push_back(endIndex - 1);
+
+            toReturn->addPrimitive(indices);
+        }
+
+        return toReturn;
+    }
+
+    MultiIndexedGeometry* GeometryDataFactory::createArrow(uint16_t numSlices, float tipLen, float cylRadius, float tipRadius) {
+        tgtAssert(numSlices > 2, "Arrow shaft must have minimum 3 slices!");
+        tgtAssert(tipRadius > cylRadius, "Tip radius must exceed cyclinder radius (for correct normals)!");
+        tgtAssert(tipLen > 0, "Tip length must be between 0 and 1!");
+        tgtAssert(tipLen < 1, "Tip length must be between 0 and 1!");
+        std::vector<tgt::vec3> vertices;
+        std::vector<tgt::vec3> normals;
+
+        // add bottom vertex
+        vertices.push_back(tgt::vec3(0.f, 0.f, 0.f));
+        normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+
+        // add shaft floor vertices
+        for (int i = 0; i < numSlices; ++i) {
+            float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+            vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 0.f));
+            normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        }
+        for (int i = 0; i < numSlices; ++i) {
+            float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+            vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 0.f));
+            normals.push_back(tgt::vec3(cos(theta), sin(theta), 0.f));
+        }
+
+        // add shaft top vertices
+        for (int i = 0; i < numSlices; ++i) {
+            float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+            vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 1.f - tipLen));
+            normals.push_back(tgt::vec3(cos(theta), sin(theta), 0.f));
+        }
+        for (int i = 0; i < numSlices; ++i) {
+            float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+            vertices.push_back(tgt::vec3(cylRadius * cos(theta), cylRadius * sin(theta), 1.f - tipLen));
+            normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        }
+
+        // add arrow tip outer cone vertices
+        for (int i = 0; i < numSlices; ++i) {
+            float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+            vertices.push_back(tgt::vec3(tipRadius * cos(theta), tipRadius * sin(theta), 1.f - tipLen));
+            normals.push_back(tgt::vec3(0.f, 0.f, -1.f));
+        }
+        float phi = atan2f(tipRadius, tipLen);
+        for (int i = 0; i < numSlices; ++i) {
+            float theta = static_cast<float>(i) * 2.f*tgt::PIf / static_cast<float>(numSlices);
+            vertices.push_back(tgt::vec3(tipRadius * cos(theta), tipRadius * sin(theta), 1.f - tipLen));
+            normals.push_back(tgt::vec3(cos(theta) * cos(phi), sin(theta) * cos(phi), sin(phi)));
+        }
+
+        // add top vertex
+        vertices.push_back(tgt::vec3(0.f, 0.f, 1.f));
+        normals.push_back(tgt::vec3(0.f, 0.f, 1.f));
+
+        // create geometry
+        MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
+
+        // add indices for primitives to geometry:
+        {
+            // cylinder floor
+            std::vector<uint16_t> indices;
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(0);
+                indices.push_back(j+1);
+            }
+            indices.push_back(0);
+            indices.push_back(1);
+
+            toReturn->addPrimitive(indices);
+        }
+        {
+            // cylinder shaft
+            std::vector<uint16_t> indices;
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(j+1+numSlices);
+                indices.push_back(j+1+numSlices*2);
+            }
+            indices.push_back(1+numSlices);
+            indices.push_back(1+numSlices*2);
+
+            toReturn->addPrimitive(indices);
+        }
+        {
+            // arrow tip bottom area
+            std::vector<uint16_t> indices;
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(j+1+numSlices*3);
+                indices.push_back(j+1+numSlices*4);
+            }
+            indices.push_back(1+numSlices*3);
+            indices.push_back(1+numSlices*4);
+
+            toReturn->addPrimitive(indices);
+        }
+        {
+            // arrow tip cone
+            uint16_t m = static_cast<uint16_t>(vertices.size() - 1);
+            std::vector<uint16_t> indices;
+            for (uint16_t j = 0; j < numSlices; ++j) {
+                indices.push_back(j+1+numSlices*5);
+                indices.push_back(m);
+            }
+            indices.push_back(1+numSlices*5);
+            indices.push_back(m);
+
+            toReturn->addPrimitive(indices);
+        }
+
+        return toReturn;
     }
 
 }

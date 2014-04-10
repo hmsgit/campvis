@@ -26,6 +26,7 @@
 #define MHDIMAGEREADER_H__
 
 #include <string>
+#include "abstractimagereader.h"
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
@@ -37,7 +38,7 @@ namespace campvis {
      *
      * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
      */
-    class MhdImageReader : public AbstractProcessor {
+    class MhdImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new MhdImageReader Processor
@@ -49,13 +50,6 @@ namespace campvis {
          **/
         virtual ~MhdImageReader();
 
-
-        /**
-         * Reads the MHD file into an ImageRepresentationDisk representation
-         * \param data  DataContainer to work on
-         */
-        virtual void process(DataContainer& data);
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "MhdImageReader"; };
         /// \see AbstractProcessor::getDescription()
@@ -65,13 +59,12 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        StringProperty p_url;               ///< URL for file to read
-        DataNameProperty p_targetImageID;   ///< image ID for read image
-
         Vec3Property p_imageOffset;         ///< Image Offset in mm
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };

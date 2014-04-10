@@ -29,6 +29,8 @@
 #include "tgt/tgt_gl.h"
 #include "tgt/vector.h"
 
+#include "core/coreapi.h"
+
 #include <string>
 #include <vector>
 
@@ -46,7 +48,7 @@ namespace campvis {
      * Class performing a reduction of 2D image data using OpenGL.
      * \note    All methods need to be called from a valid OpenGL context.
      */
-    class GlReduction {
+    class CAMPVIS_CORE_API GlReduction {
     public:
         /// Operation to be performed by reduction
         enum ReductionOperator {
@@ -89,13 +91,6 @@ namespace campvis {
 
     private:
         /**
-         * Performs a reduction of \a currentSize in each dimension and adjusts \a texCoordMultiplier.
-         * \param   currentSize         Current size to reduce (ceiling division by 2)
-         * \param   texCoordMultiplier  Tex coordinates multiplier to adjust (divide by 2 if dimension got reduced)
-         */
-        static void reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordMultiplier);
-
-        /**
          * Generates the GLSL header corresponding to the given reduction operator.
          * \param   reductionOperator   Operation to be performed by reduction
          * \return  A std::string with the corresponding GLSL header.
@@ -104,6 +99,7 @@ namespace campvis {
 
 
         ReductionOperator _reductionOperator;   ///< Operation to be performed by reduction
+        tgt::Shader* _shader1d;                 ///< OpenGL shader performing 1D reduction
         tgt::Shader* _shader2d;                 ///< OpenGL shader performing 2D reduction
         tgt::Shader* _shader3d;                 ///< OpenGL shader performing 3D reduction
         tgt::FramebufferObject* _fbo;           ///< FBO performing the reduction

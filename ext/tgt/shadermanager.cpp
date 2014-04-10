@@ -135,9 +135,20 @@ void ShaderPreprocessor::parse() {
     result_.clear();
     includedFilenames_.clear();
 
-    outputComment("BEGIN GLOBAL HEADER");
-    parsePart(ShdrMgr.getGlobalHeader(), "GLOBAL HEADER");
-    outputComment("END GLOBAL HEADER");
+    if (! shd_->customGlslVersion_.empty()) {
+        parsePart("#version " + shd_->customGlslVersion_ + "\n", "Custom per-shader version");
+    }
+    else {
+        if (! ShdrMgr.getDefaultGlslVersion().empty()) {
+            parsePart("#version " + ShdrMgr.getDefaultGlslVersion() + "\n", "Global version");
+        }
+    }
+
+    if (! ShdrMgr.getGlobalHeader().empty()) {
+        outputComment("BEGIN GLOBAL HEADER");
+        parsePart(ShdrMgr.getGlobalHeader(), "GLOBAL HEADER");
+        outputComment("END GLOBAL HEADER");
+    }
 
     if (!shd_->header_.empty()) {
         outputComment("BEGIN HEADER");
@@ -265,7 +276,7 @@ ShaderObject::~ShaderObject() {
 }
 
 void ShaderObject::loadSourceFromFile(const string& filename) throw (Exception) {
-    LDEBUG("Loading " << filename);
+    //LDEBUG("Loading " << filename);
     File* file = FileSys.open(filename);
 
     // check if file is open
@@ -286,12 +297,6 @@ void ShaderObject::loadSourceFromFile(const string& filename) throw (Exception) 
 void ShaderObject::uploadSource() {
     const GLchar* s = source_.c_str();
     glShaderSource(id_, 1,  &s, 0);
-}
-
-void ShaderObject::setDirectives(GLuint id) {
-    glProgramParameteriEXT(id, GL_GEOMETRY_INPUT_TYPE_EXT, inputType_);
-    glProgramParameteriEXT(id, GL_GEOMETRY_OUTPUT_TYPE_EXT, outputType_);
-    glProgramParameteriEXT(id, GL_GEOMETRY_VERTICES_OUT_EXT, verticesOut_);
 }
 
 bool ShaderObject::compileShader() {
@@ -499,21 +504,6 @@ void Shader::detachObjectsByType(ShaderObject::ShaderType type) {
 }
 
 bool Shader::linkProgram() {
-    if (isLinked_) {
-        // program is already linked: detach and re-attach everything
-        for (ShaderObjects::iterator iter = objects_.begin(); iter != objects_.end(); ++iter) {
-            glDetachShader(id_, (*iter)->id_);
-            glAttachShader(id_, (*iter)->id_);
-            if ((*iter)->getType() == ShaderObject::GEOMETRY_SHADER)
-                (*iter)->setDirectives(id_);
-        }
-    } else {
-        for (ShaderObjects::iterator iter = objects_.begin(); iter != objects_.end(); ++iter) {
-            if ((*iter)->getType() == ShaderObject::GEOMETRY_SHADER)
-                (*iter)->setDirectives(id_);
-        }
-    }
-
     isLinked_ = false;
     glLinkProgram(id_);
     GLint check = 0;
@@ -600,7 +590,7 @@ void Shader::load(const string& filename, const string& customHeader) throw (Exc
 }
 
 void Shader::loadSeparate(const string& vert_filename, const string& geom_filename,
-                          const string& frag_filename, const string& customHeader)
+                          const string& frag_filename, const string& customHeader, const std::string& customGlslVersion)
                           throw (Exception)
 {
     ShaderObject* frag = 0;
@@ -612,6 +602,9 @@ void Shader::loadSeparate(const string& vert_filename, const string& geom_filena
 
         if (!customHeader.empty()) {
             vert->setHeader(customHeader);
+        }
+        if (!customGlslVersion.empty()) {
+            vert->setCustomGlslVersion(customGlslVersion);
         }
 
         try {
@@ -639,6 +632,9 @@ void Shader::loadSeparate(const string& vert_filename, const string& geom_filena
         if (!customHeader.empty()) {
             geom->setHeader(customHeader);
         }
+        if (!customGlslVersion.empty()) {
+            geom->setCustomGlslVersion(customGlslVersion);
+        }
 
         try {
             geom->loadSourceFromFile(geom_filename);
@@ -665,6 +661,9 @@ void Shader::loadSeparate(const string& vert_filename, const string& geom_filena
 
         if (!customHeader.empty()) {
             frag->setHeader(customHeader);
+        }
+        if (!customGlslVersion.empty()) {
+            frag->setCustomGlslVersion(customGlslVersion);
         }
 
         try {
@@ -841,6 +840,49 @@ bool Shader::setUniform(const string& name, GLint* v, int count) {
     glUniform1iv(l, count, v);
     return true;
 }
+
+
+// Unsigned Integers
+bool Shader::setUniform(const string& name, GLuint value) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform1ui(l, value);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint v1, GLuint v2) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform2ui(l, v1, v2);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint v1, GLuint v2, GLuint v3) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform3ui(l, v1, v2, v3);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint v1, GLuint v2, GLuint v3, GLuint v4) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform4ui(l, v1, v2, v3, v4);
+    return true;
+}
+
+bool Shader::setUniform(const string& name, GLuint* v, int count) {
+    GLint l = getUniformLocation(name);
+    if (l == -1)
+        return false;
+    glUniform1uiv(l, count, v);
+    return true;
+}
+
 
 
 bool Shader::setUniform(const string& name, bool value) {
@@ -1288,33 +1330,23 @@ ShaderManager::ShaderManager()
   : ResourceManager<Shader>(false)
 {}
 
-Shader* ShaderManager::load(const string& filename, const string& customHeader,
-                            bool activate)
-                            throw (Exception)
-{
-    return loadSeparate(filename + ".vert", filename + ".frag", customHeader, activate);
+Shader* ShaderManager::load(const std::string& vertFilename, const std::string& fragFilename, const std::string& customHeader) throw (Exception) {
+    return loadWithCustomGlslVersion(vertFilename, "", fragFilename, customHeader, "");
 }
 
-Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& frag_filename,
-                                    const string& customHeader, bool activate)
-                                    throw (Exception)
-{
-    return loadSeparate(vert_filename, "", frag_filename, customHeader, activate);
+Shader* ShaderManager::load(const std::string& vertFilename, const std::string& geomFilename, const std::string& fragFilename, const std::string& customHeader) throw(Exception) {
+    return loadWithCustomGlslVersion(vertFilename, geomFilename, fragFilename, customHeader, "");
 }
 
-Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& geom_filename,
-                                    const string& frag_filename,
-                                    const string& customHeader, bool activate)
-                                    throw (Exception)
-{
-    LDEBUG("Loading files " << vert_filename << " and " << frag_filename);
+Shader* ShaderManager::loadWithCustomGlslVersion(const std::string& vertFilename, const std::string& geomFilename, const std::string& fragFilename, const std::string& customHeader, const std::string& customGlslVersion) throw(Exception) {
+    //LDEBUG("Loading files " << vertFilename << " and " << fragFilename);
     if (!GpuCaps.areShadersSupported()) {
         LERROR("Shaders are not supported.");
         throw Exception("Shaders are not supported.");
     }
 
     // create a somewhat unique identifier for this shader triple
-    string identifier = vert_filename + "#" +  frag_filename + "#" + geom_filename;
+    string identifier = vertFilename + "#" +  fragFilename + "#" + geomFilename;
 
     if (isLoaded(identifier)) {
         LDEBUG("Shader already loaded. Increase usage count.");
@@ -1326,26 +1358,24 @@ Shader* ShaderManager::loadSeparate(const string& vert_filename, const string& g
 
     // searching in all paths for every shader
     string vert_completeFilename;
-    if (!vert_filename.empty())
-        vert_completeFilename = completePath(vert_filename);
+    if (!vertFilename.empty())
+        vert_completeFilename = completePath(vertFilename);
 
     string geom_completeFilename;
-    if (!geom_filename.empty())
-        geom_completeFilename = completePath(geom_filename);
+    if (!geomFilename.empty())
+        geom_completeFilename = completePath(geomFilename);
 
     string frag_completeFilename;
-    if (!frag_filename.empty())
-        frag_completeFilename = completePath(frag_filename);
+    if (!fragFilename.empty())
+        frag_completeFilename = completePath(fragFilename);
 
     // loading and linking found shaders
     try {
         shdr->loadSeparate(vert_completeFilename, geom_completeFilename,
-                           frag_completeFilename, customHeader);
+            frag_completeFilename, customHeader, customGlslVersion);
+
         // register even when caching is disabled, needed for rebuildFromFile()
         reg(shdr, identifier);
-
-        if (activate)
-            shdr->activate();
 
         return shdr;
     }
@@ -1366,5 +1396,6 @@ bool ShaderManager::rebuildAllShadersFromFile() {
 
     return result;
 }
+
 
 } // namespace

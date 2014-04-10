@@ -43,7 +43,7 @@ namespace campvis {
      * \tparam  T   Type of the base geometry class.
      */
     template<class T>
-    class GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
+    class  GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
     public:
         /// Typedef for the geometry class this transfer function is built from.
         typedef T GeometryType;
@@ -127,7 +127,7 @@ namespace campvis {
 
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::initShader() {
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/passthrough.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/passthrough.frag", "");
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
             _shader->setAttributeLocation(2, "in_Color");

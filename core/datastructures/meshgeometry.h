@@ -40,7 +40,7 @@ namespace campvis {
      * 
      * The internal OpenGL buffers are lazy-instantiated.
      */
-    class MeshGeometry : public GeometryData {
+    class CAMPVIS_CORE_API MeshGeometry : public GeometryData {
     public:
         /**
          * Creates a new MeshGeometry built from the given faces.
@@ -93,6 +93,10 @@ namespace campvis {
 
         /// \see GeometryData::getWorldBounds
         virtual tgt::Bounds getWorldBounds() const;
+        /// \see GeometryData::hasTextureCoordinates
+        virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::applyTransformationToVertices
+        virtual void applyTransformationToVertices(const tgt::mat4& t);
 
     protected:
         /**

@@ -29,6 +29,8 @@
 #include "tgt/vector.h"
 #include <vector>
 
+#include "core/coreapi.h"
+
 namespace tgt {
     class Texture;
 }
@@ -39,9 +41,9 @@ namespace campvis {
      * Defines a single shape for the GeometryTransferFunction class.
      * TFGeometry2D is defined by a sorted list of KeyPoints, each having a position and a color.
      */
-    class TFGeometry2D {
+    class CAMPVIS_CORE_API TFGeometry2D {
     public:
-        struct KeyPoint {
+        struct CAMPVIS_CORE_API KeyPoint {
             explicit KeyPoint(const tgt::vec2& position, const tgt::col4& color)
                 : _position(position)
                 , _color(color)

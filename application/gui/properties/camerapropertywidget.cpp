@@ -29,8 +29,8 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    CameraPropertyWidget::CameraPropertyWidget(CameraProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, true, parent)
+    CameraPropertyWidget::CameraPropertyWidget(CameraProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, true, dataContainer, parent)
         , _lblCameraPosition(0)
         , _lblLookDirection(0)
         , _lblUpVector(0)

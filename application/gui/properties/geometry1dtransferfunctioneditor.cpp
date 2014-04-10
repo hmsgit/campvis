@@ -46,8 +46,8 @@
 
 namespace campvis {
 
-    Geometry1DTransferFunctionEditor::Geometry1DTransferFunctionEditor(Geometry1DTransferFunction* tf, QWidget* parent /*= 0*/)
-        : AbstractTransferFunctionEditor(tf, parent)
+    Geometry1DTransferFunctionEditor::Geometry1DTransferFunctionEditor(TransferFunctionProperty* prop, Geometry1DTransferFunction* tf, QWidget* parent /*= 0*/)
+        : AbstractTransferFunctionEditor(prop, tf, parent)
         , _logScale(true)
         , _layout(0)
         , _canvas(0)
@@ -95,7 +95,6 @@ namespace campvis {
     void Geometry1DTransferFunctionEditor::paint() {
         Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
         const std::vector<TFGeometry1D*>& geometries = gtf->getGeometries();
-        const tgt::vec2& intensityDomain = gtf->getIntensityDomain();
 
         // TODO: get rid of intermediate mode?
         glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -111,7 +110,7 @@ namespace campvis {
         LGL_ERROR;
         
         // render histogram if existent
-        const AbstractTransferFunction::IntensityHistogramType* ih = gtf->getIntensityHistogram();
+        const TransferFunctionProperty::IntensityHistogramType* ih = getIntensityHistogram();
         if (ih != 0) {
             size_t numBuckets = ih->getNumBuckets(0);
             if (numBuckets > 0) {
@@ -120,18 +119,16 @@ namespace campvis {
                     maxFilling = log(maxFilling);
 
                 float xl = static_cast<float>(0.f) / static_cast<float>(numBuckets);
-                float xr = 0.f;
                 float yl = (_logScale 
                     ? log(static_cast<float>(ih->getNumElements(0))) / maxFilling
                     : static_cast<float>(ih->getNumElements(0)) / maxFilling);
-                float yr = 0.f;
 
 
                 glBegin(GL_QUADS);
                 glColor4f(1.f, .75f, 0.f, .5f);
                 for (size_t i = 1; i < numBuckets; ++i) {
-                    xr = static_cast<float>(i) / static_cast<float>(numBuckets);
-                    yr = (_logScale 
+                    float xr = static_cast<float>(i) / static_cast<float>(numBuckets);
+                    float yr = (_logScale 
                         ? std::max(0.f, static_cast<float>(log(static_cast<float>(ih->getNumElements(i)))) / maxFilling)
                         : static_cast<float>(ih->getNumElements(i)) / maxFilling);
                     
@@ -139,9 +136,6 @@ namespace campvis {
                     glVertex2f(xl, yl);
                     glVertex2f(xr, yr);
                     glVertex2f(xr, 0.f);
-
-                    xl = xr;
-                    yl = yr;
                 }
                 glEnd();
             }
@@ -248,10 +242,10 @@ namespace campvis {
         QLabel* lblOpacityBottom = new QLabel(tr("0%"), this);
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
-        _canvas = dynamic_cast<tgt::QtThreadedCanvas*>(tgt::GlContextManager::getRef().createContext("tfcanvas", "", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, false));
-        tgtAssert(_canvas != 0, "Could not cast to QtThreadedCanvas*, something is wrong here!");
-
+        _canvas = new tgt::QtThreadedCanvas("", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, 0, false);
         GLJobProc.registerContext(_canvas);
+        GLJobProc.enqueueJob(_canvas, makeJobOnHeap<tgt::GlContextManager, tgt::GLCanvas*>(tgt::GlContextManager::getPtr(), &tgt::GlContextManager::registerContextAndInitGlew, _canvas), OpenGLJobProcessor::SerialJob);
+
         _canvas->setPainter(this, false);
         _layout->addWidget(_canvas, 1, 1, 3, 3);
 
@@ -262,7 +256,7 @@ namespace campvis {
         _lblIntensityRight = new QLabel(QString::number(gtf->getIntensityDomain().y), this);
         _layout->addWidget(_lblIntensityRight, 4, 3, 1, 1, Qt::AlignRight);
 
-        QVBoxLayout* buttonLayout = new QVBoxLayout(); // TODO: check whether buttonLayout will be deleted by Qt's GC!
+        QVBoxLayout* buttonLayout = new QVBoxLayout();
         _layout->addLayout(buttonLayout, 1, 4, 1, 3, Qt::AlignTop);
 
         _btnAddGeometry = new QPushButton(tr("Add Geometry"), this);

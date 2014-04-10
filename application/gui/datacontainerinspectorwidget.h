@@ -27,8 +27,6 @@
 
 #include "sigslot/sigslot.h"
 #include "tgt/painter.h"
-#include "tgt/qt/qtcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"
@@ -40,6 +38,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QString>
 #include <QPushButton>
 
@@ -57,6 +56,7 @@ namespace campvis {
     class DataContainer;
     class DataContainerTreeWidget;
     class FaceGeometry;
+    class DataContainerFileLoaderWidget;
 
     class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
         Q_OBJECT;
@@ -72,12 +72,17 @@ namespace campvis {
          * Destructor.
          */
         ~DataContainerInspectorWidget();
-
+        
         /**
          * Set the DataContainer this widget is inspecting.
          * \param   dataContainer   The DataContainer this widget shall inspect, may be 0.
          */
         void setDataContainer(DataContainer* dataContainer);
+
+        /**
+         * Get the DataContainer this widget is inspecting.
+         */
+        DataContainer* getDataContainer();
 
         /**
          * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
@@ -111,7 +116,7 @@ namespace campvis {
          */
         void updateColor();
 
-		/**
+        /**
          * Updates depth of the info widget
          */
         void updateDepth();
@@ -133,6 +138,12 @@ namespace campvis {
          */
         void onBtnSaveToFileClicked();
 
+        
+        /**
+         * Slot being called when the user clicks on the "Load File" button.
+         */
+        void onBtnLoadFileClicked();
+
     protected:
         /**
          * Setup the GUI stuff
@@ -147,7 +158,7 @@ namespace campvis {
          */
         
 
-	protected:
+    protected:
         static void saveToFile(DataHandle handle, std::string filename);
 
         /**
@@ -170,22 +181,28 @@ namespace campvis {
         DataContainerInspectorCanvas* _canvas;          ///< The OpenGL canvas for rendering the DataContainer's contents
         PropertyCollectionWidget* _pcWidget;
 
-        QHBoxLayout* _mainLayout;                       ///< Layout for this widget
+        QGridLayout* _mainLayout;                       ///< Layout for this widget
         QWidget* _infoWidget;                           ///< Widget showing the information about the selected QtDataHandle
-        QVBoxLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
-
+        QGridLayout* _infoWidgetLayout;                 ///< Layout for the _infoWidget
+        
         QLabel*  _lblName;
+        QLabel*  _lblNumChannels;
         QLabel*  _lblLocalMemoryFootprint;
         QLabel*  _lblVideoMemoryFootprint;
         QLabel*  _lblTimestamp;
         QLabel*  _lblSize;
         QLabel*  _lblBounds;
-		QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
+        QWidget* _colorWidget;                          ///< The widget use to show the color value and the color in a single window
         QHBoxLayout* _colorWidgetLayout;                ///< Layout for the following widget
         QLabel*  _lblColorVal;                          ///< Color Label Value in text
         QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
         QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
+        
+        // Added by Hossain Mahmud  <mahmud@in.tum.de>
+        // Date: January 02, 2014
+        QPushButton* _btnLoadFile;
         QPushButton* _btnSaveToFile;
+        DataContainerFileLoaderWidget* _propEditorWid;
 
         static const std::string loggerCat_;
     };

@@ -3,9 +3,7 @@
 #include "tgt/assert.h"
 
 namespace tgt {
-
-    GlContextManager* GlContextManager::singletonClass_ = 0;
-
+    
     GlContextManager::GlContextManager()
         : _currentContext(0)
     {
@@ -13,20 +11,10 @@ namespace tgt {
 
     GlContextManager::~GlContextManager()
     {
-        for (std::map<std::string, GLCanvas*>::iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
-            delete it->second;
+        for (std::set<GLCanvas*>::iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
+            delete *it;
         }
         _contexts.clear();
-    }
-
-
-    GLCanvas* GlContextManager::getContextByKey(const std::string& key) {
-        tbb::mutex::scoped_lock lock(_localMutex);
-        std::map<std::string, GLCanvas*>::iterator it = _contexts.find(key);
-        if (it != _contexts.end())
-            return it->second;
-        else
-            return 0;
     }
 
     void GlContextManager::lock() {
@@ -51,20 +39,6 @@ namespace tgt {
         return _currentContext;
     }
 
-    GlContextManager* GlContextManager::getPtr() {
-        tgtAssert( singletonClass_ != 0, "singletonClass_ has not been intitialized." );
-        return singletonClass_;
-    }
-
-    GlContextManager& GlContextManager::getRef() {
-        tgtAssert( singletonClass_ != 0 , "singletonClass_ has not been intitialized." );
-        return *singletonClass_;
-    }
-
-    bool GlContextManager::isInited() {
-        return (singletonClass_ != 0);
-    }
-
     void GlContextManager::lockAndAcquire(GLCanvas* context) {
         lock();
         setCurrent(context);
@@ -79,16 +53,52 @@ namespace tgt {
         setCurrent(context);
     }
 
+    void GlContextManager::registerContextAndInitGlew(GLCanvas* context) {
+        tgtAssert(context != 0, "Given context must not be 0.");
+        tgtAssert(_contexts.find(context) == _contexts.end(), "Tried to double register the same context.");
+
+        {
+            tbb::mutex::scoped_lock localLock(_localMutex);
+            _contexts.insert(context);
+        }
+       
+        // Init GLEW for this context
+        GLenum err = glewInit();
+        if (err != GLEW_OK) {
+            // Problem: glewInit failed, something is seriously wrong.
+            tgtAssert(false, "glewInit failed");
+            std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    }
+
     void GlContextManager::removeContext(GLCanvas* context) {
         _currentContext = 0;
 
         tbb::mutex::scoped_lock lock(_localMutex);
-        for (std::map<std::string, GLCanvas*>::iterator it = _contexts.begin(); it != _contexts.end(); ++it) {
-            if (it->second == context) {
-                _contexts.erase(it);
-                break;
+        std::set<GLCanvas*>::iterator it = _contexts.find(context);
+        if (it != _contexts.end()) {
+            _contexts.erase(it);
+        }
+    }
+
+    void GlContextManager::setCurrent(GLCanvas* context) {
+        if (_currentContext != context) {
+            if (context == 0) {
+                // explicitely release OpenGL context
+                _currentContext->releaseAsCurrentContext();
+                _currentContext = 0;
+            }
+            else {
+                context->acquireAsCurrentContext();
+                LGL_ERROR;
+                _currentContext = context;
             }
         }
+
     }
 
 }

@@ -53,13 +53,15 @@ namespace campvis {
         , p_targetImageId("TargetImageId", "Output Image", "", DataNameProperty::WRITE)
         , p_compositingMethod("CompositingMethod", "Compositing Method", compositingOptions, 5)
         , p_alphaValue("AlphaValue", "AlphaValue", .5f, 0.f, 1.f)
+        , p_enableBackground("EnableBackground", "Enable Background", true)
         , _shader(0)
     {
-        addProperty(&p_firstImageId);
-        addProperty(&p_secondImageId);
-        addProperty(&p_targetImageId);
-        addProperty(&p_compositingMethod);
-        addProperty(&p_alphaValue);
+        addProperty(p_firstImageId);
+        addProperty(p_secondImageId);
+        addProperty(p_targetImageId);
+        addProperty(p_compositingMethod);
+        addProperty(p_alphaValue);
+        addProperty(p_enableBackground);
 
         addDecorator(new ProcessorDecoratorBackground());
         
@@ -72,7 +74,7 @@ namespace campvis {
 
     void RenderTargetCompositor::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/rendertargetcompositor.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/rendertargetcompositor.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -82,7 +84,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void RenderTargetCompositor::process(DataContainer& data) {
+    void RenderTargetCompositor::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
         ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
 
@@ -98,10 +100,19 @@ namespace campvis {
             secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
             _shader->setUniform("_compositingMethod", p_compositingMethod.getOptionValue());
             _shader->setUniform("_alpha", p_alphaValue.getValue());
+            _shader->setUniform("_enableBackground", p_enableBackground.getValue());
 
             decorateRenderProlog(data, _shader);
+
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_ALWAYS);
+            glClearDepth(1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             QuadRdr.renderQuad();
+
+            glDepthFunc(GL_LESS);
+            glDisable(GL_DEPTH_TEST);
 
             _shader->deactivate();
             tgt::TextureUnit::setZeroUnit();

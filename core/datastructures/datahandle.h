@@ -27,6 +27,8 @@
 
 #include <ctime>
 
+#include "core/coreapi.h"
+
 namespace campvis {
     class AbstractData;
 
@@ -45,7 +47,7 @@ namespace campvis {
      *          with its reference counting!
      * \note    Reference counting implementation inspired from Scott Meyers: More Effective C++, Item 29
      */
-    class DataHandle {
+    class CAMPVIS_CORE_API DataHandle {
     public:
         /**
          * Creates a new DataHandle for the given data.

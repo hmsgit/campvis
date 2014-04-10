@@ -60,8 +60,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_mirrorID;         ///< ID for output geometry
 
         Vec3Property p_mirrorCenter;         ///< position of mirror center
@@ -73,6 +71,9 @@ namespace campvis {
         CameraProperty p_camera;
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         void updateClipProperties();
 
         static const std::string loggerCat_;

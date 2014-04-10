@@ -276,6 +276,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_R16UI:
         case GL_R32I:
         case GL_R32UI:
+        case GL_RED_INTEGER:
             return 1;
             break;
 
@@ -294,6 +295,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_RG16UI:
         case GL_RG32I:
         case GL_RG32UI:
+        case GL_RG_INTEGER:
             return 2;
             break;
 
@@ -318,6 +320,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_RGB16UI:
         case GL_RGB32I:
         case GL_RGB32UI:
+        case GL_RGB_INTEGER:
             return 3;
             break;
 
@@ -341,6 +344,7 @@ int Texture::calcNumChannels(GLint format) {
         case GL_RGBA16UI:
         case GL_RGBA32I:
         case GL_RGBA32UI:
+        case GL_RGBA_INTEGER:
             return 4;
             break;
 
@@ -518,8 +522,7 @@ tgt::Color Texture::texelAsFloat(size_t x, size_t y) const {
                     LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
             }
             break;
-        case GL_LUMINANCE:
-        case GL_ALPHA:
+        case GL_RED:
             switch(dataType_) {
                 case GL_UNSIGNED_BYTE: {
                     tgt::Vector3<uint8_t> t = tgt::vec3(texel<uint8_t>(x,y));
@@ -556,12 +559,112 @@ tgt::Color Texture::texelAsFloat(size_t x, size_t y) const {
     return ret;
 }
 
+
+tgt::Color Texture::texelAsFloat(size_t x, size_t y, size_t z) const {
+    tgt::Color ret = tgt::Color(0.0f);
+    switch(format_) {
+        case GL_RGBA:
+            switch(dataType_) {
+                case GL_UNSIGNED_BYTE: {
+                    tgt::Vector4<uint8_t> t = texel< tgt::Vector4<uint8_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFF;
+                    ret.y = (float )t.y / 0xFF;
+                    ret.z = (float )t.z / 0xFF;
+                    ret.w = (float )t.w / 0xFF;
+                    break;
+                }
+                case GL_UNSIGNED_SHORT: {
+                    tgt::Vector4<uint16_t> t = texel< tgt::Vector4<uint16_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFFFF;
+                    ret.y = (float )t.y / 0xFFFF;
+                    ret.z = (float )t.z / 0xFFFF;
+                    ret.w = (float )t.w / 0xFFFF;
+                    break;
+                }
+                case GL_FLOAT:
+                    ret = texel<tgt::Color>(x,y,z);
+                    break;
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+            }
+            break;
+        case GL_RGB:
+            switch(dataType_) {
+                case GL_UNSIGNED_BYTE: {
+                    tgt::Vector3<uint8_t> t = texel< tgt::Vector3<uint8_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFF;
+                    ret.y = (float )t.y / 0xFF;
+                    ret.z = (float )t.z / 0xFF;
+                    ret.w = 1.0f;
+                    break;
+                }
+                case GL_UNSIGNED_SHORT: {
+                    tgt::Vector3<uint16_t> t = texel< tgt::Vector3<uint16_t> >(x,y,z);
+                    ret.x = (float )t.x / 0xFFFF;
+                    ret.y = (float )t.y / 0xFFFF;
+                    ret.z = (float )t.z / 0xFFFF;
+                    ret.w = 1.0f;
+                    break;
+                }
+                case GL_FLOAT: {
+                    tgt::Vector3f t = texel<tgt::Vector3f>(x,y,z);
+                    ret.x = t.x;
+                    ret.y = t.y;
+                    ret.z = t.z;
+                    ret.w = 1.0f;
+                    break;
+                }
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+            }
+            break;
+        case GL_RED:
+            switch(dataType_) {
+                case GL_UNSIGNED_BYTE: {
+                    tgt::Vector3<uint8_t> t = tgt::vec3(texel<uint8_t>(x,y,z));
+                    ret.x = (float )t.x / 0xFF;
+                    ret.y = (float )t.y / 0xFF;
+                    ret.z = (float )t.z / 0xFF;
+                    ret.w = 1.0f;
+                    break;
+                                       }
+                case GL_UNSIGNED_SHORT: {
+                    tgt::Vector3<uint16_t> t = tgt::vec3(texel<uint16_t>(x,y,z));
+                    ret.x = (float )t.x / 0xFFFF;
+                    ret.y = (float )t.y / 0xFFFF;
+                    ret.z = (float )t.z / 0xFFFF;
+                    ret.w = 1.0f;
+                    break;
+                                        }
+                case GL_FLOAT: {
+                    tgt::Vector3f t = tgt::vec3(texel<GLfloat>(x,y,z));
+                    ret.x = t.x;
+                    ret.y = t.y;
+                    ret.z = t.z;
+                    ret.w = 1.0f;
+                    break;
+                }
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+        }
+        break;
+
+        default:
+            LWARNINGC("tgt.texture", "texelAsFloat: Unknown format!");
+    }
+    return ret;
+}
+
 float Texture::depthAsFloat(size_t x, size_t y) const {
     float ret = 0.0f;
 
-    switch(format_) {
-        case GL_DEPTH_COMPONENT:
-            switch(dataType_) {
+    switch (format_) {
+        case GL_DEPTH_COMPONENT:    // fallthrough
+        case GL_DEPTH_COMPONENT16:  // fallthrough
+        case GL_DEPTH_COMPONENT24:  // fallthrough
+        case GL_DEPTH_COMPONENT32:  // fallthrough
+        case GL_DEPTH_COMPONENT32F:
+            switch (dataType_) {
                 case GL_UNSIGNED_BYTE: {
                     ret = (float )(texel<uint8_t>(x,y) / 0xFF);
                     break;
@@ -577,8 +680,10 @@ float Texture::depthAsFloat(size_t x, size_t y) const {
                 default:
                     LWARNINGC("tgt.texture", "depthAsFloat: Unknown format!");
             }
+            break;
         default:
             LWARNINGC("tgt.texture", "depthAsFloat: Unknown format!");
+            break;
     }
 
     return ret;
@@ -611,6 +716,7 @@ void Texture::downloadTextureToBuffer(GLubyte* pixels, size_t numBytesAllocated)
         LWARNINGC("tgt.texture", "downloadTextureToBuffer: allocated buffer is too small");
     }
     else {
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glGetTexImage(type_, 0, format_, dataType_, pixels);
     }
 }
@@ -621,6 +727,7 @@ GLubyte* Texture::downloadTextureToBuffer(GLint format, GLenum dataType) const {
     int arraySize = hmul(dimensions_) * calcBpp(format, dataType);
     GLubyte* pixels = new GLubyte[arraySize];
 
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glGetTexImage(type_, 0, format, dataType, pixels);
     return pixels;
 }

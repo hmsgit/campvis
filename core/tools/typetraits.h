@@ -27,7 +27,9 @@
 
 #include "tgt/tgt_gl.h"
 #include "tgt/tgt_math.h"
+#include "tgt/matrix.h"
 #include "tgt/vector.h"
+#include "core/datastructures/tensor.h"
 #include "core/tools/weaklytypedpointer.h"
 #include <limits>
 
@@ -48,12 +50,12 @@ namespace {
 
     template<>
     struct TypeTraitsHelperPerChannel<1> {
-        static const GLint glFormat = GL_ALPHA;
+        static const GLint glFormat = GL_RED;
     };
 
     template<>
     struct TypeTraitsHelperPerChannel<2> {
-        static const GLint glFormat = GL_LUMINANCE_ALPHA;
+        static const GLint glFormat = GL_RG;
     };
 
     template<>
@@ -64,6 +66,16 @@ namespace {
     template<>
     struct TypeTraitsHelperPerChannel<4> {
         static const GLint glFormat = GL_RGBA;
+    };
+
+    template<>
+    struct TypeTraitsHelperPerChannel<6> {
+        static const GLint glFormat = GL_RGB;
+    };
+
+    template<>
+    struct TypeTraitsHelperPerChannel<9> {
+        static const GLint glFormat = GL_RGB;
     };
 
 // ================================================================================================
@@ -84,37 +96,53 @@ namespace {
         static const GLint glInteralFormat = internalFormat; \
     }; \
 
-    SPCIALIZE_TTIF(uint8_t, 1, GL_ALPHA8)
-    SPCIALIZE_TTIF(int8_t,  1, GL_ALPHA8)
-    SPCIALIZE_TTIF(uint16_t,1, GL_ALPHA16)
-    SPCIALIZE_TTIF(int16_t, 1, GL_ALPHA16)
-    SPCIALIZE_TTIF(uint32_t,1, GL_ALPHA)
-    SPCIALIZE_TTIF(int32_t, 1, GL_ALPHA)
-    SPCIALIZE_TTIF(float,   1, GL_ALPHA32F_ARB)
+    SPCIALIZE_TTIF(uint8_t, 1, GL_R8)
+    SPCIALIZE_TTIF(int8_t,  1, GL_R8)
+    SPCIALIZE_TTIF(uint16_t,1, GL_R16)
+    SPCIALIZE_TTIF(int16_t, 1, GL_R16)
+    SPCIALIZE_TTIF(uint32_t,1, GL_R32F)
+    SPCIALIZE_TTIF(int32_t, 1, GL_R32F)
+    SPCIALIZE_TTIF(float,   1, GL_R32F)
 
-    SPCIALIZE_TTIF(uint8_t, 2, GL_LUMINANCE_ALPHA)
-    SPCIALIZE_TTIF(int8_t,  2, GL_LUMINANCE_ALPHA)
-    SPCIALIZE_TTIF(uint16_t,2, GL_LUMINANCE_ALPHA)
-    SPCIALIZE_TTIF(int16_t, 2, GL_LUMINANCE_ALPHA)
-    SPCIALIZE_TTIF(uint32_t,2, GL_LUMINANCE_ALPHA)
-    SPCIALIZE_TTIF(int32_t, 2, GL_LUMINANCE_ALPHA)
-    SPCIALIZE_TTIF(float,   2, GL_LUMINANCE_ALPHA)
+    SPCIALIZE_TTIF(uint8_t, 2, GL_RG8)
+    SPCIALIZE_TTIF(int8_t,  2, GL_RG8)
+    SPCIALIZE_TTIF(uint16_t,2, GL_RG16)
+    SPCIALIZE_TTIF(int16_t, 2, GL_RG16)
+    SPCIALIZE_TTIF(uint32_t,2, GL_RG32F)
+    SPCIALIZE_TTIF(int32_t, 2, GL_RG32F)
+    SPCIALIZE_TTIF(float,   2, GL_RG32F)
 
     SPCIALIZE_TTIF(uint8_t, 3, GL_RGB8)
     SPCIALIZE_TTIF(int8_t,  3, GL_RGB8)
     SPCIALIZE_TTIF(uint16_t,3, GL_RGB16)
     SPCIALIZE_TTIF(int16_t, 3, GL_RGB16)
-    SPCIALIZE_TTIF(uint32_t,3, GL_RGB)
-    SPCIALIZE_TTIF(int32_t, 3, GL_RGB)
-    SPCIALIZE_TTIF(float,   3, GL_RGB32F_ARB)
+    SPCIALIZE_TTIF(uint32_t,3, GL_RGB32F)
+    SPCIALIZE_TTIF(int32_t, 3, GL_RGB32F)
+    SPCIALIZE_TTIF(float,   3, GL_RGB32F)
 
     SPCIALIZE_TTIF(uint8_t, 4, GL_RGBA8)
     SPCIALIZE_TTIF(int8_t,  4, GL_RGBA8)
     SPCIALIZE_TTIF(uint16_t,4, GL_RGBA16)
     SPCIALIZE_TTIF(int16_t, 4, GL_RGBA16)
-    SPCIALIZE_TTIF(uint32_t,4, GL_RGBA)
-    SPCIALIZE_TTIF(int32_t, 4, GL_RGBA)
-    SPCIALIZE_TTIF(float,   4, GL_RGBA32F_ARB)
+    SPCIALIZE_TTIF(uint32_t,4, GL_RGBA32F)
+    SPCIALIZE_TTIF(int32_t, 4, GL_RGBA32F)
+    SPCIALIZE_TTIF(float,   4, GL_RGBA32F)
+
+    SPCIALIZE_TTIF(uint8_t, 6, GL_RGB8)
+    SPCIALIZE_TTIF(int8_t,  6, GL_RGB8)
+    SPCIALIZE_TTIF(uint16_t,6, GL_RGB16)
+    SPCIALIZE_TTIF(int16_t, 6, GL_RGB16)
+    SPCIALIZE_TTIF(uint32_t,6, GL_RGB32F)
+    SPCIALIZE_TTIF(int32_t, 6, GL_RGB32F)
+    SPCIALIZE_TTIF(float,   6, GL_RGB32F)
+
+    SPCIALIZE_TTIF(uint8_t, 9, GL_RGB8)
+    SPCIALIZE_TTIF(int8_t,  9, GL_RGB8)
+    SPCIALIZE_TTIF(uint16_t,9, GL_RGB16)
+    SPCIALIZE_TTIF(int16_t, 9, GL_RGB16)
+    SPCIALIZE_TTIF(uint32_t,9, GL_RGB32F)
+    SPCIALIZE_TTIF(int32_t, 9, GL_RGB32F)
+    SPCIALIZE_TTIF(float,   9, GL_RGB32F)
 
 // ================================================================================================
 // ================================================================================================
@@ -259,6 +287,36 @@ namespace {
         }
     };
 
+    template<typename BASETYPE>
+    struct TypeTraitsHelperOfBasetypePerChannel<BASETYPE, 6> {
+        typedef Tensor2< BASETYPE > ElementType;
+
+        static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
+            tgtAssert(channel >= 0 && channel <= 5, "Channel out of bounds!");
+            return element[channel];
+        }
+
+        static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
+            tgtAssert(channel >= 0 && channel <= 5, "Channel out of bounds!");
+            element[channel] = value;
+        }
+    };
+
+    template<typename BASETYPE>
+    struct TypeTraitsHelperOfBasetypePerChannel<BASETYPE, 9> {
+        typedef tgt::Matrix3< BASETYPE > ElementType;
+
+        static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
+            tgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
+            return element.elem[channel];
+        }
+
+        static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
+            tgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
+            element.elem[channel] = value;
+        }
+    };
+
 // ================================================================================================
 // ================================================================================================
     
@@ -306,7 +364,7 @@ namespace {
     };
 
     /**
-     * Template specialization for unsigned integer types, map from [min, max] to [0.0, 1.0]
+     * Template specialization for signed integer types, map from [min, max] to [0.0, 1.0]
      */
     template<typename T>
     struct TypeNormalizerHelper<T, false, true> {

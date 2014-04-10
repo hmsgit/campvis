@@ -140,6 +140,9 @@ SET ( NLOPT_SOURCES
 
 OPTION(NLOPT_BUILD_SHARED "Build NLOPT as a shared library" OFF )
 
+#FIXME: CAMPVIs currently does not support  shared linking of modules -> nlopt needs to be linked statically
+SET(NLOPT_BUILD_SHARED FALSE)
+
 IF(NLOPT_BUILD_SHARED)
   ADD_DEFINITIONS(-DNLOPT_DLL)
   ADD_DEFINITIONS(-DNLOPT_DLL_EXPORT )

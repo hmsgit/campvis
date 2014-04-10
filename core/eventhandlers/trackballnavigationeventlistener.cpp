@@ -125,6 +125,7 @@ namespace campvis {
     }
     
     void TrackballNavigationEventListener::setSceneBounds(const tgt::Bounds& bounds) {
+        _sceneBounds = bounds;
         _trackball->setSceneBounds(bounds);
     }
 
@@ -145,8 +146,10 @@ namespace campvis {
 
     void TrackballNavigationEventListener::removeLqModeProcessor(VisualizationProcessor* vp) {
         for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it) {
-            if (*it == vp)
+            if (*it == vp) {
                 _lqModeProcessors.erase(it);
+                return;
+            }
         }
     }
 
@@ -155,7 +158,13 @@ namespace campvis {
 
         _trackball->setViewprtSize(_viewportSizeProp->getValue());
         float ratio = static_cast<float>(_viewportSizeProp->getValue().x) / static_cast<float>(_viewportSizeProp->getValue().y);
-        _cameraProperty->setWindowRatio(ratio);
+
+        if (ratio == 0) {
+            LERROR("Window ratio must not be 0.");
+        }
+        else {
+            _trackball->setWindowRatio(ratio);
+        }
     }
 
 }

@@ -78,6 +78,9 @@ namespace campvis {
 
 
     void MeshGeometry::render(GLenum mode) const {
+        if (_faces.empty())
+            return;
+
         createGLBuffers();
         if (_buffersDirty) {
             LERROR("Cannot render without initialized OpenGL buffers.");
@@ -126,11 +129,11 @@ namespace campvis {
 
 #ifdef CAMPVIS_DEBUG
                 if (!createTexCoordsBuffer && !(it->getTextureCoordinates().empty()))
-                    LDEBUG("Presence of texture coordinates in faces not consistent, not generating texture coordinates VBO!");
+                    LWARNING("Presence of texture coordinates in faces not consistent, not generating texture coordinates VBO!");
                 if (!createColorsBuffer && !(it->getColors().empty()))
-                    LDEBUG("Presence of colors in faces not consistent, not generating colors VBO!");
+                    LWARNING("Presence of colors in faces not consistent, not generating colors VBO!");
                 if (!createNormalsBuffer && !(it->getNormals().empty()))
-                    LDEBUG("Presence of normals in faces not consistent, not generating normals VBO!");
+                    LWARNING("Presence of normals in faces not consistent, not generating normals VBO!");
 #endif
             }
 
@@ -164,9 +167,9 @@ namespace campvis {
                     if (createTexCoordsBuffer)
                         _texCoordsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getTextureCoordinates().front()), numVertices * sizeof(tgt::vec3));
                     if (createColorsBuffer)
-                        _colorsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getColors().front()), numVertices * sizeof(tgt::vec3));
+                        _colorsBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getColors().front()), numVertices * sizeof(tgt::vec4));
                     if (createNormalsBuffer)
-                        _normalsBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getNormals().front()), numVertices * sizeof(tgt::vec4));
+                        _normalsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getNormals().front()), numVertices * sizeof(tgt::vec3));
                 
                     startIndex += numVertices;
                 }
@@ -302,6 +305,20 @@ namespace campvis {
             for (std::vector<tgt::vec3>::const_iterator it = _faces[i].getVertices().begin(); it != _faces[i].getVertices().end(); ++it)
                 toReturn.addPoint(*it);
         return toReturn;
+    }
+
+    bool MeshGeometry::hasTextureCoordinates() const {
+        bool toReturn = true;
+        for (size_t i = 0; i < _faces.size(); ++i) {
+            toReturn &= _faces[i].hasTextureCoordinates();
+        }
+        return toReturn;
+    }
+
+    void MeshGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+        for (size_t i = 0; i < _faces.size(); ++i) {
+            _faces[i].applyTransformationToVertices(t);
+        }
     }
 
 }

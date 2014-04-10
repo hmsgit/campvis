@@ -31,8 +31,8 @@
 #include <QWidget>
 
 namespace campvis {
-    IntPropertyWidget::IntPropertyWidget(IntProperty* property, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, parent)
+    IntPropertyWidget::IntPropertyWidget(IntProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _adjuster(0)
         , _timer(0)
     {

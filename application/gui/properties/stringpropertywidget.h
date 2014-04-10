@@ -26,6 +26,7 @@
 #define STRINGPROPERTYWIDGET_H__
 
 #include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/genericproperty.h"
 
 class QLineEdit;
@@ -41,15 +42,18 @@ namespace campvis {
     public:
         /**
          * Creates a new PropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         * \param   property        The property the widget shall handle
+         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * \param   parent          Parent Qt widget
          */
-        StringPropertyWidget(StringProperty* property, QWidget* parent = 0);
+        StringPropertyWidget(StringProperty* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
 
         /**
          * Destructor
          */
         virtual ~StringPropertyWidget();
+
+        void setButtonLabel(const std::string& btnLabel);
 
     protected:
         /**
@@ -66,5 +70,8 @@ namespace campvis {
         QPushButton* _btnLoadFile;
 
     };
+
+    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
+    template class PropertyWidgetRegistrar<StringPropertyWidget, StringProperty>;
 }
 #endif // STRINGPROPERTYWIDGET_H__

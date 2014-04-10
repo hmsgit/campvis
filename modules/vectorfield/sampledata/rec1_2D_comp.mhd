@@ -1,0 +1,6 @@
+NDims = 3
+DimSize = 89 122 100
+ElementType = MET_FLOAT
+ElementSpacing = 0.250000 0.250000 0.250000
+ElementByteOrderMSB = False
+ElementDataFile = rec1_2D_comp.raw

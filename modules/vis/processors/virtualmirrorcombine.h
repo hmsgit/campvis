@@ -69,14 +69,15 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_normalImageID;            ///< image ID for normal DVR input image
         DataNameProperty p_mirrorImageID;            ///< image ID for mirror DVR input image
         DataNameProperty p_mirrorRenderID;           ///< image ID for rendered mirror input image
         DataNameProperty p_targetImageID;            ///< image ID for output image
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+
         tgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;

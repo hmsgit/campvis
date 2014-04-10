@@ -26,6 +26,11 @@ uniform vec4 _backgroundColor1;
 uniform vec4 _backgroundColor2;
 
 void renderBackground(in vec2 texCoords, out vec4 outColor) {
-        outColor = mix(_backgroundColor1, _backgroundColor2, 0.75 * texCoords.x * texCoords.y);
-        gl_FragDepth = 1.0;
+    outColor = mix(_backgroundColor1, _backgroundColor2, 0.5 * (texCoords.x + texCoords.y));
+    gl_FragDepth = 1.0;
+}
+
+vec4 blendBackground(in vec2 texCoords, in vec4 outColor) {
+    vec4 backgroundColor = mix(_backgroundColor1, _backgroundColor2, 0.5 * (texCoords.x + texCoords.y));
+    return vec4(mix(backgroundColor.rgb, outColor.rgb, outColor.a), backgroundColor.a);
 }

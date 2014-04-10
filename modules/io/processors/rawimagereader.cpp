@@ -49,33 +49,34 @@ namespace campvis {
     const std::string RawImageReader::loggerCat_ = "CAMPVis.modules.io.RawImageReader";
 
     RawImageReader::RawImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
+        : AbstractImageReader()
         , p_size("Size", "Image Size", tgt::ivec3(1), tgt::ivec3(1), tgt::ivec3(2048))
         , p_numChannels("NumChannels", "Number of Channels per Element", 1, 1, 9)
         , p_baseType("BaseType", "Base Type", baseTypeOptions, 7)
         , p_offset("Offset", "Byte Offset", 0, 0, std::numeric_limits<int>::max())
         , p_endianness("Endianess", "Endianess", endianOptions, 2)
-        , p_targetImageID("targetImageName", "Target Image ID", "RawImageReader.output", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-        addProperty(&p_url);
-        addProperty(&p_size);
-        addProperty(&p_numChannels);
-        addProperty(&p_baseType);
-        addProperty(&p_offset);
-        addProperty(&p_endianness);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        this->_ext.push_back(".raw");
+        this->p_targetImageID.setValue("RawImageReader.output");
+        
+        addProperty(p_url);
+        addProperty(p_size);
+        addProperty(p_numChannels);
+        addProperty(p_baseType);
+        addProperty(p_offset);
+        addProperty(p_endianness);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     RawImageReader::~RawImageReader() {
 
     }
 
-    void RawImageReader::process(DataContainer& data) {
+    void RawImageReader::updateResult(DataContainer& data) {
         size_t dimensionality = 3;
         if (p_size.getValue().z == 1) {
             dimensionality = (p_size.getValue().y == 1) ? 1 : 2;
@@ -88,4 +89,5 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
+
 }

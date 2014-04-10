@@ -35,13 +35,13 @@
 
 namespace campvis {
 
-    class ProcessorDecoratorMasking : public AbstractProcessorDecorator, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API ProcessorDecoratorMasking : public AbstractProcessorDecorator, public sigslot::has_slots<> {
     public:
         ProcessorDecoratorMasking();
         virtual ~ProcessorDecoratorMasking();
 
     protected:
-        void addProperties(HasPropertyCollection* propCollection);
+        void addProperties(AbstractProcessor* propCollection);
 
         void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
 

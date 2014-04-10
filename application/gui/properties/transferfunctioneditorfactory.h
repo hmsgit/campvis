@@ -28,6 +28,7 @@
 namespace campvis {
     class AbstractTransferFunction;
     class AbstractTransferFunctionEditor;
+    class TransferFunctionProperty;
 
     /**
      * Factory class offering the static method createEditor to create transfer function editors
@@ -38,10 +39,10 @@ namespace campvis {
         /**
          * Creates the corresponding TransferFunctionEditor for the given transfer function \a tf.
          * \note    The callee has to take the ownership of the returned pointer.
-         * \param   tf  Transfer function to generate the editor for.
+         * \param   prop    TransferFunctionProperty to generate the editor for.
          * \return  A new transfer function editor for the given transfer function (depending on its type).
          */
-        static AbstractTransferFunctionEditor* createEditor(AbstractTransferFunction* tf);
+        static AbstractTransferFunctionEditor* createEditor(TransferFunctionProperty* prop);
 
     private:
         /// Shall not instantiate

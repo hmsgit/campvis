@@ -3,17 +3,19 @@
 
 #include "tgt/exception.h"
 #include "tgt/tgt_gl.h"
+#include "tgt/types.h"
 
 #include <set>
 
 namespace tgt {
     class VertexAttribute;
 
-    class BufferObject {
+    class TGT_API BufferObject {
     public:
         enum TargetType {
             ARRAY_BUFFER = GL_ARRAY_BUFFER,
-            ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER
+            ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER,
+            TEXTURE_BUFFER = GL_TEXTURE_BUFFER
         };
 
         enum UsageType {

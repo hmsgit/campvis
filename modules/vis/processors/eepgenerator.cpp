@@ -47,21 +47,21 @@ namespace campvis {
         , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
         , p_exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
-        , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_PROPERTIES)
+        , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
         , p_mirrorID("mirrorID", "Input Mirror ID", "", DataNameProperty::READ)
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorMasking());
 
-        addProperty(&p_sourceImageID);
-        addProperty(&p_geometryID);
-        addProperty(&p_geometryImageId);
-        addProperty(&p_entryImageID);
-        addProperty(&p_exitImageID);
-        addProperty(&p_camera);
+        addProperty(p_sourceImageID);
+        addProperty(p_geometryID);
+        addProperty(p_geometryImageId);
+        addProperty(p_entryImageID);
+        addProperty(p_exitImageID);
+        addProperty(p_camera);
 
-        addProperty(&p_enableMirror);
-        addProperty(&p_mirrorID);
+        addProperty(p_enableMirror, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_mirrorID);
         p_mirrorID.setVisible(false);
 
         decoratePropertyCollection(this);
@@ -73,7 +73,7 @@ namespace campvis {
 
     void EEPGenerator::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/vis/glsl/eepgenerator.frag", generateHeader(), false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/eepgenerator.frag", generateHeader());
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
             _shader->setAttributeLocation(1, "in_TexCoord");
@@ -86,18 +86,12 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void EEPGenerator::process(DataContainer& data) {
+    void EEPGenerator::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
         ScopedTypedData<MeshGeometry> proxyGeometry(data, p_geometryID.getValue());
 
         if (img != 0 && proxyGeometry != 0 && _shader != 0) {
             if (img->getDimensionality() == 3) {
-                if (hasInvalidShader()) {
-                    _shader->setHeaders(generateHeader());
-                    _shader->rebuild();
-                    validate(INVALID_SHADER);
-                }
-
                 ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
 
                 tgt::Bounds textureBounds(tgt::vec3(0.f), tgt::vec3(1.f));
@@ -230,9 +224,15 @@ namespace campvis {
         return getDecoratedHeader();
     }
 
-    void EEPGenerator::updateProperties() {
+    void EEPGenerator::updateProperties(DataContainer& dataContainer) {
         p_mirrorID.setVisible(p_enableMirror.getValue());
         validate(AbstractProcessor::INVALID_PROPERTIES);
+    }
+
+    void EEPGenerator::updateShader() {
+        _shader->setHeaders(generateHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

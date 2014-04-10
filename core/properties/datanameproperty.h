@@ -37,7 +37,7 @@ namespace campvis {
      * Specialization of a StringProperty to specify the keys (string IDs) for DataHandles to read/write.
      * Offers an additional DataAccessInfo flag whether processor will read or write from/to that ID.
      */
-    class DataNameProperty : public GenericProperty<std::string> {
+    class CAMPVIS_CORE_API DataNameProperty : public GenericProperty<std::string> {
     public:
         /**
          * DataAccessInfo flag defining whether processor will read or write from/to the corresponding DataHandle.
@@ -53,9 +53,8 @@ namespace campvis {
          * \param title     Property title (e.g. used for GUI)
          * \param value     Initial value
          * \param access    DataAccessInfo flag defining whether processor will read or write from/to the DataHandle with the given ID.
-         * \param invalidationLevel  Invalidation level that this property triggers
          */
-        DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        DataNameProperty(const std::string& name, const std::string& title, const std::string& value, DataAccessInfo access);
 
         /**
          * Virtual Destructor

@@ -54,8 +54,8 @@ namespace campvis {
          * \return  *_singleton
          */
         static PipelineFactory& getRef();
-	
-	static void deinit();
+    
+        static void deinit();
 
         std::vector<std::string> getRegisteredPipelines() const;
 

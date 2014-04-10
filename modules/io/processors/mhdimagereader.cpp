@@ -40,23 +40,23 @@ namespace campvis {
     const std::string MhdImageReader::loggerCat_ = "CAMPVis.modules.io.MhdImageReader";
 
     MhdImageReader::MhdImageReader() 
-        : AbstractProcessor()
-        , p_url("url", "Image URL", "")
-        , p_targetImageID("targetImageName", "Target Image ID", "MhdImageReader.output", DataNameProperty::WRITE)
+        : AbstractImageReader()
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
     {
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        this->_ext.push_back(".mhd");
+        this->p_targetImageID.setValue("MhdImageReader.output");
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_imageOffset);
+        addProperty(p_voxelSize);
     }
 
     MhdImageReader::~MhdImageReader() {
 
     }
 
-    void MhdImageReader::process(DataContainer& data) {
+    void MhdImageReader::updateResult(DataContainer& data) {
         try {
             // start parsing
             TextFileParser tfp(p_url.getValue(), true, "=");
@@ -76,8 +76,14 @@ namespace campvis {
 
             // image type
             if (tfp.hasKey("ObjectType")) {
-                if (tfp.getString("ObjectType") != "Image") {
-                    LERROR("Error while parsing MHD header: ObjectType = Image expected");
+                if (tfp.getString("ObjectType") == "Image") {
+                    numChannels = 1;
+                }
+                else if (tfp.getString("ObjectType") == "TensorImage") {
+                    numChannels = 6;
+                }
+                else {
+                    LERROR("Error while parsing MHD header: ObjectType = Image or ObjectType = TensorImage expected");
                     return;
                 }
             }
@@ -197,4 +203,5 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
+
 }

@@ -45,17 +45,21 @@ namespace campvis {
 
     GlReduction::GlReduction(ReductionOperator reductionOperator)
         : _reductionOperator(reductionOperator)
+        , _shader1d(0)
         , _shader2d(0)
         , _shader3d(0)
         , _fbo(0)
     {
-        _shader2d = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n", false);
-        _shader3d = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n", false);
-        if (_shader2d == 0 || _shader3d == 0) {
+        _shader1d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_1D\n");
+        _shader2d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n");
+        _shader3d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n");
+        if (_shader1d == 0 || _shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;
         }
 
+        _shader1d->setAttributeLocation(0, "in_Position");
+        _shader1d->setAttributeLocation(1, "in_TexCoord");
         _shader2d->setAttributeLocation(0, "in_Position");
         _shader2d->setAttributeLocation(1, "in_TexCoord");
         _shader3d->setAttributeLocation(0, "in_Position");
@@ -63,13 +67,14 @@ namespace campvis {
     }
 
     GlReduction::~GlReduction() {
+        ShdrMgr.dispose(_shader1d);
         ShdrMgr.dispose(_shader2d);
         ShdrMgr.dispose(_shader3d);
     }
 
     std::vector<float> GlReduction::reduce(const ImageData* image) {
         tgtAssert(image != 0, "Image must not be 0!");
-        if (_shader2d == 0 || _shader3d == 0) {
+        if (_shader1d == 0 || _shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return std::vector<float>();
         }
@@ -91,7 +96,7 @@ namespace campvis {
         std::vector<float> toReturn;
 
         tgtAssert(texture != 0, "Image must not be 0!");
-        if (_shader2d == 0 || _shader3d == 0) {
+        if (_shader1d == 0 || _shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return toReturn;
         }
@@ -101,76 +106,88 @@ namespace campvis {
         }
 
         const tgt::ivec3& size = texture->getDimensions();
-        tgt::vec2 texCoordShift = tgt::vec2(.5f) / tgt::vec2(size.xy());
-        tgt::ivec2 currentSize = size.xy();
-        reduceSizes(currentSize, texCoordShift);
-        tgt::ivec2 startSize = currentSize;
+        tgt::ivec2 texSize = size.xy();
 
         // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         // get a free texture unit
         tgt::TextureUnit inputUnit;
+        inputUnit.activate();
 
         // create temporary textures
         tgt::Texture* tempTextures[2];
         for (size_t i = 0; i < 2; ++i) {
-            tempTextures[i] = new tgt::Texture(0, tgt::ivec3(currentSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
+            tempTextures[i] = new tgt::Texture(0, tgt::ivec3(texSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
             tempTextures[i]->uploadTexture();
             tempTextures[i]->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
         }
-        size_t readTex = 0;
-        size_t writeTex = 1;
+
+        const tgt::Texture* inputTex = texture;
+        tgt::Texture* outputTex = tempTextures[1];
 
         // create and initialize FBO
         _fbo = new tgt::FramebufferObject();
         _fbo->activate();
         LGL_ERROR;
 
-        // perform first reduction step outside:
-        tgt::Shader* leShader = (texture->getDimensions().z == 1) ? _shader2d : _shader3d;
-        leShader->activate();
-        _fbo->attachTexture(tempTextures[readTex]);
+        // perform 3D reduction if needed
+        if (texture->getDimensions().z > 1) {
+            _shader3d->activate();
+            _fbo->attachTexture(outputTex);
 
-        inputUnit.activate();
-        texture->bind();
-        leShader->setUniform("_texture", inputUnit.getUnitNumber());
-        leShader->setUniform("_texCoordsShift", texCoordShift);
-        if (leShader == _shader3d)
-            leShader->setUniform("_textureDepth", texture->getDimensions().z);
+            inputTex->bind();
+            _shader3d->setUniform("_texture", inputUnit.getUnitNumber());
+            _shader3d->setUniform("_textureSize", size);
 
-        glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
-        QuadRdr.renderQuad();
-        leShader->deactivate();
-        LGL_ERROR;
-
-        _shader2d->activate();
-        _shader2d->setUniform("_texture", inputUnit.getUnitNumber());
-        reduceSizes(currentSize, texCoordShift);
-        glViewport(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y);
-
-        // perform reduction until 1x1 texture remains
-        while (currentSize.x > 1 || currentSize.y > 1) {
-            _fbo->attachTexture(tempTextures[writeTex]);
-            tempTextures[readTex]->bind();
-
-            _shader2d->setUniform("_texCoordsShift", texCoordShift);
+            glViewport(0, 0, texSize.x, texSize.y);
             QuadRdr.renderQuad();
-            LGL_ERROR;
+            _shader3d->deactivate();
 
-            reduceSizes(currentSize, texCoordShift);
-            std::swap(writeTex, readTex);
+            inputTex = outputTex;
+            outputTex = tempTextures[0];
+            LGL_ERROR;
         }
 
-        _shader2d->deactivate();
+        // perform 2D reduction if needed
+        if (texture->getDimensions().y > 1) {
+            _shader2d->activate();
+            _fbo->attachTexture(outputTex);
 
+            inputTex->bind();
+            _shader2d->setUniform("_texture", inputUnit.getUnitNumber());
+            _shader2d->setUniform("_textureSize", size.xy());
+
+            glViewport(0, 0, texSize.x, 1);
+            QuadRdr.renderQuad();
+            _shader2d->deactivate();
+
+            inputTex = outputTex;
+            outputTex = (outputTex == tempTextures[1]) ? tempTextures[0] : tempTextures[1];
+            LGL_ERROR;
+        }
+
+        // finally, perform 1D reduction if needed
+        {
+            _shader1d->activate();
+            _fbo->attachTexture(outputTex);
+
+            inputTex->bind();
+            _shader1d->setUniform("_texture", inputUnit.getUnitNumber());
+            _shader1d->setUniform("_textureSize", size.xy());
+
+            glViewport(0, 0, 1, 1);
+            QuadRdr.renderQuad();
+            _shader1d->deactivate();
+            LGL_ERROR;
+        }
 
         // read back stuff
-        GLenum readBackFormat = tempTextures[readTex]->getFormat();
-        size_t channels = tempTextures[readTex]->getNumChannels();
-        toReturn.resize(currentSize.x * currentSize.y * channels);
+        GLenum readBackFormat = outputTex->getFormat();
+        size_t channels = outputTex->getNumChannels();
+        toReturn.resize(channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
-        glReadPixels(startSize.x - currentSize.x, startSize.y - currentSize.y, currentSize.x, currentSize.y, readBackFormat, GL_FLOAT, &toReturn.front());
+        glReadPixels(0, 0, 1, 1, readBackFormat, GL_FLOAT, &toReturn.front());
         LGL_ERROR;
 
         // clean up...
@@ -186,19 +203,6 @@ namespace campvis {
         return toReturn;
     }
 
-    void GlReduction::reduceSizes(tgt::ivec2& currentSize, tgt::vec2& texCoordShift) {
-        if (currentSize.x > 1) {
-            currentSize.x = DIV_CEIL(currentSize.x, 2);
-            if (currentSize.x == 1)
-                texCoordShift.x *= -1.f;
-        }
-        if (currentSize.y > 1) {
-            currentSize.y = DIV_CEIL(currentSize.y, 2);
-            if (currentSize.y == 1)
-                texCoordShift.y *= -1.f;
-        }
-
-    }
 
     std::string GlReduction::generateGlslHeader(ReductionOperator reductionOperator) {
         switch (reductionOperator) {

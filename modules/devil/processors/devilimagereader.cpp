@@ -56,11 +56,12 @@ namespace campvis {
         , p_url("url", "Image URL", "")
         , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
         , p_importType("ImportType", "Import Type", importOptions, 3)
-        , _devilTextureReader(0)
+        , _shader(nullptr)
+        , _devilTextureReader(nullptr)
     {
-        addProperty(&p_url);
-        addProperty(&p_targetImageID);
-        addProperty(&p_importType);
+        addProperty(p_url);
+        addProperty(p_targetImageID);
+        addProperty(p_importType);
 
         _devilTextureReader = new tgt::TextureReaderDevil();
     }
@@ -71,7 +72,7 @@ namespace campvis {
 
     void DevilImageReader::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "#define NO_DEPTH\n", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "#define NO_DEPTH\n");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -81,7 +82,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void DevilImageReader::process(DataContainer& data) {
+    void DevilImageReader::updateResult(DataContainer& data) {
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
         if (tex != 0) {
             if (p_importType.getOptionValue() == "rt") {

@@ -44,38 +44,71 @@ ENDMACRO(PARSE_HEADER_FOR_PIPELINE)
 
 MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
     STRING(TOUPPER ${ModuleDirectory} ModuleDirectoryUpper)
-    
-    LIST(APPEND CampvisEnabledModules ${ModuleDirectory})
     SET(ThisModDir ${ModulesDir}/${ModuleDirectory})
 
-    # load .cmake file
-    INCLUDE(${ModuleListFile})
+    # if module is not enabled, load .cmake file for the first time to gather module status and other meta information
+    IF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
+        # add a CMake option for building this module
+        OPTION(CAMPVIS_BUILD_MODULE_${ModDirUpper}  "Build Module ${ModDir} (${ThisModStatus})" OFF)
+        
+        SET(ModuleEnabled FALSE)
+        INCLUDE(${ModuleListFile})
+        
+        IF(NOT DEFINED ThisModExternalDependencies)
+            SET(ThisModExternalDependencies FALSE)
+        ENDIF(NOT DEFINED ThisModExternalDependencies)
+            
+        # enable module if module status matches CAMPVIS_DEFAULT_ENABLED_MODULES
+        IF(${CAMPVIS_DEFAULT_ENABLED_MODULES} STREQUAL "STABLE_NO_DEPENDENCIES" AND ThisModStatus STREQUAL STABLE AND NOT ThisModExternalDependencies)
+            SET(CAMPVIS_BUILD_MODULE_${ModDirUpper} ON CACHE BOOL "Build Module ${ModDir} (${ThisModStatus})" FORCE)
+        ENDIF()
+        IF(${CAMPVIS_DEFAULT_ENABLED_MODULES} STREQUAL "STABLE_WITH_EXTERNAL_DEPENDENCIES" AND ThisModStatus STREQUAL STABLE)
+            SET(CAMPVIS_BUILD_MODULE_${ModDirUpper} ON CACHE BOOL "Build Module ${ModDir} (${ThisModStatus})" FORCE)
+        ENDIF()
+        IF(${CAMPVIS_DEFAULT_ENABLED_MODULES} STREQUAL "TESTING" AND (ThisModStatus STREQUAL STABLE OR ThisModStatus STREQUAL TESTING))
+            SET(CAMPVIS_BUILD_MODULE_${ModDirUpper} ON CACHE BOOL "Build Module ${ModDir} (${ThisModStatus})" FORCE)
+        ENDIF()
+        IF(${CAMPVIS_DEFAULT_ENABLED_MODULES} STREQUAL "ALL")
+            SET(CAMPVIS_BUILD_MODULE_${ModDirUpper} ON CACHE BOOL "Build Module ${ModDir} (${ThisModStatus})" FORCE)
+        ENDIF()
+    ENDIF(NOT DEFINED CAMPVIS_BUILD_MODULE_${ModDirUpper})
+    
+    # if module is enabled, load .cmake file for the second time, this time also parsing its build instructions
+    IF(${CAMPVIS_BUILD_MODULE_${ModDirUpper}})
+        SET(ModuleEnabled TRUE)
+        INCLUDE(${ModuleListFile})
+        
+        LIST(APPEND CampvisEnabledModules ${ModuleDirectory})
 
-    # merge module settings into global settings
-    LIST(APPEND CampvisModulesDefinitions ${ThisModDefinitions})
-    LIST(APPEND CampvisModulesIncludeDirs ${ThisModIncludeDirs})
-    LIST(APPEND CampvisModulesExternalLibs ${ThisModExternalLibs})
-    LIST(APPEND CampvisModulesLinkDirectories ${ThisModLinkDirectories})
-    LIST(APPEND CampvisModulesSources ${ThisModSources})
-    LIST(APPEND CampvisModulesHeaders ${ThisModHeaders})
-    LIST(APPEND CampvisModulesCoreSources ${ThisModCoreSources})
-    LIST(APPEND CampvisModulesCoreHeaders ${ThisModCoreHeaders})
-    LIST(APPEND CampvisExternalDllsDebug ${ThisModExternalDllsDebug})
-    LIST(APPEND CampvisExternalDllsRelease ${ThisModExternalDllsRelease})
+        # merge module settings into global settings
+        LIST(APPEND CampvisModulesDefinitions ${ThisModDefinitions})
+        LIST(APPEND CampvisModulesIncludeDirs ${ThisModIncludeDirs})
+        LIST(APPEND CampvisModulesExternalLibs ${ThisModExternalLibs})
+        LIST(APPEND CampvisModulesLinkDirectories ${ThisModLinkDirectories})
+        LIST(APPEND CampvisModulesSources ${ThisModSources})
+        LIST(APPEND CampvisModulesHeaders ${ThisModHeaders})
+        LIST(APPEND CampvisModulesCoreSources ${ThisModCoreSources})
+        LIST(APPEND CampvisModulesCoreHeaders ${ThisModCoreHeaders})
+        LIST(APPEND CampvisModulesApplicationSources ${ThisModApplicationSources})
+        LIST(APPEND CampvisModulesApplicationHeaders ${ThisModApplicationHeaders})
+        LIST(APPEND CampvisModulesApplicationToBeMocced ${ThisModApplicationToBeMocced})
+        LIST(APPEND CampvisExternalDllsDebug ${ThisModExternalDllsDebug})
+        LIST(APPEND CampvisExternalDllsRelease ${ThisModExternalDllsRelease})
 
-    # save dependencies in a variable to resolve them later
-    SET(${ModuleDirectory}ModDependencies ${ThisModDependencies})
+        # save dependencies in a variable to resolve them later
+        SET(${ModuleDirectory}ModDependencies ${ThisModDependencies})
 
-    # add shader directory to deployment list
-    LIST(APPEND CampvisShaderDirectories ${ThisModShaderDirectories})
+        # add shader directory to deployment list
+        LIST(APPEND CampvisShaderDirectories ${ThisModShaderDirectories})
 
-    # add definition that this module is activated
-    LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModuleDirectoryUpper})
+        # add definition that this module is activated
+        LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModuleDirectoryUpper})
 
-    # parse all header files for pipeline classes to add them to the pipeline registration
-    FOREACH(HeaderFile ${ThisModHeaders})
-        PARSE_HEADER_FOR_PIPELINE("modules/${HeaderFile}")
-    ENDFOREACH()
+        # parse all header files for pipeline classes to add them to the pipeline registration
+        FOREACH(HeaderFile ${ThisModHeaders})
+            PARSE_HEADER_FOR_PIPELINE("modules/${HeaderFile}")
+        ENDFOREACH()
+    ENDIF(${CAMPVIS_BUILD_MODULE_${ModDirUpper}})
 
     # unset module settings to avoid duplicates if module cmake file misses sth.
     UNSET(ThisModDefinitions)
@@ -86,10 +119,16 @@ MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
     UNSET(ThisModHeaders)
     UNSET(ThisModCoreSources)
     UNSET(ThisModCoreHeaders)
+    UNSET(CampvisApplicationSources)
+    UNSET(CampvisApplicationHeaders)
+    UNSET(CampvisApplicationToBeMocced)
     UNSET(ThisModExternalDllsDebug)
     UNSET(ThisModExternalDllsRelease)
     UNSET(ThisModShaderDirectories)
     UNSET(ThisModDependencies)
+    UNSET(ThisModStatus)
+    UNSET(ThisModExternalDependencies)
+    UNSET(ModuleEnabled)
 ENDMACRO(INCLUDE_MODULE)
 
 MACRO(RESOLVE_MODULE_DEPENDENCIES)

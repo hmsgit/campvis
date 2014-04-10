@@ -31,7 +31,7 @@
 
 namespace tgt {
 
-class TextureReader {
+class TGT_API TextureReader {
 public:
     TextureReader();
     virtual ~TextureReader() {}

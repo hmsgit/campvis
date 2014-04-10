@@ -33,8 +33,8 @@
 
 namespace campvis {
 
-    SimpleTransferFunctionEditor::SimpleTransferFunctionEditor(SimpleTransferFunction* tf, QWidget* parent /*= 0*/)
-        : AbstractTransferFunctionEditor(tf, parent)
+    SimpleTransferFunctionEditor::SimpleTransferFunctionEditor(TransferFunctionProperty* prop, SimpleTransferFunction* tf, QWidget* parent /*= 0*/)
+        : AbstractTransferFunctionEditor(prop, tf, parent)
         , _layout(0)
         , _lblColorLeft(0)
         , _lblColorRight(0)
@@ -65,8 +65,8 @@ namespace campvis {
         SimpleTransferFunction* stf = static_cast<SimpleTransferFunction*>(_transferFunction);
         _cpwColorLeft->blockSignals(true);
         _cpwColorRight->blockSignals(true);
-        _cpwColorLeft->setColor(QtColorTools::toQColor(static_cast<SimpleTransferFunction*>(_transferFunction)->getLeftColor()));
-        _cpwColorRight->setColor(QtColorTools::toQColor(static_cast<SimpleTransferFunction*>(_transferFunction)->getRightColor()));
+        _cpwColorLeft->setColor(QtColorTools::toQColor(stf->getLeftColor()));
+        _cpwColorRight->setColor(QtColorTools::toQColor(stf->getRightColor()));
         _cpwColorLeft->blockSignals(false);
         _cpwColorRight->blockSignals(false);
     }

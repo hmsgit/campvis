@@ -84,9 +84,6 @@ namespace campvis {
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
-
-        /// \see AbstractProcessor::process()
-        virtual void process(DataContainer& data);
         
         /**
          * Computes the similarity between \a movingImage and \a referenceImage using the given 
@@ -128,8 +125,10 @@ namespace campvis {
         ButtonProperty p_computeDifferenceImage;        ///< Generate Difference Image
 
     private:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
         /// \see AbstractProcessor::updateProperties
-        void updateProperties(DataContainer& dc);
+        virtual void updateProperties(DataContainer& dc);
 
         /**
          * Transforms euler angles to a 4x4 rotation matrix.

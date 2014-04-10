@@ -46,6 +46,11 @@ uniform int _sliceNumber;
 uniform vec4 _color;
 uniform bool _isDepthTexture;
 
+uniform bool _renderRChannel;
+uniform bool _renderGChannel;
+uniform bool _renderBChannel;
+uniform bool _renderAChannel;
+
 const vec4 checkerboardColor1 = vec4(0.90, 0.90, 0.90, 1.0);
 const vec4 checkerboardColor2 = vec4(0.50, 0.50, 0.50, 1.0);
 
@@ -54,14 +59,28 @@ void main() {
         if (_sliceNumber < 0) {
             // perform MIP
             out_Color = vec4(0.0);
-            for (float slice = 0.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
+            for (float slice = _3dTextureParams._sizeRCP.z/2.0; slice < 1.0; slice += _3dTextureParams._sizeRCP.z) {
                 out_Color = max(out_Color, lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, vec3(ex_TexCoord.xy, slice)).r));
             }
         }
         else {
             // render the corresponding slice
-            vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber + 0.5) / (_3dTextureParams._size.z));
-            out_Color = lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, coord).r);
+            vec3 coord = vec3(ex_TexCoord.xy, (_sliceNumber * _3dTextureParams._sizeRCP.z) + (_3dTextureParams._sizeRCP.z / 2.0));
+            vec4 texel = texture(_texture3d, coord);
+
+            if (_3dTextureParams._numChannels == 1) {
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
+            }
+            else if (_3dTextureParams._numChannels == 3) {
+                out_Color = vec4((abs(texel.rgb) - vec3(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x), 1.0);
+            }
+            else if (_3dTextureParams._numChannels == 4) {
+                out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
+            }
+            else {
+                out_Color = vec4(0.1, 0.6, 1.0, 0.75);
+            }
+            //out_Color = lookupTF(_transferFunction, _transferFunctionParams, texture(_texture3d, coord).r);
         }
     }
     else {
@@ -79,6 +98,15 @@ void main() {
             out_Color = vec4(0.1, 0.6, 1.0, 0.75);
         }
     }
+
+    if (! _renderRChannel)
+        out_Color.r = 0.0;
+    if (! _renderGChannel)
+        out_Color.g = 0.0;
+    if (! _renderBChannel)
+        out_Color.b = 0.0;
+    if (! _renderAChannel)
+        out_Color.a = 1.0;
 
     // mix with fancy checkerboard pattern:
     if ((mod(ex_TexCoord.x * 10.0, 2.0) > 1.0) ^^ (mod(ex_TexCoord.y * 10.0, 2.0) > 1.0))

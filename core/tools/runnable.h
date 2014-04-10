@@ -29,6 +29,8 @@
 #include <tbb/compat/thread>
 #include <tbb/atomic.h>
 
+#include "core/coreapi.h"
+
 namespace campvis {
     /**
      * Abstract base class for objects that shall run in a separate thread.
@@ -36,7 +38,7 @@ namespace campvis {
      * in the run() method which has to be overwritten in subclasses. Calling stop() sets _stopExecution to true
      * and waits for the thread to finish. Hence, you should test for _stopExecution in your run() method.
      */
-    class Runnable {
+    class CAMPVIS_CORE_API Runnable {
     public:
         /**
          * Creates a new Runnable object

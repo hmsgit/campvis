@@ -45,14 +45,14 @@ namespace campvis {
 
     GlGradientVolumeGenerator::GlGradientVolumeGenerator(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ, AbstractProcessor::INVALID_PROPERTIES | AbstractProcessor::INVALID_RESULT)
+        , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "GlGradientVolumeGenerator.out", DataNameProperty::WRITE)
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorGradient());
 
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
         decoratePropertyCollection(this);
     }
 
@@ -63,7 +63,7 @@ namespace campvis {
     void GlGradientVolumeGenerator::init() {
         VisualizationProcessor::init();
 
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glgradientvolumegenerator.frag", generateHeader(), false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glgradientvolumegenerator.frag", generateHeader());
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -73,23 +73,17 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void GlGradientVolumeGenerator::process(DataContainer& data) {
+    void GlGradientVolumeGenerator::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            if (hasInvalidShader()) {
-                _shader->setHeaders(generateHeader());
-                _shader->rebuild();
-                validate(INVALID_SHADER);
-            }
-
             const tgt::svec3& size = img->getSize();
 
             tgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            tgt::Texture* resultTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RGB, GL_RGB32F, GL_FLOAT, tgt::Texture::LINEAR);
+            tgt::Texture* resultTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, tgt::Texture::LINEAR);
             resultTexture->uploadTexture();
 
             // activate shader and bind textures
@@ -101,7 +95,7 @@ namespace campvis {
             glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
 
             // render quad to compute difference measure by shader
-            for (int z = 0; z < size.z; ++z) {
+            for (int z = 0; z < static_cast<int>(size.z); ++z) {
                 float zTexCoord = static_cast<float>(z)/static_cast<float>(size.z) + .5f/static_cast<float>(size.z);
                 _shader->setUniform("_zTexCoord", zTexCoord);
                 _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, z);
@@ -112,7 +106,7 @@ namespace campvis {
             _shader->deactivate();
 
             // put resulting image into DataContainer
-            ImageData* id = new ImageData(3, size, 1);
+            ImageData* id = new ImageData(3, size, 3);
             ImageRepresentationGL::create(id, resultTexture);
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputImage.getValue(), id);
@@ -129,6 +123,12 @@ namespace campvis {
 
     std::string GlGradientVolumeGenerator::generateHeader() const {
         return getDecoratedHeader();
+    }
+
+    void GlGradientVolumeGenerator::updateShader() {
+        _shader->setHeaders(generateHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

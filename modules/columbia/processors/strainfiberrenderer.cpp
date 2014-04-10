@@ -48,20 +48,20 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_strainId("StrainDataId", "Input Strain Data ID", "gr.strain", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
-        , p_camera("Camera", "Camera ID")//, "camera", DataNameProperty::READ, AbstractProcessor::INVALID_RESULT, DataNameProperty::CameraData)
+        , p_camera("Camera", "Camera ID")
+        , p_renderMode("RenderMode", "Render Mode", renderModeOptions, 2)
         , p_lineWidth("LineWidth", "Line width", 3.f, .5f, 10.f, 0.1f)
-        , p_renderMode("RenderMode", "Render Mode", renderModeOptions, 2, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
         , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_strainId);
-        addProperty(&p_renderTargetID);
-        addProperty(&p_camera);
-        addProperty(&p_color);
-        addProperty(&p_renderMode);
-        addProperty(&p_lineWidth);
+        addProperty(p_strainId);
+        addProperty(p_renderTargetID);
+        addProperty(p_camera);
+        addProperty(p_color);
+        addProperty(p_renderMode, INVALID_RESULT | INVALID_SHADER);
+        addProperty(p_lineWidth);
 
         decoratePropertyCollection(this);
     }
@@ -72,7 +72,7 @@ namespace campvis {
 
     void StrainFiberRenderer::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("modules/columbia/glsl/strainfiberrenderer.vert", "modules/columbia/glsl/strainfiberrenderer.geom", "modules/columbia/glsl/strainfiberrenderer.frag", "", false);
+        _shader = ShdrMgr.load("modules/columbia/glsl/strainfiberrenderer.vert", "modules/columbia/glsl/strainfiberrenderer.geom", "modules/columbia/glsl/strainfiberrenderer.frag", generateGlslHeader());
         if (_shader != 0) {
             _shader->setAttributeLocation(0, "in_Position");
             _shader->setAttributeLocation(1, "in_TexCoord");
@@ -86,13 +86,7 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void StrainFiberRenderer::process(DataContainer& data) {
-        if (hasInvalidShader()) {
-            _shader->setHeaders(generateGlslHeader());
-            _shader->rebuild();
-            validate(INVALID_SHADER);
-        }
-        
+    void StrainFiberRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
         if (strainData != 0 && _shader != 0) {
             const tgt::Camera& camera = p_camera.getValue();
@@ -149,6 +143,12 @@ namespace campvis {
         }
 
         return toReturn;
+    }
+
+    void StrainFiberRenderer::updateShader() {
+        _shader->setHeaders(generateGlslHeader());
+        _shader->rebuild();
+        validate(INVALID_SHADER);
     }
 
 }

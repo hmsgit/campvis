@@ -50,22 +50,6 @@ namespace campvis {
     ImageRepresentationDisk::~ImageRepresentationDisk() {
     }
 
-    ImageRepresentationDisk* ImageRepresentationDisk::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
-
-        const tgt::svec3& size = getSize();
-        tgt::svec3 newSize = urb - llf;
-        if (newSize == size) {
-            // nothing has changed, just provide a copy:
-            return clone(parent);
-        }
-
-        size_t newOffset = _offset + WeaklyTypedPointer::numBytes(_type, _parent->getNumChannels()) * (llf.x + llf.y * size.y + llf.z * size.x * size.y);
-        // the stride doesn't change!
-        tgt::svec3 newStride = (_stride == tgt::svec3::zero) ? getCanonicStride(getSize()) : _stride;
-        return new ImageRepresentationDisk(parent, _url, _type, newOffset, _endianess, newStride);
-    }
-
     campvis::WeaklyTypedPointer ImageRepresentationDisk::getImageData() const {
         const tgt::svec3& size = getSize();
         size_t numElements = tgt::hmul(size);

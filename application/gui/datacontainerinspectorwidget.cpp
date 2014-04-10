@@ -29,8 +29,6 @@
 #include "tgt/filesystem.h"
 #include "tgt/shadermanager.h"
 #include "tgt/textureunit.h"
-#include "tgt/qt/qtcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>
@@ -53,6 +51,8 @@
 
 #include "application/gui/datacontainertreewidget.h"
 #include "application/gui/qtdatahandle.h"
+#include "application/gui/datacontainerfileloaderwidget.h"
+#include "modules/io/processors/genericimagereader.h"
 
 #include <QFileDialog>
 
@@ -70,6 +70,21 @@ namespace campvis {
         , _mainLayout(0)
         , _infoWidget(0)
         , _infoWidgetLayout(0)
+        , _lblName(0)
+        , _lblNumChannels(0)
+        , _lblLocalMemoryFootprint(0)
+        , _lblVideoMemoryFootprint(0)
+        , _lblTimestamp(0)
+        , _lblSize(0)
+        , _lblBounds(0)
+        , _colorWidget(0)
+        , _colorWidgetLayout(0)
+        , _lblColorVal(0)
+        , _colorValWidget(0)
+        , _ColorValWidgetPalette(0)
+        , _btnLoadFile(0)
+        , _btnSaveToFile(0)
+        , _propEditorWid(0)
     {
         setupGUI();
     }
@@ -94,6 +109,10 @@ namespace campvis {
         }
     }
 
+    DataContainer* DataContainerInspectorWidget::getDataContainer() {
+        return _dataContainer;
+    }
+
     void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
         // copy QtDataHandle because signal will be handled by a different thread an indefinite amount of time later:
         emit dataContainerChanged(QString::fromStdString(key), QtDataHandle(dh));
@@ -107,34 +126,55 @@ namespace campvis {
     void DataContainerInspectorWidget::setupGUI() {
         setWindowTitle(tr("DataContainer Inspector"));
 
-        _mainLayout = new QHBoxLayout();
+        _mainLayout = new QGridLayout();
         _mainLayout->setSpacing(4);
         setLayout(_mainLayout);
 
+        // left column
         _dctWidget = new DataContainerTreeWidget(this);
         _dctWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
         _dctWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        _mainLayout->addWidget(_dctWidget);
+        _dctWidget->setMinimumWidth(256);
+        _mainLayout->addWidget(_dctWidget, 0, 0);
 
+        _btnLoadFile = new QPushButton(tr("Load File"), _infoWidget);
+        _mainLayout->addWidget(_btnLoadFile, 1, 0);
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+        _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
+        _btnSaveToFile->setDisabled(true);
+        _mainLayout->addWidget(_btnSaveToFile, 2, 0);
+
+        connect(_btnSaveToFile, SIGNAL(clicked()), this, SLOT(onBtnSaveToFileClicked()));
+#endif
+
+
+        // right column
         _infoWidget = new QWidget(this);
-        _infoWidgetLayout = new QVBoxLayout();
+        _infoWidgetLayout = new QGridLayout();
         _infoWidgetLayout->setSpacing(4);
         _infoWidget->setLayout(_infoWidgetLayout);
 
         _lblName = new QLabel(QString("Name: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblName);
-
-        _lblLocalMemoryFootprint = new QLabel(QString("Local Memory Footprint: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblLocalMemoryFootprint);
-
-        _lblVideoMemoryFootprint = new QLabel(QString("Video Memory Footprint: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblVideoMemoryFootprint);
+        _infoWidgetLayout->addWidget(_lblName, 0, 0);
 
         _lblTimestamp = new QLabel("Timestamp: ", _infoWidget);
-        _infoWidgetLayout->addWidget(_lblTimestamp);
+        _infoWidgetLayout->addWidget(_lblTimestamp, 0, 1);
+
+        _lblNumChannels = new QLabel("Number of Channels: ", _infoWidget);
+        _infoWidgetLayout->addWidget(_lblNumChannels, 1, 0);
+
+        _lblLocalMemoryFootprint = new QLabel(QString("Local Memory: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblLocalMemoryFootprint, 1, 1);
 
         _lblSize = new QLabel(tr("Size: "), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblSize);
+        _infoWidgetLayout->addWidget(_lblSize, 2, 0);
+
+        _lblVideoMemoryFootprint = new QLabel(QString("Video Memory: "), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblVideoMemoryFootprint, 2, 1);
+
+        _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
+        _infoWidgetLayout->addWidget(_lblBounds, 3, 0, 1, 2);
 
         _colorWidget = new QWidget(this);
         _lblColorVal = new QLabel(tr("Color: n/a"), _colorWidget);
@@ -155,23 +195,17 @@ namespace campvis {
         _colorWidgetLayout->addWidget(_lblColorVal);
         _colorWidgetLayout->addWidget(_colorValWidget);
 
-        _infoWidgetLayout->addWidget(_colorWidget);
-        
-        _lblBounds = new QLabel(tr("World Bounds:"), _infoWidget);
-        _infoWidgetLayout->addWidget(_lblBounds);
-
-        _btnSaveToFile = new QPushButton(tr("Save to File"), _infoWidget);
-        _infoWidgetLayout->addWidget(_btnSaveToFile);
+        _infoWidgetLayout->addWidget(_colorWidget, 4, 0, 1, 2);
 
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _canvas->setMinimumSize(QSize(100, 100));
-        _infoWidgetLayout->addWidget(_canvas, 1);
+        _infoWidgetLayout->addWidget(_canvas, 5, 0, 1, 2);
 
         _pcWidget = new PropertyCollectionWidget(_infoWidget);
         _pcWidget->updatePropCollection(_canvas, _dataContainer);
-        _infoWidgetLayout->addWidget(_pcWidget);
+        _infoWidgetLayout->addWidget(_pcWidget, 6, 0, 1, 2);
 
-        _mainLayout->addWidget(_infoWidget, 1);
+        _mainLayout->addWidget(_infoWidget, 0, 1, 3, 1);
 
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
         connect(
@@ -184,15 +218,15 @@ namespace campvis {
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
         connect(
-            _btnSaveToFile, SIGNAL(clicked()),
-            this, SLOT(onBtnSaveToFileClicked()));
+            _btnLoadFile, SIGNAL(clicked()),
+            this, SLOT(onBtnLoadFileClicked()));
     }
 
     void DataContainerInspectorWidget::updateColor(){
+        const tgt::Color& color = _canvas->getCapturedColor();
 
-        const tgt::Color color = _canvas->getCapturedColor();
 
-        _lblColorVal->setText(QString("Color: R = %1 G = %2 B = %3").arg(QString::number(static_cast<int>(color.r * 255)), QString::number(static_cast<int>(color.g * 255)), QString::number(static_cast<int>(color.b * 255))));
+        _lblColorVal->setText(QString("Color: [%1, %2, %3, %4]").arg(QString::number(color.r), QString::number(color.g), QString::number(color.b), QString::number(color.a)));
         
         _ColorValWidgetPalette->setColor(QPalette::Background, QColor(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255), static_cast<int>(color.b * 255)));
         _colorValWidget->setPalette(*_ColorValWidgetPalette);
@@ -241,7 +275,10 @@ namespace campvis {
             _lblTimestamp->setText("Timestamp: " + QString::number(handles.front().second.getTimestamp()));
 
             if (const ImageData* tester = dynamic_cast<const ImageData*>(handles.front().second.getData())) {
-                _canvas->p_transferFunction.getTF()->setImageHandle(handles.front().second);
+                _canvas->p_transferFunction.setImageHandle(handles.front().second);
+
+                _lblNumChannels->setText(tr("Number of Channels: ") + QString::number(tester->getNumChannels()));
+
                 std::ostringstream ss;
 
                 ss << tester->getSize();
@@ -251,17 +288,35 @@ namespace campvis {
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
 
+                _canvas->p_currentSlice.setVisible(tester->getDimensionality() == 3);
+                _canvas->p_transferFunction.setVisible(true);
+                _canvas->p_meshSolidColor.setVisible(false);
+                _canvas->p_renderRChannel.setVisible(true);
+                _canvas->p_renderGChannel.setVisible(true);
+                _canvas->p_renderBChannel.setVisible(true);
+                _canvas->p_renderAChannel.setVisible(true);
             }
             else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
                 _lblSize->setText(tr("Size: n/a"));
+                _lblNumChannels->setText(tr("Number of Channels: n/a"));
 
                 std::ostringstream ss;
                 ss << tester->getWorldBounds();
                 _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str()));
+
+                _canvas->p_currentSlice.setVisible(false);
+                _canvas->p_transferFunction.setVisible(false);
+                _canvas->p_meshSolidColor.setVisible(true);
+                _canvas->p_renderRChannel.setVisible(false);
+                _canvas->p_renderGChannel.setVisible(false);
+                _canvas->p_renderBChannel.setVisible(false);
+                _canvas->p_renderAChannel.setVisible(false);
             }
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
                 if (id != 0) {
+                    _lblNumChannels->setText(tr("Number of Channels: ") + QString::number(id->getNumChannels()));
+
                     std::ostringstream ss;
                     ss << id->getSize();
                     _lblSize->setText(tr("Size: ") + QString::fromStdString(ss.str()));
@@ -271,12 +326,22 @@ namespace campvis {
                     _lblBounds->setText(tr("World Bounds: ") + QString::fromStdString(ss.str())); 
                 }
                 else {
+                    _lblNumChannels->setText(tr("Number of Channels: n/a"));
                     _lblSize->setText(tr("Size: n/a"));
                     _lblBounds->setText(tr("World Bounds: n/a")); 
                 }
+
+                _canvas->p_currentSlice.setVisible(false);
+                _canvas->p_transferFunction.setVisible(true);
+                _canvas->p_meshSolidColor.setVisible(false);
+                _canvas->p_renderRChannel.setVisible(true);
+                _canvas->p_renderGChannel.setVisible(true);
+                _canvas->p_renderBChannel.setVisible(true);
+                _canvas->p_renderAChannel.setVisible(true);
             }
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
             else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
+                _lblNumChannels->setText(tr("Number of Channels: n/a"));
                 std::ostringstream ss;
                 ss << "Size: " << tester->numFibers() << " Fibers with " << tester->numSegments() << " Segments.";
                 _lblSize->setText(QString::fromStdString(ss.str()));
@@ -287,7 +352,7 @@ namespace campvis {
             }
 #endif
             else {
-
+                _lblNumChannels->setText(tr("Number of Channels: n/a"));
                 _lblSize->setText(tr("Size: n/a"));
                 _lblBounds->setText(tr("World Bounds: n/a")); 
             }
@@ -296,10 +361,10 @@ namespace campvis {
             _lblName->setText(QString::number(handles.size()) + " DataHandles selected");
             _lblTimestamp->setText("Timestamp: n/a");
 
-            _canvas->p_transferFunction.getTF()->setImageHandle(DataHandle(0));
+            _canvas->p_transferFunction.setImageHandle(DataHandle(0));
         }
-        _lblLocalMemoryFootprint->setText("Local Memory Footprint: " + humanizeBytes(_localFootprint));
-        _lblVideoMemoryFootprint->setText("Video Memory Footprint: " + humanizeBytes(_videoFootprint));
+        _lblLocalMemoryFootprint->setText("Local Memory: " + humanizeBytes(_localFootprint));
+        _lblVideoMemoryFootprint->setText("Video Memory: " + humanizeBytes(_videoFootprint));
 
         // update DataHandles for the DataContainerInspectorCanvas
         _canvas->setDataHandles(handles);
@@ -342,10 +407,25 @@ namespace campvis {
 
         _dataContainer = 0;
         _dctWidget->update(0);
+
+        if(_propEditorWid != nullptr)
+            _propEditorWid->deinit();
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
         updateInfoWidget();
+
+        // get the selection from the tree widget
+        const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
+
+        // iterate through the indices of the selection
+        for (QModelIndexList::const_iterator index = indices.begin(); index != indices.end(); ++index) {
+            if (index->isValid()) {
+                _btnSaveToFile->setDisabled(false);
+                return;
+            }
+        }
+        _btnSaveToFile->setDisabled(true);
     }
 
     void DataContainerInspectorWidget::onBtnSaveToFileClicked() {
@@ -440,6 +520,17 @@ namespace campvis {
         return;
 #endif
 
+    }
+
+    void DataContainerInspectorWidget::onBtnLoadFileClicked() {
+        // delete previous PropertyEditor, then create a new one
+        // the final one will be deleted with deinit()
+        if(nullptr != _propEditorWid)
+            _propEditorWid->deinit();
+
+        _propEditorWid = new DataContainerFileLoaderWidget(this, nullptr);
+        _propEditorWid->setVisible(true);
+        
     }
 
 }

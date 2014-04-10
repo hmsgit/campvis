@@ -41,7 +41,7 @@ namespace campvis {
      * \tparam  T   Base class of the ImageRepresentation to get.
      */
     template<typename T>
-    class GenericAbstractImageRepresentation : public AbstractImageRepresentation {
+    class  GenericAbstractImageRepresentation : public AbstractImageRepresentation {
     public:
         struct ScopedRepresentation {
             /**

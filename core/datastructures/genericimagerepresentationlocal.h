@@ -25,6 +25,7 @@
 #ifndef GENERICIMAGEREPRESENTATIONLOCAL_H__
 #define GENERICIMAGEREPRESENTATIONLOCAL_H__
 
+#include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/tools/typetraits.h"
 
@@ -139,7 +140,7 @@ namespace campvis {
             const ImageData* data;          ///< strongly-typed pointer to data, may be 0
             const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* representation;        ///< strongly-typed pointer to the image representation, may be 0
         };
-        
+
         /**
          * Creates a new GenericImageRepresentationLocal with the given parameters and automatically
          * adds it to \a parent which will take ownerwhip.
@@ -150,7 +151,7 @@ namespace campvis {
          * \param   data    Pointer to the image data, must not be 0, GenericImageRepresentationLocal takes ownership of this pointer!
          * \return  A pointer to the newly created ImageRepresentationDisk, you do \b not own this pointer!
          */
-        static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* create(ImageData* parent, ElementType* data);
+        static GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* create(const ImageData* parent, ElementType* data);
 
         /**
          * Destructor
@@ -175,9 +176,6 @@ namespace campvis {
 
         /// \see AbstractImageRepresentation::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
-
-        /// \see AbstractImageRepresentation::getSubImage
-        virtual ThisType* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
          * Returns a WeaklyTypedPointer to the image data.
@@ -275,13 +273,18 @@ namespace campvis {
 
         ElementType* _data;
 
+        static const std::string loggerCat_;
+
     };
 
 // = Template implementation ======================================================================
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(ImageData* parent, ElementType* data) {
-        ThisType* toReturn = new ThisType(parent, data);
+    const std::string campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::loggerCat_ = "CAMPVis.core.datastructures.GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>";
+    
+    template<typename BASETYPE, size_t NUMCHANNELS>
+    campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(const ImageData* parent, ElementType* data) {
+        ThisType* toReturn = new ThisType(const_cast<ImageData*>(parent), data);
         toReturn->addToParent();
         return toReturn;
     }
@@ -301,11 +304,61 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::~GenericImageRepresentationLocal() {
-        delete _data;
+        delete [] _data;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::tryConvertFrom(const AbstractImageRepresentation* source) {
+        if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
+            // converting from disk representation
+            if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
+                WeaklyTypedPointer wtp = tester->getImageData();
+                return create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
+            }
+            else {
+                LWARNING("Could not convert since base type or number of channels mismatch.");
+            }
+        }
+        if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
+            // converting from disk representation
+            if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
+                WeaklyTypedPointer wtp = tester->getImageData();
+                return create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
+            }
+            else {
+                LWARNING("Could not convert since base type or number of channels mismatch.");
+            }
+        }
+        else if (const ThisType* tester = dynamic_cast<const ThisType*>(source)) {
+            // just to ensure that the following else if case is really a conversion
+            LDEBUG("Trying to convert into the same type - this should not happen, since it there is no conversion needed...");
+            return tester->clone(const_cast<ImageData*>(tester->getParent()));
+        }
+        else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
+            // converting from other local representation of different data type
+            // (we ensured with the else if above that at least one of the template parameters does not match)
+            if (tester->getParent()->getNumChannels() == NUMCHANNELS) {
+                LDEBUG("Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");
+
+                size_t numElements = tester->getNumElements();
+                ElementType* newData = new ElementType[numElements];
+
+                // traverse each channel of each element and convert the value
+                for (size_t i = 0; i < numElements; ++i) {
+                    for (size_t channel = 0; channel < NUMCHANNELS; ++channel) {
+                        // get original value normalized to float
+                        float tmp = tester->getElementNormalized(i, channel);
+                        // save new value denormalized from float
+                        TypeTraits<BASETYPE, NUMCHANNELS>::setChannel(newData[i], channel, TypeNormalizer::denormalizeFromFloat<BASETYPE>(tmp));
+                    }                    
+                }
+
+                return create(tester->getParent(), newData);
+            }
+            else {
+                LWARNING("Could not convert since number of channels mismatch.");
+            }
+        }
         return 0;
     }
 
@@ -326,41 +379,6 @@ namespace campvis {
     template<typename BASETYPE, size_t NUMCHANNELS>
     size_t campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getVideoMemoryFootprint() const {
         return 0;
-    }
-
-    template<typename BASETYPE, size_t NUMCHANNELS>
-    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
-
-        const tgt::svec3& size = getSize();
-        tgt::svec3 newSize = urb - llf;
-        if (newSize == size) {
-            // nothing has changed, just provide a copy:
-            return clone(parent);
-        }
-
-        tgt::bvec3 tmp(tgt::greaterThan(newSize, tgt::svec3(1)));
-        size_t newDimensionality = 0;
-        for (size_t i = 0; i < 3; ++i) {
-            if (tmp[i] == true)
-                ++newDimensionality;
-        }
-
-        size_t numBytesPerElement = sizeof(ElementType);
-        size_t numElements = tgt::hmul(newSize);
-        ElementType* newData = new ElementType[numElements];
-
-        // slice image data into new array
-        size_t index = 0;
-        for (size_t z = llf.z; z < urb.z; ++z) {
-            for (size_t y = llf.y; y < urb.y; ++y) {
-                size_t offset = llf.x + (y * size.x) + (z * size.y * size.x);
-                memcpy(newData + index, _data + offset, newSize.x * numBytesPerElement);
-                index += newSize.x;
-            }
-        }        
-
-        return new ThisType(parent, newData);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>

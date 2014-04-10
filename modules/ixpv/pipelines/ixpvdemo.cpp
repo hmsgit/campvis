@@ -68,7 +68,7 @@ namespace campvis {
         addProcessor(&_compositor2);
         addProcessor(&_ixpvCompositor);
 
-        addProperty(&_camera);
+        addProperty(_camera);
 
         _trackballHandler = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         _trackballHandler->addLqModeProcessor(&_ctDVR);
@@ -188,11 +188,11 @@ namespace campvis {
             if (local != 0) {
                 // set TF handles
                 Interval<float> ii = local->getNormalizedIntensityRange();
-                _ctDVR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctDVR.p_transferFunction.setImageHandle(local.getDataHandle());
                 _ctDVR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
-                _ctFullDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctFullDRR.p_transferFunction.setImageHandle(local.getDataHandle());
                 _ctFullDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
-                _ctClippedDRR.p_transferFunction.getTF()->setImageHandle(local.getDataHandle());
+                _ctClippedDRR.p_transferFunction.setImageHandle(local.getDataHandle());
                 _ctClippedDRR.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(.3f, .73f));
 
                 // update camera

@@ -24,11 +24,13 @@
 
 #include "abstracttransferfunctioneditor.h"
 #include "core/classification/abstracttransferfunction.h"
+#include "core/properties/transferfunctionproperty.h"
 
 namespace campvis {
 
-    AbstractTransferFunctionEditor::AbstractTransferFunctionEditor(AbstractTransferFunction* tf, QWidget* parent /*= 0*/)
+    AbstractTransferFunctionEditor::AbstractTransferFunctionEditor(TransferFunctionProperty* prop, AbstractTransferFunction* tf, QWidget* parent /*= 0*/)
         : QWidget(parent)
+        , _tfProperty(prop)
         , _transferFunction(tf)
     {
         _ignorePropertyUpdates = 0;
@@ -43,4 +45,9 @@ namespace campvis {
         if (_ignorePropertyUpdates == 0)
             updateWidgetFromProperty();
     }
+
+    const TransferFunctionProperty::IntensityHistogramType* AbstractTransferFunctionEditor::getIntensityHistogram() const {
+        return _tfProperty->getIntensityHistogram();
+    }
+
 }

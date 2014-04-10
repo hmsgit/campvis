@@ -46,9 +46,9 @@ namespace campvis {
         , p_resampleScale("ResampleScale", "Resampling Scale", .5f, .01f, 10.f)
         , _shader(0)
     {
-        addProperty(&p_inputImage);
-        addProperty(&p_outputImage);
-        addProperty(&p_resampleScale);
+        addProperty(p_inputImage);
+        addProperty(p_outputImage);
+        addProperty(p_resampleScale);
     }
 
     GlImageResampler::~GlImageResampler() {
@@ -58,7 +58,7 @@ namespace campvis {
     void GlImageResampler::init() {
         VisualizationProcessor::init();
 
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -68,7 +68,7 @@ namespace campvis {
         VisualizationProcessor::deinit();
     }
 
-    void GlImageResampler::process(DataContainer& data) {
+    void GlImageResampler::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {

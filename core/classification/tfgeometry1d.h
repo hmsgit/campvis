@@ -29,6 +29,8 @@
 #include "tgt/vector.h"
 #include <vector>
 
+#include "core/coreapi.h"
+
 namespace tgt {
     class Texture;
 }
@@ -40,9 +42,9 @@ namespace campvis {
      * Defines a single shape for the GeometryTransferFunction class.
      * TFGeometry1D is defined by a sorted list of KeyPoints, each having a position and a color.
      */
-    class TFGeometry1D {
+    class CAMPVIS_CORE_API TFGeometry1D {
     public:
-        struct KeyPoint {
+        struct CAMPVIS_CORE_API KeyPoint {
             explicit KeyPoint(float position, const tgt::col4& color)
                 : _position(position)
                 , _color(color)
@@ -97,12 +99,45 @@ namespace campvis {
         /**
          * Creates a simple quad geometry for the given interval.
          * A quad geometry consists of two KeyPoints.
-         * \param   interval    Interval the geometry resides in
+         * \param   interval    Interval the geometry resides in, must be in [0, 1].
          * \param   leftColor   Color for left KeyPoint
          * \param   rightColor  Color for right KeyPoint
          * \return  A TFGeometry1D modelling a quad with two KeyPoints.
          */
-        static TFGeometry1D* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor);
+        static TFGeometry1D* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor);
+        
+        /**
+         * Creates a ramp geometry for the given interval.
+         * A quad geometry consists of two KeyPoints, the left one having 0 opacity, the right one with full opacity.
+         * \param   interval    Interval the geometry resides in, must be in [0, 1].
+         * \param   color       Color for ramp
+         * \return  A TFGeometry1D modelling a ramp with two KeyPoints.
+         */
+        static TFGeometry1D* crateRamp(const tgt::vec2& interval, const tgt::col4& color);
+
+        /**
+         * Creates a diverging color map of two diverging colors blending over white.
+         * \param   interval    Interval the geometry resides in, must be in [0, 1].
+         * \param   leftColor   Color for left diverging color.
+         * \param   rightColor  Color for right diverging color
+         * \return  A TFGeometry1D modelling a diverging color map with three key points.
+         */
+        static TFGeometry1D* createDivergingColorMap(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor, float bias = 0.5f);
+
+        /**
+         * Creates the cold-hot color map blending blue to red via white.
+         * \param   interval    Intensity domain for color map, must be in [0, 1].
+         * \return  A TFGeometry1D building the cold-hot color map for the given interval.
+         */
+        static TFGeometry1D* createColdHotColorMap(const tgt::vec2& interval = tgt::vec2(0.f, 1.f));
+
+        /**
+         * Creates the heated body color map blending black-red-yellow-white.
+         * \param   interval    Intensity domain for color map, must be in [0, 1].
+         * \return  A TFGeometry1D building the heated body color map for the given interval.
+         */
+        static TFGeometry1D* createHeatedBodyColorMap(const tgt::vec2& interval = tgt::vec2(0.f, 1.f));
+
     protected:
 
         std::vector<KeyPoint> _keyPoints;       ///< vector of KeyPoints, KeyPoints are sorted by x-coordinate of the position
@@ -118,7 +153,7 @@ namespace campvis {
      * \param   right   RightKeyPoint to compare
      * \return  left._position < right._position
      */
-    bool operator< (const TFGeometry1D::KeyPoint& left, const TFGeometry1D::KeyPoint& right);
+    CAMPVIS_CORE_API bool operator< (const TFGeometry1D::KeyPoint& left, const TFGeometry1D::KeyPoint& right);
 
 }
 

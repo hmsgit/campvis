@@ -47,11 +47,11 @@ namespace campvis {
         , p_targetImageId("TargetImageId", "Output Image", "", DataNameProperty::WRITE)
         , _shader(0)
     {
-        addProperty(&p_xRayImageId);
-        addProperty(&p_3dSliceImageId);
-        addProperty(&p_drrFullImageId);
-        addProperty(&p_drrClippedImageId);
-        addProperty(&p_targetImageId);
+        addProperty(p_xRayImageId);
+        addProperty(p_3dSliceImageId);
+        addProperty(p_drrFullImageId);
+        addProperty(p_drrClippedImageId);
+        addProperty(p_targetImageId);
 
         addDecorator(new ProcessorDecoratorBackground());
         decoratePropertyCollection(this);
@@ -63,7 +63,7 @@ namespace campvis {
 
     void IxpvCompositor::init() {
         VisualizationProcessor::init();
-        _shader = ShdrMgr.loadSeparate("core/glsl/passthrough.vert", "modules/ixpv/glsl/ixpvcompositor.frag", "", false);
+        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/ixpv/glsl/ixpvcompositor.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
@@ -73,7 +73,7 @@ namespace campvis {
         ShdrMgr.dispose(_shader);
     }
 
-    void IxpvCompositor::process(DataContainer& data) {
+    void IxpvCompositor::updateResult(DataContainer& data) {
         ScopedTypedData<RenderData> xRayImage(data, p_xRayImageId.getValue());
         ScopedTypedData<RenderData> sliceImage(data, p_3dSliceImageId.getValue());
         ScopedTypedData<RenderData> drrFullImage(data, p_drrFullImageId.getValue());

@@ -36,7 +36,7 @@ namespace campvis {
     CampcomMhdReceiver::CampcomMhdReceiver() 
         : AbstractProcessor()
         , p_address("ServerAddress", "Server Address", "127.0.0.1")
-        , p_connect("Connect", "Connect to Server", AbstractProcessor::VALID)
+        , p_connect("Connect", "Connect to Server")
         , p_targetImageID("targetImageName", "Target Image ID", "CampcomMhdReceiver.output", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
@@ -44,11 +44,11 @@ namespace campvis {
     {
         _incomingMhd = 0;
 
-        addProperty(&p_address);
-        addProperty(&p_targetImageID);
-        addProperty(&p_connect);
-        addProperty(&p_imageOffset);
-        addProperty(&p_voxelSize);
+        addProperty(p_address, VALID);
+        addProperty(p_targetImageID, VALID);
+        addProperty(p_connect, VALID);
+        addProperty(p_imageOffset, VALID);
+        addProperty(p_voxelSize, VALID);
 
     }
 
@@ -69,9 +69,7 @@ namespace campvis {
         _ccclient = 0;
     }
 
-    void CampcomMhdReceiver::process(DataContainer& data) {
-        validate(INVALID_RESULT);
-
+    void CampcomMhdReceiver::updateResult(DataContainer& data) {
         // Get the last received MHD file:
         // Use atomic fetch and store because at the same time CAMPCom may receive another file!
         campcom::MHDImageData* mid = _incomingMhd.fetch_and_store(0);
@@ -117,6 +115,8 @@ namespace campvis {
         ImageRepresentationLocal::create(image, wtp);
         image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
         data.addData(p_targetImageID.getValue(), image);
+
+        validate(INVALID_RESULT);
     }
 
     void CampcomMhdReceiver::onBtnConnectClicked() {

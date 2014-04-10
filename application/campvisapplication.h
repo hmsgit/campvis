@@ -65,9 +65,8 @@ namespace campvis {
          * Creates a new CampVisApplication.
          * \param   argc        number of passed arguments
          * \param   argv        vector of arguments
-         * \param   useOpenCL   Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
          */
-        CampVisApplication(int& argc, char** argv, bool useOpenCL = true);
+        CampVisApplication(int& argc, char** argv);
 
         /**
          * Destructor, make sure to call deinit() first.
@@ -119,6 +118,11 @@ namespace campvis {
          */
         DataContainer* createAndAddDataContainer(const std::string& name);
 
+        /**
+         * Reloads all GLSL shaders from file and rebuilds them.
+         */
+        void rebuildAllShadersFromFiles();
+
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
@@ -126,7 +130,8 @@ namespace campvis {
         sigslot::signal0<> s_DataContainersChanged;
 
     private:
-        void addPipelineImpl(tgt::QtThreadedCanvas* canvas, const std::string& name, AbstractPipeline* pipeline);
+        void initGlContextAndPipeline(tgt::GLCanvas* canvas, AbstractPipeline* pipeline);
+
 
         /// All pipelines 
         std::vector<AbstractPipeline*> _pipelines;
@@ -136,6 +141,12 @@ namespace campvis {
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;
 
+        /**
+         * Triggers the ShaderManager to rebuild all shaders from file and then 
+         * invalidates all VisualizationProcessors.
+         */
+        void triggerShaderRebuild();
+
         /// A local OpenGL context used for initialization
         tgt::GLCanvas* _localContext;
         /// Main window hosting GUI stuff
@@ -143,9 +154,6 @@ namespace campvis {
 
         /// Flag, whether CampVisApplication was correctly initialized
         bool _initialized;
-
-        /// Flag, whether to use OpenCL (inits and deinits KissCL lib at the appropriate time).
-        bool _useOpenCL;
 
         int _argc;
         char** _argv;

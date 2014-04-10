@@ -31,6 +31,8 @@
 #define ABSTRACTDATA_H__
 
 #include "tgt/bounds.h"
+
+#include "core/coreapi.h"
 #include "core/datastructures/scopedtypeddata.h" // not directly needed here but by many classes including AbstractData 
 #include "core/tools/referencecounted.h"
 
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Interface class for data which can compute their bounds in world coordinates.
      */
-    class IHasWorldBounds {
+    class CAMPVIS_CORE_API IHasWorldBounds {
     public:
         /// Default empty constructor
         IHasWorldBounds() {};
@@ -60,7 +62,7 @@ namespace campvis {
      * 
      * \todo 
      */
-    class AbstractData : public ReferenceCounted {
+    class CAMPVIS_CORE_API AbstractData : public ReferenceCounted {
     public:
         /**
          * Constructor, simply calles ReferenceCounted ctor.

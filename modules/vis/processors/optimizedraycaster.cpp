@@ -36,21 +36,21 @@ namespace campvis {
     OptimizedRaycaster::OptimizedRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/optimizedraycaster.frag", true)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
+        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
-        , p_enableIntersectionRefinement("EnableIntersectionRefinement", "Enable Intersection Refinement", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
-        , p_useEmptySpaceSkipping("EnableEmptySpaceSkipping", "Enable Empty Space Skipping", true, AbstractProcessor::INVALID_RESULT | INVALID_BBV)
+        , p_enableIntersectionRefinement("EnableIntersectionRefinement", "Enable Intersection Refinement", false)
+        , p_useEmptySpaceSkipping("EnableEmptySpaceSkipping", "Enable Empty Space Skipping", true)
         , _bbv(0)
         , _t(0)
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_targetImageID);
-        addProperty(&p_enableIntersectionRefinement);
-        addProperty(&p_useEmptySpaceSkipping);
+        addProperty(p_targetImageID);
+        addProperty(p_enableIntersectionRefinement, INVALID_RESULT | INVALID_SHADER);
+        addProperty(p_useEmptySpaceSkipping, INVALID_RESULT | INVALID_BBV);
 
-        addProperty(&p_enableShadowing);
-        addProperty(&p_shadowIntensity);
+        addProperty(p_enableShadowing, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES);
+        addProperty(p_shadowIntensity);
         p_shadowIntensity.setVisible(false);
 
 //         p_transferFunction.setInvalidationLevel(p_transferFunction.getInvalidationLevel() | INVALID_BBV);
@@ -139,9 +139,10 @@ namespace campvis {
         return toReturn;
     }
 
-    void OptimizedRaycaster::updateProperties() {
+    void OptimizedRaycaster::updateProperties(DataContainer& dataContainer) {
+        RaycastingProcessor::updateProperties(dataContainer);
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
-        validate(AbstractProcessor::INVALID_PROPERTIES);
+        validate(INVALID_PROPERTIES);
     }
 
     void OptimizedRaycaster::generateBbv(DataHandle dh) {

@@ -61,8 +61,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_sourceImageID;   ///< ID for input volume
         DataNameProperty p_targetImageID;   ///< ID for output gradient volume
 
@@ -72,10 +70,14 @@ namespace campvis {
         IntProperty p_numberOfSteps;
         FloatProperty p_timeStep;
         FloatProperty p_conductance;
+        FloatProperty p_thresMin;
+        FloatProperty p_thresMax;
 
     protected:
-        /// \see HasPropertyCollection::updateProperties
-        virtual void updateProperties();
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
 
         static const std::string loggerCat_;
     };

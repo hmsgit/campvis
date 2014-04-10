@@ -73,9 +73,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        /// \see AbstractProcessor::process()
-        virtual void process(DataContainer& data);
-
         DataNameProperty p_usImageId;                  ///< image ID for input image
         DataNameProperty p_blurredImageId;
         DataNameProperty p_gradientImageID;
@@ -92,6 +89,8 @@ namespace campvis {
         BoolProperty p_use3DTexture;
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
         /// adapts the range of the p_sliceNumber property to the image
         virtual void updateProperties(DataContainer dc);
 

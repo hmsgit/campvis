@@ -28,6 +28,8 @@
 #include <tbb/concurrent_vector.h>
 #include "tgt/logmanager.h"
 #include "tgt/vector.h"
+
+#include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/abstractimagerepresentation.h"
 #include "core/datastructures/imagemappinginformation.h"
@@ -40,12 +42,12 @@ namespace campvis {
 
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.
-     * Different representations (e.g. local memory, OpenGL texture, OpenCL buffer) are
+     * Different representations (e.g. local memory, OpenGL texture) are
      * to be defined by inheritance.
      * 
      * \todo 
      */
-    class ImageData : public AbstractData, public IHasWorldBounds {
+    class CAMPVIS_CORE_API ImageData : public AbstractData, public IHasWorldBounds {
     // friend so that it can add itself as representation
     friend class AbstractImageRepresentation;
 
@@ -129,17 +131,6 @@ namespace campvis {
          * \return  The image extent in world coordinates for the given voxel coordinates.
          */
         tgt::Bounds getWorldBounds(const tgt::svec3& llf, const tgt::svec3& urb) const;
-
-        /**
-         * Returns the subimage of this image given by \a llf and \a urb.
-         * TODO: Check whether it is necessary to adjust image mapping!
-         * 
-         * \note    Creates sub-images of all representations.
-         * \param   llf     Lower-Left-Front coordinates of subimage
-         * \param   urb     Upper-Right-Back coordinates of subimage
-         * \return  An image containing the sub-image of this image with the given coordinates.
-         */
-        virtual ImageData* getSubImage(const tgt::svec3& llf, const tgt::svec3& urb) const;
 
         /**
          * Transforms a vector based position to the corresponding array index.
@@ -231,13 +222,13 @@ namespace campvis {
     }
 
     template<>
-    const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
+    CAMPVIS_CORE_API const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
 
 #ifdef CAMPVIS_HAS_MODULE_ITK
     class AbstractImageRepresentationItk;
 
     template<>
-    const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
+    CAMPVIS_CORE_API const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
 #endif
 
     template<typename T>
@@ -253,7 +244,7 @@ namespace campvis {
         }
 
         // could not create a suitable representation
-        LDEBUG("Could not create a " + std::string(typeid(T*).name()) + " representation.");
+        LWARNING("Could not create a " + std::string(typeid(T*).name()) + " representation.");
         return 0;
     }
 

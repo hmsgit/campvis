@@ -23,23 +23,58 @@
 // ================================================================================================
 
 #include "tools/shading.frag"
+#include "tools/texture2d.frag"
 
+// input from geometry shader
+in vec3 geom_Position;
+in vec3 geom_TexCoord;
+in vec4 geom_Color;
+in vec3 geom_Normal;
+noperspective in vec3 geom_EdgeDistance;
 
-in vec3 ex_TexCoord;        ///< incoming texture coordinate
-in vec4 ex_Position;        ///< incoming texture coordinate
+// output fragment color
+out vec4 out_Color;
 
-out vec4 out_Color;         ///< outgoing fragment color
+// additional uniforms
+uniform int _coloringMode;
+uniform vec4 _solidColor;
+uniform vec4 _wireframeColor;
+uniform float _lineWidth = 1.0;
 
-uniform vec4 _color;
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
+#ifdef ENABLE_TEXTURING
+uniform sampler2D _texture;
+uniform TextureParameters2D _textureParams;
+#endif
+
 void main() {
-    out_Color = _color;
+    out_Color = vec4(1.0, 0.5, 0.0, 1.0);
+
+#ifdef ENABLE_TEXTURING
+    out_Color = texture(_texture, geom_TexCoord.xy);
+#else
+    if (_coloringMode == 0)
+        out_Color = geom_Color;
+    else if (_coloringMode == 1)
+        out_Color = _solidColor;
+#endif        
 
 #ifdef ENABLE_SHADING
-            // compute gradient (needed for shading and normals)
-            vec3 gradient = ex_TexCoord;
-            out_Color.rgb = calculatePhongShading(ex_Position.xyz / ex_Position.z, _lightSource, _cameraPosition, gradient, _color.rgb, _color.rgb, vec3(1.0, 1.0, 1.0));
+    // perform Phong shading
+    out_Color.rgb = calculatePhongShading(geom_Position, _lightSource, _cameraPosition, geom_Normal, out_Color.rgb, out_Color.rgb, vec3(1.0, 1.0, 1.0));
 #endif
+
+#ifdef WIREFRAME_RENDERING
+    // Find the smallest distance to the edges
+    float d = min(geom_EdgeDistance.x, min(geom_EdgeDistance.y, geom_EdgeDistance.z)) * 2.0;
+
+    // perform anti-aliasing
+    float mixVal = smoothstep(_lineWidth - 1.0, _lineWidth + 1.0, d);
+
+    // Mix the surface color with the line color
+    out_Color = mix(_wireframeColor, out_Color, mixVal);    
+#endif
+
 }

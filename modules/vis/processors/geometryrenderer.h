@@ -31,8 +31,9 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/cameraproperty.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
 #include "core/properties/floatingpointproperty.h"
+#include "core/properties/genericproperty.h"
+#include "core/properties/optionproperty.h"
 
 namespace tgt {
     class Shader;
@@ -44,6 +45,13 @@ namespace campvis {
      */
     class GeometryRenderer : public VisualizationProcessor, public HasProcessorDecorators {
     public:
+        /// Coloring mode for fragments used during rendering
+        enum ColoringMode {
+            GEOMETRY_COLOR = 0,     ///< Original color as stored in geometry
+            SOLID_COLOR = 1,        ///< Solid color set by property
+            TEXTURE_COLOR = 2       ///< Color determined from texture lookup
+        };
+
         /**
          * Constructs a new GeometryRenderer Processor
          **/
@@ -69,22 +77,40 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        virtual void process(DataContainer& data);
-
-        DataNameProperty p_geometryID;       ///< ID for input geometry
-        DataNameProperty p_renderTargetID;   ///< image ID for output image
+        DataNameProperty p_geometryID;              ///< ID for input geometry
+        DataNameProperty p_textureID;               ///< ID for input texture (optional)
+        DataNameProperty p_renderTargetID;          ///< image ID for output image
         CameraProperty p_camera;
 
-        Vec4Property p_color;                ///< rendering color
+        GenericOptionProperty<GLenum> p_renderMode;         ///< Render mode for the geometry
+        GenericOptionProperty<ColoringMode> p_coloringMode; ///< Coloring mode for fragments used during rendering
+
+        Vec4Property p_solidColor;                  ///< rendering color
+
+        FloatProperty p_pointSize;                  ///< Point Size when rendering points
+        FloatProperty p_lineWidth;                  ///< Line Width when rendering lines
+
+        BoolProperty p_showWireframe;               ///< Show wire frame
+        Vec4Property p_wireframeColor;              ///< Wireframe color
+        
 
     protected:
+        /// \see AbstractProcessor::updateResult
+        virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
+        /// \see    AbstractProcessor::updateShader
+        virtual void updateShader();
+
         /**
          * Generates the GLSL header.
          */
-        std::string generateGlslHeader() const;
+        std::string generateGlslHeader(bool hasGeometryShader) const;
 
-        tgt::Shader* _shader;                           ///< Shader for EEP generation
+        tgt::Shader* _pointShader;
+        tgt::Shader* _meshShader;
 
+    private:
         static const std::string loggerCat_;
     };
 

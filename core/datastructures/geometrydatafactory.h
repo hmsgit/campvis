@@ -27,15 +27,17 @@
 
 #include "tgt/bounds.h"
 #include "tgt/vector.h"
+
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/meshgeometry.h"
+#include "core/datastructures/multiindexedgeometry.h"
 
 #include <vector>
 
 namespace campvis {
 
-    class GeometryDataFactory {
+    class CAMPVIS_CORE_API GeometryDataFactory {
     public:
         /**
          * Creates a FaceGeometry building an axis-aligned rectangle face in the YX plane (quad) 
@@ -58,6 +60,30 @@ namespace campvis {
          */
         static MeshGeometry* createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
 
+        /**
+         * Creates an MultiIndexedGeometry storing the famous Utah teapot.
+         * \return  MultiIndexedGeometry storing the famous Utah teapot.
+         */
+        static MultiIndexedGeometry* createTeapot();
+
+        /**
+         * Creates an MultiIndexedGeometry storing a unit sphere around the origin.
+         * \param   numStacks     Number of stacks in the sphere
+         * \param   numSlices     Number of slices in the sphere
+         * \return  MultiIndexedGeometry storing a unit sphere around the origin.
+         */
+        static MultiIndexedGeometry* createSphere(uint16_t numStacks = 6, uint16_t numSlices = 12);
+
+
+        /**
+         * Creates an MultiIndexedGeometry storing a unit length arrow in Z direction starting from the origin.
+         * \param   numSlices	Number of slices in the cylinder and cone
+		 * \param	tipLen		Length of arrow tip (between 0 and 1)
+         * \param   cylRadius	Radius of the cylinder (arrow shaft)
+		 * \param	tipRadius	Radius of the bottom of the arrow tip
+         * \return  MultiIndexedGeometry storing a unit arrow in Z direction starting from the origin.
+         */
+		static MultiIndexedGeometry* createArrow(uint16_t numSlices = 12, float tipLen = 0.35, float cylRadius = 0.05, float tipRadius = 0.15);
     };
 
 }
