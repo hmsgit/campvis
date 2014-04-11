@@ -34,6 +34,10 @@
 
 #include "core/datastructures/abstractdata.h"
 
+namespace tgt {
+    class Shader;
+}
+
 namespace campvis {
 
     /**
@@ -72,6 +76,13 @@ namespace campvis {
         virtual size_t getLocalMemoryFootprint() const;
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
+
+        /**
+         * Binds this light source to the given shader by setting the corresponding uniforms.
+         * \param   shader      Shader to bind to.
+         * \param   uniformName Uniform name to use.
+         */
+        void bind(tgt::Shader* shader, const std::string& uniformName) const;
 
         /**
         * Gets the light positoin.

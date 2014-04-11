@@ -23,6 +23,7 @@
 // ================================================================================================
 
 #include "lightsourcedata.h"
+#include "tgt/shadermanager.h"
 
 namespace campvis {
     
@@ -52,6 +53,15 @@ namespace campvis {
 
     size_t LightSourceData::getVideoMemoryFootprint() const {
         return 0;
+    }
+
+    void LightSourceData::bind(tgt::Shader* shader, const std::string& uniformName) const {
+        shader->setUniform(uniformName + "._position", _lightPosition);
+        shader->setUniform(uniformName + "._ambientColor", _ambientColor);
+        shader->setUniform(uniformName + "._diffuseColor", _diffuseColor);
+        shader->setUniform(uniformName + "._specularColor", _specularColor);
+        shader->setUniform(uniformName + "._shininess", _shininess);
+        shader->setUniform(uniformName + "._attenuation", _attenuation);
     }
 
 }

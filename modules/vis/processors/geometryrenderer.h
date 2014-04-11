@@ -43,7 +43,7 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class GeometryRenderer : public VisualizationProcessor, public HasProcessorDecorators {
+    class GeometryRenderer : public VisualizationProcessor {
     public:
         /// Coloring mode for fragments used during rendering
         enum ColoringMode {
@@ -81,6 +81,9 @@ namespace campvis {
         DataNameProperty p_textureID;               ///< ID for input texture (optional)
         DataNameProperty p_renderTargetID;          ///< image ID for output image
         CameraProperty p_camera;
+
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
         GenericOptionProperty<GLenum> p_renderMode;         ///< Render mode for the geometry
         GenericOptionProperty<ColoringMode> p_coloringMode; ///< Coloring mode for fragments used during rendering
