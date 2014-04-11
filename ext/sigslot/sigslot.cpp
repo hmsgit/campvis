@@ -1,3 +1,31 @@
+// ================================================================================================
+// 
+// sigslot.h/sigslot.cpp - Signal/Slot classes:
+// 
+// Original siglsot implementation written by Sarah Thompson (sarah@telergy.com) 2002 and 
+// published under public domain. <http://sigslot.sourceforge.net/>
+// 
+// This version of the sigslot library is heavily modified, C++ compliant, inherently thread-safe,
+// and offers a manager class that allows to queue and asynchronously dispatch signals.
+// 
+// Copyright (C) 2012-2014, all rights reserved,
+//      Christian Schulte zu Berge <christian.szb@in.tum.de>
+//      Chair for Computer Aided Medical Procedures
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
+// 
+// ================================================================================================
+
 #include "sigslot.h"
 
 namespace sigslot {

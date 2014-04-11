@@ -1,91 +1,30 @@
-/*
- 
- sigslot.h: Signal/Slot classes
- 
- Written by Sarah Thompson (sarah@telergy.com) 2002.
- 
- License: Public domain. You are free to use this code however you like,
-          with the proviso that the author takes on no responsibility or
-          liability for any use.
- 
- QUICK DOCUMENTATION
- 
- (see also the full documentation at http://sigslot.sourceforge.net/)
- 
- 1. #define switches
-
-    SIGSLOT_PURE_ISO:
-    Define this to force ISO C++ compliance. This also disables
-    all of the thread safety support on platforms where it is 
-    available.
- 
-    SIGSLOT_USE_POSIX_THREADS:
-    Force use of Posix threads when using a C++ compiler other than
-    gcc on a platform that supports Posix threads. (When using gcc,
-    this is the default - use SIGSLOT_PURE_ISO to disable this if 
-    necessary)
- 
-    SIGSLOT_DEFAULT_MT_POLICY:
-    Where thread support is enabled, this defaults to multi_threaded_global.
-    Otherwise, the default is single_threaded. #define this yourself to
-    override the default. In pure ISO mode, anything other than
-    single_threaded will cause a compiler error.
-
- 2. PLATFORM NOTES
- 
-    Win32:
-    On Win32, the WIN32 symbol must be #defined. Most mainstream
-    compilers do this by default, but you may need to define it
-    yourself if your build environment is less standard. This causes
-    the Win32 thread support to be compiled in and used automatically.
- 
-    Unix/Linux/BSD, etc:
-    If you're using gcc, it is assumed that you have Posix threads
-    available, so they are used automatically. You can override this
-    (as under Windows) with the SIGSLOT_PURE_ISO switch. If you're using
-    something other than gcc but still want to use Posix threads, you
-    need to #define SIGSLOT_USE_POSIX_THREADS.
- 
-    ISO C++:
-    If none of the supported platforms are detected, or if
-    SIGSLOT_PURE_ISO is defined, all multithreading support is turned off,
-    along with any code that might cause a pure ISO C++ environment to
-    complain. Before you ask, gcc -ansi -pedantic won't compile this 
-    library, but gcc -ansi is fine. Pedantic mode seems to throw a lot of
-    errors that aren't really there. If you feel like investigating this,
-    please contact the author.
-      
- THREADING MODES
- 
-    single_threaded:
-    Your program is assumed to be single threaded from the point of view
-    of signal/slot usage (i.e. all objects using signals and slots are
-    created and destroyed from a single thread). Behaviour if objects are
-    destroyed concurrently is undefined (i.e. you'll get the occasional
-    segmentation fault/memory exception).
- 
-    multi_threaded_global:
-    Your program is assumed to be multi threaded. Objects using signals and
-    slots can be safely created and destroyed from any thread, even when
-    connections exist. In multi_threaded_global mode, this is achieved by a
-    single global mutex (actually a critical section on Windows because they
-    are faster). This option uses less OS resources, but results in more
-    opportunities for contention, possibly resulting in more context switches
-    than are strictly necessary.
- 
-    multi_threaded_local:
-    Behaviour in this mode is essentially the same as multi_threaded_global,
-    except that each signal, and each object that inherits has_slots, all 
-    have their own mutex/critical section. In practice, this means that
-    mutex collisions (and hence context switches) only happen if they are
-    absolutely essential. However, on some platforms, creating a lot of 
-    mutexes can slow down the whole OS, so use this option with care.
- 
- USING THE LIBRARY
- 
- See the full documentation at http://sigslot.sourceforge.net/
- 
-*/
+// ================================================================================================
+// 
+// sigslot.h/sigslot.cpp - Signal/Slot classes:
+// 
+// Original siglsot implementation written by Sarah Thompson (sarah@telergy.com) 2002 and 
+// published under public domain. <http://sigslot.sourceforge.net/>
+// 
+// This version of the sigslot library is heavily modified, C++ compliant, inherently thread-safe,
+// and offers a manager class that allows to queue and asynchronously dispatch signals.
+// 
+// Copyright (C) 2012-2014, all rights reserved,
+//      Christian Schulte zu Berge <christian.szb@in.tum.de>
+//      Chair for Computer Aided Medical Procedures
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
+// 
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
+// 
+// ================================================================================================
 
 #ifndef SIGSLOT_H
 #define SIGSLOT_H
@@ -235,8 +174,8 @@ namespace sigslot {
             return const_iterator(s, s.end()); 
         };
 
-        void push_back(T* element) { _storage.push_back(element); };
-        void insert(T* element) { _storage.push_back(element); };
+        void push_back(T* element) { insert(element); };
+        void insert(T* element);
 
         size_t erase(T* element);
         void erase(const const_iterator& it) { *it = nullptr; };
@@ -249,7 +188,24 @@ namespace sigslot {
     };
 
 // ================================================================================================
-    
+
+    template<typename T>
+    void concurrent_pointer_list<T>::insert(T* element) {
+        iterator it = begin();
+        iterator itEnd = end();
+
+        // to ensure non-degrading performance, we first fill the gaps.
+        for (/* nothing here */; it != itEnd; ++it) {
+            if (*it == nullptr) {
+                *it = element;
+                return;
+            }
+        }
+
+        // we did not find an empty element -> we add a new one at the end
+        _storage.push_back(element);
+    }
+
     template<typename T>
     size_t concurrent_pointer_list<T>::erase(T* element) {
         size_t count = 0;
