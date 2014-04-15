@@ -27,6 +27,7 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/genericimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -56,7 +57,7 @@ namespace campvis {
         static const std::string getId() { return "VolumeExplorerDemo"; };
 
     protected:
-
+        LightSourceProvider _lsp;
         GenericImageReader _imageReader;
         VolumeExplorer _ve;
     };

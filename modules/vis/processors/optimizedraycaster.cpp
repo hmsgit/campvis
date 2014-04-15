@@ -25,8 +25,9 @@
 #include "optimizedraycaster.h"
 
 #include "core/tools/quadrenderer.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/processordecoratorshading.h"
+#include "core/pipeline/processordecoratorgradient.h"
 
 #include <tbb/tbb.h>
 
@@ -36,6 +37,8 @@ namespace campvis {
     OptimizedRaycaster::OptimizedRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/optimizedraycaster.frag", true)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
         , p_enableIntersectionRefinement("EnableIntersectionRefinement", "Enable Intersection Refinement", false)
@@ -43,8 +46,10 @@ namespace campvis {
         , _bbv(0)
         , _t(0)
     {
-        addDecorator(new ProcessorDecoratorShading());
+        addDecorator(new ProcessorDecoratorGradient());
 
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
         addProperty(p_targetImageID);
         addProperty(p_enableIntersectionRefinement, INVALID_RESULT | INVALID_SHADER);
         addProperty(p_useEmptySpaceSkipping, INVALID_RESULT | INVALID_BBV);
@@ -107,31 +112,43 @@ namespace campvis {
             _shader->setUniform("_hasBbv", false);
         }
 
-        FramebufferActivationGuard fag(this);
-        createAndAttachTexture(GL_RGBA8);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachDepthTexture();
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
-        static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-        glDrawBuffers(3, buffers);
+        if (p_enableShading.getValue() == false || light != nullptr) {
+            FramebufferActivationGuard fag(this);
+            createAndAttachTexture(GL_RGBA8);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachDepthTexture();
 
-        if (p_enableShadowing.getValue())
-            _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(3, buffers);
 
-        glEnable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        QuadRdr.renderQuad();
+            if (p_enableShading.getValue() && light != nullptr) {
+                light->bind(_shader, "_lightSource");
+            }
+            if (p_enableShadowing.getValue())
+                _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
 
-        glDrawBuffers(1, buffers);
-        glDisable(GL_DEPTH_TEST);
-        LGL_ERROR;
+            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            QuadRdr.renderQuad();
 
-        data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+            glDrawBuffers(1, buffers);
+            glDisable(GL_DEPTH_TEST);
+            LGL_ERROR;
+
+            data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+        }
+        else {
+            LDEBUG("Could not load light source from DataContainer.");
+        }
     }
 
     std::string OptimizedRaycaster::generateHeader() const {
         std::string toReturn = RaycastingProcessor::generateHeader();
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
         if (p_enableShadowing.getValue())
             toReturn += "#define ENABLE_SHADOWING\n";
         if (p_enableIntersectionRefinement.getValue())
@@ -141,6 +158,7 @@ namespace campvis {
 
     void OptimizedRaycaster::updateProperties(DataContainer& dataContainer) {
         RaycastingProcessor::updateProperties(dataContainer);
+        p_lightId.setVisible(p_enableShading.getValue());
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
         validate(INVALID_PROPERTIES);
     }

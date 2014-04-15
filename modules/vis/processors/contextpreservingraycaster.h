@@ -67,6 +67,9 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        BoolProperty p_enableShading;   ///< Flag whether to enable shading
+        DataNameProperty p_lightId;     ///< Name/ID for the LightSource to use
+
         FloatProperty p_kappaS;     ///< k_s parameter from the paper
         FloatProperty p_kappaT;     ///< l_t parameter from the paper
     

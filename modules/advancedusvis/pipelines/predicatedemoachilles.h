@@ -33,6 +33,7 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
 
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/advancedusvis/processors/pointpredicateevaluator.h"
 #include "modules/advancedusvis/processors/predicatevolumeexplorer.h"
@@ -81,6 +82,7 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         MhdImageReader _labelReader;
         MhdImageReader _confidenceReader;

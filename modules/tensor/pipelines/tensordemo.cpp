@@ -33,6 +33,7 @@ namespace campvis {
 
     TensorDemo::TensorDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _lsp()
         , _imageReader()
         , _ta()
         , _glyphRenderer(&_canvasSize)
@@ -49,6 +50,7 @@ namespace campvis {
         _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);
 
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_ta);
         addProcessor(&_glyphRenderer);

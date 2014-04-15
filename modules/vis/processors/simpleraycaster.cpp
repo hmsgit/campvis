@@ -25,8 +25,10 @@
 #include "simpleraycaster.h"
 
 #include "core/tools/quadrenderer.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/processordecoratorshading.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
+#include "core/pipeline/processordecoratorgradient.h"
 
 #include <tbb/tbb.h>
 
@@ -35,11 +37,15 @@ namespace campvis {
 
     SimpleRaycaster::SimpleRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/simpleraycaster.frag", true)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
     {
-        addDecorator(new ProcessorDecoratorShading());
+        addDecorator(new ProcessorDecoratorGradient());
 
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
         addProperty(p_enableShadowing, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
         addProperty(p_shadowIntensity);
         p_shadowIntensity.setVisible(false);
@@ -59,33 +65,48 @@ namespace campvis {
     }
 
     void SimpleRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
-        FramebufferActivationGuard fag(this);
-        createAndAttachTexture(GL_RGBA8);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachDepthTexture();
+        if (p_enableShading.getValue() == false || light != nullptr) {
+            FramebufferActivationGuard fag(this);
+            createAndAttachTexture(GL_RGBA8);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachDepthTexture();
 
-        static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-        glDrawBuffers(3, buffers);
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(3, buffers);
 
-        if (p_enableShadowing.getValue())
-            _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
+            if (p_enableShading.getValue() && light != nullptr) {
+                light->bind(_shader, "_lightSource");
+            }
+            if (p_enableShadowing.getValue()) {
+                _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
+            }
 
-        glEnable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        QuadRdr.renderQuad();
+            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            QuadRdr.renderQuad();
 
-        // restore state
-        glDrawBuffers(1, buffers);
-        glDisable(GL_DEPTH_TEST);
-        LGL_ERROR;
+            // restore state
+            glDrawBuffers(1, buffers);
+            glDisable(GL_DEPTH_TEST);
+            LGL_ERROR;
 
-        data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+            data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+
+
+        
+        }
+        else {
+            LDEBUG("Could not load light source from DataContainer.");
+        }
     }
 
     std::string SimpleRaycaster::generateHeader() const {
         std::string toReturn = RaycastingProcessor::generateHeader();
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
         if (p_enableShadowing.getValue())
             toReturn += "#define ENABLE_SHADOWING\n";
         return toReturn;
@@ -93,6 +114,7 @@ namespace campvis {
 
     void SimpleRaycaster::updateProperties(DataContainer& dataContainer) {
         RaycastingProcessor::updateProperties(dataContainer);
+        p_lightId.setVisible(p_enableShading.getValue());
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }

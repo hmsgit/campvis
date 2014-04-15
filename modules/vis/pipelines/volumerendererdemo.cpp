@@ -35,6 +35,7 @@ namespace campvis {
     VolumeRendererDemo::VolumeRendererDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
+        , _lsp()
         , _imageReader()
         , _vr(&_canvasSize)
         , _trackballEH(0)
@@ -45,6 +46,7 @@ namespace campvis {
         _trackballEH->addLqModeProcessor(&_vr);
         addEventListenerToBack(_trackballEH);
 
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_vr);
     }

@@ -56,6 +56,8 @@ namespace campvis {
     }
 
     void LightSourceData::bind(tgt::Shader* shader, const std::string& uniformName) const {
+        tgt::Shader::IgnoreUniformLocationErrorGuard guard(shader);
+
         shader->setUniform(uniformName + "._position", _lightPosition);
         shader->setUniform(uniformName + "._ambientColor", _ambientColor);
         shader->setUniform(uniformName + "._diffuseColor", _diffuseColor);

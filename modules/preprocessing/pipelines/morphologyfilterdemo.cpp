@@ -37,10 +37,12 @@ namespace campvis {
 
     MorphologyDemo::MorphologyDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _lsp()
         , _imageReader()
         , _morphologyFilter(&_canvasSize)
         , _ve(&_canvasSize)
     {
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_morphologyFilter);
         addProcessor(&_ve);

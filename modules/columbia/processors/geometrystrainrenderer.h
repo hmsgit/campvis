@@ -42,7 +42,7 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class GeometryStrainRenderer : public VisualizationProcessor, public HasProcessorDecorators {
+    class GeometryStrainRenderer : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GeometryStrainRenderer Processor
@@ -74,11 +74,15 @@ namespace campvis {
         DataNameProperty p_renderTargetID;   ///< image ID for output image
         CameraProperty p_camera;
 
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
         Vec4Property p_color;                ///< rendering color
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
         /// \see    AbstractProcessor::updateShader
         virtual void updateShader();
 

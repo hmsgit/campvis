@@ -72,6 +72,9 @@ namespace campvis {
         virtual void deinit();
 
         DataNameProperty p_targetImageID;    ///< image ID for output image
+        
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
         BoolProperty p_enableShadowing;
         FloatProperty p_shadowIntensity;
         BoolProperty p_enableIntersectionRefinement;

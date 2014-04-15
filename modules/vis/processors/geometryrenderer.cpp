@@ -34,7 +34,6 @@
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/meshgeometry.h"
-#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
     static const GenericOption<GLenum> renderOptions[7] = {

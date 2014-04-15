@@ -39,9 +39,11 @@ namespace campvis {
 
     VolumeExplorerDemo::VolumeExplorerDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _lsp()
         , _imageReader()
         , _ve(&_canvasSize)
     {
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_ve);
 

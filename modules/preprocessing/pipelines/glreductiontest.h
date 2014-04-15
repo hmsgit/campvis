@@ -27,6 +27,8 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -63,6 +65,7 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         GlImageResampler _resampler;
         VolumeExplorer _ve;
