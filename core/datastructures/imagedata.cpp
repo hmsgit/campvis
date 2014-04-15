@@ -53,9 +53,9 @@ namespace campvis {
     ImageData* ImageData::clone() const {
         ImageData* toReturn = new ImageData(_dimensionality, _size, _numChannels);
         toReturn->_mappingInformation = _mappingInformation;
-        tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator start = _representations.begin();
-        tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator end = _representations.end();
-        toReturn->_representations.assign(start, end);
+        for (auto it = this->_representations.begin(); it != this->_representations.end(); ++it) {
+            (*it)->clone(toReturn);
+        }
         return toReturn;
     }
 
