@@ -41,8 +41,8 @@
 namespace campvis {
 
     /**
-     * Struct for handling void pointers slightly more typesafe.
-     * Therfore it stores an enum value together with the pointer for deducing its data type.
+     * Struct for handling void pointers slightly more type safe.
+     * Therefore it stores an enum value together with the pointer for deducing its data type.
      * \note    WeaklyTypedPointer takes _not_ take ownership of its pointer, hence it won't take care of deleting it!
      */
     struct CAMPVIS_CORE_API WeaklyTypedPointer {
@@ -62,7 +62,7 @@ namespace campvis {
         /**
          * Returns the number of bytes occupied by one element of the type \a bt with \a numChannels channels.
          * 
-         * \note    There is a compiletime version in WeaklyTypedPointerTraits.
+         * \note    There is a compile time version in WeaklyTypedPointerTraits.
          * \sa      WeaklyTypedPointerTraits::numBytes()
          * \param   bt          Image base type
          * \param   numChannels Number of channels per element.

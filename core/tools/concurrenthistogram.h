@@ -35,7 +35,7 @@ namespace campvis {
 
     /**
      * Generic implementation of thread-safe n-D histograms.
-     * After successfull creation ConcurrentGenericHistogramND ensures:
+     * After successful creation ConcurrentGenericHistogramND ensures:
      *  * Calling addSample() is thread-safe.
      * 
      * \tparam  T   Base data type of the histogram elements

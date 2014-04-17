@@ -43,16 +43,24 @@ namespace campvis {
 
     const std::string GlReduction::loggerCat_ = "CAMPVis.modules.registration.GlReduction";
 
-    GlReduction::GlReduction(ReductionOperator reductionOperator)
+    GlReduction::GlReduction(ReductionOperator reductionOperator, bool isForTesting)
         : _reductionOperator(reductionOperator)
         , _shader1d(0)
         , _shader2d(0)
         , _shader3d(0)
         , _fbo(0)
     {
-        _shader1d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_1D\n");
-        _shader2d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n");
-        _shader3d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n");
+        //TODO: discuss details, and generalize this
+        if(!isForTesting) {
+            _shader1d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_1D\n");
+            _shader2d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n");
+            _shader3d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n");
+        }
+        else {
+            _shader1d = ShdrMgr.load("../src/core/glsl/passthrough.vert", "../src/core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_1D\n");
+            _shader2d = ShdrMgr.load("../src/core/glsl/passthrough.vert", "../src/core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n");
+            _shader3d = ShdrMgr.load("../src/core/glsl/passthrough.vert", "../src/core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n");
+        }
         if (_shader1d == 0 || _shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;

@@ -98,21 +98,13 @@ void init() {
     if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
         LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
     }
-
-    /**?
-     * had to change macro in original file, else OpenGLJobProcessor is not known here
-     * unless "using" statement is written on the top.
-     */
-    GLJobProc.start();
-    GLJobProc.registerContext(_localContext);
-
+    
     _initialized = true;
 }
 
 void deinit() {
     tgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
-    GLJobProc.stop();
 
     /**?
      * Grrrrrrrrrrrrrrrr :#
@@ -146,10 +138,14 @@ GTEST_API_ int main(int argc, char **argv) {
     app = new QApplication(argc, argv);
     testing::InitGoogleTest(&argc, argv);
 
+    int ret;
+
     init();
+    {
+        tgt::GLContextScopedLock lock(_localContext);
+        ret= RUN_ALL_TESTS();
 
-    int ret= RUN_ALL_TESTS();
-
+    }
     deinit();
 
     //getchar();

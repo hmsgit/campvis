@@ -29,7 +29,7 @@
 
 #include "gtest/gtest.h"
 
-#include "core/tools//stringutils.h"
+#include "core/tools/stringutils.h"
 
 using namespace campvis;
 
