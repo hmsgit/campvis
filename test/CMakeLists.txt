@@ -37,7 +37,7 @@ ADD_EXECUTABLE(test-campvis
 
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs} ${CampvisHome}/ext/gtest-1.7.0/ ${CampvisHome}/ext/gtest-1.7.0/include)
-TARGET_LINK_LIBRARIES(test-campvis campvis-modules campvis-core tgt gtest ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
+TARGET_LINK_LIBRARIES(test-campvis campvis-modules campvis-core tgt gtest ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisSources ${CampvisHome}/test "")

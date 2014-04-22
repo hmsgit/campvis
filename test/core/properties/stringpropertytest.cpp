@@ -44,8 +44,8 @@ using namespace campvis;
 class StringPropertyTest : public ::testing::Test {
 protected:
     StringPropertyTest() 
-        : _strProp1("prop1", "title_prop1", "value1", AbstractProcessor::INVALID_RESULT) 
-        , _strProp2("prop2", "title_prop2", "value2", AbstractProcessor::INVALID_RESULT) 
+        : _strProp1("prop1", "title_prop1", "value1") 
+        , _strProp2("prop2", "title_prop2", "value2") 
     {
 
     }

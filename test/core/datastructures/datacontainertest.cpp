@@ -42,7 +42,7 @@ using namespace campvis;
 class DataContainerTest : public ::testing::Test {
 protected:
     DataContainerTest() {
-        this->_data = new ImageData(2, tgt::svec3(1,2,3), 4);
+        this->_data = new ImageData(2, tgt::svec3(1,2,1), 4);
         this->_dc0 = new DataContainer("dc0");
     }
 
@@ -109,7 +109,7 @@ TEST_F(DataContainerTest, getDataHandlesCopyTest) {
 TEST_F(DataContainerTest, concurrentAccessTest) {
     this->_dc0->addData("data1", this->_data);
     DataHandle dh = this->_dc0->getData("data1");
-    AbstractData *someData = new ImageData(2, tgt::svec3(1,2,3), 4);
+    AbstractData *someData = new ImageData(2, tgt::svec3(1,2,1), 4);
     this->_dc0->addData("data1", someData);
 
     EXPECT_EQ(someData, this->_dc0->getData("data1").getData());

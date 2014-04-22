@@ -41,7 +41,7 @@
 class DataHandleTest : public testing::Test {
 protected:
     DataHandleTest() {
-        _data1 = new campvis::ImageData(2, tgt::svec3(1,2,3), 4);
+        _data1 = new campvis::ImageData(2, tgt::svec3(1,2,1), 4);
 
         _dh0 = campvis::DataHandle();
         _dh1 = campvis::DataHandle(_data1);

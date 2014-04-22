@@ -5,8 +5,8 @@
 // If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitï¿½t Mï¿½nchen
+//      Boltzmannstr. 3, 85748 Garching b. Mï¿½nchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 

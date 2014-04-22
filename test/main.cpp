@@ -36,30 +36,26 @@
 //#include "tgt/glcanvas.h"
 #include "tgt/gpucapabilities.h"
 #include "tgt/shadermanager.h"
-#include "tgt/qt/qtapplication.h"
 //#include "tgt/qt/qtthreadedcanvas.h"
-#include "tgt/qt/qtcontextmanager.h"
+#include "tgt/glcontextmanager.h"
+#include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/logmanager.h"
+#include "tgt/qt/qtapplication.h"
 //#include "tbb/compat/thread"
 
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
-//using namespace campvis;
+#ifdef Q_WS_X11
+#include <X11/Xlib.h>
+#endif
 
-/// Not sure, whether or not we need it!!
 QApplication *app;
-
 /// Flag, whether CampVisApplication was correctly initialized
 bool _initialized;
-
 /// A local OpenGL context used for initialization
-/**?
- * how this variable is related with tgt macros!! 
- */
 tgt::GLCanvas* _localContext = nullptr;
-
 static const std::string loggerCat_;
 
 
@@ -67,25 +63,27 @@ void init() {
     // Make Xlib and GLX thread safe under X11
     QApplication::setAttribute(Qt::AA_X11InitThreads);
 
-    tgt::QtContextManager::init();
+    tgt::GlContextManager::init();
 
     campvis::OpenGLJobProcessor::init();
     campvis::SimpleJobProcessor::init();
 
+    tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
+    
     // Init TGT
     tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
     tgt::init(featureset);
     LogMgr.getConsoleLog()->addCat("", true);
 
     // create a local OpenGL context and init GL
-    _localContext = tgt::GlContextManager::getRef().createContext("AppContext", "", tgt::ivec2(16, 16));
-    tgtAssert(nullptr != _localContext, "Could not create local OpenGL context");
-
+    _localContext = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
+    
+    //TODO: why I had to reorder next couple of statements ?!
     tgt::GLContextScopedLock lock(_localContext);
+    tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
 
     tgt::initGL(featureset);
     ShdrMgr.setDefaultGlslVersion("330");
-
 
     campvis::QuadRenderer::init();
 
@@ -113,13 +111,6 @@ void init() {
 void deinit() {
     tgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
-
-    /**?
-     * Grrrrrrrrrrrrrrrr :#
-     * What with this BLOCK :-/ without it the program doesn't exit.
-     * OpenGLJobProcessor::deinit() halts in Singleton::deinit()
-     * WHY IS STACK SCOPE IMPORTANT HERE!!!
-     */
     {
         // Deinit everything OpenGL related using the local context.
         tgt::GLContextScopedLock lock(_localContext);
@@ -135,7 +126,7 @@ void deinit() {
     campvis::OpenGLJobProcessor::deinit();
 
 
-    tgt::QtContextManager::deinit();
+    tgt::GlContextManager::deinit();
     tgt::deinit();
 
     _initialized = false;
@@ -143,6 +134,12 @@ void deinit() {
 
 GTEST_API_ int main(int argc, char **argv) {
     printf("Running main() from main.cpp\n");
+
+#ifdef Q_WS_X11
+    XInitThreads();
+#endif
+
+
     app = new QApplication(argc, argv);
     testing::InitGoogleTest(&argc, argv);
 

@@ -39,7 +39,7 @@
 class ImageDataTest : public testing::Test {
 protected:
     ImageDataTest() {
-        _imgData0 = new campvis::ImageData(2, tgt::svec3(1,2,3), 4);
+        _imgData0 = new campvis::ImageData(2, tgt::svec3(1,2,1), 4);
         _imgData1 = _imgData0->clone();
         _absData1 = _imgData1;
     }
@@ -79,8 +79,8 @@ TEST_F(ImageDataTest, miscellaneousTest) {
 
     EXPECT_EQ(2, _imgData0->getDimensionality());
     EXPECT_EQ(4, _imgData0->getNumChannels());
-    EXPECT_EQ(tgt::hmul(tgt::svec3(1,2,3)), _imgData0->getNumElements());
-    EXPECT_EQ(tgt::svec3(1,2,3).size, _imgData0->getSize().size);
+    EXPECT_EQ(tgt::hmul(tgt::svec3(1,2,1)), _imgData0->getNumElements());
+    EXPECT_EQ(tgt::svec3(1,2,1).size, _imgData0->getSize().size);
 
     tgt::Bounds bound0 = _imgData0->getWorldBounds();
     tgt::Bounds bound1 = _imgData1->getWorldBounds();
@@ -117,28 +117,3 @@ TEST_F(ImageDataTest, cloneTest) {
     EXPECT_EQ(_imgData0->getVideoMemoryFootprint(), _imgData1->getVideoMemoryFootprint());
 }
 
-/**
- * Tests getSubImage() method.
- *
- * For test cases 1. whole image and 2. images of size (1,1,1) were checked
- */
-TEST_F(ImageDataTest, getSubImageTest) {
-    campvis::ImageData *cloned = _imgData0->getSubImage(tgt::svec3(0,0,0), _imgData0->getSize());
-
-    ASSERT_TRUE(nullptr != _imgData1);
-
-    EXPECT_EQ(_imgData0->getDimensionality(), cloned->getDimensionality());
-    EXPECT_EQ(_imgData0->getLocalMemoryFootprint(), cloned->getLocalMemoryFootprint());
-    EXPECT_TRUE(_imgData0->getMappingInformation() == cloned->getMappingInformation());
-    EXPECT_EQ(_imgData0->getNumChannels(), cloned->getNumChannels());
-    EXPECT_EQ(_imgData0->getNumElements(), cloned->getNumElements());
-    //EXPECT_EQ(_imgData0->getRepresentation(), cloned->getRepresentation());
-    EXPECT_EQ(_imgData0->getSize(), cloned->getSize());
-    //EXPECT_EQ(_imgData0->getSubImage(), cloned->getSubImage());
-    EXPECT_EQ(_imgData0->getVideoMemoryFootprint(), cloned->getVideoMemoryFootprint());
-
-    delete cloned;
-
-    cloned = _imgData0->getSubImage(_imgData0->getSize()-tgt::svec3(1,1,1), _imgData0->getSize());
-    EXPECT_EQ(tgt::svec3(1,1,1), cloned->getSize());
-}

@@ -47,10 +47,10 @@ class NumericPropertyTest : public ::testing::Test {
 protected:
     NumericPropertyTest() 
         : imax(10), imin(-10), istep(1)
-        , _intProp("intProp", "title_intProp", 0, -10, 10, 1, AbstractProcessor::INVALID_RESULT) 
-        , _intProp2("intProp2", "title_intProp2", 0, -10, 10, 1, AbstractProcessor::INVALID_RESULT) 
+        , _intProp("intProp", "title_intProp", 0, -10, 10, 1) 
+        , _intProp2("intProp2", "title_intProp2", 0, -10, 10, 1) 
         , dmax(1), dmin(-1), dstep(0.1)
-        , _doubleProp("_doubleProp", "title_doubleProp", 0, -1, 1, 0.1, AbstractProcessor::INVALID_RESULT) 
+        , _doubleProp("_doubleProp", "title_doubleProp", 0, -1, 1, 0.1) 
     {
        
     }
