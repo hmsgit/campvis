@@ -61,9 +61,7 @@ protected:
     }
 
     ~GlReductionTest() {
-        //delete localRep;
         delete imgData;
-        //delete rawData;
         delete glReduction;
     }
 
@@ -110,7 +108,7 @@ TEST_F(GlReductionTest, localRepCreationTest) {
  * Tests for ReducationOperator::MIN.
  */
 TEST_F(GlReductionTest, minTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::MIN, true);
+    glReduction = new GlReduction(GlReduction::ReductionOperator::MIN);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(0, reduced[0], 0.0001);
@@ -121,7 +119,7 @@ TEST_F(GlReductionTest, minTest) {
  * Tests for ReducationOperator::MAX.
  */
 TEST_F(GlReductionTest, maxTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::MAX, true);
+    glReduction = new GlReduction(GlReduction::ReductionOperator::MAX);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(1, reduced[0], 0.0001);
@@ -132,7 +130,7 @@ TEST_F(GlReductionTest, maxTest) {
  * Tests for ReducationOperator::PLUS.
  */
 TEST_F(GlReductionTest, sumTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::PLUS, true);
+    glReduction = new GlReduction(GlReduction::ReductionOperator::PLUS);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(1, reduced[0], 0.0001);
@@ -143,7 +141,7 @@ TEST_F(GlReductionTest, sumTest) {
  * Tests for ReducationOperator::MULTIPLICATION.
  */
 TEST_F(GlReductionTest, multTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::MULTIPLICATION, true);
+    glReduction = new GlReduction(GlReduction::ReductionOperator::MULTIPLICATION);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(0, reduced[0], 0.0001);

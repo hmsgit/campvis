@@ -89,6 +89,14 @@ void init() {
 
     campvis::QuadRenderer::init();
 
+#ifdef CAMPVIS_SOURCE_DIR
+    {
+        std::string sourcePath = CAMPVIS_SOURCE_DIR;
+        ShdrMgr.addPath(sourcePath);
+        ShdrMgr.addPath(sourcePath + "/core/glsl");
+    }
+#endif
+
     // ensure matching OpenGL specs
     LINFO("Using Graphics Hardware " << GpuCaps.getVendorAsString() << " " << GpuCaps.getGlRendererString() << " on " << GpuCaps.getOSVersionString());
     LINFO("Supported OpenGL " << GpuCaps.getGlVersion() << ", GLSL " << GpuCaps.getShaderVersion());
