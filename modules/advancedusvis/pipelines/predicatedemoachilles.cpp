@@ -42,6 +42,7 @@ namespace campvis {
 
     PredicateDemoAchilles::PredicateDemoAchilles(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _lsp()
         , _imageReader()
         , _labelReader()
         , _confidenceReader()
@@ -50,6 +51,7 @@ namespace campvis {
         , _snrFilter(&_canvasSize)
         , _ve(&_canvasSize)
     {
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_labelReader);
         addProcessor(&_confidenceReader);

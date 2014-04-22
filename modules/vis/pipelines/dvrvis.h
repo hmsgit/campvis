@@ -29,6 +29,7 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/virtualmirrorgeometrygenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -72,6 +73,8 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         CameraProperty _camera;
+        LightSourceProvider _lsp;
+
         MhdImageReader _imageReader;
         ProxyGeometryGenerator _pgGenerator;
         VirtualMirrorGeometryGenerator _vmgGenerator;

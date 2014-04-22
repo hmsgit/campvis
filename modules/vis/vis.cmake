@@ -17,7 +17,7 @@ IF(${ModuleEnabled})
 	)
 
 	SET(ThisModShaderDirectories "modules/vis/glsl")
-	SET(ThisModDependencies io)
+	SET(ThisModDependencies base io)
 ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus STABLE)

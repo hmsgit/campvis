@@ -30,6 +30,7 @@
 #include "core/properties/cameraproperty.h"
 
 
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/ltfimagereader.h"
 #include "modules/io/processors/vtkimagereader.h"
 #include "modules/columbia/processors/geometrystrainrenderer.h"
@@ -77,6 +78,7 @@ namespace campvis {
         CameraProperty _camera;
         DataNameProperty _boundsData;
 
+        LightSourceProvider _lsp;
         LtfImageReader _imageReader;
         ImageSeriesSplitter _imageSplitter;
 

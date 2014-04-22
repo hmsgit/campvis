@@ -37,12 +37,14 @@ namespace campvis {
 
     GlReductionTest::GlReductionTest(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _lsp()
         , _imageReader()
         , _resampler(&_canvasSize)
         , _ve(&_canvasSize)
         , _glr(nullptr)
         , _glr2(nullptr)
     {
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_resampler);
         addProcessor(&_ve);

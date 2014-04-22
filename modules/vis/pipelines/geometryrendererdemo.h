@@ -28,6 +28,7 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/vtkimagereader.h"
 #include "modules/vis/processors/geometryrenderer.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
@@ -65,6 +66,8 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         CameraProperty _camera;
+
+        LightSourceProvider _lsp;
         VtkImageReader _geometryReader;
         GeometryRenderer _lvRenderer;
         GeometryRenderer _teapotRenderer;

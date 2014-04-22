@@ -48,7 +48,7 @@ namespace campvis {
     /**
      * Renders axis-aligned slices with tensor glyphs.
      */
-    class TensorGlyphRenderer : public VisualizationProcessor, public HasProcessorDecorators {
+    class TensorGlyphRenderer : public VisualizationProcessor {
     public:
         /// Glyph type to render
         enum GlyphType {
@@ -94,6 +94,9 @@ namespace campvis {
 
         GenericOptionProperty<GlyphType> p_glyphType;   ///< Glyph type to render
         FloatProperty p_glyphSize;                      ///< Glyph render size
+
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
         CameraProperty p_camera;                                    ///< camera
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract

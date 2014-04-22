@@ -35,6 +35,7 @@ namespace campvis {
     DVRVis::DVRVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
+        , _lsp()
         , _imageReader()
         , _pgGenerator()
         , _vmgGenerator()
@@ -55,6 +56,7 @@ namespace campvis {
         _trackballEH->addLqModeProcessor(&_depthDarkening);
         addEventListenerToBack(_trackballEH);
 
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_pgGenerator);
         addProcessor(&_vmgGenerator);

@@ -29,6 +29,8 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
@@ -112,6 +114,7 @@ namespace campvis {
         void forceStop();
 
 
+        LightSourceProvider _lsp;
         MhdImageReader _referenceReader;
         MhdImageReader _movingReader;
         SimilarityMeasure _sm;

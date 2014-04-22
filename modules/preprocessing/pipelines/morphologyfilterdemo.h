@@ -27,6 +27,8 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glmorphologyfilter.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -56,6 +58,7 @@ namespace campvis {
         static const std::string getId() { return "MorphologyDemo"; };
 
     protected:
+        LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         GlMorphologyFilter _morphologyFilter;
         VolumeExplorer _ve;

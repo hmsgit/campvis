@@ -67,10 +67,14 @@ namespace campvis {
         FloatProperty p_shadowIntensity;
         BoolProperty p_enableAdaptiveStepsize;
 
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
     
     protected:
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
+        /// \see AbstractProcessor::updateProperties()
+        virtual void updateProperties(DataContainer& dataContainer);
 
         /// \see RaycastingProcessor::generateHeader()
         virtual std::string generateHeader() const;

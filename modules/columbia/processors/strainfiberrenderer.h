@@ -44,7 +44,7 @@ namespace campvis {
     /**
      * Renders Strain Fibers
      */
-    class StrainFiberRenderer : public VisualizationProcessor, public HasProcessorDecorators {
+    class StrainFiberRenderer : public VisualizationProcessor {
     public:
         enum RenderMode {
             STRIPES,
@@ -84,9 +84,14 @@ namespace campvis {
         FloatProperty p_lineWidth;
         Vec4Property p_color;                ///< rendering color
 
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
+
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
         /// \see    AbstractProcessor::updateShader
         virtual void updateShader();
 

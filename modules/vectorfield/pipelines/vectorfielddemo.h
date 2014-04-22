@@ -30,6 +30,7 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vectorfield/processors/vectorfieldrenderer.h"
 #include "modules/vis/processors/slicerenderer3d.h"
@@ -64,8 +65,9 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        LightSourceProvider _lsp;
         MhdImageReader _imageReader;
-		MhdImageReader _vectorFieldReader;
+        MhdImageReader _vectorFieldReader;
         VectorFieldRenderer _vectorFieldRenderer;
         SliceRenderer3D _sliceRenderer;
         RenderTargetCompositor _rtc;

@@ -39,6 +39,7 @@ namespace campvis {
     GeometryRendererDemo::GeometryRendererDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
+        , _lsp()
         , _geometryReader()
         , _lvRenderer(&_canvasSize)
         , _teapotRenderer(&_canvasSize)
@@ -52,6 +53,7 @@ namespace campvis {
         _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);
 
+        addProcessor(&_lsp);
         addProcessor(&_geometryReader);
         addProcessor(&_teapotRenderer);
         addProcessor(&_lvRenderer);

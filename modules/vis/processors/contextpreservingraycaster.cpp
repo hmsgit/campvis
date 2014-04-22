@@ -25,8 +25,9 @@
 #include "contextpreservingraycaster.h"
 
 #include "core/tools/quadrenderer.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/processordecoratorshading.h"
+#include "core/pipeline/processordecoratorgradient.h"
 
 #include <tbb/tbb.h>
 
@@ -35,11 +36,15 @@ namespace campvis {
 
     ContextPreservingRaycaster::ContextPreservingRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/contextpreservingraycaster.frag", true)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_kappaS("KappaS", "k_s (from the paper)", .5f, .0f, 1.f, .1f, 1)
         , p_kappaT("KappaT", "k_t (from the paper)", 3.f, 0.f, 10.f, .1f, 1)
     {
-        addDecorator(new ProcessorDecoratorShading());
+        addDecorator(new ProcessorDecoratorGradient());
 
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
         addProperty(p_kappaS);
         addProperty(p_kappaT);
 
@@ -58,36 +63,49 @@ namespace campvis {
     }
 
     void ContextPreservingRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
-        _shader->setUniform("_kappaS", p_kappaS.getValue());
-        _shader->setUniform("_kappaT", p_kappaT.getValue());
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
-        FramebufferActivationGuard fag(this);
-        createAndAttachTexture(GL_RGBA8);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachDepthTexture();
+        if (p_enableShading.getValue() == false || light != nullptr) {
+            if (p_enableShading.getValue() && light != nullptr) {
+                light->bind(_shader, "_lightSource");
+            }
+            _shader->setUniform("_kappaS", p_kappaS.getValue());
+            _shader->setUniform("_kappaT", p_kappaT.getValue());
 
-        static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-        glDrawBuffers(3, buffers);
+            FramebufferActivationGuard fag(this);
+            createAndAttachTexture(GL_RGBA8);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachDepthTexture();
 
-        glEnable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        QuadRdr.renderQuad();
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(3, buffers);
 
-        // restore state
-        glDrawBuffers(1, buffers);
-        glDisable(GL_DEPTH_TEST);
-        LGL_ERROR;
+            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            QuadRdr.renderQuad();
 
-        data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+            // restore state
+            glDrawBuffers(1, buffers);
+            glDisable(GL_DEPTH_TEST);
+            LGL_ERROR;
+
+            data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+        }
+        else {
+            LDEBUG("Could not load light source from DataContainer.");
+        }
     }
 
     std::string ContextPreservingRaycaster::generateHeader() const {
         std::string toReturn = RaycastingProcessor::generateHeader();
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
         return toReturn;
     }
 
     void ContextPreservingRaycaster::updateProperties(DataContainer& dataContainer) {
+        p_lightId.setVisible(p_enableShading.getValue());
         RaycastingProcessor::updateProperties(dataContainer);
     }
 

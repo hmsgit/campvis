@@ -50,12 +50,14 @@ namespace campvis {
         , p_forceStop("Force Stop", "Force Stop")
         , p_translationStepSize("TranslationStepSize", "Initial Step Size Translation", 8.f, .1f, 100.f)
         , p_rotationStepSize("RotationStepSize", "Initial Step Size Rotation", .5f, .01f, tgt::PIf)
+        , _lsp()
         , _referenceReader()
         , _movingReader()
         , _sm()
         , _ve(&_canvasSize)
         , _opt(0)
     {
+        addProcessor(&_lsp);
         addProcessor(&_referenceReader);
         addProcessor(&_movingReader);
         addProcessor(&_sm);

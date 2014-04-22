@@ -36,6 +36,7 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
         , _boundsData("BoundsData", "Bounds Data", "sfr", DataNameProperty::READ)
+        , _lsp()
         , _imageReader()
         , _flowReader()
         , _vtkReader()
@@ -57,6 +58,7 @@ namespace campvis {
         _trackballEH->addLqModeProcessor(&_sfr);
         addEventListenerToBack(_trackballEH);
 
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_imageSplitter);
         addProcessor(&_vr);

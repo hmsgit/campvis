@@ -29,10 +29,9 @@
 #include "tgt/shadermanager.h"
 
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/geometrydatafactory.h"
 #include "core/datastructures/renderdata.h"
-
-#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
 
@@ -57,13 +56,13 @@ namespace campvis {
         , p_flowProfile3("FlowSpline3", "Flow Profile - Spline 3", 1.f, .0f, 2.f)
         , p_flowProfile4("FlowSpline4", "Flow Profile - Spline 4", 1.f, .0f, 2.f)
         , p_Time("time", "Time", 0, 0, 100)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_camera("Camera", "Camera", tgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _arrowGeometry(0)
     {
-        addDecorator(new ProcessorDecoratorShading());
-
         addProperty(p_inputVectors, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_renderOutput);
         addProperty(p_arrowSize);
@@ -78,7 +77,8 @@ namespace campvis {
         addProperty(p_flowProfile3);
         addProperty(p_flowProfile4);
 
-        decoratePropertyCollection(this);
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
     }
 
     VectorFieldRenderer::~VectorFieldRenderer() {
@@ -109,69 +109,78 @@ namespace campvis {
 
         GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
 
-        if(vectors) {
-            const tgt::Camera& cam = p_camera.getValue();
-            const tgt::svec3& imgSize = vectors->getSize();
-            const int sliceNumber = p_sliceNumber.getValue();
+        if (vectors) {
+            ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
-            glEnable(GL_DEPTH_TEST);
-            _shader->activate();
+            if (p_enableShading.getValue() == false || light != nullptr) {
+                const tgt::Camera& cam = p_camera.getValue();
+                const tgt::svec3& imgSize = vectors->getSize();
+                const int sliceNumber = p_sliceNumber.getValue();
 
-            _shader->setIgnoreUniformLocationError(true);
-            _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
-            _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
-            _shader->setUniform("_viewMatrix", cam.getViewMatrix());
-            decorateRenderProlog(dataContainer, _shader);
+                glEnable(GL_DEPTH_TEST);
+                _shader->activate();
 
-            FramebufferActivationGuard fag(this);
-            createAndAttachColorTexture();
-            createAndAttachDepthTexture();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                _shader->setIgnoreUniformLocationError(true);
+                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
-            float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
-                p_flowProfile1.getValue(),
-                p_flowProfile2.getValue(),
-                p_flowProfile3.getValue(),
-                p_flowProfile4.getValue());
+                if (p_enableShading.getValue() && light != nullptr) {
+                    light->bind(_shader, "_lightSource");
+                }
+                
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                
+                float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
+                    p_flowProfile1.getValue(),
+                    p_flowProfile2.getValue(),
+                    p_flowProfile3.getValue(),
+                    p_flowProfile4.getValue());
 
-            switch (p_sliceOrientation.getOptionValue()) {
-                case XY_PLANE:
-                    for (size_t x = 0; x < imgSize.x; ++x) {
-                        for (size_t y = 0; y < imgSize.y; ++y) {
-                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber), scale);
-                        }
-                    }
-                    break;
-                case XZ_PLANE:
-                    for (size_t x = 0; x < imgSize.x; ++x) {
-                        for (size_t z = 0; z < imgSize.z; ++z) {
-                            renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)), scale);
-                        }
-                    }
-                    break;
-                case YZ_PLANE:
-                    for (size_t y = 0; y < imgSize.y; ++y) {
-                        for (size_t z = 0; z < imgSize.z; ++z) {
-                            renderVectorArrow(vectors, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)), scale);
-                        }
-                    }
-                    break;
-                case XYZ_VOLUME:
-                    for (size_t x = 0; x < imgSize.x; ++x) {
-                        for (size_t y = 0; y < imgSize.y; ++y) {
-                            for (size_t z = 0; z < imgSize.z; ++z) {
-                                renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
+                switch (p_sliceOrientation.getOptionValue()) {
+                    case XY_PLANE:
+                        for (size_t x = 0; x < imgSize.x; ++x) {
+                            for (size_t y = 0; y < imgSize.y; ++y) {
+                                renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber), scale);
                             }
                         }
-                    }
-                    break;
+                        break;
+                    case XZ_PLANE:
+                        for (size_t x = 0; x < imgSize.x; ++x) {
+                            for (size_t z = 0; z < imgSize.z; ++z) {
+                                renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)), scale);
+                            }
+                        }
+                        break;
+                    case YZ_PLANE:
+                        for (size_t y = 0; y < imgSize.y; ++y) {
+                            for (size_t z = 0; z < imgSize.z; ++z) {
+                                renderVectorArrow(vectors, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)), scale);
+                            }
+                        }
+                        break;
+                    case XYZ_VOLUME:
+                        for (size_t x = 0; x < imgSize.x; ++x) {
+                            for (size_t y = 0; y < imgSize.y; ++y) {
+                                for (size_t z = 0; z < imgSize.z; ++z) {
+                                    renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
+                                }
+                            }
+                        }
+                        break;
+                }
+
+                _shader->deactivate();
+                glDisable(GL_DEPTH_TEST);
+
+                dataContainer.addData(p_renderOutput.getValue(), new RenderData(_fbo));
             }
-
-            decorateRenderEpilog(_shader);
-            _shader->deactivate();
-            glDisable(GL_DEPTH_TEST);
-
-            dataContainer.addData(p_renderOutput.getValue(), new RenderData(_fbo));
+            else {
+                LDEBUG("Could not load light source from DataContainer.");
+            }
         }
         else {
             LERROR("Could not find suitable input data.");
@@ -181,6 +190,7 @@ namespace campvis {
     }
 
     void VectorFieldRenderer::updateProperties(DataContainer& dataContainer) {
+        p_lightId.setVisible(p_enableShading.getValue());
 
         GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
 
@@ -212,7 +222,9 @@ namespace campvis {
     }
 
     std::string VectorFieldRenderer::generateGlslHeader() const {
-        std::string toReturn = getDecoratedHeader();
+        std::string toReturn;
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
 
         return toReturn;
     }
