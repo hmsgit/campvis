@@ -33,6 +33,7 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/abstractimagerepresentation.h"
 #include "core/datastructures/imagemappinginformation.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 
 
 #include <vector>
@@ -237,7 +238,7 @@ namespace campvis {
         //       target type. This does not harm thread-safety but may lead to multiple 
         //       representations of the same type for a single image.
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            const T* tester = T::tryConvertFrom(*it);
+            const T* tester = ImageRepresentationConverter::getRef().tryConvertFrom<T>(*it);
             if (tester != 0) {
                 return tester;
             }

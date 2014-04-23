@@ -26,7 +26,10 @@
 #define OPENGLJOBPROCESSOR_H__
 
 #include "sigslot/sigslot.h"
+
+#include "tgt/glcontextmanager.h"
 #include "tgt/singleton.h"
+
 #include <tbb/atomic.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_hash_map.h>
@@ -68,6 +71,21 @@ namespace campvis {
         friend class tgt::Singleton<OpenGLJobProcessor>;
 
     public:
+        /**
+         * Scope guard to ensure that encapsulated job is synchronously executed in an arbitrary OpenGL context.
+         * This scope guard checks whether current thread is OpenGLJobProcessor thread. If so, it
+         * does nothing. If this thread is not the OpenGL thread, the OpenGLJobProcessor is paused,
+         * an arbitrary OpenGL context acquired. Upon destruction the OpenGLJobProcessor is resumed.
+         */
+        class ScopedSynchronousGlJobExecution {
+        public:
+            ScopedSynchronousGlJobExecution();
+            ~ScopedSynchronousGlJobExecution();
+
+        private:
+            tgt::GLContextScopedLock* _lock;
+        };
+
         /**
          * Enumeration of the different priorities of items.
          */

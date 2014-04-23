@@ -26,7 +26,6 @@
 #define IMAGEREPRESENTATIONDISK_H__
 
 #include "core/datastructures/genericabstractimagerepresentation.h"
-
 #include "core/tools/endianhelper.h"
 #include "core/tools/weaklytypedpointer.h"
 

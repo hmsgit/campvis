@@ -73,64 +73,6 @@ namespace campvis {
         delete _texture;
     }
 
-    ImageRepresentationGL* ImageRepresentationGL::tryConvertFrom(const AbstractImageRepresentation* source) {
-        if (source == 0)
-            return 0;
-
-        // test source image type via dynamic cast
-        if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
-            WeaklyTypedPointer wtp = tester->getImageData();
-
-            if (wtp._pointer == 0) {
-                LERROR("Could not load image from disk during conversion.");
-                return 0;
-            }
-
-            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
-
-            switch (wtp._baseType) {
-                case WeaklyTypedPointer::UINT8:
-                    delete [] static_cast<uint8_t*>(wtp._pointer);
-                    break;
-                case WeaklyTypedPointer::INT8:
-                    delete [] static_cast<int8_t*>(wtp._pointer);
-                    break;
-                case WeaklyTypedPointer::UINT16:
-                    delete [] static_cast<uint16_t*>(wtp._pointer);
-                    break;
-                case WeaklyTypedPointer::INT16:
-                    delete [] static_cast<int16_t*>(wtp._pointer);
-                    break;
-                case WeaklyTypedPointer::UINT32:
-                    delete [] static_cast<uint32_t*>(wtp._pointer);
-                    break;
-                case WeaklyTypedPointer::INT32:
-                    delete [] static_cast<int32_t*>(wtp._pointer);
-                    break;
-                case WeaklyTypedPointer::FLOAT:
-                    delete [] static_cast<float*>(wtp._pointer);
-                    break;
-                default:
-                    tgtAssert(false, "Should not reach this - wrong base data type!");
-                    break;
-            }
-            
-            return toReturn;
-        }
-        else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
-            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
-            return toReturn;
-        }
-#ifdef CAMPVIS_HAS_MODULE_ITK
-        else if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(source)) {
-            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
-            return toReturn;
-        }
-#endif
-
-        return 0;
-    }
-
     ImageRepresentationGL* ImageRepresentationGL::clone(ImageData* newParent) const {
         GLubyte* data = _texture->downloadTextureToBuffer();
         WeaklyTypedPointer wtp(WeaklyTypedPointer::baseType(_texture->getDataType()), WeaklyTypedPointer::numChannels(_texture->getFormat()), data);
@@ -295,5 +237,9 @@ namespace campvis {
         return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), ptr);
     }
 
+    const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointerConvert(GLenum dataType) const {
+        void* ptr = _texture->downloadTextureToBuffer(_texture->getFormat(), dataType);
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(dataType), _texture->getNumChannels(), ptr);
+    }
 
 }

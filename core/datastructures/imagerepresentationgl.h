@@ -27,6 +27,7 @@
 
 #include "tgt/tgt_gl.h"
 #include "tgt/texture.h"
+
 #include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/weaklytypedpointer.h"
@@ -72,16 +73,6 @@ namespace campvis {
          * Destructor
          */
         virtual ~ImageRepresentationGL();
-
-
-        /**
-         * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
-         * Returns 0 if conversion was not successful or source representation type is not compatible.
-         * \note    The callee, respectively the callee's parent, has the ownership of the returned pointer.
-         * \param   source  Source image representation for conversion.
-         * \return  A pointer to a local representation of \a source or 0 on failure. The caller does \b not have ownership.
-         */
-        static ImageRepresentationGL* tryConvertFrom(const AbstractImageRepresentation* source);
        
         /**
          * \see AbstractImageRepresentation::clone()
@@ -145,6 +136,15 @@ namespace campvis {
          */
         const WeaklyTypedPointer getWeaklyTypedPointerCopy() const;
 
+        /**
+         * Returns a WeaklyTypedPointer to the data of this representation.
+         * Caller will own the pointer - take care to eventually delete it!
+         * \see     ImageRepresentationGL::getWeaklyTypedPointer()
+         * \note    Make sure to call this method from a valid OpenGL context.
+         * \param   dataType    Data type to convert to during download
+         * \return  A WeaklyTypedPointer to the data of this representation. Caller takes ownership!
+         */
+        const WeaklyTypedPointer getWeaklyTypedPointerConvert(GLenum dataType) const;
 
     protected:
         /**
@@ -206,6 +206,7 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
+
 
 // = Template definition ==========================================================================
 
