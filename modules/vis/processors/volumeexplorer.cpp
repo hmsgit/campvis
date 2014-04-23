@@ -111,6 +111,9 @@ namespace campvis {
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
         _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
+        
+        // force recalculation of p_sliceRenderSize and p_volumeRenderSize
+        onPropertyChanged(_viewportSizeProperty);
     }
 
     void VolumeExplorer::deinit() {

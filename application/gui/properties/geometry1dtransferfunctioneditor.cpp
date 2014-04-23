@@ -136,6 +136,9 @@ namespace campvis {
                     glVertex2f(xl, yl);
                     glVertex2f(xr, yr);
                     glVertex2f(xr, 0.f);
+
+                    xl = xr;
+                    yl = yr;
                 }
                 glEnd();
             }
