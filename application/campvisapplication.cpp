@@ -92,9 +92,9 @@ namespace campvis {
 
         // create a local OpenGL context and init GL
         _localContext = new QtThreadedCanvas("", tgt::ivec2(16, 16));
-        tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
 
         tgt::GLContextScopedLock lock(_localContext);
+        tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
 
         tgt::initGL(featureset);
         ShdrMgr.setDefaultGlslVersion("330");
