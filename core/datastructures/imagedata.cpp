@@ -24,12 +24,6 @@
 
 #include "imagedata.h"
 
-#include "core/datastructures/imagerepresentationlocal.h"
-
-#ifdef CAMPVIS_HAS_MODULE_ITK
-#include "modules/itk/core/genericimagerepresentationitk.h"
-#endif
-
 namespace campvis {
     const std::string ImageData::loggerCat_ = "CAMPVis.core.datastructures.ImageData";
 
@@ -136,36 +130,4 @@ namespace campvis {
         addRepresentation(representation);
     }
 
-    template<>
-    const ImageRepresentationLocal* ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion /*= true*/) const {
-        // look, whether we already have a suitable representation
-        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(*it))
-                return tester;
-        }
-
-        if (performConversion) {
-            return tryPerformConversion<ImageRepresentationLocal>();
-        }
-
-        return 0;
-    }
-
-#ifdef CAMPVIS_HAS_MODULE_ITK
-    template<>
-    const AbstractImageRepresentationItk* ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion /*= true*/) const {
-        // look, whether we already have a suitable representation
-        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(*it))
-                return tester;
-        }
-
-        if (performConversion) {
-            tgtAssert(false, "Conversion to AbstractImageRepresentationItk not implemented - is it really needed?");
-            LWARNING("Could not convert to AbstractImageRepresentationItk");
-        }
-
-        return 0;
-    }
-#endif
 }

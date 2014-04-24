@@ -29,8 +29,9 @@
 #include "tgt/texture.h"
 
 #include "core/datastructures/genericabstractimagerepresentation.h"
-#include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/weaklytypedpointer.h"
+
+#include <string>
 
 namespace tgt {
     class Shader;
@@ -163,16 +164,6 @@ namespace campvis {
          */
         ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp);
 
-        /**
-         * Creates a new ImageRepresentationGL representation from GenericImageRepresentationLocal.
-         *
-         * \param   parent      Image this representation represents, must not be 0.
-         * \param   data        Pointer to the GenericImageRepresentationLocal instance, must not be 0
-         * \tparam  BASETYPE        Base type of image data
-         * \tparam  NUMCHANNELS     Number of channels per element
-         */
-        template<typename BASETYPE, size_t NUMCHANNELS>
-        ImageRepresentationGL(ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data);
 
         /**
          * Binds the texture without activating a texture unit.
@@ -193,44 +184,10 @@ namespace campvis {
 
         void setupAndUploadTexture(tgt::Texture* texture, bool isInteger, bool isSigned);
 
-        /**
-         * Creates the OpenGL texture from the given GenericImageRepresentationLocal \a data.
-         * \param data              Pointer to the GenericImageRepresentationLocal instance, must not be 0
-         * \tparam  BASETYPE        Base type of image data
-         * \tparam  NUMCHANNELS     Number of channels per element
-         */
-        template<typename BASETYPE, size_t NUMCHANNELS>
-        void createTexture(const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data);
-
         tgt::Texture* _texture;             //< OpenGL texture
 
         static const std::string loggerCat_;
     };
-
-
-// = Template definition ==========================================================================
-
-    template<typename BASETYPE, size_t NUMCHANNELS>
-    campvis::ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data) 
-        : AbstractImageRepresentation(parent)
-    {
-        createTexture<BASETYPE, NUMCHANNELS>(data);
-    }
-
-    template<typename BASETYPE, size_t NUMCHANNELS>
-    void campvis::ImageRepresentationGL::createTexture(const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* data) {
-        tgtAssert(data != 0, "Pointer to image must not be 0!");
-
-        _texture = new tgt::Texture(
-            reinterpret_cast<GLubyte*>(data->getImageData()), 
-            this->getSize(),
-            TypeTraits<BASETYPE, NUMCHANNELS>::glFormat,
-            TypeTraits<BASETYPE, NUMCHANNELS>::glInternalFormat, 
-            TypeTraits<BASETYPE, NUMCHANNELS>::glDataType, 
-            tgt::Texture::LINEAR);
-
-        setupAndUploadTexture(_texture, TypeTraitsHelperPerBasetype<BASETYPE>::isInteger, TypeTraitsHelperPerBasetype<BASETYPE>::isSigned);
-    }
 
 }
 

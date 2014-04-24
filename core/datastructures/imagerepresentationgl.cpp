@@ -30,11 +30,6 @@
 #include "tgt/tgt_gl.h"
 
 #include "core/datastructures/imagedata.h"
-#include "core/datastructures/imagerepresentationdisk.h"
-#include "core/datastructures/imagerepresentationlocal.h"
-#ifdef CAMPVIS_HAS_MODULE_ITK
-#include "modules/itk/core/genericimagerepresentationitk.h"
-#endif
 
 namespace campvis {
 

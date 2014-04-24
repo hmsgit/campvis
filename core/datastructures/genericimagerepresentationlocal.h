@@ -25,7 +25,6 @@
 #ifndef GENERICIMAGEREPRESENTATIONLOCAL_H__
 #define GENERICIMAGEREPRESENTATIONLOCAL_H__
 
-#include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/tools/typetraits.h"
 

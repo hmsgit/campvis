@@ -24,18 +24,10 @@
 
 #include "imagerepresentationlocal.h"
 
-#include "tgt/glcontextmanager.h"
 #include <tbb/tbb.h>
 #include <tbb/spin_mutex.h>
-#include "core/datastructures/imagerepresentationdisk.h"
-#include "core/datastructures/imagerepresentationgl.h"
-#include "core/datastructures/genericimagerepresentationlocal.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/job.h"
 
-#ifdef CAMPVIS_HAS_MODULE_ITK
-#include "modules/itk/core/genericimagerepresentationitk.h"
-#endif
+#include "core/datastructures/genericimagerepresentationlocal.h"
 
 #include <limits>
 

@@ -26,8 +26,6 @@
 #define GENERICIMAGEREPRESENTATIONITK_H__
 
 #include "core/datastructures/abstractimagerepresentation.h"
-#include "core/datastructures/genericimagerepresentationlocal.h"
-#include "core/tools/typetraits.h"
 #include "core/tools/weaklytypedpointer.h"
 #include "modules/itk/core/itktypetraits.h"
 
@@ -183,15 +181,6 @@ namespace campvis {
         virtual ~GenericImageRepresentationItk();
 
 
-        /**
-         * Performs a conversion of \a source to an GenericImageRepresentationItk<...> if feasible.
-         * Returns 0 if conversion was not successful or source representation type is not compatible.
-         * \note    The caller has to take ownership of the returned pointer if not 0.
-         * \param   source  Source image representation for conversion.
-         * \return  A pointer to a local representation of \a source or 0 on failure. The caller has to take ownership.
-         */
-        static ThisType* tryConvertFrom(const AbstractImageRepresentation* source);
-
         /// \see AbstractImageRepresentation::clone()
         virtual ThisType* clone(ImageData* newParent) const;
 
@@ -258,52 +247,6 @@ namespace campvis {
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::~GenericImageRepresentationItk() {
         
-    }
-
-    template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
-    GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::tryConvertFrom(const AbstractImageRepresentation* source) {
-        if (source == 0)
-            return 0;
-
-        if (source->getDimensionality() != DIMENSIONALITY) {
-            LWARNINGC("campvis.modules.itk.core.GenericImageRepresentationItk<>::tryConvertFrom", "Dimensionality does not match");
-            return 0;
-        }
-
-        if (const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* tester = dynamic_cast< const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* >(source)) {
-            typename itk::ImportImageFilter<ItkElementType, DIMENSIONALITY>::Pointer importer = itk::ImportImageFilter<ItkElementType, DIMENSIONALITY>::New();
-
-            typename ItkImageType::SizeType size;
-            size[0] = tester->getSize().x;
-            if (DIMENSIONALITY >= 2)
-                size[1] = tester->getSize().y;
-            if (DIMENSIONALITY >= 3)
-                size[2] = tester->getSize().z;
-            
-            typename ItkImageType::IndexType start;
-            start.Fill(0);
-
-            typename ItkImageType::RegionType region;
-            region.SetSize(size);
-            region.SetIndex(start);
-            importer->SetRegion(region);
-
-            importer->SetSpacing(tester->getParent()->getMappingInformation().getVoxelSize().elem);
-            importer->SetOrigin(tester->getParent()->getMappingInformation().getOffset().elem);
-
-            typedef typename ItkImageType::PixelType PixelType;
-            const PixelType* pixelData = reinterpret_cast<const PixelType*>(tester->getImageData());
-            importer->SetImportPointer(const_cast<PixelType*>(pixelData), tester->getNumElements(), false);
-            importer->Update();
-
-            typename ItkImageType::Pointer itkImage = importer->GetOutput();
-            if (itkImage.IsNotNull())
-                return ThisType::create(const_cast<ImageData*>(tester->getParent()), itkImage); // const_cast perfectly valid here
-            else
-                return 0;
-        }
-
-        return 0;
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>

@@ -25,6 +25,16 @@ IF(${ModuleEnabled})
     # Header files
     FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
         modules/itk/processors/*.h
+    )
+    
+    
+    # Source files:
+    FILE(GLOB CampvisModulesCoreSources RELATIVE ${ModulesDir}
+        modules/itk/core/*.cpp
+    )
+
+    # Header files
+    FILE(GLOB CampvisModulesCoreHeaders RELATIVE ${ModulesDir}
         modules/itk/core/*.h
     )
 ENDIF(${ModuleEnabled})

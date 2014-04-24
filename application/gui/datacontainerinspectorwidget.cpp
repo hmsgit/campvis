@@ -43,6 +43,7 @@
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/renderdata.h"
 
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA

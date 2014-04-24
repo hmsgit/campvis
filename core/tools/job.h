@@ -25,7 +25,6 @@
 #ifndef JOB_H__
 #define JOB_H__
 
-#include "sigslot/sigslot.h"
 #include "tgt/assert.h"
 
 #include "core/coreapi.h"

@@ -25,6 +25,8 @@
 #ifndef IMAGEREPRESENTATIONLOCAL_H__
 #define IMAGEREPRESENTATIONLOCAL_H__
 
+#include "tgt/vector.h"
+
 #include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/tools/concurrenthistogram.h"
 #include "core/tools/endianhelper.h"
@@ -32,7 +34,6 @@
 #include "core/tools/weaklytypedpointer.h"
 
 namespace campvis {
-    class ImageRepresentationDisk;
 
     /**
      * Abstract base class for storing image data in the local memory.

@@ -35,18 +35,14 @@
 #include "core/datastructures/imagemappinginformation.h"
 #include "core/datastructures/imagerepresentationconverter.h"
 
-
 #include <vector>
 
 namespace campvis {
-    class ImageRepresentationLocal;
 
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.
      * Different representations (e.g. local memory, OpenGL texture) are
      * to be defined by inheritance.
-     * 
-     * \todo 
      */
     class CAMPVIS_CORE_API ImageData : public AbstractData, public IHasWorldBounds {
     // friend so that it can add itself as representation
@@ -209,8 +205,8 @@ namespace campvis {
     const T* campvis::ImageData::getRepresentation(bool performConversion) const {
         // look, whether we already have a suitable representation
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (typeid(T) == typeid(**it)) {
-                return static_cast<const T*>(*it);
+            if (const T* tester = dynamic_cast<const T*>(*it)) {
+                return tester;
             }
         }
 
@@ -221,16 +217,6 @@ namespace campvis {
 
         return 0;
     }
-
-    template<>
-    CAMPVIS_CORE_API const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
-
-#ifdef CAMPVIS_HAS_MODULE_ITK
-    class AbstractImageRepresentationItk;
-
-    template<>
-    CAMPVIS_CORE_API const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
-#endif
 
     template<typename T>
     const T* campvis::ImageData::tryPerformConversion() const {
