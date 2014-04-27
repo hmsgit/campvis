@@ -97,7 +97,7 @@ namespace campvis {
          * \param whitespace    Set of whitespace characters which shall be removed during trimming.
          * \return  Vector of the split substrings.
          */
-        static std::vector<std::string> splitStringsafe(const std::string& str, const std::string& delimiter, char quotes = '"', const std::string& whitespace = " \t\n\r\0\x0B");
+        static std::vector<std::string> splitStringsafe(const std::string& str, const std::string& delimiter, char quotes = '\'', const std::string& whitespace = " \t\n\r\0\x0B");
 
         /**
          * Trims the string \a str.

@@ -103,6 +103,7 @@ TEST_F(ImageDataTest, miscellaneousTest) {
 /**
  * Tests the clone() function.
  */
+// TODO: extend the test for proper ImageData cloning
 TEST_F(ImageDataTest, cloneTest) {
     ASSERT_TRUE(nullptr != _imgData1);
 

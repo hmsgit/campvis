@@ -87,6 +87,15 @@ TEST_F(StringPropertyTest, sharedPropertyTest) {
     EXPECT_EQ(this->_strProp1.getValue(), this->_strProp2.getValue());
     EXPECT_EQ("value1", this->_strProp2.getValue());
 
+    this->_strProp1.setValue("anotherValue");
+    EXPECT_EQ("anotherValue", this->_strProp1.getValue());
+    EXPECT_EQ("anotherValue", this->_strProp2.getValue());
+    this->_strProp2.setValue("someOtherValue");
+    EXPECT_EQ("someOtherValue", this->_strProp2.getValue());
+    EXPECT_NE("someOtherValue", this->_strProp1.getValue());
+    EXPECT_EQ("anotherValue", this->_strProp1.getValue());
+
+    this->_strProp1.setValue("value1");
     // removeSharedProperty()
     this->_strProp1.removeSharedProperty(&this->_strProp2);
     EXPECT_EQ(this->_strProp1.getValue(), this->_strProp2.getValue());

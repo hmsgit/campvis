@@ -103,18 +103,20 @@ namespace campvis {
             // check whether there are quotes
             if (str[strpos] == quotes) {
                 // find position of closing quotes
-                endpos = str.find_first_of('"', strpos + 1);
+                endpos = str.find_first_of(quotes, strpos + 1);
 
                 std::string toPush = str.substr(strpos + 1 , endpos - strpos - 1);
                 // ensure we haven't found double quotes ("") which shall be resolved to one double quote in resulting string
-                while ((endpos != std::string::npos) && (endpos + 1 < str.length()) && (str[endpos + 1] == '"')) {
+                while ((endpos != std::string::npos) && (endpos + 1 < str.length()) && (str[endpos + 1] == quotes)) {
                     strpos = endpos + 1;
-                    endpos = str.find_first_of('"', endpos + 2);
+                    endpos = str.find_first_of(quotes, endpos + 2);
                     toPush.append(str.substr(strpos, endpos - strpos));
                 }
 
                 // push string in quotes onto toReturn
-                toReturn.push_back(StringUtils::trim(toPush, whitespace));
+                toReturn.push_back(toPush);
+                // use the following if whitespace trimming is necessary in between <quote>s
+                //toReturn.push_back(StringUtils::trim(toPush, whitespace));
 
                 // ignore everything until next delimiter
                 endpos = str.find_first_of(delimiter, endpos);

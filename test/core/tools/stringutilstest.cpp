@@ -76,20 +76,20 @@ TEST_F(StringUtilTest, caseOperationsTest) {
  */
 TEST_F(StringUtilTest, parseFloatsTest) {
     std::vector<std::string> parsed = StringUtils::parseFloats(
-        "-0.0 xyz +.12  123.zx0 --0.14 xyz");
+        "-1m-0.0 xyz +.12  123.zx0 --0.14 xyz");
     static const float value[] = 
-        { 0.0f,    .12f,123.0f,0.0f};
+        {-1, -0.0f,    .12f,123.0f,0.0f};
     std::vector<float> expected (value, value + sizeof(value) / sizeof(float) );
     //std::vector<float> expected = {0, .12, 123, 0}; // You may use this if your compiler supports, C++11
     
     EXPECT_EQ(expected.size(), parsed.size());
-    for(int i = 0; i < expected.size(); i++ ) {
-        EXPECT_FLOAT_EQ(expected[i], (float) atof(parsed[i].c_str()));
+    for (int i = 0; i < expected.size(); i++ ) {
+        EXPECT_FLOAT_EQ(expected[i], StringUtils::fromString<float>(parsed[i].c_str()));
     }
 }
 
 /** 
- * Tests replace(), trim() and split*()s.
+ * Tests split*()s.
  * 
  */
 TEST_F(StringUtilTest, splitTest) {
@@ -103,7 +103,7 @@ TEST_F(StringUtilTest, splitTest) {
     }
     
     EXPECT_EQ(expected.size(), parsed.size());
-    for(int i = 0; i < expected.size(); i++ ) {
+    for (int i = 0; i < expected.size(); i++ ) {
         EXPECT_EQ(expected[i], parsed[i]);
     }
 
@@ -112,20 +112,33 @@ TEST_F(StringUtilTest, splitTest) {
     expected.clear();
 
     parsed = StringUtils::splitStringsafe("one two three", " ", '|');
-    std::string str2[] = {"one", "two", "three", "^_^"};    // "^_^" is used to indicate last token 
+    parsed = StringUtils::splitStringsafe("one 'two three' 'four fi\'\'ve' six \' \' ", " ", '\'');
+    std::string str2[] = { "one", "two three", "four fi\'ve", "six", " " , "^_^"};//{"one", "two", "three", "^_^"};    // "^_^" is used to indicate last token 
 
     for (int i= 0; "^_^" != str2[i] ; i++) {
         expected.push_back(str2[i]);
     }
 
     EXPECT_EQ(expected.size(), parsed.size());
-    for(int i = 0; i < expected.size(); i++ ) {
+    for (int i = 0; i < expected.size(); i++ ) {
         EXPECT_EQ(expected[i], parsed[i]);
     }
+}
 
-    EXPECT_EQ("somestring", StringUtils::trim("trimitsomestringtrimit", "trimit"));
-    
+/** 
+ * Tests replace()
+ * 
+ */
+TEST_F(StringUtilTest, replaceTest) {
     EXPECT_EQ("REPLACEDsomestringREPLACED", StringUtils::replaceAll("replaceitsomestringreplaceit", "replaceit", "REPLACED"));
+}
+
+/** 
+ * Tests trim()
+ * 
+ */
+TEST_F(StringUtilTest, trimTest) {
+    EXPECT_EQ("somestring", StringUtils::trim("rrrtrimitttsomestringrrrtrimittttttt", "trimit"));
 }
 
 /** 
@@ -145,10 +158,12 @@ TEST_F(StringUtilTest, toStringTest) {
     for (int i = 0;  ; i++) {
         tokens.push_back(str[i]);        
         expected += str[i];
-        if("^_^" == str[i]) break;  
+        if ("^_^" == str[i]) 
+            break;  
         expected +=  delim;
     }
 
     EXPECT_EQ(expected, StringUtils::join(tokens, delim));
 
 }
+

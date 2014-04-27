@@ -50,7 +50,6 @@ protected:
     }
 
     ~DataHandleTest() {
-        //delete _data1;    // DON'T mess with data added to the DataHandle. More at DataHanlde.h
     }
 
     virtual void SetUp() {

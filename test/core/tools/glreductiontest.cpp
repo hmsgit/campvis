@@ -44,18 +44,20 @@ using namespace campvis;
  * and known data. Then compares the output of GlReduction::reduce() with 
  * expected values.
  */
-class GlReductionTest : public ::testing::Test {
+class GlReductionTest : public ::testing::TestWithParam<int> {
 protected:
     GlReductionTest() {
         name = new tgt::FramebufferObject();
 
         width = 10;
         height = 10;
-        depth = 1;
+        
+        EXPECT_TRUE(GetParam() == 2 || GetParam() == 3);
+        depth = (GetParam() == 3)? 10 : 1;
 
         rawData = new float[width * height * depth];
         initData(rawData, width * height * depth);
-        imgData = new ImageData(2, tgt::svec3(width, height, depth), 1);
+        imgData = new ImageData(depth == 1? 2 : 3, tgt::svec3(width, height, depth), 1);
         localRep = ImageRepresentationLocal::create(imgData, WeaklyTypedPointer(WeaklyTypedPointer::BaseType::FLOAT, 1, rawData));
         glReduction = nullptr;
     }
@@ -72,8 +74,15 @@ protected:
     }
     
     void initData(float* data, int size) {
-        memset(data, 0x0F, sizeof(float)*size);
-        data[0] = 1;
+        for (int i = 0; i < size; i++ ) {
+            data[i] = 1;
+        }
+        srand(static_cast<unsigned>(time(NULL)));
+        data[rand() % size] = 0;
+    }
+    
+    int getSize() {
+        return width * height * depth;
     }
 
 protected:
@@ -90,24 +99,25 @@ protected:
 /** 
  * Checks whether the OpenGL context is valid here.
  */
-TEST_F(GlReductionTest, isScopedLockWorking) {
-    if(name->getId() != 0){
+TEST_P(GlReductionTest, isScopedLockWorking) {
+    if (name->getId() != 0){
         SUCCEED();
-    } else
+    } else {
         FAIL();
+    }
 }
 
 /** 
  * Checks whether the local representation is valid.
  */
-TEST_F(GlReductionTest, localRepCreationTest) {
+TEST_P(GlReductionTest, localRepCreationTest) {
     EXPECT_NE(nullptr, localRep);
 }
 
 /** 
  * Tests for ReducationOperator::MIN.
  */
-TEST_F(GlReductionTest, minTest) {
+TEST_P(GlReductionTest, minTest) {
     glReduction = new GlReduction(GlReduction::ReductionOperator::MIN);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
@@ -118,7 +128,7 @@ TEST_F(GlReductionTest, minTest) {
 /** 
  * Tests for ReducationOperator::MAX.
  */
-TEST_F(GlReductionTest, maxTest) {
+TEST_P(GlReductionTest, maxTest) {
     glReduction = new GlReduction(GlReduction::ReductionOperator::MAX);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
@@ -129,21 +139,25 @@ TEST_F(GlReductionTest, maxTest) {
 /** 
  * Tests for ReducationOperator::PLUS.
  */
-TEST_F(GlReductionTest, sumTest) {
+TEST_P(GlReductionTest, sumTest) {
     glReduction = new GlReduction(GlReduction::ReductionOperator::PLUS);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
-    ASSERT_NEAR(1, reduced[0], 0.0001);
+    ASSERT_NEAR(getSize() - 1, reduced[0], 0.0001);
     ASSERT_NEAR(0, reduced[1], 0.0001);
 }
 
 /** 
  * Tests for ReducationOperator::MULTIPLICATION.
  */
-TEST_F(GlReductionTest, multTest) {
+TEST_P(GlReductionTest, multTest) {
     glReduction = new GlReduction(GlReduction::ReductionOperator::MULTIPLICATION);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(0, reduced[0], 0.0001);
     ASSERT_NEAR(0, reduced[1], 0.0001);
 }
+
+INSTANTIATE_TEST_CASE_P(2DTest, GlReductionTest, ::testing::Values(2));
+INSTANTIATE_TEST_CASE_P(3DTest, GlReductionTest, ::testing::Values(3));
+

@@ -31,17 +31,12 @@
 #include "gtest/gtest.h"
 #include <stdio.h>
 
-//#include "tgt/assert.h"
-//#include "tgt/exception.h"
-//#include "tgt/glcanvas.h"
 #include "tgt/gpucapabilities.h"
 #include "tgt/shadermanager.h"
-//#include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/glcontextmanager.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/logmanager.h"
 #include "tgt/qt/qtapplication.h"
-//#include "tbb/compat/thread"
 
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/opengljobprocessor.h"
@@ -78,7 +73,6 @@ void init() {
     // create a local OpenGL context and init GL
     _localContext = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
     
-    //TODO: why I had to reorder next couple of statements ?!
     tgt::GLContextScopedLock lock(_localContext);
     tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
 
@@ -117,9 +111,7 @@ void deinit() {
 
         campvis::QuadRenderer::deinit();
 
-        // deinit OpenGL and tgt
         tgt::deinitGL();
-
     }
 
     campvis::SimpleJobProcessor::deinit();
@@ -153,7 +145,6 @@ GTEST_API_ int main(int argc, char **argv) {
     }
     deinit();
 
-    //getchar();
     delete app;
     printf("main() returned with %d\n", ret);
     return 0;

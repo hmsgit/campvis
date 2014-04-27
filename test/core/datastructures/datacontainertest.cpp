@@ -80,10 +80,6 @@ TEST_F(DataContainerTest, miscellaneousTest) {
 
     this->_dc0->removeData("data1");
     EXPECT_EQ(nullptr, this->_dc0->getData("data1").getData());
-    // TODO: if the addDataHandle is called here instead of above
-    // this->_dc0->addDataHandle("data2", DataHandle(this->_data));
-    // the program crashes. Find why!!
-
     EXPECT_EQ(false, this->_dc0->hasData("data1"));
     EXPECT_EQ(true, this->_dc0->hasData("data2"));
 }

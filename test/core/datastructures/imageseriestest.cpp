@@ -46,8 +46,7 @@ protected:
         _imgSeries3.addImage(_dh);
     }
 
-    ~ImageSeriesTest() {        
-        //delete _image;    // Don't even think about it. Check DataHandle.h
+    ~ImageSeriesTest() {
     }
 
     virtual void SetUp() {

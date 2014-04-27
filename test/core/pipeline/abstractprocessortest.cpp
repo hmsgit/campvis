@@ -38,11 +38,12 @@
 using namespace campvis;
 
 
+// FIXME: This is not what I was supposed to be. fix me please. 
 class DummyTestProcessor : public AbstractProcessor {
 public:
     DummyTestProcessor () {
         _invalidateExternally = false;
-        _level = AbstractProcessor::InvalidationLevel::VALID;
+        this->invalidate(AbstractProcessor::InvalidationLevel::VALID);
     }
     ~DummyTestProcessor () {}
 
@@ -53,31 +54,18 @@ public:
     
     virtual void updateResult(DataContainer& dataContainer) {
         dataContainer.removeData("ImageData");
-        dataContainer.addData("ImageData", new ImageData(2, tgt::svec3(1,2,3), 4));
-
-        /** 
-         * Even if I comment out the next IF clause, it still remain invalid!!
-         * shouldn't the process() set it back to ::VALID if no invalidation 
-         * occurs i.e. the queue is empty!!
-         */
-        //if(_invalidateExternally)
-        //    this->invalidate(_level);
+        dataContainer.addData("ImageData", new ImageData(2, tgt::svec3(1,2,1), 4));
     }
 
     void setExternalInvalidation(bool status, AbstractProcessor::InvalidationLevel level) {
         _invalidateExternally = status;
-        _level = level;
+        this->invalidate(level);
         
-        /**
-         * Okay, What's the problem here!! if we want to do the invalidation in the updateResult() only,
-         * things doesn't work. :@
-         */
-        this->invalidate(_level);
+        this->invalidate(this->getInvalidationLevel());
     }
 
 private:
     bool _invalidateExternally;
-    AbstractProcessor::InvalidationLevel _level;
 };
 
 
@@ -90,7 +78,7 @@ protected:
     AbstractProcessorTest() 
         : _dataContainer("testContainer")
     {
-        this->_dataContainer.addData("ImageData", new ImageData(2, tgt::svec3(1,2,3), 4));
+        this->_dataContainer.addData("ImageData", new ImageData(2, tgt::svec3(1,2,1), 4));
     }
 
     ~AbstractProcessorTest() {
@@ -117,5 +105,4 @@ TEST_F(AbstractProcessorTest, invalidationTest) {
     this->_processor1.setExternalInvalidation(true, AbstractProcessor::InvalidationLevel::INVALID_RESULT);
     this->_processor1.process(this->_dataContainer);
     EXPECT_NE(AbstractProcessor::InvalidationLevel::VALID, this->_processor1.getInvalidationLevel());
-
 }

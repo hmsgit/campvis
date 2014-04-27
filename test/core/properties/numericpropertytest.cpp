@@ -149,3 +149,4 @@ TEST_F(NumericPropertyTest, decreaseTest) {
     this->_doubleProp.decrement();
     EXPECT_EQ(dmin, this->_doubleProp.getValue());
 }
+

@@ -43,16 +43,16 @@ using namespace campvis;
  */
 
 template<size_t ND>
-class ConcurrentHistogramND {
+class ConcurrentHistogramNDUniform {
 protected:
-    ConcurrentHistogramND()
+    ConcurrentHistogramNDUniform()
     {
         max = new int[ND];
         min = new int[ND];
         numBuckets = new size_t[ND];
-        for (int i = 0; i < ND; i++) { min[i] = 0; }
-        for (int i = 0; i < ND; i++) { max[i] = 100; }
         for (int i = 0; i < ND; i++) { 
+            min[i] = 0; 
+            max[i] = 100;
             numBuckets[i] = max[i] - min[i] + 1; 
         }
 
@@ -65,7 +65,7 @@ protected:
         _cgh = new campvis::ConcurrentGenericHistogramND<int, ND>(min, max, numBuckets);
     }
 
-    ~ConcurrentHistogramND() {
+    ~ConcurrentHistogramNDUniform() {
         delete max;
         delete min;
         delete numBuckets;
@@ -80,10 +80,10 @@ protected:
 
     void initSamples() {
         int range = max[0] - min[0] + 1;
-        for(int i = 0; i < numSamples; i++) {
+        for (int i = 0; i < numSamples; i++) {
             std::vector<int> sample;
             int x = i;
-            for(int j = ND-1; j >= 0; j--) {
+            for (int j = ND-1; j >= 0; j--) {
                 sample.push_back(x / static_cast<int>(pow(range, j)));
                 x = x % static_cast<int>(pow(range, j));
             }
@@ -91,9 +91,12 @@ protected:
         }
     }
     void computeHistogram() {
+        int total = 0;
         for (int i = 0; i < numSamples; i++) {
             histogram[i] = 1;
+            total += histogram[i];
         }
+        EXPECT_EQ(numSamples, total);
     }
 
     int getND() {return ND;}
@@ -112,7 +115,7 @@ protected:
 /** 
  * Test class 1D system.
  */
-class ConcurrentHistogram1DTest : public ConcurrentHistogramND<1>, public ::testing::Test {
+class ConcurrentHistogram1DTest : public ConcurrentHistogramNDUniform<1>, public ::testing::Test {
 public:
     ConcurrentHistogram1DTest() {
     }
@@ -134,7 +137,7 @@ TEST_F(ConcurrentHistogram1DTest, concurrentAddSampleTest) {
     });
 
     for (int i = 0; i < getND(); i++) {
-        for(int j = 0; j < numBuckets[i]; j ++) {
+        for (int j = 0; j < numBuckets[i]; j ++) {
             EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
         }
     }
@@ -143,7 +146,7 @@ TEST_F(ConcurrentHistogram1DTest, concurrentAddSampleTest) {
 /** 
  * Test class 2D system.
  */
-class ConcurrentHistogram2DTest : public ConcurrentHistogramND<2>, public ::testing::Test {
+class ConcurrentHistogram2DTest : public ConcurrentHistogramNDUniform<2>, public ::testing::Test {
 public:
     ConcurrentHistogram2DTest() {
     }
@@ -165,9 +168,154 @@ TEST_F(ConcurrentHistogram2DTest, concurrentAddSampleTest) {
     });
 
     for (int i = 0; i < getND(); i++) {
-        for(int j = 0; j < numBuckets[i]; j ++) {
+        for (int j = 0; j < numBuckets[i]; j ++) {
             EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
         }
         break;
     }
 }
+
+
+/**
+ * Test class for ConcurrentGenericHistogramND. Initializes a uniform distribution
+ * over ND dimensional space. Buckets are chosen in each unit, i.e. number of buckets
+ * is range+1. 
+ */
+
+template<size_t ND>
+class ConcurrentHistogramNDSpecific {
+protected:
+    ConcurrentHistogramNDSpecific()
+    {
+        max = new int[ND];
+        min = new int[ND];
+        numBuckets = new size_t[ND];
+        for (int i = 0; i < ND; i++) { 
+            min[i] = 0; 
+            max[i] = 9999;
+            numBuckets[i] = 2; 
+        }
+
+        numSamples = static_cast<int>(pow(max[0]-min[0]+1, ND));
+        initSamples();
+
+        histogram = new int[static_cast<int>(pow(2, ND))];
+        computeHistogram();
+
+        _cgh = new campvis::ConcurrentGenericHistogramND<int, ND>(min, max, numBuckets);
+    }
+
+    ~ConcurrentHistogramNDSpecific() {
+        delete max;
+        delete min;
+        delete numBuckets;
+        delete histogram;
+    }
+
+    virtual void SetUp() {
+    }
+
+    virtual void TearDown() {
+    }
+
+    void initSamples() {
+        int range = max[0] - min[0] + 1;
+        for (int i = 0; i < numSamples; i++) {
+            std::vector<int> sample;
+            int x = i;
+            for (int j = ND-1; j >= 0; j--) {
+                sample.push_back(x / static_cast<int>(pow(range, j)));
+                x = x % static_cast<int>(pow(range, j));
+            }
+            samples.push_back(sample);
+        }
+    }
+    void computeHistogram() {
+        //for (int i = 0; i < 2; i++) {
+        //    histogram[i] = numSamples / 2;
+        //}
+        int total = 0;
+        for (int i = 0; i < pow(2, ND); i++) {
+            histogram[i] = static_cast<int>(numSamples / pow(2, ND) );
+            total += histogram[i];
+        }
+        EXPECT_EQ(numSamples, total);
+
+    }
+
+    int getND() {return ND;}
+
+protected:
+    int *max, *min;
+    size_t *numBuckets;
+    campvis::ConcurrentGenericHistogramND<int, ND>* _cgh;
+
+    int numSamples;
+    std::vector<std::vector<int> > samples;
+    int *histogram;
+
+};
+
+/** 
+ * Test class 1D system.
+ */
+class ConcurrentHistogram1DTestSpecific : public ConcurrentHistogramNDSpecific<1>, public ::testing::Test {
+public:
+    ConcurrentHistogram1DTestSpecific() {
+    }
+};
+
+/** 
+ * Expected number of elements at each bucket should be 1
+ */
+TEST_F(ConcurrentHistogram1DTestSpecific, concurrentAddSampleTest) {
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
+        for (size_t i = range.begin(); i != range.end(); ++i) {
+            std::vector<int> vec = samples[i];
+            int value[10];
+            for (int k = 0; k < getND(); k++) {
+                value[k] = vec[k];
+            }
+            _cgh->addSample(&(samples[i].front()));
+        }
+    });
+
+    for (int i = 0; i < getND(); i++) {
+        for (int j = 0; j < numBuckets[i]; j ++) {
+            EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
+        }
+    }
+}
+
+/** 
+ * Test class 2D system.
+ */
+class ConcurrentHistogram2DTestSpecific : public ConcurrentHistogramNDUniform<2>, public ::testing::Test {
+public:
+    ConcurrentHistogram2DTestSpecific() {
+    }
+};
+
+/** 
+ * Expected number of elements at each bucket should be 1
+ */
+TEST_F(ConcurrentHistogram2DTestSpecific, concurrentAddSampleTest) {
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
+        for (size_t i = range.begin(); i != range.end(); ++i) {
+            std::vector<int> vec = samples[i];
+            int value[10];
+            for (int k = 0; k < getND(); k++) {
+                value[k] = vec[k];
+            }
+            _cgh->addSample(&(samples[i].front()));
+        }
+    });
+
+    for (int i = 0; i < getND(); i++) {
+        for (int j = 0; j < numBuckets[i]; j ++) {
+            EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
+        }
+        break;
+    }
+}
+
