@@ -21,8 +21,8 @@ OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"               
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
 OPTION(CAMPVIS_GROUP_SOURCE_FILES   "Group source files by directory"                               ON)
-OPTION(CAMPVIS_BUILD_GOOGLETEST     "Build googletest library"                                      ON)
-OPTION(CAMPVIS_BUILD_TEST_SOURCES   "Build Unit Tests of gooogletest"                               ON)
+OPTION(CAMPVIS_BUILD_GOOGLETEST     "Build googletest library"                                      OFF)
+OPTION(CAMPVIS_BUILD_TEST_SOURCES   "Build Unit Tests of gooogletest"                               OFF)
 
 IF(WIN32)
     OPTION(CAMPVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON)
