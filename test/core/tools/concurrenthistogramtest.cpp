@@ -128,16 +128,12 @@ TEST_F(ConcurrentHistogram1DTest, concurrentAddSampleTest) {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
         for (size_t i = range.begin(); i != range.end(); ++i) {
             std::vector<int> vec = samples[i];
-            int value[10];
-            for (int k = 0; k < getND(); k++) {
-                value[k] = vec[k];
-            }
             _cgh->addSample(&(samples[i].front()));
         }
     });
 
     for (int i = 0; i < getND(); i++) {
-        for (int j = 0; j < numBuckets[i]; j ++) {
+        for (size_t j = 0; j < numBuckets[i]; j ++) {
             EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
         }
     }
@@ -159,16 +155,12 @@ TEST_F(ConcurrentHistogram2DTest, concurrentAddSampleTest) {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
         for (size_t i = range.begin(); i != range.end(); ++i) {
             std::vector<int> vec = samples[i];
-            int value[10];
-            for (int k = 0; k < getND(); k++) {
-                value[k] = vec[k];
-            }
             _cgh->addSample(&(samples[i].front()));
         }
     });
 
     for (int i = 0; i < getND(); i++) {
-        for (int j = 0; j < numBuckets[i]; j ++) {
+        for (size_t j = 0; j < numBuckets[i]; j ++) {
             EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
         }
         break;
@@ -231,9 +223,6 @@ protected:
         }
     }
     void computeHistogram() {
-        //for (int i = 0; i < 2; i++) {
-        //    histogram[i] = numSamples / 2;
-        //}
         int total = 0;
         for (int i = 0; i < pow(2, ND); i++) {
             histogram[i] = static_cast<int>(numSamples / pow(2, ND) );
@@ -272,16 +261,12 @@ TEST_F(ConcurrentHistogram1DTestSpecific, concurrentAddSampleTest) {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
         for (size_t i = range.begin(); i != range.end(); ++i) {
             std::vector<int> vec = samples[i];
-            int value[10];
-            for (int k = 0; k < getND(); k++) {
-                value[k] = vec[k];
-            }
             _cgh->addSample(&(samples[i].front()));
         }
     });
 
     for (int i = 0; i < getND(); i++) {
-        for (int j = 0; j < numBuckets[i]; j ++) {
+        for (size_t j = 0; j < numBuckets[i]; j ++) {
             EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
         }
     }
@@ -303,16 +288,12 @@ TEST_F(ConcurrentHistogram2DTestSpecific, concurrentAddSampleTest) {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
         for (size_t i = range.begin(); i != range.end(); ++i) {
             std::vector<int> vec = samples[i];
-            int value[10];
-            for (int k = 0; k < getND(); k++) {
-                value[k] = vec[k];
-            }
             _cgh->addSample(&(samples[i].front()));
         }
     });
 
     for (int i = 0; i < getND(); i++) {
-        for (int j = 0; j < numBuckets[i]; j ++) {
+        for (size_t j = 0; j < numBuckets[i]; j ++) {
             EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
         }
         break;

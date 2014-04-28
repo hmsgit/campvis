@@ -83,7 +83,7 @@ TEST_F(StringUtilTest, parseFloatsTest) {
     //std::vector<float> expected = {0, .12, 123, 0}; // You may use this if your compiler supports, C++11
     
     EXPECT_EQ(expected.size(), parsed.size());
-    for (int i = 0; i < expected.size(); i++ ) {
+    for (size_t i = 0; i < expected.size(); i++ ) {
         EXPECT_FLOAT_EQ(expected[i], StringUtils::fromString<float>(parsed[i].c_str()));
     }
 }
@@ -103,7 +103,7 @@ TEST_F(StringUtilTest, splitTest) {
     }
     
     EXPECT_EQ(expected.size(), parsed.size());
-    for (int i = 0; i < expected.size(); i++ ) {
+    for (size_t i = 0; i < expected.size(); i++ ) {
         EXPECT_EQ(expected[i], parsed[i]);
     }
 
@@ -120,7 +120,7 @@ TEST_F(StringUtilTest, splitTest) {
     }
 
     EXPECT_EQ(expected.size(), parsed.size());
-    for (int i = 0; i < expected.size(); i++ ) {
+    for (size_t i = 0; i < expected.size(); i++ ) {
         EXPECT_EQ(expected[i], parsed[i]);
     }
 }
