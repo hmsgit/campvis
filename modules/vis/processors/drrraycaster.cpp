@@ -35,7 +35,7 @@ namespace campvis {
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/drrraycaster.frag", false)
         , p_shift("shift", "Normalization Shift", 0.f, -10.f, 10.f, 0.1f)
         , p_scale("scale", "Normalization Scale", 1.f, 0.f, 1000.f, 0.1f)
-        , p_invertMapping("invertMapping", "Invert Mapping", false)
+        , p_invertMapping("InvertMapping", "Invert Mapping", false)
     {
         addProperty(p_shift);
         addProperty(p_scale);

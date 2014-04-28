@@ -42,6 +42,8 @@
 #include "modules/vis/processors/rendertargetcompositor.h"
 #include "modules/vis/processors/slicerenderer3d.h"
 #include "modules/ixpv/processors/ixpvcompositor.h"
+#include "modules/vis/processors/volumerenderer.h"
+
 
 
 namespace campvis {
@@ -76,18 +78,14 @@ namespace campvis {
         DevilImageReader _xrayReader;
 
         MhdImageReader _ctReader;
-        ProxyGeometryGenerator _ctProxy;
-        EEPGenerator _ctFullEEP;
-        EEPGenerator _ctClippedEEP;
-        SimpleRaycaster _ctDVR;
-        DRRRaycaster _ctFullDRR;
-        DRRRaycaster _ctClippedDRR;
+
+        VolumeRenderer _vrFull;
+        VolumeRenderer _vrClipped;
 
         MhdImageReader _usReader;
         SliceRenderer3D _usSliceRenderer;
 
         RenderTargetCompositor _compositor;
-        RenderTargetCompositor _compositor2;
         IxpvCompositor _ixpvCompositor;
 
         CameraProperty _camera;

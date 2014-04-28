@@ -238,6 +238,7 @@ namespace campvis {
 
         // render TF geometries into texture
         glViewport(0, 0, _texture->getWidth(), _texture->getHeight());
+        glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
 
         _shader->activate();
