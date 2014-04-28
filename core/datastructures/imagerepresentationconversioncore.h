@@ -26,6 +26,7 @@
 #define IMAGEREPRESENTATIONCONVERSIONCORE_H__
 
 #include "core/coreapi.h"
+#include "core/tools/opengljobprocessor.h"
 
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/datastructures/imagerepresentationdisk.h"

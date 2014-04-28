@@ -27,6 +27,7 @@
 #include <functional>
 
 #include "core/properties/abstractproperty.h"
+#include "core/gen_converterregistration.h"
 
 namespace campvis {
 

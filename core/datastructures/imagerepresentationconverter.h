@@ -118,13 +118,13 @@ namespace campvis {
 
     private:
         /// static helper field to ensure registration at static initialization time.
-        static const size_t _factoryId;
+        static size_t _factoryId;
     };
 
     // The meat of the static factory registration, call the registerConversionFunction() method and use the 
     // returned size_t to store it in the static member and thus ensure calling during static initialization.
     template<typename ConversionTarget, typename ConverterClass>
-    const size_t ConversionFunctionRegistrar<ConversionTarget, ConverterClass>::_factoryId 
+    size_t ConversionFunctionRegistrar<ConversionTarget, ConverterClass>::_factoryId 
         = ImageRepresentationConverter::getRef().registerConversionFunction(
             typeid(ConversionTarget), 
             &ConversionFunctionRegistrar<ConversionTarget, ConverterClass>::tryConvertFrom
