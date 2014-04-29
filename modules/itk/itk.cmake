@@ -19,11 +19,13 @@ IF(${ModuleEnabled})
 
     # Source files:
     FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
+        modules/itk/pipelines/*.cpp
         modules/itk/processors/*.cpp
     )
 
     # Header files
     FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
+        modules/itk/pipelines/*.h
         modules/itk/processors/*.h
     )
     
