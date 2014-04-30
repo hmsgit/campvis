@@ -60,10 +60,8 @@ namespace campvis {
         , _quad(nullptr)
         , _numTiles(0, 0)
         , _quadSize(0, 0)
-        , _currentSlice(-1)
         , _localDataContainer("Local DataContainer for DataContainerInspectorCanvas")
         , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(200), tgt::ivec2(0, 0), tgt::ivec2(10000))
-        , p_camera("Camera", "Camera", tgt::Camera())
         , _geometryRenderer(&p_viewportSize)
         , _trackballEH(nullptr)
     {
@@ -246,9 +244,6 @@ namespace campvis {
             _paintShader->setUniform("_2dTextureParams._numChannels", static_cast<int>(texture->getNumChannels()));
         }
         else {
-            // clamp current slice to texture size, since this can't be done in event handler:
-            _currentSlice = tgt::clamp(_currentSlice, -1, texture->getDimensions().z);
-
             unit3d.activate();
             texture->bind();
             _paintShader->setUniform("_is3d", true);
@@ -287,7 +282,7 @@ namespace campvis {
     {
         if (e->modifiers() & tgt::Event::CTRL) {
             int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
-            if (texIndx < 0 || texIndx >= _textures.size())
+            if (texIndx < 0 || texIndx >= static_cast<int>(_textures.size()))
                 return;
 
             const ImageData* id = static_cast<const ImageData*>(_textures[texIndx].getData());
@@ -439,6 +434,7 @@ namespace campvis {
 
 
     void DataContainerInspectorCanvas::onPropertyChanged(const AbstractProperty* prop) {
+        // ignore properties of the geometry renderer
         if (prop != &p_geometryRendererProperties)
             invalidate();
     }

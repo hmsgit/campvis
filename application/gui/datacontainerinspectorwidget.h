@@ -180,8 +180,6 @@ namespace campvis {
         QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
         QPalette _colorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
         
-        // Added by Hossain Mahmud  <mahmud@in.tum.de>
-        // Date: January 02, 2014
         QPushButton* _btnLoadFile;
         QPushButton* _btnSaveToFile;
         DataContainerFileLoaderWidget* _propEditorWid;

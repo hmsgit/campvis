@@ -88,6 +88,10 @@ namespace campvis {
          */
         void deinit();
 
+        /**
+         * Set the DataHandles to show in the canvas to those in \a handles.
+         * \param   handles vector of name-DataHandle pairs to show in the canvas.
+         */
         void setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles);
 
         /**
@@ -112,15 +116,15 @@ namespace campvis {
 
         virtual void onEvent(tgt::Event* e);
         
-        IntProperty p_currentSlice;
-        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+        IntProperty p_currentSlice;                     ///< Currently selected slice to show
+        TransferFunctionProperty p_transferFunction;    ///< Transfer function
 
-        BoolProperty p_renderRChannel;  /// Flag whether to render Red channel
-        BoolProperty p_renderGChannel;  /// Flag whether to render Green channel
-        BoolProperty p_renderBChannel;  /// Flag whether to render Blue channel
-        BoolProperty p_renderAChannel;  /// Flag whether to render Alpha channel
+        BoolProperty p_renderRChannel;                  ///< Flag whether to render Red channel
+        BoolProperty p_renderGChannel;                  ///< Flag whether to render Green channel
+        BoolProperty p_renderBChannel;                  ///< Flag whether to render Blue channel
+        BoolProperty p_renderAChannel;                  ///< Flag whether to render Alpha channel
 
-        MetaProperty p_geometryRendererProperties;
+        MetaProperty p_geometryRendererProperties;      ///< MetaProperty for the GeometryRenderer
 
     signals:
         void s_colorChanged(const tgt::vec4&);
@@ -147,6 +151,7 @@ namespace campvis {
          * \param   dh      DataHandle to the newly added data.
          */
         void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * \param   prop    Property that emitted the signal
@@ -160,6 +165,9 @@ namespace campvis {
          */
         void updateTextures();
 
+        /**
+         * Resets the trackball and reinitializes the camera to the currently loaded geometries if necessary.
+         */
         void resetTrackball();
 
         /**
@@ -189,7 +197,8 @@ namespace campvis {
          */
         void createQuad();
 
-        std::map<QString, QtDataHandle> _handles;
+        
+        std::map<QString, QtDataHandle> _handles;   ///< Map of DataHandles to show
 
         /// Vector of textures to render. Each DataHandle contains an ImageData that has an OpenGL representation.
         /// This ensures thread safety.
@@ -210,11 +219,8 @@ namespace campvis {
         tgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
         tgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview
 
-        int _currentSlice;							///< current slice if rendering a 3D image fullscreen, render MIP if negative
-
         DataContainer _localDataContainer;          ///< Local DataContainer the GeometryRenderer works on
         IVec2Property p_viewportSize;
-        CameraProperty p_camera;
         GeometryRenderer _geometryRenderer;         ///< GeometryRenderer used to render geometries
         TrackballNavigationEventListener* _trackballEH;
     };
