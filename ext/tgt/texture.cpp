@@ -464,194 +464,272 @@ void Texture::uploadTexture() {
     LGL_ERROR;
 }
 
-tgt::Color Texture::texelAsFloat(size_t x, size_t y) const {
-    tgt::Color ret = tgt::Color(0.0f);
-    switch(format_) {
-        case GL_RGBA:
+tgt::vec4 Texture::texelAsFloat(size_t x, size_t y) const {
+    tgt::vec4 ret = tgt::vec4(0.0f);
+
+    switch (getNumChannels()) {
+        case 4:
             switch(dataType_) {
-                case GL_UNSIGNED_BYTE: {
-                    tgt::Vector4<uint8_t> t = texel< tgt::Vector4<uint8_t> >(x,y);
-                    ret.x = (float )t.x / 0xFF;
-                    ret.y = (float )t.y / 0xFF;
-                    ret.z = (float )t.z / 0xFF;
-                    ret.w = (float )t.w / 0xFF;
+                case GL_BYTE:
+                    ret = tgt::vec4(texel< tgt::Vector4<int8_t> >(x, y)) / float(0xFF);
                     break;
-                }
-                case GL_UNSIGNED_SHORT: {
-                    tgt::Vector4<uint16_t> t = texel< tgt::Vector4<uint16_t> >(x,y);
-                    ret.x = (float )t.x / 0xFFFF;
-                    ret.y = (float )t.y / 0xFFFF;
-                    ret.z = (float )t.z / 0xFFFF;
-                    ret.w = (float )t.w / 0xFFFF;
+                case GL_UNSIGNED_BYTE:
+                    ret = tgt::vec4(texel< tgt::Vector4<uint8_t> >(x, y)) / float(0xFF);
                     break;
-                }
+                case GL_SHORT:
+                    ret = tgt::vec4(texel< tgt::Vector4<int16_t> >(x, y)) / float(0xFFFF);
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    ret = tgt::vec4(texel< tgt::Vector4<uint16_t> >(x, y)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    ret = tgt::vec4(texel< tgt::Vector4<int32_t> >(x, y)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    ret = tgt::vec4(texel< tgt::Vector4<uint32_t> >(x, y)) / float(0xFFFFFFFF);
+                    break;
                 case GL_FLOAT:
-                    ret = texel<tgt::Color>(x,y);
+                    ret = texel< tgt::vec4 >(x, y);
                     break;
                 default:
                     LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
             }
             break;
-        case GL_RGB:
+
+        case 3: {
+            tgt::vec3 tmp;
             switch(dataType_) {
-                case GL_UNSIGNED_BYTE: {
-                    tgt::Vector3<uint8_t> t = texel< tgt::Vector3<uint8_t> >(x,y);
-                    ret.x = (float )t.x / 0xFF;
-                    ret.y = (float )t.y / 0xFF;
-                    ret.z = (float )t.z / 0xFF;
-                    ret.w = 1.0f;
+                case GL_BYTE:
+                    tmp = tgt::vec3(texel< tgt::Vector3<int8_t> >(x, y)) / float(0xFF);
                     break;
-                }
-                case GL_UNSIGNED_SHORT: {
-                    tgt::Vector3<uint16_t> t = texel< tgt::Vector3<uint16_t> >(x,y);
-                    ret.x = (float )t.x / 0xFFFF;
-                    ret.y = (float )t.y / 0xFFFF;
-                    ret.z = (float )t.z / 0xFFFF;
-                    ret.w = 1.0f;
+                case GL_UNSIGNED_BYTE:
+                    tmp = tgt::vec3(texel< tgt::Vector3<uint8_t> >(x, y)) / float(0xFF);
                     break;
-                }
-                case GL_FLOAT: {
-                    tgt::Vector3f t = texel<tgt::Vector3f>(x,y);
-                    ret.x = t.x;
-                    ret.y = t.y;
-                    ret.z = t.z;
-                    ret.w = 1.0f;
+                case GL_SHORT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<int16_t> >(x, y)) / float(0xFFFF);
                     break;
-                }
+                case GL_UNSIGNED_SHORT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<uint16_t> >(x, y)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<int32_t> >(x, y)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<uint32_t> >(x, y)) / float(0xFFFFFFFF);
+                    break;
+                case GL_FLOAT:
+                    tmp = texel< tgt::vec3 >(x, y);
+                    break;
                 default:
                     LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+                    break;
             }
+            ret.x = tmp.x;
+            ret.y = tmp.y;
+            ret.z = tmp.z;
             break;
-        case GL_RED:
-            switch(dataType_) {
-                case GL_UNSIGNED_BYTE: {
-                    tgt::Vector3<uint8_t> t = tgt::vec3(texel<uint8_t>(x,y));
-                    ret.x = (float )t.x / 0xFF;
-                    ret.y = (float )t.y / 0xFF;
-                    ret.z = (float )t.z / 0xFF;
-                    ret.w = 1.0f;
-                    break;
-                                       }
-                case GL_UNSIGNED_SHORT: {
-                    tgt::Vector3<uint16_t> t = tgt::vec3(texel<uint16_t>(x,y));
-                    ret.x = (float )t.x / 0xFFFF;
-                    ret.y = (float )t.y / 0xFFFF;
-                    ret.z = (float )t.z / 0xFFFF;
-                    ret.w = 1.0f;
-                    break;
-                                        }
-                case GL_FLOAT: {
-                    tgt::Vector3f t = tgt::vec3(texel<GLfloat>(x,y));
-                    ret.x = t.x;
-                    ret.y = t.y;
-                    ret.z = t.z;
-                    ret.w = 1.0f;
-                    break;
-                }
-                default:
-                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
         }
-        break;
+
+        case 2: {
+            tgt::vec2 tmp;
+            switch(dataType_) {
+                case GL_BYTE:
+                    tmp = tgt::vec2(texel< tgt::Vector2<int8_t> >(x, y)) / float(0xFF);
+                    break;
+                case GL_UNSIGNED_BYTE:
+                    tmp = tgt::vec2(texel< tgt::Vector2<uint8_t> >(x, y)) / float(0xFF);
+                    break;
+                case GL_SHORT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<int16_t> >(x, y)) / float(0xFFFF);
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<uint16_t> >(x, y)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<int32_t> >(x, y)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<uint32_t> >(x, y)) / float(0xFFFFFFFF);
+                    break;
+                case GL_FLOAT:
+                    tmp = texel< tgt::vec2 >(x, y);
+                    break;
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+                    break;
+            }
+            ret.x = tmp.x;
+            ret.y = tmp.y;
+            break;
+        }
+
+        case 1:
+            switch(dataType_) {
+                case GL_BYTE:
+                    ret.x = static_cast<float>(texel< int8_t >(x, y)) / float(0xFF);
+                    break;
+                case GL_UNSIGNED_BYTE:
+                    ret.x = static_cast<float>(texel< uint8_t >(x, y)) / float(0xFF);
+                    break;
+                case GL_SHORT:
+                    ret.x = static_cast<float>(texel< int16_t >(x, y)) / float(0xFFFF);
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    ret.x = static_cast<float>(texel< uint16_t >(x, y)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    ret.x = static_cast<float>(texel< int32_t >(x, y)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    ret.x = static_cast<float>(texel< uint32_t >(x, y)) / float(0xFFFFFFFF);
+                    break;
+                case GL_FLOAT:
+                    ret.x = texel<float>(x, y);
+                    break;
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+            }
+            break;
 
         default:
             LWARNINGC("tgt.texture", "texelAsFloat: Unknown format!");
     }
+
     return ret;
 }
 
 
-tgt::Color Texture::texelAsFloat(size_t x, size_t y, size_t z) const {
-    tgt::Color ret = tgt::Color(0.0f);
-    switch(format_) {
-        case GL_RGBA:
+tgt::vec4 Texture::texelAsFloat(size_t x, size_t y, size_t z) const {
+    tgt::vec4 ret = tgt::vec4(0.0f);
+
+    switch (getNumChannels()) {
+        case 4:
             switch(dataType_) {
-                case GL_UNSIGNED_BYTE: {
-                    tgt::Vector4<uint8_t> t = texel< tgt::Vector4<uint8_t> >(x,y,z);
-                    ret.x = (float )t.x / 0xFF;
-                    ret.y = (float )t.y / 0xFF;
-                    ret.z = (float )t.z / 0xFF;
-                    ret.w = (float )t.w / 0xFF;
+                case GL_BYTE:
+                    ret = tgt::vec4(texel< tgt::Vector4<int8_t> >(x,y,z)) / float(0xFF);
                     break;
-                }
-                case GL_UNSIGNED_SHORT: {
-                    tgt::Vector4<uint16_t> t = texel< tgt::Vector4<uint16_t> >(x,y,z);
-                    ret.x = (float )t.x / 0xFFFF;
-                    ret.y = (float )t.y / 0xFFFF;
-                    ret.z = (float )t.z / 0xFFFF;
-                    ret.w = (float )t.w / 0xFFFF;
+                case GL_UNSIGNED_BYTE:
+                    ret = tgt::vec4(texel< tgt::Vector4<uint8_t> >(x,y,z)) / float(0xFF);
                     break;
-                }
+                case GL_SHORT:
+                    ret = tgt::vec4(texel< tgt::Vector4<int16_t> >(x,y,z)) / float(0xFFFF);
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    ret = tgt::vec4(texel< tgt::Vector4<uint16_t> >(x,y,z)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    ret = tgt::vec4(texel< tgt::Vector4<int32_t> >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    ret = tgt::vec4(texel< tgt::Vector4<uint32_t> >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
                 case GL_FLOAT:
-                    ret = texel<tgt::Color>(x,y,z);
+                    ret = texel< tgt::vec4 >(x,y,z);
                     break;
                 default:
                     LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
             }
             break;
-        case GL_RGB:
+
+        case 3: {
+            tgt::vec3 tmp;
             switch(dataType_) {
-                case GL_UNSIGNED_BYTE: {
-                    tgt::Vector3<uint8_t> t = texel< tgt::Vector3<uint8_t> >(x,y,z);
-                    ret.x = (float )t.x / 0xFF;
-                    ret.y = (float )t.y / 0xFF;
-                    ret.z = (float )t.z / 0xFF;
-                    ret.w = 1.0f;
+                case GL_BYTE:
+                    tmp = tgt::vec3(texel< tgt::Vector3<int8_t> >(x,y,z)) / float(0xFF);
                     break;
-                }
-                case GL_UNSIGNED_SHORT: {
-                    tgt::Vector3<uint16_t> t = texel< tgt::Vector3<uint16_t> >(x,y,z);
-                    ret.x = (float )t.x / 0xFFFF;
-                    ret.y = (float )t.y / 0xFFFF;
-                    ret.z = (float )t.z / 0xFFFF;
-                    ret.w = 1.0f;
+                case GL_UNSIGNED_BYTE:
+                    tmp = tgt::vec3(texel< tgt::Vector3<uint8_t> >(x,y,z)) / float(0xFF);
                     break;
-                }
-                case GL_FLOAT: {
-                    tgt::Vector3f t = texel<tgt::Vector3f>(x,y,z);
-                    ret.x = t.x;
-                    ret.y = t.y;
-                    ret.z = t.z;
-                    ret.w = 1.0f;
+                case GL_SHORT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<int16_t> >(x,y,z)) / float(0xFFFF);
                     break;
-                }
+                case GL_UNSIGNED_SHORT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<uint16_t> >(x,y,z)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<int32_t> >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    tmp = tgt::vec3(texel< tgt::Vector3<uint32_t> >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
+                case GL_FLOAT:
+                    tmp = texel< tgt::vec3 >(x,y,z);
+                    break;
                 default:
                     LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+                    break;
             }
+            ret.x = tmp.x;
+            ret.y = tmp.y;
+            ret.z = tmp.z;
             break;
-        case GL_RED:
-            switch(dataType_) {
-                case GL_UNSIGNED_BYTE: {
-                    tgt::Vector3<uint8_t> t = tgt::vec3(texel<uint8_t>(x,y,z));
-                    ret.x = (float )t.x / 0xFF;
-                    ret.y = (float )t.y / 0xFF;
-                    ret.z = (float )t.z / 0xFF;
-                    ret.w = 1.0f;
-                    break;
-                                       }
-                case GL_UNSIGNED_SHORT: {
-                    tgt::Vector3<uint16_t> t = tgt::vec3(texel<uint16_t>(x,y,z));
-                    ret.x = (float )t.x / 0xFFFF;
-                    ret.y = (float )t.y / 0xFFFF;
-                    ret.z = (float )t.z / 0xFFFF;
-                    ret.w = 1.0f;
-                    break;
-                                        }
-                case GL_FLOAT: {
-                    tgt::Vector3f t = tgt::vec3(texel<GLfloat>(x,y,z));
-                    ret.x = t.x;
-                    ret.y = t.y;
-                    ret.z = t.z;
-                    ret.w = 1.0f;
-                    break;
-                }
-                default:
-                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
         }
-        break;
+
+        case 2: {
+            tgt::vec2 tmp;
+            switch(dataType_) {
+                case GL_BYTE:
+                    tmp = tgt::vec2(texel< tgt::Vector2<int8_t> >(x,y,z)) / float(0xFF);
+                    break;
+                case GL_UNSIGNED_BYTE:
+                    tmp = tgt::vec2(texel< tgt::Vector2<uint8_t> >(x,y,z)) / float(0xFF);
+                    break;
+                case GL_SHORT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<int16_t> >(x,y,z)) / float(0xFFFF);
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<uint16_t> >(x,y,z)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<int32_t> >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    tmp = tgt::vec2(texel< tgt::Vector2<uint32_t> >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
+                case GL_FLOAT:
+                    tmp = texel< tgt::vec2 >(x,y,z);
+                    break;
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+                    break;
+            }
+            ret.x = tmp.x;
+            ret.y = tmp.y;
+            break;
+        }
+
+        case 1:
+            switch(dataType_) {
+                case GL_BYTE:
+                    ret.x = static_cast<float>(texel< int8_t >(x,y,z)) / float(0xFF);
+                    break;
+                case GL_UNSIGNED_BYTE:
+                    ret.x = static_cast<float>(texel< uint8_t >(x,y,z)) / float(0xFF);
+                    break;
+                case GL_SHORT:
+                    ret.x = static_cast<float>(texel< int16_t >(x,y,z)) / float(0xFFFF);
+                    break;
+                case GL_UNSIGNED_SHORT:
+                    ret.x = static_cast<float>(texel< uint16_t >(x,y,z)) / float(0xFFFF);
+                    break;
+                case GL_INT:
+                    ret.x = static_cast<float>(texel< int32_t >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
+                case GL_UNSIGNED_INT:
+                    ret.x = static_cast<float>(texel< uint32_t >(x,y,z)) / float(0xFFFFFFFF);
+                    break;
+                case GL_FLOAT:
+                    ret.x = texel<float>(x,y,z);
+                    break;
+                default:
+                    LWARNINGC("tgt.texture", "texelAsFloat: Unknown data type!");
+            }
+            break;
 
         default:
             LWARNINGC("tgt.texture", "texelAsFloat: Unknown format!");
     }
+
     return ret;
 }
 
