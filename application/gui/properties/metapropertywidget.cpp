@@ -30,7 +30,7 @@ namespace campvis {
         : AbstractPropertyWidget(property, true, dc, parent)
         , _pcw(0)
     {
-        tgtAssert(_dataContainer != 0, "Pointer to DataContainer must not be 0.");
+        //tgtAssert(_dataContainer != 0, "Pointer to DataContainer must not be 0.");
 
         _pcw = new PropertyCollectionWidget(this);
         _pcw->updatePropCollection(property, _dataContainer);

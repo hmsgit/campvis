@@ -145,8 +145,9 @@ namespace campvis {
         _handles.clear();
         _localDataContainer.clear();
         _textures.clear();
-        GLJobProc.deregisterContext(this);
+        ShdrMgr.dispose(_paintShader);
         delete _quad;
+        GLJobProc.deregisterContext(this);
     }
 
     QSize DataContainerInspectorCanvas::sizeHint() const {

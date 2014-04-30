@@ -128,7 +128,7 @@ public:
 TEST_F(ConcurrentHistogram1DTest, concurrentAddSampleTest) {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
         for (size_t i = range.begin(); i != range.end(); ++i) {
-            std::vector<int> vec = samples[i];
+            const std::vector<int>& vec = samples[i];
             _cgh->addSample(&(samples[i].front()));
         }
     });
@@ -155,7 +155,7 @@ public:
 TEST_F(ConcurrentHistogram2DTest, concurrentAddSampleTest) {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, samples.size()), [&] (const tbb::blocked_range<size_t>& range) {
         for (size_t i = range.begin(); i != range.end(); ++i) {
-            std::vector<int> vec = samples[i];
+            const std::vector<int>& vec = samples[i];
             _cgh->addSample(&(samples[i].front()));
         }
     });
