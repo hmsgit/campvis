@@ -33,7 +33,6 @@
 
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/imagedata.h"
-#include <thread>
 
 using namespace campvis;
 
@@ -43,7 +42,7 @@ class DummyTestProcessor : public AbstractProcessor {
 public:
     DummyTestProcessor () {
         _invalidateExternally = false;
-        this->invalidate(AbstractProcessor::InvalidationLevel::VALID);
+        this->invalidate(AbstractProcessor::VALID);
     }
     ~DummyTestProcessor () {}
 
@@ -100,9 +99,9 @@ protected:
  */ 
 TEST_F(AbstractProcessorTest, invalidationTest) {
     this->_processor1.process(this->_dataContainer);
-    EXPECT_EQ(AbstractProcessor::InvalidationLevel::VALID, this->_processor1.getInvalidationLevel());
+    EXPECT_EQ(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
     
-    this->_processor1.setExternalInvalidation(true, AbstractProcessor::InvalidationLevel::INVALID_RESULT);
+    this->_processor1.setExternalInvalidation(true, AbstractProcessor::INVALID_RESULT);
     this->_processor1.process(this->_dataContainer);
-    EXPECT_NE(AbstractProcessor::InvalidationLevel::VALID, this->_processor1.getInvalidationLevel());
+    EXPECT_NE(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
 }

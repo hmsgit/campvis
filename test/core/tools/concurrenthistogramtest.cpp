@@ -56,10 +56,11 @@ protected:
             numBuckets[i] = max[i] - min[i] + 1; 
         }
 
-        numSamples = static_cast<int>(pow(max[0]-min[0]+1, ND));
+        int nd = ND;
+        numSamples = static_cast<int>(pow(static_cast<float>(max[0]-min[0]+1), nd));
         initSamples();
 
-        histogram = new int[static_cast<int>(pow(max[0]-min[0]+1, ND))];
+        histogram = new int[numSamples];
         computeHistogram();
 
         _cgh = new campvis::ConcurrentGenericHistogramND<int, ND>(min, max, numBuckets);
@@ -79,7 +80,7 @@ protected:
     }
 
     void initSamples() {
-        int range = max[0] - min[0] + 1;
+        double range = max[0] - min[0] + 1;
         for (int i = 0; i < numSamples; i++) {
             std::vector<int> sample;
             int x = i;
@@ -188,10 +189,11 @@ protected:
             numBuckets[i] = 2; 
         }
 
-        numSamples = static_cast<int>(pow(max[0]-min[0]+1, ND));
+        int nd = ND;
+        numSamples = static_cast<int>(pow(static_cast<double>(max[0]-min[0]+1), nd));
         initSamples();
 
-        histogram = new int[static_cast<int>(pow(2, ND))];
+        histogram = new int[numSamples];
         computeHistogram();
 
         _cgh = new campvis::ConcurrentGenericHistogramND<int, ND>(min, max, numBuckets);
@@ -211,7 +213,7 @@ protected:
     }
 
     void initSamples() {
-        int range = max[0] - min[0] + 1;
+        double range = static_cast<double>(max[0] - min[0] + 1);
         for (int i = 0; i < numSamples; i++) {
             std::vector<int> sample;
             int x = i;
@@ -224,8 +226,9 @@ protected:
     }
     void computeHistogram() {
         int total = 0;
-        for (int i = 0; i < pow(2, ND); i++) {
-            histogram[i] = static_cast<int>(numSamples / pow(2, ND) );
+        int nd = ND;
+        for (int i = 0; i < pow(2.0, nd); i++) {
+            histogram[i] = static_cast<int>(numSamples / pow(2.0, nd) );
             total += histogram[i];
         }
         EXPECT_EQ(numSamples, total);

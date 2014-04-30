@@ -58,7 +58,7 @@ protected:
         rawData = new float[width * height * depth];
         initData(rawData, width * height * depth);
         imgData = new ImageData(depth == 1? 2 : 3, tgt::svec3(width, height, depth), 1);
-        localRep = ImageRepresentationLocal::create(imgData, WeaklyTypedPointer(WeaklyTypedPointer::BaseType::FLOAT, 1, rawData));
+        localRep = ImageRepresentationLocal::create(imgData, WeaklyTypedPointer(WeaklyTypedPointer::FLOAT, 1, rawData));
         glReduction = nullptr;
     }
 
@@ -118,7 +118,7 @@ TEST_P(GlReductionTest, localRepCreationTest) {
  * Tests for ReducationOperator::MIN.
  */
 TEST_P(GlReductionTest, minTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::MIN);
+    glReduction = new GlReduction(GlReduction::MIN);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(0, reduced[0], 0.0001);
@@ -129,7 +129,7 @@ TEST_P(GlReductionTest, minTest) {
  * Tests for ReducationOperator::MAX.
  */
 TEST_P(GlReductionTest, maxTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::MAX);
+    glReduction = new GlReduction(GlReduction::MAX);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(1, reduced[0], 0.0001);
@@ -140,7 +140,7 @@ TEST_P(GlReductionTest, maxTest) {
  * Tests for ReducationOperator::PLUS.
  */
 TEST_P(GlReductionTest, sumTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::PLUS);
+    glReduction = new GlReduction(GlReduction::PLUS);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(getSize() - 1, reduced[0], 0.0001);
@@ -151,7 +151,7 @@ TEST_P(GlReductionTest, sumTest) {
  * Tests for ReducationOperator::MULTIPLICATION.
  */
 TEST_P(GlReductionTest, multTest) {
-    glReduction = new GlReduction(GlReduction::ReductionOperator::MULTIPLICATION);
+    glReduction = new GlReduction(GlReduction::MULTIPLICATION);
     std::vector<float> reduced = glReduction->reduce(imgData);
 
     ASSERT_NEAR(0, reduced[0], 0.0001);
