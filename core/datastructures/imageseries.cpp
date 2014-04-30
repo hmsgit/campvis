@@ -77,6 +77,5 @@ namespace campvis {
         tgtAssert(index < _images.size(), "Index out of bounds.");
         return _images[index];
     }
-
-
+    
 }

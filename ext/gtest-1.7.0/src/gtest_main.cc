@@ -31,13 +31,11 @@
 
 #include "gtest/gtest.h"
 
-//int PullInMyLibrary();
-
-
 GTEST_API_ int main(int argc, char **argv) {
     printf("Running main() from gtest_main.cc\n");
     testing::InitGoogleTest(&argc, argv);
     int ret= RUN_ALL_TESTS();
-    getchar();
-    return ret;
+    printf("gtest_main.cc returned with %d\n", ret);
+    return 0;
 }
+

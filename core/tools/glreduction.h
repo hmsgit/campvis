@@ -45,7 +45,7 @@ namespace campvis {
     class FaceGeometry;
 
     /**
-     * Class performing a reduction of 2D image data using OpenGL.
+     * Class performing a reduction of 2D or 3D image data using OpenGL.
      * \note    All methods need to be called from a valid OpenGL context.
      */
     class CAMPVIS_CORE_API GlReduction {

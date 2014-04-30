@@ -79,4 +79,14 @@ namespace campvis {
         return _worldToVoxelTransformation;
     }
 
+    bool ImageMappingInformation::operator==(const ImageMappingInformation& obj) const{
+        return (this->_offset == obj._offset)
+            && (this->_size == obj._size)
+            && (this->_voxelSize == obj._voxelSize)
+            && (this->_realWorldValueMapping == obj._realWorldValueMapping)
+            && (this->_textureToWorldTransformation == obj._textureToWorldTransformation)
+            && (this->_voxelToWorldTransformation == obj._voxelToWorldTransformation)
+            && (this->_worldToTextureTransformation == obj._worldToTextureTransformation)
+            && (this->_worldToVoxelTransformation == obj._worldToVoxelTransformation);
+    }
 }

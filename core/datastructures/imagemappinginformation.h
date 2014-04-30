@@ -95,12 +95,18 @@ namespace campvis {
          * \return  Linear mapping for mapping element values to real world values.
          */
         const LinearMapping<float>& getRealWorldMapping() const;
-
+        
         /**
          * Set the real world value mapping.
          * \param   rwvm    Linear mapping for mapping element values to real world values.
          */
         void setRealWorldMapping(const LinearMapping<float>& rwvm);
+
+        /**
+         * Overloaded equal operator
+         * \param   obj    Object to compare with.
+         */
+        bool operator==(const ImageMappingInformation& obj) const ;
 
     private:
         /**

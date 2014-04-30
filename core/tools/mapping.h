@@ -64,6 +64,10 @@ namespace campvis {
             return (value - _shift) / _scale;
         }
 
+        bool operator==(const LinearMapping<T>& obj) const{
+            return this->_shift == obj._shift && this->_scale == obj._scale;
+        }
+
         T _shift;   ///< Shifting coefficient of mapping
         T _scale;   ///< Scaling coefficient of mapping
 
