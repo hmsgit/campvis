@@ -96,8 +96,6 @@ namespace campvis {
          */
         QSize sizeHint() const;
 
-        QSize minimumSizeHint() const { return QSize(320, 320); }
-
         /**
          * Schedule a repaint job for the inspector's render target
          */
@@ -107,22 +105,12 @@ namespace campvis {
         virtual void sizeChanged(const tgt::ivec2&);
 
         /**
-         * Called on double click event on this canvas
-         * \param   e   Mouse event arguments
-         */
-        virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
-
-        /**
          * Called on mouse move event on this canvas
          * \param   e   Mouse event arguments
          */
         virtual void mouseMoveEvent(tgt::MouseEvent* e);
 
-        /**
-         * Called on mouse wheel event on this canvas.
-         * \param   e   Mouse event arguments
-         */
-        virtual void wheelEvent(tgt::MouseEvent* e);
+        virtual void onEvent(tgt::Event* e);
         
         IntProperty p_currentSlice;
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
@@ -172,6 +160,8 @@ namespace campvis {
          */
         void updateTextures();
 
+        void resetTrackball();
+
         /**
          * To be called when the canvas is invalidated, issues new paint job.
          */
@@ -192,7 +182,7 @@ namespace campvis {
          * \param name 
          * \param geometry
          */
-        void renderGeometryIntoTexture(const std::string& name, const GeometryData* geometry);
+        void renderGeometryIntoTexture(const std::string& name, int textureIndex = -1);
 
         /**
          * Creates the quad used for rendering the textures.
@@ -203,9 +193,13 @@ namespace campvis {
 
         /// Vector of textures to render. Each DataHandle contains an ImageData that has an OpenGL representation.
         /// This ensures thread safety.
-        std::vector<QtDataHandle> _textures;                 
+        std::vector<QtDataHandle> _textures;
 
-        bool _texturesDirty;                            ///< Flag that shows that the textures need update or not.
+        /// List of the names of all rendered geometries. This simplifies to update their rendering.
+        std::vector< std::pair<std::string, int> > _geometryNames;
+
+        bool _texturesDirty;                        ///< Flag that shows that the textures need update or not.
+        bool _geometriesDirty;                      ///< Flag that shows that the rendered geometries need update or not.
 
         DataContainer* _dataContainer;              ///< The DataContainer this widget is inspecting
         tbb::mutex _localMutex;                     ///< Mutex protecting the local members
@@ -215,8 +209,6 @@ namespace campvis {
 
         tgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
         tgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview
-        size_t _selectedTexture;                    ///< index of selected texture by mouse
-        bool _renderFullscreen;                     ///< flag whether to render in full screen
 
         int _currentSlice;							///< current slice if rendering a 3D image fullscreen, render MIP if negative
 

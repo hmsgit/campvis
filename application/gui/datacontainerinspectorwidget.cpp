@@ -200,11 +200,13 @@ namespace campvis {
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _canvas->setMinimumSize(QSize(100, 100));
         _infoWidgetLayout->addWidget(_canvas, 5, 0, 1, 2);
+        _infoWidgetLayout->setRowStretch(5, 2);
 
         QScrollArea* _pipelinePropertiesScrollArea = new QScrollArea(_infoWidget);
         _pipelinePropertiesScrollArea->setWidgetResizable(true);
         _pipelinePropertiesScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         _pipelinePropertiesScrollArea->setFrameStyle(QScrollArea::NoFrame);
+        _pipelinePropertiesScrollArea->setMinimumHeight(224);
 
         _pcWidget = new PropertyCollectionWidget(_pipelinePropertiesScrollArea);
         _pcWidget->updatePropCollection(_canvas, _dataContainer);

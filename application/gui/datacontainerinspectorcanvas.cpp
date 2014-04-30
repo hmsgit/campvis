@@ -60,8 +60,6 @@ namespace campvis {
         , _quad(nullptr)
         , _numTiles(0, 0)
         , _quadSize(0, 0)
-        , _selectedTexture(0)
-        , _renderFullscreen(false)
         , _currentSlice(-1)
         , _localDataContainer("Local DataContainer for DataContainerInspectorCanvas")
         , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(200), tgt::ivec2(0, 0), tgt::ivec2(10000))
@@ -93,6 +91,7 @@ namespace campvis {
         _geometryRenderer.p_textureID.setVisible(false);
         _geometryRenderer.p_renderTargetID.setVisible(false);
         _geometryRenderer.p_lightId.setVisible(false);
+        _geometryRenderer.p_camera.setVisible(false);
         _geometryRenderer.p_coloringMode.setVisible(false);
         _geometryRenderer.p_pointSize.setVisible(false);
         _geometryRenderer.p_lineWidth.setVisible(false);
@@ -103,6 +102,14 @@ namespace campvis {
         _geometryRenderer.p_renderMode.s_changed.connect(this, &DataContainerInspectorCanvas::onGeometryRendererPropertyChanged);
         _geometryRenderer.p_solidColor.s_changed.connect(this, &DataContainerInspectorCanvas::onGeometryRendererPropertyChanged);
         addProperty(p_geometryRendererProperties);
+
+        p_geometryRendererProperties.setVisible(false);
+        p_currentSlice.setVisible(false);
+        p_transferFunction.setVisible(false);
+        p_renderRChannel.setVisible(false);
+        p_renderGChannel.setVisible(false);
+        p_renderBChannel.setVisible(false);
+        p_renderAChannel.setVisible(false);
     }
 
     DataContainerInspectorCanvas::~DataContainerInspectorCanvas() {
@@ -122,16 +129,7 @@ namespace campvis {
         setPainter(this, false);
         getEventHandler()->addEventListenerToFront(this);
 
-        // use LightSourceProvider processor to create lighting information.
-        // This is needed to be done only once, therfore here in init().
-        LightSourceProvider lsp;
-        lsp.init();
-        lsp.invalidate(AbstractProcessor::INVALID_RESULT);
-        lsp.process(_localDataContainer);
-        lsp.deinit();
-
         _geometryRenderer.init();
-        _trackballEH = new TrackballNavigationEventListener(&_geometryRenderer.p_camera, &p_viewportSize);
     }
 
     void DataContainerInspectorCanvas::deinit() {
@@ -159,17 +157,26 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::paint() {
         tbb::mutex::scoped_lock lock(_localMutex);
-        if (_texturesDirty)
+        if (_texturesDirty) {
             updateTextures();
-
-        if (_textures.empty())
-            return;
+        }
+        if (_geometriesDirty) {
+            // update geometry renderings if necessary
+            for (auto it = _geometryNames.begin(); it != _geometryNames.end(); ++it) {
+                renderGeometryIntoTexture(it->first, it->second);
+            }
+            _geometriesDirty = false;
+        }
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glViewport(0, 0, size_.x, size_.y);
         glClearColor(0.7f, 0.7f, 0.7f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         LGL_ERROR;
+
+        if (_textures.empty()) {
+            return;
+        }
 
         // update layout dimensions
         _numTiles.x = ceil(sqrt(static_cast<float>(_textures.size())));
@@ -197,12 +204,23 @@ namespace campvis {
                 if (index >= static_cast<int>(_textures.size()))
                     break;
 
-                tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(_quadSize, 1.f));
-                tgt::mat4 translation = tgt::mat4::createTranslation(tgt::vec3(_quadSize.x * x, _quadSize.y * y, 0.f));
-                _paintShader->setUniform("_modelMatrix", translation * scaleMatrix);
-
+                // gather image
                 tgtAssert(dynamic_cast<const ImageData*>(_textures[index].getData()), "Found sth. else than ImageData in render texture vector. This should not happen!");
                 const ImageData* id = static_cast<const ImageData*>(_textures[index].getData());
+
+                // compute transformation matrices
+                float renderTargetRatio = static_cast<float>(_quadSize.x) / static_cast<float>(_quadSize.y);
+                float sliceRatio = (static_cast<float>(id->getSize().x) * id->getMappingInformation().getVoxelSize().x)
+                                 / (static_cast<float>(id->getSize().y) * id->getMappingInformation().getVoxelSize().y);
+                float ratioRatio = sliceRatio / renderTargetRatio;
+                tgt::mat4 viewMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
+
+                tgt::mat4 scaleMatrix = tgt::mat4::createScale(tgt::vec3(_quadSize, 1.f));
+                tgt::mat4 translation = tgt::mat4::createTranslation(tgt::vec3(_quadSize.x * x, _quadSize.y * y, 0.f));
+
+                _paintShader->setUniform("_modelMatrix", translation * scaleMatrix * viewMatrix);
+
+                // render texture
                 paintTexture(id->getRepresentation<ImageRepresentationGL>()->getTexture(), unit2d, unit3d);
             }
         }
@@ -265,63 +283,56 @@ namespace campvis {
         invalidate();
     }
 
-    void DataContainerInspectorCanvas::mouseDoubleClickEvent(tgt::MouseEvent* e) {
-        if (_renderFullscreen) {
-            _renderFullscreen = false;
-        }
-        else {
-            tgt::ivec2 selectedIndex(e->x() / _quadSize.x, e->y() / _quadSize.y);
-            _selectedTexture = (selectedIndex.y * _numTiles.x) + selectedIndex.x;
-            _renderFullscreen = true;
-        }
-        e->ignore();
-        invalidate();
-    }
-
     void DataContainerInspectorCanvas::mouseMoveEvent(tgt::MouseEvent* e)
     {
-        {
+        if (e->modifiers() & tgt::Event::CTRL) {
             int texIndx = (e->y() / _quadSize.y) * _numTiles.x + (e->x() / _quadSize.x);
             if (texIndx < 0 || texIndx >= _textures.size())
                 return;
 
-            const tgt::Texture* tex = static_cast<const ImageData*>(_textures[texIndx].getData())->getRepresentation<ImageRepresentationGL>()->getTexture();
-            const int texWidth  = tex->getWidth();
-            const int texHeight = tex->getHeight();
-            int cursorPosX = static_cast<int>(static_cast<float>(e->x() % _quadSize.x) / _quadSize.x * texWidth);
-            int cursorPosY = static_cast<int>(static_cast<float>(e->y() % _quadSize.y) / _quadSize.y * texHeight);
+            const ImageData* id = static_cast<const ImageData*>(_textures[texIndx].getData());
+            const tgt::Texture* tex = id->getRepresentation<ImageRepresentationGL>()->getTexture();
+            tgt::ivec2 imageSize = id->getSize().xy();
 
-            if(tex->isDepthTexture()) {
-                emit s_depthChanged(tex->depthAsFloat(cursorPosX, texHeight - cursorPosY - 1));
-            }
-            else {
-                if (tex->getDimensions().z != 1) {
-                    if (p_currentSlice.getValue() >= 0 && p_currentSlice.getValue() < tex->getDimensions().z) {
-                        emit s_colorChanged(tex->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1, p_currentSlice.getValue()));
+            tgt::vec2 lookupTexelFloat = tgt::vec2((e->coord() % _quadSize) * imageSize) / tgt::vec2(_quadSize);
+
+            // compute transformation matrices
+            float renderTargetRatio = static_cast<float>(_quadSize.x) / static_cast<float>(_quadSize.y);
+            float sliceRatio = (static_cast<float>(id->getSize().x) * id->getMappingInformation().getVoxelSize().x)
+                / (static_cast<float>(id->getSize().y) * id->getMappingInformation().getVoxelSize().y);
+            float ratioRatio = sliceRatio / renderTargetRatio;
+
+            lookupTexelFloat /= (ratioRatio > 1) ? tgt::vec2(1.f, 1.f / ratioRatio) : tgt::vec2(ratioRatio, 1.f);
+            
+            tgt::ivec2 lookupTexel(lookupTexelFloat);
+            if (lookupTexel.x >= 0 && lookupTexel.y >= 0 && lookupTexel.x < imageSize.x && lookupTexel.y < imageSize.y) {
+                if(tex->isDepthTexture()) {
+                    emit s_depthChanged(tex->depthAsFloat(lookupTexel.x, imageSize.y - lookupTexel.y - 1));
+                }
+                else {
+                    if (tex->getDimensions().z != 1) {
+                        if (p_currentSlice.getValue() >= 0 && p_currentSlice.getValue() < tex->getDimensions().z) {
+                            emit s_colorChanged(tex->texelAsFloat(lookupTexel.x, imageSize.y - lookupTexel.y - 1, p_currentSlice.getValue()));
+                        }
+                    }
+                    else if (tex->getDimensions().y != 1) {
+                        emit s_colorChanged(tex->texelAsFloat(lookupTexel.x, imageSize.y - lookupTexel.y - 1));
                     }
                 }
-                else if (tex->getDimensions().y != 1) {
-                    emit s_colorChanged(tex->texelAsFloat(cursorPosX, texHeight - cursorPosY - 1));
-                }
-            }      
+            }
+        }
+        else {
+            e->ignore();
         }
     }
 
-    void DataContainerInspectorCanvas::wheelEvent(tgt::MouseEvent* e) {
-        if (_renderFullscreen) {
-            switch (e->button()) {
-                case tgt::MouseEvent::MOUSE_WHEEL_UP:
-                    ++_currentSlice; // we cant clamp the value here to the number of slices - we do this during rendering
-                    e->ignore();
-                    break;
-                case tgt::MouseEvent::MOUSE_WHEEL_DOWN:
-                    if (_currentSlice >= -1)
-                        --_currentSlice;
-                    e->ignore();
-                    break;
-                default:
-                    break;
-            }
+    void DataContainerInspectorCanvas::onEvent(tgt::Event* e) {
+        tgt::EventListener::onEvent(e);
+        
+        if (_trackballEH && !e->isAccepted()) {
+            _trackballEH->onEvent(e);
+            e->accept();
+            _geometriesDirty = true;
             invalidate();
         }
     }
@@ -353,6 +364,20 @@ namespace campvis {
             _handles.clear();
             for (std::vector< std::pair<QString, QtDataHandle> >::const_iterator it = handles.begin(); it != handles.end(); ++it)
                 _handles.insert(*it);
+
+            _localDataContainer.clear();
+            _geometryNames.clear();
+
+            // use LightSourceProvider processor to create lighting information.
+            // This is needed to be done once after the local DataContainer got cleared.
+            LightSourceProvider lsp;
+            lsp.init();
+            lsp.invalidate(AbstractProcessor::INVALID_RESULT);
+            lsp.process(_localDataContainer);
+            lsp.deinit();
+
+            // reset trackball
+            resetTrackball();
 
             _texturesDirty = true;
         }
@@ -392,52 +417,85 @@ namespace campvis {
                 }
             }
             else if (const GeometryData* gd = dynamic_cast<const GeometryData*>(it->second.getData())) {
-                // render geometry into texture
                 std::string name = it->first.toStdString();
-                renderGeometryIntoTexture(name, gd);
 
-                // grab render result texture from local DataContainer and push into texture vector.
-                ScopedTypedData<RenderData> rd(_localDataContainer, name + ".rendered");
-                if (rd != nullptr && rd->getNumColorTextures() > 0) {
-                    auto rep = rd->getColorTexture(0)->getRepresentation<ImageRepresentationGL>();
-                    if (rep != nullptr) {
-                        const_cast<tgt::Texture*>(rep->getTexture())->downloadTexture();
-                        _textures.push_back(rd->getColorDataHandle(0));
-                    }
-                    else {
-                        tgtAssert(false, "The rendered geometry does not have an OpenGL representation. Something went terribly wrong.");
-                    }
-                }
-                else {
-                    tgtAssert(false, "The rendered geometry does exist. Something went wrong.");
-                }
+                // copy geometry over to local 
+                _localDataContainer.addData(name + ".geometry", const_cast<GeometryData*>(gd));
+
+                // render
+                renderGeometryIntoTexture(name);
+
+                // store name
+                _geometryNames.push_back(std::make_pair(name, static_cast<int>(_textures.size()) - 1));
             }
         }
 
         if (maxSlices == 1)
             maxSlices = -1;
-        p_currentSlice.setMaxValue(maxSlices);
+        p_currentSlice.setMaxValue(maxSlices - 1);
         _texturesDirty = false;
+        _geometriesDirty = false;
     }
 
 
     void DataContainerInspectorCanvas::onPropertyChanged(const AbstractProperty* prop) {
-        invalidate();
+        if (prop != &p_geometryRendererProperties)
+            invalidate();
     }
 
     void DataContainerInspectorCanvas::onGeometryRendererPropertyChanged(const AbstractProperty* prop) {
-        _texturesDirty = true;
+        _geometriesDirty = true;
         invalidate();
     }
 
-    void DataContainerInspectorCanvas::renderGeometryIntoTexture(const std::string& name, const GeometryData* geometry) {
-        _localDataContainer.addData(name + ".geometry", const_cast<GeometryData*>(geometry));
-        _trackballEH->reinitializeCamera(geometry);
-
+    void DataContainerInspectorCanvas::renderGeometryIntoTexture(const std::string& name, int textureIndex) {
+        // setup GeometryRenderer
         _geometryRenderer.p_geometryID.setValue(name + ".geometry");
         _geometryRenderer.p_renderTargetID.setValue(name + ".rendered");
         _geometryRenderer.validate(AbstractProcessor::INVALID_PROPERTIES);
         _geometryRenderer.process(_localDataContainer, false);
+
+        // grab render result texture from local DataContainer and push into texture vector.
+        ScopedTypedData<RenderData> rd(_localDataContainer, name + ".rendered");
+        if (rd != nullptr && rd->getNumColorTextures() > 0) {
+            auto rep = rd->getColorTexture(0)->getRepresentation<ImageRepresentationGL>();
+            if (rep != nullptr) {
+                const_cast<tgt::Texture*>(rep->getTexture())->downloadTexture();
+
+                if (textureIndex < 0 || textureIndex >= static_cast<int>(_textures.size())) {
+                    _textures.push_back(rd->getColorDataHandle(0));
+                }
+                else {
+                    _textures[textureIndex] = rd->getColorDataHandle(0);
+                }
+            }
+            else {
+                tgtAssert(false, "The rendered geometry does not have an OpenGL representation. Something went terribly wrong.");
+            }
+        }
+        else {
+            tgtAssert(false, "The rendered geometry does exist. Something went wrong.");
+        }
+    }
+
+    void DataContainerInspectorCanvas::resetTrackball() {
+        // delete old trackball
+        delete _trackballEH;
+        _trackballEH = nullptr;
+
+        // check whether we have to render geometries
+        tgt::Bounds unionBounds;
+        for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
+            if (const GeometryData* gd = dynamic_cast<const GeometryData*>(it->second.getData())) {
+                unionBounds.addVolume(gd->getWorldBounds());
+            }
+        }
+
+        // if so, create a new trackball
+        if (unionBounds.isDefined()) {
+            _trackballEH = new TrackballNavigationEventListener(&_geometryRenderer.p_camera, &p_viewportSize);
+            _trackballEH->reinitializeCamera(unionBounds);
+        }
     }
 
 }
