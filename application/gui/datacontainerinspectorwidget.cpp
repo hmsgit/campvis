@@ -53,6 +53,7 @@
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/datacontainerfileloaderwidget.h"
 #include "modules/io/processors/genericimagereader.h"
+#include "modules/io/processors/mhdimagewriter.h"
 
 #include <QFileDialog>
 #include <QScrollArea>
@@ -437,11 +438,25 @@ namespace campvis {
             QVariant item = index->data(Qt::UserRole);
             DataHandle handle = item.value<QtDataHandle>();
             QModelIndex idxName = index->sibling(index->row(), 0);
+            QString name = idxName.data(Qt::DisplayRole).toString();
 
             // only consider non-empty DataHandles that are ImageData and have render target representations
             if (handle.getData() != 0) {
-                if (dynamic_cast<const ImageData*>(handle.getData()) || dynamic_cast<const RenderData*>(handle.getData())) {
-                    QString dialogCaption = "Export " + idxName.data(Qt::DisplayRole).toString() + " as Image";
+                if (dynamic_cast<const ImageData*>(handle.getData()) && dynamic_cast<const ImageData*>(handle.getData())->getDimensionality() == 3) {
+                    QString dialogCaption = "Export " + name + " as MHD Image";
+                    QString directory = tr("");
+                    const QString fileFilter = tr("*.mhd;;MHD images (*.mhd)");
+
+                    QString filename = QFileDialog::getSaveFileName(this, dialogCaption, directory, fileFilter);
+
+                    MhdImageWriter writer;
+                    writer.p_fileName.setValue(filename.toStdString());
+                    writer.p_inputImage.setValue(name.toStdString());
+                    writer.invalidate(AbstractProcessor::INVALID_RESULT);
+                    writer.process(*_dataContainer);
+                }
+                else if (dynamic_cast<const ImageData*>(handle.getData()) || dynamic_cast<const RenderData*>(handle.getData())) {
+                    QString dialogCaption = "Export " + name + " as Image";
                     QString directory = tr("");
                     const QString fileFilter = tr("*.png;;PNG images (*.png)");
 
