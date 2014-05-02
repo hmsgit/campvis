@@ -38,8 +38,10 @@
  */
 class ImageDataTest : public testing::Test {
 protected:
-    ImageDataTest() {
-        _imgData0 = new campvis::ImageData(2, tgt::svec3(1,2,1), 4);
+    ImageDataTest() 
+        : _size(3, 2, 1)
+    {
+        _imgData0 = new campvis::ImageData(2, _size, 4);
         _imgData1 = _imgData0->clone();
         _absData1 = _imgData1;
     }
@@ -59,9 +61,10 @@ protected:
 
 
 protected:
-    campvis::ImageData *_imgData0, *_imgData1;//, *_imgData2, _imgData3, _imgData4;
+    campvis::ImageData *_imgData0, *_imgData1;
     campvis::AbstractData * _absData1;
 
+    tgt::svec3 _size;
 };
 
 /**
@@ -79,8 +82,7 @@ TEST_F(ImageDataTest, miscellaneousTest) {
 
     EXPECT_EQ(2, _imgData0->getDimensionality());
     EXPECT_EQ(4, _imgData0->getNumChannels());
-    EXPECT_EQ(tgt::hmul(tgt::svec3(1,2,1)), _imgData0->getNumElements());
-    EXPECT_EQ(tgt::svec3(1,2,1).size, _imgData0->getSize().size);
+    EXPECT_EQ(tgt::hmul(_size), _imgData0->getNumElements());
 
     tgt::Bounds bound0 = _imgData0->getWorldBounds();
     tgt::Bounds bound1 = _imgData1->getWorldBounds();
@@ -91,13 +93,11 @@ TEST_F(ImageDataTest, miscellaneousTest) {
 
     EXPECT_TRUE(temp.getMappingInformation() == _imgData0->getMappingInformation());
 
-    tgt::svec3 vec(1, 2, 3);
-    _imgData0->positionToIndex(vec);
-    EXPECT_EQ(1, 1);
-
-    size_t sz = 3;
-    _imgData0->indexToPosition(sz);
-    EXPECT_EQ(1, 1);
+    for (size_t i = 0; i < _imgData0->getNumElements(); ++i) {
+        tgt::svec3 position = _imgData0->indexToPosition(i);
+        EXPECT_EQ(_imgData0->positionToIndex(position), i);
+    }
+    
 }
 
 /**

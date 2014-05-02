@@ -1,0 +1,9 @@
+ObjectType = Image
+NDims = 3
+DimSize = 10 10 9
+ElementSpacing = 17.7734 17.7734 17.5003
+Position = 0 0 0
+ElementType = MET_USHORT
+ElementNumberOfChannels = 1
+ElementByteOrderMSB = False
+ElementDataFile = 10_10_9_image.raw

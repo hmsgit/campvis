@@ -68,7 +68,7 @@ void init() {
     // Init TGT
     tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
     tgt::init(featureset);
-    LogMgr.getConsoleLog()->addCat("", true);
+    LogMgr.getConsoleLog()->addCat("", true, tgt::Info);
 
     // create a local OpenGL context and init GL
     _localContext = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
