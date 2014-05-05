@@ -30,6 +30,7 @@
 #include "tgt/glcontextmanager.h"
 #include "tgt/gpucapabilities.h"
 #include "tgt/shadermanager.h"
+#include "tgt/texturereadertga.h"
 #include "tgt/qt/qtapplication.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tbb/compat/thread"
@@ -53,6 +54,7 @@ namespace campvis {
         : QApplication(argc, argv)
         , _localContext(0)
         , _mainWindow(0)
+        , _errorTexture(nullptr)
         , _initialized(false)
         , _argc(argc)
         , _argv(argv)
@@ -137,6 +139,10 @@ namespace campvis {
         GLJobProc.start();
         GLJobProc.registerContext(_localContext);
 
+        // load textureData from file
+        tgt::TextureReaderTga trt;
+        _errorTexture = trt.loadTexture(CAMPVIS_SOURCE_DIR "/application/data/no_input.tga", tgt::Texture::LINEAR);
+
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
         for (int i = 1; i < pipelinesToAdd.size(); ++i) {
@@ -157,6 +163,8 @@ namespace campvis {
         {
             // Deinit everything OpenGL related using the local context.
             tgt::GLContextScopedLock lock(_localContext);
+
+            delete _errorTexture;
 
             // Deinit pipeline first
             for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
@@ -213,6 +221,7 @@ namespace campvis {
         CampVisPainter* painter = new CampVisPainter(canvas, pipeline);
         canvas->setPainter(painter, false);
         pipeline->setCanvas(canvas);
+        painter->setErrorTexture(_errorTexture);
 
         _visualizations.push_back(std::make_pair(pipeline, painter));
         _pipelines.push_back(pipeline);

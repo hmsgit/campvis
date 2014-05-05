@@ -35,6 +35,7 @@
 namespace tgt {
     class Shader;
     class QtThreadedCanvas;
+    class Texture;
 }
 
 namespace campvis {
@@ -87,6 +88,8 @@ namespace campvis {
          */
         void setPipeline(AbstractPipeline* pipeline);
 
+        void setErrorTexture(tgt::Texture* texture);
+
         /**
          * Slot being notified when the pipeline's render target changed.
          */
@@ -104,6 +107,8 @@ namespace campvis {
         tgt::Shader* _copyShader;                           ///< Shader for copying the render target to the framebuffer.
         tbb::atomic<bool> _dirty;                           ///< Flag whether render result is dirty and needs to be rerendered.
         std::condition_variable _renderCondition;           ///< conditional wait condition for rendering
+
+        tgt::Texture* _errorTexture;
     };
 
 }

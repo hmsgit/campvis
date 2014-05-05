@@ -38,6 +38,7 @@
 namespace tgt {
     class GLCanvas;
     class QtThreadedCanvas;
+    class Texture;
 }
 
 namespace campvis {
@@ -151,6 +152,8 @@ namespace campvis {
         tgt::GLCanvas* _localContext;
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
+
+        tgt::Texture* _errorTexture;
 
         /// Flag, whether CampVisApplication was correctly initialized
         bool _initialized;
