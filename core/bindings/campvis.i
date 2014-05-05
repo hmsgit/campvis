@@ -43,8 +43,7 @@ namespace campvis {
 
     class AbstractProperty {
     public:
-        AbstractProperty(const std::string& name, const std::string& title,
-                         int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        AbstractProperty(const std::string& name, const std::string& title);
         virtual ~AbstractProperty();
 
         virtual void init();
@@ -52,9 +51,6 @@ namespace campvis {
 
         const std::string& getName() const;
         const std::string& getTitle() const;
-
-        int getInvalidationLevel() const;
-        void setInvalidationLevel(int il);
 
         bool isVisible() const;
         void setVisible(bool isVisible);
@@ -65,8 +61,7 @@ namespace campvis {
     template<typename T>
     class GenericProperty : public AbstractProperty {
     public:
-        GenericProperty(const std::string& name, const std::string& title, const T& value,
-                        int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        GenericProperty(const std::string& name, const std::string& title, const T& value);
         virtual ~GenericProperty();
 
         const T& getValue() const;
@@ -86,7 +81,7 @@ namespace campvis {
         };
 
         DataNameProperty(const std::string& name, const std::string& title, const std::string& value,
-                         DataAccessInfo access, int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+                         DataAccessInfo access);
         virtual ~DataNameProperty();
     };
 
@@ -101,8 +96,7 @@ namespace campvis {
             const T& value,
             const T& minValue,
             const T& maxValue,
-            const T& stepValue = T(1),
-            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+            const T& stepValue = T(1));
 
         virtual ~NumericProperty();
     };
@@ -133,8 +127,7 @@ namespace campvis {
             const T& minValue,
             const T& maxValue,
             const T& stepValue = T(0.01f),
-            const DecimalsType& decimals = DecimalsType(3),
-            int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+            const DecimalsType& decimals = DecimalsType(3));
 
         virtual ~FloatingPointProperty();
     };
@@ -150,8 +143,7 @@ namespace campvis {
 
     class CameraProperty : public GenericProperty<tgt::Camera> {
     public:
-        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera(),
-                       int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera());
         virtual ~CameraProperty();
     };
 
@@ -202,8 +194,7 @@ namespace campvis {
 
     class TransferFunctionProperty : public AbstractProperty {
     public:
-        TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf,
-                                 int invalidationLevel = AbstractProcessor::INVALID_RESULT);
+        TransferFunctionProperty(const std::string& name, const std::string& title, AbstractTransferFunction* tf);
         virtual ~TransferFunctionProperty();
 
         AbstractTransferFunction* getTF();
@@ -288,8 +279,8 @@ namespace campvis {
         HasPropertyCollection();
         virtual ~HasPropertyCollection() = 0;
 
-        void addProperty(AbstractProperty* prop);
-        void removeProperty(AbstractProperty* prop);
+        virtual void addProperty(AbstractProperty& prop);
+        void removeProperty(AbstractProperty& prop);
         AbstractProperty* getProperty(const std::string& name) const;
         AbstractProperty* getNestedProperty(const std::string& name) const;
     };
@@ -307,6 +298,8 @@ namespace campvis {
         };
 
         const std::string getName() const = 0;
+        void addProperty(AbstractProperty& prop, int invalidationLevel);
+        void setPropertyInvalidationLevel(AbstractProperty& prop, int invalidationLevel);
 
         %immutable;
         sigslot::signal1<AbstractProcessor*> s_validated;

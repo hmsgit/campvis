@@ -42,7 +42,7 @@ function pipeline:init()
     dvrTF:addGeometry(geometry1)
     dvrTF:addGeometry(geometry2)
 
-    self.ve:getProperty("TransferFunction"):replaceTF(dvrTF)
+    self.ve:getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"):replaceTF(dvrTF)
 
     self.resampler.p_resampleScale:setValue(1.25)
 end
