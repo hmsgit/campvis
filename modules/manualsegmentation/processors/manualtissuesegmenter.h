@@ -44,6 +44,7 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/properties/cameraproperty.h"
+#include "core/properties/stringproperty.h"
 
 #include "modules/manualsegmentation/tools/tissuesegmentation.h"
 

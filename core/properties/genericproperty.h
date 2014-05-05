@@ -121,7 +121,6 @@ namespace campvis {
 // = Typedefs =====================================================================================
 
     typedef GenericProperty<bool> BoolProperty;
-    typedef GenericProperty<std::string> StringProperty;
 
 // = Template Implementation ======================================================================
 

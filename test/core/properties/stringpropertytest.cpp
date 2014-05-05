@@ -29,7 +29,7 @@
 
 #include "gtest/gtest.h"
 
-#include "core/properties/genericproperty.h"
+#include "core/properties/stringproperty.h"
 
 #include "core/properties/abstractproperty.h"
 #include "core/pipeline/abstractprocessor.h"

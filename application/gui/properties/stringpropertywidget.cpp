@@ -40,7 +40,7 @@ namespace campvis {
         _lineEdit->setText(QString::fromStdString(property->getValue()));
         addWidget(_lineEdit);
 
-        if (! dynamic_cast<DataNameProperty*>(property)) {
+        if (property->getDisplayType() != StringProperty::BASIC_STRING) {
             _btnLoadFile = new QPushButton(tr("Browse"), this);
             addWidget(_btnLoadFile);
             connect(_btnLoadFile, SIGNAL(clicked(bool)), this, SLOT(onBtnLoadFileClicked(bool)));
@@ -76,30 +76,23 @@ namespace campvis {
     void StringPropertyWidget::onBtnLoadFileClicked(bool flag) {
         StringProperty* prop = static_cast<StringProperty*>(_property);
 
-        QString dialogCaption = QString::fromStdString(prop->getTitle());
-        QString directory;
-        // use directory of current property value if any, default directory otherwise
-        if (! prop->getValue().empty())
-            directory = QString::fromStdString(prop->getValue());
-        else
-            directory = tr("");
-
-        const QString fileFilter = /*QString::fromStdString(property_->getFileFilter()) + ";;" + */tr("All files (*)");
+        const QString dialogCaption = QString::fromStdString(prop->getTitle());
+        const QString directory = QString::fromStdString(prop->getValue());
+        const QString fileFilter = tr("All files (*)");
 
         QString filename;
-//        if (property_->getFileMode() == FileDialogProperty::OPEN_FILE) {
+        if (prop->getDisplayType() == StringProperty::OPEN_FILENAME) {
             filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
-/*        }
-        else if (property_->getFileMode() == FileDialogProperty::SAVE_FILE) {
+        }
+        else if (prop->getDisplayType() == StringProperty::SAVE_FILENAME) {
             filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
         }
-        else if (property_->getFileMode() == FileDialogProperty::DIRECTORY) {
-            filename = QFileDialog::getExistingDirectory(QWidget::parentWidget(), dialogCaption, QString::fromStdString(property_->get()));
-        }*/
+        else if (prop->getDisplayType() == StringProperty::DIRECTORY) {
+            filename = QFileDialog::getExistingDirectory(QWidget::parentWidget(), dialogCaption, directory);
+        }
 
         if (! filename.isEmpty()) {
             prop->setValue(filename.toStdString());
-            //emit modified();
         }
     }
 

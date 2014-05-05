@@ -43,7 +43,7 @@ namespace campvis {
     MhdImageWriter::MhdImageWriter() 
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Image", "image", DataNameProperty::READ)
-        , p_fileName("FileName", "File Name", "")
+        , p_fileName("FileName", "File Name", "", StringProperty::SAVE_FILENAME)
         , p_saveFile("SaveFile", "Save to File")
     {
         addProperty(p_inputImage, VALID);

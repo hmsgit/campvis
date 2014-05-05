@@ -37,6 +37,7 @@
 #include "core/properties/buttonproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
+#include "core/properties/stringproperty.h"
 
 namespace campvis {
     /**

@@ -43,7 +43,7 @@ namespace campvis {
 
     GenericImageReader::GenericImageReader() 
         : AbstractProcessor()
-        , p_url("url", "Image URL", "")
+        , p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
     {
         addProperty(p_url);
         p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);

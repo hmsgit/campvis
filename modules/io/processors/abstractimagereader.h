@@ -36,6 +36,7 @@
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
+#include "core/properties/stringproperty.h"
 
 namespace campvis {
     /**
@@ -64,22 +65,13 @@ namespace campvis {
          *
          * \param extension  The extension to be checked
          **/
-        virtual bool acceptsExtension(const std::string& extension);
-
-        /// functions to set the property of the readers
-        virtual void setURL(StringProperty p_url);
-        virtual void setTargetImageId(DataNameProperty& targetImageId);
-        virtual void setTargetImageId(std::string imageId);
-        virtual void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
+        virtual bool acceptsExtension(const std::string& extension) const;
         
-    public:
-        StringProperty p_url;             ///< URL for file to read
+        StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:
-        std::vector<std::string> _ext;
-        
-    private:
+        std::vector<std::string> _ext;      ///< accepted extensions
 
     };
 

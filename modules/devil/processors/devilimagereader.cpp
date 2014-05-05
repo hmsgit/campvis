@@ -53,7 +53,7 @@ namespace campvis {
 
     DevilImageReader::DevilImageReader(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_url("url", "Image URL", "")
+        , p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
         , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
         , p_importType("ImportType", "Import Type", importOptions, 3)
         , _shader(nullptr)

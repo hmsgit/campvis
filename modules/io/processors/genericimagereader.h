@@ -36,6 +36,7 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/metaproperty.h"
+#include "core/properties/stringproperty.h"
 
 #include "modules/io/processors/csvdimagereader.h"
 #include "modules/io/processors/ltfimagereader.h"

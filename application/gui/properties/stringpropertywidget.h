@@ -27,7 +27,7 @@
 
 #include "application/gui/properties/abstractpropertywidget.h"
 #include "application/gui/properties/propertywidgetfactory.h"
-#include "core/properties/genericproperty.h"
+#include "core/properties/stringproperty.h"
 
 class QLineEdit;
 class QPushButton;

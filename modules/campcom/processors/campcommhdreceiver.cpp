@@ -35,7 +35,7 @@ namespace campvis {
 
     CampcomMhdReceiver::CampcomMhdReceiver() 
         : AbstractProcessor()
-        , p_address("ServerAddress", "Server Address", "127.0.0.1")
+        , p_address("ServerAddress", "Server Address", "127.0.0.1", StringProperty::BASIC_STRING)
         , p_connect("Connect", "Connect to Server")
         , p_targetImageID("targetImageName", "Target Image ID", "CampcomMhdReceiver.output", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))

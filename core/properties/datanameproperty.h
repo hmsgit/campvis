@@ -25,7 +25,7 @@
 #ifndef DATANAMEPROPERTY_H__
 #define DATANAMEPROPERTY_H__
 
-#include "core/properties/genericproperty.h"
+#include "core/properties/stringproperty.h"
 
 #include <ctime>
 #include <set>
@@ -37,7 +37,7 @@ namespace campvis {
      * Specialization of a StringProperty to specify the keys (string IDs) for DataHandles to read/write.
      * Offers an additional DataAccessInfo flag whether processor will read or write from/to that ID.
      */
-    class CAMPVIS_CORE_API DataNameProperty : public GenericProperty<std::string> {
+    class CAMPVIS_CORE_API DataNameProperty : public StringProperty {
     public:
         /**
          * DataAccessInfo flag defining whether processor will read or write from/to the corresponding DataHandle.

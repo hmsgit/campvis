@@ -34,6 +34,7 @@
 
 #include "core/properties/buttonproperty.h"
 #include "core/properties/genericproperty.h"
+#include "core/properties/stringproperty.h"
 
 namespace campvis {
     class CmBatchGeneration : public AutoEvaluationPipeline {

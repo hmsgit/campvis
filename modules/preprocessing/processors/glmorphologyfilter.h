@@ -31,6 +31,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/optionproperty.h"
+#include "core/properties/stringproperty.h"
 
 namespace tgt {
     class Shader;

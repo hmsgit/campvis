@@ -52,7 +52,7 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "GlMorphologyFilter.out", DataNameProperty::WRITE)
-        , p_filterOperation("FilterOperation", "Operations to Apply ([edoc]+)", "ed")
+        , p_filterOperation("FilterOperation", "Operations to Apply ([edoc]+)", "ed", StringProperty::BASIC_STRING)
         , p_structuringElement("StructuringElement", "Structuring Element", structuringElementOptions, 2)
         , _erosionFilter(nullptr)
         , _dilationFilter(nullptr)

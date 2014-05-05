@@ -46,7 +46,7 @@ namespace campvis {
     DevilImageWriter::DevilImageWriter()
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Image ID", "DevilImageWriter.input", DataNameProperty::READ)
-        , p_url("url", "Image URL", "")
+        , p_url("url", "Image URL", "", StringProperty::SAVE_FILENAME)
     {
         addProperty(p_inputImage);
         addProperty(p_url);

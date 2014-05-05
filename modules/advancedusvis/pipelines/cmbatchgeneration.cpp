@@ -52,9 +52,9 @@ namespace campvis {
         , _usBlurFilter(&_canvasSize)
         , _usFusion(&_canvasSize)
         , p_autoExecution("AutoExecution", "Automatic Execution", false)
-        , p_sourcePath("SourcePath", "Source Files Path", "")
-        , p_targetPathColor("TargetPathColor", "Target Path Color Files", "")
-        , p_targetPathFuzzy("TargetPathFuzzy", "Target Path Fuzzy Files", "")
+        , p_sourcePath("SourcePath", "Source Files Path", "", StringProperty::DIRECTORY)
+        , p_targetPathColor("TargetPathColor", "Target Path Color Files", "", StringProperty::DIRECTORY)
+        , p_targetPathFuzzy("TargetPathFuzzy", "Target Path Fuzzy Files", "", StringProperty::DIRECTORY)
         , p_range("Range", "Files Range", tgt::ivec2(0, 1), tgt::ivec2(0, 0), tgt::ivec2(10000, 10000))
         , p_execute("Execute", "Execute Batch Pipeline")
     {

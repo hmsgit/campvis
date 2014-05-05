@@ -32,6 +32,7 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/optionproperty.h"
+#include "core/properties/stringproperty.h"
 #include "core/tools/weaklytypedpointer.h"
 
 namespace tgt {
