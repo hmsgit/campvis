@@ -33,19 +33,16 @@
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/abstractimagerepresentation.h"
 #include "core/datastructures/imagemappinginformation.h"
-
+#include "core/datastructures/imagerepresentationconverter.h"
 
 #include <vector>
 
 namespace campvis {
-    class ImageRepresentationLocal;
 
     /**
      * Stores basic information about one (semantic) image of arbitrary dimension.
      * Different representations (e.g. local memory, OpenGL texture) are
      * to be defined by inheritance.
-     * 
-     * \todo 
      */
     class CAMPVIS_CORE_API ImageData : public AbstractData, public IHasWorldBounds {
     // friend so that it can add itself as representation
@@ -208,8 +205,8 @@ namespace campvis {
     const T* campvis::ImageData::getRepresentation(bool performConversion) const {
         // look, whether we already have a suitable representation
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (typeid(T) == typeid(**it)) {
-                return static_cast<const T*>(*it);
+            if (const T* tester = dynamic_cast<const T*>(*it)) {
+                return tester;
             }
         }
 
@@ -221,23 +218,13 @@ namespace campvis {
         return 0;
     }
 
-    template<>
-    CAMPVIS_CORE_API const campvis::ImageRepresentationLocal* campvis::ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion) const;
-
-#ifdef CAMPVIS_HAS_MODULE_ITK
-    class AbstractImageRepresentationItk;
-
-    template<>
-    CAMPVIS_CORE_API const campvis::AbstractImageRepresentationItk* campvis::ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion) const;
-#endif
-
     template<typename T>
     const T* campvis::ImageData::tryPerformConversion() const {
         // TODO: Currently, we do not check, for multiple parallel conversions into the same
         //       target type. This does not harm thread-safety but may lead to multiple 
         //       representations of the same type for a single image.
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            const T* tester = T::tryConvertFrom(*it);
+            const T* tester = ImageRepresentationConverter::getRef().tryConvertFrom<T>(*it);
             if (tester != 0) {
                 return tester;
             }

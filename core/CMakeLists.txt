@@ -4,7 +4,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 MESSAGE(STATUS "Configuring CAMPVis Core")
 
-
 # glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     classification/*.cpp
@@ -43,6 +42,11 @@ FOREACH(CampvisModulesCoreHeader ${CampvisModulesCoreHeaders})
     SET(ModHeaderFile ../modules/${CampvisModulesCoreHeader})
     LIST(APPEND CampvisCoreHeaders ${ModHeaderFile})
 ENDFOREACH()
+
+FOREACH(HeaderFile ${CampvisCoreHeaders})
+    PARSE_HEADER_FOR_CONVERTER(${HeaderFile})
+ENDFOREACH()
+WRITE_CONVERTER_REGISTRATION("gen_converterregistration.h")
 
 ADD_LIBRARY(campvis-core 
     ${CampvisCoreSources} ${CampvisCoreHeaders} 

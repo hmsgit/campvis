@@ -26,6 +26,7 @@
 
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/lightsourcedata.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/processordecoratorgradient.h"
 

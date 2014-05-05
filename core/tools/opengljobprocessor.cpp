@@ -34,6 +34,26 @@ namespace campvis {
 
     std::thread::id OpenGLJobProcessor::_this_thread_id;
 
+// ================================================================================================
+
+    OpenGLJobProcessor::ScopedSynchronousGlJobExecution::ScopedSynchronousGlJobExecution()
+        : _lock(nullptr)
+    {
+        if (! GLJobProc.isCurrentThreadOpenGlThread()) {
+            GLJobProc.pause();
+            _lock = new tgt::GLContextScopedLock(GLJobProc.iKnowWhatImDoingGetArbitraryContext());
+        }
+    }
+
+    OpenGLJobProcessor::ScopedSynchronousGlJobExecution::~ScopedSynchronousGlJobExecution() {
+        if (_lock != nullptr) {
+            delete _lock;
+            GLJobProc.resume();
+        }
+    }
+
+// ================================================================================================
+    
     OpenGLJobProcessor::OpenGLJobProcessor()
     {
         _pause = 0;
@@ -237,6 +257,8 @@ namespace campvis {
     bool OpenGLJobProcessor::isCurrentThreadOpenGlThread() const {
         return std::this_thread::get_id() == _this_thread_id;
     }
+
+
 
 }
 
