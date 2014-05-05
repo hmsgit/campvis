@@ -36,7 +36,6 @@
 #include "modules/itk/core/genericimagerepresentationitk.h"
 
 namespace campvis {
-    namespace conversion {
 
 // = Declare converter classes ====================================================================
 
@@ -129,7 +128,7 @@ namespace campvis {
         }
 
         template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
-        GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* campvis::conversion::GenericItkConversion<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::tryConvertFrom(const AbstractImageRepresentation* source) {
+        GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* campvis::GenericItkConversion<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::tryConvertFrom(const AbstractImageRepresentation* source) {
             if (source == nullptr)
                 return nullptr;
 
@@ -169,7 +168,7 @@ namespace campvis {
 
                 typename ItkImageType::Pointer itkImage = importer->GetOutput();
                 if (itkImage.IsNotNull())
-                    return GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::ThisType::create(const_cast<ImageData*>(tester->getParent()), itkImage); // const_cast perfectly valid here
+                    return GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::create(const_cast<ImageData*>(tester->getParent()), itkImage); // const_cast perfectly valid here
                 else
                     return nullptr;
             }
@@ -177,7 +176,6 @@ namespace campvis {
             return nullptr;
         }
 
-    }
 }
 
 #endif // IMAGEREPRESENTATIONCONVERSIONITK_H__

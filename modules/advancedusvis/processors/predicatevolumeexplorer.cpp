@@ -30,6 +30,7 @@
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
 #include "core/datastructures/renderdata.h"
+#include "core/datastructures/genericimagerepresentationlocal.h"
 
 #include "core/classification/simpletransferfunction.h"
 #include "core/pipeline/processordecoratorbackground.h"

@@ -35,7 +35,6 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
 namespace campvis {
-    namespace conversion {
 
 // = Declare converter classes ====================================================================
 
@@ -79,11 +78,14 @@ namespace campvis {
 
         template<typename BASETYPE, size_t NUMCHANNELS>
         GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* GenericLocalConversion<BASETYPE, NUMCHANNELS>::tryConvertFrom(const AbstractImageRepresentation* source) {
+            typedef typename GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType ElementType;
+            typedef typename GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ThisType ThisType;
+            
             if (const ImageRepresentationDisk* tester = dynamic_cast<const ImageRepresentationDisk*>(source)) {
                 // converting from disk representation
                 if (tester->getBaseType() == TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType && tester->getParent()->getNumChannels() == NUMCHANNELS) {
                     WeaklyTypedPointer wtp = tester->getImageData();
-                    return GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType*>(wtp._pointer));
+                    return GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
                 }
                 else {
                     LWARNINGC("CAMPVis.core.datastructures.GenericLocalConversion", "Could not convert since base type or number of channels mismatch.");
@@ -99,12 +101,12 @@ namespace campvis {
 
                 WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerConvert(TypeTraits<BASETYPE, NUMCHANNELS>::glDataType);
                 if (wtp._pointer != nullptr)
-                    return GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType*>(wtp._pointer));
+                    return GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
 
                 return nullptr;
             }
 
-            else if (const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ThisType* tester = dynamic_cast<const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ThisType*>(source)) {
+            else if (const ThisType* tester = dynamic_cast<const ThisType*>(source)) {
                 // just to ensure that the following else if case is really a conversion
                 LDEBUGC("CAMPVis.core.datastructures.GenericLocalConversion", "Trying to convert into the same type - this should not happen, since it there is no conversion needed...");
                 return tester->clone(const_cast<ImageData*>(tester->getParent()));
@@ -117,7 +119,7 @@ namespace campvis {
                     LDEBUGC("CAMPVis.core.datastructures.GenericLocalConversion", "Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");
 
                     size_t numElements = tester->getNumElements();
-                    GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType* newData = new GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType[numElements];
+                    ElementType* newData = new ElementType[numElements];
 
                     // traverse each channel of each element and convert the value
                     for (size_t i = 0; i < numElements; ++i) {
@@ -139,7 +141,6 @@ namespace campvis {
             return nullptr;
         }
 
-    }
 }
 
 #endif // IMAGEREPRESENTATIONCONVERSIONCORE_H__

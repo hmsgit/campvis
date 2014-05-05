@@ -24,14 +24,8 @@
 
 #include "itkfilterdemo.h"
 
-#include "tgt/event/keyevent.h"
-#include "core/datastructures/imagedata.h"
-#include "core/datastructures/renderdata.h"
-
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
-#include "core/tools/glreduction.h"
-
 
 namespace campvis {
 

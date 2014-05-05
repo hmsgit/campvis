@@ -26,15 +26,12 @@
 #define ITKFILTERDEMO_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
-#include "modules/preprocessing/processors/glimageresampler.h"
-#include "modules/vis/processors/volumeexplorer.h"
-#include "core/tools/glreduction.h"
-
 #include "modules/itk/processors/itkimagefilter.h"
+#include "modules/vis/processors/volumeexplorer.h"
+
 
 namespace campvis {
     class ItkFilterDemo : public AutoEvaluationPipeline {

@@ -26,6 +26,7 @@
 #define GENERICIMAGEREPRESENTATIONITK_H__
 
 #include "core/datastructures/abstractimagerepresentation.h"
+#include "core/datastructures/imagedata.h"
 #include "core/tools/weaklytypedpointer.h"
 #include "modules/itk/core/itktypetraits.h"
 
