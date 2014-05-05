@@ -1,4 +1,5 @@
 require("tgt")
+require("base")
 require("cvio")
 require("vis")
 require("preprocessing")
@@ -8,6 +9,9 @@ pipeline = campvis.newPipeline("VolumeRendererDemoLua")
 function pipeline:ctor()
     self.camera = campvis.CameraProperty("camera", "Camera")
     self.addProperty(instance, self.camera)
+
+    self.lsp = base.LightSourceProvider()
+    self.addProcessor(instance, self.lsp)
 
     self.image_reader = cvio.MhdImageReader()
     self.addProcessor(instance, self.image_reader)
