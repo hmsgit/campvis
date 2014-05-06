@@ -88,7 +88,7 @@ namespace campvis {
         ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
         ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
 
-        if (firstImage != 0 && secondImage != 0 ) {
+        if ((p_compositingMethod.getOptionValue() == CompositingModeSecond || firstImage != nullptr) && (p_compositingMethod.getOptionValue() == CompositingModeFirst || secondImage != nullptr)) {
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
@@ -96,8 +96,11 @@ namespace campvis {
             _shader->activate();
             tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 
-            firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
-            secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
+            if (p_compositingMethod.getOptionValue() != CompositingModeSecond)
+                firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
+            if (p_compositingMethod.getOptionValue() != CompositingModeFirst)
+                secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
+
             _shader->setUniform("_compositingMethod", p_compositingMethod.getOptionValue());
             _shader->setUniform("_alpha", p_alphaValue.getValue());
             _shader->setUniform("_enableBackground", p_enableBackground.getValue());
