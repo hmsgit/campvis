@@ -51,6 +51,7 @@ namespace campvis {
         , p_planeNormal("PlaneNormal", "Clipping Plane Normal", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(-1.f), tgt::vec3(1.f), tgt::vec3(.1f), tgt::ivec3(2))
         , p_planeDistance("PlaneDistance", "Clipping Plane Distance", 0.f, -1000.f, 1000.f, 1.f, 1)
         , p_planeSize("PlaneSize", "Clipping Plane Size", 100.f, 0.f, 1000.f, 1.f, 1)
+        , p_use2DProjection("Use3dRendering", "Use 3D Rendering instead of 2D", true)
         , p_relativeToImageCenter("RelativeToImageCenter", "Construct Plane Relative to Image Center", true)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(nullptr)
@@ -61,6 +62,7 @@ namespace campvis {
         addProperty(p_planeNormal);
         addProperty(p_planeDistance);
         addProperty(p_planeSize);
+        addProperty(p_use2DProjection, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_relativeToImageCenter);
         addProperty(p_transferFunction);
     }
@@ -102,22 +104,38 @@ namespace campvis {
                 if (p_relativeToImageCenter.getValue())
                     base += img->getParent()->getWorldBounds().center();
 
-                // construct the four vertices
-                std::vector<tgt::vec3> vertices;
-                vertices.push_back(base + inPlaneA + inPlaneB);
-                vertices.push_back(base - inPlaneA + inPlaneB);
-                vertices.push_back(base - inPlaneA - inPlaneB);
-                vertices.push_back(base + inPlaneA - inPlaneB);
-
-                FaceGeometry slice(vertices, vertices);
+                // construct the four texCoords
+                std::vector<tgt::vec3> texCoords;
+                texCoords.push_back(base + inPlaneA + inPlaneB);
+                texCoords.push_back(base - inPlaneA + inPlaneB);
+                texCoords.push_back(base - inPlaneA - inPlaneB);
+                texCoords.push_back(base + inPlaneA - inPlaneB);
+                FaceGeometry slice(texCoords, texCoords);
 
                 // perform the rendering
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
+                tgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
 
-                _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+                if (p_use2DProjection.getValue()) {
+                    // generate a camera position that simulates 2D rendering
+                    // this way it is easier to achieve the correct aspect ratio in all cases
+                    tgt::vec3 camPosition = base - p_planeSize.getValue() * n;
+                    float ratio = static_cast<float>(getEffectiveViewportSize().x) / getEffectiveViewportSize().y;
+
+                    // experimentally discovered: 
+                    // if the camera distance is half as big as the plane size, a field of view of
+                    // 54 allows to see everything
+                    float fovy = 54.f;
+
+                    tgt::Camera c(camPosition, base, inPlaneA, fovy, ratio, 0.1f, 10000.f);
+                    _shader->setUniform("_projectionMatrix", c.getProjectionMatrix());
+                    _shader->setUniform("_viewMatrix", c.getViewMatrix());
+                }
+                else {
+                    _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
+                    _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+                }
 
                 tgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
@@ -127,6 +145,7 @@ namespace campvis {
                 createAndAttachColorTexture();
                 createAndAttachDepthTexture();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
                 slice.render(GL_POLYGON);
 
                 _shader->deactivate();
@@ -152,7 +171,9 @@ namespace campvis {
         if (img != 0) {
             p_transferFunction.setVisible(img->getNumChannels() == 1);
         }
+
         p_transferFunction.setImageHandle(img.getDataHandle());
+        p_camera.setVisible(!p_use2DProjection.getValue());
                         
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }

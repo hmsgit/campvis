@@ -76,6 +76,7 @@ namespace campvis {
         FloatProperty p_planeDistance;                  ///< Clipping plane distance
         FloatProperty p_planeSize;                      ///< Size of clipping plane
 
+        BoolProperty p_use2DProjection;                  ///< Use 3D Rendering instead of 2D
         BoolProperty p_relativeToImageCenter;           ///< Flag whether to construct image plane relative to image center
         
         TransferFunctionProperty p_transferFunction;    ///< Transfer function

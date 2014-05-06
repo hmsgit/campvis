@@ -64,6 +64,7 @@ namespace campvis {
         _camera.addSharedProperty(&_mprRenderer.p_camera);
         _mprRenderer.p_targetImageID.setValue("MPR");
         _mprRenderer.p_targetImageID.addSharedProperty(&_compositor.p_firstImageId);
+        _mprRenderer.p_planeSize.setValue(250.f);
 
         _compositor.p_compositingMethod.selectByOption(RenderTargetCompositor::CompositingModeFirst);
         _compositor.p_targetImageId.setValue("final");
