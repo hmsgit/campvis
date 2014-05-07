@@ -46,9 +46,12 @@ namespace {
     template<typename T>
     struct NumericPropertyTraits<T, true> {
         static T validateValue(const T& value, const T& minValue, const T& maxValue) {
-            if (value >= minValue && value <= maxValue)
+            if (value >= minValue && value <= maxValue) {
                 return value;
+            }
             else {
+                if (tgt::LogManager::isInited())
+                    LDEBUGC("CAMPVis.core.properties.NumericProperty", "Validating value " << value << ": Out of bounds [" << minValue << ", " << maxValue << "], clamping to range!");
                 return (value < minValue) ? minValue : maxValue;
             }
         }
@@ -63,10 +66,14 @@ namespace {
             T toReturn(value);
 
             for (size_t i = 0; i < value.size; ++i) {
-                if (toReturn[i] < minValue[i])
+                if (toReturn[i] < minValue[i]) {
+                    if (tgt::LogManager::isInited())
+                        LDEBUGC("CAMPVis.core.properties.NumericProperty", "Validating value " << value << ": Out of bounds [" << minValue << ", " << maxValue << "], clamping to range!");
                     toReturn[i] = minValue[i];
-                else if (toReturn[i] > maxValue[i])
+                }
+                else if (toReturn[i] > maxValue[i]) {
                     toReturn[i] = maxValue[i];
+                }
             }
             return toReturn;
         }

@@ -291,6 +291,18 @@ namespace campvis {
             validate(static_cast<int>(il));
         }
 
+        /**
+         * Sets that incoming change signals from properties are ignored.
+         * \see observePropertyChanges()
+         */
+        void ignorePropertyChanges();
+
+        /**
+         * Sets that incoming signals from properties are no longer ignored.
+         * \see ignorePropertyChanges()
+         */
+        void observePropertyChanges();
+
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;
 
@@ -351,6 +363,7 @@ namespace campvis {
 
         tbb::atomic<bool> _enabled;                 ///< flag whether this processor is currently enabled
         tbb::atomic<bool> _clockExecutionTime;      ///< flag whether to measure the execution time of this processor
+        tbb::atomic<int> _ignorePropertyChanges;    ///< flag whether signals from properties shall be ignored
 
         /// Flag whether this processor is currently locked
         /// (This implies, that all properties are locked and it is not valid to call process())
