@@ -31,10 +31,10 @@
 #include "core/datastructures/cameradata.h"
 
 namespace campvis {
-    static const GenericOption<tgt::Camera::ProjectionMode> projectionOptions[3] = {
-        GenericOption<tgt::Camera::ProjectionMode>("perspective", "Perspective", tgt::Camera::PERSPECTIVE),
-        GenericOption<tgt::Camera::ProjectionMode>("orthographic", "Orthographice", tgt::Camera::ORTHOGRAPHIC),
-        GenericOption<tgt::Camera::ProjectionMode>("frustum", "Frustum", tgt::Camera::FRUSTUM)
+    static const GenericOption<cgt::Camera::ProjectionMode> projectionOptions[3] = {
+        GenericOption<cgt::Camera::ProjectionMode>("perspective", "Perspective", cgt::Camera::PERSPECTIVE),
+        GenericOption<cgt::Camera::ProjectionMode>("orthographic", "Orthographice", cgt::Camera::ORTHOGRAPHIC),
+        GenericOption<cgt::Camera::ProjectionMode>("frustum", "Frustum", cgt::Camera::FRUSTUM)
     };
 
     const std::string CameraProvider::loggerCat_ = "CAMPVis.modules.io.CameraProvider";
@@ -42,12 +42,12 @@ namespace campvis {
     CameraProvider::CameraProvider() 
         : AbstractProcessor()
         , p_cameraId("CameraId", "Camera ID", "camera", DataNameProperty::WRITE)
-        , p_position("Position", "Camera Position", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
-        , p_focus("Focus", "Camera Focus", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
-        , p_upVector("UpVector", "Camera Up Vector", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f))
+        , p_position("Position", "Camera Position", cgt::vec3(0.f, 0.f, -100.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
+        , p_focus("Focus", "Camera Focus", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
+        , p_upVector("UpVector", "Camera Up Vector", cgt::vec3(0.f, 1.f, 0.f), cgt::vec3(-1.f), cgt::vec3(1.f))
         , p_fov("FoV", "Field of View", 45.f, 1.f, 180.f)
         , p_aspectRatio("AspectRatio", "Aspect Ratio", 1.f, .001f, 100.f)
-        , p_clippingPlanes("ClippingPlanes", "Near/Far Clipping Planes", tgt::vec2(.1f, 50.f), tgt::vec2(0.f), tgt::vec2(10000.f))
+        , p_clippingPlanes("ClippingPlanes", "Near/Far Clipping Planes", cgt::vec2(.1f, 1000.f), cgt::vec2(0.f), cgt::vec2(10000.f))
         , p_projectionMode("ProjectionMode", "Projection Mode", projectionOptions, 3)
     {
         addProperty(p_cameraId);
@@ -65,7 +65,7 @@ namespace campvis {
     }
 
     void CameraProvider::updateResult(DataContainer& dataContainer) {
-        CameraData* cameraData = new CameraData(tgt::Camera(
+        CameraData* cameraData = new CameraData(cgt::Camera(
             p_position.getValue(),
             p_focus.getValue(),
             p_upVector.getValue(),

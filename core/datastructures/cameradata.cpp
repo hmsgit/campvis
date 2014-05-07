@@ -32,7 +32,7 @@
 namespace campvis {
 
 
-    CameraData::CameraData(const tgt::Camera& camera /*= tgt::Camera()*/) 
+    CameraData::CameraData(const cgt::Camera& camera /*= cgt::Camera()*/) 
         : AbstractData()
         , _camera(camera)
     {
@@ -55,15 +55,15 @@ namespace campvis {
         return 0;
     }
 
-    const tgt::Camera& CameraData::getCamera() const {
+    const cgt::Camera& CameraData::getCamera() const {
         return _camera;
     }
 
-    tgt::Camera& CameraData::getCamera() {
+    cgt::Camera& CameraData::getCamera() {
         return _camera;
     }
 
-    void CameraData::setCamera(const tgt::Camera& camera) {
+    void CameraData::setCamera(const cgt::Camera& camera) {
         _camera = camera;
     }
 

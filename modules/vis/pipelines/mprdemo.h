@@ -28,6 +28,7 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/mprrenderer.h"
@@ -49,30 +50,17 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
-
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "MprDemo"; };
 
 
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
-        CameraProperty _camera;
-
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         MprRenderer _mprRenderer;
         RenderTargetCompositor _compositor;
-
-        TrackballNavigationEventListener* _trackballEH;
 
     };
 

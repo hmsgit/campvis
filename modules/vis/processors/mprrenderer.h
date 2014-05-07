@@ -70,7 +70,7 @@ namespace campvis {
         DataNameProperty p_sourceImageID;               ///< image ID for input image
         DataNameProperty p_targetImageID;               ///< image ID for output image
 
-        CameraProperty p_camera;
+        DataNameProperty p_camera;
 
         Vec3Property p_planeNormal;                     ///< Clipping plane normal
         FloatProperty p_planeDistance;                  ///< Clipping plane distance

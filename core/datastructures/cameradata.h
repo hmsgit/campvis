@@ -30,12 +30,9 @@
 #ifndef CAMERADATA_H__
 #define CAMERADATA_H__
 
-#include "tgt/camera.h"
+#include "cgt/camera.h"
 #include "core/datastructures/abstractdata.h"
 #include <vector>
-
-namespace tgt {
-}
 
 namespace campvis {
     /**
@@ -47,7 +44,7 @@ namespace campvis {
          * Constructor, creating a new CameraData object initialized by \a camera.
          * \param   camera  Camera object used for initialization (optional)
          */
-        explicit CameraData(const tgt::Camera& camera = tgt::Camera());
+        explicit CameraData(const cgt::Camera& camera = cgt::Camera());
 
         /**
          * Destructor.
@@ -69,22 +66,22 @@ namespace campvis {
          * Const getter for the camera settings.
          * \return  _camera
          */
-        const tgt::Camera& getCamera() const;
+        const cgt::Camera& getCamera() const;
 
         /**
          * Non-const getter for the camera settings.
          * \return  _camera
          */
-        tgt::Camera& getCamera();
+        cgt::Camera& getCamera();
 
         /**
          * Sets the camera settings to \a camera.
          * \param   camera  New camera settings.
          */
-        void setCamera(const tgt::Camera& camera);
+        void setCamera(const cgt::Camera& camera);
 
     protected:
-        tgt::Camera _camera;        ///< The tgt::Camera object storing the camera setup
+        cgt::Camera _camera;        ///< The cgt::Camera object storing the camera setup
 
     };
 

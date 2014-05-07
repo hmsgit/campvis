@@ -31,12 +31,12 @@
 #define TRACKBALLCAMERAPROVIDER_H__
 
 #include "tbb/atomic.h"
-#include "tgt/bounds.h"
-#include "tgt/event/eventlistener.h"
-#include "tgt/navigation/trackball.h"
+#include "cgt/bounds.h"
+#include "cgt/event/eventlistener.h"
+#include "cgt/navigation/trackball.h"
 #include "modules/base/processors/cameraprovider.h"
 
-namespace tgt {
+namespace cgt {
     class Trackball;
 }
 
@@ -46,7 +46,7 @@ namespace campvis {
     /**
      * Generates CameraData objects.
      */
-    class TrackballCameraProvider : public CameraProvider, public tgt::EventListener , public tgt::IHasCamera {
+    class TrackballCameraProvider : public CameraProvider, public cgt::EventListener , public cgt::IHasCamera {
     public:
         /// Trackball automation mode
         enum AutomationMode {
@@ -69,13 +69,13 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties()
         virtual void updateProperties(DataContainer& dataContainer);
 
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
-        /// \see tgt::Camera::IHasCamera::getCamera()
-        virtual tgt::Camera* getCamera();
+        /// \see cgt::Camera::IHasCamera::getCamera()
+        virtual cgt::Camera* getCamera();
 
-        /// \see tgt::Camera::IHasCamera::update()
+        /// \see cgt::Camera::IHasCamera::update()
         virtual void update();
 
 
@@ -107,9 +107,9 @@ namespace campvis {
         IVec2Property* _canvasSize;
 
         /// Temporary copy of the property's camera which will be modified and written back to the property upon update().
-        tgt::Camera _localCopy;
-        /// The tgt::Trackball for the navigation logic
-        tgt::Trackball* _trackball;
+        cgt::Camera _localCopy;
+        /// The cgt::Trackball for the navigation logic
+        cgt::Trackball* _trackball;
 
         tbb::atomic<bool> _dirty;
 

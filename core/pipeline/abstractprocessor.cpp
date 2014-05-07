@@ -145,6 +145,14 @@ namespace campvis {
         AbstractProcessor::ScopedLock lock(this);
         cgtAssert(_locked == true, "Processor not locked, this should not happen!");
 
+        if (hasInvalidShader()) {
+            updateShader();
+            validate(INVALID_SHADER);
+        }
+        if (hasInvalidProperties()) {
+            updateProperties(data);
+            validate(INVALID_PROPERTIES);
+        }
         if (hasInvalidResult()) {
             updateResult(data);
             validate(INVALID_RESULT);

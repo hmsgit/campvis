@@ -27,8 +27,8 @@
 // 
 // ================================================================================================
 
-#include "tgt/assert.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/assert.h"
+#include "cgt/event/mouseevent.h"
 
 #include "trackballcameraprovider.h"
 #include "core/datastructures/cameradata.h"
@@ -52,8 +52,8 @@ namespace campvis {
         : CameraProvider()
         , p_automationMode("AutomationMode", "Automation Mode", automationOptions, 3)
         , p_image("ReferenceImage", "Reference Image", "", DataNameProperty::READ)
-        , p_llf("LLF", "Bounding Box LLF", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
-        , p_urb("URB", "Bounding Box URB", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f))
+        , p_llf("LLF", "Bounding Box LLF", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
+        , p_urb("URB", "Bounding Box URB", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
         , _canvasSize(canvasSize)
         , _trackball(0)
     {
@@ -64,7 +64,7 @@ namespace campvis {
         addProperty(p_llf);
         addProperty(p_urb);
         
-        _trackball = new tgt::Trackball(this, _canvasSize->getValue());
+        _trackball = new cgt::Trackball(this, _canvasSize->getValue());
         _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
     }
 
@@ -73,33 +73,33 @@ namespace campvis {
         delete _trackball;
     }
 
-    void TrackballCameraProvider::onEvent(tgt::Event* e) {
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
-            if (me->action() == tgt::MouseEvent::PRESSED) {
+    void TrackballCameraProvider::onEvent(cgt::Event* e) {
+        if (typeid(*e) == typeid(cgt::MouseEvent)) {
+            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
+            if (me->action() == cgt::MouseEvent::PRESSED) {
                 for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it)
                     (*it)->p_lqMode.setValue(true);
                 _trackball->mousePressEvent(me);
             }
-            else if (me->action() == tgt::MouseEvent::RELEASED) {
+            else if (me->action() == cgt::MouseEvent::RELEASED) {
                 for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it)
                     (*it)->p_lqMode.setValue(false);
                 _trackball->mouseReleaseEvent(me);
             }
-            else if (me->action() == tgt::MouseEvent::MOTION) {
+            else if (me->action() == cgt::MouseEvent::MOTION) {
                 _trackball->mouseMoveEvent(me);
             }
-            else if (me->action() == tgt::MouseEvent::WHEEL)
+            else if (me->action() == cgt::MouseEvent::WHEEL)
                 _trackball->wheelEvent(me);
         }
-        else if (typeid(*e) == typeid(tgt::KeyEvent)) {
-            _trackball->keyEvent(static_cast<tgt::KeyEvent*>(e));
+        else if (typeid(*e) == typeid(cgt::KeyEvent)) {
+            _trackball->keyEvent(static_cast<cgt::KeyEvent*>(e));
         }
     }
 
-    tgt::Camera* TrackballCameraProvider::getCamera() {
+    cgt::Camera* TrackballCameraProvider::getCamera() {
         if (!_dirty) {
-            _localCopy = tgt::Camera(
+            _localCopy = cgt::Camera(
                 p_position.getValue(),
                 p_focus.getValue(),
                 p_upVector.getValue(),
@@ -121,16 +121,17 @@ namespace campvis {
         p_upVector.setValue(_localCopy.getUpVector());
         p_fov.setValue(_localCopy.getFovy());
         p_aspectRatio.setValue(_localCopy.getRatio());
-        p_clippingPlanes.setValue(tgt::vec2(_localCopy.getNearDist(), _localCopy.getFarDist()));
+        if (cgt::isNumber(_localCopy.getNearDist()) && cgt::isNumber(_localCopy.getFarDist()))
+            p_clippingPlanes.setValue(cgt::vec2(_localCopy.getNearDist(), _localCopy.getFarDist()));
         
         switch (_localCopy.getProjectionMode()) {
-            case tgt::Camera::PERSPECTIVE:
+            case cgt::Camera::PERSPECTIVE:
                 p_projectionMode.selectById("perspective");
                 break;
-            case tgt::Camera::ORTHOGRAPHIC:
+            case cgt::Camera::ORTHOGRAPHIC:
                 p_projectionMode.selectById("orthographic");
                 break;
-            case tgt::Camera::FRUSTUM:
+            case cgt::Camera::FRUSTUM:
                 p_projectionMode.selectById("frustum");
                 break;
         }
@@ -151,8 +152,8 @@ namespace campvis {
         // convert data
         ScopedTypedData<ImageData> img(data, p_image.getValue());
         if (img != 0) {
-            tgt::Bounds volumeExtent = img->getWorldBounds();
-            tgt::vec3 pos = volumeExtent.center() - tgt::vec3(0, 0, tgt::length(volumeExtent.diagonal()));
+            cgt::Bounds volumeExtent = img->getWorldBounds();
+            cgt::vec3 pos = volumeExtent.center() - cgt::vec3(0, 0, cgt::length(volumeExtent.diagonal()));
 
             if (_trackball->getSceneBounds() != volumeExtent) {
                 _trackball->setSceneBounds(volumeExtent);
@@ -164,8 +165,8 @@ namespace campvis {
     }
 
     void TrackballCameraProvider::addLqModeProcessor(VisualizationProcessor* vp) {
-        tgtAssert(vp != 0, "Pointer to processor must not be 0.");
-        tgtAssert(std::find(_lqModeProcessors.begin(), _lqModeProcessors.end(), vp) == _lqModeProcessors.end(), "Processor already in list of LQ mode processors.");
+        cgtAssert(vp != 0, "Pointer to processor must not be 0.");
+        cgtAssert(std::find(_lqModeProcessors.begin(), _lqModeProcessors.end(), vp) == _lqModeProcessors.end(), "Processor already in list of LQ mode processors.");
 
         _lqModeProcessors.push_back(vp);
     }

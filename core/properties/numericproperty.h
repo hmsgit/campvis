@@ -25,6 +25,7 @@
 #ifndef NUMERICPROPERTY_H__
 #define NUMERICPROPERTY_H__
 
+#include "cgt/logmanager.h"
 #include "cgt/vector.h"
 
 #include "core/coreapi.h"
@@ -50,11 +51,15 @@ namespace {
                 return value;
             }
             else {
-                if (tgt::LogManager::isInited())
+                if (cgt::LogManager::isInited())
                     LDEBUGC("CAMPVis.core.properties.NumericProperty", "Validating value " << value << ": Out of bounds [" << minValue << ", " << maxValue << "], clamping to range!");
                 return (value < minValue) ? minValue : maxValue;
             }
         }
+
+        static bool isNan(const T& value) {
+            return (value != value);
+        };
     };
 
     /**
@@ -67,7 +72,7 @@ namespace {
 
             for (size_t i = 0; i < value.size; ++i) {
                 if (toReturn[i] < minValue[i]) {
-                    if (tgt::LogManager::isInited())
+                    if (cgt::LogManager::isInited())
                         LDEBUGC("CAMPVis.core.properties.NumericProperty", "Validating value " << value << ": Out of bounds [" << minValue << ", " << maxValue << "], clamping to range!");
                     toReturn[i] = minValue[i];
                 }
@@ -77,6 +82,15 @@ namespace {
             }
             return toReturn;
         }
+
+        static bool isNan(const T& value) {
+            bool toReturn = false;
+            for (size_t i = 0; i < value.size; ++i) {
+                toReturn |= (value[i] != value[i]);
+            }
+
+            return toReturn;
+        };
     };
 
 }
@@ -180,6 +194,12 @@ namespace campvis {
          * Decrements the value of this property.
          */
         virtual void decrement();
+
+        /**
+         * See GenericProperty::unlock()
+         * This one additionally checks for NaN values, as they break the existing code.
+         */
+        virtual void unlock();
 
         /// Signal emitted, when the property's minimum or maximum value changes.
         sigslot::signal1<const AbstractProperty*> s_minMaxChanged;
@@ -316,6 +336,14 @@ namespace campvis {
     template<typename T>
     void campvis::NumericProperty<T>::decrement() {
         this->setValue(this->_value - this->_stepValue);
+    }
+
+    template<typename T>
+    void campvis::NumericProperty<T>::unlock() {
+        if (NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::isNan(_backBuffer) && NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::isNan(_value))
+            AbstractProperty::unlock();
+        else
+            GenericProperty<T>::unlock();
     }
 }
 

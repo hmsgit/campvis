@@ -32,7 +32,8 @@
 
 #include <string>
 
-#include "tgt/camera.h"
+#include "cgt/camera.h"
+
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
@@ -78,7 +79,7 @@ namespace campvis {
         FloatProperty p_aspectRatio;        ///< Aspect Ratio
         Vec2Property p_clippingPlanes;      ///< Near and far clipping planes
 
-        GenericOptionProperty<tgt::Camera::ProjectionMode> p_projectionMode;   ///< Projection mode
+        GenericOptionProperty<cgt::Camera::ProjectionMode> p_projectionMode;   ///< Projection mode
 
     protected:
 
