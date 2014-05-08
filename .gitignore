@@ -16,6 +16,8 @@ moc_*.cxx_parameters
 /Win32/
 /ipch/
 *.dir/
+*.suo
+*.vcxproj.user
 
 # Project files of common IDEs
 *.cbp
