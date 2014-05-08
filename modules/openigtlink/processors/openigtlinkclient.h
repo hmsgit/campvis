@@ -92,7 +92,8 @@ namespace campvis {
         Vec3Property p_imageOffset;         ///< Image Offset in mm
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
-        
+        BoolProperty p_receivePositions;       ///< toggle receiving IMAGE messages
+        DataNameProperty p_targetPositionID;   ///< image ID for read image        
 
         /**
          * Updates the data container with the latest received frame/transformation
@@ -122,6 +123,10 @@ namespace campvis {
         tbb::atomic<tgt::mat4 *> _lastReceivedTransform;        ///< the last transform that has been received by the igtl worker thread
         igtl::ImageMessage::Pointer _lastReceivedImageMessage;  ///< last received igtl image message
         tbb::mutex _lastReceivedImageMessageMutex;              ///< mutex to control access to the _lastReceivedImageMessage pointer
+
+        tbb::mutex _lastReceivedPositionMutex;                  ///< mutex to control access to _lastReceivedPosition and _lastReceivedQuaternion
+        tgt::vec3 _lastReceivedPosition;                        ///< last received position in the position message
+        tgt::vec4 _lastReceivedQuaternion;                      ///< last received quaternion/orientation in the position message
 
     };
 

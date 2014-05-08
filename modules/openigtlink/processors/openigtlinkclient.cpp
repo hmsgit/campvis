@@ -25,6 +25,7 @@
 #include "openigtlinkclient.h"
 
 #include "transformdata.h"
+#include "positiondata.h"
 
 #include <igtlTransformMessage.h>
 #include <igtlPositionMessage.h>
@@ -48,6 +49,8 @@ namespace campvis {
         , p_targetTransformID("targetTransformName", "Target Transform ID", "OpenIGTLinkClient.transform", DataNameProperty::WRITE)
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_receivePositions("ReceivePositions", "Receive POSITION Messages", true)
+        , p_targetPositionID("targetPositionsID", "Target Position ID", "OpenIGTLinkClient.position", DataNameProperty::WRITE)
     {
         _lastReceivedTransform = 0;
         _lastReceivedImageMessage = 0;
@@ -55,14 +58,17 @@ namespace campvis {
         addProperty(p_address, VALID);
         addProperty(p_port, VALID);
         addProperty(p_deviceName, VALID);
+
+        addProperty(p_connect, VALID);
+
         addProperty(p_receiveTransforms, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_receiveImages, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_targetTransformID, VALID);
         addProperty(p_targetImageID, VALID);
         addProperty(p_imageOffset, VALID);
         addProperty(p_voxelSize, VALID);
-        
-        addProperty(p_connect, VALID);
+        addProperty(p_receivePositions, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_targetPositionID, VALID);
     }
 
     OpenIGTLinkClient::~OpenIGTLinkClient() {
@@ -140,6 +146,15 @@ namespace campvis {
                 image->setMappingInformation(ImageMappingInformation(size, p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
                 data.addData(p_targetImageID.getValue(), image);
             }
+        }
+
+        if(p_receivePositions.getValue())
+        {
+            _lastReceivedPositionMutex.lock();
+            PositionData * pd = new PositionData(_lastReceivedPosition, _lastReceivedQuaternion);
+            _lastReceivedPositionMutex.unlock();
+
+            data.addData(p_targetPositionID.getValue(), pd);
         }
 
         validate(INVALID_RESULT);
@@ -231,17 +246,16 @@ namespace campvis {
 
         if (c & igtl::MessageHeader::UNPACK_BODY) // if CRC check is OK
         {
-            // Retrive the transform data
-            float position[3];
-            float quaternion[4];
+            _lastReceivedPositionMutex.lock();
+            positionMsg->GetPosition(_lastReceivedPosition.elem);
+            positionMsg->GetQuaternion(_lastReceivedQuaternion.elem);
+            _lastReceivedPositionMutex.unlock();
 
-            positionMsg->GetPosition(position);
-            positionMsg->GetQuaternion(quaternion);
+            std::cerr << "position   = (" << _lastReceivedPosition[0] << ", " << _lastReceivedPosition[1] << ", " << _lastReceivedPosition[2] << ")" << std::endl;
+            std::cerr << "quaternion = (" << _lastReceivedQuaternion[0] << ", " << _lastReceivedQuaternion[1] << ", "
+                << _lastReceivedQuaternion[2] << ", " << _lastReceivedQuaternion[3] << ")" << std::endl << std::endl;
 
-            std::cerr << "position   = (" << position[0] << ", " << position[1] << ", " << position[2] << ")" << std::endl;
-            std::cerr << "quaternion = (" << quaternion[0] << ", " << quaternion[1] << ", "
-                << quaternion[2] << ", " << quaternion[3] << ")" << std::endl << std::endl;
-
+            invalidate(INVALID_RESULT);
             return 1;
         }
 
@@ -368,10 +382,13 @@ namespace campvis {
                 else
                     _socket->Skip(headerMsg->GetBodySizeToRead(), 0);
             }
-            /*else if (strcmp(headerMsg->GetDeviceType(), "POSITION") == 0)
+            else if (strcmp(headerMsg->GetDeviceType(), "POSITION") == 0)
             {
-                ReceivePosition(_socket, headerMsg);
-            }*/
+                if(p_receivePositions.getValue())
+                    ReceivePosition(_socket, headerMsg);
+                else
+                    _socket->Skip(headerMsg->GetBodySizeToRead(), 0);
+            }
             else if (strcmp(headerMsg->GetDeviceType(), "IMAGE") == 0)
             {
                 if(p_receiveImages.getValue())
