@@ -9,11 +9,15 @@ namespace campvis {
     class LuaTable;
     class LuaVmState;
 
+    /**
+     * Class representing CAMPVis pipelines defined in Lua.
+     */
     class LuaPipeline : public AutoEvaluationPipeline {
     public:
         /**
          * Create a new Lua pipeline.
          *
+         * \param name          Name of this pipeline
          * \param scriptPath    Path to the Lua script defining the pipeline
          * \param dc            DataContainer containing local working set of data for this pipeline
          */
@@ -34,8 +38,8 @@ namespace campvis {
         virtual void deinit();
 
     protected:
-        const std::string _name;                     ///< the name of this pipeline
-        const std::string _scriptPath;               ///< path to the Lua script defining the pipeline
+        const std::string _name;                     ///< The name of this pipeline
+        const std::string _scriptPath;               ///< Path to the Lua script defining the pipeline
         LuaVmState* _luaVmState;                     ///< Lua VM state used to evaluate the pipeline
         std::shared_ptr<LuaTable> _pipelineTable;    ///< Pointer to the Lua table associated with the pipeline
     };

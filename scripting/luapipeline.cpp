@@ -23,9 +23,11 @@ namespace campvis {
         if (!_luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
             return;
 
+        // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
         if (!_luaVmState->execString("require(\"campvis\")"))
             return;
 
+        // Make this pipeline object available to the script so that it can configure it
         if (!_luaVmState->injectObjectPointer(this, "campvis::AutoEvaluationPipeline *", "instance"))
             return;
 
