@@ -55,7 +55,7 @@ namespace campvis {
         , p_llf("LLF", "Bounding Box LLF", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
         , p_urb("URB", "Bounding Box URB", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
         , _canvasSize(canvasSize)
-        , _trackball(0)
+        , _trackball(nullptr)
     {
         _dirty = false;
 
@@ -65,10 +65,18 @@ namespace campvis {
         addProperty(p_urb);
         
         _trackball = new cgt::Trackball(this, _canvasSize->getValue());
-        _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
     }
 
     TrackballCameraProvider::~TrackballCameraProvider() {
+
+    }
+
+    void TrackballCameraProvider::init() {
+        _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
+        onRenderTargetSizeChanged(_canvasSize);
+    }
+
+    void TrackballCameraProvider::deinit() {
         _canvasSize->s_changed.disconnect(this);
         delete _trackball;
     }
@@ -146,6 +154,7 @@ namespace campvis {
         _trackball->setViewprtSize(_canvasSize->getValue());
         float ratio = static_cast<float>(_canvasSize->getValue().x) / static_cast<float>(_canvasSize->getValue().y);
         p_aspectRatio.setValue(ratio);
+        invalidate(INVALID_RESULT);
     }
 
     void TrackballCameraProvider::updateProperties(DataContainer& data) {
@@ -178,6 +187,19 @@ namespace campvis {
                 return;
             }
         }
+    }
+
+    void TrackballCameraProvider::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
+        cgtAssert(viewportSizeProp != nullptr, "Pointer must not be 0.");
+
+        if (_canvasSize != nullptr) {
+            _canvasSize->s_changed.disconnect(this);
+        }
+
+        _canvasSize = viewportSizeProp;
+        _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
+        setPropertyInvalidationLevel(*viewportSizeProp, INVALID_RESULT);
+        onRenderTargetSizeChanged(viewportSizeProp);
     }
 
 }

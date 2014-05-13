@@ -178,6 +178,7 @@ namespace campvis {
         _viewportSizeProperty = viewportSizeProp;
         _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
         setPropertyInvalidationLevel(*viewportSizeProp, INVALID_RESULT);
+        invalidate(INVALID_RESULT);
     }
 
 }

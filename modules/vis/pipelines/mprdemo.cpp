@@ -65,6 +65,7 @@ namespace campvis {
 
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
         _imageReader.p_targetImageID.addSharedProperty(&_mprRenderer.p_sourceImageID);
 
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .08f));

@@ -65,6 +65,10 @@ namespace campvis {
          **/
         virtual ~TrackballCameraProvider();
 
+        /// \see AbstractProcessor::init()
+        virtual void init();
+        /// \see AbstractProcessor::deinit()
+        virtual void deinit();
 
         /// \see AbstractProcessor::updateProperties()
         virtual void updateProperties(DataContainer& dataContainer);
@@ -93,6 +97,15 @@ namespace campvis {
         */
         void removeLqModeProcessor(VisualizationProcessor* vp);
 
+
+        /**
+         * Sets the property defining the viewport size to \a viewportSizeProp.
+         * \note    This processor will keep and access this pointer, so make sure the referenced
+         *          property exists at least as long as this processor or you set it to a different
+         *          property before.
+         * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
+         */
+        void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
         GenericOptionProperty<AutomationMode> p_automationMode;
 

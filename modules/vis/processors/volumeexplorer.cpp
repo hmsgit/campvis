@@ -55,6 +55,7 @@ namespace campvis {
         , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties")
         , _shader(nullptr)
         , _quad(nullptr)
+        , _tcp(viewportSizeProp)
         , _raycaster(viewportSizeProp, raycaster)
         , _sliceRenderer(sliceRenderer)
         , p_smallRenderSize("SmallRenderSize", "Small Render Size", cgt::ivec2(32), cgt::ivec2(0), cgt::ivec2(10000), cgt::ivec2(1))
@@ -63,7 +64,6 @@ namespace campvis {
         , _ySliceHandler(&_sliceRenderer->p_ySliceNumber)
         , _zSliceHandler(&_sliceRenderer->p_zSliceNumber)
         , _windowingHandler(nullptr)
-        , _trackballEH(nullptr)
         , _mousePressedInRaycaster(false)
         , _viewUnderEvent(VOLUME)
         , _eventPositionOffset(0)
@@ -76,9 +76,9 @@ namespace campvis {
 
         p_largeView.selectByOption(VOLUME);
 
-        addProperty(p_inputVolume, INVALID_PROPERTIES);
+        addProperty(p_inputVolume, INVALID_PROPERTIES | CAMERA_INVALID);
         addProperty(p_outputImage);
-        addProperty(p_largeView, LARGE_VIEW_INVALID | SLICES_INVALID | VR_INVALID | INVALID_RESULT);
+        addProperty(p_largeView, LARGE_VIEW_INVALID | CAMERA_INVALID | SLICES_INVALID | VR_INVALID | INVALID_RESULT);
         addProperty(p_enableScribbling, VALID);
 
         addDecorator(new ProcessorDecoratorBackground());
@@ -100,9 +100,11 @@ namespace campvis {
         _raycaster.p_outputImage.setVisible(false);
         addProperty(p_vrProperties, VALID);
 
+        p_inputVolume.addSharedProperty(&_tcp.p_image);
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
         p_inputVolume.addSharedProperty(&_sliceRenderer->p_sourceImageID);
 
+        _tcp.setViewportSizeProperty(&p_largeRenderSize);
         _sliceRenderer->setViewportSizeProperty(&p_smallRenderSize);
         _raycaster.setViewportSizeProperty(&p_largeRenderSize);
 
@@ -110,8 +112,7 @@ namespace campvis {
         addProperty(p_largeRenderSize, VALID);
 
         // Event-Handlers
-        _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, &p_largeRenderSize);
-        _trackballEH->addLqModeProcessor(&_raycaster);
+        _tcp.addLqModeProcessor(&_raycaster);
 
         if (TransferFunctionProperty* tester = dynamic_cast<TransferFunctionProperty*>(_sliceRenderer->getProperty("TransferFunction"))) {
         	_windowingHandler.setTransferFunctionProperty(tester);
@@ -119,11 +120,11 @@ namespace campvis {
     }
 
     VolumeExplorer::~VolumeExplorer() {
-        delete _trackballEH;
     }
 
     void VolumeExplorer::init() {
         VisualizationProcessor::init();
+        _tcp.init();
         _raycaster.init();
         _sliceRenderer->init();
 
@@ -131,6 +132,7 @@ namespace campvis {
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
 
+        _tcp.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
         _sliceRenderer->s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
@@ -141,6 +143,7 @@ namespace campvis {
     }
 
     void VolumeExplorer::deinit() {
+        _tcp.deinit();
         _raycaster.deinit();
         _sliceRenderer->deinit();
         VisualizationProcessor::deinit();
@@ -156,11 +159,11 @@ namespace campvis {
                 case XZ_PLANE: // fallthrough
                 case YZ_PLANE:
                     _raycaster.setViewportSizeProperty(&p_smallRenderSize);
-                    _trackballEH->setViewportSizeProperty(&p_smallRenderSize);
+                    _tcp.setViewportSizeProperty(&p_smallRenderSize);
                     break;
                 case VOLUME:
                     _raycaster.setViewportSizeProperty(&p_largeRenderSize);
-                    _trackballEH->setViewportSizeProperty(&p_largeRenderSize);
+                    _tcp.setViewportSizeProperty(&p_largeRenderSize);
                     break;
             }
             validate(LARGE_VIEW_INVALID);
@@ -186,9 +189,15 @@ namespace campvis {
             if (! (getInvalidationLevel() & VR_INVALID))
                 invalidate(SLICES_INVALID);
         }
-        if (getInvalidationLevel() & VR_INVALID) {
+
+        if (getInvalidationLevel() & CAMERA_INVALID) {
+            _tcp.process(data);
             _raycaster.process(data);
         }
+        else if (getInvalidationLevel() & VR_INVALID) {
+            _raycaster.process(data);
+        }
+
         if (getInvalidationLevel() & SLICES_INVALID) {
             _sliceRenderer->setViewportSizeProperty(p_largeView.getOptionValue() == YZ_PLANE ? &p_largeRenderSize : &p_smallRenderSize);
             _sliceRenderer->p_sliceOrientation.selectByOption(SliceRenderProcessor::YZ_PLANE);
@@ -209,7 +218,7 @@ namespace campvis {
         // compose rendering
         composeFinalRendering(data);
 
-        validate(INVALID_RESULT | VR_INVALID | SLICES_INVALID);
+        validate(INVALID_RESULT | CAMERA_INVALID | VR_INVALID | SLICES_INVALID);
     }
 
     void VolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {
@@ -337,6 +346,9 @@ namespace campvis {
         // make sure to only invalidate ourself if the invalidation is not triggered by us
         // => the _locked state is a trustworthy source for this information :)
         if (! isLocked()) {
+            if (processor == &_tcp) {
+                invalidate(CAMERA_INVALID);
+            }
             if (processor == &_raycaster) {
                 invalidate(VR_INVALID);
             }
@@ -366,8 +378,6 @@ namespace campvis {
                 _sliceRenderer->p_zSliceNumber.setMaxValue(_cachedImageSize.z - 1);
                 _sliceRenderer->p_zSliceNumber.setValue(_cachedImageSize.z / 2);
             }
-
-            _trackballEH->reinitializeCamera(img);
         }
     }
 
@@ -418,7 +428,7 @@ namespace campvis {
                     _mousePressedInRaycaster = true;
                 else if (me->action() == cgt::MouseEvent::RELEASED)
                     _mousePressedInRaycaster = false;
-                _trackballEH->onEvent(&adjustedMe);
+                _tcp.onEvent(&adjustedMe);
             }
             else if (me->action() == cgt::MouseEvent::WHEEL) {
                 // Mouse wheel has changed -> cycle slices
