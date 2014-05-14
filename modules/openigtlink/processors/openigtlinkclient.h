@@ -26,6 +26,7 @@
 #define OPENIGTLINKCLIENT_H__
 
 #include <string>
+#include <map>
 
 #include <igtlOSUtil.h>
 #include <igtlClientSocket.h>
@@ -48,8 +49,10 @@
 
 namespace campvis {
     /**
-     * Experimental demo implementation how to receive MHD files via CAMPCom, convert it to
-     * CAMPVis ImageData and store it into the DataContainer.
+     * OpenIGTLink Client processor. Connects to a specified server and receives all OpenIGTLink messages.
+     * Processes the messages according to the currently set properties p_receiveTransform, p_receivePositions
+     * and p_receiveImage and puts them into the received data into the respective data containers.
+     * This Class contains modified code from the OpenIGTLink ReceiveClient example.
      */
     class OpenIGTLinkClient : public AbstractProcessor, public Runnable {
     public:
@@ -84,19 +87,19 @@ namespace campvis {
 
 
         BoolProperty p_receiveImages;       ///< toggle receiving IMAGE messages
-        DataNameProperty p_targetImageID;   ///< image ID for read image
+        StringProperty p_targetImagePrefix;   ///< image ID prefix for read image
 
         BoolProperty p_receiveTransforms;   ///< toggle receiving TRANSFORM messages
-        DataNameProperty p_targetTransformID; ///< data ID for read transformation
+        StringProperty p_targetTransformPrefix; ///< data ID prefix for read transformation
         
         Vec3Property p_imageOffset;         ///< Image Offset in mm
         Vec3Property p_voxelSize;           ///< Voxel Size in mm
 
         BoolProperty p_receivePositions;       ///< toggle receiving IMAGE messages
-        DataNameProperty p_targetPositionID;   ///< image ID for read image        
+        StringProperty p_targetPositionPrefix;   ///< image ID prefix for read images
 
         /**
-         * Updates the data container with the latest received frame/transformation
+         * Updates the data container with the latest received transformation/position/image data
          * \param   dataContainer    DataContainer to work on
          */
         virtual void updateResult(DataContainer& dataContainer);
@@ -104,30 +107,44 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
-        /// Callback slot for connect button
-        void onBtnConnectClicked();
+        /// Callback slot for connect button. can also be called from outside.
+        void connectToServer();
+        /// Callback slot for disconnect button. can also be called from outside.
+        void disconnect();
         
-        static const std::string loggerCat_;
-
     protected:
-        int OpenIGTLinkClient::ReceiveTransform(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
-        int OpenIGTLinkClient::ReceivePosition(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
-        int ReceiveImage(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
+        /// Stores received data from a POSITION Message
+        struct PositionMessageData {
+            tgt::vec3 _position;
+            tgt::vec4 _quaternion;
+        };
 
+        /// Implements the \a Runnable::run() method to execute a new thread. The new thread will
+        /// go into a receive loop to receive the OpenIGTLink messages asynchronously
         virtual void run();
+
+        /// Receive a TRANSFORM message from the OpenIGTLink socket and put the data into the local buffers
+        int ReceiveTransform(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
+
+        /// Receive a POSITION message from the OpenIGTLink socket and put the data into the local buffers
+        int ReceivePosition(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
+
+        /// Receive a IMAGE message from the OpenIGTLink socket and put into the local buffers
+        int ReceiveImage(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
 
         //connection
         igtl::ClientSocket::Pointer _socket;
         
         //data
-        tbb::atomic<tgt::mat4 *> _lastReceivedTransform;        ///< the last transform that has been received by the igtl worker thread
-        igtl::ImageMessage::Pointer _lastReceivedImageMessage;  ///< last received igtl image message
-        tbb::mutex _lastReceivedImageMessageMutex;              ///< mutex to control access to the _lastReceivedImageMessage pointer
+        std::map<std::string, tgt::mat4> _receivedTransforms;        ///< the transforms that has been received by the igtl worker thread, mapped by device name
+        std::map<std::string, igtl::ImageMessage::Pointer> _receivedImages;  ///< the image messages received by the igtl worker thread, mapped by device name
+        std::map<std::string, PositionMessageData> _receivedPositions; ///< position message data received by the igtl worker thread, mapped by device name        
 
-        tbb::mutex _lastReceivedPositionMutex;                  ///< mutex to control access to _lastReceivedPosition and _lastReceivedQuaternion
-        tgt::vec3 _lastReceivedPosition;                        ///< last received position in the position message
-        tgt::vec4 _lastReceivedQuaternion;                      ///< last received quaternion/orientation in the position message
+        tbb::mutex _transformMutex;                             ///< mutex to control access to the _receivedTransforms pointer
+        tbb::mutex _imageMutex;                                 ///< mutex to control access to the _receivedImages pointer
+        tbb::mutex _positionMutex;                              ///< mutex to control access to _receivedPositions
 
+        static const std::string loggerCat_;
     };
 
 }

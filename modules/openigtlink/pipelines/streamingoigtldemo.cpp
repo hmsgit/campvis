@@ -24,11 +24,7 @@
 
 #include "streamingoigtldemo.h"
 
-#include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
-
-#include "core/classification/geometry1dtransferfunction.h"
-#include "core/classification/tfgeometry1d.h"
 
 namespace campvis {
 
@@ -51,7 +47,7 @@ namespace campvis {
         _renderTargetID.setValue("combine");
 
         _igtlClient.p_address.setValue("127.0.0.1");
-        _igtlClient.p_targetImageID.setValue("combine");
+        _igtlClient.p_targetImagePrefix.setValue("combine");
 
         _canvasSize.s_changed.connect<StreamingOIGTLDemo>(this, &StreamingOIGTLDemo::onRenderTargetSizeChanged);
     }

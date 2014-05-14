@@ -24,8 +24,8 @@
 
 #include "openigtlinkclient.h"
 
-#include "transformdata.h"
-#include "positiondata.h"
+#include "../datastructures/transformdata.h"
+#include "../datastructures/positiondata.h"
 
 #include <igtlTransformMessage.h>
 #include <igtlPositionMessage.h>
@@ -44,17 +44,14 @@ namespace campvis {
         , p_deviceName("ServerDeviceName", "Device Name (empty to accept all)")
         , p_connect("Connect", "Connect to Server")
         , p_receiveImages("ReceiveImages", "Receive IMAGE Messages", false)
-        , p_targetImageID("targetImageName", "Target Image ID", "OpenIGTLinkClient.output", DataNameProperty::WRITE)
+        , p_targetImagePrefix("targetImageName", "Target Image Prefix", "IGTL.image.")
         , p_receiveTransforms("ReceiveTransforms", "Receive TRANSFORM Messages", true)
-        , p_targetTransformID("targetTransformName", "Target Transform ID", "OpenIGTLinkClient.transform", DataNameProperty::WRITE)
+        , p_targetTransformPrefix("targetTransformPrefix", "Target Transform Prefix", "IGTL.transform.")
         , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
         , p_receivePositions("ReceivePositions", "Receive POSITION Messages", true)
-        , p_targetPositionID("targetPositionsID", "Target Position ID", "OpenIGTLinkClient.position", DataNameProperty::WRITE)
+        , p_targetPositionPrefix("targetPositionsPrefix", "Target Position Prefix", "IGTL.position.")
     {
-        _lastReceivedTransform = 0;
-        _lastReceivedImageMessage = 0;
-
         addProperty(p_address, VALID);
         addProperty(p_port, VALID);
         addProperty(p_deviceName, VALID);
@@ -63,12 +60,12 @@ namespace campvis {
 
         addProperty(p_receiveTransforms, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_receiveImages, INVALID_RESULT | INVALID_PROPERTIES);
-        addProperty(p_targetTransformID, VALID);
-        addProperty(p_targetImageID, VALID);
+        addProperty(p_targetTransformPrefix, VALID);
+        addProperty(p_targetImagePrefix, VALID);
         addProperty(p_imageOffset, VALID);
         addProperty(p_voxelSize, VALID);
         addProperty(p_receivePositions, INVALID_RESULT | INVALID_PROPERTIES);
-        addProperty(p_targetPositionID, VALID);
+        addProperty(p_targetPositionPrefix, VALID);
     }
 
     OpenIGTLinkClient::~OpenIGTLinkClient() {
@@ -76,7 +73,7 @@ namespace campvis {
     }
 
     void OpenIGTLinkClient::init() {
-        p_connect.s_clicked.connect(this, &OpenIGTLinkClient::onBtnConnectClicked);
+        p_connect.s_clicked.connect(this, &OpenIGTLinkClient::connectToServer);
     }
 
     void OpenIGTLinkClient::deinit() {
@@ -88,25 +85,24 @@ namespace campvis {
 
         if(p_receiveTransforms.getValue()) 
         {
-            tgt::mat4 * newTransform = _lastReceivedTransform.fetch_and_store(nullptr);
-            if(newTransform) {
-                TransformData * td = new TransformData(*newTransform);
+            _transformMutex.lock();
+            for(auto it = _receivedTransforms.begin(), end = _receivedTransforms.end(); it != end; ++it) { 
+                TransformData * td = new TransformData(it->second);
         
-                data.addData(p_targetTransformID.getValue(), td);
-                delete newTransform; //was allocated in the receiver thread - not needed anymore
+                data.addData(p_targetTransformPrefix.getValue() + it->first, td);
 
                 LDEBUG("Transform data put into container. ");
             }
+            _receivedTransforms.clear();
+            _transformMutex.unlock();
         }
 
         if(p_receiveImages.getValue()) 
         {
-            _lastReceivedImageMessageMutex.lock();
-            igtl::ImageMessage::Pointer imageMessage = _lastReceivedImageMessage;    
-            _lastReceivedImageMessageMutex.unlock();
-
-            if(imageMessage) 
+            _imageMutex.lock();
+            for(auto it = _receivedImages.begin(), end = _receivedImages.end(); it != end; ++it)
             {
+                igtl::ImageMessage::Pointer imageMessage = it->second;    
                 WeaklyTypedPointer wtp;
                 wtp._pointer = new uint8_t[imageMessage->GetImageSize()];
                 LDEBUG("Image has " << imageMessage->GetNumComponents() << " components and is of size " << imageMessage->GetImageSize());
@@ -135,40 +131,47 @@ namespace campvis {
 
                 tgt::vec3 imageOffset(0.f);
                 tgt::vec3 voxelSize(1.f);
-
                 tgt::ivec3 size_i(1);
+
+                imageMessage->GetSpacing(voxelSize.elem);
                 imageMessage->GetDimensions(size_i.elem);
-                tgt::svec3 size(size_i);
+                tgt::svec3 size(size_i);                
+                imageMessage->GetOrigin(imageOffset.elem);
 
                 size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;
                 ImageData* image = new ImageData(dimensionality, size, wtp._numChannels);
                 ImageRepresentationLocal::create(image, wtp);
                 image->setMappingInformation(ImageMappingInformation(size, p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
-                data.addData(p_targetImageID.getValue(), image);
+                data.addData(p_targetImagePrefix.getValue() + it->first, image);
             }
+            _receivedImages.clear();
+            _imageMutex.unlock();
         }
 
         if(p_receivePositions.getValue())
         {
-            _lastReceivedPositionMutex.lock();
-            PositionData * pd = new PositionData(_lastReceivedPosition, _lastReceivedQuaternion);
-            _lastReceivedPositionMutex.unlock();
-
-            data.addData(p_targetPositionID.getValue(), pd);
+            _positionMutex.lock();
+            for(auto it = _receivedPositions.begin(), end = _receivedPositions.end(); it != end; ++it) 
+            {
+                PositionData * pd = new PositionData(it->second._position, it->second._quaternion);
+                data.addData(p_targetPositionPrefix.getValue() + it->first, pd);
+            }
+            _receivedPositions.clear();
+            _positionMutex.unlock();
         }
 
         validate(INVALID_RESULT);
     }
 
     void OpenIGTLinkClient::updateProperties(DataContainer& dataContainer) {
-        p_targetImageID.setVisible(p_receiveImages.getValue());
+        p_targetImagePrefix.setVisible(p_receiveImages.getValue());
 
         p_imageOffset.setVisible(p_receiveImages.getValue());
         p_voxelSize.setVisible(p_receiveImages.getValue());
-        p_targetTransformID.setVisible(p_receiveImages.getValue() || p_receiveTransforms.getValue());
+        p_targetTransformPrefix.setVisible(p_receiveImages.getValue() || p_receiveTransforms.getValue());
     }
 
-    void OpenIGTLinkClient::onBtnConnectClicked() {
+    void OpenIGTLinkClient::connectToServer() {
 
         if(_socket && _socket->GetConnected()) {
             LWARNING("Already connected!");
@@ -181,15 +184,22 @@ namespace campvis {
 
         if (r != 0)
         {
-            LERROR("Cannot connect to the server " << p_address.getValue());
+            LERROR("Cannot connect to the server " << p_address.getValue() << ":" << p_port.getValue());
+            _socket = nullptr;
             return;
         }
 
-        LINFO("Connected to server!");
+        LINFO("Connected to server " << p_address.getValue() << ":" << p_port.getValue());
 
         start(); //start receiving data in a new thread
 
         validate(INVALID_RESULT);
+    }
+
+    void OpenIGTLinkClient::disconnect() {
+        stop();
+        _socket = nullptr;
+        LINFO("Disconnected.");
     }
 
     int OpenIGTLinkClient::ReceiveTransform(igtl::Socket * socket, igtl::MessageHeader::Pointer& header)
@@ -211,14 +221,15 @@ namespace campvis {
 
         if (c & igtl::MessageHeader::UNPACK_BODY) // if CRC check is OK
         {
-            tgt::mat4 * mtx = new tgt::mat4;
-            // Retrieve the transform data (this cast is a bit dubious but should be ok judging from the class internals)
-            transMsg->GetMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx->elem));
-            igtl::PrintMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx->elem));
+            tgt::mat4 mtx;
+            // Retrieve the transform data (this cast is a bit dubious but should be ok judging from the respective class internals)
+            transMsg->GetMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx.elem));
+            igtl::PrintMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx.elem));
             std::cerr << std::endl;
 
-            tgt::mat4 * toDelete = _lastReceivedTransform.fetch_and_store(mtx);
-            if(toDelete) delete toDelete;
+            _transformMutex.lock();
+            _receivedTransforms[transMsg->GetDeviceName()] = mtx;
+            _transformMutex.unlock();
 
             invalidate(INVALID_RESULT);
             return 1;
@@ -246,14 +257,19 @@ namespace campvis {
 
         if (c & igtl::MessageHeader::UNPACK_BODY) // if CRC check is OK
         {
-            _lastReceivedPositionMutex.lock();
-            positionMsg->GetPosition(_lastReceivedPosition.elem);
-            positionMsg->GetQuaternion(_lastReceivedQuaternion.elem);
-            _lastReceivedPositionMutex.unlock();
+            PositionMessageData pmd;
 
-            std::cerr << "position   = (" << _lastReceivedPosition[0] << ", " << _lastReceivedPosition[1] << ", " << _lastReceivedPosition[2] << ")" << std::endl;
-            std::cerr << "quaternion = (" << _lastReceivedQuaternion[0] << ", " << _lastReceivedQuaternion[1] << ", "
-                << _lastReceivedQuaternion[2] << ", " << _lastReceivedQuaternion[3] << ")" << std::endl << std::endl;
+            positionMsg->GetPosition(pmd._position.elem);
+            positionMsg->GetQuaternion(pmd._quaternion.elem);
+            
+
+            _positionMutex.lock();
+            _receivedPositions[positionMsg->GetDeviceName()] = pmd;
+            _positionMutex.unlock();
+
+            std::cerr << "position   = (" << pmd._position[0] << ", " << pmd._position[1] << ", " << pmd._position[2] << ")" << std::endl;
+            std::cerr << "quaternion = (" << pmd._quaternion[0] << ", " << pmd._quaternion[1] << ", "
+                << pmd._quaternion[2] << ", " << pmd._quaternion[3] << ")" << std::endl << std::endl;
 
             invalidate(INVALID_RESULT);
             return 1;
@@ -282,9 +298,9 @@ namespace campvis {
         if (c & igtl::MessageHeader::UNPACK_BODY) // if CRC check is OK
         {
             // put the message pointer into our locked buffer
-            _lastReceivedImageMessageMutex.lock();
-            _lastReceivedImageMessage = imgMsg;
-            _lastReceivedImageMessageMutex.unlock();
+            _imageMutex.lock();
+            _receivedImages[imgMsg->GetDeviceName()] = imgMsg;
+            _imageMutex.unlock();
 
             // Retrieve the image data
             int   size[3];          // image dimension
@@ -298,13 +314,13 @@ namespace campvis {
             imgMsg->GetSpacing(spacing);
             imgMsg->GetSubVolume(svsize, svoffset);
 
-            tgt::mat4 * mtx = new tgt::mat4;
+            tgt::mat4 mtx;
             // Retrieve the transform data (this cast is a bit dubious but should be ok judging from the class internals)
-            imgMsg->GetMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx->elem));
-            std::cerr << std::endl;
-
-            tgt::mat4 * toDelete = _lastReceivedTransform.fetch_and_store(mtx);
-            if(toDelete) delete toDelete;
+            imgMsg->GetMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx.elem));
+            
+            _transformMutex.lock();
+            _receivedTransforms[imgMsg->GetDeviceName()] = mtx;
+            _transformMutex.unlock();
 
             std::cerr << "Device Name           : " << imgMsg->GetDeviceName() << std::endl;
             std::cerr << "Scalar Type           : " << scalarType << std::endl;
@@ -317,7 +333,8 @@ namespace campvis {
             std::cerr << "Sub-Volume offset     : ("
                 << svoffset[0] << ", " << svoffset[1] << ", " << svoffset[2] << ")" << std::endl << std::endl;
 
-            igtl::PrintMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx->elem));
+            igtl::PrintMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx.elem));
+            std::cout << std::endl;
 
             invalidate(INVALID_RESULT);
             return 1;
@@ -335,7 +352,7 @@ namespace campvis {
         headerMsg = igtl::MessageHeader::New();
         ts = igtl::TimeStamp::New();
 
-        while (!_stopExecution)
+        while (!_stopExecution && _socket)
         {
             // Initialize receive buffer
             headerMsg->InitPack();
@@ -345,6 +362,7 @@ namespace campvis {
             if (r == 0)
             {
                 _socket->CloseSocket();
+                _socket = nullptr;
                 LINFO("Socket Connection closed.");
                 break;
             }
@@ -432,6 +450,8 @@ namespace campvis {
                 _socket->Skip(headerMsg->GetBodySizeToRead(), 0);
             }
         }
-        _socket->CloseSocket();
+        if(_socket)       
+            _socket->CloseSocket();
+        _socket = nullptr;
     }
 }
