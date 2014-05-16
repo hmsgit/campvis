@@ -54,7 +54,7 @@ namespace campvis {
 
         std::vector<std::string> toReturn;
         toReturn.reserve(_pipelineMap.size());
-        for (std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it)
+        for (std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> >::const_iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it)
             toReturn.push_back(it->first);
         return toReturn;
     }
@@ -62,7 +62,7 @@ namespace campvis {
     AbstractPipeline* PipelineFactory::createPipeline(const std::string& id, DataContainer* dc) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
 
-        std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.find(id);
+        std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> >::const_iterator it = _pipelineMap.find(id);
         if (it == _pipelineMap.end())
             return 0;
         else
