@@ -26,9 +26,9 @@
 #define STREAMINGOIGTLDEMO_H__
 
 #include "modules/openigtlink/processors/openigtlinkclient.h"
+#include "modules/openigtlink/processors/matrixprocessor.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-#include "modules/vis/processors/volumeexplorer.h"
+
 
 namespace campvis {
     class StreamingOIGTLDemo : public AutoEvaluationPipeline {
@@ -64,6 +64,7 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         OpenIGTLinkClient _igtlClient;
+		MatrixProcessor _matrixProcessor;
     };
 
 }

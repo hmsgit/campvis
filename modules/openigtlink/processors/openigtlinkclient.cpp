@@ -58,14 +58,16 @@ namespace campvis {
 
         addProperty(p_connect, VALID);
 
-        addProperty(p_receiveTransforms, INVALID_RESULT | INVALID_PROPERTIES);
-        addProperty(p_receiveImages, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_receiveTransforms, INVALID_PROPERTIES);
+        addProperty(p_receiveImages, INVALID_PROPERTIES);
         addProperty(p_targetTransformPrefix, VALID);
         addProperty(p_targetImagePrefix, VALID);
         addProperty(p_imageOffset, VALID);
         addProperty(p_voxelSize, VALID);
-        addProperty(p_receivePositions, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_receivePositions, INVALID_PROPERTIES);
         addProperty(p_targetPositionPrefix, VALID);
+
+		invalidate(INVALID_PROPERTIES);
     }
 
     OpenIGTLinkClient::~OpenIGTLinkClient() {
@@ -169,6 +171,7 @@ namespace campvis {
         p_imageOffset.setVisible(p_receiveImages.getValue());
         p_voxelSize.setVisible(p_receiveImages.getValue());
         p_targetTransformPrefix.setVisible(p_receiveImages.getValue() || p_receiveTransforms.getValue());
+		p_targetPositionPrefix.setVisible(p_receivePositions.getValue());
     }
 
     void OpenIGTLinkClient::connectToServer() {
