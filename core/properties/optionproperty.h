@@ -68,7 +68,7 @@ namespace campvis {
             , _title(title)
             , _value(value)
         {};
-
+        
         std::string _id;
         std::string _title;
         T _value;
@@ -161,6 +161,41 @@ namespace campvis {
          * \param   option  Option to set.
          */
         void selectByOption(T option);
+        
+        /** 
+         * Add a new Option
+         * \param option New option to add
+         * returns Number of items
+         */
+        size_t addOption(GenericOption<T> option);
+
+        /** 
+         * Update current option
+         * \param copy Data to copy from
+         * returns Number of items
+         */
+        size_t updateCurrent(GenericOption<T> copy);
+        size_t updateCurrent(T& copy);
+        
+        /** 
+         * Remove current copy, except the last one
+         * returns Number of items
+         */
+        size_t removeCurrent();
+
+        /** 
+         * Returns a non-const reference of current option's value
+         * \param index Position to 
+         * \note With great power comes great responsibility
+         * returns Number of items
+         */
+        T& getOptionReference(int index = -1);
+
+        /** 
+         * Get Option count
+         * returns Number of items
+         */
+        size_t getOptionCount();
 
     protected:
         std::vector< GenericOption<T> > _options;
@@ -221,9 +256,10 @@ namespace campvis {
         LERROR("Could not find option with id '" + id + "'");
     }
 
+    //TODO: Shouldn't this be index >= 0 ?
     template<typename T>
     void campvis::GenericOptionProperty<T>::selectByIndex(int index) {
-        tgtAssert(index > 0 && index < _options.size(), "Index out of bounds.");
+        tgtAssert(index >= 0 && index < _options.size(), "Index out of bounds.");
         setValue(index);
     }
 
@@ -238,6 +274,49 @@ namespace campvis {
         LERROR("Could not find specified option.");
     }
 
+    template<typename T>
+    size_t campvis::GenericOptionProperty<T>::addOption(GenericOption<T> option) {
+        this->_options.push_back(option);
+        //setMaxValue(this->_options.size());
+        setMaxValue(static_cast<int>(this->_options.size()) - 1);
+        return this->_options.size();
+    }
+
+    template<typename T>
+    size_t campvis::GenericOptionProperty<T>::removeCurrent() {
+        int index = getValue();
+        if (index == 0) return 0;
+        if(index <= this->_options.size()-1)
+            this->_options.erase(this->_options.begin() + index);
+        selectByIndex(index <= static_cast<int>(this->_options.size())-1? index : static_cast<int>(this->_options.size())-1);
+        return index <= static_cast<int>(this->_options.size())-1? index : static_cast<int>(this->_options.size())-1;
+    }
+
+    template<typename T>
+    size_t campvis::GenericOptionProperty<T>::updateCurrent(GenericOption<T> copy) {
+        std::vector< GenericOption<T> >::iterator *it = this->_options[getValue()];
+        it->_id = copy._id;
+        it->_title = copy._title;
+        it->_value = copy._value;
+        return this->_options.size();
+    }
+
+    template<typename T>
+    size_t campvis::GenericOptionProperty<T>::updateCurrent(T& copy) {
+        GenericOption<T> *it = &this->_options[getValue()];
+        it->_value = copy;
+        return this->_options.size();
+    }
+
+    template<typename T>
+    T& campvis::GenericOptionProperty<T>::getOptionReference(int index) {
+        return index == -1?  _options[_value]._value : _options[index]._value;
+    }
+
+    template<typename T>
+    size_t campvis::GenericOptionProperty<T>::getOptionCount() {
+        return _options.size();
+    }
 }
 
 #endif // OPTIONPROPERTY_H__

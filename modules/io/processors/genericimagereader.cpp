@@ -34,7 +34,7 @@
 
 
 namespace campvis {
-    const std::string GenericImageReader::loggerCat_ = "CAMPVis.modules.io.MhdImageReader";
+    const std::string GenericImageReader::loggerCat_ = "CAMPVis.modules.io.GenericImageReader";
 
     GenericImageReader::GenericImageReader() 
         : AbstractProcessor()
@@ -48,6 +48,7 @@ namespace campvis {
         this->addReader(new MhdImageReader());
         this->addReader(new RawImageReader());
         this->addReader(new VtkImageReader());
+        this->addReader(new DevilImageReader(new IVec2Property("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))));
 
 
         this->_ext = "";
@@ -78,7 +79,7 @@ namespace campvis {
                 (it->second)->setVisible(true);
                 this->_currentlyVisible = it->second;
             }
-            (it->first)->process(data);
+            dynamic_cast<AbstractProcessor*>(it->first)->process(data);
         }
     }
 
@@ -151,8 +152,8 @@ namespace campvis {
     }
 
     int GenericImageReader::addReader(AbstractImageReader* reader) {
-        MetaProperty* meta = new MetaProperty(reader->getName()+"MetaProp", reader->getName());
-        meta->addPropertyCollection(*reader);
+        MetaProperty* meta = new MetaProperty(dynamic_cast<AbstractProcessor*>(reader)->getName()+"MetaProp", dynamic_cast<AbstractProcessor*>(reader)->getName());
+        meta->addPropertyCollection(*dynamic_cast<AbstractProcessor*>(reader));
         meta->setVisible(false);
         this->addProperty(*meta);
 
@@ -167,7 +168,7 @@ namespace campvis {
         return 0;
     }
 
-    void GenericImageReader::onUrlPropertyChanged(const AbstractProperty*) {
+    void GenericImageReader::onUrlPropertyChanged(const AbstractProperty* prop) {
         // first set visibility of old extension to false
         setVisibibility(_ext, false);
 

@@ -67,7 +67,7 @@ namespace campvis {
      * FloatingPointProperty extends NumericProperty to control how many decimal places should be
      * shown when displaying the property's value.
      *
-     * \tparam  T   Base type of the property's value.
+     * \param  T   Base type of the property's value.
      */
     template<typename T>
     class FloatingPointProperty : public NumericProperty<T> {
@@ -132,6 +132,8 @@ namespace campvis {
     typedef FloatingPointProperty<tgt::vec2> Vec2Property;
     typedef FloatingPointProperty<tgt::vec3> Vec3Property;
     typedef FloatingPointProperty<tgt::vec4> Vec4Property;
+
+    //typedef FloatingPointProperty<tgt::vec4> ColorProperty;
 
 // = Template Implementation ======================================================================
 

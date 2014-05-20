@@ -27,6 +27,7 @@
 
 #include <IL/il.h>
 #include <cstring>
+#include <vector>
 
 #include "tgt/logmanager.h"
 #include "tgt/filesystem.h"
@@ -40,30 +41,41 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
 #include "core/tools/quadrenderer.h"
+#include "core/tools/stringutils.h"
+#include "core/tools/mapping.h"
 
 
 namespace campvis {
     const std::string DevilImageReader::loggerCat_ = "CAMPVis.modules.io.DevilImageReader";
 
-    GenericOption<std::string> importOptions[3] = {
+    GenericOption<std::string> importOptions[4] = {
         GenericOption<std::string>("rt", "Render Target"),
         GenericOption<std::string>("texture", "OpenGL Texture"),
-        GenericOption<std::string>("localIntensity", "Local Intensity Image")
+        GenericOption<std::string>("localIntensity", "Local Intensity Image"),
+        GenericOption<std::string>("localIntensity3", "Local Intensity Image RGB")
     };
 
     DevilImageReader::DevilImageReader(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
-        , p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
-        , p_importType("ImportType", "Import Type", importOptions, 3)
+        //, p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
+        //, p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
+        , p_importType("ImportType", "Import Type", importOptions, 4)
+        , p_importSimilar("ImportSimilar", "Import All Similar Files", false)
         , _shader(nullptr)
         , _devilTextureReader(nullptr)
     {
+        this->_ext.push_back(".jpg");
+        this->_ext.push_back(".tif");
+        this->p_targetImageID.setValue("DevilImageReader.output");
+
         addProperty(p_url);
         addProperty(p_targetImageID);
         addProperty(p_importType);
+        addProperty(p_importSimilar);
 
         _devilTextureReader = new tgt::TextureReaderDevil();
+
+        p_importType.selectById("localIntensity3");
     }
 
     DevilImageReader::~DevilImageReader() {
@@ -83,10 +95,23 @@ namespace campvis {
     }
 
     void DevilImageReader::updateResult(DataContainer& data) {
+        std::string url = this->p_url.getValue();
+        std::string base = "", numstr = "", ext = "";
+        size_t _Pos = url.rfind('_');
+        size_t dotPos = url.rfind('.');
+        if (dotPos > _Pos && dotPos != std::string::npos && _Pos != std::string::npos ) {
+            numstr = url.substr(_Pos+1, dotPos);
+            base = url.substr(0, _Pos+1);
+            ext = url.substr(dotPos);
+        }
+        int suffix = StringUtils::fromString<int>(numstr);
+        std::cout << "\nfileName Suffix: "<<suffix <<" count: "<<dotPos-_Pos <<std::endl;
+
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
+
         if (tex != 0) {
             if (p_importType.getOptionValue() == "rt") {
-                ImageData id (2, tex->getDimensions(), tex->getNumChannels());
+                ImageData id (3, tex->getDimensions(), tex->getNumChannels());
                 ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
 
                 FramebufferActivationGuard fag(this);
@@ -112,7 +137,7 @@ namespace campvis {
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
             }
             else if (p_importType.getOptionValue() == "texture") {
-                ImageData* id = new ImageData(2, tex->getDimensions(), tex->getNumChannels());
+                ImageData* id = new ImageData(3, tex->getDimensions(), tex->getNumChannels());
                 ImageRepresentationGL::create(id, tex);
                 data.addData(p_targetImageID.getValue(), id);
             }
@@ -121,7 +146,7 @@ namespace campvis {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                 tex->downloadTexture();
                 size_t numElements = tgt::hmul(tex->getDimensions());
-                ImageData* id = new ImageData(2, tex->getDimensions(), 1);
+                ImageData* id = new ImageData(3, tex->getDimensions(), 1);
 
                 // TODO: use macro magic to switch through the different data types and number of channels
                 if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
@@ -134,6 +159,111 @@ namespace campvis {
                 }
 
                 delete tex;
+                data.addData(p_targetImageID.getValue(), id);
+            }
+            else if (p_importType.getOptionValue() == "localIntensity33") {
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                tex->downloadTexture();
+                size_t numElements = tgt::hmul(tex->getDimensions());
+                tgt::ivec3 temp = tex->getDimensions();
+                temp.z = 100;
+                ImageData* id = new ImageData(3, temp, 3);
+
+                /*if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
+                    tgt::Vector3<uint8_t>* data = reinterpret_cast<tgt::Vector3<uint8_t>*>(tex->getPixelData());
+                    tgt::Vector3<uint8_t>* data3d = new tgt::Vector3<uint8_t>[numElements];
+                    for (size_t i = 0; i < numElements; ++i) {
+                        data3d[i].x = data[i].x;
+                        data3d[i].y = data[i].y;
+                        data3d[i].z = data[i].z;
+                    }
+                    GenericImageRepresentationLocal<uint8_t, 3>::create(id, data3d);
+                }*/
+                if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
+                    tgt::Vector3<uint8_t>* data = reinterpret_cast<tgt::Vector3<uint8_t>*>(tex->getPixelData());
+                    tgt::Vector3<uint8_t>* data3d = new tgt::Vector3<uint8_t>[temp.y * temp.x*temp.z];
+                    //for(int i =0; i < temp.z; i++)
+                    //    data3d[i] = new tgt::Vector3<uint8_t>[temp.y * temp.x];
+                    for (size_t i = 0; i < numElements; ++i) {
+                        for(int k = 0; k < temp.z; k++){
+                        data3d[k*numElements + i].x = data[i].x;
+                        data3d[k*numElements + i].y = data[i].y;
+                        data3d[k*numElements + i].z = data[i].z;}
+                    }
+                    GenericImageRepresentationLocal<uint8_t, 3>::create(id, data3d);
+                }
+
+                delete tex;
+                data.addData(p_targetImageID.getValue(), id);
+            }
+            else if (p_importType.getOptionValue() == "localIntensity3") {
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                tex->downloadTexture();
+                size_t numElements = tgt::hmul(tex->getDimensions());
+                tgt::ivec3 temp = tex->getDimensions();
+                //temp.z = 1;
+                int zee = 0;
+
+                /*if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
+                    tgt::Vector3<uint8_t>* data = reinterpret_cast<tgt::Vector3<uint8_t>*>(tex->getPixelData());
+                    tgt::Vector3<uint8_t>* data3d = new tgt::Vector3<uint8_t>[numElements];
+                    for (size_t i = 0; i < numElements; ++i) {
+                        data3d[i].x = data[i].x;
+                        data3d[i].y = data[i].y;
+                        data3d[i].z = data[i].z;
+                    }
+                    GenericImageRepresentationLocal<uint8_t, 3>::create(id, data3d);
+                }*/
+
+                //tgt::Vector3<uint8_t>* data3d;
+                std::vector<tgt::Vector3<uint8_t> > vdata;// = new std::vector<tgt::Vector3<uint8_t> >();
+                while (nullptr != tex) {
+                    if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
+                        tgt::Vector3<uint8_t>* data = reinterpret_cast<tgt::Vector3<uint8_t>*>(tex->getPixelData());
+                        //data3d = new tgt::Vector3<uint8_t>[temp.y * temp.x*temp.z];
+                        for (size_t i = 0; i < numElements*1; ++i) {
+                            for(int k = 0; k < temp.z; k++){
+                                //data3d[k*numElements + i].x = data[i].x;
+                                //data3d[k*numElements + i].y = data[i].y;
+                                //data3d[k*numElements + i].z = data[i].z;
+                                vdata.push_back(data[i % numElements]);
+                            }
+                        }
+                        //std::vector<tgt::Vector3<uint8_t> > x(data, data+numElements);
+                        //vdata->push_back(x);
+                        zee+=1;
+                        //GenericImageRepresentationLocal<uint8_t, 3>::create(id, data3d);
+                    }
+
+                    delete tex;
+
+                    if (this->p_importSimilar.getValue() == true) {
+                        numstr = StringUtils::toString(++suffix, dotPos-_Pos-1, '0');
+                        std::cout << base+numstr+ext;
+                        tex = _devilTextureReader->loadTexture(base+numstr+ext, tgt::Texture::LINEAR, false, true, true, false);
+                        if(nullptr != tex) 
+                            tex->downloadTexture();
+                    }
+                    else {
+                        break;
+                    }
+                    //break;
+                } //while
+
+                temp.z = zee;
+                ImageData* id = new ImageData(3, temp, 3);
+
+                //uint8_t* data3d = new uint8_t[temp.x * temp.y * temp.z+100];
+                //for (size_t i = 0; i < temp.x*temp.y*temp.z; ++i) {
+                //    data3d[i] = vdata->at(i).x;
+                //}
+                //GenericImageRepresentationLocal<uint8_t, 1>::create(id, data3d);
+
+                tgt::Vector3<uint8_t>* data3d = new tgt::Vector3<uint8_t>[temp.x * temp.y * temp.z];
+                memcpy_s(data3d, temp.x*temp.y*temp.z *3, &vdata.front(), temp.x*temp.y*temp.z*3);
+                GenericImageRepresentationLocal<uint8_t, 3>::create(id, data3d);
+
+                id->setMappingInformation(ImageMappingInformation(id->getSize(), id->getMappingInformation().getOffset(), id->getMappingInformation().getVoxelSize() * tgt::vec3(1, 1, 1) ));
                 data.addData(p_targetImageID.getValue(), id);
             }
         }
