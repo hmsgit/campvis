@@ -100,7 +100,7 @@ namespace campvis {
 			tgt::mat4 mat;
 			float * p = mat.elem;
 			for (int i = 0; i < 16; i++) {
-				*p = atof(tokens[i].c_str());
+				*p = static_cast<float>(atof(tokens[i].c_str()));
 				p++;
 			}
 			return mat;
@@ -113,10 +113,10 @@ namespace campvis {
 			}
 			float angle;
 			tgt::vec3 axis;
-			angle = atof(tokens[1].c_str());
-			axis[0] = atof(tokens[2].c_str());
-			axis[1] = atof(tokens[3].c_str());
-			axis[2] = atof(tokens[4].c_str());
+			angle = static_cast<float>(atof(tokens[1].c_str()));
+			axis[0] = static_cast<float>(atof(tokens[2].c_str()));
+			axis[1] = static_cast<float>(atof(tokens[3].c_str()));
+			axis[2] = static_cast<float>(atof(tokens[4].c_str()));
 			return tgt::mat4::createRotation(angle, axis);
 		}
 		else if (tokens[0] == "trans") {
@@ -126,9 +126,9 @@ namespace campvis {
 			}
 
 			tgt::vec3 translation;
-			translation[0] = atof(tokens[1].c_str());
-			translation[1] = atof(tokens[2].c_str());
-			translation[2] = atof(tokens[3].c_str());
+			translation[0] = static_cast<float>(atof(tokens[1].c_str()));
+			translation[1] = static_cast<float>(atof(tokens[2].c_str()));
+			translation[2] = static_cast<float>(atof(tokens[3].c_str()));
 			return tgt::mat4::createTranslation(translation);
 		}
 		else if (tokens[0] == "scale") {
@@ -138,10 +138,10 @@ namespace campvis {
 			}
 
 			tgt::vec3 scale;
-			scale[0] = atof(tokens[1].c_str());
+			scale[0] = static_cast<float>(atof(tokens[1].c_str()));
 			if (tokens.size() == 4) {
-				scale[1] = atof(tokens[2].c_str());
-				scale[2] = atof(tokens[3].c_str());
+				scale[1] = static_cast<float>(atof(tokens[2].c_str()));
+				scale[2] = static_cast<float>(atof(tokens[3].c_str()));
 			}
 			else {
 				scale[1] = scale[2] = scale[0];
