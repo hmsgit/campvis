@@ -42,8 +42,8 @@ namespace campvis {
 		, p_matrixAModifiers("MatrixAModifiers", "Matrix A Modifiers")
 		, p_matrixBModifiers("MatrixBModifiers", "Matrix B Modifiers")
 		, p_targetMatrixID("TargetMatrixID", "Target Matrix ID", "result.matrix", DataNameProperty::WRITE)
+		, lastdc_(nullptr)
     {
-
         addProperty(p_matrixA, VALID);
         addProperty(p_matrixAModifiers, VALID);
         addProperty(p_matrixB, VALID);
@@ -53,7 +53,8 @@ namespace campvis {
     }
 
 	MatrixProcessor::~MatrixProcessor() {
-
+		if (lastdc_)
+			lastdc_->s_dataAdded.disconnect(this);
     }
 
 	void MatrixProcessor::init() {
@@ -65,6 +66,15 @@ namespace campvis {
     }
 
 	void MatrixProcessor::updateResult(DataContainer& data) {
+		if (&data != lastdc_) {
+			if (lastdc_) {
+				lastdc_->s_dataAdded.disconnect(this);
+			}
+			
+			data.s_dataAdded.connect(this, &MatrixProcessor::DataContainerDataAdded);
+			lastdc_ = &data;
+		}
+
 		tgt::mat4 matA = processMatrixString(p_matrixA.getValue(), data);
 		tgt::mat4 matB = processMatrixString(p_matrixB.getValue(), data);
 
@@ -87,6 +97,12 @@ namespace campvis {
 
         validate(INVALID_RESULT);
     }
+
+	void MatrixProcessor::updateProperties(DataContainer& dataContainer)
+	{
+		// we invalidate just in case a hardcoded matrix or its modifiers have changed
+		invalidate(INVALID_RESULT);
+	}
 
 	tgt::mat4 MatrixProcessor::processMatrixString(std::string matrixString, DataContainer& data)
 	{
@@ -193,5 +209,11 @@ namespace campvis {
 			}
 		}
 		return result;
+	}
+
+	void MatrixProcessor::DataContainerDataAdded(const std::string &name, const DataHandle &data)
+	{
+		if (name == p_matrixA.getValue() || name == p_matrixB.getValue())
+			invalidate(INVALID_RESULT);
 	}
 }

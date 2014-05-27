@@ -124,13 +124,13 @@ namespace campvis {
         virtual void run();
 
         /// Receive a TRANSFORM message from the OpenIGTLink socket and put the data into the local buffers
-        int ReceiveTransform(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
+        int ReceiveTransform(igtl::Socket* socket, igtl::MessageHeader::Pointer& header);
 
         /// Receive a POSITION message from the OpenIGTLink socket and put the data into the local buffers
-        int ReceivePosition(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
+        int ReceivePosition(igtl::Socket* socket, igtl::MessageHeader::Pointer& header);
 
         /// Receive a IMAGE message from the OpenIGTLink socket and put into the local buffers
-        int ReceiveImage(igtl::Socket * socket, igtl::MessageHeader::Pointer& header);
+        int ReceiveImage(igtl::Socket* socket, igtl::MessageHeader::Pointer& header);
 
         //connection
         igtl::ClientSocket::Pointer _socket;

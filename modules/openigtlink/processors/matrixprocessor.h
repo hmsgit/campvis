@@ -38,19 +38,23 @@
 
 namespace campvis {
     /**
-     * Experimental demo implementation how to receive MHD files via CAMPCom, convert it to
-     * CAMPVis ImageData and store it into the DataContainer.
+     * Matrix processor to perform some basic matrix arithmatic like combining two matrices.
+	 *
+	 * Takes two matrices as an input either from a string or from the data container 
+	 * (see \a processMatrixString()), preprocesses them according to the specified modifiers (see \a processModiferString())
+	 * and puts the result of multiplying A*B into the data container as a \a TransformData entry.
+	 *
+	 * Example use case: OpenIGTLink client outputs matrices TrackerToReference and TrackerToProbe. Configure
+	 * matrixA as "TrackerToProbe" with modifier "I" and matrixB as "TrackerToReference" with empty modifier
+	 * to compute the "ProbeToReference" matrix. If an additional calibration matrix is needed, this can be achieved by
+	 * adding a new MatrixProcessor that multiplies a hardcoded calibration matrix to the result or the inputs.
      */
     class MatrixProcessor : public AbstractProcessor {
     public:
-        /**
-         * Constructs a new CampcomMhdReceiver Processor
-         **/
+        /// Constructor
         MatrixProcessor();
 
-        /**
-         * Destructor
-         **/
+        /// Destructor
         virtual ~MatrixProcessor();
 
         /// \see AbstractProcessor::init()
@@ -70,19 +74,62 @@ namespace campvis {
         StringProperty p_matrixA;           ///< first Matrix input for the computation. \see MatrixProcessor::processMatrixString()
 		StringProperty p_matrixB;			///< second Matrix input for the computation. \see MatrixProcessor::processMatrixString()
 
-		StringProperty p_matrixAModifiers;  ///< modifier string to be applied to matrix A. \see MatrixProcessor::processModifiers()
-		StringProperty p_matrixBModifiers;  ///< modifier string to be applied to matrix B. \see MatrixProcessor::processModifiers()
+		StringProperty p_matrixAModifiers;  ///< modifier string to be applied to matrix A. \see MatrixProcessor::processModifierString()
+		StringProperty p_matrixBModifiers;  ///< modifier string to be applied to matrix B. \see MatrixProcessor::processModifierString()
        
         DataNameProperty p_targetMatrixID;   ///< image ID for read image
 
+
+		void DataContainerDataAdded(const std::string& name, const DataHandle& data);
 
     protected:
         /// \see AbstractProcessor::updateResult()
         virtual void updateResult(DataContainer& dataContainer);
 
+		/// \see AbstractProcessor::updateProperties()
+		virtual void updateProperties(DataContainer& dataContainer);
+
+		/**
+		 * Processes a modifier string and returns the modified matrix.
+		 *
+		 * \param matrix the input matrix to be modified
+		 * \param modifiers a string containing modifiers that will be applied to the matrix from left to right.
+		 *		Possible Modifiers are:
+		 *		 - _I_: invert matrix
+		 *		 - _T_: transpose matrix
+		 *		 - _r_: extract rotational part \see tgt::mat4::getRotationalPart()
+		 *		 - _s_: extract scaling part \see tgt::mat4::getScalingPart()
+		 *		 - _-_: negate componentwise
+		 *
+		 * i.e. a call with a modifier string "IT" will calculate the transpose of the inverse.
+		 */
 		tgt::mat4 processModifierString(tgt::mat4 matrix, std::string modifiers);
 
+		/**
+		 * Processes a matrix string and returns the resulting matrix.
+		 *
+		 * \param matrixString the matrix string to be parsed
+		 * \param data the data container that is used to read data from
+		 * 
+		 * The matrix string can either be a name to a data handle or a string specifying a matrix directly.
+		 * The string is split into tokens with space as a delimiter and is parsed according to the following rules:
+		 *  - an empty string or "identity" creates an identity matrix
+		 *  - if the string contains exactly 16 tokens, a direct matrix input is assumed: all
+		 *    tokens are converted to floats and are used as coefficients. The parsing is done row-major: a
+		 *    string "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 creates a matrix with first row 1,2,3,4, second row 
+		 *    5,6,7,8 and so on
+		 *  - "rot <angle> <ax> <ay> <az>" creates a rotation matrix around axis (ax,ay,az) with specified angle in radians.
+		 *    \see tgt::mat4::createRotation()
+		 *  - "trans <tx> <ty> <tz>" creates a translation matrix with translation (tx,ty,tz)
+		 *  - "scale <sx> [<sy> <sz>]" creates a scaling matrix. if only one coefficient is specified, a uniform scaling
+		 *    is created, otherwise all three scaling factors are used.
+		 *  - if any of the above fails, a warning is emitted and identity is returned
+		 *  - if none of the above cases apply, the name is assumed to be a name of a data handle in the supplied data container,
+		 *    containing an entry of type \a TransformData
+		 */
 		tgt::mat4 processMatrixString(std::string matrixString, DataContainer& data);
+
+		DataContainer * lastdc_;
 
         static const std::string loggerCat_;
     };
