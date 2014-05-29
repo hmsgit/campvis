@@ -40,6 +40,8 @@
 
 #include "core/tools/quadrenderer.h"
 
+#include "modules\openigtlink\datastructures\transformdata.h"
+
 namespace campvis {
     const std::string MprRenderer::loggerCat_ = "CAMPVis.modules.vis.MprRenderer";
 
@@ -48,6 +50,7 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
+		, p_transformationID("transformationID", "Input Transformation", "", DataNameProperty::READ)
         , p_planeNormal("PlaneNormal", "Clipping Plane Normal", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(-1.f), tgt::vec3(1.f), tgt::vec3(.1f), tgt::ivec3(2))
         , p_planeDistance("PlaneDistance", "Clipping Plane Distance", 0.f, -1000.f, 1000.f, 1.f, 1)
         , p_planeSize("PlaneSize", "Clipping Plane Size", 100.f, 0.f, 1000.f, 1.f, 1)
@@ -59,6 +62,7 @@ namespace campvis {
         addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_targetImageID);
         addProperty(p_camera);
+		addProperty(p_transformationID);
         addProperty(p_planeNormal);
         addProperty(p_planeDistance);
         addProperty(p_planeSize);
@@ -96,20 +100,41 @@ namespace campvis {
                 if (abs(tgt::dot(temp, n) > 0.9))
                     temp = tgt::vec3(0.0, 1.0, 0.0);
 
-                tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_planeSize.getValue();
-                tgt::vec3 inPlaneB = tgt::normalize(tgt::cross(n, inPlaneA)) * 0.5f * p_planeSize.getValue();
-                tgt::vec3 base = (n * -p_planeDistance.getValue());
+				tgt::vec3 inPlaneA;
+				tgt::vec3 inPlaneB;
+				tgt::vec3 base;
 
-                // move to image center if wanted
-                if (p_relativeToImageCenter.getValue())
-                    base += img->getParent()->getWorldBounds().center();
+				{
+					ScopedTypedData<TransformData> td(data, p_transformationID.getValue());
+					if (td) 
+                    {
+						// convention for now: the slice in xy plane centered at (0,0,0) is sampled
+						// coordinate system supplied by the transformation
+						tgt::mat4 t = td->getTransform();
+						
+						base = t * tgt::vec3(0, 0, 0);
+                        inPlaneA = tgt::normalize((t * tgt::vec4(1, 0, 0, 0)).xyz()) * 0.5f * p_planeSize.getValue();
+                        inPlaneB = tgt::normalize((t * tgt::vec4(0, 1, 0, 0)).xyz()) * 0.5f * p_planeSize.getValue();
+					}
+					else {
+						inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_planeSize.getValue();
+						inPlaneB = tgt::normalize(tgt::cross(n, inPlaneA)) * 0.5f * p_planeSize.getValue();
+						base = (n * -p_planeDistance.getValue());
 
-                // construct the four texCoords
-                std::vector<tgt::vec3> texCoords;
-                texCoords.push_back(base + inPlaneA + inPlaneB);
-                texCoords.push_back(base - inPlaneA + inPlaneB);
-                texCoords.push_back(base - inPlaneA - inPlaneB);
-                texCoords.push_back(base + inPlaneA - inPlaneB);
+						// move to image center if wanted
+						if (p_relativeToImageCenter.getValue())
+							base += img->getParent()->getWorldBounds().center();
+					}
+				}
+
+				// construct the four texCoords
+				std::vector<tgt::vec3> texCoords;
+
+				texCoords.push_back(base + inPlaneA + inPlaneB);
+				texCoords.push_back(base - inPlaneA + inPlaneB);
+				texCoords.push_back(base - inPlaneA - inPlaneB);
+				texCoords.push_back(base + inPlaneA - inPlaneB);
+
                 FaceGeometry slice(texCoords, texCoords);
 
                 // perform the rendering
