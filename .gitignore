@@ -44,3 +44,6 @@ moc_*.cxx_parameters
 
 # TBB library in ext/
 ext/tbb
+
+# SWIG wrapper code
+*LUA_wrap.cxx

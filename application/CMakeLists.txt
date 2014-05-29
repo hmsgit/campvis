@@ -93,20 +93,24 @@ LIST(APPEND CampvisApplicationSources ${CampvisApplicationFormsHeaders})
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
+SET(CampvisMainLibs campvis-core campvis-modules tgt)
+
+IF(CAMPVIS_ENABLE_SCRIPTING)
+    LIST(APPEND CampvisMainLibs campvis-scripting)
+ENDIF(CAMPVIS_ENABLE_SCRIPTING)
+
 ADD_EXECUTABLE(campvis-application
     ${CampvisApplicationSources} ${CampvisApplicationHeaders}
     ${CampvisApplicationMoc}
 )
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-application campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
-
+TARGET_LINK_LIBRARIES(campvis-application ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationHeaders ${CampvisHome} "")
 ENDIF()
-
 
 IF(CAMPVIS_DEPLOY_SHADERS)
     LIST(APPEND CampvisShaderDirectories "application/glsl")

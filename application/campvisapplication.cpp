@@ -46,6 +46,10 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "modules/pipelinefactory.h"
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+#include "scripting/gen_pipelineregistration.h"
+#endif
+
 namespace campvis {
 
     const std::string CampVisApplication::loggerCat_ = "CAMPVis.application.CampVisApplication";

@@ -16,7 +16,9 @@ OPTION(CAMPVIS_DEBUG                "Activate debug code?"                      
 OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                                     ON)
 OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                                            ON)
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
+OPTION(CAMPVIS_ENABLE_SCRIPTING     "Add support for scripting CAMPVis using Lua"                   OFF)
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
+OPTION(CAMPVIS_BUILD_LIB_LUA        "Build Lua Library"                                             OFF)
 OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   OFF)
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
@@ -45,6 +47,18 @@ IF(CAMPVIS_BUILD_LIB_TGT)
     ADD_SUBDIRECTORY(ext/tgt)
 ENDIF()
 
+IF(CAMPVIS_BUILD_LIB_LUA)
+    # Keep LUA_BUILD_AS_DLL in sync with BUILD_SHARED_LIBS
+    SET(LUA_BUILD_AS_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "Build Lua library as DLL" FORCE)
+
+    ADD_SUBDIRECTORY(ext/lua EXCLUDE_FROM_ALL)
+
+    # If the above command failed, provide a hint how to fix the problem
+    IF(NOT TARGET liblua)
+        MESSAGE(SEND_ERROR "Did you forget to run `git submodule update --init`?")
+    ENDIF(NOT TARGET liblua)
+ENDIF()
+
 IF(CAMPVIS_BUILD_CORE)
     ADD_SUBDIRECTORY(core)
 ENDIF()
@@ -53,6 +67,11 @@ IF(CAMPVIS_BUILD_MODULES)
     ADD_SUBDIRECTORY(modules)
 ENDIF()
 
+
+IF(CAMPVIS_ENABLE_SCRIPTING)
+    ADD_SUBDIRECTORY(scripting)
+    LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_HAS_SCRIPTING")
+ENDIF()
 
 IF(CAMPVIS_BUILD_APPLICATION)
     ADD_SUBDIRECTORY(application)
