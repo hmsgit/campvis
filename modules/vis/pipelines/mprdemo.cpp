@@ -39,6 +39,8 @@ namespace campvis {
         , _imageReader()
         , _mprRenderer(&_canvasSize)
         , _compositor(&_canvasSize)
+        , _trackerPose()
+        , _igtlClient()
         , _trackballEH(0)
     {
         addProperty(_camera);
@@ -47,9 +49,12 @@ namespace campvis {
         addEventListenerToBack(_trackballEH);
 
         addProcessor(&_lsp);
+        addProcessor(&_igtlClient);
         addProcessor(&_imageReader);
+        addProcessor(&_trackerPose);
         addProcessor(&_mprRenderer);
         addProcessor(&_compositor);
+
     }
 
     MprDemo::~MprDemo() {
@@ -60,6 +65,8 @@ namespace campvis {
         AutoEvaluationPipeline::init();
         
         _imageReader.s_validated.connect(this, &MprDemo::onProcessorValidated);
+        _trackerPose.s_validated.connect(this, &MprDemo::onProcessorValidated);
+        _igtlClient.s_validated.connect(this, &MprDemo::onProcessorValidated);
 
         _camera.addSharedProperty(&_mprRenderer.p_camera);
         _mprRenderer.p_targetImageID.setValue("MPR");
@@ -77,6 +84,14 @@ namespace campvis {
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _mprRenderer.p_transferFunction.replaceTF(tf);
+
+        _trackerPose.p_matrixAID.setValue("IGTL.transform.ProbeToTracker");
+        _trackerPose.p_matrixAType.selectByOption("data");
+        _trackerPose.p_matrixBID.setValue("IGTL.transform.ReferenceToTracker");
+        _trackerPose.p_matrixBType.selectByOption("data");
+        _trackerPose.p_matrixBModifiers.setValue("I");
+        _trackerPose.p_targetMatrixID.setValue("ProbeToReference");
+        _trackerPose.p_targetMatrixID.addSharedProperty(&_mprRenderer.p_transformationID);
     }
 
     void MprDemo::deinit() {

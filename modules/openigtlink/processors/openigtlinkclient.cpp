@@ -39,7 +39,7 @@ namespace campvis {
 
     OpenIGTLinkClient::OpenIGTLinkClient() 
         : AbstractProcessor()
-        , p_address("ServerAddress", "Server Address", "127.0.0.1", StringProperty::BASIC_STRING)
+        , p_address("ServerAddress", "Server Address", "127.0.0.1")
         , p_port("ServerPort", "Server Port", 18944, 1, 65535, 1)
         , p_deviceName("ServerDeviceName", "Device Name (empty to accept all)")
         , p_connect("Connect", "Connect to Server")

@@ -31,10 +31,7 @@
 #include <tgt/matrix.h>
 
 #include "core/pipeline/abstractprocessor.h"
-#include "core/properties/buttonproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/stringproperty.h"
+#include "core/properties/allproperties.h"
 
 namespace campvis {
     /**
@@ -51,6 +48,11 @@ namespace campvis {
      */
     class MatrixProcessor : public AbstractProcessor {
     public:
+        enum SourceType {
+            FIXED = 0,
+            DATA = 1
+        };
+
         /// Constructor
         MatrixProcessor();
 
@@ -71,12 +73,17 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        StringProperty p_matrixA;           ///< first Matrix input for the computation. \see MatrixProcessor::processMatrixString()
-		StringProperty p_matrixB;			///< second Matrix input for the computation. \see MatrixProcessor::processMatrixString()
+        GenericOptionProperty<std::string> p_matrixAType;
+        DataNameProperty p_matrixAID;           ///< first Matrix input for the computation. \see MatrixProcessor::processMatrixString()
+        StringProperty p_matrixAString;
+        StringProperty p_matrixAModifiers;  ///< modifier string to be applied to matrix A. \see MatrixProcessor::processModifierString()
+        
 
-		StringProperty p_matrixAModifiers;  ///< modifier string to be applied to matrix A. \see MatrixProcessor::processModifierString()
-		StringProperty p_matrixBModifiers;  ///< modifier string to be applied to matrix B. \see MatrixProcessor::processModifierString()
-       
+        GenericOptionProperty<std::string> p_matrixBType;
+        DataNameProperty p_matrixBID;           ///< first Matrix input for the computation. \see MatrixProcessor::processMatrixString()
+        StringProperty p_matrixBString;
+        StringProperty p_matrixBModifiers;  ///< modifier string to be applied to matrix A. \see MatrixProcessor::processModifierString()
+
         DataNameProperty p_targetMatrixID;   ///< image ID for read image
 
 
@@ -129,7 +136,7 @@ namespace campvis {
 		 */
 		tgt::mat4 processMatrixString(std::string matrixString, DataContainer& data);
 
-		DataContainer * lastdc_;
+		DataContainer * _lastdc;
 
         static const std::string loggerCat_;
     };
