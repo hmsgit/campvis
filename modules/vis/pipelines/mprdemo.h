@@ -76,6 +76,7 @@ namespace campvis {
         RenderTargetCompositor _compositor;
 
 		MatrixProcessor _trackerPose;
+        MatrixProcessor _probeToTip;
         OpenIGTLinkClient _igtlClient;
 
         TrackballNavigationEventListener* _trackballEH;

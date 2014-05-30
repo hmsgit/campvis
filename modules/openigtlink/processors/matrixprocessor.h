@@ -84,7 +84,7 @@ namespace campvis {
         StringProperty p_matrixBString;
         StringProperty p_matrixBModifiers;  ///< modifier string to be applied to matrix A. \see MatrixProcessor::processModifierString()
 
-        DataNameProperty p_targetMatrixID;   ///< image ID for read image
+        DataNameProperty p_targetMatrixID;   ///< name for the output matrix
 
 
 		void DataContainerDataAdded(const std::string& name, const DataHandle& data);
