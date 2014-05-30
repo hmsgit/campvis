@@ -50,21 +50,20 @@ namespace campvis {
         , p_matrixBID("MatrixB_ID", "Matrix B", "matrixB", DataNameProperty::READ)
         , p_matrixBString("MatrixB_String", "Matrix B String", "identity")
         , p_matrixBModifiers("MatrixBModifiers", "Matrix B Modifiers")
-
-        , p_targetMatrixID("TargetMatrixID", "Target Matrix ID", "result.matrix", DataNameProperty::WRITE)
+        , p_targetMatrixID("TargetMatrixID", "Target Matrix ID", "ProbeToReference", DataNameProperty::WRITE)
         , _lastdc(nullptr)
     {
         addProperty(p_matrixAType, INVALID_PROPERTIES);
-        addProperty(p_matrixAID, INVALID_RESULT);
-        addProperty(p_matrixAString, INVALID_RESULT);
-        addProperty(p_matrixAModifiers, INVALID_RESULT);
+        addProperty(p_matrixAID, VALID);
+        addProperty(p_matrixAString, VALID);
+        addProperty(p_matrixAModifiers, VALID);
 
         addProperty(p_matrixBType, INVALID_PROPERTIES);
-        addProperty(p_matrixBID, INVALID_RESULT);
-        addProperty(p_matrixBString, INVALID_RESULT);
-        addProperty(p_matrixBModifiers, INVALID_RESULT);
+        addProperty(p_matrixBID, VALID);
+        addProperty(p_matrixBString, VALID);
+        addProperty(p_matrixBModifiers, VALID);
 
-        addProperty(p_targetMatrixID, INVALID_RESULT);
+        addProperty(p_targetMatrixID, VALID);
 
         invalidate(INVALID_PROPERTIES);
     }
@@ -85,14 +84,14 @@ namespace campvis {
     void MatrixProcessor::updateResult(DataContainer& data) {
         LINFO("Updating Result");
 
-        //if (&data != _lastdc) {
-        //    if (_lastdc) {
-        //        _lastdc->s_dataAdded.disconnect(this);
-        //    }
+        if (&data != _lastdc) {
+            if (_lastdc) {
+                _lastdc->s_dataAdded.disconnect(this);
+            }
 
-        //    data.s_dataAdded.connect(this, &MatrixProcessor::DataContainerDataAdded);
-        //    _lastdc = &data;
-        //}
+            data.s_dataAdded.connect(this, &MatrixProcessor::DataContainerDataAdded);
+            _lastdc = &data;
+        }
 
         tgt::mat4 matA = tgt::mat4::createIdentity();
         if(p_matrixAType.getOptionValue() == "fixed")
