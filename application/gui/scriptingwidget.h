@@ -32,6 +32,8 @@
 #include "application/tools/bufferinglog.h"
 #include "application/gui/loghighlighter.h"
 
+#include <deque>
+
 #include <QComboBox>
 #include <QLabel>
 #include <QWidget>
@@ -65,6 +67,7 @@ namespace campvis {
          */
         void setupGUI();
 
+        bool eventFilter(QObject* obj, QEvent* event);
 
     public slots:
         /**
@@ -77,6 +80,7 @@ namespace campvis {
          */
         void appendMessage(const QString& message);
 
+    private slots:
         /**
          * Delete all messages from the log viewer
          */
@@ -92,6 +96,9 @@ namespace campvis {
         QLineEdit* _editCommand;            ///< Text field to enter Lua commands
         QPushButton* _btnExecute;           ///< Button to execute command
         QPushButton* _btnClear;             ///< Button to clear the console output
+
+        std::deque<QString> _history;       ///< History of executed commands
+        int _currentPosition;            ///< Current position in command history
     };
 }
 

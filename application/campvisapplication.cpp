@@ -59,6 +59,7 @@ namespace campvis {
         , _localContext(0)
         , _mainWindow(0)
         , _errorTexture(nullptr)
+        , _luaVmState(nullptr)
         , _initialized(false)
         , _argc(argc)
         , _argv(argv)
@@ -145,6 +146,30 @@ namespace campvis {
         tgt::TextureReaderTga trt;
         _errorTexture = trt.loadTexture(CAMPVIS_SOURCE_DIR "/application/data/no_input.tga", tgt::Texture::LINEAR);
 
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+        // create and store Lua VM for this very pipeline
+        _luaVmState = new LuaVmState();
+
+        // Let Lua know where CAMPVis modules are located
+        if (! _luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
+            LERROR("Error setting up Lua VM.");
+
+        // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
+        if (! _luaVmState->execString("require(\"campvis\")"))
+            LERROR("Error setting up Lua VM.");
+        if (! _luaVmState->execString("require(\"tgt\")"))
+            LERROR("Error setting up Lua VM.");
+
+        if (! _luaVmState->execString("pipelines = {}"))
+            LERROR("Error setting up Lua VM.");
+
+        if (! _luaVmState->execString("inspect = require 'inspect'"))
+            LERROR("Error setting up Lua VM.");
+
+        _luaVmState->redirectLuaPrint();
+#endif
+
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
         for (int i = 1; i < pipelinesToAdd.size(); ++i) {
@@ -221,7 +246,7 @@ namespace campvis {
         pipeline->setCanvas(canvas);
         painter->setErrorTexture(_errorTexture);
 
-        PipelineRecord pr = { pipeline, painter, nullptr };
+        PipelineRecord pr = { pipeline, painter };
         _pipelines.push_back(pr);
 
         _mainWindow->addVisualizationPipelineWidget(name, canvas);
@@ -232,28 +257,12 @@ namespace campvis {
             makeJobOnHeap<CampVisApplication, tgt::GLCanvas*, AbstractPipeline*>(this, &CampVisApplication::initGlContextAndPipeline, canvas, pipeline), 
             OpenGLJobProcessor::SerialJob);
 
-        // create and store Lua VM for this very pipeline
 #ifdef CAMPVIS_HAS_SCRIPTING
-        LuaVmState* lvs = new LuaVmState();
-
-        // Let Lua know where CAMPVis modules are located
-        if (!lvs->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
-            LERROR("Error setting up Lua VM.");
-
-        // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
-        if (!lvs->execString("require(\"campvis\")"))
-            LERROR("Error setting up Lua VM.");
-        if (!lvs->execString("require(\"tgt\")"))
-            LERROR("Error setting up Lua VM.");
-
-//         if (!lvs->execFile(CAMPVIS_SOURCE_DIR "/application/scripting/inspect.lua"))
-//             LERROR("Error setting up Lua VM.");
-
-        if (!lvs->injectObjectPointer(pipeline, "campvis::AutoEvaluationPipeline *", "pipeline")) {
+        if (! _luaVmState->injectObjectPointerToTable(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", static_cast<int>(_pipelines.size())))
+        //if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", name))
             LERROR("Could not inject the pipeline into the Lua VM.");
-        }
 
-        _pipelines.back()._luaVmState = std::shared_ptr<LuaVmState>(lvs);
+        _luaVmState->execString("inspect(pipelines)");
 #endif
 
         s_PipelinesChanged();
@@ -311,5 +320,10 @@ namespace campvis {
         }
     }
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+    LuaVmState* CampVisApplication::getLuaVmState() {
+        return _luaVmState;
+    }
+#endif
 
 }

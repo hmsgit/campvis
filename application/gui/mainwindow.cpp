@@ -325,10 +325,11 @@ namespace campvis {
     }
 
     void MainWindow::onLuaCommandExecuted(const QString& cmd) {
-        // FIXME: so far just a hack
-        if (! _application->_pipelines.empty()){
-            _application->_pipelines.front()._luaVmState->execString(cmd.toStdString());
+#ifdef CAMPVIS_HAS_SCRIPTING
+        if (_application->getLuaVmState() != nullptr) {
+            _application->getLuaVmState()->execString(cmd.toStdString());
         }
+#endif
     }
 
 }

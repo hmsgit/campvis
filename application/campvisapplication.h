@@ -71,9 +71,6 @@ namespace campvis {
         struct PipelineRecord {
             AbstractPipeline* _pipeline;
             CampVisPainter* _painter;
-#ifdef CAMPVIS_HAS_SCRIPTING
-            std::shared_ptr<LuaVmState> _luaVmState;
-#endif
         };
 
         /**
@@ -138,6 +135,15 @@ namespace campvis {
          */
         void rebuildAllShadersFromFiles();
 
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+        /**
+         * Returns the global LuaVmState of this application.
+         */
+        LuaVmState* getLuaVmState();
+#endif
+
+
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
@@ -165,7 +171,11 @@ namespace campvis {
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
 
+        /// Error texture to show if there is no output found
         tgt::Texture* _errorTexture;
+
+        /// the global LuaVmState of this application
+        LuaVmState* _luaVmState;
 
         /// Flag, whether CampVisApplication was correctly initialized
         bool _initialized;

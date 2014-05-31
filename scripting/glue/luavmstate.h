@@ -73,6 +73,8 @@ namespace campvis {
          */
         std::shared_ptr<GlobalLuaTable> getGlobalTable();
 
+        void redirectLuaPrint();
+
         /**
          * Wraps a C++ object using SWIG and injects it into the Lua state managed by LuaVmState.
          *
@@ -86,7 +88,39 @@ namespace campvis {
          * \return  true if the object was injected into the Lua state successfully, false otherwise
          */
         template<typename T>
-        bool injectObjectPointer(T* objPointer, const std::string& typeName, const std::string& luaVarName);
+        bool injectGlobalObjectPointer(T* objPointer, const std::string& typeName, const std::string& luaVarName);
+
+        /**
+         * Wraps a C++ object using SWIG and injects it into the Lua state managed by LuaVmState.
+         *
+         * SWIG glue for the object to be injected must be loaded (using execFile or execString)
+         * into the Lua state before calling this method or the injection will fail. The Lua VM
+         * doesn't take ownership of the object.
+         *
+         * \param   objPointer      Pointer to the C++ object to inject into the Lua state
+         * \param   typeName        SWIG name of the object's type
+         * \param   luaTableName    Table name in which to store the object in the Lua state
+         * \param   luaTableIndex   Index in the table to store the object in
+         * \return  true if the object was injected into the Lua state successfully, false otherwise
+         */
+        template<typename T>
+        bool injectObjectPointerToTable(T* objPointer, const std::string& typeName, const std::string& luaTableName, int luaTableIndex);
+
+        /**
+         * Wraps a C++ object using SWIG and injects it into the Lua state managed by LuaVmState.
+         *
+         * SWIG glue for the object to be injected must be loaded (using execFile or execString)
+         * into the Lua state before calling this method or the injection will fail. The Lua VM
+         * doesn't take ownership of the object.
+         *
+         * \param   objPointer      Pointer to the C++ object to inject into the Lua state
+         * \param   typeName        SWIG name of the object's type
+         * \param   luaTableName    Table name in which to store the object in the Lua state
+         * \param   luaTableIndex   Index in the table to store the object in
+         * \return  true if the object was injected into the Lua state successfully, false otherwise
+         */
+        template<typename T>
+        bool injectObjectPointerToTableField(T* objPointer, const std::string& typeName, const std::string& luaTableName, const std::string& luaFieldName);
 
         /**
          * Return the Lua state managed by LuaVmState.
@@ -123,7 +157,7 @@ namespace campvis {
     };
 
     template<typename T>
-    bool LuaVmState::injectObjectPointer(T* objPointer, const std::string& typeName, const std::string& luaVarName) {
+    bool LuaVmState::injectGlobalObjectPointer(T* objPointer, const std::string& typeName, const std::string& luaVarName) {
         LuaStateMutexType::scoped_lock lock(_luaStateMutex);
         swig_type_info* objTypeInfo = SWIG_TypeQuery(_luaState, typeName.c_str());
 
@@ -135,7 +169,44 @@ namespace campvis {
             lua_setglobal(_luaState, luaVarName.c_str());
             return true;
         }
-    }
+    };
+
+    template<typename T>
+    bool LuaVmState::injectObjectPointerToTable(T* objPointer, const std::string& typeName, const std::string& luaTableName, int luaTableIndex) {
+        LuaStateMutexType::scoped_lock lock(_luaStateMutex);
+        swig_type_info* objTypeInfo = SWIG_TypeQuery(_luaState, typeName.c_str());
+
+        if (objTypeInfo == nullptr) {
+            std::cerr << "SWIG wrapper for " << typeName << " not found" << std::endl;
+            return false;
+        } else {
+            lua_getglobal(_luaState, luaTableName.c_str());             // push the table name
+            lua_pushnumber(_luaState, luaTableIndex);                   // push the index
+            SWIG_NewPointerObj(_luaState, objPointer, objTypeInfo, 0);  // push the object
+            lua_settable(_luaState, -3);                                // set the table in the VM
+            lua_pop(_luaState, 1);
+            return true;
+        }
+    };
+
+    template<typename T>
+    bool LuaVmState::injectObjectPointerToTableField(T* objPointer, const std::string& typeName, const std::string& luaTableName, const std::string& luaFieldName) {
+        LuaStateMutexType::scoped_lock lock(_luaStateMutex);
+        swig_type_info* objTypeInfo = SWIG_TypeQuery(_luaState, typeName.c_str());
+
+        if (objTypeInfo == nullptr) {
+            std::cerr << "SWIG wrapper for " << typeName << " not found" << std::endl;
+            return false;
+        } else {
+            lua_getglobal(_luaState, luaTableName.c_str());             // push the table name
+            lua_pushstring(_luaState, luaFieldName.c_str());            // push the field name
+            SWIG_NewPointerObj(_luaState, objPointer, objTypeInfo, 0);  // push the object
+            lua_settable(_luaState, -3);                                // set the table in the VM
+            lua_pop(_luaState, 1);
+            return true;
+        }
+    };
+
 }
 
 #endif // LUAVMSTATE_H__

@@ -24,10 +24,17 @@
 
 #include "scriptingwidget.h"
 
+#include <QKeyEvent>
+
 namespace campvis {
 
     ScriptingWidget::ScriptingWidget(QWidget* parent)
         : QWidget(parent)
+        , _consoleDisplay(nullptr)
+        , _editCommand(nullptr)
+        , _btnExecute(nullptr)
+        , _btnClear(nullptr)
+        , _currentPosition(-1)
     {
         setupGUI();
     }
@@ -55,6 +62,7 @@ namespace campvis {
         _consoleDisplay->document()->setDefaultFont(monoFont);
         _editCommand = new QLineEdit(this);
         _editCommand->setPlaceholderText(tr("Enter Lua commands here..."));
+        _editCommand->installEventFilter(this);
         controlsLayout->addWidget(_editCommand);
 
         _btnExecute = new QPushButton(tr("&Execute"), this);
@@ -81,7 +89,33 @@ namespace campvis {
     void ScriptingWidget::execute() {
         QString command = _editCommand->text();
         emit s_commandExecuted(command);
+        _history.push_front(command);
+        _currentPosition = -1;
         _editCommand->clear();
     }
+
+    bool ScriptingWidget::eventFilter(QObject* obj, QEvent* event) {
+        if (obj == _editCommand && event->type() == QEvent::KeyPress) {
+            QKeyEvent* e = static_cast<QKeyEvent*>(event);
+            if (e->key() == Qt::Key_Up && _currentPosition < static_cast<int>(_history.size())-1) {
+                ++_currentPosition;
+                _editCommand->setText(_history[_currentPosition]);
+                return true;
+            }
+            if (e->key() == Qt::Key_Down && _currentPosition >= 0) {
+                --_currentPosition;
+                if (_currentPosition >= 0)
+                    _editCommand->setText(_history[_currentPosition]);
+                else
+                    _editCommand->setText(tr(""));
+
+                return true;
+            }
+        }
+
+        return QObject::eventFilter(obj, event);
+    }
+
+
 
 }
