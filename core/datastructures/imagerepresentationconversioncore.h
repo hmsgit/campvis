@@ -72,6 +72,7 @@ namespace campvis {
         INSTANTIATE_TEMPLATE_N(2);
         INSTANTIATE_TEMPLATE_N(3);
         INSTANTIATE_TEMPLATE_N(4);
+		INSTANTIATE_TEMPLATE_N(6);
 
 
 // = Template definition ==========================================================================
