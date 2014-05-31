@@ -35,6 +35,10 @@
 
 #include "core/datastructures/datacontainer.h"
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+#include "scripting/glue/luavmstate.h"
+#endif
+
 namespace tgt {
     class GLCanvas;
     class QtThreadedCanvas;
@@ -45,6 +49,7 @@ namespace campvis {
     class AbstractPipeline;
     class MainWindow;
     class CampVisPainter;
+    class LuaVmState;
 
     /**
      * The CampVisApplication class wraps Pipelines, Evaluators and Painters all together and takes
@@ -62,6 +67,15 @@ namespace campvis {
     friend class MainWindow;
 
     public:
+        /// Record storing a pipeline together with its painter and Lua VM state.
+        struct PipelineRecord {
+            AbstractPipeline* _pipeline;
+            CampVisPainter* _painter;
+#ifdef CAMPVIS_HAS_SCRIPTING
+            std::shared_ptr<LuaVmState> _luaVmState;
+#endif
+        };
+
         /**
          * Creates a new CampVisApplication.
          * \param   argc        number of passed arguments
@@ -135,9 +149,7 @@ namespace campvis {
 
 
         /// All pipelines 
-        std::vector<AbstractPipeline*> _pipelines;
-        /// All visualisations (i.e. Pipelines with their corresponding painters/canvases)
-        std::vector< std::pair<AbstractPipeline*, CampVisPainter*> > _visualizations;
+        std::vector<PipelineRecord> _pipelines;
 
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;

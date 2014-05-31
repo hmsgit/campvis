@@ -3,17 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 MESSAGE(STATUS "Configuring CAMPVis Scripting")
 
-# Lua
-FIND_PACKAGE(Lua REQUIRED)
-IF(LUA_FOUND)
-    MESSAGE(STATUS "* Found Lua")
-    LIST(APPEND CampvisGlobalDefinitions ${LUA_DEFINITIONS})
-    LIST(APPEND CampvisGlobalIncludeDirs ${LUA_INCLUDE_DIR})
-    LIST(APPEND CampvisGlobalExternalLibs ${LUA_LIBRARY})
-ELSE(LUA_FOUND)
-    MESSAGE(FATAL_ERROR "Lua not found!")
-ENDIF(LUA_FOUND)
-
 # SWIG
 FIND_PACKAGE(SWIG REQUIRED)
 MESSAGE(STATUS "* Found SWIG")
@@ -37,7 +26,8 @@ SET(CampvisLuaModulesDirectory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_IN
 
 # Lua modules will be placed in a sub-directory that won't be picked up by Lua automatically. Let
 # the code know via a #define what that sub-directory is so that it can instruct Lua to search it.
-LIST(APPEND CampvisScriptingDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModulesDirectory}?${CMAKE_SHARED_MODULE_SUFFIX}\"")
+LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModulesDirectory}?${CMAKE_SHARED_MODULE_SUFFIX}\"")
+SET(CampvisGlobalDefinitions "${CampvisGlobalDefinitions}" PARENT_SCOPE)
 
 SET(CampvisBindingDirs ext/tgt core)
 

@@ -69,6 +69,17 @@ ENDIF()
 
 
 IF(CAMPVIS_ENABLE_SCRIPTING)
+    # First, find Lua to setup paths for all projects correctly
+    FIND_PACKAGE(Lua REQUIRED)
+    IF(LUA_FOUND)
+        MESSAGE(STATUS "* Found Lua")
+        LIST(APPEND CampvisGlobalDefinitions ${LUA_DEFINITIONS})
+        LIST(APPEND CampvisGlobalIncludeDirs ${LUA_INCLUDE_DIR})
+        LIST(APPEND CampvisGlobalExternalLibs ${LUA_LIBRARY})
+    ELSE(LUA_FOUND)
+        MESSAGE(FATAL_ERROR "Lua not found!")
+    ENDIF(LUA_FOUND)
+    
     ADD_SUBDIRECTORY(scripting)
     LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_HAS_SCRIPTING")
 ENDIF()

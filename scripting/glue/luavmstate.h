@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <string>
-#include "swigluarun.h"
+#include "scripting/swigluarun.h"
 #include "tbb/recursive_mutex.h"
 
 extern "C" {
