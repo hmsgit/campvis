@@ -256,6 +256,7 @@ namespace campvis {
             default:
                 LWARNING("Ignoring unknown modifier: " << modifiers[pos]);
             }
+            ++pos;
         }
         return result;
     }
