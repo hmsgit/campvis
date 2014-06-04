@@ -146,6 +146,12 @@ namespace campvis {
                 else if (dimensionality == 2)
                     imageOffset = tgt::vec3(tfp.getVec2("Position"), 0.f);
             }
+            if (tfp.hasKey("Offset")) {
+                if (dimensionality == 3)
+                    imageOffset = tfp.getVec3("Offset");
+                else if (dimensionality == 2)
+                    imageOffset = tgt::vec3(tfp.getVec2("Offset"), 0.f);
+            }
             if (tfp.hasKey("VolumePosition")) {
                 if (dimensionality == 3)
                     imageOffset = tfp.getVec3("VolumePosition");
