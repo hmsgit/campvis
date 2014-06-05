@@ -43,6 +43,7 @@ namespace campvis {
         , p_port("ServerPort", "Server Port", 18944, 1, 65535, 1)
         , p_deviceName("ServerDeviceName", "Device Name (empty to accept all)")
         , p_connect("Connect", "Connect to Server")
+        , p_disconnect("Disconnect", "Disconnect from Server")
         , p_receiveImages("ReceiveImages", "Receive IMAGE Messages", false)
         , p_targetImagePrefix("targetImageName", "Target Image Prefix", "IGTL.image.")
         , p_receiveTransforms("ReceiveTransforms", "Receive TRANSFORM Messages", true)
@@ -57,6 +58,7 @@ namespace campvis {
         addProperty(p_deviceName, VALID);
 
         addProperty(p_connect, VALID);
+        addProperty(p_disconnect, VALID);
 
         addProperty(p_receiveTransforms, INVALID_PROPERTIES);
         addProperty(p_receiveImages, INVALID_PROPERTIES);
@@ -76,6 +78,7 @@ namespace campvis {
 
     void OpenIGTLinkClient::init() {
         p_connect.s_clicked.connect(this, &OpenIGTLinkClient::connectToServer);
+        p_disconnect.setVisible(false);
     }
 
     void OpenIGTLinkClient::deinit() {
@@ -92,8 +95,9 @@ namespace campvis {
                 TransformData * td = new TransformData(it->second);
         
                 data.addData(p_targetTransformPrefix.getValue() + it->first, td);
-
+#ifdef IGTL_CLIENT_DEBUGGING
                 LDEBUG("Transform data put into container. ");
+#endif
             }
             _receivedTransforms.clear();
             _transformMutex.unlock();
@@ -107,7 +111,9 @@ namespace campvis {
                 igtl::ImageMessage::Pointer imageMessage = it->second;    
                 WeaklyTypedPointer wtp;
                 wtp._pointer = new uint8_t[imageMessage->GetImageSize()];
+#ifdef IGTL_CLIENT_EBUGGING
                 LDEBUG("Image has " << imageMessage->GetNumComponents() << " components and is of size " << imageMessage->GetImageSize());
+#endif
                 memcpy(wtp._pointer, imageMessage->GetScalarPointer(), imageMessage->GetImageSize());
                 wtp._numChannels = imageMessage->GetNumComponents();
 
@@ -143,6 +149,7 @@ namespace campvis {
                 size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;
                 ImageData* image = new ImageData(dimensionality, size, wtp._numChannels);
                 ImageRepresentationLocal::create(image, wtp);
+
                 image->setMappingInformation(ImageMappingInformation(size, p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
                 data.addData(p_targetImagePrefix.getValue() + it->first, image);
             }
@@ -193,6 +200,8 @@ namespace campvis {
         }
 
         LINFO("Connected to server " << p_address.getValue() << ":" << p_port.getValue());
+
+
 
         start(); //start receiving data in a new thread
 
@@ -355,6 +364,9 @@ namespace campvis {
         headerMsg = igtl::MessageHeader::New();
         ts = igtl::TimeStamp::New();
 
+        p_connect.setVisible(false);
+        p_disconnect.setVisible(true);
+
         while (!_stopExecution && _socket)
         {
             // Initialize receive buffer
@@ -456,5 +468,7 @@ namespace campvis {
         if(_socket)       
             _socket->CloseSocket();
         _socket = nullptr;
+        p_disconnect.setVisible(false);
+        p_connect.setVisible(true);
     }
 }
