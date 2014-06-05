@@ -22,8 +22,6 @@
 // 
 // ================================================================================================
 
-#define CAMPCOM_FAST_SERIALIZATION
-
 #include "matrixprocessor.h"
 
 #include "core/datastructures/imagedata.h"
@@ -53,17 +51,17 @@ namespace campvis {
         , p_targetMatrixID("TargetMatrixID", "Target Matrix ID", "ProbeToReference", DataNameProperty::WRITE)
         , _lastdc(nullptr)
     {
-        addProperty(p_matrixAType, INVALID_PROPERTIES);
-        addProperty(p_matrixAID, VALID);
-        addProperty(p_matrixAString, VALID);
-        addProperty(p_matrixAModifiers, VALID);
+        addProperty(p_matrixAType, INVALID_PROPERTIES | INVALID_RESULT);
+        addProperty(p_matrixAID, INVALID_RESULT);
+        addProperty(p_matrixAString, INVALID_RESULT);
+        addProperty(p_matrixAModifiers, INVALID_RESULT);
 
-        addProperty(p_matrixBType, INVALID_PROPERTIES);
-        addProperty(p_matrixBID, VALID);
-        addProperty(p_matrixBString, VALID);
-        addProperty(p_matrixBModifiers, VALID);
+        addProperty(p_matrixBType, INVALID_PROPERTIES | INVALID_RESULT);
+        addProperty(p_matrixBID, INVALID_RESULT);
+        addProperty(p_matrixBString, INVALID_RESULT);
+        addProperty(p_matrixBModifiers, INVALID_RESULT);
 
-        addProperty(p_targetMatrixID, VALID);
+        addProperty(p_targetMatrixID, INVALID_RESULT);
 
         invalidate(INVALID_PROPERTIES);
     }
@@ -82,7 +80,9 @@ namespace campvis {
     }
 
     void MatrixProcessor::updateResult(DataContainer& data) {
+#ifdef MATRIX_PROCESSOR_DEBUGGING
         LINFO("Updating Result");
+#endif
 
         if (&data != _lastdc) {
             if (_lastdc) {
@@ -115,12 +115,14 @@ namespace campvis {
 
         tgt::mat4 result = matAProcessed * matBProcessed;
 
+#ifdef MATRIX_PROCESSOR_DEBUGGING
         LDEBUG("Matrix A: " << std::endl << matA);
         LDEBUG("Matrix A':" << std::endl << matAProcessed);
         LDEBUG("Matrix B: " << std::endl << matB);
         LDEBUG("Matrix B':" << std::endl << matBProcessed);
         LDEBUG("Result Matrix: " << std::endl << result);
         LDEBUG(std::endl);
+#endif
 
         TransformData * td = new TransformData(result);
 
@@ -131,7 +133,9 @@ namespace campvis {
 
     void MatrixProcessor::updateProperties(DataContainer& dataContainer)
     {
+#ifdef MATRIX_PROCESSOR_DEBUGGING
         LINFO("Updating Properties");
+#endif
         if (p_matrixAType.getOptionValue() == "fixed") {
             p_matrixAID.setVisible(false);
             p_matrixAString.setVisible(true);

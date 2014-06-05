@@ -25,6 +25,8 @@
 #ifndef OPENIGTLINKCLIENT_H__
 #define OPENIGTLINKCLIENT_H__
 
+//#define IGTL_CLIENT_DEBUGGING
+
 #include <string>
 #include <map>
 
@@ -84,6 +86,7 @@ namespace campvis {
         NumericProperty<int> p_port;        ///< server port to connect to
         StringProperty p_deviceName;        ///< IGTL device name (leave empty to accept all)
         ButtonProperty p_connect;           ///< Connect button
+        ButtonProperty p_disconnect;        ///< Disconnect button
 
 
         BoolProperty p_receiveImages;       ///< toggle receiving IMAGE messages

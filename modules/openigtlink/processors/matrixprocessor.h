@@ -25,6 +25,7 @@
 #ifndef MATRIXPROCESSOR_H__
 #define MATRIXPROCESSOR_H__
 
+//#define MATRIX_PROCESSOR_DEBUGGING
 
 #include <string>
 
