@@ -117,8 +117,9 @@ namespace campvis {
 
         _widgetMap.insert(std::make_pair(prop, propWidget));
         _layout->addWidget(propWidget);
-        propWidget->setVisible(prop->isVisible());
+
         prop->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
+        prop->s_visibilityChanged(prop);
     }
 
     void PropertyCollectionWidget::removeProperty(std::map<AbstractProperty*, QWidget*>::iterator it) {
