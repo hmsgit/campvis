@@ -179,6 +179,8 @@ namespace campvis {
         p_voxelSize.setVisible(p_receiveImages.getValue());
         p_targetTransformPrefix.setVisible(p_receiveImages.getValue() || p_receiveTransforms.getValue());
 		p_targetPositionPrefix.setVisible(p_receivePositions.getValue());
+
+        validate(INVALID_PROPERTIES);
     }
 
     void OpenIGTLinkClient::connectToServer() {
