@@ -22,8 +22,8 @@
 // 
 // ================================================================================================
 
-#ifndef POSITIONDATA_H__
-#define POSITIONDATA_H__
+#ifndef TRANSFORMDATA_H__
+#define TRANSFORMDATA_H__
 
 #include "tgt/vector.h"
 
@@ -32,35 +32,33 @@
 namespace campvis {
 
     /**
-     * Abstract base class for data handled by a DataHandle and stored in a DataContainer.
-     * 
-     * \todo 
+     * Data Container class for transforms. Stores a \a tgt::mat4 object.
      */
-    class PositionData : public AbstractData {
+    class TransformData : public AbstractData {
     public:
         /**
          * Constructor, Creates a new light source.
-         * \param   position       The initial position
-         * \param   quaternion     The initial quaternion/orientation
+         * \param   transform       The transformation
          */
-        explicit PositionData(const tgt::vec3& position, const tgt::vec4& quaternion) 
-            : _position(position)
-            , _quaternion(quaternion) 
-        { };
+        explicit TransformData(const tgt::mat4 & transform) 
+            : AbstractData()
+            , _transform(transform) 
+        { 
+        };
 
         /**
          * Virtual destructor
          */
-        virtual ~PositionData() {};
+        virtual ~TransformData() {};
 
         /// \see AbstractData::clone()
-        virtual PositionData* clone() const {
-            return new PositionData(*this);
+        virtual TransformData* clone() const {
+            return new TransformData(*this);
         };
 
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const {
-            return sizeof(PositionData);
+            return sizeof(TransformData);
         };
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const {
@@ -68,35 +66,21 @@ namespace campvis {
         };
 
         /**
-        * Gets the quaternion
-        * \return _quaternion
+        * Gets the transformation
+        * \return _transform
         **/
-        tgt::vec4 getQuaternion() const { return _quaternion; }
-
+        tgt::mat4 getTransform() const { return _transform; }
         /**
-        * Sets the quaternion.
-        * \param val New quaternion matrix
+        * Sets the transformation.
+        * \param _transformation New transformation matrix
         **/
-        void setQuaternion(tgt::vec4 val) { _quaternion = val; }
-        
-        /**
-        * Gets the position
-        * \return _position
-        **/
-        tgt::vec3 getPosition() const { return _position; }
-
-        /**
-        * Sets the position.
-        * \param val New position matrix
-        **/
-        void setPosition(tgt::vec3 val) { _position = val; }
-        
+        void setTransform(const tgt::mat4 & val) { _transform = val; }
+                
 
     protected:
-        tgt::vec3 _position;                ///< the position
-        tgt::vec4 _quaternion;              ///< The orientation quaternion
+        tgt::mat4 _transform;               ///< The transform
     };
 
 }
 
-#endif // POSITION_H__
+#endif // TRANSFORMDATA_H__
