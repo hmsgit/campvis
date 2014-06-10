@@ -63,6 +63,11 @@ namespace campvis {
         if (getCanvas() == 0)
             return;
 
+        if (_copyShader == nullptr) {
+            LERROR("Shader not initialized!");
+            return;
+        }
+
         const tgt::ivec2& size = getCanvas()->getSize();
         glViewport(0, 0, size.x, size.y);
 
@@ -126,7 +131,7 @@ namespace campvis {
             _copyShader->setAttributeLocation(1, "in_TexCoords");
         }
         catch (tgt::Exception& e) {
-            LERRORC("main.cpp", "Encountered tgt::Exception: " << e.what());
+            LFATAL("Encountered tgt::Exception: " << e.what());
         }
     }
 
