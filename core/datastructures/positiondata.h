@@ -41,54 +41,52 @@ namespace campvis {
          * \param   position       The initial position
          * \param   quaternion     The initial quaternion/orientation
          */
-        explicit PositionData(const tgt::vec3 &position, const tgt::vec4 &quaternion = tgt::vec4(0.f, 0.f, 0.f, 0.f) )
-            : AbstractData()
-            , _position(position)
-            , _quaternion(quaternion) 
-        { };
+        explicit PositionData(const tgt::vec3 &position, const tgt::vec4 &quaternion = tgt::vec4(0.f, 0.f, 0.f, 0.f) );;
 
         /**
          * Virtual destructor
          */
-        virtual ~PositionData() {};
+        virtual ~PositionData();;
 
         /// \see AbstractData::clone()
-        virtual PositionData* clone() const {
-            return new PositionData(*this);
-        };
+        virtual PositionData* clone() const;;
 
         /// \see AbstractData::getLocalMemoryFootprint()
-        virtual size_t getLocalMemoryFootprint() const {
-            return sizeof(PositionData);
-        };
+        virtual size_t getLocalMemoryFootprint() const;;
         /// \see AbstractData::getVideoMemoryFootprint()
-        virtual size_t getVideoMemoryFootprint() const {
-            return 0;
-        };
+        virtual size_t getVideoMemoryFootprint() const;;
 
         /**
         * Gets the quaternion
         * \return _quaternion
         **/
-        tgt::vec4 getQuaternion() const { return _quaternion; }
+        tgt::vec4 getQuaternion() const {
+            return _quaternion;
+        }
 
         /**
         * Sets the quaternion.
         * \param val New quaternion vector
         **/
-        void setQuaternion(const tgt::vec4 &val) { _quaternion = val; }
+        void setQuaternion(const tgt::vec4 &val) {
+            _quaternion = val;
+        }
         
         /**
         * Gets the position
         * \return _position
         **/
-        tgt::vec3 getPosition() const { return _position; }
+        tgt::vec3 getPosition() const {
+            return _position;
+        }
 
         /**
         * Sets the position.
         * \param val New position vector
         **/
-        void setPosition(const tgt::vec3 &val) { _position = val; }
+        void setPosition(const tgt::vec3 &val) {
+            _position = val;
+        }
         
 
     protected:

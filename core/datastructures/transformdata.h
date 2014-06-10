@@ -40,41 +40,35 @@ namespace campvis {
          * Constructor, Creates a new light source.
          * \param   transform       The transformation
          */
-        explicit TransformData(const tgt::mat4 & transform) 
-            : AbstractData()
-            , _transform(transform) 
-        { 
-        };
+        explicit TransformData(const tgt::mat4 & transform);
 
         /**
          * Virtual destructor
          */
-        virtual ~TransformData() {};
+        virtual ~TransformData();
 
         /// \see AbstractData::clone()
-        virtual TransformData* clone() const {
-            return new TransformData(*this);
-        };
+        virtual TransformData* clone() const;
 
         /// \see AbstractData::getLocalMemoryFootprint()
-        virtual size_t getLocalMemoryFootprint() const {
-            return sizeof(TransformData);
-        };
+        virtual size_t getLocalMemoryFootprint() const;
         /// \see AbstractData::getVideoMemoryFootprint()
-        virtual size_t getVideoMemoryFootprint() const {
-            return 0;
-        };
+        virtual size_t getVideoMemoryFootprint() const;
 
         /**
         * Gets the transformation
         * \return _transform
         **/
-        tgt::mat4 getTransform() const { return _transform; }
+        tgt::mat4 getTransform() const {
+            return _transform;
+        }
         /**
         * Sets the transformation.
         * \param _transformation New transformation matrix
         **/
-        void setTransform(const tgt::mat4 & val) { _transform = val; }
+        void setTransform(const tgt::mat4 & val) {
+            _transform = val;
+        }
                 
 
     protected:
