@@ -26,7 +26,6 @@ in vec3 ex_TexCoord;
 in vec4 ex_Color;
 out vec4 out_Color;
 
-//#include "tools/background.frag"
 #include "tools/texture2d.frag"
 #include "tools/transferfunction.frag"
 
