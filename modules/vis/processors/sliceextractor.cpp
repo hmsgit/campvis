@@ -348,7 +348,7 @@ namespace campvis {
                     tgt::vec3 imgSize(id->getSize());
 
                     float sliceRatio, ratioRatio;
-                    tgt::svec3 voxel;
+                    tgt::vec3 voxel;
 
                     switch (p_sliceOrientation.getOptionValue()) {
                         case XY_PLANE:
@@ -358,7 +358,7 @@ namespace campvis {
                             posNormalized *= (ratioRatio > 1) ? tgt::vec2(1.f, ratioRatio) : tgt::vec2(1.f / ratioRatio, 1.f);
                             posNormalized = tgt::clamp(posNormalized, 0.f, 1.f);
 
-                            voxel = tgt::clamp(tgt::svec3(static_cast<size_t>(posNormalized.x * imageSize.x), static_cast<size_t>(posNormalized.y * imageSize.y), p_zSliceNumber.getValue()), tgt::svec3(0, 0, 0), imageSize);
+                            voxel = tgt::clamp(tgt::vec3(posNormalized.x * imageSize.x, posNormalized.y * imageSize.y, static_cast<float>(p_zSliceNumber.getValue())), tgt::vec3(0.f), tgt::vec3(imageSize));
                             break;
                         case XZ_PLANE:
                             sliceRatio = (imgSize.x * id->getMappingInformation().getVoxelSize().x) / (imgSize.z * id->getMappingInformation().getVoxelSize().z);
@@ -367,7 +367,7 @@ namespace campvis {
                             posNormalized *= (ratioRatio > 1) ? tgt::vec2(1.f, ratioRatio) : tgt::vec2(1.f / ratioRatio, 1.f);
                             posNormalized = tgt::clamp(posNormalized, 0.f, 1.f);
 
-                            voxel = tgt::clamp(tgt::svec3(static_cast<size_t>(posNormalized.x * imageSize.x), p_ySliceNumber.getValue(), static_cast<size_t>(posNormalized.y * imageSize.z)), tgt::svec3(0, 0, 0), imageSize);
+                            voxel = tgt::clamp(tgt::vec3(posNormalized.x * imageSize.x, static_cast<float>(p_ySliceNumber.getValue()), posNormalized.y * imageSize.z), tgt::vec3(0.f), tgt::vec3(imageSize));
                             break;
                         case YZ_PLANE:
                             sliceRatio = (imgSize.y * id->getMappingInformation().getVoxelSize().y) / (imgSize.z * id->getMappingInformation().getVoxelSize().z);
@@ -376,7 +376,7 @@ namespace campvis {
                             posNormalized *= (ratioRatio > 1) ? tgt::vec2(1.f, ratioRatio) : tgt::vec2(1.f / ratioRatio, 1.f);
                             posNormalized = tgt::clamp(posNormalized, 0.f, 1.f);
 
-                            voxel = tgt::clamp(tgt::svec3(p_xSliceNumber.getValue(), static_cast<size_t>(posNormalized.x * imageSize.y), static_cast<size_t>(posNormalized.y * imageSize.z)), tgt::svec3(0, 0, 0), imageSize);
+                            voxel = tgt::clamp(tgt::vec3(static_cast<float>(p_xSliceNumber.getValue()), posNormalized.x * imageSize.y, posNormalized.y * imageSize.z), tgt::vec3(0.f), tgt::vec3(imageSize));
                             break;
                     }
 
