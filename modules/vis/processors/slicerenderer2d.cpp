@@ -94,8 +94,8 @@ namespace campvis {
              
                 float renderTargetRatio = static_cast<float>(getEffectiveViewportSize().x) / static_cast<float>(getEffectiveViewportSize().y);
 
-                tgt::vec2 topLeft_px(p_cropLeft.getValue(), p_cropTop.getValue());
-                tgt::vec2 bottomRight_px(imgSize.x - p_cropRight.getValue(), imgSize.y - p_cropBottom.getValue());
+                tgt::vec2 topLeft_px(static_cast<float>(p_cropLeft.getValue()), static_cast<float>(p_cropTop.getValue()));
+                tgt::vec2 bottomRight_px(static_cast<float>(imgSize.x - p_cropRight.getValue()), static_cast<float>(imgSize.y - p_cropBottom.getValue()));
                 tgt::vec2 croppedSize = bottomRight_px - topLeft_px;
 
                 float sliceRatio =
@@ -157,7 +157,7 @@ namespace campvis {
         p_transferFunction.setImageHandle(img.getDataHandle());
 
         if (img != 0) {
-            const tgt::svec3& size = img->getSize();
+            tgt::ivec3 size = img->getSize();
 
             /// NOTE: the setMaxValue calls create crashes, probably due to qt threading issues
             //          it is a lot more stable with this _lastImgSize check

@@ -102,7 +102,7 @@ namespace campvis {
         static const std::string loggerCat_;
 
     private:
-        tgt::svec3 _lastImgSize;
+        tgt::ivec3 _lastImgSize;
     };
 
 }
