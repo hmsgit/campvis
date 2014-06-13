@@ -28,7 +28,7 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/stringutils.h"
 
-#include "../datastructures/transformdata.h"
+#include "core/datastructures/transformdata.h"
 
 namespace campvis {
     const std::string MatrixProcessor::loggerCat_ = "CAMPVis.modules.core.MatrixProcessor";

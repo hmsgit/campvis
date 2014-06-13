@@ -24,8 +24,8 @@
 
 #include "openigtlinkclient.h"
 
-#include "../datastructures/transformdata.h"
-#include "../datastructures/positiondata.h"
+#include "core/datastructures/transformdata.h"
+#include "core/datastructures/positiondata.h"
 
 #include <igtlTransformMessage.h>
 #include <igtlPositionMessage.h>

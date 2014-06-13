@@ -34,7 +34,7 @@
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 #include "modules/openigtlink/processors/openigtlinkclient.h"
-#include "modules/openigtlink/processors/matrixprocessor.h"
+#include "modules/base/processors/matrixprocessor.h"
 
 namespace campvis {
     class MprDemo : public AutoEvaluationPipeline {
