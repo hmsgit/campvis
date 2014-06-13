@@ -34,7 +34,7 @@ namespace campvis {
     /**
      * Data Container to store a position and (optional) rotation as quaternion
      */
-    class PositionData : public AbstractData {
+    class CAMPVIS_CORE_API PositionData : public AbstractData {
     public:
         /**
          * Constructor, Creates a new light source.
@@ -46,7 +46,7 @@ namespace campvis {
         /**
          * Virtual destructor
          */
-        virtual ~PositionData();;
+        virtual ~PositionData();
 
         /// \see AbstractData::clone()
         virtual PositionData* clone() const;;

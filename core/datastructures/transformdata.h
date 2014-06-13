@@ -34,7 +34,7 @@ namespace campvis {
     /**
      * Data Container class for transforms. Stores a \a tgt::mat4 object.
      */
-    class TransformData : public AbstractData {
+    class CAMPVIS_CORE_API TransformData : public AbstractData {
     public:
         /**
          * Constructor, Creates a new light source.
