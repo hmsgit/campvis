@@ -40,7 +40,7 @@
 
 #include "core/tools/quadrenderer.h"
 
-#include "modules\openigtlink\datastructures\transformdata.h"
+#include "core/datastructures/transformdata.h"
 
 namespace campvis {
     const std::string MprRenderer::loggerCat_ = "CAMPVis.modules.vis.MprRenderer";

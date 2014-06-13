@@ -62,10 +62,10 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
-    void StreamingOIGTLDemo::onRenderTargetSizeChanged(const AbstractProperty* prop) {
+    void StreamingOIGTLDemo::onRenderTargetSizeChanged(const AbstractProperty *prop) {
     }
 
-    void StreamingOIGTLDemo::onProcessorValidated(AbstractProcessor* processor) {
+    void StreamingOIGTLDemo::onProcessorValidated(AbstractProcessor *processor) {
     }
 
 

@@ -26,7 +26,7 @@
 #define STREAMINGOIGTLDEMO_H__
 
 #include "modules/openigtlink/processors/openigtlinkclient.h"
-#include "modules/openigtlink/processors/matrixprocessor.h"
+#include "modules/base/processors/matrixprocessor.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
 
@@ -36,7 +36,7 @@ namespace campvis {
         /**
          * Creates a AutoEvaluationPipeline.
          */
-        StreamingOIGTLDemo(DataContainer* dc);
+        StreamingOIGTLDemo(DataContainer *dc);
 
         /**
          * Virtual Destructor
@@ -53,7 +53,7 @@ namespace campvis {
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "StreamingOpenIGTLinkDemo"; };
 
-        void onRenderTargetSizeChanged(const AbstractProperty* prop);
+        void onRenderTargetSizeChanged(const AbstractProperty *prop);
 
     protected:
         /**
@@ -61,7 +61,7 @@ namespace campvis {
          * Updates the camera properties, when the input image has changed.
          * \param   processor   The processor that emitted the signal
          */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
+        virtual void onProcessorValidated(AbstractProcessor *processor);
 
         OpenIGTLinkClient _igtlClient;
 		MatrixProcessor _matrixProcessor;
