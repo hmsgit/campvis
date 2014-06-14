@@ -95,14 +95,24 @@ namespace campvis {
         DataNameProperty p_geometryID;                     ///< ID for input geometry
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
-        GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
+        /// orientation of the slice to extract
+        GenericOptionProperty<SliceOrientation> p_sliceOrientation;
+
         IntProperty p_xSliceNumber;                         ///< number of the slice in X direction
         Vec4Property p_xSliceColor;                         ///< color for x marker
         IntProperty p_ySliceNumber;                         ///< number of the slice in Y direction
         Vec4Property p_ySliceColor;                         ///< color for y marker
         IntProperty p_zSliceNumber;                         ///< number of the slice in Z direction
         Vec4Property p_zSliceColor;                         ///< color for z marker
-        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+
+        BoolProperty p_fitToWindow;                         ///< Flag whether fit image to window or use scaling and offset
+        FloatProperty p_scalingFactor;                      ///< Image scaling factor
+        IVec2Property p_offset;                             ///< Image offset
+
+        TransferFunctionProperty p_transferFunction;        ///< Transfer function
+
+        GenericOptionProperty<GLenum> p_geometryRenderMode; ///< Render mode for the geometry
+        FloatProperty p_geometryRenderSize;                 ///< Size of rendered elements
 
     protected:
         /// \see AbstractProcessor::updateResult
