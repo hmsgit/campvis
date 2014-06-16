@@ -28,6 +28,7 @@
 //#define MATRIX_PROCESSOR_DEBUGGING
 
 #include <string>
+#include <set>
 
 #include <tgt/matrix.h>
 
@@ -174,9 +175,11 @@ namespace campvis {
         */
         void parseString(const std::string & parserInput, DataContainer & dc);
 
-		DataContainer * _lastdc;
-
         static const std::string loggerCat_;
+
+    private:
+        DataContainer * _lastdc;
+        std::set<std::string> _dataDependencies; ///< set of data container element names that the current formula depends on
     };
 
 }
