@@ -40,6 +40,8 @@ namespace campvis {
 
     MatrixProcessor::MatrixProcessor()
         : AbstractProcessor()
+        , p_parserMode("parsermode", "Enable Parser Mode (Experimental!)", false)
+        , p_parserInputString("parserInput", "Parser Input")
         , p_matrixAType("MatrixA_Type", "Matrix A Source", typeOptions, 2)
         , p_matrixAID("MatrixA_ID", "Matrix A", "matrixA", DataNameProperty::READ)
         , p_matrixAString("MatrixA_String", "Matrix A String", "identity")
@@ -51,6 +53,9 @@ namespace campvis {
         , p_targetMatrixID("TargetMatrixID", "Target Matrix ID", "ProbeToReference", DataNameProperty::WRITE)
         , _lastdc(nullptr)
     {
+        addProperty(p_parserMode, INVALID_PROPERTIES);
+        addProperty(p_parserInputString, INVALID_RESULT);
+
         addProperty(p_matrixAType, INVALID_PROPERTIES | INVALID_RESULT);
         addProperty(p_matrixAID, INVALID_RESULT);
         addProperty(p_matrixAString, INVALID_RESULT);
@@ -93,40 +98,45 @@ namespace campvis {
             _lastdc = &data;
         }
 
-        tgt::mat4 matA = tgt::mat4::createIdentity();
-        if(p_matrixAType.getOptionValue() == "fixed")
-            matA = processMatrixString(p_matrixAString.getValue(), data);
-        else {
-            ScopedTypedData<TransformData> td(data, p_matrixAID.getValue());
-            if (td != 0) matA = td->getTransform();
+        if (p_parserMode.getValue()) {
+            parseString(p_parserInputString.getValue(), data);
         }
-        
-        tgt::mat4 matB = tgt::mat4::createIdentity();
-        if (p_matrixBType.getOptionValue() == "fixed")
-            matB = processMatrixString(p_matrixBString.getValue(), data);
         else {
-            ScopedTypedData<TransformData> td(data, p_matrixBID.getValue());
-            if (td != 0) matB = td->getTransform();
-        }
+            tgt::mat4 matA = tgt::mat4::createIdentity();
+            if (p_matrixAType.getOptionValue() == "fixed")
+                matA = processMatrixString(p_matrixAString.getValue(), data);
+            else {
+                ScopedTypedData<TransformData> td(data, p_matrixAID.getValue());
+                if (td != 0) matA = td->getTransform();
+            }
 
-        tgt::mat4 matAProcessed = processModifierString(matA, p_matrixAModifiers.getValue());
-        tgt::mat4 matBProcessed = processModifierString(matB, p_matrixBModifiers.getValue());
+            tgt::mat4 matB = tgt::mat4::createIdentity();
+            if (p_matrixBType.getOptionValue() == "fixed")
+                matB = processMatrixString(p_matrixBString.getValue(), data);
+            else {
+                ScopedTypedData<TransformData> td(data, p_matrixBID.getValue());
+                if (td != 0) matB = td->getTransform();
+            }
+
+            tgt::mat4 matAProcessed = processModifierString(matA, p_matrixAModifiers.getValue());
+            tgt::mat4 matBProcessed = processModifierString(matB, p_matrixBModifiers.getValue());
 
 
-        tgt::mat4 result = matAProcessed * matBProcessed;
+            tgt::mat4 result = matAProcessed * matBProcessed;
 
 #ifdef MATRIX_PROCESSOR_DEBUGGING
-        LDEBUG("Matrix A: " << std::endl << matA);
-        LDEBUG("Matrix A':" << std::endl << matAProcessed);
-        LDEBUG("Matrix B: " << std::endl << matB);
-        LDEBUG("Matrix B':" << std::endl << matBProcessed);
-        LDEBUG("Result Matrix: " << std::endl << result);
-        LDEBUG(std::endl);
+            LDEBUG("Matrix A: " << std::endl << matA);
+            LDEBUG("Matrix A':" << std::endl << matAProcessed);
+            LDEBUG("Matrix B: " << std::endl << matB);
+            LDEBUG("Matrix B':" << std::endl << matBProcessed);
+            LDEBUG("Result Matrix: " << std::endl << result);
+            LDEBUG(std::endl);
 #endif
 
-        TransformData * td = new TransformData(result);
+            TransformData * td = new TransformData(result);
 
-        data.addData(p_targetMatrixID.getValue(), td);
+            data.addData(p_targetMatrixID.getValue(), td);
+        }
 
         validate(INVALID_RESULT);
     }
@@ -136,28 +146,45 @@ namespace campvis {
 #ifdef MATRIX_PROCESSOR_DEBUGGING
         LINFO("Updating Properties");
 #endif
-        if (p_matrixAType.getOptionValue() == "fixed") {
-            p_matrixAID.setVisible(false);
-            p_matrixAString.setVisible(true);
-        }
-        else {
-            p_matrixAID.setVisible(true);
-            p_matrixAString.setVisible(false);
-        }
+        bool pmode = p_parserMode.getValue();
+        p_parserInputString.setVisible(pmode);
 
-        if (p_matrixBType.getOptionValue() == "fixed") {
-            p_matrixBID.setVisible(false);
-            p_matrixBString.setVisible(true);
-        }
-        else {
-            p_matrixBID.setVisible(true);
-            p_matrixBString.setVisible(false);
+        p_matrixAType.setVisible(!pmode);
+        p_matrixAID.setVisible(!pmode);
+        p_matrixAString.setVisible(!pmode);
+        p_matrixAModifiers.setVisible(!pmode);
+
+        p_matrixBType.setVisible(!pmode);
+        p_matrixBID.setVisible(!pmode);
+        p_matrixBString.setVisible(!pmode);
+        p_matrixBModifiers.setVisible(!pmode);
+
+        p_targetMatrixID.setVisible(!pmode);
+
+        if(!pmode) {
+            if (p_matrixAType.getOptionValue() == "fixed") {
+                p_matrixAID.setVisible(false);
+                p_matrixAString.setVisible(true);
+            }
+            else {
+                p_matrixAID.setVisible(true);
+                p_matrixAString.setVisible(false);
+            }
+
+            if (p_matrixBType.getOptionValue() == "fixed") {
+                p_matrixBID.setVisible(false);
+                p_matrixBString.setVisible(true);
+            }
+            else {
+                p_matrixBID.setVisible(true);
+                p_matrixBString.setVisible(false);
+            }
         }
 
         validate(INVALID_PROPERTIES);
     }
 
-    tgt::mat4 MatrixProcessor::processMatrixString(std::string matrixString, DataContainer& data)
+    tgt::mat4 MatrixProcessor::processMatrixString(std::string matrixString, DataContainer& data, std::map<std::string, tgt::mat4> *localDefs)
     {
         std::vector<std::string> tokens = StringUtils::split(matrixString, " ");
 
@@ -220,6 +247,14 @@ namespace campvis {
         }
         // if we cannot find another pattern, we assume we have a data container ID
         else {
+            // see if we can find the matrix in the local definitions
+            if (localDefs) {
+                auto pos = localDefs->find(matrixString);
+                if (pos != localDefs->end()) {
+                    return pos->second;
+                }
+            }
+
             ScopedTypedData<TransformData> td(data, matrixString);
             if (td == 0) {
                 LWARNING("Data Container ID \"" << matrixString << "\" was not suitable as input Matrix");
@@ -263,6 +298,74 @@ namespace campvis {
             ++pos;
         }
         return result;
+    }
+
+
+    void MatrixProcessor::parseString(const std::string & parserInput, DataContainer & dc)
+    {
+        std::map<std::string, tgt::mat4> results;
+
+        std::vector<std::string> equations = StringUtils::split(parserInput, ";");
+
+        //evaluate every assignment
+        for (size_t i = 0, nEq = equations.size(); i != nEq; ++i)
+        {
+            std::string & eqn = equations[i];
+            try {
+                //skip empty equations
+                if (!eqn.size()) continue;
+
+                //LDEBUG("Equation: " << eqn);
+
+                size_t equal_pos = eqn.find('=', 0);
+                if (equal_pos == std::string::npos) {
+                    LWARNING("No equal sign in equation \"" << eqn << "\". Skipping this assignment.");
+                    continue;
+                }
+
+                std::string assignedMatName = eqn.substr(0, equal_pos);
+                std::string formulaToEvaluate = eqn.substr(equal_pos + 1, std::string::npos);
+                //LDEBUG("Matrix Name: " << assignedMatName << ". Formula: " << formulaToEvaluate);
+
+                //split formulaToEvaluate by the multiplications
+                tgt::mat4 assignedResult = tgt::mat4::identity;
+                std::vector<std::string> multiplicands = StringUtils::split(formulaToEvaluate, "*");
+                for (size_t m = 0, nMul = multiplicands.size(); m != nMul; ++m)
+                {
+                    std::string & matStrCombined = multiplicands[m];
+                    //parse multiplicands of form "[<MatrixString>]_<Modifiers>"
+                    size_t delimPos = matStrCombined.find("]");
+
+                    if (!(matStrCombined[0] == '[') || delimPos == std::string::npos) {
+                        LWARNING("Error parsing matrix part \"" << matStrCombined << "\": Delimiters not found! Ignoring multiplicand..");
+                        continue;
+                    }
+
+                    std::string matStr = matStrCombined.substr(1, delimPos - 1);
+                    std::string modifiers = delimPos + 2 > matStrCombined.size() ? ""
+                        : matStrCombined.substr(delimPos + 2, std::string::npos);
+                    //LDEBUG("Matrix String: " << matStr << " Modifiers: " << modifiers);
+
+                    //evaluate matrix and and multiply to the result
+                    tgt::mat4 multiplicand = processMatrixString(matStr, dc, &results);
+                    assignedResult *= processModifierString(multiplicand, modifiers);
+                }
+
+                //save result into result map
+                results[assignedMatName] = assignedResult;
+            }
+            catch (std::exception &e) {
+                LWARNING("Exception while parsing equation \"" << eqn << "\": " << e.what());
+            }
+        }
+
+        // put all results into the data container
+        // matrix names beginning with an underscore are skipped
+        for (auto it = results.begin(), end = results.end(); it != end; ++it) {
+            if (it->first[0] != '_') {
+                dc.addData(it->first, new TransformData(it->second));
+            }
+        }
     }
 
     void MatrixProcessor::DataContainerDataAdded(const std::string &name, const DataHandle &data)
