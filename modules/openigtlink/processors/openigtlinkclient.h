@@ -37,6 +37,7 @@
 
 #include <tgt/matrix.h>
 
+#include <tbb/compat/thread>
 #include <tbb/atomic.h>
 #include <tbb/mutex.h>
 
@@ -45,7 +46,6 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
-#include "core/tools/runnable.h"
 #include "core/datastructures/imagedata.h"
 
 
@@ -56,7 +56,7 @@ namespace campvis {
      * and p_receiveImage and puts them into the received data into the respective data containers.
      * This Class contains modified code from the OpenIGTLink ReceiveClient example.
      */
-    class OpenIGTLinkClient : public AbstractProcessor, public Runnable {
+    class OpenIGTLinkClient : public AbstractProcessor {
     public:
         /**
          * Constructs a new CampcomMhdReceiver Processor
@@ -111,7 +111,7 @@ namespace campvis {
         virtual void updateProperties(DataContainer& dataContainer);
 
         /// Callback slot for connect button. can also be called from outside.
-        void connectToServer();
+        void connect();
         /// Callback slot for disconnect button. can also be called from outside.
         void disconnect();
         
@@ -122,9 +122,9 @@ namespace campvis {
             tgt::vec4 _quaternion;
         };
 
-        /// Implements the \a Runnable::run() method to execute a new thread. The new thread will
+        /// Main method for the receiver thread. The new thread will
         /// go into a receive loop to receive the OpenIGTLink messages asynchronously
-        virtual void run();
+        virtual void runReceiverThread();
 
         /// Receive a TRANSFORM message from the OpenIGTLink socket and put the data into the local buffers
         int ReceiveTransform(igtl::Socket* socket, igtl::MessageHeader::Pointer& header);
@@ -135,7 +135,7 @@ namespace campvis {
         /// Receive a IMAGE message from the OpenIGTLink socket and put into the local buffers
         int ReceiveImage(igtl::Socket* socket, igtl::MessageHeader::Pointer& header);
 
-        //connection
+        //igtl connection
         igtl::ClientSocket::Pointer _socket;
         
         //data
@@ -143,11 +143,23 @@ namespace campvis {
         std::map<std::string, igtl::ImageMessage::Pointer> _receivedImages;  ///< the image messages received by the igtl worker thread, mapped by device name
         std::map<std::string, PositionMessageData> _receivedPositions; ///< position message data received by the igtl worker thread, mapped by device name        
 
-        tbb::mutex _transformMutex;                             ///< mutex to control access to the _receivedTransforms pointer
-        tbb::mutex _imageMutex;                                 ///< mutex to control access to the _receivedImages pointer
+        tbb::mutex _transformMutex;                             ///< mutex to control access to _receivedTransforms
+        tbb::mutex _imageMutex;                                 ///< mutex to control access to _receivedImages
         tbb::mutex _positionMutex;                              ///< mutex to control access to _receivedPositions
 
         static const std::string loggerCat_;
+
+        // this is thread management stuff
+        // very similar to the Runnable base class
+    private:
+        /// Start the receiver thread
+        void startReceiver();
+        /// stop the receiver thread
+        void stopReceiver();
+
+        tbb::atomic<bool> _stopExecution;       ///< Flag whether the thread should stop
+        std::thread* _receiverThread;                    ///< Thread of the Runnable
+        tbb::atomic<bool> _receiverRunning;
     };
 
 }
