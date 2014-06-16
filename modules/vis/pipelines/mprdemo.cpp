@@ -39,9 +39,6 @@ namespace campvis {
         , _imageReader()
         , _mprRenderer(&_canvasSize)
         , _compositor(&_canvasSize)
-        , _trackerPose()
-        , _probeToTip()
-        , _igtlClient()
         , _trackballEH(0)
     {
         addProperty(_camera);
@@ -50,14 +47,9 @@ namespace campvis {
         addEventListenerToBack(_trackballEH);
 
         addProcessor(&_lsp);
-
         addProcessor(&_imageReader);
-        addProcessor(&_compositor);
         addProcessor(&_mprRenderer);
-        addProcessor(&_igtlClient);
-        addProcessor(&_trackerPose);
-        addProcessor(&_probeToTip);
-
+        addProcessor(&_compositor);
     }
 
     MprDemo::~MprDemo() {
@@ -85,21 +77,6 @@ namespace campvis {
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _mprRenderer.p_transferFunction.replaceTF(tf);
-
-        _trackerPose.p_matrixAID.setValue("IGTL.transform.ProbeToTracker");
-        _trackerPose.p_matrixAType.selectByOption("data");
-        _trackerPose.p_matrixBID.setValue("IGTL.transform.ReferenceToTracker");
-        _trackerPose.p_matrixBType.selectByOption("data");
-        // _trackerPose.p_matrixBModifiers.setValue("I");
-        _trackerPose.p_targetMatrixID.setValue("ProbeToReference");
-
-        //this is the Image->Probe matrix from the TRUS config file
-        _probeToTip.p_matrixAString.setValue("0.13758 0.0266467 0.00606382 -310.999 0.00447841 0.00887565 -0.137823 -18.5525 -0.0272137 0.133125 0.00797508 -105.741 0 0 0 1");
-        _probeToTip.p_matrixBID.setValue("ProbeToReference");
-        _probeToTip.p_matrixBType.selectByOption("data");
-        _probeToTip.p_targetMatrixID.setValue("TipToReference");
-
-        _probeToTip.p_targetMatrixID.addSharedProperty(&_mprRenderer.p_transformationID);
     }
 
     void MprDemo::deinit() {

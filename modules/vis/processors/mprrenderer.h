@@ -72,8 +72,6 @@ namespace campvis {
 
         CameraProperty p_camera;
 
-		DataNameProperty p_transformationID;			///< transformation id for input transformation
-
         Vec3Property p_planeNormal;                     ///< Clipping plane normal
         FloatProperty p_planeDistance;                  ///< Clipping plane distance
         FloatProperty p_planeSize;                      ///< Size of clipping plane

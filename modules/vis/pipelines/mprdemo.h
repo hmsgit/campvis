@@ -33,9 +33,6 @@
 #include "modules/vis/processors/mprrenderer.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
 
-#include "modules/openigtlink/processors/openigtlinkclient.h"
-#include "modules/base/processors/matrixprocessor.h"
-
 namespace campvis {
     class MprDemo : public AutoEvaluationPipeline {
     public:
@@ -74,10 +71,6 @@ namespace campvis {
         MhdImageReader _imageReader;
         MprRenderer _mprRenderer;
         RenderTargetCompositor _compositor;
-
-		MatrixProcessor _trackerPose;
-        MatrixProcessor _probeToTip;
-        OpenIGTLinkClient _igtlClient;
 
         TrackballNavigationEventListener* _trackballEH;
 
