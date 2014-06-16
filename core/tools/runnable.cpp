@@ -43,8 +43,7 @@ namespace campvis {
         if (_running)
             stop();
 
-        if (_thread)
-	        delete _thread;
+	    delete _thread;
     }
 
     void Runnable::stop() {
