@@ -66,7 +66,7 @@ namespace campvis {
         , p_ySliceColor("YSliceColor", "Y Slice Color", tgt::vec4(0.f, 1.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , p_zSliceNumber("ZSliceNumber", "Z Slice Number", 0, 0, 0)
         , p_zSliceColor("ZSliceColor", "Z Slice Color", tgt::vec4(0.f, 0.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
-        , p_fitToWindow("FitToWindow", "Fit to Window", false)
+        , p_fitToWindow("FitToWindow", "Fit to Window", true)
         , p_scalingFactor("ScalingFactor", "Scaling Factor", 1.f, 0.f, 10.f, .1f, 2)
         , p_offset("Offset", "Offset", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(100))
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
