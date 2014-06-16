@@ -508,6 +508,7 @@ namespace campvis {
                 _receiverThread->join();
 
             _receiverRunning = false;
+            delete _receiverThread;
         }
         catch (std::exception& e) {
             LERRORC("CAMPVis.modules.base.MatrixProcessor", "Caught exception during _thread.join: " << e.what());
