@@ -54,7 +54,7 @@ namespace campvis {
         , _lastdc(nullptr)
     {
         addProperty(p_parserMode, INVALID_PROPERTIES);
-        addProperty(p_parserInputString, INVALID_RESULT);
+        addProperty(p_parserInputString, INVALID_PROPERTIES | INVALID_RESULT);
 
         addProperty(p_matrixAType, INVALID_PROPERTIES | INVALID_RESULT);
         addProperty(p_matrixAID, INVALID_RESULT);
@@ -179,6 +179,15 @@ namespace campvis {
                 p_matrixBID.setVisible(true);
                 p_matrixBString.setVisible(false);
             }
+        }
+
+        //update the data name dependencies
+        _dataDependencies.clear();
+        auto l1 = StringUtils::split(p_parserInputString.getValue(), "[");
+        for (size_t i = 1, s = l1.size(); i < s; ++i) {
+            auto l2 = StringUtils::split(l1[i], "]");
+            LDEBUG("Data Name: " << l2[0]);
+            _dataDependencies.insert(l2[0]);
         }
 
         validate(INVALID_PROPERTIES);
@@ -370,7 +379,13 @@ namespace campvis {
 
     void MatrixProcessor::DataContainerDataAdded(const std::string &name, const DataHandle &data)
     {
-        if (name == p_matrixAID.getValue() || name == p_matrixBID.getValue())
-            invalidate(INVALID_RESULT);
+        if (p_parserMode.getValue()) {
+            if (_dataDependencies.find(name) != _dataDependencies.end())
+                invalidate(INVALID_RESULT);
+        }
+        else {
+            if (name == p_matrixAID.getValue() || name == p_matrixBID.getValue())
+                invalidate(INVALID_RESULT);
+        }
     }
 }
