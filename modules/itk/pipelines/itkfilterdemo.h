@@ -31,6 +31,7 @@
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/itk/processors/itkimagefilter.h"
 #include "modules/vis/processors/volumeexplorer.h"
+#include "modules/itk/processors/itkreader.h"
 
 
 namespace campvis {
@@ -58,7 +59,7 @@ namespace campvis {
 
     protected:
         LightSourceProvider _lsp;
-        MhdImageReader _imageReader;
+        ItkReader _imageReader;
         ItkImageFilter _itkFilter;
         VolumeExplorer _ve;
     };
