@@ -60,6 +60,9 @@ namespace campvis {
 
         StringProperty p_url;
 
+        BoolProperty p_imageSeries;
+        StringProperty p_lastUrl;
+
         DataNameProperty p_targetImageID;   ///< ID for output image
 
     protected:
@@ -67,6 +70,12 @@ namespace campvis {
         virtual void updateResult(DataContainer& data);
 
         static const std::string loggerCat_;
+
+    private:
+        void ReadImageDirect(DataContainer& data);
+        void ReadImageSeries(DataContainer& data);
+
+        std::vector<std::string> GetImageFileNames();
     };
 
 }
