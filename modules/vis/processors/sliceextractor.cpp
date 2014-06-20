@@ -128,7 +128,7 @@ namespace campvis {
                 float foo = 0.f;
 
                 tgt::ivec2 viewportSize = getEffectiveViewportSize();
-                tgt::vec2 imageSize;
+                tgt::vec2 imageSize(0.f);
                 float renderTargetRatio = static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y);
                 
                 switch (p_sliceOrientation.getValue()) {
@@ -377,7 +377,7 @@ namespace campvis {
                     tgt::vec2 posNormalized = tgt::vec2(static_cast<float>(me->x()), static_cast<float>(me->y())) / tgt::vec2(_viewportSizeProperty->getValue());
                     tgt::vec3 imgSize(id->getSize());
 
-                    tgt::vec2 imageSize;
+                    tgt::vec2 imageSize(0.f);
                     switch (p_sliceOrientation.getOptionValue()) {
                         case XY_PLANE:
                             imageSize = tgt::vec2((static_cast<float>(imgSize.x) * id->getMappingInformation().getVoxelSize().x),

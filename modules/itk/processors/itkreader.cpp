@@ -100,7 +100,7 @@ namespace campvis {
             tgt::ivec3 size_i(1);
 
             //we assured above that numDimensions is < 3
-            for (int i = 0; i < numDimensions; i++) {
+            for (int i = 0; i < static_cast<int>(numDimensions); i++) {
                 size_i[i] = imageIO->GetDimensions(i);
                 imageOffset[i] = imageIO->GetOrigin(i);
                 voxelSize[i] = imageIO->GetSpacing(i);
@@ -162,7 +162,7 @@ namespace campvis {
                 imageIO->Read(inputBuf);
 
                 double * dptr = inputBuf;
-                float * fptr = reinterpret_cast<float*>(wtp._pointer);
+                float * fptr = static_cast<float*>(wtp._pointer);
                 for (int i = 0, s = imageIO->GetImageSizeInComponents(); i < s; ++i) {
                     *fptr = *dptr;
                     fptr++;
@@ -224,7 +224,7 @@ namespace campvis {
             tgt::ivec3 size_i(1);
 
             //we assured above that numDimensions is < 3
-            for (int i = 0; i < numDimensions; i++) {
+            for (int i = 0; i < static_cast<int>(numDimensions); i++) {
                 size_i[i] = imageIO->GetDimensions(i);
                 imageOffset[i] = imageIO->GetOrigin(i);
                 voxelSize[i] = imageIO->GetSpacing(i);
@@ -279,10 +279,10 @@ namespace campvis {
             imageIO->SetIORegion(ioRegion);
 
             //allocate a temporary buffer if necessary
-            double * inputBuf = (pixelType == ScalarPixelType::DOUBLE) ? new double[imageIO->GetImageSizeInComponents()] : nullptr;
+            double* inputBuf = (pixelType == ScalarPixelType::DOUBLE) ? new double[imageIO->GetImageSizeInComponents()] : nullptr;
             size_t sliceSize = (pixelType == ScalarPixelType::DOUBLE) ? imageIO->GetImageSizeInComponents() * sizeof(float) : imageIO->GetImageSizeInBytes();
             wtp._pointer = new uint8_t[numSlices * sliceSize];
-            for(size_t idx=0; idx < numSlices; idx++) {
+            for (int idx = 0; idx < numSlices; ++idx) {
                 itk::ImageIOBase::Pointer fileIO = imageIO;
                     //itk::ImageIOFactory::CreateImageIO(imageFileNames[idx].c_str(), itk::ImageIOFactory::ReadMode);
                 fileIO->SetFileName(imageFileNames[idx]);
@@ -292,13 +292,13 @@ namespace campvis {
                 size_t currentSliceSize = (pixelType == ScalarPixelType::DOUBLE) ? imageIO->GetImageSizeInComponents() * sizeof(float) : fileIO->GetImageSizeInBytes();
                 if (currentSliceSize != sliceSize) {
                     LERROR("Image " << imageFileNames[idx] << " has different dimensionality or data type!");
-                    delete wtp._pointer;
+                    delete static_cast<uint8_t*>(wtp._pointer);
                     delete inputBuf;
                     wtp._pointer = nullptr;
                     return;
                 }
 
-                uint8_t * sliceBuffer = reinterpret_cast<uint8_t*>(wtp._pointer) + idx * sliceSize;
+                uint8_t* sliceBuffer = static_cast<uint8_t*>(wtp._pointer) + idx * sliceSize;
 
                 if (pixelType != ScalarPixelType::DOUBLE) {
                     // directly read slice into buffer
@@ -308,8 +308,8 @@ namespace campvis {
                     //convert float volume to double volume
                     fileIO->Read(inputBuf);
 
-                    double * dptr = inputBuf;
-                    float * fptr = reinterpret_cast<float*>(sliceBuffer);
+                    double* dptr = inputBuf;
+                    float* fptr = static_cast<float*>(sliceBuffer);
                     for (int i = 0, s = fileIO->GetImageSizeInComponents(); i < s; ++i) {
                         *fptr = static_cast<float>(*dptr);
                         fptr++;

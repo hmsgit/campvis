@@ -106,7 +106,6 @@ namespace campvis {
                 float ratioRatio = sliceRatio / renderTargetRatio;
                 tgt::mat4 viewMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
                 viewMatrix.t11 *= -1;
-                tgt::mat4 originalViewMatrix = viewMatrix;
 
                 // prepare OpenGL
                 _shader->activate();
