@@ -309,7 +309,7 @@ namespace campvis {
                     fileIO->Read(inputBuf);
 
                     double* dptr = inputBuf;
-                    float* fptr = static_cast<float*>(sliceBuffer);
+                    float* fptr = reinterpret_cast<float*>(sliceBuffer);
                     for (int i = 0, s = fileIO->GetImageSizeInComponents(); i < s; ++i) {
                         *fptr = static_cast<float>(*dptr);
                         fptr++;
