@@ -51,6 +51,7 @@ namespace campvis {
         , p_matrixBString("MatrixB_String", "Matrix B String", "identity")
         , p_matrixBModifiers("MatrixBModifiers", "Matrix B Modifiers")
         , p_targetMatrixID("TargetMatrixID", "Target Matrix ID", "ProbeToReference", DataNameProperty::WRITE)
+        , p_cameraProperty("Camera", "Exported Camera")
         , _lastdc(nullptr)
     {
         addProperty(p_parserMode, INVALID_PROPERTIES);
@@ -67,6 +68,8 @@ namespace campvis {
         addProperty(p_matrixBModifiers, INVALID_RESULT);
 
         addProperty(p_targetMatrixID, INVALID_RESULT);
+
+        addProperty(p_cameraProperty, VALID);
 
         invalidate(INVALID_PROPERTIES);
     }
@@ -186,7 +189,7 @@ namespace campvis {
         auto l1 = StringUtils::split(p_parserInputString.getValue(), "[");
         for (size_t i = 1, s = l1.size(); i < s; ++i) {
             auto l2 = StringUtils::split(l1[i], "]");
-            LDEBUG("Data Name: " << l2[0]);
+            //LDEBUG("Data Name: " << l2[0]);
             _dataDependencies.insert(l2[0]);
         }
 
@@ -319,7 +322,7 @@ namespace campvis {
         //evaluate every assignment
         for (size_t i = 0, nEq = equations.size(); i != nEq; ++i)
         {
-            std::string & eqn = equations[i];
+            std::string eqn = campvis::StringUtils::trim(equations[i]);
             try {
                 //skip empty equations
                 if (!eqn.size()) continue;
@@ -332,8 +335,8 @@ namespace campvis {
                     continue;
                 }
 
-                std::string assignedMatName = eqn.substr(0, equal_pos);
-                std::string formulaToEvaluate = eqn.substr(equal_pos + 1, std::string::npos);
+                std::string assignedMatName = campvis::StringUtils::trim(eqn.substr(0, equal_pos));
+                std::string formulaToEvaluate = campvis::StringUtils::trim(eqn.substr(equal_pos + 1, std::string::npos));
                 //LDEBUG("Matrix Name: " << assignedMatName << ". Formula: " << formulaToEvaluate);
 
                 //split formulaToEvaluate by the multiplications
@@ -341,7 +344,7 @@ namespace campvis {
                 std::vector<std::string> multiplicands = StringUtils::split(formulaToEvaluate, "*");
                 for (size_t m = 0, nMul = multiplicands.size(); m != nMul; ++m)
                 {
-                    std::string & matStrCombined = multiplicands[m];
+                    std::string matStrCombined = campvis::StringUtils::trim(multiplicands[m]);
                     //parse multiplicands of form "[<MatrixString>]_<Modifiers>"
                     size_t delimPos = matStrCombined.find("]");
 
@@ -370,9 +373,15 @@ namespace campvis {
 
         // put all results into the data container
         // matrix names beginning with an underscore are skipped
+        // _camera matrix is used to modify m_cameraProperty
         for (auto it = results.begin(), end = results.end(); it != end; ++it) {
             if (it->first[0] != '_') {
                 dc.addData(it->first, new TransformData(it->second));
+            }
+            if (it->first == "_camera") {
+                tgt::Camera cam = p_cameraProperty.getValue();
+                cam.setViewMatrix(it->second);
+                p_cameraProperty.setValue(cam);
             }
         }
     }

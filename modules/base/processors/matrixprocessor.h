@@ -48,6 +48,10 @@ namespace campvis {
      * slower than the "basic" mode, but for most applications this performance hit should not be a problem. 
      * Performance could be reduced in a future iteration by pre-processing the input string instead of parsing it on the fly in each update call. 
      * Please note that this features is EXPERIMENTAL and has not been extensively tested.
+     * An additional feature of the Parser Mode is the option to export a matrix through the \a m_cameraProperty field. Please
+     * make sure that the m_cameraProperty is initialized and updated correctly regarding viewport changes (for example by setting
+     * the property as a target for a TrackballEventHandler) as this feature only modifies the position, lookat and up vector of the
+     * camera.
      *
 	 * Example use case: OpenIGTLink client outputs matrices TrackerToReference and TrackerToProbe. Configure
 	 * matrixA as "TrackerToProbe" with modifier "I" and matrixB as "TrackerToReference" with empty modifier
@@ -97,6 +101,7 @@ namespace campvis {
 
         DataNameProperty p_targetMatrixID;   ///< name for the output matrix
 
+        CameraProperty p_cameraProperty;
 
 		void DataContainerDataAdded(const std::string& name, const DataHandle& data);
 
