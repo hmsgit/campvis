@@ -28,6 +28,7 @@ FILE(GLOB CampvisApplicationForms
 )
 
 SET(CampvisApplicationToBeMocced
+    qtjobprocessor.h
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h

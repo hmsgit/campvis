@@ -295,11 +295,12 @@ namespace campvis {
             _scriptingConsoleWidget->deinit();
     }
 
-    void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
+    MdiDockableWindow * MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
         MdiDockableWindow* dockableWindow = _mdiArea->addWidget(canvas);
         QString windowTitle = QString::fromStdString(name);
         dockableWindow->setWindowTitle(windowTitle);
         dockableWindow->show();
+        return dockableWindow;
     }
 
     QDockWidget* MainWindow::dockPrimaryWidget(const std::string& name, QWidget* widget) {

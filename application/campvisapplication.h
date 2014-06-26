@@ -157,6 +157,8 @@ namespace campvis {
         /// All pipelines 
         std::vector<PipelineRecord> _pipelines;
 
+        std::map<AbstractPipeline *, MdiDockableWindow *> _pipelineWindows;
+
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;
 

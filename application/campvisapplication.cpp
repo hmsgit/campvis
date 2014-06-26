@@ -48,6 +48,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 
 #include "modules/pipelinefactory.h"
+#include "qtjobprocessor.h"
 
 #ifdef CAMPVIS_HAS_SCRIPTING
 #include "scripting/gen_pipelineregistration.h"
@@ -77,6 +78,7 @@ namespace campvis {
 
         OpenGLJobProcessor::init();
         SimpleJobProcessor::init();
+        QtJobProcessor::init();
     }
 
     CampVisApplication::~CampVisApplication() {
@@ -259,7 +261,9 @@ namespace campvis {
         PipelineRecord pr = { pipeline, painter };
         _pipelines.push_back(pr);
 
-        _mainWindow->addVisualizationPipelineWidget(name, canvas);
+        if (!hide) {
+            _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(name, canvas);
+        }
 
         // initialize context (GLEW) and pipeline in OpenGL thread)
         GLJobProc.enqueueJob(
