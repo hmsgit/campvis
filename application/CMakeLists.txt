@@ -62,6 +62,7 @@ SET(CampvisApplicationToBeMocced
     gui/properties/propertycollectionwidget.h
     gui/properties/simpletransferfunctioneditor.h
     gui/properties/stringpropertywidget.h
+    gui/properties/statuspropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
     tools/qtexteditlog.h
     tools/bufferinglog.h
