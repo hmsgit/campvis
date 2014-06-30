@@ -37,6 +37,13 @@ namespace campvis {
     }
 
     void ButtonProperty::click() {
+        //pass the click on to all shared button that are connected
+        for (auto it = _sharedProperties.begin(), end = _sharedProperties.end(); it != end; ++it) {
+            ButtonProperty * btn = dynamic_cast<ButtonProperty*>(*it);
+            if (btn)
+                btn->click();
+        }
+
         s_clicked.emitSignal();
         s_changed.emitSignal(this);
     }
