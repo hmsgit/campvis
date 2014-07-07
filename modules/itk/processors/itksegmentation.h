@@ -59,7 +59,7 @@ namespace campvis {
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Cristina Precup <cristina.precup@tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
-        virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
         DataNameProperty p_sourceImageID;   ///< ID for input volume
         DataNameProperty p_targetImageID;   ///< ID for segmented output volume
