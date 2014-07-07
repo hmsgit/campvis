@@ -38,7 +38,7 @@
 
 namespace campvis {
     /**
-    * Performs watershed image filter on input image using ITK.
+    * Performs segmentation on input image using ITK.
     */
     class ItkSegmentation : public AbstractProcessor {
     public:
@@ -62,7 +62,7 @@ namespace campvis {
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
         DataNameProperty p_sourceImageID;   ///< ID for input volume
-        DataNameProperty p_targetImageID;   ///< ID for output gradient volume
+        DataNameProperty p_targetImageID;   ///< ID for segmented output volume
 
         GenericOptionProperty<std::string> p_segmentationType;    ///< Segmentation type
 

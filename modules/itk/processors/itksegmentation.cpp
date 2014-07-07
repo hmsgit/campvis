@@ -30,10 +30,7 @@
 #include "modules/itk/core/genericimagerepresentationitk.h"
 
 #include <itkIntTypes.h>
-#include <itkGradientMagnitudeImageFilter.h>
-#include <itkWatershedImageFilter.h>
 #include <itkCastImageFilter.h>
-
 #include <itkConnectedThresholdImageFilter.h>
 #include <itkMaskImageFilter.h>
 
@@ -45,7 +42,7 @@
 /**
 * Executes the specified segmentation on the data.
 * \param MA_baseType       base type of input image
-* \param MA_returnType     base type of ouput image
+* \param MA_returnType     base type of output image
 * \param MA_numChannels    number of channels of input image
 * \param MA_dimensionality dimensionality of images
 * \param MD_filterBody     additional stuff to execute between filter definition and execution
@@ -54,26 +51,24 @@
     { \
     GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ScopedRepresentation itkRep(data, p_sourceImageID.getValue()); \
     if (itkRep != 0) { \
-    typedef GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
-    typedef GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
-    itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
-    typedef itk::Image<itk::IdentifierType, MA_dimensionality> LabelImageType; \
-    typedef itk::MaskImageFilter< OutputImageType, OutputImageType > MaskFilterType;\
-    MaskFilterType::Pointer maskFilter = MaskFilterType::New();\
-    MD_filterBody \
-    filter->SetInput(itkRep->getItkImage()); \
-    filter->Update(); \
-    maskFilter->SetInput(itkRep->getItkImage()); \
-    maskFilter->SetMaskImage(filter->GetOutput());\
-    itk::CastImageFilter<OutputImageType, OutputImageType>::Pointer caster = itk::CastImageFilter<OutputImageType, OutputImageType>::New(); \
-    caster->SetInput(maskFilter->GetOutput()); \
-    caster->Update(); \
-    \
-    GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::create(id, caster->GetOutput()); \
+        typedef GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::ItkImageType InputImageType; \
+        typedef GenericImageRepresentationItk<MA_returnType, MA_numChannels, MA_dimensionality>::ItkImageType OutputImageType; \
+        itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
+        typedef itk::Image<itk::IdentifierType, MA_dimensionality> LabelImageType; \
+        typedef itk::MaskImageFilter< OutputImageType, OutputImageType > MaskFilterType;\
+        MaskFilterType::Pointer maskFilter = MaskFilterType::New();\
+        MD_filterBody \
+        filter->SetInput(itkRep->getItkImage()); \
+        filter->Update(); \
+        maskFilter->SetInput(itkRep->getItkImage()); \
+        maskFilter->SetMaskImage(filter->GetOutput());\
+        itk::CastImageFilter<OutputImageType, OutputImageType>::Pointer caster = itk::CastImageFilter<OutputImageType, OutputImageType>::New(); \
+        caster->SetInput(maskFilter->GetOutput()); \
+        caster->Update(); \
+        \
+        GenericImageRepresentationItk<MA_baseType, MA_numChannels, MA_dimensionality>::create(id, caster->GetOutput()); \
     } \
     }
-
-
 
 #define DISPATCH_ITK_SEGMENTATION_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
     tgtAssert(MA_WTP._numChannels == 1, "ItkSegmentation only supports single-channel images.") \
@@ -106,11 +101,10 @@
     tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
-
 /**
 * Dispatches the execution for the ITK filter \a MA_filterType for the image \a MA_localRep.
 * \param MA_localRep       local representation of the image to apply the filter to
-* \param MA_filterType     type name if the ITK filter to use (within itk:: namespace)
+* \param MA_filterType     type name of the ITK filter to use (within itk:: namespace)
 * \param MD_filterBody     additional stuff to execute between filter definition and execution
 */
 #define DISPATCH_ITK_SEGMENTATION(MA_localRep, MA_filterType, MD_filterBody) \
