@@ -27,30 +27,31 @@
 
 #include <string>
 
-#include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
-#include "core/properties/floatingpointproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
-#include "modules/preprocessing/tools/abstractimagefilter.h"
+#include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
     /**
     * Performs segmentation on input image using ITK.
     */
-    class ItkSegmentation : public AbstractProcessor {
+    class ItkSegmentation : public VolumeExplorer {
     public:
         /**
         * Constructs a new ItkSegmentation Processor
         **/
-        ItkSegmentation();
+        ItkSegmentation(IVec2Property* viewportSizeProp);
 
         /**
         * Destructor
         **/
         virtual ~ItkSegmentation();
+
+        /// \see AbstractEventHandler::execute()
+        virtual void onEvent(tgt::Event* e);
 
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "ItkSegmentation"; };

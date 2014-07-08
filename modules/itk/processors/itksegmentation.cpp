@@ -129,18 +129,18 @@ namespace campvis {
 
     const std::string ItkSegmentation::loggerCat_ = "CAMPVis.modules.classification.ItkSegmentation";
 
-    ItkSegmentation::ItkSegmentation()
-        : AbstractProcessor()
-        , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
-        , p_targetImageID("OutputGradients", "Output Segmented Volume ID", "segmented_volume", DataNameProperty::WRITE)
-        , p_segmentationType("SegmentationType", "Segmentation Type", segmentationTypes, 1)
-        , p_seedX("SeedX", "Seed X", 162, 0, 0, 1)
-        , p_seedY("SeedY", "Seed Y", 169, 0, 0, 1)
-        , p_seedZ("SeedZ", "Seed Z", 182, 0, 0, 1)
-        , p_thresMin("ThresMin", "Min Threshold", 70, 0, 255, 1)
-        , p_thresMax("ThresMax", "Max Threshold", 130, 0, 255, 1)
+    ItkSegmentation::ItkSegmentation(IVec2Property* viewportSizeProp)
+    : VolumeExplorer(viewportSizeProp)
+    , p_sourceImageID("InputSegmentationVolume", "Input Segmentation Volume ID", "volume", DataNameProperty::READ)
+    , p_targetImageID("OutputSegmentationVolume", "Output Segmented Volume ID", "segmented_volume", DataNameProperty::WRITE)
+    , p_segmentationType("SegmentationType", "Segmentation Type", segmentationTypes, 1)
+    , p_seedX("SeedX", "Seed X", 0, 0, 0, 1)
+    , p_seedY("SeedY", "Seed Y", 0, 0, 0, 1)
+    , p_seedZ("SeedZ", "Seed Z", 0, 0, 0, 1)
+    , p_thresMin("ThresMin", "Min Threshold", 70, 0, 255, 1)
+    , p_thresMax("ThresMax", "Max Threshold", 130, 0, 255, 1)
     {
-        addProperty(p_sourceImageID);
+        addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_targetImageID);
         addProperty(p_segmentationType, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_seedX);
@@ -148,13 +148,14 @@ namespace campvis {
         addProperty(p_seedZ);
         addProperty(p_thresMin);
         addProperty(p_thresMax);
+        p_enableScribbling.setValue(true);
     }
 
     ItkSegmentation::~ItkSegmentation() {
-
     }
 
     void ItkSegmentation::updateResult(DataContainer& data) {
+    	VolumeExplorer::updateResult(data);
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
         
         if (input != 0 && input->getParent()->getNumChannels() == 1 && (input->getDimensionality() == 2 || input->getDimensionality() == 3)) {
@@ -203,7 +204,9 @@ namespace campvis {
         validate(INVALID_RESULT);
     }
 
-    void ItkSegmentation::updateProperties(DataContainer& /*dataContainer*/) {
+    void ItkSegmentation::updateProperties(DataContainer& data) {
+        VolumeExplorer::updateProperties(data);
+
         if (p_segmentationType.getOptionValue() == "regionGrowing") {
             p_seedX.setVisible(true);
             p_seedY.setVisible(true);
@@ -213,6 +216,29 @@ namespace campvis {
         }
 
         validate(AbstractProcessor::INVALID_PROPERTIES);
+    }
+
+    void ItkSegmentation::onEvent(tgt::Event* e) {
+        VolumeExplorer::onEvent(e);
+        if (typeid(*e) == typeid(tgt::MouseEvent)) {
+            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
+            if (p_enableScribbling.getValue() && (me->modifiers() & tgt::Event::CTRL || me->modifiers() & tgt::Event::ALT)) {
+
+                //update the input image for the segmentation (take the one that is explored by the VolumeExplorer)
+                p_sourceImageID.setValue(p_inputVolume.getValue());
+
+                // update the maximum size
+                p_seedX.setMaxValue(_sliceExtractor.p_xSliceNumber.getMaxValue());
+                p_seedY.setMaxValue(_sliceExtractor.p_ySliceNumber.getMaxValue());
+                p_seedZ.setMaxValue(_sliceExtractor.p_zSliceNumber.getMaxValue());
+
+                tgt::svec3 voxel;
+                voxel = tgt::vec3(_yesScribbles[0]);
+                p_seedX.setValue(voxel.x);
+                p_seedY.setValue(voxel.y);
+                p_seedZ.setValue(voxel.z);
+            }
+        }
     }
 
 }
