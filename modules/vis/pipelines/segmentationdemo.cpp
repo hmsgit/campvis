@@ -41,17 +41,15 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _lsp()
         , _imageReader()
-        , _ve(&_canvasSize)
         , _itkFilter()
-        , _itkSegmentation()
+        , _itkSegmentation(&_canvasSize)
     {
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
-        addProcessor(&_ve);
         addProcessor(&_itkFilter);
         addProcessor(&_itkSegmentation);
 
-        addEventListenerToBack(&_ve);
+        addEventListenerToBack(&_itkSegmentation);
     }
 
     SegmentationDemo::~SegmentationDemo() {
@@ -60,14 +58,13 @@ namespace campvis {
     void SegmentationDemo::init() {
         AutoEvaluationPipeline::init();
 
-        _ve.p_outputImage.setValue("result");
+        _itkSegmentation.p_outputImage.setValue("result");
         _renderTargetID.setValue("result");
 
         //_imageReader.setURL(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
-        //_imageReader.setURL(CAMPVIS_SOURCE_DIR "/../misc/mha_loader_CAMPVis_volumes/prostate_phantom_US/prostate_phantom_fcal_volume_uncompressed.mhd");
         _imageReader.setURL(CAMPVIS_SOURCE_DIR "/../misc/mha_loader_CAMPVis_volumes/prostate_phantom_US/prostate_phantom_fcal_volume_uncompressed.mha");
         _imageReader.setTargetImageId("reader.output");
-        _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
+        _imageReader.setTargetImageIdSharedProperty(&_itkSegmentation.p_inputVolume);
 
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
@@ -75,14 +72,13 @@ namespace campvis {
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.12f, .15f), tgt::col4(85, 0, 0, 128), tgt::col4(255, 0, 0, 128)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.19f, .28f), tgt::col4(89, 89, 89, 155), tgt::col4(89, 89, 89, 155)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.41f, .51f), tgt::col4(170, 170, 128, 64), tgt::col4(192, 192, 128, 64)));
-        static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
-        static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
+
+        static_cast<TransferFunctionProperty*>(_itkSegmentation.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
+        static_cast<FloatProperty*>(_itkSegmentation.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
     }
 
     void SegmentationDemo::deinit() {
         _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
     }
-
-
 }
