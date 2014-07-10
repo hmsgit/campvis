@@ -276,6 +276,9 @@ namespace campvis {
             _dcInspectorWidget->init();
 
         _logViewer->init();
+
+        if (_scriptingConsoleWidget)
+            _scriptingConsoleWidget->init();
     }
 
     void MainWindow::deinit() {
@@ -283,6 +286,9 @@ namespace campvis {
             _dcInspectorWidget->deinit();
 
         _logViewer->deinit();
+
+        if (_scriptingConsoleWidget)
+            _scriptingConsoleWidget->deinit();
     }
 
     void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {

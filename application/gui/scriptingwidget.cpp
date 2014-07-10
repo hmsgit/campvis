@@ -37,9 +37,18 @@ namespace campvis {
         , _currentPosition(-1)
     {
         setupGUI();
+        addCat("", true, tgt::LuaInfo);
     }
 
     ScriptingWidget::~ScriptingWidget() {
+    }
+
+    void ScriptingWidget::init() {
+        LogMgr.addLog(this);
+    }
+
+    void ScriptingWidget::deinit() {
+        LogMgr.removeLog(this);
     }
 
     void ScriptingWidget::setupGUI() {
@@ -75,11 +84,10 @@ namespace campvis {
         connect(_btnClear, SIGNAL(clicked()), this, SLOT(clearLog()));
         connect(_btnExecute, SIGNAL(clicked()), this, SLOT(execute()));
         connect(_editCommand, SIGNAL(returnPressed()), this, SLOT(execute()));
-        connect(this, SIGNAL(s_commandExecuted(QString)), this, SLOT(appendMessage(const QString&)));
     }
 
     void ScriptingWidget::appendMessage(const QString& message) {
-        _consoleDisplay->append(tr("> ") + message);
+        _consoleDisplay->append(message);
     }
 
     void ScriptingWidget::clearLog() {
@@ -88,7 +96,10 @@ namespace campvis {
 
     void ScriptingWidget::execute() {
         QString command = _editCommand->text();
+        appendMessage(tr("> ") + command);
+
         emit s_commandExecuted(command);
+
         _history.push_front(command);
         _currentPosition = -1;
         _editCommand->clear();
@@ -115,6 +126,13 @@ namespace campvis {
 
         return QObject::eventFilter(obj, event);
     }
+
+    void ScriptingWidget::logFiltered(const std::string &cat, tgt::LogLevel level, const std::string& msg, const std::string& extendedInfo/*=""*/) {
+        if (level == tgt::LuaInfo || level == tgt::LuaError) {
+            appendMessage(QString::fromStdString(msg));
+        }
+    }
+
 
 
 

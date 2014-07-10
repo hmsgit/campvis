@@ -150,6 +150,7 @@ namespace campvis {
 #ifdef CAMPVIS_HAS_SCRIPTING
         // create and store Lua VM for this very pipeline
         _luaVmState = new LuaVmState();
+        _luaVmState->redirectLuaPrint();
 
         // Let Lua know where CAMPVis modules are located
         if (! _luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
@@ -166,8 +167,6 @@ namespace campvis {
 
         if (! _luaVmState->execString("inspect = require 'inspect'"))
             LERROR("Error setting up Lua VM.");
-
-        _luaVmState->redirectLuaPrint();
 #endif
 
         // parse argument list and create pipelines
@@ -324,6 +323,7 @@ namespace campvis {
     LuaVmState* CampVisApplication::getLuaVmState() {
         return _luaVmState;
     }
+
 #endif
 
 }

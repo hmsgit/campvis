@@ -26,6 +26,7 @@
 #define SCRIPTINGWIDGET_H__
 
 #include "sigslot/sigslot.h"
+#include "tgt/logmanager.h"
 #include "tgt/painter.h"
 #include "tbb/mutex.h"
 
@@ -45,13 +46,15 @@
 #include <QTextEdit>
 
 namespace campvis {
-
-    class ScriptingWidget : public QWidget {
+    /**
+     * Qt widget providing a console-like interface to the Lua VM of CampvisApplication.
+     */
+    class ScriptingWidget : public QWidget, tgt::Log {
         Q_OBJECT;
 
     public:
         /**
-         * Creates a new DataContainerInspectorWidget.
+         * Creates a new ScriptingWidget.
          * \param   parent          Parent Qt widget, may be 0 (default)
          */
         explicit ScriptingWidget(QWidget* parent = 0);
@@ -61,6 +64,18 @@ namespace campvis {
          */
         ~ScriptingWidget();
 
+        bool isOpen() { return true; }
+        
+        /**
+         * Initializes the underlying log and registers it with tgt.
+         */
+        void init();
+
+        /**
+         * Deinitializes the underlying log and deregisters it from tgt.
+         */
+        void deinit();
+
     protected:
         /**
          * Setup the the log viewer's GUI
@@ -68,6 +83,8 @@ namespace campvis {
         void setupGUI();
 
         bool eventFilter(QObject* obj, QEvent* event);
+
+        void logFiltered(const std::string &cat, tgt::LogLevel level, const std::string& msg, const std::string& extendedInfo="");
 
     public slots:
         /**
@@ -98,7 +115,7 @@ namespace campvis {
         QPushButton* _btnClear;             ///< Button to clear the console output
 
         std::deque<QString> _history;       ///< History of executed commands
-        int _currentPosition;            ///< Current position in command history
+        int _currentPosition;               ///< Current position in command history
     };
 }
 

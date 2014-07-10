@@ -32,7 +32,7 @@ static int lua_campvis_print(lua_State* L) {
         lua_pop(L, 1);  /* pop result */
     }
 
-    LINFOC("Lua", str);
+    LogMgr.log("Lua", tgt::LuaInfo, str);
     return 0;
 }
 
@@ -80,9 +80,9 @@ namespace campvis {
         const char* errorMsg = lua_tostring(_luaState, -1);
 
         if (errorMsg == nullptr)
-            std::cerr << "(error object is not a string)" << std::endl;
+            LogMgr.log("Lua", tgt::LuaError, "(error object is not a string)");
         else
-            std::cerr << errorMsg << std::endl;
+            LogMgr.log("Lua", tgt::LuaError, errorMsg);
 
         lua_pop(_luaState, 1);
     }
