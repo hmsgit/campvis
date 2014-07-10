@@ -10,10 +10,13 @@ IF(${ModuleEnabled})
 
 	# Header files (including GLSL files so that they'll appear in VS projects)
 	FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
+		modules/manualsegmentation/glsl/*.h
 		modules/manualsegmentation/pipelines/*.h
 		modules/manualsegmentation/processors/*.h
 		modules/manualsegmentation/tools/*.h
 	)
+
+	SET(ThisModShaderDirectories "modules/manualsegmentation/glsl")
 	SET(ThisModDependencies io itk vis)
 ENDIF(${ModuleEnabled})
 

@@ -134,6 +134,23 @@ namespace campvis {
         std::vector<AbstractPointPredicate*> _predicates;
     };
 
+    // ================================================================================================
+
+    class OrCombinedPointPredicate : public AbstractPointPredicate {
+    public:
+        OrCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates);
+
+        virtual ~OrCombinedPointPredicate();
+
+
+        virtual std::string getGlslHeader() const;
+        virtual std::string getPredicateEvaluationGlslString() const;
+        virtual void setupShader(tgt::Shader* shader) const;
+
+    protected:
+        std::vector<AbstractPointPredicate*> _predicates;
+    };
+
 // ================================================================================================
 
     class RangePointPredicate : public AbstractPointPredicate {

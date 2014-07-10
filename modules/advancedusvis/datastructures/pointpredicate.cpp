@@ -157,6 +157,46 @@ namespace campvis {
         AbstractPointPredicate::setupShader(shader);
     }
 
+    // ================================================================================================
+
+    OrCombinedPointPredicate::OrCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates) 
+        : AbstractPointPredicate("", name, title)
+        , _predicates(predicates)
+    {
+        for (size_t i = 0; i < _predicates.size(); ++i) {
+            addProperty(*_predicates[i]);
+        }
+    }
+
+    OrCombinedPointPredicate::~OrCombinedPointPredicate() {
+        for (size_t i = 0; i < _predicates.size(); ++i)
+            delete _predicates[i];
+    }
+
+    std::string OrCombinedPointPredicate::getGlslHeader() const {
+        std::string toReturn = AbstractPointPredicate::getGlslHeader();
+        for (size_t i = 0; i < _predicates.size(); ++i)
+            toReturn += _predicates[i]->getGlslHeader();
+
+        return toReturn;
+    }
+
+    std::string OrCombinedPointPredicate::getPredicateEvaluationGlslString() const {
+        std::string toReturn = "(" + _predicates.front()->getPredicateEvaluationGlslString();
+        for (size_t i = 1; i < _predicates.size(); ++i)
+            toReturn += " || " + _predicates[i]->getPredicateEvaluationGlslString();
+        toReturn += ")";
+
+        return toReturn;
+    }
+
+    void OrCombinedPointPredicate::setupShader(tgt::Shader* shader) const {
+        for (size_t i = 0; i < _predicates.size(); ++i)
+            _predicates[i]->setupShader(shader);
+
+        AbstractPointPredicate::setupShader(shader);
+    }
+
 
 // ================================================================================================
 

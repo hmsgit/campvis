@@ -91,7 +91,7 @@ namespace campvis {
         _snrFilter.p_outputImage.setValue("snr");
         _snrFilter.p_outputImage.addSharedProperty(&_ve.p_inputSnr);
 
-        _gaussian.p_sigma.setValue(16.2f);
+        _gaussian.p_sigma.setValue(6.2f);
         _gaussian.p_outputImage.addSharedProperty(&_vesselnesFilter.p_inputImage);
 
         _vesselnesFilter.p_outputImage.setValue("vesselness");
@@ -149,6 +149,7 @@ namespace campvis {
             v.push_back(foo);
             v.push_back(bar);
             vpToAdd = new AndCombinedPointPredicate("CarotidVessel", "Vesselness & Carotid", v);
+            vpToAdd->p_intensityHack.setValue(.15f);
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new LabelBitPointPredicate("label", "Skin", "Skin Layer");
@@ -159,8 +160,17 @@ namespace campvis {
             static_cast<LabelBitPointPredicate*>(vpToAdd)->p_bit.setValue(1);
             histogram->addPredicate(vpToAdd);
 
-            vpToAdd = new LabelBitPointPredicate("label", "Vessel", "Vessel Layer");
-            static_cast<LabelBitPointPredicate*>(vpToAdd)->p_bit.setValue(2);
+//             vpToAdd = new LabelBitPointPredicate("label", "Vessel", "Vessel Layer");
+//             static_cast<LabelBitPointPredicate*>(vpToAdd)->p_bit.setValue(2);
+//             histogram->addPredicate(vpToAdd);
+            a = new LabelBitPointPredicate("label", "Vessel3", "Vessel Layer");
+            static_cast<LabelBitPointPredicate*>(a)->p_bit.setValue(2);
+            b = new LabelBitPointPredicate("label", "Vessel4", "Vessel Layer 2");
+            static_cast<LabelBitPointPredicate*>(b)->p_bit.setValue(3);
+            std::vector<AbstractPointPredicate*> v2;
+            v2.push_back(a);
+            v2.push_back(b);
+            vpToAdd = new OrCombinedPointPredicate("VesselLayer", "Vessel Layer", v2);
             histogram->addPredicate(vpToAdd);
 
             histogram->resetPredicates();
