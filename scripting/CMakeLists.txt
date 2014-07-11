@@ -62,7 +62,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
     SWIG_ADD_MODULE(${LuaModName} lua ${InterfaceFile})
     SWIG_LINK_LIBRARIES(${LuaModName} tgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
 
-    SET(LuaModFullPath "${CampvisLuaModulesDirectory}${CMAKE_SHARED_LIBRARY_PREFIX}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    SET(LuaModFullPath "${CampvisLuaModulesDirectory}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
     # The most reliable approach to changing a target's output directory to a sub-directory of the
     # main build folder if a multi-config generator (e.g. Visual Studio or XCode) may be used is
@@ -110,8 +110,10 @@ LIST(APPEND CampvisScriptingHeaders "swigluarun.h")
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY(campvis-scripting STATIC
+
+ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}
     ${CampvisScriptingSources} ${CampvisScriptingHeaders}
 )
+
 ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
 TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})

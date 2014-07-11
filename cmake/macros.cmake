@@ -79,7 +79,7 @@ MACRO(WRITE_SCRIPTED_PIPELINE_REGISTRATION FileName)
     LIST(APPEND PipelineRegistrationSource "// Include required headers:\n"
                                            "#include \"scripting/scriptedpipelineregistrar.h\"\n")
 
-    LIST(APPEND PipelineRegistrationSource "\nnamespace campvis {\n\tnamespace {\n" )
+    LIST(APPEND PipelineRegistrationSource "\nnamespace campvis {\n" )
     LIST(APPEND PipelineRegistrationSource "\t\t// Instantiate templated ScriptedPipelineRegistrars to register pipelines.\n" )
 
     WHILE(ScriptedPipelineRegistrationPipelineNames)
@@ -96,7 +96,7 @@ MACRO(WRITE_SCRIPTED_PIPELINE_REGISTRATION FileName)
                                                "${PipelineName}PipelineScript>\;\n")
     ENDWHILE(ScriptedPipelineRegistrationPipelineNames)
 
-    LIST(APPEND PipelineRegistrationSource "\t}\n}\n" )
+    LIST(APPEND PipelineRegistrationSource "}\n" )
 
     FILE(WRITE ${FileName} ${PipelineRegistrationSource})
 ENDMACRO(WRITE_SCRIPTED_PIPELINE_REGISTRATION)

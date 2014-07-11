@@ -1,6 +1,7 @@
 #ifndef LUAVMSTATE_H__
 #define LUAVMSTATE_H__
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include "scripting/swigluarun.h"

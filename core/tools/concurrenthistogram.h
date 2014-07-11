@@ -164,7 +164,7 @@ namespace campvis {
     template<typename T, size_t ND>
     void campvis::ConcurrentGenericHistogramND<T, ND>::addSample(T sample[ND]) {
         size_t bucketNumbers[ND];
-        for(int i = 0; i < ND; ++i)
+        for (size_t i = 0; i < ND; ++i)
             bucketNumbers[i] = getBucketNumber(i, sample[i]);
 
         size_t index = getArrayIndex(bucketNumbers);

@@ -10,6 +10,8 @@
 %include lua_fnptr.i
 
 %{
+#include <cstdio>
+#include <iostream>
 #include "tbb/recursive_mutex.h"
 #include "ext/sigslot/sigslot.h"
 %}
@@ -284,7 +286,7 @@ namespace sigslot {
         {}
 
         virtual _connection_base0<mt_policy>* clone() {
-            return new _lua_connection0(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection0(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base0<mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
@@ -298,11 +300,11 @@ namespace sigslot {
 
         virtual void emitSignal() {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList = new std::list<ArgWithTypeInfoType>(0);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -322,7 +324,7 @@ namespace sigslot {
         {}
 
         virtual _connection_base1<arg1_type, mt_policy>* clone() {
-            return new _lua_connection1(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection1(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base1<arg1_type, mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
@@ -336,11 +338,11 @@ namespace sigslot {
 
         virtual void emitSignal(arg1_type a1) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList = getArgWithTypeInfoList<arg1_type>(a1);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -361,7 +363,7 @@ namespace sigslot {
         {}
 
         virtual _connection_base2<arg1_type, arg2_type, mt_policy>* clone() {
-            return new _lua_connection2(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection2(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base2<arg1_type, arg2_type, mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
@@ -375,11 +377,11 @@ namespace sigslot {
 
         virtual void emitSignal(arg1_type a1, arg2_type a2) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList = getArgWithTypeInfoList<arg1_type, arg2_type>(a1, a2);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -400,7 +402,7 @@ namespace sigslot {
         {}
 
         virtual _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>* clone() {
-            return new _lua_connection3(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection3(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base3<arg1_type, arg2_type, arg3_type,
@@ -417,11 +419,11 @@ namespace sigslot {
         virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type>(a1, a2, a3);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -442,7 +444,7 @@ namespace sigslot {
         {}
 
         virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* clone() {
-            return new _lua_connection4(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection4(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type,
@@ -459,11 +461,11 @@ namespace sigslot {
         virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type>(a1, a2, a3, a4);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -484,7 +486,7 @@ namespace sigslot {
         {}
 
         virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* clone() {
-            return new _lua_connection5(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection5(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type,
@@ -501,11 +503,11 @@ namespace sigslot {
         virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(a1, a2, a3, a4, a5);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -530,7 +532,7 @@ namespace sigslot {
         virtual _connection_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
                                   mt_policy>* clone()
         {
-            return new _lua_connection6(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection6(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
@@ -548,11 +550,11 @@ namespace sigslot {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type,
                                            arg6_type>(a1, a2, a3, a4, a5, a6);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -577,7 +579,7 @@ namespace sigslot {
         virtual _connection_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
                                   mt_policy>* clone()
         {
-            return new _lua_connection7(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection7(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
@@ -597,11 +599,11 @@ namespace sigslot {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
                                            arg7_type>(a1, a2, a3, a4, a5, a6, a7);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 
@@ -626,7 +628,7 @@ namespace sigslot {
         virtual _connection_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
                                   arg8_type, mt_policy>* clone()
         {
-            return new _lua_connection8(copySlotFunction(), _lua_state_mutex);
+            return new _lua_connection8(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
         virtual _connection_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
@@ -646,11 +648,11 @@ namespace sigslot {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
                                            arg7_type, arg8_type>(a1, a2, a3, a4, a5, a6, a7, a8);
-            callLuaSlot(argWithTypeInfoList);
+            this->callLuaSlot(argWithTypeInfoList);
         }
 
         virtual has_slots<mt_policy>* getdest() const {
-            return getDummyDest();
+            return this->getDummyDest();
         }
     };
 }
