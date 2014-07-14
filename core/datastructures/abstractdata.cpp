@@ -26,12 +26,12 @@
 
 namespace campvis {
 
-    AbstractData::AbstractData() 
-        : ReferenceCounted()
-    {
+    AbstractData::AbstractData() {
+
     }
 
     AbstractData::~AbstractData() {
+
     }
 
 }
