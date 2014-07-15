@@ -32,19 +32,33 @@ namespace campvis {
     {
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
 
+        connect(this, SIGNAL(s_minChanged(double)), this, SLOT(onMinChanged(double)), Qt::QueuedConnection);
+        connect(this, SIGNAL(s_maxChanged(double)), this, SLOT(onMaxChanged(double)), Qt::QueuedConnection);
+        connect(this, SIGNAL(s_singleStepChanged(double)), this, SLOT(onSingleStepChanged(double)), Qt::QueuedConnection);
+
         connect(_spinBox, SIGNAL(valueChanged(double)), this, SLOT(onSpinBoxValueChanged(double)));
         connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
     }
 
-    void DoubleAdjusterWidget::setValue(double value)
-    {
+    void DoubleAdjusterWidget::setValue(double value) {
         setValueImpl(value);
     }
 
-    void DoubleAdjusterWidget::setDecimals(int prec)
-    {
+    void DoubleAdjusterWidget::setDecimals(int prec) {
         _spinBox->setDecimals(prec);
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
+    }
+
+    void DoubleAdjusterWidget::setMinimum(double minimum) {
+        emit s_minChanged(minimum);
+    }
+
+    void DoubleAdjusterWidget::setMaximum(double maximum) {
+        emit s_maxChanged(maximum);
+    }
+
+    void DoubleAdjusterWidget::setSingleStep(double value) {
+        emit s_singleStepChanged(value);
     }
 
     void DoubleAdjusterWidget::onSpinBoxValueChanged(double value) {
@@ -67,4 +81,18 @@ namespace campvis {
         AbstractAdjusterWidget<double>::setSliderProperties(1, 0, std::ceil((maxValue - minValue) / stepValue));
         setSliderValue(value());
     }
+
+    void DoubleAdjusterWidget::onMinChanged(double minimum) {
+        setMinimumImpl(minimum);
+    }
+
+    void DoubleAdjusterWidget::onMaxChanged(double maximum) {
+        setMaximumImpl(maximum);
+    }
+
+    void DoubleAdjusterWidget::onSingleStepChanged(double value) {
+        setSingleStepImpl(value);
+    }
+
+
 }
