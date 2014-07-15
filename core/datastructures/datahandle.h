@@ -26,6 +26,7 @@
 #define datahandle_h__
 
 #include <ctime>
+#include <memory>
 
 #include "core/coreapi.h"
 
@@ -91,12 +92,7 @@ namespace campvis {
 
 
     private:
-        /**
-         * Initializes the reference counting for the data.
-         */
-        void init();
-
-        AbstractData* _data;                    ///< managed data
+        std::shared_ptr<AbstractData> _ptr;     ///< managed data
         clock_t _timestamp;                     ///< Timestamp when this data has been created
     };
 

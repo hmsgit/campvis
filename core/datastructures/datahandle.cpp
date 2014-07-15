@@ -29,52 +29,34 @@
 
 namespace campvis {
     DataHandle::DataHandle(AbstractData* data) 
-        : _data(data)
+        : _ptr(data)
         , _timestamp(clock())
     {
-        init();
+
     }
 
     DataHandle::DataHandle(const DataHandle& rhs) 
-        : _data(rhs._data)
+        : _ptr(rhs._ptr)
         , _timestamp(rhs._timestamp)
     {
-        init();
+
     }
 
     DataHandle& DataHandle::operator=(const DataHandle& rhs) {
-        if (_data != rhs._data) {
-            AbstractData* oldData = _data;
-            _data = rhs._data;
+        if (_ptr != rhs._ptr) {
+            _ptr = rhs._ptr;
             _timestamp = rhs._timestamp;
-            init();
-            if (oldData) {
-                oldData->removeReference();
-            }
         }
 
         return *this;
     }
 
     DataHandle::~DataHandle() {
-        if (_data)
-            _data->removeReference();
     }
 
 
     const AbstractData* DataHandle::getData() const {
-        return _data;
-    }
-
-    void DataHandle::init() {
-        if (_data == 0)
-            return;
-
-        if (! _data->isShareable()) {
-            _data = _data->clone();
-            _timestamp = clock();
-        }
-        _data->addReference();
+        return _ptr.get();
     }
 
     clock_t DataHandle::getTimestamp() const {
