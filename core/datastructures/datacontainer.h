@@ -26,7 +26,7 @@
 #define DATACONTAINER_H__
 
 #include "sigslot/sigslot.h"
-#include <tbb/concurrent_unordered_map.h>
+#include <tbb/concurrent_hash_map.h>
 #include <tbb/spin_mutex.h>
 
 #include "core/coreapi.h"
@@ -158,7 +158,7 @@ namespace campvis {
         //std::map<std::string, DataHandle> _handles;
         mutable tbb::spin_mutex _localMutex;
 
-        tbb::concurrent_unordered_map<std::string, DataHandle> _handles;
+        tbb::concurrent_hash_map<std::string, DataHandle> _handles;
 
         std::string _name;
 

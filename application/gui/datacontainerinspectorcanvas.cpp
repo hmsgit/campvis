@@ -416,7 +416,7 @@ namespace campvis {
                 std::string name = it->first.toStdString();
 
                 // copy geometry over to local 
-                _localDataContainer.addData(name + ".geometry", const_cast<GeometryData*>(gd));
+                _localDataContainer.addDataHandle(name + ".geometry", it->second);
 
                 // render
                 renderGeometryIntoTexture(name);

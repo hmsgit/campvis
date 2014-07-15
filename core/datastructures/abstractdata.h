@@ -25,6 +25,8 @@
 #ifndef ABSTRACTDATA_H__
 #define ABSTRACTDATA_H__
 
+#include <memory>
+#include <tbb/atomic.h>
 #include "tgt/bounds.h"
 
 #include "core/coreapi.h"
@@ -51,12 +53,16 @@ namespace campvis {
 
 // ================================================================================================
 
+    class DataHandle;
+
     /**
      * Abstract base class for data handled by a DataHandle and stored in a DataContainer.
      * 
      * \todo 
      */
     class CAMPVIS_CORE_API AbstractData {
+    friend class DataHandle;
+
     public:
         /**
          * Constructor, simply calles ReferenceCounted ctor.
@@ -87,8 +93,11 @@ namespace campvis {
          */
         virtual size_t getVideoMemoryFootprint() const = 0;
 
-    protected:
-
+    private:
+        /// This weak_ptr points to the shared_ptr owning group of this object, if existant.
+        /// Should be only accessed by DataHandle (therefore the friendship) in order to avoid
+        /// multiple owning groups for the same object.
+        std::weak_ptr<AbstractData> _weakPtr;
     };
 
 }

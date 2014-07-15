@@ -29,10 +29,17 @@
 
 namespace campvis {
     DataHandle::DataHandle(AbstractData* data) 
-        : _ptr(data)
-        , _timestamp(clock())
+        : _timestamp(clock())
     {
-
+        if (data) {
+            if (data->_weakPtr.expired()) {
+                _ptr = std::shared_ptr<AbstractData>(data);
+                data->_weakPtr = _ptr;
+            }
+            else {
+                _ptr = std::shared_ptr<AbstractData>(data->_weakPtr);
+            }
+        }
     }
 
     DataHandle::DataHandle(const DataHandle& rhs) 
@@ -43,7 +50,7 @@ namespace campvis {
     }
 
     DataHandle& DataHandle::operator=(const DataHandle& rhs) {
-        if (_ptr != rhs._ptr) {
+        if (this != &rhs) {
             _ptr = rhs._ptr;
             _timestamp = rhs._timestamp;
         }
@@ -52,6 +59,7 @@ namespace campvis {
     }
 
     DataHandle::~DataHandle() {
+
     }
 
 
