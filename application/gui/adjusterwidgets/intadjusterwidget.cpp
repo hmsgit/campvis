@@ -32,6 +32,10 @@ namespace campvis {
     {
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
 
+        connect(this, SIGNAL(s_minChanged(int)), this, SLOT(onMinChanged(int)), Qt::QueuedConnection);
+        connect(this, SIGNAL(s_maxChanged(int)), this, SLOT(onMaxChanged(int)), Qt::QueuedConnection);
+        connect(this, SIGNAL(s_singleStepChanged(int)), this, SLOT(onSingleStepChanged(int)), Qt::QueuedConnection);
+
         connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
         connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
     }
@@ -39,6 +43,18 @@ namespace campvis {
     void IntAdjusterWidget::setValue(int value)
     {
         setValueImpl(value);
+    }
+
+    void IntAdjusterWidget::setMinimum(int minimum) {
+        emit s_minChanged(minimum);
+    }
+
+    void IntAdjusterWidget::setMaximum(int maximum) {
+        emit s_maxChanged(maximum);
+    }
+
+    void IntAdjusterWidget::setSingleStep(int value) {
+        emit s_singleStepChanged(value);
     }
 
     void IntAdjusterWidget::onSpinBoxValueChanged(int value) {
@@ -49,6 +65,18 @@ namespace campvis {
     void IntAdjusterWidget::onSliderValueChanged(int value) {
         onSliderValueChangedImpl(value);
         emit valueChanged(value);
+    }
+
+    void IntAdjusterWidget::onMinChanged(int minimum) {
+        setMinimumImpl(minimum);
+    }
+
+    void IntAdjusterWidget::onMaxChanged(int maximum) {
+        setMaximumImpl(maximum);
+    }
+
+    void IntAdjusterWidget::onSingleStepChanged(int value) {
+        setSingleStepImpl(value);
     }
 
 }
