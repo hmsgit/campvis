@@ -117,7 +117,7 @@ namespace campvis {
          * \param   bucketNumbers   Array of the bucket number for each dimension (must have at least ND elements).
          * \return  The array index for the given bucket numbers.
          */
-        size_t getArrayIndex(size_t* bucketNumbers) const;
+        size_t getArrayIndex(size_t bucketNumbers[ND]) const;
 
         T _min[ND];                         ///< minimum value for each dimension
         T _max[ND];                         ///< maximum value for each dimension
@@ -189,11 +189,14 @@ namespace campvis {
         }
 
         double ratio = static_cast<double>(sample - _min[dimension]) / static_cast<double>(_max[dimension] - _min[dimension]);
-        return static_cast<size_t>(tgt::clamp(static_cast<int>(ratio * _numBuckets[dimension]), static_cast<int>(0), static_cast<int>(_numBuckets[dimension]) - 1));
+        int toReturn = static_cast<int>(ratio * _numBuckets[dimension]);
+        toReturn = std::max(toReturn, 0);
+        toReturn = std::min(toReturn, static_cast<int>(_numBuckets[dimension]) - 1);
+        return toReturn;
     }
 
     template<typename T, size_t ND>
-    size_t campvis::ConcurrentGenericHistogramND<T, ND>::getArrayIndex(size_t* bucketNumbers) const {
+    size_t campvis::ConcurrentGenericHistogramND<T, ND>::getArrayIndex(size_t bucketNumbers[ND]) const {
         size_t index = 0;
         size_t multiplier = 1;
         for (size_t i = 0; i < ND; ++i) {

@@ -50,7 +50,7 @@ protected:
         max = new int[ND];
         min = new int[ND];
         numBuckets = new size_t[ND];
-        for (int i = 0; i < ND; i++) { 
+        for (size_t i = 0; i < ND; i++) { 
             min[i] = 0; 
             max[i] = 100;
             numBuckets[i] = max[i] - min[i] + 1; 
@@ -135,7 +135,8 @@ TEST_F(ConcurrentHistogram1DTest, concurrentAddSampleTest) {
 
     for (int i = 0; i < getND(); i++) {
         for (size_t j = 0; j < numBuckets[i]; j ++) {
-            EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
+            size_t expected = static_cast<size_t>(histogram[i]);
+            EXPECT_EQ(expected, _cgh->getNumElements(j));
         }
     }
 }
@@ -162,7 +163,8 @@ TEST_F(ConcurrentHistogram2DTest, concurrentAddSampleTest) {
 
     for (int i = 0; i < getND(); i++) {
         for (size_t j = 0; j < numBuckets[i]; j ++) {
-            EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
+            size_t expected = static_cast<size_t>(histogram[i]);
+            EXPECT_EQ(expected, _cgh->getNumElements(j));
         }
         break;
     }
@@ -183,7 +185,7 @@ protected:
         max = new int[ND];
         min = new int[ND];
         numBuckets = new size_t[ND];
-        for (int i = 0; i < ND; i++) { 
+        for (size_t i = 0; i < ND; i++) { 
             min[i] = 0; 
             max[i] = 9999;
             numBuckets[i] = 2; 
@@ -270,7 +272,8 @@ TEST_F(ConcurrentHistogram1DTestSpecific, concurrentAddSampleTest) {
 
     for (int i = 0; i < getND(); i++) {
         for (size_t j = 0; j < numBuckets[i]; j ++) {
-            EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
+            size_t expected = static_cast<size_t>(histogram[i]);
+            EXPECT_EQ(expected, _cgh->getNumElements(j));
         }
     }
 }
@@ -297,7 +300,8 @@ TEST_F(ConcurrentHistogram2DTestSpecific, concurrentAddSampleTest) {
 
     for (int i = 0; i < getND(); i++) {
         for (size_t j = 0; j < numBuckets[i]; j ++) {
-            EXPECT_EQ(histogram[i], _cgh->getNumElements(j));
+            size_t expected = static_cast<size_t>(histogram[i]);
+            EXPECT_EQ(expected, _cgh->getNumElements(j));
         }
         break;
     }
