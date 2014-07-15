@@ -3,10 +3,49 @@
 #include <iostream>
 #include "globalluatable.h"
 
+#include "tgt/logmanager.h"
+
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
+}
+
+static int lua_campvis_print(lua_State* L) {
+    int nargs = lua_gettop(L);
+    lua_getglobal(L, "tostring");
+    std::string str;
+
+    for (int i=1; i <= nargs; i++) {
+        const char *s;
+        size_t l;
+        lua_pushvalue(L, -1);  /* function to be called */
+        lua_pushvalue(L, i);   /* value to print */
+        lua_call(L, 1, 1);
+        s = lua_tolstring(L, -1, &l);  /* get result */
+        if (s == NULL)
+            return luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
+
+        if (i>1) 
+            str += "\t";
+        str += s;
+        lua_pop(L, 1);  /* pop result */
+    }
+
+    LogMgr.log("Lua", tgt::LuaInfo, str);
+    return 0;
+}
+
+static int lua_campvis_debug(lua_State* L) {
+    for (;;) {
+        char buffer[250];
+        //luai_writestringerror("%s", "lua_debug> ");
+        if (fgets(buffer, sizeof(buffer), stdin) == 0 || strcmp(buffer, "cont\n") == 0)
+            return 0;
+        if (luaL_loadbuffer(L, buffer, strlen(buffer), "=(debug command)") || lua_pcall(L, 0, 0, 0))
+            LDEBUGC("Lua", lua_tostring(L, -1));
+        lua_settop(L, 0);  /* remove eventual returns */
+    }
 }
 
 
@@ -41,9 +80,9 @@ namespace campvis {
         const char* errorMsg = lua_tostring(_luaState, -1);
 
         if (errorMsg == nullptr)
-            std::cerr << "(error object is not a string)" << std::endl;
+            LogMgr.log("Lua", tgt::LuaError, "(error object is not a string)");
         else
-            std::cerr << errorMsg << std::endl;
+            LogMgr.log("Lua", tgt::LuaError, errorMsg);
 
         lua_pop(_luaState, 1);
     }
@@ -90,4 +129,19 @@ namespace campvis {
             this->logLuaError();
         }
     }
+
+    void LuaVmState::redirectLuaPrint() {
+        LuaStateMutexType::scoped_lock lock(_luaStateMutex);
+
+        static const struct luaL_Reg printlib[] = {
+            {"print", &lua_campvis_print},
+            {"debug", &lua_campvis_debug},
+            {NULL, NULL} /* end of array */
+        };
+
+        lua_getglobal(_luaState, "_G");
+        luaL_register(_luaState, NULL, printlib);
+        lua_pop(_luaState, 1);
+    }
+
 }

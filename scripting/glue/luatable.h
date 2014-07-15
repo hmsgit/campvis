@@ -29,7 +29,7 @@ namespace campvis {
      * such calls to be propagated through their enclosing tables all the way up to the global
      * table.
      */
-    class LuaTable : private std::enable_shared_from_this<LuaTable>
+    class LuaTable : public std::enable_shared_from_this<LuaTable>
     {
         friend RegularLuaTable;
         friend GlobalLuaTable;

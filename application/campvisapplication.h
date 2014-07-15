@@ -35,6 +35,10 @@
 
 #include "core/datastructures/datacontainer.h"
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+#include "scripting/glue/luavmstate.h"
+#endif
+
 namespace tgt {
     class GLCanvas;
     class QtThreadedCanvas;
@@ -45,6 +49,7 @@ namespace campvis {
     class AbstractPipeline;
     class MainWindow;
     class CampVisPainter;
+    class LuaVmState;
 
     /**
      * The CampVisApplication class wraps Pipelines, Evaluators and Painters all together and takes
@@ -62,6 +67,12 @@ namespace campvis {
     friend class MainWindow;
 
     public:
+        /// Record storing a pipeline together with its painter and Lua VM state.
+        struct PipelineRecord {
+            AbstractPipeline* _pipeline;
+            CampVisPainter* _painter;
+        };
+
         /**
          * Creates a new CampVisApplication.
          * \param   argc        number of passed arguments
@@ -124,6 +135,15 @@ namespace campvis {
          */
         void rebuildAllShadersFromFiles();
 
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+        /**
+         * Returns the global LuaVmState of this application.
+         */
+        LuaVmState* getLuaVmState();
+#endif
+
+
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0<> s_PipelinesChanged;
 
@@ -135,9 +155,7 @@ namespace campvis {
 
 
         /// All pipelines 
-        std::vector<AbstractPipeline*> _pipelines;
-        /// All visualisations (i.e. Pipelines with their corresponding painters/canvases)
-        std::vector< std::pair<AbstractPipeline*, CampVisPainter*> > _visualizations;
+        std::vector<PipelineRecord> _pipelines;
 
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;
@@ -153,7 +171,11 @@ namespace campvis {
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
 
+        /// Error texture to show if there is no output found
         tgt::Texture* _errorTexture;
+
+        /// the global LuaVmState of this application
+        LuaVmState* _luaVmState;
 
         /// Flag, whether CampVisApplication was correctly initialized
         bool _initialized;

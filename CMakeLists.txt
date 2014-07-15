@@ -48,8 +48,10 @@ IF(CAMPVIS_BUILD_LIB_TGT)
 ENDIF()
 
 IF(CAMPVIS_BUILD_LIB_LUA)
-    # Keep LUA_BUILD_AS_DLL in sync with BUILD_SHARED_LIBS
-    SET(LUA_BUILD_AS_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "Build Lua library as DLL" FORCE)
+    IF(WIN32)
+        # Keep LUA_BUILD_AS_DLL in sync with BUILD_SHARED_LIBS
+        SET(LUA_BUILD_AS_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "Build Lua library as DLL" FORCE)
+    ENDIF(WIN32)
 
     ADD_SUBDIRECTORY(ext/lua EXCLUDE_FROM_ALL)
 
@@ -69,6 +71,17 @@ ENDIF()
 
 
 IF(CAMPVIS_ENABLE_SCRIPTING)
+    # First, find Lua to setup paths for all projects correctly
+    FIND_PACKAGE(Lua REQUIRED)
+    IF(LUA_FOUND)
+        MESSAGE(STATUS "* Found Lua")
+        LIST(APPEND CampvisGlobalDefinitions ${LUA_DEFINITIONS})
+        LIST(APPEND CampvisGlobalIncludeDirs ${LUA_INCLUDE_DIR})
+        LIST(APPEND CampvisGlobalExternalLibs ${LUA_LIBRARY})
+    ELSE(LUA_FOUND)
+        MESSAGE(FATAL_ERROR "Lua not found!")
+    ENDIF(LUA_FOUND)
+    
     ADD_SUBDIRECTORY(scripting)
     LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_HAS_SCRIPTING")
 ENDIF()

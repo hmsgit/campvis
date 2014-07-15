@@ -3,17 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 MESSAGE(STATUS "Configuring CAMPVis Scripting")
 
-# Lua
-FIND_PACKAGE(Lua REQUIRED)
-IF(LUA_FOUND)
-    MESSAGE(STATUS "* Found Lua")
-    LIST(APPEND CampvisGlobalDefinitions ${LUA_DEFINITIONS})
-    LIST(APPEND CampvisGlobalIncludeDirs ${LUA_INCLUDE_DIR})
-    LIST(APPEND CampvisGlobalExternalLibs ${LUA_LIBRARY})
-ELSE(LUA_FOUND)
-    MESSAGE(FATAL_ERROR "Lua not found!")
-ENDIF(LUA_FOUND)
-
 # SWIG
 FIND_PACKAGE(SWIG REQUIRED)
 MESSAGE(STATUS "* Found SWIG")
@@ -37,7 +26,8 @@ SET(CampvisLuaModulesDirectory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_IN
 
 # Lua modules will be placed in a sub-directory that won't be picked up by Lua automatically. Let
 # the code know via a #define what that sub-directory is so that it can instruct Lua to search it.
-LIST(APPEND CampvisScriptingDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModulesDirectory}?${CMAKE_SHARED_MODULE_SUFFIX}\"")
+LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModulesDirectory}?${CMAKE_SHARED_MODULE_SUFFIX}\"")
+SET(CampvisGlobalDefinitions "${CampvisGlobalDefinitions}" PARENT_SCOPE)
 
 SET(CampvisBindingDirs ext/tgt core)
 
@@ -72,7 +62,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
     SWIG_ADD_MODULE(${LuaModName} lua ${InterfaceFile})
     SWIG_LINK_LIBRARIES(${LuaModName} tgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
 
-    SET(LuaModFullPath "${CampvisLuaModulesDirectory}${CMAKE_SHARED_LIBRARY_PREFIX}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    SET(LuaModFullPath "${CampvisLuaModulesDirectory}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
     # The most reliable approach to changing a target's output directory to a sub-directory of the
     # main build folder if a multi-config generator (e.g. Visual Studio or XCode) may be used is
@@ -120,8 +110,10 @@ LIST(APPEND CampvisScriptingHeaders "swigluarun.h")
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY(campvis-scripting STATIC
+
+ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}
     ${CampvisScriptingSources} ${CampvisScriptingHeaders}
 )
+
 ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
 TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})

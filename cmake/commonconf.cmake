@@ -121,6 +121,10 @@ IF(WIN32)
             SET(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /MANIFEST:NO")
             SET(CMAKE_EXE_LINKER_FLAGS_DEBUG    "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /MANIFEST:NO")
         ENDIF()
+        
+        # For Windows targets, we have to build campvis-modules and some other libs as static library, 
+        # since we did not define the __declspec exports here.
+        SET(CampvisSharedStaticModulesFix "STATIC")
     ENDIF()
 
     # enable/disable incremental linking in debug builds
@@ -142,7 +146,7 @@ IF(WIN32)
         SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
         SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}")
     ENDIF(CAMPVIS_NMAKE)
-
+    
 ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
     LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable")

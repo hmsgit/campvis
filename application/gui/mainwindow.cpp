@@ -58,6 +58,7 @@ namespace campvis {
         , _selectedProcessor(0)
         , _selectedDataContainer(0)
         , _logViewer(0)
+        , _scriptingConsoleWidget(nullptr)
     {
         tgtAssert(_application != 0, "Application must not be 0.");
         ui.setupUi(this);
@@ -130,6 +131,12 @@ namespace campvis {
         _logViewer = new LogViewerWidget(this);
         ui.logViewerDock->setWidget(_logViewer);
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+        _scriptingConsoleWidget = new ScriptingWidget(this);
+        ui.scriptingConsoleDock->setWidget(_scriptingConsoleWidget);
+        connect(_scriptingConsoleWidget, SIGNAL(s_commandExecuted(const QString&)), this, SLOT(onLuaCommandExecuted(const QString&)));
+#endif
+
         _dcInspectorWidget = new DataContainerInspectorWidget();
         this->populateMainMenu();
 
@@ -185,11 +192,17 @@ namespace campvis {
     }
 
     void MainWindow::onPipelinesChanged() {
-        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
+        std::vector<AbstractPipeline*> pipelines;
+        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
+
+        emit updatePipelineWidget(_application->_dataContainers, pipelines);
     }
 
     void MainWindow::onDataContainersChanged() {
-        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
+        std::vector<AbstractPipeline*> pipelines;
+        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
+
+        emit updatePipelineWidget(_application->_dataContainers, pipelines);
     }
 
     void MainWindow::onPipelineWidgetItemClicked(const QModelIndex& index) {
@@ -263,6 +276,9 @@ namespace campvis {
             _dcInspectorWidget->init();
 
         _logViewer->init();
+
+        if (_scriptingConsoleWidget)
+            _scriptingConsoleWidget->init();
     }
 
     void MainWindow::deinit() {
@@ -270,6 +286,9 @@ namespace campvis {
             _dcInspectorWidget->deinit();
 
         _logViewer->deinit();
+
+        if (_scriptingConsoleWidget)
+            _scriptingConsoleWidget->deinit();
     }
 
     void MainWindow::addVisualizationPipelineWidget(const std::string& name, QWidget* canvas) {
@@ -309,6 +328,14 @@ namespace campvis {
 
     void MainWindow::onRebuildShadersClicked() {
         _application->rebuildAllShadersFromFiles();
+    }
+
+    void MainWindow::onLuaCommandExecuted(const QString& cmd) {
+#ifdef CAMPVIS_HAS_SCRIPTING
+        if (_application->getLuaVmState() != nullptr) {
+            _application->getLuaVmState()->execString(cmd.toStdString());
+        }
+#endif
     }
 
 }

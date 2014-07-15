@@ -38,6 +38,7 @@ SET(CampvisApplicationToBeMocced
     gui/qtdatahandle.h
     gui/logviewerwidget.h
     gui/loghighlighter.h
+    gui/scriptingwidget.h
     gui/mdi/mdidockarea.h
     gui/mdi/mdidockablewindow.h
     gui/mdi/mdidockedwindow.h
