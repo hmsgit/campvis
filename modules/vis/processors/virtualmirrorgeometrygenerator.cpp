@@ -74,7 +74,7 @@ namespace campvis {
         std::vector<tgt::vec3> vertices;
 
         tgt::vec3 temp = cam.getUpVector();
-        if(abs(tgt::dot(temp, n) > 0.9f))
+        if (abs(tgt::dot(temp, n)) > 0.9f)
             temp = tgt::vec3(0.f, 1.f, 0.f);
 
         tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_size.getValue();

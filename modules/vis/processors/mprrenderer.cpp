@@ -93,7 +93,7 @@ namespace campvis {
                 // Construct the clipping plane in world coordinates
                 tgt::vec3 n = tgt::normalize(p_planeNormal.getValue());
                 tgt::vec3 temp(1.0, 0.0, 0.0);
-                if (abs(tgt::dot(temp, n) > 0.9))
+                if (abs(tgt::dot(temp, n)) > 0.9)
                     temp = tgt::vec3(0.0, 1.0, 0.0);
 
                 tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_planeSize.getValue();

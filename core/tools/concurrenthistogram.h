@@ -164,7 +164,7 @@ namespace campvis {
     template<typename T, size_t ND>
     void campvis::ConcurrentGenericHistogramND<T, ND>::addSample(T sample[ND]) {
         size_t bucketNumbers[ND];
-        for(int i = 0; i < ND; ++i)
+        for (size_t i = 0; i < ND; ++i)
             bucketNumbers[i] = getBucketNumber(i, sample[i]);
 
         size_t index = getArrayIndex(bucketNumbers);
@@ -186,13 +186,10 @@ namespace campvis {
 
         if (sample < _min[dimension] || sample > _max[dimension]) {
             return _numBuckets[dimension];
-#ifdef CAMPVIS_DEBUG_NOTNOW
-            LWARNINGC("CAMPVis.core.tools.ConcurrentGenericHistogramND", "Added sample " << sample << " out of bounds for dimension " << dimension << ".");
-#endif
         }
 
         double ratio = static_cast<double>(sample - _min[dimension]) / static_cast<double>(_max[dimension] - _min[dimension]);
-        return static_cast<size_t>(tgt::clamp(static_cast<int>(ratio * _numBuckets[dimension]), static_cast<int>(0), static_cast<int>(_numBuckets[dimension] - 1)));
+        return static_cast<size_t>(tgt::clamp(static_cast<int>(ratio * _numBuckets[dimension]), static_cast<int>(0), static_cast<int>(_numBuckets[dimension]) - 1));
     }
 
     template<typename T, size_t ND>

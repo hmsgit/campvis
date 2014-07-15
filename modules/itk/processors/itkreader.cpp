@@ -120,21 +120,21 @@ namespace campvis {
             LDEBUG("pixel type: " << imageIO->GetPixelType()); // '5'
 
             switch (pixelType) {
-            case ScalarPixelType::CHAR:
+            case itk::ImageIOBase::CHAR:
                 wtp._baseType = WeaklyTypedPointer::INT8; break;
-            case ScalarPixelType::UCHAR:
+            case itk::ImageIOBase::UCHAR:
                 wtp._baseType = WeaklyTypedPointer::UINT8; break;
-            case ScalarPixelType::SHORT:
+            case itk::ImageIOBase::SHORT:
                 wtp._baseType = WeaklyTypedPointer::INT16; break;
-            case ScalarPixelType::USHORT:
+            case itk::ImageIOBase::USHORT:
                 wtp._baseType = WeaklyTypedPointer::UINT16; break;
-            case ScalarPixelType::INT:
+            case itk::ImageIOBase::INT:
                 wtp._baseType = WeaklyTypedPointer::INT32; break;
-            case ScalarPixelType::UINT:
+            case itk::ImageIOBase::UINT:
                 wtp._baseType = WeaklyTypedPointer::UINT32; break;
-            case ScalarPixelType::DOUBLE:
+            case itk::ImageIOBase::DOUBLE:
                 LWARNING("Pixel Type is DOUBLE. Conversion to float may result in loss of precision!");
-            case ScalarPixelType::FLOAT:
+            case itk::ImageIOBase::FLOAT:
                 wtp._baseType = WeaklyTypedPointer::FLOAT; break;
 
 
@@ -150,7 +150,7 @@ namespace campvis {
             ioRegion.SetSize(ioSize);
             imageIO->SetIORegion(ioRegion);
 
-            if (pixelType != ScalarPixelType::DOUBLE) {
+            if (pixelType != itk::ImageIOBase::DOUBLE) {
                 //Finally, allocate buffer and read the image data
                 wtp._pointer = new uint8_t[imageIO->GetImageSizeInBytes()];
                 imageIO->Read(wtp._pointer);
@@ -248,21 +248,21 @@ namespace campvis {
             LDEBUG("pixel type: " << imageIO->GetPixelType());
 
             switch (pixelType) {
-            case ScalarPixelType::CHAR:
+            case itk::ImageIOBase::CHAR:
                 wtp._baseType = WeaklyTypedPointer::INT8; break;
-            case ScalarPixelType::UCHAR:
+            case itk::ImageIOBase::UCHAR:
                 wtp._baseType = WeaklyTypedPointer::UINT8; break;
-            case ScalarPixelType::SHORT:
+            case itk::ImageIOBase::SHORT:
                 wtp._baseType = WeaklyTypedPointer::INT16; break;
-            case ScalarPixelType::USHORT:
+            case itk::ImageIOBase::USHORT:
                 wtp._baseType = WeaklyTypedPointer::UINT16; break;
-            case ScalarPixelType::INT:
+            case itk::ImageIOBase::INT:
                 wtp._baseType = WeaklyTypedPointer::INT32; break;
-            case ScalarPixelType::UINT:
+            case itk::ImageIOBase::UINT:
                 wtp._baseType = WeaklyTypedPointer::UINT32; break;
-            case ScalarPixelType::DOUBLE:
+            case itk::ImageIOBase::DOUBLE:
                 LWARNING("Pixel Type is DOUBLE. Conversion to float may result in loss of precision!");
-            case ScalarPixelType::FLOAT:
+            case itk::ImageIOBase::FLOAT:
                 wtp._baseType = WeaklyTypedPointer::FLOAT; break;
 
 
@@ -279,8 +279,8 @@ namespace campvis {
             imageIO->SetIORegion(ioRegion);
 
             //allocate a temporary buffer if necessary
-            double* inputBuf = (pixelType == ScalarPixelType::DOUBLE) ? new double[imageIO->GetImageSizeInComponents()] : nullptr;
-            size_t sliceSize = (pixelType == ScalarPixelType::DOUBLE) ? imageIO->GetImageSizeInComponents() * sizeof(float) : imageIO->GetImageSizeInBytes();
+            double* inputBuf = (pixelType == itk::ImageIOBase::DOUBLE) ? new double[imageIO->GetImageSizeInComponents()] : nullptr;
+            size_t sliceSize = (pixelType == itk::ImageIOBase::DOUBLE) ? imageIO->GetImageSizeInComponents() * sizeof(float) : imageIO->GetImageSizeInBytes();
             wtp._pointer = new uint8_t[numSlices * sliceSize];
             for (int idx = 0; idx < numSlices; ++idx) {
                 itk::ImageIOBase::Pointer fileIO = imageIO;
@@ -289,7 +289,7 @@ namespace campvis {
                 fileIO->ReadImageInformation();
                 fileIO->SetIORegion(ioRegion);
 
-                size_t currentSliceSize = (pixelType == ScalarPixelType::DOUBLE) ? imageIO->GetImageSizeInComponents() * sizeof(float) : fileIO->GetImageSizeInBytes();
+                size_t currentSliceSize = (pixelType == itk::ImageIOBase::DOUBLE) ? imageIO->GetImageSizeInComponents() * sizeof(float) : fileIO->GetImageSizeInBytes();
                 if (currentSliceSize != sliceSize) {
                     LERROR("Image " << imageFileNames[idx] << " has different dimensionality or data type!");
                     delete static_cast<uint8_t*>(wtp._pointer);
@@ -300,7 +300,7 @@ namespace campvis {
 
                 uint8_t* sliceBuffer = static_cast<uint8_t*>(wtp._pointer) + idx * sliceSize;
 
-                if (pixelType != ScalarPixelType::DOUBLE) {
+                if (pixelType != itk::ImageIOBase::DOUBLE) {
                     // directly read slice into buffer
                     fileIO->Read(sliceBuffer);
                 }
