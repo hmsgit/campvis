@@ -61,12 +61,13 @@ namespace campvis {
         _ve.p_outputImage.setValue("result");
         _renderTargetID.setValue("result");
 
-        //_imageReader.setURL(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
-        //_imageReader.setURL(CAMPVIS_SOURCE_DIR "/../misc/mha_loader_CAMPVis_volumes/prostate_phantom_US/prostate_phantom_fcal_volume_uncompressed.mhd");
-        _imageReader.setURL(CAMPVIS_SOURCE_DIR "/../misc/mha_loader_CAMPVis_volumes/prostate_phantom_US/prostate_phantom_fcal_volume_uncompressed.mha");
-        _imageReader.setTargetImageId("reader.output");
-        _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
+        // These 2 properties are not needed in the segmentation demo
+        _imageReader.removeProperty(_imageReader.p_imageSeries);
+        _imageReader.removeProperty(_imageReader.p_lastUrl);
 
+        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/prostatePhantom.mha");
+        _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(32, 192, 0, 128), tgt::col4(32, 192, 0, 128)));

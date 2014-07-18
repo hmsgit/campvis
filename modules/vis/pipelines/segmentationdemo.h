@@ -27,7 +27,7 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/base/processors/lightsourceprovider.h"
-#include "modules/io/processors/genericimagereader.h"
+#include "modules/itk/processors/itkreader.h"
 #include "modules/itk/processors/itkimagefilter.h"
 #include "modules/itk/processors/itksegmentation.h"
 
@@ -57,7 +57,7 @@ namespace campvis {
 
     protected:
         LightSourceProvider _lsp;
-        GenericImageReader _imageReader;
+        ItkReader _imageReader;
         ItkImageFilter _itkFilter;
         ItkSegmentation _itkSegmentation;
     };
