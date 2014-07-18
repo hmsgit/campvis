@@ -126,7 +126,7 @@
         ResampleFilterType::Pointer resample = ResampleFilterType::New(); \
         resample->SetTransform(finalTransform); \
         resample->SetInput(itkRepMoving->getItkImage()); \
-        MA_baseType defaultPixelValue = 100; \
+        MA_baseType defaultPixelValue = 0; \
         resample->SetSize(itkRepFixed->getItkImage()->GetLargestPossibleRegion().GetSize()); \
         resample->SetOutputOrigin(itkRepFixed->getItkImage()->GetOrigin()); \
         resample->SetOutputSpacing(itkRepFixed->getItkImage()->GetSpacing()); \
