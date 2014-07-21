@@ -28,8 +28,6 @@
 
 #include "core/properties/allproperties.h"
 
-#include <itkImage.h>
-#include <itkImageFileReader.h>
 
 namespace campvis {
     /**

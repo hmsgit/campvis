@@ -32,6 +32,8 @@
 #include "core/tools/stringutils.h"
 #include <iomanip>
 
+#include <itkImage.h>
+#include <itkImageFileReader.h>
 
 namespace campvis {
 
