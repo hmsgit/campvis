@@ -59,6 +59,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
 
     SET_SOURCE_FILES_PROPERTIES(${InterfaceFile} PROPERTIES CPLUSPLUS ON)
     SET_SOURCE_FILES_PROPERTIES(${InterfaceFile} PROPERTIES SWIG_FLAGS "-I${CampvisHome}")
+    LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
     SWIG_ADD_MODULE(${LuaModName} lua ${InterfaceFile})
     SWIG_LINK_LIBRARIES(${LuaModName} tgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
 
@@ -109,6 +110,7 @@ LIST(APPEND CampvisScriptingHeaders "swigluarun.h")
 
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisScriptingDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CMAKE_CURRENT_BINARY_DIR})
+LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
 
 ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}

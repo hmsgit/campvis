@@ -107,10 +107,10 @@ TEST_F(StringPropertyTest, sharedPropertyTest) {
 
     // getSharedProperties()
     std::set<AbstractProperty*> sharedProps = this->_strProp1.getSharedProperties();
-    EXPECT_EQ(0, sharedProps.size());
+    EXPECT_EQ(0U, sharedProps.size());
     this->_strProp1.addSharedProperty(&this->_strProp2);
     sharedProps = this->_strProp1.getSharedProperties();
-    EXPECT_EQ(1, sharedProps.size());
+    EXPECT_EQ(1U, sharedProps.size());
     AbstractProperty *prop = *sharedProps.begin();
     EXPECT_EQ(this->_strProp2.getName(), prop->getName());
 }

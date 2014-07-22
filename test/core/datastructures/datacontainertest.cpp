@@ -88,9 +88,9 @@ TEST_F(DataContainerTest, miscellaneousTest) {
  * Tests the function getDataHandlesCopy.
  */
 TEST_F(DataContainerTest, getDataHandlesCopyTest) {
-    EXPECT_EQ(0, this->_dc0->getDataHandlesCopy().size());
+    EXPECT_EQ(0U, this->_dc0->getDataHandlesCopy().size());
     this->_dc0->addData("data1", this->_data);
-    EXPECT_EQ(1, this->_dc0->getDataHandlesCopy().size());
+    EXPECT_EQ(1U, this->_dc0->getDataHandlesCopy().size());
     std::pair<std::string, DataHandle> pair = this->_dc0->getDataHandlesCopy()[0];
     EXPECT_EQ("data1", pair.first);
     EXPECT_EQ(this->_data, pair.second.getData());
