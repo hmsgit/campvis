@@ -280,11 +280,10 @@ namespace campvis {
 
     tgt::mat4 MatrixProcessor::processModifierString(tgt::mat4 matrix, std::string modifiers)
     {
-        int pos = 0;
+        size_t pos = 0;
         tgt::mat4 result = matrix, tmp;
 
-        while (pos < modifiers.size())
-        {
+        while (pos < modifiers.size()) {
             switch (modifiers[pos]) {
             case 'I':
                 if (!result.invert(tmp)) {

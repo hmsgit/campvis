@@ -80,8 +80,8 @@ protected:
 TEST_F(ImageDataTest, miscellaneousTest) {
     ASSERT_TRUE(nullptr != _imgData1);
 
-    EXPECT_EQ(2, _imgData0->getDimensionality());
-    EXPECT_EQ(4, _imgData0->getNumChannels());
+    EXPECT_EQ(2U, _imgData0->getDimensionality());
+    EXPECT_EQ(4U, _imgData0->getNumChannels());
     EXPECT_EQ(tgt::hmul(_size), _imgData0->getNumElements());
 
     tgt::Bounds bound0 = _imgData0->getWorldBounds();

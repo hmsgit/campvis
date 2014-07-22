@@ -341,9 +341,7 @@ namespace campvis {
             float spacing[3];       // spacing (mm/pixel)
             int   svsize[3];        // sub-volume size
             int   svoffset[3];      // sub-volume offset
-            int   scalarType;       // scalar type
-
-            scalarType = imgMsg->GetScalarType();
+        
             imgMsg->GetDimensions(size);
             imgMsg->GetSpacing(spacing);
             imgMsg->GetSubVolume(svsize, svoffset);

@@ -71,12 +71,12 @@ protected:
  * getImage()
  */
 TEST_F(ImageSeriesTest, miscellaneousTest) {
-    EXPECT_EQ(0, _imgSeries1.getNumImages());
-    EXPECT_EQ(1, _imgSeries2.getNumImages());
-    EXPECT_EQ(1, _imgSeries3.getNumImages());
+    EXPECT_EQ(0U, _imgSeries1.getNumImages());
+    EXPECT_EQ(1U, _imgSeries2.getNumImages());
+    EXPECT_EQ(1U, _imgSeries3.getNumImages());
 
     _imgSeries3.addImage(_image);
-    EXPECT_EQ(2, _imgSeries3.getNumImages());
+    EXPECT_EQ(2U, _imgSeries3.getNumImages());
 
     EXPECT_EQ(_dh.getData(), _imgSeries3.getImage(_imgSeries3.getNumImages()-1).getData());
 }
