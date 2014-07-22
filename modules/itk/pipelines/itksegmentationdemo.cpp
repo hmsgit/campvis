@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "segmentationdemo.h"
+#include "itksegmentationdemo.h"
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
@@ -37,7 +37,7 @@
 
 namespace campvis {
 
-    SegmentationDemo::SegmentationDemo(DataContainer* dc)
+    ItkSegmentationDemo::ItkSegmentationDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _lsp()
         , _imageReader()
@@ -52,10 +52,10 @@ namespace campvis {
         addEventListenerToBack(&_itkSegmentation);
     }
 
-    SegmentationDemo::~SegmentationDemo() {
+    ItkSegmentationDemo::~ItkSegmentationDemo() {
     }
 
-    void SegmentationDemo::init() {
+    void ItkSegmentationDemo::init() {
         AutoEvaluationPipeline::init();
 
         _itkSegmentation.p_outputImage.setValue("result");
@@ -79,7 +79,7 @@ namespace campvis {
         static_cast<FloatProperty*>(_itkSegmentation.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
     }
 
-    void SegmentationDemo::deinit() {
+    void ItkSegmentationDemo::deinit() {
         _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
     }

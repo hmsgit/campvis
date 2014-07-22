@@ -27,7 +27,7 @@
 // 
 // ================================================================================================
 
-#include "registrationdemo.h"
+#include "itkregistrationdemo.h"
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
@@ -37,7 +37,7 @@
 
 namespace campvis {
 
-    RegistrationDemo::RegistrationDemo(DataContainer* dc)
+    ItkRegistrationDemo::ItkRegistrationDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _lsp()
         , _imageReader()
@@ -52,10 +52,10 @@ namespace campvis {
         addEventListenerToBack(&_ve);
     }
 
-    RegistrationDemo::~RegistrationDemo() {
+    ItkRegistrationDemo::~ItkRegistrationDemo() {
     }
 
-    void RegistrationDemo::init() {
+    void ItkRegistrationDemo::init() {
         AutoEvaluationPipeline::init();
 
         _ve.p_outputImage.setValue("result");
@@ -78,7 +78,7 @@ namespace campvis {
         static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
     }
 
-    void RegistrationDemo::deinit() {
+    void ItkRegistrationDemo::deinit() {
         _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
     }

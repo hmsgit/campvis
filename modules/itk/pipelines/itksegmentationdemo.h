@@ -22,28 +22,27 @@
 // 
 // ================================================================================================
 
-#ifndef RegistrationDemo_H__
-#define RegistrationDemo_H__
+#ifndef ITKSEGMENTATIONDEMO_H__
+#define ITKSEGMENTATIONDEMO_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/base/processors/lightsourceprovider.h"
-#include "modules/vis/processors/volumeexplorer.h"
 #include "modules/itk/processors/itkreader.h"
 #include "modules/itk/processors/itkimagefilter.h"
-#include "modules/itk/processors/itkregistration.h"
+#include "modules/itk/processors/itksegmentation.h"
 
 namespace campvis {
-    class RegistrationDemo : public AutoEvaluationPipeline {
+    class ItkSegmentationDemo : public AutoEvaluationPipeline {
     public:
         /**
         * Creates a AutoEvaluationPipeline.
         */
-        RegistrationDemo(DataContainer* dc);
+        ItkSegmentationDemo(DataContainer* dc);
 
         /**
         * Virtual Destructor
         **/
-        virtual ~RegistrationDemo();
+        virtual ~ItkSegmentationDemo();
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
@@ -54,15 +53,15 @@ namespace campvis {
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
         /// \see AbstractPipeline::getId()
-        static const std::string getId() { return "RegistrationDemo"; };
+        static const std::string getId() { return "ItkSegmentationDemo"; };
 
     protected:
         LightSourceProvider _lsp;
         ItkReader _imageReader;
-        VolumeExplorer _ve;
-        ItkRegistration _itkRegistration;
+        ItkImageFilter _itkFilter;
+        ItkSegmentation _itkSegmentation;
     };
 
 }
 
-#endif // RegistrationDemo_H__
+#endif // ITKSEGMENTATIONDEMO_H__
