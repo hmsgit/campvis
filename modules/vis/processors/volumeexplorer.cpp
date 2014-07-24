@@ -38,7 +38,7 @@
 namespace campvis {
     const std::string VolumeExplorer::loggerCat_ = "CAMPVis.modules.vis.VolumeExplorer";
 
-    VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
+    VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp, SliceRenderProcessor* sliceRenderer, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
@@ -46,17 +46,20 @@ namespace campvis {
         , p_seProperties("SliceExtractorProperties", "Slice Extractor Properties")
         , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties")
         , _raycaster(viewportSizeProp, raycaster)
-        , _sliceExtractor(viewportSizeProp)
+        , _sliceRenderer(sliceRenderer)
         , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
         , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
-        , _xSliceHandler(&_sliceExtractor.p_xSliceNumber)
-        , _ySliceHandler(&_sliceExtractor.p_ySliceNumber)
-        , _zSliceHandler(&_sliceExtractor.p_zSliceNumber)
-        , _windowingHandler(&_sliceExtractor.p_transferFunction)
+        , _xSliceHandler(&_sliceRenderer->p_xSliceNumber)
+        , _ySliceHandler(&_sliceRenderer->p_ySliceNumber)
+        , _zSliceHandler(&_sliceRenderer->p_zSliceNumber)
+        , _windowingHandler(nullptr)
         , _trackballEH(0)
         , _mousePressedInRaycaster(false)
         , _scribblePointer(nullptr)
     {
+        tgtAssert(raycaster != nullptr, "Raycasting Processor must not be 0.");
+        tgtAssert(_sliceRenderer != nullptr, "Slice Rendering Processor must not be 0.");
+
         addProperty(p_inputVolume, INVALID_PROPERTIES);
         addProperty(p_outputImage);
         addProperty(p_enableScribbling, VALID);
@@ -64,14 +67,14 @@ namespace campvis {
         addDecorator(new ProcessorDecoratorBackground());
         decoratePropertyCollection(this);
         
-        p_seProperties.addPropertyCollection(_sliceExtractor);
-        _sliceExtractor.p_lqMode.setVisible(false);
-        _sliceExtractor.p_sourceImageID.setVisible(false);
-        _sliceExtractor.p_targetImageID.setVisible(false);
-        _sliceExtractor.p_sliceOrientation.setVisible(false);
-        _sliceExtractor.p_xSliceColor.setVisible(false);
-        _sliceExtractor.p_ySliceColor.setVisible(false);
-        _sliceExtractor.p_zSliceColor.setVisible(false);
+        p_seProperties.addPropertyCollection(*_sliceRenderer);
+        _sliceRenderer->p_lqMode.setVisible(false);
+        _sliceRenderer->p_sourceImageID.setVisible(false);
+        _sliceRenderer->p_targetImageID.setVisible(false);
+        _sliceRenderer->p_sliceOrientation.setVisible(false);
+        _sliceRenderer->p_xSliceColor.setVisible(false);
+        _sliceRenderer->p_ySliceColor.setVisible(false);
+        _sliceRenderer->p_zSliceColor.setVisible(false);
         addProperty(p_seProperties, VALID);
 
         p_vrProperties.addPropertyCollection(_raycaster);
@@ -81,9 +84,9 @@ namespace campvis {
         addProperty(p_vrProperties, VALID);
 
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
-        p_inputVolume.addSharedProperty(&_sliceExtractor.p_sourceImageID);
+        p_inputVolume.addSharedProperty(&_sliceRenderer->p_sourceImageID);
 
-        _sliceExtractor.setViewportSizeProperty(&p_sliceRenderSize);
+        _sliceRenderer->setViewportSizeProperty(&p_sliceRenderSize);
         _raycaster.setViewportSizeProperty(&p_volumeRenderSize);
 
         addProperty(p_sliceRenderSize, VALID);
@@ -92,6 +95,10 @@ namespace campvis {
         // Event-Handlers
         _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, &p_volumeRenderSize);
         _trackballEH->addLqModeProcessor(&_raycaster);
+
+        if (TransferFunctionProperty* tester = dynamic_cast<TransferFunctionProperty*>(_sliceRenderer->getProperty("TransferFunction"))) {
+        	_windowingHandler.setTransferFunctionProperty(tester);
+        }
     }
 
     VolumeExplorer::~VolumeExplorer() {
@@ -101,13 +108,13 @@ namespace campvis {
     void VolumeExplorer::init() {
         VisualizationProcessor::init();
         _raycaster.init();
-        _sliceExtractor.init();
+        _sliceRenderer->init();
 
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/volumeexplorer.frag", "");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
 
-        _sliceExtractor.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
+        _sliceRenderer->s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
         _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
@@ -118,7 +125,7 @@ namespace campvis {
 
     void VolumeExplorer::deinit() {
         _raycaster.deinit();
-        _sliceExtractor.deinit();
+        _sliceRenderer->deinit();
         VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
         delete _quad;
@@ -151,17 +158,17 @@ namespace campvis {
             _raycaster.process(data);
         }
         if (getInvalidationLevel() & SLICES_INVALID) {
-            _sliceExtractor.p_sliceOrientation.selectById("x");
-            _sliceExtractor.p_targetImageID.setValue(p_outputImage.getValue() + ".xSlice");
-            _sliceExtractor.process(data);
+            _sliceRenderer->p_sliceOrientation.selectById("x");
+            _sliceRenderer->p_targetImageID.setValue(p_outputImage.getValue() + ".xSlice");
+            _sliceRenderer->process(data);
 
-            _sliceExtractor.p_sliceOrientation.selectById("y");
-            _sliceExtractor.p_targetImageID.setValue(p_outputImage.getValue() + ".ySlice");
-            _sliceExtractor.process(data);
+            _sliceRenderer->p_sliceOrientation.selectById("y");
+            _sliceRenderer->p_targetImageID.setValue(p_outputImage.getValue() + ".ySlice");
+            _sliceRenderer->process(data);
 
-            _sliceExtractor.p_sliceOrientation.selectById("z");
-            _sliceExtractor.p_targetImageID.setValue(p_outputImage.getValue() + ".zSlice");
-            _sliceExtractor.process(data);
+            _sliceRenderer->p_sliceOrientation.selectById("z");
+            _sliceRenderer->p_targetImageID.setValue(p_outputImage.getValue() + ".zSlice");
+            _sliceRenderer->process(data);
         }
 
         // compose rendering
@@ -177,19 +184,19 @@ namespace campvis {
         }
         if (prop == &p_outputImage) {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
-            _sliceExtractor.p_geometryID.setValue(p_outputImage.getValue() + ".scribbles");
+            _sliceRenderer->p_geometryID.setValue(p_outputImage.getValue() + ".scribbles");
         }
         if (prop == &p_inputVolume) {
             invalidate(VR_INVALID | SLICES_INVALID);
         }
         if (prop == &p_enableScribbling) {
             if (p_enableScribbling.getValue() == true) {
-                _sliceExtractor.s_scribblePainted.connect(this, &VolumeExplorer::onSliceExtractorScribblePainted);
-                _sliceExtractor.p_geometryID.setValue(p_outputImage.getValue() + ".scribbles");
+                _sliceRenderer->s_scribblePainted.connect(this, &VolumeExplorer::onSliceExtractorScribblePainted);
+                _sliceRenderer->p_geometryID.setValue(p_outputImage.getValue() + ".scribbles");
             }
             else {
-                _sliceExtractor.s_scribblePainted.disconnect(this);
-                _sliceExtractor.p_geometryID.setValue("");
+                _sliceRenderer->s_scribblePainted.disconnect(this);
+                _sliceRenderer->p_geometryID.setValue("");
             }
         }
 
@@ -264,7 +271,7 @@ namespace campvis {
             if (processor == &_raycaster) {
                 invalidate(VR_INVALID);
             }
-            if (processor == &_sliceExtractor) {
+            if (processor == _sliceRenderer) {
                 invalidate(SLICES_INVALID);
             }
 
@@ -274,22 +281,21 @@ namespace campvis {
 
     void VolumeExplorer::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
-        _sliceExtractor.p_transferFunction.setImageHandle(img.getDataHandle());
         static_cast<TransferFunctionProperty*>(_raycaster.getNestedProperty("RaycasterProps::TransferFunction"))->setImageHandle(img.getDataHandle());
 
         if (img != 0) {
             const tgt::svec3& imgSize = img->getSize();
-            if (_sliceExtractor.p_xSliceNumber.getMaxValue() != static_cast<int>(imgSize.x) - 1){
-                _sliceExtractor.p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
-                _sliceExtractor.p_xSliceNumber.setValue(static_cast<int>(imgSize.x) / 2);
+            if (_sliceRenderer->p_xSliceNumber.getMaxValue() != static_cast<int>(imgSize.x) - 1){
+                _sliceRenderer->p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
+                _sliceRenderer->p_xSliceNumber.setValue(static_cast<int>(imgSize.x) / 2);
             }
-            if (_sliceExtractor.p_ySliceNumber.getMaxValue() != static_cast<int>(imgSize.y) - 1){
-                _sliceExtractor.p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
-                _sliceExtractor.p_ySliceNumber.setValue(static_cast<int>(imgSize.y) / 2);
+            if (_sliceRenderer->p_ySliceNumber.getMaxValue() != static_cast<int>(imgSize.y) - 1){
+                _sliceRenderer->p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
+                _sliceRenderer->p_ySliceNumber.setValue(static_cast<int>(imgSize.y) / 2);
             }
-            if (_sliceExtractor.p_zSliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
-                _sliceExtractor.p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
-                _sliceExtractor.p_zSliceNumber.setValue(static_cast<int>(imgSize.z) / 2);
+            if (_sliceRenderer->p_zSliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
+                _sliceRenderer->p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+                _sliceRenderer->p_zSliceNumber.setValue(static_cast<int>(imgSize.z) / 2);
             }
 
             _trackballEH->reinitializeCamera(img);
@@ -328,31 +334,31 @@ namespace campvis {
                     AbstractProcessor::ScopedLock lock(this);
 
                     if (me->y() <= p_sliceRenderSize.getValue().y) {
-                        _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::XY_PLANE);
+                        _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::XY_PLANE);
                         tgt::MouseEvent adjustedMe(
                             me->x(), me->y(),
                             me->action(), me->modifiers(), me->button(),
                             p_sliceRenderSize.getValue()
                             );
-                        _sliceExtractor.onEvent(&adjustedMe);
+                        _sliceRenderer->onEvent(&adjustedMe);
                     }
                     else if (me->y() <= 2*p_sliceRenderSize.getValue().y) {
-                        _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::XZ_PLANE);
+                        _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::XZ_PLANE);
                         tgt::MouseEvent adjustedMe(
                             me->x(), me->y() - p_sliceRenderSize.getValue().y,
                             me->action(), me->modifiers(), me->button(),
                             p_sliceRenderSize.getValue()
                             );
-                        _sliceExtractor.onEvent(&adjustedMe);
+                        _sliceRenderer->onEvent(&adjustedMe);
                     }
                     else {
-                        _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::YZ_PLANE);
+                        _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::YZ_PLANE);
                         tgt::MouseEvent adjustedMe(
                             me->x(), me->y() - (2 * p_sliceRenderSize.getValue().y),
                             me->action(), me->modifiers(), me->button(),
                             p_sliceRenderSize.getValue()
                             );
-                        _sliceExtractor.onEvent(&adjustedMe);
+                        _sliceRenderer->onEvent(&adjustedMe);
                     }
 
                 }

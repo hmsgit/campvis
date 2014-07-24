@@ -58,7 +58,7 @@ namespace campvis {
          * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          * \param   raycaster           Raycaster to use for rendering, must not be 0, VolumeRenderer will take ownership.
          **/
-        VolumeExplorer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster = new SimpleRaycaster(0));
+        VolumeExplorer(IVec2Property* viewportSizeProp, SliceRenderProcessor* sliceRenderer = new SliceExtractor(0), RaycastingProcessor* raycaster = new SimpleRaycaster(0));
 
         /**
          * Destructor
@@ -131,7 +131,7 @@ namespace campvis {
         FaceGeometry* _quad;
 
         VolumeRenderer _raycaster;
-        SliceExtractor _sliceExtractor;
+        SliceRenderProcessor* _sliceRenderer;
 
         IVec2Property p_sliceRenderSize;
         IVec2Property p_volumeRenderSize;

@@ -43,7 +43,7 @@ namespace campvis {
     const std::string PredicateVolumeExplorer::loggerCat_ = "CAMPVis.modules.vis.PredicateVolumeExplorer";
 
     PredicateVolumeExplorer::PredicateVolumeExplorer(IVec2Property* viewportSizeProp)
-        : VolumeExplorer(viewportSizeProp, new PointPredicateRaycaster(0))
+        : VolumeExplorer(viewportSizeProp, new SliceExtractor(0), new PointPredicateRaycaster(0))
         , p_inputLabels("InputLabels", "Input Label Image", "", DataNameProperty::READ)
         , p_inputSnr("InputSnr", "Input SNR", "", DataNameProperty::READ)
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
