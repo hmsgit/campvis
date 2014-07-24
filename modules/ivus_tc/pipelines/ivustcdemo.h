@@ -27,7 +27,7 @@
 
 
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
+#include "core/properties/allproperties.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/genericimagereader.h"
@@ -59,6 +59,14 @@ namespace campvis {
         static const std::string getId() { return "IvusTcDemo"; };
 
     protected:
+        /// reads and processes all images from the given directory
+        void readAndProcessImages();
+
+        void readImage(const std::string& baseDir, const std::string& id);
+
+        StringProperty p_sourceDirectory;
+        ButtonProperty p_readImagesButton;
+
         LightSourceProvider _lsp;
         IvusBatchReader _imageReader;
         VolumeExplorer _ve;
