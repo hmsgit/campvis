@@ -60,11 +60,12 @@ namespace campvis {
         s_headerChanged.emitSignal();
     }
 
-    void PointPredicateHistogram::resetPredicates() {
+    void PointPredicateHistogram::resetPredicates(bool resetColors) {
         float imp = 1.f / _predicates.size();
         for (size_t i = 0; i < _predicates.size(); ++i) {
             _predicates[i]->p_importance.setValue(imp);
-            _predicates[i]->p_color.setValue(tgt::vec2(0.f));
+            if (resetColors)
+                _predicates[i]->p_color.setValue(tgt::vec2(0.f));
         }
 
         s_configurationChanged.emitSignal();
@@ -81,7 +82,7 @@ namespace campvis {
         }
 
         toReturn +=
-            "vec4 performPredicateBasedShading(in float intensity, in float gradientMagnitude, in float gradientAngle, float viewAngle, in float snr, in float vesselness, in float confidence, in uint label) {\n"
+            "vec4 performPredicateBasedShading(" + _predicateFunctionArgumentString + ") {\n"
             "    float impCount = 0.0;\n"
             "    float hueCount = 0.0;\n"
             "    vec4 impSum = vec4(0.0, 0.0, 0.0, 1.0);\n";
@@ -113,7 +114,7 @@ namespace campvis {
             "}\n\n";
 
         toReturn +=
-            "uint computePredicateBitfield(in float intensity, in float gradientMagnitude, in float gradientAngle, float viewAngle, in float snr, in float vesselness, in float confidence, in uint label) {\n"
+            "uint computePredicateBitfield(" + _predicateFunctionArgumentString + ") {\n"
             "    uint toReturn = 0U;\n";
 
         for (size_t i = 0; i < _predicates.size(); ++i) {
@@ -153,6 +154,10 @@ namespace campvis {
     void PointPredicateHistogram::unlock() {
         for (size_t i = 0; i < _predicates.size(); ++i)
             _predicates[i]->unlockAllProperties();
+    }
+
+    void PointPredicateHistogram::setPredicateFunctionArgumentString(const std::string& pfas) {
+        _predicateFunctionArgumentString = pfas;
     }
 
 }

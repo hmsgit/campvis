@@ -11,7 +11,7 @@ IF(${ModuleEnabled})
 
 	# Header files (including GLSL files so that they'll appear in VS projects)
 	FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
-		modules/advancedusvis/datastructures/*.frag
+		modules/advancedusvis/datastructures/*.h
 		modules/advancedusvis/glsl/*.frag
 		modules/advancedusvis/glsl/*.vert
 		modules/advancedusvis/pipelines/*.h

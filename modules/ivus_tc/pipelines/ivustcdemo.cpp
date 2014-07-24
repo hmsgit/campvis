@@ -31,6 +31,8 @@
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
+#include "modules/ivus_tc/processors/ivustcsliceextractor.h"
+
 namespace campvis {
 
     IvusTcDemo::IvusTcDemo(DataContainer* dc)
@@ -39,7 +41,7 @@ namespace campvis {
         , p_readImagesButton("ReadImagesButton", "Read Images")
         , _lsp()
         , _imageReader(&_canvasSize)
-        , _ve(&_canvasSize)
+        , _ve(&_canvasSize, new IvusTcSliceExtractor(nullptr))
     {
         // Use AbstractPipeline overload to avoid automatic evaluation of _imageReader processor
 //        AbstractPipeline::addProcessor(&_imageReader);
@@ -60,22 +62,56 @@ namespace campvis {
         AutoEvaluationPipeline::init();
         _imageReader.init();
         p_readImagesButton.s_clicked.connect(this, &IvusTcDemo::readAndProcessImages);
-        
+
+        _ve.p_inputVolume.setValue("image.ivus");
         _ve.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
         
-        _imageReader.p_inputDirectory.setValue("D:/Medical Data/IVUS/H52 LAD1/IVUS");
         _imageReader.p_fileExtension.setValue("bmp");
-        _imageReader.p_outputImage.setValue("reader.output");
-        _imageReader.p_outputImage.addSharedProperty(&_ve.p_inputVolume);
-        
 
-        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.12f, .15f), tgt::col4(85, 0, 0, 128), tgt::col4(255, 0, 0, 128)));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.19f, .28f), tgt::col4(89, 89, 89, 155), tgt::col4(89, 89, 89, 155)));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.41f, .51f), tgt::col4(170, 170, 128, 64), tgt::col4(192, 192, 128, 64)));
-        static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
-        static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
+        // initialize predicates with default config
+        PointPredicateHistogramProperty* php = dynamic_cast<PointPredicateHistogramProperty*>(_ve.getNestedProperty("SliceExtractorProperties::PredicateHistogram"));
+        if (php != nullptr) {
+            PointPredicateHistogram* histogram = php->getPredicateHistogram();
+
+            AbstractPointPredicate* vpToAdd = 0;
+//             vpToAdd = new RangePointPredicate("ivus", "IvusIntensity", "IVUS Intensity Range");
+//             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.f, 1.f));
+//             histogram->addPredicate(vpToAdd);
+
+            vpToAdd = new RangePointPredicate("cm", "ConfidenceMap", "Confidence");
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.25f, 1.f));
+            histogram->addPredicate(vpToAdd);
+
+            vpToAdd = new RangePointPredicate("tc.r", "Calcified", "Calcified Tissue");
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.f, 1.f));
+            histogram->addPredicate(vpToAdd);
+
+            vpToAdd = new RangePointPredicate("tc.g", "Fibrotic", "Fibrotic Tissue");
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.2f, 1.f));
+            histogram->addPredicate(vpToAdd);
+
+            vpToAdd = new RangePointPredicate("tc.b", "Lipidic", "Lipidic Tissue");
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.4f, 1.f));
+            histogram->addPredicate(vpToAdd);
+
+            vpToAdd = new RangePointPredicate("tc.a", "Necrotic", "Necrotic Tissue");
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.6f, 1.f));
+            histogram->addPredicate(vpToAdd);
+
+            vpToAdd = new RangePointPredicate("plaque", "Plaque", "Plaque Mask");
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.5f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.8f, 1.f));
+            histogram->addPredicate(vpToAdd);
+
+            histogram->resetPredicates(false);
+            addProperty(*php);
+        }
+
     }
 
     void IvusTcDemo::deinit() {

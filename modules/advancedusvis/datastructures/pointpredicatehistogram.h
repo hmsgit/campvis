@@ -70,7 +70,7 @@ namespace campvis {
         /**
          * Resets the predicate histogram to default setting.
          */
-        void resetPredicates();
+        void resetPredicates(bool resetColors = true);
 
         /**
          * Returns the vector of predicates.
@@ -90,6 +90,12 @@ namespace campvis {
          */
         void setupRenderShader(tgt::Shader* shader) const;
 
+        /**
+         * Sets the GLSL predicate function argument string.
+         * \param   pfas    the GLSL predicate function argument string (without parentheses)
+         */
+        void setPredicateFunctionArgumentString(const std::string& pfas);
+
 
         /// Signal emitted when this predicate histogram's configuration (importance, color, ...) has changed
         sigslot::signal0 s_configurationChanged;
@@ -104,6 +110,8 @@ namespace campvis {
 
         /// vector of all voxel predicates
         std::vector<AbstractPointPredicate*> _predicates;
+        /// The GLSL predicate function argument string (without parentheses).
+        std::string _predicateFunctionArgumentString;
 
         static const std::string loggerCat_;
 
