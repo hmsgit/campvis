@@ -66,7 +66,7 @@ namespace campvis {
 
         // We ensure all shared properties to be of correct type the base class method.
         // Hence, static_cast ist safe.
-        setHistogramPointer(static_cast<PointPredicateHistogramProperty*>(prop)->_histogram);
+        static_cast<PointPredicateHistogramProperty*>(prop)->setHistogramPointer(this->_histogram);
     }
 
     PointPredicateHistogram* PointPredicateHistogramProperty::getPredicateHistogram() {
