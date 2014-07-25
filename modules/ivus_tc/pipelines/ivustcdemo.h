@@ -33,6 +33,7 @@
 #include "modules/io/processors/genericimagereader.h"
 #include "modules/ivus_tc/processors/ivusbatchreader.h"
 #include "modules/vis/processors/volumeexplorer.h"
+#include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
 namespace campvis {
     class IvusTcDemo : public AutoEvaluationPipeline {
@@ -66,6 +67,7 @@ namespace campvis {
 
         StringProperty p_sourceDirectory;
         ButtonProperty p_readImagesButton;
+        PointPredicateHistogramProperty p_predicateHistogram;
 
         LightSourceProvider _lsp;
         IvusBatchReader _imageReader;

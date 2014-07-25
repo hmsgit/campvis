@@ -28,10 +28,10 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
-#include "core/classification/geometry1dtransferfunction.h"
-#include "core/classification/tfgeometry1d.h"
+#include "core/classification/simpletransferfunction.h"
 
 #include "modules/ivus_tc/processors/ivustcsliceextractor.h"
+#include "modules/ivus_tc/processors/ivustcraycaster.h"
 
 namespace campvis {
 
@@ -39,9 +39,10 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , p_sourceDirectory("SoruceDirectory", "Source Directory", "D:/Medical Data/IVUS/H52 LAD1", StringProperty::DIRECTORY)
         , p_readImagesButton("ReadImagesButton", "Read Images")
+        , p_predicateHistogram("PredicateHistogram", "Voxel Predicate Selection")
         , _lsp()
         , _imageReader(&_canvasSize)
-        , _ve(&_canvasSize, new IvusTcSliceExtractor(nullptr))
+        , _ve(&_canvasSize, new IvusTcSliceExtractor(nullptr), new IvusTcRaycaster(nullptr))
     {
         // Use AbstractPipeline overload to avoid automatic evaluation of _imageReader processor
 //        AbstractPipeline::addProcessor(&_imageReader);
@@ -53,6 +54,8 @@ namespace campvis {
         addProperty(p_readImagesButton);
 
         addEventListenerToBack(&_ve);
+
+        p_predicateHistogram.getPredicateHistogram()->setPredicateFunctionArgumentString("in float ivus, in float cm, in vec4 tc, in float plaque");
     }
 
     IvusTcDemo::~IvusTcDemo() {
@@ -70,14 +73,11 @@ namespace campvis {
         _imageReader.p_fileExtension.setValue("bmp");
 
         // initialize predicates with default config
-        PointPredicateHistogramProperty* php = dynamic_cast<PointPredicateHistogramProperty*>(_ve.getNestedProperty("SliceExtractorProperties::PredicateHistogram"));
+        PointPredicateHistogramProperty* php = &p_predicateHistogram;
         if (php != nullptr) {
             PointPredicateHistogram* histogram = php->getPredicateHistogram();
 
             AbstractPointPredicate* vpToAdd = 0;
-//             vpToAdd = new RangePointPredicate("ivus", "IvusIntensity", "IVUS Intensity Range");
-//             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.f, 1.f));
-//             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("cm", "ConfidenceMap", "Confidence");
             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.25f, 1.f));
@@ -110,7 +110,15 @@ namespace campvis {
 
             histogram->resetPredicates(false);
             addProperty(*php);
+
+            php->addSharedProperty(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::PredicateHistogram"));
+            php->addSharedProperty(_ve.getNestedProperty("SliceExtractorProperties::PredicateHistogram"));
         }
+
+        SimpleTransferFunction* stf = new SimpleTransferFunction(128, tgt::vec2(.1f, 1.f));
+        stf->setLeftColor(tgt::vec4(0.f));
+        stf->setRightColor(tgt::vec4(255.f));
+        static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(stf);
 
     }
 
