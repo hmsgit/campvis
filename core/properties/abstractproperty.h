@@ -39,9 +39,6 @@
 namespace campvis {
     /**
      * Abstract base class for CAMPVis Property.
-     * 
-     * \todo    Add PropertyWidgets, add clone()?
-     *          Think about a reasonable locking mechanism and implement that
      */
     class CAMPVIS_CORE_API AbstractProperty {
     public:

@@ -35,7 +35,6 @@ namespace campvis {
      * Generic class for value-based properties.
      *
      * \tparam  T   Base type of the property's value.
-     * \todo    Add PropertyWidgets, review use of mutex
      */
     template<typename T>
     class GenericProperty : public AbstractProperty {
@@ -179,11 +178,9 @@ namespace campvis {
     template<typename T>
     void campvis::GenericProperty<T>::setFrontValue(const T& value) {
         _value = value;
-        // TODO:    think about the correct/reasonable order of observer notification
-        //          thread-safety might play a role thereby...
         for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
             // We ensure all shared properties to be of type GenericProperty<T> in the addSharedProperty overload.
-            // Hence, static_cast ist safe.
+            // Hence, static_cast is safe.
             GenericProperty<T>* child = static_cast< GenericProperty<T>* >(*it);
             child->setValue(value);
         }

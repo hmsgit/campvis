@@ -191,9 +191,6 @@ namespace campvis {
         /// \see AbstractImageRepresentation::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
-        /// \see AbstractImageRepresentation::getSubImage
-        virtual ThisType* getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const;
-
         /**
          * Returns a WeaklyTypedPointer to the image data.
          * \note    The pointer is still owned by this ImageRepresentationLocal. If you want a copy, use clone().
@@ -264,13 +261,6 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
     size_t campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::getVideoMemoryFootprint() const {
-        return 0;
-    }
-
-    template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>
-    GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>* campvis::GenericImageRepresentationItk<BASETYPE, NUMCHANNELS, DIMENSIONALITY>::getSubImage(ImageData* parent, const tgt::svec3& llf, const tgt::svec3& urb) const {
-        tgtAssert(tgt::hand(tgt::lessThan(llf, urb)), "Coordinates in LLF must be component-wise smaller than the ones in URB!");
-        // TODO: implement - there certainly exists an ITK filter for this...
         return 0;
     }
 

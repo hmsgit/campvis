@@ -37,8 +37,6 @@ namespace campvis {
 
     /**
      * Abstract base class for data handled by a DataHandle and stored in a DataContainer.
-     * 
-     * \todo 
      */
     class CAMPVIS_CORE_API LightSourceData : public AbstractData {
     public:

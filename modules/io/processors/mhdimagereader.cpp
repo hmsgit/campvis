@@ -133,7 +133,6 @@ namespace campvis {
             if (tfp.hasKey("ElementByteOrderMSB"))
                 e = (tfp.getBool("ElementByteOrderMSB") ? EndianHelper::IS_BIG_ENDIAN : EndianHelper::IS_LITTLE_ENDIAN);
             
-            // TODO: spacing, element size, etc.
             if (tfp.hasKey("ElementSpacing")) {
                 if (dimensionality == 3)
                     voxelSize = tfp.getVec3("ElementSpacing");

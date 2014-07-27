@@ -120,8 +120,6 @@ namespace campvis {
                             -2*n.x*n.y   , 1 - 2*n.y*n.y, -2*n.z*n.y   , 0, 
                             -2*n.x*n.z   , -2*n.y*n.z   , 1 - 2*n.z*n.z, 0, 
                             2*n.x*k      , 2*n.y*k      , 2*n.z*k      , 1));
-
-                        // TODO: double check, whether matrix transpose is necessary
                     }
                     else {
                         LERROR("No suitable virtual mirror geometry found.");
