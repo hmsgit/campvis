@@ -773,6 +773,7 @@ void Texture::downloadTexture() {
     if (pixels_ == 0)
         alloc();
 
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glGetTexImage(type_, 0, format_, dataType_, pixels_);
 }
 
@@ -782,6 +783,7 @@ GLubyte* Texture::downloadTextureToBuffer() const {
     int arraySize = hmul(dimensions_) * bpp_;
     GLubyte* pixels = new GLubyte[arraySize];
 
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glGetTexImage(type_, 0, format_, dataType_, pixels);
     return pixels;
 }
