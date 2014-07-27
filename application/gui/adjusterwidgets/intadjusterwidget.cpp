@@ -32,9 +32,9 @@ namespace campvis {
     {
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
 
-        connect(this, SIGNAL(s_minChanged(int)), this, SLOT(onMinChanged(int)), Qt::QueuedConnection);
-        connect(this, SIGNAL(s_maxChanged(int)), this, SLOT(onMaxChanged(int)), Qt::QueuedConnection);
-        connect(this, SIGNAL(s_singleStepChanged(int)), this, SLOT(onSingleStepChanged(int)), Qt::QueuedConnection);
+        connect(this, SIGNAL(s_minChanged(int)), this, SLOT(onMinChanged(int)));
+        connect(this, SIGNAL(s_maxChanged(int)), this, SLOT(onMaxChanged(int)));
+        connect(this, SIGNAL(s_singleStepChanged(int)), this, SLOT(onSingleStepChanged(int)));
 
         connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
         connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));

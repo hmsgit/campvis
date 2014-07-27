@@ -109,7 +109,6 @@ namespace campvis {
         _usBlurFilter.p_sigma.setValue(2.f);
 
 
-        // TODO: replace this hardcoded domain by automatically determined from image min/max values
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _usFusion.p_transferFunction.replaceTF(tf);

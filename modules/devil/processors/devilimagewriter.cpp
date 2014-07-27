@@ -91,8 +91,6 @@ namespace campvis {
         else {
             LDEBUG("Could not load RenderData with given ID from pipeline.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void DevilImageWriter::writeIlImage(const WeaklyTypedPointer& wtp, const tgt::ivec2& size, const std::string& filename) const {

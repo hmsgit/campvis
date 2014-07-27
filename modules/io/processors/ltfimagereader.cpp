@@ -96,8 +96,6 @@ namespace campvis {
         else {
             LERROR("Could not deduce counting index.");
         }
-
-        validate(INVALID_RESULT);
     }
     
 }

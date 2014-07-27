@@ -51,16 +51,12 @@ namespace campvis {
                 data.addDataHandle(p_outputID.getValue(), series->getImage(p_imageIndex.getValue()));
             }
         }
-
-        validate(INVALID_RESULT);
     }
 
     void ImageSeriesSplitter::updateProperties(DataContainer& dataContainer) {
         ScopedTypedData<ImageSeries> series(dataContainer, p_inputID.getValue());
         if (series != 0)
             p_imageIndex.setMaxValue(static_cast<int>(series->getNumImages()));
-
-        validate(INVALID_PROPERTIES);
     }
 
 }

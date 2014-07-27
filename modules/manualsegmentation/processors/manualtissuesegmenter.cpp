@@ -350,8 +350,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void ManualTissueSegmenter::updateProperties(DataContainer& data) {
@@ -362,8 +360,6 @@ namespace campvis {
                 p_frameNumber.setMaxValue(img->getSize().z - 1);
             }
         }
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void ManualTissueSegmenter::onEvent(tgt::Event* e) {

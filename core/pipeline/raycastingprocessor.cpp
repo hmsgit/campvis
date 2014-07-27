@@ -171,8 +171,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string RaycastingProcessor::generateHeader() const {
@@ -183,15 +181,11 @@ namespace campvis {
     void RaycastingProcessor::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
         p_transferFunction.setImageHandle(img.getDataHandle());
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void RaycastingProcessor::updateShader() {
         _shader->setHeaders(generateHeader());
         _shader->rebuild();
-
-        validate(AbstractProcessor::INVALID_SHADER);
     }
 
 }

@@ -75,7 +75,6 @@ namespace campvis {
             }
             else {
                 LERROR("Error while parsing CSVD header: No Size specified.");
-                validate(INVALID_RESULT);
                 return;
             }
 
@@ -97,7 +96,6 @@ namespace campvis {
                 pt = WeaklyTypedPointer::FLOAT;
             else {
                 LERROR("Error while parsing MHD header: Unsupported element type: " << et);
-                validate(INVALID_RESULT);
                 return;
             }
 
@@ -160,22 +158,17 @@ namespace campvis {
             }
             else {
                 LERROR("Error while parsing CSVD header: No file names specified.");
-                validate(INVALID_RESULT);
                 return;
             }
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
-            validate(INVALID_RESULT);
             return;
         }
         catch (std::exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
-            validate(INVALID_RESULT);
             return;
         }
-
-        validate(INVALID_RESULT);
     }
 
 }

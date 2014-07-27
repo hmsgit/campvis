@@ -155,12 +155,9 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void PointPredicateEvaluator::updateProperties(DataContainer dataContainer) {
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     std::string PointPredicateEvaluator::generateHeader() const {
@@ -175,7 +172,6 @@ namespace campvis {
     void PointPredicateEvaluator::updateShader() {
         _shader->setHeaders(generateHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
     }
 
 }

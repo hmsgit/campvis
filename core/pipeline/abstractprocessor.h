@@ -59,6 +59,25 @@ namespace campvis {
     class CAMPVIS_CORE_API AbstractProcessor : public HasPropertyCollection {
     public:
         /**
+         * Scoped lock of an AbstractProcessor that automatically unlocks the processor on destruction.
+         * Useful for exception safety.
+         */
+        struct CAMPVIS_CORE_API ScopedLock {
+            /**
+             * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
+             * \param   p                   Processor to lock
+             * \param   unlockInExtraThread Unlock \a p in extra thread (since this might be an expensive operation)
+             */
+            ScopedLock(AbstractProcessor* p, bool unlockInExtraThread);
+
+            /// Destructor, unlocks the processor
+            ~ScopedLock();
+
+            AbstractProcessor* _p;      ///< The processor to lock
+            bool _unlockInExtraThread;  ///< Unlock _p in extra thread (since this might be an expensive operation)
+        };
+
+        /**
          * Available invalidation levels
          */
         enum InvalidationLevel {
@@ -275,26 +294,6 @@ namespace campvis {
         sigslot::signal1<AbstractProcessor*> s_validated;
 
     protected:
-        /**
-         * Scoped lock of an AbstractProcessor that automatically unlocks the processor on destruction.
-         * Useful for exception safety.
-         */
-        struct CAMPVIS_CORE_API ScopedLock {
-            /**
-             * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
-             * \param   p                   Processor to lock
-             * \param   unlockInExtraThread Unlock \a p in extra thread (since this might be an expensive operation)
-             */
-            ScopedLock(AbstractProcessor* p, bool unlockInExtraThread);
-
-            /// Destructor, unlocks the processor
-            ~ScopedLock();
-
-            AbstractProcessor* _p;      ///< The processor to lock
-            bool _unlockInExtraThread;  ///< Unlock _p in extra thread (since this might be an expensive operation)
-        };
-
-
         /**
          * Gets called from default process() method when having an invalidation level of INVALID_SHADER.
          * 

@@ -139,8 +139,6 @@ namespace campvis {
         else {
             LERROR("Could not get Image to write from DataContainer.");
         }
-
-        validate(INVALID_RESULT);
     }
 
 }

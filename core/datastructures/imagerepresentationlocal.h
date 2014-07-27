@@ -37,8 +37,6 @@ namespace campvis {
 
     /**
      * Abstract base class for storing image data in the local memory.
-     * 
-     * \todo    implement padding, add some kind of cool iterators
      */
     class CAMPVIS_CORE_API ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
     public:

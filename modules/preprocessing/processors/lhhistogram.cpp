@@ -192,8 +192,6 @@ namespace campvis {
         else {
             LDEBUG("No suitable intensities image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
 }

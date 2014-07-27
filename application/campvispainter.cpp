@@ -125,7 +125,6 @@ namespace campvis {
 
     void CampVisPainter::init() {
         try {
-            // TODO:    Remove hardcoded paths, and use ShdrMgr.addPath() at some central location
             _copyShader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "");
             _copyShader->setAttributeLocation(0, "in_Position");
             _copyShader->setAttributeLocation(1, "in_TexCoords");

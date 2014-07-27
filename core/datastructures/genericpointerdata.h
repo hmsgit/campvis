@@ -28,11 +28,13 @@
 
 #include "core/datastructures/abstractdata.h"
 #include <string>
+#include <memory>
 
 namespace campvis {
 
     /**
      * Class that generically wraps around a pointer of the template type and takes ownership of it.
+     * Ownership is handled through shared pointers, as the clone() method only returns a shallow copy.
      * \tparam  T   Type of the pointer this AbstractData wraps around.
      */
     template<typename T>
@@ -40,7 +42,7 @@ namespace campvis {
     public:
         /**
          * Creates a new GenericPointerData and initializes its pointer with \a data.
-         * \param   data    The initial pointer for this data, may be 0, GenericPointerData takes ownerwhip.
+         * \param   data    The initial pointer for this data, may be 0, GenericPointerData takes ownership.
          */
         explicit GenericPointerData(T* data)
             : AbstractData()
@@ -48,10 +50,19 @@ namespace campvis {
         {};
 
         /**
-         * Destructor, deletes the pointer.
+         * Creates a new GenericPointerData and initializes its pointer with \a data.
+         * \param   data    The initial pointer for this data, may be 0, GenericPointerData takes ownership.
+         */
+        explicit GenericPointerData(std::shared_ptr<T> data)
+            : AbstractData()
+            , _data(data)
+        {};
+
+        /**
+         * Destructor
          */
         virtual ~GenericPointerData() {
-            delete _data;
+
         };
 
         /**
@@ -72,10 +83,10 @@ namespace campvis {
 
         /**
          * Sets the data to \a data.
-         * \param   data    The new pointer for this data, may be 0, GenericPointerData takes ownerwhip.
+         * \param   data    The new pointer for this data, may be 0, GenericPointerData takes ownership.
          */
         void setData(T* data) {
-            _data = data;
+            _data = std::shared_ptr<T>(data);
         };
 
 
@@ -83,8 +94,7 @@ namespace campvis {
          * Prototype - clone method, some people call this virtual constructor...
          * \return  A SHALLOW copy of this object.
          */
-        virtual AbstractData* clone() const {
-            // FIXME: This is only a shallow copy - not what you expect from clone!
+        virtual GenericPointerData<T>* clone() const {
             return new GenericPointerData<T>(_data);
         };
 
@@ -105,7 +115,7 @@ namespace campvis {
         };
 
     protected:
-        T* _data;           ///< Pointer to the data.
+        std::shared_ptr<T> _data;       ///< Shared pointer to the data.
     };
 }
 

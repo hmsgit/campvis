@@ -337,9 +337,6 @@ namespace campvis {
         else {
             LDEBUG("No suitable input image found.");
         }
-
-
-        validate(INVALID_RESULT);
     }
 
     void ItkImageFilter::updateProperties(DataContainer& /*dataContainer*/) {
@@ -388,8 +385,6 @@ namespace campvis {
             p_thresMin.setVisible(true);
             p_thresMax.setVisible(true);
         }
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

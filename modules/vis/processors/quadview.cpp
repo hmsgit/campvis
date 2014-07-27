@@ -76,7 +76,6 @@ namespace campvis {
         ScopedTypedData<RenderData> inputImage4(data, p_inputImage4.getValue());
 
         if (inputImage1 == 0 && inputImage2 == 0 && inputImage3 == 0 && inputImage4 == 0) {
-            validate(INVALID_RESULT);
             return;
         }
 
@@ -115,7 +114,6 @@ namespace campvis {
         LGL_ERROR;
 
         data.addData(p_outputImage.getValue(), new RenderData(_fbo));
-        validate(INVALID_RESULT);
     }
 
 }

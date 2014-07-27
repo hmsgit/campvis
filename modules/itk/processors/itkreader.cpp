@@ -58,14 +58,12 @@ namespace campvis {
 
 
     void ItkReader::updateResult(DataContainer& data)  {
-
         if (p_imageSeries.getValue()) {
             ReadImageSeries(data);
         }
         else {
             ReadImageDirect(data);
         }
-        validate(INVALID_RESULT);
     }
 
     void ItkReader::ReadImageDirect(DataContainer& data) {

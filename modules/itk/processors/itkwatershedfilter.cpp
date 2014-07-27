@@ -22,6 +22,9 @@
 // 
 // ================================================================================================
 
+#pragma warning(push)
+#pragma warning(disable : 4996 4244) // disable unchecked iterators warnings in ITK code
+
 #include "itkwatershedfilter.h"
 
 #include "tgt/glmath.h"
@@ -34,8 +37,11 @@
 #include <itkWatershedImageFilter.h>
 #include <itkCastImageFilter.h>
 
+#pragma warning(pop)
+
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
+
 
 // In this class we want to use various ITK filters. Each filter needs the same ITK boilerplate
 // code to be written before and after calling the filter. Futhermore, we need to distinguish 
@@ -169,8 +175,6 @@ namespace campvis {
         else {
             LDEBUG("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
 }

@@ -49,8 +49,6 @@ namespace campvis {
      * also ensures (hopefully) that nobody can do messy things, such as changing the data while some other 
      * thread is reading it. Theoretically this should be possible, but a correct implementation would require
      * some brain fuck.
-     * 
-     * \todo    Check thread-safety
      */
     class CAMPVIS_CORE_API DataContainer {
     public:

@@ -68,7 +68,6 @@ namespace campvis {
             }
 
             {
-                // TODO: there is probably a more elegant method...
                 tbb::spin_mutex::scoped_lock(mutex);
                 _normalizedIntensityRange.nibble(localMin);
                 _normalizedIntensityRange.nibble(localMax);

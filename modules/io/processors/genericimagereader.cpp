@@ -80,8 +80,6 @@ namespace campvis {
             }
             (it->first)->process(data);
         }
-        
-        validate(INVALID_RESULT);
     }
 
     void GenericImageReader::setVisibibility(const std::string& extention, bool visibility) {

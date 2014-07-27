@@ -39,8 +39,6 @@ namespace campvis {
      * Collection of various helper methods for strings.
      *
      * \sa std::string
-     * 
-     * \todo    Test, test, test!
      */
     class CAMPVIS_CORE_API StringUtils {
     public:

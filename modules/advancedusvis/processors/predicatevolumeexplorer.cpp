@@ -108,7 +108,6 @@ namespace campvis {
         }
 
         VolumeExplorer::updateResult(data);
-        validate(INVALID_RESULT);
     }
 
     void PredicateVolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {

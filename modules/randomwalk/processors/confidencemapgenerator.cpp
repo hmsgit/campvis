@@ -206,8 +206,6 @@ namespace campvis {
             ImageData* output = new ImageData(input->getDimensionality(), tgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
             GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
             data.addData(p_targetImageID.getValue(), output);
-
-            validate(INVALID_RESULT);
         }
         else {
             LDEBUG("No suitable input image found.");

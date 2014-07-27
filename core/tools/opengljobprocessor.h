@@ -27,14 +27,15 @@
 
 #include "sigslot/sigslot.h"
 
-#include "tgt/glcontextmanager.h"
-#include "tgt/singleton.h"
+#include <ext/threading.h>
 
 #include <tbb/atomic.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_vector.h>
-#include <tbb/compat/condition_variable>
+
+#include "tgt/glcontextmanager.h"
+#include "tgt/singleton.h"
 
 #include "core/coreapi.h"
 #include "core/tools/job.h"

@@ -33,7 +33,6 @@
 #include "tgt/texturereadertga.h"
 #include "tgt/qt/qtapplication.h"
 #include "tgt/qt/qtthreadedcanvas.h"
-#include "tbb/compat/thread"
 
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
@@ -44,6 +43,7 @@
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/visualizationprocessor.h"
+
 #include "modules/pipelinefactory.h"
 
 #ifdef CAMPVIS_HAS_SCRIPTING

@@ -140,8 +140,6 @@ namespace campvis {
 
             data.addData(p_targetMatrixID.getValue(), td);
         }
-
-        validate(INVALID_RESULT);
     }
 
     void MatrixProcessor::updateProperties(DataContainer& dataContainer)
@@ -192,8 +190,6 @@ namespace campvis {
             //LDEBUG("Data Name: " << l2[0]);
             _dataDependencies.insert(l2[0]);
         }
-
-        validate(INVALID_PROPERTIES);
     }
 
     tgt::mat4 MatrixProcessor::processMatrixString(std::string matrixString, DataContainer& data, std::map<std::string, tgt::mat4> *localDefs)

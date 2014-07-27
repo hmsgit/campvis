@@ -89,7 +89,6 @@ namespace campvis {
 
         FaceGeometry* mirror = new FaceGeometry(vertices);
         data.addData(p_mirrorID.getValue(), mirror);
-        validate(INVALID_RESULT);
     }
 
 }

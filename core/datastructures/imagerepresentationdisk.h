@@ -33,8 +33,6 @@ namespace campvis {
 
     /**
      * Subclass of ImageData offering access to image data stored in binary form on the local harddisk.
-     * 
-     * \todo    Number of channels
      */
     class CAMPVIS_CORE_API ImageRepresentationDisk : public GenericAbstractImageRepresentation<ImageRepresentationDisk> {
     public:
