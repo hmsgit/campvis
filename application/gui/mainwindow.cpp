@@ -135,6 +135,8 @@ namespace campvis {
         _scriptingConsoleWidget = new ScriptingWidget(this);
         ui.scriptingConsoleDock->setWidget(_scriptingConsoleWidget);
         connect(_scriptingConsoleWidget, SIGNAL(s_commandExecuted(const QString&)), this, SLOT(onLuaCommandExecuted(const QString&)));
+#else
+        ui.scriptingConsoleDock->setVisible(false);
 #endif
 
         _dcInspectorWidget = new DataContainerInspectorWidget();
