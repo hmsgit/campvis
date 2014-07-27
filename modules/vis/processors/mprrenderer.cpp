@@ -161,8 +161,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void MprRenderer::updateProperties(DataContainer& dc) {
@@ -174,8 +172,6 @@ namespace campvis {
 
         p_transferFunction.setImageHandle(img.getDataHandle());
         p_camera.setVisible(!p_use2DProjection.getValue());
-                        
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

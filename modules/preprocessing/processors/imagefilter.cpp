@@ -83,9 +83,6 @@ namespace campvis {
         else {
             LDEBUG("No suitable input image found.");
         }
-
-
-        validate(INVALID_RESULT);
     }
 
 }

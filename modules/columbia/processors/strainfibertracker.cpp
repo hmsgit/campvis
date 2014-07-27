@@ -211,8 +211,6 @@ namespace campvis {
         else {
             LERROR("No input data.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::vector<tgt::vec3> StrainFiberTracker::performUniformSeeding(const ImageRepresentationLocal& strainData) const {

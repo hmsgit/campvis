@@ -134,8 +134,6 @@ namespace campvis {
         else {
             LERROR("No suitable input geometry found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string StrainFiberRenderer::generateGlslHeader() const {
@@ -160,12 +158,10 @@ namespace campvis {
     void StrainFiberRenderer::updateShader() {
         _shader->setHeaders(generateGlslHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
     }
 
     void StrainFiberRenderer::updateProperties(DataContainer& dataContainer) {
         p_lightId.setVisible(p_enableShading.getValue());
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

@@ -112,8 +112,6 @@ namespace campvis {
             LERROR("Error while parsing VTK file: " << e.what());
             return;
         }
-
-        validate(INVALID_RESULT);
     }
 
     void VtkImageReader::parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception) {

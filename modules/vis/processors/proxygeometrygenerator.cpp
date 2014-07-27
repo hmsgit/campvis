@@ -81,12 +81,9 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void ProxyGeometryGenerator::updateProperties(DataContainer& dataContainer) {
-        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
         ScopedTypedData<ImageData> img(dataContainer, p_sourceImageID.getValue());
 
         if (img != 0) {
@@ -98,8 +95,6 @@ namespace campvis {
             p_clipY.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().y)));
             p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().z)));
         }
-
-        validate(INVALID_PROPERTIES);
     }
 
 }

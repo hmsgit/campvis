@@ -262,8 +262,6 @@ namespace campvis {
         else {
             LDEBUG("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void ItkRegistration::updateProperties(DataContainer& /*dataContainer*/) {
@@ -271,8 +269,6 @@ namespace campvis {
             p_noOfBins.setVisible(true);
             p_noOfSamples.setVisible(true);
         }
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

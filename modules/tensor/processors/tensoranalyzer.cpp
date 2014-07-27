@@ -108,8 +108,6 @@ namespace campvis {
         else {
             LERROR("Could not compute Eigensystem");
         }
-        
-        validate(INVALID_RESULT);
     }
 
     void TensorAnalyzer::computeEigensystem(DataContainer& data) {

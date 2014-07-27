@@ -105,8 +105,6 @@ namespace campvis {
         else {
             LERROR("No suitable input images found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
 }

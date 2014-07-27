@@ -135,8 +135,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     tgt::Texture* GlMorphologyFilter::applyFilter(const tgt::Texture* inputTexture, tgt::Shader* filter) const {
@@ -179,7 +177,6 @@ namespace campvis {
         _erosionFilter->rebuild();
         _dilationFilter->setHeaders(generateGlslHeader("max"));
         _dilationFilter->rebuild();
-        validate(INVALID_SHADER);
     }
 
     std::string GlMorphologyFilter::generateGlslHeader(const std::string& filerOp) const {

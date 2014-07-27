@@ -216,8 +216,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image or proxy geometry found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string EEPGenerator::generateHeader() const {
@@ -226,13 +224,11 @@ namespace campvis {
 
     void EEPGenerator::updateProperties(DataContainer& dataContainer) {
         p_mirrorID.setVisible(p_enableMirror.getValue());
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void EEPGenerator::updateShader() {
         _shader->setHeaders(generateHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
     }
 
 }

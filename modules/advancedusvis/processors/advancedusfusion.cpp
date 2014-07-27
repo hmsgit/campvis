@@ -151,8 +151,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void AdvancedUsFusion::updateProperties(DataContainer dc) {
@@ -164,8 +162,6 @@ namespace campvis {
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
         p_use3DTexture.setValue(img->getDimensionality() == 3);
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     std::string AdvancedUsFusion::generateHeader() const {

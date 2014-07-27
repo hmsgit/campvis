@@ -185,8 +185,6 @@ namespace campvis {
         else {
             LERROR("Could not find suitable input data.");
         }
-        
-        validate(INVALID_RESULT);
     }
 
     void VectorFieldRenderer::updateProperties(DataContainer& dataContainer) {
@@ -212,13 +210,11 @@ namespace campvis {
         else {
             LERROR("No suitable input data found or size of images mismatch!");
         }
-        validate(INVALID_PROPERTIES);
     }
 
     void VectorFieldRenderer::updateShader() {
         _shader->setHeaders(generateGlslHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
     }
 
     std::string VectorFieldRenderer::generateGlslHeader() const {

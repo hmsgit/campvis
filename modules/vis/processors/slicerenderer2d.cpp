@@ -147,8 +147,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void SliceRenderer2D::updateProperties(DataContainer& dc) {
@@ -169,8 +167,6 @@ namespace campvis {
                 _lastImgSize = size;
             }
         }
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

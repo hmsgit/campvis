@@ -161,7 +161,6 @@ namespace campvis {
         RaycastingProcessor::updateProperties(dataContainer);
         p_lightId.setVisible(p_enableShading.getValue());
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
-        validate(INVALID_PROPERTIES);
     }
 
     void OptimizedRaycaster::generateBbv(DataHandle dh) {

@@ -116,7 +116,6 @@ namespace campvis {
         RaycastingProcessor::updateProperties(dataContainer);
         p_lightId.setVisible(p_enableShading.getValue());
         p_shadowIntensity.setVisible(p_enableShadowing.getValue());
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
 }

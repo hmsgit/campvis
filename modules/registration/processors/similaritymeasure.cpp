@@ -136,8 +136,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void SimilarityMeasure::updateProperties(DataContainer& dc) {
@@ -153,8 +151,6 @@ namespace campvis {
             p_clipY.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().y)));
             p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().z)));
         }
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     float SimilarityMeasure::computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation) {

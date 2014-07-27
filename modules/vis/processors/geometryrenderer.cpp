@@ -208,8 +208,6 @@ namespace campvis {
         else {
             LERROR("No suitable input geometry found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string GeometryRenderer::generateGlslHeader(bool hasGeometryShader) const {
@@ -235,7 +233,6 @@ namespace campvis {
         _pointShader->rebuild();
         _meshShader->setHeaders(generateGlslHeader(true));
         _meshShader->rebuild();
-        validate(INVALID_SHADER);
     }
 
     void GeometryRenderer::updateProperties(DataContainer& dataContainer) {

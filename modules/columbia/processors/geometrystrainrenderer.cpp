@@ -119,8 +119,6 @@ namespace campvis {
         else {
             LERROR("No suitable input geometry found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string GeometryStrainRenderer::generateGlslHeader() const {
@@ -133,13 +131,10 @@ namespace campvis {
     void GeometryStrainRenderer::updateShader() {
         _shader->setHeaders(generateGlslHeader());
         _shader->rebuild();
-
-        validate(INVALID_SHADER);
     }
 
     void GeometryStrainRenderer::updateProperties(DataContainer& dataContainer) {
         p_lightId.setVisible(p_enableShading.getValue());
-        validate(INVALID_PROPERTIES);
     }
 
 }

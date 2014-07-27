@@ -294,8 +294,6 @@ namespace campvis {
 
             _trackballEH->reinitializeCamera(img);
         }
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void VolumeExplorer::onEvent(tgt::Event* e) {

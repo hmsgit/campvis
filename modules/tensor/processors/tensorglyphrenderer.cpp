@@ -174,8 +174,6 @@ namespace campvis {
         else {
             LERROR("Could not find suitable input data.");
         }
-        
-        validate(INVALID_RESULT);
     }
 
     void TensorGlyphRenderer::updateProperties(DataContainer& dataContainer) {
@@ -202,14 +200,11 @@ namespace campvis {
                 LERROR("Size of eigenvalue image and eigenvector image mismatch!");
             }
         }
-
-        validate(INVALID_PROPERTIES);
     }
 
     void TensorGlyphRenderer::updateShader() {
         _shader->setHeaders(generateGlslHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
     }
 
     std::string TensorGlyphRenderer::generateGlslHeader() const {

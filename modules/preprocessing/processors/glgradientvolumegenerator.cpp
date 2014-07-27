@@ -117,8 +117,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string GlGradientVolumeGenerator::generateHeader() const {
@@ -128,7 +126,6 @@ namespace campvis {
     void GlGradientVolumeGenerator::updateShader() {
         _shader->setHeaders(generateHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
     }
 
 }

@@ -328,8 +328,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void SliceExtractor::updateProperties(DataContainer& dc) {
@@ -355,8 +353,6 @@ namespace campvis {
 
         p_scalingFactor.setVisible(! p_fitToWindow.getValue());
         p_offset.setVisible(! p_fitToWindow.getValue());
-
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     void SliceExtractor::onEvent(tgt::Event* e) {

@@ -130,12 +130,9 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void ScanlineDistributionComputation::updateProperties(DataContainer dataContainer) {
-        validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
     std::string ScanlineDistributionComputation::generateHeader() const {

@@ -60,8 +60,6 @@ namespace campvis {
             p_shininess.getValue(),
             p_attenuation.getValue());
         data.addData(p_lightId.getValue(), lsd);
-
-        validate(INVALID_RESULT);
     }
 
 }

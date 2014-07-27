@@ -158,7 +158,6 @@ namespace campvis {
     void PointPredicateRaycaster::updateProperties(DataContainer& dataContainer) {
         p_lightId.setVisible(p_enableShading.getValue());
         RaycastingProcessor::updateProperties(dataContainer);
-        validate(INVALID_PROPERTIES);
     }
 
 }

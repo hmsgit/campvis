@@ -140,7 +140,5 @@ namespace campvis {
         else {
             LERROR("Could not load image.");
         }
-
-        validate(INVALID_RESULT);
     }
 }
