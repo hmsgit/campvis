@@ -16,11 +16,15 @@ OPTION(CAMPVIS_DEBUG                "Activate debug code?"                      
 OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                                     ON)
 OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                                            ON)
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
+OPTION(CAMPVIS_ENABLE_SCRIPTING     "Add support for scripting CAMPVis using Lua"                   OFF)
 OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
+OPTION(CAMPVIS_BUILD_LIB_LUA        "Build Lua Library"                                             OFF)
 OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   OFF)
 
 OPTION(CAMPVIS_DEPLOY_SHADERS       "Deploy Shader files to binary directory"                       OFF)
 OPTION(CAMPVIS_GROUP_SOURCE_FILES   "Group source files by directory"                               ON)
+OPTION(CAMPVIS_BUILD_GOOGLETEST     "Build googletest library"                                      OFF)
+OPTION(CAMPVIS_BUILD_TEST_SOURCES   "Build Unit Tests of gooogletest"                               OFF)
 
 IF(WIN32)
     OPTION(CAMPVIS_COPY_EXTERNAL_DLLS   "Copy external DLLs to bin directory?"                      ON)
@@ -43,6 +47,20 @@ IF(CAMPVIS_BUILD_LIB_TGT)
     ADD_SUBDIRECTORY(ext/tgt)
 ENDIF()
 
+IF(CAMPVIS_BUILD_LIB_LUA)
+    IF(WIN32)
+        # Keep LUA_BUILD_AS_DLL in sync with BUILD_SHARED_LIBS
+        SET(LUA_BUILD_AS_DLL ${BUILD_SHARED_LIBS} CACHE BOOL "Build Lua library as DLL" FORCE)
+    ENDIF(WIN32)
+
+    ADD_SUBDIRECTORY(ext/lua EXCLUDE_FROM_ALL)
+
+    # If the above command failed, provide a hint how to fix the problem
+    IF(NOT TARGET liblua)
+        MESSAGE(SEND_ERROR "Did you forget to run `git submodule update --init`?")
+    ENDIF(NOT TARGET liblua)
+ENDIF()
+
 IF(CAMPVIS_BUILD_CORE)
     ADD_SUBDIRECTORY(core)
 ENDIF()
@@ -52,8 +70,32 @@ IF(CAMPVIS_BUILD_MODULES)
 ENDIF()
 
 
+IF(CAMPVIS_ENABLE_SCRIPTING)
+    # First, find Lua to setup paths for all projects correctly
+    FIND_PACKAGE(Lua REQUIRED)
+    IF(LUA_FOUND)
+        MESSAGE(STATUS "* Found Lua")
+        LIST(APPEND CampvisGlobalDefinitions ${LUA_DEFINITIONS})
+        LIST(APPEND CampvisGlobalIncludeDirs ${LUA_INCLUDE_DIR})
+        LIST(APPEND CampvisGlobalExternalLibs ${LUA_LIBRARY})
+    ELSE(LUA_FOUND)
+        MESSAGE(FATAL_ERROR "Lua not found!")
+    ENDIF(LUA_FOUND)
+    
+    ADD_SUBDIRECTORY(scripting)
+    LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_HAS_SCRIPTING")
+ENDIF()
+
 IF(CAMPVIS_BUILD_APPLICATION)
     ADD_SUBDIRECTORY(application)
+ENDIF()
+
+IF(CAMPVIS_BUILD_GOOGLETEST)
+    ADD_SUBDIRECTORY(ext/gtest-1.7.0)
+ENDIF()
+
+IF(CAMPVIS_BUILD_TEST_SOURCES)
+    ADD_SUBDIRECTORY(test)
 ENDIF()
 
 IF(CAMPVIS_BUILD_DOXYGEN)

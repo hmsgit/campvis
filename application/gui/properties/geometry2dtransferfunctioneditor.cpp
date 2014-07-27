@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -240,7 +240,7 @@ namespace campvis {
         _lblIntensityRight = new QLabel(QString::number(gtf->getIntensityDomain().y), this);
         _layout->addWidget(_lblIntensityRight, 4, 3, 1, 1, Qt::AlignRight);
 
-        QVBoxLayout* buttonLayout = new QVBoxLayout(); // TODO: check whether buttonLayout will be deleted by Qt's GC!
+        QVBoxLayout* buttonLayout = new QVBoxLayout();
         _layout->addLayout(buttonLayout, 1, 4, 1, 3, Qt::AlignTop);
 
         _btnAddGeometry = new QPushButton(tr("Add Geometry"), this);

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -26,7 +26,6 @@
 #define IMAGEREPRESENTATIONDISK_H__
 
 #include "core/datastructures/genericabstractimagerepresentation.h"
-
 #include "core/tools/endianhelper.h"
 #include "core/tools/weaklytypedpointer.h"
 
@@ -34,8 +33,6 @@ namespace campvis {
 
     /**
      * Subclass of ImageData offering access to image data stored in binary form on the local harddisk.
-     * 
-     * \todo    Number of channels
      */
     class CAMPVIS_CORE_API ImageRepresentationDisk : public GenericAbstractImageRepresentation<ImageRepresentationDisk> {
     public:

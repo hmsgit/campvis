@@ -9,12 +9,13 @@ CAMPVis a software platform for medical imaging and visualization. It is targete
 * Source Code: *[Gitlab](https://campgit.in.tum.de/berge/campvis)*
 * Build Instructions, Wiki, Documentation, Tutorials, Issue-Tracking: *[Redmine](https://campcloud.informatik.tu-muenchen.de/redmine/projects/tumvis)*
 * Doxygen Documentation: *[Doxygen](http://campci.informatik.tu-muenchen.de:8090/userContent/campvis/doc/index.html)*
-* Build Server / Continuous Integration: *[Jenkins](http://campci.informatik.tu-muenchen.de:8090/job/CAMPVis/)*
+* Build Server / Continuous Integration: *[Jenkins](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/)*
 
 ### Code & Build Status
 
 * Linux/GCC 4.8: [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=campvis-jobs/campvis-gcc)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gcc/)
 * Windows/MSVC 2013: [![Build Status](http://campci.informatik.tu-muenchen.de:8090/buildStatus/icon?job=campvis-jobs/campvis-msvc12)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-msvc12/)
+* Test Results: [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gtest/test/trend)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-gtest/lastCompletedBuild/testReport/)
 * Open Points: [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/tasks/trendGraph/png)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/tasks/)
 * CppCheck: [![Cppcheck Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/cppcheckResult/graph)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/cppcheckResult/)
 * Lines of Code: [![LOC Trend](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/sloccountResult/trend)](http://campci.informatik.tu-muenchen.de:8090/job/campvis-jobs/job/campvis-metrics/sloccountResult/)

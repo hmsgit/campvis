@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -26,8 +26,9 @@
 #define CAMPVISPAINTER_H__
 
 #include "sigslot/sigslot.h"
-#include "tbb/atomic.h"
-#include "tbb/compat/condition_variable"
+
+#include <ext/threading.h>
+#include <tbb/atomic.h>
 
 #include "tgt/logmanager.h"
 #include "tgt/painter.h"
@@ -35,6 +36,7 @@
 namespace tgt {
     class Shader;
     class QtThreadedCanvas;
+    class Texture;
 }
 
 namespace campvis {
@@ -87,6 +89,8 @@ namespace campvis {
          */
         void setPipeline(AbstractPipeline* pipeline);
 
+        void setErrorTexture(tgt::Texture* texture);
+
         /**
          * Slot being notified when the pipeline's render target changed.
          */
@@ -104,6 +108,8 @@ namespace campvis {
         tgt::Shader* _copyShader;                           ///< Shader for copying the render target to the framebuffer.
         tbb::atomic<bool> _dirty;                           ///< Flag whether render result is dirty and needs to be rerendered.
         std::condition_variable _renderCondition;           ///< conditional wait condition for rendering
+
+        tgt::Texture* _errorTexture;
     };
 
 }

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -22,8 +22,9 @@
 // 
 // ================================================================================================
 
-#include <tbb/compat/thread>
 #include "tgt/assert.h"
+
+#include <ext/threading.h>
 
 #include "abstractprocessor.h"
 #include "core/properties/abstractproperty.h"
@@ -132,26 +133,31 @@ namespace campvis {
 
 
     void AbstractProcessor::process(DataContainer& data, bool unlockInExtraThread) {
+        if (hasInvalidShader()) {
+            updateShader();
+            validate(INVALID_SHADER);
+        }
+        if (hasInvalidProperties()) {
+            updateProperties(data);
+            validate(INVALID_PROPERTIES);
+        }
+
         // use a scoped lock for exception safety
         AbstractProcessor::ScopedLock lock(this, unlockInExtraThread);
         tgtAssert(_locked == true, "Processor not locked, this should not happen!");
 
-        if (hasInvalidShader())
-            updateShader();
-        if (hasInvalidProperties())
-            updateProperties(data);
-        if (hasInvalidResult())
+        if (hasInvalidResult()) {
             updateResult(data);
+            validate(INVALID_RESULT);
+        }
     }
 
     void AbstractProcessor::updateShader() {
         LDEBUG("Called non-overriden updateShader() in " << getName() << ". Did you forget to override your method?");
-        validate(INVALID_SHADER);
     }
 
     void AbstractProcessor::updateProperties(DataContainer& dc) {
         LDEBUG("Called non-overriden updateProperties() in " << getName() << ". Did you forget to override your method?");
-        validate(INVALID_PROPERTIES);
     }
 
     void AbstractProcessor::addProperty(AbstractProperty& prop) {

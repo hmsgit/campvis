@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -27,8 +27,9 @@
 #include "tgt/textureunit.h"
 
 #include "core/tools/quadrenderer.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/processordecoratorshading.h"
+#include "core/pipeline/processordecoratorgradient.h"
 
 namespace campvis {
     const std::string PointPredicateRaycaster::loggerCat_ = "CAMPVis.modules.vis.PointPredicateRaycaster";
@@ -39,14 +40,19 @@ namespace campvis {
         , p_inputSnr("InputSnr", "Input SNR", "", DataNameProperty::READ)
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
         , p_inputConfidence("InputConfidence", "Input Confidence", "", DataNameProperty::READ)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_predicateHistogram("PredicateSelection", "Voxel Predicate Selection")
     {
-        addDecorator(new ProcessorDecoratorShading());
+        addDecorator(new ProcessorDecoratorGradient());
 
         addProperty(p_inputLabels, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_inputSnr);
         addProperty(p_inputVesselness);
         addProperty(p_inputConfidence);
+
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
         addProperty(p_predicateHistogram);
 
         decoratePropertyCollection(this);
@@ -72,53 +78,64 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation confidence(dataContainer, p_inputConfidence.getValue());
 
         if (labels && snr && vesselness && confidence) {
-            const tgt::Texture* lt = labels->getTexture();
-            if (lt->getFilter() != tgt::Texture::NEAREST) {
-                const_cast<tgt::Texture*>(lt)->setFilter(tgt::Texture::NEAREST);
+            ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
+
+            if (p_enableShading.getValue() == false || light != nullptr) {
+                const tgt::Texture* lt = labels->getTexture();
+                if (lt->getFilter() != tgt::Texture::NEAREST) {
+                    const_cast<tgt::Texture*>(lt)->setFilter(tgt::Texture::NEAREST);
+                }
+
+                const tgt::Texture* tex = image->getTexture();
+                if (tex->getFilter() != tgt::Texture::MIPMAP) {
+                    const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+                    LGL_ERROR;
+                    glGenerateMipmap(GL_TEXTURE_3D);
+                    LGL_ERROR;
+                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    LGL_ERROR;
+                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                    LGL_ERROR;
+                }
+
+                tgt::TextureUnit labelUnit, snrUnit, vesselnessUnit, confidenceUnit;
+                labels->bind(_shader, labelUnit, "_labels", "_labelsParams");
+                snr->bind(_shader, snrUnit, "_snr", "_snrParams");
+                vesselness->bind(_shader, vesselnessUnit, "_vesselness", "_vesselnessParams");
+                confidence->bind(_shader, confidenceUnit, "_confidence", "_confidenceParams");
+                
+                if (p_enableShading.getValue() && light != nullptr) {
+                    light->bind(_shader, "_lightSource");
+                }
+
+                _shader->setIgnoreUniformLocationError(true);
+                p_predicateHistogram.getPredicateHistogram()->setupRenderShader(_shader);
+                _shader->setIgnoreUniformLocationError(false);
+                LGL_ERROR;
+
+                FramebufferActivationGuard fag(this);
+                createAndAttachTexture(GL_RGBA8);
+                createAndAttachTexture(GL_RGBA32F);
+                createAndAttachTexture(GL_RGBA32F);
+                createAndAttachDepthTexture();
+
+                static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+                glDrawBuffers(3, buffers);
+
+                glEnable(GL_DEPTH_TEST);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                QuadRdr.renderQuad();
+
+                // restore state
+                glDrawBuffers(1, buffers);
+                glDisable(GL_DEPTH_TEST);
+                LGL_ERROR;
+
+                dataContainer.addData(p_targetImageID.getValue(), new RenderData(_fbo));
             }
-
-            const tgt::Texture* tex = image->getTexture();
-            if (tex->getFilter() != tgt::Texture::MIPMAP) {
-                const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
-                LGL_ERROR;
-                glGenerateMipmap(GL_TEXTURE_3D);
-                LGL_ERROR;
-                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                LGL_ERROR;
-                glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-                LGL_ERROR;
+            else {
+                LDEBUG("Could not load light source from DataContainer.");
             }
-
-            tgt::TextureUnit labelUnit, snrUnit, vesselnessUnit, confidenceUnit;
-            labels->bind(_shader, labelUnit, "_labels", "_labelsParams");
-            snr->bind(_shader, snrUnit, "_snr", "_snrParams");
-            vesselness->bind(_shader, vesselnessUnit, "_vesselness", "_vesselnessParams");
-            confidence->bind(_shader, confidenceUnit, "_confidence", "_confidenceParams");
-
-            _shader->setIgnoreUniformLocationError(true);
-            p_predicateHistogram.getPredicateHistogram()->setupRenderShader(_shader);
-            _shader->setIgnoreUniformLocationError(false);
-            LGL_ERROR;
-
-            FramebufferActivationGuard fag(this);
-            createAndAttachTexture(GL_RGBA8);
-            createAndAttachTexture(GL_RGBA32F);
-            createAndAttachTexture(GL_RGBA32F);
-            createAndAttachDepthTexture();
-
-            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-            glDrawBuffers(3, buffers);
-
-            glEnable(GL_DEPTH_TEST);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            QuadRdr.renderQuad();
-
-            // restore state
-            glDrawBuffers(1, buffers);
-            glDisable(GL_DEPTH_TEST);
-            LGL_ERROR;
-
-            dataContainer.addData(p_targetImageID.getValue(), new RenderData(_fbo));
         }
         else {
             LERROR("Could not load Voxel Predicate Mask Image.");
@@ -127,6 +144,8 @@ namespace campvis {
 
     std::string PointPredicateRaycaster::generateHeader() const {
         std::string toReturn = RaycastingProcessor::generateHeader();
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
 
         toReturn += p_predicateHistogram.getPredicateHistogram()->getGlslHeader();
         return toReturn;
@@ -134,6 +153,11 @@ namespace campvis {
 
     void PointPredicateRaycaster::onHistogramHeaderChanged() {
         invalidate(INVALID_SHADER);
+    }
+
+    void PointPredicateRaycaster::updateProperties(DataContainer& dataContainer) {
+        p_lightId.setVisible(p_enableShading.getValue());
+        RaycastingProcessor::updateProperties(dataContainer);
     }
 
 }

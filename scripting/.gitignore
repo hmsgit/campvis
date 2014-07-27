@@ -1,0 +1,5 @@
+# Header with SWIG run-time functions
+/swigluarun.h
+
+# Scripted pipeline registration header
+/gen_pipelineregistration.h

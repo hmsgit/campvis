@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -103,18 +103,20 @@ namespace campvis {
             // check whether there are quotes
             if (str[strpos] == quotes) {
                 // find position of closing quotes
-                endpos = str.find_first_of('"', strpos + 1);
+                endpos = str.find_first_of(quotes, strpos + 1);
 
                 std::string toPush = str.substr(strpos + 1 , endpos - strpos - 1);
                 // ensure we haven't found double quotes ("") which shall be resolved to one double quote in resulting string
-                while ((endpos != std::string::npos) && (endpos + 1 < str.length()) && (str[endpos + 1] == '"')) {
+                while ((endpos != std::string::npos) && (endpos + 1 < str.length()) && (str[endpos + 1] == quotes)) {
                     strpos = endpos + 1;
-                    endpos = str.find_first_of('"', endpos + 2);
+                    endpos = str.find_first_of(quotes, endpos + 2);
                     toPush.append(str.substr(strpos, endpos - strpos));
                 }
 
                 // push string in quotes onto toReturn
-                toReturn.push_back(StringUtils::trim(toPush, whitespace));
+                toReturn.push_back(toPush);
+                // use the following if whitespace trimming is necessary in between <quote>s
+                //toReturn.push_back(StringUtils::trim(toPush, whitespace));
 
                 // ignore everything until next delimiter
                 endpos = str.find_first_of(delimiter, endpos);

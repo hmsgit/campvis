@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -26,12 +26,16 @@
 #define OPENGLJOBPROCESSOR_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/singleton.h"
+
+#include <ext/threading.h>
+
 #include <tbb/atomic.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_vector.h>
-#include <tbb/compat/condition_variable>
+
+#include "tgt/glcontextmanager.h"
+#include "tgt/singleton.h"
 
 #include "core/coreapi.h"
 #include "core/tools/job.h"
@@ -68,6 +72,21 @@ namespace campvis {
         friend class tgt::Singleton<OpenGLJobProcessor>;
 
     public:
+        /**
+         * Scope guard to ensure that encapsulated job is synchronously executed in an arbitrary OpenGL context.
+         * This scope guard checks whether current thread is OpenGLJobProcessor thread. If so, it
+         * does nothing. If this thread is not the OpenGL thread, the OpenGLJobProcessor is paused,
+         * an arbitrary OpenGL context acquired. Upon destruction the OpenGLJobProcessor is resumed.
+         */
+        class ScopedSynchronousGlJobExecution {
+        public:
+            ScopedSynchronousGlJobExecution();
+            ~ScopedSynchronousGlJobExecution();
+
+        private:
+            tgt::GLContextScopedLock* _lock;
+        };
+
         /**
          * Enumeration of the different priorities of items.
          */
@@ -193,6 +212,6 @@ namespace campvis {
 
 }
 
-#define GLJobProc tgt::Singleton<OpenGLJobProcessor>::getRef()
+#define GLJobProc tgt::Singleton<campvis::OpenGLJobProcessor>::getRef()
 
 #endif // OPENGLJOBPROCESSOR_H__

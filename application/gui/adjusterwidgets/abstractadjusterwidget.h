@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -76,32 +76,14 @@ namespace campvis {
         T minimum() const;
 
         /**
-         * Change the adjuster's minimum value.
-         * \param   minimum      new minimum value for the adjuster
-         */
-        void setMinimum(T minimum);
-
-        /**
          * Return the adjuster's maximum value.
          */
         T maximum() const;
 
         /**
-         * Change the adjuster's maximum value.
-         * \param   maximum      new maximum value for the adjuster
-         */
-        void setMaximum(T maximum);
-
-        /**
          * Return the adjuster's single step value.
          */
         T singleStep() const;
-
-        /**
-         * Change the adjuster's single step value.
-         * \param   value      new single step value for the adjuster
-         */
-        void setSingleStep(T value);
 
     protected:
         /**
@@ -109,6 +91,24 @@ namespace campvis {
          * \param   value      new value for the adjuster
          */
         void setValueImpl(T value);
+        
+        /**
+         * Change the adjuster's minimum value.
+         * \param   minimum      new minimum value for the adjuster
+         */
+        void setMinimumImpl(T minimum);
+        
+        /**
+         * Change the adjuster's maximum value.
+         * \param   maximum      new maximum value for the adjuster
+         */
+        void setMaximumImpl(T maximum);
+
+        /**
+         * Change the adjuster's single step value.
+         * \param   value      new single step value for the adjuster
+         */
+        void setSingleStepImpl(T value);
 
         /// Slot getting called when the spin box's value changes
         void onSpinBoxValueChangedImpl(T value);
@@ -161,53 +161,45 @@ namespace campvis {
     }
 
     template<typename T>
-    T AbstractAdjusterWidget<T>::value() const
-    {
+    T AbstractAdjusterWidget<T>::value() const {
         return _spinBox->value();
     }
 
     template<typename T>
-    void AbstractAdjusterWidget<T>::setValueImpl(T value)
-    {
+    void AbstractAdjusterWidget<T>::setValueImpl(T value) {
         _spinBox->setValue(value);
         setSliderValue(value);
     }
 
     template<typename T>
-    T AbstractAdjusterWidget<T>::minimum() const
-    {
+    T AbstractAdjusterWidget<T>::minimum() const {
         return _spinBox->minimum();
     }
 
     template<typename T>
-    void AbstractAdjusterWidget<T>::setMinimum(T minimum)
-    {
+    void AbstractAdjusterWidget<T>::setMinimumImpl(T minimum) {
         _spinBox->setMinimum(minimum);
         setSliderProperties(_spinBox->singleStep(), minimum, _spinBox->maximum());
     }
 
     template<typename T>
-    T AbstractAdjusterWidget<T>::maximum() const
-    {
+    T AbstractAdjusterWidget<T>::maximum() const {
         return _spinBox->maximum();
     }
 
     template<typename T>
-    void AbstractAdjusterWidget<T>::setMaximum(T maximum)
-    {
+    void AbstractAdjusterWidget<T>::setMaximumImpl(T maximum) {
         _spinBox->setMaximum(maximum);
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), maximum);
     }
 
     template<typename T>
-    T AbstractAdjusterWidget<T>::singleStep() const
-    {
+    T AbstractAdjusterWidget<T>::singleStep() const {
         return _spinBox->singleStep();
     }
 
     template<typename T>
-    void AbstractAdjusterWidget<T>::setSingleStep(T value)
-    {
+    void AbstractAdjusterWidget<T>::setSingleStepImpl(T value) {
         _spinBox->setSingleStep(value);
         setSliderProperties(value, _spinBox->minimum(), _spinBox->maximum());
     }

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -39,8 +39,6 @@ namespace campvis {
      * Collection of various helper methods for strings.
      *
      * \sa std::string
-     * 
-     * \todo    Test, test, test!
      */
     class CAMPVIS_CORE_API StringUtils {
     public:
@@ -64,17 +62,17 @@ namespace campvis {
          *
          * \param   str     Input string to parse.
          *
-         * \note    TODO: The detection algorithm is a litte simplified and will not yield correct results
+         * \note    TODO: The detection algorithm is a little simplified and will not yield correct results
          *          in every case.
          **/
         static std::vector<std::string> parseFloats(const std::string& str);
 
         /**
-         * Replaces all occurences of \a from in \a str with \a to.
+         * Replaces all occurrences of \a from in \a str with \a to.
          * \param str   String to perform replacement on.
          * \param from  String to be replaced.
-         * \param to    String repace.
-         * \return  \a str with all occurences of \a from replaced with \a to.
+         * \param to    String replace.
+         * \return  \a str with all occurrences of \a from replaced with \a to.
          */
         static std::string replaceAll(const std::string& str, const std::string& from, const std::string& to);
 
@@ -97,11 +95,11 @@ namespace campvis {
          * \param whitespace    Set of whitespace characters which shall be removed during trimming.
          * \return  Vector of the split substrings.
          */
-        static std::vector<std::string> splitStringsafe(const std::string& str, const std::string& delimiter, char quotes = '"', const std::string& whitespace = " \t\n\r\0\x0B");
+        static std::vector<std::string> splitStringsafe(const std::string& str, const std::string& delimiter, char quotes = '\'', const std::string& whitespace = " \t\n\r\0\x0B");
 
         /**
          * Trims the string \a str.
-         * All leading and trailing occurences of the characters in \a whitespace will be removed.
+         * All leading and trailing occurrences of the characters in \a whitespace will be removed.
          * 
          * \param str           The string to trim.
          * \param whitespace    Set of whitespace characters which shall be removed at the beginning and the end.

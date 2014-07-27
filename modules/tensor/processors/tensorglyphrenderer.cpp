@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -29,10 +29,9 @@
 #include "tgt/shadermanager.h"
 
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/geometrydatafactory.h"
 #include "core/datastructures/renderdata.h"
-
-#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
 
@@ -57,24 +56,26 @@ namespace campvis {
         , p_renderOutput("RenderOutput", "Output Image", "TensorGlyphRenderer.output", DataNameProperty::WRITE)
         , p_glyphType("GlyphType", "Glyph Type to Render", glyphTypes, 3)
         , p_glyphSize("GlyphSize", "Glyph Size", 1.f, .1f, 5.f)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_camera("Camera", "Camera", tgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _ellipsoidGeometry(0)
         , _cubeGeometry(0)
     {
-        addDecorator(new ProcessorDecoratorShading());
-
         addProperty(p_inputEigenvalues, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_inputEigenvectors, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_renderOutput);
         addProperty(p_glyphType);
         addProperty(p_glyphSize);
+
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
+
         addProperty(p_camera);
         addProperty(p_sliceOrientation, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_sliceNumber);
-
-        decoratePropertyCollection(this);
     }
 
     TensorGlyphRenderer::~TensorGlyphRenderer() {
@@ -112,63 +113,72 @@ namespace campvis {
 
         if (evals && evecs) {
             if (evals->getSize() == evecs->getSize()) {
-                const tgt::Camera& cam = p_camera.getValue();
-                const tgt::svec3& imgSize = evals->getSize();
+                ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
-                glEnable(GL_DEPTH_TEST);
-                _shader->activate();
+                if (p_enableShading.getValue() == false || light != nullptr) {
+                    const tgt::Camera& cam = p_camera.getValue();
+                    const tgt::svec3& imgSize = evals->getSize();
 
-                _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
-                _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", cam.getViewMatrix());
-                decorateRenderProlog(dataContainer, _shader);
+                    glEnable(GL_DEPTH_TEST);
+                    _shader->activate();
 
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    _shader->setIgnoreUniformLocationError(true);
+                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                    _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
+                    _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
-                switch (p_sliceOrientation.getOptionValue()) {
-                    case XY_PLANE:
-                        for (size_t x = 0; x < imgSize.x; ++x) {
+                    if (p_enableShading.getValue() && light != nullptr) {
+                        light->bind(_shader, "_lightSource");
+                    }
+
+                    FramebufferActivationGuard fag(this);
+                    createAndAttachColorTexture();
+                    createAndAttachDepthTexture();
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+                    switch (p_sliceOrientation.getOptionValue()) {
+                        case XY_PLANE:
+                            for (size_t x = 0; x < imgSize.x; ++x) {
+                                for (size_t y = 0; y < imgSize.y; ++y) {
+                                    renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), p_sliceNumber.getValue()));
+                                }
+                            }
+                            break;
+                        case XZ_PLANE:
+                            for (size_t x = 0; x < imgSize.x; ++x) {
+                                for (size_t z = 0; z < imgSize.z; ++z) {
+                                    renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), p_sliceNumber.getValue(), static_cast<int>(z)));
+                                }
+                            }
+                            break;
+                        case YZ_PLANE:
                             for (size_t y = 0; y < imgSize.y; ++y) {
-                                renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), p_sliceNumber.getValue()));
+                                for (size_t z = 0; z < imgSize.z; ++z) {
+                                    renderTensorGlyph(evals, evecs, tgt::ivec3(p_sliceNumber.getValue(), static_cast<int>(y), static_cast<int>(z)));
+                                }
                             }
-                        }
-                        break;
-                    case XZ_PLANE:
-                        for (size_t x = 0; x < imgSize.x; ++x) {
-                            for (size_t z = 0; z < imgSize.z; ++z) {
-                                renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), p_sliceNumber.getValue(), static_cast<int>(z)));
-                            }
-                        }
-                        break;
-                    case YZ_PLANE:
-                        for (size_t y = 0; y < imgSize.y; ++y) {
-                            for (size_t z = 0; z < imgSize.z; ++z) {
-                                renderTensorGlyph(evals, evecs, tgt::ivec3(p_sliceNumber.getValue(), static_cast<int>(y), static_cast<int>(z)));
-                            }
-                        }
-                        break;
+                            break;
+                    }
+
+
+                    _shader->deactivate();
+                    glDisable(GL_DEPTH_TEST);
+
+                    dataContainer.addData(p_renderOutput.getValue(), new RenderData(_fbo));
                 }
-
-
-                decorateRenderEpilog(_shader);
-                _shader->deactivate();
-                glDisable(GL_DEPTH_TEST);
-
-                dataContainer.addData(p_renderOutput.getValue(), new RenderData(_fbo));
+                else {
+                    LDEBUG("Could not load light source from DataContainer.");
+                }
             }
         }
         else {
             LERROR("Could not find suitable input data.");
         }
-        
-        validate(INVALID_RESULT);
     }
 
     void TensorGlyphRenderer::updateProperties(DataContainer& dataContainer) {
+        p_lightId.setVisible(p_enableShading.getValue());
+
         GenericImageRepresentationLocal<float, 3>::ScopedRepresentation evals(dataContainer, p_inputEigenvalues.getValue());
         GenericImageRepresentationLocal<float, 9>::ScopedRepresentation evecs(dataContainer, p_inputEigenvectors.getValue());
 
@@ -190,18 +200,17 @@ namespace campvis {
                 LERROR("Size of eigenvalue image and eigenvector image mismatch!");
             }
         }
-
-        validate(INVALID_PROPERTIES);
     }
 
     void TensorGlyphRenderer::updateShader() {
         _shader->setHeaders(generateGlslHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
     }
 
     std::string TensorGlyphRenderer::generateGlslHeader() const {
-        std::string toReturn = getDecoratedHeader();
+        std::string toReturn;
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
 
         return toReturn;
     }

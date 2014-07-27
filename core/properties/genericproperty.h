@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -35,7 +35,6 @@ namespace campvis {
      * Generic class for value-based properties.
      *
      * \tparam  T   Base type of the property's value.
-     * \todo    Add PropertyWidgets, review use of mutex
      */
     template<typename T>
     class GenericProperty : public AbstractProperty {
@@ -121,7 +120,6 @@ namespace campvis {
 // = Typedefs =====================================================================================
 
     typedef GenericProperty<bool> BoolProperty;
-    typedef GenericProperty<std::string> StringProperty;
 
 // = Template Implementation ======================================================================
 
@@ -180,11 +178,9 @@ namespace campvis {
     template<typename T>
     void campvis::GenericProperty<T>::setFrontValue(const T& value) {
         _value = value;
-        // TODO:    think about the correct/reasonable order of observer notification
-        //          thread-safety might play a role thereby...
         for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
             // We ensure all shared properties to be of type GenericProperty<T> in the addSharedProperty overload.
-            // Hence, static_cast ist safe.
+            // Hence, static_cast is safe.
             GenericProperty<T>* child = static_cast< GenericProperty<T>* >(*it);
             child->setValue(value);
         }

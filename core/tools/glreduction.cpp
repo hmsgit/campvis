@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -53,6 +53,7 @@ namespace campvis {
         _shader1d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_1D\n");
         _shader2d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_2D\n");
         _shader3d = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/tools/glreduction.frag", generateGlslHeader(_reductionOperator) + "#define REDUCTION_3D\n");
+
         if (_shader1d == 0 || _shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -34,6 +34,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace campvis {
     class AbstractPipeline;
@@ -68,10 +69,10 @@ namespace campvis {
          * \return  The registration index.
          */
         template<typename T>
-        size_t registerPipeline(AbstractPipeline* (* callee)(DataContainer*)) {
+        size_t registerPipeline(std::function<AbstractPipeline*(DataContainer*)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
-            std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::iterator it = _pipelineMap.lower_bound(T::getId());
+            std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> >::iterator it = _pipelineMap.lower_bound(T::getId());
             if (it == _pipelineMap.end() || it->first != T::getId()) {
                 _pipelineMap.insert(it, std::make_pair(T::getId(), callee));
             }
@@ -86,7 +87,7 @@ namespace campvis {
         mutable tbb::spin_mutex _mutex;
         static tbb::atomic<PipelineFactory*> _singleton;    ///< the singleton object
 
-        std::map<std::string, AbstractPipeline* (*)(DataContainer*)> _pipelineMap;
+        std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> > _pipelineMap;
     };
 
 

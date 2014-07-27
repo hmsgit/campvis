@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -43,6 +43,7 @@
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/renderdata.h"
 
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
@@ -53,8 +54,10 @@
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/datacontainerfileloaderwidget.h"
 #include "modules/io/processors/genericimagereader.h"
+#include "modules/io/processors/mhdimagewriter.h"
 
 #include <QFileDialog>
+#include <QScrollArea>
 
 namespace campvis {
 
@@ -81,7 +84,6 @@ namespace campvis {
         , _colorWidgetLayout(0)
         , _lblColorVal(0)
         , _colorValWidget(0)
-        , _ColorValWidgetPalette(0)
         , _btnLoadFile(0)
         , _btnSaveToFile(0)
         , _propEditorWid(0)
@@ -183,9 +185,9 @@ namespace campvis {
         _colorValWidget->setAutoFillBackground(true);
         _colorValWidget->setFixedSize(16, 16);
         
-        _ColorValWidgetPalette = new QPalette(palette());
-        _ColorValWidgetPalette->setColor(QPalette::Background, Qt::gray);
-        _colorValWidget->setPalette(*(_ColorValWidgetPalette));
+        _colorValWidgetPalette = QPalette(palette());
+        _colorValWidgetPalette.setColor(QPalette::Background, Qt::gray);
+        _colorValWidget->setPalette(_colorValWidgetPalette);
         
         _colorWidgetLayout = new QHBoxLayout();
         _colorWidgetLayout->setSpacing(0);
@@ -200,14 +202,24 @@ namespace campvis {
         _canvas = new DataContainerInspectorCanvas(_infoWidget);
         _canvas->setMinimumSize(QSize(100, 100));
         _infoWidgetLayout->addWidget(_canvas, 5, 0, 1, 2);
+        _infoWidgetLayout->setRowStretch(5, 2);
 
-        _pcWidget = new PropertyCollectionWidget(_infoWidget);
+        QScrollArea* _pipelinePropertiesScrollArea = new QScrollArea(_infoWidget);
+        _pipelinePropertiesScrollArea->setWidgetResizable(true);
+        _pipelinePropertiesScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        _pipelinePropertiesScrollArea->setFrameStyle(QScrollArea::NoFrame);
+        _pipelinePropertiesScrollArea->setMinimumHeight(224);
+
+        _pcWidget = new PropertyCollectionWidget(_pipelinePropertiesScrollArea);
         _pcWidget->updatePropCollection(_canvas, _dataContainer);
-        _infoWidgetLayout->addWidget(_pcWidget, 6, 0, 1, 2);
+        _pipelinePropertiesScrollArea->setWidget(_pcWidget);
+
+        _infoWidgetLayout->addWidget(_pipelinePropertiesScrollArea, 6, 0, 1, 2);
 
         _mainLayout->addWidget(_infoWidget, 0, 1, 3, 1);
 
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
+        qRegisterMetaType<tgt::vec4>("tgt_vec4");
         connect(
             _dctWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), 
             this, SLOT(onDCTWidgetSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -215,31 +227,17 @@ namespace campvis {
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _canvas, SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
         connect(
+            _canvas, SIGNAL(s_colorChanged(const tgt::vec4&)),
+            this, SLOT(onColorChanged(const tgt::vec4&)));
+        connect(
+            _canvas, SIGNAL(s_depthChanged(float)),
+            this, SLOT(onDepthChanged(float)));
+        connect(
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _dctWidget->getTreeModel(), SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
         connect(
             _btnLoadFile, SIGNAL(clicked()),
             this, SLOT(onBtnLoadFileClicked()));
-    }
-
-    void DataContainerInspectorWidget::updateColor(){
-        const tgt::Color& color = _canvas->getCapturedColor();
-
-
-        _lblColorVal->setText(QString("Color: [%1, %2, %3, %4]").arg(QString::number(color.r), QString::number(color.g), QString::number(color.b), QString::number(color.a)));
-        
-        _ColorValWidgetPalette->setColor(QPalette::Background, QColor(static_cast<int>(color.r * 255), static_cast<int>(color.g * 255), static_cast<int>(color.b * 255)));
-        _colorValWidget->setPalette(*_ColorValWidgetPalette);
-    }
-
-    void DataContainerInspectorWidget::updateDepth(){
-
-        float depth = _canvas->getCapturedDepth();
-
-        _lblColorVal->setText(QString("Depth: %1").arg(QString::number(depth)));
-        
-        _ColorValWidgetPalette->setColor(QPalette::Background, QColor(static_cast<int>(depth * 255), static_cast<int>(depth * 255), static_cast<int>(depth * 255)));
-        _colorValWidget->setPalette(*_ColorValWidgetPalette);
     }
 
     void DataContainerInspectorWidget::updateInfoWidget() {
@@ -290,11 +288,11 @@ namespace campvis {
 
                 _canvas->p_currentSlice.setVisible(tester->getDimensionality() == 3);
                 _canvas->p_transferFunction.setVisible(true);
-                _canvas->p_meshSolidColor.setVisible(false);
                 _canvas->p_renderRChannel.setVisible(true);
                 _canvas->p_renderGChannel.setVisible(true);
                 _canvas->p_renderBChannel.setVisible(true);
                 _canvas->p_renderAChannel.setVisible(true);
+                _canvas->p_geometryRendererProperties.setVisible(false);
             }
             else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(handles.front().second.getData())) {
                 _lblSize->setText(tr("Size: n/a"));
@@ -306,11 +304,11 @@ namespace campvis {
 
                 _canvas->p_currentSlice.setVisible(false);
                 _canvas->p_transferFunction.setVisible(false);
-                _canvas->p_meshSolidColor.setVisible(true);
                 _canvas->p_renderRChannel.setVisible(false);
                 _canvas->p_renderGChannel.setVisible(false);
                 _canvas->p_renderBChannel.setVisible(false);
                 _canvas->p_renderAChannel.setVisible(false);
+                _canvas->p_geometryRendererProperties.setVisible(true);
             }
             else if (const RenderData* tester = dynamic_cast<const RenderData*>(handles.front().second.getData())) {
                 const ImageData* id = tester->getNumColorTextures() > 0 ? tester->getColorTexture() : tester->getDepthTexture();
@@ -333,11 +331,11 @@ namespace campvis {
 
                 _canvas->p_currentSlice.setVisible(false);
                 _canvas->p_transferFunction.setVisible(true);
-                _canvas->p_meshSolidColor.setVisible(false);
                 _canvas->p_renderRChannel.setVisible(true);
                 _canvas->p_renderGChannel.setVisible(true);
                 _canvas->p_renderBChannel.setVisible(true);
                 _canvas->p_renderAChannel.setVisible(true);
+                _canvas->p_geometryRendererProperties.setVisible(false);
             }
 #ifdef CAMPVIS_HAS_MODULE_COLUMBIA
             else if (const FiberData* tester = dynamic_cast<const FiberData*>(handles.front().second.getData())) {
@@ -389,7 +387,7 @@ namespace campvis {
 
     void DataContainerInspectorWidget::init() {
         if (_canvas != 0)
-            _canvas->init(this);
+            _canvas->init();
 
         _inited = true;
     }
@@ -441,11 +439,25 @@ namespace campvis {
             QVariant item = index->data(Qt::UserRole);
             DataHandle handle = item.value<QtDataHandle>();
             QModelIndex idxName = index->sibling(index->row(), 0);
+            QString name = idxName.data(Qt::DisplayRole).toString();
 
             // only consider non-empty DataHandles that are ImageData and have render target representations
             if (handle.getData() != 0) {
-                if (dynamic_cast<const ImageData*>(handle.getData()) || dynamic_cast<const RenderData*>(handle.getData())) {
-                    QString dialogCaption = "Export " + idxName.data(Qt::DisplayRole).toString() + " as Image";
+                if (dynamic_cast<const ImageData*>(handle.getData()) && dynamic_cast<const ImageData*>(handle.getData())->getDimensionality() == 3) {
+                    QString dialogCaption = "Export " + name + " as MHD Image";
+                    QString directory = tr("");
+                    const QString fileFilter = tr("*.mhd;;MHD images (*.mhd)");
+
+                    QString filename = QFileDialog::getSaveFileName(this, dialogCaption, directory, fileFilter);
+
+                    MhdImageWriter writer;
+                    writer.p_fileName.setValue(filename.toStdString());
+                    writer.p_inputImage.setValue(name.toStdString());
+                    writer.invalidate(AbstractProcessor::INVALID_RESULT);
+                    writer.process(*_dataContainer);
+                }
+                else if (dynamic_cast<const ImageData*>(handle.getData()) || dynamic_cast<const RenderData*>(handle.getData())) {
+                    QString dialogCaption = "Export " + name + " as Image";
                     QString directory = tr("");
                     const QString fileFilter = tr("*.png;;PNG images (*.png)");
 
@@ -531,6 +543,22 @@ namespace campvis {
         _propEditorWid = new DataContainerFileLoaderWidget(this, nullptr);
         _propEditorWid->setVisible(true);
         
+    }
+
+    void DataContainerInspectorWidget::onColorChanged(const tgt::vec4& color) {
+        _lblColorVal->setText(QString("Color: [%1, %2, %3, %4]").arg(QString::number(color.r), QString::number(color.g), QString::number(color.b), QString::number(color.a)));
+
+        tgt::ivec4 clamped(tgt::clamp(color * 255.f, 0.f, 255.f));
+        _colorValWidgetPalette.setColor(QPalette::Background, QColor(clamped.r, clamped.g, clamped.b, clamped.a));
+        _colorValWidget->setPalette(_colorValWidgetPalette);
+    }
+
+    void DataContainerInspectorWidget::onDepthChanged(float depth) {
+        _lblColorVal->setText(QString("Depth: %1").arg(QString::number(depth)));
+
+        tgt::ivec4 clamped(tgt::clamp(depth * 255.f, 0.f, 255.f));
+        _colorValWidgetPalette.setColor(QPalette::Background, QColor(clamped.r, clamped.g, clamped.b, clamped.a));
+        _colorValWidget->setPalette(_colorValWidgetPalette);
     }
 
 }

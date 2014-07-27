@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -33,8 +33,9 @@ namespace campvis {
 
     VectorFieldDemo::VectorFieldDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _lsp()
         , _imageReader()
-		, _vectorFieldReader()
+        , _vectorFieldReader()
         , _vectorFieldRenderer(&_canvasSize)
         , _sliceRenderer(&_canvasSize)
         , _rtc(&_canvasSize)
@@ -49,8 +50,9 @@ namespace campvis {
         _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);
 
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
-		addProcessor(&_vectorFieldReader);
+        addProcessor(&_vectorFieldReader);
         addProcessor(&_vectorFieldRenderer);
         addProcessor(&_sliceRenderer);
         addProcessor(&_rtc);
@@ -69,24 +71,24 @@ namespace campvis {
         p_sliceNumber.addSharedProperty(&_sliceRenderer.p_sliceNumber);
 
         _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/rec1_2D_comp.mhd");
-		
-		_imageReader.p_targetImageID.setValue("reader.output");
-		_imageReader.p_targetImageID.addSharedProperty(&_sliceRenderer.p_sourceImageID);
-		_imageReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
+        
+        _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_sliceRenderer.p_sourceImageID);
+        _imageReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
-		_vectorFieldReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_vec.mhd");
-		_vectorFieldReader.p_targetImageID.setValue("vectors");
-		_vectorFieldReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectors);
+        _vectorFieldReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_vec.mhd");
+        _vectorFieldReader.p_targetImageID.setValue("vectors");
+        _vectorFieldReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectors);
 
         _vectorFieldRenderer.p_renderOutput.addSharedProperty(&_rtc.p_firstImageId);
-		_vectorFieldRenderer.p_arrowSize.setValue(0.03f);
-		_vectorFieldRenderer.p_lenThresholdMin.setValue(100.f);
-		_vectorFieldRenderer.p_flowProfile1.setValue(0.4716088614374652f);
-		_vectorFieldRenderer.p_flowProfile2.setValue(0.0638348311845516f);
-		_vectorFieldRenderer.p_flowProfile3.setValue(0.1713471562960614f);
-		_vectorFieldRenderer.p_flowProfile4.setValue(0.1019371804834016f);
-		_vectorFieldRenderer.p_lenThresholdMax.setValue(400.f);
-		_vectorFieldRenderer.p_sliceOrientation.setValue(3);
+        _vectorFieldRenderer.p_arrowSize.setValue(0.03f);
+        _vectorFieldRenderer.p_lenThresholdMin.setValue(100.f);
+        _vectorFieldRenderer.p_flowProfile1.setValue(0.4716088614374652f);
+        _vectorFieldRenderer.p_flowProfile2.setValue(0.0638348311845516f);
+        _vectorFieldRenderer.p_flowProfile3.setValue(0.1713471562960614f);
+        _vectorFieldRenderer.p_flowProfile4.setValue(0.1019371804834016f);
+        _vectorFieldRenderer.p_lenThresholdMax.setValue(400.f);
+        _vectorFieldRenderer.p_sliceOrientation.setValue(3);
 
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
@@ -101,7 +103,7 @@ namespace campvis {
     }
 
     void VectorFieldDemo::onProcessorValidated(AbstractProcessor* processor) {
-		if (processor == &_imageReader) {
+        if (processor == &_imageReader) {
             // update camera
             ScopedTypedData<IHasWorldBounds> img(*_data, _sliceRenderer.p_sourceImageID.getValue());
             if (img) {

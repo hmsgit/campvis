@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -31,9 +31,9 @@
 
 
 #include "modules/columbia/datastructures/fiberdata.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
-#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
 
@@ -52,10 +52,10 @@ namespace campvis {
         , p_renderMode("RenderMode", "Render Mode", renderModeOptions, 2)
         , p_lineWidth("LineWidth", "Line width", 3.f, .5f, 10.f, 0.1f)
         , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , _shader(0)
     {
-        addDecorator(new ProcessorDecoratorShading());
-
         addProperty(p_strainId);
         addProperty(p_renderTargetID);
         addProperty(p_camera);
@@ -63,7 +63,8 @@ namespace campvis {
         addProperty(p_renderMode, INVALID_RESULT | INVALID_SHADER);
         addProperty(p_lineWidth);
 
-        decoratePropertyCollection(this);
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
     }
 
     StrainFiberRenderer::~StrainFiberRenderer() {
@@ -88,49 +89,58 @@ namespace campvis {
 
     void StrainFiberRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
+
         if (strainData != 0 && _shader != 0) {
-            const tgt::Camera& camera = p_camera.getValue();
+            if (p_enableShading.getValue() == false || light != nullptr) {
+                const tgt::Camera& camera = p_camera.getValue();
 
-            // set modelview and projection matrices
-            FramebufferActivationGuard fag(this);
-            createAndAttachColorTexture();
-            createAndAttachDepthTexture();
+                // set modelview and projection matrices
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
-            _shader->activate();
-            _shader->setIgnoreUniformLocationError(true);
-            decorateRenderProlog(data, _shader);
-            _shader->setUniform("_projectionMatrix", camera.getProjectionMatrix());
-            _shader->setUniform("_viewMatrix", camera.getViewMatrix());
-            _shader->setUniform("_cameraPosition", camera.getPosition());
-            _shader->setUniform("_fiberWidth", p_lineWidth.getValue()/4.f);
-            _shader->setIgnoreUniformLocationError(false); 
+                _shader->activate();
+                _shader->setIgnoreUniformLocationError(true);
+                if (p_enableShading.getValue() && light != nullptr) {
+                    light->bind(_shader, "_lightSource");
+                }
+                _shader->setUniform("_projectionMatrix", camera.getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", camera.getViewMatrix());
+                _shader->setUniform("_cameraPosition", camera.getPosition());
+                _shader->setUniform("_fiberWidth", p_lineWidth.getValue()/4.f);
+                _shader->setIgnoreUniformLocationError(false); 
 
-            // create entry points texture
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LESS);
-            glClearDepth(1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                // create entry points texture
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_LESS);
+                glClearDepth(1.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glLineWidth(p_lineWidth.getValue());
-            strainData->render();
-            glLineWidth(1.f);
+                glLineWidth(p_lineWidth.getValue());
+                strainData->render();
+                glLineWidth(1.f);
 
-            decorateRenderEpilog(_shader);
-            _shader->deactivate();
-            glDisable(GL_DEPTH_TEST);
-            LGL_ERROR;
+                _shader->deactivate();
+                glDisable(GL_DEPTH_TEST);
+                LGL_ERROR;
 
-            data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
+                data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
+            }
+            else {
+                LDEBUG("Could not load light source from DataContainer.");
+            }
         }
         else {
             LERROR("No suitable input geometry found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string StrainFiberRenderer::generateGlslHeader() const {
-        std::string toReturn = getDecoratedHeader();
+        std::string toReturn;
+
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
 
         switch (p_renderMode.getOptionValue()) {
             case STRIPES:
@@ -148,7 +158,10 @@ namespace campvis {
     void StrainFiberRenderer::updateShader() {
         _shader->setHeaders(generateGlslHeader());
         _shader->rebuild();
-        validate(INVALID_SHADER);
+    }
+
+    void StrainFiberRenderer::updateProperties(DataContainer& dataContainer) {
+        p_lightId.setVisible(p_enableShading.getValue());
     }
 
 }

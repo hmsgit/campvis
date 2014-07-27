@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -35,7 +35,6 @@ namespace campvis {
      * which is better suited for precise adjustments.
      */
     class IntAdjusterWidget : public AbstractAdjusterWidget<int> {
-
         Q_OBJECT
 
     public:
@@ -45,12 +44,29 @@ namespace campvis {
          */
         IntAdjusterWidget(QWidget* parent = 0);
 
-    public slots:
         /**
          * Change the adjuster's current value.
          * \param   value      New value for the adjuster
          */
         void setValue(int value);
+
+        /**
+         * Change the adjuster's minimum value.
+         * \param   minimum      new minimum value for the adjuster
+         */
+        void setMinimum(int minimum);
+
+        /**
+         * Change the adjuster's maximum value.
+         * \param   maximum      new maximum value for the adjuster
+         */
+        void setMaximum(int maximum);
+
+        /**
+         * Change the adjuster's single step value.
+         * \param   value      new single step value for the adjuster
+         */
+        void setSingleStep(int value);
 
     signals:
         /**
@@ -59,12 +75,27 @@ namespace campvis {
          */
         void valueChanged(int value);
 
+        /// Signal emitted when the property's minimum value has changed
+        void s_minChanged(int minimum);
+        /// Signal emitted when the property's maximum value has changed
+        void s_maxChanged(int maximum);
+        /// Signal emitted when the property's single step value has changed
+        void s_singleStepChanged(int value);
+
+
     private slots:
         /// Slot getting called when the spin box's value changes
         void onSpinBoxValueChanged(int value);
 
         /// Slot getting called when the slider's value changes
         void onSliderValueChanged(int value);
+
+        /// Slot getting called when the property's minimum value has changed
+        void onMinChanged(int minimum);
+        /// Slot getting called when the property's maximum value has changed
+        void onMaxChanged(int maximum);
+        /// Slot getting called when the property's single step value has changed
+        void onSingleStepChanged(int value);
 
     };
 

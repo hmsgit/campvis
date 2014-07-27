@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -133,7 +133,6 @@ namespace campvis {
             if (tfp.hasKey("ElementByteOrderMSB"))
                 e = (tfp.getBool("ElementByteOrderMSB") ? EndianHelper::IS_BIG_ENDIAN : EndianHelper::IS_LITTLE_ENDIAN);
             
-            // TODO: spacing, element size, etc.
             if (tfp.hasKey("ElementSpacing")) {
                 if (dimensionality == 3)
                     voxelSize = tfp.getVec3("ElementSpacing");
@@ -145,6 +144,12 @@ namespace campvis {
                     imageOffset = tfp.getVec3("Position");
                 else if (dimensionality == 2)
                     imageOffset = tgt::vec3(tfp.getVec2("Position"), 0.f);
+            }
+            if (tfp.hasKey("Offset")) {
+                if (dimensionality == 3)
+                    imageOffset = tfp.getVec3("Offset");
+                else if (dimensionality == 2)
+                    imageOffset = tgt::vec3(tfp.getVec2("Offset"), 0.f);
             }
             if (tfp.hasKey("VolumePosition")) {
                 if (dimensionality == 3)
@@ -192,16 +197,12 @@ namespace campvis {
         }
         catch (tgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
-            validate(INVALID_RESULT);
             return;
         }
         catch (std::exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
-            validate(INVALID_RESULT);
             return;
         }
-
-        validate(INVALID_RESULT);
     }
 
 }

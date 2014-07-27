@@ -34,8 +34,6 @@
 namespace tgt {
 
 
-/// \todo Bounds
-
 /**
  This class is an abstract superclass for spacecurves. \n
  It provides the virtual methods getPoint() and getDerivative(), which

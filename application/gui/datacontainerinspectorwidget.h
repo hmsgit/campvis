@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -89,10 +89,6 @@ namespace campvis {
          */
         void onDataContainerDataAdded(const std::string&, const DataHandle&);
 
-        void mousePressEvent(QMouseEvent*) {
-            updateInfoWidget();
-        }
-
         /**
          * Size hint for the default window size
          * \return QSize(640, 480)
@@ -111,16 +107,6 @@ namespace campvis {
          */
         void deinit();
 
-        /**
-         * Updates color of the info widget
-         */
-        void updateColor();
-
-        /**
-         * Updates depth of the info widget
-         */
-        void updateDepth();
-
     signals:
         void dataContainerChanged(const QString&, QtDataHandle);
 
@@ -138,25 +124,21 @@ namespace campvis {
          */
         void onBtnSaveToFileClicked();
 
-        
         /**
          * Slot being called when the user clicks on the "Load File" button.
          */
         void onBtnLoadFileClicked();
+
+        /// Slot being called when the color under the mouse has changed
+        void onColorChanged(const tgt::vec4& color);
+        /// Slot being called when the depth under the mouse has changed
+        void onDepthChanged(float depth);
 
     protected:
         /**
          * Setup the GUI stuff
          */
         void setupGUI();
-
-        /**
-         * Saves the Image in \a handle to the file \a filename.
-         * \note    This method must be called with a valid OpenGL context!
-         * \param handle    DataHandle containing the image to save. Must contain ImageData or RenderData!
-         * \param filename  Filename for the file to save.
-         */
-        
 
     protected:
         static void saveToFile(DataHandle handle, std::string filename);
@@ -196,10 +178,8 @@ namespace campvis {
         QHBoxLayout* _colorWidgetLayout;                ///< Layout for the following widget
         QLabel*  _lblColorVal;                          ///< Color Label Value in text
         QWidget* _colorValWidget;                       ///< Widget that shows the color value in color
-        QPalette* _ColorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
+        QPalette _colorValWidgetPalette;               ///< Palette which will be used to colorize the color widget
         
-        // Added by Hossain Mahmud  <mahmud@in.tum.de>
-        // Date: January 02, 2014
         QPushButton* _btnLoadFile;
         QPushButton* _btnSaveToFile;
         DataContainerFileLoaderWidget* _propEditorWid;

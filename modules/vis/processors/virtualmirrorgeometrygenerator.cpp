@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -74,7 +74,7 @@ namespace campvis {
         std::vector<tgt::vec3> vertices;
 
         tgt::vec3 temp = cam.getUpVector();
-        if(abs(tgt::dot(temp, n) > 0.9f))
+        if (abs(tgt::dot(temp, n)) > 0.9f)
             temp = tgt::vec3(0.f, 1.f, 0.f);
 
         tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_size.getValue();
@@ -89,7 +89,6 @@ namespace campvis {
 
         FaceGeometry* mirror = new FaceGeometry(vertices);
         data.addData(p_mirrorID.getValue(), mirror);
-        validate(INVALID_RESULT);
     }
 
 }

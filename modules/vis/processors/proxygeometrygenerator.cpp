@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -81,12 +81,9 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void ProxyGeometryGenerator::updateProperties(DataContainer& dataContainer) {
-        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
         ScopedTypedData<ImageData> img(dataContainer, p_sourceImageID.getValue());
 
         if (img != 0) {
@@ -98,8 +95,6 @@ namespace campvis {
             p_clipY.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().y)));
             p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().z)));
         }
-
-        validate(INVALID_PROPERTIES);
     }
 
 }

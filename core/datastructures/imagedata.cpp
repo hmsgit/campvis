@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -23,12 +23,6 @@
 // ================================================================================================
 
 #include "imagedata.h"
-
-#include "core/datastructures/imagerepresentationlocal.h"
-
-#ifdef CAMPVIS_HAS_MODULE_ITK
-#include "modules/itk/core/genericimagerepresentationitk.h"
-#endif
 
 namespace campvis {
     const std::string ImageData::loggerCat_ = "CAMPVis.core.datastructures.ImageData";
@@ -53,9 +47,9 @@ namespace campvis {
     ImageData* ImageData::clone() const {
         ImageData* toReturn = new ImageData(_dimensionality, _size, _numChannels);
         toReturn->_mappingInformation = _mappingInformation;
-        tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator start = _representations.begin();
-        tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator end = _representations.end();
-        toReturn->_representations.assign(start, end);
+        for (auto it = this->_representations.begin(); it != this->_representations.end(); ++it) {
+            (*it)->clone(toReturn);
+        }
         return toReturn;
     }
 
@@ -136,36 +130,4 @@ namespace campvis {
         addRepresentation(representation);
     }
 
-    template<>
-    const ImageRepresentationLocal* ImageData::getRepresentation<ImageRepresentationLocal>(bool performConversion /*= true*/) const {
-        // look, whether we already have a suitable representation
-        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(*it))
-                return tester;
-        }
-
-        if (performConversion) {
-            return tryPerformConversion<ImageRepresentationLocal>();
-        }
-
-        return 0;
-    }
-
-#ifdef CAMPVIS_HAS_MODULE_ITK
-    template<>
-    const AbstractImageRepresentationItk* ImageData::getRepresentation<AbstractImageRepresentationItk>(bool performConversion /*= true*/) const {
-        // look, whether we already have a suitable representation
-        for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
-            if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(*it))
-                return tester;
-        }
-
-        if (performConversion) {
-            tgtAssert(false, "Conversion to AbstractImageRepresentationItk not implemented - is it really needed?");
-            LWARNING("Could not convert to AbstractImageRepresentationItk");
-        }
-
-        return 0;
-    }
-#endif
 }

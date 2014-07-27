@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -22,12 +22,11 @@
 // 
 // ================================================================================================
 
+in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #include "tools/texture2d.frag"
 
-uniform vec2 _viewportSize;
-uniform vec2 _viewportSizeRCP;
 uniform sampler2D _colorTexture;
 uniform TextureParameters2D _texParams;
 
@@ -36,10 +35,9 @@ uniform sampler2D _depthTexture;
 #endif
 
 void main() {
-    vec2 fragCoord = gl_FragCoord.xy * _viewportSizeRCP;
-    out_Color = texture(_colorTexture, fragCoord);
+    out_Color = texture(_colorTexture, ex_TexCoord.xy);
 
 #ifndef NO_DEPTH
-    gl_FragDepth = texture(_depthTexture, fragCoord).r;
+    gl_FragDepth = texture(_depthTexture, ex_TexCoord.xy).r;
 #endif
 }

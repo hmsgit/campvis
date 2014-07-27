@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -30,9 +30,9 @@
 #include "tgt/glcontextmanager.h"
 #include "tgt/gpucapabilities.h"
 #include "tgt/shadermanager.h"
+#include "tgt/texturereadertga.h"
 #include "tgt/qt/qtapplication.h"
 #include "tgt/qt/qtthreadedcanvas.h"
-#include "tbb/compat/thread"
 
 #include "application/campvispainter.h"
 #include "application/gui/mainwindow.h"
@@ -43,7 +43,12 @@
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/visualizationprocessor.h"
+
 #include "modules/pipelinefactory.h"
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+#include "scripting/gen_pipelineregistration.h"
+#endif
 
 namespace campvis {
 
@@ -53,6 +58,8 @@ namespace campvis {
         : QApplication(argc, argv)
         , _localContext(0)
         , _mainWindow(0)
+        , _errorTexture(nullptr)
+        , _luaVmState(nullptr)
         , _initialized(false)
         , _argc(argc)
         , _argv(argv)
@@ -71,11 +78,9 @@ namespace campvis {
         tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
         // delete everything in the right order:
-        for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
-            delete it->second;
-        }
-        for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            delete *it;
+        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            delete it->_painter;
+            delete it->_pipeline;
         }
         for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
             delete *it;
@@ -92,9 +97,9 @@ namespace campvis {
 
         // create a local OpenGL context and init GL
         _localContext = new QtThreadedCanvas("", tgt::ivec2(16, 16));
-        tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
 
         tgt::GLContextScopedLock lock(_localContext);
+        tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
 
         tgt::initGL(featureset);
         ShdrMgr.setDefaultGlslVersion("330");
@@ -137,6 +142,33 @@ namespace campvis {
         GLJobProc.start();
         GLJobProc.registerContext(_localContext);
 
+        // load textureData from file
+        tgt::TextureReaderTga trt;
+        _errorTexture = trt.loadTexture(CAMPVIS_SOURCE_DIR "/application/data/no_input.tga", tgt::Texture::LINEAR);
+
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+        // create and store Lua VM for this very pipeline
+        _luaVmState = new LuaVmState();
+        _luaVmState->redirectLuaPrint();
+
+        // Let Lua know where CAMPVis modules are located
+        if (! _luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
+            LERROR("Error setting up Lua VM.");
+
+        // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
+        if (! _luaVmState->execString("require(\"campvis\")"))
+            LERROR("Error setting up Lua VM.");
+        if (! _luaVmState->execString("require(\"tgt\")"))
+            LERROR("Error setting up Lua VM.");
+
+        if (! _luaVmState->execString("pipelines = {}"))
+            LERROR("Error setting up Lua VM.");
+
+        if (! _luaVmState->execString("inspect = require 'inspect'"))
+            LERROR("Error setting up Lua VM.");
+#endif
+
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
         for (int i = 1; i < pipelinesToAdd.size(); ++i) {
@@ -158,14 +190,12 @@ namespace campvis {
             // Deinit everything OpenGL related using the local context.
             tgt::GLContextScopedLock lock(_localContext);
 
-            // Deinit pipeline first
-            for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-                (*it)->deinit();
-            }
+            delete _errorTexture;
 
-            // Now deinit painters:
-            for (std::vector< std::pair<AbstractPipeline*, CampVisPainter*> >::iterator it = _visualizations.begin(); it != _visualizations.end(); ++it) {
-                it->second->deinit();
+            // Deinit pipeline and painter first
+            for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+                it->_pipeline->deinit();
+                it->_painter->deinit();
             }
 
             _mainWindow->deinit();
@@ -213,9 +243,10 @@ namespace campvis {
         CampVisPainter* painter = new CampVisPainter(canvas, pipeline);
         canvas->setPainter(painter, false);
         pipeline->setCanvas(canvas);
+        painter->setErrorTexture(_errorTexture);
 
-        _visualizations.push_back(std::make_pair(pipeline, painter));
-        _pipelines.push_back(pipeline);
+        PipelineRecord pr = { pipeline, painter };
+        _pipelines.push_back(pr);
 
         _mainWindow->addVisualizationPipelineWidget(name, canvas);
 
@@ -224,6 +255,14 @@ namespace campvis {
             canvas, 
             makeJobOnHeap<CampVisApplication, tgt::GLCanvas*, AbstractPipeline*>(this, &CampVisApplication::initGlContextAndPipeline, canvas, pipeline), 
             OpenGLJobProcessor::SerialJob);
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+        if (! _luaVmState->injectObjectPointerToTable(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", static_cast<int>(_pipelines.size())))
+        //if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", name))
+            LERROR("Could not inject the pipeline into the Lua VM.");
+
+        _luaVmState->execString("inspect(pipelines)");
+#endif
 
         s_PipelinesChanged();
     }
@@ -271,8 +310,8 @@ namespace campvis {
             LINFO("Rebuilding shaders from file successful.");
         }
 
-        for (std::vector<AbstractPipeline*>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            for (std::vector<AbstractProcessor*>::const_iterator pit = (*it)->getProcessors().begin(); pit != (*it)->getProcessors().end(); ++pit) {
+        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            for (std::vector<AbstractProcessor*>::const_iterator pit = it->_pipeline->getProcessors().begin(); pit != it->_pipeline->getProcessors().end(); ++pit) {
                 if (VisualizationProcessor* tester = dynamic_cast<VisualizationProcessor*>(*pit)) {
                 	tester->invalidate(AbstractProcessor::INVALID_RESULT);
                 }
@@ -280,5 +319,11 @@ namespace campvis {
         }
     }
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+    LuaVmState* CampVisApplication::getLuaVmState() {
+        return _luaVmState;
+    }
+
+#endif
 
 }

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -25,8 +25,8 @@
 #include "strainraycaster.h"
 
 #include "core/tools/quadrenderer.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
     const std::string StrainRaycaster::loggerCat_ = "CAMPVis.modules.vis.StrainRaycaster";
@@ -37,14 +37,16 @@ namespace campvis {
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows", false)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
         , p_enableAdaptiveStepsize("EnableAdaptiveStepSize", "Enable Adaptive Step Size", true)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
     {
-        addDecorator(new ProcessorDecoratorShading());
-
         addProperty(p_targetImageID);
-        addProperty(p_enableShadowing, INVALID_SHADER | INVALID_RESULT);
+        addProperty(p_enableShadowing, INVALID_SHADER | INVALID_PROPERTIES | INVALID_RESULT);
         addProperty(p_shadowIntensity);
         addProperty(p_enableAdaptiveStepsize, INVALID_SHADER | INVALID_RESULT);
-        decoratePropertyCollection(this);
+
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
     }
 
     StrainRaycaster::~StrainRaycaster() {
@@ -52,29 +54,47 @@ namespace campvis {
     }
 
     void StrainRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
-        if (image.getImageData()->getNumChannels() == 3 || image.getImageData()->getNumChannels() == 4) {
-            FramebufferActivationGuard fag(this);
-            createAndAttachColorTexture();
-            createAndAttachDepthTexture();
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            QuadRdr.renderQuad();
-            LGL_ERROR;
+        if (p_enableShading.getValue() == false || light != nullptr) {
+            if (image.getImageData()->getNumChannels() == 3 || image.getImageData()->getNumChannels() == 4) {
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
-            data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+                if (p_enableShading.getValue() && light != nullptr) {
+                    light->bind(_shader, "_lightSource");
+                }
+
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                QuadRdr.renderQuad();
+                LGL_ERROR;
+
+                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+            }
+            else {
+                LERROR("Wrong Number of Channels in Input Volume.");
+            }
         }
         else {
-            LERROR("Wrong Number of Channels in Input Volume.");
+            LDEBUG("Could not load light source from DataContainer.");
         }
     }
 
     std::string StrainRaycaster::generateHeader() const {
         std::string toReturn = RaycastingProcessor::generateHeader();
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
         if (p_enableShadowing.getValue())
             toReturn += "#define ENABLE_SHADOWING\n";
         if (p_enableAdaptiveStepsize.getValue())
             toReturn += "#define ENABLE_ADAPTIVE_STEPSIZE\n";
         return toReturn;
+    }
+
+    void StrainRaycaster::updateProperties(DataContainer& dataContainer) {
+        p_lightId.setVisible(p_enableShading.getValue());
+        p_shadowIntensity.setVisible(p_enableShadowing.getValue());
     }
 
 }

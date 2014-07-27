@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -86,6 +86,12 @@ namespace campvis {
 
         painter.drawText(2, MARGIN_TOP + 5, tr("1"));
         painter.drawText(2, MARGIN_TOP + hh + 5, tr("0"));
+
+        painter.save();
+        painter.rotate(-90);
+        QRectF importanceLabelRect(QPointF(-(MARGIN_TOP + hh + 5), 10), QPointF(-(MARGIN_TOP + 5), 2));
+        painter.drawText(importanceLabelRect, Qt::AlignCenter, tr("Importance"));
+        painter.restore();
 
         // paint bars
         std::vector<AbstractPointPredicate*> preds = _prop->getPredicateHistogram()->getPredicates();

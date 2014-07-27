@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -28,6 +28,7 @@
 #include "tgt/camera.h"
 #include "tgt/quadric.h"
 #include "tgt/shadermanager.h"
+#include "tgt/texture.h"
 #include "tgt/textureunit.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 
@@ -45,8 +46,9 @@ namespace campvis {
 
     CampVisPainter::CampVisPainter(tgt::GLCanvas* canvas, AbstractPipeline* pipeline)
         : tgt::Painter(canvas)
-        , _pipeline(0)
-        , _copyShader(0)
+        , _pipeline(nullptr)
+        , _copyShader(nullptr)
+        , _errorTexture(nullptr)
     {
         tgtAssert(getCanvas() != 0, "The given canvas must not be 0!");
         _dirty = true;
@@ -61,6 +63,11 @@ namespace campvis {
         if (getCanvas() == 0)
             return;
 
+        if (_copyShader == nullptr) {
+            LERROR("Shader not initialized!");
+            return;
+        }
+
         const tgt::ivec2& size = getCanvas()->getSize();
         glViewport(0, 0, size.x, size.y);
 
@@ -68,13 +75,14 @@ namespace campvis {
         ScopedTypedData<RenderData> rd(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
         ImageRepresentationGL::ScopedRepresentation repGL(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // activate the shader
+        _copyShader->activate();
+        tgt::Shader::IgnoreUniformLocationErrorGuard guard(_copyShader);
+
+        // render whatever there is to render
         if (rd != 0 || (repGL != 0 && repGL->getDimensionality() == 2)) {
-            // activate shader
-            _copyShader->activate();
-            _copyShader->setIgnoreUniformLocationError(true);
-            _copyShader->setUniform("_viewportSize", size);
-            _copyShader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(size));
-            _copyShader->setIgnoreUniformLocationError(false);
+            _copyShader->setUniform("_viewMatrix", tgt::mat4::identity);
 
             // bind input textures
             tgt::TextureUnit colorUnit;
@@ -82,41 +90,30 @@ namespace campvis {
                 rd->bindColorTexture(_copyShader, colorUnit);
             else if (repGL)
                 repGL->bind(_copyShader, colorUnit);
-            LGL_ERROR;
 
             // execute the shader
-            _copyShader->setAttributeLocation(0, "in_Position");
-            _copyShader->setAttributeLocation(1, "in_TexCoords");
             QuadRdr.renderQuad();
-            _copyShader->deactivate();
-            LGL_ERROR;
+        }
+        // if there is nothing to render, render the error texture
+        else if (_errorTexture != nullptr) {
+            float ratioRatio = static_cast<float>(size.y) / size.x;
+            tgt::mat4 viewMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
+            _copyShader->setUniform("_viewMatrix", viewMatrix);
+
+            // bind input textures
+            tgt::TextureUnit colorUnit;
+            colorUnit.activate();
+            _errorTexture->bind();
+            _copyShader->setUniform("_colorTexture", colorUnit.getUnitNumber());
+
+            // execute the shader
+            QuadRdr.renderQuad();
         }
         else {
-            // TODO: render some nifty error texture
-            //       so long, we do some dummy rendering
-            tgt::Camera c(tgt::vec3(0.f,0.f,2.f)); 
-            c.look();  
-            glColor3f(1.f, 0.f, 0.f);  
-            tgt::Sphere sphere(.5f, 64, 32);  
-            sphere.render();
-
-            /*
-            // render error texture
-            if (!errorTex_) {
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                return;
-            }
-            glClear(GL_DEPTH_BUFFER_BIT);
-
-            glActiveTexture(GL_TEXTURE0);
-            errorTex_->bind();
-            errorTex_->enable();
-
-            glColor3f(1.f, 1.f, 1.f);
-            renderQuad();
-
-            errorTex_->disable();*/
+            LERROR("Nothing to render but could not load error texture either.");
         }
+
+        _copyShader->deactivate();
         LGL_ERROR;
 
         getCanvas()->swap();
@@ -128,11 +125,12 @@ namespace campvis {
 
     void CampVisPainter::init() {
         try {
-            // TODO:    Remove hardcoded paths, and use ShdrMgr.addPath() at some central location
             _copyShader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "");
+            _copyShader->setAttributeLocation(0, "in_Position");
+            _copyShader->setAttributeLocation(1, "in_TexCoords");
         }
         catch (tgt::Exception& e) {
-            LERRORC("main.cpp", "Encountered tgt::Exception: " << e.what());
+            LFATAL("Encountered tgt::Exception: " << e.what());
         }
     }
 
@@ -174,4 +172,9 @@ namespace campvis {
         tgtAssert(dynamic_cast<tgt::QtThreadedCanvas*>(canvas) != 0, "Canvas must be of type QtThreadedCanvas!");
         Painter::setCanvas(canvas);
     }
+
+    void CampVisPainter::setErrorTexture(tgt::Texture* texture) {
+        _errorTexture = texture;
+    }
+
 }

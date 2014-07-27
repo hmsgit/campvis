@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -48,14 +48,14 @@ namespace campvis {
     /**
      * Renders a vector field with arrows.
      */
-    class VectorFieldRenderer : public VisualizationProcessor, public HasProcessorDecorators {
+    class VectorFieldRenderer : public VisualizationProcessor {
     public:
         /// Slice orientation
         enum SliceOrientation {
             XY_PLANE = 0,
             XZ_PLANE = 1,
             YZ_PLANE = 2,
-			XYZ_VOLUME = 3
+            XYZ_VOLUME = 3
         };
 
         /**
@@ -82,20 +82,23 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
         
-		DataNameProperty p_inputVectors;   ///< ID for input vector image
+        DataNameProperty p_inputVectors;   ///< ID for input vector image
 
         DataNameProperty p_renderOutput;        ///< ID for output rendered image
 
         FloatProperty p_arrowSize;                      ///< Arrow size size
-		FloatProperty p_lenThresholdMin;                ///< Threshold minimum
-		FloatProperty p_lenThresholdMax;                ///< Threshold maximum
+        FloatProperty p_lenThresholdMin;                ///< Threshold minimum
+        FloatProperty p_lenThresholdMax;                ///< Threshold maximum
 
-		FloatProperty p_flowProfile1;
-		FloatProperty p_flowProfile2;
-		FloatProperty p_flowProfile3;
-		FloatProperty p_flowProfile4;
+        FloatProperty p_flowProfile1;
+        FloatProperty p_flowProfile2;
+        FloatProperty p_flowProfile3;
+        FloatProperty p_flowProfile4;
 
-		IntProperty p_Time;
+        IntProperty p_Time;
+
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
         CameraProperty p_camera;                                    ///< camera
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
@@ -111,18 +114,18 @@ namespace campvis {
 
         std::string generateGlslHeader() const;
 
-		// for B-Spline evaluation
-		float getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3);
-		float evaluateCubicBSpline(float t);
+        // for B-Spline evaluation
+        float getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3);
+        float evaluateCubicBSpline(float t);
 
         /**
          * Renders a single vector arrow
-		 * \param   vectors     Input vector image
+         * \param   vectors     Input vector image
          * \param   position    Position to render
          */
         void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale);
 
-		GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
+        GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
         tgt::Shader* _shader;               ///< Shader for arrow rendering
         
         static const std::string loggerCat_;

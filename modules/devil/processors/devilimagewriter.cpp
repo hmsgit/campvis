@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -46,7 +46,7 @@ namespace campvis {
     DevilImageWriter::DevilImageWriter()
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Image ID", "DevilImageWriter.input", DataNameProperty::READ)
-        , p_url("url", "Image URL", "")
+        , p_url("url", "Image URL", "", StringProperty::SAVE_FILENAME)
     {
         addProperty(p_inputImage);
         addProperty(p_url);
@@ -91,8 +91,6 @@ namespace campvis {
         else {
             LDEBUG("Could not load RenderData with given ID from pipeline.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     void DevilImageWriter::writeIlImage(const WeaklyTypedPointer& wtp, const tgt::ivec2& size, const std::string& filename) const {

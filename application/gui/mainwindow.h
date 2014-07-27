@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -31,6 +31,7 @@
 #include "application/gui/pipelinetreewidget.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
+#include "application/gui/scriptingwidget.h"
 #include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
 
@@ -105,7 +106,7 @@ namespace campvis {
         /// Qt signal for updating the PropertyCollectionWidget
         void updatePropCollectionWidget(HasPropertyCollection*, DataContainer*);
 
-    private slots:
+    public slots:
         /**
          * Slot to be called by the PipelineWidget when the selected item changes.
          * \param   index   Index of the selected item
@@ -127,6 +128,9 @@ namespace campvis {
 
         /// Slot to be called when all shaders shall be rebuilt.
         void onRebuildShadersClicked();
+
+        /// Slot to be called when a Lua command shall be executed.
+        void onLuaCommandExecuted(const QString& cmd);
 
     private:
 
@@ -185,6 +189,8 @@ namespace campvis {
         DataContainer* _selectedDataContainer;              ///< currently selected DataContainer
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
+        ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+
         std::vector<QDockWidget*> _primaryDocks;            ///< Docks located in top docking area of the main window
     };
 }

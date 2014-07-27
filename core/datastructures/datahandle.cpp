@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -29,52 +29,42 @@
 
 namespace campvis {
     DataHandle::DataHandle(AbstractData* data) 
-        : _data(data)
-        , _timestamp(clock())
+        : _timestamp(clock())
     {
-        init();
+        if (data) {
+            if (data->_weakPtr.expired()) {
+                _ptr = std::shared_ptr<AbstractData>(data);
+                data->_weakPtr = _ptr;
+            }
+            else {
+                _ptr = std::shared_ptr<AbstractData>(data->_weakPtr);
+            }
+        }
     }
 
     DataHandle::DataHandle(const DataHandle& rhs) 
-        : _data(rhs._data)
+        : _ptr(rhs._ptr)
         , _timestamp(rhs._timestamp)
     {
-        init();
+
     }
 
     DataHandle& DataHandle::operator=(const DataHandle& rhs) {
-        if (_data != rhs._data) {
-            AbstractData* oldData = _data;
-            _data = rhs._data;
+        if (this != &rhs) {
+            _ptr = rhs._ptr;
             _timestamp = rhs._timestamp;
-            init();
-            if (oldData) {
-                oldData->removeReference();
-            }
         }
 
         return *this;
     }
 
     DataHandle::~DataHandle() {
-        if (_data)
-            _data->removeReference();
+
     }
 
 
     const AbstractData* DataHandle::getData() const {
-        return _data;
-    }
-
-    void DataHandle::init() {
-        if (_data == 0)
-            return;
-
-        if (! _data->isShareable()) {
-            _data = _data->clone();
-            _timestamp = clock();
-        }
-        _data->addReference();
+        return _ptr.get();
     }
 
     clock_t DataHandle::getTimestamp() const {

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -63,40 +63,30 @@ namespace campvis {
 
         tgtAssert(dh.getData() != 0, "The data in the DataHandle must not be 0!");
         tgtAssert(!name.empty(), "The data's name must not be empty.");
-        {
-            //tbb::spin_mutex::scoped_lock lock(_localMutex);
-            tbb::concurrent_unordered_map<std::string, DataHandle>::iterator it = _handles.find(name);
-            if (it != _handles.end()/* && it->first == name*/) {
-                it->second = dh;
-            }
-            else {
-                _handles.insert(/*it,*/ std::make_pair(name, dh));
-            }
-        }
+        _handles.erase(name);
+        _handles.insert(std::make_pair(name, dh));
+ 
         s_dataAdded(name, dh);
         s_changed();
     }
 
     bool DataContainer::hasData(const std::string& name) const {
-        //tbb::spin_mutex::scoped_lock lock(_localMutex);
-        return (_handles.find(name) != _handles.end());
+        tbb::concurrent_hash_map<std::string, DataHandle>::const_accessor a;
+        return _handles.find(a, name);
     }
 
     DataHandle DataContainer::getData(const std::string& name) const {
-        //tbb::spin_mutex::scoped_lock lock(_localMutex);
-        tbb::concurrent_unordered_map<std::string, DataHandle>::const_iterator it = _handles.find(name);
-        if (it == _handles.end())
+        tbb::concurrent_hash_map<std::string, DataHandle>::const_accessor a;
+        if (_handles.find(a, name)) {
+            return a->second;
+        }
+        else {
             return DataHandle(0);
-        else
-            return it->second;
+        }
     }
 
     void DataContainer::removeData(const std::string& name) {
-        tbb::spin_mutex::scoped_lock lock(_localMutex);
-        tbb::concurrent_unordered_map<std::string, DataHandle>::const_iterator it = _handles.find(name);
-        if (it != _handles.end()) {
-            _handles.unsafe_erase(it);
-        }
+        _handles.erase(name);
     }
 
     std::vector< std::pair< std::string, DataHandle> > DataContainer::getDataHandlesCopy() const {
@@ -104,20 +94,14 @@ namespace campvis {
         toReturn.reserve(_handles.size());
 
         tbb::spin_mutex::scoped_lock lock(_localMutex);
-        for (tbb::concurrent_unordered_map<std::string, DataHandle>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
+        for (tbb::concurrent_hash_map<std::string, DataHandle>::const_iterator it = _handles.begin(); it != _handles.end(); ++it) {
             toReturn.push_back(std::make_pair(it->first, it->second));
         }
 
         return toReturn;
     }
 
-//     tbb::concurrent_unordered_map<std::string, DataHandle> DataContainer::getHandlesCopy() const {
-//         //tbb::spin_mutex::scoped_lock lock(_localMutex);
-//         return _handles;
-//     }
-
     void DataContainer::clear() {
-        //tbb::spin_mutex::scoped_lock lock(_localMutex);
         _handles.clear();
     }
 

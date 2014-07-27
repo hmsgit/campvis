@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -35,14 +35,16 @@
 
 #include "application/gui/qtdatahandle.h"
 
-#include "core/properties/propertycollection.h"
+#include "core/properties/metaproperty.h"
 #include "core/properties/numericproperty.h"
+#include "core/properties/propertycollection.h"
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/opengljobprocessor.h"
+#include "core/eventhandlers/trackballnavigationeventlistener.h"
+
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/vis/processors/geometryrenderer.h"
 
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/datastructures/meshgeometry.h"
 
 namespace tgt {
     class Shader;
@@ -56,27 +58,8 @@ namespace campvis {
     class DataContainerTreeWidget;
     class DataHandle;
     class FaceGeometry;
+    class GeometryData;
     class DataContainerInspectorWidget;
-
-    /**
-     * Stores information about the textures which store the rendered geomtery.
-     * Note: The object's destroy() function should be called before deleting or releasing the object's memory.
-     */
-    struct GeometryTextureInfo {
-        campvis::QtDataHandle _geomData;
-        tgt::Texture* _texture;
-        int _trackballIndx;
-        
-        GeometryTextureInfo(): _geomData(0), _texture(0) {
-        }
-        
-        void destroy() {
-            delete _texture;
-        }
-
-        ~GeometryTextureInfo() {
-        }
-    };
 
     class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public tgt::EventListener, public HasPropertyCollection {
         Q_OBJECT;
@@ -97,7 +80,7 @@ namespace campvis {
          * Initializes the OpenGL stuff (e.g. shaders).
          * Must be called with a valid and locked OpenGL context.
          */
-        virtual void init(DataContainerInspectorWidget* _pWidget);
+        virtual void init();
 
         /**
          * Deinitializes the OpenGL stuff (e.g. shaders).
@@ -106,22 +89,10 @@ namespace campvis {
         void deinit();
 
         /**
-         * Reset the content of the canvas.
-         * It will clear the array of textures, rendered geomteries, color buffers, depth buffers and its content.
+         * Set the DataHandles to show in the canvas to those in \a handles.
+         * \param   handles vector of name-DataHandle pairs to show in the canvas.
          */
-        void resetContent();
-
         void setDataHandles(const std::vector< std::pair<QString, QtDataHandle> >& handles);
-        
-        /**
-         * returns the color value which is captured with the mouse.
-         */
-        const tgt::Color& getCapturedColor();
-
-        /**
-         * returns the depth value which is captured with the mouse.
-         */
-        const float& getCapturedDepth();
 
         /**
          * Size hint for the default window size
@@ -138,49 +109,26 @@ namespace campvis {
         virtual void sizeChanged(const tgt::ivec2&);
 
         /**
-         * Called on double click event on this canvas
-         * \param   e   Mouse event arguments
-         */
-        virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
-
-        /**
          * Called on mouse move event on this canvas
          * \param   e   Mouse event arguments
          */
         virtual void mouseMoveEvent(tgt::MouseEvent* e);
 
-        /**
-         * Called on mouse wheel event on this canvas.
-         * \param   e   Mouse event arguments
-         */
-        virtual void wheelEvent(tgt::MouseEvent* e);
+        virtual void onEvent(tgt::Event* e);
         
-        /**
-         * Called on mouse press button event on this canvas.
-         * \param   e   Mouse event arguments
-         */
-        virtual void mousePressEvent(tgt::MouseEvent* e);
-        
-        /**
-         * Called on mouse release button event on this canvas.
-         * \param   e   Mouse event arguments
-         */
-        virtual void mouseReleaseEvent(tgt::MouseEvent* e);
-        
-        /**
-         * Slot getting called when one of the observed properties changed and notifies its observers.
-         * \param   prop    Property that emitted the signal
-         */
-        virtual void onPropertyChanged(const AbstractProperty* prop);
+        IntProperty p_currentSlice;                     ///< Currently selected slice to show
+        TransferFunctionProperty p_transferFunction;    ///< Transfer function
 
-        IntProperty p_currentSlice;
-        Vec4Property p_meshSolidColor;                   ///< Color used to render the mesh object
-        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+        BoolProperty p_renderRChannel;                  ///< Flag whether to render Red channel
+        BoolProperty p_renderGChannel;                  ///< Flag whether to render Green channel
+        BoolProperty p_renderBChannel;                  ///< Flag whether to render Blue channel
+        BoolProperty p_renderAChannel;                  ///< Flag whether to render Alpha channel
 
-        BoolProperty p_renderRChannel;  /// Flag whether to render Red channel
-        BoolProperty p_renderGChannel;  /// Flag whether to render Green channel
-        BoolProperty p_renderBChannel;  /// Flag whether to render Blue channel
-        BoolProperty p_renderAChannel;  /// Flag whether to render Alpha channel
+        MetaProperty p_geometryRendererProperties;      ///< MetaProperty for the GeometryRenderer
+
+    signals:
+        void s_colorChanged(const tgt::vec4&);
+        void s_depthChanged(float depth);
 
     private slots:
         /**
@@ -197,11 +145,6 @@ namespace campvis {
         virtual void paint();
 
         /**
-         * Performs the painting.
-         */
-        virtual void paintMeshGeomTextures();
-
-        /**
          * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
          * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
          * \param   name    Name of the added data.
@@ -210,16 +153,22 @@ namespace campvis {
         void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
 
         /**
+         * Slot getting called when one of the observed properties changed and notifies its observers.
+         * \param   prop    Property that emitted the signal
+         */
+        virtual void onPropertyChanged(const AbstractProperty* prop);
+        virtual void onGeometryRendererPropertyChanged(const AbstractProperty* prop);
+
+        /**
          * Updates the textures vector.
          * \note Only call with acquired lock and valid OpenGL context!!
          */
         void updateTextures();
 
         /**
-         * Updates the textures vector elements that belongs to mesh geomteries.
-         * \note Only call with acquired lock and valid OpenGL context!!
+         * Resets the trackball and reinitializes the camera to the currently loaded geometries if necessary.
          */
-        void updateMeshGeomRenderedTextures();
+        void resetTrackball();
 
         /**
          * To be called when the canvas is invalidated, issues new paint job.
@@ -227,38 +176,39 @@ namespace campvis {
         void invalidate();
 
         /**
-         * To be called when the mesh geometry parts of the scene is invalidated, issues new paint job only for textures that belong to mesh geomteries.
-         */
-        void invalidateMeshGeomTextures();
-
-        /**
          * Renders the given 2D texture.
          * Binds the texture to the shader, sets the uniforms and renders the quad.
-         * \param   texture     The texture to render.
+         * \param   texture     The texture to render. Must not be 0.
          * \param   uint2d      The texture unit that will be attached to rendering pipeline (2D for 2D textures).
          * \param   uint2d      The texture unit that will be attached to rendering pipeline (3D for 3D textures).
          */
         void paintTexture(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
 
         /**
-         * Renders the Meshgeometry into the geometry renderer color buffer and depth buffer.
-         * Binds the texture to the shader, sets the uniforms and renders the mesh geometry.
-         * \param   meshgeometry        The mesh to be rendered.
-         * \param   colorBuffer         The color buffer that the object will be rendered to.
-         * \param   depthBuffer         The depth buffer that the object will be rendered to.
-         * \param   meshIndex           The index of the rendered mesh in the texture array.
+         * Renders \a geometry into a texture.
+         * 
+         * \param name 
+         * \param geometry
          */
-        void drawGeomteryData(const campvis::GeometryData* meshgeometry, tgt::Texture* colorBuffer, const int& trackballIndx);
+        void renderGeometryIntoTexture(const std::string& name, int textureIndex = -1);
 
         /**
          * Creates the quad used for rendering the textures.
          */
         void createQuad();
 
-        std::map<QString, QtDataHandle> _handles;
-        std::vector<const tgt::Texture*> _textures;     ///< vector of textures
-        bool _texturesDirty;                            ///< Flag that shows that the textures need update or not.
-        bool _meshGeomTexturesDirty;                    ///< Flag that shows that the mesh geometry textures need updare or not.
+        
+        std::map<QString, QtDataHandle> _handles;   ///< Map of DataHandles to show
+
+        /// Vector of textures to render. Each DataHandle contains an ImageData that has an OpenGL representation.
+        /// This ensures thread safety.
+        std::vector<QtDataHandle> _textures;
+
+        /// List of the names of all rendered geometries. This simplifies to update their rendering.
+        std::vector< std::pair<std::string, int> > _geometryNames;
+
+        bool _texturesDirty;                        ///< Flag that shows that the textures need update or not.
+        bool _geometriesDirty;                      ///< Flag that shows that the rendered geometries need update or not.
 
         DataContainer* _dataContainer;              ///< The DataContainer this widget is inspecting
         tbb::mutex _localMutex;                     ///< Mutex protecting the local members
@@ -266,25 +216,13 @@ namespace campvis {
         tgt::Shader* _paintShader;                  ///< GLSL shader for rendering the textures
         FaceGeometry* _quad;                        ///< Quad used for rendering
 
-        tgt::Color _color;                          ///< Color under the mouse cursor
-        float      _depth;							///< Depth under the mouse cursor
-        DataContainerInspectorWidget* _widget;      ///< Pointer to the widget which has access to this canvas
-
         tgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
         tgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview
-        size_t _selectedTexture;                    ///< index of selected texture by mouse
-        int _selectedTrackball;						///< index of selected trackball which will be updated currently
-        bool _renderFullscreen;                     ///< flag whether to render in full screen
 
-        int _currentSlice;							///< current slice if rendering a 3D image fullscreen, render MIP if negative
-
-        tgt::Shader* _geometryRenderingShader;			                    ///< GLSL shader for rendering the mesh geomteries
-        tgt::FramebufferObject* _frameBuffer;
-        tgt::Texture* _depthBuffer;
-
-        std::vector<campvis::CameraProperty*> _trackballCameraProperties;   ///< The property of the trackball camera. Used to pass the trackball camera to the shader.
-        std::vector<TrackballNavigationEventListener*> _trackballEHs;       ///< TrackBall Event Handler for the camera rotating around the object in the canvas
-        std::vector<GeometryTextureInfo> _geomTextureInfos;                 ///< Array of data regarding the rendered geomteries
+        DataContainer _localDataContainer;          ///< Local DataContainer the GeometryRenderer works on
+        IVec2Property p_viewportSize;
+        GeometryRenderer _geometryRenderer;         ///< GeometryRenderer used to render geometries
+        TrackballNavigationEventListener* _trackballEH;
     };
 }
 

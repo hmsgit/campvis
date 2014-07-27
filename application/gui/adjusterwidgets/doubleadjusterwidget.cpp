@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -32,19 +32,33 @@ namespace campvis {
     {
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
 
+        connect(this, SIGNAL(s_minChanged(double)), this, SLOT(onMinChanged(double)));
+        connect(this, SIGNAL(s_maxChanged(double)), this, SLOT(onMaxChanged(double)));
+        connect(this, SIGNAL(s_singleStepChanged(double)), this, SLOT(onSingleStepChanged(double)));
+
         connect(_spinBox, SIGNAL(valueChanged(double)), this, SLOT(onSpinBoxValueChanged(double)));
         connect(_slider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
     }
 
-    void DoubleAdjusterWidget::setValue(double value)
-    {
+    void DoubleAdjusterWidget::setValue(double value) {
         setValueImpl(value);
     }
 
-    void DoubleAdjusterWidget::setDecimals(int prec)
-    {
+    void DoubleAdjusterWidget::setDecimals(int prec) {
         _spinBox->setDecimals(prec);
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
+    }
+
+    void DoubleAdjusterWidget::setMinimum(double minimum) {
+        emit s_minChanged(minimum);
+    }
+
+    void DoubleAdjusterWidget::setMaximum(double maximum) {
+        emit s_maxChanged(maximum);
+    }
+
+    void DoubleAdjusterWidget::setSingleStep(double value) {
+        emit s_singleStepChanged(value);
     }
 
     void DoubleAdjusterWidget::onSpinBoxValueChanged(double value) {
@@ -67,4 +81,18 @@ namespace campvis {
         AbstractAdjusterWidget<double>::setSliderProperties(1, 0, std::ceil((maxValue - minValue) / stepValue));
         setSliderValue(value());
     }
+
+    void DoubleAdjusterWidget::onMinChanged(double minimum) {
+        setMinimumImpl(minimum);
+    }
+
+    void DoubleAdjusterWidget::onMaxChanged(double maximum) {
+        setMaximumImpl(maximum);
+    }
+
+    void DoubleAdjusterWidget::onSingleStepChanged(double value) {
+        setSingleStepImpl(value);
+    }
+
+
 }

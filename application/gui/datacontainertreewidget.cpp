@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -31,6 +31,7 @@
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/abstractdata.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/meshgeometry.h"
 #include "core/datastructures/indexedmeshgeometry.h"
@@ -131,6 +132,10 @@ namespace campvis {
 
                 else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
                     return QVariant(QString("Image Series"));
+                }
+
+                else if (const LightSourceData* tester = dynamic_cast<const LightSourceData*>(data)) {
+                    return QVariant(QString("Light Source"));
                 }
             }
             else

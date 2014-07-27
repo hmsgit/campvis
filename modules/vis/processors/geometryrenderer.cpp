@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -30,10 +30,10 @@
 #include "tgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/meshgeometry.h"
-#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
     static const GenericOption<GLenum> renderOptions[7] = {
@@ -60,6 +60,8 @@ namespace campvis {
         , p_textureID("TextureId", "Input Texture ID (optional)", "gr.inputtexture", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_renderMode("RenderMode", "Render Mode", renderOptions, 7)
         , p_coloringMode("ColoringMode", "ColoringMode", coloringOptions, 3)
         , p_solidColor("SolidColor", "Solid Color", tgt::vec4(1.f, .5f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
@@ -72,12 +74,13 @@ namespace campvis {
     {
         p_coloringMode.selectByOption(SOLID_COLOR);
 
-        addDecorator(new ProcessorDecoratorShading());
-
         addProperty(p_geometryID);
         addProperty(p_textureID);
         addProperty(p_renderTargetID);
         addProperty(p_camera);
+
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
 
         addProperty(p_renderMode, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_coloringMode, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES);
@@ -87,8 +90,6 @@ namespace campvis {
         addProperty(p_lineWidth);
         addProperty(p_showWireframe, INVALID_RESULT | INVALID_SHADER | INVALID_PROPERTIES);
         addProperty(p_wireframeColor);
-
-        decoratePropertyCollection(this);
     }
 
     GeometryRenderer::~GeometryRenderer() {
@@ -112,6 +113,7 @@ namespace campvis {
 
     void GeometryRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
         ScopedTypedData<RenderData> rd(data, p_textureID.getValue());
         ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue());
 
@@ -128,7 +130,11 @@ namespace campvis {
             }
         }
 
-        if (proxyGeometry != 0 && (p_coloringMode.getOptionValue() != TEXTURE_COLOR || texture != nullptr) && _pointShader != 0 && _meshShader != 0) {
+        if (proxyGeometry != 0 
+            && (p_enableShading.getValue() == false || light != nullptr)
+            && (p_coloringMode.getOptionValue() != TEXTURE_COLOR || texture != nullptr) 
+            && _pointShader != 0 && _meshShader != 0)
+            {
             // select correct shader
             tgt::Shader* leShader = 0;
             if (p_renderMode.getOptionValue() == GL_POINTS || p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
@@ -150,7 +156,11 @@ namespace campvis {
 
             // set modelview and projection matrices
             leShader->setIgnoreUniformLocationError(true);
-            decorateRenderProlog(data, leShader);
+            
+            if (p_enableShading.getValue() && light != nullptr) {
+                light->bind(leShader, "_lightSource");
+            }
+
             leShader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
             leShader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
             leShader->setUniform("_viewportMatrix", viewportMatrix);
@@ -187,7 +197,6 @@ namespace campvis {
             else if (p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
                 glLineWidth(1.f);
 
-            decorateRenderEpilog(leShader);
             leShader->deactivate();
             glDepthFunc(GL_LESS);
             glDisable(GL_DEPTH_TEST);
@@ -199,12 +208,13 @@ namespace campvis {
         else {
             LERROR("No suitable input geometry found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string GeometryRenderer::generateGlslHeader(bool hasGeometryShader) const {
-        std::string toReturn = getDecoratedHeader();
+        std::string toReturn;
+
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
 
         if (hasGeometryShader && p_showWireframe.getValue())
             toReturn += "#define WIREFRAME_RENDERING\n";
@@ -223,11 +233,11 @@ namespace campvis {
         _pointShader->rebuild();
         _meshShader->setHeaders(generateGlslHeader(true));
         _meshShader->rebuild();
-        validate(INVALID_SHADER);
     }
 
     void GeometryRenderer::updateProperties(DataContainer& dataContainer) {
         p_solidColor.setVisible(p_coloringMode.getOptionValue() == SOLID_COLOR);
+        p_lightId.setVisible(p_enableShading.getValue());
 
         switch (p_renderMode.getOptionValue()) {
             case GL_POINTS:

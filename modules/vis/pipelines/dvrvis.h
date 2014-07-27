@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -29,6 +29,7 @@
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/virtualmirrorgeometrygenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -72,6 +73,8 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         CameraProperty _camera;
+        LightSourceProvider _lsp;
+
         MhdImageReader _imageReader;
         ProxyGeometryGenerator _pgGenerator;
         VirtualMirrorGeometryGenerator _vmgGenerator;

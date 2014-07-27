@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -31,9 +31,9 @@
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
-#include "core/pipeline/processordecoratorshading.h"
 
 namespace campvis {
     const std::string GeometryStrainRenderer::loggerCat_ = "CAMPVis.modules.vis.GeometryStrainRenderer";
@@ -44,17 +44,19 @@ namespace campvis {
         , p_strainId("StrainDataId", "Input Strain Data ID", "gr.strain", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
         , p_camera("camera", "Camera")
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
         , _shader(0)
     {
-        addDecorator(new ProcessorDecoratorShading());
 
         addProperty(p_geometryID);
         addProperty(p_renderTargetID);
         addProperty(p_camera);
-        addProperty(p_color);
 
-        decoratePropertyCollection(this);
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
+        addProperty(p_color);
     }
 
     GeometryStrainRenderer::~GeometryStrainRenderer() {
@@ -78,51 +80,61 @@ namespace campvis {
     void GeometryStrainRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ImageRepresentationGL::ScopedRepresentation strainData(data, p_strainId.getValue());
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
         if (proxyGeometry != 0 && strainData != 0 && _shader != 0) {
-            // set modelview and projection matrices
-            FramebufferActivationGuard fag(this);
-            createAndAttachColorTexture();
-            createAndAttachDepthTexture();
+            if (p_enableShading.getValue() == false || light != nullptr) {
+                // set modelview and projection matrices
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
 
-            _shader->activate();
-            decorateRenderProlog(data, _shader);
-            _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
-            _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
-            _shader->setUniform("_color", p_color.getValue());
+                _shader->activate();
+                if (p_enableShading.getValue() && light != nullptr) {
+                    light->bind(_shader, "_lightSource");
+                }
+                _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
+                _shader->setUniform("_color", p_color.getValue());
 
-            tgt::TextureUnit strainUnit;
-            strainData->bind(_shader, strainUnit, "_strainTexture");
+                tgt::TextureUnit strainUnit;
+                strainData->bind(_shader, strainUnit, "_strainTexture");
 
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LESS);
-            glClearDepth(1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            proxyGeometry->render();
+                glEnable(GL_DEPTH_TEST);
+                glDepthFunc(GL_LESS);
+                glClearDepth(1.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                proxyGeometry->render();
 
-            decorateRenderEpilog(_shader);
-            _shader->deactivate();
-            glDisable(GL_DEPTH_TEST);
-            LGL_ERROR;
+                _shader->deactivate();
+                glDisable(GL_DEPTH_TEST);
+                LGL_ERROR;
 
-            data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
+                data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
+            }
+            else {
+                LDEBUG("Could not load light source from DataContainer.");
+            }
         }
         else {
             LERROR("No suitable input geometry found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     std::string GeometryStrainRenderer::generateGlslHeader() const {
-        std::string toReturn = getDecoratedHeader();
+        std::string toReturn;
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
         return toReturn;
     }
 
     void GeometryStrainRenderer::updateShader() {
         _shader->setHeaders(generateGlslHeader());
         _shader->rebuild();
-
-        validate(INVALID_SHADER);
     }
+
+    void GeometryStrainRenderer::updateProperties(DataContainer& dataContainer) {
+        p_lightId.setVisible(p_enableShading.getValue());
+    }
+
 }

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -35,7 +35,7 @@ namespace campvis {
 
     /**
      * Generic implementation of thread-safe n-D histograms.
-     * After successfull creation ConcurrentGenericHistogramND ensures:
+     * After successful creation ConcurrentGenericHistogramND ensures:
      *  * Calling addSample() is thread-safe.
      * 
      * \tparam  T   Base data type of the histogram elements
@@ -117,7 +117,7 @@ namespace campvis {
          * \param   bucketNumbers   Array of the bucket number for each dimension (must have at least ND elements).
          * \return  The array index for the given bucket numbers.
          */
-        size_t getArrayIndex(size_t* bucketNumbers) const;
+        size_t getArrayIndex(size_t bucketNumbers[ND]) const;
 
         T _min[ND];                         ///< minimum value for each dimension
         T _max[ND];                         ///< maximum value for each dimension
@@ -164,7 +164,7 @@ namespace campvis {
     template<typename T, size_t ND>
     void campvis::ConcurrentGenericHistogramND<T, ND>::addSample(T sample[ND]) {
         size_t bucketNumbers[ND];
-        for(int i = 0; i < ND; ++i)
+        for (size_t i = 0; i < ND; ++i)
             bucketNumbers[i] = getBucketNumber(i, sample[i]);
 
         size_t index = getArrayIndex(bucketNumbers);
@@ -186,17 +186,17 @@ namespace campvis {
 
         if (sample < _min[dimension] || sample > _max[dimension]) {
             return _numBuckets[dimension];
-#ifdef CAMPVIS_DEBUG_NOTNOW
-            LWARNINGC("CAMPVis.core.tools.ConcurrentGenericHistogramND", "Added sample " << sample << " out of bounds for dimension " << dimension << ".");
-#endif
         }
 
         double ratio = static_cast<double>(sample - _min[dimension]) / static_cast<double>(_max[dimension] - _min[dimension]);
-        return static_cast<size_t>(tgt::clamp(static_cast<int>(ratio * _numBuckets[dimension]), static_cast<int>(0), static_cast<int>(_numBuckets[dimension] - 1)));
+        int toReturn = static_cast<int>(ratio * _numBuckets[dimension]);
+        toReturn = std::max(toReturn, 0);
+        toReturn = std::min(toReturn, static_cast<int>(_numBuckets[dimension]) - 1);
+        return toReturn;
     }
 
     template<typename T, size_t ND>
-    size_t campvis::ConcurrentGenericHistogramND<T, ND>::getArrayIndex(size_t* bucketNumbers) const {
+    size_t campvis::ConcurrentGenericHistogramND<T, ND>::getArrayIndex(size_t bucketNumbers[ND]) const {
         size_t index = 0;
         size_t multiplier = 1;
         for (size_t i = 0; i < ND; ++i) {

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -41,8 +41,8 @@
 namespace campvis {
 
     /**
-     * Struct for handling void pointers slightly more typesafe.
-     * Therfore it stores an enum value together with the pointer for deducing its data type.
+     * Struct for handling void pointers slightly more type safe.
+     * Therefore it stores an enum value together with the pointer for deducing its data type.
      * \note    WeaklyTypedPointer takes _not_ take ownership of its pointer, hence it won't take care of deleting it!
      */
     struct CAMPVIS_CORE_API WeaklyTypedPointer {
@@ -62,7 +62,7 @@ namespace campvis {
         /**
          * Returns the number of bytes occupied by one element of the type \a bt with \a numChannels channels.
          * 
-         * \note    There is a compiletime version in WeaklyTypedPointerTraits.
+         * \note    There is a compile time version in WeaklyTypedPointerTraits.
          * \sa      WeaklyTypedPointerTraits::numBytes()
          * \param   bt          Image base type
          * \param   numChannels Number of channels per element.

@@ -41,11 +41,13 @@ namespace tgt {
  * Debug messages are not logged in release builds!
  */
 enum LogLevel {
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Fatal
+    LuaInfo = 0,
+    LuaError = 1,
+    Debug = 10,
+    Info = 11,
+    Warning = 12,
+    Error = 13,
+    Fatal = 14
 };
 
 /**

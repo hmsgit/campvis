@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -58,6 +58,25 @@ namespace campvis {
      */
     class CAMPVIS_CORE_API AbstractProcessor : public HasPropertyCollection {
     public:
+        /**
+         * Scoped lock of an AbstractProcessor that automatically unlocks the processor on destruction.
+         * Useful for exception safety.
+         */
+        struct CAMPVIS_CORE_API ScopedLock {
+            /**
+             * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
+             * \param   p                   Processor to lock
+             * \param   unlockInExtraThread Unlock \a p in extra thread (since this might be an expensive operation)
+             */
+            ScopedLock(AbstractProcessor* p, bool unlockInExtraThread);
+
+            /// Destructor, unlocks the processor
+            ~ScopedLock();
+
+            AbstractProcessor* _p;      ///< The processor to lock
+            bool _unlockInExtraThread;  ///< Unlock _p in extra thread (since this might be an expensive operation)
+        };
+
         /**
          * Available invalidation levels
          */
@@ -202,7 +221,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the invalidation level is valid (i.e. no invalid flag is set).
+         * Returns whether the invalidation level is valid (i.e. no invalid flag is set).
          * \return _level == VALID
          */
         bool isValid() const {
@@ -210,7 +229,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the the INVALID_RESULT flag is set.
+         * Returns whether the the INVALID_RESULT flag is set.
          * \return _level & INVALID_RESULT
          */
         bool hasInvalidResult() const {
@@ -218,7 +237,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the the INVALID_SHADER flag is set.
+         * Returns whether the the INVALID_SHADER flag is set.
          * \return _level & INVALID_SHADER
          */
         bool hasInvalidShader() const {
@@ -226,7 +245,7 @@ namespace campvis {
         }
 
         /**
-         * Returns wheter the the INVALID_PROPERTIES flag is set.
+         * Returns whether the the INVALID_PROPERTIES flag is set.
          * \return _level & INVALID_PROPERTIES
          */
         bool hasInvalidProperties() const {
@@ -275,26 +294,6 @@ namespace campvis {
         sigslot::signal1<AbstractProcessor*> s_validated;
 
     protected:
-        /**
-         * Scoped lock of an AbstractProcessor that automatically unlocks the processor on destruction.
-         * Useful for exception safety.
-         */
-        struct CAMPVIS_CORE_API ScopedLock {
-            /**
-             * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
-             * \param   p                   Processor to lock
-             * \param   unlockInExtraThread Unlock \a p in extra thread (since this might be an expensive operation)
-             */
-            ScopedLock(AbstractProcessor* p, bool unlockInExtraThread);
-
-            /// Destructor, unlocks the processor
-            ~ScopedLock();
-
-            AbstractProcessor* _p;      ///< The processor to lock
-            bool _unlockInExtraThread;  ///< Unlock _p in extra thread (since this might be an expensive operation)
-        };
-
-
         /**
          * Gets called from default process() method when having an invalidation level of INVALID_SHADER.
          * 

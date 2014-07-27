@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -88,7 +88,7 @@ namespace campvis {
         ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
         ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
 
-        if (firstImage != 0 && secondImage != 0 ) {
+        if ((p_compositingMethod.getOptionValue() == CompositingModeSecond || firstImage != nullptr) && (p_compositingMethod.getOptionValue() == CompositingModeFirst || secondImage != nullptr)) {
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
@@ -96,8 +96,11 @@ namespace campvis {
             _shader->activate();
             tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 
-            firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
-            secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
+            if (p_compositingMethod.getOptionValue() != CompositingModeSecond)
+                firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
+            if (p_compositingMethod.getOptionValue() != CompositingModeFirst)
+                secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
+
             _shader->setUniform("_compositingMethod", p_compositingMethod.getOptionValue());
             _shader->setUniform("_alpha", p_alphaValue.getValue());
             _shader->setUniform("_enableBackground", p_enableBackground.getValue());
@@ -123,8 +126,6 @@ namespace campvis {
         else {
             LERROR("No suitable input images found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
 }

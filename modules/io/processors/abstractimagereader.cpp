@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -31,7 +26,7 @@
 
 namespace campvis {
     AbstractImageReader::AbstractImageReader() 
-        : p_url("url", "Image URL", "")
+        : p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
         , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
     {
     }
@@ -39,29 +34,9 @@ namespace campvis {
     AbstractImageReader::~AbstractImageReader() {
     }
 
-    void AbstractImageReader::setURL(StringProperty p_url) {
-        this->p_url.setValue(p_url.getValue());
-    }
-
-    void AbstractImageReader::setTargetImageId(DataNameProperty& targetImageId) {
-        this->p_targetImageID.setValue(targetImageId.getValue());
-        std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
-        for(std::set<AbstractProperty*>::iterator it = sharedProperties.begin(); it != sharedProperties.end(); ++it) {
-            this->p_targetImageID.addSharedProperty(*it);
-        }
-    }
-
-    void AbstractImageReader::setTargetImageId(std::string imageId) {
-            this->p_targetImageID.setValue(imageId);
-    }
-
-    void AbstractImageReader::setTargetImageIdSharedProperty(DataNameProperty* sharedProperty) {
-            this->p_targetImageID.addSharedProperty(sharedProperty);
-    }
-
-    bool AbstractImageReader::acceptsExtension(const std::string& extension) {
-        for(std::vector<std::string>::iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
-            if(*it == extension) {
+    bool AbstractImageReader::acceptsExtension(const std::string& extension) const {
+        for (std::vector<std::string>::const_iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
+            if (*it == extension) {
                 return true;
             }
         }

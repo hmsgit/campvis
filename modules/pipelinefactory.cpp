@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -54,7 +54,7 @@ namespace campvis {
 
         std::vector<std::string> toReturn;
         toReturn.reserve(_pipelineMap.size());
-        for (std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it)
+        for (std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> >::const_iterator it = _pipelineMap.begin(); it != _pipelineMap.end(); ++it)
             toReturn.push_back(it->first);
         return toReturn;
     }
@@ -62,7 +62,7 @@ namespace campvis {
     AbstractPipeline* PipelineFactory::createPipeline(const std::string& id, DataContainer* dc) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
 
-        std::map<std::string, AbstractPipeline* (*)(DataContainer*)>::const_iterator it = _pipelineMap.find(id);
+        std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> >::const_iterator it = _pipelineMap.find(id);
         if (it == _pipelineMap.end())
             return 0;
         else

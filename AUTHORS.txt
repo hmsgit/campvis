@@ -3,11 +3,17 @@ Authors and Contributors of the CAMPVis Software Framework:
 CAMPVis originally devoloped by:
   Christian Schulte zu Berge <christian.szb@in.tum.de>
   Chair for Computer Aided Medical Procedures
-  Technische Universität München
-  Boltzmannstr. 3, 85748 Garching b. München, Germany
+  Technische Universitaet Muenchen
+  Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
+ 
+The CAMPVis Software Framework project is partially funded by the German 
+Ministry of Education and Research (BMBF) [index number 01IS12057].
 
-
-Further Developers and Contributors:
+Further developers and contributors (only larger projects listed here):
+ * Regression Testing Interface: Hossain Mahmud <hossain.mahmud@gmail.com>
+ * Scripting Engine: Artur Grunau <artur.grunau@uj.edu.pl>
  * Qt GUI: Artur Grunau <artur.grunau@uj.edu.pl>
  * Diffusion Tensor Imaging Plugin: Tobias Brachert <brachert@mytum.de>
  
+For authorship of the individual processors, please have a look into the
+corresponding header files.

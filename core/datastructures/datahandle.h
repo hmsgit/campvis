@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -26,6 +26,7 @@
 #define datahandle_h__
 
 #include <ctime>
+#include <memory>
 
 #include "core/coreapi.h"
 
@@ -91,12 +92,7 @@ namespace campvis {
 
 
     private:
-        /**
-         * Initializes the reference counting for the data.
-         */
-        void init();
-
-        AbstractData* _data;                    ///< managed data
+        std::shared_ptr<AbstractData> _ptr;     ///< managed data
         clock_t _timestamp;                     ///< Timestamp when this data has been created
     };
 

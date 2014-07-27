@@ -2,28 +2,23 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
+// 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
-// The licensing of this softare is not yet resolved. Until then, redistribution in source or
-// binary forms outside the CAMP chair is not permitted, unless explicitly stated in legal form.
-// However, the names of the original authors and the above copyright notice must retain in its
-// original state in any case.
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+// except in compliance with the License. You may obtain a copy of the License at
 // 
-// Legal disclaimer provided by the BSD license:
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
-// AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
-// OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+// http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software distributed under the 
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+// either express or implied. See the License for the specific language governing permissions 
+// and limitations under the License.
 // 
 // ================================================================================================
 
@@ -42,6 +37,7 @@ namespace campvis {
 
     PredicateDemoCarotid2::PredicateDemoCarotid2(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _lsp()
         , _imageReader()
         , _labelReader()
         , _confidenceReader()
@@ -51,6 +47,7 @@ namespace campvis {
         , _snrFilter(&_canvasSize)
         , _ve(&_canvasSize)
     {
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_labelReader);
         addProcessor(&_confidenceReader);
@@ -94,7 +91,7 @@ namespace campvis {
         _snrFilter.p_outputImage.setValue("snr");
         _snrFilter.p_outputImage.addSharedProperty(&_ve.p_inputSnr);
 
-        _gaussian.p_sigma.setValue(16.2f);
+        _gaussian.p_sigma.setValue(6.2f);
         _gaussian.p_outputImage.addSharedProperty(&_vesselnesFilter.p_inputImage);
 
         _vesselnesFilter.p_outputImage.setValue("vesselness");
@@ -152,6 +149,7 @@ namespace campvis {
             v.push_back(foo);
             v.push_back(bar);
             vpToAdd = new AndCombinedPointPredicate("CarotidVessel", "Vesselness & Carotid", v);
+            vpToAdd->p_intensityHack.setValue(.15f);
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new LabelBitPointPredicate("label", "Skin", "Skin Layer");
@@ -162,8 +160,17 @@ namespace campvis {
             static_cast<LabelBitPointPredicate*>(vpToAdd)->p_bit.setValue(1);
             histogram->addPredicate(vpToAdd);
 
-            vpToAdd = new LabelBitPointPredicate("label", "Vessel", "Vessel Layer");
-            static_cast<LabelBitPointPredicate*>(vpToAdd)->p_bit.setValue(2);
+//             vpToAdd = new LabelBitPointPredicate("label", "Vessel", "Vessel Layer");
+//             static_cast<LabelBitPointPredicate*>(vpToAdd)->p_bit.setValue(2);
+//             histogram->addPredicate(vpToAdd);
+            a = new LabelBitPointPredicate("label", "Vessel3", "Vessel Layer");
+            static_cast<LabelBitPointPredicate*>(a)->p_bit.setValue(2);
+            b = new LabelBitPointPredicate("label", "Vessel4", "Vessel Layer 2");
+            static_cast<LabelBitPointPredicate*>(b)->p_bit.setValue(3);
+            std::vector<AbstractPointPredicate*> v2;
+            v2.push_back(a);
+            v2.push_back(b);
+            vpToAdd = new OrCombinedPointPredicate("VesselLayer", "Vessel Layer", v2);
             histogram->addPredicate(vpToAdd);
 
             histogram->resetPredicates();

@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -25,20 +25,18 @@
 #ifndef IMAGEREPRESENTATIONLOCAL_H__
 #define IMAGEREPRESENTATIONLOCAL_H__
 
-#include "core/datastructures/genericabstractimagerepresentation.h"
+#include "tgt/vector.h"
 
+#include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/tools/concurrenthistogram.h"
 #include "core/tools/endianhelper.h"
 #include "core/tools/interval.h"
 #include "core/tools/weaklytypedpointer.h"
 
 namespace campvis {
-    class ImageRepresentationDisk;
 
     /**
      * Abstract base class for storing image data in the local memory.
-     * 
-     * \todo    implement padding, add some kind of cool iterators
      */
     class CAMPVIS_CORE_API ImageRepresentationLocal : public GenericAbstractImageRepresentation<ImageRepresentationLocal> {
     public:
@@ -46,15 +44,6 @@ namespace campvis {
          * Destructor
          */
         virtual ~ImageRepresentationLocal();
-
-        /**
-         * Performs a conversion of \a source to an ImageRepresentationLocal if feasible.
-         * Returns 0 if conversion was not successful or source representation type is not compatible.
-         * \note    The callee, respectively the callee's parent, has the ownership of the returned pointer.
-         * \param   source  Source image representation for conversion.
-         * \return  A pointer to a local representation of \a source or 0 on failure. The caller does \b not have ownership.
-         */
-        static ImageRepresentationLocal* tryConvertFrom(const AbstractImageRepresentation* source);
 
         static ImageRepresentationLocal* create(const ImageData* parent, WeaklyTypedPointer wtp);
 

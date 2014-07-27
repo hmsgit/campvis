@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -52,7 +52,7 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "GlMorphologyFilter.out", DataNameProperty::WRITE)
-        , p_filterOperation("FilterOperation", "Operations to Apply ([edoc]+)", "ed")
+        , p_filterOperation("FilterOperation", "Operations to Apply ([edoc]+)", "ed", StringProperty::BASIC_STRING)
         , p_structuringElement("StructuringElement", "Structuring Element", structuringElementOptions, 2)
         , _erosionFilter(nullptr)
         , _dilationFilter(nullptr)
@@ -135,8 +135,6 @@ namespace campvis {
         else {
             LERROR("No suitable input image found.");
         }
-
-        validate(INVALID_RESULT);
     }
 
     tgt::Texture* GlMorphologyFilter::applyFilter(const tgt::Texture* inputTexture, tgt::Shader* filter) const {
@@ -179,7 +177,6 @@ namespace campvis {
         _erosionFilter->rebuild();
         _dilationFilter->setHeaders(generateGlslHeader("max"));
         _dilationFilter->rebuild();
-        validate(INVALID_SHADER);
     }
 
     std::string GlMorphologyFilter::generateGlslHeader(const std::string& filerOp) const {

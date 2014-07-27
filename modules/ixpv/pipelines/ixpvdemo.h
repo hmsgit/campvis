@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -42,6 +42,8 @@
 #include "modules/vis/processors/rendertargetcompositor.h"
 #include "modules/vis/processors/slicerenderer3d.h"
 #include "modules/ixpv/processors/ixpvcompositor.h"
+#include "modules/vis/processors/volumerenderer.h"
+
 
 
 namespace campvis {
@@ -76,18 +78,14 @@ namespace campvis {
         DevilImageReader _xrayReader;
 
         MhdImageReader _ctReader;
-        ProxyGeometryGenerator _ctProxy;
-        EEPGenerator _ctFullEEP;
-        EEPGenerator _ctClippedEEP;
-        SimpleRaycaster _ctDVR;
-        DRRRaycaster _ctFullDRR;
-        DRRRaycaster _ctClippedDRR;
+
+        VolumeRenderer _vrFull;
+        VolumeRenderer _vrClipped;
 
         MhdImageReader _usReader;
         SliceRenderer3D _usSliceRenderer;
 
         RenderTargetCompositor _compositor;
-        RenderTargetCompositor _compositor2;
         IxpvCompositor _ixpvCompositor;
 
         CameraProperty _camera;

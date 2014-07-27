@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -46,10 +46,28 @@ namespace campvis {
         DoubleAdjusterWidget(QWidget* parent = 0);
 
         /**
-         * Set how many decimals the adjuster will use for displaying and interpreting doubles.
+         * Set how many decimals the adjuster will use for displaying and doubleerpreting doubles.
          * \param   prec      number of decimals the adjuster will use
          */
         void setDecimals(int prec);
+
+        /**
+         * Change the adjuster's minimum value.
+         * \param   minimum      new minimum value for the adjuster
+         */
+        void setMinimum(double minimum);
+
+        /**
+         * Change the adjuster's maximum value.
+         * \param   maximum      new maximum value for the adjuster
+         */
+        void setMaximum(double maximum);
+
+        /**
+         * Change the adjuster's single step value.
+         * \param   value      new single step value for the adjuster
+         */
+        void setSingleStep(double value);
 
     public slots:
         /**
@@ -64,6 +82,13 @@ namespace campvis {
          * \param   value      new value of the adjuster
          */
         void valueChanged(double value);
+
+        /// Signal emitted when the property's minimum value has changed
+        void s_minChanged(double minimum);
+        /// Signal emitted when the property's maximum value has changed
+        void s_maxChanged(double maximum);
+        /// Signal emitted when the property's single step value has changed
+        void s_singleStepChanged(double value);
 
     protected:
         /**
@@ -94,6 +119,12 @@ namespace campvis {
         /// Slot getting called when the slider's value changes
         void onSliderValueChanged(int value);
 
+        /// Slot getting called when the property's minimum value has changed
+        void onMinChanged(double minimum);
+        /// Slot getting called when the property's maximum value has changed
+        void onMaxChanged(double maximum);
+        /// Slot getting called when the property's single step value has changed
+        void onSingleStepChanged(double value);
     };
 
 }

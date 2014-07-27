@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -124,6 +124,23 @@ namespace campvis {
         AndCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates);
 
         virtual ~AndCombinedPointPredicate();
+
+
+        virtual std::string getGlslHeader() const;
+        virtual std::string getPredicateEvaluationGlslString() const;
+        virtual void setupShader(tgt::Shader* shader) const;
+
+    protected:
+        std::vector<AbstractPointPredicate*> _predicates;
+    };
+
+    // ================================================================================================
+
+    class OrCombinedPointPredicate : public AbstractPointPredicate {
+    public:
+        OrCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates);
+
+        virtual ~OrCombinedPointPredicate();
 
 
         virtual std::string getGlslHeader() const;

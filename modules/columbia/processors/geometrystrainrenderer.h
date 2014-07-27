@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universität München
-//      Boltzmannstr. 3, 85748 Garching b. München, Germany
+//      Technische Universitaet Muenchen
+//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -42,7 +42,7 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class GeometryStrainRenderer : public VisualizationProcessor, public HasProcessorDecorators {
+    class GeometryStrainRenderer : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GeometryStrainRenderer Processor
@@ -74,11 +74,15 @@ namespace campvis {
         DataNameProperty p_renderTargetID;   ///< image ID for output image
         CameraProperty p_camera;
 
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
         Vec4Property p_color;                ///< rendering color
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
         /// \see    AbstractProcessor::updateShader
         virtual void updateShader();
 
