@@ -25,7 +25,7 @@ namespace tgt {
         _glMutex.unlock();
     }
 
-    tbb::mutex& GlContextManager::getGlMutex() {
+    std::mutex& GlContextManager::getGlMutex() {
         return _glMutex;
     }
 
@@ -58,7 +58,7 @@ namespace tgt {
         tgtAssert(_contexts.find(context) == _contexts.end(), "Tried to double register the same context.");
 
         {
-            tbb::mutex::scoped_lock localLock(_localMutex);
+            std::lock_guard<std::mutex> localLock(_localMutex);
             _contexts.insert(context);
         }
        
@@ -78,7 +78,7 @@ namespace tgt {
     void GlContextManager::removeContext(GLCanvas* context) {
         _currentContext = 0;
 
-        tbb::mutex::scoped_lock lock(_localMutex);
+        std::lock_guard<std::mutex> lock(_localMutex);
         std::set<GLCanvas*>::iterator it = _contexts.find(context);
         if (it != _contexts.end()) {
             _contexts.erase(it);

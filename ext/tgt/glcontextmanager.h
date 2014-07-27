@@ -4,7 +4,8 @@
 #include "tgt/singleton.h"
 #include "tgt/glcanvas.h"
 #include "tgt/types.h"
-#include <tbb/mutex.h>  // TODO: TBB dependency in TGT is not that beautiful...
+
+#include <ext/threading.h>
 #include <set>
 #include <string>
 
@@ -49,7 +50,7 @@ namespace tgt {
          * Returns the mutex protecting the OpenGL context
          * \return  _glMutex
          */
-        tbb::mutex& getGlMutex();
+        std::mutex& getGlMutex();
 
         /**
          * Acquires \a context as current OpenGL context.
@@ -97,9 +98,9 @@ namespace tgt {
 
         std::set<GLCanvas*> _contexts;  ///< Map of all OpenGL contexts
         GLCanvas* _currentContext;                   ///< Current active OpenGL context
-        tbb::mutex _glMutex;                         ///< Mutex protecting OpenGL for multi-threaded access
+        std::mutex _glMutex;                         ///< Mutex protecting OpenGL for multi-threaded access
 
-        tbb::mutex _localMutex;                      ///< local mutex to prodect _contexts
+        std::mutex _localMutex;                      ///< local mutex to prodect _contexts
     };
 
 

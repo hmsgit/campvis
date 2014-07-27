@@ -26,7 +26,8 @@
 #define RUNNABLE_H__
 
 #include "tgt/logmanager.h"
-#include <tbb/compat/thread>
+
+#include <ext/threading.h>
 #include <tbb/atomic.h>
 
 #include "core/coreapi.h"

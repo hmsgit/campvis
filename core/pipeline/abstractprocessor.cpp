@@ -22,8 +22,9 @@
 // 
 // ================================================================================================
 
-#include <tbb/compat/thread>
 #include "tgt/assert.h"
+
+#include <ext/threading.h>
 
 #include "abstractprocessor.h"
 #include "core/properties/abstractproperty.h"

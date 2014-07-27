@@ -37,7 +37,7 @@
 
 #include <tgt/matrix.h>
 
-#include <tbb/compat/thread>
+#include <ext/threading.h>
 #include <tbb/atomic.h>
 #include <tbb/mutex.h>
 

@@ -81,7 +81,7 @@ namespace campvis {
     void OpenGLJobProcessor::run() {
         _this_thread_id = std::this_thread::get_id();
 
-        std::unique_lock<tbb::mutex> lock(tgt::GlContextManager::getRef().getGlMutex());
+        std::unique_lock<std::mutex> lock(tgt::GlContextManager::getRef().getGlMutex());
         clock_t lastCleanupTime = clock() * 1000 / CLOCKS_PER_SEC;
 
         while (! _stopExecution) {

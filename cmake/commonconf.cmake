@@ -156,8 +156,6 @@ ENDIF(WIN32)
 IF(CMAKE_COMPILER_IS_GNUCXX)
     # enable C++11 support in GCC
     LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11")
-    # however: we want to use the TBB implementation of threads
-    LIST(APPEND CampvisGlobalDefinitions "-DTBB_IMPLEMENT_CPP0X")
 ENDIF()
 
 # tgt configuration
