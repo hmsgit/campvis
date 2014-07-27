@@ -30,20 +30,22 @@
 #include "gtest/gtest.h"
 
 #include "core/pipeline/abstractprocessor.h"
-
+#include "core/properties/genericproperty.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/imagedata.h"
 
 using namespace campvis;
 
 
-// FIXME: This is not what I was supposed to be. fix me please. 
 class DummyTestProcessor : public AbstractProcessor {
 public:
-    DummyTestProcessor () {
-        _invalidateExternally = false;
-        this->invalidate(AbstractProcessor::VALID);
+    DummyTestProcessor () 
+        : _boolProperty("BoolProperty", "Bool Property", false)
+        , _togglePropertyDuringProcess(false)
+    {
+        addProperty(_boolProperty);
     }
+
     ~DummyTestProcessor () {}
 
     virtual const std::string getName() const { return "DummyTestProcessor"; };
@@ -52,19 +54,14 @@ public:
     virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
     
     virtual void updateResult(DataContainer& dataContainer) {
-        dataContainer.removeData("ImageData");
-        dataContainer.addData("ImageData", new ImageData(2, tgt::svec3(1,2,1), 4));
+        if (_togglePropertyDuringProcess) {
+            bool currentValue = _boolProperty.getValue();
+            _boolProperty.setValue(! currentValue);
+        }
     }
 
-    void setExternalInvalidation(bool status, AbstractProcessor::InvalidationLevel level) {
-        _invalidateExternally = status;
-        this->invalidate(level);
-        
-        this->invalidate(this->getInvalidationLevel());
-    }
-
-private:
-    bool _invalidateExternally;
+    BoolProperty _boolProperty;
+    bool _togglePropertyDuringProcess;
 };
 
 
@@ -98,10 +95,26 @@ protected:
  * Tests invalidation of data
  */ 
 TEST_F(AbstractProcessorTest, invalidationTest) {
+    this->_processor1.invalidate(AbstractProcessor::INVALID_RESULT);
+    this->_processor1._togglePropertyDuringProcess = false;
     this->_processor1.process(this->_dataContainer);
     EXPECT_EQ(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
-    
-    this->_processor1.setExternalInvalidation(true, AbstractProcessor::INVALID_RESULT);
+}
+
+/** 
+ * Tests processor's locking mechanism 
+ */ 
+TEST_F(AbstractProcessorTest, lockingTest) {
+    this->_processor1.invalidate(AbstractProcessor::INVALID_RESULT);
+    this->_processor1._togglePropertyDuringProcess = true;
     this->_processor1.process(this->_dataContainer);
     EXPECT_NE(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
+
+    {
+        AbstractProcessor::ScopedLock lock(&this->_processor1, false);
+        bool currentValue = this->_processor1._boolProperty.getValue();
+        this->_processor1._boolProperty.setValue(! currentValue);
+
+        EXPECT_EQ(currentValue, this->_processor1._boolProperty.getValue());
+    }
 }
