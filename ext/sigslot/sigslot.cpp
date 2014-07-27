@@ -55,7 +55,7 @@ namespace sigslot {
 
     void signal_manager::run() {
         _this_thread_id = std::this_thread::get_id();
-        std::unique_lock<tbb::mutex> lock(_ecMutex);
+        std::unique_lock<std::mutex> lock(_ecMutex);
 
         while (! _stopExecution) {
             // try pop the next event from the event queue

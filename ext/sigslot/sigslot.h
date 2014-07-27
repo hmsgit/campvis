@@ -56,7 +56,7 @@
 #include <list>
 
 #include "tgt/assert.h"
-#include <tbb/compat/condition_variable>
+#include <ext/threading.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_vector.h>
 
@@ -91,10 +91,9 @@ namespace sigslot {
             }
 
             concurrent_pointer_list_iterator& operator++() {
-                tgtAssert(_position != _end, "Trying to advance an iterator past the end!");
                 do {
                     ++_position;
-                } while (_position != _end && *_position == nullptr);
+                } while (_position < _end && *_position == nullptr);
                 return *this;
             }
 
@@ -105,10 +104,9 @@ namespace sigslot {
             }
 
             concurrent_pointer_list_iterator& operator--() {
-                tgtAssert(_position != _begin, "Trying to advance an iterator befor the begin!");
                 do {
                     --_position;
-                } while (_position != _begin && *_position == nullptr);
+                } while (_position > _begin && *_position == nullptr);
                 return *this;
             }
 
@@ -127,11 +125,11 @@ namespace sigslot {
             }
 
             bool operator==(const concurrent_pointer_list_iterator& rhs) const {
-                return (_begin == rhs._begin && _position == rhs._position && _end == rhs._end);
+                return (_position == rhs._position);
             }
 
             bool operator!=(const concurrent_pointer_list_iterator& rhs) const {
-                return (_begin != rhs._begin || _position != rhs._position || _end != rhs._end);
+                return (_position != rhs._position);
             }
 
         protected:
@@ -308,10 +306,10 @@ namespace sigslot {
         /// Typedef for the signal queue
         typedef tbb::concurrent_queue<_signal_handle_base*> SignalQueue;
 
-        SignalQueue _signalQueue;   ///< Queue for signals to be dispatched
+        SignalQueue _signalQueue;                       ///< Queue for signals to be dispatched
 
-        std::condition_variable _evaluationCondition; ///< conditional wait to be used when there are currently no jobs to process
-        tbb::mutex _ecMutex; ///< Mutex for protecting _evaluationCondition
+        std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
+        std::mutex _ecMutex;                            ///< Mutex for protecting _evaluationCondition
 
         std::thread::id _this_thread_id;
 

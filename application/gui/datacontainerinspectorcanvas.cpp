@@ -450,7 +450,7 @@ namespace campvis {
         _geometryRenderer.p_geometryID.setValue(name + ".geometry");
         _geometryRenderer.p_renderTargetID.setValue(name + ".rendered");
         _geometryRenderer.validate(AbstractProcessor::INVALID_PROPERTIES);
-        _geometryRenderer.process(_localDataContainer, false);
+        _geometryRenderer.process(_localDataContainer);
 
         // grab render result texture from local DataContainer and push into texture vector.
         ScopedTypedData<RenderData> rd(_localDataContainer, name + ".rendered");
