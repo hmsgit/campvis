@@ -107,32 +107,6 @@ namespace sigslot {
                                        getArgWithTypeInfoList<T2, T3, T4, T5>(arg2, arg3, arg4, arg5));
     }
 
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
-    inline std::list<ArgWithTypeInfoType>* getArgWithTypeInfoList(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5,
-                                                                  T6 arg6)
-    {
-        return argWithTypeInfoListCons(getArgWithTypeInfo<T1>(arg1),
-                                       getArgWithTypeInfoList<T2, T3, T4, T5, T6>(arg2, arg3, arg4, arg5, arg6));
-    }
-
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
-    inline std::list<ArgWithTypeInfoType>* getArgWithTypeInfoList(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6,
-                                                                  T7 arg7)
-    {
-        return argWithTypeInfoListCons(getArgWithTypeInfo<T1>(arg1),
-                                       getArgWithTypeInfoList<T2, T3, T4, T5, T6, T7>(arg2, arg3, arg4, arg5, arg6,
-                                                                                      arg7));
-    }
-
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
-    inline std::list<ArgWithTypeInfoType>* getArgWithTypeInfoList(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6,
-                                                                  T7 arg7, T8 arg8)
-    {
-        return argWithTypeInfoListCons(getArgWithTypeInfo<T1>(arg1),
-                                       getArgWithTypeInfoList<T2, T3, T4, T5, T6, T7, T8>(arg2, arg3, arg4, arg5, arg6,
-                                                                                          arg7, arg8));
-    }
-
     // Type of mutex used to guard access to Lua state. See LuaVmState for more details.
     typedef tbb::recursive_mutex LuaStateMutexType;
 
@@ -143,8 +117,12 @@ namespace sigslot {
      * well as some other logic (e.g. copySlotFunction and getDummyDest) common to all Lua
      * connections. Subclasses need simply to call the helpers provided by this class from their
      * interface implementation methods.
+     *
+     * The template parameter is just a dummy parameter to enforce that _connection_base0 is always
+     * locally instantiated as template and not linked into the sigslot library. This makes writing
+     * scripting bindings much easier
      */
-    template<class mt_policy>
+    template<int DUMMY_PARAMETER = 0>
     class _lua_connection_base {
     public:
         _lua_connection_base(SWIGLUA_REF slot_fn)
@@ -222,9 +200,9 @@ namespace sigslot {
          *
          * @return dummy destination object
          */
-        has_slots<mt_policy>* getDummyDest() const {
+        has_slots* getDummyDest() const {
             if (_dummy_dest == nullptr)
-                _dummy_dest = new has_slots<mt_policy>();
+                _dummy_dest = new has_slots();
 
             return _dummy_dest;
         }
@@ -266,30 +244,34 @@ namespace sigslot {
         }
 
         SWIGLUA_REF _slot_fn;                          ///< Reference to a Lua function acting as a slot
-        mutable has_slots<mt_policy>* _dummy_dest;     ///< Dummy destination object needed to support getdest()
+        mutable has_slots* _dummy_dest;                ///< Dummy destination object needed to support getdest()
         LuaStateMutexType* _lua_state_mutex;           ///< Mutex guarding access to the above function's Lua state
     };
 
     /**
      * Custom signal-slot connection type for nullary signals that accepts Lua functions as slots.
+     *
+     * The template parameter is just a dummy parameter to enforce that _connection_base0 is always
+     * locally instantiated as template and not linked into the sigslot library. This makes writing
+     * scripting bindings much easier
      */
-    template<class mt_policy>
-    class _lua_connection0 : public _lua_connection_base<mt_policy>, public _connection_base0<mt_policy>
+    template<int DUMMY_PARAMETER = 0>
+    class _lua_connection0 : public _lua_connection_base<>, public _connection_base0
     {
     public:
         _lua_connection0(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
+            : _lua_connection_base<>(slot_fn)
         {}
 
         _lua_connection0(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
+            : _lua_connection_base<>(slot_fn, lua_state_mutex)
         {}
 
-        virtual _connection_base0<mt_policy>* clone() {
-            return new _lua_connection0(this->copySlotFunction(), this->_lua_state_mutex);
+        virtual _connection_base0* clone() {
+            return new _lua_connection0<DUMMY_PARAMETER>(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
-        virtual _connection_base0<mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
+        virtual _connection_base0* duplicate(sigslot::has_slots* pnewdest) {
             /*
              * Because Lua connections do not have any external destination objects that could be
              * copied (which in turn would require duplicating the connections for the copy), this
@@ -303,7 +285,7 @@ namespace sigslot {
             this->callLuaSlot(argWithTypeInfoList);
         }
 
-        virtual has_slots<mt_policy>* getdest() const {
+        virtual has_slots* getdest() const {
             return this->getDummyDest();
         }
     };
@@ -311,23 +293,23 @@ namespace sigslot {
     /**
      * Custom signal-slot connection type for unary signals that accepts Lua functions as slots.
      */
-    template<class arg1_type, class mt_policy>
-    class _lua_connection1 : public _lua_connection_base<mt_policy>, public _connection_base1<arg1_type, mt_policy>
+    template<class arg1_type>
+    class _lua_connection1 : public _lua_connection_base<>, public _connection_base1<arg1_type>
     {
     public:
         _lua_connection1(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
+            : _lua_connection_base<>(slot_fn)
         {}
 
         _lua_connection1(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
+            : _lua_connection_base<>(slot_fn, lua_state_mutex)
         {}
 
-        virtual _connection_base1<arg1_type, mt_policy>* clone() {
+        virtual _connection_base1<arg1_type>* clone() {
             return new _lua_connection1(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
-        virtual _connection_base1<arg1_type, mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
+        virtual _connection_base1<arg1_type>* duplicate(sigslot::has_slots* pnewdest) {
             /*
              * Because Lua connections do not have any external destination objects that could be
              * copied (which in turn would require duplicating the connections for the copy), this
@@ -341,7 +323,7 @@ namespace sigslot {
             this->callLuaSlot(argWithTypeInfoList);
         }
 
-        virtual has_slots<mt_policy>* getdest() const {
+        virtual has_slots* getdest() const {
             return this->getDummyDest();
         }
     };
@@ -349,24 +331,24 @@ namespace sigslot {
     /**
      * Custom signal-slot connection type for binary signals that accepts Lua functions as slots.
      */
-    template<class arg1_type, class arg2_type, class mt_policy>
-    class _lua_connection2 : public _lua_connection_base<mt_policy>
-                           , public _connection_base2<arg1_type, arg2_type, mt_policy>
+    template<class arg1_type, class arg2_type>
+    class _lua_connection2 : public _lua_connection_base<>
+                           , public _connection_base2<arg1_type, arg2_type>
     {
     public:
         _lua_connection2(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
+            : _lua_connection_base<>(slot_fn)
         {}
 
         _lua_connection2(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
+            : _lua_connection_base<>(slot_fn, lua_state_mutex)
         {}
 
-        virtual _connection_base2<arg1_type, arg2_type, mt_policy>* clone() {
+        virtual _connection_base2<arg1_type, arg2_type>* clone() {
             return new _lua_connection2(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
-        virtual _connection_base2<arg1_type, arg2_type, mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest) {
+        virtual _connection_base2<arg1_type, arg2_type>* duplicate(sigslot::has_slots* pnewdest) {
             /*
              * Because Lua connections do not have any external destination objects that could be
              * copied (which in turn would require duplicating the connections for the copy), this
@@ -380,7 +362,7 @@ namespace sigslot {
             this->callLuaSlot(argWithTypeInfoList);
         }
 
-        virtual has_slots<mt_policy>* getdest() const {
+        virtual has_slots* getdest() const {
             return this->getDummyDest();
         }
     };
@@ -388,25 +370,24 @@ namespace sigslot {
     /**
      * Custom signal-slot connection type for ternary signals that accepts Lua functions as slots.
      */
-    template<class arg1_type, class arg2_type, class arg3_type, class mt_policy>
-    class _lua_connection3 : public _lua_connection_base<mt_policy>
-                           , public _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type>
+    class _lua_connection3 : public _lua_connection_base<>
+                           , public _connection_base3<arg1_type, arg2_type, arg3_type>
     {
     public:
         _lua_connection3(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
+            : _lua_connection_base<>(slot_fn)
         {}
 
         _lua_connection3(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
+            : _lua_connection_base<>(slot_fn, lua_state_mutex)
         {}
 
-        virtual _connection_base3<arg1_type, arg2_type, arg3_type, mt_policy>* clone() {
+        virtual _connection_base3<arg1_type, arg2_type, arg3_type>* clone() {
             return new _lua_connection3(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
-        virtual _connection_base3<arg1_type, arg2_type, arg3_type,
-                                  mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest)
+        virtual _connection_base3<arg1_type, arg2_type, arg3_type>* duplicate(sigslot::has_slots* pnewdest)
         {
             /*
              * Because Lua connections do not have any external destination objects that could be
@@ -422,7 +403,7 @@ namespace sigslot {
             this->callLuaSlot(argWithTypeInfoList);
         }
 
-        virtual has_slots<mt_policy>* getdest() const {
+        virtual has_slots* getdest() const {
             return this->getDummyDest();
         }
     };
@@ -430,25 +411,24 @@ namespace sigslot {
     /**
      * Custom signal-slot connection type for 4-ary signals that accepts Lua functions as slots.
      */
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class mt_policy>
-    class _lua_connection4 : public _lua_connection_base<mt_policy>
-                           , public _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type>
+    class _lua_connection4 : public _lua_connection_base<>
+                           , public _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>
     {
     public:
         _lua_connection4(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
+            : _lua_connection_base<>(slot_fn)
         {}
 
         _lua_connection4(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
+            : _lua_connection_base<>(slot_fn, lua_state_mutex)
         {}
 
-        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* clone() {
+        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* clone() {
             return new _lua_connection4(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
-        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type,
-                                  mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest)
+        virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* duplicate(sigslot::has_slots* pnewdest)
         {
             /*
              * Because Lua connections do not have any external destination objects that could be
@@ -464,7 +444,7 @@ namespace sigslot {
             this->callLuaSlot(argWithTypeInfoList);
         }
 
-        virtual has_slots<mt_policy>* getdest() const {
+        virtual has_slots* getdest() const {
             return this->getDummyDest();
         }
     };
@@ -472,25 +452,24 @@ namespace sigslot {
     /**
      * Custom signal-slot connection type for 5-ary signals that accepts Lua functions as slots.
      */
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class mt_policy>
-    class _lua_connection5 : public _lua_connection_base<mt_policy>
-                           , public _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
+    class _lua_connection5 : public _lua_connection_base<>
+                           , public _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>
     {
     public:
         _lua_connection5(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
+            : _lua_connection_base<>(slot_fn)
         {}
 
         _lua_connection5(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
+            : _lua_connection_base<>(slot_fn, lua_state_mutex)
         {}
 
-        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* clone() {
+        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* clone() {
             return new _lua_connection5(this->copySlotFunction(), this->_lua_state_mutex);
         }
 
-        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type,
-                                  mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest)
+        virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* duplicate(sigslot::has_slots* pnewdest)
         {
             /*
              * Because Lua connections do not have any external destination objects that could be
@@ -506,165 +485,21 @@ namespace sigslot {
             this->callLuaSlot(argWithTypeInfoList);
         }
 
-        virtual has_slots<mt_policy>* getdest() const {
+        virtual has_slots* getdest() const {
             return this->getDummyDest();
         }
     };
 
-    /**
-     * Custom signal-slot connection type for 6-ary signals that accepts Lua functions as slots.
-     */
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class arg6_type,
-             class mt_policy>
-    class _lua_connection6 : public _lua_connection_base<mt_policy>
-                           , public _connection_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                                      mt_policy>
-    {
-    public:
-        _lua_connection6(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
-        {}
-
-        _lua_connection6(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
-        {}
-
-        virtual _connection_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                  mt_policy>* clone()
-        {
-            return new _lua_connection6(this->copySlotFunction(), this->_lua_state_mutex);
-        }
-
-        virtual _connection_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                  mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest)
-        {
-            /*
-             * Because Lua connections do not have any external destination objects that could be
-             * copied (which in turn would require duplicating the connections for the copy), this
-             * method should never be invoked.
-             */
-            return nullptr;
-        }
-
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6) {
-            std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
-                    getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type,
-                                           arg6_type>(a1, a2, a3, a4, a5, a6);
-            this->callLuaSlot(argWithTypeInfoList);
-        }
-
-        virtual has_slots<mt_policy>* getdest() const {
-            return this->getDummyDest();
-        }
-    };
-
-    /**
-     * Custom signal-slot connection type for 7-ary signals that accepts Lua functions as slots.
-     */
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class arg6_type,
-             class arg7_type, class mt_policy>
-    class _lua_connection7 : public _lua_connection_base<mt_policy>
-                           , public _connection_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                                      arg7_type, mt_policy>
-    {
-    public:
-        _lua_connection7(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
-        {}
-
-        _lua_connection7(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
-        {}
-
-        virtual _connection_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                  mt_policy>* clone()
-        {
-            return new _lua_connection7(this->copySlotFunction(), this->_lua_state_mutex);
-        }
-
-        virtual _connection_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                  mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest)
-        {
-            /*
-             * Because Lua connections do not have any external destination objects that could be
-             * copied (which in turn would require duplicating the connections for the copy), this
-             * method should never be invoked.
-             */
-            return nullptr;
-        }
-
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6,
-                                arg7_type a7)
-        {
-            std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
-                    getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                           arg7_type>(a1, a2, a3, a4, a5, a6, a7);
-            this->callLuaSlot(argWithTypeInfoList);
-        }
-
-        virtual has_slots<mt_policy>* getdest() const {
-            return this->getDummyDest();
-        }
-    };
-
-    /**
-     * Custom signal-slot connection type for 8-ary signals that accepts Lua functions as slots.
-     */
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class arg6_type,
-             class arg7_type, class arg8_type, class mt_policy>
-    class _lua_connection8 : public _lua_connection_base<mt_policy>
-                           , public _connection_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                                      arg7_type, arg8_type, mt_policy>
-    {
-    public:
-        _lua_connection8(SWIGLUA_REF slot_fn)
-            : _lua_connection_base<mt_policy>(slot_fn)
-        {}
-
-        _lua_connection8(SWIGLUA_REF slot_fn, LuaStateMutexType* lua_state_mutex)
-            : _lua_connection_base<mt_policy>(slot_fn, lua_state_mutex)
-        {}
-
-        virtual _connection_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                  arg8_type, mt_policy>* clone()
-        {
-            return new _lua_connection8(this->copySlotFunction(), this->_lua_state_mutex);
-        }
-
-        virtual _connection_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                  arg8_type, mt_policy>* duplicate(sigslot::has_slots<mt_policy>* pnewdest)
-        {
-            /*
-             * Because Lua connections do not have any external destination objects that could be
-             * copied (which in turn would require duplicating the connections for the copy), this
-             * method should never be invoked.
-             */
-            return nullptr;
-        }
-
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6,
-                                arg7_type a7, arg8_type a8)
-        {
-            std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
-                    getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                           arg7_type, arg8_type>(a1, a2, a3, a4, a5, a6, a7, a8);
-            this->callLuaSlot(argWithTypeInfoList);
-        }
-
-        virtual has_slots<mt_policy>* getdest() const {
-            return this->getDummyDest();
-        }
-    };
 }
 }
 
 namespace sigslot {
 
-    template<class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
     class signal0 {
     public:
         signal0();
-        signal0(const sigslot::signal0<mt_policy>& s);
+        signal0(const sigslot::signal0& s);
+        virtual ~signal0();
 
         %extend {
             /**
@@ -673,8 +508,7 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection0<mt_policy>* conn = new sigslot::_lua_connection0<mt_policy>(slot_fn);
+                sigslot::_lua_connection0<>* conn = new sigslot::_lua_connection0<>(slot_fn);
                 $self->m_connected_slots.push_back(conn);
             }
 
@@ -684,15 +518,13 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base0<mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
+                typedef sigslot::_signal_base0::connections_list connections_list;
                 connections_list::iterator it = $self->m_connected_slots.begin();
                 connections_list::iterator itEnd = $self->m_connected_slots.end();
 
                 while (it != itEnd) {
-                    sigslot::_lua_connection0<mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection0<mt_policy>*>(*it);
+                    sigslot::_lua_connection0<>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection0<>*>(*it);
 
                     if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
                         delete lua_connection;
@@ -706,11 +538,12 @@ namespace sigslot {
         }
     };
 
-    template<class arg1_type, class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
+    template<class arg1_type>
     class signal1 {
     public:
         signal1();
-        signal1(const sigslot::signal1<arg1_type, mt_policy>& s);
+        signal1(const sigslot::signal1<arg1_type>& s);
+        virtual ~signal1();
 
         %extend {
             /**
@@ -719,9 +552,8 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection1<arg1_type, mt_policy>* conn =
-                    new sigslot::_lua_connection1<arg1_type, mt_policy>(slot_fn);
+                sigslot::_lua_connection1<arg1_type>* conn =
+                    new sigslot::_lua_connection1<arg1_type>(slot_fn);
                 $self->m_connected_slots.push_back(conn);
             }
 
@@ -731,15 +563,14 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base1<arg1_type, mt_policy>::connections_list connections_list;
+                typedef sigslot::_signal_base1<arg1_type>::connections_list connections_list;
 
-                sigslot::lock_block_write<mt_policy> lock($self);
                 connections_list::iterator it = $self->m_connected_slots.begin();
                 connections_list::iterator itEnd = $self->m_connected_slots.end();
 
                 while (it != itEnd) {
-                    sigslot::_lua_connection1<arg1_type, mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection1<arg1_type, mt_policy>*>(*it);
+                    sigslot::_lua_connection1<arg1_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection1<arg1_type>*>(*it);
 
                     if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
                         delete lua_connection;
@@ -753,11 +584,12 @@ namespace sigslot {
         }
     };
 
-    template<class arg1_type, class arg2_type, class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
+    template<class arg1_type, class arg2_type>
     class signal2 {
     public:
         signal2();
-        signal2(const sigslot::signal2<arg1_type, arg2_type, mt_policy>& s);
+        signal2(const sigslot::signal2<arg1_type, arg2_type>& s);
+        virtual ~signal2();
 
         %extend {
             /**
@@ -766,9 +598,8 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection2<arg1_type, arg2_type, mt_policy>* conn =
-                    new sigslot::_lua_connection2<arg1_type, arg2_type, mt_policy>(slot_fn);
+                sigslot::_lua_connection2<arg1_type, arg2_type>* conn =
+                    new sigslot::_lua_connection2<arg1_type, arg2_type>(slot_fn);
                 $self->m_connected_slots.push_back(conn);
             }
 
@@ -778,15 +609,13 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base2<arg1_type, arg2_type, mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
+                typedef sigslot::_signal_base2<arg1_type, arg2_type>::connections_list connections_list;
                 connections_list::iterator it = $self->m_connected_slots.begin();
                 connections_list::iterator itEnd = $self->m_connected_slots.end();
 
                 while (it != itEnd) {
-                    sigslot::_lua_connection2<arg1_type, arg2_type, mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection2<arg1_type, arg2_type, mt_policy>*>(*it);
+                    sigslot::_lua_connection2<arg1_type, arg2_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection2<arg1_type, arg2_type>*>(*it);
 
                     if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
                         delete lua_connection;
@@ -800,11 +629,12 @@ namespace sigslot {
         }
     };
 
-    template<class arg1_type, class arg2_type, class arg3_type, class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
+    template<class arg1_type, class arg2_type, class arg3_type>
     class signal3 {
     public:
         signal3();
-        signal3(const sigslot::signal3<arg1_type, arg2_type, arg3_type, mt_policy>& s);
+        signal3(const sigslot::signal3<arg1_type, arg2_type, arg3_type>& s);
+        virtual ~signal3();
 
         %extend {
             /**
@@ -813,9 +643,8 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type, mt_policy>* conn =
-                    new sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type, mt_policy>(slot_fn);
+                sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type>* conn =
+                    new sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type>(slot_fn);
                 $self->m_connected_slots.push_back(conn);
             }
 
@@ -825,16 +654,13 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base3<arg1_type, arg2_type, arg3_type,
-                                               mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
+                typedef sigslot::_signal_base3<arg1_type, arg2_type, arg3_type>::connections_list connections_list;
                 connections_list::iterator it = $self->m_connected_slots.begin();
                 connections_list::iterator itEnd = $self->m_connected_slots.end();
 
                 while (it != itEnd) {
-                    sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type, mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type, mt_policy>*>(*it);
+                    sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection3<arg1_type, arg2_type, arg3_type>*>(*it);
 
                     if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
                         delete lua_connection;
@@ -848,12 +674,12 @@ namespace sigslot {
         }
     };
 
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type,
-             class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type>
     class signal4 {
     public:
         signal4();
-        signal4(const sigslot::signal4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>& s);
+        signal4(const sigslot::signal4<arg1_type, arg2_type, arg3_type, arg4_type>& s);
+        virtual ~signal4();
 
         %extend {
             /**
@@ -862,9 +688,8 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* conn =
-                    new sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>(slot_fn);
+                sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type>* conn =
+                    new sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type>(slot_fn);
                 $self->m_connected_slots.push_back(conn);
             }
 
@@ -874,17 +699,13 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base4<arg1_type, arg2_type, arg3_type, arg4_type,
-                                               mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
+                typedef sigslot::_signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>::connections_list connections_list;
                 connections_list::iterator it = $self->m_connected_slots.begin();
                 connections_list::iterator itEnd = $self->m_connected_slots.end();
 
                 while (it != itEnd) {
-                    sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type, mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type,
-                                                                   mt_policy>*>(*it);
+                    sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type>* lua_connection =
+                            dynamic_cast<sigslot::_lua_connection4<arg1_type, arg2_type, arg3_type, arg4_type>*>(*it);
 
                     if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
                         delete lua_connection;
@@ -898,12 +719,12 @@ namespace sigslot {
         }
     };
 
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type,
-             class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
     class signal5 {
     public:
         signal5();
-        signal5(const sigslot::signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>& s);
+        signal5(const sigslot::signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& s);
+        virtual ~signal5();
 
         %extend {
             /**
@@ -912,10 +733,8 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, mt_policy>* conn =
-                    new sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type,
-                                                  mt_policy>(slot_fn);
+                sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* conn =
+                    new sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(slot_fn);
                 $self->m_connected_slots.push_back(conn);
             }
 
@@ -925,180 +744,14 @@ namespace sigslot {
              * @param slot_fn reference to a Lua function acting as a slot
              */
             void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type,
-                                               mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
+                typedef sigslot::_signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>::connections_list connections_list;
                 connections_list::iterator it = $self->m_connected_slots.begin();
                 connections_list::iterator itEnd = $self->m_connected_slots.end();
 
                 while (it != itEnd) {
-                    sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type,
-                                              mt_policy>* lua_connection =
+                    sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* lua_connection =
                             dynamic_cast<sigslot::_lua_connection5<arg1_type, arg2_type, arg3_type, arg4_type,
-                                                                   arg5_type, mt_policy>*>(*it);
-
-                    if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
-                        delete lua_connection;
-                        $self->m_connected_slots.erase(it);
-                        return;
-                    }
-
-                    ++it;
-                }
-            }
-        }
-    };
-
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class arg6_type,
-             class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
-    class signal6 {
-    public:
-        signal6();
-        signal6(const sigslot::signal6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, mt_policy>& s);
-
-        %extend {
-            /**
-             * Connect this signal to a Lua function.
-             *
-             * @param slot_fn reference to a Lua function acting as a slot
-             */
-            void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                          mt_policy>* conn =
-                    new sigslot::_lua_connection6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                                  mt_policy>(slot_fn);
-                $self->m_connected_slots.push_back(conn);
-            }
-
-            /**
-             * Disconnect a Lua function from this signal.
-             *
-             * @param slot_fn reference to a Lua function acting as a slot
-             */
-            void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                               mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
-                connections_list::iterator it = $self->m_connected_slots.begin();
-                connections_list::iterator itEnd = $self->m_connected_slots.end();
-
-                while (it != itEnd) {
-                    sigslot::_lua_connection6<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                              mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection6<arg1_type, arg2_type, arg3_type, arg4_type,
-                                                                   arg5_type, arg6_type, mt_policy>*>(*it);
-
-                    if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
-                        delete lua_connection;
-                        $self->m_connected_slots.erase(it);
-                        return;
-                    }
-
-                    ++it;
-                }
-            }
-        }
-    };
-
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class arg6_type,
-             class arg7_type, class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
-    class signal7 {
-    public:
-        signal7();
-        signal7(const sigslot::signal7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                       mt_policy>& s);
-
-        %extend {
-            /**
-             * Connect this signal to a Lua function.
-             *
-             * @param slot_fn reference to a Lua function acting as a slot
-             */
-            void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                          mt_policy>* conn =
-                    new sigslot::_lua_connection7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                                  arg7_type, mt_policy>(slot_fn);
-                $self->m_connected_slots.push_back(conn);
-            }
-
-            /**
-             * Disconnect a Lua function from this signal.
-             *
-             * @param slot_fn reference to a Lua function acting as a slot
-             */
-            void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                               arg7_type, mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
-                connections_list::iterator it = $self->m_connected_slots.begin();
-                connections_list::iterator itEnd = $self->m_connected_slots.end();
-
-                while (it != itEnd) {
-                    sigslot::_lua_connection7<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                              arg7_type, mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection7<arg1_type, arg2_type, arg3_type, arg4_type,
-                                                                   arg5_type, arg6_type, arg7_type, mt_policy>*>(*it);
-
-                    if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
-                        delete lua_connection;
-                        $self->m_connected_slots.erase(it);
-                        return;
-                    }
-
-                    ++it;
-                }
-            }
-        }
-    };
-
-    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type, class arg6_type,
-             class arg7_type, class arg8_type, class mt_policy = sigslot::SIGSLOT_DEFAULT_MT_POLICY>
-    class signal8 {
-    public:
-        signal8();
-        signal8(const sigslot::signal8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                       arg8_type, mt_policy>& s);
-
-        %extend {
-            /**
-             * Connect this signal to a Lua function.
-             *
-             * @param slot_fn reference to a Lua function acting as a slot
-             */
-            void connect(SWIGLUA_REF slot_fn) {
-                sigslot::lock_block_write<mt_policy> lock($self);
-                sigslot::_lua_connection8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type,
-                                          arg8_type, mt_policy>* conn =
-                    new sigslot::_lua_connection8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                                  arg7_type, arg8_type, mt_policy>(slot_fn);
-                $self->m_connected_slots.push_back(conn);
-            }
-
-            /**
-             * Disconnect a Lua function from this signal.
-             *
-             * @param slot_fn reference to a Lua function acting as a slot
-             */
-            void disconnect(SWIGLUA_REF slot_fn) {
-                typedef sigslot::_signal_base8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                               arg7_type, arg8_type, mt_policy>::connections_list connections_list;
-
-                sigslot::lock_block_write<mt_policy> lock($self);
-                connections_list::iterator it = $self->m_connected_slots.begin();
-                connections_list::iterator itEnd = $self->m_connected_slots.end();
-
-                while (it != itEnd) {
-                    sigslot::_lua_connection8<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type,
-                                              arg7_type, arg8_type, mt_policy>* lua_connection =
-                            dynamic_cast<sigslot::_lua_connection8<arg1_type, arg2_type, arg3_type, arg4_type,
-                                                                   arg5_type, arg6_type, arg7_type, arg8_type,
-                                                                   mt_policy>*>(*it);
+                                                                   arg5_type>*>(*it);
 
                     if (lua_connection != nullptr && lua_connection->wrapsSlotFunction(slot_fn)) {
                         delete lua_connection;

@@ -111,7 +111,7 @@ TEST_F(AbstractProcessorTest, lockingTest) {
     EXPECT_NE(AbstractProcessor::VALID, this->_processor1.getInvalidationLevel());
 
     {
-        AbstractProcessor::ScopedLock lock(&this->_processor1, false);
+        AbstractProcessor::ScopedLock lock(&this->_processor1);
         bool currentValue = this->_processor1._boolProperty.getValue();
         this->_processor1._boolProperty.setValue(! currentValue);
 

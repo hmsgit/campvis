@@ -260,6 +260,10 @@ namespace campvis {
         DataHandle getData(const std::string& name) const;
         void removeData(const std::string& name);
         void clear();
+
+        %immutable;
+        sigslot::signal0 s_changed;
+        %mutable;
     };
 
     /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */

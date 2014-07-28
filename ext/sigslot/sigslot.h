@@ -319,10 +319,10 @@ namespace sigslot {
 // ================================================================================================
 
     
-    class has_slots;
+    class SIGSLOT_API has_slots;
     
     
-    class _connection_base0
+    class SIGSLOT_API _connection_base0
     {
     public:
         virtual ~_connection_base0() {}
@@ -1306,7 +1306,7 @@ namespace sigslot {
                 : _sender(sender)
             {};
 
-            ~signal_handle0() {};
+            virtual ~signal_handle0() {};
 
             // override
             void emitSignal() const {
@@ -1329,6 +1329,8 @@ namespace sigslot {
         
         signal0(const signal0& s)
         : _signal_base0(s) {}
+
+        virtual ~signal0() {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)())
@@ -1374,7 +1376,7 @@ namespace sigslot {
                 , _a1(a1)
             {};
 
-            ~signal_handle1() {};
+            virtual ~signal_handle1() {};
 
             // override
             void emitSignal() const {
@@ -1397,6 +1399,8 @@ namespace sigslot {
         
         signal1(const signal1<arg1_type>& s)
         : _signal_base1<arg1_type>(s) {}
+
+        virtual ~signal1() {}
         
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type))
@@ -1443,7 +1447,7 @@ namespace sigslot {
                 , _a2(a2)
             {};
 
-            ~signal_handle2() {};
+            virtual ~signal_handle2() {};
 
             // override
             void emitSignal() const {
@@ -1467,7 +1471,9 @@ namespace sigslot {
         
         signal2(const signal2<arg1_type, arg2_type>& s)
         : _signal_base2<arg1_type, arg2_type>(s) {}
-        
+
+        virtual ~signal2() {}
+
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type,
                                                                  arg2_type))
@@ -1515,7 +1521,7 @@ namespace sigslot {
                 , _a3(a3)
             {};
 
-            ~signal_handle3() {};
+            virtual ~signal_handle3() {};
 
             // override
             void emitSignal() const {
@@ -1540,7 +1546,9 @@ namespace sigslot {
         
         signal3(const signal3<arg1_type, arg2_type, arg3_type>& s)
         : _signal_base3<arg1_type, arg2_type, arg3_type>(s) {}
-        
+
+        virtual ~signal3() {}
+
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type,
                                                                  arg2_type, arg3_type))
@@ -1589,7 +1597,7 @@ namespace sigslot {
                 , _a4(a4)
             {};
 
-            ~signal_handle4() {};
+            virtual ~signal_handle4() {};
 
             // override
             void emitSignal() const {
@@ -1615,7 +1623,9 @@ namespace sigslot {
         
         signal4(const signal4<arg1_type, arg2_type, arg3_type, arg4_type>& s)
         : _signal_base4<arg1_type, arg2_type, arg3_type, arg4_type>(s) {}
-        
+
+        virtual ~signal4() {}
+
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type))
         {
@@ -1664,7 +1674,7 @@ namespace sigslot {
                 , _a5(a5)
             {};
 
-            ~signal_handle5() {};
+            virtual ~signal_handle5() {};
 
             // override
             void emitSignal() const {
@@ -1691,7 +1701,9 @@ namespace sigslot {
         
         signal5(const signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& s)
         : _signal_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(s) {}
-        
+
+        virtual ~signal5() {}
+
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type))
         {
