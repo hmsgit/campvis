@@ -413,6 +413,7 @@ namespace campvis {
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
         updateInfoWidget();
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
         // get the selection from the tree widget
         const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
 
@@ -424,6 +425,7 @@ namespace campvis {
             }
         }
         _btnSaveToFile->setDisabled(true);
+#endif
     }
 
     void DataContainerInspectorWidget::onBtnSaveToFileClicked() {

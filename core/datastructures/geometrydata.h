@@ -77,7 +77,7 @@ namespace campvis {
         GeometryData& operator=(const GeometryData& rhs);
 
         /// \see AbstractData::clone()
-        virtual AbstractData* clone() const = 0;
+        virtual GeometryData* clone() const = 0;
 
         /**
          * Renders this GeometryData.
