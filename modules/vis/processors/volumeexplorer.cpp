@@ -339,7 +339,7 @@ namespace campvis {
                     else if (me->y() <= 2*p_sliceRenderSize.getValue().y) {
                         _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::XZ_PLANE);
                         tgt::MouseEvent adjustedMe(
-                            me->x(), me->y() - p_sliceRenderSize.getValue().x,
+                            me->x(), me->y() - p_sliceRenderSize.getValue().y,
                             me->action(), me->modifiers(), me->button(),
                             p_sliceRenderSize.getValue()
                             );
@@ -348,7 +348,7 @@ namespace campvis {
                     else {
                         _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::YZ_PLANE);
                         tgt::MouseEvent adjustedMe(
-                            me->x(), me->y() - (2 * p_sliceRenderSize.getValue().x),
+                            me->x(), me->y() - (2 * p_sliceRenderSize.getValue().y),
                             me->action(), me->modifiers(), me->button(),
                             p_sliceRenderSize.getValue()
                             );
