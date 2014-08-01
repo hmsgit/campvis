@@ -188,12 +188,17 @@ namespace campvis {
     void AbstractPipeline::onEvent(tgt::Event* e) {
         // copy and paste from tgt::EventHandler::onEvent() but without deleting e
         for (size_t i = 0 ; i < listeners_.size() ; ++i) {
-            // check if current listener listens to the eventType of e
-            if(listeners_[i]->getEventTypes() & e->getEventType() ){
-                listeners_[i]->onEvent(e);
-                if (e->isAccepted())
-                    break;
+            // don't forward this event to ourselves - otherwise we'll end up with an endless loop.
+            if (listeners_[i] == this) {
+                tgt::EventListener::onEvent(e);
             }
+            // check if current listener listens to the eventType of e
+            else if (listeners_[i]->getEventTypes() & e->getEventType() ){
+                listeners_[i]->onEvent(e);
+            }
+
+            if (e->isAccepted())
+                break;
         }
     }
 
