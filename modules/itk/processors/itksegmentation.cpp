@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
@@ -33,6 +33,7 @@
 #include <itkCastImageFilter.h>
 #include <itkConnectedThresholdImageFilter.h>
 #include <itkMaskImageFilter.h>
+#include <itkRescaleIntensityImageFilter.h>
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -56,11 +57,17 @@
         itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
         typedef itk::Image<itk::IdentifierType, MA_dimensionality> LabelImageType; \
         typedef itk::MaskImageFilter< OutputImageType, OutputImageType > MaskFilterType;\
-        MaskFilterType::Pointer maskFilter = MaskFilterType::New();\
+        /*rescale the intensity values for the interval [0,255] (some images yield intensities outside this range)*/ \
+        typedef itk::RescaleIntensityImageFilter< InputImageType, InputImageType > RescaleFilterType;\
+        RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New(); \
+        rescaleFilter->SetInput(itkRep->getItkImage()); \
+        rescaleFilter->SetOutputMinimum(0); \
+        rescaleFilter->SetOutputMaximum(255); \
+        MaskFilterType::Pointer maskFilter = MaskFilterType::New(); \
         MD_filterBody \
-        filter->SetInput(itkRep->getItkImage()); \
+        filter->SetInput(rescaleFilter->GetOutput()); \
         filter->Update(); \
-        maskFilter->SetInput(itkRep->getItkImage()); \
+        maskFilter->SetInput(rescaleFilter->GetOutput()); \
         maskFilter->SetMaskImage(filter->GetOutput());\
         itk::CastImageFilter<OutputImageType, OutputImageType>::Pointer caster = itk::CastImageFilter<OutputImageType, OutputImageType>::New(); \
         caster->SetInput(maskFilter->GetOutput()); \
