@@ -30,7 +30,9 @@
 
 namespace sigslot {
 
-    signal_manager::signal_manager() {
+    signal_manager::signal_manager() 
+        : _handlingMode(DEFAULT)
+    {
 
     }
 
@@ -38,12 +40,22 @@ namespace sigslot {
 
     }
 
-    void signal_manager::triggerSignal(_signal_handle_base* signal) const {
+    void signal_manager::triggerSignal(_signal_handle_base* signal) {
+        if (_handlingMode == FORCE_QUEUE) {
+            queueSignal(signal);
+            return;
+        }
+
         signal->emitSignal();
         delete signal;
     }
 
     bool signal_manager::queueSignal(_signal_handle_base* signal) {
+        if (_handlingMode == FORCE_DIRECT) {
+            triggerSignal(signal);
+            return true;
+        }
+
         tgtAssert(signal != 0, "Signal must not be 0.");
         if (signal == 0)
             return false;
@@ -78,6 +90,14 @@ namespace sigslot {
 
     bool signal_manager::isCurrentThreadSignalManagerThread() const {
         return std::this_thread::get_id() == _this_thread_id;
+    }
+
+    signal_manager::SignalHandlingMode signal_manager::getSignalHandlingMode() const {
+        return _handlingMode;
+    }
+
+    void signal_manager::setSignalHandlingMode(SignalHandlingMode mode) {
+        _handlingMode = mode;
     }
 
 

@@ -57,6 +57,7 @@
 
 #include "tgt/assert.h"
 #include <ext/threading.h>
+
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_vector.h>
 
@@ -270,12 +271,30 @@ namespace sigslot {
         friend class tgt::Singleton<signal_manager>;
 
     public:
+        /// Enumeration of signal handling modes for the signal_manager
+        enum SignalHandlingMode {
+            DEFAULT,        ///< Default mode is that all signals are queued unless they are emitted from the signal_manager thread.
+            FORCE_DIRECT,   ///< Force all signals being directly handled by the emitting thread.
+            FORCE_QUEUE     ///< Force all signals being queued and handled by the signal_manager thread.
+        };
+
+        /**
+         * Returns the signal handling mode of this signal_manager.
+         */
+        SignalHandlingMode getSignalHandlingMode() const;
+
+        /**
+         * Sets the signal handling mode of this signal_manager to \mode.
+         * \param   mode    New signal handling mode to set.
+         */
+        void setSignalHandlingMode(SignalHandlingMode mode);
+
         /**
          * Directly dispatches the signal \a signal to all currently registered listeners.
          * \note    For using threaded signal dispatching use queueSignal()
          * \param   signal   signal to dispatch
          */
-        void triggerSignal(_signal_handle_base* signal) const;
+        void triggerSignal(_signal_handle_base* signal);
 
         /**
          * Enqueue \a signal into the list of signals to be dispatched.
@@ -306,6 +325,7 @@ namespace sigslot {
         /// Typedef for the signal queue
         typedef tbb::concurrent_queue<_signal_handle_base*> SignalQueue;
 
+        SignalHandlingMode _handlingMode;               ///< Mode for handling signals
         SignalQueue _signalQueue;                       ///< Queue for signals to be dispatched
 
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process

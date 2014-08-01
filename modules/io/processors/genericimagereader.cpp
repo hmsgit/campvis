@@ -154,7 +154,7 @@ namespace campvis {
         MetaProperty* meta = new MetaProperty(reader->getName()+"MetaProp", reader->getName());
         meta->addPropertyCollection(*reader);
         meta->setVisible(false);
-
+        this->addProperty(*meta);
 
         StringProperty* sp = dynamic_cast<StringProperty*>(meta->getProperty("url"));
         tgtAssert(sp != 0, "This should not happen.");
@@ -163,7 +163,6 @@ namespace campvis {
             sp->setVisible(false);
         }
 
-        this->addProperty(*meta);
         this->_readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
         return 0;
     }
