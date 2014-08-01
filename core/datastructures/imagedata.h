@@ -26,6 +26,8 @@
 #define IMAGEDATA_H__
 
 #include <tbb/concurrent_vector.h>
+#include <tbb/spin_mutex.h>
+
 #include "tgt/logmanager.h"
 #include "tgt/vector.h"
 
@@ -195,6 +197,9 @@ namespace campvis {
         const size_t _numElements;                      ///< number of elements (= tgt::hmul(size))
         ImageMappingInformation _mappingInformation;    ///< Mapping information of this image
 
+        /// Mutex protecting the representation conversions to ensure that there is only one conversion happening at a time.
+        mutable tbb::spin_mutex _conversionMutex;
+
         static const std::string loggerCat_;
     };
 
@@ -212,6 +217,15 @@ namespace campvis {
 
         // no representation found, create a new one
         if (performConversion) {
+            tbb::spin_mutex::scoped_lock lock(_conversionMutex);
+
+            // in the meantime, there something might have changed, so check again whether there is a new rep.
+            for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
+                if (const T* tester = dynamic_cast<const T*>(*it)) {
+                    return tester;
+                }
+            }
+
             return tryPerformConversion<T>();
         }
 
@@ -220,18 +234,16 @@ namespace campvis {
 
     template<typename T>
     const T* campvis::ImageData::tryPerformConversion() const {
-        // TODO: Currently, we do not check, for multiple parallel conversions into the same
-        //       target type. This does not harm thread-safety but may lead to multiple 
-        //       representations of the same type for a single image.
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
             const T* tester = ImageRepresentationConverter::getRef().tryConvertFrom<T>(*it);
             if (tester != 0) {
+                //LDEBUG("Performed a image representation conversion from " + std::string(typeid(**it).name()) + " to " + std::string(typeid(T).name()) + ".");
                 return tester;
             }
         }
 
         // could not create a suitable representation
-        LWARNING("Could not create a " + std::string(typeid(T*).name()) + " representation.");
+        LWARNING("Could not create a " + std::string(typeid(T).name()) + " representation.");
         return 0;
     }
 
