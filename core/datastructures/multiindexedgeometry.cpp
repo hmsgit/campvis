@@ -108,14 +108,10 @@ namespace campvis {
 
         if (_indicesBuffer != 0)
             sum += sizeof(tgt::BufferObject);
-        if (_verticesBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_texCoordsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_colorsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_normalsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
+        for (size_t i = 0; i < NUM_BUFFERS; ++i) {
+            if (_buffers[i] != nullptr)
+                sum += sizeof(tgt::BufferObject);
+        }
 
         return sizeof(*this) + sum + (sizeof(size_t) * _indices.size()) + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * _colors.size());
     }
@@ -131,6 +127,16 @@ namespace campvis {
 
         _buffersDirty = true;
 
+    }
+
+    const std::vector<tgt::col4>& MultiIndexedGeometry::getPickingInformation() const {
+        return _pickingInformation;
+    }
+
+    void MultiIndexedGeometry::setPickingInformation(const std::vector<tgt::col4>& pickingInformation) {
+        tgtAssert(pickingInformation.size() == 0 || pickingInformation.size() == _vertices.size(), "Number of picking informations does not match number of vertices!");
+        _pickingInformation = pickingInformation;
+        _buffersDirty = true;
     }
 
     void MultiIndexedGeometry::render(GLenum mode) const {
@@ -152,6 +158,8 @@ namespace campvis {
             vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
             vao.setVertexAttributePointer(3, _normalsBuffer);
+        if (_pickingBuffer)
+            vao.setVertexAttributePointer(4, _pickingBuffer);
         vao.bindIndexBuffer(_indicesBuffer);
 
         const GLvoid** ptr = (const GLvoid**)(&_offsets.front()); // <- hidden reinterpret_cast<const GLvoid**> here, ugly OpenGL...
@@ -184,6 +192,10 @@ namespace campvis {
                     _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
                     _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
                 }
+                if (! _pickingInformation.empty()) {
+                    _pickingBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                    _pickingBuffer->data(&_pickingInformation.front(), _pickingInformation.size() * sizeof(tgt::col4), tgt::BufferObject::UNSIGNED_BYTE, 4);
+                }
             }
             catch (tgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
@@ -207,6 +219,10 @@ namespace campvis {
         return ! _textureCoordinates.empty();
     }
 
+    bool MultiIndexedGeometry::hasPickingInformation() const {
+        return !_pickingInformation.empty();
+    }
+
     void MultiIndexedGeometry::deleteIndicesBuffer() const {
         delete _indicesBuffer;
         _indicesBuffer = 0;
@@ -220,6 +236,5 @@ namespace campvis {
 
         _buffersDirty = true;
     }
-
 
 }

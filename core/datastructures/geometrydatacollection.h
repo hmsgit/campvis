@@ -110,6 +110,12 @@ namespace campvis {
         virtual bool hasTextureCoordinates() const;
 
         /**
+         * Returns whether all geometries of the collection have picking information.
+         * \return  True if all geometries of the collection set picking information during rendering.
+         */
+        virtual bool hasPickingInformation() const;
+
+        /**
          * Applies the transformation matrix \a t to each vertex of this geometry.
          * \param   t   Transformation matrix to apply
          */

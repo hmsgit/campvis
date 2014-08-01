@@ -36,6 +36,37 @@ namespace tgt {
 }
 
 namespace campvis {
+    class CAMPVIS_CORE_API GeometryDataBase {
+    public:
+        /// Enumeration for defining semantics of stored buffer data
+        enum ElementSemantic {
+            VERTEX                  = 0,    ///< Vextex data
+            TEXTURE_COORDINATE      = 1,    ///< Texture coordinate data
+            COLOR                   = 2,    ///< Color data
+            NORMAL                  = 3,    ///< Normal data
+            PICKING_INFORMATION     = 4     ///< Picking information
+        };
+
+        /// Enumeration for defining the host data type of the element
+        enum ElementHostType {
+            UINT8,
+            UINT16,
+            UINT32,
+            FLOAT,
+            VEC2,
+            VEC3,
+            VEC4
+        };
+    };
+
+    template<GeometryDataBase::ElementSemantic SEMANTIC>
+    struct GeometryDataTraits {};
+
+    template<>
+    struct GeometryDataTraits<GeometryDataBase::VERTEX> {
+        typedef tgt::vec3 HostType;
+    };
+
     /**
      * Abstract base class for geometry data in CAMPVis.
      * 
@@ -50,7 +81,7 @@ namespace campvis {
      *  - Vertex normals: Vertex attribute 3
      * 
      */    
-    class CAMPVIS_CORE_API GeometryData : public AbstractData, public IHasWorldBounds {
+    class CAMPVIS_CORE_API GeometryData : public AbstractData, public GeometryDataBase, public IHasWorldBounds {
     public:
         /**
          * Constructor
@@ -91,11 +122,23 @@ namespace campvis {
          */
         virtual tgt::Bounds getWorldBounds() const = 0;
 
+        template<GeometryDataBase::ElementSemantic SEMANTIC>
+        const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* getElementData() const;
+
+        template<GeometryDataBase::ElementSemantic SEMANTIC>
+        void setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData);
+
         /**
          * Returns whether the geometry has texture coordinates.
          * \return  True if this geometry sets texture coordinates during rendering.
          */
         virtual bool hasTextureCoordinates() const = 0;
+
+        /**
+         * Returns whether this geometry has picking information.
+         * \return  True if this geometry sets picking information during rendering.
+         */
+        virtual bool hasPickingInformation() const = 0;
 
         /**
          * Applies the transformation matrix \a t to each vertex of this geometry.
@@ -131,6 +174,13 @@ namespace campvis {
          */
         const tgt::BufferObject* getNormalsBuffer() const;
 
+        /**
+         * Returns the Pointer to the OpenGL Buffer with the vertex normals.
+         * May be 0 if none are present or not yet created.
+         * \return  _normalsBuffer
+         */
+        const tgt::BufferObject* getPickingBuffer() const;
+
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
@@ -140,10 +190,13 @@ namespace campvis {
          */
         void deleteBuffers() const;
 
+        std::vector<void*> _elementPointers;
+
+
         // mutable to support const lazy initialization
         mutable bool _buffersDirty;             ///< Flag whether the buffers are dirty (i.e. need to be (re)initialized)
 
-        enum { NUM_BUFFERS = 4 };               ///< Number of buffers in _buffers array
+        enum { NUM_BUFFERS = 5 };               ///< Number of buffers in _buffers array
 
         union {
             struct {
@@ -151,6 +204,7 @@ namespace campvis {
                 mutable tgt::BufferObject* _texCoordsBuffer;    ///< Pointer to the OpenGL Buffer with the vertex texture coordinates
                 mutable tgt::BufferObject* _colorsBuffer;       ///< Pointer to the OpenGL Buffer with the vertex colors
                 mutable tgt::BufferObject* _normalsBuffer;      ///< Pointer to the OpenGL Buffer with the vertex normals
+                mutable tgt::BufferObject* _pickingBuffer;      ///< Pointer to the OpenGL Buffer with the picking information
             };
 
             mutable tgt::BufferObject* _buffers[NUM_BUFFERS];   ///< Array of all buffers
@@ -160,6 +214,27 @@ namespace campvis {
 
         static const std::string loggerCat_;
     };
+
+    template<GeometryDataBase::ElementSemantic SEMANTIC>
+    const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* GeometryData::getElementData() const {
+        if (_elementPointers.size() >= SEMANTIC) {
+            return static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(_elementPointers[SEMANTIC]);
+        }
+
+        return nullptr;
+    }
+
+    template<GeometryDataBase::ElementSemantic SEMANTIC>
+    void GeometryData::setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData) {
+        if (_elementPointers.size() < SEMANTIC + 1)
+            _elementPointers.resize(SEMANTIC, nullptr);
+
+        void* oldPtr = _elementPointers[SEMANTIC];
+        if (oldPtr != elementData)
+            delete static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(oldPtr);
+
+        _elementPointers[SEMANTIC] = elementData;
+    }
 
 }
 

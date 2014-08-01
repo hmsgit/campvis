@@ -22,8 +22,8 @@
 // 
 // ================================================================================================
 
-#ifndef INDEXEDIndexedMeshGeometry_H__
-#define INDEXEDIndexedMeshGeometry_H__
+#ifndef INDEXEDMESHGEOMETRY_H__
+#define INDEXEDMESHGEOMETRY_H__
 
 #include "tgt/bounds.h"
 #include "tgt/vector.h"
@@ -79,6 +79,20 @@ namespace campvis {
          */
         IndexedMeshGeometry& operator=(const IndexedMeshGeometry& rhs);
 
+
+        /**
+         * The list of picking information colors, may be empty.
+         * \return  _pickingInformation
+         */
+        const std::vector<tgt::col4>& getPickingInformation() const;
+
+        /**
+         * Sets the picking information of this geometry to \a pickingInformation
+         * \param   pickingInformation  The new list of picking information for this geometry
+         */
+        void setPickingInformation(const std::vector<tgt::col4>& pickingInformation);
+
+
         /// \see AbstractData::clone()
         virtual IndexedMeshGeometry* clone() const;
 
@@ -99,6 +113,8 @@ namespace campvis {
         virtual tgt::Bounds getWorldBounds() const;
         /// \see GeometryData::hasTextureCoordinates
         virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::hasPickingInformation
+        virtual bool hasPickingInformation() const;
         /// \see GeometryData::applyTransformationToVertices
         virtual void applyTransformationToVertices(const tgt::mat4& t);
 
@@ -118,6 +134,8 @@ namespace campvis {
         std::vector<tgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
         std::vector<tgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
 
+        std::vector<tgt::col4> _pickingInformation;     ///< The list of picking information colors, max be empty.
+
         mutable tgt::BufferObject* _indicesBuffer;
 
         static const std::string loggerCat_;
@@ -125,4 +143,4 @@ namespace campvis {
 
 }
 
-#endif // INDEXEDIndexedMeshGeometry_H__
+#endif // INDEXEDMESHGEOMETRY_H__

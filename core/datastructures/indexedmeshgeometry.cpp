@@ -84,6 +84,7 @@ namespace campvis {
         _textureCoordinates = rhs._textureCoordinates;
         _colors = rhs._colors;
         _normals = rhs._normals;
+        _pickingInformation = rhs._pickingInformation;
 
         // delete old VBOs and null pointers
         deleteIndicesBuffer();
@@ -91,23 +92,28 @@ namespace campvis {
         return *this;
     }
 
+    const std::vector<tgt::col4>& IndexedMeshGeometry::getPickingInformation() const {
+        return _pickingInformation;
+    }
+
+    void IndexedMeshGeometry::setPickingInformation(const std::vector<tgt::col4>& pickingInformation) {
+        tgtAssert(pickingInformation.size() == 0 || pickingInformation.size() == _vertices.size(), "Number of picking informations does not match number of vertices!");
+        _pickingInformation = pickingInformation;
+        _buffersDirty = true;
+    }
+
     IndexedMeshGeometry* IndexedMeshGeometry::clone() const {
-        return new IndexedMeshGeometry(_indices, _vertices, _textureCoordinates, _colors, _normals);
+        IndexedMeshGeometry* toReturn = new IndexedMeshGeometry(_indices, _vertices, _textureCoordinates, _colors, _normals);
+        toReturn->setPickingInformation(_pickingInformation);
+        return toReturn;
     }
 
     size_t IndexedMeshGeometry::getLocalMemoryFootprint() const {
         size_t sum = 0;
-
-        if (_indicesBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_verticesBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_texCoordsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_colorsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_normalsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
+        for (size_t i = 0; i < NUM_BUFFERS; ++i) {
+            if (_buffers[i] != nullptr)
+                sum += sizeof(tgt::BufferObject);
+        }
 
         return sizeof(*this) + sum + (sizeof(size_t) * _indices.size()) + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * _colors.size());
     }
@@ -136,6 +142,8 @@ namespace campvis {
             vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
             vao.setVertexAttributePointer(3, _normalsBuffer);
+        if (_pickingBuffer)
+            vao.setVertexAttributePointer(4, _pickingBuffer);
         vao.bindIndexBuffer(_indicesBuffer);
 
         glDrawElements(mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_SHORT, 0);
@@ -166,6 +174,10 @@ namespace campvis {
                     _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
                     _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
                 }
+                if (! _pickingInformation.empty()) {
+                    _pickingBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                    _pickingBuffer->data(&_pickingInformation.front(), _pickingInformation.size() * sizeof(tgt::col4), tgt::BufferObject::UNSIGNED_BYTE, 4);
+                }
             }
             catch (tgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
@@ -194,6 +206,10 @@ namespace campvis {
         return ! _textureCoordinates.empty();
     }
 
+    bool IndexedMeshGeometry::hasPickingInformation() const {
+        return _pickingInformation.empty();
+    }
+
     void IndexedMeshGeometry::applyTransformationToVertices(const tgt::mat4& t) {
         for (size_t i = 0; i < _vertices.size(); ++i) {
             tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
@@ -202,6 +218,5 @@ namespace campvis {
 
         _buffersDirty = true;
     }
-
 
 }

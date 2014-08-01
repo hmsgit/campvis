@@ -56,14 +56,10 @@ namespace campvis {
         for (std::vector<FaceGeometry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it)
             sum += it->getLocalMemoryFootprint();
 
-        if (_verticesBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_texCoordsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_colorsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_normalsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
+        for (size_t i = 0; i < NUM_BUFFERS; ++i) {
+            if (_buffers[i] != nullptr)
+                sum += sizeof(tgt::BufferObject);
+        }
 
         return sizeof(*this) + sum;
     }
@@ -96,6 +92,8 @@ namespace campvis {
             vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
             vao.setVertexAttributePointer(3, _normalsBuffer);
+        if (_pickingBuffer)
+            vao.setVertexAttributePointer(4, _pickingBuffer);
         LGL_ERROR;
 
         GLint startIndex = 0;
@@ -117,6 +115,7 @@ namespace campvis {
             bool createTexCoordsBuffer = true;
             bool createColorsBuffer = true;
             bool createNormalsBuffer = true;
+            bool createPickingBuffer = true;
 
             size_t totalVertices = 0;
             // Check which buffers are to create. Meanwhile calculate the total number of vertices:
@@ -126,6 +125,7 @@ namespace campvis {
                 createTexCoordsBuffer &= !(it->getTextureCoordinates().empty());
                 createColorsBuffer &= !(it->getColors().empty());
                 createNormalsBuffer &= !(it->getNormals().empty());
+                createPickingBuffer &= !(it->getPickingInformation().empty());
 
 #ifdef CAMPVIS_DEBUG
                 if (!createTexCoordsBuffer && !(it->getTextureCoordinates().empty()))
@@ -134,6 +134,8 @@ namespace campvis {
                     LWARNING("Presence of colors in faces not consistent, not generating colors VBO!");
                 if (!createNormalsBuffer && !(it->getNormals().empty()))
                     LWARNING("Presence of normals in faces not consistent, not generating normals VBO!");
+                if (!createPickingBuffer && !(it->getPickingInformation().empty()))
+                    LWARNING("Presence of picking information in faces not consistent, not generating normals VBO!");
 #endif
             }
 
@@ -154,6 +156,10 @@ namespace campvis {
                     _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
                     _normalsBuffer->data(0, totalVertices * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
                 }
+                if (createPickingBuffer) {
+                    _pickingBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                    _pickingBuffer->data(0, totalVertices * sizeof(tgt::vec4), tgt::BufferObject::FLOAT, 4);
+                }
 
                 // Now start filling the VBOs with data, one face at a time...
                 size_t startIndex = 0;
@@ -170,6 +176,8 @@ namespace campvis {
                         _colorsBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getColors().front()), numVertices * sizeof(tgt::vec4));
                     if (createNormalsBuffer)
                         _normalsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getNormals().front()), numVertices * sizeof(tgt::vec3));
+                    if (createPickingBuffer)
+                        _pickingBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getPickingInformation().front()), numVertices * sizeof(tgt::vec4));
                 
                     startIndex += numVertices;
                 }
@@ -282,6 +290,7 @@ namespace campvis {
                 // build face
                 std::vector<tgt::vec3> verts, texCoords, norms;
                 std::vector<tgt::vec4> cols;
+                std::vector<tgt::col4> picks;
 
                 for (std::list< Vertex >::iterator it = sortedVertices.begin(); it != sortedVertices.end(); ++it) {
                     verts.push_back(tmp[it->first].getVertices()[it->second]);
@@ -291,8 +300,11 @@ namespace campvis {
                         cols.push_back(tmp[it->first].getColors()[it->second]);
                     if (! tmp[it->first].getNormals().empty())
                         norms.push_back(tmp[it->first].getNormals()[it->second]);
+                    if (! tmp[it->first].getPickingInformation().empty())
+                        picks.push_back(tmp[it->first].getPickingInformation()[it->second]);
                 }
                 tmp.push_back(FaceGeometry(verts, texCoords, cols, norms));
+                tmp.back().setPickingInformation(picks);
             }
         }
 
@@ -311,6 +323,14 @@ namespace campvis {
         bool toReturn = true;
         for (size_t i = 0; i < _faces.size(); ++i) {
             toReturn &= _faces[i].hasTextureCoordinates();
+        }
+        return toReturn;
+    }
+
+    bool MeshGeometry::hasPickingInformation() const {
+        bool toReturn = true;
+        for (size_t i = 0; i < _faces.size(); ++i) {
+            toReturn &= _faces[i].hasPickingInformation();
         }
         return toReturn;
     }
