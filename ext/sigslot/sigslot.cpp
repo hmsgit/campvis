@@ -46,7 +46,7 @@ namespace sigslot {
             return;
         }
 
-        signal->emitSignal();
+        signal->processSignal();
         delete signal;
     }
 
@@ -73,7 +73,7 @@ namespace sigslot {
             // try pop the next event from the event queue
             _signal_handle_base* signal;
             if (_signalQueue.try_pop(signal)) {
-                signal->emitSignal();
+                signal->processSignal();
                 delete signal;
             }
             else {

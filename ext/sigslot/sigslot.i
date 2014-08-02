@@ -280,7 +280,7 @@ namespace sigslot {
             return nullptr;
         }
 
-        virtual void emitSignal() {
+        virtual void processSignal() {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList = new std::list<ArgWithTypeInfoType>(0);
             this->callLuaSlot(argWithTypeInfoList);
         }
@@ -318,7 +318,7 @@ namespace sigslot {
             return nullptr;
         }
 
-        virtual void emitSignal(arg1_type a1) {
+        virtual void processSignal(arg1_type a1) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList = getArgWithTypeInfoList<arg1_type>(a1);
             this->callLuaSlot(argWithTypeInfoList);
         }
@@ -357,7 +357,7 @@ namespace sigslot {
             return nullptr;
         }
 
-        virtual void emitSignal(arg1_type a1, arg2_type a2) {
+        virtual void processSignal(arg1_type a1, arg2_type a2) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList = getArgWithTypeInfoList<arg1_type, arg2_type>(a1, a2);
             this->callLuaSlot(argWithTypeInfoList);
         }
@@ -397,7 +397,7 @@ namespace sigslot {
             return nullptr;
         }
 
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3) {
+        virtual void processSignal(arg1_type a1, arg2_type a2, arg3_type a3) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type>(a1, a2, a3);
             this->callLuaSlot(argWithTypeInfoList);
@@ -438,7 +438,7 @@ namespace sigslot {
             return nullptr;
         }
 
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4) {
+        virtual void processSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type>(a1, a2, a3, a4);
             this->callLuaSlot(argWithTypeInfoList);
@@ -479,7 +479,7 @@ namespace sigslot {
             return nullptr;
         }
 
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5) {
+        virtual void processSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5) {
             std::list<ArgWithTypeInfoType>* argWithTypeInfoList =
                     getArgWithTypeInfoList<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(a1, a2, a3, a4, a5);
             this->callLuaSlot(argWithTypeInfoList);

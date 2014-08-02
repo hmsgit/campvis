@@ -250,7 +250,15 @@ namespace sigslot {
         /// Virtual destructor
         virtual ~_signal_handle_base() {};
         /// Emits the signal of this signal handle.
-        virtual void emitSignal() const = 0;
+        virtual void processSignal() const = 0;
+
+#ifdef CAMPVIS_DEBUG
+        // This is debug information only, automatically removed from release builds
+
+        std::string _callingFunction;   ///< Function that emitted this signal
+        std::string _callingFile;       ///< File which emitted this signal
+        int _callingLine;               ///< Line where this signal was emitted
+#endif
     };
 
 // ================================================================================================
@@ -347,7 +355,7 @@ namespace sigslot {
     public:
         virtual ~_connection_base0() {}
         virtual has_slots* getdest() const = 0;
-        virtual void emitSignal() = 0;
+        virtual void processSignal() = 0;
         virtual _connection_base0* clone() = 0;
         virtual _connection_base0* duplicate(has_slots* pnewdest) = 0;
     };
@@ -358,7 +366,7 @@ namespace sigslot {
     public:
         virtual ~_connection_base1() {}
         virtual has_slots* getdest() const = 0;
-        virtual void emitSignal(arg1_type) = 0;
+        virtual void processSignal(arg1_type) = 0;
         virtual _connection_base1<arg1_type>* clone() = 0;
         virtual _connection_base1<arg1_type>* duplicate(has_slots* pnewdest) = 0;
     };
@@ -369,7 +377,7 @@ namespace sigslot {
     public:
         virtual ~_connection_base2() {}
         virtual has_slots* getdest() const = 0;
-        virtual void emitSignal(arg1_type, arg2_type) = 0;
+        virtual void processSignal(arg1_type, arg2_type) = 0;
         virtual _connection_base2<arg1_type, arg2_type>* clone() = 0;
         virtual _connection_base2<arg1_type, arg2_type>* duplicate(has_slots* pnewdest) = 0;
     };
@@ -380,7 +388,7 @@ namespace sigslot {
     public:
         virtual ~_connection_base3() {}
         virtual has_slots* getdest() const = 0;
-        virtual void emitSignal(arg1_type, arg2_type, arg3_type) = 0;
+        virtual void processSignal(arg1_type, arg2_type, arg3_type) = 0;
         virtual _connection_base3<arg1_type, arg2_type, arg3_type>* clone() = 0;
         virtual _connection_base3<arg1_type, arg2_type, arg3_type>* duplicate(has_slots* pnewdest) = 0;
     };
@@ -391,7 +399,7 @@ namespace sigslot {
     public:
         virtual ~_connection_base4() {}
         virtual has_slots* getdest() const = 0;
-        virtual void emitSignal(arg1_type, arg2_type, arg3_type, arg4_type) = 0;
+        virtual void processSignal(arg1_type, arg2_type, arg3_type, arg4_type) = 0;
         virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* clone() = 0;
         virtual _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>* duplicate(has_slots* pnewdest) = 0;
     };
@@ -402,7 +410,7 @@ namespace sigslot {
     public:
         virtual ~_connection_base5() {}
         virtual has_slots* getdest() const = 0;
-        virtual void emitSignal(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type) = 0;
+        virtual void processSignal(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type) = 0;
         virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* clone() = 0;
         virtual _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* duplicate(has_slots* pnewdest) = 0;
     };
@@ -415,8 +423,26 @@ namespace sigslot {
     public:
         virtual void slot_disconnect(has_slots* pslot) = 0;
         virtual void slot_duplicate(has_slots const* poldslot, has_slots* pnewslot) = 0;
+
+#ifdef CAMPVIS_DEBUG
+    protected:
+        // This is debug information only, automatically removed from release builds
+        // using local variables is not really thread-safe, but for debug-only code, this is a risk we can take.
+        std::string _callingFunction;   ///< Function that emitted the last signal
+        std::string _callingFile;       ///< File which emitted the last signal
+        int _callingLine;               ///< Line where the last signal was emitted
+
+        // In debug mode, this macro writes the caller information to the signal handle
+        #define writeDebugInfoToSignalHandle(_the_signal_handle) \
+            _the_signal_handle->_callingFunction = this->_callingFunction; \
+            _the_signal_handle->_callingFile = this->_callingFile; \
+            _the_signal_handle->_callingLine = this->_callingLine;
+#else
+        // In release mode, this macro expands to a NOP.
+        #define writeDebugInfoToSignalHandle(_the_signal_handle) 
+#endif
     };
-    
+
     class SIGSLOT_API has_slots
     {
     private:
@@ -1088,7 +1114,7 @@ namespace sigslot {
             return new _connection0<dest_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
-        virtual void emitSignal()
+        virtual void processSignal()
         {
             (m_pobject->*m_pmemfun)();
         }
@@ -1129,7 +1155,7 @@ namespace sigslot {
             return new _connection1<dest_type, arg1_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
-        virtual void emitSignal(arg1_type a1)
+        virtual void processSignal(arg1_type a1)
         {
             (m_pobject->*m_pmemfun)(a1);
         }
@@ -1171,7 +1197,7 @@ namespace sigslot {
             return new _connection2<dest_type, arg1_type, arg2_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
-        virtual void emitSignal(arg1_type a1, arg2_type a2)
+        virtual void processSignal(arg1_type a1, arg2_type a2)
         {
             (m_pobject->*m_pmemfun)(a1, a2);
         }
@@ -1213,7 +1239,7 @@ namespace sigslot {
             return new _connection3<dest_type, arg1_type, arg2_type, arg3_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3)
+        virtual void processSignal(arg1_type a1, arg2_type a2, arg3_type a3)
         {
             (m_pobject->*m_pmemfun)(a1, a2, a3);
         }
@@ -1254,7 +1280,7 @@ namespace sigslot {
             return new _connection4<dest_type, arg1_type, arg2_type, arg3_type, arg4_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+        virtual void processSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
         {
             (m_pobject->*m_pmemfun)(a1, a2, a3, a4);
         }
@@ -1295,7 +1321,7 @@ namespace sigslot {
             return new _connection5<dest_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>((dest_type *)pnewdest, m_pmemfun);
         }
         
-        virtual void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+        virtual void processSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
         {
             (m_pobject->*m_pmemfun)(a1, a2, a3, a4, a5);
         }
@@ -1329,14 +1355,14 @@ namespace sigslot {
             virtual ~signal_handle0() {};
 
             // override
-            void emitSignal() const {
+            void processSignal() const {
                 connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
                 connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->emitSignal();
+                    (*it)->processSignal();
                     it = itNext;
                 }
             };
@@ -1363,24 +1389,31 @@ namespace sigslot {
         void trigger()
         {
             signal_handle0* sh = new signal_handle0(this);
+            writeDebugInfoToSignalHandle(sh);
             signal_manager::getRef().triggerSignal(sh);
         }
         
         void queue()
         {
             signal_handle0* sh = new signal_handle0(this);
+            writeDebugInfoToSignalHandle(sh);
             signal_manager::getRef().queueSignal(sh);
         }
 
-        void operator()()
+        void emitSignal()
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
                 trigger();
             else
                 queue();
         }
+
+        void operator()()
+        {
+            emitSignal();
+        }
     };
-    
+
     template<class arg1_type>
     class signal1 : public _signal_base1<arg1_type>
     {
@@ -1399,14 +1432,14 @@ namespace sigslot {
             virtual ~signal_handle1() {};
 
             // override
-            void emitSignal() const {
+            void processSignal() const {
                 typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
                 typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->emitSignal(_a1);
+                    (*it)->processSignal(_a1);
                     it = itNext;
                 }
             };
@@ -1433,21 +1466,28 @@ namespace sigslot {
         void trigger(arg1_type a1)
         {
             signal_handle1* sh = new signal_handle1(this, a1);
+            writeDebugInfoToSignalHandle(sh);
             signal_manager::getRef().triggerSignal(sh);
         }
 
         void queue(arg1_type a1)
         {
             signal_handle1* sh = new signal_handle1(this, a1);
+            writeDebugInfoToSignalHandle(sh);
             signal_manager::getRef().queueSignal(sh);
         }
 
-        void operator()(arg1_type a1)
+        void emitSignal(arg1_type a1)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
                 trigger(a1);
             else
                 queue(a1);
+        }
+
+        void operator()(arg1_type a1)
+        {
+            emitSignal(a1);
         }
     };
     
@@ -1470,14 +1510,14 @@ namespace sigslot {
             virtual ~signal_handle2() {};
 
             // override
-            void emitSignal() const {
+            void processSignal() const {
                 typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
                 typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->emitSignal(_a1, _a2);
+                    (*it)->processSignal(_a1, _a2);
                     it = itNext;
                 }
             };
@@ -1506,21 +1546,28 @@ namespace sigslot {
         void trigger(arg1_type a1, arg2_type a2)
         {
             signal_handle2* sh = new signal_handle2(this, a1, a2);
+            writeDebugInfoToSignalHandle(sh);
             signal_manager::getRef().triggerSignal(sh);
         }
 
         void queue(arg1_type a1, arg2_type a2)
         {
             signal_handle2* sh = new signal_handle2(this, a1, a2);
+            writeDebugInfoToSignalHandle(sh);
             signal_manager::getRef().queueSignal(sh);
         }
         
-        void operator()(arg1_type a1, arg2_type a2)
+        void emitSignal(arg1_type a1, arg2_type a2)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
                 trigger(a1, a2);
             else
                 queue(a1, a2);
+        }
+
+        void operator()(arg1_type a1, arg2_type a2)
+        {
+            emitSignal(a1, a2);
         }
     };
     
@@ -1544,14 +1591,14 @@ namespace sigslot {
             virtual ~signal_handle3() {};
 
             // override
-            void emitSignal() const {
+            void processSignal() const {
                 typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
                 typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->emitSignal(_a1, _a2, _a3);
+                    (*it)->processSignal(_a1, _a2, _a3);
                     it = itNext;
                 }
             };
@@ -1590,12 +1637,17 @@ namespace sigslot {
             signal_manager::getRef().queueSignal(sh);
         }
         
-        void operator()(arg1_type a1, arg2_type a2, arg3_type a3)
+        void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
                 trigger(a1, a2, a3);
             else
                 queue(a1, a2, a3);
+        }
+
+        void operator()(arg1_type a1, arg2_type a2, arg3_type a3)
+        {
+            emitSignal(a1, a2, a3);
         }
     };
     
@@ -1620,14 +1672,14 @@ namespace sigslot {
             virtual ~signal_handle4() {};
 
             // override
-            void emitSignal() const {
+            void processSignal() const {
                 typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
                 typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->emitSignal(_a1, _a2, _a3, _a4);
+                    (*it)->processSignal(_a1, _a2, _a3, _a4);
                     it = itNext;
                 }
             };
@@ -1666,12 +1718,17 @@ namespace sigslot {
             signal_manager::getRef().queueSignal(sh);
         }
         
-        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+        void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
                 trigger(a1, a2, a3, a4);
             else
                 queue(a1, a2, a3, a4);
+        }
+
+        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+        {
+            emitSignal(a1, a2, a3, a4);
         }
     };
     
@@ -1697,14 +1754,14 @@ namespace sigslot {
             virtual ~signal_handle5() {};
 
             // override
-            void emitSignal() const {
+            void processSignal() const {
                 typename connections_list::const_iterator itNext, it = _sender->m_connected_slots.begin();
                 typename connections_list::const_iterator itEnd = _sender->m_connected_slots.end();
 
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->emitSignal(_a1, _a2, _a3, _a4, _a5);
+                    (*it)->processSignal(_a1, _a2, _a3, _a4, _a5);
                     it = itNext;
                 }
             };
@@ -1744,15 +1801,112 @@ namespace sigslot {
             signal_manager::getRef().queueSignal(sh);
         }
         
-        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+        void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
                 trigger(a1, a2, a3, a4, a5);
             else
                 queue(a1, a2, a3, a4, a5);
         }
+
+        void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+        {
+            emitSignal(a1, a2, a3, a4, a5);
+        }
     };
-    
+
+
+#ifdef CAMPVIS_DEBUG
+    // These are decorator classes (non strictly speaking) to add debug functionality to signals.
+    // They overload the emitSignal() method with a version that stores calling function, file and line.
+    // Together with the macro magic further down, this provides us with a clean, non-intrusive way
+    // to automatically enhance all client calls to emitSignal with additional debug information.
+    //
+    // Implementaion inspired by http://stackoverflow.com/questions/353180/how-do-i-find-the-name-of-the-calling-function
+    class signal0_debug_decorator : public signal0 {
+    public:
+        signal0_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+    };
+
+    template<class arg1_type>
+    class signal1_debug_decorator : public signal1<arg1_type> {
+    public:
+        signal1_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+    };
+
+    template<class arg1_type, class arg2_type>
+    class signal2_debug_decorator : public signal2<arg1_type, arg2_type> {
+    public:
+        signal2_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+    };
+
+    template<class arg1_type, class arg2_type, class arg3_type>
+    class signal3_debug_decorator : public signal3<arg1_type, arg2_type, arg3_type> {
+    public:
+        signal3_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+    };
+
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type>
+    class signal4_debug_decorator : public signal4<arg1_type, arg2_type, arg3_type, arg4_type> {
+    public:
+        signal4_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+    };
+
+    template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
+    class signal5_debug_decorator : public signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type> {
+    public:
+        signal5_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+    };
+
+    // redefine all necessary symbols
+    #undef signal0
+    #define signal0 signal0_debug_decorator
+    #undef signal1
+    #define signal1 signal1_debug_decorator
+    #undef signal2
+    #define signal2 signal2_debug_decorator
+    #undef signal3
+    #define signal3 signal3_debug_decorator
+    #undef signal4
+    #define signal4 signal4_debug_decorator
+    #undef signal5
+    #define signal5 signal5_debug_decorator
+
+    #undef emitSignal
+    #define emitSignal emitSignal(__FUNCTION__, __FILE__, __LINE__)
+
+#endif
+
 } // namespace sigslot
 
 #endif // SIGSLOT_H
