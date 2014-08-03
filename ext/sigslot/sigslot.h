@@ -268,8 +268,8 @@ namespace sigslot {
      * 
      * The signal_manager implements the Runnable interface, i.e. runs in it's own thread once it
      * was launched. The signal_manager takes care of dispatching signals to their connections.
-     * This is either done synchrnously by using triggerSignal() or asynchronously by using 
-     * queueSignal(). Furthermore it allows to check, whether the current thread is the 
+     * This is either done synchrnously by using triggerSignalImpl() or asynchronously by using 
+     * queueSignalImpl(). Furthermore it allows to check, whether the current thread is the 
      * signal_manager thread. This allows the default signal emitting method operator() to 
      * automatically decide on the dispatch type based on the emitting thread.
      * 
@@ -299,19 +299,19 @@ namespace sigslot {
 
         /**
          * Directly dispatches the signal \a signal to all currently registered listeners.
-         * \note    For using threaded signal dispatching use queueSignal()
+         * \note    For using threaded signal dispatching use queueSignalImpl()
          * \param   signal   signal to dispatch
          */
-        void triggerSignal(_signal_handle_base* signal);
+        void triggerSignalImpl(_signal_handle_base* signal);
 
         /**
          * Enqueue \a signal into the list of signals to be dispatched.
-         * \note    Dispatch will be perfomed in signal_mananger thread. For direct dispatch in
-         *          caller thread use triggerSignal().
+         * \note    Dispatch will be performed in signal_mananger thread. For direct dispatch in
+         *          caller thread use triggerSignalImpl().
          * \param   signal   signal to dispatch
          * \return  True, if \a signal was successfully enqueued to signal queue.
          */
-        bool queueSignal(_signal_handle_base* signal);
+        bool queueSignalImpl(_signal_handle_base* signal);
 
         /**
          * Checks whether calling thread is signal_manager thread.
@@ -1386,26 +1386,26 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void trigger()
+        void triggerSignal()
         {
             signal_handle0* sh = new signal_handle0(this);
             writeDebugInfoToSignalHandle(sh);
-            signal_manager::getRef().triggerSignal(sh);
+            signal_manager::getRef().triggerSignalImpl(sh);
         }
         
-        void queue()
+        void queueSignal()
         {
             signal_handle0* sh = new signal_handle0(this);
             writeDebugInfoToSignalHandle(sh);
-            signal_manager::getRef().queueSignal(sh);
+            signal_manager::getRef().queueSignalImpl(sh);
         }
 
         void emitSignal()
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
-                trigger();
+                triggerSignal();
             else
-                queue();
+                queueSignal();
         }
 
         void operator()()
@@ -1463,26 +1463,26 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void trigger(arg1_type a1)
+        void triggerSignal(arg1_type a1)
         {
             signal_handle1* sh = new signal_handle1(this, a1);
             writeDebugInfoToSignalHandle(sh);
-            signal_manager::getRef().triggerSignal(sh);
+            signal_manager::getRef().triggerSignalImpl(sh);
         }
 
-        void queue(arg1_type a1)
+        void queueSignal(arg1_type a1)
         {
             signal_handle1* sh = new signal_handle1(this, a1);
             writeDebugInfoToSignalHandle(sh);
-            signal_manager::getRef().queueSignal(sh);
+            signal_manager::getRef().queueSignalImpl(sh);
         }
 
         void emitSignal(arg1_type a1)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
-                trigger(a1);
+                triggerSignal(a1);
             else
-                queue(a1);
+                queueSignal(a1);
         }
 
         void operator()(arg1_type a1)
@@ -1543,26 +1543,26 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void trigger(arg1_type a1, arg2_type a2)
+        void triggerSignal(arg1_type a1, arg2_type a2)
         {
             signal_handle2* sh = new signal_handle2(this, a1, a2);
             writeDebugInfoToSignalHandle(sh);
-            signal_manager::getRef().triggerSignal(sh);
+            signal_manager::getRef().triggerSignalImpl(sh);
         }
 
-        void queue(arg1_type a1, arg2_type a2)
+        void queueSignal(arg1_type a1, arg2_type a2)
         {
             signal_handle2* sh = new signal_handle2(this, a1, a2);
             writeDebugInfoToSignalHandle(sh);
-            signal_manager::getRef().queueSignal(sh);
+            signal_manager::getRef().queueSignalImpl(sh);
         }
         
         void emitSignal(arg1_type a1, arg2_type a2)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
-                trigger(a1, a2);
+                triggerSignal(a1, a2);
             else
-                queue(a1, a2);
+                queueSignal(a1, a2);
         }
 
         void operator()(arg1_type a1, arg2_type a2)
@@ -1625,24 +1625,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void trigger(arg1_type a1, arg2_type a2, arg3_type a3)
+        void triggerSignal(arg1_type a1, arg2_type a2, arg3_type a3)
         {
             signal_handle3* sh = new signal_handle3(this, a1, a2, a3);
-            signal_manager::getRef().triggerSignal(sh);
+            signal_manager::getRef().triggerSignalImpl(sh);
         }
 
-        void queue(arg1_type a1, arg2_type a2, arg3_type a3)
+        void queueSignal(arg1_type a1, arg2_type a2, arg3_type a3)
         {
             signal_handle3* sh = new signal_handle3(this, a1, a2, a3);
-            signal_manager::getRef().queueSignal(sh);
+            signal_manager::getRef().queueSignalImpl(sh);
         }
         
         void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
-                trigger(a1, a2, a3);
+                triggerSignal(a1, a2, a3);
             else
-                queue(a1, a2, a3);
+                queueSignal(a1, a2, a3);
         }
 
         void operator()(arg1_type a1, arg2_type a2, arg3_type a3)
@@ -1706,24 +1706,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void trigger(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+        void triggerSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
         {
             signal_handle4* sh = new signal_handle4(this, a1, a2, a3, a4);
-            signal_manager::getRef().triggerSignal(sh);
+            signal_manager::getRef().triggerSignalImpl(sh);
         }
 
-        void queue(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
+        void queueSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
         {
             signal_handle4* sh = new signal_handle4(this, a1, a2, a3, a4);
-            signal_manager::getRef().queueSignal(sh);
+            signal_manager::getRef().queueSignalImpl(sh);
         }
         
         void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
-                trigger(a1, a2, a3, a4);
+                triggerSignal(a1, a2, a3, a4);
             else
-                queue(a1, a2, a3, a4);
+                queueSignal(a1, a2, a3, a4);
         }
 
         void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4)
@@ -1789,24 +1789,24 @@ namespace sigslot {
             pclass->signal_connect(this);
         }
         
-        void trigger(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+        void triggerSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
         {
             signal_handle5* sh = new signal_handle5(this, a1, a2, a3, a4, a5);
-            signal_manager::getRef().triggerSignal(sh);
+            signal_manager::getRef().triggerSignalImpl(sh);
         }
 
-        void queue(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
+        void queueSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
         {
             signal_handle5* sh = new signal_handle5(this, a1, a2, a3, a4, a5);
-            signal_manager::getRef().queueSignal(sh);
+            signal_manager::getRef().queueSignalImpl(sh);
         }
         
         void emitSignal(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
         {
             if (signal_manager::getRef().isCurrentThreadSignalManagerThread())
-                trigger(a1, a2, a3, a4, a5);
+                triggerSignal(a1, a2, a3, a4, a5);
             else
-                queue(a1, a2, a3, a4, a5);
+                queueSignal(a1, a2, a3, a4, a5);
         }
 
         void operator()(arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5)
@@ -1825,7 +1825,23 @@ namespace sigslot {
     // Implementaion inspired by http://stackoverflow.com/questions/353180/how-do-i-find-the-name-of-the-calling-function
     class signal0_debug_decorator : public signal0 {
     public:
-        signal0_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+        signal0_debug_decorator() {}
+        signal0_debug_decorator(const signal0_debug_decorator& s) : signal0(s) {}
+        virtual ~signal0_debug_decorator() {}
+
+        signal0& triggerSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal0& queueSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal0& emitSignal(std::string caller, std::string file, int line) {
             this->_callingFunction = caller;
             this->_callingFile = file;
             this->_callingLine = line;
@@ -1836,7 +1852,23 @@ namespace sigslot {
     template<class arg1_type>
     class signal1_debug_decorator : public signal1<arg1_type> {
     public:
-        signal1_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+        signal1_debug_decorator() {}
+        signal1_debug_decorator(const signal1_debug_decorator<arg1_type>& s) : signal1<arg1_type>(s) {}
+        virtual ~signal1_debug_decorator() {}
+
+        signal1<arg1_type>& triggerSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal1<arg1_type>& queueSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal1<arg1_type>& emitSignal(std::string caller, std::string file, int line) {
             this->_callingFunction = caller;
             this->_callingFile = file;
             this->_callingLine = line;
@@ -1847,7 +1879,23 @@ namespace sigslot {
     template<class arg1_type, class arg2_type>
     class signal2_debug_decorator : public signal2<arg1_type, arg2_type> {
     public:
-        signal2_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+        signal2_debug_decorator() {}
+        signal2_debug_decorator(const signal2_debug_decorator<arg1_type, arg2_type>& s) : signal2<arg1_type, arg2_type>(s) {}
+        virtual ~signal2_debug_decorator() {}
+
+        signal2<arg1_type, arg2_type>& triggerSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal2<arg1_type, arg2_type>& queueSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal2<arg1_type, arg2_type>& emitSignal(std::string caller, std::string file, int line) {
             this->_callingFunction = caller;
             this->_callingFile = file;
             this->_callingLine = line;
@@ -1858,7 +1906,23 @@ namespace sigslot {
     template<class arg1_type, class arg2_type, class arg3_type>
     class signal3_debug_decorator : public signal3<arg1_type, arg2_type, arg3_type> {
     public:
-        signal3_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+        signal3_debug_decorator() {}
+        signal3_debug_decorator(const signal3_debug_decorator<arg1_type, arg2_type, arg3_type>& s) : signal3<arg1_type, arg2_type, arg3_type>(s) {}
+        virtual ~signal3_debug_decorator() {}
+
+        signal3<arg1_type, arg2_type, arg3_type>& triggerSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal3<arg1_type, arg2_type, arg3_type>& queueSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal3<arg1_type, arg2_type, arg3_type>& emitSignal(std::string caller, std::string file, int line) {
             this->_callingFunction = caller;
             this->_callingFile = file;
             this->_callingLine = line;
@@ -1869,7 +1933,23 @@ namespace sigslot {
     template<class arg1_type, class arg2_type, class arg3_type, class arg4_type>
     class signal4_debug_decorator : public signal4<arg1_type, arg2_type, arg3_type, arg4_type> {
     public:
-        signal4_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+        signal4_debug_decorator() {}
+        signal4_debug_decorator(const signal4_debug_decorator<arg1_type, arg2_type, arg3_type, arg4_type>& s) : signal4<arg1_type, arg2_type, arg3_type, arg4_type>(s) {}
+        virtual ~signal4_debug_decorator() {}
+
+        signal4<arg1_type, arg2_type, arg3_type, arg4_type>& triggerSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal4<arg1_type, arg2_type, arg3_type, arg4_type>& queueSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal4<arg1_type, arg2_type, arg3_type, arg4_type>& emitSignal(std::string caller, std::string file, int line) {
             this->_callingFunction = caller;
             this->_callingFile = file;
             this->_callingLine = line;
@@ -1880,7 +1960,23 @@ namespace sigslot {
     template<class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
     class signal5_debug_decorator : public signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type> {
     public:
-        signal5_debug_decorator& emitSignal(std::string caller, std::string file, int line) {
+        signal5_debug_decorator() {}
+        signal5_debug_decorator(const signal5_debug_decorator<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& s) : signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(s) {}
+        virtual ~signal5_debug_decorator() {}
+
+        signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& triggerSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& queueSignal(std::string caller, std::string file, int line) {
+            this->_callingFunction = caller;
+            this->_callingFile = file;
+            this->_callingLine = line;
+            return *this;
+        }
+        signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& emitSignal(std::string caller, std::string file, int line) {
             this->_callingFunction = caller;
             this->_callingFile = file;
             this->_callingLine = line;
@@ -1902,6 +1998,10 @@ namespace sigslot {
     #undef signal5
     #define signal5 signal5_debug_decorator
 
+    #undef triggerSignal
+    #define triggerSignal triggerSignal(__FUNCTION__, __FILE__, __LINE__).triggerSignal
+    #undef queueSignal
+    #define queueSignal queueSignal(__FUNCTION__, __FILE__, __LINE__).queueSignal
     #undef emitSignal
     #define emitSignal emitSignal(__FUNCTION__, __FILE__, __LINE__)
 

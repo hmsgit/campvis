@@ -40,9 +40,9 @@ namespace sigslot {
 
     }
 
-    void signal_manager::triggerSignal(_signal_handle_base* signal) {
+    void signal_manager::triggerSignalImpl(_signal_handle_base* signal) {
         if (_handlingMode == FORCE_QUEUE) {
-            queueSignal(signal);
+            queueSignalImpl(signal);
             return;
         }
 
@@ -50,9 +50,9 @@ namespace sigslot {
         delete signal;
     }
 
-    bool signal_manager::queueSignal(_signal_handle_base* signal) {
+    bool signal_manager::queueSignalImpl(_signal_handle_base* signal) {
         if (_handlingMode == FORCE_DIRECT) {
-            triggerSignal(signal);
+            triggerSignalImpl(signal);
             return true;
         }
 
