@@ -66,8 +66,8 @@ namespace campvis {
         _handles.erase(name);
         _handles.insert(std::make_pair(name, dh));
  
-        s_dataAdded(name, dh);
-        s_changed();
+        s_dataAdded.emitSignal(name, dh);
+        s_changed.emitSignal();
     }
 
     bool DataContainer::hasData(const std::string& name) const {

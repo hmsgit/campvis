@@ -123,7 +123,7 @@ namespace campvis {
 
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &_renderTargetID) {
-            s_renderTargetChanged();
+            s_renderTargetChanged.emitSignal();
         }
         else if (prop == &_canvasSize && _canvas != 0 && !_ignoreCanvasSizeUpdate) {
             if (_canvasSize.getValue() != _canvas->getSize()) {
@@ -249,7 +249,7 @@ namespace campvis {
 
     void AbstractPipeline::onDataContainerDataAdded(const std::string& name, DataHandle dh) {
         if (name == _renderTargetID.getValue()) {
-            s_renderTargetChanged();
+            s_renderTargetChanged.emitSignal();
         }
     }
 

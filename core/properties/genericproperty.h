@@ -184,7 +184,7 @@ namespace campvis {
             GenericProperty<T>* child = static_cast< GenericProperty<T>* >(*it);
             child->setValue(value);
         }
-        s_changed(this);
+        s_changed.emitSignal(this);
     }
 
     template<typename T>

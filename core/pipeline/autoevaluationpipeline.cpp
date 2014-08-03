@@ -136,7 +136,7 @@ namespace campvis {
             PortMapType::const_iterator it = _portMap.find(name);
             while (it != _portMap.end() && it->first == name) {
                 // invalidate those properties by emitting changed signal
-                it->second->s_changed(it->second);
+                it->second->s_changed.emitSignal(it->second);
                 ++it;
             }
         }

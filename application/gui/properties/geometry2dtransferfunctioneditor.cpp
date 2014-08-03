@@ -61,19 +61,7 @@ namespace campvis {
     }
 
     Geometry2DTransferFunctionEditor::~Geometry2DTransferFunctionEditor() {
-        tbb::mutex::scoped_lock lock(_localMutex);
-
-        // clear and delete former stuff
-        _selectedGeometry = 0;
-        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
-            if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
-                tester->s_selected.disconnect(this);
-            }
-            delete *it;
-        }
-
-        Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
-        gtf->s_geometryCollectionChanged.disconnect(this);
+        disconnectFromTf();
 
         if (OpenGLJobProcessor::isInited())
             GLJobProc.deregisterContext(_canvas);
@@ -295,6 +283,32 @@ namespace campvis {
 //             }
 // 
 //             gtf->removeGeometry(geometryToRemove);
+        }
+    }
+
+    void Geometry2DTransferFunctionEditor::onTfAboutToBeDeleted() {
+        disconnectFromTf();
+    }
+
+    void Geometry2DTransferFunctionEditor::disconnectFromTf() {
+        tbb::mutex::scoped_lock lock(_localMutex);
+
+        // clear and delete former stuff
+        _selectedGeometry = 0;
+        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+            if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
+                tester->s_selected.disconnect(this);
+            }
+            delete *it;
+        }
+        _manipulators.clear();
+
+        Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
+        if (gtf != nullptr) {
+            gtf->s_geometryCollectionChanged.disconnect(this);
+            gtf->s_aboutToBeDeleted.disconnect(this);
+            _transferFunction->s_changed.disconnect(this);
+            _transferFunction = nullptr;
         }
     }
 

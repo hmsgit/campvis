@@ -105,7 +105,7 @@ namespace campvis {
             _keyPoint->_position = tfCoords.x;
             _keyPoint->_color.a = static_cast<uint8_t>(tfCoords.y * 255.f);
             std::sort(_geometry->getKeyPoints().begin(), _geometry->getKeyPoints().end());
-            _geometry->s_changed();
+            _geometry->s_changed.emitSignal();
         }
         // ignore here, because other listeners probably need this signal as well
         e->ignore();
@@ -119,7 +119,7 @@ namespace campvis {
             if(newColor.isValid()) {
                 tgt::col4 tmp = QtColorTools::toTgtColor(newColor);
                 _keyPoint->_color = tgt::col4(tmp.xyz(), _keyPoint->_color.a);
-                _geometry->s_changed();
+                _geometry->s_changed.emitSignal();
             }
             e->accept();
         }
@@ -163,7 +163,7 @@ namespace campvis {
         if (insideGeometry(_pressedPosition)) {
             _mousePressed = true;
             _valuesWhenPressed = _geometry->getKeyPoints();
-            s_selected(this);
+            s_selected.emitSignal(this);
             e->accept();
         }
         else { 
@@ -186,7 +186,7 @@ namespace campvis {
                 _geometry->getKeyPoints()[i]._position = _valuesWhenPressed[i]._position + displacement.x;
             }
 
-            _geometry->s_changed();
+            _geometry->s_changed.emitSignal();
         }
         // ignore here, because other listeners probably need this signal as well
         e->ignore();
@@ -203,7 +203,7 @@ namespace campvis {
                 for (std::vector<TFGeometry1D::KeyPoint>::iterator it = _geometry->getKeyPoints().begin(); it != _geometry->getKeyPoints().end(); ++it) {
                     it->_color = tgt::col4(tmp.xyz(), it->_color.a);
                 }
-                _geometry->s_changed();
+                _geometry->s_changed.emitSignal();
             }
             e->accept();
         }

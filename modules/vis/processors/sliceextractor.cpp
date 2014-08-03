@@ -419,12 +419,12 @@ namespace campvis {
                     if ((me->action() == tgt::MouseEvent::PRESSED) && (me->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT)) {
                         _inScribbleMode = true;
                         if (tgt::hand(tgt::greaterThanEqual(voxel, tgt::vec3(0.f))) && tgt::hand(tgt::lessThan(voxel, imgSize))) {
-                            s_scribblePainted(voxel);
+                            s_scribblePainted.emitSignal(voxel);
                         }
                     }
                     else if (_inScribbleMode && me->action() == tgt::MouseEvent::MOTION) {
                         if (tgt::hand(tgt::greaterThanEqual(voxel, tgt::vec3(0.f))) && tgt::hand(tgt::lessThan(voxel, imgSize))) {
-                            s_scribblePainted(voxel);
+                            s_scribblePainted.emitSignal(voxel);
                         }
                     }
                     else if (_inScribbleMode && me->action() == tgt::MouseEvent::RELEASED) {

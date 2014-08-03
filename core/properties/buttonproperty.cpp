@@ -37,8 +37,8 @@ namespace campvis {
     }
 
     void ButtonProperty::click() {
-        s_clicked();
-        s_changed(this);
+        s_clicked.emitSignal();
+        s_changed.emitSignal(this);
     }
 
 }

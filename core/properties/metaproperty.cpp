@@ -37,7 +37,7 @@ namespace campvis {
     }
 
     void MetaProperty::onPropertyChanged(const AbstractProperty* prop) {
-        s_changed(this);
+        s_changed.emitSignal(this);
     }
 
     void MetaProperty::addPropertyCollection(HasPropertyCollection& pc) {

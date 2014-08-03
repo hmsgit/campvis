@@ -269,7 +269,7 @@ namespace campvis {
         _luaVmState->execString("inspect(pipelines)");
 #endif
 
-        s_PipelinesChanged();
+        s_PipelinesChanged.emitSignal();
     }
 
     void CampVisApplication::initGlContextAndPipeline(tgt::GLCanvas* canvas, AbstractPipeline* pipeline) {
@@ -296,7 +296,7 @@ namespace campvis {
     DataContainer* CampVisApplication::createAndAddDataContainer(const std::string& name) {
         DataContainer* dc = new DataContainer(name);
         _dataContainers.push_back(dc);
-        s_DataContainersChanged();
+        s_DataContainersChanged.emitSignal();
         return dc;
     }
 

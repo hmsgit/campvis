@@ -111,7 +111,7 @@ namespace campvis {
             do {
                 tmp = _level;
             } while (_level.compare_and_swap(tmp | level, tmp) != tmp);
-            s_invalidated(this);
+            s_invalidated.emitSignal(this);
         }
     }
 
@@ -120,7 +120,7 @@ namespace campvis {
         do {
             tmp = _level;
         } while (_level.compare_and_swap(tmp & (~level), tmp) != tmp);
-        s_validated(this);
+        s_validated.emitSignal(this);
     }
 
     bool AbstractProcessor::getClockExecutionTime() const {

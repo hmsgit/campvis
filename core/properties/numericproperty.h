@@ -269,7 +269,7 @@ namespace campvis {
             child->setMinValue(value);
         }
 
-        this->s_minMaxChanged(this);
+        this->s_minMaxChanged.emitSignal(this);
     }
 
     template<typename T>
@@ -284,7 +284,7 @@ namespace campvis {
             child->setMaxValue(value);
         }
 
-        this->s_minMaxChanged(this);
+        this->s_minMaxChanged.emitSignal(this);
     }
 
     template<typename T>
@@ -298,7 +298,7 @@ namespace campvis {
             child->setStepValue(value);
         }
 
-        this->s_stepChanged(this);
+        this->s_stepChanged.emitSignal(this);
     }
 
     template<typename T>

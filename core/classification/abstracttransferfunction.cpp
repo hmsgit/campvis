@@ -99,8 +99,8 @@ namespace campvis {
             tbb::mutex::scoped_lock lock(_localMutex);
             _intensityDomain = newDomain;
         }
-        s_intensityDomainChanged();
-        s_changed();
+        s_intensityDomainChanged.emitSignal();
+        s_changed.emitSignal();
     }
 
     const tgt::vec2& AbstractTransferFunction::getIntensityDomain() const {

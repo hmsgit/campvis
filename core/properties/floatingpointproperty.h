@@ -174,7 +174,7 @@ namespace campvis {
             child->setDecimals(decimals);
         }
 
-        this->s_decimalsChanged(this);
+        this->s_decimalsChanged.emitSignal(this);
     }
 }
 

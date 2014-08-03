@@ -57,7 +57,7 @@ namespace campvis {
     }
 
     void TransferFunctionProperty::onTFChanged() {
-        s_changed(this);
+        s_changed.emitSignal(this);
     }
 
     void TransferFunctionProperty::deinit() {
@@ -69,7 +69,7 @@ namespace campvis {
 
     void TransferFunctionProperty::replaceTF(AbstractTransferFunction* tf) {
         tgtAssert(tf != 0, "Transfer function must not be 0.");
-        s_BeforeTFReplace(_transferFunction);
+        s_BeforeTFReplace.triggerSignal(_transferFunction); // use trigger to force blocking signal handling in same thread
 
         if (_transferFunction != 0) {
             _transferFunction->s_changed.disconnect(this);
@@ -85,7 +85,7 @@ namespace campvis {
             _transferFunction->s_intensityDomainChanged.connect(this, &TransferFunctionProperty::onTfIntensityDomainChanged);
         }
 
-        s_AfterTFReplace(_transferFunction);
+        s_AfterTFReplace.emitSignal(_transferFunction);
     }
 
     void TransferFunctionProperty::addSharedProperty(AbstractProperty* prop) {
@@ -113,12 +113,12 @@ namespace campvis {
 
         _imageHandle = imageHandle;
         _dirtyHistogram = true;
-        s_imageHandleChanged();
+        s_imageHandleChanged.emitSignal();
     }
 
     void TransferFunctionProperty::setAutoFitWindowToData(bool newValue) {
         _autoFitWindowToData = newValue;
-        s_autoFitWindowToDataChanged();
+        s_autoFitWindowToDataChanged.emitSignal();
     }
 
     bool TransferFunctionProperty::getAutoFitWindowToData() const {

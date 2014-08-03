@@ -83,6 +83,11 @@ namespace campvis {
         void onGeometryCollectionChanged();
 
         /**
+         * Slot to be called when the handled TF is about to be deleted.
+         */
+        void onTfAboutToBeDeleted();
+
+        /**
          * Slot tp be called when a WholeTFGeometryManipulator was selected.
          * \param   the selected WholeTFGeometryManipulator
          */
@@ -100,6 +105,11 @@ namespace campvis {
         void onBtnRemoveGeometryClicked();
 
     protected:
+        /**
+         * Disconnects this editor from the handled TF and cleans up everything.
+         */
+        void disconnectFromTf();
+
         /**
          * Performs the painting.
          */
