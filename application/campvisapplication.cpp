@@ -67,6 +67,8 @@ namespace campvis {
         // Make Xlib and GLX thread safe under X11
         QApplication::setAttribute(Qt::AA_X11InitThreads);
 
+        sigslot::signal_manager::init();
+        sigslot::signal_manager::getRef().start();
         _mainWindow = new MainWindow(this);
         tgt::GlContextManager::init();
 
@@ -85,6 +87,9 @@ namespace campvis {
         for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
             delete *it;
         }
+
+        sigslot::signal_manager::getRef().stop();
+        sigslot::signal_manager::deinit();
     }
 
     void CampVisApplication::init() {
@@ -264,7 +269,7 @@ namespace campvis {
         _luaVmState->execString("inspect(pipelines)");
 #endif
 
-        s_PipelinesChanged();
+        s_PipelinesChanged.emitSignal();
     }
 
     void CampVisApplication::initGlContextAndPipeline(tgt::GLCanvas* canvas, AbstractPipeline* pipeline) {
@@ -291,7 +296,7 @@ namespace campvis {
     DataContainer* CampVisApplication::createAndAddDataContainer(const std::string& name) {
         DataContainer* dc = new DataContainer(name);
         _dataContainers.push_back(dc);
-        s_DataContainersChanged();
+        s_DataContainersChanged.emitSignal();
         return dc;
     }
 

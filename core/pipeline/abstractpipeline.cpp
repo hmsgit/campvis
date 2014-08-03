@@ -123,7 +123,7 @@ namespace campvis {
 
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &_renderTargetID) {
-            s_renderTargetChanged();
+            s_renderTargetChanged.emitSignal();
         }
         else if (prop == &_canvasSize && _canvas != 0 && !_ignoreCanvasSizeUpdate) {
             if (_canvasSize.getValue() != _canvas->getSize()) {
@@ -142,7 +142,7 @@ namespace campvis {
         return *_data;
     }
 
-    void AbstractPipeline::executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred) {
+    void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
         tgtAssert(processor != 0, "Processor must not be 0.");
 
         // execute processor if needed
@@ -219,12 +219,12 @@ namespace campvis {
         tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
         GLJobProc.enqueueJob(
             _canvas, 
-            makeJobOnHeap<AbstractPipeline, AbstractProcessor*, bool>(this, &AbstractPipeline::executeProcessor, processor, true),
+            makeJobOnHeap<AbstractPipeline, AbstractProcessor*>(this, &AbstractPipeline::executeProcessor, processor),
             OpenGLJobProcessor::SerialJob);
     }
 
     void AbstractPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
-        AbstractPipeline::executeProcessor(processor, true);
+        AbstractPipeline::executeProcessor(processor);
 
 #ifdef CAMPVIS_DEBUG
         tgtAssert(getGlBool(GL_DEPTH_TEST) == false, "Invalid OpenGL state after processor execution, GL_DEPTH_TEST != false.");
@@ -247,9 +247,9 @@ namespace campvis {
 #endif
     }
 
-    void AbstractPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
+    void AbstractPipeline::onDataContainerDataAdded(const std::string& name, DataHandle dh) {
         if (name == _renderTargetID.getValue()) {
-            s_renderTargetChanged();
+            s_renderTargetChanged.emitSignal();
         }
     }
 

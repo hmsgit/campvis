@@ -45,7 +45,7 @@ namespace campvis {
         predicateToAdd->s_enabledChanged.connect(this, &PointPredicateHistogram::onPredicateEnabledChanged);
 
         _predicates.push_back(predicateToAdd);
-        s_headerChanged();
+        s_headerChanged.emitSignal();
     }
 
     void PointPredicateHistogram::removePredicate(size_t i) {
@@ -57,7 +57,7 @@ namespace campvis {
         delete _predicates[i];
 
         _predicates.erase(_predicates.begin() + i);
-        s_headerChanged();
+        s_headerChanged.emitSignal();
     }
 
     void PointPredicateHistogram::resetPredicates() {
@@ -67,7 +67,7 @@ namespace campvis {
             _predicates[i]->p_color.setValue(tgt::vec2(0.f));
         }
 
-        s_configurationChanged();
+        s_configurationChanged.emitSignal();
     }
 
     std::vector<AbstractPointPredicate*>& PointPredicateHistogram::getPredicates() {
@@ -138,11 +138,11 @@ namespace campvis {
     }
 
     void PointPredicateHistogram::onPredicateConfigurationChanged() {
-        s_configurationChanged();
+        s_configurationChanged.emitSignal();
     }
 
     void PointPredicateHistogram::onPredicateEnabledChanged() {
-        s_headerChanged();
+        s_headerChanged.emitSignal();
     }
 
     void PointPredicateHistogram::lock() {

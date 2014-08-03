@@ -75,7 +75,7 @@ namespace campvis {
                     OpenGLJobProcessor::SerialJob);
             }
             else {
-                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*, bool>(this, &AutoEvaluationPipeline::executeProcessor, processor, false));
+                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessor, processor));
             }
         }
         else {
@@ -127,7 +127,7 @@ namespace campvis {
         }
     }
 
-    void AutoEvaluationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
+    void AutoEvaluationPipeline::onDataContainerDataAdded(const std::string& name, DataHandle dh) {
         {
             // acquire read lock
             tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
@@ -136,7 +136,7 @@ namespace campvis {
             PortMapType::const_iterator it = _portMap.find(name);
             while (it != _portMap.end() && it->first == name) {
                 // invalidate those properties by emitting changed signal
-                it->second->s_changed(it->second);
+                it->second->s_changed.emitSignal(it->second);
                 ++it;
             }
         }

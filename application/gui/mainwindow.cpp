@@ -142,6 +142,8 @@ namespace campvis {
         _dcInspectorWidget = new DataContainerInspectorWidget();
         this->populateMainMenu();
 
+        qRegisterMetaType< std::vector<DataContainer*> >("std::vector<DataContainer*>");
+        qRegisterMetaType< std::vector<AbstractPipeline*> >("std::vector<AbstractPipeline*>");
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
             _pipelineWidget, SLOT(update(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)));

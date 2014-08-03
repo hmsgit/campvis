@@ -39,14 +39,14 @@ namespace campvis {
         PropertyCollection::iterator it = findProperty(prop.getName());
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
-            s_propertyRemoved(*it);
+            s_propertyRemoved.emitSignal(*it);
             *it = &prop;
         }
         else {
             _properties.push_back(&prop);
         }
         prop.s_changed.connect(this, &HasPropertyCollection::onPropertyChanged);
-        s_propertyAdded(&prop);
+        s_propertyAdded.emitSignal(&prop);
     }
 
     void HasPropertyCollection::removeProperty(AbstractProperty& prop) {
@@ -54,7 +54,7 @@ namespace campvis {
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
             _properties.erase(it);
-            s_propertyRemoved(&prop);
+            s_propertyRemoved.emitSignal(&prop);
         }
     }
 

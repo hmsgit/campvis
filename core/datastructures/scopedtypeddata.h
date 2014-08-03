@@ -75,7 +75,7 @@ namespace campvis {
          * Gets the DataHandle.
          * \return dh
          */
-        const DataHandle& getDataHandle() const {
+        DataHandle getDataHandle() const {
             return dh;
         }
 

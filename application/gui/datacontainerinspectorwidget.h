@@ -58,7 +58,7 @@ namespace campvis {
     class FaceGeometry;
     class DataContainerFileLoaderWidget;
 
-    class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
+    class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:
@@ -87,7 +87,7 @@ namespace campvis {
         /**
          * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
          */
-        void onDataContainerDataAdded(const std::string&, const DataHandle&);
+        void onDataContainerDataAdded(const std::string&, DataHandle);
 
         /**
          * Size hint for the default window size

@@ -58,6 +58,10 @@ void init() {
     // Make Xlib and GLX thread safe under X11
     QApplication::setAttribute(Qt::AA_X11InitThreads);
 
+    sigslot::signal_manager::init();
+    sigslot::signal_manager::getRef().setSignalHandlingMode(sigslot::signal_manager::FORCE_DIRECT);
+    sigslot::signal_manager::getRef().start();
+
     tgt::GlContextManager::init();
 
     campvis::OpenGLJobProcessor::init();
@@ -120,6 +124,9 @@ void deinit() {
 
     tgt::GlContextManager::deinit();
     tgt::deinit();
+
+    sigslot::signal_manager::getRef().stop();
+    sigslot::signal_manager::deinit();
 
     _initialized = false;
 }

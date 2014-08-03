@@ -89,7 +89,7 @@ namespace campvis {
 
     void AbstractProperty::setVisible(bool isVisible) {
         _isVisible = isVisible;
-        s_visibilityChanged(this);
+        s_visibilityChanged.emitSignal(this);
     }
 
 }

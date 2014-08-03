@@ -108,10 +108,10 @@ namespace campvis {
                 }
             }
 
-            s_enabledChanged();
+            s_enabledChanged.emitSignal();
         }
         else {
-            s_configurationChanged();
+            s_configurationChanged.emitSignal();
         }
 
         MetaProperty::onPropertyChanged(prop);

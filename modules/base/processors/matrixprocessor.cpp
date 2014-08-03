@@ -381,8 +381,7 @@ namespace campvis {
         }
     }
 
-    void MatrixProcessor::DataContainerDataAdded(const std::string &name, const DataHandle &data)
-    {
+    void MatrixProcessor::DataContainerDataAdded(const std::string& name, DataHandle data) {
         if (p_parserMode.getValue()) {
             if (_dataDependencies.find(name) != _dataDependencies.end())
                 invalidate(INVALID_RESULT);

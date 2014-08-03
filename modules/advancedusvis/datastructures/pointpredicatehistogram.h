@@ -35,7 +35,7 @@ namespace campvis {
     /**
      * Data object storing information about selected predicates and their settings.
      */
-    class PointPredicateHistogram : public sigslot::has_slots<> {
+    class PointPredicateHistogram : public sigslot::has_slots {
     public:
 
         /**
@@ -92,9 +92,9 @@ namespace campvis {
 
 
         /// Signal emitted when this predicate histogram's configuration (importance, color, ...) has changed
-        sigslot::signal0<> s_configurationChanged;
+        sigslot::signal0 s_configurationChanged;
         /// Signal emitted when this predicate histogram's GLSL header has changed
-        sigslot::signal0<> s_headerChanged;
+        sigslot::signal0 s_headerChanged;
 
     private:
         /// Slot called when a predicate's configuration has changed

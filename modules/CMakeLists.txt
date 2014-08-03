@@ -22,7 +22,7 @@ ADD_LIBRARY(campvis-modules ${CampvisSharedStaticModulesFix}
 
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-modules campvis-core tgt ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-modules campvis-core tgt sigslot ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisModulesSources ${CampvisHome} "")

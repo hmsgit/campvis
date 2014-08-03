@@ -94,7 +94,7 @@ namespace campvis {
         void render() const;
 
         /// Signal to be emitted when this TF geometry has changed.
-        sigslot::signal0<> s_changed;
+        sigslot::signal0 s_changed;
 
         /**
          * Creates a simple quad geometry for the given interval.

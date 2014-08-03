@@ -325,7 +325,7 @@ namespace campvis {
                     }
 
                     // lock this processor, so that the slice orientation's setting does not change
-                    AbstractProcessor::ScopedLock lock(this, false);
+                    AbstractProcessor::ScopedLock lock(this);
 
                     if (me->y() <= p_sliceRenderSize.getValue().y) {
                         _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::XY_PLANE);

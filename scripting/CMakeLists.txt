@@ -19,6 +19,10 @@ FILE(GLOB CampvisScriptingHeaders
     glue/*.h
 )
 
+IF(WIN32)
+    LIST(APPEND CampvisScriptingDefinitions /wd4267)
+ENDIF(WIN32)
+
 
 # Place all of CAMPVis' Lua modules in one sub-directory and shorten their names. This is done to
 # make Lua modules easier to import and avoid mixing them with other CAMPVis' libraries.

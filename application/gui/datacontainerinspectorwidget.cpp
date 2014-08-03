@@ -115,7 +115,7 @@ namespace campvis {
         return _dataContainer;
     }
 
-    void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
+    void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, DataHandle dh) {
         // copy QtDataHandle because signal will be handled by a different thread an indefinite amount of time later:
         emit dataContainerChanged(QString::fromStdString(key), QtDataHandle(dh));
     }

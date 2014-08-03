@@ -111,7 +111,7 @@ namespace campvis {
             do {
                 tmp = _level;
             } while (_level.compare_and_swap(tmp | level, tmp) != tmp);
-            s_invalidated(this);
+            s_invalidated.emitSignal(this);
         }
     }
 
@@ -120,7 +120,7 @@ namespace campvis {
         do {
             tmp = _level;
         } while (_level.compare_and_swap(tmp & (~level), tmp) != tmp);
-        s_validated(this);
+        s_validated.emitSignal(this);
     }
 
     bool AbstractProcessor::getClockExecutionTime() const {
@@ -132,7 +132,7 @@ namespace campvis {
     }
 
 
-    void AbstractProcessor::process(DataContainer& data, bool unlockInExtraThread) {
+    void AbstractProcessor::process(DataContainer& data) {
         if (hasInvalidShader()) {
             updateShader();
             validate(INVALID_SHADER);
@@ -143,7 +143,7 @@ namespace campvis {
         }
 
         // use a scoped lock for exception safety
-        AbstractProcessor::ScopedLock lock(this, unlockInExtraThread);
+        AbstractProcessor::ScopedLock lock(this);
         tgtAssert(_locked == true, "Processor not locked, this should not happen!");
 
         if (hasInvalidResult()) {
@@ -173,23 +173,4 @@ namespace campvis {
         tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, true);
         _invalidationMap[&prop] = invalidationLevel;
     }
-
-// ================================================================================================
-
-    AbstractProcessor::ScopedLock::ScopedLock(AbstractProcessor* p, bool unlockInExtraThread)
-        : _p(p)
-        , _unlockInExtraThread(unlockInExtraThread) 
-    {
-        _p->lockProcessor();
-    }
-
-    AbstractProcessor::ScopedLock::~ScopedLock() {
-        // Unlocking processors might be expensive, since a long chain of invalidations might be started
-        // -> do this in another thread...
-        if (_unlockInExtraThread)
-            SimpleJobProc.enqueueJob(makeJob(_p, &AbstractProcessor::unlockProcessor));
-        else
-            _p->unlockProcessor();    
-    }
-
 }

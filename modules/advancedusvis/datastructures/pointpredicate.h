@@ -93,9 +93,9 @@ namespace campvis {
         const std::string& getInputVariable() const;
 
         /// Signal emitted when this predicate's configuration (importance, color, ...) has changed
-        sigslot::signal0<> s_configurationChanged;
+        sigslot::signal0 s_configurationChanged;
         /// Signal emitted when this predicate's enabled state has changed
-        sigslot::signal0<> s_enabledChanged;
+        sigslot::signal0 s_enabledChanged;
 
         BoolProperty p_enable;
         FloatProperty p_importance;

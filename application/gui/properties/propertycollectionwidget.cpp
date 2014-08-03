@@ -119,7 +119,7 @@ namespace campvis {
         _layout->addWidget(propWidget);
 
         prop->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
-        prop->s_visibilityChanged(prop);
+        prop->s_visibilityChanged.emitSignal(prop);
     }
 
     void PropertyCollectionWidget::removeProperty(std::map<AbstractProperty*, QWidget*>::iterator it) {

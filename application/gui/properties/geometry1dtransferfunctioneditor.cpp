@@ -59,25 +59,16 @@ namespace campvis {
     {
         _selectedGeometry = 0;
         setupGUI();
+
         tf->s_geometryCollectionChanged.connect(this, &Geometry1DTransferFunctionEditor::onGeometryCollectionChanged);
+        tf->s_aboutToBeDeleted.connect(this, &Geometry1DTransferFunctionEditor::onTfAboutToBeDeleted);
+
         updateManipulators();
         setEventTypes(tgt::Event::MOUSEPRESSEVENT);
     }
 
     Geometry1DTransferFunctionEditor::~Geometry1DTransferFunctionEditor() {
-        tbb::mutex::scoped_lock lock(_localMutex);
-
-        // clearEventListeners and delete former stuff
-        _selectedGeometry = 0;
-        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
-            if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
-                tester->s_selected.disconnect(this);
-            }
-            delete *it;
-        }
-
-        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
-        gtf->s_geometryCollectionChanged.disconnect(this);
+        disconnectFromTf();
 
         if (OpenGLJobProcessor::isInited())
             GLJobProc.deregisterContext(_canvas);
@@ -215,7 +206,7 @@ namespace campvis {
             }
 
             updateManipulators();
-            g->s_changed();
+            g->s_changed.emitSignal();
         }
         else {
             _selectedGeometry = 0;
@@ -350,6 +341,32 @@ namespace campvis {
     void Geometry1DTransferFunctionEditor::onCbLogScaleStateChanged(int state) {
         _logScale = (state & Qt::Checked);
         invalidate();
+    }
+
+    void Geometry1DTransferFunctionEditor::onTfAboutToBeDeleted() {
+        disconnectFromTf();
+    }
+
+    void Geometry1DTransferFunctionEditor::disconnectFromTf() {
+        tbb::mutex::scoped_lock lock(_localMutex);
+
+        // clearEventListeners and delete former stuff
+        _selectedGeometry = 0;
+        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+            if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
+                tester->s_selected.disconnect(this);
+            }
+            delete *it;
+        }
+        _manipulators.clear();
+
+        Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(_transferFunction);
+        if (gtf != nullptr) {
+            gtf->s_geometryCollectionChanged.disconnect(this);
+            gtf->s_aboutToBeDeleted.disconnect(this);
+            _transferFunction->s_changed.disconnect(this);
+            _transferFunction = nullptr;
+        }
     }
 
 

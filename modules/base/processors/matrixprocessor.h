@@ -103,7 +103,7 @@ namespace campvis {
 
         CameraProperty p_cameraProperty;
 
-		void DataContainerDataAdded(const std::string& name, const DataHandle& data);
+		void DataContainerDataAdded(const std::string& name, DataHandle data);
 
     protected:
         /// \see AbstractProcessor::updateResult()

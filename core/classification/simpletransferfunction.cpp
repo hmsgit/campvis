@@ -82,7 +82,7 @@ namespace campvis {
             _leftColor = color;
         }
         _dirtyTexture = true;
-        s_changed();
+        s_changed.emitSignal();
     }
 
     void SimpleTransferFunction::setRightColor(const tgt::col4& color) {
@@ -91,7 +91,7 @@ namespace campvis {
             _rightColor = color;
         }
         _dirtyTexture = true;
-        s_changed();
+        s_changed.emitSignal();
     }
 
     const tgt::col4& SimpleTransferFunction::getLeftColor() const {

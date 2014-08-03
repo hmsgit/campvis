@@ -40,7 +40,7 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
-    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots<> {
+    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:

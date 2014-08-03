@@ -66,16 +66,21 @@ namespace campvis {
             /**
              * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
              * \param   p                   Processor to lock
-             * \param   unlockInExtraThread Unlock \a p in extra thread (since this might be an expensive operation)
              */
-            ScopedLock(AbstractProcessor* p, bool unlockInExtraThread);
+            ScopedLock(AbstractProcessor* p) 
+                : _p(p)
+            {
+                _p->lockProcessor();
+            };
 
             /// Destructor, unlocks the processor
-            ~ScopedLock();
+            ~ScopedLock() {
+                _p->unlockProcessor();    
+            };
 
             AbstractProcessor* _p;      ///< The processor to lock
-            bool _unlockInExtraThread;  ///< Unlock _p in extra thread (since this might be an expensive operation)
         };
+        
 
         /**
          * Available invalidation levels
@@ -175,9 +180,8 @@ namespace campvis {
          * with respect to the current invalidation level.
          * 
          * \param   data                DataContainer to work on.
-         * \param   unlockInExtraThread Flag whether the processor shall be unlockedin an extra thread (since unlock might be expensive).
          **/
-        void process(DataContainer& data, bool unlockInExtraThread = false);
+        void process(DataContainer& data);
 
         /**
          * Gets the flag whether this processor is currently enabled.

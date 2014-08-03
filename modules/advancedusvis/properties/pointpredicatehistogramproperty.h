@@ -45,7 +45,7 @@ namespace campvis {
      * others, they will share the pointer (instead of copying around as with other properties)!
      * Therefore, we use a std::shared_ptr.
      */
-    class PointPredicateHistogramProperty : public AbstractProperty, public sigslot::has_slots<> {
+    class PointPredicateHistogramProperty : public AbstractProperty, public sigslot::has_slots {
     public:
         /**
          * Creates a new PointPredicateHistogramProperty
@@ -115,7 +115,7 @@ namespace campvis {
 
 
         /// Signal emitted when this predicate histogram's GLSL header has changed
-        sigslot::signal0<> s_headerChanged;
+        sigslot::signal0 s_headerChanged;
 
     private:
         /// Slot called when a predicate histogram's configuration has changed

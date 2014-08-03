@@ -171,15 +171,14 @@ namespace campvis {
 
 
         /// Signal emitted when the pipeline's render target has changed
-        sigslot::signal0<> s_renderTargetChanged;
+        sigslot::signal0 s_renderTargetChanged;
 
     protected:
         /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
-         * \param   unlockInExtraThred  If true, the call to processor->unlock() will be done in an extra thread.
          */
-        void executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred);
+        void executeProcessor(AbstractProcessor* processor);
         
         /**
          * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 
@@ -208,7 +207,7 @@ namespace campvis {
          * \param   name    Name of the added data.
          * \param   dh      DataHandle to the newly added data.
          */
-        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+        virtual void onDataContainerDataAdded(const std::string& name, DataHandle dh);
 
         /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
         DataContainer* _data;

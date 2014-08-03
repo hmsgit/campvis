@@ -43,7 +43,7 @@ namespace campvis {
      * \tparam  T   Type of the base geometry class.
      */
     template<class T>
-    class  GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
+    class GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots {
     public:
         /// Typedef for the geometry class this transfer function is built from.
         typedef T GeometryType;
@@ -96,7 +96,10 @@ namespace campvis {
         void onGeometryChanged();
 
         /// Signal to be emitted when the vector of T objects (_geometries) changed (The collection, not the actual geometry).
-        sigslot::signal0<> s_geometryCollectionChanged;
+        sigslot::signal0 s_geometryCollectionChanged;
+
+        /// Signal to be emitted when this TF object is about to be deleted.
+        sigslot::signal0 s_aboutToBeDeleted;
 
     protected:
         /**
@@ -139,6 +142,8 @@ namespace campvis {
 
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::deinit() {
+        s_aboutToBeDeleted.triggerSignal(); // use trigger to force blocking signal handling in same thread
+
         for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
             (*it)->s_changed.disconnect(this);
             delete *it;
@@ -168,8 +173,8 @@ namespace campvis {
         }
         geometry->s_changed.connect(this, &GenericGeometryTransferFunction<T>::onGeometryChanged);
         _dirtyTexture = true;
-        s_geometryCollectionChanged();
-        s_changed();
+        s_geometryCollectionChanged.emitSignal();
+        s_changed.emitSignal();
     }
 
     template<class T>
@@ -186,14 +191,14 @@ namespace campvis {
         geometry->s_changed.disconnect(this);
         delete geometry;
         _dirtyTexture = true;
-        s_geometryCollectionChanged();
-        s_changed();
+        s_geometryCollectionChanged.emitSignal();
+        s_changed.emitSignal();
     }
 
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::onGeometryChanged() {
         _dirtyTexture = true;
-        s_changed();
+        s_changed.emitSignal();
     }
 
     template<class T>

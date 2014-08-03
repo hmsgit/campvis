@@ -98,12 +98,12 @@ namespace campvis {
 
     void PointPredicateHistogramProperty::onHistogramConfigurationChanged() {
         if (_ignoreSignals == 0)
-            s_changed(this);
+            s_changed.emitSignal(this);
     }
 
     void PointPredicateHistogramProperty::onHistogramHeaderChanged() {
         if (_ignoreSignals == 0)
-            s_headerChanged();
+            s_headerChanged.emitSignal();
     }
 
     std::vector<float> PointPredicateHistogramProperty::getCurrentHistogramDistribution() const {
@@ -181,7 +181,7 @@ namespace campvis {
         tgtAssert(std::abs(sum - 1.f) < 0.0001f, "Sum of importances is not 1 - sth. went wrong!");
         --_ignoreSignals;
 
-        s_changed(this);
+        s_changed.emitSignal(this);
     }
 
 }
