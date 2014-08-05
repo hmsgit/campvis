@@ -30,9 +30,6 @@
 #include "application/gui/properties/propertywidgetfactory.h"
 #include "core/properties/floatingpointproperty.h"
 
-#include "application/gui/qtcolortools.h"
-
-
 namespace campvis {
     /**
      * Widget for a FloatProperty
@@ -273,7 +270,7 @@ namespace campvis {
             void onValueChanged(double value) { onValueChangedImpl(); };
     }; 
 
-    // ================================================================================================
+// ================================================================================================
 
     class Vec4PropertyWidget : public VecPropertyWidget<4> {
         Q_OBJECT
@@ -290,8 +287,7 @@ namespace campvis {
             void onValueChanged(double value) { onValueChangedImpl(); };
     }; 
 
-    // ================================================================================================
-
+// ================================================================================================
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
     template class PropertyWidgetRegistrar<Vec2PropertyWidget, typename VecPropertyWidgetTraits<2>::PropertyType, 5>;

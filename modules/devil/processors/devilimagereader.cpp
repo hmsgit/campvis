@@ -57,14 +57,13 @@ namespace campvis {
 
     DevilImageReader::DevilImageReader(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        //, p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
-        //, p_targetImageID("targetImageName", "Target Image ID", "DevilImageReader.output", DataNameProperty::WRITE)
         , p_importType("ImportType", "Import Type", importOptions, 4)
         , p_importSimilar("ImportSimilar", "Import All Similar Files", false)
         , _shader(nullptr)
         , _devilTextureReader(nullptr)
     {
         this->_ext.push_back(".jpg");
+        this->_ext.push_back(".png");
         this->_ext.push_back(".tif");
         this->p_targetImageID.setValue("DevilImageReader.output");
 

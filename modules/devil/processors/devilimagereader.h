@@ -75,8 +75,6 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        //StringProperty p_url;               ///< URL for file to read
-        //DataNameProperty p_targetImageID;   ///< image ID for read image
         GenericOptionProperty<std::string> p_importType;
         BoolProperty p_importSimilar;
 

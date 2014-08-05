@@ -45,8 +45,5 @@ moc_*.cxx_parameters
 # TBB library in ext/
 ext/tbb
 
-# alglib library in ext/
-#ext/alglib
-
 # SWIG wrapper code
 *LUA_wrap.cxx

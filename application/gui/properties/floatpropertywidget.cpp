@@ -84,5 +84,4 @@ namespace campvis {
         if (_ignorePropertyUpdates == 0)
             emit s_propertyChanged(property);
     }
-
 }

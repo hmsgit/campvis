@@ -659,9 +659,9 @@ namespace campvis {
         name += StringUtils::toString(++_objectNameSuffix, 2, '0');
         ContourObject obj(name);
         obj._color.setValue(tgt::vec4(
-            (float)0.9 - 0.2 * (_objectNameSuffix%3) + 0.15 *(_objectNameSuffix/3),
-            (float)0.2 + 0.2 * (_objectNameSuffix%3) - 0.15 *(_objectNameSuffix/3), 
-            (float)0.5 + 0.2 * (_objectNameSuffix%3) - 0.15 *(_objectNameSuffix/3), 1));
+            static_cast<float>(0.9 - 0.2 * (_objectNameSuffix%3) + 0.15 *(_objectNameSuffix/3)),
+            static_cast<float>(0.2 + 0.2 * (_objectNameSuffix%3) - 0.15 *(_objectNameSuffix/3)), 
+            static_cast<float>(0.5 + 0.2 * (_objectNameSuffix%3) - 0.15 *(_objectNameSuffix/3)), 1));
         p_objectList->addOption(GenericOption<ContourObject>(name, name, obj));
         p_objectList->selectById(name);
     }
