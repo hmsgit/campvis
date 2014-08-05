@@ -68,9 +68,12 @@ namespace campvis {
 
         _ve.p_inputVolume.setValue("image.ivus");
         _ve.p_outputImage.setValue("combine");
+        _ve.getVolumeRenderer()->getRaycastingProcessor()->p_samplingRate.setValue(1.f);
+
         _renderTargetID.setValue("combine");
         
         _imageReader.p_fileExtension.setValue("bmp");
+        _imageReader.p_imageSpacing.setValue(tgt::vec3(.1f, .1f, .75f));
 
         // initialize predicates with default config
         PointPredicateHistogramProperty* php = &p_predicateHistogram;
@@ -79,10 +82,10 @@ namespace campvis {
 
             AbstractPointPredicate* vpToAdd = 0;
 
-            vpToAdd = new RangePointPredicate("cm", "ConfidenceMap", "Confidence");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.25f, 1.f));
-            histogram->addPredicate(vpToAdd);
-
+//             vpToAdd = new RangePointPredicate("cm", "ConfidenceMap", "Confidence");
+//             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.25f, 1.f));
+//             histogram->addPredicate(vpToAdd);
+// 
             vpToAdd = new RangePointPredicate("tc.r", "Calcified", "Calcified Tissue");
             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
             vpToAdd->p_color.setValue(tgt::vec2(0.f, 1.f));

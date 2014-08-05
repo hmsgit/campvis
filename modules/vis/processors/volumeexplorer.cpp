@@ -466,4 +466,12 @@ namespace campvis {
         }
     }
 
+    VolumeRenderer* VolumeExplorer::getVolumeRenderer() {
+        return &_raycaster;
+    }
+
+    SliceRenderProcessor* VolumeExplorer::getSliceRenderer() {
+        return _sliceRenderer;
+    }
+
 }

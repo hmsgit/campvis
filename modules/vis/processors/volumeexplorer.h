@@ -91,6 +91,18 @@ namespace campvis {
         /// \see tgt::EventListener::onEvent()
         virtual void onEvent(tgt::Event* e);
 
+        /**
+         * Returns the VolumeRenderer processor.
+         * \return	&_raycaster
+         */
+        VolumeRenderer* getVolumeRenderer();
+
+        /**
+         * Returns the SliceRenderProcessor.
+         * \return	_sliceRenderer
+         */
+        SliceRenderProcessor* getSliceRenderer();
+
         DataNameProperty p_inputVolume;     ///< image ID for first input image
         DataNameProperty p_outputImage;     ///< image ID for output image
 
