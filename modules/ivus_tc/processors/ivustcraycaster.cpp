@@ -131,7 +131,7 @@ namespace campvis {
             }
         }
         else {
-            LERROR("Could not load Voxel Predicate Mask Image.");
+            LDEBUG("Could not load Voxel Predicate Mask Image.");
         }
     }
 
