@@ -162,7 +162,7 @@ namespace campvis {
             }
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 

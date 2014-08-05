@@ -206,7 +206,7 @@ namespace campvis {
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
         }
         else {
-            LERROR("No suitable input geometry found.");
+            LDEBUG("No suitable input geometry found.");
         }
     }
 
