@@ -26,6 +26,7 @@
 // 
 // ================================================================================================
 
+#include <memory>
 #include "sigslot.h"
 
 namespace sigslot {
@@ -37,7 +38,7 @@ namespace sigslot {
     }
 
     signal_manager::~signal_manager() {
-
+        _signalPool.recycle();
     }
 
     void signal_manager::triggerSignalImpl(_signal_handle_base* signal) {
@@ -102,5 +103,36 @@ namespace sigslot {
 
 
     const std::string signal_manager::loggerCat_;
+
+
+    // Implementation inspired by http://stackoverflow.com/questions/7194127/how-should-i-write-iso-c-standard-conformant-custom-new-and-delete-operators/7194149#7194149
+    void* _signal_handle_base::operator new(std::size_t size) throw(std::bad_alloc) {
+        if (size == 0)
+            size = 1;
+
+        while (true) {
+            void* toReturn = signal_manager::getRef()._signalPool.malloc(size);
+
+            if (toReturn != nullptr)
+                return toReturn;
+
+            //allocation was unsuccessful; find out what the current new-handling function is (see below)
+            new_handler globalHandler = std::set_new_handler(0);
+            std::set_new_handler(globalHandler);
+
+            if (globalHandler)             //If new_hander is registered call it
+                (*globalHandler)();
+            else 
+                throw std::bad_alloc();   //No handler is registered throw an exception
+        }
+    }
+
+    void _signal_handle_base::operator delete(void* rawMemory, std::size_t size) throw() {
+        if (rawMemory == nullptr)
+            return;
+
+        signal_manager::getRef()._signalPool.free(rawMemory);
+        return;
+    }
 
 }
