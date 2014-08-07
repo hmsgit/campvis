@@ -49,6 +49,20 @@ namespace campvis {
         void operator()() {
             this->execute();
         }
+
+
+        /**
+         * Overloading the new operator to create signal handles in signal_manager's memory pool.
+         * \param   size    Number of bytes to allocate.
+         */
+        static void* operator new(std::size_t size) throw(std::bad_alloc);
+
+        /**
+         * Overloading the delete operator to correctly remove signal handles from signal_manager's memory pool.
+         * \param   rawMemory   Pointer to object to delete
+         * \param   size        Number of bytes
+         */
+        static void operator delete(void* rawMemory, std::size_t size) throw();
     };
 
 // = Specific Jobs ================================================================================

@@ -27,6 +27,8 @@
 // ================================================================================================
 
 #include <memory>
+#include <new>
+
 #include "sigslot.h"
 
 namespace sigslot {
@@ -117,7 +119,7 @@ namespace sigslot {
                 return toReturn;
 
             //allocation was unsuccessful; find out what the current new-handling function is (see below)
-            new_handler globalHandler = std::set_new_handler(0);
+            std::new_handler globalHandler = std::set_new_handler(0);
             std::set_new_handler(globalHandler);
 
             if (globalHandler)             //If new_hander is registered call it

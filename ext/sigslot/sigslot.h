@@ -255,7 +255,17 @@ namespace sigslot {
         /// Emits the signal of this signal handle.
         virtual void processSignal() const = 0;
 
+        /**
+         * Overloading the new operator to create signal handles in signal_manager's memory pool.
+         * \param   size    Number of bytes to allocate.
+         */
         static void* operator new(std::size_t size) throw(std::bad_alloc);
+
+        /**
+         * Overloading the delete operator to correctly remove signal handles from signal_manager's memory pool.
+         * \param   rawMemory   Pointer to object to delete
+         * \param   size        Number of bytes
+         */
         static void operator delete(void* rawMemory, std::size_t size) throw();
 
 #ifdef CAMPVIS_DEBUG
@@ -282,8 +292,8 @@ namespace sigslot {
      * signal_manager can be considered as thread-safe.
      */
     class SIGSLOT_API signal_manager : public tgt::Singleton<signal_manager>, public tgt::Runnable {
-        friend class tgt::Singleton<signal_manager>;
-        friend class _signal_handle_base;
+        friend class tgt::Singleton<signal_manager>;    ///< CRTP
+        friend class _signal_handle_base;               ///< so the custom new/delete operator can access the memory pool
 
     public:
         /// Enumeration of signal handling modes for the signal_manager
