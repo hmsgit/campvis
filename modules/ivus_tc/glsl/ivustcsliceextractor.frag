@@ -56,10 +56,18 @@ void main() {
 
         vec4 pr = performPredicateBasedShading(ivus, cm, tc, plaque);
 
-        vec3 hsl = rgb2hsv(vec3(ivus));
-        hsl.xy += pr.xy;
-        hsl.x = mod(hsl.x, 1.0);
-        out_Color = vec4(hsv2rgb(hsl), 1.0);
+        vec3 hcy = vec3(pr.xy, cm * smoothstep(0.0, 0.5, pr.y));
+        vec3 mixed = hcy2rgb(hcy);
+        //vec3 mixed = mix(vec3(ivus), hcy2rgb(hcy), min(cm, pr.y));
+        //vec3 mixed = mix(vec3(1.0), vec3(1.0, 0.5, 0.0), max(cm, pr.y));
+        out_Color = vec4(mixed, 1.0);
+
+        //vec3 hsl = rgb2hcy(vec3(ivus));
+        //hsl.xy += pr.xy;
+        //hsl.x = mod(hsl.x, 1.0);
+        //hsl.y *= cm;
+        //out_Color = vec4(hcy2rgb(hsl), 1.0);
+        
     }
     else if (_useSolidColor) {
         out_Color = _color;

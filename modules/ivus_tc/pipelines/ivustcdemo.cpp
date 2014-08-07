@@ -66,21 +66,29 @@ namespace campvis {
         _imageReader.init();
         p_readImagesButton.s_clicked.connect(this, &IvusTcDemo::readAndProcessImages);
 
+        _lsp.p_ambientColor.setValue(tgt::vec3(.75f));
+        _lsp.p_shininess.setValue(8.f);
+
         _ve.p_inputVolume.setValue("image.ivus");
         _ve.p_outputImage.setValue("combine");
-        _ve.getVolumeRenderer()->getRaycastingProcessor()->p_samplingRate.setValue(1.f);
+        _ve.getVolumeRenderer()->getRaycastingProcessor()->p_samplingRate.setValue(.5f);
 
         _renderTargetID.setValue("combine");
         
         _imageReader.p_fileExtension.setValue("bmp");
-        _imageReader.p_imageSpacing.setValue(tgt::vec3(.1f, .1f, .75f));
+        _imageReader.p_imageSpacing.setValue(tgt::vec3(.1f, .1f, .6f));
 
         // initialize predicates with default config
         PointPredicateHistogramProperty* php = &p_predicateHistogram;
         if (php != nullptr) {
             PointPredicateHistogram* histogram = php->getPredicateHistogram();
+            histogram->_glslModulationHackForIvus = true;
 
             AbstractPointPredicate* vpToAdd = 0;
+
+            vpToAdd = new RangePointPredicate("ivus", "IvusIntensity", "IVUS Intensity");
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.f, 1.f));
+            histogram->addPredicate(vpToAdd);
 
 //             vpToAdd = new RangePointPredicate("cm", "ConfidenceMap", "Confidence");
 //             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.25f, 1.f));
@@ -88,30 +96,33 @@ namespace campvis {
 // 
             vpToAdd = new RangePointPredicate("tc.r", "Calcified", "Calcified Tissue");
             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.667f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("tc.g", "Fibrotic", "Fibrotic Tissue");
             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.2f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.165f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("tc.b", "Lipidic", "Lipidic Tissue");
             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.4f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.9f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("tc.a", "Necrotic", "Necrotic Tissue");
             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.6f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("plaque", "Plaque", "Plaque Mask");
             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.5f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.8f, 1.f));
+            vpToAdd->p_color.setValue(tgt::vec2(0.35f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             histogram->resetPredicates(false);
+            std::vector<float> adjustment(histogram->getPredicates().size(), 0.f);
+            adjustment[0] = -1.f;
+            php->adjustImportances(adjustment, php->getCurrentHistogramDistribution());
             addProperty(*php);
 
             php->addSharedProperty(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::PredicateHistogram"));

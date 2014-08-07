@@ -26,7 +26,7 @@ IF(${ModuleEnabled})
 
 	SET(ThisModShaderDirectories "modules/advancedusvis/glsl")
 	SET(ThisModShaderDirectories "modules/advancedusvis/sampledata")
-	SET(ThisModDependencies vis io preprocessing)
+	SET(ThisModDependencies vis io preprocessing randomwalk)
 ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus TESTING)

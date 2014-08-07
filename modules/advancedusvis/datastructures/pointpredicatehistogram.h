@@ -102,6 +102,8 @@ namespace campvis {
         /// Signal emitted when this predicate histogram's GLSL header has changed
         sigslot::signal0 s_headerChanged;
 
+        bool _glslModulationHackForIvus;
+
     private:
         /// Slot called when a predicate's configuration has changed
         void onPredicateConfigurationChanged();
@@ -112,6 +114,7 @@ namespace campvis {
         std::vector<AbstractPointPredicate*> _predicates;
         /// The GLSL predicate function argument string (without parentheses).
         std::string _predicateFunctionArgumentString;
+
 
         static const std::string loggerCat_;
 

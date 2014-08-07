@@ -142,8 +142,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             float imp = pr.a;
 
             if (imp > 0.0) {
-                if (pr.z > 0.0)
-                    color = clamp(color + pr.z, 0.0, 1.0);
+//                if (pr.z > 0.0)
+//                    color = clamp(color + pr.z, 0.0, 1.0);
 
     #ifdef ENABLE_SHADING
                 // compute gradient (needed for shading and normals)
@@ -153,10 +153,11 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
                 // perform predicate-based shading
                 color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
                 
-                vec3 hsl = rgb2hsv(color.rgb * color.a);
+                vec3 hsl = rgb2hcy(color.rgb * color.a);
                 hsl.xy += pr.xy;
                 hsl.x = mod(hsl.x, 1.0);
-                color.rgb = hsv2rgb(hsl);
+                //hsl.z = cm / 2.0;
+                color.rgb = hcy2rgb(hsl);
 
                 // perform depth-based shading
                 const float DBS = 0.01;

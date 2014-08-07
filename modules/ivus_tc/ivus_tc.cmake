@@ -17,7 +17,7 @@ IF(${ModuleEnabled})
 	)
 
 	SET(ThisModShaderDirectories "modules/ivus_tc/glsl")
-	SET(ThisModDependencies base io devil vis)
+	SET(ThisModDependencies base io devil vis advancedusvis)
 ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus EXPERIMENTAL)
