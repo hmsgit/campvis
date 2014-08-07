@@ -60,6 +60,7 @@
 
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_vector.h>
+#include <tbb/spin_mutex.h>
 
 #include "ext/tgt/runnable.h"
 #include "ext/tgt/singleton.h"
@@ -427,16 +428,27 @@ namespace sigslot {
 #ifdef CAMPVIS_DEBUG
     protected:
         // This is debug information only, automatically removed from release builds
-        // using local variables is not really thread-safe, but for debug-only code, this is a risk we can take.
+        // As we're using local variables, we have to protect them with the mutex. This is neither
+        // beautiful nor efficient, but as it's for debug-only code, we should be able to live with it.
+        // In a side note: This mutex is sufficient to avoid segfaults or other crashes. However, it
+        //                 does not guarantee the correct order of execution. Hence, there exist cases
+        //                 where the debug information stored in the signal handle is not correct. 
+        //                 This is a risk we can take, as the chance that the *very same* signal 
+        //                 gets emitted concurrently form different threads is very low.
+        tbb::spin_mutex _debugMutex;    ///< Mutex to protect these three variables
+        
         std::string _callingFunction;   ///< Function that emitted the last signal
         std::string _callingFile;       ///< File which emitted the last signal
         int _callingLine;               ///< Line where the last signal was emitted
 
         // In debug mode, this macro writes the caller information to the signal handle
         #define writeDebugInfoToSignalHandle(_the_signal_handle) \
+            { \
+            tbb::spin_mutex::scoped_lock lock(this->_debugMutex); \
             _the_signal_handle->_callingFunction = this->_callingFunction; \
             _the_signal_handle->_callingFile = this->_callingFile; \
-            _the_signal_handle->_callingLine = this->_callingLine;
+            _the_signal_handle->_callingLine = this->_callingLine; \
+            }
 #else
         // In release mode, this macro expands to a NOP.
         #define writeDebugInfoToSignalHandle(_the_signal_handle) 
@@ -1821,6 +1833,14 @@ namespace sigslot {
     // They overload the emitSignal() method with a version that stores calling function, file and line.
     // Together with the macro magic further down, this provides us with a clean, non-intrusive way
     // to automatically enhance all client calls to emitSignal with additional debug information.
+
+    // In debug mode, this macro writes the caller information to the signal handle
+    #define writeDebugInfoToSignal() \
+        tbb::spin_mutex::scoped_lock lock(this->_debugMutex); \
+        this->_callingFunction = caller; \
+        this->_callingFile = file; \
+        this->_callingLine = line;
+
     //
     // Implementaion inspired by http://stackoverflow.com/questions/353180/how-do-i-find-the-name-of-the-calling-function
     class signal0_debug_decorator : public signal0 {
@@ -1830,21 +1850,15 @@ namespace sigslot {
         virtual ~signal0_debug_decorator() {}
 
         signal0& triggerSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal0& queueSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal0& emitSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
     };
@@ -1857,21 +1871,15 @@ namespace sigslot {
         virtual ~signal1_debug_decorator() {}
 
         signal1<arg1_type>& triggerSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal1<arg1_type>& queueSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal1<arg1_type>& emitSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
     };
@@ -1884,21 +1892,15 @@ namespace sigslot {
         virtual ~signal2_debug_decorator() {}
 
         signal2<arg1_type, arg2_type>& triggerSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal2<arg1_type, arg2_type>& queueSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal2<arg1_type, arg2_type>& emitSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
     };
@@ -1911,21 +1913,15 @@ namespace sigslot {
         virtual ~signal3_debug_decorator() {}
 
         signal3<arg1_type, arg2_type, arg3_type>& triggerSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal3<arg1_type, arg2_type, arg3_type>& queueSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal3<arg1_type, arg2_type, arg3_type>& emitSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
     };
@@ -1938,21 +1934,15 @@ namespace sigslot {
         virtual ~signal4_debug_decorator() {}
 
         signal4<arg1_type, arg2_type, arg3_type, arg4_type>& triggerSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal4<arg1_type, arg2_type, arg3_type, arg4_type>& queueSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal4<arg1_type, arg2_type, arg3_type, arg4_type>& emitSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
     };
@@ -1965,21 +1955,15 @@ namespace sigslot {
         virtual ~signal5_debug_decorator() {}
 
         signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& triggerSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& queueSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
         signal5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>& emitSignal(std::string caller, std::string file, int line) {
-            this->_callingFunction = caller;
-            this->_callingFile = file;
-            this->_callingLine = line;
+            writeDebugInfoToSignal();
             return *this;
         }
     };
