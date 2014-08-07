@@ -86,9 +86,15 @@ ELSE (WIN32)
     )
     FIND_LIBRARY(
         TBB_LIBRARY
-        NAMES TBB libtbb.so
+        NAMES libtbb.so
         PATHS ${TbbDirectory}/lib /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib /sw/lib /opt/local/lib
         DOC "The TBB library"
+    )
+    FIND_LIBRARY(
+        TBB_MALLOC_LIBRARY
+        NAMES libtbbmalloc.so
+        PATHS ${TbbDirectory}/lib /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib /sw/lib /opt/local/lib
+        DOC "The TBB malloc library"
     )
 ENDIF (WIN32)
 
