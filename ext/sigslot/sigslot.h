@@ -58,8 +58,10 @@
 #include "tgt/assert.h"
 #include <ext/threading.h>
 
+#define TBB_PREVIEW_MEMORY_POOL 1
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_vector.h>
+#include <tbb/memory_pool.h>
 #include <tbb/spin_mutex.h>
 
 #include "ext/tgt/runnable.h"
@@ -246,12 +248,25 @@ namespace sigslot {
 // ================================================================================================
 
     /// Base class for signal handles that provides an interface to emit the signal.
-    class _signal_handle_base {
+    class SIGSLOT_API _signal_handle_base {
     public:
         /// Virtual destructor
         virtual ~_signal_handle_base() {};
         /// Emits the signal of this signal handle.
         virtual void processSignal() const = 0;
+
+        /**
+         * Overloading the new operator to create signal handles in signal_manager's memory pool.
+         * \param   size    Number of bytes to allocate.
+         */
+        static void* operator new(std::size_t size) throw(std::bad_alloc);
+
+        /**
+         * Overloading the delete operator to correctly remove signal handles from signal_manager's memory pool.
+         * \param   rawMemory   Pointer to object to delete
+         * \param   size        Number of bytes
+         */
+        static void operator delete(void* rawMemory, std::size_t size) throw();
 
 #ifdef CAMPVIS_DEBUG
         // This is debug information only, automatically removed from release builds
@@ -277,7 +292,8 @@ namespace sigslot {
      * signal_manager can be considered as thread-safe.
      */
     class SIGSLOT_API signal_manager : public tgt::Singleton<signal_manager>, public tgt::Runnable {
-        friend class tgt::Singleton<signal_manager>;
+        friend class tgt::Singleton<signal_manager>;    ///< CRTP
+        friend class _signal_handle_base;               ///< so the custom new/delete operator can access the memory pool
 
     public:
         /// Enumeration of signal handling modes for the signal_manager
@@ -341,6 +357,9 @@ namespace sigslot {
         std::mutex _ecMutex;                            ///< Mutex for protecting _evaluationCondition
 
         std::thread::id _this_thread_id;
+
+        typedef std::allocator<_signal_handle_base> pool_allocator_t;
+        tbb::memory_pool<pool_allocator_t> _signalPool; ///< Memory pool for the signals
 
         static const std::string loggerCat_;
     };

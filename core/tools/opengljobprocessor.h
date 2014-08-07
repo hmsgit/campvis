@@ -31,10 +31,12 @@
 
 #include <ext/threading.h>
 
+#define TBB_PREVIEW_MEMORY_POOL 1
 #include <tbb/atomic.h>
 #include <tbb/concurrent_queue.h>
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_vector.h>
+#include <tbb/memory_pool.h>
 
 #include "tgt/glcontextmanager.h"
 #include "tgt/singleton.h"
@@ -70,7 +72,8 @@ namespace campvis {
      * This class is to be considered as thread-safe.
      */
     class CAMPVIS_CORE_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable, public sigslot::has_slots {
-        friend class tgt::Singleton<OpenGLJobProcessor>;
+        friend class tgt::Singleton<OpenGLJobProcessor>;    ///< CRTP
+        friend class AbstractJob;                           ///< so the custom new/delete operator can access the memory pool
 
     public:
         /**
@@ -208,6 +211,9 @@ namespace campvis {
         tbb::atomic<tgt::GLCanvas*> _currentContext;         ///< current active OpenGL context
 
     private:
+        typedef std::allocator<AbstractJob> pool_allocator_t;
+        tbb::memory_pool<pool_allocator_t> _signalPool; ///< Memory pool for the signals
+
         static std::thread::id _this_thread_id;
     };
 
