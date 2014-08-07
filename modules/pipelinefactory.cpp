@@ -46,6 +46,7 @@ namespace campvis {
     
     void PipelineFactory::deinit() {
         delete _singleton;
+        _singleton = nullptr;
     }
 
 

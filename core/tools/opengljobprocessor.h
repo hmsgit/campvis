@@ -212,7 +212,7 @@ namespace campvis {
 
     private:
         typedef std::allocator<AbstractJob> pool_allocator_t;
-        tbb::memory_pool<pool_allocator_t> _signalPool; ///< Memory pool for the signals
+        tbb::memory_pool<pool_allocator_t> _jobPool; ///< Memory pool for the signals
 
         static std::thread::id _this_thread_id;
     };

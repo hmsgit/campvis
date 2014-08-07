@@ -92,7 +92,7 @@ namespace campvis {
     }
 
     VolumeRenderer::~VolumeRenderer() {
-
+        delete _raycaster;
     }
 
     void VolumeRenderer::init() {

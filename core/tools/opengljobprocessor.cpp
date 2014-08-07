@@ -71,6 +71,7 @@ namespace campvis {
 
         _contextQueueMap.clear();
         _contexts.clear();
+        _jobPool.recycle();
     }
 
     void OpenGLJobProcessor::stop() {

@@ -37,7 +37,7 @@ namespace campvis {
             size = 1;
 
         while (true) {
-            void* toReturn = OpenGLJobProcessor::getRef()._signalPool.malloc(size);
+            void* toReturn = OpenGLJobProcessor::getRef()._jobPool.malloc(size);
 
             if (toReturn != nullptr)
                 return toReturn;
@@ -57,7 +57,7 @@ namespace campvis {
         if (rawMemory == nullptr)
             return;
 
-        OpenGLJobProcessor::getRef()._signalPool.free(rawMemory);
+        OpenGLJobProcessor::getRef()._jobPool.free(rawMemory);
     }
 
 }

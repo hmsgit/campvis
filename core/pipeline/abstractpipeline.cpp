@@ -37,6 +37,8 @@
 
 #include <ctime>
 
+
+#ifdef CAMPVIS_DEBUG
 // Anonymous OpenGL helper functions
 namespace {
     GLboolean getGlBool(GLenum param) {
@@ -57,6 +59,7 @@ namespace {
         return toReturn;
     }
 }
+#endif
 
 
 namespace campvis {

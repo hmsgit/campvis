@@ -35,13 +35,16 @@
 #include "tgt/qt/qtthreadedcanvas.h"
 
 #include "application/campvispainter.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "application/gui/mainwindow.h"
+
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
 #include "modules/pipelinefactory.h"
@@ -210,12 +213,15 @@ namespace campvis {
             tgt::deinitGL();
         }
 
-        SimpleJobProcessor::deinit();
-        OpenGLJobProcessor::deinit();
-        PipelineFactory::deinit();
-
         tgt::GlContextManager::deinit();
         tgt::deinit();
+
+        OpenGLJobProcessor::deinit();
+        SimpleJobProcessor::deinit();
+
+        PropertyWidgetFactory::deinit();
+        ImageRepresentationConverter::deinit();
+        PipelineFactory::deinit();
 
         // MainWindow dtor needs a valid CampVisApplication, so we need to call it here instead of during destruction.
         delete _mainWindow;
