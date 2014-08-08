@@ -158,6 +158,7 @@ namespace campvis {
                     _trackballEH->setViewportSizeProperty(&p_largeRenderSize);
                     break;
             }
+            validate(LARGE_VIEW_INVALID);
         }
         if (getInvalidationLevel() & SCRIBBLE_INVALID) {
             std::vector<tgt::vec3> vertices;
