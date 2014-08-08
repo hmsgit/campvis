@@ -44,8 +44,6 @@
 #include "core/coreapi.h"
 #include "core/tools/job.h"
 
-#include <ctime>
-
 
 namespace tgt {
     class GLCanvas;

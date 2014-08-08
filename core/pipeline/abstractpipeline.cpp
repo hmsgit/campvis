@@ -25,6 +25,8 @@
 
 #include "abstractpipeline.h"
 
+#include <tbb/tick_count.h>
+
 #include "tgt/exception.h"
 #include "tgt/glcanvas.h"
 #include "tgt/tgt_gl.h"
@@ -34,8 +36,6 @@
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
-
-#include <ctime>
 
 
 #ifdef CAMPVIS_DEBUG
@@ -151,7 +151,9 @@ namespace campvis {
         // execute processor if needed
         if (processor->getEnabled() && !processor->isLocked()) {
             if (! processor->isValid()) {
-                clock_t startTime = clock();
+                tbb::tick_count startTime;
+                if (processor->getClockExecutionTime())
+                    startTime = tbb::tick_count::now();
 
                 try {
                     processor->process(*_data);
@@ -164,8 +166,8 @@ namespace campvis {
                 }
 
                 if (processor->getClockExecutionTime()) {
-                    clock_t endTime = clock();
-                    LINFO("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+                    tbb::tick_count endTime = tbb::tick_count::now();
+                    LINFO("Executed processor " << processor->getName() << " duration: " << (endTime - startTime).seconds());
                 }
             }
         }

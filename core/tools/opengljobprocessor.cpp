@@ -24,6 +24,8 @@
 
 #include "opengljobprocessor.h"
 
+#include <tbb/tick_count.h>
+
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
 #include "tgt/openglgarbagecollector.h"
@@ -83,16 +85,16 @@ namespace campvis {
         _this_thread_id = std::this_thread::get_id();
 
         std::unique_lock<std::mutex> lock(tgt::GlContextManager::getRef().getGlMutex());
-        clock_t lastCleanupTime = clock() * 1000 / CLOCKS_PER_SEC;
+        tbb::tick_count lastCleanupTime = tbb::tick_count::now();
 
         while (! _stopExecution) {
             // this is a simple round-robing scheduling between all contexts:
             bool hadWork = false;
             // TODO: consider only non-empty context queues here
-            clock_t maxTimePerContext = static_cast<clock_t>(30 / _contexts.size());
+            double maxTimePerContext = (1.0 / 30.0) / _contexts.size();
 
             for (size_t i = 0; i < _contexts.size(); ++i) {
-                clock_t startTimeCurrentContext = clock() * 1000 / CLOCKS_PER_SEC;
+                tbb::tick_count startTimeCurrentContext = tbb::tick_count::now();
                 tgt::GLCanvas* context = _contexts[i];
 
                 tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*>::const_accessor a;
@@ -121,7 +123,7 @@ namespace campvis {
                 // now comes the per-context scheduling strategy:
                 // first: perform as much serial jobs as possible:
                 AbstractJob* jobToDo = 0;
-                while ((clock() * 1000 / CLOCKS_PER_SEC) - startTimeCurrentContext < maxTimePerContext) {
+                while ((tbb::tick_count::now() - startTimeCurrentContext).seconds() < maxTimePerContext) {
                     // try fetch a job
                     if (! a->second->_serialJobs.try_pop(jobToDo)) {
                         // no job to do, exit the while loop
@@ -147,15 +149,15 @@ namespace campvis {
 
 
                 // fourth: start the GC if it's time
-                if (clock() * 1000 / CLOCKS_PER_SEC - lastCleanupTime > 250) {
+                if ((tbb::tick_count::now() - lastCleanupTime).seconds() > 0.25) {
                     GLGC.deleteGarbage();
-                    lastCleanupTime = clock();
+                    lastCleanupTime = tbb::tick_count::now();
                 }
             }
             
             while (_pause > 0) {
                 GLGC.deleteGarbage();
-                lastCleanupTime = clock();
+                lastCleanupTime = tbb::tick_count::now();
                 tgt::GlContextManager::getRef().releaseCurrentContext();
                 _evaluationCondition.wait(lock);
                 tgt::GlContextManager::getRef().acquireContext(_currentContext);
@@ -165,7 +167,7 @@ namespace campvis {
             if (! hadWork) {
                 if (_currentContext != 0) {
                     GLGC.deleteGarbage();
-                    lastCleanupTime = clock();
+                    lastCleanupTime = tbb::tick_count::now();
                 }
                 tgt::GlContextManager::getRef().releaseCurrentContext();
                 _evaluationCondition.wait(lock);
