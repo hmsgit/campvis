@@ -134,7 +134,7 @@ namespace campvis {
             data.addData(p_outputImage.getValue(), new RenderData(_fbo));
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 

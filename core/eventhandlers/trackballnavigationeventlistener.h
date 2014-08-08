@@ -100,6 +100,11 @@ namespace campvis {
         virtual void onEvent(tgt::Event* e);
         
 
+        /**
+         * Sets the property defining the viewport size.
+         * \param   viewportSizeProp    The new property defining the viewport size, must not be 0.
+         */
+        void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
         /**
          * Reinitializes the camera using the data in \a hwb.

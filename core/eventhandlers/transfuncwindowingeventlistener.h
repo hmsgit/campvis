@@ -42,6 +42,7 @@ namespace campvis {
     public:
         /**
          * Creates a TransFuncWindowingEventListener.
+         * \param   property    The target transfer function property, may be 0.
          */
         explicit TransFuncWindowingEventListener(TransferFunctionProperty* property);
 
@@ -53,8 +54,14 @@ namespace campvis {
         /// \see tgt::EventListener::onEvent()
         virtual void onEvent(tgt::Event* e);
 
+        /**
+         * Sets the target transfer function property.
+         * \param   prop    The new target transfer function property, may be 0.
+         */
+        void setTransferFunctionProperty(TransferFunctionProperty* prop);
+
     protected:
-        TransferFunctionProperty* _prop;
+        TransferFunctionProperty* _prop;    ///< The target transfer function property, may be 0
 
         bool _mousePressed;                 ///< Flag whether the mouse is currently pressed
         tgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed

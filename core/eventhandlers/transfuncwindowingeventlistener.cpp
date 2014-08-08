@@ -35,11 +35,10 @@ namespace campvis {
     TransFuncWindowingEventListener::TransFuncWindowingEventListener(TransferFunctionProperty* property)
         : tgt::EventListener()
         , _prop(property)
-	, _mousePressed(false)
-	, _mouseDownPosition(0, 0)
-	, _originalIntensityDomain(0.f, 1.f)
+        , _mousePressed(false)
+        , _mouseDownPosition(0, 0)
+        , _originalIntensityDomain(0.f, 1.f)
     {
-        tgtAssert(_prop != 0, "Assigned property must not be 0.");
     }
 
     TransFuncWindowingEventListener::~TransFuncWindowingEventListener() {
@@ -47,6 +46,8 @@ namespace campvis {
     }
 
     void TransFuncWindowingEventListener::onEvent(tgt::Event* e) {
+        if (_prop == nullptr)
+            return;
         if (typeid(*e) != typeid(tgt::MouseEvent))
             return;
 
@@ -87,6 +88,10 @@ namespace campvis {
             _prop->getTF()->setIntensityDomain(tgt::clamp(newIntesityDomain, tgt::vec2(0.f), tgt::vec2(1.f)));
             e->ignore();
         }
+    }
+
+    void TransFuncWindowingEventListener::setTransferFunctionProperty(TransferFunctionProperty* prop) {
+        _prop = prop;
     }
 
 }

@@ -115,7 +115,7 @@ namespace campvis {
             LGL_ERROR;
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 

@@ -138,7 +138,7 @@ namespace campvis {
             }
         }
         else {
-            LERROR("Could not load image.");
+            LDEBUG("Could not load image.");
         }
     }
 }

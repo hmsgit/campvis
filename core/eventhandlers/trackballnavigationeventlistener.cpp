@@ -82,6 +82,7 @@ namespace campvis {
     void TrackballNavigationEventListener::onEvent(tgt::Event* e) {
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
+            _trackball->setViewprtSize(me->viewport());
             if (me->action() == tgt::MouseEvent::PRESSED) {
                 for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it)
                     (*it)->p_lqMode.setValue(true);
@@ -165,6 +166,15 @@ namespace campvis {
         else {
             _trackball->setWindowRatio(ratio);
         }
+    }
+
+    void TrackballNavigationEventListener::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
+        _viewportSizeProp->s_changed.disconnect(this);
+
+        tgtAssert(viewportSizeProp != nullptr, "The property must not be 0.");
+        _viewportSizeProp = viewportSizeProp;
+        onViewportSizePropChanged(_viewportSizeProp);
+        _viewportSizeProp->s_changed.connect(this, &TrackballNavigationEventListener::onViewportSizePropChanged);
     }
 
 }
