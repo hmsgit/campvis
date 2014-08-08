@@ -87,7 +87,7 @@ namespace campvis {
         /**
          * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
          */
-        void onDataContainerDataAdded(const std::string&, DataHandle);
+        void onDataContainerDataAdded(std::string, DataHandle);
 
         /**
          * Size hint for the default window size

@@ -252,7 +252,7 @@ namespace campvis {
 #endif
     }
 
-    void AbstractPipeline::onDataContainerDataAdded(const std::string& name, DataHandle dh) {
+    void AbstractPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
         if (name == _renderTargetID.getValue()) {
             s_renderTargetChanged.emitSignal();
         }

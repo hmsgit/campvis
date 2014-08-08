@@ -65,7 +65,7 @@ namespace campvis {
          */
         virtual void updateWidgetFromProperty();
 
-        void onDataAdded(const std::string& key, DataHandle dh);
+        void onDataAdded(std::string key, DataHandle dh);
 
     private slots:
         void onTextChanged(const QString& text);

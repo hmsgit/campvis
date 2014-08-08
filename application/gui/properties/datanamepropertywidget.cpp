@@ -99,7 +99,7 @@ namespace campvis {
         --_ignorePropertyUpdates;
     }
 
-    void DataNamePropertyWidget::onDataAdded(const std::string& key, DataHandle dh) {
+    void DataNamePropertyWidget::onDataAdded(std::string key, DataHandle dh) {
         emit s_dataAddedQt(QString::fromStdString(key), dh);
     }
 

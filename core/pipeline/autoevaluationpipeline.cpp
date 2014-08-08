@@ -127,7 +127,7 @@ namespace campvis {
         }
     }
 
-    void AutoEvaluationPipeline::onDataContainerDataAdded(const std::string& name, DataHandle dh) {
+    void AutoEvaluationPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
         {
             // acquire read lock
             tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
