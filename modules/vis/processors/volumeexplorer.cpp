@@ -36,19 +36,27 @@
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
+    static const GenericOption<VolumeExplorer::Views> largeViewOptions[4] = {
+        GenericOption<VolumeExplorer::Views>("z", "XY Plane", VolumeExplorer::XY_PLANE),
+        GenericOption<VolumeExplorer::Views>("y", "XZ Plane", VolumeExplorer::XZ_PLANE),
+        GenericOption<VolumeExplorer::Views>("x", "YZ Plane", VolumeExplorer::YZ_PLANE),
+        GenericOption<VolumeExplorer::Views>("volume", "Volume", VolumeExplorer::VOLUME)
+    };
+
     const std::string VolumeExplorer::loggerCat_ = "CAMPVis.modules.vis.VolumeExplorer";
 
     VolumeExplorer::VolumeExplorer(IVec2Property* viewportSizeProp, SliceRenderProcessor* sliceRenderer, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "ve.output", DataNameProperty::WRITE)
+        , p_largeView("LargeView", "Large View Selection", largeViewOptions, 4)
         , p_enableScribbling("EnableScribbling", "Enable Scribbling in Slice Views", false)
         , p_seProperties("SliceExtractorProperties", "Slice Extractor Properties")
         , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties")
         , _raycaster(viewportSizeProp, raycaster)
         , _sliceRenderer(sliceRenderer)
-        , p_sliceRenderSize("SliceRenderSize", "Slice Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
-        , p_volumeRenderSize("VolumeRenderSize", "Volume Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
+        , p_smallRenderSize("SmallRenderSize", "Small Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
+        , p_largeRenderSize("LargeRenderSize", "Large Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
         , _xSliceHandler(&_sliceRenderer->p_xSliceNumber)
         , _ySliceHandler(&_sliceRenderer->p_ySliceNumber)
         , _zSliceHandler(&_sliceRenderer->p_zSliceNumber)
@@ -56,12 +64,16 @@ namespace campvis {
         , _trackballEH(0)
         , _mousePressedInRaycaster(false)
         , _scribblePointer(nullptr)
+        , _cachedImageSize(0)
     {
         tgtAssert(raycaster != nullptr, "Raycasting Processor must not be 0.");
         tgtAssert(_sliceRenderer != nullptr, "Slice Rendering Processor must not be 0.");
 
+        p_largeView.selectByOption(VOLUME);
+
         addProperty(p_inputVolume, INVALID_PROPERTIES);
         addProperty(p_outputImage);
+        addProperty(p_largeView, LARGE_VIEW_INVALID | SLICES_INVALID | VR_INVALID | INVALID_RESULT);
         addProperty(p_enableScribbling, VALID);
 
         addDecorator(new ProcessorDecoratorBackground());
@@ -86,14 +98,14 @@ namespace campvis {
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
         p_inputVolume.addSharedProperty(&_sliceRenderer->p_sourceImageID);
 
-        _sliceRenderer->setViewportSizeProperty(&p_sliceRenderSize);
-        _raycaster.setViewportSizeProperty(&p_volumeRenderSize);
+        _sliceRenderer->setViewportSizeProperty(&p_smallRenderSize);
+        _raycaster.setViewportSizeProperty(&p_largeRenderSize);
 
-        addProperty(p_sliceRenderSize, VALID);
-        addProperty(p_volumeRenderSize, VALID);
+        addProperty(p_smallRenderSize, VALID);
+        addProperty(p_largeRenderSize, VALID);
 
         // Event-Handlers
-        _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, &p_volumeRenderSize);
+        _trackballEH = new TrackballNavigationEventListener(&_raycaster.p_camera, &p_largeRenderSize);
         _trackballEH->addLqModeProcessor(&_raycaster);
 
         if (TransferFunctionProperty* tester = dynamic_cast<TransferFunctionProperty*>(_sliceRenderer->getProperty("TransferFunction"))) {
@@ -119,7 +131,7 @@ namespace campvis {
 
         _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
         
-        // force recalculation of p_sliceRenderSize and p_volumeRenderSize
+        // force recalculation of p_smallRenderSize and p_largeRenderSize
         onPropertyChanged(_viewportSizeProperty);
     }
 
@@ -133,6 +145,20 @@ namespace campvis {
 
     void VolumeExplorer::updateResult(DataContainer& data) {
         // launch sub-renderers if necessary
+        if (getInvalidationLevel() & LARGE_VIEW_INVALID) {
+            switch (p_largeView.getOptionValue()) {
+                case XY_PLANE: // fallthrough
+                case XZ_PLANE: // fallthrough
+                case YZ_PLANE:
+                    _raycaster.setViewportSizeProperty(&p_smallRenderSize);
+                    _trackballEH->setViewportSizeProperty(&p_smallRenderSize);
+                    break;
+                case VOLUME:
+                    _raycaster.setViewportSizeProperty(&p_largeRenderSize);
+                    _trackballEH->setViewportSizeProperty(&p_largeRenderSize);
+                    break;
+            }
+        }
         if (getInvalidationLevel() & SCRIBBLE_INVALID) {
             std::vector<tgt::vec3> vertices;
             std::vector<tgt::vec4> colors;
@@ -158,15 +184,18 @@ namespace campvis {
             _raycaster.process(data);
         }
         if (getInvalidationLevel() & SLICES_INVALID) {
-            _sliceRenderer->p_sliceOrientation.selectById("x");
+            _sliceRenderer->setViewportSizeProperty(p_largeView.getOptionValue() == YZ_PLANE ? &p_largeRenderSize : &p_smallRenderSize);
+            _sliceRenderer->p_sliceOrientation.selectByOption(SliceRenderProcessor::YZ_PLANE);
             _sliceRenderer->p_targetImageID.setValue(p_outputImage.getValue() + ".xSlice");
             _sliceRenderer->process(data);
 
-            _sliceRenderer->p_sliceOrientation.selectById("y");
+            _sliceRenderer->setViewportSizeProperty(p_largeView.getOptionValue() == XZ_PLANE ? &p_largeRenderSize : &p_smallRenderSize);
+            _sliceRenderer->p_sliceOrientation.selectByOption(SliceRenderProcessor::XZ_PLANE);
             _sliceRenderer->p_targetImageID.setValue(p_outputImage.getValue() + ".ySlice");
             _sliceRenderer->process(data);
 
-            _sliceRenderer->p_sliceOrientation.selectById("z");
+            _sliceRenderer->setViewportSizeProperty(p_largeView.getOptionValue() == XY_PLANE ? &p_largeRenderSize : &p_smallRenderSize);
+            _sliceRenderer->p_sliceOrientation.selectByOption(SliceRenderProcessor::XY_PLANE);
             _sliceRenderer->p_targetImageID.setValue(p_outputImage.getValue() + ".zSlice");
             _sliceRenderer->process(data);
         }
@@ -179,8 +208,8 @@ namespace campvis {
 
     void VolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == _viewportSizeProperty) {
-            p_sliceRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
-            p_volumeRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
+            p_smallRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
+            p_largeRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
         }
         if (prop == &p_outputImage) {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
@@ -220,8 +249,8 @@ namespace campvis {
         _shader->activate();
 
         tgt::vec2 rts(_viewportSizeProperty->getValue());
-        tgt::vec2 vrs(p_volumeRenderSize.getValue());
-        tgt::vec2 srs(p_sliceRenderSize.getValue());
+        tgt::vec2 vrs(p_largeRenderSize.getValue());
+        tgt::vec2 srs(p_smallRenderSize.getValue());
 
         _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, rts.x, rts.y, 0, -1, 1));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -231,8 +260,24 @@ namespace campvis {
             _shader->setUniform("_renderBackground", true);
 
             vrImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+            switch (p_largeView.getOptionValue()) {
+                case XY_PLANE:
+                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 2.f * srs.y, 0.f)));
+                    break;
+                case XZ_PLANE:
+                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, srs.y, 0.f)));
+                    break;
+                case YZ_PLANE:
+                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 0.f, 0.f)));
+                    break;
+                case VOLUME:
+                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+                    break;
+            }
             _quad->render(GL_POLYGON);
 
             _shader->setUniform("_renderBackground", false);
@@ -240,20 +285,38 @@ namespace campvis {
         }
         if (zSliceImage != 0) {
             zSliceImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 2.f * srs.y, 0.f)));
+            if (p_largeView.getOptionValue() == XY_PLANE) {
+                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
+                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+            }
+            else {
+                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
+                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 2.f * srs.y, 0.f)));
+            }
             _quad->render(GL_POLYGON);
         }
         if (ySliceImage != 0) {
             ySliceImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, srs.y, 0.f)));
+            if (p_largeView.getOptionValue() == XZ_PLANE) {
+                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
+                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+            }
+            else {
+                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
+                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, srs.y, 0.f)));
+            }
             _quad->render(GL_POLYGON);
         }
         if (xSliceImage != 0) {
             xSliceImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 0.f, 0.f)));
+            if (p_largeView.getOptionValue() == YZ_PLANE) {
+                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
+                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+            }
+            else {
+                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
+                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 0.f, 0.f)));
+            }
             _quad->render(GL_POLYGON);
         }
 
@@ -283,19 +346,19 @@ namespace campvis {
         ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
         static_cast<TransferFunctionProperty*>(_raycaster.getNestedProperty("RaycasterProps::TransferFunction"))->setImageHandle(img.getDataHandle());
 
-        if (img != 0) {
-            const tgt::svec3& imgSize = img->getSize();
-            if (_sliceRenderer->p_xSliceNumber.getMaxValue() != static_cast<int>(imgSize.x) - 1){
-                _sliceRenderer->p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
-                _sliceRenderer->p_xSliceNumber.setValue(static_cast<int>(imgSize.x) / 2);
+        if (img != 0 && _cachedImageSize != tgt::ivec3(img->getSize())) {
+            _cachedImageSize = img->getSize();
+            if (_sliceRenderer->p_xSliceNumber.getMaxValue() != _cachedImageSize.x - 1){
+                _sliceRenderer->p_xSliceNumber.setMaxValue(_cachedImageSize.x - 1);
+                _sliceRenderer->p_xSliceNumber.setValue(_cachedImageSize.x / 2);
             }
-            if (_sliceRenderer->p_ySliceNumber.getMaxValue() != static_cast<int>(imgSize.y) - 1){
-                _sliceRenderer->p_ySliceNumber.setMaxValue(static_cast<int>(imgSize.y) - 1);
-                _sliceRenderer->p_ySliceNumber.setValue(static_cast<int>(imgSize.y) / 2);
+            if (_sliceRenderer->p_ySliceNumber.getMaxValue() != _cachedImageSize.y - 1){
+                _sliceRenderer->p_ySliceNumber.setMaxValue(_cachedImageSize.y - 1);
+                _sliceRenderer->p_ySliceNumber.setValue(_cachedImageSize.y / 2);
             }
-            if (_sliceRenderer->p_zSliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
-                _sliceRenderer->p_zSliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
-                _sliceRenderer->p_zSliceNumber.setValue(static_cast<int>(imgSize.z) / 2);
+            if (_sliceRenderer->p_zSliceNumber.getMaxValue() != _cachedImageSize.z - 1){
+                _sliceRenderer->p_zSliceNumber.setMaxValue(_cachedImageSize.z - 1);
+                _sliceRenderer->p_zSliceNumber.setValue(_cachedImageSize.z / 2);
             }
 
             _trackballEH->reinitializeCamera(img);
@@ -307,83 +370,90 @@ namespace campvis {
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
 
-            // we're currently on the slice view (left-hand) side and not in the process of changing the camera trackball
-            if (!_mousePressedInRaycaster && me->x() <= p_sliceRenderSize.getValue().x) {
-                // Mouse wheel has changed -> cycle slices
-                if (me->action() == tgt::MouseEvent::WHEEL) {
-                    if (me->y() <= p_sliceRenderSize.getValue().y)
-                        _zSliceHandler.onEvent(e);
-                    else if (me->y() <= 2*p_sliceRenderSize.getValue().y)
-                        _ySliceHandler.onEvent(e);
-                    else
-                        _xSliceHandler.onEvent(e);
-                }
-
-                // CTRL pressed -> forward to SliceExtractor's scribbling
-                else if (p_enableScribbling.getValue() && (me->modifiers() & tgt::Event::CTRL || me->modifiers() & tgt::Event::ALT)) {
-                    if (me->action() == tgt::MouseEvent::PRESSED) {
-                        _scribblePointer = (me->modifiers() & tgt::Event::CTRL) ? &_yesScribbles : &_noScribbles;
-                        if (! (me->modifiers() & tgt::Event::SHIFT))
-                            _scribblePointer->clear();
+            // if the mouse was pressed, we need to cache the view parameters of the view underneath
+            // the pointer, so that we can adjust the MouseEvents to the corresponding subviews.
+            if (me->action() == tgt::MouseEvent::PRESSED || (!_mousePressedInRaycaster && me->action() == tgt::MouseEvent::WHEEL)) {
+                if (me->x() <= p_smallRenderSize.getValue().x) {
+                    if (me->y() <= p_smallRenderSize.getValue().y) {
+                        _eventPositionOffset = tgt::ivec2(0, 0);
+                        _eventViewportSize = p_smallRenderSize.getValue();
+                        _viewUnderEvent = (p_largeView.getOptionValue() == XY_PLANE) ? VOLUME : XY_PLANE;
                     }
-                    else if (_scribblePointer != nullptr && me->action() == tgt::MouseEvent::RELEASED) {
-                        _scribblePointer = nullptr;
-                    }
-
-                    // lock this processor, so that the slice orientation's setting does not change
-                    AbstractProcessor::ScopedLock lock(this);
-
-                    if (me->y() <= p_sliceRenderSize.getValue().y) {
-                        _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::XY_PLANE);
-                        tgt::MouseEvent adjustedMe(
-                            me->x(), me->y(),
-                            me->action(), me->modifiers(), me->button(),
-                            p_sliceRenderSize.getValue()
-                            );
-                        _sliceRenderer->onEvent(&adjustedMe);
-                    }
-                    else if (me->y() <= 2*p_sliceRenderSize.getValue().y) {
-                        _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::XZ_PLANE);
-                        tgt::MouseEvent adjustedMe(
-                            me->x(), me->y() - p_sliceRenderSize.getValue().y,
-                            me->action(), me->modifiers(), me->button(),
-                            p_sliceRenderSize.getValue()
-                            );
-                        _sliceRenderer->onEvent(&adjustedMe);
+                    else if (me->y() <= 2*p_smallRenderSize.getValue().y) {
+                        _eventPositionOffset = tgt::ivec2(0, -p_smallRenderSize.getValue().y);
+                        _eventViewportSize = p_smallRenderSize.getValue();
+                        _viewUnderEvent = (p_largeView.getOptionValue() == XZ_PLANE) ? VOLUME : XZ_PLANE;
                     }
                     else {
-                        _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::YZ_PLANE);
-                        tgt::MouseEvent adjustedMe(
-                            me->x(), me->y() - (2 * p_sliceRenderSize.getValue().y),
-                            me->action(), me->modifiers(), me->button(),
-                            p_sliceRenderSize.getValue()
-                            );
-                        _sliceRenderer->onEvent(&adjustedMe);
+                        _eventPositionOffset = tgt::ivec2(0, -2 * p_smallRenderSize.getValue().y);
+                        _eventViewportSize = p_smallRenderSize.getValue();
+                        _viewUnderEvent = (p_largeView.getOptionValue() == YZ_PLANE) ? VOLUME : YZ_PLANE;
                     }
-
                 }
-
-                // adjust slice TF windowing
                 else {
-                    _windowingHandler.onEvent(e);
+                    _eventPositionOffset = tgt::ivec2(- p_smallRenderSize.getValue().x, 0);
+                    _eventViewportSize = p_largeRenderSize.getValue();
+                    _viewUnderEvent = p_largeView.getOptionValue();
                 }
             }
-            else {
+
+            // create a new MouseEvent for the corresponding subview
+            tgt::MouseEvent adjustedMe(me->x() + _eventPositionOffset.x, me->y() + _eventPositionOffset.y,
+                me->action(), me->modifiers(), me->button(),
+                _eventViewportSize);
+
+            // now divert the new MouseEvent to the corresponding handler
+            if (me->action() == tgt::MouseEvent::DOUBLECLICK) {
+                p_largeView.selectByOption(_viewUnderEvent);
+            }
+            else if (_mousePressedInRaycaster || _viewUnderEvent == VOLUME) {
                 // raycasting trackball navigation
                 if (me->action() == tgt::MouseEvent::PRESSED)
                     _mousePressedInRaycaster = true;
                 else if (me->action() == tgt::MouseEvent::RELEASED)
                     _mousePressedInRaycaster = false;
-
-                tgt::MouseEvent adjustedMe(
-                    me->x() - p_sliceRenderSize.getValue().x,
-                    me->y(),
-                    me->action(),
-                    me->modifiers(),
-                    me->button(),
-                    me->viewport() - tgt::ivec2(p_sliceRenderSize.getValue().x, 0)
-                    );
                 _trackballEH->onEvent(&adjustedMe);
+            }
+            else if (me->action() == tgt::MouseEvent::WHEEL) {
+                // Mouse wheel has changed -> cycle slices
+                if (_viewUnderEvent == XY_PLANE) {
+                    _zSliceHandler.onEvent(e);
+                }
+                else if (_viewUnderEvent == XZ_PLANE) {
+                    _ySliceHandler.onEvent(e);
+                }
+                else {
+                    _xSliceHandler.onEvent(e);
+                }
+            }
+            else if (p_enableScribbling.getValue() && (me->modifiers() & tgt::Event::CTRL || me->modifiers() & tgt::Event::ALT)) {
+                // CTRL pressed -> forward to SliceExtractor's scribbling
+                if (me->action() == tgt::MouseEvent::PRESSED) {
+                    _scribblePointer = (me->modifiers() & tgt::Event::CTRL) ? &_yesScribbles : &_noScribbles;
+                    if (! (me->modifiers() & tgt::Event::SHIFT))
+                        _scribblePointer->clear();
+                }
+                else if (_scribblePointer != nullptr && me->action() == tgt::MouseEvent::RELEASED) {
+                    _scribblePointer = nullptr;
+                }
+
+                // lock this processor, so that the slice orientation's setting does not change
+                AbstractProcessor::ScopedLock lock(this);
+
+                if (_viewUnderEvent == XY_PLANE) {
+                    _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::XY_PLANE);
+                }
+                else if (_viewUnderEvent == XZ_PLANE) {
+                    _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::XZ_PLANE);
+                }
+                else {
+                    _sliceRenderer->p_sliceOrientation.selectByOption(SliceExtractor::YZ_PLANE);
+                }
+                _sliceRenderer->onEvent(&adjustedMe);
+            }
+            else {
+                // adjust slice TF windowing
+                _windowingHandler.onEvent(&adjustedMe);
             }
         }
     }

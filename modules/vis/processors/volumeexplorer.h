@@ -53,6 +53,14 @@ namespace campvis {
      */
     class VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public tgt::EventListener {
     public:
+        /// Enumeration of the 4 views of the VolumeExplorer
+        enum Views {
+            XY_PLANE,
+            XZ_PLANE,
+            YZ_PLANE,
+            VOLUME
+        };
+
         /**
          * Constructs a new VolumeExplorer Processor
          * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
@@ -86,6 +94,7 @@ namespace campvis {
         DataNameProperty p_inputVolume;     ///< image ID for first input image
         DataNameProperty p_outputImage;     ///< image ID for output image
 
+        GenericOptionProperty<Views> p_largeView;   ///< View to be shown in the large render target
         BoolProperty p_enableScribbling;    ///< Enable Scribbling in Slice Views
 
         MetaProperty p_seProperties;        ///< MetaProperty for SliceExtractor properties
@@ -99,6 +108,7 @@ namespace campvis {
             VR_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
             SLICES_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
             SCRIBBLE_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
+            LARGE_VIEW_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 3
         };
 
         /// \see AbstractProcessor::updateResult
@@ -133,8 +143,8 @@ namespace campvis {
         VolumeRenderer _raycaster;
         SliceRenderProcessor* _sliceRenderer;
 
-        IVec2Property p_sliceRenderSize;
-        IVec2Property p_volumeRenderSize;
+        IVec2Property p_smallRenderSize;
+        IVec2Property p_largeRenderSize;
 
 
         MWheelToNumericPropertyEventListener _xSliceHandler;
@@ -144,9 +154,15 @@ namespace campvis {
         TrackballNavigationEventListener* _trackballEH;
         bool _mousePressedInRaycaster;                  ///< Flag whether mouse was pressed in raycaster
 
+        Views _viewUnderEvent;                          ///< View to apply events to
+        tgt::ivec2 _eventPositionOffset;                ///< Offset to be added to mouse event position
+        tgt::ivec2 _eventViewportSize;                  ///< Viewport of adjusted mouse event
+
         std::vector<tgt::vec3>* _scribblePointer;       ///< Pointer encoding whether the mouse was pressed (!= nullptr) and whether we have yes-scribbles or no-scribbles.
         std::vector<tgt::vec3> _yesScribbles;           ///< All voxels of the current yes-scribbles
         std::vector<tgt::vec3> _noScribbles;            ///< All voxels of the current no-scribbles
+
+        tgt::ivec3 _cachedImageSize;
 
         static const std::string loggerCat_;
     };
