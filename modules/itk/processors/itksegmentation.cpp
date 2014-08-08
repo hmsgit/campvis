@@ -231,9 +231,9 @@ namespace campvis {
                 p_sourceImageID.setValue(p_inputVolume.getValue());
 
                 // update the maximum size
-                p_seedX.setMaxValue(_sliceExtractor.p_xSliceNumber.getMaxValue());
-                p_seedY.setMaxValue(_sliceExtractor.p_ySliceNumber.getMaxValue());
-                p_seedZ.setMaxValue(_sliceExtractor.p_zSliceNumber.getMaxValue());
+                p_seedX.setMaxValue(_sliceRenderer->p_xSliceNumber.getMaxValue());
+                p_seedY.setMaxValue(_sliceRenderer->p_ySliceNumber.getMaxValue());
+                p_seedZ.setMaxValue(_sliceRenderer->p_zSliceNumber.getMaxValue());
 
                 tgt::svec3 voxel;
                 voxel = tgt::vec3(_yesScribbles[0]);
