@@ -258,7 +258,7 @@ namespace campvis {
 
     template<typename T>
     void campvis::GenericOptionProperty<T>::selectByIndex(int index) {
-        tgtAssert(index >= 0 && index < _options.size(), "Index out of bounds.");
+        tgtAssert(index >= 0 && index < static_cast<int>(_options.size()), "Index out of bounds.");
         setValue(index);
     }
 
@@ -282,17 +282,17 @@ namespace campvis {
 
     template<typename T>
     size_t campvis::GenericOptionProperty<T>::removeCurrent() {
-        int index = getValue();
+        size_t index = getValue();
         if (index == 0) return 0;
         if (index <= this->_options.size()-1)
             this->_options.erase(this->_options.begin() + index);
-        selectByIndex((index <= static_cast<int>(this->_options.size()) - 1) ? index : static_cast<int>(this->_options.size()) - 1);
-        return (index <= static_cast<int>(this->_options.size()) - 1) ? index : (static_cast<int>(this->_options.size()) - 1);
+        selectByIndex((index <= this->_options.size() - 1) ? static_cast<int>(index) : static_cast<int>(this->_options.size() - 1));
+        return (index <= this->_options.size() - 1) ? index : this->_options.size() - 1;
     }
 
     template<typename T>
     size_t campvis::GenericOptionProperty<T>::updateCurrent(GenericOption<T> copy) {
-        std::vector< GenericOption<T> >::iterator* it = this->_options[getValue()];
+        GenericOption<T>* it = &this->_options[getValue()];
         it->_id = copy._id;
         it->_title = copy._title;
         it->_value = copy._value;

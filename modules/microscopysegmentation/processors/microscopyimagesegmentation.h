@@ -182,6 +182,12 @@ namespace campvis {
         IVec2Property p_leftPaneSize;                   ///< Used to define space for zslice
         IVec2Property p_zSize;                          ///< Actual size for zslice
 
+        MWheelToNumericPropertyEventListener _xSliceHandler;
+        MWheelToNumericPropertyEventListener _ySliceHandler;
+        MWheelToNumericPropertyEventListener _zSliceHandler;
+        TransFuncWindowingEventListener _windowingHandler;
+        TrackballNavigationEventListener* _trackballEH;
+
         ColorProperty p_paintColor;                     ///< Color picker for active object
         Vec3Property p_axisScaling;                     ///< Asis ratio. Used to change ImageMappingInformation
         tgt::vec3 _oldScaling;
@@ -195,12 +201,6 @@ namespace campvis {
         StringProperty p_csvPath;                       ///< Filepath to save CSV
         ButtonProperty p_saveCSV;                       ///< Save changes in CSV
         GenericOptionProperty<ContourObject> *p_objectList; ///< List of drawn contours
-
-        MWheelToNumericPropertyEventListener _xSliceHandler;
-        MWheelToNumericPropertyEventListener _ySliceHandler;
-        MWheelToNumericPropertyEventListener _zSliceHandler;
-        TransFuncWindowingEventListener _windowingHandler;
-        TrackballNavigationEventListener* _trackballEH;
         bool _mousePressedInRaycaster;                  ///< Flag whether mouse was pressed in raycaster
 
         static const std::string loggerCat_;

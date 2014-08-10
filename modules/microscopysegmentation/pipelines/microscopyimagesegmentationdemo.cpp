@@ -42,7 +42,6 @@ namespace campvis {
     {
         addProcessor(&_lsp);
 
-        //_ve.getProperty()->addSharedProperty(_imageReader.getProperty("imgReaderViewport"));
         addProcessor(&_imageReader);
         addProcessor(&_ve);
 
@@ -58,20 +57,15 @@ namespace campvis {
         _ve.p_outputImage.setValue("mscopy");
         _renderTargetID.setValue("mscopy");
 
-        //_imageReader.setURL(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
-        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/../lymph/LymphP1_0086.tif");
+        _imageReader.setURL(CAMPVIS_SOURCE_DIR "/../lymph/LymphP1_0086.tif");
         MetaProperty *metaProp = dynamic_cast<MetaProperty*>(_imageReader.getProperty("DevilImageReaderMetaProp"));
         tgtAssert(nullptr != metaProp, "This should not happen.");
         BoolProperty *bp = dynamic_cast<BoolProperty*>(metaProp->getProperty("ImportSimilar"));
         tgtAssert(nullptr != bp, "This should not happen.");
         bp->setValue(true);
-        
-        _imageReader.setTargetImageId("mscopy.output");
-        _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);        
-        //_imageReader.p_importType.selectById("localIntensity3");//selectByIndex(2);
-        //_imageReader.p_targetImageID.setValue("reader.output");
-        //_imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
 
+        _imageReader.setTargetImageId("mscopy.output");
+        _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.12f, .15f), tgt::col4(85, 0, 0, 128), tgt::col4(255, 0, 0, 128)));
@@ -84,9 +78,4 @@ namespace campvis {
     void MicroscopyImageSegmentationDemo::deinit() {
         AutoEvaluationPipeline::deinit();
     }
-
-    //void MicroscopyImageSegmentation::updateProperties(DataContainer &dc) {
-
-    //}
-
 }

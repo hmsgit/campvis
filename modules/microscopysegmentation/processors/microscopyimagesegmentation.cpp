@@ -95,19 +95,19 @@ namespace campvis {
         , _zSliceHandler(&_sliceExtractor.p_zSliceNumber)
         , _windowingHandler(&_sliceExtractor.p_transferFunction)
         , _trackballEH(0)
-        , _mousePressedInRaycaster(false)
         , p_paintColor("PaintColor", "Change Color", tgt::vec4(255), tgt::vec4(0.0f), tgt::vec4(255))
         , p_axisScaling("AxisScaling", "Axis Scale", tgt::vec3(1), tgt::vec3(1), tgt::vec3(25), tgt::vec3(1))
-        , p_objectList(0)
+        , p_fitToWindow("FitToWindow", "Fit to Window", true)
+        , p_scalingFactor("ScalingFactor", "Scaling Factor", 1.f, 0.f, 10.f, .1f, 2)
+        , p_offset("Offset", "Offset", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(100))
         , p_addObject("addObjectButton", "Add Object")
         , p_deleteObject("deleteObjectButton", "Delete Current Object")
         , p_csvPath("csvPath", "File Name", "", StringProperty::SAVE_FILENAME)
         , p_saveCSV("saveCSV", "Save")
+        , p_objectList(0)
+        , _mousePressedInRaycaster(false)        
         , _objectNamePrefix("Object ")
         , _objectNameSuffix(0) 
-        , p_fitToWindow("FitToWindow", "Fit to Window", true)
-        , p_scalingFactor("ScalingFactor", "Scaling Factor", 1.f, 0.f, 10.f, .1f, 2)
-        , p_offset("Offset", "Offset", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(100))
 
     {
         addProperty(p_inputVolume, INVALID_PROPERTIES);
@@ -254,7 +254,7 @@ namespace campvis {
                     float pos = 0;
                     vertices.clear();
                     colors.clear();
-                    for (int gg = 0; gg < selectedObject._points.size() * 5; gg++ ) {
+                    for (size_t gg = 0; gg < selectedObject._points.size() * 5; gg++ ) {
                         double x, y, z = selectedObject._points[0].z;
                         alglib::pspline2calc(p, pos, x, y);
                         pos += stepSize;
@@ -292,7 +292,7 @@ namespace campvis {
                             float pos = 0;
                             vertices.clear();
                             colors.clear();
-                            for (int gg= 0; gg < it.size() * 5; gg++ ) {
+                            for (size_t gg= 0; gg < it.size() * 5; gg++ ) {
                                 double x, y, z = it[0].z;
                                 alglib::pspline2calc(p, pos, x, y);
                                 pos += stepSize;
@@ -556,7 +556,7 @@ namespace campvis {
                     }
 
                     // lock this processor, so that the slice orientation's setting does not change
-                    AbstractProcessor::ScopedLock lock(this, false);
+                    AbstractProcessor::ScopedLock lock(this);
 
                     if (me->y() <= blockSize.y * 2 && me->x() >= leftPane.x) {
                         _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::XZ_PLANE);//xz
@@ -632,10 +632,10 @@ namespace campvis {
                     return;
                 }
 
-                for (int i = 0; i < selectedObject._points.size(); i++) {
+                for (size_t i = 0; i < selectedObject._points.size(); i++) {
                     unsigned long dist2 = distanceSqr(selectedObject._points[i], voxel);
                     if (dist > dist2) {
-                        insertNextVoxelAt = i;
+                        insertNextVoxelAt = static_cast<int>(i);
                         dist = dist2;
                     }
                 }
@@ -672,14 +672,14 @@ namespace campvis {
     }
 
     void MicroscopyImageSegmentation::onPaintColorChanged(const AbstractProperty *prop) {
-        ContourObject &obj = this->p_objectList->getOptionValue();
+        ContourObject &obj = this->p_objectList->getOptionReference();
         obj._color.setValue(p_paintColor.getValue());
         this->p_objectList->updateCurrent(obj);
 
         invalidate(INVALID_RESULT | SCRIBBLE_INVALID);
     }
     void MicroscopyImageSegmentation::onObjectSelectionChanged (const AbstractProperty *prop) {
-        ContourObject &obj = this->p_objectList->getOptionValue();
+        const ContourObject &obj = this->p_objectList->getOptionValue();
         this->p_paintColor.setValue(obj._color.getValue());
 
         invalidate(INVALID_RESULT | SCRIBBLE_INVALID);

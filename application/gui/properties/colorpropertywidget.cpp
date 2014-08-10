@@ -42,11 +42,9 @@ namespace campvis {
     }
 
     ColorPropertyWidget::~ColorPropertyWidget() {
-        ColorProperty* property = static_cast<ColorProperty*>(_property);
     }
 
     void ColorPropertyWidget::updateWidgetFromProperty() {
-        ColorProperty* prop = static_cast<ColorProperty*>(_property);
         _colorPicker->blockSignals(true);
         const tgt::vec4 val = static_cast<ColorProperty*>(_property)->getValue();
         _colorPicker->setColor(QtColorTools::toQColor(tgt::vec4(val.x *255, val.y*255, val.z*255, val.w*255)));
@@ -57,7 +55,7 @@ namespace campvis {
         ++_ignorePropertyUpdates;
         ColorProperty* prop = static_cast<ColorProperty*>(_property);
         tgt::vec4 val = QtColorTools::toTgtColor(_colorPicker->color());
-        prop->setValue(tgt::vec4(val.x/val.w, val.y/val.w, val.z/val.w, val.w/val.w));
+        prop->setValue(tgt::vec4(val.x/val.w, val.y/val.w, val.z/val.w, 1));
         --_ignorePropertyUpdates;
     }
 

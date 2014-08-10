@@ -35,8 +35,6 @@ namespace campvis {
 
     typedef _ColorProperty<tgt::vec4> ColorProperty;
 
-
-
     template<typename T>
     _ColorProperty<T>::_ColorProperty(
         const std::string& name,
@@ -44,7 +42,7 @@ namespace campvis {
         const T& value,
         const T& minValue,
         const T& maxValue,
-        const T& stepValue = T(0.01f)) 
+        const T& stepValue) 
         : Vec4Property(name, title, value, minValue, maxValue, stepValue)
     {
 

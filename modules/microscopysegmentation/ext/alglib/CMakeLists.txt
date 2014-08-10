@@ -12,12 +12,12 @@
 project(alglib CXX C)
 cmake_minimum_required(VERSION 2.6.2)
 
-# Where Google Test's .h files can be found.
+# Where .h files can be found.
 include_directories(
   ${alglib_SOURCE_DIR}
   ${alglib_SOURCE_DIR})
 
-# Where Google Test's libraries can be found.
+# Where libraries can be found.
 link_directories(${gtest_BINARY_DIR})
 
 LIST(APPEND AlglibHeaders
@@ -54,13 +54,9 @@ LIST(APPEND AlglibSources
 
 
 ########################################################################
-#
-# Defines the alglib & gtest_main libraries.  User tests should link
-# with one of them.
 
-# Google Test libraries.  We build them using more strict warnings than what
-# are used for other targets, to ensure that alglib can be compiled by a user
-# aggressive about warnings.
+# Defines the alglib librarie.  
+
 ADD_LIBRARY(alglib STATIC 
     ${AlglibSources} ${AlglibHeaders} )
 #cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
@@ -70,9 +66,11 @@ ADD_LIBRARY(alglib STATIC
 if ( CMAKE_COMPILER_IS_GNUCC )
     # This is tested
     set_property( TARGET alglib APPEND_STRING PROPERTY COMPILE_FLAGS -Wall )
+	SET(CMAKE_CXX_FLAGS "-fPIC -fno-strict-aliasing")
 endif ( CMAKE_COMPILER_IS_GNUCC )
 if ( MSVC )
     # This is untested
-    set_property( TARGET alglib APPEND_STRING PROPERTY COMPILE_FLAGS /W1 )
+    set_property( TARGET alglib APPEND_STRING PROPERTY COMPILE_FLAGS "/W1 /EHsc" )
+	SET(CMAKE_CXX_FLAGS "-fno-strict-aliasing")
 endif ( MSVC )
 

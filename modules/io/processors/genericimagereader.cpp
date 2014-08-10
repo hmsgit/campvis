@@ -56,6 +56,10 @@ namespace campvis {
     }
     
     GenericImageReader::~GenericImageReader() {
+        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); ++it) {
+            delete it->second;
+            delete it->first;
+        }
     }
 
     void GenericImageReader::init() {
@@ -64,8 +68,14 @@ namespace campvis {
 
     void GenericImageReader::deinit() {
         for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); ++it) {
-            if (nullptr != it->first) delete it->first;
-            if (nullptr != it->second) delete it->second;
+            // deinit MetaProperty first!
+            if (nullptr != it->second) {
+                it->second->deinit();
+            }
+            // then we can delete the reader!
+            if (nullptr != it->first) {
+                dynamic_cast<AbstractProcessor*>(it->first)->deinit();
+            }
         }
     }
 
