@@ -22,36 +22,45 @@
 // 
 // ================================================================================================
 
-#include "metaproperty.h"
+in vec3 ex_TexCoord;
+in vec4 ex_Color;
+out vec4 out_Color;
 
-namespace campvis {
+#include "tools/background.frag"
+#include "tools/texture2d.frag"
+#include "tools/texture3d.frag"
+#include "tools/transferfunction.frag"
 
-    const std::string MetaProperty::loggerCat_ = "CAMPVis.core.datastructures.MetaProperty";
 
-    MetaProperty::MetaProperty(const std::string& name, const std::string& title)
-        : AbstractProperty(name, title)
-    {
+
+uniform sampler2D _colorTexture;
+uniform sampler2D _depthTexture;
+uniform TextureParameters2D _texParams;
+
+uniform sampler3D _texture;
+uniform TextureParameters3D _textureParams;
+uniform sampler1D _transferFunction;
+uniform TFParameters1D _transferFunctionParams;
+uniform mat4 _texCoordsMatrix;
+
+
+uniform bool _renderBackground = false;
+uniform bool _useTexturing = false;
+uniform bool _useSolidColor = false;
+uniform vec4 _color = vec4(1.0, 1.0, 1.0, 1.0);
+
+void main() {
+    out_Color = texture(_colorTexture, ex_TexCoord.xy);
+    gl_FragDepth = texture(_depthTexture, ex_TexCoord.xy).r;
+
+    if (_renderBackground) {
+        out_Color = blendBackground(ex_TexCoord.xy, out_Color);
     }
-
-    MetaProperty::~MetaProperty() {
+	
+    if (_useSolidColor) {
+        out_Color = _color;
     }
-
-    void MetaProperty::deinit() {
-        for (size_t i = 0; i < _properties.size(); ++i) {
-            removeProperty(*_properties[i]);
-        }
-    }
-
-    void MetaProperty::onPropertyChanged(const AbstractProperty* prop) {
-        s_changed.emitSignal(this);
-    }
-
-    void MetaProperty::addPropertyCollection(HasPropertyCollection& pc) {
-        PropertyCollection& c = pc.getProperties();
-        for (std::vector<AbstractProperty*>::const_iterator it = c.begin(); it != c.end(); ++it) {
-            addProperty(**it);
-        }
-    }
-
-
+    //else {
+    //    out_Color = ex_Color;
+    //}
 }

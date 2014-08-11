@@ -53,6 +53,8 @@ namespace campvis {
          **/
         virtual ~MetaProperty();
 
+        /// \see AbstractProperty::deinit
+        virtual void deinit();
 
         /// \see HasPropertyCollection::onPropertyChanged
         virtual void onPropertyChanged(const AbstractProperty* prop);

@@ -37,7 +37,7 @@ namespace campvis {
      * Reads a CSVD to read multiple CSV image files into the pipeline.
      * This YANF (yet another neat format) is proudly provided by Christian Schulte zu Berge.
      */
-    class CsvdImageReader : public AbstractImageReader {
+    class CsvdImageReader : public AbstractImageReader, public AbstractProcessor {
     public:
         /**
          * Constructs a new CsvdImageReader Processor

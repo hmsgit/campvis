@@ -367,7 +367,7 @@ namespace campvis {
     }
 
     void VolumeExplorer::onEvent(tgt::Event* e) {
-        // forward the event to the correspsonding event listeners depending on the mouse position
+        // forward the event to the corresponding event listeners depending on the mouse position
         if (typeid(*e) == typeid(tgt::MouseEvent)) {
             tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
 

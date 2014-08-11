@@ -66,6 +66,17 @@ namespace campvis {
         void setDisplayType(DisplayType val) { _displayType = val; }
 
         
+        /**
+         * Overloads == operator.
+         * \param rhs Object to compare with.
+         **/
+        bool operator==(StringProperty& rhs) { 
+            return this->getValue() == rhs.getValue()
+                && this->getName() == rhs.getName()
+                && this->getTitle() == rhs.getTitle();
+        }
+
+        
     protected:
         DisplayType _displayType;
 

@@ -39,6 +39,8 @@
 #include "modules/io/processors/rawimagereader.h"
 #include "modules/io/processors/vtkimagereader.h"
 
+#include "modules/devil/processors/devilimagereader.h"
+
 namespace campvis {
     /**
      * Reads an image file into the pipeline. This is mainly a wrapper class. It uses
@@ -93,7 +95,7 @@ namespace campvis {
         static const std::string loggerCat_;
         
     private:
-        void onUrlPropertyChanged(const AbstractProperty*);
+        void onUrlPropertyChanged(const AbstractProperty* prop);
 
         void adjustToNewExtension();
 

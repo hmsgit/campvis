@@ -33,6 +33,8 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/io/processors/abstractimagereader.h"
+
 namespace tgt {
     class Shader;
     class TextureReaderDevil;
@@ -45,7 +47,7 @@ namespace campvis {
      *
      * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
      */
-    class DevilImageReader : public VisualizationProcessor {
+    class DevilImageReader : public AbstractImageReader, public VisualizationProcessor {
     public:
         /**
          * Constructs a new DevilImageReader Processor
@@ -73,9 +75,8 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        StringProperty p_url;               ///< URL for file to read
-        DataNameProperty p_targetImageID;   ///< image ID for read image
         GenericOptionProperty<std::string> p_importType;
+        BoolProperty p_importSimilar;
 
     protected:
         /// \see AbstractProcessor::updateResult

@@ -53,6 +53,7 @@ SET(CampvisApplicationToBeMocced
     gui/properties/datanamepropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h
+    gui/properties/colorpropertywidget.h
     gui/properties/geometry1dtransferfunctioneditor.h
     gui/properties/geometry2dtransferfunctioneditor.h
     gui/properties/metapropertywidget.h

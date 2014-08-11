@@ -38,7 +38,7 @@ namespace campvis {
      *
      * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
      */
-    class MhdImageReader : public AbstractImageReader {
+    class MhdImageReader : public AbstractImageReader, public AbstractProcessor {
     public:
         /**
          * Constructs a new MhdImageReader Processor
