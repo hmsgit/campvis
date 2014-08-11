@@ -65,6 +65,7 @@ void init() {
     tgt::GlContextManager::init();
 
     campvis::OpenGLJobProcessor::init();
+    campvis::OpenGLJobProcessor::getRef().iKnowWhatImDoingSetThisThreadOpenGlThread();
     campvis::SimpleJobProcessor::init();
 
     tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
@@ -79,6 +80,7 @@ void init() {
     
     tgt::GLContextScopedLock lock(_localContext);
     tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
+    campvis::OpenGLJobProcessor::getRef().registerContext(_localContext);
 
     tgt::initGL(featureset);
     ShdrMgr.setDefaultGlslVersion("330");

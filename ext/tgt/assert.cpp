@@ -54,6 +54,7 @@ bool myCustomAssert(long line, const char* filename, const char* functionName, c
                 exit(EXIT_FAILURE);
             default:
                 std::cout << "An assertion in a assertion... :(" << std::endl;
+                exit(EXIT_FAILURE);
         }
     } while (true);
 #else
