@@ -167,15 +167,15 @@ namespace campvis {
             _geometriesDirty = false;
         }
 
+        if (_textures.empty()) {
+            return;
+        }
+
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glViewport(0, 0, size_.x, size_.y);
         glClearColor(0.7f, 0.7f, 0.7f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         LGL_ERROR;
-
-        if (_textures.empty()) {
-            return;
-        }
 
         // update layout dimensions
         _numTiles.x = ceil(sqrt(static_cast<float>(_textures.size())));

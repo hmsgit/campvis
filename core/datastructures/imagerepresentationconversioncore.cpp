@@ -46,6 +46,7 @@ namespace campvis {
                 return nullptr;
             }
 
+            OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
 
             switch (wtp._baseType) {
@@ -78,6 +79,7 @@ namespace campvis {
             return toReturn;
         }
         else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
+            OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
