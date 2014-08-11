@@ -25,6 +25,7 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModApplicationToBeMocced RELATIVE ${ModulesDir} modules/advancedusvis/widgets/*.h)
 
 	SET(ThisModShaderDirectories "modules/advancedusvis/glsl")
+	SET(ThisModShaderDirectories "modules/advancedusvis/sampledata")
 	SET(ThisModDependencies vis io preprocessing)
 ENDIF(${ModuleEnabled})
 

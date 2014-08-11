@@ -59,7 +59,7 @@ namespace campvis {
         _ve.p_outputImage.setValue("result");
         _renderTargetID.setValue("result");
 
-        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
+        _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_resampler.p_inputImage);
 

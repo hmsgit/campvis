@@ -72,7 +72,7 @@ namespace campvis {
 
         // load textureData from file
         tgt::TextureReaderTga trt;
-        tgt::Texture* campTexture = trt.loadTexture(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/camplogo.tga", tgt::Texture::LINEAR);
+        tgt::Texture* campTexture = trt.loadTexture(ShdrMgr.completePath("/modules/vis/sampledata/camplogo.tga"), tgt::Texture::LINEAR);
         ImageData* textureData = new ImageData(2, campTexture->getDimensions(), campTexture->getNumChannels());
         ImageRepresentationGL::create(textureData, campTexture);
         getDataContainer().addData("CampTexture", textureData);
@@ -94,7 +94,7 @@ namespace campvis {
         _camera.addSharedProperty(&_teapotRenderer.p_camera);
         _camera.addSharedProperty(&_cubeRenderer.p_camera);
 
-        _geometryReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/left_ventricle_mesh.vtk");
+        _geometryReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/left_ventricle_mesh.vtk"));
         _geometryReader.p_targetImageID.setValue("reader.output");
 
         _lvRenderer.p_geometryID.setValue("reader.output");
