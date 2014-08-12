@@ -52,6 +52,7 @@ namespace campvis {
 
         addProperty(p_sourceDirectory);
         addProperty(p_readImagesButton);
+        addProperty(*(_ve.getSliceRenderer()->getProperty("MixWithIvus")));
 
         addEventListenerToBack(&_ve);
 

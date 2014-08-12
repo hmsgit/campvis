@@ -43,11 +43,13 @@ namespace campvis {
         , p_tcImage("TcImage", "Tissue Classification Image", "image.tc", DataNameProperty::READ)
         , p_plaqueImage("PlaqueImage", "Plaque Mask Image", "image.plaque", DataNameProperty::READ)
         , p_predicateHistogram("PredicateHistogram", "predicate Histogram")
+        , p_mixWithIvus("MixWithIvus", "Mix Segmentation with IVUS", true)
     {
         addProperty(p_cmImage);
         addProperty(p_tcImage);
         addProperty(p_plaqueImage);
         addProperty(p_predicateHistogram);
+        addProperty(p_mixWithIvus);
 
         invalidate(AbstractProcessor::INVALID_SHADER);
 
@@ -85,6 +87,7 @@ namespace campvis {
             _shader->setUniform("_projectionMatrix", identity);
             _shader->setUniform("_useTexturing", true);
             _shader->setUniform("_useSolidColor", true);
+            _shader->setUniform("_mixWithIvus", p_mixWithIvus.getValue());
 
             // render slice
             FramebufferActivationGuard fag(this);

@@ -41,6 +41,7 @@ uniform TextureParameters3D _plaqueParams;
 
 uniform mat4 _texCoordsMatrix;
 
+uniform bool _mixWithIvus = true;
 uniform bool _useTexturing = true;
 uniform bool _useSolidColor = true;
 uniform vec4 _color = vec4(1.0, 1.0, 1.0, 1.0);
@@ -58,8 +59,12 @@ void main() {
 
         vec3 hcy = vec3(pr.xy, cm * smoothstep(0.0, 0.5, pr.y));
         vec3 mixed = hcy2rgb(hcy);
-        //vec3 mixed = mix(vec3(ivus), hcy2rgb(hcy), min(cm, pr.y));
-        //vec3 mixed = mix(vec3(1.0), vec3(1.0, 0.5, 0.0), max(cm, pr.y));
+        if (_mixWithIvus)
+//            mixed = max(vec3(ivus), mixed);
+            mixed = mix(vec3(ivus), mixed, max(cm, pr.y));
+//            mixed = mix(vec3(ivus), mixed, min(cm, pr.y));
+
+        //vec3 mixed = mix(vec3(1.0), vec3(1.0, 0.5, 0.0), max(cm, pr.y)); 
         out_Color = vec4(mixed, 1.0);
 
         //vec3 hsl = rgb2hcy(vec3(ivus));

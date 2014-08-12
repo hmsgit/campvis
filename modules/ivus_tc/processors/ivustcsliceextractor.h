@@ -59,6 +59,7 @@ namespace campvis {
         DataNameProperty p_plaqueImage;
 
         PointPredicateHistogramProperty p_predicateHistogram;
+        BoolProperty p_mixWithIvus;
 
     protected:
         /// \see SliceRenderProcessor::renderImageImpl
