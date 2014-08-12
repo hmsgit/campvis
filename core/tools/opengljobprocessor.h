@@ -80,7 +80,7 @@ namespace campvis {
          * does nothing. If this thread is not the OpenGL thread, the OpenGLJobProcessor is paused,
          * an arbitrary OpenGL context acquired. Upon destruction the OpenGLJobProcessor is resumed.
          */
-        class ScopedSynchronousGlJobExecution {
+        class CAMPVIS_CORE_API ScopedSynchronousGlJobExecution {
         public:
             ScopedSynchronousGlJobExecution();
             ~ScopedSynchronousGlJobExecution();

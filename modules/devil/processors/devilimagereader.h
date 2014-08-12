@@ -27,7 +27,6 @@
 
 #include <string>
 
-#include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/optionproperty.h"
@@ -47,12 +46,12 @@ namespace campvis {
      *
      * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
      */
-    class DevilImageReader : public AbstractImageReader, public VisualizationProcessor {
+    class DevilImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new DevilImageReader Processor
          **/
-        DevilImageReader(IVec2Property* viewportSizeProp);
+        DevilImageReader();
 
         /**
          * Destructor

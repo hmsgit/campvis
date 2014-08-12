@@ -71,6 +71,5 @@ endif ( CMAKE_COMPILER_IS_GNUCC )
 if ( MSVC )
     # This is untested
     set_property( TARGET alglib APPEND_STRING PROPERTY COMPILE_FLAGS "/W1 /EHsc" )
-	SET(CMAKE_CXX_FLAGS "-fno-strict-aliasing")
 endif ( MSVC )
 

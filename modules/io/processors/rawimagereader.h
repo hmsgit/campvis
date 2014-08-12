@@ -41,7 +41,7 @@ namespace campvis {
     /**
      * Reads raw images into the pipeline.
      */
-    class RawImageReader : public AbstractImageReader, public AbstractProcessor {
+    class RawImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new RawImageReader Processor

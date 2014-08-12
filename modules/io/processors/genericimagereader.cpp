@@ -48,7 +48,7 @@ namespace campvis {
         this->addReader(new MhdImageReader());
         this->addReader(new RawImageReader());
         this->addReader(new VtkImageReader());
-        this->addReader(new DevilImageReader(new IVec2Property("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))));
+        this->addReader(new DevilImageReader());
 
 
         this->_ext = "";
@@ -74,7 +74,7 @@ namespace campvis {
             }
             // then we can delete the reader!
             if (nullptr != it->first) {
-                dynamic_cast<AbstractProcessor*>(it->first)->deinit();
+                it->first->deinit();
             }
         }
     }
@@ -89,7 +89,7 @@ namespace campvis {
                 (it->second)->setVisible(true);
                 this->_currentlyVisible = it->second;
             }
-            dynamic_cast<AbstractProcessor*>(it->first)->process(data);
+            it->first->process(data);
         }
     }
 
@@ -162,8 +162,8 @@ namespace campvis {
     }
 
     int GenericImageReader::addReader(AbstractImageReader* reader) {
-        MetaProperty* meta = new MetaProperty(dynamic_cast<AbstractProcessor*>(reader)->getName()+"MetaProp", dynamic_cast<AbstractProcessor*>(reader)->getName());
-        meta->addPropertyCollection(*dynamic_cast<AbstractProcessor*>(reader));
+        MetaProperty* meta = new MetaProperty(reader->getName()+"MetaProp", reader->getName());
+        meta->addPropertyCollection(*reader);
         meta->setVisible(false);
         this->addProperty(*meta);
 

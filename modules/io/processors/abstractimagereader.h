@@ -42,7 +42,7 @@ namespace campvis {
      * of files into ImageRepresentationDisk representation
      *
      */
-    class AbstractImageReader {
+    class AbstractImageReader : public AbstractProcessor {
     public:
         /**
          * Constructs a new AbstractImageReader Processor

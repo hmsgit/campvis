@@ -34,7 +34,7 @@ namespace campvis {
 
     IxpvDemo::IxpvDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _xrayReader(&_canvasSize)
+        , _xrayReader()
         , _ctReader()
         , _vrFull(&_canvasSize, new DRRRaycaster(&_canvasSize))
         , _vrClipped(&_canvasSize, new DRRRaycaster(&_canvasSize))

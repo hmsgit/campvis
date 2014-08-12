@@ -47,7 +47,7 @@ namespace campvis {
 
     CmBatchGeneration::CmBatchGeneration(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _usReader(&_canvasSize)
+        , _usReader()
         , _confidenceGenerator()
         , _usBlurFilter(&_canvasSize)
         , _usFusion(&_canvasSize)

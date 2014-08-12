@@ -40,6 +40,8 @@
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
+#include "core/tools/opengljobprocessor.h"
+
 #include "core/tools/quadrenderer.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/mapping.h"
@@ -55,8 +57,8 @@ namespace campvis {
         GenericOption<std::string>("localIntensity3", "Local Intensity Image RGB")
     };
 
-    DevilImageReader::DevilImageReader(IVec2Property* viewportSizeProp)
-        : VisualizationProcessor(viewportSizeProp)
+    DevilImageReader::DevilImageReader()
+        : AbstractImageReader()
         , p_importType("ImportType", "Import Type", importOptions, 4)
         , p_importSimilar("ImportSimilar", "Import All Similar Files", false)
         , _shader(nullptr)
@@ -82,14 +84,14 @@ namespace campvis {
     }
 
     void DevilImageReader::init() {
-        VisualizationProcessor::init();
+        AbstractImageReader::init();
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "#define NO_DEPTH\n");
         _shader->setAttributeLocation(0, "in_Position");
         _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void DevilImageReader::deinit() {
-        VisualizationProcessor::deinit();
+        AbstractImageReader::deinit();
         ShdrMgr.dispose(_shader);
     }
 
@@ -106,34 +108,13 @@ namespace campvis {
         int suffix = StringUtils::fromString<int>(numstr);
         std::cout << "\nfileName Suffix: "<<suffix <<" count: "<<dotPos-_Pos <<std::endl;
 
+        // FIXME: clean up this whole implementation mess and make it fully non-OpenGL!
+        OpenGLJobProcessor::ScopedSynchronousGlJobExecution glGuard;
         tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
 
         if (tex != 0) {
             if (p_importType.getOptionValue() == "rt") {
-                ImageData id (3, tex->getDimensions(), tex->getNumChannels());
-                ImageRepresentationGL* image = ImageRepresentationGL::create(&id, tex);
-
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-
-                _shader->activate();
-                _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSize", getEffectiveViewportSize());
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
-                _shader->setIgnoreUniformLocationError(false);
-                tgt::TextureUnit texUnit;
-
-                image->bind(_shader, texUnit, "_colorTexture");
-
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                QuadRdr.renderQuad();
-
-                _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
-                LGL_ERROR;
-
-                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+                tgtAssert(false, "This type is no longer supported.");
             }
             else if (p_importType.getOptionValue() == "texture") {
                 ImageData* id = new ImageData(3, tex->getDimensions(), tex->getNumChannels());

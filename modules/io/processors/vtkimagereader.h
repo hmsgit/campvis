@@ -39,7 +39,7 @@ namespace campvis {
      *
      * \note    Full format specification at http://www.vtk.org/VTK/img/file-formats.pdf
      */
-    class VtkImageReader : public AbstractImageReader, public AbstractProcessor {
+    class VtkImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new VtkImageReader Processor
