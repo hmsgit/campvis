@@ -46,10 +46,12 @@ namespace campvis {
     DevilImageWriter::DevilImageWriter()
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Image ID", "DevilImageWriter.input", DataNameProperty::READ)
-        , p_url("url", "Image URL", "", StringProperty::SAVE_FILENAME)
+        , p_url("Url", "Image URL", "", StringProperty::SAVE_FILENAME)
+        , p_writeDepthImage("WriteDepthImage", "Write Depth Image", false)
     {
         addProperty(p_inputImage);
         addProperty(p_url);
+        addProperty(p_writeDepthImage);
     }
 
     DevilImageWriter::~DevilImageWriter() {
@@ -64,7 +66,7 @@ namespace campvis {
             std::string filebase = tgt::FileSystem::fullBaseName(filename);
             if (extension.empty()) {
                 LINFO("Filename has no extension, defaulting to .PNG.");
-                extension = ".png";
+                extension = "png";
             }
 
             for (size_t i = 0; i < image->getNumColorTextures(); ++i) {
@@ -75,16 +77,16 @@ namespace campvis {
                 }
 
                 WeaklyTypedPointer wtp = id->getWeaklyTypedPointer();
-                writeIlImage(wtp, id->getSize().xy(), filebase + ".color" + ((image->getNumColorTextures() > 1) ? StringUtils::toString(i) : "") + extension);
+                writeIlImage(wtp, id->getSize().xy(), filebase + ((image->getNumColorTextures() > 1) ? StringUtils::toString(i) : "") + "." + extension);
             }
-            if (image->hasDepthTexture()) {
+            if (p_writeDepthImage.getValue() && image->hasDepthTexture()) {
                 const ImageRepresentationLocal* id = image->getDepthTexture()->getRepresentation<ImageRepresentationLocal>(true);
                 if (id == 0) {
                     LERROR("Could not download depth texture from RenderData, skipping.");
                 }
                 else {
                     WeaklyTypedPointer wtp = id->getWeaklyTypedPointer();
-                    writeIlImage(wtp, id->getSize().xy(), filebase + ".depth" + extension);
+                    writeIlImage(wtp, id->getSize().xy(), filebase + ".depth." + extension);
                 }
             }
         }
@@ -106,12 +108,13 @@ namespace campvis {
         ILboolean success = ilSaveImage(filename.c_str());
         ilDeleteImages(1, &img);
 
-        if (success != IL_NO_ERROR) {
+        if (! success) {
             ILenum errorcode;
             while ((errorcode = ilGetError()) != IL_NO_ERROR) {
                 LERROR("Error while writing '" << filename << "': "<< iluErrorString(errorcode));
             } 
         }
+
     }
 
 }
