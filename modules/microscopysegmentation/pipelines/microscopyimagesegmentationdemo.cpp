@@ -64,6 +64,9 @@ namespace campvis {
         tgtAssert(nullptr != bp, "This should not happen.");
         bp->setValue(true);
 
+        if (GenericOptionProperty<std::string>* tester = dynamic_cast<GenericOptionProperty<std::string>*>(_imageReader.getNestedProperty("DevilImageReaderMetaProp::ImportType")))
+            tester->selectById("localIntensity3");
+
         _imageReader.setTargetImageId("mscopy.output");
         _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
 

@@ -50,20 +50,20 @@
 namespace campvis {
     const std::string DevilImageReader::loggerCat_ = "CAMPVis.modules.io.DevilImageReader";
 
-    GenericOption<std::string> importOptions[4] = {
+    GenericOption<std::string> importOptions[3] = {
         GenericOption<std::string>("rt", "Render Target"),
-        GenericOption<std::string>("texture", "OpenGL Texture"),
         GenericOption<std::string>("localIntensity", "Local Intensity Image"),
         GenericOption<std::string>("localIntensity3", "Local Intensity Image RGB")
     };
 
     DevilImageReader::DevilImageReader()
         : AbstractImageReader()
-        , p_importType("ImportType", "Import Type", importOptions, 4)
+        , p_importType("ImportType", "Import Type", importOptions, 3)
         , p_importSimilar("ImportSimilar", "Import All Similar Files", false)
         , _shader(nullptr)
         , _devilTextureReader(nullptr)
     {
+        this->_ext.push_back(".bmp");
         this->_ext.push_back(".jpg");
         this->_ext.push_back(".png");
         this->_ext.push_back(".tif");
@@ -75,8 +75,6 @@ namespace campvis {
         addProperty(p_importSimilar);
 
         _devilTextureReader = new tgt::TextureReaderDevil();
-
-        p_importType.selectById("localIntensity3");
     }
 
     DevilImageReader::~DevilImageReader() {
@@ -96,96 +94,176 @@ namespace campvis {
     }
 
     void DevilImageReader::updateResult(DataContainer& data) {
-        std::string url = this->p_url.getValue();
-        std::string base = "", numstr = "", ext = "";
-        size_t _Pos = url.rfind('_');
-        size_t dotPos = url.rfind('.');
-        if (dotPos > _Pos && dotPos != std::string::npos && _Pos != std::string::npos ) {
-            numstr = url.substr(_Pos+1, dotPos);
-            base = url.substr(0, _Pos+1);
-            ext = url.substr(dotPos);
-        }
-        int suffix = StringUtils::fromString<int>(numstr);
-        std::cout << "\nfileName Suffix: "<<suffix <<" count: "<<dotPos-_Pos <<std::endl;
+        const std::string& url = p_url.getValue();
+        std::string directory = tgt::FileSystem::dirName(url);
+        std::string base = tgt::FileSystem::baseName(url);
+        std::string ext = tgt::FileSystem::fileExtension(url);
 
-        // FIXME: clean up this whole implementation mess and make it fully non-OpenGL!
-        OpenGLJobProcessor::ScopedSynchronousGlJobExecution glGuard;
-        tgt::Texture* tex = _devilTextureReader->loadTexture(p_url.getValue(), tgt::Texture::LINEAR, false, true, true, false);
+        // check whether we open an image series
+        size_t suffixPos = base.find_last_not_of("0123456789");
+        if (suffixPos != std::string::npos)
+            ++suffixPos;
+        size_t suffixLength = (suffixPos == std::string::npos) ? 0 : base.length() - suffixPos;
 
-        if (tex != 0) {
-            if (p_importType.getOptionValue() == "rt") {
-                tgtAssert(false, "This type is no longer supported.");
-            }
-            else if (p_importType.getOptionValue() == "texture") {
-                ImageData* id = new ImageData(3, tex->getDimensions(), tex->getNumChannels());
-                ImageRepresentationGL::create(id, tex);
-                data.addData(p_targetImageID.getValue(), id);
-            }
-            else if (p_importType.getOptionValue() == "localIntensity") {
-                // TODO: Clean up pre-MICCAI mess!
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                tex->downloadTexture();
-                size_t numElements = tgt::hmul(tex->getDimensions());
-                ImageData* id = new ImageData(3, tex->getDimensions(), 1);
-
-                // TODO: use macro magic to switch through the different data types and number of channels
-                if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
-                    tgt::Vector3<uint8_t>* data = reinterpret_cast<tgt::Vector3<uint8_t>*>(tex->getPixelData());
-                    uint8_t* copy = new uint8_t[numElements];
-                    for (size_t i = 0; i < numElements; ++i) {
-                        copy[i] = data[i].x;
-                    }
-                    GenericImageRepresentationLocal<uint8_t, 1>::create(id, copy);
-                }
-
-                delete tex;
-                data.addData(p_targetImageID.getValue(), id);
-            }
-            else if (p_importType.getOptionValue() == "localIntensity3") {
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                tex->downloadTexture();
-                size_t numElements = tgt::hmul(tex->getDimensions());
-                tgt::ivec3 temp = tex->getDimensions();
-                int zee = 0;
-
-                std::vector<tgt::Vector3<uint8_t> > vdata;
-                while (nullptr != tex) {
-                    if (tex->getDataType() == GL_UNSIGNED_BYTE && tex->getNumChannels() == 3) {
-                        tgt::Vector3<uint8_t>* data = reinterpret_cast<tgt::Vector3<uint8_t>*>(tex->getPixelData());
-                        for (size_t i = 0; i < numElements*1; ++i) {
-                            for(int k = 0; k < temp.z; k++){
-                                vdata.push_back(data[i % numElements]);
-                            }
-                        }
-                        zee+=1;
-                    }
-                    delete tex;
-
-                    if (this->p_importSimilar.getValue() == true) {
-                        numstr = StringUtils::toString(++suffix, dotPos-_Pos-1, '0');
-                        std::cout << base+numstr+ext;
-                        tex = _devilTextureReader->loadTexture(base+numstr+ext, tgt::Texture::LINEAR, false, true, true, false);
-                        if(nullptr != tex) 
-                            tex->downloadTexture();
-                    }
-                    else {
-                        break;
-                    }
-                }
-
-                temp.z = zee;
-                ImageData* id = new ImageData(3, temp, 3);
-
-                tgt::Vector3<uint8_t>* data3d = new tgt::Vector3<uint8_t>[temp.x * temp.y * temp.z];
-                memcpy(data3d, &vdata.front(), temp.x*temp.y*temp.z *3);
-                GenericImageRepresentationLocal<uint8_t, 3>::create(id, data3d);
-
-                id->setMappingInformation(ImageMappingInformation(id->getSize(), id->getMappingInformation().getOffset(), id->getMappingInformation().getVoxelSize() * tgt::vec3(1, 1, 1) ));
-                data.addData(p_targetImageID.getValue(), id);
-            }
+        // assemble the list of files to read
+        std::vector<std::string> files;
+        if (suffixLength == 0 || !p_importSimilar.getValue()) {
+            files.push_back(url);
         }
         else {
-            LDEBUG("Could not load image.");
+            std::string prefix = base.substr(0, suffixPos);
+            int index = StringUtils::fromString<int>(base.substr(suffixPos));
+
+            while (tgt::FileSystem::fileExists(directory + "/" + prefix + StringUtils::toString(index, suffixLength, '0') + "." + ext)) {
+                files.push_back(directory + "/" + prefix + StringUtils::toString(index, suffixLength, '0') + "." + ext);
+                ++index;
+            }
+        }
+
+        tgt::ivec3 imageSize(0, 0, static_cast<int>(files.size()));
+        uint8_t* buffer = nullptr;
+
+        ILint devilFormat = 0;
+        if (p_importType.getOptionValue() == "localIntensity") 
+            devilFormat = IL_LUMINANCE;
+        else if (p_importType.getOptionValue() == "localIntensity3") 
+            devilFormat = IL_RGB;
+        else if (p_importType.getOptionValue() == "rt") 
+            devilFormat = IL_RGBA;
+
+        ILint devilDataType = 0;
+        WeaklyTypedPointer::BaseType  campvisDataType;
+        size_t numChannels = 1;
+
+        // start reading
+        for (size_t i = 0; i < files.size(); ++i) {
+            // prepare DevIL
+            ILuint img;
+            ilGenImages(1, &img);
+            ilBindImage(img);
+
+            // try load file
+            if (! ilLoadImage(files[i].c_str())) {
+                LERROR("Could not load image: " << files[i]);
+                delete [] buffer;
+                return;
+            }
+
+            // prepare buffer and perform dimensions check
+            if (i == 0) {
+                imageSize.x = ilGetInteger(IL_IMAGE_WIDTH);
+                imageSize.y = ilGetInteger(IL_IMAGE_HEIGHT);
+
+                if (devilFormat == 0)
+                    devilFormat = ilGetInteger(IL_IMAGE_FORMAT);
+
+                switch (ilGetInteger(IL_IMAGE_TYPE)) {
+                    case IL_UNSIGNED_BYTE:
+                        devilDataType = IL_UNSIGNED_BYTE;
+                        campvisDataType = WeaklyTypedPointer::UINT8;
+                        break;
+                    case IL_BYTE:
+                        devilDataType = IL_BYTE;
+                        campvisDataType = WeaklyTypedPointer::INT8;
+                        break;
+                    case IL_UNSIGNED_SHORT:
+                        devilDataType = IL_UNSIGNED_SHORT;
+                        campvisDataType = WeaklyTypedPointer::UINT16;
+                        break;
+                    case IL_SHORT:
+                        devilDataType = IL_SHORT;
+                        campvisDataType = WeaklyTypedPointer::INT16;
+                        break;
+                    case IL_UNSIGNED_INT:
+                        devilDataType = IL_UNSIGNED_INT;
+                        campvisDataType = WeaklyTypedPointer::UINT32;
+                        break;
+                    case IL_INT:
+                        devilDataType = IL_INT;
+                        campvisDataType = WeaklyTypedPointer::INT32;
+                        break;
+                    case IL_FLOAT:
+                        devilDataType = IL_FLOAT;
+                        campvisDataType = WeaklyTypedPointer::FLOAT;
+                        break;
+                    default:
+                        LERROR("unsupported data type: " << ilGetInteger(IL_IMAGE_TYPE) << " (" << files[i] << ")");
+                        return;
+                }
+
+                switch (devilFormat) {
+                    case IL_LUMINANCE:
+                        numChannels = 1;
+                        break;
+                    case IL_LUMINANCE_ALPHA:
+                        numChannels = 2;
+                        break;
+                    case IL_RGB:
+                        numChannels = 3;
+                        break;
+                    case IL_RGBA:
+                        numChannels = 4;
+                        break;
+                    default:
+                        LERROR("unsupported image format: " << devilFormat << " (" << files[i] << ")");
+                        return;
+                }
+                buffer = new uint8_t[tgt::hmul(imageSize) * WeaklyTypedPointer::numBytes(campvisDataType, numChannels)];
+            }
+            else {
+                if (imageSize.x != ilGetInteger(IL_IMAGE_WIDTH)) {
+                    LERROR("Could not load images: widths do not match!");
+                    delete [] buffer;
+                    return;
+                }
+                if (imageSize.y != ilGetInteger(IL_IMAGE_HEIGHT)) {
+                    LERROR("Could not load images: heights do not match!");
+                    delete [] buffer;
+                    return;
+                }
+            }
+
+            // get data from image and transform to single intensity image:
+            ILubyte* data = ilGetData(); 
+
+            ilCopyPixels(0, 0, 0, imageSize.x, imageSize.y, 1, devilFormat, devilDataType, buffer + (WeaklyTypedPointer::numBytes(campvisDataType, numChannels) * i * imageSize.x * imageSize.y));
+            ILint err = ilGetError();
+            if (err != IL_NO_ERROR) {
+                LERROR("Error during conversion: " << iluErrorString(err));
+                delete [] buffer;
+                return;
+            }
+
+            ilDeleteImage(img);
+        }
+
+        size_t dimensionality = 3;
+        if (imageSize.z == 1)
+            dimensionality = 2;
+        if (imageSize.y == 1)
+            dimensionality = 1;
+
+
+        ImageData* id = new ImageData(dimensionality, imageSize, numChannels);
+        WeaklyTypedPointer wtp(campvisDataType, numChannels, buffer);
+        ImageRepresentationLocal::create(id, wtp);
+        //id->setMappingInformation(ImageMappingInformation(imageSize, p_imageOffset.getValue(), p_voxelSize.getValue()));
+
+        if (p_importType.getOptionValue() == "rt") {
+            RenderData* rd = new RenderData();
+            rd->addColorTexture(id);
+
+            // create fake depth image
+            ImageData* idDepth = new ImageData(dimensionality, imageSize, 1);
+            float* ptr = new float[tgt::hmul(imageSize)];
+            WeaklyTypedPointer wtpDepth(campvisDataType, 1, ptr);
+            ImageRepresentationLocal::create(idDepth, wtpDepth);
+            rd->setDepthTexture(idDepth);
+
+            data.addData(p_targetImageID.getValue(), rd);
+        }
+        else {
+            data.addData(p_targetImageID.getValue(), id);
         }
     }
 }
