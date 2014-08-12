@@ -48,8 +48,10 @@ namespace campvis {
         this->addReader(new MhdImageReader());
         this->addReader(new RawImageReader());
         this->addReader(new VtkImageReader());
-        this->addReader(new DevilImageReader());
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+        this->addReader(new DevilImageReader());
+#endif
 
         this->_ext = "";
         this->_currentlyVisible = nullptr;
