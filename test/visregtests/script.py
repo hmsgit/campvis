@@ -37,6 +37,8 @@ from skimage.measure import structural_similarity as ssim
 refDir = 'reference/';
 testDir = 'testruns/';
 resultDir = 'results/';
+if (not os.path.exists(resultDir)) :
+        os.mkdir(resultDir)
 
 casesDir = os.listdir(refDir);
 prevRunDirs = os.listdir(testDir);

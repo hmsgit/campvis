@@ -10,8 +10,8 @@ FILE(GLOB TestCampvisSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     core/datastructures/*.cpp
     core/properties/*.cpp
     core/tools/*.cpp
-	core/pipeline/*.cpp
-	modules/*.cpp
+    core/pipeline/*.cpp
+    modules/*.cpp
 )
 
 # Summary of tuple support for Microsoft Visual Studio:

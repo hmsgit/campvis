@@ -32,6 +32,7 @@
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/tools/opengljobprocessor.h"
+#include "core/tools/stringutils.h"
 
 #include "modules/pipelinefactory.h"
 #include "modules/devil/processors/devilimagewriter.h"
@@ -50,6 +51,25 @@ protected:
         , _pipeline(nullptr)
         , _wroteFile(false)
     {
+        _basePath = "visregtests/";
+        if ( ! tgt::FileSystem::dirExists(_basePath)) {
+            tgt::FileSystem::createDirectory(_basePath);
+        }
+        _basePath = "visregtests/testruns/";
+        if ( ! tgt::FileSystem::dirExists(_basePath)) {
+            tgt::FileSystem::createDirectory(_basePath);
+        }
+        std::vector<std::string> filelist = tgt::FileSystem::listSubDirectories(_basePath, true);
+        std::string testRunNo = "";
+        std::string caseNo = "1/";
+        if (_prevNoCases++ == 0) {
+            testRunNo = filelist.size() > 0 ? StringUtils::toString(StringUtils::fromString<int>(filelist[filelist.size()-1])+1) : "1";
+            tgt::FileSystem::createDirectoryRecursive(_basePath+testRunNo+"/"+ caseNo);
+        }
+        else 
+            testRunNo = filelist[filelist.size()-1];
+        
+        _basePath += testRunNo+"/"+caseNo;
     }
 
     ~PipelineWriteResultImageTest() {
@@ -106,6 +126,8 @@ protected:
 protected:
     std::string _pipelineName;
     std::string _fileName;
+    std::string _basePath;
+    static int _prevNoCases;
 
     DataContainer _dataContainer;
     AbstractPipeline* _pipeline;
@@ -113,10 +135,11 @@ protected:
 
     bool _wroteFile;
 };
+int PipelineWriteResultImageTest::_prevNoCases = 0;
 
 TEST_F(PipelineWriteResultImageTest, VolumeExplorerDemo) {
     _pipelineName = "VolumeExplorerDemo";
-    _fileName = "volumeexplorerdemo.png";
+    _fileName = _basePath +"volumeexplorerdemo.png";
     init();
     execute();
     EXPECT_TRUE(_wroteFile);
@@ -124,7 +147,7 @@ TEST_F(PipelineWriteResultImageTest, VolumeExplorerDemo) {
 
 TEST_F(PipelineWriteResultImageTest, GeometryRendererDemo) {
     _pipelineName = "GeometryRendererDemo";
-    _fileName = "geometryrendererdemo.png";
+    _fileName = _basePath +"geometryrendererdemo.png";
     init();
     execute();
     EXPECT_TRUE(_wroteFile);
@@ -132,7 +155,7 @@ TEST_F(PipelineWriteResultImageTest, GeometryRendererDemo) {
 
 TEST_F(PipelineWriteResultImageTest, SliceVis) {
     _pipelineName = "SliceVis";
-    _fileName = "slicevis.png";
+    _fileName = _basePath +"slicevis.png";
     init();
     execute();
     EXPECT_TRUE(_wroteFile);
