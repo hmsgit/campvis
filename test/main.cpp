@@ -79,6 +79,8 @@ void init() {
     
     tgt::GLContextScopedLock lock(_localContext);
     tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
+    GLJobProc.iKnowWhatImDoingSetOpenGlThread();
+    GLJobProc.registerContext(_localContext);
 
     tgt::initGL(featureset);
     ShdrMgr.setDefaultGlslVersion("330");

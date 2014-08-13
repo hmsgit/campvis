@@ -153,6 +153,13 @@ namespace campvis {
         tgt::GLCanvas* iKnowWhatImDoingGetArbitraryContext();
 
         /**
+         * Sets the OpenGL thread to the calling thread.
+         * \note    You can do really messy things with this. Do not use this method unless
+         *          you know what you're doing and know that there is no other way...
+         */
+        void iKnowWhatImDoingSetOpenGlThread();
+
+        /**
          * Checks whether calling thread is OpenGL thread.
          * \return  std::this_thread::get_id() == _this_thread_id
          */

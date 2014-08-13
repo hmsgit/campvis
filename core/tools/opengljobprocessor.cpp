@@ -258,6 +258,10 @@ namespace campvis {
         return std::this_thread::get_id() == _this_thread_id;
     }
 
+    void OpenGLJobProcessor::iKnowWhatImDoingSetOpenGlThread() {
+        _this_thread_id = std::this_thread::get_id();
+    }
+
 
 
 }
