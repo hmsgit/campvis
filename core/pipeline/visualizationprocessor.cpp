@@ -39,6 +39,10 @@ namespace campvis {
         , _fbo(0)
         , _viewportSizeProperty(viewportSizeProp)
     {
+        if (_viewportSizeProperty) {
+            _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
+            setPropertyInvalidationLevel(*_viewportSizeProperty, INVALID_RESULT);
+        }
     }
 
     VisualizationProcessor::~VisualizationProcessor() {
@@ -51,12 +55,14 @@ namespace campvis {
         addProperty(p_lqMode);
 
         _fbo = new cgt::FramebufferObject();
-        _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
-        setPropertyInvalidationLevel(*_viewportSizeProperty, INVALID_RESULT);
     }
 
     void VisualizationProcessor::deinit() {
-        _viewportSizeProperty->s_changed.disconnect(this);
+        if (_viewportSizeProperty) {
+            _viewportSizeProperty->s_changed.disconnect(this);
+            _viewportSizeProperty = nullptr;
+        }
+
         _viewportSizeProperty->s_changed.disconnect(this);
         delete _fbo;
         AbstractProcessor::deinit();
@@ -169,9 +175,9 @@ namespace campvis {
     }
 
     void VisualizationProcessor::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
-        cgtAssert(viewportSizeProp != 0, "Pointer must not be 0.");
+        cgtAssert(viewportSizeProp != nullptr, "Pointer must not be nullptr.");
 
-        if (_viewportSizeProperty != 0) {
+        if (_viewportSizeProperty != nullptr) {
             _viewportSizeProperty->s_changed.disconnect(this);
         }
 
