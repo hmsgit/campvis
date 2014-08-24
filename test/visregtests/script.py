@@ -1,3 +1,4 @@
+import os.path
 # ================================================================================================
 # 
 # This file is part of the CAMPVis Software Framework.
@@ -25,14 +26,25 @@
 __author__="Mahmud"
 __date__ ="$Jul 10, 2014 1:58:04 AM$"
 
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+# import numpy as np
+# import matplotlib
+# import matplotlib.pyplot as plt
+# import matplotlib.image as mpimg
 import os
 
-from skimage import data, img_as_float, io
-from skimage.measure import structural_similarity as ssim
+from skimage import io#, img_as_float, data
+#from skimage.measure import structural_similarity as ssim
+import xml.etree.ElementTree as et
+import numpy as np
+
+from xml.etree import ElementTree
+from xml.dom import minidom
+
+# Return a pretty-printed XML string for the Element
+def prettify(elem):
+    rough_string = ElementTree.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
 
 refDir = 'reference/';
 testDir = 'testruns/';
@@ -47,14 +59,26 @@ prevResDirs = os.listdir(resultDir);
 # Create a new directory to store result
 curRun = 0;
 for i in range(len(prevResDirs)) :
-    prevRunDirs[i] = int(prevRunDirs[i][4:])
-    prevResDirs[i] = int(prevResDirs[i][4:])
+    prevRunDirs[i] = int(prevRunDirs[i][0:])
+    prevResDirs[i] = int(prevResDirs[i][0:])
     if (prevRunDirs[i] == prevResDirs[i]) :
         curRun += 1;
         continue;
     break;
 
+# List the test runs that are not computed yet
 newTestDirs = prevRunDirs[curRun:];
+
+# Find or create results.xml file created by test-campvis
+xmlFile = "result.xml";
+if (os.path.isfile(xmlFile)) :
+    tree = et.parse(xmlFile);
+    root = tree.getroot();
+else :
+    root = et.Element("testsuites", {"tests":"0", "failures":"0", "disabled":"0", 
+    "errors":"0", "timestamp":"2014-08-24T01:35:42", "time":"0", "name":"AllTests"}); 
+    tree = et.ElementTree(root);
+    
 
 for test in newTestDirs :
     curTestDir = testDir + str(prevRunDirs[curRun]) + "/";
@@ -72,6 +96,11 @@ for test in newTestDirs :
         os.mkdir(resCaseDir)
         
         files = os.listdir(refCaseDir)
+        if (len(files) != 0) :
+            suite = et.SubElement(root, "testsuite", {"name":refCaseDir, "tests":"0", 
+            "failures":"0", "disabled":"0", "errors":"0", "time":"0"});
+        
+        i = 0;
         for file in files :
             refFilePath = refCaseDir + file;
             testFilePath = testCaseDir + file;
@@ -80,7 +109,8 @@ for test in newTestDirs :
             if (not os.path.isfile(testFilePath)) :
                 continue;
             
-            if (refFilePath[-4:] != ".jpg" and refFilePath[-4:] != ".png" and refFilePath[-4:] != ".tif") :
+            if (refFilePath[-4:] != ".jpg" and refFilePath[-4:] != ".png" 
+            and refFilePath[-4:] != ".tif") :
                 continue;
 
             ref = io.imread(refFilePath);
@@ -98,6 +128,24 @@ for test in newTestDirs :
             #plt.axis('off')
             #plt.tight_layout()
             #plt.show()
+            
+            case = et.SubElement(suite, "tastcase", {"name":file, "status":"run", 
+            "time":"0", "classname":refCaseDir});
+            suite.set("tests", str(int(suite.get("tests"))+1));
+            root.set("tests", str(int(root.get("tests"))+1));
+            
+            
+            if (np.sum(test) != 0) :#
+                failure = et.SubElement(case, "failure", {"message":"", "type":""});
+                failure.set("message", "Image difference is not 0");
+                failure.text = "<![CDATA[" + \
+                "MESSAGE" + \
+                "]]>";
+                
+                suite.set("failures", str(int(suite.get("failures")) + 1));
+                root.set("failures", str(int(root.get("failures")) + 1));
+            
+tree.write(xmlFile);
             
 print ""
 

@@ -38,3 +38,4 @@ if (CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisSources ${CampvisHome}/test "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisHeaders ${CampvisHome}/test "")
 ENDIF()
+
