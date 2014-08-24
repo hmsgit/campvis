@@ -1,85 +1,81 @@
-<testsuites disabled="0" errors="0" failures="2" name="AllTests" tests="49" time="2.535" timestamp="2014-08-24T01:35:42">
-  <testsuite disabled="0" errors="0" failures="0" name="DataContainerTest" tests="3" time="0.002">
-    <testcase classname="DataContainerTest" name="miscellaneousTest" status="run" time="0" />
-    <testcase classname="DataContainerTest" name="getDataHandlesCopyTest" status="run" time="0" />
-    <testcase classname="DataContainerTest" name="concurrentAccessTest" status="run" time="0.001" />
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="46" failures="0" disabled="0" errors="0" timestamp="2014-08-24T09:57:56" time="2.545" name="AllTests">
+  <testsuite name="DataContainerTest" tests="3" failures="0" disabled="0" errors="0" time="0.002">
+    <testcase name="miscellaneousTest" status="run" time="0.001" classname="DataContainerTest" />
+    <testcase name="getDataHandlesCopyTest" status="run" time="0" classname="DataContainerTest" />
+    <testcase name="concurrentAccessTest" status="run" time="0" classname="DataContainerTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="DataHandleTest" tests="2" time="0.001">
-    <testcase classname="DataHandleTest" name="getDataTest" status="run" time="0" />
-    <testcase classname="DataHandleTest" name="getTimestampTest" status="run" time="0" />
+  <testsuite name="DataHandleTest" tests="2" failures="0" disabled="0" errors="0" time="0">
+    <testcase name="getDataTest" status="run" time="0" classname="DataHandleTest" />
+    <testcase name="getTimestampTest" status="run" time="0" classname="DataHandleTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="ImageDataTest" tests="2" time="0.002">
-    <testcase classname="ImageDataTest" name="miscellaneousTest" status="run" time="0" />
-    <testcase classname="ImageDataTest" name="cloneTest" status="run" time="0" />
+  <testsuite name="ImageDataTest" tests="2" failures="0" disabled="0" errors="0" time="0.002">
+    <testcase name="miscellaneousTest" status="run" time="0" classname="ImageDataTest" />
+    <testcase name="cloneTest" status="run" time="0" classname="ImageDataTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="ImageRepresentationTest" tests="3" time="0.03">
-    <testcase classname="ImageRepresentationTest" name="conversion_disk_local_gl_test" status="run" time="0.002" />
-    <testcase classname="ImageRepresentationTest" name="conversion_disk_gl_local_test" status="run" time="0.001" />
-    <testcase classname="ImageRepresentationTest" name="basetype_conversion_test" status="run" time="0.023" />
+  <testsuite name="ImageRepresentationTest" tests="3" failures="0" disabled="0" errors="0" time="0.029">
+    <testcase name="conversion_disk_local_gl_test" status="run" time="0.003" classname="ImageRepresentationTest" />
+    <testcase name="conversion_disk_gl_local_test" status="run" time="0.001" classname="ImageRepresentationTest" />
+    <testcase name="basetype_conversion_test" status="run" time="0.022" classname="ImageRepresentationTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="ImageSeriesTest" tests="2" time="0.002">
-    <testcase classname="ImageSeriesTest" name="miscellaneousTest" status="run" time="0" />
-    <testcase classname="ImageSeriesTest" name="cloneTest" status="run" time="0" />
+  <testsuite name="ImageSeriesTest" tests="2" failures="0" disabled="0" errors="0" time="0.002">
+    <testcase name="miscellaneousTest" status="run" time="0" classname="ImageSeriesTest" />
+    <testcase name="cloneTest" status="run" time="0" classname="ImageSeriesTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="NumericPropertyTest" tests="4" time="0.004">
-    <testcase classname="NumericPropertyTest" name="maxTest" status="run" time="0" />
-    <testcase classname="NumericPropertyTest" name="minTest" status="run" time="0" />
-    <testcase classname="NumericPropertyTest" name="increaseTest" status="run" time="0" />
-    <testcase classname="NumericPropertyTest" name="decreaseTest" status="run" time="0" />
+  <testsuite name="NumericPropertyTest" tests="4" failures="0" disabled="0" errors="0" time="0.003">
+    <testcase name="maxTest" status="run" time="0" classname="NumericPropertyTest" />
+    <testcase name="minTest" status="run" time="0" classname="NumericPropertyTest" />
+    <testcase name="increaseTest" status="run" time="0" classname="NumericPropertyTest" />
+    <testcase name="decreaseTest" status="run" time="0" classname="NumericPropertyTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="1" name="StringPropertyTest" tests="3" time="0.004">
-    <testcase classname="StringPropertyTest" name="getSetValueTest" status="run" time="0.001">
-      <failure message="..\src\test\core\properties\stringpropertytest.cpp:74&#10;Value of: this-&gt;_strProp1.getValue()&#10;  Actual: &quot;anotherValue2&quot;&#10;Expected: &quot;anotherValue&quot;" type="">..\src\test\core\properties\stringpropertytest.cpp:74
-Value of: this-&gt;_strProp1.getValue()
-  Actual: "anotherValue2"
-Expected: "anotherValue"</failure>
-    </testcase>
-    <testcase classname="StringPropertyTest" name="sharedPropertyTest" status="run" time="0.001" />
-    <testcase classname="StringPropertyTest" name="unlockTest" status="run" time="0.001" />
+  <testsuite name="StringPropertyTest" tests="3" failures="0" disabled="0" errors="0" time="0.003">
+    <testcase name="getSetValueTest" status="run" time="0" classname="StringPropertyTest" />
+    <testcase name="sharedPropertyTest" status="run" time="0" classname="StringPropertyTest" />
+    <testcase name="unlockTest" status="run" time="0" classname="StringPropertyTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="ConcurrentHistogram1DTest" tests="1" time="0.002">
-    <testcase classname="ConcurrentHistogram1DTest" name="concurrentAddSampleTest" status="run" time="0.002" />
+  <testsuite name="ConcurrentHistogram1DTest" tests="1" failures="0" disabled="0" errors="0" time="0.002">
+    <testcase name="concurrentAddSampleTest" status="run" time="0.001" classname="ConcurrentHistogram1DTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="ConcurrentHistogram2DTest" tests="1" time="0.099">
-    <testcase classname="ConcurrentHistogram2DTest" name="concurrentAddSampleTest" status="run" time="0.099" />
+  <testsuite name="ConcurrentHistogram2DTest" tests="1" failures="0" disabled="0" errors="0" time="0.085">
+    <testcase name="concurrentAddSampleTest" status="run" time="0.085" classname="ConcurrentHistogram2DTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="ConcurrentHistogram1DTestSpecific" tests="1" time="0.118">
-    <testcase classname="ConcurrentHistogram1DTestSpecific" name="concurrentAddSampleTest" status="run" time="0.117" />
+  <testsuite name="ConcurrentHistogram1DTestSpecific" tests="1" failures="0" disabled="0" errors="0" time="0.109">
+    <testcase name="concurrentAddSampleTest" status="run" time="0.109" classname="ConcurrentHistogram1DTestSpecific" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="ConcurrentHistogram2DTestSpecific" tests="1" time="0.131">
-    <testcase classname="ConcurrentHistogram2DTestSpecific" name="concurrentAddSampleTest" status="run" time="0.129" />
+  <testsuite name="ConcurrentHistogram2DTestSpecific" tests="1" failures="0" disabled="0" errors="0" time="0.129">
+    <testcase name="concurrentAddSampleTest" status="run" time="0.129" classname="ConcurrentHistogram2DTestSpecific" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="StringUtilTest" tests="6" time="0.005">
-    <testcase classname="StringUtilTest" name="caseOperationsTest" status="run" time="0" />
-    <testcase classname="StringUtilTest" name="parseFloatsTest" status="run" time="0" />
-    <testcase classname="StringUtilTest" name="splitTest" status="run" time="0" />
-    <testcase classname="StringUtilTest" name="replaceTest" status="run" time="0" />
-    <testcase classname="StringUtilTest" name="trimTest" status="run" time="0" />
-    <testcase classname="StringUtilTest" name="toStringTest" status="run" time="0" />
+  <testsuite name="StringUtilTest" tests="6" failures="0" disabled="0" errors="0" time="0.006">
+    <testcase name="caseOperationsTest" status="run" time="0" classname="StringUtilTest" />
+    <testcase name="parseFloatsTest" status="run" time="0" classname="StringUtilTest" />
+    <testcase name="splitTest" status="run" time="0.001" classname="StringUtilTest" />
+    <testcase name="replaceTest" status="run" time="0" classname="StringUtilTest" />
+    <testcase name="trimTest" status="run" time="0" classname="StringUtilTest" />
+    <testcase name="toStringTest" status="run" time="0" classname="StringUtilTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="AbstractProcessorTest" tests="2" time="0.002">
-    <testcase classname="AbstractProcessorTest" name="invalidationTest" status="run" time="0.001" />
-    <testcase classname="AbstractProcessorTest" name="lockingTest" status="run" time="0.001" />
+  <testsuite name="AbstractProcessorTest" tests="2" failures="0" disabled="0" errors="0" time="0.003">
+    <testcase name="invalidationTest" status="run" time="0" classname="AbstractProcessorTest" />
+    <testcase name="lockingTest" status="run" time="0.001" classname="AbstractProcessorTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="PipelineWriteResultImageTest" tests="3" time="1.998">
-    <testcase classname="PipelineWriteResultImageTest" name="VolumeExplorerDemo" status="run" time="1.362" />
-    <testcase classname="PipelineWriteResultImageTest" name="GeometryRendererDemo" status="run" time="0.311" />
-    <testcase classname="PipelineWriteResultImageTest" name="SliceVis" status="run" time="0.32" />
+  <testsuite name="PipelineWriteResultImageTest" tests="3" failures="0" disabled="0" errors="0" time="2.034">
+    <testcase name="VolumeExplorerDemo" status="run" time="1.447" classname="PipelineWriteResultImageTest" />
+    <testcase name="GeometryRendererDemo" status="run" time="0.268" classname="PipelineWriteResultImageTest" />
+    <testcase name="SliceVis" status="run" time="0.315" classname="PipelineWriteResultImageTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="2DTest/GlReductionTest" tests="6" time="0.06">
-    <testcase classname="2DTest/GlReductionTest" name="isScopedLockWorking/0" status="run" time="0" value_param="2" />
-    <testcase classname="2DTest/GlReductionTest" name="localRepCreationTest/0" status="run" time="0" value_param="2" />
-    <testcase classname="2DTest/GlReductionTest" name="minTest/0" status="run" time="0.012" value_param="2" />
-    <testcase classname="2DTest/GlReductionTest" name="maxTest/0" status="run" time="0.012" value_param="2" />
-    <testcase classname="2DTest/GlReductionTest" name="sumTest/0" status="run" time="0.013" value_param="2" />
-    <testcase classname="2DTest/GlReductionTest" name="multTest/0" status="run" time="0.012" value_param="2" />
+  <testsuite name="2DTest/GlReductionTest" tests="6" failures="0" disabled="0" errors="0" time="0.062">
+    <testcase name="isScopedLockWorking/0" value_param="2" status="run" time="0" classname="2DTest/GlReductionTest" />
+    <testcase name="localRepCreationTest/0" value_param="2" status="run" time="0" classname="2DTest/GlReductionTest" />
+    <testcase name="minTest/0" value_param="2" status="run" time="0.016" classname="2DTest/GlReductionTest" />
+    <testcase name="maxTest/0" value_param="2" status="run" time="0.012" classname="2DTest/GlReductionTest" />
+    <testcase name="sumTest/0" value_param="2" status="run" time="0.012" classname="2DTest/GlReductionTest" />
+    <testcase name="multTest/0" value_param="2" status="run" time="0.014" classname="2DTest/GlReductionTest" />
   </testsuite>
-  <testsuite disabled="0" errors="0" failures="0" name="3DTest/GlReductionTest" tests="6" time="0.061">
-    <testcase classname="3DTest/GlReductionTest" name="isScopedLockWorking/0" status="run" time="0" value_param="3" />
-    <testcase classname="3DTest/GlReductionTest" name="localRepCreationTest/0" status="run" time="0.001" value_param="3" />
-    <testcase classname="3DTest/GlReductionTest" name="minTest/0" status="run" time="0.012" value_param="3" />
-    <testcase classname="3DTest/GlReductionTest" name="maxTest/0" status="run" time="0.012" value_param="3" />
-    <testcase classname="3DTest/GlReductionTest" name="sumTest/0" status="run" time="0.013" value_param="3" />
-    <testcase classname="3DTest/GlReductionTest" name="multTest/0" status="run" time="0.014" value_param="3" />
+  <testsuite name="3DTest/GlReductionTest" tests="6" failures="0" disabled="0" errors="0" time="0.056">
+    <testcase name="isScopedLockWorking/0" value_param="3" status="run" time="0" classname="3DTest/GlReductionTest" />
+    <testcase name="localRepCreationTest/0" value_param="3" status="run" time="0" classname="3DTest/GlReductionTest" />
+    <testcase name="minTest/0" value_param="3" status="run" time="0.012" classname="3DTest/GlReductionTest" />
+    <testcase name="maxTest/0" value_param="3" status="run" time="0.012" classname="3DTest/GlReductionTest" />
+    <testcase name="sumTest/0" value_param="3" status="run" time="0.011" classname="3DTest/GlReductionTest" />
+    <testcase name="multTest/0" value_param="3" status="run" time="0.011" classname="3DTest/GlReductionTest" />
   </testsuite>
-<testsuite disabled="0" errors="0" failures="1" name="reference/1/" tests="3" time="0"><tastcase classname="reference/1/" name="geometryrendererdemo.png" status="run" time="0" /><tastcase classname="reference/1/" name="slicevis.png" status="run" time="0"><failure message="Image difference is not 0" type="">&lt;![CDATA[MESSAGE]]&gt;</failure></tastcase><tastcase classname="reference/1/" name="volumeexplorerdemo.png" status="run" time="0" /></testsuite></testsuites>
+</testsuites>
