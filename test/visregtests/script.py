@@ -129,7 +129,7 @@ for test in newTestDirs :
             #plt.tight_layout()
             #plt.show()
             
-            case = et.SubElement(suite, "tastcase", {"name":file, "status":"run", 
+            case = et.SubElement(suite, "testcase", {"name":file, "status":"run", 
             "time":"0", "classname":refCaseDir});
             suite.set("tests", str(int(suite.get("tests"))+1));
             root.set("tests", str(int(root.get("tests"))+1));
