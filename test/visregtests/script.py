@@ -36,6 +36,7 @@ from skimage import io#, img_as_float, data
 #from skimage.measure import structural_similarity as ssim
 import xml.etree.ElementTree as et
 import numpy as np
+import shutil as fio
 
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -49,25 +50,26 @@ def prettify(elem):
 refDir = 'reference/';
 testDir = 'testruns/';
 resultDir = 'results/';
+failedDir = 'failed/';
 if (not os.path.exists(resultDir)) :
         os.mkdir(resultDir)
 
 casesDir = os.listdir(refDir);
-prevRunDirs = os.listdir(testDir);
-prevResDirs = os.listdir(resultDir);
+#prevRunDirs = os.listdir(testDir);
+#prevResDirs = os.listdir(resultDir);
 
 # Create a new directory to store result
-curRun = 0;
-for i in range(len(prevResDirs)) :
-    prevRunDirs[i] = int(prevRunDirs[i][0:])
-    prevResDirs[i] = int(prevResDirs[i][0:])
-    if (prevRunDirs[i] == prevResDirs[i]) :
-        curRun += 1;
-        continue;
-    break;
+#curRun = 0;
+#for i in range(len(prevResDirs)) :
+#    prevRunDirs[i] = int(prevRunDirs[i][0:])
+#    prevResDirs[i] = int(prevResDirs[i][0:])
+#    if (prevRunDirs[i] == prevResDirs[i]) :
+#        curRun += 1;
+#        continue;
+#    break;
 
 # List the test runs that are not computed yet
-newTestDirs = prevRunDirs[curRun:];
+#newTestDirs = prevRunDirs[curRun:];
 
 # Find or create results.xml file created by test-campvis
 xmlFile = "result.xml";
@@ -79,73 +81,90 @@ else :
     "errors":"0", "timestamp":"2014-08-24T01:35:42", "time":"0", "name":"AllTests"}); 
     tree = et.ElementTree(root);
     
-
+'''
 for test in newTestDirs :
     curTestDir = testDir + str(prevRunDirs[curRun]) + "/";
     resultSaveDir = resultDir + str(prevRunDirs[curRun]) + "/";
     curRun += 1;
-    os.mkdir(resultSaveDir)
+    os.mkdir(resultSaveDir)'''
     
-    for case in casesDir :
-        refCaseDir = refDir + case + "/";
-        testCaseDir = curTestDir + case + "/";
-        resCaseDir = resultSaveDir + case + "/";
-        # if no corresponding test directory - continue
-        if (not os.path.exists(testCaseDir)) :
-            continue;
+curTestDir = testDir;
+resultSaveDir = resultDir;
+for case in casesDir :
+    refCaseDir = refDir + case + "/";
+    testCaseDir = curTestDir + case + "/";
+    resCaseDir = resultSaveDir + case + "/";
+    # if no corresponding test directory - continue
+    if (not os.path.exists(testCaseDir)) :
+        continue;
+    if (not os.path.exists(resCaseDir)) :
         os.mkdir(resCaseDir)
-        
-        files = os.listdir(refCaseDir)
-        if (len(files) != 0) :
-            suite = et.SubElement(root, "testsuite", {"name":refCaseDir, "tests":"0", 
-            "failures":"0", "disabled":"0", "errors":"0", "time":"0"});
-        
-        i = 0;
-        for file in files :
-            refFilePath = refCaseDir + file;
-            testFilePath = testCaseDir + file;
-            resFilePath = resCaseDir + file;
-            # Check existence of test file       
-            if (not os.path.isfile(testFilePath)) :
-                continue;
-            
-            if (refFilePath[-4:] != ".jpg" and refFilePath[-4:] != ".png" 
-            and refFilePath[-4:] != ".tif") :
-                continue;
 
-            ref = io.imread(refFilePath);
-            test = io.imread(testFilePath);
-            # Check dimension of the file before finding difference
-            if (ref.shape == test.shape) :
-                test = ref-test;
-            else :
-                test = ref;
-            io.imsave(resFilePath, test);
+    files = os.listdir(refCaseDir)
+    if (len(files) != 0) :
+        suite = et.SubElement(root, "testsuite", {"name":refCaseDir, "tests":"0", 
+        "failures":"0", "disabled":"0", "errors":"0", "time":"0"});
+
+    i = 0;
+    for file in files :
+        refFilePath = refCaseDir + file;
+        testFilePath = testCaseDir + file;
+        resFilePath = resCaseDir + file;
+        # Check existence of test file       
+        if (not os.path.isfile(testFilePath)) :
+            continue;
+
+        if (refFilePath[-4:] != ".jpg" and refFilePath[-4:] != ".png" 
+        and refFilePath[-4:] != ".tif") :
+            continue;
+
+        ref = io.imread(refFilePath);
+        test = io.imread(testFilePath);
+        # Check dimension of the file before finding difference
+        if (ref.shape == test.shape) :
+            test = ref-test;
+        else :
+            test = ref;
+        io.imsave(resFilePath, test);
+
+        #(x, y, z) = test.shape            
+        #plt.figure(figsize=(4, 4))
+        #plt.imshow(test)#, cmap='gray', interpolation='nearest')
+        #plt.axis('off')
+        #plt.tight_layout()
+        #plt.show()
+
+        case = et.SubElement(suite, "testcase", {"name":file, "status":"run", 
+        "time":"0", "classname":refCaseDir});
+        suite.set("tests", str(int(suite.get("tests"))+1));
+        root.set("tests", str(int(root.get("tests"))+1));
+
+
+        if (np.sum(test) != 0) :
+            failure = et.SubElement(case, "failure", {"message":"", "type":""});
+            failure.set("message", "Image difference is not 0");
+            '''failure.text = "<![CDATA[" + \
+            "MESSAGE" + \
+            "]]>";'''
+            failure.text = "Reference and test images differ in " + str(sum(1 for x in test if x.any() > 0)) + " pixel/s";
+
+            suite.set("failures", str(int(suite.get("failures")) + 1));
+            root.set("failures", str(int(root.get("failures")) + 1));
             
-            #(x, y, z) = test.shape            
-            #plt.figure(figsize=(4, 4))
-            #plt.imshow(test)#, cmap='gray', interpolation='nearest')
-            #plt.axis('off')
-            #plt.tight_layout()
-            #plt.show()
+            print "failed";
+            if (not os.path.exists(failedDir + refCaseDir)) :
+                os.makedirs(failedDir + refCaseDir);
+            fio.copy(refFilePath, failedDir + refFilePath);
             
-            case = et.SubElement(suite, "testcase", {"name":file, "status":"run", 
-            "time":"0", "classname":refCaseDir});
-            suite.set("tests", str(int(suite.get("tests"))+1));
-            root.set("tests", str(int(root.get("tests"))+1));
+            if (not os.path.exists(failedDir + testCaseDir)) :
+                os.makedirs(failedDir + testCaseDir);
+            fio.copy(testFilePath, failedDir + testFilePath);
             
-            
-            if (np.sum(test) != 0) :#
-                failure = et.SubElement(case, "failure", {"message":"", "type":""});
-                failure.set("message", "Image difference is not 0");
-                failure.text = "<![CDATA[" + \
-                "MESSAGE" + \
-                "]]>";
-                
-                suite.set("failures", str(int(suite.get("failures")) + 1));
-                root.set("failures", str(int(root.get("failures")) + 1));
+            if (not os.path.exists(failedDir + resCaseDir)) :
+                os.makedirs(failedDir + resCaseDir);
+            fio.copy(resFilePath, failedDir + resFilePath);
             
 tree.write(xmlFile);
-            
+
 print ""
 

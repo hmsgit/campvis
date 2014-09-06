@@ -144,7 +144,7 @@ GTEST_API_ int main(int argc, char **argv) {
     app = new QApplication(argc, argv);
     //testing::InitGoogleTest(&argc, argv);
     int _argc = 2;
-    char *options[] = {static_cast<char *>("THIS DOESN'T HAVE ANY EFFECT"), static_cast<char *>("--gtest_output=xml:visregtests/result.xml")};
+    char *options[] = {"THIS DOESN'T HAVE ANY EFFECT", "--gtest_output=xml:visregtests/result.xml"};
     testing::InitGoogleTest(&_argc, options);
 
     int ret;
