@@ -1,4 +1,3 @@
-import os.path
 # ================================================================================================
 # 
 # This file is part of the CAMPVis Software Framework.
@@ -23,23 +22,16 @@ import os.path
 # 
 # ================================================================================================
 
-__author__="Mahmud"
-__date__ ="$Jul 10, 2014 1:58:04 AM$"
-
-# import numpy as np
-# import matplotlib
-# import matplotlib.pyplot as plt
-# import matplotlib.image as mpimg
 import os
-
-from skimage import io#, img_as_float, data
-#from skimage.measure import structural_similarity as ssim
+import os.path
 import xml.etree.ElementTree as et
 import numpy as np
 import shutil as fio
 
+from skimage import io, color
 from xml.etree import ElementTree
 from xml.dom import minidom
+from skimage.measure import structural_similarity as ssim
 
 # Return a pretty-printed XML string for the Element
 def prettify(elem):
@@ -55,21 +47,6 @@ if (not os.path.exists(resultDir)) :
         os.mkdir(resultDir)
 
 casesDir = os.listdir(refDir);
-#prevRunDirs = os.listdir(testDir);
-#prevResDirs = os.listdir(resultDir);
-
-# Create a new directory to store result
-#curRun = 0;
-#for i in range(len(prevResDirs)) :
-#    prevRunDirs[i] = int(prevRunDirs[i][0:])
-#    prevResDirs[i] = int(prevResDirs[i][0:])
-#    if (prevRunDirs[i] == prevResDirs[i]) :
-#        curRun += 1;
-#        continue;
-#    break;
-
-# List the test runs that are not computed yet
-#newTestDirs = prevRunDirs[curRun:];
 
 # Find or create results.xml file created by test-campvis
 xmlFile = "result.xml";
@@ -77,16 +54,10 @@ if (os.path.isfile(xmlFile)) :
     tree = et.parse(xmlFile);
     root = tree.getroot();
 else :
+    # XML
     root = et.Element("testsuites", {"tests":"0", "failures":"0", "disabled":"0", 
     "errors":"0", "timestamp":"2014-08-24T01:35:42", "time":"0", "name":"AllTests"}); 
     tree = et.ElementTree(root);
-    
-'''
-for test in newTestDirs :
-    curTestDir = testDir + str(prevRunDirs[curRun]) + "/";
-    resultSaveDir = resultDir + str(prevRunDirs[curRun]) + "/";
-    curRun += 1;
-    os.mkdir(resultSaveDir)'''
     
 curTestDir = testDir;
 resultSaveDir = resultDir;
@@ -102,6 +73,7 @@ for case in casesDir :
 
     files = os.listdir(refCaseDir)
     if (len(files) != 0) :
+        # XML
         suite = et.SubElement(root, "testsuite", {"name":refCaseDir, "tests":"0", 
         "failures":"0", "disabled":"0", "errors":"0", "time":"0"});
 
@@ -119,39 +91,49 @@ for case in casesDir :
             continue;
 
         ref = io.imread(refFilePath);
-        test = io.imread(testFilePath);
+        testim = io.imread(testFilePath);
         # Check dimension of the file before finding difference
-        if (ref.shape == test.shape) :
-            test = ref-test;
+        if (ref.shape == testim.shape) :
+            test = ref-testim;
         else :
             test = ref;
-        io.imsave(resFilePath, test);
+        # Store fully opaque image    
+        rgb = test[:, :, : 3];
+        alpha = test[:, :, 3:];
+        opaque = [[[255]*alpha.shape[2]] * alpha.shape[1]] * alpha.shape[0]
+        #io.imsave(resFilePath, rgb);
+        io.imsave(resFilePath, [rgb + opaque]);
+        # Calculate MSE and SSIM
+        mse = np.linalg.norm(test);
+        reff = color.rgb2gray(ref);
+        testf = color.rgb2gray(test);
+        ssimval = ssim(reff, testf);
 
-        #(x, y, z) = test.shape            
-        #plt.figure(figsize=(4, 4))
-        #plt.imshow(test)#, cmap='gray', interpolation='nearest')
-        #plt.axis('off')
-        #plt.tight_layout()
-        #plt.show()
-
+        # XML
         case = et.SubElement(suite, "testcase", {"name":file, "status":"run", 
         "time":"0", "classname":refCaseDir});
         suite.set("tests", str(int(suite.get("tests"))+1));
         root.set("tests", str(int(root.get("tests"))+1));
 
-
         if (np.sum(test) != 0) :
+            # Prepare and write messages to show in stacktrace
             failure = et.SubElement(case, "failure", {"message":"", "type":""});
             failure.set("message", "Image difference is not 0");
-            '''failure.text = "<![CDATA[" + \
-            "MESSAGE" + \
-            "]]>";'''
-            failure.text = "Reference and test images differ in " + str(sum(1 for x in test if x.any() > 0)) + " pixel/s";
+            alphamsg = "differ in both RGB and aplha channels";
+            if (sum(1 for x in rgb if x.any() > 0) == 0):
+                alphamsg = "differ in transparency level only";
+            elif (sum(1 for x in alpha if x.any() > 0) == 0) :
+                alphamsg = "differ in RGB channels only";
+
+            failure.text = "Reference and test images differ in " \
+            + str(sum(1 for x in test if x.any() > 0)) + " pixel/s\n" \
+            + "and images " + alphamsg \
+            + "\nMSE: " + str(mse) + " SSIM: " + str(ssimval);
 
             suite.set("failures", str(int(suite.get("failures")) + 1));
             root.set("failures", str(int(root.get("failures")) + 1));
             
-            print "failed";
+            # Copy artifacts to failed directory
             if (not os.path.exists(failedDir + refCaseDir)) :
                 os.makedirs(failedDir + refCaseDir);
             fio.copy(refFilePath, failedDir + refFilePath);
@@ -165,6 +147,3 @@ for case in casesDir :
             fio.copy(resFilePath, failedDir + resFilePath);
             
 tree.write(xmlFile);
-
-print ""
-
