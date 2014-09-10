@@ -82,6 +82,7 @@ for case in casesDir :
         refFilePath = refCaseDir + file;
         testFilePath = testCaseDir + file;
         resFilePath = resCaseDir + file;
+        alphaFilePath = resFilePath[:-4]+"_aplha"+resFilePath[-4:];
         # Check existence of test file       
         if (not os.path.isfile(testFilePath)) :
             continue;
@@ -96,13 +97,15 @@ for case in casesDir :
         if (ref.shape == testim.shape) :
             test = ref-testim;
         else :
+            print "i'm in else! HELP me!"
             test = ref;
         # Store fully opaque image    
         rgb = test[:, :, : 3];
         alpha = test[:, :, 3:];
         opaque = [[[255]*alpha.shape[2]] * alpha.shape[1]] * alpha.shape[0]
         #io.imsave(resFilePath, rgb);
-        io.imsave(resFilePath, [rgb + opaque]);
+        io.imsave(resFilePath, np.concatenate((rgb, opaque), axis=2));
+        io.imsave(alphaFilePath, alpha);
         # Calculate MSE and SSIM
         mse = np.linalg.norm(test);
         reff = color.rgb2gray(ref);
@@ -145,5 +148,6 @@ for case in casesDir :
             if (not os.path.exists(failedDir + resCaseDir)) :
                 os.makedirs(failedDir + resCaseDir);
             fio.copy(resFilePath, failedDir + resFilePath);
-            
+            fio.copy(alphaFilePath, failedDir + alphaFilePath);
+        #break;
 tree.write(xmlFile);
