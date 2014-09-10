@@ -97,7 +97,6 @@ for case in casesDir :
         if (ref.shape == testim.shape) :
             test = np.abs(ref.astype(int)-testim.astype(int));
         else :
-            print "i'm in else! HELP me!"
             test = ref;
         # Store fully opaque image    
         rgb = test[:, :, : 3];
@@ -109,7 +108,7 @@ for case in casesDir :
         # Calculate MSE and SSIM
         mse = np.linalg.norm(test);
         reff = color.rgb2gray(ref);
-        testf = color.rgb2gray(test);
+        testf = color.rgb2gray(test.astype(float));
         ssimval = ssim(reff, testf);
 
         # XML
