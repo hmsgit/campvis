@@ -95,7 +95,7 @@ for case in casesDir :
         testim = io.imread(testFilePath);
         # Check dimension of the file before finding difference
         if (ref.shape == testim.shape) :
-            test = ref-testim;
+            test = np.abs(ref.astype(int)-testim.astype(int));
         else :
             print "i'm in else! HELP me!"
             test = ref;
