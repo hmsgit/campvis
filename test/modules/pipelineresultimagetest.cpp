@@ -41,7 +41,7 @@ using namespace campvis;
 
 
 /**
- * Test class for StringUtils.
+ * Test class for creating test images for visual regression test
  */
 
 class PipelineWriteResultImageTest : public ::testing::Test {
@@ -61,15 +61,6 @@ protected:
         }
         std::vector<std::string> filelist = tgt::FileSystem::listSubDirectories(_basePath, true);
         std::string caseNo = "1/";
-        //std::string testRunNo = "";
-        //if (_prevNoCases++ == 0) {
-        //    testRunNo = filelist.size() > 0 ? StringUtils::toString(StringUtils::fromString<int>(filelist[filelist.size()-1])+1) : "1";
-        //    tgt::FileSystem::createDirectoryRecursive(_basePath+testRunNo+"/"+ caseNo);
-        //}
-        //else 
-        //    testRunNo = filelist[filelist.size()-1];
-        //
-        //_basePath += testRunNo+"/"+caseNo;
         tgt::FileSystem::createDirectoryRecursive(_basePath+ caseNo);
         _basePath += caseNo;
     }
