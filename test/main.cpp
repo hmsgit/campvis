@@ -80,7 +80,8 @@ void init() {
     
     tgt::GLContextScopedLock lock(_localContext);
     tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
-    campvis::OpenGLJobProcessor::getRef().registerContext(_localContext);
+    GLJobProc.iKnowWhatImDoingSetThisThreadOpenGlThread();
+    GLJobProc.registerContext(_localContext);
 
     tgt::initGL(featureset);
     ShdrMgr.setDefaultGlslVersion("330");
@@ -142,7 +143,10 @@ GTEST_API_ int main(int argc, char **argv) {
 
 
     app = new QApplication(argc, argv);
-    testing::InitGoogleTest(&argc, argv);
+    //testing::InitGoogleTest(&argc, argv);
+    int _argc = 2;
+    char *options[] = {"THIS DOESN'T HAVE ANY EFFECT", "--gtest_output=xml:visregtests/result.xml"};
+    testing::InitGoogleTest(&_argc, options);
 
     int ret;
 

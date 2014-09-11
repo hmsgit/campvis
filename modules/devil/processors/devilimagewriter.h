@@ -70,6 +70,7 @@ namespace campvis {
 
         DataNameProperty p_inputImage;      ///< image ID for image to write
         StringProperty p_url;               ///< URL for file to write
+        BoolProperty p_writeDepthImage;     ///< Flag whether to save also depth image
 
     protected:
         /// \see AbstractProcessor::updateResult
