@@ -251,7 +251,7 @@ namespace campvis {
         float renderTargetRatio = static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y);
 
         _texCoordMatrix = tgt::mat4::zero;
-        _geometryModelMatrix = tgt::mat4::identity;
+        _geometryModelMatrix = tgt::mat4::zero;
         switch (p_sliceOrientation.getValue()) {
             case XY_PLANE:
                 // keep texture coordinates for x,y, shift z coordinates to slice value
@@ -260,6 +260,8 @@ namespace campvis {
                 _texCoordMatrix.t22 = 1.f;
                 _texCoordMatrix.t33 = 1.f;
                 _texCoordMatrix.t23 = sliceTexCoord.z;
+
+                _geometryModelMatrix = tgt::mat4::identity;
 
                 // compute clip volume so that we only show the geometry at the current slice.
                 clip = (-2.f * static_cast<float>(p_zSliceNumber.getValue()) / imgSize.z) + 1.f;
