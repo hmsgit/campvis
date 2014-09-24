@@ -258,6 +258,10 @@ public:
 
     std::string getLinkerLog() const;
 
+    // Subroutines
+    bool selectSubroutine(ShaderObject::ShaderType type, const std::string& subroutineName);
+
+
     //
     // Uniform stuff
     //

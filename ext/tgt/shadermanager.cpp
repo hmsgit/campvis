@@ -1322,6 +1322,16 @@ void Shader::setNormalizedAttribute(GLint index, const Vector4<GLuint>& v) {
     glVertexAttrib4Nuiv(index, v.elem);
 }
 
+bool Shader::selectSubroutine(ShaderObject::ShaderType type, const std::string& subroutineName) {
+    GLuint index = glGetSubroutineIndex(id_, type, subroutineName.c_str());
+    if (index == -1) {
+        LWARNING("Failed to locate subroutine Location: " << subroutineName);
+        return false;
+    }
+    glUniformSubroutinesuiv(type, 1, &index);
+    return true;
+}
+
 //------------------------------------------------------------------------------
 
 const string ShaderManager::loggerCat_("tgt.Shader.Manager");

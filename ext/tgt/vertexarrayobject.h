@@ -31,6 +31,12 @@ namespace tgt {
         ~VertexArrayObject();
 
         /**
+         * Returns the OpneGL object ID
+         * \return  _id
+         */
+        GLuint getId() const;
+
+        /**
          * Binds this VertexArrayObject to the current OpenGL context.
          */
         void bind();

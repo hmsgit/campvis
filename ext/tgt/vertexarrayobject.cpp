@@ -80,4 +80,8 @@ namespace tgt {
             tgtAssert(false, "Could not find Vertex Attribute location for this BufferObject. You have to add it first using setVertexAttributePointer()!");
     }
 
+    GLuint VertexArrayObject::getId() const {
+        return _id;
+    }
+
 }

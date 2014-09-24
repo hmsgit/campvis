@@ -36,6 +36,7 @@ namespace campvis {
         , _lsp()
         , _imageReader()
         , _vectorFieldReader()
+        , _pfr(&_canvasSize)
         , _vectorFieldRenderer(&_canvasSize)
         , _sliceRenderer(&_canvasSize)
         , _rtc(&_canvasSize)
@@ -53,6 +54,7 @@ namespace campvis {
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_vectorFieldReader);
+        addProcessor(&_pfr);
         addProcessor(&_vectorFieldRenderer);
         addProcessor(&_sliceRenderer);
         addProcessor(&_rtc);
@@ -65,6 +67,7 @@ namespace campvis {
         AutoEvaluationPipeline::init();
 
         p_camera.addSharedProperty(&_vectorFieldRenderer.p_camera);
+        p_camera.addSharedProperty(&_pfr.p_camera);
         p_camera.addSharedProperty(&_sliceRenderer.p_camera);
 
         p_sliceNumber.addSharedProperty(&_vectorFieldRenderer.p_sliceNumber);
@@ -78,6 +81,7 @@ namespace campvis {
 
         _vectorFieldReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_vec.mhd");
         _vectorFieldReader.p_targetImageID.setValue("vectors");
+        _vectorFieldReader.p_targetImageID.addSharedProperty(&_pfr.p_inputVectors);
         _vectorFieldReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectors);
 
         _vectorFieldRenderer.p_renderOutput.addSharedProperty(&_rtc.p_firstImageId);
@@ -90,12 +94,21 @@ namespace campvis {
         _vectorFieldRenderer.p_lenThresholdMax.setValue(400.f);
         _vectorFieldRenderer.p_sliceOrientation.setValue(3);
 
+        _pfr.p_lenThresholdMin.setValue(100.f);
+        _pfr.p_flowProfile1.setValue(0.4716088614374652f);
+        _pfr.p_flowProfile2.setValue(0.0638348311845516f);
+        _pfr.p_flowProfile3.setValue(0.1713471562960614f);
+        _pfr.p_flowProfile4.setValue(0.1019371804834016f);
+        _pfr.p_lenThresholdMax.setValue(400.f);
+        _pfr.p_renderOutput.setValue("particles");
+
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _sliceRenderer.p_transferFunction.replaceTF(tf);
         _sliceRenderer.p_targetImageID.setValue("slice");
-        _sliceRenderer.p_targetImageID.addSharedProperty(&_rtc.p_secondImageId);
+        //_sliceRenderer.p_targetImageID.addSharedProperty(&_rtc.p_secondImageId);
 
+        _rtc.p_secondImageId.setValue("particles");
         _rtc.p_compositingMethod.selectById("depth");
         _rtc.p_targetImageId.setValue("composed");
 
