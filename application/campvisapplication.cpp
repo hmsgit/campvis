@@ -37,6 +37,7 @@
 #include "application/campvispainter.h"
 #include "application/gui/properties/propertywidgetfactory.h"
 #include "application/gui/mainwindow.h"
+#include "application/gui/mdi/mdidockablewindow.h"
 
 #include "core/tools/job.h"
 #include "core/tools/opengljobprocessor.h"
@@ -261,9 +262,7 @@ namespace campvis {
         PipelineRecord pr = { pipeline, painter };
         _pipelines.push_back(pr);
 
-        if (!hide) {
-            _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(name, canvas);
-        }
+        _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(name, canvas);
 
         // initialize context (GLEW) and pipeline in OpenGL thread)
         GLJobProc.enqueueJob(
