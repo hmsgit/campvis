@@ -227,8 +227,6 @@ namespace campvis {
             }
 
             // get data from image and transform to single intensity image:
-            ILubyte* data = ilGetData(); 
-
             ilCopyPixels(0, 0, 0, imageSize.x, imageSize.y, 1, devilFormat, devilDataType, buffer + (WeaklyTypedPointer::numBytes(campvisDataType, numChannels) * i * imageSize.x * imageSize.y));
             ILint err = ilGetError();
             if (err != IL_NO_ERROR) {
@@ -257,8 +255,10 @@ namespace campvis {
             rd->addColorTexture(id);
 
             // create fake depth image
+			// TODO: think of a better solution to this...
             ImageData* idDepth = new ImageData(dimensionality, imageSize, 1);
             float* ptr = new float[tgt::hmul(imageSize)];
+			memset(ptr, 0, tgt::hmul(imageSize) * sizeof(float));
             WeaklyTypedPointer wtpDepth(campvisDataType, 1, ptr);
             ImageRepresentationLocal::create(idDepth, wtpDepth);
             rd->setDepthTexture(idDepth);
