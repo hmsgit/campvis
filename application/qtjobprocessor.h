@@ -34,7 +34,17 @@ namespace campvis {
 
 
     /**
-     * Job processor class for campvis
+     * This job processor singleton can be used to execute jobs (asynchronously) from inside the Qt GUI thread.
+     * This can result in simpler and better understandable code when only a few lines of code need
+     * to be executed in the context, as it removes the need to introduce a new signal and slot just
+     * to transition into the Qt GUI thread.
+     * 
+     * Example:
+     * \code
+     * QtJobProc.enqueueJob([=](){
+     *     _application->_mainWindow->statusBar()->showMessage(QString::fromStdString(status), timeout);
+     * });
+     * \endcode
      */
     class QtJobProcessor : public QWidget, public tgt::Singleton<QtJobProcessor> {
         Q_OBJECT;
@@ -45,8 +55,14 @@ namespace campvis {
                 
         virtual ~QtJobProcessor();
 
+        /**
+         Enqueues a new job to be processed by the job processor
+         */
         void enqueueJob(AbstractJob * job);
 
+        /**
+         Convenience function to simplify the code, removing the necessity for a makeJobOnHeap() call
+         */
         void enqueueJob(std::function<void(void)> fn);
 
    signals:

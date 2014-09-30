@@ -49,8 +49,6 @@ namespace campvis {
     {
         tgtAssert(job, "Job must not be null!");
 
-        std::cout << "Job processed." << std::endl;
-
         (*job)();
         delete job;
     }
