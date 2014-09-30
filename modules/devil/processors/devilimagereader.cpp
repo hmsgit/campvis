@@ -120,6 +120,9 @@ namespace campvis {
             }
         }
 
+		if (files.empty())
+			return;
+
         tgt::ivec3 imageSize(0, 0, static_cast<int>(files.size()));
         uint8_t* buffer = nullptr;
 
@@ -132,7 +135,7 @@ namespace campvis {
             devilFormat = IL_RGBA;
 
         ILint devilDataType = 0;
-        WeaklyTypedPointer::BaseType  campvisDataType;
+		WeaklyTypedPointer::BaseType campvisDataType = WeaklyTypedPointer::UINT8;
         size_t numChannels = 1;
 
         // start reading
