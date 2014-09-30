@@ -89,7 +89,7 @@ namespace campvis {
          * \param   name       the name of the visualization pipeline
          * \param   canvas     the pipeline's canvas
          */
-        void addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
+        MdiDockableWindow * addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
 
     protected:
         /**

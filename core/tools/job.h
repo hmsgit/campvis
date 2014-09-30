@@ -29,6 +29,8 @@
 
 #include "core/coreapi.h"
 
+#include <functional>
+
 namespace campvis {
 
     /**
@@ -258,6 +260,27 @@ namespace campvis {
         A2 _arg2;                   ///< Second Argument to pass to \a callee
     };
 
+
+    /**
+     * specific job that evaluates a function object
+     */
+    class CAMPVIS_CORE_API CallFunctionObjectJob : public AbstractJob{
+    public:
+        CallFunctionObjectJob(std::function<void(void)> fn) 
+        : _fn(fn)
+        {
+        }
+
+        ~CallFunctionObjectJob() {};
+
+        virtual void execute() {
+            _fn();
+        };
+
+    protected:
+        std::function<void(void)> _fn;
+    };
+
 // = Helper functions for easier creation of jobs =================================================
 
     /**
@@ -382,6 +405,24 @@ namespace campvis {
     template<class A1, class A2>
     CallFunc2ArgJob<A1, A2> makeJob(void (*callee)(A1, A2), A1 arg1, A2 arg2) {
         return CallFunc2ArgJob<A1, A2>(callee, arg1, arg2);
+    }
+
+    /**
+     * Creates a new CallFunctionObjectJob
+     * \NOTE when the compiler decides not to inline this function, there will be linking errors
+     *     in that case, try removing this function (it is only scarcely used)
+     */
+    inline CallFunctionObjectJob makeJob(std::function<void(void)> fn) {
+        return CallFunctionObjectJob(fn);
+    }
+
+    /**
+     * creates a new CallFunctionObjectJob on the Heap
+     * \NOTE when the compiler decides not to inline this function, there will be linking errors
+     *     in that case, try removing this function (it is only scarcely used)
+     */
+    inline CallFunctionObjectJob * makeJobOnHeap(std::function<void(void)> fn) {
+        return new CallFunctionObjectJob(fn);
     }
 }
 

@@ -101,8 +101,6 @@ namespace campvis {
 
         DataNameProperty p_targetMatrixID;   ///< name for the output matrix
 
-        CameraProperty p_cameraProperty;
-
 		void DataContainerDataAdded(std::string name, DataHandle data);
 
     protected:

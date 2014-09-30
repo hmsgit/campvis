@@ -63,7 +63,7 @@ namespace campvis {
         /**
          * Adds a widget to the local Qt layout.
          */
-        void addWidget(QWidget* widget);
+        void addWidget(QWidget* widget, int stretch = 1);
 
         AbstractProperty* _property;    ///< The property this widget handles
         DataContainer* _dataContainer;  ///< DataContainer to use (e.g. to populate GUI), may be 0!

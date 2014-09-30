@@ -22,18 +22,18 @@
 // 
 // ================================================================================================
 
-#ifndef ALLPROPERTIES_H__
-#define ALLPROPERTIES_H__
+#include "statusproperty.h"
 
-#include "core/properties/buttonproperty.h"
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/metaproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/stringproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-#include "core/properties/statusproperty.h"
+namespace campvis {
 
-#endif // ALLPROPERTIES_H__
+
+    const std::string StatusProperty::loggerCat_ = "CAMPVis.core.datastructures.StatusProperty";
+
+    StatusProperty::StatusProperty(const std::string& name, const std::string& title, const Status & value)
+        : GenericProperty<Status>(name, title, value)
+    {
+    }
+
+    StatusProperty::~StatusProperty() {
+    }
+}

@@ -67,8 +67,8 @@ namespace campvis {
         _property->s_changed.disconnect(this);
     }
 
-    void AbstractPropertyWidget::addWidget(QWidget* widget) {
-        _layout->addWidget(widget, 1);
+    void AbstractPropertyWidget::addWidget(QWidget* widget, int stretch) {
+        _layout->addWidget(widget, stretch);
     }
 
     void AbstractPropertyWidget::onPropertyChanged(const AbstractProperty* property) {

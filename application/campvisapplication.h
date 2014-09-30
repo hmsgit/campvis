@@ -35,6 +35,7 @@
 
 #include "core/datastructures/datacontainer.h"
 
+
 #ifdef CAMPVIS_HAS_SCRIPTING
 #include "scripting/glue/luavmstate.h"
 #endif
@@ -49,6 +50,7 @@ namespace campvis {
     class AbstractPipeline;
     class MainWindow;
     class CampVisPainter;
+    class MdiDockableWindow;
     class LuaVmState;
 
     /**
@@ -156,6 +158,8 @@ namespace campvis {
 
         /// All pipelines 
         std::vector<PipelineRecord> _pipelines;
+
+        std::map<AbstractPipeline *, MdiDockableWindow *> _pipelineWindows;
 
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;

@@ -64,6 +64,7 @@ namespace campvis {
             propertyCollection->s_propertyAdded.connect(this, &PropertyCollectionWidget::onPropCollectionPropAdded);
             propertyCollection->s_propertyRemoved.connect(this, &PropertyCollectionWidget::onPropCollectionPropRemoved);
         }
+        _layout->addStretch(1);
     }
 
     void PropertyCollectionWidget::setupWidget() {

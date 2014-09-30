@@ -177,6 +177,7 @@ namespace campvis {
 
     template<typename T>
     void campvis::GenericProperty<T>::setFrontValue(const T& value) {
+        bool valueChanged = !(_value == value);
         _value = value;
         for (std::set<AbstractProperty*>::iterator it = _sharedProperties.begin(); it != _sharedProperties.end(); ++it) {
             // We ensure all shared properties to be of type GenericProperty<T> in the addSharedProperty overload.
@@ -184,7 +185,8 @@ namespace campvis {
             GenericProperty<T>* child = static_cast< GenericProperty<T>* >(*it);
             child->setValue(value);
         }
-        s_changed.emitSignal(this);
+        if (valueChanged) //dont't signal a change if it has not really changed
+            s_changed.emitSignal(this);
     }
 
     template<typename T>

@@ -169,6 +169,12 @@ namespace campvis {
          */
         const std::string& getRenderTargetID() const;
 
+        /**
+         * returns the currently set canvas for the pipeline
+         */
+        tgt::GLCanvas * getCanvas() {
+            return _canvas;
+        }
 
         /// Signal emitted when the pipeline's render target has changed
         sigslot::signal0 s_renderTargetChanged;

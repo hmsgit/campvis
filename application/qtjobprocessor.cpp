@@ -22,18 +22,36 @@
 // 
 // ================================================================================================
 
-#ifndef ALLPROPERTIES_H__
-#define ALLPROPERTIES_H__
+#include "qtjobprocessor.h"
 
-#include "core/properties/buttonproperty.h"
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/metaproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/stringproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-#include "core/properties/statusproperty.h"
+namespace campvis {
+    QtJobProcessor::QtJobProcessor() 
+        : QWidget() 
+    {
+        connect(this, SIGNAL(newJobSignal(AbstractJob *)), this, SLOT(onJobArrived(AbstractJob *)));
+    }
 
-#endif // ALLPROPERTIES_H__
+    QtJobProcessor::~QtJobProcessor()
+    {
+
+    }
+
+    void QtJobProcessor::enqueueJob(AbstractJob * job) {
+        emit newJobSignal(job);
+    }
+
+    void QtJobProcessor::enqueueJob(std::function<void(void)> fn)
+    {
+        emit newJobSignal(makeJobOnHeap(fn));
+    }
+
+    void QtJobProcessor::onJobArrived(AbstractJob * job)
+    {
+        tgtAssert(job, "Job must not be null!");
+
+        (*job)();
+        delete job;
+    }
+
+}
+
