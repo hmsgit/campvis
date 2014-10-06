@@ -84,7 +84,7 @@ namespace campvis {
         addProperty(p_lenThresholdMax);
         addProperty(p_camera);
         addProperty(p_sliceNumber);
-        addProperty(p_Time);
+        addProperty(p_Time, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
         addProperty(p_flowProfile1);
         addProperty(p_flowProfile2);
         addProperty(p_flowProfile3);
@@ -156,15 +156,14 @@ namespace campvis {
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
-                _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+                _shader->setUniform("_modelMatrix", vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix());
+                _shader->setUniform("_scale", scale);
 
                 if (p_enableShading.getValue() && light != nullptr) {
                     light->bind(_shader, "_lightSource");
                 }
-                _shader->setIgnoreUniformLocationError(false);
 
                 if (getInvalidationLevel() & FIRST_FREE_TO_USE_INVALIDATION_LEVEL) {
                     // stage 1: perform 1 step of particle simulation
@@ -172,6 +171,8 @@ namespace campvis {
                     _shader->setUniform("_time", _currentTime);
                     _shader->setUniform("_frameLength", frameLength);
                     _shader->setUniform("_lifetime", 10.f);
+
+                    LINFO(_currentTime);
 
                     tgt::TextureUnit flowUnit;
                     vectors->bind(_shader, flowUnit, "_volume", "_volumeTextureParams");
@@ -201,7 +202,7 @@ namespace campvis {
 
                 _shader->selectSubroutine(tgt::ShaderObject::VERTEX_SHADER, "render");
                 glBindVertexArray((_drawBuffer == 1) ? _vaoA->getId() : _vaoB->getId());
-                glPointSize(10.f);
+                glPointSize(4.f);
                 //glDrawTransformFeedback(GL_POINTS, _feedback[1-_drawBuffer]);
                 glDrawArrays(GL_POINTS, 0, _numParticles);
                 glPointSize(1.f);
@@ -354,7 +355,7 @@ namespace campvis {
         std::vector<float> startTimes;
 
         tgt::vec3 imageSize = vectors->getSize();
-        _numParticles = 100;
+        _numParticles = 2048;
 
         for (GLuint i = 0; i < _numParticles; ++i) {
             tgt::vec3 position, velocity;
@@ -364,9 +365,9 @@ namespace campvis {
                 velocity.x = vectors->getElementNormalizedLinear(position, 0);
                 velocity.y = vectors->getElementNormalizedLinear(position, 1);
                 velocity.z = vectors->getElementNormalizedLinear(position, 2);
-            } while (velocity == tgt::vec3::zero);
+            } while (tgt::length(velocity) < 100.f);
 
-            float startTime = generateRandomFloat(.1f);
+            float startTime = generateRandomFloat(10.f);
 
             initialPositions.push_back(position);
             initialVelocities.push_back(velocity);

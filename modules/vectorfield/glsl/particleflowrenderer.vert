@@ -63,6 +63,7 @@ uniform mat4 _projectionMatrix = mat4(
 uniform float _time;
 uniform float _frameLength;
 uniform float _lifetime;
+uniform float _scale;
 
 uniform sampler3D _volume;
 uniform TextureParameters3D _volumeTextureParams;
@@ -71,19 +72,19 @@ uniform TextureParameters3D _volumeTextureParams;
 subroutine (RenderPassType)
 void update() {
     if (_time > in_StartTime) {
-        float age = in_StartTime - _time;
-        if (age > _lifetime) {
+        float age = _time - in_StartTime;
+        if (age > _lifetime || length(in_Velocity) < 10.0) {
             // particle expired, recycle
             ex_Position = in_InitialPosition;
-            ex_Velocity = texture(_volume, (_volumeTextureParams._worldToTextureMatrix * vec4(ex_Position, 1.0)).xyz).xyz;
+            ex_Velocity = texture(_volume, (ex_Position / _volumeTextureParams._size).xyz).xyz;
             ex_StartTime = _time;
         }
         else {
             // particle alive, advance
-            ex_Position = in_Position + (in_Velocity * _frameLength * 0.1);
+            ex_Position = in_Position + (in_Velocity * _frameLength * 0.05 * _scale);
 
             // compute new velocity by mixture of old velocity and flow at current location, model some inertia
-            vec3 v = texture(_volume, (_volumeTextureParams._worldToTextureMatrix * vec4(ex_Position, 1.0)).xyz).xyz;
+            vec3 v = texture(_volume, (ex_Position / _volumeTextureParams._size).xyz).xyz;
             ex_Velocity = mix(in_Velocity, v, 0.5);//smoothstep(0.5, 2.0, v/in_Velocity));
             ex_StartTime = in_StartTime;
         }
@@ -99,7 +100,7 @@ void update() {
 subroutine (RenderPassType)
 void render() {
     float age = _time - in_StartTime;
-    ex_Transparency = 1.0;// - (age / _lifetime);
+    ex_Transparency = (age >= 0.0) ? 1.0 - (age / _lifetime) : 0.0;
 
     gl_Position = _projectionMatrix * (_viewMatrix * (_modelMatrix * vec4(in_Position, 1.0)));
     //ex_Position = in_Position;
