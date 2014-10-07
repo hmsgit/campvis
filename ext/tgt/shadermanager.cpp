@@ -1324,7 +1324,7 @@ void Shader::setNormalizedAttribute(GLint index, const Vector4<GLuint>& v) {
 
 bool Shader::selectSubroutine(ShaderObject::ShaderType type, const std::string& subroutineName) {
     GLuint index = glGetSubroutineIndex(id_, type, subroutineName.c_str());
-    if (index == -1) {
+    if (index == GL_INVALID_INDEX) {
         LWARNING("Failed to locate subroutine Location: " << subroutineName);
         return false;
     }
