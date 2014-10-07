@@ -32,6 +32,7 @@
 
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
+#include "modules/vectorfield/processors/particleflowrenderer.h"
 #include "modules/vectorfield/processors/vectorfieldrenderer.h"
 #include "modules/vis/processors/slicerenderer3d.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
@@ -65,15 +66,22 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        /// \see HasPropertyCollection::onPropertyChanged
+        virtual void onPropertyChanged(const AbstractProperty* prop);
+
         LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         MhdImageReader _vectorFieldReader;
+        ParticleFlowRenderer _pfr;
         VectorFieldRenderer _vectorFieldRenderer;
         SliceRenderer3D _sliceRenderer;
         RenderTargetCompositor _rtc;
 
         CameraProperty p_camera;
         IntProperty p_sliceNumber;
+        GenericOptionProperty<std::string> p_viewSelection;
+        IntProperty p_time;
+
         TrackballNavigationEventListener* _trackballEH;
     };
 
