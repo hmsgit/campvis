@@ -64,6 +64,7 @@ uniform float _time;
 uniform float _frameLength;
 uniform float _lifetime;
 uniform float _scale;
+uniform vec2 _threshold;
 
 uniform sampler3D _volume;
 uniform TextureParameters3D _volumeTextureParams;
@@ -73,7 +74,7 @@ subroutine (RenderPassType)
 void update() {
     if (_time > in_StartTime) {
         float age = _time - in_StartTime;
-        if (age > _lifetime || length(in_Velocity) < 10.0) {
+        if (age > _lifetime || length(in_Velocity) < _threshold.x || length(in_Velocity) > _threshold.y) {
             // particle expired, recycle
             ex_Position = in_InitialPosition;
             ex_Velocity = texture(_volume, (ex_Position / _volumeTextureParams._size).xyz).xyz;

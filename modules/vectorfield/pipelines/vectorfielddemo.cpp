@@ -28,8 +28,14 @@
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/datastructures/imagedata.h"
 
 namespace campvis {
+
+    static const GenericOption<std::string> viewSelectionOptions[2] = {
+        GenericOption<std::string>("arrows", "Arrows"),
+        GenericOption<std::string>("particles", "Particle Simulation"),
+    };
 
     VectorFieldDemo::VectorFieldDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
@@ -42,11 +48,15 @@ namespace campvis {
         , _rtc(&_canvasSize)
         , p_camera("Camera", "Camera", tgt::Camera())
         , p_sliceNumber("SliceNuber", "Slice Number", 0, 0, 1024)
+        , p_viewSelection("ViewSelection", "Select 3D View", viewSelectionOptions, 2)
+        , p_time("Time", "Time", 0, 0, 100)
         , _trackballEH(0)
 
     {
         addProperty(p_camera);
         addProperty(p_sliceNumber);
+        addProperty(p_viewSelection);
+        addProperty(p_time);
 
         _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
         addEventListenerToBack(_trackballEH);
@@ -84,7 +94,7 @@ namespace campvis {
         _vectorFieldReader.p_targetImageID.addSharedProperty(&_pfr.p_inputVectors);
         _vectorFieldReader.p_targetImageID.addSharedProperty(&_vectorFieldRenderer.p_inputVectors);
 
-        _vectorFieldRenderer.p_renderOutput.addSharedProperty(&_rtc.p_firstImageId);
+        _vectorFieldRenderer.p_renderOutput.setValue("arrows");
         _vectorFieldRenderer.p_arrowSize.setValue(0.03f);
         _vectorFieldRenderer.p_lenThresholdMin.setValue(100.f);
         _vectorFieldRenderer.p_flowProfile1.setValue(0.4716088614374652f);
@@ -101,26 +111,46 @@ namespace campvis {
         _pfr.p_flowProfile4.setValue(0.1019371804834016f);
         _pfr.p_lenThresholdMax.setValue(400.f);
         _pfr.p_renderOutput.setValue("particles");
+        _pfr.setEnabled(false);
 
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
         tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
         _sliceRenderer.p_transferFunction.replaceTF(tf);
         _sliceRenderer.p_targetImageID.setValue("slice");
-        //_sliceRenderer.p_targetImageID.addSharedProperty(&_rtc.p_secondImageId);
 
-        _rtc.p_secondImageId.setValue("particles");
+        _rtc.p_firstImageId.setValue("arrows");
+        _rtc.p_secondImageId.setValue("slice");
         _rtc.p_compositingMethod.selectById("depth");
         _rtc.p_targetImageId.setValue("composed");
 
         _renderTargetID.setValue("composed");
+
+        p_time.addSharedProperty(&_vectorFieldRenderer.p_Time);
+        p_time.addSharedProperty(&_pfr.p_Time);
     }
 
     void VectorFieldDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
-            ScopedTypedData<IHasWorldBounds> img(*_data, _sliceRenderer.p_sourceImageID.getValue());
+            ScopedTypedData<ImageData> img(*_data, _sliceRenderer.p_sourceImageID.getValue());
             if (img) {
                 _trackballEH->reinitializeCamera(img);
+                p_sliceNumber.setMaxValue(static_cast<int>(img->getSize().z));
+            }
+        }
+    }
+
+    void VectorFieldDemo::onPropertyChanged(const AbstractProperty* prop) {
+        if (prop == &p_viewSelection) {
+            if (p_viewSelection.getOptionValue() == "arrows") {
+                _rtc.p_firstImageId.setValue("arrows");
+                _vectorFieldRenderer.setEnabled(true);
+                _pfr.setEnabled(false);
+            }
+            else if (p_viewSelection.getOptionValue() == "particles") {
+                _rtc.p_firstImageId.setValue("particles");
+                _vectorFieldRenderer.setEnabled(false);
+                _pfr.setEnabled(true);
             }
         }
     }

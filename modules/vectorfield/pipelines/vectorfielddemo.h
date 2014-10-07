@@ -66,6 +66,9 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        /// \see HasPropertyCollection::onPropertyChanged
+        virtual void onPropertyChanged(const AbstractProperty* prop);
+
         LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         MhdImageReader _vectorFieldReader;
@@ -76,6 +79,9 @@ namespace campvis {
 
         CameraProperty p_camera;
         IntProperty p_sliceNumber;
+        GenericOptionProperty<std::string> p_viewSelection;
+        IntProperty p_time;
+
         TrackballNavigationEventListener* _trackballEH;
     };
 

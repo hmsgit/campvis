@@ -31,6 +31,9 @@
 #include "tgt/textureunit.h"
 #include "tgt/vertexarrayobject.h"
 
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
+
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/lightsourcedata.h"
@@ -40,28 +43,34 @@
 
 namespace campvis {
 
+    static const GenericOption<ParticleFlowRenderer::ColoringMode> coloringModeOptions[3] = {
+        GenericOption<ParticleFlowRenderer::ColoringMode>("age", "Coloring by Age", ParticleFlowRenderer::COLORING_AGE),
+        GenericOption<ParticleFlowRenderer::ColoringMode>("velocity", "Coloring by Velocity", ParticleFlowRenderer::COLORING_VELOCITY),
+        GenericOption<ParticleFlowRenderer::ColoringMode>("direction", "Coloring by Direction", ParticleFlowRenderer::COLORING_DIRECTION)
+    };
+
     const std::string ParticleFlowRenderer::loggerCat_ = "CAMPVis.modules.classification.ParticleFlowRenderer";
 
     ParticleFlowRenderer::ParticleFlowRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_resetButton("ResetButton", "Reset")
-        , p_stepButton("StepButton", "Step")
-        , p_stepInt("StepInt", "Step", 0, 0, 10)
         , p_inputVectors("InputImage", "Input Image Vectors", "vectors", DataNameProperty::READ)
         , p_renderOutput("RenderOutput", "Output Image", "ParticleFlowRenderer.output", DataNameProperty::WRITE)
-        , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .001f, 5.f)
         , p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1000.f, 0.005f)
         , p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
+        , p_numParticles("NumParticles", "Number of Particles", 2048, 32, 65536)
+        , p_lifetime("Lifetime", "Particle Lifetime", 10.f, 1.f, 100.f, 1.f, 1)
         , p_flowProfile1("FlowSpline1", "Flow Profile - Spline 1", 1.f, .0f, 2.f)
         , p_flowProfile2("FlowSpline2", "Flow Profile - Spline 2", 1.f, .0f, 2.f)
         , p_flowProfile3("FlowSpline3", "Flow Profile - Spline 3", 1.f, .0f, 2.f)
         , p_flowProfile4("FlowSpline4", "Flow Profile - Spline 4", 1.f, .0f, 2.f)
         , p_Time("time", "Time", 0, 0, 100)
+        , p_pointSize("PointSize", "Point Size", 4, 1, 16)
+        , p_coloring("Coloring", "Color Scheme", coloringModeOptions, 3)
+        , p_transferFunction("TransferFunction", "Coloring Transfer Function", new Geometry1DTransferFunction(256))
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_camera("Camera", "Camera", tgt::Camera())
-        , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
-        , _arrowGeometry(nullptr)
         , _shader(nullptr)
         , _positionBufferA(nullptr)
         , _positionBufferB(nullptr)
@@ -74,24 +83,29 @@ namespace campvis {
         , _vaoB(nullptr)
     {
         addProperty(p_resetButton, INVALID_PROPERTIES);
-        addProperty(p_stepButton, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
-        addProperty(p_stepInt, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
+        addProperty(p_Time, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
 
         addProperty(p_inputVectors, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_renderOutput);
-        addProperty(p_arrowSize);
         addProperty(p_lenThresholdMin);
         addProperty(p_lenThresholdMax);
+
+        addProperty(p_numParticles);
+        addProperty(p_lifetime);
         addProperty(p_camera);
-        addProperty(p_sliceNumber);
-        addProperty(p_Time, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
         addProperty(p_flowProfile1);
         addProperty(p_flowProfile2);
         addProperty(p_flowProfile3);
         addProperty(p_flowProfile4);
 
+        addProperty(p_pointSize);
+        addProperty(p_coloring);
+        addProperty(p_transferFunction);
+
         addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
         addProperty(p_lightId);
+
+        static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createHeatedBodyColorMap());
     }
 
     ParticleFlowRenderer::~ParticleFlowRenderer() {
@@ -107,15 +121,10 @@ namespace campvis {
         _shader->linkProgram();
         tgtAssert(_shader->isLinked(), "Shader not linked!");
         LGL_ERROR;
-
-        _arrowGeometry = GeometryDataFactory::createArrow(12, 0.35f, 0.05f, 0.09f);
     }
 
     void ParticleFlowRenderer::deinit() {
         ShdrMgr.dispose(_shader);
-
-        delete _arrowGeometry;
-        _arrowGeometry = 0;
 
         delete _positionBufferA;
         delete _positionBufferB;
@@ -124,6 +133,9 @@ namespace campvis {
         delete _startTimeBufferA;
         delete _startTimeBufferB;
         delete _initialPositionBuffer;
+
+        delete _vaoA;
+        delete _vaoB;
 
         VisualizationProcessor::deinit();
     }
@@ -136,16 +148,12 @@ namespace campvis {
             return;
         }
 
-        //GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
         ImageRepresentationGL::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
-
         if (vectors) {
             ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
             if (p_enableShading.getValue() == false || light != nullptr) {
                 const tgt::Camera& cam = p_camera.getValue();
-                const tgt::svec3& imgSize = vectors->getSize();
-                const int sliceNumber = p_sliceNumber.getValue();
 
                 float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
                     p_flowProfile1.getValue(),
@@ -160,6 +168,7 @@ namespace campvis {
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
                 _shader->setUniform("_modelMatrix", vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix());
                 _shader->setUniform("_scale", scale);
+                _shader->setUniform("_threshold", tgt::vec2(p_lenThresholdMin.getValue(), p_lenThresholdMax.getValue()));
 
                 if (p_enableShading.getValue() && light != nullptr) {
                     light->bind(_shader, "_lightSource");
@@ -170,9 +179,7 @@ namespace campvis {
                     _shader->selectSubroutine(tgt::ShaderObject::VERTEX_SHADER, "update");
                     _shader->setUniform("_time", _currentTime);
                     _shader->setUniform("_frameLength", frameLength);
-                    _shader->setUniform("_lifetime", 10.f);
-
-                    LINFO(_currentTime);
+                    _shader->setUniform("_lifetime", p_lifetime.getValue());
 
                     tgt::TextureUnit flowUnit;
                     vectors->bind(_shader, flowUnit, "_volume", "_volumeTextureParams");
@@ -200,12 +207,17 @@ namespace campvis {
                 createAndAttachDepthTexture();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+                tgt::TextureUnit tfUnit;
                 _shader->selectSubroutine(tgt::ShaderObject::VERTEX_SHADER, "render");
+                _shader->setUniform("_coloringMode", p_coloring.getValue());
+                p_transferFunction.getTF()->bind(_shader, tfUnit);
+
+                glEnable(GL_POINT_SPRITE);
                 glBindVertexArray((_drawBuffer == 1) ? _vaoA->getId() : _vaoB->getId());
-                glPointSize(4.f);
-                //glDrawTransformFeedback(GL_POINTS, _feedback[1-_drawBuffer]);
+                glPointSize(static_cast<GLfloat>(p_pointSize.getValue()));
                 glDrawArrays(GL_POINTS, 0, _numParticles);
                 glPointSize(1.f);
+                glDisable(GL_POINT_SPRITE);
 
                 _shader->deactivate();
                 glDisable(GL_DEPTH_TEST);
@@ -226,7 +238,6 @@ namespace campvis {
         p_lightId.setVisible(p_enableShading.getValue());
 
         GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
-
         if (vectors) {
             // initialize buffers etc.
             initializeTransformFeedbackBuffers(vectors);
@@ -248,52 +259,6 @@ namespace campvis {
 
         return toReturn;
     }
-
-    void ParticleFlowRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale) {
-
-        // avoid overflows
-        if(position.x >= vectors->getSize().x || position.x < 0 ||
-            position.y >= vectors->getSize().y || position.y < 0 ||
-            position.z >= vectors->getSize().z || position.z < 0)
-            return;
-
-        // gather vector direction
-        const tgt::vec3& dir = vectors->getElement(position);
-        float len = tgt::length(dir);
-
-        // threshold
-        if(len < p_lenThresholdMin.getValue() || len > p_lenThresholdMax.getValue())
-            return;
-
-        tgt::vec3 up(0.f, 0.f, 1.f);
-        tgt::vec3 dirNorm = tgt::normalize(dir);
-        tgt::vec3 axis = tgt::cross(up, dirNorm);
-        float dotPr = tgt::dot(up, dirNorm);
-        tgt::mat4 rotationMatrix;
-        if(abs(dotPr-1)<1.e-3f)
-            rotationMatrix = tgt::mat4::identity;
-        else if(abs(dotPr+1)<1.e-3f)
-            rotationMatrix = tgt::mat4::createRotation(tgt::PIf, tgt::vec3(1.f, 0.f, 0.f));
-        else {
-            rotationMatrix = tgt::mat4::createRotation(acos(dotPr), tgt::normalize(axis));
-        }
-
-        const tgt::mat4& voxelToWorldMatrix = vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix();
-
-        // compute model matrix
-        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
-            tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue())) * tgt::mat4::createScale(tgt::vec3(scale));
-
-        // setup shader
-        //_shader->setUniform("_color", tgt::vec4(dirNorm, 1.f));
-        float color = (len - p_lenThresholdMin.getValue()) / (p_lenThresholdMax.getValue() - p_lenThresholdMin.getValue());
-        _shader->setUniform("_color", tgt::vec4(1.f, 1-color, 1-color, 1.f));
-
-        // render single ellipsoid
-        _shader->setUniform("_modelMatrix", modelMatrix);
-        _arrowGeometry->render(GL_TRIANGLE_STRIP);
-    }
-
 
     float ParticleFlowRenderer::getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3)
     {
@@ -350,24 +315,32 @@ namespace campvis {
         delete _vaoA;
         delete _vaoB;
 
+        _initialPositionBuffer = nullptr;
+
+        LINFO("Starting generating particles, this may take a while...");
         std::vector<tgt::vec3> initialPositions;
         std::vector<tgt::vec3> initialVelocities;
         std::vector<float> startTimes;
 
         tgt::vec3 imageSize = vectors->getSize();
-        _numParticles = 2048;
+        _numParticles = static_cast<GLuint>(p_numParticles.getValue());
 
         for (GLuint i = 0; i < _numParticles; ++i) {
             tgt::vec3 position, velocity;
+            size_t emergencyStopCounter = 0;
 
             do {
                 position = tgt::vec3(generateRandomFloat(imageSize.x), generateRandomFloat(imageSize.y), generateRandomFloat(imageSize.z));
                 velocity.x = vectors->getElementNormalizedLinear(position, 0);
                 velocity.y = vectors->getElementNormalizedLinear(position, 1);
                 velocity.z = vectors->getElementNormalizedLinear(position, 2);
-            } while (tgt::length(velocity) < 100.f);
+                if (++emergencyStopCounter > 10000) {
+                    LERROR("Could not create enough particles that match flow threshold range");
+                    return;
+                }
+            } while (tgt::length(velocity) < p_lenThresholdMin.getValue() || tgt::length(velocity) > p_lenThresholdMax.getValue());
 
-            float startTime = generateRandomFloat(10.f);
+            float startTime = generateRandomFloat(p_lifetime.getValue());
 
             initialPositions.push_back(position);
             initialVelocities.push_back(velocity);
@@ -408,30 +381,22 @@ namespace campvis {
         glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
         _vaoA = new tgt::VertexArrayObject();
-        LGL_ERROR;
         _vaoA->setVertexAttributePointer(0, _positionBufferA);
-        LGL_ERROR;
         _vaoA->setVertexAttributePointer(1, _velocityBufferA);
-        LGL_ERROR;
         _vaoA->setVertexAttributePointer(2, _startTimeBufferA);
-        LGL_ERROR;
         _vaoA->setVertexAttributePointer(3, _initialPositionBuffer);
-        LGL_ERROR;
 
         _vaoB = new tgt::VertexArrayObject();
-        LGL_ERROR;
         _vaoB->setVertexAttributePointer(0, _positionBufferB);
-        LGL_ERROR;
         _vaoB->setVertexAttributePointer(1, _velocityBufferB);
-        LGL_ERROR;
         _vaoB->setVertexAttributePointer(2, _startTimeBufferB);
-        LGL_ERROR;
         _vaoB->setVertexAttributePointer(3, _initialPositionBuffer);
         LGL_ERROR;
 
+        LINFO("Done generating particles, thanks for standing by.");
         _currentTime = 0.f;
         _drawBuffer = 0;
-        invalidate(FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
+        invalidate(INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
     }
 
     float ParticleFlowRenderer::generateRandomFloat(float max /*= 1.f*/) {

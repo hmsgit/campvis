@@ -48,6 +48,12 @@ namespace campvis {
      */
     class ParticleFlowRenderer : public VisualizationProcessor {
     public:
+        enum ColoringMode {
+            COLORING_AGE = 0,
+            COLORING_VELOCITY = 1,
+            COLORING_DIRECTION = 2,
+        };
+
         /**
          * Constructs a new ParticleFlowRenderer Processor
          **/
@@ -73,16 +79,15 @@ namespace campvis {
         virtual void deinit();
         
         ButtonProperty p_resetButton;
-        ButtonProperty p_stepButton;
-        IntProperty p_stepInt;
 
         DataNameProperty p_inputVectors;        ///< ID for input vector image
-
         DataNameProperty p_renderOutput;        ///< ID for output rendered image
 
-        FloatProperty p_arrowSize;                      ///< Arrow size size
         FloatProperty p_lenThresholdMin;                ///< Threshold minimum
         FloatProperty p_lenThresholdMax;                ///< Threshold maximum
+
+        IntProperty p_numParticles;                 ///< Number of particles;
+        FloatProperty p_lifetime;                   ///< Particle life time
 
         FloatProperty p_flowProfile1;
         FloatProperty p_flowProfile2;
@@ -90,12 +95,14 @@ namespace campvis {
         FloatProperty p_flowProfile4;
 
         IntProperty p_Time;
+        IntProperty p_pointSize;
+        GenericOptionProperty<ColoringMode> p_coloring;
+        TransferFunctionProperty p_transferFunction;
 
         BoolProperty p_enableShading;               ///< Flag whether to enable shading
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
         CameraProperty p_camera;                                    ///< camera
-        IntProperty p_sliceNumber;                                  ///< slice number
 
     protected:
         /// \see AbstractProcessor::updateResult
@@ -111,19 +118,10 @@ namespace campvis {
         float getTemporalFlowScaling(float t, float Ct0, float Ct1, float Ct2, float Ct3);
         float evaluateCubicBSpline(float t);
 
-        /**
-         * Renders a single vector arrow
-         * \param   vectors     Input vector image
-         * \param   position    Position to render
-         */
-        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale);
-
-
         void initializeTransformFeedbackBuffers(const GenericImageRepresentationLocal<float, 3>* vectors);
 
         float generateRandomFloat(float max = 1.f);
 
-        GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
         tgt::Shader* _shader;               ///< Shader for arrow rendering
 
         GLuint _feedback[2];
