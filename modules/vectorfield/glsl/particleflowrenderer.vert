@@ -36,6 +36,7 @@ out vec3 ex_Position;
 out vec3 ex_Velocity;
 out float ex_StartTime;
 
+out vec3 ex_Direction;
 out float ex_Transparency;
 
 /// Matrix defining model-to-world transformation
@@ -109,6 +110,7 @@ void render() {
 
     //vec4 normalTmp = (normalMatrix * vec4(in_Normal, 0.0));
     // ex_Normal = normalize((normalTmp).xyz);
+	ex_Direction = in_Velocity;
 }
 
 void main() {

@@ -25,7 +25,7 @@
 #include "tools/shading.frag"
 #include "tools/transferfunction.frag"
 
-in vec3 ex_Velocity;
+in vec3 ex_Direction;
 in float ex_Transparency;
 
 out vec4 out_Color; ///< outgoing fragment color
@@ -46,14 +46,14 @@ void main() {
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, ex_Transparency);
             break;
         case 1: // velocity
-            float f = length(ex_Velocity);
+            float f = length(ex_Direction);
             f -= _threshold.x;
             f /= (_threshold.y - _threshold.x);
             f *= _scale;
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, f);
             break;
         case 2: // direction
-            out_Color = vec4(normalize(abs(ex_Velocity)), 1.0);
+            out_Color = vec4(normalize(abs(ex_Direction)), 1.0);
             break;
         default:
             discard;
