@@ -64,21 +64,19 @@ namespace campvis {
     }
 
     FaceGeometry* FaceGeometry::clone() const {
-        return new FaceGeometry(_vertices, _textureCoordinates, _colors, _normals);
+        FaceGeometry* toReturn = new FaceGeometry(_vertices, _textureCoordinates, _colors, _normals);
+        toReturn->setPickingInformation(_pickingInformation);
+        return toReturn;
     }
 
     size_t FaceGeometry::getLocalMemoryFootprint() const {
         size_t sum = 0;
-        if (_verticesBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_texCoordsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_colorsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_normalsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
+        for (size_t i = 0; i < NUM_BUFFERS; ++i) {
+            if (_buffers[i] != nullptr)
+                sum += sizeof(tgt::BufferObject);
+        }
 
-        return sizeof(*this) + sum + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * _colors.size());
+        return sizeof(*this) + sum + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * (_colors.size() + _pickingInformation.size()));
     }
 
     size_t FaceGeometry::size() const {
@@ -99,6 +97,16 @@ namespace campvis {
 
     const std::vector<tgt::vec3>& FaceGeometry::getTextureCoordinates() const {
         return _textureCoordinates;
+    }
+
+    const std::vector<tgt::col4>& FaceGeometry::getPickingInformation() const {
+        return _pickingInformation;
+    }
+
+    void FaceGeometry::setPickingInformation(const std::vector<tgt::col4>& pickingInformation) {
+        tgtAssert(pickingInformation.size() == 0 || pickingInformation.size() == _vertices.size(), "Number of picking informations does not match number of vertices!");
+        _pickingInformation = pickingInformation;
+        _buffersDirty = true;
     }
 
     const tgt::vec3& FaceGeometry::getFaceNormal() const {
@@ -124,6 +132,8 @@ namespace campvis {
             vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
             vao.setVertexAttributePointer(3, _normalsBuffer);
+        if (_pickingBuffer)
+            vao.setVertexAttributePointer(4, _pickingBuffer);
         LGL_ERROR;
 
         glDrawArrays(mode, 0, static_cast<GLsizei>(_vertices.size()));
@@ -149,6 +159,10 @@ namespace campvis {
                 if (! _normals.empty()) {
                     _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
                     _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                }
+                if (! _pickingInformation.empty()) {
+                    _pickingBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+                    _pickingBuffer->data(&_pickingInformation.front(), _pickingInformation.size() * sizeof(tgt::col4), tgt::BufferObject::UNSIGNED_BYTE, 4);
                 }
             }
             catch (tgt::Exception& e) {
@@ -177,6 +191,7 @@ namespace campvis {
 
         std::vector<tgt::vec3> verts, texCoords, norms;
         std::vector<tgt::vec4> cols;
+        std::vector<tgt::col4> picks;
         size_t lastIndex = _vertices.size() - 1;
         float lastDistance = distanceToPlane(_vertices.back(), p, pNormal, epsilon);
 
@@ -195,6 +210,8 @@ namespace campvis {
                     cols.push_back(tgt::mix(_colors[lastIndex], _colors[i], t));
                 if (!_normals.empty())
                     norms.push_back(tgt::mix(_normals[lastIndex], _normals[i], t));
+                if (!_pickingInformation.empty())
+                    picks.push_back(_pickingInformation[i]);
             }
             // case 2: last vertex inside, this vertex outside clip region => clip
             else if (lastDistance <= 0 && currrentDistance > 0) {
@@ -207,6 +224,8 @@ namespace campvis {
                     cols.push_back(tgt::mix(_colors[lastIndex], _colors[i], t));
                 if (!_normals.empty())
                     norms.push_back(tgt::mix(_normals[lastIndex], _normals[i], t));
+                if (!_pickingInformation.empty())
+                    picks.push_back(_pickingInformation[lastIndex]);
             }
 
             // case 1.2 + case 3: current vertix in front of plane => keep
@@ -218,13 +237,17 @@ namespace campvis {
                     cols.push_back(_colors[i]);
                 if (!_normals.empty())
                     norms.push_back(_normals[i]);
+                if (!_pickingInformation.empty())
+                    picks.push_back(_pickingInformation[i]);
             }
 
             lastIndex = i;
             lastDistance = currrentDistance;
         }
 
-        return FaceGeometry(verts, texCoords, cols, norms);
+        FaceGeometry toReturn(verts, texCoords, cols, norms);
+        toReturn.setPickingInformation(picks);
+        return toReturn;
     }
 
     tgt::Bounds FaceGeometry::getWorldBounds() const {
@@ -238,6 +261,10 @@ namespace campvis {
         return ! _textureCoordinates.empty();
     }
 
+    bool FaceGeometry::hasPickingInformation() const {
+        return !_pickingInformation.empty();
+    }
+
     void FaceGeometry::applyTransformationToVertices(const tgt::mat4& t) {
         for (size_t i = 0; i < _vertices.size(); ++i) {
             tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
@@ -246,5 +273,6 @@ namespace campvis {
 
         _buffersDirty = true;
     }
+
 
 }

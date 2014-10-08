@@ -17,6 +17,7 @@ IF(${ModuleEnabled})
 	)
 
 	SET(ThisModShaderDirectories "modules/vis/glsl")
+	SET(ThisModShaderDirectories "modules/vis/sampledata")
 	SET(ThisModDependencies base io)
 ENDIF(${ModuleEnabled})
 

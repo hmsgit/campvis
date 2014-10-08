@@ -85,7 +85,7 @@ namespace campvis {
         _camera.addSharedProperty(&_dvrNormal.p_camera);
         _camera.addSharedProperty(&_dvrVM.p_camera);
 
-        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
+        _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_eepGenerator.p_sourceImageID);
         _imageReader.p_targetImageID.addSharedProperty(&_vmEepGenerator.p_sourceImageID);

@@ -155,7 +155,7 @@ namespace campvis {
 
         // load textureData from file
         tgt::TextureReaderTga trt;
-        _errorTexture = trt.loadTexture(CAMPVIS_SOURCE_DIR "/application/data/no_input.tga", tgt::Texture::LINEAR);
+        _errorTexture = trt.loadTexture(ShdrMgr.completePath("application/data/no_input.tga"), tgt::Texture::LINEAR);
 
 
 #ifdef CAMPVIS_HAS_SCRIPTING

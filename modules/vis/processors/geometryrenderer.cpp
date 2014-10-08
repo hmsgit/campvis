@@ -179,6 +179,12 @@ namespace campvis {
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
 
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+            if (proxyGeometry->hasPickingInformation()) {
+                createAndAttachColorTexture();
+                glDrawBuffers(3, buffers);
+            }
+
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_DEPTH_TEST);
@@ -196,6 +202,11 @@ namespace campvis {
                 glPointSize(1.f);
             else if (p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
                 glLineWidth(1.f);
+
+
+            if (proxyGeometry->hasPickingInformation()) {
+                glDrawBuffers(1, buffers);
+            }
 
             leShader->deactivate();
             glDepthFunc(GL_LESS);

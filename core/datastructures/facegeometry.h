@@ -105,6 +105,18 @@ namespace campvis {
          * \return _textureCoordinates
          */
         const std::vector<tgt::vec3>& getTextureCoordinates() const;
+        
+        /**
+         * The list of picking information colors, may be empty.
+         * \return  _pickingInformation
+         */
+        const std::vector<tgt::col4>& getPickingInformation() const;
+
+        /**
+         * Sets the picking information of this geometry to \a pickingInformation
+         * \param   pickingInformation  The new list of picking information for this geometry
+         */
+        void setPickingInformation(const std::vector<tgt::col4>& pickingInformation);
 
         /**
          * The normal vector of this face.
@@ -134,6 +146,8 @@ namespace campvis {
         virtual tgt::Bounds getWorldBounds() const;
         /// \see GeometryData::hasTextureCoordinates
         virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::hasPickingInformation
+        virtual bool hasPickingInformation() const;
         /// \see GeometryData::applyTransformationToVertices
         virtual void applyTransformationToVertices(const tgt::mat4& t);
 
@@ -148,6 +162,8 @@ namespace campvis {
         std::vector<tgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
         std::vector<tgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
         std::vector<tgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
+
+        std::vector<tgt::col4> _pickingInformation;     ///< The list of picking information colors, max be empty.
 
         tgt::vec3 _faceNormal;                          ///< The normal vector of this face.
 

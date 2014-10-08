@@ -114,6 +114,15 @@ namespace campvis {
         return true;
     }
 
+    bool GeometryDataCollection::hasPickingInformation() const {
+        for (size_t i = 0; i < _geometries.size(); ++i) {
+            if (! _geometries[i]->hasPickingInformation())
+                return false;
+        }
+
+        return true;
+    }
+
     void GeometryDataCollection::applyTransformationToVertices(const tgt::mat4& t) {
         for (size_t i = 0; i < _geometries.size(); ++i)
             _geometries[i]->applyTransformationToVertices(t);
@@ -136,5 +145,4 @@ namespace campvis {
 
         return sum;
     }
-
 }

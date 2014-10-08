@@ -117,6 +117,7 @@ IF(CAMPVIS_GROUP_SOURCE_FILES)
 ENDIF()
 
 IF(CAMPVIS_DEPLOY_SHADERS)
+    LIST(APPEND CampvisShaderDirectories "application/data")
     LIST(APPEND CampvisShaderDirectories "application/glsl")
     LIST(APPEND CampvisShaderDirectories "core/glsl")
 

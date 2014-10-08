@@ -70,7 +70,7 @@ namespace campvis {
          * \return  _data, may be 0, GenericPointerData has ownership
          */
         const T* getData() const {
-            return _data;
+            return _data.get();
         };
 
         /**
@@ -78,7 +78,7 @@ namespace campvis {
          * \return  _data, may be 0, GenericPointerData has ownership
          */
         T* getData() {
-            return _data;
+            return _data.get();
         };
 
         /**
