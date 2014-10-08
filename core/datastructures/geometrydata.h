@@ -36,36 +36,6 @@ namespace tgt {
 }
 
 namespace campvis {
-    class CAMPVIS_CORE_API GeometryDataBase {
-    public:
-        /// Enumeration for defining semantics of stored buffer data
-        enum ElementSemantic {
-            VERTEX                  = 0,    ///< Vextex data
-            TEXTURE_COORDINATE      = 1,    ///< Texture coordinate data
-            COLOR                   = 2,    ///< Color data
-            NORMAL                  = 3,    ///< Normal data
-            PICKING_INFORMATION     = 4     ///< Picking information
-        };
-
-        /// Enumeration for defining the host data type of the element
-        enum ElementHostType {
-            UINT8,
-            UINT16,
-            UINT32,
-            FLOAT,
-            VEC2,
-            VEC3,
-            VEC4
-        };
-    };
-
-    template<GeometryDataBase::ElementSemantic SEMANTIC>
-    struct GeometryDataTraits {};
-
-    template<>
-    struct GeometryDataTraits<GeometryDataBase::VERTEX> {
-        typedef tgt::vec3 HostType;
-    };
 
     /**
      * Abstract base class for geometry data in CAMPVis.
@@ -81,7 +51,7 @@ namespace campvis {
      *  - Vertex normals: Vertex attribute 3
      * 
      */    
-    class CAMPVIS_CORE_API GeometryData : public AbstractData, public GeometryDataBase, public IHasWorldBounds {
+    class CAMPVIS_CORE_API GeometryData : public AbstractData, public IHasWorldBounds {
     public:
         /**
          * Constructor
@@ -122,11 +92,6 @@ namespace campvis {
          */
         virtual tgt::Bounds getWorldBounds() const = 0;
 
-        template<GeometryDataBase::ElementSemantic SEMANTIC>
-        const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* getElementData() const;
-
-        template<GeometryDataBase::ElementSemantic SEMANTIC>
-        void setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData);
 
         /**
          * Returns whether the geometry has texture coordinates.
@@ -190,8 +155,6 @@ namespace campvis {
          */
         void deleteBuffers() const;
 
-        std::vector<void*> _elementPointers;
-
 
         // mutable to support const lazy initialization
         mutable bool _buffersDirty;             ///< Flag whether the buffers are dirty (i.e. need to be (re)initialized)
@@ -215,27 +178,77 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
-    template<GeometryDataBase::ElementSemantic SEMANTIC>
-    const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* GeometryData::getElementData() const {
-        if (_elementPointers.size() >= SEMANTIC) {
-            return static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(_elementPointers[SEMANTIC]);
-        }
-
-        return nullptr;
-    }
-
-    template<GeometryDataBase::ElementSemantic SEMANTIC>
-    void GeometryData::setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData) {
-        if (_elementPointers.size() < SEMANTIC + 1)
-            _elementPointers.resize(SEMANTIC, nullptr);
-
-        void* oldPtr = _elementPointers[SEMANTIC];
-        if (oldPtr != elementData)
-            delete static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(oldPtr);
-
-        _elementPointers[SEMANTIC] = elementData;
-    }
-
 }
+
+/*
+=== This is a draft for a new, generic GeometryData class design that manages arbitrary OpenGL buffers ====
+
+class CAMPVIS_CORE_API GeometryDataBase {
+public:
+    /// Enumeration for defining semantics of stored buffer data
+    enum ElementSemantic {
+        VERTEX                  = 0,    ///< Vextex data
+        TEXTURE_COORDINATE      = 1,    ///< Texture coordinate data
+        COLOR                   = 2,    ///< Color data
+        NORMAL                  = 3,    ///< Normal data
+        PICKING_INFORMATION     = 4     ///< Picking information
+    };
+
+    /// Enumeration for defining the host data type of the element
+    enum ElementHostType {
+        UINT8,
+        UINT16,
+        UINT32,
+        FLOAT,
+        VEC2,
+        VEC3,
+        VEC4
+    };
+};
+
+template<GeometryDataBase::ElementSemantic SEMANTIC>
+struct GeometryDataTraits {};
+
+template<>
+struct GeometryDataTraits<GeometryDataBase::VERTEX> {
+    typedef tgt::vec3 HostType;
+};
+
+class CAMPVIS_CORE_API DraftNewGeometryData {
+public:
+    template<GeometryDataBase::ElementSemantic SEMANTIC>
+    const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* getElementData() const;
+
+    template<GeometryDataBase::ElementSemantic SEMANTIC>
+    void setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData);
+
+protected:
+    std::vector<void*> _elementPointers;
+};
+
+
+template<GeometryDataBase::ElementSemantic SEMANTIC>
+const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* GeometryData::getElementData() const {
+    if (_elementPointers.size() >= SEMANTIC) {
+        return static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(_elementPointers[SEMANTIC]);
+    }
+
+    return nullptr;
+}
+
+template<GeometryDataBase::ElementSemantic SEMANTIC>
+void GeometryData::setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData) {
+    if (_elementPointers.size() < SEMANTIC + 1)
+        _elementPointers.resize(SEMANTIC, nullptr);
+
+    void* oldPtr = _elementPointers[SEMANTIC];
+    if (oldPtr != elementData)
+        delete static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(oldPtr);
+
+    _elementPointers[SEMANTIC] = elementData;
+}
+
+*/
+
 
 #endif // GEOMETRYDATA_H__
