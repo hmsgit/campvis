@@ -63,8 +63,14 @@ namespace campvis {
         addProperty(p_image, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_llf);
         addProperty(p_urb);
-        
-        _trackball = new cgt::Trackball(this, _canvasSize->getValue());
+
+        if (_canvasSize != nullptr) {
+            _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
+            _trackball = new cgt::Trackball(this, _canvasSize->getValue());
+        }
+        else {
+            _trackball = new cgt::Trackball(this, cgt::ivec2(100, 100));
+        }
     }
 
     TrackballCameraProvider::~TrackballCameraProvider() {
@@ -72,12 +78,13 @@ namespace campvis {
     }
 
     void TrackballCameraProvider::init() {
-        _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
         onRenderTargetSizeChanged(_canvasSize);
     }
 
     void TrackballCameraProvider::deinit() {
-        _canvasSize->s_changed.disconnect(this);
+        if (_canvasSize != nullptr)
+            _canvasSize->s_changed.disconnect(this);
+
         delete _trackball;
     }
 
@@ -170,7 +177,6 @@ namespace campvis {
                 _trackball->reinitializeCamera(pos, volumeExtent.center(), p_upVector.getValue());
             }
         }
-        validate(INVALID_PROPERTIES);
     }
 
     void TrackballCameraProvider::addLqModeProcessor(VisualizationProcessor* vp) {

@@ -64,7 +64,6 @@ namespace campvis {
     }
 
     void AbstractPipeline::init() {
-        _renderTargetID.s_changed.connect<AbstractPipeline>(this, &AbstractPipeline::onPropertyChanged);
 
         initAllProperties();
 
@@ -93,7 +92,6 @@ namespace campvis {
             }
         }
 
-        _renderTargetID.s_changed.disconnect(this);
 
         // clear DataContainer
         _data->clear();

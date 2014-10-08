@@ -102,8 +102,6 @@ namespace campvis {
 
         p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
 
-        p_inputVolume.s_changed.connect(this, &VolumeRenderer::onPropertyChanged);
-
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
@@ -117,8 +115,6 @@ namespace campvis {
         _pgGenerator.s_invalidated.disconnect(this);
         _eepGenerator.s_invalidated.disconnect(this);
         _raycaster->s_invalidated.disconnect(this);
-
-        p_inputVolume.s_changed.disconnect(this);
 
         _pgGenerator.deinit();
         _eepGenerator.deinit();

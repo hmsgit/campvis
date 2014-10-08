@@ -76,6 +76,5 @@ namespace campvis {
             p_projectionMode.getOptionValue()));
 
         dataContainer.addData(p_cameraId.getValue(), cameraData);
-        validate(INVALID_RESULT);
     }
 }
