@@ -131,6 +131,7 @@ namespace campvis {
     void HasPropertyCollection::deinitAllProperties() {
         for (PropertyCollection::iterator it = _properties.begin(); it != _properties.end(); ++it) {
             (*it)->deinit();
+            (*it)->s_changed.disconnect(this);
         }
     }
 

@@ -57,6 +57,7 @@ namespace campvis {
 
     void VisualizationProcessor::deinit() {
         _viewportSizeProperty->s_changed.disconnect(this);
+        _viewportSizeProperty->s_changed.disconnect(this);
         delete _fbo;
         AbstractProcessor::deinit();
     }

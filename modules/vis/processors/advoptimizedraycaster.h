@@ -2,11 +2,11 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
-//      Technische Universitaet Muenchen
-//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
+//      Technische Universität München
+//      Boltzmannstr. 3, 85748 Garching b. München, Germany
 // 
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
 // 
@@ -22,14 +22,14 @@
 // 
 // ================================================================================================
 
-#ifndef OPTIMIZEDRAYCASTER_H__
-#define OPTIMIZEDRAYCASTER_H__
+#ifndef AdvOptimizedRaycaster_H__
+#define AdvOptimizedRaycaster_H__
 
 #include "core/pipeline/raycastingprocessor.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "core/tools/volumebricking.h"
+#include "modules/vis/tools/voxelhierarchymapper.h"
 
 #include <string>
 
@@ -39,30 +39,33 @@ namespace tgt {
 
 namespace campvis {
     /**
-     * Performs a simple volume ray casting.
+     * Performs ray casting using acceleration data structure. Also, the number of control instructions which is used is reduced to increase the execution performance on the gpu.
+     * The method is similar to [THGM11] paper. First, the data to be rendered is voxelized and stored in a 2D texture (each element of the texture is a 32-bit int. So, each element of the texture 
+     * can store 32 ). Then, a hierarchy is generated to increase the ray-rendering
+     * [THGM11] Sinje Thiedemann, Niklas Henrich, Thorsten Grosch, and Stefan Müller. 2011. Voxel-based global illumination. In Symposium on Interactive 3D Graphics and Games (I3D '11). ACM, New York, NY, USA, 103-110. DOI=10.1145/1944745.1944763 http://doi.acm.org/10.1145/1944745.1944763
      */
-    class OptimizedRaycaster : public RaycastingProcessor {
+    class AdvOptimizedRaycaster : public RaycastingProcessor {
     public:
         enum AdditionalInvalidationLevels {
             INVALID_BBV = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL
         };
 
         /**
-         * Constructs a new OptimizedRaycaster Processor
+         * Constructs a new AdvOptimizedRaycaster Processor
          **/
-        OptimizedRaycaster(IVec2Property* viewportSizeProp);
+        AdvOptimizedRaycaster(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
          **/
-        virtual ~OptimizedRaycaster();
+        virtual ~AdvOptimizedRaycaster();
 
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "OptimizedRaycaster"; };
+        virtual const std::string getName() const { return "AdvOptimizedRaycaster"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Performs a simple volume ray casting."; };
+        virtual const std::string getDescription() const { return "Performs advanced ray casting to render sparse and big volumes faster."; };
         /// \see AbstractProcessor::getAuthor()
-        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        virtual const std::string getAuthor() const { return "Morteza Mostajab <mostajab@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
@@ -71,19 +74,12 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
-        DataNameProperty p_targetImageID;    ///< image ID for output image
-        
         BoolProperty p_enableShading;               ///< Flag whether to enable shading
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
-        BoolProperty p_enableShadowing;
-        FloatProperty p_shadowIntensity;
-        BoolProperty p_enableIntersectionRefinement;
 
-        BoolProperty p_useEmptySpaceSkipping;
-    
     protected:
-        /// \see AbstractProcessor::updateProperties()
-        virtual void updateProperties(DataContainer& dataContainer);
+        /// \see HasProperyCollection::updateProperties()
+        virtual void updateProperties();
 
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
@@ -91,15 +87,14 @@ namespace campvis {
         /// \see RaycastingProcessor::generateHeader()
         virtual std::string generateHeader() const;
 
+        /// Renders the voxelized volume
+        void renderVv(DataContainer& dh); 
 
-        void generateBbv(DataHandle dh);
-
-        BinaryBrickedVolume* _bbv;
-        tgt::Texture* _vvTex;
+        VoxelHierarchyMapper* _vhm;
 
         static const std::string loggerCat_;
     };
 
 }
 
-#endif // OPTIMIZEDRAYCASTER_H__
+#endif // AdvOptimizedRaycaster_H__
