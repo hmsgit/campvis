@@ -26,8 +26,9 @@
 
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/renderdata.h"
-#include "core/pipeline/processordecoratorshading.h"
+#include "core/pipeline/processordecoratorgradient.h"
 #include "core/datastructures/imagedata.h"
+#include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/geometrydatafactory.h"
 
 #include "modules/vis/advraycaster/voxeltexturemipmapping.h"
@@ -39,27 +40,21 @@ namespace campvis {
 
     AdvOptimizedRaycaster::AdvOptimizedRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/advraycaster/glsl/AdvOptimizedRaycaster.frag", true, "400")
-        , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
-        , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
-        , p_enableIntersectionRefinement("EnableIntersectionRefinement", "Enable Intersection Refinement", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
-        , p_useEmptySpaceSkipping("EnableEmptySpaceSkipping", "Enable Empty Space Skipping", true, AbstractProcessor::INVALID_RESULT | INVALID_BBV)
+        , p_enableShading("EnableShading", "Enable Shading", true)
+        , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , _vv(0)
         , _quad(0)
         , _voxelGeneratorShdr(0)
         , _vvTex(0)
         , _mipMapGen(0)
     {
-        addDecorator(new ProcessorDecoratorShading());
+        addDecorator(new ProcessorDecoratorGradient());
 
-        addProperty(&p_enableIntersectionRefinement);
-        addProperty(&p_useEmptySpaceSkipping);
+        addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
+        addProperty(p_lightId);
 
-        addProperty(&p_enableShadowing);
-        addProperty(&p_shadowIntensity);
-        p_shadowIntensity.setVisible(false);
-
-        p_transferFunction.setInvalidationLevel(p_transferFunction.getInvalidationLevel() | INVALID_BBV);
-         p_sourceImageID.setInvalidationLevel(p_sourceImageID.getInvalidationLevel() | INVALID_BBV);
+        setPropertyInvalidationLevel(p_transferFunction, INVALID_BBV | INVALID_RESULT);
+        setPropertyInvalidationLevel(p_sourceImageID, INVALID_BBV | INVALID_RESULT);
 
         decoratePropertyCollection(this);
     }
@@ -90,66 +85,70 @@ namespace campvis {
             renderVv(data);
 
             validate(INVALID_BBV);
-            _shader->activate();
         }
         
-        if (_vvTex != 0 && p_useEmptySpaceSkipping.getValue()){
-            // bind
-            bbvUnit.activate();
-            _vvTex->bind();
-            _shader->setIgnoreUniformLocationError(true);
-            _shader->setUniform("_vvTexture", bbvUnit.getUnitNumber());
-            _shader->setUniform("_vvTextureParams._size", tgt::vec3(_vvTex->getDimensions()));
-            _shader->setUniform("_vvTextureParams._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_vvTex->getDimensions()));
-            _shader->setUniform("_vvTextureParams._numChannels", static_cast<int>(1));
+        ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
-            _shader->setUniform("_vvVoxelSize", static_cast<int>(_vv->getBrickSize()));
-            _shader->setUniform("_vvVoxelDepth", static_cast<int>(_vv->getBrickDepth()));
-            _shader->setUniform("_hasVv", true);
+        if (p_enableShading.getValue() == false || light != nullptr) {
+            _shader->activate();
 
-            _shader->setUniform("_vvMaxMipMapLevel", _maxMipMapLevel);
+            if (_vvTex != 0){
+                // bind
+                bbvUnit.activate();
+                _vvTex->bind();
+                _shader->setIgnoreUniformLocationError(true);
+                _shader->setUniform("_vvTexture", bbvUnit.getUnitNumber());
+                _shader->setUniform("_vvTextureParams._size", tgt::vec3(_vvTex->getDimensions()));
+                _shader->setUniform("_vvTextureParams._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_vvTex->getDimensions()));
+                _shader->setUniform("_vvTextureParams._numChannels", static_cast<int>(1));
 
-            _shader->setIgnoreUniformLocationError(false);
-        } else {
-            _shader->setUniform("_hasVv", false);
+                _shader->setUniform("_vvVoxelSize", static_cast<int>(_vv->getBrickSize()));
+                _shader->setUniform("_vvVoxelDepth", static_cast<int>(_vv->getBrickDepth()));
+                _shader->setUniform("_hasVv", true);
+
+                _shader->setUniform("_vvMaxMipMapLevel", _maxMipMapLevel);
+
+                _shader->setIgnoreUniformLocationError(false);
+            } else {
+                _shader->setUniform("_hasVv", false);
+            }
+
+            if (p_enableShading.getValue() && light != nullptr) {
+                light->bind(_shader, "_lightSource");
+            }
+
+            FramebufferActivationGuard fag(this);
+            createAndAttachTexture(GL_RGBA8);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachDepthTexture();
+
+
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+            glDrawBuffers(3, buffers);
+
+            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            QuadRdr.renderQuad();
+
+            glDisable(GL_DEPTH_TEST);
+            LGL_ERROR;
+
+            glDrawBuffers(1, buffers);
+
+            data.addData(p_targetImageID.getValue(), new RenderData(_fbo)); 
         }
-
-        FramebufferActivationGuard fag(this);
-        createAndAttachTexture(GL_RGBA8);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachTexture(GL_RGBA32F);
-        createAndAttachDepthTexture();
-
-        static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-        glDrawBuffers(3, buffers);
-
-        if (p_enableShadowing.getValue())
-            _shader->setUniform("_shadowIntensity", p_shadowIntensity.getValue());
-
-        glEnable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        QuadRdr.renderQuad();
-
-        glDisable(GL_DEPTH_TEST);
-        LGL_ERROR;
-
-        glDrawBuffers(1, buffers);
-
-        data.addData(p_targetImageID.getValue(), new RenderData(_fbo)); 
     }
 
     std::string AdvOptimizedRaycaster::generateHeader() const {
         std::string toReturn = RaycastingProcessor::generateHeader();
-        if (p_enableShadowing.getValue())
-            toReturn += "#define ENABLE_SHADOWING\n";
-        if (p_enableIntersectionRefinement.getValue())
-            toReturn += "#define INTERSECTION_REFINEMENT\n";
+        if (p_enableShading.getValue())
+            toReturn += "#define ENABLE_SHADING\n";
         return toReturn;
     }
 
     void AdvOptimizedRaycaster::updateProperties() {
-        p_shadowIntensity.setVisible(p_enableShadowing.getValue());
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 

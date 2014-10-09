@@ -75,12 +75,9 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
-        BoolProperty p_enableShadowing;
-        FloatProperty p_shadowIntensity;
-        BoolProperty p_enableIntersectionRefinement;
+        BoolProperty p_enableShading;               ///< Flag whether to enable shading
+        DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
-        BoolProperty p_useEmptySpaceSkipping;
-    
     protected:
         /// \see HasProperyCollection::updateProperties()
         virtual void updateProperties();

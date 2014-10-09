@@ -25,19 +25,12 @@
 #ifndef AdvDVRVis_H__
 #define AdvDVRVis_H__
 
-#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/cameraproperty.h"
+#include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/virtualmirrorgeometrygenerator.h"
-#include "modules/vis/processors/proxygeometrygenerator.h"
-#include "modules/vis/processors/geometryrenderer.h"
-#include "modules/vis/processors/eepgenerator.h"
-#include "modules/vis/advraycaster/advoptimizedraycaster.h"
-#include "modules/vis/processors/simpleraycaster.h"
-#include "modules/vis/processors/depthdarkening.h"
-#include "modules/vis/processors/virtualmirrorcombine.h"
+#include "modules/vis/processors/volumerenderer.h"
 
 namespace campvis {
     class AdvDVRVis : public AutoEvaluationPipeline {
@@ -72,16 +65,10 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
         CameraProperty _camera;
+
+        LightSourceProvider _lsp;
         MhdImageReader _imageReader;
-        ProxyGeometryGenerator _pgGenerator;
-        VirtualMirrorGeometryGenerator _vmgGenerator;
-        GeometryRenderer _vmRenderer;
-        EEPGenerator _eepGenerator;
-        EEPGenerator _vmEepGenerator;
-        AdvOptimizedRaycaster _dvrNormal;
-        AdvOptimizedRaycaster _dvrVM;
-        DepthDarkening _depthDarkening;
-        VirtualMirrorCombine _combine;
+        VolumeRenderer _vr;
 
         TrackballNavigationEventListener* _trackballEH;
     };

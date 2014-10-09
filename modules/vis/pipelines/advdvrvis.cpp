@@ -22,7 +22,7 @@
 // 
 // ================================================================================================
 
-#include "AdvDVRVis.h"
+#include "advdvrvis.h"
 
 #include "tgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
@@ -30,41 +30,27 @@
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
+#include "modules/vis/advraycaster/advoptimizedraycaster.h"
+
 namespace campvis {
 
     AdvDVRVis::AdvDVRVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
         , _camera("camera", "Camera")
+        , _lsp()
         , _imageReader()
-        , _pgGenerator()
-        , _vmgGenerator()
-        , _vmRenderer(&_canvasSize)
-        , _eepGenerator(&_canvasSize)
-        , _vmEepGenerator(&_canvasSize)
-        , _dvrNormal(&_canvasSize)
-        , _dvrVM(&_canvasSize)
-        , _depthDarkening(&_canvasSize)
-        , _combine(&_canvasSize)
+        , _vr(&_canvasSize, new AdvOptimizedRaycaster(&_canvasSize))
         , _trackballEH(0)
     {
-        addProperty(&_camera);
+        addProperty(_camera);
 
         _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballEH->addLqModeProcessor(&_dvrNormal);
-        _trackballEH->addLqModeProcessor(&_dvrVM);
-        _trackballEH->addLqModeProcessor(&_depthDarkening);
+        _trackballEH->addLqModeProcessor(&_vr);
         addEventListenerToBack(_trackballEH);
 
+        addProcessor(&_lsp);
         addProcessor(&_imageReader);
-        addProcessor(&_pgGenerator);
-        addProcessor(&_vmgGenerator);
-        addProcessor(&_vmRenderer);
-        addProcessor(&_eepGenerator);
-        addProcessor(&_vmEepGenerator);
-        addProcessor(&_dvrNormal);
-        addProcessor(&_dvrVM);
-        addProcessor(&_depthDarkening);
-        addProcessor(&_combine);
+        addProcessor(&_vr);
     }
 
     AdvDVRVis::~AdvDVRVis() {
@@ -73,72 +59,23 @@ namespace campvis {
 
     void AdvDVRVis::init() {
         AutoEvaluationPipeline::init();
-        
+
         _imageReader.s_validated.connect(this, &AdvDVRVis::onProcessorValidated);
 
-        _camera.addSharedProperty(&_vmgGenerator.p_camera);
-        _camera.addSharedProperty(&_vmRenderer.p_camera);
-        _camera.addSharedProperty(&_eepGenerator.p_camera);
-        _camera.addSharedProperty(&_vmEepGenerator.p_camera);
-        _camera.addSharedProperty(&_dvrNormal.p_camera);
-        _camera.addSharedProperty(&_dvrVM.p_camera);
-
-        //_imageReader.p_url.setValue("D:\\Medical Data\\Dentalscan\\dental.mhd");
-        //_imageReader.p_url.setValue("C:/NavabJob/Dataset/nucleon.mhd");
-        //_imageReader.p_url.setValue("C:/NavabJob/Dataset/walnut.mhd");
-        //_imageReader.p_url.setValue("C:/NavabJob/Dataset/dental.mhd");
-        _imageReader.p_url.setValue("C:/Campvis/Dataset/smallHeart.mhd");
-        _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.addSharedProperty(&_eepGenerator.p_sourceImageID);
-        _imageReader.p_targetImageID.addSharedProperty(&_vmEepGenerator.p_sourceImageID);
-        _imageReader.p_targetImageID.addSharedProperty(&_dvrVM.p_sourceImageID);
-        _imageReader.p_targetImageID.addSharedProperty(&_dvrNormal.p_sourceImageID);
-        _imageReader.p_targetImageID.addSharedProperty(&_pgGenerator.p_sourceImageID);
-
-        _dvrNormal.p_targetImageID.setValue("drr.output");
-        _dvrVM.p_targetImageID.setValue("dvr.output");
-
-         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrNormal.p_transferFunction.replaceTF(dvrTF);
-
-         Geometry1DTransferFunction* vmTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrVM.p_transferFunction.replaceTF(vmTF);
-
-        _vmRenderer.p_renderTargetID.addSharedProperty(&_combine.p_mirrorRenderID);
-        _vmEepGenerator.p_entryImageID.setValue("vm.eep.entry");
-        _vmEepGenerator.p_exitImageID.setValue("vm.eep.exit");
-        _vmEepGenerator.p_enableMirror.setValue(true);
-
-        // not the most beautiful way... *g*
-        // this will all get better with scripting support.
-        static_cast<BoolProperty*>(_vmEepGenerator.getProperty("applyMask"))->setValue(true);
-        _vmRenderer.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
-
+        _camera.addSharedProperty(&_vr.p_camera);
+        _vr.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
 
-        _pgGenerator.p_geometryID.addSharedProperty(&_vmEepGenerator.p_geometryID);
-        _pgGenerator.p_geometryID.addSharedProperty(&_eepGenerator.p_geometryID);
-        _vmgGenerator.p_mirrorID.addSharedProperty(&_vmEepGenerator.p_mirrorID);
-        _vmgGenerator.p_mirrorID.addSharedProperty(&_vmRenderer.p_geometryID);
-        _vmgGenerator.p_mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));
-        _vmgGenerator.p_poi.setValue(tgt::vec3(40.f, 40.f, 40.f));
-        _vmgGenerator.p_size.setValue(60.f);
+        _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
+        _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_vr.p_inputVolume);
 
-        _eepGenerator.p_entryImageID.addSharedProperty(&_dvrNormal.p_entryImageID);
-        _vmEepGenerator.p_entryImageID.addSharedProperty(&_dvrVM.p_entryImageID);
-
-        _eepGenerator.p_exitImageID.addSharedProperty(&_dvrNormal.p_exitImageID);
-        _vmEepGenerator.p_exitImageID.addSharedProperty(&_dvrVM.p_exitImageID);
-
-        _dvrVM.p_targetImageID.addSharedProperty(&_combine.p_mirrorImageID);
-        _combine.p_targetImageID.setValue("combine");
-
-        _dvrNormal.p_targetImageID.addSharedProperty(&_depthDarkening.p_inputImage);
-        _depthDarkening.p_outputImage.addSharedProperty(&_combine.p_normalImageID);
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.12f, .15f), tgt::col4(85, 0, 0, 128), tgt::col4(255, 0, 0, 128)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.19f, .28f), tgt::col4(89, 89, 89, 155), tgt::col4(89, 89, 89, 155)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.41f, .51f), tgt::col4(170, 170, 128, 64), tgt::col4(192, 192, 128, 64)));
+        static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
+        static_cast<FloatProperty*>(_vr.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(4.f);
     }
 
     void AdvDVRVis::deinit() {
