@@ -58,10 +58,8 @@ uniform TFParameters1D _transferFunctionParams;
 
 // BBV Lookup volume
 uniform usampler2D _vvTexture;
-uniform TextureParameters2D _vvTextureParams;
 uniform int _vvVoxelSize;
 uniform int _vvVoxelDepth;
-uniform bool _hasVv;
 uniform int _vvMaxMipMapLevel;
 
 

@@ -87,8 +87,6 @@ namespace campvis {
         p_camera.addSharedProperty(&_raycaster->p_camera);
 
         p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
-
-        p_inputVolume.s_changed.connect(this, &VolumeRenderer::onPropertyChanged);
     }
 
     VolumeRenderer::~VolumeRenderer() {

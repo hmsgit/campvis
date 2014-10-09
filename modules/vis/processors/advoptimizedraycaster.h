@@ -29,8 +29,7 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "modules/vis/advraycaster/rendervolumeVoxelizing.h"
-#include "modules/vis/advraycaster/VoxelTextureMipMapping.h"
+#include "modules/vis/tools/voxelhierarchymapper.h"
 
 #include <string>
 
@@ -91,14 +90,7 @@ namespace campvis {
         /// Renders the voxelized volume
         void renderVv(DataContainer& dh); 
 
-        VoxelTexMipMapGenerator* _mipMapGen;    //!< Voxel Texture Mip Map Generator
-        int _maxMipMapLevel;
-        VoxelizedRenderVolume* _vv;             //!< Voxelized Render volume
-        tgt::Texture* _vvTex;                   //!< Generated 2D Texture 
-
-
-        FaceGeometry* _quad;
-        tgt::Shader* _voxelGeneratorShdr;
+        VoxelHierarchyMapper* _vhm;
 
         static const std::string loggerCat_;
     };

@@ -30,7 +30,7 @@
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
-#include "modules/vis/advraycaster/advoptimizedraycaster.h"
+#include "modules/vis/processors/advoptimizedraycaster.h"
 
 namespace campvis {
 

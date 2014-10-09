@@ -77,7 +77,7 @@ namespace campvis {
     }
 
     void VolumeRendererDemo::deinit() {
-        _canvasSize.s_changed.disconnect(this);
+        _imageReader.s_validated.disconnect(this);
         AutoEvaluationPipeline::deinit();
     }
 
