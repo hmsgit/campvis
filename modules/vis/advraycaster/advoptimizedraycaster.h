@@ -75,7 +75,6 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
-        DataNameProperty p_targetImageID;    ///< image ID for output image
         BoolProperty p_enableShadowing;
         FloatProperty p_shadowIntensity;
         BoolProperty p_enableIntersectionRefinement;

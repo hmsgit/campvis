@@ -39,7 +39,6 @@ namespace campvis {
 
     AdvOptimizedRaycaster::AdvOptimizedRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/advraycaster/glsl/AdvOptimizedRaycaster.frag", true, "400")
-        , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER | AbstractProcessor::INVALID_PROPERTIES)
         , p_shadowIntensity("ShadowIntensity", "Shadow Intensity", .5f, .0f, 1.f)
         , p_enableIntersectionRefinement("EnableIntersectionRefinement", "Enable Intersection Refinement", false, AbstractProcessor::INVALID_RESULT | AbstractProcessor::INVALID_SHADER)
@@ -52,7 +51,6 @@ namespace campvis {
     {
         addDecorator(new ProcessorDecoratorShading());
 
-        addProperty(&p_targetImageID);
         addProperty(&p_enableIntersectionRefinement);
         addProperty(&p_useEmptySpaceSkipping);
 
