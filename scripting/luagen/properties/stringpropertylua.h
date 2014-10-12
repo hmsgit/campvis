@@ -22,11 +22,11 @@
 // 
 // ================================================================================================
 
-#ifndef STRINGPROPERTYWIDGET_H__
-#define STRINGPROPERTYWIDGET_H__
+#ifndef STRINGPROPERTYLUA_H__
+#define STRINGPROPERTYLUA_H__
 
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertyluafactory.h"
 #include "core/properties/stringproperty.h"
 
 class QLineEdit;
@@ -34,44 +34,27 @@ class QPushButton;
 
 namespace campvis {
     /**
-     * Widget for a StringProperty
+     * Lua for a StringProperty
      */
-    class StringPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
-
+    class StringPropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
+         * Creates a new PropertyLua for the property \a property.
+         * \param   property        The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent          Parent Qt widget
+         * \param   parent          Parent Qt lua
          */
-        StringPropertyWidget(StringProperty* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
+        StringPropertyLua(StringProperty* property, DataContainer* dataContainer = nullptr);
 
         /**
          * Destructor
          */
-        virtual ~StringPropertyWidget();
+        virtual ~StringPropertyLua();
 
-        void setButtonLabel(const std::string& btnLabel);
-
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
-    private slots:
-        void onTextChanged(const QString& text);
-        void onBtnLoadFileClicked(bool flag);
-
-    private:
-        QLineEdit* _lineEdit;
-        QPushButton* _btnLoadFile;
-
+        std::string getLuaScript();
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<StringPropertyWidget, StringProperty>;
+    template class PropertyLuaRegistrar<StringPropertyLua, StringProperty>;
 }
-#endif // STRINGPROPERTYWIDGET_H__
+#endif // STRINGPROPERTYLUA_H__

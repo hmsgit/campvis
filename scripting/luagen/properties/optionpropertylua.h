@@ -22,11 +22,11 @@
 // 
 // ================================================================================================
 
-#ifndef OPTIONPROPERTYWIDGET_H__
-#define OPTIONPROPERTYWIDGET_H__
+#ifndef OPTIONPROPERTYLUA_H__
+#define OPTIONPROPERTYLUA_H__
 
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertyluafactory.h"
 #include "core/properties/optionproperty.h"
 
 class QComboBox;
@@ -35,40 +35,28 @@ namespace campvis {
     class AbstractOptionProperty;
 
     /**
-     * Widget for a IntProperty
+     * Lua for a IntProperty
      */
-    class OptionPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
+    class OptionPropertyLua : public AbstractPropertyLua {
 
     public:
         /**
-         * Creates a new OptionPropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
+         * Creates a new OptionPropertyLua for the property \a property.
+         * \param   property        The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent          Parent Qt widget
+         * \param   parent          Parent Qt lua
          */
-        OptionPropertyWidget(AbstractOptionProperty* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
+        OptionPropertyLua(AbstractOptionProperty* property, DataContainer* dataContainer = nullptr);
 
         /**
          * Destructor
          */
-        virtual ~OptionPropertyWidget();
+        virtual ~OptionPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
-    private slots:
-        void onComboBoxIndexChanged(int value);
-
-    private:
-        QComboBox* _comboBox;
-
+        std::string getLuaScript();
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<OptionPropertyWidget, AbstractOptionProperty, 10>;
+    template class PropertyLuaRegistrar<OptionPropertyLua, AbstractOptionProperty, 10>;
 }
-#endif // OPTIONPROPERTYWIDGET_H__
+#endif // OPTIONPROPERTYLUA_H__

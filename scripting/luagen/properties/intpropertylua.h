@@ -22,91 +22,59 @@
 // 
 // ================================================================================================
 
-#ifndef INTPROPERTYWIDGET_H__
-#define INTPROPERTYWIDGET_H__
+#ifndef INTPROPERTYLUA_H__
+#define INTPROPERTYLUA_H__
 
-#include "application/gui/adjusterwidgets/intadjusterwidget.h"
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertyluafactory.h"
 #include "core/properties/numericproperty.h"
-
-class QCheckBox;
-class QPushButton;
-class QTimer;
+#include "core/tools/stringutils.h"
 
 namespace campvis {
     /**
-     * Widget for a IntProperty
+     * Lua for a IntProperty
      */
-    class IntPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
-
+    class IntPropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new IntPropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
+         * Creates a new IntPropertyLua for the property \a property.
+         * \param   property        The property the Lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent          Parent Qt widget
+         * \param   parent          Parent Qt Lua
          */
-        IntPropertyWidget(IntProperty* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
+        IntPropertyLua(IntProperty* property, DataContainer* dataContainer = nullptr);
 
         /**
          * Destructor
          */
-        virtual ~IntPropertyWidget();
+        virtual ~IntPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
-    private slots:
-        void onValueChanged(int value);
-        void onIntervalValueChanged(int value);
-        void onEnableTimerChanged(int state);
-        void onTimer();
-        void onBtnSHTClicked();
-
-    private:
-        /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
-        virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
-
-        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
-        virtual void onPropertyStepChanged(const AbstractProperty* property);
-
-        IntAdjusterWidget* _adjuster;
-
-        QPushButton* _btnShowHideTimer;
-        QTimer* _timer;
-        QCheckBox* _cbEnableTimer;
-        QSpinBox* _sbInterval;
-
+        std::string getLuaScript();
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<IntPropertyWidget, IntProperty>;
+    template class PropertyLuaRegistrar<IntPropertyLua, IntProperty>;
 
 // ================================================================================================
 
     namespace {
         template<size_t SIZE>
-        struct IVecPropertyWidgetTraits {};
+        struct IVecPropertyLuaTraits {};
 
         template<>
-        struct IVecPropertyWidgetTraits<2> {
+        struct IVecPropertyLuaTraits<2> {
             typedef IVec2Property PropertyType;
             typedef tgt::ivec2 BaseType;
         };
 
         template<>
-        struct IVecPropertyWidgetTraits<3> {
+        struct IVecPropertyLuaTraits<3> {
             typedef IVec3Property PropertyType;
             typedef tgt::ivec3 BaseType;
         };
 
         template<>
-        struct IVecPropertyWidgetTraits<4> {
+        struct IVecPropertyLuaTraits<4> {
             typedef IVec4Property PropertyType;
             typedef tgt::ivec4 BaseType;
         };
@@ -115,169 +83,120 @@ namespace campvis {
 // ================================================================================================
 
     /**
-     * Generic base class for IVec property widgets.
+     * Generic base class for IVec property Luas.
      * Unfortunately Q_OBJECT and templates do not fit together, so we an additional level of 
      * indirection helps as usual...
      */
     template<size_t SIZE>
-    class IVecPropertyWidget : public AbstractPropertyWidget {
+    class IVecPropertyLua : public AbstractPropertyLua {
     public:
         enum { size = SIZE };
-        typedef typename IVecPropertyWidgetTraits<SIZE>::PropertyType PropertyType;
+        typedef typename IVecPropertyLuaTraits<SIZE>::PropertyType PropertyType;
 
         /**
-         * Creates a new IVecPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         * Creates a new IVecPropertyLua for the property \a property.
+         * \param   property    The property the Lua shall handle
+         * \param   parent      Parent Qt Lua
          */
-        IVecPropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
+        IVecPropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr);
 
         /**
          * Destructor
          */
-        virtual ~IVecPropertyWidget();
+        virtual ~IVecPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
-        void onValueChangedImpl();
-
-        /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
-        virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
-
-        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
-        virtual void onPropertyStepChanged(const AbstractProperty* property);
-
-        IntAdjusterWidget* _adjusters[size];
+        virtual std::string getLuaScript();
     };
 
 // ================================================================================================
 
     template<size_t SIZE>
-    campvis::IVecPropertyWidget<SIZE>::IVecPropertyWidget(PropertyType* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, true, dataContainer, parent)
+    campvis::IVecPropertyLua<SIZE>::IVecPropertyLua(PropertyType* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, true, dataContainer)
     {
-        for (size_t i = 0; i < size; ++i) {
-            _adjusters[i] = new IntAdjusterWidget;
-            _adjusters[i]->setMinimum(property->getMinValue()[i]);
-            _adjusters[i]->setMaximum(property->getMaxValue()[i]);
-            _adjusters[i]->setSingleStep(property->getStepValue()[i]);
-            _adjusters[i]->setValue(property->getValue()[i]);
-            addWidget(_adjusters[i]);
-        }
-
-        property->s_minMaxChanged.connect(this, &IVecPropertyWidget::onPropertyMinMaxChanged);
-        property->s_stepChanged.connect(this, &IVecPropertyWidget::onPropertyStepChanged);
     }
 
     template<size_t SIZE>
-    campvis::IVecPropertyWidget<SIZE>::~IVecPropertyWidget() {
-        static_cast<PropertyType*>(_property)->s_minMaxChanged.disconnect(this);
-        static_cast<PropertyType*>(_property)->s_stepChanged.disconnect(this);
+    campvis::IVecPropertyLua<SIZE>::~IVecPropertyLua() {
     }
 
     template<size_t SIZE>
-    void campvis::IVecPropertyWidget<SIZE>::updateWidgetFromProperty() {
-        PropertyType* prop = static_cast<PropertyType*>(_property);
-        for (size_t i = 0; i < size; ++i) {
-            _adjusters[i]->blockSignals(true);
-            _adjusters[i]->setValue(prop->getValue()[i]);
-            _adjusters[i]->blockSignals(false);
-        }
-    }
+    std::string campvis::IVecPropertyLua<SIZE>::getLuaScript() {
+        std::string ret = "-- NOT IMPLEMENTED IVecProperty";
+        //ret += "getProperty(" + _property->getName() + "):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
 
-    template<size_t SIZE>
-    void campvis::IVecPropertyWidget<SIZE>::onValueChangedImpl() {
-        ++_ignorePropertyUpdates;
-        PropertyType* prop = static_cast<PropertyType*>(_property);
-        typename IVecPropertyWidgetTraits<SIZE>::BaseType newValue;
-        for (size_t i = 0; i < size; ++i)
-            newValue[i] = _adjusters[i]->value();
-        prop->setValue(newValue);
-        --_ignorePropertyUpdates;
-    }
-
-    template<size_t SIZE>
-    void campvis::IVecPropertyWidget<SIZE>::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            PropertyType* prop = static_cast<PropertyType*>(_property);
-            for (size_t i = 0; i < size; ++i) {
-                _adjusters[i]->setMinimum(prop->getMinValue()[i]);
-                _adjusters[i]->setMaximum(prop->getMaxValue()[i]);
-            }
-        }
-    }
-
-    template<size_t SIZE>
-    void campvis::IVecPropertyWidget<SIZE>::onPropertyStepChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            PropertyType* prop = static_cast<PropertyType*>(_property);
-            for (size_t i = 0; i < size; ++i) {
-                _adjusters[i]->setSingleStep(prop->getStepValue()[i]);
-            }
-        }
+        std::printf(ret.c_str());
+        return ret;
     }
 
 // ================================================================================================
 
-    class IVec2PropertyWidget : public IVecPropertyWidget<2> {
-        Q_OBJECT
+    class IVec2PropertyLua : public IVecPropertyLua<2> {
     public:
-        IVec2PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : IVecPropertyWidget<2>(property, dataContainer, parent)
+        IVec2PropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr)
+            : IVecPropertyLua<2>(property, dataContainer)
         {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-            }
         }
 
-    private slots:
-        void onValueChanged(int value) { onValueChangedImpl(); };
+        std::string campvis::IVec2PropertyLua::getLuaScript() {
+            tgt::ivec2 value = static_cast<IVec2Property*>(_property)->getValue();
+            std::string ret = "";
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+                + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) + "))";
+
+            std::printf(ret.c_str());
+            return ret;
+        }
     }; 
 
 // ================================================================================================
     
-    class IVec3PropertyWidget : public IVecPropertyWidget<3> {
-        Q_OBJECT
+    class IVec3PropertyLua : public IVecPropertyLua<3> {
     public:
-        IVec3PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : IVecPropertyWidget<3>(property, dataContainer, parent)
+        IVec3PropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr)
+            : IVecPropertyLua<3>(property, dataContainer)
         {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-            }
         }
 
-        private slots:
-            void onValueChanged(int value) { onValueChangedImpl(); };
+        std::string campvis::IVec3PropertyLua::getLuaScript() {
+            tgt::ivec3 value = static_cast<IVec3Property*>(_property)->getValue();
+            std::string ret = "";
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+                + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
+                + StringUtils::toString(value.z) + "))";
+
+            std::printf(ret.c_str());
+            return ret;
+        }
     }; 
 
 // ================================================================================================
 
-    class IVec4PropertyWidget : public IVecPropertyWidget<4> {
-        Q_OBJECT
+    class IVec4PropertyLua : public IVecPropertyLua<4> {
     public:
-        IVec4PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : IVecPropertyWidget<4>(property, dataContainer, parent)
+        IVec4PropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr)
+            : IVecPropertyLua<4>(property, dataContainer)
         {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-            }
         }
 
-        private slots:
-            void onValueChanged(int value) { onValueChangedImpl(); };
+        std::string campvis::IVec4PropertyLua::getLuaScript() {
+            tgt::ivec4 value = static_cast<IVec4Property*>(_property)->getValue();
+            std::string ret = "";
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+                + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
+                + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
+
+            std::printf(ret.c_str());
+            return ret;
+        }
     }; 
 
 // ================================================================================================
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<IVec2PropertyWidget, typename IVecPropertyWidgetTraits<2>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<IVec3PropertyWidget, typename IVecPropertyWidgetTraits<3>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<IVec4PropertyWidget, typename IVecPropertyWidgetTraits<4>::PropertyType, 5>;
+    template class PropertyLuaRegistrar<IVec2PropertyLua, typename IVecPropertyLuaTraits<2>::PropertyType, 5>;
+    template class PropertyLuaRegistrar<IVec3PropertyLua, typename IVecPropertyLuaTraits<3>::PropertyType, 5>;
+    template class PropertyLuaRegistrar<IVec4PropertyLua, typename IVecPropertyLuaTraits<4>::PropertyType, 5>;
 
 }
-#endif // INTPROPERTYWIDGET_H__
+#endif // INTPROPERTYLUA_H__

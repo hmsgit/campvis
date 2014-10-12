@@ -22,66 +22,24 @@
 // 
 // ================================================================================================
 
-#include "floatpropertywidget.h"
+#include "floatpropertylua.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
-    FloatPropertyWidget::FloatPropertyWidget(FloatProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, dataContainer, parent)
-        , _adjuster(0)
+    FloatPropertyLua::FloatPropertyLua(FloatProperty* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, false, dataContainer)
     {
-        _adjuster = new DoubleAdjusterWidget();
-        _adjuster->setMinimum(property->getMinValue());
-        _adjuster->setMaximum(property->getMaxValue());
-        _adjuster->setDecimals(property->getDecimals());
-        _adjuster->setSingleStep(property->getStepValue());
-        _adjuster->setValue(property->getValue());
-
-        addWidget(_adjuster);
-
-        connect(_adjuster, SIGNAL(valueChanged(double)), this, SLOT(onAdjusterValueChanged(double)));
-        property->s_minMaxChanged.connect(this, &FloatPropertyWidget::onPropertyMinMaxChanged);
-        property->s_stepChanged.connect(this, &FloatPropertyWidget::onPropertyStepChanged);
-        property->s_decimalsChanged.connect(this, &FloatPropertyWidget::onPropertyDecimalsChanged);
     }
 
-    FloatPropertyWidget::~FloatPropertyWidget() {
+    FloatPropertyLua::~FloatPropertyLua() {
         FloatProperty* property = static_cast<FloatProperty*>(_property);
-
-        property->s_minMaxChanged.disconnect(this);
-        property->s_stepChanged.disconnect(this);
-        property->s_decimalsChanged.disconnect(this);
     }
 
-    void FloatPropertyWidget::updateWidgetFromProperty() {
-        FloatProperty* prop = static_cast<FloatProperty*>(_property);
-        _adjuster->blockSignals(true);
-        _adjuster->setValue(prop->getValue());
-        _adjuster->setMinimum(prop->getMinValue());
-        _adjuster->setMaximum(prop->getMaxValue());
-        _adjuster->setSingleStep(prop->getStepValue());
-        _adjuster->setDecimals(prop->getDecimals());
-        _adjuster->blockSignals(false);
-    }
+    std::string FloatPropertyLua::getLuaScript() {
+        std::string ret = "";
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(" + StringUtils::toString( static_cast<FloatProperty*>(_property)->getValue() ) + ")";
 
-    void FloatPropertyWidget::onAdjusterValueChanged(double value) {
-        ++_ignorePropertyUpdates;
-        FloatProperty* prop = static_cast<FloatProperty*>(_property);
-        prop->setValue(value);
-        --_ignorePropertyUpdates;
-    }
-
-    void FloatPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0)
-            emit s_propertyChanged(property);
-    }
-
-    void FloatPropertyWidget::onPropertyStepChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0)
-            emit s_propertyChanged(property);
-    }
-
-    void FloatPropertyWidget::onPropertyDecimalsChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0)
-            emit s_propertyChanged(property);
+        std::printf(ret.c_str());
+        return ret;
     }
 }

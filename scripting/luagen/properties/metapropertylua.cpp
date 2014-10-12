@@ -22,39 +22,26 @@
 // 
 // ================================================================================================
 
-#ifndef BUTTONPROPERTYLUA_H__
-#define BUTTONPROPERTYLUA_H__
-
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
-#include "core/properties/buttonproperty.h"
-
-class QPushButton;
+#include "tgt/assert.h"
+#include "metapropertywidget.h"
 
 namespace campvis {
-    /**
-     * Lua for a Camera.
-     * For now just offering read-access.
-     */
-    class ButtonPropertyLua : public AbstractPropertyLua {
-    public:
-        /**
-         * Creates a new ButtonPropertyLua for the property \a property.
-         * \param   property    The property the lua shall handle
-         * \param   parent      Parent Qt lua
-         */
-        ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer = nullptr);
+    MetaPropertyWidget::MetaPropertyWidget(MetaProperty* property, DataContainer* dc, QWidget* parent /*= 0*/)
+        : AbstractPropertyWidget(property, true, dc, parent)
+        , _pcw(0)
+    {
+        //tgtAssert(_dataContainer != 0, "Pointer to DataContainer must not be 0.");
 
-        /**
-         * Destructor
-         */
-        virtual ~ButtonPropertyLua();
+        _pcw = new PropertyCollectionWidget(this);
+        _pcw->updatePropCollection(property, _dataContainer);
+        addWidget(_pcw);
+    }
 
-        std::string getLuaScript();
-    };
+    MetaPropertyWidget::~MetaPropertyWidget() {
+    }
 
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<ButtonPropertyLua, ButtonProperty>;
+    void MetaPropertyWidget::updateWidgetFromProperty() {
+    }
+
+
 }
-
-#endif // BUTTONPROPERTYLUA_H__

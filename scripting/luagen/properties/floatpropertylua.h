@@ -22,85 +22,60 @@
 // 
 // ================================================================================================
 
-#ifndef FLOATPROPERTYWIDGET_H__
-#define FLOATPROPERTYWIDGET_H__
+#ifndef FLOATPROPERTYLUA_H__
+#define FLOATPROPERTYLUA_H__
 
-#include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertyluafactory.h"
 #include "core/properties/floatingpointproperty.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
     /**
-     * Widget for a FloatProperty
+     * Lua for a FloatProperty
      */
-    class FloatPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT
-
+    class FloatPropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new FloatPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
+         * Creates a new FloatPropertyLua for the property \a property.
+         * \param   property    The property the Lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent      Parent Qt widget
+         * \param   parent      Parent Qt Lua
          */
-        FloatPropertyWidget(FloatProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
+        FloatPropertyLua(FloatProperty* property, DataContainer* dataContainer);
 
         /**
          * Destructor
          */
-        virtual ~FloatPropertyWidget();
+        virtual ~FloatPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
-    private slots:
-        /// Slot getting called when the adjuster's value changes
-        void onAdjusterValueChanged(double value);
-
-    private:
-        /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
-        virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
-
-        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
-        virtual void onPropertyStepChanged(const AbstractProperty* property);
-
-        /**
-         * Slot getting called when the number of significant decimal places of the property has
-         * changed, so that the widget can be updated.
-         */
-        virtual void onPropertyDecimalsChanged(const AbstractProperty* property);
-
-        DoubleAdjusterWidget* _adjuster;        ///< Widget allowing the user to change the property's value
-
+        std::string getLuaScript();
+        
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<FloatPropertyWidget, FloatProperty>;
+    template class PropertyLuaRegistrar<FloatPropertyLua, FloatProperty>;
 
 // ================================================================================================
 
     namespace {
         template<size_t SIZE>
-        struct VecPropertyWidgetTraits {};
+        struct VecPropertyLuaTraits {};
 
         template<>
-        struct VecPropertyWidgetTraits<2> {
+        struct VecPropertyLuaTraits<2> {
             typedef Vec2Property PropertyType;
             typedef tgt::vec2 BaseType;
         };
 
         template<>
-        struct VecPropertyWidgetTraits<3> {
+        struct VecPropertyLuaTraits<3> {
             typedef Vec3Property PropertyType;
             typedef tgt::vec3 BaseType;
         };
 
         template<>
-        struct VecPropertyWidgetTraits<4> {
+        struct VecPropertyLuaTraits<4> {
             typedef Vec4Property PropertyType;
             typedef tgt::vec4 BaseType;
         };
@@ -109,191 +84,121 @@ namespace campvis {
 // ================================================================================================
 
     /**
-     * Generic base class for Vec property widgets.
+     * Generic base class for Vec property Luas.
      * Unfortunately Q_OBJECT and templates do not fit together, so we an additional level of 
      * indirection helps as usual...
      */
     template<size_t SIZE>
-    class VecPropertyWidget : public AbstractPropertyWidget {
+    class VecPropertyLua : public AbstractPropertyLua {
     public:
         enum { size = SIZE };
-        typedef typename VecPropertyWidgetTraits<SIZE>::PropertyType PropertyType;
+        typedef typename VecPropertyLuaTraits<SIZE>::PropertyType PropertyType;
 
         /**
-         * Creates a new VecPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
+         * Creates a new VecPropertyLua for the property \a property.
+         * \param   property    The property the Lua shall handle
+         * \param   parent      Parent Qt Lua
          */
-        VecPropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0);
+        VecPropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr);
 
         /**
          * Destructor
          */
-        virtual ~VecPropertyWidget();
+        virtual ~VecPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
+        virtual std::string getLuaScript();
 
-        void onValueChangedImpl();
-
-        /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
-        virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
-
-        /// Slot getting called when the property's step value has changed, so that the widget can be updated.
-        virtual void onPropertyStepChanged(const AbstractProperty* property);
-
-        /**
-         * Slot getting called when the number of significant decimal places of the property has
-         * changed, so that the widget can be updated.
-         */
-        virtual void onPropertyDecimalsChanged(const AbstractProperty* property);
-
-        DoubleAdjusterWidget* _adjusters[size];
     };
 
 // ================================================================================================
 
     template<size_t SIZE>
-    campvis::VecPropertyWidget<SIZE>::VecPropertyWidget(PropertyType* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, true, dataContainer, parent)
+    campvis::VecPropertyLua<SIZE>::VecPropertyLua(PropertyType* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, true, dataContainer)
     {
-        for (size_t i = 0; i < size; ++i) {
-            _adjusters[i] = new DoubleAdjusterWidget();
-            _adjusters[i]->setMinimum(property->getMinValue()[i]);
-            _adjusters[i]->setMaximum(property->getMaxValue()[i]);
-            _adjusters[i]->setDecimals(property->getDecimals()[i]);
-            _adjusters[i]->setSingleStep(property->getStepValue()[i]);
-            _adjusters[i]->setValue(property->getValue()[i]);
-            addWidget(_adjusters[i]);
-        }
-
-        property->s_minMaxChanged.connect(this, &VecPropertyWidget::onPropertyMinMaxChanged);
-        property->s_stepChanged.connect(this, &VecPropertyWidget::onPropertyStepChanged);
-        property->s_decimalsChanged.connect(this, &VecPropertyWidget::onPropertyDecimalsChanged);
     }
 
     template<size_t SIZE>
-    campvis::VecPropertyWidget<SIZE>::~VecPropertyWidget() {
+    campvis::VecPropertyLua<SIZE>::~VecPropertyLua() {
         PropertyType* property = static_cast<PropertyType*>(_property);
-
-        property->s_minMaxChanged.disconnect(this);
-        property->s_stepChanged.disconnect(this);
-        property->s_decimalsChanged.disconnect(this);
     }
 
     template<size_t SIZE>
-    void campvis::VecPropertyWidget<SIZE>::updateWidgetFromProperty() {
-        PropertyType* prop = static_cast<PropertyType*>(_property);
-        for (size_t i = 0; i < size; ++i) {
-            _adjusters[i]->blockSignals(true);
-            _adjusters[i]->setValue(prop->getValue()[i]);
-            _adjusters[i]->blockSignals(false);
-        }
-    }
+    std::string campvis::VecPropertyLua<SIZE>::getLuaScript() {
+        std::string ret = "-- NOT IMPLEMENTED VecProperty";
+        //ret += "getProperty(" + _property->getName() + "):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
 
-    template<size_t SIZE>
-    void campvis::VecPropertyWidget<SIZE>::onValueChangedImpl() {
-        ++_ignorePropertyUpdates;
-        PropertyType* prop = static_cast<PropertyType*>(_property);
-        typename VecPropertyWidgetTraits<SIZE>::BaseType newValue;
-        for (size_t i = 0; i < size; ++i)
-            newValue[i] = _adjusters[i]->value();
-        prop->setValue(newValue);
-        --_ignorePropertyUpdates;
+        std::printf(ret.c_str());
+        return ret;
     }
-
-    template<size_t SIZE>
-    void campvis::VecPropertyWidget<SIZE>::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            PropertyType* prop = static_cast<PropertyType*>(_property);
-            for (size_t i = 0; i < size; ++i) {
-                _adjusters[i]->setMinimum(prop->getMinValue()[i]);
-                _adjusters[i]->setMaximum(prop->getMaxValue()[i]);
-            }
-        }
-    }
-
-    template<size_t SIZE>
-    void campvis::VecPropertyWidget<SIZE>::onPropertyStepChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            PropertyType* prop = static_cast<PropertyType*>(_property);
-            for (size_t i = 0; i < size; ++i) {
-                _adjusters[i]->setSingleStep(prop->getStepValue()[i]);
-            }
-        }
-    }
-
-    template<size_t SIZE>
-    void campvis::VecPropertyWidget<SIZE>::onPropertyDecimalsChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            PropertyType* prop = static_cast<PropertyType*>(_property);
-            for (size_t i = 0; i < size; ++i) {
-                _adjusters[i]->setDecimals(prop->getDecimals()[i]);
-            }
-        }
-    }
-
 // ================================================================================================
 
-    class Vec2PropertyWidget : public VecPropertyWidget<2> {
-        Q_OBJECT
+    class Vec2PropertyLua : public VecPropertyLua<2> {
     public:
-        Vec2PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : VecPropertyWidget<2>(property, dataContainer, parent)
+        Vec2PropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr)
+            : VecPropertyLua<2>(property, dataContainer)
         {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
-            }
         }
 
-    private slots:
-        void onValueChanged(double value) { onValueChangedImpl(); };
+        std::string campvis::Vec2PropertyLua::getLuaScript() {
+            tgt::vec2 value = static_cast<Vec2Property*>(_property)->getValue();
+            std::string ret = "";
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+                + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) + "))";
+
+            std::printf(ret.c_str());
+            return ret;
+        }
     }; 
 
 // ================================================================================================
     
-    class Vec3PropertyWidget : public VecPropertyWidget<3> {
-        Q_OBJECT
+    class Vec3PropertyLua : public VecPropertyLua<3> {
     public:
-        Vec3PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : VecPropertyWidget<3>(property, dataContainer, parent)
+        Vec3PropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr)
+            : VecPropertyLua<3>(property, dataContainer)
         {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
-            }
         }
+        std::string campvis::Vec3PropertyLua::getLuaScript() {
+            tgt::vec3 value = static_cast<Vec3Property*>(_property)->getValue();
+            std::string ret = "";
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+                + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) 
+                +", " + StringUtils::toString(value.z) + "))";
 
-        private slots:
-            void onValueChanged(double value) { onValueChangedImpl(); };
+            std::printf(ret.c_str());
+            return ret;
+        }
     }; 
 
 // ================================================================================================
 
-    class Vec4PropertyWidget : public VecPropertyWidget<4> {
-        Q_OBJECT
+    class Vec4PropertyLua : public VecPropertyLua<4> {
     public:
-        Vec4PropertyWidget(PropertyType* property, DataContainer* dataContainer = nullptr, QWidget* parent = 0)
-            : VecPropertyWidget<4>(property, dataContainer, parent)
+        Vec4PropertyLua(PropertyType* property, DataContainer* dataContainer = nullptr)
+            : VecPropertyLua<4>(property, dataContainer)
         {
-            for (size_t i = 0; i < size; ++i) {
-                connect(_adjusters[i], SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
-            }
         }
 
-        private slots:
-            void onValueChanged(double value) { onValueChangedImpl(); };
-    }; 
+        std::string campvis::Vec4PropertyLua::getLuaScript() {
+            tgt::vec4 value = static_cast<Vec4Property*>(_property)->getValue();
+            std::string ret = "";
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+                + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
+                + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
+
+            std::printf(ret.c_str());
+            return ret;
+        }
+    };
 
 // ================================================================================================
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<Vec2PropertyWidget, typename VecPropertyWidgetTraits<2>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<Vec3PropertyWidget, typename VecPropertyWidgetTraits<3>::PropertyType, 5>;
-    template class PropertyWidgetRegistrar<Vec4PropertyWidget, typename VecPropertyWidgetTraits<4>::PropertyType, 5>;
+    template class PropertyLuaRegistrar<Vec2PropertyLua, typename VecPropertyLuaTraits<2>::PropertyType, 5>;
+    template class PropertyLuaRegistrar<Vec3PropertyLua, typename VecPropertyLuaTraits<3>::PropertyType, 5>;
+    template class PropertyLuaRegistrar<Vec4PropertyLua, typename VecPropertyLuaTraits<4>::PropertyType, 5>;
 
 }
 
-#endif // FLOATPROPERTYWIDGET_H__
+#endif // FLOATPROPERTYLUA_H__

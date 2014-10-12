@@ -22,122 +22,24 @@
 // 
 // ================================================================================================
 
-#include "intpropertywidget.h"
-
-#include <QCheckBox>
-#include <QTimer>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QWidget>
+#include "intpropertylua.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
-    IntPropertyWidget::IntPropertyWidget(IntProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, dataContainer, parent)
-        , _adjuster(0)
-        , _timer(0)
+    IntPropertyLua::IntPropertyLua(IntProperty* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, false, dataContainer)
     {
-        _timer = new QTimer(this);
-        _timer->setSingleShot(false);
-
-        QWidget* widget = new QWidget(this);
-        QGridLayout* layout = new QGridLayout(widget);
-        layout->setSpacing(2);
-        layout->setMargin(0);
-        widget->setLayout(layout);
-
-        _adjuster = new IntAdjusterWidget;
-        _adjuster->setMinimum(property->getMinValue());
-        _adjuster->setMaximum(property->getMaxValue());
-        _adjuster->setSingleStep(property->getStepValue());
-        _adjuster->setValue(property->getValue());
-        layout->addWidget(_adjuster, 0, 0, 1, 2);
-
-        _btnShowHideTimer = new QPushButton(tr("S"));
-        _btnShowHideTimer->setFixedWidth(16);
-        layout->addWidget(_btnShowHideTimer, 0, 2);
-
-        _cbEnableTimer = new QCheckBox("Enable Timer", widget);
-        _cbEnableTimer->setVisible(false);
-        layout->addWidget(_cbEnableTimer, 1, 0);
-
-        _sbInterval = new QSpinBox(widget);
-        _sbInterval->setMinimum(1);
-        _sbInterval->setMaximum(2000);
-        _sbInterval->setValue(50);
-        _sbInterval->setVisible(false);
-        layout->addWidget(_sbInterval, 1, 1, 1, 2);
-
-        addWidget(widget);
-
-        connect(_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
-        connect(_adjuster, SIGNAL(valueChanged(int)), this, SLOT(onValueChanged(int)));
-        connect(_cbEnableTimer, SIGNAL(stateChanged(int)), this, SLOT(onEnableTimerChanged(int)));
-        connect(_sbInterval, SIGNAL(valueChanged(int)), this, SLOT(onIntervalValueChanged(int)));
-        connect(_btnShowHideTimer, SIGNAL(clicked()), this, SLOT(onBtnSHTClicked()));
-        property->s_minMaxChanged.connect(this, &IntPropertyWidget::onPropertyMinMaxChanged);
-        property->s_stepChanged.connect(this, &IntPropertyWidget::onPropertyStepChanged);
     }
 
-    IntPropertyWidget::~IntPropertyWidget() {
-        static_cast<IntProperty*>(_property)->s_minMaxChanged.disconnect(this);
-        static_cast<IntProperty*>(_property)->s_stepChanged.disconnect(this);
+    IntPropertyLua::~IntPropertyLua() {
     }
 
-    void IntPropertyWidget::updateWidgetFromProperty() {
-        IntProperty* prop = static_cast<IntProperty*>(_property);
-        _adjuster->blockSignals(true);
-        _adjuster->setValue(prop->getValue());
-        _adjuster->blockSignals(false);
-    }
+    std::string IntPropertyLua::getLuaScript() {
+        std::string ret = "";
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(" + StringUtils::toString( static_cast<IntProperty*>(_property)->getValue() ) + ")";
 
-    void IntPropertyWidget::onValueChanged(int value) {
-        ++_ignorePropertyUpdates;
-        IntProperty* prop = static_cast<IntProperty*>(_property);
-        prop->setValue(value);
-        --_ignorePropertyUpdates;
-    }
-
-    void IntPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            IntProperty* prop = static_cast<IntProperty*>(_property);
-            _adjuster->setMinimum(prop->getMinValue());
-            _adjuster->setMaximum(prop->getMaxValue());
-        }
-    }
-
-    void IntPropertyWidget::onPropertyStepChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0) {
-            IntProperty* prop = static_cast<IntProperty*>(_property);
-            _adjuster->setSingleStep(prop->getStepValue());
-        }
-    }
-
-    void IntPropertyWidget::onIntervalValueChanged(int value) {
-        _timer->setInterval(value);
-    }
-
-    void IntPropertyWidget::onEnableTimerChanged(int state) {
-        if (state == Qt::Checked) {
-            _timer->setInterval(_sbInterval->value());
-            _timer->start();
-        }
-        else if (state == Qt::Unchecked) {
-            _timer->stop();
-        }
-    }
-
-    void IntPropertyWidget::onTimer() {
-        IntProperty* prop = static_cast<IntProperty*>(_property);
-        if (prop->getValue() < prop->getMaxValue())
-            prop->increment();
-        else
-            prop->setValue(prop->getMinValue());
-    }
-
-    void IntPropertyWidget::onBtnSHTClicked() {
-        _cbEnableTimer->setVisible(! _cbEnableTimer->isVisible());
-        _sbInterval->setVisible(! _sbInterval->isVisible());
-        _btnShowHideTimer->setText(_sbInterval->isVisible() ? tr("H") : tr("S"));
+        std::printf(ret.c_str());
+        return ret;
     }
 
 }

@@ -22,78 +22,26 @@
 // 
 // ================================================================================================
 
-#include "stringpropertywidget.h"
+#include "stringpropertylua.h"
 #include "core/properties/datanameproperty.h"
+#include "core/tools/stringutils.h"
 
-#include <QLineEdit>
-#include <QPushButton>
-#include <QDir>
-#include <QFileDialog>
 
 namespace campvis {
-    StringPropertyWidget::StringPropertyWidget(StringProperty* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, dataContainer, parent)
-        , _lineEdit(0)
-        , _btnLoadFile(0)
+    StringPropertyLua::StringPropertyLua(StringProperty* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, false, dataContainer)
     {
-        _lineEdit = new QLineEdit(this);
-        _lineEdit->setText(QString::fromStdString(property->getValue()));
-        addWidget(_lineEdit);
-
-        if (property->getDisplayType() != StringProperty::BASIC_STRING) {
-            _btnLoadFile = new QPushButton(tr("Browse"), this);
-            addWidget(_btnLoadFile);
-            connect(_btnLoadFile, SIGNAL(clicked(bool)), this, SLOT(onBtnLoadFileClicked(bool)));
-        }
-
-        connect(_lineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
     }
 
-    StringPropertyWidget::~StringPropertyWidget() {
+    StringPropertyLua::~StringPropertyLua() {
 
     }
-    void StringPropertyWidget::setButtonLabel(const std::string& btnLabel) {
-        this->_btnLoadFile->setText(QString(btnLabel.c_str()));
+
+    std::string StringPropertyLua::getLuaScript() {
+        std::string ret = "";
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(\"" + StringUtils::toString( static_cast<StringProperty*>(_property)->getValue() ) + "\")";
+
+        std::printf(ret.c_str());
+        return ret;
     }
-
-    void StringPropertyWidget::updateWidgetFromProperty() {
-        StringProperty* prop = static_cast<StringProperty*>(_property);
-        QString qs = QString::fromStdString(prop->getValue());
-        if (_lineEdit->text() != qs) {
-            _lineEdit->blockSignals(true);
-            _lineEdit->setText(qs);
-            _lineEdit->blockSignals(false);
-        }
-    }
-
-    void StringPropertyWidget::onTextChanged(const QString& text) {
-        StringProperty* prop = static_cast<StringProperty*>(_property);
-        ++_ignorePropertyUpdates;
-        prop->setValue(text.toStdString());
-        --_ignorePropertyUpdates;
-    }
-
-    void StringPropertyWidget::onBtnLoadFileClicked(bool flag) {
-        StringProperty* prop = static_cast<StringProperty*>(_property);
-
-        const QString dialogCaption = QString::fromStdString(prop->getTitle());
-        const QString directory = QString::fromStdString(prop->getValue());
-        const QString fileFilter = tr("All files (*)");
-
-        QString filename;
-        if (prop->getDisplayType() == StringProperty::OPEN_FILENAME) {
-            filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
-        }
-        else if (prop->getDisplayType() == StringProperty::SAVE_FILENAME) {
-            filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
-        }
-        else if (prop->getDisplayType() == StringProperty::DIRECTORY) {
-            filename = QFileDialog::getExistingDirectory(QWidget::parentWidget(), dialogCaption, directory);
-        }
-
-        if (! filename.isEmpty()) {
-            prop->setValue(filename.toStdString());
-        }
-    }
-
 }

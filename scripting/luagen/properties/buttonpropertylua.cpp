@@ -22,29 +22,20 @@
 // 
 // ================================================================================================
 
-#include "buttonpropertywidget.h"
+#include "buttonpropertylua.h"
 
 #include <QPushButton>
 
 namespace campvis {
-    ButtonPropertyWidget::ButtonPropertyWidget(ButtonProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, dataContainer, parent)
-        , _button(0)
+    ButtonPropertyLua::ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, false, dataContainer)
     {
-        _button = new QPushButton(QString::fromStdString(property->getTitle()), this);
-        connect(_button, SIGNAL(clicked(bool)), this, SLOT(onButtonClicked(bool)));
-        addWidget(_button);
     }
 
-    ButtonPropertyWidget::~ButtonPropertyWidget() {
+    ButtonPropertyLua::~ButtonPropertyLua() {
     }
 
-    void ButtonPropertyWidget::updateWidgetFromProperty() {
+    std::string ButtonPropertyLua::getLuaScript() {
+        return "-- Not necessary ButtonProperty";
     }
-
-    void ButtonPropertyWidget::onButtonClicked(bool) {
-        ButtonProperty* bp = static_cast<ButtonProperty*>(_property);
-        bp->click();
-    }
-
 }

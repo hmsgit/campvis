@@ -22,49 +22,25 @@
 // 
 // ================================================================================================
 
-#include "optionpropertywidget.h"
-
-#include <QComboBox>
+#include "optionpropertylua.h"
 #include "core/properties/optionproperty.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
-    OptionPropertyWidget::OptionPropertyWidget(AbstractOptionProperty* property, DataContainer* dataContainer /*= nullptr*/, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, dataContainer, parent)
-        , _comboBox(0)
+    OptionPropertyLua::OptionPropertyLua(AbstractOptionProperty* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, false, dataContainer)
     {
-        _comboBox = new QComboBox(this);
-        updateWidgetFromProperty();
-        addWidget(_comboBox);
-
-        connect(_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onComboBoxIndexChanged(int)));
     }
 
-    OptionPropertyWidget::~OptionPropertyWidget() {
-        static_cast<IntProperty*>(_property)->s_minMaxChanged.disconnect(this);
+    OptionPropertyLua::~OptionPropertyLua() {
     }
 
-    void OptionPropertyWidget::updateWidgetFromProperty() {
-        AbstractOptionProperty* prop = static_cast<AbstractOptionProperty*>(_property);
-        _comboBox->blockSignals(true);
-        _comboBox->clear();
+    std::string OptionPropertyLua::getLuaScript() {
+        std::string ret = "";
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(" + StringUtils::toString( static_cast<AbstractOptionProperty*>(_property)->getValue() ) + ")";
 
-        // build combo box from descriptions
-        std::vector< std::pair<std::string, std::string> > options = prop->getOptionsAsPairOfStrings();
-        for (std::vector< std::pair<std::string, std::string> >::iterator it = options.begin(); it != options.end(); ++it) {
-            _comboBox->addItem(QString::fromStdString(it->second), QString::fromStdString(it->first));
-        }
-
-        // set selected options
-        _comboBox->setCurrentIndex(prop->getValue());
-
-        _comboBox->blockSignals(false);
-    }
-
-    void OptionPropertyWidget::onComboBoxIndexChanged(int value) {
-        ++_ignorePropertyUpdates;
-        AbstractOptionProperty* prop = static_cast<AbstractOptionProperty*>(_property);
-        prop->setValue(value);
-        --_ignorePropertyUpdates;
+        std::printf(ret.c_str());
+        return ret;
     }
 
 }

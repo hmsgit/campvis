@@ -22,39 +22,55 @@
 // 
 // ================================================================================================
 
-#ifndef BUTTONPROPERTYLUA_H__
-#define BUTTONPROPERTYLUA_H__
+#ifndef CAMERAPROPERTYWIDGET_H__
+#define CAMERAPROPERTYWIDGET_H__
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
-#include "core/properties/buttonproperty.h"
+#include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
+#include "core/properties/cameraproperty.h"
 
-class QPushButton;
+class QLabel;
 
 namespace campvis {
     /**
-     * Lua for a Camera.
+     * Widget for a Camera.
      * For now just offering read-access.
      */
-    class ButtonPropertyLua : public AbstractPropertyLua {
+    class CameraPropertyWidget : public AbstractPropertyWidget {
+        Q_OBJECT;
+
     public:
         /**
-         * Creates a new ButtonPropertyLua for the property \a property.
-         * \param   property    The property the lua shall handle
-         * \param   parent      Parent Qt lua
+         * Creates a new CameraPropertyWidget for the property \a property.
+         * \param   property    The property the widget shall handle
+         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * \param   parent      Parent Qt widget
          */
-        ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer = nullptr);
+        CameraPropertyWidget(CameraProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
 
         /**
          * Destructor
          */
-        virtual ~ButtonPropertyLua();
+        virtual ~CameraPropertyWidget();
 
-        std::string getLuaScript();
+    protected:
+        /**
+         * Gets called when the property has changed, so that widget can update its state.
+         */
+        virtual void updateWidgetFromProperty();
+
+    private:
+        QWidget* _widget;
+        QLabel* _lblCameraPosition;
+        QLabel* _lblFocusPosition;
+        QLabel* _lblLookDirection;
+        QLabel* _lblUpVector;
+
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<ButtonPropertyLua, ButtonProperty>;
+    template class PropertyWidgetRegistrar<CameraPropertyWidget, CameraProperty>;
 }
 
-#endif // BUTTONPROPERTYLUA_H__
+#endif // CAMERAPROPERTYWIDGET_H__
+

@@ -22,39 +22,53 @@
 // 
 // ================================================================================================
 
-#ifndef BUTTONPROPERTYLUA_H__
-#define BUTTONPROPERTYLUA_H__
+#ifndef METAPROPERTYWIDGET_H__
+#define METAPROPERTYWIDGET_H__
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
-#include "core/properties/buttonproperty.h"
 
-class QPushButton;
+#include "core/properties/metaproperty.h"
+#include "application/gui/properties/abstractpropertywidget.h"
+#include "application/gui/properties/propertycollectionwidget.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 
 namespace campvis {
+    class DataContainer;
+
     /**
-     * Lua for a Camera.
+     * Widget for a Camera.
      * For now just offering read-access.
      */
-    class ButtonPropertyLua : public AbstractPropertyLua {
+    class MetaPropertyWidget : public AbstractPropertyWidget {
+        Q_OBJECT;
+
     public:
         /**
-         * Creates a new ButtonPropertyLua for the property \a property.
-         * \param   property    The property the lua shall handle
-         * \param   parent      Parent Qt lua
+         * Creates a new MetaPropertyWidget for the property \a property.
+         * \param   property        The property the widget shall handle
+         * \param   dataContainer   DataContainer to use, must not be 0.
+         * \param   parent          Parent Qt widget
          */
-        ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer = nullptr);
+        MetaPropertyWidget(MetaProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
 
         /**
          * Destructor
          */
-        virtual ~ButtonPropertyLua();
+        virtual ~MetaPropertyWidget();
 
-        std::string getLuaScript();
+    protected:
+        /**
+         * Gets called when the property has changed, so that widget can update its state.
+         */
+        virtual void updateWidgetFromProperty();
+
+
+    private:
+        PropertyCollectionWidget* _pcw;
+
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<ButtonPropertyLua, ButtonProperty>;
+    template class PropertyWidgetRegistrar<MetaPropertyWidget, MetaProperty>;
 }
 
-#endif // BUTTONPROPERTYLUA_H__
+#endif // METAPROPERTYWIDGET_H__

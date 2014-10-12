@@ -36,7 +36,7 @@ namespace campvis {
 
     std::string BoolPropertyLua::getLuaScript() {
         std::string ret = "";
-        ret += "getProperty(" + _property->getName() + "):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
         
         std::printf(ret.c_str());
         return ret;
