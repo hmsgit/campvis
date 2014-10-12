@@ -124,8 +124,6 @@ namespace campvis {
     std::string campvis::IVecPropertyLua<SIZE>::getLuaScript() {
         std::string ret = "-- NOT IMPLEMENTED IVecProperty";
         //ret += "getProperty(" + _property->getName() + "):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
-
-        std::printf(ret.c_str());
         return ret;
     }
 
@@ -141,10 +139,8 @@ namespace campvis {
         std::string campvis::IVec2PropertyLua::getLuaScript() {
             tgt::ivec2 value = static_cast<IVec2Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.ivec2(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) + "))";
-
-            std::printf(ret.c_str());
             return ret;
         }
     }; 
@@ -161,11 +157,9 @@ namespace campvis {
         std::string campvis::IVec3PropertyLua::getLuaScript() {
             tgt::ivec3 value = static_cast<IVec3Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.ivec3(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
                 + StringUtils::toString(value.z) + "))";
-
-            std::printf(ret.c_str());
             return ret;
         }
     }; 
@@ -182,11 +176,9 @@ namespace campvis {
         std::string campvis::IVec4PropertyLua::getLuaScript() {
             tgt::ivec4 value = static_cast<IVec4Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.ivec4(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
                 + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
-
-            std::printf(ret.c_str());
             return ret;
         }
     }; 

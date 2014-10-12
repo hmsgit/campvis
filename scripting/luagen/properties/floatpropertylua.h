@@ -127,8 +127,6 @@ namespace campvis {
     std::string campvis::VecPropertyLua<SIZE>::getLuaScript() {
         std::string ret = "-- NOT IMPLEMENTED VecProperty";
         //ret += "getProperty(" + _property->getName() + "):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
-
-        std::printf(ret.c_str());
         return ret;
     }
 // ================================================================================================
@@ -145,8 +143,6 @@ namespace campvis {
             std::string ret = "";
             ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) + "))";
-
-            std::printf(ret.c_str());
             return ret;
         }
     }; 
@@ -162,11 +158,9 @@ namespace campvis {
         std::string campvis::Vec3PropertyLua::getLuaScript() {
             tgt::vec3 value = static_cast<Vec3Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec3(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) 
                 +", " + StringUtils::toString(value.z) + "))";
-
-            std::printf(ret.c_str());
             return ret;
         }
     }; 
@@ -183,11 +177,9 @@ namespace campvis {
         std::string campvis::Vec4PropertyLua::getLuaScript() {
             tgt::vec4 value = static_cast<Vec4Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec2(" 
+            ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec4(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
                 + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
-
-            std::printf(ret.c_str());
             return ret;
         }
     };

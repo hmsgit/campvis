@@ -22,45 +22,38 @@
 // 
 // ================================================================================================
 
-#ifndef CAMERAPROPERTYWIDGET_H__
-#define CAMERAPROPERTYWIDGET_H__
+#ifndef CAMERAPROPERTYLUA_H__
+#define CAMERAPROPERTYLUA_H__
 
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertyluafactory.h"
 #include "core/properties/cameraproperty.h"
 
 class QLabel;
 
 namespace campvis {
     /**
-     * Widget for a Camera.
+     * Lua for a Camera.
      * For now just offering read-access.
      */
-    class CameraPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
-
+    class CameraPropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new CameraPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
+         * Creates a new CameraPropertyLua for the property \a property.
+         * \param   property    The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent      Parent Qt widget
+         * \param   parent      Parent Qt lua
          */
-        CameraPropertyWidget(CameraProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
+        CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer);
 
         /**
          * Destructor
          */
-        virtual ~CameraPropertyWidget();
+        virtual ~CameraPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
+        std::string getLuaScript();
 
     private:
-        QWidget* _widget;
         QLabel* _lblCameraPosition;
         QLabel* _lblFocusPosition;
         QLabel* _lblLookDirection;
@@ -69,8 +62,8 @@ namespace campvis {
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<CameraPropertyWidget, CameraProperty>;
+    template class PropertyLuaRegistrar<CameraPropertyLua, CameraProperty>;
 }
 
-#endif // CAMERAPROPERTYWIDGET_H__
+#endif // CAMERAPROPERTYLUA_H__
 

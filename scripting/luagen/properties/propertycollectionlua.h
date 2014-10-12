@@ -27,10 +27,7 @@
 
 #include "propertycollectionlua.h"
 #include "abstractpropertylua.h"
-#include "sigslot/sigslot.h"
-#include <QList>
-#include <QVBoxLayout>
-#include <QWidget>
+
 #include <map>
 
 namespace campvis {
@@ -42,80 +39,30 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
-    class PropertyCollectionLua : public sigslot::has_slots {
+    class PropertyCollectionLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new PropertyCollectionLua.
          * \param   parent  Parent widget, may be 0.
          */
-        PropertyCollectionLua();
+        PropertyCollectionLua(HasPropertyCollection* propertyCollection = nullptr, DataContainer* dc = nullptr);
 
         /**
          * Destructor.
          */
         ~PropertyCollectionLua();
 
-    public slots:
-        /**
-         * Updates the property collection this widget works on.
-         * \param   propertyCollection  New HasPropertyCollection instance for this widget, may be 0.
-         */
+        std::string getLuaScript();
+
         void updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc);
 
-        /**
-         * Slot to be called when one of the properties' visibility has changed.
-         * \param prop  Property that emitted the signal
-         */
-        void onPropertyVisibilityChanged(const AbstractProperty* prop);
-        
-    protected slots:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        //virtual void onLuaVisibilityChanged(AbstractPropertyLua* propLua, bool visibility);
-
-        /**
-         * Creates the property widget for \a prop, connects all necessary signals, etc.
-         * \param   prop    Property to add
-         */
         void addProperty(AbstractProperty* prop);
-
-        /**
-         * Removes the property widget for \a prop, disconnects all necessary signals, etc.
-         * \param   prop    Iterator to widget map for the property to remove.
-         */
-        void removeProperty(std::map<AbstractProperty*, AbstractPropertyLua*>::iterator prop);
-
-    signals:
-        //void s_luaVisibilityChanged(AbstractPropertyLua* widget, bool visibility);
-
-        //void propertyAdded(AbstractProperty* prop);
-        //void propertyRemoved(std::map<AbstractProperty*, AbstractPropertyLua*>::iterator prop);
-
-    private:
-        /**
-         * Sets up this widget
-         */
-        void setupLua();
-
-        /**
-         * Clears the _luaMap and destroys all widgets inside.
-         */
-        void clearLuaMap();
-
-        /**
-         * Slot called from PropertyCollection a property was added.
-         */
-        void onPropCollectionPropAdded(AbstractProperty* prop);
-
-        /**
-         * Slot called from PropertyCollection a property was removed.
-         */
-        void onPropCollectionPropRemoved(AbstractProperty* prop);
+        
+    protected:
+        std::string getLuaScript(std::string prefix);
 
         HasPropertyCollection* _propCollection; ///< The HasPropertyCollection instance this widget is currently working on.
-        DataContainer* _dataContainer;          ///< The DataContainer the properties shall work on
-
+        
         std::map<AbstractProperty*, AbstractPropertyLua*> _luaMap;
     };
 }

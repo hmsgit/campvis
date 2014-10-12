@@ -1,5 +1,19 @@
 #include "regularluatable.h"
 
+// Add property luas to ensure build
+// TODO: find a better way
+#include "scripting/luagen/properties/boolpropertylua.h"
+#include "scripting/luagen/properties/buttonpropertylua.h"
+#include "scripting/luagen/properties/floatpropertylua.h"
+#include "scripting/luagen/properties/intpropertylua.h"
+#include "scripting/luagen/properties/optionpropertylua.h"
+#include "scripting/luagen/properties/stringpropertylua.h"
+#include "scripting/luagen/properties/camerapropertylua.h"
+#include "scripting/luagen/properties/colorpropertylua.h"
+#include "scripting/luagen/properties/datanamepropertylua.h"
+#include "scripting/luagen/properties/metapropertylua.h"
+
+#include "scripting/luagen/properties/propertycollectionlua.h"
 
 namespace campvis {
 

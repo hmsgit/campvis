@@ -22,46 +22,25 @@
 // 
 // ================================================================================================
 
-#include "colorpropertywidget.h"
+#include "colorpropertylua.h"
 #include "core/properties/colorproperty.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
-    ColorPropertyWidget::ColorPropertyWidget(ColorProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, false, dataContainer, parent)
-        //, _lblColorPicker(0)
-        , _colorPicker(0)
+    ColorPropertyLua::ColorPropertyLua(ColorProperty* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, false, dataContainer)
     {
-        //_lblColorPicker = new QLabel("Change color: ", this);
-        _colorPicker = new ColorPickerWidget(QtColorTools::toQColor(property->getValue()), this);
-
-        addWidget(_colorPicker);
-
-        //connect(_colorPicker, SIGNAL(valueChanged(tgt::vec4)), this, SLOT(onColorChanged(tgt::vec4)));
-        connect(_colorPicker, SIGNAL(colorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
-
     }
 
-    ColorPropertyWidget::~ColorPropertyWidget() {
+    ColorPropertyLua::~ColorPropertyLua() {
     }
 
-    void ColorPropertyWidget::updateWidgetFromProperty() {
-        _colorPicker->blockSignals(true);
-        const tgt::vec4 val = static_cast<ColorProperty*>(_property)->getValue();
-        _colorPicker->setColor(QtColorTools::toQColor(tgt::vec4(val.x *255, val.y*255, val.z*255, val.w*255)));
-        _colorPicker->blockSignals(false);
+    std::string ColorPropertyLua::getLuaScript() {
+        tgt::vec4 value = static_cast<ColorProperty*>(_property)->getValue();
+        std::string ret = "";
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.vec4(" 
+            + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
+            + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
+        return ret;
     }
-
-    void ColorPropertyWidget::onColorChanged(const QColor& value) {
-        ++_ignorePropertyUpdates;
-        ColorProperty* prop = static_cast<ColorProperty*>(_property);
-        tgt::vec4 val = QtColorTools::toTgtColor(_colorPicker->color());
-        prop->setValue(tgt::vec4(val.x/val.w, val.y/val.w, val.z/val.w, 1));
-        --_ignorePropertyUpdates;
-    }
-
-    void ColorPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
-        if (_ignorePropertyUpdates == 0)
-            emit s_propertyChanged(property);
-    }
-
 }

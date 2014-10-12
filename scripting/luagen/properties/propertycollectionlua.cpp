@@ -35,21 +35,10 @@
 namespace campvis {
 
 
-    PropertyCollectionLua::PropertyCollectionLua()
-        : _propCollection(0)
-        , _dataContainer(0)
+    PropertyCollectionLua::PropertyCollectionLua(HasPropertyCollection* propertyCollection, DataContainer* dc)
+        : AbstractPropertyLua(nullptr, false, dc)
+        , _propCollection(propertyCollection)
     {
-        setupLua();
-    }
-
-    PropertyCollectionLua::~PropertyCollectionLua() {
-        clearLuaMap();
-    }
-
-    void PropertyCollectionLua::updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc) {
-        // remove and delete all widgets of the previous PropertyCollection
-        clearLuaMap();
-        
         _propCollection = propertyCollection;
         _dataContainer = dc;
 
@@ -58,62 +47,50 @@ namespace campvis {
             for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
                 addProperty(*it);
             } 
-
-            //propertyCollection->s_propertyAdded.connect(this, &PropertyCollectionLua::onPropCollectionPropAdded);
-            //propertyCollection->s_propertyRemoved.connect(this, &PropertyCollectionLua::onPropCollectionPropRemoved);
         }
     }
 
-    void PropertyCollectionLua::setupLua() {
-    
+    PropertyCollectionLua::~PropertyCollectionLua() {
     }
 
-    void PropertyCollectionLua::clearLuaMap() {
+    void PropertyCollectionLua::updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc) {
+        _propCollection = propertyCollection;
+        _dataContainer = dc;
+
+        // create widgets for the new PropertyCollection
+        if (propertyCollection != 0) {
+            for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
+                addProperty(*it);
+            }
+        }
+    }
+
+    std::string PropertyCollectionLua::getLuaScript() {
+        std::string ret = "";
+        std::string prefix = "proc:";
         for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
-            removeProperty(it);
+            ret += prefix + it->second->getLuaScript() + "\n";
         }
+        return ret;
+    }
 
-        _luaMap.clear();
-
-        if (_propCollection != 0) {
-            //_propCollection->s_propertyAdded.disconnect(this);
-            //_propCollection->s_propertyRemoved.disconnect(this);
+    std::string PropertyCollectionLua::getLuaScript(std::string prefix) {
+        std::string ret = "";
+        prefix = "";
+        for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
+            ret += prefix + it->second->getLuaScript() + "\n";
+            prefix = "proc:";
         }
-    }
-
-    void PropertyCollectionLua::onPropertyVisibilityChanged(const AbstractProperty* prop) {
-        // const_cast does not harm anything.
-        std::map<AbstractProperty*, AbstractPropertyLua*>::iterator item = _luaMap.find(const_cast<AbstractProperty*>(prop));
-        //if (item != _luaMap.end())
-            //emit s_luaVisibilityChanged(item->second, item->first->isVisible());
-    }
-
-    void PropertyCollectionLua::onPropCollectionPropAdded(AbstractProperty* prop) {
-        //emit propertyAdded(prop);
-    }
-
-    void PropertyCollectionLua::onPropCollectionPropRemoved(AbstractProperty* prop) {
-        std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.find(prop);
-        //if (it != _luaMap.end())
-            //emit propertyRemoved(it);
+        return ret;
     }
 
     void PropertyCollectionLua::addProperty(AbstractProperty* prop) {
         AbstractPropertyLua* propWidget = PropertyLuaFactory::getRef().createPropertyLua(prop, _dataContainer);
-        if (propWidget == 0)
+        if (propWidget == 0) {
+            printf("NOT IMPLEMENTED LUA PROPERTY !! %s\n", prop->getName().c_str());
             return;
-        //    propWidget = new AbstractPropertyLua(QString::fromStdString(prop->getTitle()));
-
+        }
         _luaMap.insert(std::make_pair(prop, propWidget));
-        propWidget->getLuaScript();
-
-        prop->s_visibilityChanged.connect(this, &PropertyCollectionLua::onPropertyVisibilityChanged);
-        prop->s_visibilityChanged.emitSignal(prop);
-    }
-
-    void PropertyCollectionLua::removeProperty(std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it) {
-        it->first->s_visibilityChanged.disconnect(this);
-        delete it->second;
     }
 
 }

@@ -22,14 +22,12 @@
 // 
 // ================================================================================================
 
-#ifndef DATANAMEPROPERTYWIDGET_H__
-#define DATANAMEPROPERTYWIDGET_H__
+#ifndef DATANAMEPROPERTYLUA_H__
+#define DATANAMEPROPERTYLUA_H__
 
-#include "sigslot/sigslot.h"
 #include "core/properties/datanameproperty.h"
-#include "application/gui/qtdatahandle.h"
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertyluafactory.h"
 
 class QComboBox;
 class QLineEdit;
@@ -40,58 +38,28 @@ namespace campvis {
     class DataHandle;
 
     /**
-     * Widget for a DataNameProperty
+     * Lua for a DataNameProperty
      */
-    class DataNamePropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT
-
+    class DataNamePropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
+         * Creates a new PropertyLua for the property \a property.
+         * \param   property    The property the lua shall handle
          * \param   dc          DataContainer this property uses to populate the combo box (may be 0).
-         * \param   parent      Parent Qt widget
+         * \param   parent      Parent Qt lua
          */
-        DataNamePropertyWidget(DataNameProperty* property, DataContainer* dc, QWidget* parent = 0);
+        DataNamePropertyLua(DataNameProperty* property, DataContainer* dc);
 
         /**
          * Destructor
          */
-        virtual ~DataNamePropertyWidget();
+        virtual ~DataNamePropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
-        void onDataAdded(std::string key, DataHandle dh);
-
-    private slots:
-        void onTextChanged(const QString& text);
-        void onDataAddedQt(const QString& key, QtDataHandle dh);
-
-    signals:
-        void s_dataAddedQt(const QString& key, QtDataHandle dh);
-
-    private:
-        /**
-         * Set the combo box's current text to the provided value.
-         *
-         * If \c text can already be found in the combo box, the corresponding item is made active. Otherwise, \c text
-         * is set as the contents of the combo box's text edit.
-         *
-         * \param   text      text to be set in the combo box
-         */
-        void setCurrentComboBoxText(const QString& text);
-
-        QLineEdit* _lineEdit;
-        QComboBox* _combobox;
-
+        std::string getLuaScript();
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<DataNamePropertyWidget, DataNameProperty, 10>;
+    template class PropertyLuaRegistrar<DataNamePropertyLua, DataNameProperty, 10>;
 }
 
-#endif // DATANAMEPROPERTYWIDGET_H__
+#endif // DATANAMEPROPERTYLUA_H__

@@ -22,53 +22,46 @@
 // 
 // ================================================================================================
 
-#ifndef METAPROPERTYWIDGET_H__
-#define METAPROPERTYWIDGET_H__
+#ifndef METAPROPERTYLUA_H__
+#define METAPROPERTYLUA_H__
 
 
 #include "core/properties/metaproperty.h"
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertycollectionwidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertycollectionlua.h"
+#include "propertyluafactory.h"
 
 namespace campvis {
     class DataContainer;
 
     /**
-     * Widget for a Camera.
+     * Lua for a Camera.
      * For now just offering read-access.
      */
-    class MetaPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT;
-
+    class MetaPropertyLua : public PropertyCollectionLua {
     public:
         /**
-         * Creates a new MetaPropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
+         * Creates a new MetaPropertyLua for the property \a property.
+         * \param   property        The property the lua shall handle
          * \param   dataContainer   DataContainer to use, must not be 0.
-         * \param   parent          Parent Qt widget
+         * \param   parent          Parent Qt lua
          */
-        MetaPropertyWidget(MetaProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
+        MetaPropertyLua(MetaProperty* property, DataContainer* dataContainer);
 
         /**
          * Destructor
          */
-        virtual ~MetaPropertyWidget();
+        virtual ~MetaPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
+        std::string getLuaScript();
 
     private:
-        PropertyCollectionWidget* _pcw;
+        PropertyCollectionLua* _pcl;
 
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyWidgetRegistrar<MetaPropertyWidget, MetaProperty>;
+    template class PropertyLuaRegistrar<MetaPropertyLua, MetaProperty>;
 }
 
-#endif // METAPROPERTYWIDGET_H__
+#endif // METAPROPERTYLUA_H__

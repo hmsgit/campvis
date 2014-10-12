@@ -23,24 +23,21 @@
 // ================================================================================================
 
 #include "tgt/assert.h"
-#include "metapropertywidget.h"
+#include "metapropertylua.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
-    MetaPropertyWidget::MetaPropertyWidget(MetaProperty* property, DataContainer* dc, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, true, dc, parent)
-        , _pcw(0)
+    MetaPropertyLua::MetaPropertyLua(MetaProperty* property, DataContainer* dc)
+        : PropertyCollectionLua(property, dc)
     {
-        //tgtAssert(_dataContainer != 0, "Pointer to DataContainer must not be 0.");
-
-        _pcw = new PropertyCollectionWidget(this);
-        _pcw->updatePropCollection(property, _dataContainer);
-        addWidget(_pcw);
+        //_pcl = static_cast<PropertyCollectionLua*> (this);
     }
 
-    MetaPropertyWidget::~MetaPropertyWidget() {
+    MetaPropertyLua::~MetaPropertyLua() {
     }
 
-    void MetaPropertyWidget::updateWidgetFromProperty() {
+    std::string MetaPropertyLua::getLuaScript() {
+        return PropertyCollectionLua::getLuaScript("");
     }
 
 

@@ -30,7 +30,7 @@ namespace campvis {
         : _property(property)
         , _dataContainer(dataContainer)
     {
-        _ignorePropertyUpdates = 0;
+        //_ignorePropertyUpdates = 0;
     }
 
     AbstractPropertyLua::~AbstractPropertyLua() {

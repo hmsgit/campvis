@@ -22,63 +22,42 @@
 // 
 // ================================================================================================
 
-#ifndef COLORPROPERTYWIDGET_H__
-#define COLORPROPERTYWIDGET_H__
+#ifndef COLORPROPERTYLUA_H__
+#define COLORPROPERTYLUA_H__
 
-#include "application/gui/adjusterwidgets/doubleadjusterwidget.h"
-#include "application/gui/properties/abstractpropertywidget.h"
-#include "application/gui/properties/propertywidgetfactory.h"
+#include "abstractpropertylua.h"
+#include "propertyluafactory.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/colorproperty.h"
-
-#include "application/gui/qtcolortools.h"
 
 
 namespace campvis {
     /**
-     * Widget for a ColorProperty
+     * Lua for a ColorProperty
      */
-    class ColorPropertyWidget : public AbstractPropertyWidget {
-        Q_OBJECT
-
+    class ColorPropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new FloatPropertyWidget for the property \a property.
-         * \param   property    The property the widget shall handle
+         * Creates a new FloatPropertyLua for the property \a property.
+         * \param   property    The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent      Parent Qt widget
+         * \param   parent      Parent Qt lua
          */
-        ColorPropertyWidget(ColorProperty* property, DataContainer* dataContainer, QWidget* parent = 0);
+        ColorPropertyLua(ColorProperty* property, DataContainer* dataContainer);
 
         /**
          * Destructor
          */
-        virtual ~ColorPropertyWidget();
+        virtual ~ColorPropertyLua();
 
-    protected:
-        /**
-         * Gets called when the property has changed, so that widget can update its state.
-         */
-        virtual void updateWidgetFromProperty();
-
-    private slots:
-        /// Slot getting called when the adjuster's value changes
-        void onColorChanged(const QColor&);
-
-    private:
-        /// Slot getting called when the property's min or max value has changed, so that the widget can be updated.
-        virtual void onPropertyMinMaxChanged(const AbstractProperty* property);
-
-        //QLabel *_lblColorPicker;
-        ColorPickerWidget * _colorPicker;        ///< color picker widget allowing to change color
-
+        std::string getLuaScript();
     }; 
 
 // ================================================================================================
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.   
-    template class PropertyWidgetRegistrar<ColorPropertyWidget, ColorProperty>;
+    template class PropertyLuaRegistrar<ColorPropertyLua, ColorProperty>;
 
 }
 
-#endif // COLORPROPERTYWIDGET_H__
+#endif // COLORPROPERTYLUA_H__

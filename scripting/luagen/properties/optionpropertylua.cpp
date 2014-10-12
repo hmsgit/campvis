@@ -37,9 +37,8 @@ namespace campvis {
 
     std::string OptionPropertyLua::getLuaScript() {
         std::string ret = "";
-        ret += "getProperty(\"" + _property->getName() + "\"):setValue(" + StringUtils::toString( static_cast<AbstractOptionProperty*>(_property)->getValue() ) + ")";
-
-        std::printf(ret.c_str());
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(" 
+            + StringUtils::toString( static_cast<AbstractOptionProperty*>(_property)->getValue() ) + ")";
         return ret;
     }
 

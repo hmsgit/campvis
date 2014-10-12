@@ -22,45 +22,52 @@
 // 
 // ================================================================================================
 
-#include "camerapropertywidget.h"
+#include "camerapropertylua.h"
 
-#include <QGridLayout>
-#include <QLabel>
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    CameraPropertyWidget::CameraPropertyWidget(CameraProperty* property, DataContainer* dataContainer, QWidget* parent /*= 0*/)
-        : AbstractPropertyWidget(property, true, dataContainer, parent)
-        , _lblCameraPosition(0)
-        , _lblLookDirection(0)
-        , _lblUpVector(0)
+    CameraPropertyLua::CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer)
+        : AbstractPropertyLua(property, true, dataContainer)
     {
-        _widget = new QWidget(this);
-        QGridLayout* gridLayout = new QGridLayout(_widget);
-        _widget->setLayout(gridLayout);
-
-        _lblCameraPosition = new QLabel("Position: ", _widget);
-        gridLayout->addWidget(_lblCameraPosition, 0, 0);
-        _lblFocusPosition = new QLabel("Focus: ", _widget);
-        gridLayout->addWidget(_lblFocusPosition, 1, 0);
-        _lblLookDirection = new QLabel("Look Direction: ", _widget);
-        gridLayout->addWidget(_lblLookDirection, 2, 0);
-        _lblUpVector = new QLabel("Up Vector: ", _widget);
-        gridLayout->addWidget(_lblUpVector, 3, 0);
-
-        addWidget(_widget);
-        updateWidgetFromProperty();
     }
 
-    CameraPropertyWidget::~CameraPropertyWidget() {
+    CameraPropertyLua::~CameraPropertyLua() {
     }
 
-    void CameraPropertyWidget::updateWidgetFromProperty() {
-        CameraProperty* prop = static_cast<CameraProperty*>(_property);
-        _lblCameraPosition->setText("Position: " + QString::fromStdString(StringUtils::toString(prop->getValue().getPosition())));
-        _lblFocusPosition->setText("Focus: " + QString::fromStdString(StringUtils::toString(prop->getValue().getFocus())));
-        _lblLookDirection->setText("Look Direction: " + QString::fromStdString(StringUtils::toString(prop->getValue().getLook())));
-        _lblUpVector->setText("Up Vector: " + QString::fromStdString(StringUtils::toString(prop->getValue().getUpVector())));
+    //void CameraPropertyLua::updateLuaFromProperty() {
+    //    CameraProperty* prop = static_cast<CameraProperty*>(_property);
+    //    _lblCameraPosition->setText("Position: " + QString::fromStdString(StringUtils::toString(prop->getValue().getPosition())));
+    //    _lblFocusPosition->setText("Focus: " + QString::fromStdString(StringUtils::toString(prop->getValue().getFocus())));
+    //    _lblLookDirection->setText("Look Direction: " + QString::fromStdString(StringUtils::toString(prop->getValue().getLook())));
+    //    _lblUpVector->setText("Up Vector: " + QString::fromStdString(StringUtils::toString(prop->getValue().getUpVector())));
+    //}
+
+    std::string CameraPropertyLua::getLuaScript() {
+        std::string ret = "";
+        tgt::Camera cam =  static_cast<CameraProperty*>(_property)->getValue();
+        tgt::vec3 pos = cam.getPosition();
+        tgt::vec3 focus = cam.getFocus();
+        tgt::vec3 up = cam.getUpVector();
+        float fovy = cam.getFovy();
+        float ratio = cam.getRatio();
+        float distn = cam.getNearDist();
+        float distf = cam.getFarDist();
+        int pm = cam.getProjectionMode();
+
+        ret += "getProperty(\"" + _property->getName() + "\"):setValue(tgt.Camera("
+            + "tgt.vec3(" + StringUtils::toString(pos.x) + "," + StringUtils::toString(pos.y) + "," + StringUtils::toString(pos.z) + ")"
+            + "," + "tgt.vec3(" + StringUtils::toString(focus.x) + "," + StringUtils::toString(focus.y) + "," + StringUtils::toString(focus.z) + ")"
+            + "," + "tgt.vec3(" + StringUtils::toString(up.x) + "," + StringUtils::toString(up.y) + "," + StringUtils::toString(up.z) + ")"
+            + "," + StringUtils::toString(fovy)
+            + "," + StringUtils::toString(ratio)
+            + "," + StringUtils::toString(distn)
+            + "," + StringUtils::toString(distf)
+            + "," + StringUtils::toString(pm)
+            +"))";
+
+        //ret = "-- If required need to implement lua interface for tgt:Camera";
+        return ret;
     }
 
 }

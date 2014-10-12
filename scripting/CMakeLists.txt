@@ -12,11 +12,15 @@ INCLUDE(${SWIG_USE_FILE})
 FILE(GLOB CampvisScriptingSources
     *.cpp
     glue/*.cpp
+	luagen/*.cpp
+	luagen/properties/*.cpp
 )
 
 FILE(GLOB CampvisScriptingHeaders
     *.h
     glue/*.h
+	luagen/*.h
+	luagen/properties/*.h
 )
 
 IF(WIN32)
@@ -123,4 +127,9 @@ ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}
 )
 
 ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
-TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
+
+IF(CAMPVIS_GROUP_SOURCE_FILES)
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisScriptingSources ${CampvisHome} "")
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisScriptingHeaders ${CampvisHome} "")
+ENDIF()

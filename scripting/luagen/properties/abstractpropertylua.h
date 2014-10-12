@@ -63,7 +63,7 @@ namespace campvis {
         DataContainer* _dataContainer;  ///< DataContainer to use (e.g. to populate GUI), may be 0!
 
         /// Semaphore acts as flag whether the widget shall ignore incoming signals from properties being updated.
-        tbb::atomic<int> _ignorePropertyUpdates;
+        //tbb::atomic<int> _ignorePropertyUpdates;
 
     };
 }
