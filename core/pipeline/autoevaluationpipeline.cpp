@@ -127,6 +127,17 @@ namespace campvis {
         }
     }
 
+    namespace {
+        /// Local helper function to recursively emit the s_changed signal for the given
+        /// properties and all of its shared properties.
+        void recursiveEmitSignal(DataNameProperty* p) {
+            std::set<AbstractProperty*> v = p->getSharedProperties();
+            for (auto it = v.begin(); it != v.end(); ++it)
+                recursiveEmitSignal(static_cast<DataNameProperty*>(*it));
+            p->s_changed.emitSignal(p);
+        }
+    }
+
     void AutoEvaluationPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
         {
             // acquire read lock
@@ -136,7 +147,7 @@ namespace campvis {
             PortMapType::const_iterator it = _portMap.find(name);
             while (it != _portMap.end() && it->first == name) {
                 // invalidate those properties by emitting changed signal
-                it->second->s_changed.emitSignal(it->second);
+                recursiveEmitSignal(it->second);
                 ++it;
             }
         }

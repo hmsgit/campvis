@@ -78,11 +78,12 @@ namespace campvis {
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
     protected:
-        /// \see HasProperyCollection::updateProperties()
-        virtual void updateProperties();
 
         /// \see RaycastingProcessor::processImpl()
         virtual void processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image);
+
+        /// \see RaycastingProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
 
         /// \see RaycastingProcessor::generateHeader()
         virtual std::string generateHeader() const;

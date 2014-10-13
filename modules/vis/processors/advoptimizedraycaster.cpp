@@ -46,7 +46,7 @@ namespace campvis {
         addProperty(p_lightId);
 
         setPropertyInvalidationLevel(p_transferFunction, INVALID_BBV | INVALID_RESULT);
-        setPropertyInvalidationLevel(p_sourceImageID, INVALID_BBV | INVALID_RESULT);
+        setPropertyInvalidationLevel(p_sourceImageID, INVALID_BBV | INVALID_PROPERTIES | INVALID_RESULT);
 
         decoratePropertyCollection(this);
     }
@@ -129,7 +129,8 @@ namespace campvis {
         return toReturn;
     }
 
-    void AdvOptimizedRaycaster::updateProperties() {
+    void AdvOptimizedRaycaster::updateProperties(DataContainer& dataContainer) {
+        RaycastingProcessor::updateProperties(dataContainer);
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
