@@ -161,7 +161,7 @@ namespace campvis {
     }
 
     void CampVisPainter::repaint() {
-        GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &CampVisPainter::paint), OpenGLJobProcessor::PaintJob);
+        //GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &CampVisPainter::paint), OpenGLJobProcessor::PaintJob);
     }
 
     void CampVisPainter::onRenderTargetChanged() {

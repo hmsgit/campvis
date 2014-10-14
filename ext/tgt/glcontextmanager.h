@@ -6,6 +6,10 @@
 #include "tgt/types.h"
 
 #include <ext/threading.h>
+
+#include <tbb/concurrent_hash_map.h>
+#include <tbb/spin_rw_mutex.h>
+
 #include <set>
 #include <string>
 
@@ -32,75 +36,60 @@ namespace tgt {
          * Registers \a canvas as new managed OpenGL context and initializes GLEW.
          * \param   canvas  OpenGL context to register
          */
-        void registerContextAndInitGlew(GLCanvas* context);
+        void registerContextAndInitGlew(GLCanvas* context, const std::string& title);
 
         /**
          * Removes the OpenGL context \a context from the list of managed contexts.
          * \param   context Context to remove.
          */
         void removeContext(GLCanvas* context);
-        
-        /**
-         * Returns the currently active OpenGL context.
-         * \return  _currentContext
-         */
-        GLCanvas* getCurrentContext() const;
 
         /**
-         * Returns the mutex protecting the OpenGL context
+         * Returns the mutex protecting the OpenGL context for the given context
+         * \param   context     OpenGL context to release.
          * \return  _glMutex
          */
-        std::mutex& getGlMutex();
+        std::mutex* getGlMutexForContext(GLCanvas* context);
 
         /**
          * Acquires \a context as current OpenGL context.
          * \param   context     OpenGL context to acquire.
+         * \param   lockGlMutex Flag whether to lock the OpenGL mutex of the context.
          */
-        void acquireContext(GLCanvas* context);
+        void acquireContext(GLCanvas* context, bool lockGlMutex);
 
         /**
-         * Releases the currently bound OpenGL context.
+         * Releases the given OpenGL context.
+         * \param   context         OpenGL context to release.
+         * \param   unlockGlMutex   Flag whether to unlock the OpenGL mutex of the context.
          */
-        void releaseCurrentContext();
-
-
-        /**
-         * Locks the OpenGL context mutex and acquires \a context as current OpenGl context.
-         * \param   context     OpenGL context to acquire.
-         */
-        void lockAndAcquire(GLCanvas* context);
+        void releaseContext(GLCanvas* context, bool unlockGlMutex);
 
         /**
-         * Releases the currently bound OpenGL context and also releases the OpenGL mutex.
+         * Checks whether the calling thread as an OpenGL context acquired.
+         * \return  True if the calling thread as an OpenGL context acquired.
          */
-        void releaseAndUnlock();
+        bool checkWhetherThisThreadHasAcquiredOpenGlContext() const;
         
     protected:
-        /**
-         * Sets the given context \a context as the current context for the OpenGL device.
-         * If \a context is already the current context, nothing will happen.
-         * \param   context     Context to set as current.
-         */
-        void setCurrent(GLCanvas* context);
+        /// Struct encapsulating all necessary information to manage an OpenGL thread
+        struct ContextInfo {
+            GLCanvas* _context;             ///< The context itself
+            std::mutex* _glMutex;           ///< The mutex protecting the context from concurrent access
+            std::thread::id _threadId;      ///< The thread id that acquired the context the last time (more for debug reasons)
+            bool _acquired;                 ///< (Debug) flag whether this context is currently acquired
+            std::string _title;             ///< Title of this context (as debug info)
+        };
 
-        /**
-         * Locks the OpenGL device for other threads acessing the ContextManager.
-         * \see GlContextManager::release
-         */
-        void lock();
+        /// Map of all managed OpenGL contexts
+        tbb::concurrent_hash_map<GLCanvas*, ContextInfo> _contextMap;
 
-        /**
-         * Releases the lock on the OpenGL device
-         * \see GlContextManager::lock
-         */
-        void unlock();
+        /// Set of all threads with currently acquired OpenGL context.
+        std::set<std::thread::id> _threadsWithAcquiredOpenGlContext;
+        /// Mutex protecting _threadsWithAcquiredOpenGlContext
+        mutable tbb::spin_rw_mutex _threadSetMutex;
 
-
-        std::set<GLCanvas*> _contexts;  ///< Map of all OpenGL contexts
-        GLCanvas* _currentContext;                   ///< Current active OpenGL context
-        std::mutex _glMutex;                         ///< Mutex protecting OpenGL for multi-threaded access
-
-        std::mutex _localMutex;                      ///< local mutex to prodect _contexts
+        static std::string loggerCat_;
     };
 
 
@@ -113,18 +102,20 @@ namespace tgt {
             : _context(context)
         {
             if (_context) {
-                GlContextManager::getRef().lockAndAcquire(context);
+                GlContextManager::getRef().acquireContext(context, true);
             }
         };
         ~GLContextScopedLock() {
             if (_context)
-                GlContextManager::getRef().releaseAndUnlock();
+                GlContextManager::getRef().releaseContext(_context, true);
         }
     private:
         GLCanvas* _context;
     };
 
 } // namespace tgt
+
+#define GLCtxtMgr tgt::Singleton<tgt::GlContextManager>::getRef()
 
 
 #endif // GLCONTEXTMANAGER_H__

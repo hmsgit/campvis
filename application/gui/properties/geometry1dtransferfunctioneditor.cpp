@@ -70,8 +70,6 @@ namespace campvis {
     Geometry1DTransferFunctionEditor::~Geometry1DTransferFunctionEditor() {
         disconnectFromTf();
 
-        if (OpenGLJobProcessor::isInited())
-            GLJobProc.deregisterContext(_canvas);
         if (tgt::GlContextManager::isInited())
             tgt::GlContextManager::getRef().removeContext(_canvas);
     }
@@ -177,9 +175,11 @@ namespace campvis {
     }
 
     void Geometry1DTransferFunctionEditor::sizeChanged(const tgt::ivec2& size) {
-        tbb::mutex::scoped_lock lock(_localMutex);
-        for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
-            (*it)->setViewportSize(size);
+        {
+            tbb::mutex::scoped_lock lock(_localMutex);
+            for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
+                (*it)->setViewportSize(size);
+            }
         }
         invalidate();
     }
@@ -220,7 +220,9 @@ namespace campvis {
     }
 
     void Geometry1DTransferFunctionEditor::invalidate() {
-        GLJobProc.enqueueJob(_canvas, makeJobOnHeap(this, &Geometry1DTransferFunctionEditor::paint), OpenGLJobProcessor::PaintJob);
+        // TODO: check, whether this should be done in an extra thread
+        tgt::GLContextScopedLock lock(_canvas);
+        paint();
     }
 
     void Geometry1DTransferFunctionEditor::setupGUI() {
@@ -237,8 +239,8 @@ namespace campvis {
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
         _canvas = new tgt::QtThreadedCanvas("", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, 0, false);
-        GLJobProc.registerContext(_canvas);
-        GLJobProc.enqueueJob(_canvas, makeJobOnHeap<tgt::GlContextManager, tgt::GLCanvas*>(tgt::GlContextManager::getPtr(), &tgt::GlContextManager::registerContextAndInitGlew, _canvas), OpenGLJobProcessor::SerialJob);
+        GLCtxtMgr.registerContextAndInitGlew(_canvas, "Geometry1DTransferFunctionEditor");
+        GLCtxtMgr.releaseContext(_canvas, false);
 
         _canvas->setPainter(this, false);
         _layout->addWidget(_canvas, 1, 1, 3, 3);
@@ -275,7 +277,7 @@ namespace campvis {
         _canvas->getEventHandler()->clearEventListeners();
         for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
             if (WholeTFGeometryManipulator* tester = dynamic_cast<WholeTFGeometryManipulator*>(*it)) {
-            	tester->s_selected.disconnect(this);
+                tester->s_selected.disconnect(this);
             }
             delete *it;
         }

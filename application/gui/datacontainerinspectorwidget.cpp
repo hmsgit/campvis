@@ -467,10 +467,8 @@ namespace campvis {
 
                     if (! filename.isEmpty()) {
                         // Texture access needs OpenGL context - dispatch method call:
-                        GLJobProc.enqueueJob(
-                            _canvas, 
-                            makeJobOnHeap(&DataContainerInspectorWidget::saveToFile, handle, filename.toStdString()), 
-                            OpenGLJobProcessor::SerialJob);
+                        tgt::GLContextScopedLock lock(_canvas);
+                        saveToFile(handle, filename.toStdString());
                     }
                 }
             }

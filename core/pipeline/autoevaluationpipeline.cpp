@@ -62,26 +62,10 @@ namespace campvis {
     }
 
     void AutoEvaluationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
-        if (_canvas == 0 || _enabled == false)
+        if (_canvas == nullptr || getEnabled() == false)
             return;
 
-        tbb::concurrent_hash_map<AbstractProcessor*, bool>::const_accessor a;
-        if (_isVisProcessorMap.find(a, processor)) {
-            if (a->second) {
-                // is VisualizationProcessor
-                GLJobProc.enqueueJob(
-                    _canvas, 
-                    makeJobOnHeap<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessorAndCheckOpenGLState, processor), 
-                    OpenGLJobProcessor::SerialJob);
-            }
-            else {
-                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessor, processor));
-            }
-        }
-        else {
-            tgtAssert(false, "Could not find processor in processor map.");
-            LWARNING("Caught invalidation of a non-registered processor!");
-        }
+        setPipelineDirty();
     }
 
     void AutoEvaluationPipeline::addProcessor(AbstractProcessor* processor) {
@@ -89,6 +73,15 @@ namespace campvis {
         findDataNamePropertiesAndAddToPortMap(processor);
 
         AbstractPipeline::addProcessor(processor);
+    }
+
+    void AutoEvaluationPipeline::executePipeline() {
+        // execute each processor (we do this n*n times, as we might have a complex dependency graph)
+        for (size_t i = 0; i < _processors.size(); ++i) {
+            for (size_t i = 0; i < _processors.size(); ++i) {
+                _processors[i]->process(getDataContainer());
+            }
+        }
     }
 
     void AutoEvaluationPipeline::onDataNamePropertyChanged(const AbstractProperty* prop) {
@@ -151,8 +144,6 @@ namespace campvis {
                 ++it;
             }
         }
-
-        AbstractPipeline::onDataContainerDataAdded(name, dh);
     }
 
     void AutoEvaluationPipeline::findDataNamePropertiesAndAddToPortMap(const HasPropertyCollection* hpc) {

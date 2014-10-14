@@ -51,23 +51,11 @@ namespace tgt {
 
 namespace campvis {
     /**
-     * Singleton class for managing and executing work items (jobs) that need an active OpenGL context.
-     * After an OpenGL context has been registered you can enqueue jobs that are to be executed within that 
-     * context to the job queue. Enqueued jobs are executed asynchroniously using a specific scheduling 
-     * strategy, depending on the given JobType:
+     * This job processor singleton can be used to execute jobs that need an OpenGL context.
      * 
-     * OpenGLJobProcessor implements a round-robin scheduling strategy for the registered OpenGL contexts, 
-     * meaning that each context gets roughly the same computing time. Thereby, it tries to maintain an update
-     * frequency of 30fps for each context.
-     * The jobs for each contexts are scheduled using the following technique: As mentioned above, each context
-     * has a time slot of \a n milliseconds. At first, as much serial jobs are executed as possible until their
-     * queue is empty or or the time is up. Then, one low priority job is executed. Finally, the PaintJob is
-     * executed (if existant) before switching to the next context.
-     * 
-     * This class implements the Runnable interface, hence, runs in its own thread. Furthermore, it uses 
-     * conditional wait, when there are currently no jobs to process.
-     * 
-     * This class is to be considered as thread-safe.
+     * Implementing the Runnable interface, the OpenGLJobProcessor runs a background thread having
+     * and acquired OpenGL context. You can execute OpenGL calls asynchroniously using enqueueJob()
+     * or synchronously using the ScopedSynchronousGlJobExecution guard.
      */
     class CAMPVIS_CORE_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable, public sigslot::has_slots {
         friend class tgt::Singleton<OpenGLJobProcessor>;    ///< CRTP
@@ -89,14 +77,6 @@ namespace campvis {
             tgt::GLContextScopedLock* _lock;
         };
 
-        /**
-         * Enumeration of the different priorities of items.
-         */
-        enum JobType {
-            PaintJob,           ///< PaintJobs have the highest priority, there can only be one paint job per context at a time.
-            SerialJob,          ///< SerialJobs have a lower priority than PaintJobs, but are guaranteed to be executed in order.
-            LowPriorityJob      ///< Low priority jobs have the lowest priority, can be executed at any time. The only guarantee is that thay won't starve.
-        };
 
         /**
          * Destructor, deletes all unfinished jobs.
@@ -108,13 +88,7 @@ namespace campvis {
          * Registers the given OpenGL context, so that it gets its own job queue.
          * \param   context     OpenGL context to register.
          */
-        void registerContext(tgt::GLCanvas* context);
-
-        /**
-         * Deregisters the given OpenGL context, so that it has no longer its own job queue.
-         * \param   context     OpenGL context to deregister.
-         */
-        void deregisterContext(tgt::GLCanvas* context);
+        void setContext(tgt::GLCanvas* context);
 
         /// \see Runnable::stop
         void stop();
@@ -136,14 +110,12 @@ namespace campvis {
         void resume();
 
         /**
-         * Enqueues the given Job with the given priority.
+         * Enqueues the given job.
          * 
          * \note    OpenGLJobProcessor takes ownership of \a job.
-         * \param   canvas      OpenGL context for which to enqueue the job, must be registered.
          * \param   job         Job to enqueue, PriorityPool takes ownership of this Job!
-         * \param   priority    Priority of the job to enqueue
          */
-        void enqueueJob(tgt::GLCanvas* canvas, AbstractJob* job, JobType priority);
+        void enqueueJob(AbstractJob* job);
 
 
         /**
@@ -153,73 +125,19 @@ namespace campvis {
          */
         tgt::GLCanvas* iKnowWhatImDoingGetArbitraryContext();
 
-        /**
-         * Sets the calling thread as OpenGl thread.
-         * \note    You can do really messy things with this. Do not use this method unless
-         *          you know what you're doing and know that there is no other way...
-         */
-        void iKnowWhatImDoingSetThisThreadOpenGlThread();
-
-        /**
-         * Checks whether calling thread is OpenGL thread.
-         * \return  std::this_thread::get_id() == _this_thread_id
-         */
-        bool isCurrentThreadOpenGlThread() const;
-
     protected:
-        /**
-         * Struct encapsulating the job queue for a single OpenGL context.
-         */
-        struct CAMPVIS_CORE_API PerContextJobQueue {
-            /**
-             * Creates an empty PerContextJobQueue.
-             */
-            PerContextJobQueue() {
-                _paintJob = 0;
-            }
-
-            /**
-             * Destructor, deletes all enqueued jobs.
-             */
-            ~PerContextJobQueue() {
-                if (_paintJob != 0)
-                    delete _paintJob;
-
-                AbstractJob* jobToDelete = 0;
-                while (_serialJobs.try_pop(jobToDelete))
-                    delete jobToDelete;
-                while (_lowPriorityJobs.try_pop(jobToDelete))
-                    delete jobToDelete;
-            }
-
-            tbb::atomic<AbstractJob*> _paintJob;                    ///< PaintJob of the context
-            tbb::concurrent_queue<AbstractJob*> _serialJobs;        ///< Queue of serial jobs for the context
-            tbb::concurrent_queue<AbstractJob*> _lowPriorityJobs;   ///< Queue of jow priority jobs for the context
-
-            /**
-             * Checks, whether there is any job to do for this context.
-             * \return (_serialJobs.empty() && _lowPriorityJobs.empty() && (_paintJob == 0))
-             */
-            bool empty() const {
-                return ((_paintJob == 0) && _serialJobs.empty() && _lowPriorityJobs.empty());
-            }
-        };
-
+        // Protected constructor since it's a singleton
         OpenGLJobProcessor();
 
-        tbb::concurrent_hash_map<tgt::GLCanvas*, PerContextJobQueue*> _contextQueueMap;
-        tbb::concurrent_vector<tgt::GLCanvas*> _contexts;
+        tgt::GLCanvas* _context;                        ///< The OpenGL context to use
+        tbb::concurrent_queue<AbstractJob*> _jobQueue;  ///< The OpenGL job queue
 
-        tbb::atomic<int> _pause;
+        tbb::atomic<int> _pause;                        ///< Counter of pause requests
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
-
-        tbb::atomic<tgt::GLCanvas*> _currentContext;         ///< current active OpenGL context
 
     private:
         typedef std::allocator<AbstractJob> pool_allocator_t;
-        tbb::memory_pool<pool_allocator_t> _jobPool; ///< Memory pool for the signals
-
-        static std::thread::id _this_thread_id;
+        tbb::memory_pool<pool_allocator_t> _jobPool;    ///< Memory pool for the signals
     };
 
 }

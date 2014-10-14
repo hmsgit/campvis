@@ -64,6 +64,9 @@ namespace campvis {
         virtual void addProcessor(AbstractProcessor* processor);
 
     protected:
+        /// \see AbstractPipeline::executePipeline()
+        virtual void executePipeline();
+
         /**
          * Slot getting called when one of the observed processors got invalidated.
          * The default behaviour is to dispatch a job to execute the invalidated processor and emit the s_invalidated signal.
