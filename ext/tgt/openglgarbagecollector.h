@@ -32,8 +32,10 @@
 
 
 #include "tgt/tgt_gl.h"
+#include "tgt/opengljobprocessor.h"
 #include "tgt/singleton.h"
 #include "tgt/types.h"
+
 #include <tbb/atomic.h>
 #include <tbb/concurrent_vector.h>
 #include <tbb/spin_mutex.h>
@@ -59,16 +61,19 @@ namespace tgt {
         void addGarbageTexture(GLuint id) {
             tbb::spin_mutex::scoped_lock lock(_addMutex);
             _texturesToDelete[_currentFrontindex].push_back(id);
+            GLJobProc.enqueueJob(makeJobOnHeap(this, &OpenGLGarbageCollector::deleteGarbage));
         };
 
         void addGarbageFramebufferObject(GLuint id) {
             tbb::spin_mutex::scoped_lock lock(_addMutex);
             _fbosToDelete[_currentFrontindex].push_back(id);
+            GLJobProc.enqueueJob(makeJobOnHeap(this, &OpenGLGarbageCollector::deleteGarbage));
         };
 
         void addGarbageBufferObject(GLuint id) {
             tbb::spin_mutex::scoped_lock lock(_addMutex);
             _buffersToDelete[_currentFrontindex].push_back(id);
+            GLJobProc.enqueueJob(makeJobOnHeap(this, &OpenGLGarbageCollector::deleteGarbage));
         };
 
         void deleteGarbage();
