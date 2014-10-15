@@ -26,6 +26,7 @@
 
 #include "tgt/assert.h"
 #include "tgt/camera.h"
+#include "tgt/glcontextmanager.h"
 #include "tgt/quadric.h"
 #include "tgt/shadermanager.h"
 #include "tgt/texture.h"
@@ -48,8 +49,7 @@ namespace campvis {
         , _copyShader(nullptr)
         , _errorTexture(nullptr)
     {
-        tgtAssert(getCanvas() != 0, "The given canvas must not be 0!");
-        _dirty = true;
+        tgtAssert(getCanvas() != nullptr, "The given canvas must not be 0!");
         setPipeline(pipeline);
     }
 
@@ -58,7 +58,7 @@ namespace campvis {
     }
 
     void CampVisPainter::paint() {
-        if (getCanvas() == 0)
+        if (getCanvas() == nullptr)
             return;
 
         if (_copyShader == nullptr) {
@@ -79,7 +79,7 @@ namespace campvis {
         tgt::Shader::IgnoreUniformLocationErrorGuard guard(_copyShader);
 
         // render whatever there is to render
-        if (rd != 0 || (repGL != 0 && repGL->getDimensionality() == 2)) {
+        if (rd != nullptr || (repGL != nullptr && repGL->getDimensionality() == 2)) {
             _copyShader->setUniform("_viewMatrix", tgt::mat4::identity);
 
             // bind input textures
@@ -135,39 +135,33 @@ namespace campvis {
     void CampVisPainter::deinit() {
         ShdrMgr.dispose(_copyShader);
 
-        if (_pipeline != 0) {
-            _pipeline->s_renderTargetChanged.disconnect(this);
-            if (getCanvas()->getEventHandler() != 0)
+        if (_pipeline != nullptr) {
+            if (getCanvas()->getEventHandler() != nullptr)
                 getCanvas()->getEventHandler()->removeEventListener(_pipeline);
-            _pipeline = 0;
+            _pipeline = nullptr;
         }
     }
 
     void CampVisPainter::setPipeline(AbstractPipeline* pipeline) {
-        tgtAssert(pipeline != 0, "The given pipeline must not be 0.");
-        if (_pipeline != 0) {
-            _pipeline->s_renderTargetChanged.disconnect(this);
-            if (getCanvas()->getEventHandler() != 0)
+        tgtAssert(pipeline != nullptr, "The given pipeline must not be 0.");
+
+        if (_pipeline != nullptr) {
+            if (getCanvas()->getEventHandler() != nullptr)
                 getCanvas()->getEventHandler()->removeEventListener(_pipeline);
         }
 
         _pipeline = pipeline;
-        _pipeline->s_renderTargetChanged.connect(this, &CampVisPainter::onRenderTargetChanged);
         _pipeline->setRenderTargetSize(getCanvas()->getSize());
-        if (getCanvas()->getEventHandler() != 0)
+        if (getCanvas()->getEventHandler() != nullptr)
             getCanvas()->getEventHandler()->addEventListenerToFront(_pipeline);
     }
 
     void CampVisPainter::repaint() {
-        //GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &CampVisPainter::paint), OpenGLJobProcessor::PaintJob);
-    }
-
-    void CampVisPainter::onRenderTargetChanged() {
-        repaint();
+        // do nothing, as the painting is entirely managed by the pipeline.
     }
 
     void CampVisPainter::setCanvas(tgt::GLCanvas* canvas) {
-        tgtAssert(dynamic_cast<tgt::QtThreadedCanvas*>(canvas) != 0, "Canvas must be of type QtThreadedCanvas!");
+        tgtAssert(dynamic_cast<tgt::QtThreadedCanvas*>(canvas) != nullptr, "Canvas must be of type QtThreadedCanvas!");
         Painter::setCanvas(canvas);
     }
 

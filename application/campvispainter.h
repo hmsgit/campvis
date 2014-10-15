@@ -91,10 +91,6 @@ namespace campvis {
 
         void setErrorTexture(tgt::Texture* texture);
 
-        /**
-         * Slot being notified when the pipeline's render target changed.
-         */
-        void onRenderTargetChanged();
 
     private:
         /**
@@ -106,10 +102,7 @@ namespace campvis {
 
         AbstractPipeline* _pipeline;                        ///< Pipeline to render
         tgt::Shader* _copyShader;                           ///< Shader for copying the render target to the framebuffer.
-        tbb::atomic<bool> _dirty;                           ///< Flag whether render result is dirty and needs to be rerendered.
-        std::condition_variable _renderCondition;           ///< conditional wait condition for rendering
-
-        tgt::Texture* _errorTexture;
+        tgt::Texture* _errorTexture;                        ///< Pointer to error texture
     };
 
 }

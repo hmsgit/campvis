@@ -138,7 +138,6 @@ namespace campvis {
                 executePipeline();
 
                 // paint on canvas
-                // FIXME: clean up the whole painter crap...
                 _canvas->getPainter()->paint();
             }
 
