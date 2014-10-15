@@ -125,6 +125,12 @@ namespace campvis {
         virtual void stop();
 
         /**
+         * Executes this pipeline.
+         * To be implemented in the subclass.
+         */
+        virtual void executePipeline() = 0;
+
+        /**
          * Returns the DataContainer of this pipeline, const version.
          * \return _data
          */
@@ -186,12 +192,6 @@ namespace campvis {
          * Sets the resultDirty flag of this pipeline and starts its execution if necessary.
          */
         void setPipelineDirty();
-
-        /**
-         * Executes this pipeline.
-         * To be implemented in the subclass.
-         */
-        virtual void executePipeline() = 0;
 
         /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.

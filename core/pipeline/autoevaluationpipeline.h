@@ -63,9 +63,10 @@ namespace campvis {
         /// \see AbstractPipeline::addProcessor()
         virtual void addProcessor(AbstractProcessor* processor);
 
-    protected:
         /// \see AbstractPipeline::executePipeline()
         virtual void executePipeline();
+
+    protected:
 
         /**
          * Slot getting called when one of the observed processors got invalidated.

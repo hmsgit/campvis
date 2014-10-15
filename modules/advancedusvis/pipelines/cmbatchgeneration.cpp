@@ -124,7 +124,7 @@ namespace campvis {
 
         p_autoExecution.setValue(false);
 
-        tgt::GLContextScopedLock lock(_canvas, true);
+        tgt::GLContextScopedLock lock(_canvas);
         for (int i = p_range.getValue().x; i < p_range.getValue().y; ++i) {
             executePass(i);
         }

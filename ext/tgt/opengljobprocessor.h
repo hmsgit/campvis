@@ -86,6 +86,12 @@ namespace tgt {
          */
         void setContext(tgt::GLCanvas* context);
 
+        /**
+         * Returns the OpenGL context of this object..
+         * \return  _context
+         */
+        tgt::GLCanvas* getContext();
+
         /// \see Runnable::stop
         void stop();
         
@@ -113,13 +119,6 @@ namespace tgt {
          */
         void enqueueJob(AbstractJob* job);
 
-
-        /**
-         * Returns an arbitrary registered OpenGL context.
-         * \note    You can do really messy things with this. Do not use this method unless
-         *          you know what you're doing and know that there is no other way...
-         */
-        tgt::GLCanvas* iKnowWhatImDoingGetArbitraryContext();
 
     protected:
         // Protected constructor since it's a singleton

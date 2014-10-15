@@ -28,9 +28,6 @@
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
-#include "core/tools/simplejobprocessor.h"
-#include "core/tools/job.h"
-
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
 namespace campvis {

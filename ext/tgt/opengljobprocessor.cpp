@@ -38,7 +38,7 @@ namespace tgt {
     {
         if (! GLCtxtMgr.checkWhetherThisThreadHasAcquiredOpenGlContext()) {
             GLJobProc.pause();
-            _lock = new tgt::GLContextScopedLock(GLJobProc.iKnowWhatImDoingGetArbitraryContext());
+            _lock = new tgt::GLContextScopedLock(GLJobProc.getContext());
         }
     }
 
@@ -135,8 +135,7 @@ namespace tgt {
         _context = context;
     }
 
-
-    tgt::GLCanvas* OpenGLJobProcessor::iKnowWhatImDoingGetArbitraryContext() {
+    tgt::GLCanvas* OpenGLJobProcessor::getContext() {
         return _context;
     }
 
