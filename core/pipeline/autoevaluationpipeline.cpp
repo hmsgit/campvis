@@ -23,15 +23,13 @@
 // ================================================================================================
 
 #include "autoevaluationpipeline.h"
+
 #include "tgt/tgt_gl.h"
 #include "tgt/glcanvas.h"
+
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/metaproperty.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
-
 
 namespace campvis {
     const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";

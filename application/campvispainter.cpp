@@ -37,8 +37,6 @@
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/pipeline/abstractpipeline.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {

@@ -36,7 +36,6 @@
 #include "core/classification/tfgeometry1d.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "core/tools/opengljobprocessor.h"
 
 #include <QCheckBox>
 #include <QGridLayout>

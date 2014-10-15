@@ -26,7 +26,11 @@
 #define OPENGLJOBPROCESSOR_H__
 
 #include "sigslot/sigslot.h"
+
+#include "tgt/glcontextmanager.h"
+#include "tgt/job.h"
 #include "tgt/runnable.h"
+#include "tgt/singleton.h"
 #include "tgt/singleton.h"
 
 #include <ext/threading.h>
@@ -38,18 +42,10 @@
 #include <tbb/concurrent_vector.h>
 #include <tbb/memory_pool.h>
 
-#include "tgt/glcontextmanager.h"
-#include "tgt/singleton.h"
-
-#include "core/coreapi.h"
-#include "core/tools/job.h"
-
 
 namespace tgt {
     class GLCanvas;
-}
 
-namespace campvis {
     /**
      * This job processor singleton can be used to execute jobs that need an OpenGL context.
      * 
@@ -57,7 +53,7 @@ namespace campvis {
      * and acquired OpenGL context. You can execute OpenGL calls asynchroniously using enqueueJob()
      * or synchronously using the ScopedSynchronousGlJobExecution guard.
      */
-    class CAMPVIS_CORE_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable, public sigslot::has_slots {
+    class TGT_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable, public sigslot::has_slots {
         friend class tgt::Singleton<OpenGLJobProcessor>;    ///< CRTP
         friend class AbstractJob;                           ///< so the custom new/delete operator can access the memory pool
 
@@ -68,7 +64,7 @@ namespace campvis {
          * does nothing. If this thread is not the OpenGL thread, the OpenGLJobProcessor is paused,
          * an arbitrary OpenGL context acquired. Upon destruction the OpenGLJobProcessor is resumed.
          */
-        class CAMPVIS_CORE_API ScopedSynchronousGlJobExecution {
+        class TGT_API ScopedSynchronousGlJobExecution {
         public:
             ScopedSynchronousGlJobExecution();
             ~ScopedSynchronousGlJobExecution();
@@ -142,6 +138,6 @@ namespace campvis {
 
 }
 
-#define GLJobProc tgt::Singleton<campvis::OpenGLJobProcessor>::getRef()
+#define GLJobProc tgt::Singleton<tgt::OpenGLJobProcessor>::getRef()
 
 #endif // OPENGLJOBPROCESSOR_H__

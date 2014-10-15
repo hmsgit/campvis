@@ -35,9 +35,6 @@
 #include <IL/ilu.h>
 #endif
 
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/facegeometry.h"

@@ -25,13 +25,12 @@
 #ifndef QTJOBPROCESSOR_H__
 #define QTJOBPROCESSOR_H__
 
-#include "core/tools/job.h"
+#include "tgt/job.h"
 #include "tgt/singleton.h"
 #include <QWidget>
 #include <functional>
 
 namespace campvis {
-
 
     /**
      * This job processor singleton can be used to execute jobs (asynchronously) from inside the Qt GUI thread.
@@ -58,18 +57,18 @@ namespace campvis {
         /**
          Enqueues a new job to be processed by the job processor
          */
-        void enqueueJob(AbstractJob * job);
+        void enqueueJob(tgt::AbstractJob* job);
 
         /**
          Convenience function to simplify the code, removing the necessity for a makeJobOnHeap() call
          */
         void enqueueJob(std::function<void(void)> fn);
 
-   signals:
-        void newJobSignal(AbstractJob * job);
+    signals:
+        void newJobSignal(tgt::AbstractJob* job);
 
     private slots:
-        void onJobArrived(AbstractJob * job);
+        void onJobArrived(tgt::AbstractJob* job);
     };
 
 }

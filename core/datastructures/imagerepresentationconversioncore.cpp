@@ -26,10 +26,6 @@
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
-#include "tgt/glcontextmanager.h"
-
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/job.h"
 
 namespace campvis {
 
@@ -46,7 +42,7 @@ namespace campvis {
                 return nullptr;
             }
 
-            OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
 
             switch (wtp._baseType) {
@@ -79,7 +75,7 @@ namespace campvis {
             return toReturn;
         }
         else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
-            OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
@@ -97,7 +93,7 @@ namespace campvis {
             return ImageRepresentationLocal::create(tester->getParent(), tester->getImageData());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
-            OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
             if (wtp._pointer != nullptr)
                 return ImageRepresentationLocal::create(source->getParent(), wtp);

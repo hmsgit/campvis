@@ -29,6 +29,7 @@
 #include "tgt/glcanvas.h"
 #include "tgt/glcontextmanager.h"
 #include "tgt/gpucapabilities.h"
+#include "tgt/opengljobprocessor.h"
 #include "tgt/shadermanager.h"
 #include "tgt/texturereadertga.h"
 #include "tgt/qt/qtapplication.h"
@@ -39,8 +40,6 @@
 #include "application/gui/mainwindow.h"
 #include "application/gui/mdi/mdidockablewindow.h"
 
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"

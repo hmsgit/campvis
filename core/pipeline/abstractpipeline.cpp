@@ -35,9 +35,6 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessor.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
 
 
 #ifdef CAMPVIS_DEBUG

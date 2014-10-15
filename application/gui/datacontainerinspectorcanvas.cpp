@@ -34,7 +34,6 @@
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
-#include "core/tools/job.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
 

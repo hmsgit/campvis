@@ -30,9 +30,8 @@
 #include "tgt/logmanager.h"
 #include "tgt/openglgarbagecollector.h"
 #include "tgt/glcontextmanager.h"
-#include "core/tools/job.h"
 
-namespace campvis {
+namespace tgt {
 
     OpenGLJobProcessor::ScopedSynchronousGlJobExecution::ScopedSynchronousGlJobExecution()
         : _lock(nullptr)

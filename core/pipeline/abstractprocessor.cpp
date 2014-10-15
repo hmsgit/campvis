@@ -22,15 +22,11 @@
 // 
 // ================================================================================================
 
+#include "abstractprocessor.h"
 #include "tgt/assert.h"
+#include "core/properties/abstractproperty.h"
 
 #include <ext/threading.h>
-
-#include "abstractprocessor.h"
-#include "core/properties/abstractproperty.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
 
 namespace campvis {
 
