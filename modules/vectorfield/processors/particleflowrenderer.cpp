@@ -202,15 +202,15 @@ namespace campvis {
                 }
 
                 // stage 2: render particles
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
                 tgt::TextureUnit tfUnit;
                 _shader->selectSubroutine(tgt::ShaderObject::VERTEX_SHADER, "render");
                 _shader->setUniform("_coloringMode", p_coloring.getValue());
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
+
+                FramebufferActivationGuard fag(this);
+                createAndAttachColorTexture();
+                createAndAttachDepthTexture();
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 glEnable(GL_POINT_SPRITE);
                 glBindVertexArray((_drawBuffer == 1) ? _vaoA->getId() : _vaoB->getId());

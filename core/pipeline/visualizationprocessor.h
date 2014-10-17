@@ -66,7 +66,8 @@ namespace campvis {
                 : _parentProcessor(vp)
                 , _fbo(vp->_fbo)
             {
-                tgtAssert(_fbo != 0, "FBO must not be 0.");
+                tgtAssert(_fbo != nullptr, "FBO must not be 0.");
+                tgtAssert(_fbo->getId() != 0, "The FBO's OpenGL ID is 0, this is wrong.");
                 _fbo->activate();
 
                 const tgt::ivec2& windowSize = vp->getEffectiveViewportSize();

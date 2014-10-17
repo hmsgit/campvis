@@ -45,4 +45,22 @@ GLenum _lGLError(int line, const char* file) {
     return err;
 }
 
+GLboolean getGlBool(GLenum param) {
+    GLboolean toReturn;
+    glGetBooleanv(param, &toReturn);
+    return toReturn;
+}
+
+GLint getGlInt(GLenum param) {
+    GLint toReturn;
+    glGetIntegerv(param, &toReturn);
+    return toReturn;
+}
+
+GLfloat getGlFloat(GLenum param) {
+    GLfloat toReturn;
+    glGetFloatv(param, &toReturn);
+    return toReturn;
+}
+
 } // namespace tgt

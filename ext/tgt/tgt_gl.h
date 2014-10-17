@@ -40,6 +40,12 @@
 
 namespace tgt {
     TGT_API GLenum _lGLError(int line, const char* file);
+
+    GLboolean getGlBool(GLenum param);;
+
+    GLint getGlInt(GLenum param);;
+
+    GLfloat getGlFloat(GLenum param);
 } // namespace tgt
 
 #ifdef TGT_DEBUG

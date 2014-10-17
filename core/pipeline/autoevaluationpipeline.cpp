@@ -49,9 +49,13 @@ namespace campvis {
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
         }
+
+        _data->s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
     }
 
     void AutoEvaluationPipeline::deinit() {
+        _data->s_dataAdded.disconnect(this);
+
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.disconnect(this);
         }
@@ -74,11 +78,10 @@ namespace campvis {
     }
 
     void AutoEvaluationPipeline::executePipeline() {
-        // execute each processor (we do this n*n times, as we might have a complex dependency graph)
+        // execute each processor once 
+        // (AbstractProcessor::process() takes care of executing only invalid processors)
         for (size_t i = 0; i < _processors.size(); ++i) {
-            for (size_t i = 0; i < _processors.size(); ++i) {
-                _processors[i]->process(getDataContainer());
-            }
+            _processors[i]->process(getDataContainer());
         }
     }
 

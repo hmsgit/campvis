@@ -471,10 +471,15 @@ void Shader::detachObject(ShaderObject* obj) {
 
 void Shader::activate() {
     if (isLinked_)
-        glUseProgram(id_);
+        activate(id_);
 }
 
 void Shader::activate(GLint id) {
+#if TGT_DEBUG
+    if (tgt::getGlInt(GL_CURRENT_PROGRAM) != 0)
+        LWARNING("Binding a new Shader while another Shader is active. Do you really want to do this?");
+#endif
+
     glUseProgram(id);
 }
 
