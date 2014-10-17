@@ -34,12 +34,12 @@
 #include "tgt/gpucapabilities.h"
 #include "tgt/shadermanager.h"
 #include "tgt/glcontextmanager.h"
+#include "tgt/opengljobprocessor.h"
 #include "tgt/qt/qtthreadedcanvas.h"
 #include "tgt/logmanager.h"
 #include "tgt/qt/qtapplication.h"
 
 #include "core/tools/simplejobprocessor.h"
-#include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
 #ifdef Q_WS_X11
@@ -64,8 +64,7 @@ void init() {
 
     tgt::GlContextManager::init();
 
-    campvis::OpenGLJobProcessor::init();
-    campvis::OpenGLJobProcessor::getRef().iKnowWhatImDoingSetThisThreadOpenGlThread();
+    tgt::OpenGLJobProcessor::init();
     campvis::SimpleJobProcessor::init();
 
     tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
@@ -76,12 +75,14 @@ void init() {
     LogMgr.getConsoleLog()->addCat("", true, tgt::Info);
 
     // create a local OpenGL context and init GL
-    _localContext = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
+    tgt::QtThreadedCanvas* backgroundCanvas = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
+    GLCtxtMgr.registerContextAndInitGlew(backgroundCanvas, "Background Context");
+    GLCtxtMgr.releaseContext(backgroundCanvas, false);
+    GLJobProc.setContext(backgroundCanvas);
+    GLJobProc.start();
     
-    tgt::GLContextScopedLock lock(_localContext);
-    tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
-    GLJobProc.iKnowWhatImDoingSetThisThreadOpenGlThread();
-    GLJobProc.registerContext(_localContext);
+    _localContext = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
+    tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext, "Local Context");
 
     tgt::initGL(featureset);
     ShdrMgr.setDefaultGlslVersion("330");
@@ -105,7 +106,9 @@ void init() {
     if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
         LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
     }
-    
+
+    GLCtxtMgr.releaseContext(_localContext, false);
+
     _initialized = true;
 }
 
@@ -118,11 +121,12 @@ void deinit() {
 
         campvis::QuadRenderer::deinit();
 
+        campvis::SimpleJobProcessor::deinit();
+        GLJobProc.stop();
+        tgt::OpenGLJobProcessor::deinit();
+
         tgt::deinitGL();
     }
-
-    campvis::SimpleJobProcessor::deinit();
-    campvis::OpenGLJobProcessor::deinit();
 
 
     tgt::GlContextManager::deinit();

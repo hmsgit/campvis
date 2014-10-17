@@ -40,8 +40,10 @@ SET(TGT_SOURCES
 	init.cpp
 	light.cpp
 	logmanager.cpp
+	job.cpp
 	naturalcubicspline.cpp
 	openglgarbagecollector.cpp
+	opengljobprocessor.cpp
 	painter.cpp
 	runnable.cpp
 	shadermanager.cpp

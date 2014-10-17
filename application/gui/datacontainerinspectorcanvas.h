@@ -39,7 +39,6 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/propertycollection.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "core/tools/opengljobprocessor.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"
 
 #include "modules/base/processors/lightsourceprovider.h"

@@ -34,7 +34,6 @@
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
-#include "core/tools/job.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/geometry1dtransferfunction.h"
 
@@ -67,15 +66,8 @@ namespace campvis {
     {
         static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
 
-        makeCurrent();
-        // Init GLEW for this context
-        GLenum err = glewInit();
-        if (err != GLEW_OK) {
-            // Problem: glewInit failed, something is seriously wrong.
-            tgtAssert(false, "glewInit failed");
-            std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        GLCtxtMgr.registerContextAndInitGlew(this, "DataContainerInspector");
+        GLCtxtMgr.releaseContext(this, false);
         
         addProperty(p_currentSlice);
         addProperty(p_transferFunction);
@@ -117,7 +109,6 @@ namespace campvis {
     void DataContainerInspectorCanvas::init() {
         initAllProperties();
 
-        GLJobProc.registerContext(this);
         _paintShader = ShdrMgr.load("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "");
         _paintShader->setAttributeLocation(0, "in_Position");
         _paintShader->setAttributeLocation(1, "in_TexCoords");
@@ -147,7 +138,8 @@ namespace campvis {
         _textures.clear();
         ShdrMgr.dispose(_paintShader);
         delete _quad;
-        GLJobProc.deregisterContext(this);
+
+        GLCtxtMgr.removeContext(this);
     }
 
     QSize DataContainerInspectorCanvas::sizeHint() const {
@@ -261,8 +253,11 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::invalidate() {
         // only if inited
-        if (_quad != 0 && _paintShader != 0)
-            GLJobProc.enqueueJob(this, makeJobOnHeap(this, &DataContainerInspectorCanvas::paint), OpenGLJobProcessor::PaintJob);
+        if (_quad != 0 && _paintShader != 0) {
+            // TODO: check, whether this should be done in an extra thread
+            tgt::GLContextScopedLock lock(this);
+            paint();
+        }
     }
 
     void DataContainerInspectorCanvas::createQuad() {

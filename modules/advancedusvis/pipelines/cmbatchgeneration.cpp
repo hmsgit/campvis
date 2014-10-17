@@ -24,16 +24,14 @@
 
 #include "cmbatchgeneration.h"
 
-#include "tgt/event/keyevent.h"
 #include "tgt/filesystem.h"
+#include "tgt/glcontextmanager.h"
+#include "tgt/event/keyevent.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
-#include "core/tools/job.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>
@@ -125,8 +123,10 @@ namespace campvis {
             return;
 
         p_autoExecution.setValue(false);
+
+        tgt::GLContextScopedLock lock(_canvas);
         for (int i = p_range.getValue().x; i < p_range.getValue().y; ++i) {
-            GLJobProc.enqueueJob(_canvas, makeJobOnHeap(this, &CmBatchGeneration::executePass, i), OpenGLJobProcessor::SerialJob);
+            executePass(i);
         }
     }
 

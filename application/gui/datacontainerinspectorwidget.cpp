@@ -35,9 +35,6 @@
 #include <IL/ilu.h>
 #endif
 
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/facegeometry.h"
@@ -467,10 +464,8 @@ namespace campvis {
 
                     if (! filename.isEmpty()) {
                         // Texture access needs OpenGL context - dispatch method call:
-                        GLJobProc.enqueueJob(
-                            _canvas, 
-                            makeJobOnHeap(&DataContainerInspectorWidget::saveToFile, handle, filename.toStdString()), 
-                            OpenGLJobProcessor::SerialJob);
+                        tgt::GLContextScopedLock lock(_canvas);
+                        saveToFile(handle, filename.toStdString());
                     }
                 }
             }

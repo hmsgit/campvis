@@ -28,6 +28,7 @@
 #include "sigslot/sigslot.h"
 
 #include "tgt/logmanager.h"
+#include "tgt/runnable.h"
 #include "tgt/vector.h"
 #include "tgt/event/eventhandler.h"
 #include "tgt/event/eventlistener.h"
@@ -54,7 +55,7 @@ namespace campvis {
     /**
      * Abstract base class for CAMPVis Pipelines.
      */
-    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public tgt::EventHandler, public tgt::EventListener {
+    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public tgt::Runnable, public tgt::EventHandler, public tgt::EventListener {
     public:
         /**
          * Creates a AbstractPipeline.
@@ -114,6 +115,20 @@ namespace campvis {
          */
         virtual void onEvent(tgt::Event* e);
 
+        /**
+         * Entrance point for the pipeline thread.
+         * \see Runnable::run
+         */
+        virtual void run();
+
+        /// \see Runnable::stop
+        virtual void stop();
+
+        /**
+         * Executes this pipeline.
+         * To be implemented in the subclass.
+         */
+        virtual void executePipeline() = 0;
 
         /**
          * Returns the DataContainer of this pipeline, const version.
@@ -169,29 +184,20 @@ namespace campvis {
          */
         const std::string& getRenderTargetID() const;
 
-        /**
-         * returns the currently set canvas for the pipeline
-         */
-        tgt::GLCanvas * getCanvas() {
-            return _canvas;
-        }
-
         /// Signal emitted when the pipeline's render target has changed
         sigslot::signal0 s_renderTargetChanged;
 
     protected:
         /**
+         * Sets the resultDirty flag of this pipeline and starts its execution if necessary.
+         */
+        void setPipelineDirty();
+
+        /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
          */
         void executeProcessor(AbstractProcessor* processor);
-        
-        /**
-         * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 
-         * and locks its properties meanwhile.
-         * \param   processor   Processor to execute.
-         */
-        void lockGLContextAndExecuteProcessor(AbstractProcessor* processor);
         
         /**
          * Executes \a processor and afterwards checks the OpenGL state to be valid.
@@ -207,25 +213,22 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
-        /**
-         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
-         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
-         * \param   name    Name of the added data.
-         * \param   dh      DataHandle to the newly added data.
-         */
-        virtual void onDataContainerDataAdded(std::string name, DataHandle dh);
 
         /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
         DataContainer* _data;
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
-        tbb::atomic<bool> _enabled;                         ///< flag whether this pipeline is currently enabled
 
         tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
         IVec2Property _canvasSize;                          ///< original canvas size
         bool _ignoreCanvasSizeUpdate;
 
         DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
+
+    private:
+        std::condition_variable _evaluationCondition;       ///< conditional wait to be used when the pipeline currently does not need to be executed.
+        tbb::atomic<bool> _enabled;                         ///< flag whether this pipeline is currently enabled
+        tbb::atomic<bool> _pipelineDirty;                   ///< Flag whether this pipeline is dirty and executePipeline() needs to be called.
 
         static const std::string loggerCat_;
 

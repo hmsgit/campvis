@@ -26,8 +26,7 @@
 
 #include "tgt/assert.h"
 #include "tgt/logmanager.h"
-
-#include "core/tools/opengljobprocessor.h"
+#include "tgt/opengljobprocessor.h"
 
 namespace campvis {
 
@@ -36,7 +35,7 @@ namespace campvis {
             return nullptr;
 
         if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(source)) {
-            OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }

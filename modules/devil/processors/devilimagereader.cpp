@@ -40,8 +40,6 @@
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
-#include "core/tools/opengljobprocessor.h"
-
 #include "core/tools/quadrenderer.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/mapping.h"

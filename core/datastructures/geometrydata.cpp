@@ -28,8 +28,6 @@
 #include "tgt/glcontextmanager.h"
 #include "tgt/vertexarrayobject.h"
 
-#include "core/tools/opengljobprocessor.h"
-
 namespace campvis {
 
     const std::string GeometryData::loggerCat_ = "CAMPVis.core.datastructures.GeometryData";;

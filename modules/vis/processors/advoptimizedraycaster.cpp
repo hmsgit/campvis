@@ -67,6 +67,7 @@ namespace campvis {
     }
 
     void AdvOptimizedRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
+        _shader->deactivate();
 
         if (getInvalidationLevel() & INVALID_BBV){
             _vhm->createHierarchy(image, p_transferFunction.getTF());

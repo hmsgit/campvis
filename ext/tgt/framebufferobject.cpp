@@ -45,6 +45,11 @@ FramebufferObject::~FramebufferObject()
 
 void FramebufferObject::activate()
 {
+#if TGT_DEBUG
+    if (tgt::getGlInt(GL_FRAMEBUFFER_BINDING) != 0)
+        LWARNING("Binding a new FBO while another FBO is bound. Do you really want to do this?");
+#endif
+
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, id_);
     LGL_ERROR;
 }

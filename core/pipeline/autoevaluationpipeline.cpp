@@ -23,15 +23,13 @@
 // ================================================================================================
 
 #include "autoevaluationpipeline.h"
+
 #include "tgt/tgt_gl.h"
 #include "tgt/glcanvas.h"
+
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/metaproperty.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
-
 
 namespace campvis {
     const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";
@@ -51,9 +49,13 @@ namespace campvis {
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
         }
+
+        _data->s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
     }
 
     void AutoEvaluationPipeline::deinit() {
+        _data->s_dataAdded.disconnect(this);
+
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.disconnect(this);
         }
@@ -62,26 +64,10 @@ namespace campvis {
     }
 
     void AutoEvaluationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
-        if (_canvas == 0 || _enabled == false)
+        if (_canvas == nullptr || getEnabled() == false)
             return;
 
-        tbb::concurrent_hash_map<AbstractProcessor*, bool>::const_accessor a;
-        if (_isVisProcessorMap.find(a, processor)) {
-            if (a->second) {
-                // is VisualizationProcessor
-                GLJobProc.enqueueJob(
-                    _canvas, 
-                    makeJobOnHeap<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessorAndCheckOpenGLState, processor), 
-                    OpenGLJobProcessor::SerialJob);
-            }
-            else {
-                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessor, processor));
-            }
-        }
-        else {
-            tgtAssert(false, "Could not find processor in processor map.");
-            LWARNING("Caught invalidation of a non-registered processor!");
-        }
+        setPipelineDirty();
     }
 
     void AutoEvaluationPipeline::addProcessor(AbstractProcessor* processor) {
@@ -89,6 +75,14 @@ namespace campvis {
         findDataNamePropertiesAndAddToPortMap(processor);
 
         AbstractPipeline::addProcessor(processor);
+    }
+
+    void AutoEvaluationPipeline::executePipeline() {
+        // execute each processor once 
+        // (AbstractProcessor::process() takes care of executing only invalid processors)
+        for (size_t i = 0; i < _processors.size(); ++i) {
+            executeProcessorAndCheckOpenGLState(_processors[i]);
+        }
     }
 
     void AutoEvaluationPipeline::onDataNamePropertyChanged(const AbstractProperty* prop) {
@@ -151,8 +145,6 @@ namespace campvis {
                 ++it;
             }
         }
-
-        AbstractPipeline::onDataContainerDataAdded(name, dh);
     }
 
     void AutoEvaluationPipeline::findDataNamePropertiesAndAddToPortMap(const HasPropertyCollection* hpc) {

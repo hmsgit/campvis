@@ -32,7 +32,6 @@
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/properties/propertycollectionwidget.h"
-#include "core/tools/opengljobprocessor.h"
 
 #include <QLabel>
 #include <QWidget>

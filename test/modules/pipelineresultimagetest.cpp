@@ -27,11 +27,11 @@
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 
 #include "tgt/filesystem.h"
+#include "tgt/opengljobprocessor.h"
 
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/abstractpipeline.h"
-#include "core/tools/opengljobprocessor.h"
 #include "core/tools/stringutils.h"
 
 #include "modules/pipelinefactory.h"
@@ -85,7 +85,7 @@ protected:
 
         if (_pipeline != nullptr) {
             // setup pipeline
-            _pipeline->setCanvas(GLJobProc.iKnowWhatImDoingGetArbitraryContext());
+            _pipeline->setCanvas(GLJobProc.getContext());
             _pipeline->init();
             _pipeline->setEnabled(true);
             _pipeline->setRenderTargetSize(tgt::ivec2(1024, 1024));
@@ -100,12 +100,7 @@ protected:
                 processors[i]->invalidate(AbstractProcessor::INVALID_RESULT);
             }
 
-            // execute each processor (we do this n*n times, as we might have a complex dependency graph)
-            for (size_t i = 0; i < processors.size(); ++i) {
-                for (size_t i = 0; i < processors.size(); ++i) {
-                    processors[i]->process(_dataContainer);
-                }
-            }
+            _pipeline->executePipeline();
 
             // write result image
             _imageWriter.p_inputImage.setValue(_pipeline->getRenderTargetID());

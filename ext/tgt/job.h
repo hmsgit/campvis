@@ -26,17 +26,16 @@
 #define JOB_H__
 
 #include "tgt/assert.h"
-
-#include "core/coreapi.h"
+#include "tgt/types.h"
 
 #include <functional>
 
-namespace campvis {
+namespace tgt {
 
     /**
      * Abstract base class for a job that can be executed.
      */
-    class CAMPVIS_CORE_API AbstractJob {
+    class TGT_API AbstractJob {
     public:
         /**
          * Pure virtual destructor.
@@ -48,6 +47,9 @@ namespace campvis {
          */
         virtual void execute() = 0;
 
+        /**
+         * Executes the job, calls execute().
+         */
         void operator()() {
             this->execute();
         }
@@ -264,7 +266,7 @@ namespace campvis {
     /**
      * specific job that evaluates a function object
      */
-    class CAMPVIS_CORE_API CallFunctionObjectJob : public AbstractJob{
+    class TGT_API CallFunctionObjectJob : public AbstractJob {
     public:
         CallFunctionObjectJob(std::function<void(void)> fn) 
         : _fn(fn)
