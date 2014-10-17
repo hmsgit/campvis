@@ -80,8 +80,6 @@ namespace campvis {
     }
 
     void AbstractPipeline::deinit() {
-        stop();
-
         deinitAllProperties();
 
         // deinitialize all processors:
@@ -117,7 +115,7 @@ namespace campvis {
                 _canvas->getPainter()->paint();
             }
 
-            if (!_enabled || !_pipelineDirty) {
+            if (!_stopExecution && (!_enabled || !_pipelineDirty)) {
                 tgt::GlContextManager::getRef().releaseContext(_canvas, false);
                 _evaluationCondition.wait(lock);
                 tgt::GlContextManager::getRef().acquireContext(_canvas, false);

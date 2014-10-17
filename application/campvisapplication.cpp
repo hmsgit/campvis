@@ -194,7 +194,10 @@ namespace campvis {
     void CampVisApplication::deinit() {
         tgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
-        GLJobProc.stop();
+        // Stop all pipeline threads.
+        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            it->_pipeline->stop();
+        }
 
         {
             // Deinit everything OpenGL related using the local context.
@@ -215,18 +218,19 @@ namespace campvis {
             tgt::deinitGL();
         }
 
-        tgt::GlContextManager::deinit();
-        tgt::deinit();
+        // MainWindow dtor needs a valid CampVisApplication, so we need to call it here instead of during destruction.
+        delete _mainWindow;
 
+        GLJobProc.stop();
         OpenGLJobProcessor::deinit();
         SimpleJobProcessor::deinit();
+
+        tgt::GlContextManager::deinit();
+        tgt::deinit();
 
         PropertyWidgetFactory::deinit();
         ImageRepresentationConverter::deinit();
         PipelineFactory::deinit();
-
-        // MainWindow dtor needs a valid CampVisApplication, so we need to call it here instead of during destruction.
-        delete _mainWindow;
 
         _initialized = false;
     }

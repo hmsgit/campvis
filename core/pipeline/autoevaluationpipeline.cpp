@@ -81,7 +81,7 @@ namespace campvis {
         // execute each processor once 
         // (AbstractProcessor::process() takes care of executing only invalid processors)
         for (size_t i = 0; i < _processors.size(); ++i) {
-            _processors[i]->process(getDataContainer());
+            executeProcessorAndCheckOpenGLState(_processors[i]);
         }
     }
 

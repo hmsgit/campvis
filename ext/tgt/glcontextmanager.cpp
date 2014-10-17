@@ -37,8 +37,6 @@ namespace tgt {
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-        // LDEBUG("Initialized context '" << title << "'");
     }
 
     void GlContextManager::removeContext(GLCanvas* context) {
@@ -77,8 +75,6 @@ namespace tgt {
                 ci._acquired = true;
                 ci._threadId = std::this_thread::get_id();
                 context->acquireAsCurrentContext();
-
-                // LDEBUG("Acquired context '" << a->second._title << "' from thread " << a->second._threadId);
             }
             else {
                 tgtAssert(false, "Could not find the context in map, this should not happen!");
@@ -102,7 +98,6 @@ namespace tgt {
     
                 if (unlockGlMutex)
                     ci._glMutex->unlock();
-                // LDEBUG("Released context '" << a->second._title << "'");
             }
             else {
                 tgtAssert(false, "Could not find the context in map, this should not happen!");

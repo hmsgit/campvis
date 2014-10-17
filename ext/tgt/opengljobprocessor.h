@@ -119,13 +119,24 @@ namespace tgt {
          */
         void enqueueJob(AbstractJob* job);
 
+        /**
+         * Enqueue OpenGL Garbage collection job
+         */
+        void enqueueGarbageCollection();
+
 
     protected:
+        /**
+         * Performs a OpenGL Garbage Collection if necessary.
+         */
+        void performGarbageCollectionIfNecessary();
+
         // Protected constructor since it's a singleton
         OpenGLJobProcessor();
 
         tgt::GLCanvas* _context;                        ///< The OpenGL context to use
         tbb::concurrent_queue<AbstractJob*> _jobQueue;  ///< The OpenGL job queue
+        tbb::atomic<bool> _performGarbageCollection;    ///< Flag whether to perform garbage cxollection
 
         tbb::atomic<int> _pause;                        ///< Counter of pause requests
         std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process

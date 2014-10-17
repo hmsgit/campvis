@@ -55,6 +55,7 @@ namespace tgt {
     {
         _pause = 0;
         _context= nullptr;
+        _performGarbageCollection = false;
     }
 
     OpenGLJobProcessor::~OpenGLJobProcessor() {
@@ -90,16 +91,20 @@ namespace tgt {
                 // execute and delete the job
                 jobToDo->execute();
                 delete jobToDo;
+
+                performGarbageCollectionIfNecessary();
             }
 
-            while (_pause > 0) {
+            while (_pause > 0 && !_stopExecution) {
+                performGarbageCollectionIfNecessary();
                 tgt::GlContextManager::getRef().releaseContext(_context, false);
                 _evaluationCondition.wait(lock);
                 tgt::GlContextManager::getRef().acquireContext(_context, false);
                 hadWork = true;
             }
 
-            if (! hadWork) {
+            if (! hadWork && !_stopExecution) {
+                performGarbageCollectionIfNecessary();
                 tgt::GlContextManager::getRef().releaseContext(_context, false);
                 _evaluationCondition.wait(lock);
                 tgt::GlContextManager::getRef().acquireContext(_context, false);
@@ -137,6 +142,18 @@ namespace tgt {
 
     tgt::GLCanvas* OpenGLJobProcessor::getContext() {
         return _context;
+    }
+
+    void OpenGLJobProcessor::enqueueGarbageCollection() {
+        _performGarbageCollection = true;
+        _evaluationCondition.notify_all();
+    }
+
+    void OpenGLJobProcessor::performGarbageCollectionIfNecessary() {
+        if (_performGarbageCollection && tgt::OpenGLGarbageCollector::isInited()) {
+            _performGarbageCollection = false;
+            GLGC.deleteGarbage();
+        }
     }
 
 

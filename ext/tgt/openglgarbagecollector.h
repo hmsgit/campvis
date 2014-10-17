@@ -61,19 +61,19 @@ namespace tgt {
         void addGarbageTexture(GLuint id) {
             tbb::spin_mutex::scoped_lock lock(_addMutex);
             _texturesToDelete[_currentFrontindex].push_back(id);
-            GLJobProc.enqueueJob(makeJobOnHeap(this, &OpenGLGarbageCollector::deleteGarbage));
+            GLJobProc.enqueueGarbageCollection();
         };
 
         void addGarbageFramebufferObject(GLuint id) {
             tbb::spin_mutex::scoped_lock lock(_addMutex);
             _fbosToDelete[_currentFrontindex].push_back(id);
-            GLJobProc.enqueueJob(makeJobOnHeap(this, &OpenGLGarbageCollector::deleteGarbage));
+            GLJobProc.enqueueGarbageCollection();
         };
 
         void addGarbageBufferObject(GLuint id) {
             tbb::spin_mutex::scoped_lock lock(_addMutex);
             _buffersToDelete[_currentFrontindex].push_back(id);
-            GLJobProc.enqueueJob(makeJobOnHeap(this, &OpenGLGarbageCollector::deleteGarbage));
+            GLJobProc.enqueueGarbageCollection();
         };
 
         void deleteGarbage();
