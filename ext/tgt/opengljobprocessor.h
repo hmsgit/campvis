@@ -25,8 +25,6 @@
 #ifndef OPENGLJOBPROCESSOR_H__
 #define OPENGLJOBPROCESSOR_H__
 
-#include "sigslot/sigslot.h"
-
 #include "tgt/glcontextmanager.h"
 #include "tgt/job.h"
 #include "tgt/runnable.h"
@@ -53,7 +51,7 @@ namespace tgt {
      * and acquired OpenGL context. You can execute OpenGL calls asynchroniously using enqueueJob()
      * or synchronously using the ScopedSynchronousGlJobExecution guard.
      */
-    class TGT_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable, public sigslot::has_slots {
+    class TGT_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable {
         friend class tgt::Singleton<OpenGLJobProcessor>;    ///< CRTP
         friend class AbstractJob;                           ///< so the custom new/delete operator can access the memory pool
 
