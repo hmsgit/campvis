@@ -34,7 +34,7 @@ namespace campvis {
 
     DVRVis::DVRVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
+        , _camera("Camera", "Camera")
         , _lsp()
         , _imageReader()
         , _pgGenerator()
@@ -96,15 +96,15 @@ namespace campvis {
         _dvrNormal.p_targetImageID.setValue("drr.output");
         _dvrVM.p_targetImageID.setValue("dvr.output");
 
-         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrNormal.p_transferFunction.replaceTF(dvrTF);
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.12f, .15f), tgt::col4(85, 0, 0, 128), tgt::col4(255, 0, 0, 128)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.19f, .28f), tgt::col4(89, 89, 89, 155), tgt::col4(89, 89, 89, 155)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.41f, .51f), tgt::col4(170, 170, 128, 64), tgt::col4(192, 192, 128, 64)));
+        _dvrNormal.p_transferFunction.replaceTF(dvrTF);
 
-         Geometry1DTransferFunction* vmTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrVM.p_transferFunction.replaceTF(vmTF);
+        Geometry1DTransferFunction* vmTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
+        vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.41f, .51f), tgt::col4(170, 170, 128, 64), tgt::col4(192, 192, 128, 64)));
+        _dvrVM.p_transferFunction.replaceTF(vmTF);
 
         _vmRenderer.p_renderTargetID.addSharedProperty(&_combine.p_mirrorRenderID);
         _vmEepGenerator.p_entryImageID.setValue("vm.eep.entry");
@@ -124,8 +124,8 @@ namespace campvis {
         _vmgGenerator.p_mirrorID.addSharedProperty(&_vmEepGenerator.p_mirrorID);
         _vmgGenerator.p_mirrorID.addSharedProperty(&_vmRenderer.p_geometryID);
         _vmgGenerator.p_mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));
-        _vmgGenerator.p_poi.setValue(tgt::vec3(40.f, 40.f, 40.f));
-        _vmgGenerator.p_size.setValue(60.f);
+        _vmgGenerator.p_poi.setValue(tgt::vec3(50.f, 80.f, 15.f));
+        _vmgGenerator.p_size.setValue(128.f);
 
         _eepGenerator.p_entryImageID.addSharedProperty(&_dvrNormal.p_entryImageID);
         _vmEepGenerator.p_entryImageID.addSharedProperty(&_dvrVM.p_entryImageID);
