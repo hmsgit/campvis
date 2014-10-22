@@ -103,8 +103,6 @@ namespace campvis {
             }
 
             // get data from image and transform to single intensity image:
-            ILubyte *data = ilGetData(); 
-
             ilCopyPixels(0, 0, 0, imageSize.x, imageSize.y, 1, IL_LUMINANCE, IL_UNSIGNED_BYTE, buffer + (sizeof(uint8_t) * i * imageSize.x * imageSize.y));
             ILint err = ilGetError();
             if (err != IL_NO_ERROR) {
