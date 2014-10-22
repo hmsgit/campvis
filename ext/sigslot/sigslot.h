@@ -250,8 +250,16 @@ namespace sigslot {
     /// Base class for signal handles that provides an interface to emit the signal.
     class SIGSLOT_API _signal_handle_base {
     public:
+        // default constructor
+        _signal_handle_base()
+#ifdef CAMPVIS_DEBUG
+            : _callingLine(0)
+#endif
+        {};
+
         /// Virtual destructor
         virtual ~_signal_handle_base() {};
+
         /// Emits the signal of this signal handle.
         virtual void processSignal() const = 0;
 
@@ -270,7 +278,6 @@ namespace sigslot {
 
 #ifdef CAMPVIS_DEBUG
         // This is debug information only, automatically removed from release builds
-
         std::string _callingFunction;   ///< Function that emitted this signal
         std::string _callingFile;       ///< File which emitted this signal
         int _callingLine;               ///< Line where this signal was emitted

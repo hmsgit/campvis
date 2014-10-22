@@ -66,6 +66,7 @@ namespace campvis {
         , _viewportSizeProp(viewportSizeProp)
         , _cpnw(cameraProperty)
         , _trackball(0)
+        , _sceneBounds(tgt::vec3(0.f))
     {
         tgtAssert(_cameraProperty != 0, "Assigned camera property must not be 0.");
         tgtAssert(_viewportSizeProp != 0, "Assigned viewport size property must not be 0.");

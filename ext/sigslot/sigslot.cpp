@@ -74,7 +74,7 @@ namespace sigslot {
 
         while (! _stopExecution) {
             // try pop the next event from the event queue
-            _signal_handle_base* signal;
+            _signal_handle_base* signal = nullptr;
             if (_signalQueue.try_pop(signal)) {
                 signal->processSignal();
                 delete signal;

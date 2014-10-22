@@ -145,8 +145,11 @@ GTEST_API_ int main(int argc, char **argv) {
     XInitThreads();
 #endif
 
-
     app = new QApplication(argc, argv);
+
+    // Make Xlib and GLX thread safe under X11
+    QApplication::setAttribute(Qt::AA_X11InitThreads);
+
     testing::InitGoogleTest(&argc, argv);
     int ret;
 
