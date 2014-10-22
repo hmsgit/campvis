@@ -28,6 +28,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
 #include "modules/devil/processors/devilimagereader.h"
 
 namespace campvis {
@@ -35,7 +36,7 @@ namespace campvis {
     /**
      * Reads a batch of IVUS images from a directory and stacks them into a 3D volume.
      */
-    class IvusBatchReader : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API IvusBatchReader : public VisualizationProcessor {
     public:
         /**
          * Constructs a new IvusBatchReader Processor

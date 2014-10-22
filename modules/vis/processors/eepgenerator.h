@@ -32,6 +32,8 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class EEPGenerator : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API EEPGenerator : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new EEPGenerator Processor

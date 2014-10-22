@@ -27,6 +27,9 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/ltfimagereader.h"
@@ -42,7 +45,7 @@
 #include "modules/vis/processors/volumerenderer.h"
 
 namespace campvis {
-    class Columbia1 : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API Columbia1 : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -88,6 +91,9 @@ namespace campvis {
         RenderTargetCompositor _compositor;
 
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<Columbia1>;
 
 }
 

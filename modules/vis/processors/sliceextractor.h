@@ -26,12 +26,13 @@
 #define SLICEEXTRACTOR_H__
 
 #include "core/pipeline/slicerenderprocessor.h"
+#include "modules/modulesapi.h"
 
 namespace campvis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class SliceExtractor : public SliceRenderProcessor {
+    class CAMPVIS_MODULES_API SliceExtractor : public SliceRenderProcessor {
     public:
         /**
          * Constructs a new SliceExtractor Processor

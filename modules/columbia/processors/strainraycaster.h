@@ -31,6 +31,8 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
 namespace cgt {
@@ -41,7 +43,7 @@ namespace campvis {
     /**
      * Performs strain volume ray casting.
      */
-    class StrainRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API StrainRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new StrainRaycaster Processor

@@ -26,14 +26,14 @@
 #define IVUSTCSLICEEXTRACTOR_H__
 
 #include "core/pipeline/slicerenderprocessor.h"
-
+#include "modules/modulesapi.h"
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
 namespace campvis {
     /**
      * IVUS Tissue Classification Slice Rendering with Predicate Histogram-based classification.
      */
-    class IvusTcSliceExtractor : public SliceRenderProcessor {
+    class CAMPVIS_MODULES_API IvusTcSliceExtractor : public SliceRenderProcessor {
     public:
         /**
          * Constructs a new IvusTcSliceExtractor Processor

@@ -30,18 +30,18 @@
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/preprocessing/processors/gradientvolumegenerator.h"
 #include "modules/preprocessing/processors/lhhistogram.h"
-
 #include "modules/registration/processors/similaritymeasure.h"
 
 #include <nlopt.hpp>
 
 namespace campvis {
-    class NloptRegistration : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API NloptRegistration : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.

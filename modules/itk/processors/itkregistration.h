@@ -34,13 +34,14 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/preprocessing/tools/abstractimagefilter.h"
 
 namespace campvis {
     /**
     * Performs watershed image filter on input image using ITK.
     */
-    class ItkRegistration : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ItkRegistration : public AbstractProcessor {
     public:
         /**
         * Constructs a new ItkRegistration Processor

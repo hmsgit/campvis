@@ -27,15 +27,18 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/genericimagereader.h"
 #include "modules/microscopysegmentation/processors/microscopyimagesegmentation.h"
-
 #include "modules/devil/processors/devilimagereader.h"
 
 namespace campvis {
-    class MicroscopyImageSegmentationDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API MicroscopyImageSegmentationDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -63,6 +66,9 @@ namespace campvis {
         GenericImageReader _imageReader; //GenericImageReader _imageReader;
         MicroscopyImageSegmentation _ve;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<MicroscopyImageSegmentationDemo>;
 
 }
 

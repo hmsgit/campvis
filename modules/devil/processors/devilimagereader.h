@@ -32,6 +32,7 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/io/processors/abstractimagereader.h"
 
 namespace cgt {
@@ -45,7 +46,7 @@ namespace campvis {
      *
      * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
      */
-    class DevilImageReader : public AbstractImageReader {
+    class CAMPVIS_MODULES_API DevilImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new DevilImageReader Processor

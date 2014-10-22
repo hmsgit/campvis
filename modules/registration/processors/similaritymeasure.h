@@ -41,6 +41,8 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -54,7 +56,7 @@ namespace campvis {
     /**
      * Computes a Similarity Measure using OpenGL
      */
-    class SimilarityMeasure : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API SimilarityMeasure : public VisualizationProcessor {
     public:
         enum AdditionalInvalidationLevels {
             PERFORM_OPTIMIZATION = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 0,

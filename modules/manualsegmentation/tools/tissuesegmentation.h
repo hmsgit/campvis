@@ -27,12 +27,14 @@
 
 #include "cgt/vector.h"
 
+#include "modules/modulesapi.h"
+
 #include <iostream>
 #include <vector>
 
 namespace campvis {
 
-    class TissueSegmentation {
+    class CAMPVIS_MODULES_API TissueSegmentation {
     public:
         // A segmentation layer consists of a vector of Frames, each containing a vector of points.
         struct Layer {

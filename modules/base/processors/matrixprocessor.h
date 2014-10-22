@@ -34,6 +34,7 @@
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/allproperties.h"
+#include "modules/modulesapi.h"
 
 namespace campvis {
     /**
@@ -58,7 +59,7 @@ namespace campvis {
 	 * to compute the "ProbeToReference" matrix. If an additional calibration matrix is needed, this can be achieved by
 	 * adding a new MatrixProcessor that multiplies a hardcoded calibration matrix to the result or the inputs.
      */
-    class MatrixProcessor : public AbstractProcessor {
+    class CAMPVIS_MODULES_API MatrixProcessor : public AbstractProcessor {
     public:
         enum SourceType {
             FIXED = 0,

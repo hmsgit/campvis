@@ -31,6 +31,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
 namespace cgt {
@@ -43,7 +44,7 @@ namespace campvis {
     /**
      * Evaluates the Point Predicate Histogram and stores the results in a bitmask image.
      */
-    class PointPredicateEvaluator : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API PointPredicateEvaluator : public VisualizationProcessor {
     public:
         /**
          * Constructs a new PointPredicateEvaluator Processor

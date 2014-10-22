@@ -30,6 +30,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Extracts arbitrary MPRs from images using a single clip plane.
      */
-    class MprRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API MprRenderer : public VisualizationProcessor {
     public:
         /**
          * Constructs a new MprRenderer Processor

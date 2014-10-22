@@ -22,47 +22,28 @@
 // 
 // ================================================================================================
 
-#ifndef FONTRENDERINGDEMO_H__
-#define FONTRENDERINGDEMO_H__
+#ifndef CAMPVIS_MODULESAPI_H__
+#define CAMPVIS_MODULESAPI_H__
 
-#include "core/pipeline/autoevaluationpipeline.h"
+#ifdef CAMPVIS_DYNAMIC_LIBS
+    #ifdef CAMPVIS_MODULES_BUILD_DLL
+        // building library -> export symbols
+        #ifdef WIN32
+            #define CAMPVIS_MODULES_API __declspec(dllexport)
+        #else
+            #define CAMPVIS_MODULES_API
+        #endif
+    #else
+        // including library -> import symbols
+        #ifdef WIN32
+            #define CAMPVIS_MODULES_API __declspec(dllimport)
+        #else
+            #define CAMPVIS_MODULES_API
+        #endif
+    #endif
+#else
+    // building/including static library -> do nothing
+    #define CAMPVIS_MODULES_API
+#endif
 
-#include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-#include "modules/fontrendering/processors/textrenderer.h"
-
-
-namespace campvis {
-namespace fontrendering {
-
-    class CAMPVIS_MODULES_API FontRenderingDemo : public AutoEvaluationPipeline {
-    public:
-        /**
-         * Creates a AutoEvaluationPipeline.
-         */
-        FontRenderingDemo(DataContainer* dc);
-
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~FontRenderingDemo();
-
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "fontrendering::FontRenderingDemo"; };
-
-
-        TextRenderer _tr;
-    };
-
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<FontRenderingDemo>;
-
-}
-}
-
-#endif // FONTRENDERINGDEMO_H__
+#endif // CAMPVIS_MODULESAPI_H__

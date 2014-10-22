@@ -30,6 +30,8 @@
 #include "cgt/texture.h"
 #include "cgt/vector.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
 // forward declarations
@@ -55,7 +57,7 @@ namespace fontrendering {
      * \note    Current implementation only supports the ASCII-256 character set.
      * \throws  std::exception on initialization error
      */
-    class FontAtlas {
+    class CAMPVIS_MODULES_API FontAtlas {
     public:
         /**
          * Creates a new FontAtlas of the given font and size.

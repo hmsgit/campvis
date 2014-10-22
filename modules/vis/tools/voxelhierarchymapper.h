@@ -29,7 +29,9 @@
 
 #include "cgt/framebufferobject.h"
 #include "cgt/shadermanager.h"
+
 #include "core/datastructures/facegeometry.h"
+#include "modules/modulesapi.h"
 
 namespace cgt {
     class FramebufferObject;
@@ -47,7 +49,7 @@ namespace campvis {
      * 
      * \note    All methods (incl. constructor) need a valid OpenGL context when called.
      */
-    class VoxelHierarchyMapper {
+    class CAMPVIS_MODULES_API VoxelHierarchyMapper {
     public:
         /**
          * Creates a VoxelHierarchyMapper and prepare the framebuffer and shader for next function calls of the object.

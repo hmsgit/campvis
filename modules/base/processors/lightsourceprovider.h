@@ -31,12 +31,14 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Creates LightSourceData and stores it in the DataContainer.
      * \see LightSourceData
      */
-    class LightSourceProvider : public AbstractProcessor {
+    class CAMPVIS_MODULES_API LightSourceProvider : public AbstractProcessor {
     public:
         /**
          * Constructs a new LightSourceProvider Processor.

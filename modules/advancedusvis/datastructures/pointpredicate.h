@@ -29,6 +29,8 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/metaproperty.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
 namespace cgt {
@@ -37,7 +39,7 @@ namespace cgt {
 
 namespace campvis {
 
-    class AbstractPointPredicate : public MetaProperty {
+    class CAMPVIS_MODULES_API AbstractPointPredicate : public MetaProperty {
     public:
 //         class AbstractColorModulationDecorator {
 //         public:
@@ -135,7 +137,7 @@ namespace campvis {
     
 // ================================================================================================
 
-    class AndCombinedPointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API AndCombinedPointPredicate : public AbstractPointPredicate {
     public:
         AndCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates);
 
@@ -152,7 +154,7 @@ namespace campvis {
 
     // ================================================================================================
 
-    class OrCombinedPointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API OrCombinedPointPredicate : public AbstractPointPredicate {
     public:
         OrCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates);
 
@@ -169,7 +171,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    class RangePointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API RangePointPredicate : public AbstractPointPredicate {
     public:
         RangePointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
@@ -191,7 +193,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    class LabelBitPointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API LabelBitPointPredicate : public AbstractPointPredicate {
     public:
         LabelBitPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 

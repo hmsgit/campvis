@@ -34,6 +34,8 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -44,7 +46,7 @@ namespace campvis {
     /**
      * Performs the composition of a multiple render targets
      */
-    class RenderTargetCompositor : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API RenderTargetCompositor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         enum CompositingMode {
             CompositingModeFirst = 0,

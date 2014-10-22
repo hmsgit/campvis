@@ -27,13 +27,14 @@
 
 #include <tbb/tbb.h>
 #include "cgt/assert.h"
+#include "modules/modulesapi.h"
 
 #include <vector>
 
 namespace campvis {
     class ImageRepresentationLocal;
 
-    struct AbstractImageFilter {
+    struct CAMPVIS_MODULES_API AbstractImageFilter {
         AbstractImageFilter(const ImageRepresentationLocal* input, ImageRepresentationLocal* output)
             : _input(input)
             , _output(output)
@@ -51,7 +52,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    struct ImageFilterMedian : public AbstractImageFilter {
+    struct CAMPVIS_MODULES_API ImageFilterMedian : public AbstractImageFilter {
     public:
         ImageFilterMedian(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize);
 
@@ -63,7 +64,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    struct ImageFilterGauss : public AbstractImageFilter {
+    struct CAMPVIS_MODULES_API ImageFilterGauss : public AbstractImageFilter {
     public:
         ImageFilterGauss(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize, float sigma);
 

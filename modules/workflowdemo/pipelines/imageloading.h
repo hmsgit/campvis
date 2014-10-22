@@ -26,12 +26,14 @@
 #define IMAGELOADING_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 #include "modules/io/processors/genericimagereader.h"
 
 namespace campvis {
 namespace workflowdemo {
 
-    class ImageLoading : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API ImageLoading : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -53,6 +55,8 @@ namespace workflowdemo {
         campvis::GenericImageReader _imageReader;
     };
 
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<ImageLoading>;
 }
 }
 

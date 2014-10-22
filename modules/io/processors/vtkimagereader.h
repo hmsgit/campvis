@@ -33,13 +33,15 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Reads a VTK image file into the pipeline.
      *
      * \note    Full format specification at http://www.vtk.org/VTK/img/file-formats.pdf
      */
-    class VtkImageReader : public AbstractImageReader {
+    class CAMPVIS_MODULES_API VtkImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new VtkImageReader Processor

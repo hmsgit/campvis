@@ -29,6 +29,9 @@
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -38,7 +41,7 @@
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
-    class TensorDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API TensorDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Small demo pipeline for tensor data visualization.
@@ -69,6 +72,9 @@ namespace campvis {
 
         IntProperty p_sliceNumber;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<TensorDemo>;
 
 }
 

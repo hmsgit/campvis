@@ -28,6 +28,10 @@
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -41,7 +45,7 @@
 #include "modules/vis/processors/virtualmirrorcombine.h"
 
 namespace campvis {
-    class DVRVis : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API DVRVis : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -75,6 +79,9 @@ namespace campvis {
         DepthDarkening _depthDarkening;
         VirtualMirrorCombine _combine;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<DVRVis>;
 
 }
 

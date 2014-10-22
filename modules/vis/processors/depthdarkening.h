@@ -31,6 +31,8 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class DepthDarkening : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API DepthDarkening : public VisualizationProcessor {
     public:
         /**
          * Constructs a new DepthDarkening Processor

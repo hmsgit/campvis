@@ -31,6 +31,8 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class GeometryStrainRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GeometryStrainRenderer : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GeometryStrainRenderer Processor

@@ -31,6 +31,8 @@
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/volumebricking.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
 namespace cgt {
@@ -41,7 +43,7 @@ namespace campvis {
     /**
      * Performs a simple volume ray casting.
      */
-    class OptimizedRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API OptimizedRaycaster : public RaycastingProcessor {
     public:
         enum AdditionalInvalidationLevels {
             INVALID_BBV = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL

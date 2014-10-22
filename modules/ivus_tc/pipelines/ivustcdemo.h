@@ -28,6 +28,10 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/properties/allproperties.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/genericimagereader.h"
@@ -36,7 +40,7 @@
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
 namespace campvis {
-    class IvusTcDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API IvusTcDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -74,6 +78,8 @@ namespace campvis {
         VolumeExplorer _ve;
     };
 
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<IvusTcDemo>;
 }
 
 #endif // IVUSTCDEMO_H__

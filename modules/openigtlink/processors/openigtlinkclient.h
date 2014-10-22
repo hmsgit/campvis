@@ -45,8 +45,9 @@
 #include "core/properties/buttonproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
-
 #include "core/datastructures/imagedata.h"
+
+#include "modules/modulesapi.h"
 
 
 namespace campvis {
@@ -56,7 +57,7 @@ namespace campvis {
      * and p_receiveImage and puts them into the received data into the respective data containers.
      * This Class contains modified code from the OpenIGTLink ReceiveClient example.
      */
-    class OpenIGTLinkClient : public AbstractProcessor {
+    class CAMPVIS_MODULES_API OpenIGTLinkClient : public AbstractProcessor {
     public:
         /**
          * Constructs a new CampcomMhdReceiver Processor

@@ -33,6 +33,7 @@
 #include "core/properties/metaproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/io/processors/csvdimagereader.h"
 #include "modules/io/processors/ltfimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -49,7 +50,7 @@ namespace campvis {
      * the other image reader implemented for its tasks.
      *
      */
-    class GenericImageReader : public AbstractProcessor {
+    class CAMPVIS_MODULES_API GenericImageReader : public AbstractProcessor {
     public:
         /**
          * Constructs a new GenericImageReader Processor

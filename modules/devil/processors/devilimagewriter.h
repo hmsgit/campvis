@@ -35,6 +35,8 @@
 #include "core/properties/stringproperty.h"
 #include "core/tools/weaklytypedpointer.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -46,7 +48,7 @@ namespace campvis {
      *
      * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
      */
-    class DevilImageWriter : public AbstractProcessor {
+    class CAMPVIS_MODULES_API DevilImageWriter : public AbstractProcessor {
     public:
         /**
          * Constructs a new DevilImageWriter Processor

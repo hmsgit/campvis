@@ -31,6 +31,8 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/numericproperty.h"
 
+#include "modules/modulesapi.h"
+
 #include <deque>
 
 namespace campvis {
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Performs a fiber tracking of incomoing strain data.
      */
-    class StrainFiberTracker : public AbstractProcessor {
+    class CAMPVIS_MODULES_API StrainFiberTracker : public AbstractProcessor {
     public:
         /**
          * Constructs a new StrainFiberTracker Processor

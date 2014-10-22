@@ -33,6 +33,8 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Reads an image file into the pipeline. This is mainly a wrapper class. It uses
@@ -42,7 +44,7 @@ namespace campvis {
      * of files into ImageRepresentationDisk representation
      *
      */
-    class AbstractImageReader : public AbstractProcessor {
+    class CAMPVIS_MODULES_API AbstractImageReader : public AbstractProcessor {
     public:
         /**
          * Constructs a new AbstractImageReader Processor

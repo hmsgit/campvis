@@ -32,13 +32,14 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
     /**
     * Performs segmentation on input image using ITK.
     */
-    class ItkSegmentation : public VolumeExplorer {
+    class CAMPVIS_MODULES_API ItkSegmentation : public VolumeExplorer {
     public:
         /**
         * Constructs a new ItkSegmentation Processor

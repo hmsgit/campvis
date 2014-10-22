@@ -31,6 +31,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Creates the gradient volume for the given intensity volume using OpenGL.
      */
-    class GlGradientVolumeGenerator : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API GlGradientVolumeGenerator : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new GlGradientVolumeGenerator Processor

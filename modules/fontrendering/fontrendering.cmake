@@ -3,8 +3,8 @@
 IF(${ModuleEnabled})
 	# dirty, dirty hack to force freetype to build stastic lib
 	SET(bsl ${BUILD_SHARED_LIBS})
-	IF(${CampvisSharedStaticModulesFix})
-		SET(BUILD_SHARED_LIBS 0)
+	IF(${CampvisSharedStaticModulesFix} STREQUAL "STATIC")
+		SET(BUILD_SHARED_LIBS OFF)
 	ENDIF()
 	
 	# build RadomWalksLib library

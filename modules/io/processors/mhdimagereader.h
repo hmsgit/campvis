@@ -32,13 +32,15 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Reads a MHD image file into the pipeline.
      *
      * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
      */
-    class MhdImageReader : public AbstractImageReader {
+    class CAMPVIS_MODULES_API MhdImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new MhdImageReader Processor

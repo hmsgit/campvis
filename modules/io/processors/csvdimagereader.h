@@ -32,12 +32,14 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Reads a CSVD to read multiple CSV image files into the pipeline.
      * This YANF (yet another neat format) is proudly provided by Christian Schulte zu Berge.
      */
-    class CsvdImageReader : public AbstractImageReader {
+    class CAMPVIS_MODULES_API CsvdImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new CsvdImageReader Processor

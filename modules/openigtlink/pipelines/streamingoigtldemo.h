@@ -25,13 +25,15 @@
 #ifndef STREAMINGOIGTLDEMO_H__
 #define STREAMINGOIGTLDEMO_H__
 
+#include "modules/modulesapi.h"
 #include "modules/openigtlink/processors/openigtlinkclient.h"
 #include "modules/base/processors/matrixprocessor.h"
+
 #include "core/pipeline/autoevaluationpipeline.h"
 
 
 namespace campvis {
-    class StreamingOIGTLDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API StreamingOIGTLDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.

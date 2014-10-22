@@ -34,6 +34,8 @@
 #include "cgt/bounds.h"
 #include "cgt/event/eventlistener.h"
 #include "cgt/navigation/trackball.h"
+
+#include "modules/modulesapi.h"
 #include "modules/base/processors/cameraprovider.h"
 
 namespace cgt {
@@ -46,7 +48,7 @@ namespace campvis {
     /**
      * Generates CameraData objects.
      */
-    class TrackballCameraProvider : public CameraProvider, public cgt::EventListener, public cgt::IHasCamera {
+    class CAMPVIS_MODULES_API TrackballCameraProvider : public CameraProvider, public cgt::EventListener, public cgt::IHasCamera {
     public:
         /// Trackball automation mode
         enum AutomationMode {

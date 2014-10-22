@@ -35,11 +35,13 @@
 #include "core/tools/endianhelper.h"
 #include "core/tools/weaklytypedpointer.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Reads raw images into the pipeline.
      */
-    class LtfImageReader : public AbstractImageReader {
+    class CAMPVIS_MODULES_API LtfImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new LtfImageReader Processor

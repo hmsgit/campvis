@@ -29,11 +29,13 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Splits an ImageSeries into its single images.
      */
-    class ImageSeriesSplitter : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ImageSeriesSplitter : public AbstractProcessor {
     public:
         /**
          * Constructs a new ImageSeriesSplitter Processor

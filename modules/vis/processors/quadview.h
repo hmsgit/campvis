@@ -29,6 +29,8 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -37,7 +39,7 @@ namespace campvis {
     /**
      * Combines up to four render targets into a single one.
      */
-    class QuadView : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API QuadView : public VisualizationProcessor {
     public:
         /**
          * Constructs a new QuadView Processor

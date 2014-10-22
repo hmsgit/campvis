@@ -27,13 +27,16 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
-    class ResamplingDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API ResamplingDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -61,6 +64,9 @@ namespace campvis {
         GlImageResampler _resampler;
         VolumeExplorer _ve;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<ResamplingDemo>;
 
 }
 
