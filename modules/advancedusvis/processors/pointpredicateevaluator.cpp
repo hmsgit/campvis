@@ -70,6 +70,7 @@ namespace campvis {
     }
 
     void PointPredicateEvaluator::init() {
+        p_histogram.getPredicateHistogram()->setPredicateFunctionArgumentString("in float intensity, in float gradientMagnitude, in float gradientAngle, float viewAngle, in float snr, in float vesselness, in float confidence, in uint label");
         VisualizationProcessor::init();
 
         _shader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/advancedusvis/glsl/pointpredicateevaluator.frag", generateHeader(), "400");

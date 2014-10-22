@@ -66,7 +66,7 @@ namespace campvis {
 
         // We ensure all shared properties to be of correct type the base class method.
         // Hence, static_cast ist safe.
-        setHistogramPointer(static_cast<PointPredicateHistogramProperty*>(prop)->_histogram);
+        static_cast<PointPredicateHistogramProperty*>(prop)->setHistogramPointer(this->_histogram);
     }
 
     PointPredicateHistogram* PointPredicateHistogramProperty::getPredicateHistogram() {
@@ -146,7 +146,10 @@ namespace campvis {
         do {
             // set each underflowed value to 0 and adjust the other importances by an according fraction.
             std::for_each(underflowIndices.begin(), underflowIndices.end(), [&] (int underflowIndex) {
-                tgtAssert(! adjustableIndices.empty(), "The vector of adjustable indices is empty, but we need at least one. This should not happen!");
+                if (adjustableIndices.empty()) {
+                    LERROR("The vector of adjustable indices is empty, but we need at least one. This should not happen!");
+                    return;
+                }
 
                 float delta = newImportances[underflowIndex] / adjustableIndices.size();
                 std::for_each(adjustableIndices.begin(), adjustableIndices.end(), [&] (int index) { 
@@ -178,7 +181,10 @@ namespace campvis {
             predicates[i]->p_importance.setValue(newImportances[i]);
             sum += newImportances[i];
         }
-        tgtAssert(std::abs(sum - 1.f) < 0.0001f, "Sum of importances is not 1 - sth. went wrong!");
+
+        if (std::abs(sum - 1.f) > 0.001f)
+            LERROR("Sum of importances is not 1 - sth. went wrong!");
+
         --_ignoreSignals;
 
         s_changed.emitSignal(this);

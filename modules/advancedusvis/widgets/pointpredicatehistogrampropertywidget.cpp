@@ -74,6 +74,9 @@ namespace campvis {
 
         layout->addWidget(narf, 1, 0, 1, 3);
 
+        _lwPredicates->setVisible(false);
+        narf->setVisible(false);
+        
         _slHue = new QSlider(Qt::Vertical, mainWidget);
         _slHue->setMinimum(0);
         _slHue->setMaximum(100);
