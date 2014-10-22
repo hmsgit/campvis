@@ -62,8 +62,10 @@ namespace campvis {
     }
 
     void PointPredicateRaycaster::init() {
-        p_predicateHistogram.s_headerChanged.connect(this, &PointPredicateRaycaster::onHistogramHeaderChanged);
+        p_predicateHistogram.getPredicateHistogram()->setPredicateFunctionArgumentString("in float intensity, in float gradientMagnitude, in float gradientAngle, float viewAngle, in float snr, in float vesselness, in float confidence, in uint label");
+
         RaycastingProcessor::init();
+        p_predicateHistogram.s_headerChanged.connect(this, &PointPredicateRaycaster::onHistogramHeaderChanged);
     }
 
     void PointPredicateRaycaster::deinit() {

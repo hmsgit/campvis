@@ -39,6 +39,22 @@ namespace campvis {
 
     class AbstractPointPredicate : public MetaProperty {
     public:
+//         class AbstractColorModulationDecorator {
+//         public:
+//             AbstractColorModulationDecorator(AbstractPointPredicate* parent)
+//                 : _parent(parent)
+//             {}
+// 
+//             virtual ~AbstractColorModulationDecorator() {}
+// 
+//             virtual const std::string& getHuePart() const = 0;
+//             virtual const std::string& getSaturationPart() const = 0;
+//             virtual const std::string& getIntensityPart() const = 0;
+//         protected:
+//             AbstractPointPredicate* _parent;
+//         };
+
+
         AbstractPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
         virtual ~AbstractPointPredicate();
@@ -163,6 +179,8 @@ namespace campvis {
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
         virtual void setupShader(tgt::Shader* shader) const;
+
+        const std::string& getRangeUniformname() const { return _rangeUniformName; };
 
         Vec2Property p_range;
 
