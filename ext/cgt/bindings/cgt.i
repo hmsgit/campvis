@@ -1,13 +1,13 @@
-%module tgt
+%module cgt
 %include "stdint.i"
 %{
-#include "ext/tgt/camera.h"
-#include "ext/tgt/vector.h"
-#include "ext/tgt/event/eventlistener.h"
+#include "ext/cgt/camera.h"
+#include "ext/cgt/vector.h"
+#include "ext/cgt/event/eventlistener.h"
 %}
 
 
-namespace tgt {
+namespace cgt {
 
     /* Vector2 */
 

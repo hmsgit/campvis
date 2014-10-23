@@ -33,7 +33,7 @@ SET(CampvisLuaModulesDirectory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_IN
 LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModulesDirectory}?${CMAKE_SHARED_MODULE_SUFFIX}\"")
 SET(CampvisGlobalDefinitions "${CampvisGlobalDefinitions}" PARENT_SCOPE)
 
-SET(CampvisBindingDirs ext/tgt core)
+SET(CampvisBindingDirs ext/cgt core)
 
 # Look for bindings for all enabled CAMPVis modules
 FOREACH(ModName ${CampvisModules})
@@ -65,7 +65,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
     SET_SOURCE_FILES_PROPERTIES(${InterfaceFile} PROPERTIES SWIG_FLAGS "-I${CampvisHome}")
     LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
     SWIG_ADD_MODULE(${LuaModName} lua ${InterfaceFile})
-    SWIG_LINK_LIBRARIES(${LuaModName} tgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
+    SWIG_LINK_LIBRARIES(${LuaModName} cgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
 
     SET(LuaModFullPath "${CampvisLuaModulesDirectory}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
@@ -122,4 +122,4 @@ ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}
 )
 
 ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
-TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})

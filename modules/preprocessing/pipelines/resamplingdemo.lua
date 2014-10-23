@@ -1,4 +1,4 @@
-require("tgt")
+require("cgt")
 require("base")
 require("cvio")
 require("vis")
@@ -37,12 +37,12 @@ function pipeline:init()
     self.resampler.p_outputImage:setValue("resampled")
     self.resampler.p_outputImage:addSharedProperty(self.ve.p_inputVolume)
 
-    local geometry1 = campvis.TFGeometry1D_createQuad(tgt.vec2(0.1, 0.125), tgt.col4(255, 0, 0, 32),
-                                                      tgt.vec4(255, 0, 0, 32))
-    local geometry2 = campvis.TFGeometry1D_createQuad(tgt.vec2(.4, .5), tgt.col4(0, 255, 0, 128),
-                                                      tgt.vec4(0, 255, 0, 128))
+    local geometry1 = campvis.TFGeometry1D_createQuad(cgt.vec2(0.1, 0.125), cgt.col4(255, 0, 0, 32),
+                                                      cgt.vec4(255, 0, 0, 32))
+    local geometry2 = campvis.TFGeometry1D_createQuad(cgt.vec2(.4, .5), cgt.col4(0, 255, 0, 128),
+                                                      cgt.vec4(0, 255, 0, 128))
 
-    local dvrTF = campvis.Geometry1DTransferFunction(128, tgt.vec2(0, 0.05))
+    local dvrTF = campvis.Geometry1DTransferFunction(128, cgt.vec2(0, 0.05))
     dvrTF:addGeometry(geometry1)
     dvrTF:addGeometry(geometry2)
 

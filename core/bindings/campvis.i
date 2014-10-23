@@ -1,7 +1,7 @@
 %module campvis
 %include factory.i
 %include std_string.i
-%import "ext/tgt/bindings/tgt.i"
+%import "ext/cgt/bindings/cgt.i"
 %include "ext/sigslot/sigslot.i"
 %{
 #include "core/datastructures/abstractdata.h"
@@ -101,9 +101,9 @@ namespace campvis {
         virtual ~NumericProperty();
     };
 
-    %template(Ivec2GenericProperty) GenericProperty< tgt::Vector2<int> >;
-    %template(IVec2Property) NumericProperty< tgt::Vector2<int> >;
-    typedef NumericProperty< tgt::Vector2<int> > IVec2Property;
+    %template(Ivec2GenericProperty) GenericProperty< cgt::Vector2<int> >;
+    %template(IVec2Property) NumericProperty< cgt::Vector2<int> >;
+    typedef NumericProperty< cgt::Vector2<int> > IVec2Property;
 
     template<typename T>
     struct FloatingPointPropertyTraits {};
@@ -139,11 +139,11 @@ namespace campvis {
 
     /* CameraProperty */
 
-    %template(GenericProperty_Camera) GenericProperty<tgt::Camera>;
+    %template(GenericProperty_Camera) GenericProperty<cgt::Camera>;
 
-    class CameraProperty : public GenericProperty<tgt::Camera> {
+    class CameraProperty : public GenericProperty<cgt::Camera> {
     public:
-        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera());
+        CameraProperty(const std::string& name, const std::string& title, cgt::Camera cam = cgt::Camera());
         virtual ~CameraProperty();
     };
 
@@ -154,14 +154,14 @@ namespace campvis {
     class TFGeometry1D {
     public:
         virtual ~TFGeometry1D();
-        static TFGeometry1D* createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::vec4& rightColor);
+        static TFGeometry1D* createQuad(const cgt::vec2& interval, const cgt::col4& leftColor, const cgt::vec4& rightColor);
     };
 
     /* AbstractTransferFunction */
 
     class AbstractTransferFunction {
     public:
-        AbstractTransferFunction(const tgt::svec3& size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        AbstractTransferFunction(const cgt::svec3& size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
         virtual ~AbstractTransferFunction();
 
         virtual AbstractTransferFunction* clone() const = 0;
@@ -172,7 +172,7 @@ namespace campvis {
     template<class T>
     class GenericGeometryTransferFunction : public AbstractTransferFunction {
     public:
-        GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        GenericGeometryTransferFunction(const cgt::vec3& size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
         virtual ~GenericGeometryTransferFunction();
 
         void addGeometry(T* geometry);
@@ -184,7 +184,7 @@ namespace campvis {
 
     class Geometry1DTransferFunction : public GenericGeometryTransferFunction<TFGeometry1D> {
     public:
-        Geometry1DTransferFunction(size_t size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        Geometry1DTransferFunction(size_t size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
         virtual ~Geometry1DTransferFunction();
 
         virtual Geometry1DTransferFunction* clone() const;
@@ -208,7 +208,7 @@ namespace campvis {
         IHasWorldBounds();
         virtual ~IHasWorldBounds();
 
-        virtual tgt::Bounds getWorldBounds() const = 0;
+        virtual cgt::Bounds getWorldBounds() const = 0;
     };
 
     /* AbstractData */
@@ -225,11 +225,11 @@ namespace campvis {
 
     class ImageData : public AbstractData, public IHasWorldBounds {
     public:
-        ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
+        ImageData(size_t dimensionality, const cgt::svec3& size, size_t numChannels);
         virtual ~ImageData();
 
         virtual ImageData* clone() const;
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
     };
 
     /* Downcast the return value of DataHandle::getData to appropriate subclass */
@@ -329,7 +329,7 @@ namespace campvis {
     public:
         virtual void addProcessor(AbstractProcessor* processor);
 
-        void addEventListenerToBack(tgt::EventListener* e);
+        void addEventListenerToBack(cgt::EventListener* e);
     };
 
     /* VisualizationProcessor */
@@ -342,7 +342,7 @@ namespace campvis {
 
     /* TrackballNavigationEventListener */
 
-    class TrackballNavigationEventListener : public tgt::EventListener {
+    class TrackballNavigationEventListener : public cgt::EventListener {
     public:
         TrackballNavigationEventListener(CameraProperty* cameraProperty, IVec2Property* viewportSizeProp);
         virtual ~TrackballNavigationEventListener();
@@ -351,7 +351,7 @@ namespace campvis {
         void removeLqModeProcessor(VisualizationProcessor* vp);
 
         void reinitializeCamera(const IHasWorldBounds* hwb);
-        void reinitializeCamera(const tgt::Bounds& worldBounds);
+        void reinitializeCamera(const cgt::Bounds& worldBounds);
     };
 }
 
