@@ -24,7 +24,7 @@
 
 #include "tensordemo.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"

@@ -23,10 +23,10 @@
 // ================================================================================================
 
 #include "slicerenderer2d.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/event/mouseevent.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"

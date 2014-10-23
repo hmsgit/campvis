@@ -27,10 +27,10 @@
 
 #include <sigslot/sigslot.h>
 
-#include "tgt/bounds.h"
-#include "tgt/logmanager.h"
-#include "tgt/event/eventlistener.h"
-#include "tgt/navigation/trackball.h"
+#include "cgt/bounds.h"
+#include "cgt/logmanager.h"
+#include "cgt/event/eventlistener.h"
+#include "cgt/navigation/trackball.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/datahandle.h"

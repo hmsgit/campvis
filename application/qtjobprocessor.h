@@ -25,8 +25,8 @@
 #ifndef QTJOBPROCESSOR_H__
 #define QTJOBPROCESSOR_H__
 
-#include "tgt/job.h"
-#include "tgt/singleton.h"
+#include "cgt/job.h"
+#include "cgt/singleton.h"
 #include <QWidget>
 #include <functional>
 

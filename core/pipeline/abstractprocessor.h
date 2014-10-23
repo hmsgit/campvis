@@ -30,7 +30,7 @@
 #include <tbb/spin_rw_mutex.h>
 
 #include "sigslot/sigslot.h"
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/datacontainer.h"

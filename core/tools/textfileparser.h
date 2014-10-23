@@ -25,9 +25,9 @@
 #ifndef TEXTFILEPARSER_H__
 #define TEXTFILEPARSER_H__
 
-#include "tgt/exception.h"
-#include "tgt/filesystem.h"
-#include "tgt/vector.h"
+#include "cgt/exception.h"
+#include "cgt/filesystem.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/tools/stringutils.h"

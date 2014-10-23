@@ -26,7 +26,7 @@
 #define BUFFERINGLOG_H__
 
 #include "tbb/mutex.h"
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 #include <deque>
 #include <QObject>

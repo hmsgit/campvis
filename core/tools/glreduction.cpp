@@ -24,11 +24,11 @@
 
 #include "glreduction.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/framebufferobject.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"

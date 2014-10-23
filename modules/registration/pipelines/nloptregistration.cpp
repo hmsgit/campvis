@@ -24,9 +24,9 @@
 
 #include "nloptregistration.h"
 
-#include "tgt/event/keyevent.h"
-#include "tgt/openglgarbagecollector.h"
-#include "tgt/painter.h"
+#include "cgt/event/keyevent.h"
+#include "cgt/openglgarbagecollector.h"
+#include "cgt/painter.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"

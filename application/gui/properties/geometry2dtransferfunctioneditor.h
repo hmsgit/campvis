@@ -26,8 +26,8 @@
 #define GEOMETRY2DTRANSFERFUNCTIONEDITOR_H__
 
 #include "tbb/mutex.h"
-#include "tgt/painter.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/painter.h"
+#include "cgt/event/eventlistener.h"
 #include "core/classification/tfgeometry2d.h"
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 

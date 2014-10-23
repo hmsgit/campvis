@@ -25,10 +25,10 @@
 #ifndef TYPETRAITS_H__
 #define TYPETRAITS_H__
 
-#include "tgt/tgt_gl.h"
-#include "tgt/tgt_math.h"
-#include "tgt/matrix.h"
-#include "tgt/vector.h"
+#include "cgt/tgt_gl.h"
+#include "cgt/tgt_math.h"
+#include "cgt/matrix.h"
+#include "cgt/vector.h"
 #include "core/datastructures/tensor.h"
 #include "core/tools/weaklytypedpointer.h"
 #include <limits>

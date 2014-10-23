@@ -25,9 +25,9 @@
 #ifndef VISUALIZATIONPROCESSOR_H__
 #define VISUALIZATIONPROCESSOR_H__
 
-#include "tgt/framebufferobject.h"
-#include "tgt/texture.h"
-#include "tgt/vector.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/texture.h"
+#include "cgt/vector.h"
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/numericproperty.h"

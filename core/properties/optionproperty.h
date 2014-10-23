@@ -25,7 +25,7 @@
 #ifndef OPTIONPROPERTY_H__
 #define OPTIONPROPERTY_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include "core/properties/numericproperty.h"
 
 #include <string>

@@ -26,7 +26,7 @@
 
 #include <limits>
 
-#include "tgt/filesystem.h"
+#include "cgt/filesystem.h"
 #include "core/tools/stringutils.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imageseries.h"

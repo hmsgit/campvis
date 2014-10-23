@@ -25,9 +25,9 @@
 #ifndef TFGEOMETRYMANIPULATOR_H__
 #define TFGEOMETRYMANIPULATOR_H__
 
-#include "tgt/vector.h"
-#include "tgt/matrix.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/vector.h"
+#include "cgt/matrix.h"
+#include "cgt/event/eventlistener.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/tfgeometry2d.h"
 

@@ -25,8 +25,8 @@
 #ifndef IMAGEREPRESENTATIONCONVERTER_H__
 #define IMAGEREPRESENTATIONCONVERTER_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/singleton.h"
+#include "cgt/logmanager.h"
+#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>

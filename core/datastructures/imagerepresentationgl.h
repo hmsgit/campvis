@@ -25,8 +25,8 @@
 #ifndef IMAGEREPRESENTATIONGL_H__
 #define IMAGEREPRESENTATIONGL_H__
 
-#include "tgt/tgt_gl.h"
-#include "tgt/texture.h"
+#include "cgt/tgt_gl.h"
+#include "cgt/texture.h"
 
 #include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/tools/weaklytypedpointer.h"

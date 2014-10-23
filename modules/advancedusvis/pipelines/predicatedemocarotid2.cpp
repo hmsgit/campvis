@@ -24,7 +24,7 @@
 
 #include "predicatedemocarotid2.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/imagedata.h"
 

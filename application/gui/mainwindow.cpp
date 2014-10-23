@@ -24,7 +24,7 @@
 
 #include "mainwindow.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include "application/campvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"

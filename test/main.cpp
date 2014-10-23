@@ -34,13 +34,13 @@
 
 #include "sigslot/sigslot.h"
 
-#include "tgt/glcontextmanager.h"
-#include "tgt/gpucapabilities.h"
-#include "tgt/init.h"
-#include "tgt/logmanager.h"
-#include "tgt/opengljobprocessor.h"
-#include "tgt/shadermanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/gpucapabilities.h"
+#include "cgt/init.h"
+#include "cgt/logmanager.h"
+#include "cgt/opengljobprocessor.h"
+#include "cgt/shadermanager.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"

@@ -23,7 +23,7 @@
 // ================================================================================================
 
 #include "lightsourcedata.h"
-#include "tgt/shadermanager.h"
+#include "cgt/shadermanager.h"
 
 namespace campvis {
     

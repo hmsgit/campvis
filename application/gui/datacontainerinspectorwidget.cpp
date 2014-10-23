@@ -24,11 +24,11 @@
 
 #include "datacontainerinspectorwidget.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/filesystem.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/filesystem.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>

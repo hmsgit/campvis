@@ -24,8 +24,8 @@
 
 #include "mwheeltonumericpropertyeventlistener.h"
 
-#include "tgt/assert.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/assert.h"
+#include "cgt/event/mouseevent.h"
 #include "core/properties/numericproperty.h"
 
 namespace campvis {

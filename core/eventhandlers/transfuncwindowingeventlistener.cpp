@@ -24,8 +24,8 @@
 
 #include "transfuncwindowingeventlistener.h"
 
-#include "tgt/assert.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/assert.h"
+#include "cgt/event/mouseevent.h"
 #include "core/classification/abstracttransferfunction.h"
 #include "core/properties/transferfunctionproperty.h"
 

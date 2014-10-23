@@ -25,7 +25,7 @@
 #ifndef ALGORITHMICGEOMETRY_H__
 #define ALGORITHMICGEOMETRY_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include "core/coreapi.h"
 
 namespace campvis {

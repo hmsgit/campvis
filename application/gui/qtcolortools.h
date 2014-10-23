@@ -25,7 +25,7 @@
 #ifndef QTCOLORTOOLS_H__
 #define QTCOLORTOOLS_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include <QColor>
 #include <QLabel>
 

@@ -27,9 +27,9 @@
 
 #include <string>
 
-#include "tgt/buffer.h"
-#include "tgt/matrix.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/buffer.h"
+#include "cgt/matrix.h"
+#include "cgt/vertexarrayobject.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"

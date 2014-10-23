@@ -24,9 +24,9 @@
 
 #include "tfgeometrymanipulator.h"
 
-#include "tgt/assert.h"
-#include "tgt/tgt_gl.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/assert.h"
+#include "cgt/tgt_gl.h"
+#include "cgt/event/mouseevent.h"
 
 #include "application/gui/qtcolortools.h"
 #include "core/classification/geometry1dtransferfunction.h"

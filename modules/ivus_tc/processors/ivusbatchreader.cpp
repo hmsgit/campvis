@@ -26,8 +26,8 @@
 
 #include <IL/il.h>
 
-#include "tgt/logmanager.h"
-#include "tgt/filesystem.h"
+#include "cgt/logmanager.h"
+#include "cgt/filesystem.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/stringutils.h"
 

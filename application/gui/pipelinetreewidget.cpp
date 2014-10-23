@@ -24,7 +24,7 @@
 
 #include "pipelinetreewidget.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QStringList>

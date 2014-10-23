@@ -26,7 +26,7 @@
 #define TFGEOMETRY2D_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include <vector>
 
 #include "core/coreapi.h"

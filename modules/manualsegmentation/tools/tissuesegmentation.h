@@ -25,7 +25,7 @@
 #ifndef TISSUESEGMENTATION_H__
 #define TISSUESEGMENTATION_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include <iostream>
 #include <vector>

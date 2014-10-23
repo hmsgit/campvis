@@ -29,7 +29,7 @@
 
 #include "itkregistrationdemo.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"

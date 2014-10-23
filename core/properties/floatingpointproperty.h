@@ -25,7 +25,7 @@
 #ifndef FLOATINGPOINTPROPERTY_H__
 #define FLOATINGPOINTPROPERTY_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include "core/properties/numericproperty.h"
 
 namespace {

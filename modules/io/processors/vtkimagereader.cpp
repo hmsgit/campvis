@@ -29,7 +29,7 @@
 #include <sstream>
 #include <string>
 
-#include "tgt/filesystem.h"
+#include "cgt/filesystem.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/indexedmeshgeometry.h"

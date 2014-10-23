@@ -28,7 +28,7 @@
 #include "sigslot/sigslot.h"
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 #include "core/coreapi.h"
 #include "core/pipeline/abstractprocessor.h"

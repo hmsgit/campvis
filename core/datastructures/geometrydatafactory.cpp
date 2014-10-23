@@ -24,7 +24,7 @@
 
 #include "geometrydatafactory.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 #include "core/tools/teapot.h"
 

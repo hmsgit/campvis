@@ -27,11 +27,11 @@
 
 #include "sigslot/sigslot.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/runnable.h"
-#include "tgt/vector.h"
-#include "tgt/event/eventhandler.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/logmanager.h"
+#include "cgt/runnable.h"
+#include "cgt/vector.h"
+#include "cgt/event/eventhandler.h"
+#include "cgt/event/eventlistener.h"
 
 #include <tbb/spin_mutex.h>
 #include <tbb/mutex.h>

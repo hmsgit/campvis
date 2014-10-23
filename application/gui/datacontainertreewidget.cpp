@@ -26,7 +26,7 @@
 
 #include "datacontainertreewidget.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"

@@ -23,7 +23,7 @@
 // ================================================================================================
 
 #include "abstractprocessor.h"
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include "core/properties/abstractproperty.h"
 
 #include <ext/threading.h>

@@ -25,8 +25,8 @@
 #ifndef INTERVAL_H__
 #define INTERVAL_H__
 
-#include "tgt/tgt_math.h"
-#include "tgt/vector.h"
+#include "cgt/tgt_math.h"
+#include "cgt/vector.h"
 #include <limits>
 
 namespace campvis {

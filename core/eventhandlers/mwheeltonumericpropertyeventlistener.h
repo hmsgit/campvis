@@ -25,8 +25,8 @@
 #ifndef MWHEELTONUMERICPROPERTYEVENTHANDLER_H__
 #define MWHEELTONUMERICPROPERTYEVENTHANDLER_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/logmanager.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/coreapi.h"
 

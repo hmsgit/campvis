@@ -28,7 +28,7 @@
 #include <string>
 #include "abstractimagereader.h"
 
-#include "tgt/exception.h"
+#include "cgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"

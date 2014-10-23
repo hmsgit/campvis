@@ -26,7 +26,7 @@
 #define ABSTRACTTRANSFERFUNCTION_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include <tbb/atomic.h>
 #include <tbb/mutex.h>
 

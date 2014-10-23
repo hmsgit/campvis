@@ -25,7 +25,7 @@
 #ifndef POSITIONDATA_H__
 #define POSITIONDATA_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
 

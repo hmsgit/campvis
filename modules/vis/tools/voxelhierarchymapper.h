@@ -27,8 +27,8 @@
 
 #include <string>
 
-#include "tgt/framebufferobject.h"
-#include "tgt/shadermanager.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/shadermanager.h"
 #include "core/datastructures/facegeometry.h"
 
 namespace tgt {

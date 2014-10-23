@@ -25,8 +25,8 @@
 #ifndef imagemapping_h__
 #define imagemapping_h__
 
-#include "tgt/matrix.h"
-#include "tgt/vector.h"
+#include "cgt/matrix.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/tools/mapping.h"

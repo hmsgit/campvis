@@ -25,7 +25,7 @@
 #ifndef IMAGEREPRESENTATIONCONVERSIONCORE_H__
 #define IMAGEREPRESENTATIONCONVERSIONCORE_H__
 
-#include "tgt/opengljobprocessor.h"
+#include "cgt/opengljobprocessor.h"
 
 #include "core/coreapi.h"
 

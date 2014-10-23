@@ -25,8 +25,8 @@
 #ifndef ABSTRACTIMAGEREPRESENTATION_H__
 #define ABSTRACTIMAGEREPRESENTATION_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"

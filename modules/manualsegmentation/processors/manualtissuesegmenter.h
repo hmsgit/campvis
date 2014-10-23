@@ -28,8 +28,8 @@
 #include <string>
 #include <map>
 
-#include "tgt/bounds.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/bounds.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/datastructures/datahandle.h"
 #include "core/pipeline/visualizationprocessor.h"

@@ -25,8 +25,8 @@
 #ifndef FACEGEOMETRY_H__
 #define FACEGEOMETRY_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 #include "core/datastructures/geometrydata.h"
 
 #include <vector>

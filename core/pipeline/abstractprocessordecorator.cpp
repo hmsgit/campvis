@@ -24,8 +24,8 @@
 
 #include "abstractprocessordecorator.h"
 
-#include "tgt/assert.h"
-#include "tgt/shadermanager.h"
+#include "cgt/assert.h"
+#include "cgt/shadermanager.h"
 
 namespace campvis {
 

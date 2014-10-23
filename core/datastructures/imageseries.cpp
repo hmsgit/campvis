@@ -24,7 +24,7 @@
 
 #include "imageseries.h"
 #include "imagedata.h"
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 namespace campvis {
 

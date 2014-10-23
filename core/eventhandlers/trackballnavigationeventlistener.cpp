@@ -23,8 +23,8 @@
 // ================================================================================================
 
 #include "trackballnavigationeventlistener.h"
-#include "tgt/assert.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/assert.h"
+#include "cgt/event/mouseevent.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/properties/cameraproperty.h"
 #include "core/pipeline/visualizationprocessor.h"

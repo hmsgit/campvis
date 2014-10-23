@@ -25,8 +25,8 @@
 #ifndef QUADRENDERER_H__
 #define QUADRENDERER_H__
 
-#include "tgt/singleton.h"
-#include "tgt/tgt_gl.h"
+#include "cgt/singleton.h"
+#include "cgt/tgt_gl.h"
 
 #include "core/coreapi.h"
 

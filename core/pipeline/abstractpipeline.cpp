@@ -27,11 +27,11 @@
 
 #include <tbb/tick_count.h>
 
-#include "tgt/exception.h"
-#include "tgt/glcanvas.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/painter.h"
-#include "tgt/tgt_gl.h"
+#include "cgt/exception.h"
+#include "cgt/glcanvas.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/painter.h"
+#include "cgt/tgt_gl.h"
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessor.h"

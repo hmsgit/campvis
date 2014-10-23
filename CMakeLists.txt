@@ -44,7 +44,7 @@ include(cmake/parseModulesDir.cmake)
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 
 IF(CAMPVIS_BUILD_LIB_TGT)
-    ADD_SUBDIRECTORY(ext/tgt)
+    ADD_SUBDIRECTORY(ext/cgt)
     ADD_SUBDIRECTORY(ext/sigslot)
 ENDIF()
 

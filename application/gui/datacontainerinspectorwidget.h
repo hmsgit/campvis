@@ -26,7 +26,7 @@
 #define DATACONTAINERINSPECTORWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/painter.h"
+#include "cgt/painter.h"
 #include "tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"

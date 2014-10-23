@@ -24,9 +24,9 @@
 
 #include "renderdata.h"
 
-#include "tgt/framebufferobject.h"
-#include "tgt/textureunit.h"
-#include "tgt/shadermanager.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/textureunit.h"
+#include "cgt/shadermanager.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"

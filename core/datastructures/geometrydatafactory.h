@@ -25,8 +25,8 @@
 #ifndef GEOMETRYFACTORY_H__
 #define GEOMETRYFACTORY_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/facegeometry.h"

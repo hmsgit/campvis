@@ -24,8 +24,8 @@
 
 #include "datacontainer.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
 #include "core/datastructures/abstractdata.h"
 
 namespace campvis {

@@ -24,9 +24,9 @@
 
 #include "fiberdata.h"
 
-#include "tgt/buffer.h"
-#include "tgt/logmanager.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/buffer.h"
+#include "cgt/logmanager.h"
+#include "cgt/vertexarrayobject.h"
 
 namespace campvis {
 

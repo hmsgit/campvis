@@ -24,10 +24,10 @@
 
 #include "volumebricking.h"
 
-#include "tgt/assert.h"
-#include "tgt/glmath.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/glmath.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/genericimagerepresentationlocal.h"
 

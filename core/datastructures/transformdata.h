@@ -25,7 +25,7 @@
 #ifndef TRANSFORMDATA_H__
 #define TRANSFORMDATA_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
 

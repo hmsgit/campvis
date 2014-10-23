@@ -24,9 +24,9 @@
 
 #include "datacontainerinspectorcanvas.h"
 
-#include "tgt/assert.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/datahandle.h"
@@ -39,7 +39,7 @@
 
 #include "datacontainerinspectorwidget.h"
 
-#include "ext/tgt/navigation/trackball.h"
+#include "ext/cgt/navigation/trackball.h"
 
 
 namespace campvis {

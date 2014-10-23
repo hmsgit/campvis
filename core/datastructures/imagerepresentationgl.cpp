@@ -24,10 +24,10 @@
 
 #include "imagerepresentationgl.h"
 
-#include "tgt/assert.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/tgt_gl.h"
+#include "cgt/assert.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/tgt_gl.h"
 
 #include "core/datastructures/imagedata.h"
 

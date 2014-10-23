@@ -24,9 +24,9 @@
 
 #include "vectorfieldrenderer.h"
 
-#include "tgt/tgt_math.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
+#include "cgt/tgt_math.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/lightsourcedata.h"

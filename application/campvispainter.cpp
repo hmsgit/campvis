@@ -24,13 +24,13 @@
 
 #include "campvispainter.h"
 
-#include "tgt/assert.h"
-#include "tgt/camera.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/assert.h"
+#include "cgt/camera.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 
 
 #include "core/datastructures/imagedata.h"

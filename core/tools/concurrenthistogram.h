@@ -26,9 +26,9 @@
 #define CONCURRENTHISTOGRAM_H__
 
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/tgt_math.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/tgt_math.h"
 #include <tbb/atomic.h>
 
 namespace campvis {

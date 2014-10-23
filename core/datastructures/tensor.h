@@ -25,7 +25,7 @@
 #ifndef TENSOR_H__
 #define TENSOR_H__
 
-#include "tgt/matrix.h"
+#include "cgt/matrix.h"
 
 namespace campvis {
 

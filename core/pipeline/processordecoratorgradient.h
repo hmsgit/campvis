@@ -26,7 +26,7 @@
 #define PROCESSORDECORATORGRADIENT_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/floatingpointproperty.h"

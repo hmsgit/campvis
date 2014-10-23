@@ -24,9 +24,9 @@
 
 #include "cmbatchgeneration.h"
 
-#include "tgt/filesystem.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/event/keyevent.h"
+#include "cgt/filesystem.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/event/keyevent.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"

@@ -25,7 +25,7 @@
 #ifndef MICROSCOPYIMAGESEGMENTATION_H__
 #define MICROSCOPYIMAGESEGMENTATION_H__
 
-#include "tgt/event/eventlistener.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"

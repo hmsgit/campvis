@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include "tgt/event/eventlistener.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/pipeline/visualizationprocessor.h"

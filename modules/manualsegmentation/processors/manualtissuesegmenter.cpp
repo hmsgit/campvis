@@ -23,11 +23,11 @@
 // ================================================================================================
 
 #include "manualtissuesegmenter.h"
-#include "tgt/bounds.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/bounds.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 #include "core/tools/interval.h"
 

@@ -25,7 +25,7 @@
 #ifndef PROCESSORDECORATORMASKING_H__
 #define PROCESSORDECORATORMASKING_H__
 
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/abstractprocessordecorator.h"

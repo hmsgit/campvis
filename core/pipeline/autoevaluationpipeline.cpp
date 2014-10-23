@@ -24,8 +24,8 @@
 
 #include "autoevaluationpipeline.h"
 
-#include "tgt/tgt_gl.h"
-#include "tgt/glcanvas.h"
+#include "cgt/tgt_gl.h"
+#include "cgt/glcanvas.h"
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"

@@ -26,11 +26,11 @@
 #define DATACONTAINERINSPECTORCANVAS_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/painter.h"
-#include "tgt/event/eventlistener.h"
-#include "tgt/event/mouseevent.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/painter.h"
+#include "cgt/event/eventlistener.h"
+#include "cgt/event/mouseevent.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"

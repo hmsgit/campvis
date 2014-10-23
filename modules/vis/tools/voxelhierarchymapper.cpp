@@ -24,12 +24,12 @@
 
 #include "voxelhierarchymapper.h"
 
-#include "tgt/assert.h"
-#include "tgt/framebufferobject.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
-#include "tgt/tgt_gl.h"
+#include "cgt/assert.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
+#include "cgt/tgt_gl.h"
 
 #include "core/classification/abstracttransferfunction.h"
 #include "core/datastructures/imagerepresentationgl.h"

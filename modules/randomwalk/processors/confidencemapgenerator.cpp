@@ -25,9 +25,9 @@
 #include "confidencemapgenerator.h"
 
 #include <tbb/tbb.h>
-#include "tgt/logmanager.h"
-#include "tgt/tgt_math.h"
-#include "tgt/vector.h"
+#include "cgt/logmanager.h"
+#include "cgt/tgt_math.h"
+#include "cgt/vector.h"
 #include "core/tools/interval.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"

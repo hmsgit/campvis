@@ -25,7 +25,7 @@
 #ifndef IMAGEREPRESENTATIONLOCAL_H__
 #define IMAGEREPRESENTATIONLOCAL_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/tools/concurrenthistogram.h"

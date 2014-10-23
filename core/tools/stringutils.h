@@ -25,7 +25,7 @@
 #ifndef STRINGUTILS_H__
 #define STRINGUTILS_H__
 
-#include "tgt/exception.h"
+#include "cgt/exception.h"
 #include <iomanip>
 #include <sstream>
 #include <string>

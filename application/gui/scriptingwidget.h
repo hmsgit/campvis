@@ -26,8 +26,8 @@
 #define SCRIPTINGWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/logmanager.h"
-#include "tgt/painter.h"
+#include "cgt/logmanager.h"
+#include "cgt/painter.h"
 #include "tbb/mutex.h"
 
 #include "application/tools/bufferinglog.h"

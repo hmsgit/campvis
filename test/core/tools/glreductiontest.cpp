@@ -34,7 +34,7 @@
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 
-#include "tgt/framebufferobject.h"
+#include "cgt/framebufferobject.h"
 
 using namespace campvis;
 

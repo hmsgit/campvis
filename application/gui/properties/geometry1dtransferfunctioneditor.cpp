@@ -24,10 +24,10 @@
 
 #include "geometry1dtransferfunctioneditor.h"
 
-#include "tgt/assert.h"
-#include "tgt/shadermanager.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/assert.h"
+#include "cgt/shadermanager.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 
 #include "application/gui/qtcolortools.h"
 #include "application/gui/properties/tfgeometrymanipulator.h"

@@ -30,7 +30,7 @@
 #include <string>
 #include <set>
 
-#include <tgt/matrix.h>
+#include <cgt/matrix.h>
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/allproperties.h"

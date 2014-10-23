@@ -25,7 +25,7 @@
 #ifndef VOLUMEEXPLORER_H__
 #define VOLUMEEXPLORER_H__
 
-#include "tgt/event/eventlistener.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/trackballnavigationeventlistener.h"

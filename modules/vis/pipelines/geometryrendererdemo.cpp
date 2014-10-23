@@ -24,7 +24,7 @@
 
 #include "geometryrendererdemo.h"
 
-#include "tgt/texturereadertga.h"
+#include "cgt/texturereadertga.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"

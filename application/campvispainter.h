@@ -30,8 +30,8 @@
 #include <ext/threading.h>
 #include <tbb/atomic.h>
 
-#include "tgt/logmanager.h"
-#include "tgt/painter.h"
+#include "cgt/logmanager.h"
+#include "cgt/painter.h"
 
 namespace tgt {
     class Shader;

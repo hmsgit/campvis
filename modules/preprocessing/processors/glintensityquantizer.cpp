@@ -24,10 +24,10 @@
 
 #include "glintensityquantizer.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/texture.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/texture.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"

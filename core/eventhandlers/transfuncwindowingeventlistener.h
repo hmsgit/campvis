@@ -25,9 +25,9 @@
 #ifndef TRANSFUNCWINDOWINGEVENTHANDLER_H__
 #define TRANSFUNCWINDOWINGEVENTHANDLER_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/vector.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/logmanager.h"
+#include "cgt/vector.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/coreapi.h"
 

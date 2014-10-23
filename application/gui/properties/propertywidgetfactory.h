@@ -25,8 +25,8 @@
 #ifndef PROPERTYWIDGETFACTORY_H__
 #define PROPERTYWIDGETFACTORY_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/singleton.h"
+#include "cgt/logmanager.h"
+#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>

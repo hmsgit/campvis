@@ -25,7 +25,7 @@
 #ifndef VOLUMEBRICKING_H__
 #define VOLUMEBRICKING_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/imagedata.h"

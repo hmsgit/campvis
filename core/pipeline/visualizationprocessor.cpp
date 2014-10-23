@@ -24,7 +24,7 @@
 
 #include "visualizationprocessor.h"
 
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 #include "core/datastructures/imagedata.h"
 
 namespace campvis {

@@ -24,8 +24,8 @@
 
 #include "gradientvolumegenerator.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
 
 #include <tbb/tbb.h>
 

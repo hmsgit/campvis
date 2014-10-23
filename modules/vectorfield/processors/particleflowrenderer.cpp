@@ -24,12 +24,12 @@
 
 #include "particleflowrenderer.h"
 
-#include "tgt/buffer.h"
-#include "tgt/tgt_math.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/buffer.h"
+#include "cgt/tgt_math.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/vertexarrayobject.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"

@@ -24,7 +24,7 @@
 
 #include "qtexteditlog.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 namespace campvis {
 

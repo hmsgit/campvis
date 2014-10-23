@@ -27,11 +27,11 @@
 
 #include <cstring>
 
-#include "tgt/logmanager.h"
-#include "tgt/filesystem.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texturereaderdevil.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/filesystem.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texturereaderdevil.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationlocal.h"

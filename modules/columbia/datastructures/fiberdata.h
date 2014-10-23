@@ -25,9 +25,9 @@
 #ifndef FIBERDATA_H__
 #define FIBERDATA_H__
 
-#include "tgt/bounds.h"
-#include "tgt/tgt_gl.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/tgt_gl.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
 

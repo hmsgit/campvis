@@ -24,11 +24,11 @@
 
 #include "simpletransferfunction.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 namespace campvis {
 

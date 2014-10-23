@@ -24,7 +24,7 @@
 
 #include "imagerepresentationdisk.h"
 
-#include "tgt/filesystem.h"
+#include "cgt/filesystem.h"
 
 
 namespace campvis {

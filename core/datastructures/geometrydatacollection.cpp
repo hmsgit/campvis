@@ -23,7 +23,7 @@
 // ================================================================================================
 
 #include "geometrydatacollection.h"
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 namespace campvis {
 

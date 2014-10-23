@@ -24,9 +24,9 @@
 
 #include "tfgeometry1d.h"
 
-#include "tgt/assert.h"
-#include "tgt/texture.h"
-#include "tgt/tgt_math.h"
+#include "cgt/assert.h"
+#include "cgt/texture.h"
+#include "cgt/tgt_math.h"
 
 #include "core/datastructures/facegeometry.h"
 

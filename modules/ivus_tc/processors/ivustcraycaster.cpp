@@ -24,7 +24,7 @@
 
 #include "ivustcraycaster.h"
 
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/lightsourcedata.h"

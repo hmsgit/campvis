@@ -24,16 +24,16 @@
 
 #include "campvisapplication.h"
 
-#include "tgt/assert.h"
-#include "tgt/exception.h"
-#include "tgt/glcanvas.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/gpucapabilities.h"
-#include "tgt/opengljobprocessor.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texturereadertga.h"
-#include "tgt/qt/qtapplication.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/assert.h"
+#include "cgt/exception.h"
+#include "cgt/glcanvas.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/gpucapabilities.h"
+#include "cgt/init.h"
+#include "cgt/opengljobprocessor.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texturereadertga.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 
 #include "application/campvispainter.h"
 #include "application/gui/properties/propertywidgetfactory.h"
@@ -49,6 +49,8 @@
 
 #include "modules/pipelinefactory.h"
 #include "qtjobprocessor.h"
+
+#include <QApplication>
 
 #ifdef CAMPVIS_HAS_SCRIPTING
 #include "scripting/gen_pipelineregistration.h"

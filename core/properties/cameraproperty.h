@@ -25,7 +25,7 @@
 #ifndef CAMERAPROPERTY_H__
 #define CAMERAPROPERTY_H__
 
-#include "tgt/camera.h"
+#include "cgt/camera.h"
 #include "core/properties/genericproperty.h"
 
 namespace campvis {

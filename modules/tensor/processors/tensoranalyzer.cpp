@@ -24,8 +24,8 @@
 
 #include "tensoranalyzer.h"
 
-#include "tgt/tgt_math.h"
-#include "tgt/logmanager.h"
+#include "cgt/tgt_math.h"
+#include "cgt/logmanager.h"
 
 #include <Eigen/Eigenvalues>
 #include <tbb/tbb.h>

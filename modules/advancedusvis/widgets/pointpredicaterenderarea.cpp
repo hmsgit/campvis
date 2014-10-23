@@ -22,7 +22,7 @@
 // 
 // ================================================================================================
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include "pointpredicatehistogrampropertywidget.h"
 
 #include "core/tools/stringutils.h"

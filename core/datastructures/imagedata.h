@@ -28,8 +28,8 @@
 #include <tbb/concurrent_vector.h>
 #include <tbb/spin_mutex.h>
 
-#include "tgt/logmanager.h"
-#include "tgt/vector.h"
+#include "cgt/logmanager.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"

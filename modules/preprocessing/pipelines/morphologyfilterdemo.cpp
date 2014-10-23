@@ -24,7 +24,7 @@
 
 #include "morphologyfilterdemo.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
 

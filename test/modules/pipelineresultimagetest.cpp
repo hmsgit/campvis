@@ -26,8 +26,8 @@
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 
-#include "tgt/filesystem.h"
-#include "tgt/opengljobprocessor.h"
+#include "cgt/filesystem.h"
+#include "cgt/opengljobprocessor.h"
 
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/renderdata.h"

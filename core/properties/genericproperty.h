@@ -26,7 +26,7 @@
 #define GENERICPROPERTY_H__
 
 #include <tbb/spin_mutex.h>
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 #include "core/properties/abstractproperty.h"
 
 namespace campvis {

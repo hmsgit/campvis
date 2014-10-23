@@ -24,11 +24,11 @@
 
 #include "facegeometry.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/buffer.h"
-#include "tgt/vertexarrayobject.h"
-#include "tgt/vector.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/buffer.h"
+#include "cgt/vertexarrayobject.h"
+#include "cgt/vector.h"
 
 namespace campvis {
 

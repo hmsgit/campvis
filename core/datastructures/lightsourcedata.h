@@ -25,7 +25,7 @@
 #ifndef LIGHTSOURCEDATA_H__
 #define LIGHTSOURCEDATA_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
 

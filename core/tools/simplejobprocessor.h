@@ -25,7 +25,7 @@
 #ifndef SIMPLEJOBPROCESSOR_H__
 #define SIMPLEJOBPROCESSOR_H__
 
-#include "tgt/singleton.h"
+#include "cgt/singleton.h"
 #include <tbb/task_group.h>
 
 #include "core/coreapi.h"

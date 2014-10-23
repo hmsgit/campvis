@@ -1,0 +1,120 @@
+/**********************************************************************
+ *                                                                    *
+ * tgt - Tiny Graphics Toolbox                                        *
+ *                                                                    *
+ * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
+ * Department of Computer Science, University of Muenster, Germany.   *
+ * <http://viscg.uni-muenster.de>                                     *
+ *                                                                    *
+ * This file is part of the tgt library. This library is free         *
+ * software; you can redistribute it and/or modify it under the terms *
+ * of the GNU Lesser General Public License version 2.1 as published  *
+ * by the Free Software Foundation.                                   *
+ *                                                                    *
+ * This library is distributed in the hope that it will be useful,    *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of     *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the       *
+ * GNU Lesser General Public License for more details.                *
+ *                                                                    *
+ * You should have received a copy of the GNU Lesser General Public   *
+ * License in the file "LICENSE.txt" along with this library.         *
+ * If not, see <http://www.gnu.org/licenses/>.                        *
+ *                                                                    *
+ **********************************************************************/
+
+#include "cgt/init.h"
+
+#include "cgt/tgt_gl.h"
+
+#include "cgt/assert.h"
+#include "cgt/openglgarbagecollector.h"
+#include "cgt/singleton.h"
+#include "cgt/gpucapabilities.h"
+#ifdef _MSC_VER
+    #include "cgt/gpucapabilitieswindows.h"
+#endif
+#include "cgt/shadermanager.h"
+#include "cgt/event/eventhandler.h"
+
+#ifdef TGT_HAS_DEVIL
+#include "cgt/texturereaderdevil.h"
+#endif
+#include "cgt/texturereadertga.h"
+
+namespace tgt {
+
+void init(InitFeature::Features featureset, LogLevel logLevel) {
+    if (featureset & InitFeature::SHADER_MANAGER) {
+        featureset = (InitFeature::Features) (featureset | InitFeature::GPU_PROPERTIES | InitFeature::FILE_SYSTEM);
+    }
+
+    if (featureset & InitFeature::TEXTURE_MANAGER) {
+        featureset = (InitFeature::Features) (featureset | InitFeature::GPU_PROPERTIES | InitFeature::FILE_SYSTEM);
+    }
+
+    if (featureset & InitFeature::LOG_MANAGER) {
+        LogManager::init();
+        if (featureset & InitFeature::LOG_TO_CONSOLE) {
+            ConsoleLog* log = new ConsoleLog();
+            log->addCat("", true, logLevel);
+            LogMgr.addLog(log);
+        }
+        // LogMgr disposes all its logs
+    }
+
+    if (featureset & InitFeature::FILE_SYSTEM)
+        FileSystem::init();
+}
+
+void deinit() {
+    if (FileSystem::isInited())
+        FileSystem::deinit();
+
+    if (LogManager::isInited())
+        LogManager::deinit();
+}
+
+void initGL(InitFeature::Features featureset) {
+    if (featureset & InitFeature::SHADER_MANAGER) {
+        featureset = (InitFeature::Features) (featureset | InitFeature::GPU_PROPERTIES | InitFeature::FILE_SYSTEM);
+    }
+    if (featureset & InitFeature::TEXTURE_MANAGER) {
+        featureset = (InitFeature::Features) (featureset | InitFeature::GPU_PROPERTIES | InitFeature::FILE_SYSTEM);
+    }
+
+
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        // Problem: glewInit failed, something is seriously wrong.
+        tgtAssert(false, "glewInit failed");
+        std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    LINFOC("tgt.init", "GLEW version:       " << glewGetString(GLEW_VERSION));
+
+    if (featureset & InitFeature::GPU_PROPERTIES )
+        GpuCapabilities::init();
+#ifdef _MSC_VER
+        GpuCapabilitiesWindows::init();
+#endif
+
+    // starting shadermanager
+    ShaderManager::init();
+
+    OpenGLGarbageCollector::init();
+}
+
+void deinitGL() {
+    if (OpenGLGarbageCollector::isInited())
+        OpenGLGarbageCollector::deinit();
+    if (GpuCapabilities::isInited())
+        GpuCapabilities::deinit();
+#ifdef _MSC_VER
+    if (GpuCapabilitiesWindows::isInited())
+        GpuCapabilitiesWindows::deinit();
+#endif
+    if (ShaderManager::isInited())
+        ShaderManager::deinit();
+}
+
+} // namespace

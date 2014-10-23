@@ -24,11 +24,11 @@
 
 #include "glgaussianfilter.h"
 
-#include "tgt/buffer.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/texture.h"
+#include "cgt/buffer.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/texture.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"

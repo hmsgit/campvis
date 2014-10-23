@@ -24,7 +24,7 @@
 
 #include "processordecoratormasking.h"
 
-#include "tgt/shadermanager.h"
+#include "cgt/shadermanager.h"
 #include "core/pipeline/abstractprocessor.h"
 
 namespace campvis {

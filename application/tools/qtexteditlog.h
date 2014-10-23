@@ -25,7 +25,7 @@
 #ifndef QTEXTEDITLOG_H__
 #define QTEXTEDITLOG_H__
 
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 #include <QObject>
 #include <QTextEdit>

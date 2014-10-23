@@ -27,9 +27,9 @@
 
 #include <string>
 
-#include "tgt/buffer.h"
-#include "tgt/vertexarrayobject.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/buffer.h"
+#include "cgt/vertexarrayobject.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
