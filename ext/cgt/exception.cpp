@@ -1,10 +1,14 @@
 /**********************************************************************
  *                                                                    *
- * cgt - Tiny Graphics Toolbox                                        *
+ * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
+ *     Chair for Computer Aided Medical Procedures                    *
+ *     Technische Universitaet Muenchen, Germany.                     *
+ *     <http://campar.in.tum.de/>                                     *
  *                                                                    *
- * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
- * Department of Computer Science, University of Muenster, Germany.   *
- * <http://viscg.uni-muenster.de>                                     *
+ * forked from tgt - Tiny Graphics Toolbox, Copyright (C) 2006-2011   *
+ *     Visualization and Computer Graphics Group, Department of       *
+ *     Computer Science, University of Muenster, Germany.             *
+ *     <http://viscg.uni-muenster.de>                                 *
  *                                                                    *
  * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
