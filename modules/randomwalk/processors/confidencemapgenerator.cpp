@@ -26,7 +26,7 @@
 
 #include <tbb/tbb.h>
 #include "cgt/logmanager.h"
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_math.h"
 #include "cgt/vector.h"
 #include "core/tools/interval.h"
 #include "core/datastructures/imagedata.h"

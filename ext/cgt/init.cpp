@@ -24,7 +24,7 @@
 
 #include "cgt/init.h"
 
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "cgt/assert.h"
 #include "cgt/openglgarbagecollector.h"

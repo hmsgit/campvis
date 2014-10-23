@@ -28,7 +28,7 @@
 #include "cgt/types.h"
 #include "cgt/vector.h"
 #include "cgt/bounds.h"
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_math.h"
 
 namespace cgt {
 

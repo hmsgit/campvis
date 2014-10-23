@@ -28,7 +28,7 @@
 #include "cgt/assert.h"
 #include "cgt/logmanager.h"
 #include "cgt/texture.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/types.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL

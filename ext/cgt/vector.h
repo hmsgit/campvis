@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_math.h"
 
 /*
     Performance remarks:

@@ -25,7 +25,7 @@
 #ifndef CGT_NAVIGATION_H
 #define CGT_NAVIGATION_H
 
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "cgt/bounds.h"
 #include "cgt/camera.h"

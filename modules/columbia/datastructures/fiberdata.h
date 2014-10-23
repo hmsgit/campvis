@@ -26,7 +26,7 @@
 #define FIBERDATA_H__
 
 #include "cgt/bounds.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"

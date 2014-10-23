@@ -24,7 +24,7 @@
 
 #include "vectorfieldrenderer.h"
 
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_math.h"
 #include "cgt/logmanager.h"
 #include "cgt/shadermanager.h"
 

@@ -27,7 +27,7 @@
 #include "cgt/assert.h"
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "core/datastructures/imagedata.h"
 

@@ -28,7 +28,7 @@
 #include <string>
 
 #include "cgt/singleton.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/types.h"
 
 namespace cgt {

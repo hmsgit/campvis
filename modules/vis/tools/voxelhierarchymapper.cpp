@@ -29,7 +29,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/texture.h"
 #include "cgt/textureunit.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "core/classification/abstracttransferfunction.h"
 #include "core/datastructures/imagerepresentationgl.h"

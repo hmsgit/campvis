@@ -46,7 +46,7 @@ SET(CGT_SOURCES
 	texturereaderdevil.cpp
 	texturereadertga.cpp
 	textureunit.cpp
-	tgt_gl.cpp
+	cgt_gl.cpp
 	timer.cpp
 	vertexarrayobject.cpp
 #event

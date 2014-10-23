@@ -25,8 +25,8 @@
 #ifndef TYPETRAITS_H__
 #define TYPETRAITS_H__
 
-#include "cgt/tgt_gl.h"
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/cgt_math.h"
 #include "cgt/matrix.h"
 #include "cgt/vector.h"
 #include "core/datastructures/tensor.h"

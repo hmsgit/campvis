@@ -25,7 +25,7 @@
 #ifndef CGT_GLCANVAS_H
 #define CGT_GLCANVAS_H
 
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "cgt/types.h"
 #include "cgt/vector.h"

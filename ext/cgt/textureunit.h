@@ -26,7 +26,7 @@
 #define CGT_TEXTUREUNIT_H
 
 #include <string>
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/shadermanager.h"
 
 namespace cgt {

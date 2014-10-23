@@ -25,7 +25,7 @@
 #ifndef CGT_GLMATH_H
 #define CGT_GLMATH_H
 
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "cgt/matrix.h"
 

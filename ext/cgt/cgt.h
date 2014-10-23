@@ -26,7 +26,7 @@
 #define CGT_CGT_H
 
 //Used Libs
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 //Basics
 #include "cgt/types.h"

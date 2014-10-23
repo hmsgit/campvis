@@ -26,7 +26,7 @@
 #define CGT_TEXTURE_H
 
 #include <string>
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/types.h"
 #include "cgt/vector.h"
 

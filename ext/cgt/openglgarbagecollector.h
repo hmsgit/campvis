@@ -31,7 +31,7 @@
 #define OPENGLGARBAGECOLLECTOR_H_
 
 
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/opengljobprocessor.h"
 #include "cgt/singleton.h"
 #include "cgt/types.h"

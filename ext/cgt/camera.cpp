@@ -27,7 +27,7 @@
 #include "cgt/assert.h"
 #include "cgt/glmath.h"
 #include "cgt/quaternion.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include <cmath>
 #include <iostream>

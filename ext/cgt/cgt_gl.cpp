@@ -22,7 +22,7 @@
  *                                                                    *
  **********************************************************************/
 
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "cgt/logmanager.h"
 

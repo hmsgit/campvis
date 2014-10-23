@@ -26,7 +26,7 @@
 #define GLREDUCTION_H__
 
 #include "cgt/exception.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/vector.h"
 
 #include "core/coreapi.h"

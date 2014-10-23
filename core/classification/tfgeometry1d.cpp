@@ -26,7 +26,7 @@
 
 #include "cgt/assert.h"
 #include "cgt/texture.h"
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_math.h"
 
 #include "core/datastructures/facegeometry.h"
 

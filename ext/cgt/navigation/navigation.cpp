@@ -30,7 +30,7 @@
 // #include "cgt/glmath.h"
 // #include "cgt/quaternion.h"
 // #include "cgt/spline.h"
-// #include "cgt/tgt_gl.h"
+// #include "cgt/cgt_gl.h"
 
 
 namespace cgt {

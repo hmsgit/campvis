@@ -25,7 +25,7 @@
 #ifndef INTERVAL_H__
 #define INTERVAL_H__
 
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_math.h"
 #include "cgt/vector.h"
 #include <limits>
 

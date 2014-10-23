@@ -25,7 +25,7 @@
 #ifndef GEOMETRYDATA_H__
 #define GEOMETRYDATA_H__
 
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 #include "cgt/bounds.h"
 #include "core/datastructures/abstractdata.h"
 #include <vector>

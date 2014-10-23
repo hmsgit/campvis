@@ -25,8 +25,8 @@
 #ifndef ITKTYPETRAITS_H__
 #define ITKTYPETRAITS_H__
 
-#include "cgt/tgt_gl.h"
-#include "cgt/tgt_math.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/cgt_math.h"
 #include "cgt/vector.h"
 
 #include <itkVector.h>

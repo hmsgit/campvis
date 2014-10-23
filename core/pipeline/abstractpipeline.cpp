@@ -31,7 +31,7 @@
 #include "cgt/glcanvas.h"
 #include "cgt/glcontextmanager.h"
 #include "cgt/painter.h"
-#include "cgt/tgt_gl.h"
+#include "cgt/cgt_gl.h"
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessor.h"
