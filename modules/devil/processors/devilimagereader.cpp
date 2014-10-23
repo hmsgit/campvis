@@ -118,8 +118,8 @@ namespace campvis {
             }
         }
 
-		if (files.empty())
-			return;
+        if (files.empty())
+            return;
 
         cgt::ivec3 imageSize(0, 0, static_cast<int>(files.size()));
         uint8_t* buffer = nullptr;
@@ -133,7 +133,7 @@ namespace campvis {
             devilFormat = IL_RGBA;
 
         ILint devilDataType = 0;
-		WeaklyTypedPointer::BaseType campvisDataType = WeaklyTypedPointer::UINT8;
+        WeaklyTypedPointer::BaseType campvisDataType = WeaklyTypedPointer::UINT8;
         size_t numChannels = 1;
 
         // start reading
@@ -253,10 +253,10 @@ namespace campvis {
             rd->addColorTexture(id);
 
             // create fake depth image
-			// TODO: think of a better solution to this...
+            // TODO: think of a better solution to this...
             ImageData* idDepth = new ImageData(dimensionality, imageSize, 1);
             float* ptr = new float[cgt::hmul(imageSize)];
-			memset(ptr, 0, cgt::hmul(imageSize) * sizeof(float));
+            memset(ptr, 0, cgt::hmul(imageSize) * sizeof(float));
             WeaklyTypedPointer wtpDepth(campvisDataType, 1, ptr);
             ImageRepresentationLocal::create(idDepth, wtpDepth);
             rd->setDepthTexture(idDepth);

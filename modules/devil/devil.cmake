@@ -2,7 +2,7 @@
 
 IF(${ModuleEnabled})
     # Tell TGT that we have the DevIL module
-    LIST(APPEND ThisModDefinitions -DTGT_HAS_DEVIL)
+    LIST(APPEND ThisModDefinitions -DCGT_HAS_DEVIL)
 
     IF(UNIX)
         # Unix-like systems have their DevIL lib via their package manager
