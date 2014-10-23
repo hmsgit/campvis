@@ -87,7 +87,7 @@ namespace campvis {
             _shader->activate();
             decorateRenderProlog(data, _shader);
 
-            tgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
+            cgt::TextureUnit normalColorUnit, normalDepthUnit, mirrorColorUnit, mirrorDepthUnit, mirrorRenderedDepthUnit;
             normalImage->bind(_shader, normalColorUnit, normalDepthUnit, "_normalColor", "_normalDepth", "_normalTexParams");
             mirrorImage->bind(_shader, mirrorColorUnit, mirrorDepthUnit, "_mirrorColor", "_mirrorDepth", "_mirrorTexParams");
             mirrorRendered->bindDepthTexture(_shader, mirrorRenderedDepthUnit, "_mirrorRenderedDepth", "_mirrorRenderedTexParams");
@@ -96,7 +96,7 @@ namespace campvis {
             QuadRdr.renderQuad();
 
             _shader->deactivate();
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             glDepthFunc(GL_LESS);
             glDisable(GL_DEPTH_TEST);
             LGL_ERROR;

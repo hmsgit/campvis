@@ -31,14 +31,14 @@
 #include "cgt/openglgarbagecollector.h"
 #include "cgt/glcontextmanager.h"
 
-namespace tgt {
+namespace cgt {
 
     OpenGLJobProcessor::ScopedSynchronousGlJobExecution::ScopedSynchronousGlJobExecution()
         : _lock(nullptr)
     {
         if (! GLCtxtMgr.checkWhetherThisThreadHasAcquiredOpenGlContext()) {
             GLJobProc.pause();
-            _lock = new tgt::GLContextScopedLock(GLJobProc.getContext());
+            _lock = new cgt::GLContextScopedLock(GLJobProc.getContext());
         }
     }
 
@@ -77,9 +77,9 @@ namespace tgt {
     }
 
     void OpenGLJobProcessor::run() {
-        tgtAssert(_context != nullptr, "You have to set the context first before calling OpenGLJobProcessor::run()!");
-        std::unique_lock<std::mutex> lock(*tgt::GlContextManager::getRef().getGlMutexForContext(_context));
-        tgt::GlContextManager::getRef().acquireContext(_context, false);
+        cgtAssert(_context != nullptr, "You have to set the context first before calling OpenGLJobProcessor::run()!");
+        std::unique_lock<std::mutex> lock(*cgt::GlContextManager::getRef().getGlMutexForContext(_context));
+        cgt::GlContextManager::getRef().acquireContext(_context, false);
 
         while (! _stopExecution) {
             bool hadWork = false;
@@ -97,22 +97,22 @@ namespace tgt {
 
             while (_pause > 0 && !_stopExecution) {
                 performGarbageCollectionIfNecessary();
-                tgt::GlContextManager::getRef().releaseContext(_context, false);
+                cgt::GlContextManager::getRef().releaseContext(_context, false);
                 _evaluationCondition.wait(lock);
-                tgt::GlContextManager::getRef().acquireContext(_context, false);
+                cgt::GlContextManager::getRef().acquireContext(_context, false);
                 hadWork = true;
             }
 
             if (! hadWork && !_stopExecution) {
                 performGarbageCollectionIfNecessary();
-                tgt::GlContextManager::getRef().releaseContext(_context, false);
+                cgt::GlContextManager::getRef().releaseContext(_context, false);
                 _evaluationCondition.wait(lock);
-                tgt::GlContextManager::getRef().acquireContext(_context, false);
+                cgt::GlContextManager::getRef().acquireContext(_context, false);
             }
         }
 
         // release OpenGL context, so that other threads can access it
-        tgt::GlContextManager::getRef().releaseContext(_context, false);
+        cgt::GlContextManager::getRef().releaseContext(_context, false);
     }
 
     void OpenGLJobProcessor::pause() {
@@ -121,7 +121,7 @@ namespace tgt {
 
     void OpenGLJobProcessor::resume() {
         if (_pause == 0) {
-            tgtAssert(false, "Called resume on non-paused job processor!");
+            cgtAssert(false, "Called resume on non-paused job processor!");
             return;
         }
 
@@ -135,12 +135,12 @@ namespace tgt {
         _evaluationCondition.notify_all();
     }
 
-    void OpenGLJobProcessor::setContext(tgt::GLCanvas* context) {
-        tgtAssert(_context == nullptr, "You are trying to change an already set context, thou shalt not do that!");
+    void OpenGLJobProcessor::setContext(cgt::GLCanvas* context) {
+        cgtAssert(_context == nullptr, "You are trying to change an already set context, thou shalt not do that!");
         _context = context;
     }
 
-    tgt::GLCanvas* OpenGLJobProcessor::getContext() {
+    cgt::GLCanvas* OpenGLJobProcessor::getContext() {
         return _context;
     }
 
@@ -150,7 +150,7 @@ namespace tgt {
     }
 
     void OpenGLJobProcessor::performGarbageCollectionIfNecessary() {
-        if (_performGarbageCollection && tgt::OpenGLGarbageCollector::isInited()) {
+        if (_performGarbageCollection && cgt::OpenGLGarbageCollector::isInited()) {
             _performGarbageCollection = false;
             GLGC.deleteGarbage();
         }

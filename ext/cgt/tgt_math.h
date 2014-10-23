@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_MATH_H
-#define TGT_MATH_H
+#ifndef CGT_MATH_H
+#define CGT_MATH_H
 
 #include "cgt/assert.h"
 #include "cgt/types.h"
@@ -44,7 +44,7 @@
 #undef min
 #endif
 
-namespace tgt {
+namespace cgt {
 
 /*
     constant pi
@@ -240,6 +240,6 @@ inline bool isFiniteNumber(double d) {
     return (d <= DBL_MAX && d >= -DBL_MAX);
 }
 
-} // namespace tgt
+} // namespace cgt
 
-#endif // TGT_MATH_H
+#endif // CGT_MATH_H

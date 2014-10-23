@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -28,7 +28,7 @@
 
 #include "cgt/assert.h"
 
-namespace tgt {
+namespace cgt {
 
 using std::min;
 using std::max;
@@ -47,8 +47,8 @@ void Bounds::addPoint(const Vector& v) {
 }
 
 bool Bounds::insideXZ(const Bounds& bounds) const {
-    tgtAssert(       isDefined(), "This Box ist not defined.");
-    tgtAssert(bounds.isDefined(), "Box b ist not defined.");
+    cgtAssert(       isDefined(), "This Box ist not defined.");
+    cgtAssert(bounds.isDefined(), "Box b ist not defined.");
 
     vec3 llfb = bounds.getLLF();
     vec3 urbb = bounds.getURB();
@@ -67,15 +67,15 @@ bool Bounds::insideXZ(const Bounds& bounds) const {
 }
 
 bool Bounds::insideXZ(const vec3& v) const {
-    tgtAssert(  isDefined(), "This Box ist not defined.");
+    cgtAssert(  isDefined(), "This Box ist not defined.");
 
     return (llf_[0] <= v[0]) && (v[0] <= urb_[0])
         && (llf_[2] <= v[2]) && (v[2] <= urb_[2]);
 }
 
 bool Bounds::inside(const Bounds& bounds) const {
-    tgtAssert(       isDefined(), "This Box ist not defined.");
-    tgtAssert(bounds.isDefined(), "Box b ist not defined.");
+    cgtAssert(       isDefined(), "This Box ist not defined.");
+    cgtAssert(bounds.isDefined(), "Box b ist not defined.");
 
     vec3 llfb = bounds.getLLF();
     vec3 urbb = bounds.getURB();
@@ -100,7 +100,7 @@ bool Bounds::inside(const Bounds& bounds) const {
 }
 
 bool Bounds::inside(const vec3& v) const {
-    tgtAssert(  isDefined(), "This Box ist not defined.");
+    cgtAssert(  isDefined(), "This Box ist not defined.");
 
     return (llf_[0] <= v[0]) && (v[0] <= urb_[0])
         && (llf_[1] <= v[1]) && (v[1] <= urb_[1])

@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,27 +22,27 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_TIMEEVENT_H
-#define TGT_TIMEEVENT_H
+#ifndef CGT_TIMEEVENT_H
+#define CGT_TIMEEVENT_H
 
 #include "cgt/event/event.h"
 #include "cgt/types.h"
 
-namespace tgt {
+namespace cgt {
 
 class Timer;
 
-class TGT_API TimeEvent : public Event {
+class CGT_API TimeEvent : public Event {
 public:
-    /// A default constructor. Note that there is no tgt::Timer set this way.
+    /// A default constructor. Note that there is no cgt::Timer set this way.
     TimeEvent();
     TimeEvent(Timer* timer);
 
-    /// Getter for the tgt::Timer that throw this Event
-    /// @return tgt::Timer
+    /// Getter for the cgt::Timer that throw this Event
+    /// @return cgt::Timer
     Timer* getTimer();
 
-    /// Sets the tgt::Timer that is used to determine who sent this event.
+    /// Sets the cgt::Timer that is used to determine who sent this event.
     void setTimer(Timer* timer);
 
     virtual int getEventType();
@@ -53,4 +53,4 @@ protected:
 
 }
 
-#endif //TGT_TIMEEVENT_H
+#endif //CGT_TIMEEVENT_H

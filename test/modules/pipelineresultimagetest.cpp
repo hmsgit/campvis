@@ -53,16 +53,16 @@ protected:
         , _wroteFile(false)
     {
         _basePath = "visregtests/";
-        if ( ! tgt::FileSystem::dirExists(_basePath)) {
-            tgt::FileSystem::createDirectory(_basePath);
+        if ( ! cgt::FileSystem::dirExists(_basePath)) {
+            cgt::FileSystem::createDirectory(_basePath);
         }
         _basePath = "visregtests/testruns/";
-        if ( ! tgt::FileSystem::dirExists(_basePath)) {
-            tgt::FileSystem::createDirectory(_basePath);
+        if ( ! cgt::FileSystem::dirExists(_basePath)) {
+            cgt::FileSystem::createDirectory(_basePath);
         }
-        std::vector<std::string> filelist = tgt::FileSystem::listSubDirectories(_basePath, true);
+        std::vector<std::string> filelist = cgt::FileSystem::listSubDirectories(_basePath, true);
         std::string caseNo = "1/";
-        tgt::FileSystem::createDirectoryRecursive(_basePath+ caseNo);
+        cgt::FileSystem::createDirectoryRecursive(_basePath+ caseNo);
         _basePath += caseNo;
     }
 
@@ -89,7 +89,7 @@ protected:
             _pipeline->setCanvas(GLJobProc.getContext());
             _pipeline->init();
             _pipeline->setEnabled(true);
-            _pipeline->setRenderTargetSize(tgt::ivec2(1024, 1024));
+            _pipeline->setRenderTargetSize(cgt::ivec2(1024, 1024));
 
             // invalidate each processor
             std::vector<AbstractProcessor*> processors = _pipeline->getProcessors();
@@ -109,7 +109,7 @@ protected:
             _imageWriter.invalidate(AbstractProcessor::INVALID_RESULT);
             _imageWriter.process(_dataContainer);
 
-            _wroteFile = tgt::FileSystem::fileExists(_fileName);
+            _wroteFile = cgt::FileSystem::fileExists(_fileName);
         }
     }
 
@@ -182,10 +182,10 @@ TEST_F(PipelineWriteResultImageTest, DVRVis) {
 
     AbstractProperty* p = _pipeline->getProperty("Camera");
     if (CameraProperty* tester = dynamic_cast<CameraProperty*>(p)) {
-        tgt::Camera c = tester->getValue();
-        c.setPosition(tgt::vec3(417.f, 44.5f, -112.5f));
-        c.setFocus(tgt::vec3(91.f, 91.f, 80.f));
-        c.setUpVector(tgt::vec3(-0.487f, 0.142f, -0.861f));
+        cgt::Camera c = tester->getValue();
+        c.setPosition(cgt::vec3(417.f, 44.5f, -112.5f));
+        c.setFocus(cgt::vec3(91.f, 91.f, 80.f));
+        c.setUpVector(cgt::vec3(-0.487f, 0.142f, -0.861f));
         tester->setValue(c);
     }
     execute();

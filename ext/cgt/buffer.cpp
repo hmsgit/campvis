@@ -2,8 +2,8 @@
 #include "cgt/openglgarbagecollector.h"
 
 
-namespace tgt {
-    BufferObject::BufferObject(TargetType target, UsageType usage) throw (tgt::Exception)
+namespace cgt {
+    BufferObject::BufferObject(TargetType target, UsageType usage) throw (cgt::Exception)
         : _id(0)
         , _targetType(target)
         , _usageType(usage)
@@ -14,7 +14,7 @@ namespace tgt {
     {
         glGenBuffers(1, &_id);
         if (_id == 0) {
-            throw new tgt::Exception("Could not create OpenGL Buffer object.");
+            throw new cgt::Exception("Could not create OpenGL Buffer object.");
         }
     }
 

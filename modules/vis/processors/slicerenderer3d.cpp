@@ -80,16 +80,16 @@ namespace campvis {
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                const tgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = p_camera.getValue();
 
                 // Creating the slice proxy geometry works as follows:
                 // Create the cube proxy geometry for the volume, then clip the cube against the slice plane.
                 // The closing face is the slice proxy geometry.
                 // This is probably not the fastest, but an elegant solution, which also supports arbitrary slice orientations. :)
-                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
-                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
+                cgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
+                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
 
-                tgt::vec3 normal(0.f, 0.f, 1.f);
+                cgt::vec3 normal(0.f, 0.f, 1.f);
                 float p = img->getParent()->getMappingInformation().getOffset().z + (p_sliceNumber.getValue() * img->getParent()->getMappingInformation().getVoxelSize().z);
                 MeshGeometry clipped = cube->clipAgainstPlane(p, normal, true);
                 const FaceGeometry& slice = clipped.getFaces().back(); // the last face is the closing face
@@ -99,11 +99,11 @@ namespace campvis {
                 _shader->activate();
 
                 _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / cgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
-                tgt::TextureUnit inputUnit, tfUnit;
+                cgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
@@ -114,7 +114,7 @@ namespace campvis {
                 slice.render(GL_POLYGON);
 
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 glDisable(GL_DEPTH_TEST);
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
@@ -132,7 +132,7 @@ namespace campvis {
         ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
 
         if (img != 0) {
-            const tgt::svec3& imgSize = img->getSize();
+            const cgt::svec3& imgSize = img->getSize();
             if (p_sliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
                 p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
             }

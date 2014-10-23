@@ -46,7 +46,7 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "predicatemask", DataNameProperty::WRITE)
-        , p_scanningDirection("ScanningDirection", "US Scanning Direction", tgt::vec3(0.f, 1.f, 0.f), tgt::vec3(-1.f), tgt::vec3(1.f))
+        , p_scanningDirection("ScanningDirection", "US Scanning Direction", cgt::vec3(0.f, 1.f, 0.f), cgt::vec3(-1.f), cgt::vec3(1.f))
         , p_threshold("Threshold", "Threshold", .1f, .01f, 1.f)
         , p_stepSize("StepSize", "Step Size", 2.f, 1.f, 16.f, 1.f, 1)
         , _shader(0)
@@ -83,16 +83,16 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(dataContainer, p_inputImage.getValue());
 
         if (img != 0 && _shader != 0) {
-            tgt::svec3 size = img->getSize() / static_cast<size_t>(2);
-            tgt::ivec2 viewportSize = size.xy();
+            cgt::svec3 size = img->getSize() / static_cast<size_t>(2);
+            cgt::ivec2 viewportSize = size.xy();
 
-            tgt::TextureUnit inputUnit, gradientUnit;
+            cgt::TextureUnit inputUnit, gradientUnit;
             inputUnit.activate();
 
             // create texture for result
-            tgt::Texture* distanceTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, tgt::Texture::LINEAR);
+            cgt::Texture* distanceTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, cgt::Texture::LINEAR);
             distanceTexture->uploadTexture();
-            distanceTexture->setWrapping(tgt::Texture::CLAMP);
+            distanceTexture->setWrapping(cgt::Texture::CLAMP);
 
             // activate shader and bind textures
             _shader->activate();
@@ -124,7 +124,7 @@ namespace campvis {
             id->setMappingInformation(img->getParent()->getMappingInformation());
             dataContainer.addData(p_outputImage.getValue(), id);
 
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
         }
         else {

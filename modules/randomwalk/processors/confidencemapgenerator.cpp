@@ -54,9 +54,9 @@ namespace campvis {
             , _output(output)
             , _processor(processor)
         {
-            tgtAssert(input != 0, "Pointer to Input must not be 0.");
-            tgtAssert(output != 0, "Pointer to Output must not be 0.");
-            _numElementsPerSlice = tgt::hmul(_input->getSize().xy());
+            cgtAssert(input != 0, "Pointer to Input must not be 0.");
+            cgtAssert(output != 0, "Pointer to Output must not be 0.");
+            _numElementsPerSlice = cgt::hmul(_input->getSize().xy());
             _fanAngles = Interval<float>(_processor->p_angles.getValue());
             _fanSize = Interval<float>(_processor->p_lengths.getValue());
         }
@@ -67,7 +67,7 @@ namespace campvis {
             ConfidenceMaps2DFacade _cmGenerator;
             _cmGenerator.setSolver(_processor->p_solver.getOptionValue(), _processor->p_numSteps.getValue());
             std::vector<double> inputValues;
-            const tgt::svec3& imageSize = _input->getSize();
+            const cgt::svec3& imageSize = _input->getSize();
             inputValues.resize(_numElementsPerSlice);
             size_t offset = _numElementsPerSlice * range.begin();
 
@@ -90,8 +90,8 @@ namespace campvis {
                         for (size_t x = 0; x < imageSize.y; ++x) {
                             float r = _fanSize.getLeft() + static_cast<float>(x) / static_cast<float>(imageSize.y) * _fanSize.size();
 
-                            tgt::vec3 cc(r * cos(phi) + _processor->p_origin.getValue().x, r * sin(phi) + _processor->p_origin.getValue().y, 0.f);
-                            tgtAssert(x + imageSize.y * y < _numElementsPerSlice, "asdasd");
+                            cgt::vec3 cc(r * cos(phi) + _processor->p_origin.getValue().x, r * sin(phi) + _processor->p_origin.getValue().y, 0.f);
+                            cgtAssert(x + imageSize.y * y < _numElementsPerSlice, "asdasd");
                             inputValues[x + imageSize.y * y] = static_cast<double>(_input->getElementNormalizedLinear(cc, 0));
                         }
                     }
@@ -121,16 +121,16 @@ namespace campvis {
                             float r = (sqrt(dx*dx + dy*dy) - _fanSize.getLeft()) / _fanSize.size();
                             float phi = atan2(dy, dx);
                             if (phi < 0.f)
-                                phi += 2.f * tgt::PIf;
+                                phi += 2.f * cgt::PIf;
 
                             phi = (phi - _fanAngles.getLeft()) / _fanAngles.size();
 
                             // for now just nearest neighbour sampling:
-                            int column = tgt::iround(r * imageSize.y);
-                            int row = tgt::iround(phi * imageSize.x);
+                            int column = cgt::iround(r * imageSize.y);
+                            int row = cgt::iround(phi * imageSize.x);
                             if (column > 0 && column < static_cast<int>(imageSize.y) && row > 0 && row < static_cast<int>(imageSize.x)) {
-                                tgtAssert(x + imageSize.x * y < _numElementsPerSlice, "asdasd2");
-                                tgtAssert(column + imageSize.y * row < _numElementsPerSlice, "asdasd3");
+                                cgtAssert(x + imageSize.x * y < _numElementsPerSlice, "asdasd2");
+                                cgtAssert(column + imageSize.y * row < _numElementsPerSlice, "asdasd3");
                                 _output[x + imageSize.x * y] = tmp[column + imageSize.y * row];
                             }
                             else {
@@ -168,9 +168,9 @@ namespace campvis {
         , p_solver("FilterMode", "Filter Mode", solvers, 4)
         , p_numSteps("NumSteps", "Number of Solver Steps", 1000, 100, 5000)
         , p_curvilinear("Curvilinear", "Curvilinear Transducer?", false)
-        , p_origin("PolarOrigin", "Polar Origin", tgt::vec2(0.f), tgt::vec2(-1000.f), tgt::vec2(1000.f), tgt::vec2(0.1f))
-        , p_angles("PolarAngles", "Polar Angles", tgt::vec2(0.f, 1.f), tgt::vec2(0.f), tgt::vec2(1000.f), tgt::vec2(0.1f))
-        , p_lengths("PolarLengths", "Polar Lengths", tgt::vec2(0.f, 100.f), tgt::vec2(0.f), tgt::vec2(1000.f), tgt::vec2(0.1f))
+        , p_origin("PolarOrigin", "Polar Origin", cgt::vec2(0.f), cgt::vec2(-1000.f), cgt::vec2(1000.f), cgt::vec2(0.1f))
+        , p_angles("PolarAngles", "Polar Angles", cgt::vec2(0.f, 1.f), cgt::vec2(0.f), cgt::vec2(1000.f), cgt::vec2(0.1f))
+        , p_lengths("PolarLengths", "Polar Lengths", cgt::vec2(0.f, 100.f), cgt::vec2(0.f), cgt::vec2(1000.f), cgt::vec2(0.1f))
         
     {
         addProperty(p_sourceImageID);
@@ -195,7 +195,7 @@ namespace campvis {
         ImageRepresentationLocal::ScopedRepresentation input(data, p_sourceImageID.getValue());
 
         if (input != 0 && input->getDimensionality() >= 2 && input->getParent()->getNumChannels() >= 1) {
-            const tgt::svec3& imageSize = input->getSize();
+            const cgt::svec3& imageSize = input->getSize();
             size_t numElements = input->getNumElements();
             float* outputValues = new float[numElements];
 
@@ -203,7 +203,7 @@ namespace campvis {
                 tbb::blocked_range<size_t>(0, imageSize.z),
                 CMGenerator(input, outputValues, this));
 
-            ImageData* output = new ImageData(input->getDimensionality(), tgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
+            ImageData* output = new ImageData(input->getDimensionality(), cgt::svec3(input->getSize().x, input->getSize().y, 1), 1);
             GenericImageRepresentationLocal<float, 1>::create(output, outputValues);
             data.addData(p_targetImageID.getValue(), output);
         }

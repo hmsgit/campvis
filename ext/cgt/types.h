@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_TYPES_H
-#define TGT_TYPES_H
+#ifndef CGT_TYPES_H
+#define CGT_TYPES_H
 
 /*
  * This file is a derived work of the following file:
@@ -81,38 +81,38 @@
     size_t
     ulong
 
-    TGT_UNUSED
+    CGT_UNUSED
 */
 
 /**
  * This is needed for .dll or .so support respectively
  */
 #ifdef CAMPVIS_DYNAMIC_LIBS
-    #ifdef TGT_BUILD_DLL
+    #ifdef CGT_BUILD_DLL
         #ifdef WIN32
-            #define TGT_API __declspec(dllexport)
+            #define CGT_API __declspec(dllexport)
         #else //WIN32 - so it is UNIX -> I assume gcc
-            #define TGT_API
+            #define CGT_API
         #endif //WIN32
-    #else //TGT_BUILD_DLL
+    #else //CGT_BUILD_DLL
         #ifdef WIN32
-            #define TGT_API __declspec(dllimport)
+            #define CGT_API __declspec(dllimport)
         #else //WIN32 - so it is UNIX -> I assume gcc
-            #define TGT_API
+            #define CGT_API
         #endif //WIN32
-    #endif //TGT_BUILD_DLL
+    #endif //CGT_BUILD_DLL
 #else
-    #define TGT_API // building static library -> do nothing
+    #define CGT_API // building static library -> do nothing
 #endif
 
 /**
  * With this macro you can get rid of annoying "unused parameter" warnings
  */
 #ifdef __GNUC__
-    #define TGT_UNUSED __attribute__ ((unused))
+    #define CGT_UNUSED __attribute__ ((unused))
 #else
     /// empty macro for unsupported compilers
-    #define TGT_UNUSED
+    #define CGT_UNUSED
 #endif
 
 //#ifdef _MSC_VER
@@ -147,7 +147,7 @@ typedef unsigned long ulong;
 
     /* Exact-width integer types */
 
-    #ifndef TGT_USE_SDL_WIN32
+    #ifndef CGT_USE_SDL_WIN32
     typedef CHAR     int8_t;
     #endif
 
@@ -334,10 +334,10 @@ typedef unsigned long ulong;
 #endif //WIN32
 
 #ifdef WIN32
-    #define TGT_PATH_SEPARATOR "\\"
+    #define CGT_PATH_SEPARATOR "\\"
 #else
-    #define TGT_PATH_SEPARATOR "/"
+    #define CGT_PATH_SEPARATOR "/"
 #endif
 
 
-#endif //TGT_TYPES_H
+#endif //CGT_TYPES_H

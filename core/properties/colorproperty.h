@@ -33,7 +33,7 @@ namespace campvis {
     template<typename T>
     const std::string campvis::_ColorProperty<T>::loggerCat_ = "CAMPVis.core.properties.ColorProperty";
 
-    typedef _ColorProperty<tgt::vec4> ColorProperty;
+    typedef _ColorProperty<cgt::vec4> ColorProperty;
 
     template<typename T>
     _ColorProperty<T>::_ColorProperty(

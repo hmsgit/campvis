@@ -104,8 +104,8 @@ namespace campvis {
 
         _quadView.p_outputImage.setValue("quadview.output");
 
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, 1.f));
+        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 255), cgt::col4(255, 255, 255, 255)));
         _usFusion1.p_transferFunction.replaceTF(tf);
         _usFusion2.p_transferFunction.replaceTF(tf->clone());
         _usFusion3.p_transferFunction.replaceTF(tf->clone());
@@ -118,13 +118,13 @@ namespace campvis {
         AutoEvaluationPipeline::deinit();
     }
 
-    void AdvancedUsVis::keyEvent(tgt::KeyEvent* e) {
+    void AdvancedUsVis::keyEvent(cgt::KeyEvent* e) {
         if (e->pressed()) {
             switch (e->keyCode()) {
-                case tgt::KeyEvent::K_UP:
+                case cgt::KeyEvent::K_UP:
                     _usFusion1.p_sliceNumber.increment();
                     break;
-                case tgt::KeyEvent::K_DOWN:
+                case cgt::KeyEvent::K_DOWN:
                     _usFusion1.p_sliceNumber.decrement();
                     break;
                 default:

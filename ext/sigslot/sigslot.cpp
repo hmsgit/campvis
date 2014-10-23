@@ -59,7 +59,7 @@ namespace sigslot {
             return true;
         }
 
-        tgtAssert(signal != 0, "Signal must not be 0.");
+        cgtAssert(signal != 0, "Signal must not be 0.");
         if (signal == 0)
             return false;
 
@@ -88,7 +88,7 @@ namespace sigslot {
 
     void signal_manager::stop() {
         _evaluationCondition.notify_all(); 
-        tgt::Runnable::stop();
+        cgt::Runnable::stop();
     }
 
     bool signal_manager::isCurrentThreadSignalManagerThread() const {

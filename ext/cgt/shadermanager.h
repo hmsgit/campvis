@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_SHADERMANAGER_H
-#define TGT_SHADERMANAGER_H
+#ifndef CGT_SHADERMANAGER_H
+#define CGT_SHADERMANAGER_H
 
 #include <list>
 #include <set>
@@ -37,7 +37,7 @@
 #include "cgt/singleton.h"
 #include "cgt/vector.h"
 
-namespace tgt {
+namespace cgt {
 
 /**
  * Type of a shader object, can be vertex, fragment or geometry shader
@@ -59,7 +59,7 @@ namespace tgt {
  * //GL_GEOMETRY_VERTICES_OUT_EXT(42)
  * [...]
  */
-class TGT_API ShaderObject {
+class CGT_API ShaderObject {
 public:
     friend class Shader;
     friend class ShaderPreprocessor;
@@ -175,7 +175,7 @@ protected:
  *
  * @note Convenient loading of shaders from file is provided by ShaderManager.
  */
-class TGT_API Shader {
+class CGT_API Shader {
 
     friend class ShaderManager;
 
@@ -190,7 +190,7 @@ public:
          * Sets the shader's ignoreError_ to true.
          * \param   shader  Shader to enable ignoring uniform location errors.
          */
-        IgnoreUniformLocationErrorGuard(tgt::Shader* shader)
+        IgnoreUniformLocationErrorGuard(cgt::Shader* shader)
             : _shader(shader)
             , _stateToRestore(shader->getIgnoreUniformLocationError())
         {
@@ -205,7 +205,7 @@ public:
         }
 
     private:
-        tgt::Shader* _shader;   ///< Shader to modify
+        cgt::Shader* _shader;   ///< Shader to modify
         bool _stateToRestore;   ///< Original state
     };
 
@@ -441,10 +441,10 @@ protected:
 
 class ShaderManager;
 #ifdef DLL_TEMPLATE_INST
-template class TGT_API Singleton<ShaderManager>;
+template class CGT_API Singleton<ShaderManager>;
 #endif
 #ifdef DLL_TEMPLATE_INST
-template class TGT_API ResourceManager<Shader>;
+template class CGT_API ResourceManager<Shader>;
 #endif
 
 /**
@@ -452,7 +452,7 @@ template class TGT_API ResourceManager<Shader>;
  *
  * @see ResourceManager
  */
-class TGT_API ShaderManager : public ResourceManager<Shader>, public Singleton<ShaderManager> {
+class CGT_API ShaderManager : public ResourceManager<Shader>, public Singleton<ShaderManager> {
 public:
 
     ShaderManager();
@@ -609,8 +609,8 @@ protected:
     static const std::string loggerCat_;
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#define ShdrMgr tgt::Singleton<tgt::ShaderManager>::getRef()
+#define ShdrMgr cgt::Singleton<cgt::ShaderManager>::getRef()
 
-#endif //TGT_SHADERMANAGER_H
+#endif //CGT_SHADERMANAGER_H

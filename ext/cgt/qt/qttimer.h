@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2008 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,14 +22,14 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_QTTIMER_H_
-#define TGT_QTTIMER_H_
+#ifndef CGT_QTTIMER_H_
+#define CGT_QTTIMER_H_
 
 #include "cgt/event/eventhandler.h"
 #include "cgt/timer.h"
 #include <QObject>
 
-namespace tgt {
+namespace cgt {
 
 class QtTimer : public Timer, public QObject {
 public:
@@ -46,4 +46,4 @@ private:
 
 }
 
-#endif //TGT_QTTIMER_H
+#endif //CGT_QTTIMER_H

@@ -45,7 +45,7 @@
 #include <vector>
 #include "core/datastructures/facegeometry.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -65,9 +65,9 @@ namespace campvis {
         StringProperty _objectName;
         ColorProperty _color;                       ///< Color of the Object
         BoolProperty _visibility;
-        std::vector<tgt::ivec3> _points;            ///< List of points for the current object being painted
+        std::vector<cgt::ivec3> _points;            ///< List of points for the current object being painted
 
-        std::vector< std::vector<tgt::ivec3> > _objectsCoordinates;         ///< List of previously painted contours
+        std::vector< std::vector<cgt::ivec3> > _objectsCoordinates;         ///< List of previously painted contours
     protected:
         enum {
             CONTOUR = 0,
@@ -95,7 +95,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for graphical segmentation of slices through user input.
      */
-    class MicroscopyImageSegmentation : public VisualizationProcessor, public HasProcessorDecorators, public tgt::EventListener {
+    class MicroscopyImageSegmentation : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
     public:
         /**
          * Constructs a new MicroscopyImageSegmentation Processor
@@ -124,8 +124,8 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
         
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
         DataNameProperty p_inputVolume;     ///< image ID for first input image
         DataNameProperty p_outputImage;     ///< image ID for output image
@@ -165,14 +165,14 @@ namespace campvis {
          * Callback called from SliceExtractor when a scribble has been painted.
          * \param   voxel   Voxel position of scribble
          */
-        void onSliceExtractorScribblePainted(tgt::vec3 voxel);
+        void onSliceExtractorScribblePainted(cgt::vec3 voxel);
 
         void composeFinalRendering(DataContainer& data);
 
         /// \see    AbstractProcessor::updateProperties
         void updateProperties(DataContainer& dc);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
         FaceGeometry* _quad;
 
         VolumeRenderer _vr;
@@ -190,7 +190,7 @@ namespace campvis {
 
         ColorProperty p_paintColor;                     ///< Color picker for active object
         Vec3Property p_axisScaling;                     ///< Asis ratio. Used to change ImageMappingInformation
-        tgt::vec3 _oldScaling;
+        cgt::vec3 _oldScaling;
 
         BoolProperty p_fitToWindow;                         ///< Flag whether fit image to window or use scaling and offset
         FloatProperty p_scalingFactor;                      ///< Image scaling factor
@@ -216,7 +216,7 @@ namespace campvis {
         void addProperties();
         void removeProperties();
 
-        double distanceSqr(tgt::vec3 src, tgt::vec3 dest);
+        double distanceSqr(cgt::vec3 src, cgt::vec3 dest);
 
         std::string _objectNamePrefix;
         int _objectNameSuffix;

@@ -36,7 +36,7 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -97,7 +97,7 @@ namespace campvis {
          */
         virtual std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for EEP generation
+        cgt::Shader* _shader;                           ///< Shader for EEP generation
 
         static const std::string loggerCat_;
     };

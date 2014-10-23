@@ -170,7 +170,7 @@ namespace campvis {
         this->addProperty(*meta);
 
         StringProperty* sp = dynamic_cast<StringProperty*>(meta->getProperty("url"));
-        tgtAssert(sp != 0, "This should not happen.");
+        cgtAssert(sp != 0, "This should not happen.");
         if (sp != 0) {
             p_url.addSharedProperty(sp);
             sp->setVisible(false);

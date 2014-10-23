@@ -31,7 +31,7 @@
 
 #include "core/coreapi.h"
 
-namespace tgt {
+namespace cgt {
     class Texture;
 }
 
@@ -44,13 +44,13 @@ namespace campvis {
     class CAMPVIS_CORE_API TFGeometry2D {
     public:
         struct CAMPVIS_CORE_API KeyPoint {
-            explicit KeyPoint(const tgt::vec2& position, const tgt::col4& color)
+            explicit KeyPoint(const cgt::vec2& position, const cgt::col4& color)
                 : _position(position)
                 , _color(color)
             {};
 
-            tgt::vec2 _position;
-            tgt::col4 _color;
+            cgt::vec2 _position;
+            cgt::col4 _color;
         };
 
         /**
@@ -95,7 +95,7 @@ namespace campvis {
          * \param   color       Color for geometry
          * \return  A TFGeometry2D modelling a quad with four KeyPoints.
          */
-        static TFGeometry2D* createQuad(const tgt::vec2& ll, const tgt::vec2& ur, const tgt::col4& color);
+        static TFGeometry2D* createQuad(const cgt::vec2& ll, const cgt::vec2& ur, const cgt::col4& color);
     protected:
         /**
          * Sorts the key points of this TF counter-clockwise.

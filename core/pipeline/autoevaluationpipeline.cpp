@@ -112,12 +112,12 @@ namespace campvis {
                 }
 
                 // sanity check, if this assertion fails, we have a problem...
-                tgtAssert(result.second, "Could not insert Property into port map!");
+                cgtAssert(result.second, "Could not insert Property into port map!");
             }
         }
         else {
             // this should not happen, otherwise we did something wrong before.
-            tgtAssert(false, "Could not find Property in iterator map!");
+            cgtAssert(false, "Could not find Property in iterator map!");
         }
     }
 
@@ -157,7 +157,7 @@ namespace campvis {
                 if (dnp->getAccessInfo() == DataNameProperty::READ) {
                     tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
                     std::pair<PortMapType::iterator, bool> result = _portMap.insert(std::make_pair(dnp->getValue(), dnp));
-                    tgtAssert(result.second, "Could not insert Property into port map!");
+                    cgtAssert(result.second, "Could not insert Property into port map!");
                     if (result.second) {
                         _iteratorMap[dnp] = result.first;
                         dnp->s_changed.connect(this, &AutoEvaluationPipeline::onDataNamePropertyChanged);

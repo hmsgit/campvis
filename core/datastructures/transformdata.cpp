@@ -27,7 +27,7 @@
 namespace campvis {
 
 
-    TransformData::TransformData(const tgt::mat4 & transform)
+    TransformData::TransformData(const cgt::mat4 & transform)
         : AbstractData()
         , _transform(transform)
     {

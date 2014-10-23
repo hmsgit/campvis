@@ -26,7 +26,7 @@
 
 namespace campvis {
 
-    PositionData::PositionData( const tgt::vec3 &position, const tgt::vec4 &quaternion /*= tgt::vec4(0.f, 0.f, 0.f, 0.f) */ )
+    PositionData::PositionData( const cgt::vec3 &position, const cgt::vec4 &quaternion /*= cgt::vec4(0.f, 0.f, 0.f, 0.f) */ )
         : AbstractData()
         , _position(position)
         , _quaternion(quaternion)

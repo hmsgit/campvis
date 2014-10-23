@@ -40,8 +40,8 @@ namespace campvis {
 
     CsvdImageReader::CsvdImageReader() 
         : AbstractImageReader()
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
     {
         this->_ext.push_back(".csv");
         this->p_targetImageID.setValue("CsvdImageReader.output");
@@ -63,11 +63,11 @@ namespace campvis {
             tfp.parse<TextFileParser::ItemSeparatorLines>();
 
             // init optional parameters with sane default values
-            tgt::svec3 size;
+            cgt::svec3 size;
             WeaklyTypedPointer::BaseType pt;
 
-            tgt::vec3 voxelSize(1.f);
-            tgt::vec3 imageOffset(0.f);
+            cgt::vec3 voxelSize(1.f);
+            cgt::vec3 imageOffset(0.f);
 
             // dimensionality and size
             if (tfp.hasKey("Size")) {
@@ -107,13 +107,13 @@ namespace campvis {
                 size_t index = 0;
 
                 std::string url = StringUtils::trim(tfp.getString("CsvFileBaseName"));
-                url = tgt::FileSystem::cleanupPath(tgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
+                url = cgt::FileSystem::cleanupPath(cgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
 
                 // start parsing of CSV files
 #define DISPATCH_PARSING(WTP_TYPE, C_TYPE, TMP_TYPE) \
     if (pt == WTP_TYPE) {\
-        C_TYPE* dataArray = new C_TYPE[tgt::hmul(size)]; \
-        memset(dataArray, 0, sizeof(C_TYPE) * tgt::hmul(size)); \
+        C_TYPE* dataArray = new C_TYPE[cgt::hmul(size)]; \
+        memset(dataArray, 0, sizeof(C_TYPE) * cgt::hmul(size)); \
         for (size_t slice = 0; slice < size.z; ++slice) { \
             std::stringstream ss; \
             ss << url << slice << ".csv"; \
@@ -121,7 +121,7 @@ namespace campvis {
              \
             std::ifstream file(concatenated.c_str(), std::ifstream::in); \
             if (!file.is_open() || file.bad()) \
-                throw tgt::FileException("Could not open file " + ss.str() + " for reading.", p_url.getValue()); \
+                throw cgt::FileException("Could not open file " + ss.str() + " for reading.", p_url.getValue()); \
                  \
             TMP_TYPE tmp; \
             for (size_t column = 0; column < size.y && file.good(); ++column) { \
@@ -153,7 +153,7 @@ namespace campvis {
                     data.addData(p_targetImageID.getValue(), image);
                 }
                 else {
-                    throw tgt::FileException("Error while parsing the data.", p_url.getValue());
+                    throw cgt::FileException("Error while parsing the data.", p_url.getValue());
                 }
             }
             else {
@@ -161,7 +161,7 @@ namespace campvis {
                 return;
             }
         }
-        catch (tgt::Exception& e) {
+        catch (cgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
             return;
         }

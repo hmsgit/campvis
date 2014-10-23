@@ -51,7 +51,7 @@ namespace campvis {
         virtual ~ItkSegmentation();
 
         /// \see AbstractEventHandler::execute()
-        virtual void onEvent(tgt::Event* e);
+        virtual void onEvent(cgt::Event* e);
 
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "ItkSegmentation"; };

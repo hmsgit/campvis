@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -31,7 +31,7 @@
 
 using std::string;
 
-namespace tgt {
+namespace cgt {
 
 //------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ std::string resolveLineNumber(int number, const std::vector<ShaderObject::LineIn
 
 } // namespace
 
-const std::string ShaderPreprocessor::loggerCat_("tgt.Shader.ShaderPreprocessor");
+const std::string ShaderPreprocessor::loggerCat_("cgt.Shader.ShaderPreprocessor");
 
 ShaderPreprocessor::ShaderPreprocessor(ShaderObject* obj, Mode /*mode*/)
     : shd_(obj), lineTracker_(obj->lineTracker_), inputType_(0), outputType_(0), verticesOut_(0)
@@ -255,7 +255,7 @@ GLint ShaderPreprocessor::getGeomShaderVerticesOut() const {
 
 //------------------------------------------------------------------------------
 
-const string ShaderObject::loggerCat_("tgt.Shader.ShaderObject");
+const string ShaderObject::loggerCat_("cgt.Shader.ShaderObject");
 
 ShaderObject::ShaderObject(const string& filename, ShaderType type)
     : filename_(filename)
@@ -438,7 +438,7 @@ bool ShaderObject::rebuildFromFile() {
 
 //------------------------------------------------------------------------------
 
-const string Shader::loggerCat_("tgt.Shader.Shader");
+const string Shader::loggerCat_("cgt.Shader.Shader");
 
 Shader::Shader()
     : isLinked_(false)
@@ -474,8 +474,8 @@ void Shader::activate() {
 }
 
 void Shader::activate(GLint id) {
-#if TGT_DEBUG
-    if (tgt::getGlInt(GL_CURRENT_PROGRAM) != 0)
+#if CGT_DEBUG
+    if (cgt::getGlInt(GL_CURRENT_PROGRAM) != 0)
         LWARNING("Binding a new Shader while another Shader is active. Do you really want to do this?");
 #endif
 
@@ -1338,7 +1338,7 @@ bool Shader::selectSubroutine(ShaderObject::ShaderType type, const std::string& 
 
 //------------------------------------------------------------------------------
 
-const string ShaderManager::loggerCat_("tgt.Shader.Manager");
+const string ShaderManager::loggerCat_("cgt.Shader.Manager");
 
 ShaderManager::ShaderManager()
   : ResourceManager<Shader>(false)

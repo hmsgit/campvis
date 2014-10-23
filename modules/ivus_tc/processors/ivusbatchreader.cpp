@@ -38,7 +38,7 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_inputDirectory("InputDirectory", "Input Directory", "", StringProperty::DIRECTORY)
         , p_fileExtension("FileExtension", "File Extension", "bmp", StringProperty::BASIC_STRING)
-        , p_imageSpacing("ImageSpacing", "Image Spacing", tgt::vec3(.1f, .1f, .5f), tgt::vec3(0.f), tgt::vec3(10.f), tgt::vec3(.1f), tgt::ivec3(2))
+        , p_imageSpacing("ImageSpacing", "Image Spacing", cgt::vec3(.1f, .1f, .5f), cgt::vec3(0.f), cgt::vec3(10.f), cgt::vec3(.1f), cgt::ivec3(2))
         , p_outputImage("OutputImage", "Output Image", "dd.output", DataNameProperty::WRITE)
     {
         addProperty(p_inputDirectory);
@@ -61,10 +61,10 @@ namespace campvis {
     void IvusBatchReader::updateResult(DataContainer& data) {
         std::string ext = StringUtils::lowercase(p_fileExtension.getValue());
 
-        std::vector<std::string> files = tgt::FileSystem::listFiles(p_inputDirectory.getValue(), true);
-        files.erase(std::remove_if(files.begin(), files.end(), [&] (const std::string& s) -> bool { return tgt::FileSystem::fileExtension(s, true) != ext; } ), files.end());
+        std::vector<std::string> files = cgt::FileSystem::listFiles(p_inputDirectory.getValue(), true);
+        files.erase(std::remove_if(files.begin(), files.end(), [&] (const std::string& s) -> bool { return cgt::FileSystem::fileExtension(s, true) != ext; } ), files.end());
 
-        tgt::ivec3 imageSize(0, 0, static_cast<int>(files.size()));
+        cgt::ivec3 imageSize(0, 0, static_cast<int>(files.size()));
         uint8_t* buffer = nullptr;
 
         for (size_t i = 0; i < files.size(); ++i) {
@@ -87,7 +87,7 @@ namespace campvis {
                 imageSize.x = ilGetInteger(IL_IMAGE_WIDTH);
                 imageSize.y = ilGetInteger(IL_IMAGE_HEIGHT);
 
-                buffer = new uint8_t[tgt::hmul(imageSize)];
+                buffer = new uint8_t[cgt::hmul(imageSize)];
             }
             else {
                 if (imageSize.x != ilGetInteger(IL_IMAGE_WIDTH)) {
@@ -117,7 +117,7 @@ namespace campvis {
         ImageData* id = new ImageData(3, imageSize, 1);
         GenericImageRepresentationLocal<uint8_t, 1>::create(id, buffer);
         data.addData(p_outputImage.getValue(), id);
-        ImageMappingInformation imi(imageSize, tgt::vec3(0.f), p_imageSpacing.getValue());
+        ImageMappingInformation imi(imageSize, cgt::vec3(0.f), p_imageSpacing.getValue());
         id->setMappingInformation(imi);
         validate(AbstractProcessor::INVALID_RESULT);
     }

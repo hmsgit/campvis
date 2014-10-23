@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_TRACKBALL_H
-#define TGT_TRACKBALL_H
+#ifndef CGT_TRACKBALL_H
+#define CGT_TRACKBALL_H
 
 #include <cmath>
 #include <vector>
@@ -37,14 +37,14 @@
 #include "cgt/timer.h"
 
 
-namespace tgt {
+namespace cgt {
 
 /**
     This class implements a Trackball which can be used to freely rotate an object
     around a given center (or, if you will, to rotate the camera around and focus it
     on that center while it is continuously moving on a sphere).
 */
-class TGT_API Trackball : public Navigation {
+class CGT_API Trackball : public Navigation {
     public:
 
         /// Constructor
@@ -58,7 +58,7 @@ class TGT_API Trackball : public Navigation {
         ///                             here. You will then have to call some setMouseFoo and
         ///                             setKeyBar methods to make the trackball work.
         /// \param continousSpinTimer To offer continous spin feature, trackball needs a
-        ///                           tgt::Timer-object. As we need a toolkit-specific timer,
+        ///                           cgt::Timer-object. As we need a toolkit-specific timer,
         ///                           trackball cannot create it itself, the user has to provide
         ///                           it to the constructor.
         Trackball(IHasCamera* hcam, const ivec2& viewportSize, bool defaultEventHandling = true, Timer* continousSpinTimer = NULL);
@@ -381,6 +381,6 @@ class TGT_API Trackball : public Navigation {
 
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#endif // TGT_TRACKBALL_H
+#endif // CGT_TRACKBALL_H

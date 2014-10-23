@@ -19,7 +19,7 @@ SET(SIGSLOT_SOURCES sigslot.cpp)
 ADD_LIBRARY(sigslot ${SIGSLOT_HEADERS} ${SIGSLOT_SOURCES})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
-TARGET_LINK_LIBRARIES(sigslot tgt)
+TARGET_LINK_LIBRARIES(sigslot cgt)
 
 # if campvis-core is built as a shared library, CMake will define the following flag to instruct
 # the code to export DLL symbols

@@ -79,13 +79,13 @@ namespace campvis {
 
     }
 
-    void FiberData::addFiber(const std::deque<tgt::vec3>& vertices) {
+    void FiberData::addFiber(const std::deque<cgt::vec3>& vertices) {
         _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
         _fibers.push_back(Fiber(_vertices.size() - vertices.size(), _vertices.size()));
         _buffersInitialized = false;
     }
 
-    void FiberData::addFiber(const std::vector<tgt::vec3>& vertices) {
+    void FiberData::addFiber(const std::vector<cgt::vec3>& vertices) {
         _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
         _fibers.push_back(Fiber(_vertices.size() - vertices.size(), _vertices.size()));
         _buffersInitialized = false;
@@ -128,7 +128,7 @@ namespace campvis {
     }
 
     size_t FiberData::getLocalMemoryFootprint() const {
-        size_t sum = _vertices.size() * sizeof(tgt::vec3);
+        size_t sum = _vertices.size() * sizeof(cgt::vec3);
         sum += _fibers.size() * sizeof(Fiber);
         sum += sizeof(*this);
         return sum;
@@ -157,7 +157,7 @@ namespace campvis {
         _vboFiberStartIndices = new GLint[_vertices.size()];
         _vboFiberCounts = new GLint[_vertices.size()];
 
-        std::vector<tgt::vec3> tangents;
+        std::vector<cgt::vec3> tangents;
         tangents.resize(_vertices.size());
 
         for (std::vector<Fiber>::const_iterator it = _fibers.begin(); it != _fibers.end(); ++it) {
@@ -165,12 +165,12 @@ namespace campvis {
             _vboFiberCounts[_vboFiberArraySize] = static_cast<GLsizei>(it->_endIndex - it->_startIndex);
             ++_vboFiberArraySize;
 
-            tgt::vec3 dirPrev = tgt::vec3::zero;
-            tgt::vec3 dirNext = tgt::vec3::zero;
+            cgt::vec3 dirPrev = cgt::vec3::zero;
+            cgt::vec3 dirNext = cgt::vec3::zero;
 
             for (size_t i = it->_startIndex; i < it->_endIndex-1; ++i) {
                 dirNext = _vertices[i+1] - _vertices[i];
-                tangents[i] = tgt::normalize(dirPrev + dirNext);
+                tangents[i] = cgt::normalize(dirPrev + dirNext);
                 dirPrev = dirNext;
             }
 
@@ -178,13 +178,13 @@ namespace campvis {
         }
 
         try {
-            _vertexBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-            _vertexBuffer->data(&_vertices.front(), _vertices.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+            _vertexBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+            _vertexBuffer->data(&_vertices.front(), _vertices.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
 
-            _tangentBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-            _tangentBuffer->data(&tangents.front(), tangents.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+            _tangentBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+            _tangentBuffer->data(&tangents.front(), tangents.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
         }
-        catch (tgt::Exception& e) {
+        catch (cgt::Exception& e) {
             LERRORC("CAMPVis.modules.columbia.FiberData", "Error creating OpenGL Buffer objects: " << e.what());
             _buffersInitialized = false;
             return;
@@ -204,7 +204,7 @@ namespace campvis {
             return;
         }
 
-        tgt::VertexArrayObject vao;
+        cgt::VertexArrayObject vao;
         vao.setVertexAttributePointer(0, _vertexBuffer);
         vao.setVertexAttributePointer(1, _tangentBuffer);
         LGL_ERROR;
@@ -214,9 +214,9 @@ namespace campvis {
 
     }
 
-    tgt::Bounds FiberData::getWorldBounds() const {
-        tgt::Bounds toReturn;
-        for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
+    cgt::Bounds FiberData::getWorldBounds() const {
+        cgt::Bounds toReturn;
+        for (std::vector<cgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
             toReturn.addPoint(*it);
         return toReturn;
     }

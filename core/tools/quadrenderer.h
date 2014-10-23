@@ -37,8 +37,8 @@ namespace campvis {
      * Small helper singleton class for rendering the default [-1, 1]^2 quad.
      * Texture coordinates are [0, 1]^2.
      */
-    class CAMPVIS_CORE_API QuadRenderer : public tgt::Singleton<QuadRenderer> {
-        friend class tgt::Singleton<QuadRenderer>;
+    class CAMPVIS_CORE_API QuadRenderer : public cgt::Singleton<QuadRenderer> {
+        friend class cgt::Singleton<QuadRenderer>;
 
     public:
         /**
@@ -59,7 +59,7 @@ namespace campvis {
         FaceGeometry* _quad;    ///< The FaceGeometry that renders the quad.
     };
 
-#define QuadRdr tgt::Singleton<campvis::QuadRenderer>::getRef()
+#define QuadRdr cgt::Singleton<campvis::QuadRenderer>::getRef()
 
 }
 

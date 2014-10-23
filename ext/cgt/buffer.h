@@ -7,10 +7,10 @@
 
 #include <set>
 
-namespace tgt {
+namespace cgt {
     class VertexAttribute;
 
-    class TGT_API BufferObject {
+    class CGT_API BufferObject {
     public:
         enum TargetType {
             ARRAY_BUFFER = GL_ARRAY_BUFFER,
@@ -47,9 +47,9 @@ namespace tgt {
          * Creates a new OpenGL buffer object and generates an ID for it.
          * \param   target      Target type of buffer object.
          * \param   usage       Usage of data.
-         * \throw   tgt::Exception when OpenGL buffer generation failed.
+         * \throw   cgt::Exception when OpenGL buffer generation failed.
          */
-        BufferObject(TargetType target, UsageType usage) throw (tgt::Exception);
+        BufferObject(TargetType target, UsageType usage) throw (cgt::Exception);
 
         /**
          * Disposes and deletes the OpenGL buffer object.

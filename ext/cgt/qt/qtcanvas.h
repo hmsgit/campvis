@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2008 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_QTCANVAS_H
-#define TGT_QTCANVAS_H
+#ifndef CGT_QTCANVAS_H
+#define CGT_QTCANVAS_H
 
 #include "cgt/glcanvas.h"
 #include "cgt/types.h"
@@ -35,12 +35,12 @@
 
 #include <deque>
 
-namespace tgt {
+namespace cgt {
 
 /**
- * Qt implementation of GLCanvas. Inherits QGLWidget and combines the Qt methods and tgt methods.
+ * Qt implementation of GLCanvas. Inherits QGLWidget and combines the Qt methods and cgt methods.
  */
-class TGT_API QtCanvas : public GLCanvas, public QGLWidget {
+class CGT_API QtCanvas : public GLCanvas, public QGLWidget {
 public:
     /**
      * The constructor. Allows the user to specify a shared widget that this canvas will share
@@ -135,14 +135,14 @@ public:
     virtual void keyReleaseEvent(QKeyEvent* event);
 
     ///
-    /// Helpers used to generate tgt-Events out of qt-Events
+    /// Helpers used to generate cgt-Events out of qt-Events
     ///
 
-    // map one Qt-mousebutton to one tgt-mousebutton
-    static tgt::MouseEvent::MouseButtons getButton(QMouseEvent* e);
-    // map a set of Qt-mousebuttons to a set of tgt-mousebuttons
-    static tgt::MouseEvent::MouseButtons getButtons(QMouseEvent* e);
-    static tgt::Event::Modifier getModifier(QInputEvent* e);
+    // map one Qt-mousebutton to one cgt-mousebutton
+    static cgt::MouseEvent::MouseButtons getButton(QMouseEvent* e);
+    // map a set of Qt-mousebuttons to a set of cgt-mousebuttons
+    static cgt::MouseEvent::MouseButtons getButtons(QMouseEvent* e);
+    static cgt::Event::Modifier getModifier(QInputEvent* e);
     static KeyEvent::KeyCode getKey(int key);
     static QGLFormat getQGLFormat(const Buffers buffers);
 
@@ -153,4 +153,4 @@ protected:
 
 } // namespace
 
-#endif // TGT_QTCANVAS_H
+#endif // CGT_QTCANVAS_H

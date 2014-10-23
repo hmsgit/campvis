@@ -71,14 +71,14 @@ namespace campvis {
                 toReturn.append("#define computeGradient(tex, texParams, texCoords) computeGradientSobel(tex, texCoords)\n");
                 break;
             default:
-                tgtAssert(false, "Invalid enum!");
+                cgtAssert(false, "Invalid enum!");
                 break;
         }
 
         return toReturn;
     }
 
-    void ProcessorDecoratorGradient::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
+    void ProcessorDecoratorGradient::renderProlog(const DataContainer& dataContainer, cgt::Shader* shader) {
         if (p_gradientMethod.getOptionValue() == ForwardDifferences || p_gradientMethod.getOptionValue() == CentralDifferences) {
             shader->setUniform("_gradientLod", p_lod.getValue());
         }

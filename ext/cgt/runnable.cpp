@@ -24,7 +24,7 @@
 
 #include "runnable.h"
 
-namespace tgt {
+namespace cgt {
     namespace {
         void invokeThread(Runnable* r) {
             r->run();

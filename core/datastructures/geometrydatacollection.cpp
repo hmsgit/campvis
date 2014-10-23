@@ -75,7 +75,7 @@ namespace campvis {
     }
 
     const GeometryData* GeometryDataCollection::getGeometry(size_t index) const {
-        tgtAssert(index < _geometries.size(), "Index out of bounds!");
+        cgtAssert(index < _geometries.size(), "Index out of bounds!");
         if (index < _geometries.size()) {
             return _geometries[index];
         }
@@ -84,7 +84,7 @@ namespace campvis {
     }
 
     void GeometryDataCollection::removeGeometry(size_t index) {
-        tgtAssert(index < _geometries.size(), "Index out of bounds!");
+        cgtAssert(index < _geometries.size(), "Index out of bounds!");
         if (index < _geometries.size()) {
             delete _geometries[index];
             _geometries.erase(_geometries.begin() + index);
@@ -96,8 +96,8 @@ namespace campvis {
             _geometries[i]->render(mode);
     }
 
-    tgt::Bounds GeometryDataCollection::getWorldBounds() const {
-        tgt::Bounds toReturn;
+    cgt::Bounds GeometryDataCollection::getWorldBounds() const {
+        cgt::Bounds toReturn;
 
         for (size_t i = 0; i < _geometries.size(); ++i)
             toReturn.addVolume(_geometries[i]->getWorldBounds());
@@ -123,7 +123,7 @@ namespace campvis {
         return true;
     }
 
-    void GeometryDataCollection::applyTransformationToVertices(const tgt::mat4& t) {
+    void GeometryDataCollection::applyTransformationToVertices(const cgt::mat4& t) {
         for (size_t i = 0; i < _geometries.size(); ++i)
             _geometries[i]->applyTransformationToVertices(t);
     }

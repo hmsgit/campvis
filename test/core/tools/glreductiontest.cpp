@@ -47,7 +47,7 @@ using namespace campvis;
 class GlReductionTest : public ::testing::TestWithParam<int> {
 protected:
     GlReductionTest() {
-        name = new tgt::FramebufferObject();
+        name = new cgt::FramebufferObject();
 
         width = 10;
         height = 10;
@@ -57,7 +57,7 @@ protected:
 
         rawData = new float[width * height * depth];
         initData(rawData, width * height * depth);
-        imgData = new ImageData(depth == 1? 2 : 3, tgt::svec3(width, height, depth), 1);
+        imgData = new ImageData(depth == 1? 2 : 3, cgt::svec3(width, height, depth), 1);
         localRep = ImageRepresentationLocal::create(imgData, WeaklyTypedPointer(WeaklyTypedPointer::FLOAT, 1, rawData));
         glReduction = nullptr;
     }
@@ -86,7 +86,7 @@ protected:
     }
 
 protected:
-    tgt::FramebufferObject *name;
+    cgt::FramebufferObject *name;
 
     int width, height, depth;
     float* rawData;

@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,13 +22,13 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_PAINTER_H
-#define TGT_PAINTER_H
+#ifndef CGT_PAINTER_H
+#define CGT_PAINTER_H
 
 #include "cgt/types.h"
 #include "cgt/vector.h"
 
-namespace tgt {
+namespace cgt {
 
 class GLCanvas;
 class Camera;
@@ -37,10 +37,10 @@ class Camera;
  * Base class for all rendering on a canvas. Every canvas has a painter and use its
  * render method for rendering content.
  *
- * A tgt application is supposed to derive it's own Painter(s) and override paint, initialize
+ * A cgt application is supposed to derive it's own Painter(s) and override paint, initialize
  * and sizeChanged method
  */
-class TGT_API Painter {
+class CGT_API Painter {
 public:
     /// Constructor
     Painter(GLCanvas* canvas = 0);
@@ -89,6 +89,6 @@ private:
     GLCanvas* canvas_;
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#endif  //TGT_PAINTER_H
+#endif  //CGT_PAINTER_H

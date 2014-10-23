@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -26,7 +26,7 @@
 
 #include "cgt/logmanager.h"
 
-namespace tgt {
+namespace cgt {
 
 GLenum _lGLError(int line, const char* file) {
     GLenum err = glGetError();
@@ -39,7 +39,7 @@ GLenum _lGLError(int line, const char* file) {
         tmp1 << (exp ? (const char*) exp : "unknown");
         loggerCat << "gl-error:" << file << ':' << line;
 
-        LogMgr.log(loggerCat.str(), tgt::Error, tmp1.str(), tmp2.str());
+        LogMgr.log(loggerCat.str(), cgt::Error, tmp1.str(), tmp2.str());
     }
 
     return err;
@@ -63,4 +63,4 @@ GLfloat getGlFloat(GLenum param) {
     return toReturn;
 }
 
-} // namespace tgt
+} // namespace cgt

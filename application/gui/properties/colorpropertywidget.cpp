@@ -36,7 +36,7 @@ namespace campvis {
 
         addWidget(_colorPicker);
 
-        //connect(_colorPicker, SIGNAL(valueChanged(tgt::vec4)), this, SLOT(onColorChanged(tgt::vec4)));
+        //connect(_colorPicker, SIGNAL(valueChanged(cgt::vec4)), this, SLOT(onColorChanged(cgt::vec4)));
         connect(_colorPicker, SIGNAL(colorChanged(const QColor&)), this, SLOT(onColorChanged(const QColor&)));
 
     }
@@ -46,16 +46,16 @@ namespace campvis {
 
     void ColorPropertyWidget::updateWidgetFromProperty() {
         _colorPicker->blockSignals(true);
-        const tgt::vec4 val = static_cast<ColorProperty*>(_property)->getValue();
-        _colorPicker->setColor(QtColorTools::toQColor(tgt::vec4(val.x *255, val.y*255, val.z*255, val.w*255)));
+        const cgt::vec4 val = static_cast<ColorProperty*>(_property)->getValue();
+        _colorPicker->setColor(QtColorTools::toQColor(cgt::vec4(val.x *255, val.y*255, val.z*255, val.w*255)));
         _colorPicker->blockSignals(false);
     }
 
     void ColorPropertyWidget::onColorChanged(const QColor& value) {
         ++_ignorePropertyUpdates;
         ColorProperty* prop = static_cast<ColorProperty*>(_property);
-        tgt::vec4 val = QtColorTools::toTgtColor(_colorPicker->color());
-        prop->setValue(tgt::vec4(val.x/val.w, val.y/val.w, val.z/val.w, 1));
+        cgt::vec4 val = QtColorTools::toTgtColor(_colorPicker->color());
+        prop->setValue(cgt::vec4(val.x/val.w, val.y/val.w, val.z/val.w, 1));
         --_ignorePropertyUpdates;
     }
 

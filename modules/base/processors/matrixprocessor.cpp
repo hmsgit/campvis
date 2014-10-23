@@ -102,7 +102,7 @@ namespace campvis {
             parseString(p_parserInputString.getValue(), data);
         }
         else {
-            tgt::mat4 matA = tgt::mat4::createIdentity();
+            cgt::mat4 matA = cgt::mat4::createIdentity();
             if (p_matrixAType.getOptionValue() == "fixed")
                 matA = processMatrixString(p_matrixAString.getValue(), data);
             else {
@@ -110,7 +110,7 @@ namespace campvis {
                 if (td != 0) matA = td->getTransform();
             }
 
-            tgt::mat4 matB = tgt::mat4::createIdentity();
+            cgt::mat4 matB = cgt::mat4::createIdentity();
             if (p_matrixBType.getOptionValue() == "fixed")
                 matB = processMatrixString(p_matrixBString.getValue(), data);
             else {
@@ -118,11 +118,11 @@ namespace campvis {
                 if (td != 0) matB = td->getTransform();
             }
 
-            tgt::mat4 matAProcessed = processModifierString(matA, p_matrixAModifiers.getValue());
-            tgt::mat4 matBProcessed = processModifierString(matB, p_matrixBModifiers.getValue());
+            cgt::mat4 matAProcessed = processModifierString(matA, p_matrixAModifiers.getValue());
+            cgt::mat4 matBProcessed = processModifierString(matB, p_matrixBModifiers.getValue());
 
 
-            tgt::mat4 result = matAProcessed * matBProcessed;
+            cgt::mat4 result = matAProcessed * matBProcessed;
 
 #ifdef MATRIX_PROCESSOR_DEBUGGING
             LDEBUG("Matrix A: " << std::endl << matA);
@@ -202,16 +202,16 @@ namespace campvis {
         }
     }
 
-    tgt::mat4 MatrixProcessor::processMatrixString(std::string matrixString, DataContainer& data, std::map<std::string, tgt::mat4> *localDefs)
+    cgt::mat4 MatrixProcessor::processMatrixString(std::string matrixString, DataContainer& data, std::map<std::string, cgt::mat4> *localDefs)
     {
         std::vector<std::string> tokens = StringUtils::split(matrixString, " ");
 
         if (tokens.size() == 0 || tokens[0] == "identity") {
-            return tgt::mat4(tgt::mat4::identity);
+            return cgt::mat4(cgt::mat4::identity);
         }
         // if we have exactly 16 tokens, we assume we have a matrix in numerical form
         else if (tokens.size() == 16) {
-            tgt::mat4 mat;
+            cgt::mat4 mat;
             float * p = mat.elem;
             for (int i = 0; i < 16; i++) {
                 *p = static_cast<float>(atof(tokens[i].c_str()));
@@ -223,35 +223,35 @@ namespace campvis {
         else if (tokens[0] == "rot") {
             if (tokens.size() != 5) {
                 LWARNING("Rotation matrix string does not have the correct number of arguments!");
-                return tgt::mat4::createIdentity();
+                return cgt::mat4::createIdentity();
             }
             float angle;
-            tgt::vec3 axis;
+            cgt::vec3 axis;
             angle = static_cast<float>(atof(tokens[1].c_str()));
             axis[0] = static_cast<float>(atof(tokens[2].c_str()));
             axis[1] = static_cast<float>(atof(tokens[3].c_str()));
             axis[2] = static_cast<float>(atof(tokens[4].c_str()));
-            return tgt::mat4::createRotation(angle, axis);
+            return cgt::mat4::createRotation(angle, axis);
         }
         else if (tokens[0] == "trans") {
             if (tokens.size() != 4) {
                 LWARNING("Translation matrix string does not have the correct number of arguments!");
-                return tgt::mat4::createIdentity();
+                return cgt::mat4::createIdentity();
             }
 
-            tgt::vec3 translation;
+            cgt::vec3 translation;
             translation[0] = static_cast<float>(atof(tokens[1].c_str()));
             translation[1] = static_cast<float>(atof(tokens[2].c_str()));
             translation[2] = static_cast<float>(atof(tokens[3].c_str()));
-            return tgt::mat4::createTranslation(translation);
+            return cgt::mat4::createTranslation(translation);
         }
         else if (tokens[0] == "scale") {
             if (tokens.size() != 2 && tokens.size() != 4) {
                 LWARNING("Scaling matrix string does not have the correct number of arguments!");
-                return tgt::mat4::createIdentity();
+                return cgt::mat4::createIdentity();
             }
 
-            tgt::vec3 scale;
+            cgt::vec3 scale;
             scale[0] = static_cast<float>(atof(tokens[1].c_str()));
             if (tokens.size() == 4) {
                 scale[1] = static_cast<float>(atof(tokens[2].c_str()));
@@ -261,7 +261,7 @@ namespace campvis {
                 scale[1] = scale[2] = scale[0];
             }
 
-            return tgt::mat4::createScale(scale);
+            return cgt::mat4::createScale(scale);
         }
         // if we cannot find another pattern, we assume we have a data container ID
         else {
@@ -276,7 +276,7 @@ namespace campvis {
             ScopedTypedData<TransformData> td(data, matrixString);
             if (td == 0) {
                 LWARNING("Data Container ID \"" << matrixString << "\" was not suitable as input Matrix");
-                return tgt::mat4::createIdentity();
+                return cgt::mat4::createIdentity();
             }
 
             return td->getTransform();
@@ -284,10 +284,10 @@ namespace campvis {
 
     }
 
-    tgt::mat4 MatrixProcessor::processModifierString(tgt::mat4 matrix, std::string modifiers)
+    cgt::mat4 MatrixProcessor::processModifierString(cgt::mat4 matrix, std::string modifiers)
     {
         size_t pos = 0;
-        tgt::mat4 result = matrix, tmp;
+        cgt::mat4 result = matrix, tmp;
 
         while (pos < modifiers.size()) {
             switch (modifiers[pos]) {
@@ -298,16 +298,16 @@ namespace campvis {
                 else result = tmp;
                 break;
             case 'T':
-                result = tgt::transpose(result);
+                result = cgt::transpose(result);
                 break;
             case '-':
-                result = tgt::mat4::zero - result;
+                result = cgt::mat4::zero - result;
                 break;
             case 'r':
                 result = result.getRotationalPart();
                 break;
             case 's':
-                result = tgt::mat4::createScale(result.getScalingPart());
+                result = cgt::mat4::createScale(result.getScalingPart());
                 break;
             default:
                 LWARNING("Ignoring unknown modifier: " << modifiers[pos]);
@@ -320,7 +320,7 @@ namespace campvis {
 
     void MatrixProcessor::parseString(const std::string & parserInput, DataContainer & dc)
     {
-        std::map<std::string, tgt::mat4> results;
+        std::map<std::string, cgt::mat4> results;
 
         std::vector<std::string> equations = StringUtils::split(parserInput, ";");
 
@@ -345,7 +345,7 @@ namespace campvis {
                 //LDEBUG("Matrix Name: " << assignedMatName << ". Formula: " << formulaToEvaluate);
 
                 //split formulaToEvaluate by the multiplications
-                tgt::mat4 assignedResult = tgt::mat4::identity;
+                cgt::mat4 assignedResult = cgt::mat4::identity;
                 std::vector<std::string> multiplicands = StringUtils::split(formulaToEvaluate, "*");
                 for (size_t m = 0, nMul = multiplicands.size(); m != nMul; ++m)
                 {
@@ -364,7 +364,7 @@ namespace campvis {
                     //LDEBUG("Matrix String: " << matStr << " Modifiers: " << modifiers);
 
                     //evaluate matrix and and multiply to the result
-                    tgt::mat4 multiplicand = processMatrixString(matStr, dc, &results);
+                    cgt::mat4 multiplicand = processMatrixString(matStr, dc, &results);
                     assignedResult *= processModifierString(multiplicand, modifiers);
                 }
 

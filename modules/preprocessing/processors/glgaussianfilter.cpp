@@ -75,10 +75,10 @@ namespace campvis {
         _shader3D->setAttributeLocation(1, "in_TexCoord");
 
         // create kernel buffer
-        tgt::TextureUnit inputUnit;
+        cgt::TextureUnit inputUnit;
         inputUnit.activate();
 
-        _kernelBuffer = new tgt::BufferObject(tgt::BufferObject::TEXTURE_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
+        _kernelBuffer = new cgt::BufferObject(cgt::BufferObject::TEXTURE_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
         glGenTextures(1, &_kernelBufferTexture);
         LGL_ERROR;
     }
@@ -97,17 +97,17 @@ namespace campvis {
 
         if (img != 0) {
             if (img->getParent()->getDimensionality() > 1) {
-                tgt::ivec3 size = img->getSize();
+                cgt::ivec3 size = img->getSize();
                 int halfKernelSize = static_cast<int>(2.5 * p_sigma.getValue());
-                tgtAssert(halfKernelSize < MAX_HALF_KERNEL_SIZE, "halfKernelSize too big -> kernel uniform buffer will be out of bounds!")
+                cgtAssert(halfKernelSize < MAX_HALF_KERNEL_SIZE, "halfKernelSize too big -> kernel uniform buffer will be out of bounds!")
 
-                tgt::TextureUnit inputUnit, kernelUnit;
+                cgt::TextureUnit inputUnit, kernelUnit;
                 inputUnit.activate();
 
                 // create texture for result
-                tgt::Texture* resultTextures[2];
+                cgt::Texture* resultTextures[2];
                 for (size_t i = 0; i < 2; ++i) {
-                    resultTextures[i] = new tgt::Texture(0, size, img->getTexture()->getFormat(), img->getTexture()->getInternalFormat(), img->getTexture()->getDataType(), tgt::Texture::LINEAR);
+                    resultTextures[i] = new cgt::Texture(0, size, img->getTexture()->getFormat(), img->getTexture()->getInternalFormat(), img->getTexture()->getDataType(), cgt::Texture::LINEAR);
                     resultTextures[i]->uploadTexture();
                 }
 
@@ -116,10 +116,10 @@ namespace campvis {
                 for (int i = 0; i <= halfKernelSize; ++i) {
                     kernel[i] = exp(- static_cast<GLfloat>(i*i) / (2.f * p_sigma.getValue() * p_sigma.getValue()));
                 }
-                _kernelBuffer->data(kernel, (halfKernelSize + 1) * sizeof(GLfloat), tgt::BufferObject::FLOAT, 1);
+                _kernelBuffer->data(kernel, (halfKernelSize + 1) * sizeof(GLfloat), cgt::BufferObject::FLOAT, 1);
 
                 // we need to distinguish 2D and 3D case
-                tgt::Shader* leShader = (size.z == 1) ? _shader2D : _shader3D;
+                cgt::Shader* leShader = (size.z == 1) ? _shader2D : _shader3D;
 
                 // activate shader
                 leShader->activate();
@@ -139,7 +139,7 @@ namespace campvis {
                 // start 3 passes of convolution: in X, Y and Z direction:
                 {
                     // X pass
-                    leShader->setUniform("_direction", tgt::ivec3(1, 0, 0));
+                    leShader->setUniform("_direction", cgt::ivec3(1, 0, 0));
                     img->bind(leShader, inputUnit);
 
                     // render quad to compute difference measure by shader
@@ -154,7 +154,7 @@ namespace campvis {
                 }
                 {
                     // Y pass
-                    leShader->setUniform("_direction", tgt::ivec3(0, 1, 0));
+                    leShader->setUniform("_direction", cgt::ivec3(0, 1, 0));
                     inputUnit.activate();
                     resultTextures[0]->bind();
 
@@ -171,7 +171,7 @@ namespace campvis {
                 // we need the third pass only in the 3D case
                 if (size.z > 1) {
                     // Z pass
-                    leShader->setUniform("_direction", tgt::ivec3(0, 0, 1));
+                    leShader->setUniform("_direction", cgt::ivec3(0, 0, 1));
                     inputUnit.activate();
                     resultTextures[1]->bind();
 
@@ -201,7 +201,7 @@ namespace campvis {
 
                 delete resultTextures[1];
 
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 LGL_ERROR;
             }
             else {

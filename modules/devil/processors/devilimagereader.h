@@ -34,7 +34,7 @@
 
 #include "modules/io/processors/abstractimagereader.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
     class TextureReaderDevil;
 }
@@ -81,8 +81,8 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;
-        tgt::TextureReaderDevil* _devilTextureReader;
+        cgt::Shader* _shader;
+        cgt::TextureReaderDevil* _devilTextureReader;
 
         static const std::string loggerCat_;
     };

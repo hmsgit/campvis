@@ -33,7 +33,7 @@
 #include "core/properties/transferfunctionproperty.h"
 #include "core/properties/numericproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -77,7 +77,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;               ///< Shader for resampling
+        cgt::Shader* _shader;               ///< Shader for resampling
 
         static const std::string loggerCat_;
     };

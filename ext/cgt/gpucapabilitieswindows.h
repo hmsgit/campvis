@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_GPUCAPABILITIESWINDOWS_H
-#define TGT_GPUCAPABILITIESWINDOWS_H
+#ifndef CGT_GPUCAPABILITIESWINDOWS_H
+#define CGT_GPUCAPABILITIESWINDOWS_H
 
 #ifdef _MSC_VER
 
@@ -31,16 +31,16 @@
 #include "cgt/singleton.h"
 #include "cgt/types.h"
 
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
     #include <wbemidl.h>
     #include <comdef.h>
 #endif
 
-namespace tgt {
+namespace cgt {
 
 class GpuCapabilitiesWindows;
 #ifdef DLL_TEMPLATE_INST
-template class TGT_API Singleton<GpuCapabilitiesWindows>;
+template class CGT_API Singleton<GpuCapabilitiesWindows>;
 #endif
 
 /**
@@ -54,9 +54,9 @@ template class TGT_API Singleton<GpuCapabilitiesWindows>;
  * Windows Management Instrumentation (WMI), Windows registry,
  * and driver dlls.
  *
- * @note WMI is only used if TGT_WITH_WMI is defined
+ * @note WMI is only used if CGT_WITH_WMI is defined
  */
-class TGT_API GpuCapabilitiesWindows : public tgt::GpuCapabilities, public Singleton<GpuCapabilitiesWindows> {
+class CGT_API GpuCapabilitiesWindows : public cgt::GpuCapabilities, public Singleton<GpuCapabilitiesWindows> {
 public:
     using Singleton<GpuCapabilitiesWindows>::init;
     using Singleton<GpuCapabilitiesWindows>::isInited;
@@ -85,7 +85,7 @@ public:
 
     /**
      * Constructor performs the WMI initialization,
-     * if compiled with WMI support (TGT_WITH_WMI).
+     * if compiled with WMI support (CGT_WITH_WMI).
      */
     GpuCapabilitiesWindows();
 
@@ -120,7 +120,7 @@ public:
      * Windows Management Instrumentation (WMI), hence it is
      * vendor independent.
      *
-     * If voreen was compiled without WMI support (TGT_WITH_WMI) or the WMI data retrieval fails,
+     * If voreen was compiled without WMI support (CGT_WITH_WMI) or the WMI data retrieval fails,
      * the information is read from the registry. If both methods fail, -1 is returned.
      */
     int getVideoRamSize();
@@ -131,7 +131,7 @@ protected:
 
     std::string loggerCat_;
 
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
 
     /**
      * Has to be called before a \sa WMIquery() can be done.
@@ -146,7 +146,7 @@ protected:
      *
      * @return true, if WMI deinitialization succeeded
      *
-     * @warning function is only defined if TGT_WITH_WMI is set!
+     * @warning function is only defined if CGT_WITH_WMI is set!
      */
     bool WMIdeinit();
 
@@ -221,7 +221,7 @@ private:
     DWORD readVRAMSizeFromReg();
     char* findPrimaryDevicesKey();
 
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
    // WMI internals. Should not be touched outside the present WMI functions.
    IWbemLocator* pIWbemLocator_;
    IWbemServices* pWbemServices_;
@@ -231,10 +231,10 @@ private:
 
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#define GpuCapsWin tgt::Singleton<tgt::GpuCapabilitiesWindows>::getRef()
+#define GpuCapsWin cgt::Singleton<cgt::GpuCapabilitiesWindows>::getRef()
 
 #endif //_MSC_VER
 
-#endif // TGT_GPUCAPABILITIESWINDOWS_H
+#endif // CGT_GPUCAPABILITIESWINDOWS_H

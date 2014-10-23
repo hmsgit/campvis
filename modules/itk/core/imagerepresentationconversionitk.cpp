@@ -35,7 +35,7 @@ namespace campvis {
             return nullptr;
 
         if (const AbstractImageRepresentationItk* tester = dynamic_cast<const AbstractImageRepresentationItk*>(source)) {
-            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
@@ -63,14 +63,14 @@ namespace campvis {
             region = tester->getItkImage()->GetBufferedRegion(); \
             \
             ItkImageType::SizeType s = region.GetSize(); \
-            tgt::svec3 size(s[0], 1, 1); \
+            cgt::svec3 size(s[0], 1, 1); \
             if (dimensionality >= 2) \
                 size.y = s[1]; \
             if (dimensionality == 3) \
                 size.z = s[2]; \
             \
-            ElementType* pixelDataCopy = new ElementType[tgt::hmul(size)]; \
-            memcpy(pixelDataCopy, pixelData, tgt::hmul(size) * TypeTraits<basetype, numchannels>::elementSize); \
+            ElementType* pixelDataCopy = new ElementType[cgt::hmul(size)]; \
+            memcpy(pixelDataCopy, pixelData, cgt::hmul(size) * TypeTraits<basetype, numchannels>::elementSize); \
             return GenericImageRepresentationLocal<basetype, numchannels>::create(const_cast<ImageData*>(source->getParent()), pixelDataCopy); \
         }
 

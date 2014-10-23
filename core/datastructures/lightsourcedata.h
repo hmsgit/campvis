@@ -29,7 +29,7 @@
 
 #include "core/datastructures/abstractdata.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -50,12 +50,12 @@ namespace campvis {
          * \param   attenuation     The attenuation factors
          */
         explicit LightSourceData(
-            const tgt::vec3& lightPosition,
-            const tgt::vec3& ambientColor = tgt::vec3(.4f),
-            const tgt::vec3& diffuseColor = tgt::vec3(.75f),
-            const tgt::vec3& specularColor = tgt::vec3(.6f),
+            const cgt::vec3& lightPosition,
+            const cgt::vec3& ambientColor = cgt::vec3(.4f),
+            const cgt::vec3& diffuseColor = cgt::vec3(.75f),
+            const cgt::vec3& specularColor = cgt::vec3(.6f),
             float shininess = 24.f,
-            const tgt::vec3& attenuation = tgt::vec3(0.f));
+            const cgt::vec3& attenuation = cgt::vec3(0.f));
 
         /**
          * Virtual destructor
@@ -75,51 +75,51 @@ namespace campvis {
          * \param   shader      Shader to bind to.
          * \param   uniformName Uniform name to use.
          */
-        void bind(tgt::Shader* shader, const std::string& uniformName) const;
+        void bind(cgt::Shader* shader, const std::string& uniformName) const;
 
         /**
         * Gets the light positoin.
         * \return _lightPosition
         **/
-        tgt::vec3 getLightPosition() const { return _lightPosition; }
+        cgt::vec3 getLightPosition() const { return _lightPosition; }
         /**
         * Sets the light positoin.
         * \param _lightPosition New value for the light positoin.
         **/
-        void setLightPosition(tgt::vec3 val) { _lightPosition = val; }
+        void setLightPosition(cgt::vec3 val) { _lightPosition = val; }
 
         /**
         * Gets the ambient color.
         * \return _ambientColor
         **/
-        tgt::vec3 getAmbientColor() const { return _ambientColor; }
+        cgt::vec3 getAmbientColor() const { return _ambientColor; }
         /**
         * Sets the ambient color.
         * \param _ambientColor New value for the ambient color.
         **/
-        void setAmbientColor(tgt::vec3 val) { _ambientColor = val; }
+        void setAmbientColor(cgt::vec3 val) { _ambientColor = val; }
 
         /**
         * Gets the diffuse light color.
         * \return _diffuseColor
         **/
-        tgt::vec3 getDiffuseColor() const { return _diffuseColor; }
+        cgt::vec3 getDiffuseColor() const { return _diffuseColor; }
         /**
         * Sets the diffuse light color.
         * \param _diffuseColor New value for the diffuse light color.
         **/
-        void setDiffuseColor(tgt::vec3 val) { _diffuseColor = val; }
+        void setDiffuseColor(cgt::vec3 val) { _diffuseColor = val; }
 
         /**
         * Gets the specular color.
         * \return _specularColor
         **/
-        tgt::vec3 getSpecularColor() const { return _specularColor; }
+        cgt::vec3 getSpecularColor() const { return _specularColor; }
         /**
         * Sets the specular color.
         * \param _specularColor New value for the specular color.
         **/
-        void setSpecularColor(tgt::vec3 val) { _specularColor = val; }
+        void setSpecularColor(cgt::vec3 val) { _specularColor = val; }
 
         /**
         * Gets the specular shininess.
@@ -136,21 +136,21 @@ namespace campvis {
         * Gets the attenuation factors.
         * \return _attenuation
         **/
-        tgt::vec3 getAttenuation() const { return _attenuation; }
+        cgt::vec3 getAttenuation() const { return _attenuation; }
         /**
         * Sets the attenuation factors.
         * \param _attenuation New value for the attenuation factors.
         **/
-        void setAttenuation(tgt::vec3 val) { _attenuation = val; }
+        void setAttenuation(cgt::vec3 val) { _attenuation = val; }
                 
 
     protected:
-        tgt::vec3 _lightPosition;           ///< Light position
-        tgt::vec3 _ambientColor;            ///< Ambient light color
-        tgt::vec3 _diffuseColor;            ///< Diffuse light color
-        tgt::vec3 _specularColor;           ///< Specular light color
+        cgt::vec3 _lightPosition;           ///< Light position
+        cgt::vec3 _ambientColor;            ///< Ambient light color
+        cgt::vec3 _diffuseColor;            ///< Diffuse light color
+        cgt::vec3 _specularColor;           ///< Specular light color
         float _shininess;                   ///< Specular shininess
-        tgt::vec3 _attenuation;             ///< Attenuation factors
+        cgt::vec3 _attenuation;             ///< Attenuation factors
         
     };
 

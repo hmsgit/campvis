@@ -40,7 +40,7 @@
 
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -101,7 +101,7 @@ namespace campvis {
         /// Generates the GLSL header
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
     private:
         static const std::string loggerCat_;

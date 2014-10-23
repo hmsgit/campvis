@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,15 +22,15 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_FRUSTUM_H
-#define TGT_FRUSTUM_H
+#ifndef CGT_FRUSTUM_H
+#define CGT_FRUSTUM_H
 
 #include "cgt/types.h"
 #include "cgt/vector.h"
 #include "cgt/bounds.h"
 #include "cgt/tgt_math.h"
 
-namespace tgt {
+namespace cgt {
 
 // foreward declaration
 class Camera;
@@ -39,7 +39,7 @@ class Camera;
  * This class is used by the Camera for culling in connection with axis aligned bounding boxes
  * or points.
  */
-class TGT_API Frustum {
+class CGT_API Frustum {
 
 private:
     /// the distances from the center of the near plane to the left, right, top and bottom borders
@@ -117,11 +117,11 @@ public:
     /// number num.
     ///
     /// Can be used to handle normals within a for-loop e.g. when culling against frustum, see
-    /// tgt::Camara::isCulled, tgt::Camera::isCulledXZ.
+    /// cgt::Camara::isCulled, cgt::Camera::isCulledXZ.
     const vec3& getNormal(int num) const;
     bool operator==(const Frustum& rhs) const;
 };
 
 }
 
-#endif //TGT_FRUSTUM_H_
+#endif //CGT_FRUSTUM_H_

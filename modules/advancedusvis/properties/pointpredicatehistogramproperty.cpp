@@ -78,7 +78,7 @@ namespace campvis {
     }
 
     void PointPredicateHistogramProperty::setHistogramPointer(std::shared_ptr<PointPredicateHistogram> histogram) {
-        tgtAssert(histogram != nullptr, "Must not be nullptr!");
+        cgtAssert(histogram != nullptr, "Must not be nullptr!");
 
         if (_histogram != nullptr) {
             _histogram->s_configurationChanged.disconnect(this);
@@ -116,8 +116,8 @@ namespace campvis {
 
     void PointPredicateHistogramProperty::adjustImportances(std::vector<float> deltas, const std::vector<float>& baseHistogram, int fixedIndex) {
         std::vector<AbstractPointPredicate*> predicates = _histogram->getPredicates();
-        tgtAssert(deltas.size() == baseHistogram.size(), "Size of deltas mismatches the size of baseHistogram!");
-        tgtAssert(deltas.size() == predicates.size(), "Number of deltas mismatches the number of predicates!");
+        cgtAssert(deltas.size() == baseHistogram.size(), "Size of deltas mismatches the size of baseHistogram!");
+        cgtAssert(deltas.size() == predicates.size(), "Number of deltas mismatches the number of predicates!");
 
         // first pass of normalization: ensure sum of deltas = 0:
         float sum = 0.f;

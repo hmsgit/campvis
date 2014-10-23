@@ -36,8 +36,8 @@ namespace campvis {
      * Enqueued jobs are dispatched via the tbb::task_group interface as single tasks.
      * No priority schemes are implemented by now.
      */
-    class CAMPVIS_CORE_API SimpleJobProcessor : public tgt::Singleton<SimpleJobProcessor> {
-        friend class tgt::Singleton<SimpleJobProcessor>;
+    class CAMPVIS_CORE_API SimpleJobProcessor : public cgt::Singleton<SimpleJobProcessor> {
+        friend class cgt::Singleton<SimpleJobProcessor>;
 
     public:
         /**
@@ -62,6 +62,6 @@ namespace campvis {
 
 }
 
-#define SimpleJobProc tgt::Singleton<SimpleJobProcessor>::getRef()
+#define SimpleJobProc cgt::Singleton<SimpleJobProcessor>::getRef()
 
 #endif // SIMPLEJOBPROCESSOR_H__

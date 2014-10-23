@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_GPUCAPABILITIES_H
-#define TGT_GPUCAPABILITIES_H
+#ifndef CGT_GPUCAPABILITIES_H
+#define CGT_GPUCAPABILITIES_H
 
 #include <string>
 
@@ -31,15 +31,15 @@
 #include "cgt/tgt_gl.h"
 #include "cgt/types.h"
 
-namespace tgt {
+namespace cgt {
 
 class GpuCapabilities;
 #ifdef DLL_TEMPLATE_INST
-template class TGT_API Singleton<GpuCapabilities>;
+template class CGT_API Singleton<GpuCapabilities>;
 #endif
 
 /**
- * This tgt-Singleton provides information about the graphics system.
+ * This cgt-Singleton provides information about the graphics system.
  * This information includes:
  *  - Operating system
  *  - OpenGL version
@@ -52,17 +52,17 @@ template class TGT_API Singleton<GpuCapabilities>;
  *
  * The global identifier of this class' singleton is <tt>GpuCaps</tt>.
  */
-class TGT_API GpuCapabilities : public Singleton<GpuCapabilities> {
+class CGT_API GpuCapabilities : public Singleton<GpuCapabilities> {
 public:
 
     /**
      * Specifies the version
      * of the OpenGL/glsl implementation.
-     * TGT_GL_VERSION_x_y denotes OpenGL version x.y.
+     * CGT_GL_VERSION_x_y denotes OpenGL version x.y.
      *
-     * TGT prefix is necessary due to name clashes with glew.
+     * CGT prefix is necessary due to name clashes with glew.
      */
-    class TGT_API GlVersion {
+    class CGT_API GlVersion {
         public:
         GlVersion(int major = 0, int minor = 0, int release = 0);
 
@@ -87,29 +87,29 @@ public:
         int minor() const { return minor_; }
         int release() const { return release_; }
 
-        TGT_API friend bool operator==(const GlVersion& x, const GlVersion& y);
-        TGT_API friend bool operator!=(const GlVersion& x, const GlVersion& y);
-        TGT_API friend bool operator<(const GlVersion& x, const GlVersion& y);
-        TGT_API friend bool operator<=(const GlVersion& x, const GlVersion& y);
-        TGT_API friend bool operator>(const GlVersion& x, const GlVersion& y);
-        TGT_API friend bool operator>=(const GlVersion& x, const GlVersion& y);
-        TGT_API friend std::ostream& operator<<(std::ostream& s, const GlVersion& v);
+        CGT_API friend bool operator==(const GlVersion& x, const GlVersion& y);
+        CGT_API friend bool operator!=(const GlVersion& x, const GlVersion& y);
+        CGT_API friend bool operator<(const GlVersion& x, const GlVersion& y);
+        CGT_API friend bool operator<=(const GlVersion& x, const GlVersion& y);
+        CGT_API friend bool operator>(const GlVersion& x, const GlVersion& y);
+        CGT_API friend bool operator>=(const GlVersion& x, const GlVersion& y);
+        CGT_API friend std::ostream& operator<<(std::ostream& s, const GlVersion& v);
 
-        static const GlVersion TGT_GL_VERSION_1_0;
-        static const GlVersion TGT_GL_VERSION_1_1;
-        static const GlVersion TGT_GL_VERSION_1_2;
-        static const GlVersion TGT_GL_VERSION_1_3;
-        static const GlVersion TGT_GL_VERSION_1_4;
-        static const GlVersion TGT_GL_VERSION_1_5;
-        static const GlVersion TGT_GL_VERSION_2_0;
-        static const GlVersion TGT_GL_VERSION_2_1;
-        static const GlVersion TGT_GL_VERSION_3_0;
-        static const GlVersion TGT_GL_VERSION_3_1;
-        static const GlVersion TGT_GL_VERSION_3_2;
-        static const GlVersion TGT_GL_VERSION_3_3;
-        static const GlVersion TGT_GL_VERSION_4_0;
-        static const GlVersion TGT_GL_VERSION_4_1;
-        static const GlVersion TGT_GL_VERSION_4_2;
+        static const GlVersion CGT_GL_VERSION_1_0;
+        static const GlVersion CGT_GL_VERSION_1_1;
+        static const GlVersion CGT_GL_VERSION_1_2;
+        static const GlVersion CGT_GL_VERSION_1_3;
+        static const GlVersion CGT_GL_VERSION_1_4;
+        static const GlVersion CGT_GL_VERSION_1_5;
+        static const GlVersion CGT_GL_VERSION_2_0;
+        static const GlVersion CGT_GL_VERSION_2_1;
+        static const GlVersion CGT_GL_VERSION_3_0;
+        static const GlVersion CGT_GL_VERSION_3_1;
+        static const GlVersion CGT_GL_VERSION_3_2;
+        static const GlVersion CGT_GL_VERSION_3_3;
+        static const GlVersion CGT_GL_VERSION_4_0;
+        static const GlVersion CGT_GL_VERSION_4_1;
+        static const GlVersion CGT_GL_VERSION_4_2;
 
         static const GlVersion SHADER_VERSION_110; ///< GLSL version 1.10
         static const GlVersion SHADER_VERSION_120; ///< GLSL version 1.20
@@ -435,8 +435,8 @@ private:
     int maxColorAttachments_;
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#define GpuCaps tgt::Singleton<tgt::GpuCapabilities>::getRef()
+#define GpuCaps cgt::Singleton<cgt::GpuCapabilities>::getRef()
 
-#endif // TGT_GPUCAPABILITIES_H
+#endif // CGT_GPUCAPABILITIES_H

@@ -37,7 +37,7 @@ namespace campvis {
     
     const std::string AbstractTransferFunction::loggerCat_ = "CAMPVis.core.classification.AbstractTransferFunction";
 
-    AbstractTransferFunction::AbstractTransferFunction(const tgt::svec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
+    AbstractTransferFunction::AbstractTransferFunction(const cgt::svec3& size, const cgt::vec2& intensityDomain /*= cgt::vec2(0.f, 1.f)*/)
         : _size(size)
         , _intensityDomain(intensityDomain)
         , _texture(0)
@@ -55,8 +55,8 @@ namespace campvis {
         _texture = 0;
     }
 
-    void AbstractTransferFunction::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/, const std::string& transFuncParamsUniform /*= "_transferFunctionParameters"*/) {
-        tgtAssert(shader != 0, "Shader must not be 0.");
+    void AbstractTransferFunction::bind(cgt::Shader* shader, const cgt::TextureUnit& texUnit, const std::string& transFuncUniform /*= "_transferFunction"*/, const std::string& transFuncParamsUniform /*= "_transferFunctionParameters"*/) {
+        cgtAssert(shader != 0, "Shader must not be 0.");
 
         {
             tbb::mutex::scoped_lock lock(_localMutex);
@@ -80,21 +80,21 @@ namespace campvis {
         shader->setUniform(transFuncUniform, texUnit.getUnitNumber());
         switch (getDimensionality()) {
             case 1:
-                shader->setUniform(transFuncParamsUniform + "._intensityDomain", tgt::vec2(_intensityDomain));
+                shader->setUniform(transFuncParamsUniform + "._intensityDomain", cgt::vec2(_intensityDomain));
                 break;
             case 2:
-                shader->setUniform(transFuncParamsUniform + "._intensityDomainX", tgt::vec2(_intensityDomain));
+                shader->setUniform(transFuncParamsUniform + "._intensityDomainX", cgt::vec2(_intensityDomain));
                 break;
             default:
-                tgtAssert(false, "Unsupported TF dimensionality!");
+                cgtAssert(false, "Unsupported TF dimensionality!");
                 break;
         }
         
         shader->setIgnoreUniformLocationError(tmp);
     }
     
-    void AbstractTransferFunction::setIntensityDomain(const tgt::vec2& newDomain) {
-        tgtAssert(newDomain.x <= newDomain.y, "Intensity domain is not a valid interval.");
+    void AbstractTransferFunction::setIntensityDomain(const cgt::vec2& newDomain) {
+        cgtAssert(newDomain.x <= newDomain.y, "Intensity domain is not a valid interval.");
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             _intensityDomain = newDomain;
@@ -103,11 +103,11 @@ namespace campvis {
         s_changed.emitSignal();
     }
 
-    const tgt::vec2& AbstractTransferFunction::getIntensityDomain() const {
+    const cgt::vec2& AbstractTransferFunction::getIntensityDomain() const {
         return _intensityDomain;
     }
 
-    const tgt::Texture* AbstractTransferFunction::getTexture() {
+    const cgt::Texture* AbstractTransferFunction::getTexture() {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             if (_texture == 0 || _dirtyTexture) {

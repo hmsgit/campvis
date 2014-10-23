@@ -55,10 +55,10 @@ namespace campvis {
          */
         explicit IndexedMeshGeometry(
             const std::vector<uint16_t>& indices,
-            const std::vector<tgt::vec3>& vertices,
-            const std::vector<tgt::vec3>& textureCoordinates = std::vector<tgt::vec3>(),
-            const std::vector<tgt::vec4>& colors = std::vector<tgt::vec4>(),
-            const std::vector<tgt::vec3>& normals = std::vector<tgt::vec3>()
+            const std::vector<cgt::vec3>& vertices,
+            const std::vector<cgt::vec3>& textureCoordinates = std::vector<cgt::vec3>(),
+            const std::vector<cgt::vec4>& colors = std::vector<cgt::vec4>(),
+            const std::vector<cgt::vec3>& normals = std::vector<cgt::vec3>()
             );
         
         /**
@@ -84,13 +84,13 @@ namespace campvis {
          * The list of picking information colors, may be empty.
          * \return  _pickingInformation
          */
-        const std::vector<tgt::col4>& getPickingInformation() const;
+        const std::vector<cgt::col4>& getPickingInformation() const;
 
         /**
          * Sets the picking information of this geometry to \a pickingInformation
          * \param   pickingInformation  The new list of picking information for this geometry
          */
-        void setPickingInformation(const std::vector<tgt::col4>& pickingInformation);
+        void setPickingInformation(const std::vector<cgt::col4>& pickingInformation);
 
 
         /// \see AbstractData::clone()
@@ -110,13 +110,13 @@ namespace campvis {
         virtual void render(GLenum mode) const;
 
         /// \see GeometryData::getWorldBounds
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
         /// \see GeometryData::hasTextureCoordinates
         virtual bool hasTextureCoordinates() const;
         /// \see GeometryData::hasPickingInformation
         virtual bool hasPickingInformation() const;
         /// \see GeometryData::applyTransformationToVertices
-        virtual void applyTransformationToVertices(const tgt::mat4& t);
+        virtual void applyTransformationToVertices(const cgt::mat4& t);
 
     protected:
         /**
@@ -129,14 +129,14 @@ namespace campvis {
         void deleteIndicesBuffer() const;
 
         std::vector<uint16_t> _indices;                 ///< Index list defining the faces
-        std::vector<tgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
-        std::vector<tgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
-        std::vector<tgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
-        std::vector<tgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
+        std::vector<cgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
+        std::vector<cgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
+        std::vector<cgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
+        std::vector<cgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
 
-        std::vector<tgt::col4> _pickingInformation;     ///< The list of picking information colors, max be empty.
+        std::vector<cgt::col4> _pickingInformation;     ///< The list of picking information colors, max be empty.
 
-        mutable tgt::BufferObject* _indicesBuffer;
+        mutable cgt::BufferObject* _indicesBuffer;
 
         static const std::string loggerCat_;
     };

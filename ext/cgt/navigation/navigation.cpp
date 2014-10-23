@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -33,7 +33,7 @@
 // #include "cgt/tgt_gl.h"
 
 
-namespace tgt {
+namespace cgt {
 
 // Rotate the Camera about an abitrary axis and angle given by the user
 void Navigation::rotateView(float angle, const vec3& axis) {
@@ -155,20 +155,20 @@ void Navigation::moveCamera(const vec3& motionvector) {
     updateClippingPlanes();
 }
 
-void Navigation::setSceneBounds(const tgt::Bounds& bounds) {
+void Navigation::setSceneBounds(const cgt::Bounds& bounds) {
     _sceneBounds = bounds;
     updateClippingPlanes();
     hcam_->update();
 }
 
 void Navigation::updateClippingPlanes() {
-    float diag = tgt::length(_sceneBounds.diagonal()) * 0.75f;
-    float dist = tgt::distance(getCamera()->getPosition(), _sceneBounds.center());
+    float diag = cgt::length(_sceneBounds.diagonal()) * 0.75f;
+    float dist = cgt::distance(getCamera()->getPosition(), _sceneBounds.center());
     getCamera()->setNearDist(std::max(dist - diag, 0.1f));
     getCamera()->setFarDist(diag + 2 * dist);
 }
 
-const tgt::Bounds& Navigation::getSceneBounds() const {
+const cgt::Bounds& Navigation::getSceneBounds() const {
     return _sceneBounds;
 }
 

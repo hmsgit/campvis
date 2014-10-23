@@ -97,7 +97,7 @@ LIST(APPEND CampvisApplicationSources ${CampvisApplicationFormsHeaders})
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
-SET(CampvisMainLibs campvis-core campvis-modules tgt sigslot)
+SET(CampvisMainLibs campvis-core campvis-modules cgt sigslot)
 
 IF(CAMPVIS_ENABLE_SCRIPTING)
     LIST(APPEND CampvisMainLibs campvis-scripting)

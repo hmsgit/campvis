@@ -45,8 +45,8 @@ namespace campvis {
 
     VtkImageReader::VtkImageReader() 
         : AbstractImageReader()
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
     {
         this->_ext.push_back(".vtk");
         this->p_targetImageID.setValue("VtkImageReader.output");
@@ -71,12 +71,12 @@ namespace campvis {
         try {
             std::ifstream file(p_url.getValue().c_str(), std::ifstream::in);
             if (!file.is_open() || file.bad())
-                throw tgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
+                throw cgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
 
             std::string curLine = getTrimmedLine(file);
             // cppcheck-suppress stlIfStrFind
             if (curLine.find("# vtk DataFile Version") != 0)
-                throw tgt::FileException("Unknown identifier in vtk file.", p_url.getValue());
+                throw cgt::FileException("Unknown identifier in vtk file.", p_url.getValue());
 
             // next line is the header - contains only unimportant data
             getTrimmedLine(file);
@@ -84,9 +84,9 @@ namespace campvis {
             // this line is the format
             curLine = StringUtils::lowercase(getTrimmedLine(file));
             if (curLine == "binary")
-                throw tgt::FileException("Binary data format currently unsupported.", p_url.getValue());
+                throw cgt::FileException("Binary data format currently unsupported.", p_url.getValue());
             else if (curLine != "ascii")
-                throw tgt::FileException("Unsupported format in vtk file - expected binary or ascii.", p_url.getValue());
+                throw cgt::FileException("Unsupported format in vtk file - expected binary or ascii.", p_url.getValue());
 
             // now comes the dataset structure
             curLine = StringUtils::lowercase(getTrimmedLine(file));
@@ -97,14 +97,14 @@ namespace campvis {
                 else if (splitted[1] == "polydata")
                     parsePolydata(data, file);
                 else 
-                    throw tgt::FileException("Unsupported dataset structure in vtk file - expected \"DATASET STRUCTURED_POINTS\" or \"DATASET POLYDATA\".", p_url.getValue());
+                    throw cgt::FileException("Unsupported dataset structure in vtk file - expected \"DATASET STRUCTURED_POINTS\" or \"DATASET POLYDATA\".", p_url.getValue());
             }
             else {
-                throw tgt::FileException("Unexpected tokens in vtk file.", p_url.getValue());
+                throw cgt::FileException("Unexpected tokens in vtk file.", p_url.getValue());
             }
 
         }
-        catch (tgt::Exception& e) {
+        catch (cgt::Exception& e) {
             LERROR("Error while parsing VTK file: " << e.what());
             return;
         }
@@ -114,13 +114,13 @@ namespace campvis {
         }
     }
 
-    void VtkImageReader::parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception) {
+    void VtkImageReader::parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception) {
         // init optional parameters with sane default values
         size_t dimensionality = 3;
-        tgt::svec3 size(static_cast<size_t>(0));
+        cgt::svec3 size(static_cast<size_t>(0));
 
-        tgt::vec3 voxelSize(1.f);
-        tgt::vec3 imageOffset(0.f);
+        cgt::vec3 voxelSize(1.f);
+        cgt::vec3 imageOffset(0.f);
 
         std::string curLine;
         std::vector<std::string> splitted;
@@ -143,7 +143,7 @@ namespace campvis {
                 ss >> imageOffset.x >> imageOffset.y >> imageOffset.z;
             }
             else {
-                throw tgt::FileException("Unsupported dataset structure field '" + curLine + "' in vtk file.", p_url.getValue());
+                throw cgt::FileException("Unsupported dataset structure field '" + curLine + "' in vtk file.", p_url.getValue());
             }
         }
 
@@ -151,21 +151,21 @@ namespace campvis {
         curLine = StringUtils::lowercase(getTrimmedLine(file));
         splitted = StringUtils::split(curLine, " ");
         if (splitted.size() != 2 || splitted[0] != "point_data")
-            throw tgt::FileException("Unsupported dataset attribute '" + splitted[0] + "' in vtk file - expected \"POINT_DATA n\".", p_url.getValue());
+            throw cgt::FileException("Unsupported dataset attribute '" + splitted[0] + "' in vtk file - expected \"POINT_DATA n\".", p_url.getValue());
         size_t numPoints = StringUtils::fromString<size_t>(splitted[1]);
 
-        if (numPoints < tgt::hmul(size))
-            throw tgt::FileException("Number of points in dataset (" + splitted[0] + ") doesn't match dimensions: " + StringUtils::toString(size), p_url.getValue());
+        if (numPoints < cgt::hmul(size))
+            throw cgt::FileException("Number of points in dataset (" + splitted[0] + ") doesn't match dimensions: " + StringUtils::toString(size), p_url.getValue());
 
         // now comes the data description block "FIELD ..."
         curLine = StringUtils::lowercase(getTrimmedLine(file));
         splitted = StringUtils::split(curLine, " ");
         if (splitted.size() != 3 || splitted[0] != "field")
-            throw tgt::FileException("Unsupported dataset attribute '" + splitted[0] + "' in vtk file - expected \"FIELD ...\".", p_url.getValue());
+            throw cgt::FileException("Unsupported dataset attribute '" + splitted[0] + "' in vtk file - expected \"FIELD ...\".", p_url.getValue());
         size_t numArrays = StringUtils::fromString<size_t>(splitted[2]);
 
         if (numArrays != 1)
-            throw tgt::FileException("Multiple arrays in data set currently not supported - too lazy...", p_url.getValue());
+            throw cgt::FileException("Multiple arrays in data set currently not supported - too lazy...", p_url.getValue());
 
         curLine = StringUtils::lowercase(getTrimmedLine(file));
         splitted = StringUtils::split(curLine, " ");
@@ -173,7 +173,7 @@ namespace campvis {
         size_t numProcessors = StringUtils::fromString<size_t>(splitted[2]);
 
         if (numTuples * numProcessors != numPoints)
-            throw tgt::FileException("Number of points in dataset doesn't match dimensions of data field", p_url.getValue());
+            throw cgt::FileException("Number of points in dataset doesn't match dimensions of data field", p_url.getValue());
 
         ImageData* image = new ImageData(dimensionality, size, 1);
         ImageRepresentationLocal* rep = 0;
@@ -205,17 +205,17 @@ namespace campvis {
             data.addData(p_targetImageID.getValue(), image);
         }
         else {
-            throw tgt::FileException("Error while parsing the data.", p_url.getValue());
+            throw cgt::FileException("Error while parsing the data.", p_url.getValue());
         }
     }
 
-    void VtkImageReader::parsePolydata(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception) {
+    void VtkImageReader::parsePolydata(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception) {
         std::string curLine;
         std::vector<std::string> splitted;
 
         std::vector<uint16_t> indices;
-        std::vector<tgt::vec3> vertices;
-        std::vector<tgt::vec3> normals;
+        std::vector<cgt::vec3> vertices;
+        std::vector<cgt::vec3> normals;
 
         while (file.good()) {
             curLine = StringUtils::lowercase(getTrimmedLine(file));
@@ -223,7 +223,7 @@ namespace campvis {
 
             if (splitted.size() == 3 && splitted[0] == "points") {
                 size_t numVertices = StringUtils::fromString<size_t>(splitted[1]);
-                vertices.resize(numVertices, tgt::vec3(0.f));
+                vertices.resize(numVertices, cgt::vec3(0.f));
 
                 // TODO: make parsing more robust...
                 for (size_t i = 0; i < numVertices; ++i) {
@@ -251,7 +251,7 @@ namespace campvis {
                 splitted = StringUtils::split(curLine, " ");
 
                 if (splitted.size() == 3 && splitted[0] == "normals") {
-                    normals.resize(numPoints, tgt::vec3(0.f));
+                    normals.resize(numPoints, cgt::vec3(0.f));
 
                     // TODO: make parsing more robust...
                     for (size_t i = 0; i < numPoints; ++i) {
@@ -262,7 +262,7 @@ namespace campvis {
         }
 
         // all parsing done - lets create the image:
-        IndexedMeshGeometry* g = new IndexedMeshGeometry(indices, vertices, std::vector<tgt::vec3>(), std::vector<tgt::vec4>(), normals);
+        IndexedMeshGeometry* g = new IndexedMeshGeometry(indices, vertices, std::vector<cgt::vec3>(), std::vector<cgt::vec4>(), normals);
         data.addData(p_targetImageID.getValue(), g);
     }
     

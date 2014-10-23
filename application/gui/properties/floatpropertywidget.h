@@ -90,19 +90,19 @@ namespace campvis {
         template<>
         struct VecPropertyWidgetTraits<2> {
             typedef Vec2Property PropertyType;
-            typedef tgt::vec2 BaseType;
+            typedef cgt::vec2 BaseType;
         };
 
         template<>
         struct VecPropertyWidgetTraits<3> {
             typedef Vec3Property PropertyType;
-            typedef tgt::vec3 BaseType;
+            typedef cgt::vec3 BaseType;
         };
 
         template<>
         struct VecPropertyWidgetTraits<4> {
             typedef Vec4Property PropertyType;
-            typedef tgt::vec4 BaseType;
+            typedef cgt::vec4 BaseType;
         };
     }
 

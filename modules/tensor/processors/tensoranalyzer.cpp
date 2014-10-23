@@ -132,8 +132,8 @@ namespace campvis {
                     const Tensor2<float>& t = input->getElement(i);
 
                     if (t.Dxx == 0 && t.Dxy == 0 && t.Dxz == 0 && t.Dyy == 0 && t.Dyz == 0 && t.Dzz == 0) {
-                        evalRep->setElement(i, tgt::vec3::zero);
-                        evecRep->setElement(i, tgt::mat3::zero);
+                        evalRep->setElement(i, cgt::vec3::zero);
+                        evecRep->setElement(i, cgt::mat3::zero);
                         continue;
                     }
 
@@ -148,9 +148,9 @@ namespace campvis {
                     const Eigen::Matrix3f& vectors = solver.eigenvectors();
 
                     // kill NaN values
-                    if (tgt::isNaN(values(0)) || tgt::isNaN(values(1)) || tgt::isNaN(values(2))) {
-                        evalRep->setElement(i, tgt::vec3::zero);
-                        evecRep->setElement(i, tgt::mat3::zero);
+                    if (cgt::isNaN(values(0)) || cgt::isNaN(values(1)) || cgt::isNaN(values(2))) {
+                        evalRep->setElement(i, cgt::vec3::zero);
+                        evecRep->setElement(i, cgt::mat3::zero);
                         continue;
                     }
 
@@ -191,18 +191,18 @@ namespace campvis {
                         // If we encounter both positive and negative eigenvalues this must be due to severe noise
                         // (e.g. area outside brain) so it is reasonable to discard these voxels.
                         ++countDiscarded;
-                        evalRep->setElement(i, tgt::vec3::zero);
-                        evecRep->setElement(i, tgt::mat3::zero);
+                        evalRep->setElement(i, cgt::vec3::zero);
+                        evecRep->setElement(i, cgt::mat3::zero);
                         continue;
                     }
 
                     if (negative && evh == MASK) {
-                        evalRep->setElement(i, tgt::vec3::zero);
-                        evecRep->setElement(i, tgt::mat3::zero);
+                        evalRep->setElement(i, cgt::vec3::zero);
+                        evecRep->setElement(i, cgt::mat3::zero);
                     }
                     else {
-                        evalRep->setElement(i, tgt::vec3(values(high), values(mid), values(low)));
-                        evecRep->setElement(i, tgt::mat3(vectors(0, high), vectors(1, high), vectors(2, high),
+                        evalRep->setElement(i, cgt::vec3(values(high), values(mid), values(low)));
+                        evecRep->setElement(i, cgt::mat3(vectors(0, high), vectors(1, high), vectors(2, high),
                             vectors(0, mid),  vectors(1, mid),  vectors(2, mid),
                             vectors(0, low),  vectors(1, low),  vectors(2, low)));
 
@@ -255,10 +255,10 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
                     float ev = vals.x;
-                    if (ev == 0.0f || tgt::isNaN(ev))
+                    if (ev == 0.0f || cgt::isNaN(ev))
                         output->setElement(i, 0.0f);
                     else
                         output->setElement(i, ev);
@@ -271,10 +271,10 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
                     float ev = vals.y;
-                    if (ev == 0.0f || tgt::isNaN(ev))
+                    if (ev == 0.0f || cgt::isNaN(ev))
                         output->setElement(i, 0.0f);
                     else
                         output->setElement(i, ev);
@@ -287,10 +287,10 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
                     float ev = vals.z;
-                    if (ev == 0.0f || tgt::isNaN(ev))
+                    if (ev == 0.0f || cgt::isNaN(ev))
                         output->setElement(i, 0.0f);
                     else
                         output->setElement(i, ev);
@@ -316,9 +316,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = (vals.x * vals.y * vals.z) / pow((vals.x + vals.y + vals.z)/3.f, 3);
@@ -331,10 +331,10 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
                     const float root = sqrt(.5f);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = root * sqrt((vals.x-vals.y)*(vals.x-vals.y) + (vals.y-vals.z)*(vals.y-vals.z) + (vals.z-vals.x)*(vals.z-vals.x)) / sqrt(vals.x*vals.x + vals.y*vals.y + vals.z*vals.z);
@@ -347,10 +347,10 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
                     const float root = sqrt(.5f);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = root * sqrt((vals.x-vals.y)*(vals.x-vals.y) + (vals.y-vals.z)*(vals.y-vals.z) + (vals.z-vals.x)*(vals.z-vals.x)) / (vals.x + vals.y + vals.z);
@@ -363,9 +363,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = (vals.x + vals.y + vals.z) / 3;
@@ -378,9 +378,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = vals.x + vals.y + vals.z;
@@ -393,9 +393,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = vals.x;
@@ -408,9 +408,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = (vals.y + vals.z) / 2;
@@ -423,9 +423,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = (vals.x - vals.y) / (vals.x + vals.y + vals.z);
@@ -438,9 +438,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = 2.f*(vals.y - vals.z) / (vals.x + vals.y + vals.z);
@@ -453,9 +453,9 @@ namespace campvis {
             GenericImageRepresentationLocal<float, 1>* output = GenericImageRepresentationLocal<float, 1>::create(id, 0);
             tbb::parallel_for(tbb::blocked_range<size_t>(0, id->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    const tgt::vec3& vals = evalRep->getElement(i);
+                    const cgt::vec3& vals = evalRep->getElement(i);
 
-                    if (vals == tgt::vec3::zero || tgt::isNaN(vals))
+                    if (vals == cgt::vec3::zero || cgt::isNaN(vals))
                         output->getElement(i) = 0;
                     else
                         output->getElement(i) = (3.f*vals.z) / (vals.x + vals.y + vals.z);

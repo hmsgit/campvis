@@ -30,13 +30,13 @@
 namespace campvis {
     const std::string ImageRepresentationDisk::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationDisk";
 
-    ImageRepresentationDisk* ImageRepresentationDisk::create(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec3::zero */, bool multichannelSideBySide /*= false*/) {
+    ImageRepresentationDisk* ImageRepresentationDisk::create(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const cgt::svec3& stride /*= cgt::svec3::zero */, bool multichannelSideBySide /*= false*/) {
         ImageRepresentationDisk* toReturn = new ImageRepresentationDisk(parent, url, type, offset, endianness, stride, multichannelSideBySide);
         toReturn->addToParent();
         return toReturn;
     }
 
-    ImageRepresentationDisk::ImageRepresentationDisk(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const tgt::svec3& stride /*= tgt::svec2::zero */, bool multichannelSideBySide /*= false*/)
+    ImageRepresentationDisk::ImageRepresentationDisk(ImageData* parent, const std::string& url, WeaklyTypedPointer::BaseType type, size_t offset /*= 0*/, EndianHelper::Endianness endianness /*= EndianHelper::LITTLE_ENDIAN*/, const cgt::svec3& stride /*= cgt::svec2::zero */, bool multichannelSideBySide /*= false*/)
         : GenericAbstractImageRepresentation<ImageRepresentationDisk>(parent)
         , _url(url)
         , _offset(offset)
@@ -51,8 +51,8 @@ namespace campvis {
     }
 
     campvis::WeaklyTypedPointer ImageRepresentationDisk::getImageData() const {
-        const tgt::svec3& size = getSize();
-        size_t numElements = tgt::hmul(size);
+        const cgt::svec3& size = getSize();
+        size_t numElements = cgt::hmul(size);
         size_t numBytesPerElement = WeaklyTypedPointer::numBytes(_type, _parent->getNumChannels());
         size_t numBytes = numElements * numBytesPerElement;
 
@@ -71,8 +71,8 @@ namespace campvis {
             char* data = new char[numBytes];
 
             // handle stride:
-            tgt::svec3 canonicStride = getCanonicStride(size);
-            if (_stride == tgt::svec3::zero || _stride == canonicStride) {
+            cgt::svec3 canonicStride = getCanonicStride(size);
+            if (_stride == cgt::svec3::zero || _stride == canonicStride) {
                 // no stride is easy - we have just one chunk of data:
                 file.read(data, numBytes);
             }
@@ -151,7 +151,7 @@ namespace campvis {
                         }
 
                     default:
-                        tgtAssert(false, "Should not reach this!");
+                        cgtAssert(false, "Should not reach this!");
                         LERROR("Tried to swap endianess with unsupported number of bytes per element (" << numBytesPerElement << ")");
                         break;
                 }
@@ -182,8 +182,8 @@ namespace campvis {
 
     }
 
-    tgt::svec3 ImageRepresentationDisk::getCanonicStride(const tgt::svec3& size) const {
-        return tgt::svec3(0, size.x, size.x * size.y);
+    cgt::svec3 ImageRepresentationDisk::getCanonicStride(const cgt::svec3& size) const {
+        return cgt::svec3(0, size.x, size.x * size.y);
     }
 
     ImageRepresentationDisk* ImageRepresentationDisk::clone(ImageData* newParent) const {

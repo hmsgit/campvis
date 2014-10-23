@@ -34,7 +34,7 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -91,7 +91,7 @@ namespace campvis {
          */
         std::string generateGlslHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for EEP generation
+        cgt::Shader* _shader;                           ///< Shader for EEP generation
 
         static const std::string loggerCat_;
     };

@@ -298,8 +298,8 @@ namespace sigslot {
      * 
      * signal_manager can be considered as thread-safe.
      */
-    class SIGSLOT_API signal_manager : public tgt::Singleton<signal_manager>, public tgt::Runnable {
-        friend class tgt::Singleton<signal_manager>;    ///< CRTP
+    class SIGSLOT_API signal_manager : public cgt::Singleton<signal_manager>, public cgt::Runnable {
+        friend class cgt::Singleton<signal_manager>;    ///< CRTP
         friend class _signal_handle_base;               ///< so the custom new/delete operator can access the memory pool
 
     public:

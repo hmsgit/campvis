@@ -41,9 +41,9 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Output Geometry ID", "proxygeometry", DataNameProperty::WRITE)
-        , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-        , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-        , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_clipX("clipX", "X Axis Clip Coordinates", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(0))
+        , p_clipY("clipY", "Y Axis Clip Coordinates", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(0))
+        , p_clipZ("clipZ", "Z Axis Clip Coordinates", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(0))
     {
         addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_geometryID);
@@ -57,21 +57,21 @@ namespace campvis {
     }
 
     void ProxyGeometryGenerator::updateResult(DataContainer& data) {
-        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
+        cgtAssert(_locked == true, "Processor not locked, this should not happen!");
         ScopedTypedData<ImageData> img(data, p_sourceImageID.getValue());
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                tgt::Bounds volumeExtent = img->getWorldBounds(tgt::svec3(p_clipX.getValue().x, p_clipY.getValue().x, p_clipZ.getValue().x), tgt::svec3(p_clipX.getValue().y, p_clipY.getValue().y, p_clipZ.getValue().y));
-                tgt::vec3 numSlices = tgt::vec3(img->getSize());
+                cgt::Bounds volumeExtent = img->getWorldBounds(cgt::svec3(p_clipX.getValue().x, p_clipY.getValue().x, p_clipZ.getValue().x), cgt::svec3(p_clipX.getValue().y, p_clipY.getValue().y, p_clipZ.getValue().y));
+                cgt::vec3 numSlices = cgt::vec3(img->getSize());
 
 
-                tgt::vec3 texLLF(static_cast<float>(p_clipX.getValue().x), static_cast<float>(p_clipY.getValue().x), static_cast<float>(p_clipZ.getValue().x));
+                cgt::vec3 texLLF(static_cast<float>(p_clipX.getValue().x), static_cast<float>(p_clipY.getValue().x), static_cast<float>(p_clipZ.getValue().x));
                 texLLF /= numSlices;
-                tgt::vec3 texURB(static_cast<float>(p_clipX.getValue().y), static_cast<float>(p_clipY.getValue().y), static_cast<float>(p_clipZ.getValue().y));
+                cgt::vec3 texURB(static_cast<float>(p_clipX.getValue().y), static_cast<float>(p_clipY.getValue().y), static_cast<float>(p_clipZ.getValue().y));
                 texURB /= numSlices;
 
-                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, tgt::Bounds(texLLF, texURB));
+                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(texLLF, texURB));
                 data.addData(p_geometryID.getValue(), cube);
             }
             else {
@@ -87,13 +87,13 @@ namespace campvis {
         ScopedTypedData<ImageData> img(dataContainer, p_sourceImageID.getValue());
 
         if (img != 0) {
-            p_clipX.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().x), static_cast<int>(img->getSize().x)));
-            p_clipY.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().y), static_cast<int>(img->getSize().y)));
-            p_clipZ.setMaxValue(tgt::ivec2(static_cast<int>(img->getSize().z), static_cast<int>(img->getSize().z)));
+            p_clipX.setMaxValue(cgt::ivec2(static_cast<int>(img->getSize().x), static_cast<int>(img->getSize().x)));
+            p_clipY.setMaxValue(cgt::ivec2(static_cast<int>(img->getSize().y), static_cast<int>(img->getSize().y)));
+            p_clipZ.setMaxValue(cgt::ivec2(static_cast<int>(img->getSize().z), static_cast<int>(img->getSize().z)));
 
-            p_clipX.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().x)));
-            p_clipY.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().y)));
-            p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(img->getSize().z)));
+            p_clipX.setValue(cgt::ivec2(0, static_cast<int>(img->getSize().x)));
+            p_clipY.setValue(cgt::ivec2(0, static_cast<int>(img->getSize().y)));
+            p_clipZ.setValue(cgt::ivec2(0, static_cast<int>(img->getSize().z)));
         }
     }
 

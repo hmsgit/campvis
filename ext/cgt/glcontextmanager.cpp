@@ -3,9 +3,9 @@
 #include "cgt/assert.h"
 #include "cgt/logmanager.h"
 
-namespace tgt {
+namespace cgt {
 
-    std::string GlContextManager::loggerCat_ = "tgt.GlContextManager";
+    std::string GlContextManager::loggerCat_ = "cgt.GlContextManager";
     
     GlContextManager::GlContextManager() {
     }
@@ -19,8 +19,8 @@ namespace tgt {
 
     void GlContextManager::registerContextAndInitGlew(GLCanvas* context, const std::string& title) {
         tbb::concurrent_hash_map<GLCanvas*, ContextInfo>::accessor a;
-        tgtAssert(context != 0, "Given context must not be 0.");
-        tgtAssert(! _contextMap.find(a, context), "Tried to double register the same context.");
+        cgtAssert(context != 0, "Given context must not be 0.");
+        cgtAssert(! _contextMap.find(a, context), "Tried to double register the same context.");
 
         ContextInfo ci = { context, new std::mutex(), std::this_thread::get_id(), true, title };
         _contextMap.insert(std::make_pair(context, ci));
@@ -30,7 +30,7 @@ namespace tgt {
         GLenum err = glewInit();
         if (err != GLEW_OK) {
             // Problem: glewInit failed, something is seriously wrong.
-            tgtAssert(false, "glewInit failed");
+            cgtAssert(false, "glewInit failed");
             std::cerr << "glewInit failed, error: " << glewGetErrorString(err) << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -45,7 +45,7 @@ namespace tgt {
             delete a->second._glMutex;
         }
         else {
-            tgtAssert(false, "Could not find the context in map, this should not happen!");
+            cgtAssert(false, "Could not find the context in map, this should not happen!");
         }
 
         _contextMap.erase(a);
@@ -57,7 +57,7 @@ namespace tgt {
             return a->second._glMutex;
         }
         else {
-            tgtAssert(false, "Could not find the context in map, this should not happen!");
+            cgtAssert(false, "Could not find the context in map, this should not happen!");
             return nullptr;
         }
     }
@@ -70,14 +70,14 @@ namespace tgt {
                 if (lockGlMutex)
                     ci._glMutex->lock();
 
-                tgtAssert(a->second._acquired == false || a->second._threadId == std::this_thread::get_id(), "Tried to acquire an OpenGL thread that is already acquired by another thread!");
+                cgtAssert(a->second._acquired == false || a->second._threadId == std::this_thread::get_id(), "Tried to acquire an OpenGL thread that is already acquired by another thread!");
 
                 ci._acquired = true;
                 ci._threadId = std::this_thread::get_id();
                 context->acquireAsCurrentContext();
             }
             else {
-                tgtAssert(false, "Could not find the context in map, this should not happen!");
+                cgtAssert(false, "Could not find the context in map, this should not happen!");
             }
         }
 
@@ -89,8 +89,8 @@ namespace tgt {
         {
             tbb::concurrent_hash_map<GLCanvas*, ContextInfo>::const_accessor a;
             if (_contextMap.find(a, context)) {
-                tgtAssert(a->second._acquired == true, "Tried to release an unbound OpenGL context!");
-                tgtAssert(a->second._threadId == std::this_thread::get_id(), "Tried to release an OpenGL thread that was acquired by another thread!");
+                cgtAssert(a->second._acquired == true, "Tried to release an unbound OpenGL context!");
+                cgtAssert(a->second._threadId == std::this_thread::get_id(), "Tried to release an OpenGL thread that was acquired by another thread!");
     
                 ContextInfo& ci = const_cast<ContextInfo&>(a->second);
                 ci._acquired = false;
@@ -100,7 +100,7 @@ namespace tgt {
                     ci._glMutex->unlock();
             }
             else {
-                tgtAssert(false, "Could not find the context in map, this should not happen!");
+                cgtAssert(false, "Could not find the context in map, this should not happen!");
             }
         }
 

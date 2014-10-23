@@ -29,7 +29,7 @@
 
 #include "cgt/opengljobprocessor.h"
 
-namespace tgt {
+namespace cgt {
 
     // Implementation inspired by http://stackoverflow.com/questions/7194127/how-should-i-write-iso-c-standard-conformant-custom-new-and-delete-operators/7194149#7194149
     void* AbstractJob::operator new(std::size_t size) throw(std::bad_alloc) {

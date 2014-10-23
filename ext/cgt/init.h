@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,15 +22,15 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_INIT_H
-#define TGT_INIT_H
+#ifndef CGT_INIT_H
+#define CGT_INIT_H
 
 #include "cgt/types.h"
 #include "cgt/logmanager.h"
 
-namespace tgt {
+namespace cgt {
 
-class TGT_API InitFeature {
+class CGT_API InitFeature {
 public:
     enum Features {
         NONE            =      0,
@@ -51,17 +51,17 @@ public:
     };
 };
 
-/// init general purpose singletons of tgt
-TGT_API void init(InitFeature::Features featureset = InitFeature::ALL, LogLevel logLevel = Info);
-/// init GLEW and OpenGL-dependent singletons of tgt.
+/// init general purpose singletons of cgt
+CGT_API void init(InitFeature::Features featureset = InitFeature::ALL, LogLevel logLevel = Info);
+/// init GLEW and OpenGL-dependent singletons of cgt.
 /// to be called when OpenGL context already exists.
-TGT_API void initGL(InitFeature::Features featureset = InitFeature::ALL);
+CGT_API void initGL(InitFeature::Features featureset = InitFeature::ALL);
 
-/// deinit the singletons of tgt
-TGT_API void deinit();
-/// deinit the singletons of tgt
-TGT_API void deinitGL();
+/// deinit the singletons of cgt
+CGT_API void deinit();
+/// deinit the singletons of cgt
+CGT_API void deinitGL();
 
 };
 
-#endif //TGT_INIT_H
+#endif //CGT_INIT_H

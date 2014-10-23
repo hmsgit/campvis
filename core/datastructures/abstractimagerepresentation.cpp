@@ -31,7 +31,7 @@ namespace campvis {
     AbstractImageRepresentation::AbstractImageRepresentation(ImageData* parent)
         : _parent(parent)
     {
-        tgtAssert(parent != 0, "Parent ImageData must not be 0!");
+        cgtAssert(parent != 0, "Parent ImageData must not be 0!");
     }
 
     AbstractImageRepresentation::AbstractImageRepresentation(const AbstractImageRepresentation& rhs) {
@@ -49,7 +49,7 @@ namespace campvis {
         return _parent->getDimensionality();
     }
 
-    const tgt::svec3& AbstractImageRepresentation::getSize() const {
+    const cgt::svec3& AbstractImageRepresentation::getSize() const {
         return _parent->getSize();
     }
 

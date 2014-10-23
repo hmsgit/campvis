@@ -41,8 +41,8 @@ namespace campvis {
 
     MhdImageReader::MhdImageReader() 
         : AbstractImageReader()
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
     {
         this->_ext.push_back(".mhd");
         this->p_targetImageID.setValue("MhdImageReader.output");
@@ -65,14 +65,14 @@ namespace campvis {
             // init optional parameters with sane default values
             std::string url;
             size_t dimensionality;
-            tgt::svec3 size;
+            cgt::svec3 size;
             WeaklyTypedPointer::BaseType pt;
             size_t numChannels = 1;
             size_t offset = 0;
             EndianHelper::Endianness e = EndianHelper::IS_LITTLE_ENDIAN;
 
-            tgt::vec3 voxelSize(1.f);
-            tgt::vec3 imageOffset(0.f);
+            cgt::vec3 voxelSize(1.f);
+            cgt::vec3 imageOffset(0.f);
 
             // image type
             if (tfp.hasKey("ObjectType")) {
@@ -94,7 +94,7 @@ namespace campvis {
             // dimensionality and size
             dimensionality = tfp.getSizeT("NDims");
             if (dimensionality == 2)
-                size = tgt::svec3(tfp.getSvec2("DimSize"), 1);
+                size = cgt::svec3(tfp.getSvec2("DimSize"), 1);
             else if (dimensionality == 3)
                 size = tfp.getSvec3("DimSize");
             else {
@@ -137,25 +137,25 @@ namespace campvis {
                 if (dimensionality == 3)
                     voxelSize = tfp.getVec3("ElementSpacing");
                 else if (dimensionality == 2)
-                    voxelSize = tgt::vec3(tfp.getVec2("ElementSpacing"), 1.f);
+                    voxelSize = cgt::vec3(tfp.getVec2("ElementSpacing"), 1.f);
             }
             if (tfp.hasKey("Position")) {
                 if (dimensionality == 3)
                     imageOffset = tfp.getVec3("Position");
                 else if (dimensionality == 2)
-                    imageOffset = tgt::vec3(tfp.getVec2("Position"), 0.f);
+                    imageOffset = cgt::vec3(tfp.getVec2("Position"), 0.f);
             }
             if (tfp.hasKey("Offset")) {
                 if (dimensionality == 3)
                     imageOffset = tfp.getVec3("Offset");
                 else if (dimensionality == 2)
-                    imageOffset = tgt::vec3(tfp.getVec2("Offset"), 0.f);
+                    imageOffset = cgt::vec3(tfp.getVec2("Offset"), 0.f);
             }
             if (tfp.hasKey("VolumePosition")) {
                 if (dimensionality == 3)
                     imageOffset = tfp.getVec3("VolumePosition");
                 else if (dimensionality == 2)
-                    imageOffset = tgt::vec3(tfp.getVec2("VolumePosition"), 0.f);
+                    imageOffset = cgt::vec3(tfp.getVec2("VolumePosition"), 0.f);
             }
             if (tfp.hasKey("ElementNumberOfChannels")) {
                 numChannels = tfp.getSizeT("ElementNumberOfChannels");
@@ -166,9 +166,9 @@ namespace campvis {
             if (url == "LOCAL") {
                 url = p_url.getValue();
                 // find beginning of local data:
-                tgt::File* file = FileSys.open(p_url.getValue());
+                cgt::File* file = FileSys.open(p_url.getValue());
                 if (!file || !file->isOpen())
-                    throw tgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
+                    throw cgt::FileException("Could not open file " + p_url.getValue() + " for reading.", p_url.getValue());
 
                 while (!file->eof()) {
                     std::string line = StringUtils::trim(file->getLine());
@@ -184,7 +184,7 @@ namespace campvis {
                 return;
             }
             else {
-                url = tgt::FileSystem::cleanupPath(tgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
+                url = cgt::FileSystem::cleanupPath(cgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
             } 
 
 
@@ -195,7 +195,7 @@ namespace campvis {
             image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
             data.addData(p_targetImageID.getValue(), image);
         }
-        catch (tgt::Exception& e) {
+        catch (cgt::Exception& e) {
             LERROR("Error while parsing MHD header: " << e.what());
             return;
         }

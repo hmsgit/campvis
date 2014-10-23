@@ -61,8 +61,8 @@ protected:
         EXPECT_TRUE(_ushortRep != nullptr);
 
         // download texture
-        const tgt::Texture* tex = _glRep->getTexture();
-        const_cast<tgt::Texture*>(tex)->downloadTexture();
+        const cgt::Texture* tex = _glRep->getTexture();
+        const_cast<cgt::Texture*>(tex)->downloadTexture();
 
         // compare both representations voxel-wise
         for (size_t i = 0; i < _image->getNumElements(); ++i) {
@@ -113,7 +113,7 @@ protected:
 
 protected:
     ImageData* _image;
-    tgt::svec3 _size;
+    cgt::svec3 _size;
 
     const ImageRepresentationLocal* _localRep;
     const ImageRepresentationGL* _glRep;

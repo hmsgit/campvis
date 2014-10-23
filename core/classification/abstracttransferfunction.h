@@ -36,7 +36,7 @@
 
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
     class Texture;
     class TextureUnit;
@@ -66,7 +66,7 @@ namespace campvis {
          * \param   size            Size of the transfer function texture
          * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
          */
-        AbstractTransferFunction(const tgt::svec3& size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        AbstractTransferFunction(const cgt::svec3& size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
 
         /**
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
@@ -98,26 +98,26 @@ namespace campvis {
          * \param   transFuncUniform            Uniform name to store the TF sampler
          * \param   transFuncParamsUniform      Uniform name to store the TF parameters struct
          */
-        void bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& transFuncUniform = "_transferFunction", const std::string& transFuncParamsUniform = "_transferFunctionParams");
+        void bind(cgt::Shader* shader, const cgt::TextureUnit& texUnit, const std::string& transFuncUniform = "_transferFunction", const std::string& transFuncParamsUniform = "_transferFunctionParams");
         
         /**
          * Sets the intensity domain where the transfer function is mapped to during classification.
          * \param   newDomain   new intensity domain
          */
-        void setIntensityDomain(const tgt::vec2& newDomain);
+        void setIntensityDomain(const cgt::vec2& newDomain);
 
         /**
          * Returns the intensity domain where the transfer function is mapped to during classification.
          * \return _intensityDomain
          */
-        const tgt::vec2& getIntensityDomain() const;
+        const cgt::vec2& getIntensityDomain() const;
 
         /**
          * Gets the OpenGL lookup texture storing the TF.
          * \note    Calling thread must have a valid OpenGL context.
          * \return  _texture
          */
-        const tgt::Texture* getTexture();
+        const cgt::Texture* getTexture();
         
         /// Signal emitted when transfer function has changed.
         sigslot::signal0 s_changed;
@@ -136,9 +136,9 @@ namespace campvis {
          */
         virtual void createTexture() = 0;
 
-        tgt::svec3 _size;                   ///< Size of the transfer function texture
-        tgt::vec2 _intensityDomain;         ///< Intensity Domain where the transfer function is mapped to during classification
-        tgt::Texture* _texture;             ///< OpenGL lookup texture storing the TF
+        cgt::svec3 _size;                   ///< Size of the transfer function texture
+        cgt::vec2 _intensityDomain;         ///< Intensity Domain where the transfer function is mapped to during classification
+        cgt::Texture* _texture;             ///< OpenGL lookup texture storing the TF
         tbb::atomic<bool> _dirtyTexture;    ///< Flag whether the OpenGL texture has to be updated
 
         mutable tbb::mutex _localMutex;     ///< mutex protecting the local members

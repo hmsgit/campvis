@@ -64,11 +64,11 @@ namespace campvis {
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_renderMode("RenderMode", "Render Mode", renderOptions, 7)
         , p_coloringMode("ColoringMode", "ColoringMode", coloringOptions, 3)
-        , p_solidColor("SolidColor", "Solid Color", tgt::vec4(1.f, .5f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_solidColor("SolidColor", "Solid Color", cgt::vec4(1.f, .5f, 0.f, 1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , p_pointSize("PointSize", "Point Size", 3.f, .1f, 10.f)
         , p_lineWidth("LineWidth", "Line Width", 1.f, .1f, 10.f)
         , p_showWireframe("ShowWireframe", "Show Wireframe", true)
-        , p_wireframeColor("WireframeColor", "Wireframe Color", tgt::vec4(1.f, 1.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_wireframeColor("WireframeColor", "Wireframe Color", cgt::vec4(1.f, 1.f, 1.f, 1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , _pointShader(0)
         , _meshShader(0)
     {
@@ -136,20 +136,20 @@ namespace campvis {
             && _pointShader != 0 && _meshShader != 0)
             {
             // select correct shader
-            tgt::Shader* leShader = 0;
+            cgt::Shader* leShader = 0;
             if (p_renderMode.getOptionValue() == GL_POINTS || p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
                 leShader = _pointShader;
             else
                 leShader = _meshShader;
 
             // calculate viewport matrix for NDC -> viewport conversion
-            tgt::vec2 halfViewport = tgt::vec2(getEffectiveViewportSize()) / 2.f;
-            tgt::mat4 viewportMatrix = tgt::mat4::createTranslation(tgt::vec3(halfViewport, 0.f)) * tgt::mat4::createScale(tgt::vec3(halfViewport, 1.f));
+            cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
+            cgt::mat4 viewportMatrix = cgt::mat4::createTranslation(cgt::vec3(halfViewport, 0.f)) * cgt::mat4::createScale(cgt::vec3(halfViewport, 1.f));
 
             leShader->activate();
 
             // bind texture if needed
-            tgt::TextureUnit tut, narf, blub, textureUnit;
+            cgt::TextureUnit tut, narf, blub, textureUnit;
             tut.activate();
             if (texture != nullptr)
                 texture->bind(leShader, textureUnit, "_texture", "_textureParams");

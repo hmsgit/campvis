@@ -68,18 +68,18 @@ namespace campvis {
         if (cm && tc && plaque) {
             // prepare OpenGL
             _shader->activate();
-            tgt::TextureUnit ivusUnit, cmUnit, tcUnit, plaqueUnit;
+            cgt::TextureUnit ivusUnit, cmUnit, tcUnit, plaqueUnit;
             img->bind(_shader, ivusUnit, "_ivus", "_ivusParams");
             cm->bind(_shader, cmUnit, "_cm", "_cmParams");
             tc->bind(_shader, tcUnit, "_tc", "_tcParams");
             plaque->bind(_shader, plaqueUnit, "_plaque", "_plaqueParams");
 
             {
-                tgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
+                cgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
                 p_predicateHistogram.getPredicateHistogram()->setupRenderShader(_shader);
             }
             
-            tgt::mat4 identity = tgt::mat4::identity;
+            cgt::mat4 identity = cgt::mat4::identity;
 
             _shader->setUniform("_texCoordsMatrix", _texCoordMatrix);
             _shader->setUniform("_modelMatrix", identity);
@@ -102,7 +102,7 @@ namespace campvis {
             renderGeometry(dataContainer, img);
 
             _shader->deactivate();
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
 
             dataContainer.addData(p_targetImageID.getValue(), new RenderData(_fbo));
         }

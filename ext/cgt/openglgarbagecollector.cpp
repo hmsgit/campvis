@@ -32,7 +32,7 @@
 #include "cgt/assert.h"
 #include "cgt/logmanager.h"
 
-namespace tgt {
+namespace cgt {
     
     OpenGLGarbageCollector::OpenGLGarbageCollector() {
         _currentFrontindex = 0;

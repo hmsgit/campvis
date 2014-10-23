@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_GL_H
-#define TGT_GL_H
+#ifndef CGT_GL_H
+#define CGT_GL_H
 
 #ifdef __APPLE__
     #include <GL/glew.h>
@@ -38,20 +38,20 @@
 #include "cgt/gpucapabilities.h"
 #include "cgt/types.h"
 
-namespace tgt {
-    TGT_API GLenum _lGLError(int line, const char* file);
+namespace cgt {
+    CGT_API GLenum _lGLError(int line, const char* file);
 
-    TGT_API GLboolean getGlBool(GLenum param);;
+    CGT_API GLboolean getGlBool(GLenum param);;
 
-    TGT_API GLint getGlInt(GLenum param);;
+    CGT_API GLint getGlInt(GLenum param);;
 
-    TGT_API GLfloat getGlFloat(GLenum param);
-} // namespace tgt
+    CGT_API GLfloat getGlFloat(GLenum param);
+} // namespace cgt
 
-#ifdef TGT_DEBUG
-    #define LGL_ERROR tgt::_lGLError(__LINE__, __FILE__)
+#ifdef CGT_DEBUG
+    #define LGL_ERROR cgt::_lGLError(__LINE__, __FILE__)
 #else
     #define LGL_ERROR
 #endif
 
-#endif  //TGT_GL_H
+#endif  //CGT_GL_H

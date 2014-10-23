@@ -33,7 +33,7 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/stringproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -87,11 +87,11 @@ namespace campvis {
          * \param   filter          Filter to apply (should be _erosionFilter or _dilationFilter or compatible)
          * \return  An OpenGL texture with the filtered image
          */
-        tgt::Texture* applyFilter(const tgt::Texture* inputTexture, tgt::Shader* filter) const;
+        cgt::Texture* applyFilter(const cgt::Texture* inputTexture, cgt::Shader* filter) const;
 
 
-        tgt::Shader* _erosionFilter;        ///< Shader for performing erosion filter
-        tgt::Shader* _dilationFilter;       ///< Shader for performing dilation filter
+        cgt::Shader* _erosionFilter;        ///< Shader for performing erosion filter
+        cgt::Shader* _dilationFilter;       ///< Shader for performing dilation filter
 
         static const std::string loggerCat_;
     };

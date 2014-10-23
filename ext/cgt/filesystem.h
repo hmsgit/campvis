@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_FILESYSTEM_H
-#define TGT_FILESYSTEM_H
+#ifndef CGT_FILESYSTEM_H
+#define CGT_FILESYSTEM_H
 
 #include "cgt/logmanager.h"
 #include "cgt/singleton.h"
@@ -36,14 +36,14 @@
 #include <fstream>
 #include <stdio.h>
 
-namespace tgt {
+namespace cgt {
 
 class ZipArchive;
 
 /**
  * Base class for input files.
  */
-class TGT_API File {
+class CGT_API File {
 public:
     /**
      * Offset identifiers for seek(). Used exactly like
@@ -103,7 +103,7 @@ protected:
 /**
  * A file from the regular filesystem.
  */
-class TGT_API RegularFile : public File {
+class CGT_API RegularFile : public File {
 public:
     /// Open filename
     RegularFile(const std::string& filename);
@@ -130,7 +130,7 @@ protected:
 /**
  * A virtual file, read from a chunk of memory
  */
-class TGT_API MemoryFile : public File {
+class CGT_API MemoryFile : public File {
 public:
     /// Create memoryfile from data with given size and call it filename.
     /// If deleteData is true the memory file will delete the data upon destruction.
@@ -159,7 +159,7 @@ protected:
 /**
  * A virtual file, part of a tar archive.
  */
-class TGT_API TarFile : public File {
+class CGT_API TarFile : public File {
 public:
     /// Open the file at offset with size in the archive tarfilename and call it filename
     TarFile(const std::string& filename, const std::string& tarfilename, size_t offset, size_t size);
@@ -189,7 +189,7 @@ protected:
 /**
  * A FileFactory plugs into the virtual FS and creates File objects
  */
-class TGT_API FileFactory {
+class CGT_API FileFactory {
 public:
     virtual ~FileFactory() {}
     /// Open the file filename from this factory
@@ -202,7 +202,7 @@ public:
  * Creates instances of MemoryFile.
  * This factory always provides only one file.
  */
-class TGT_API MemoryFileFactory : public FileFactory {
+class CGT_API MemoryFileFactory : public FileFactory {
 public:
     /// Create factory which provides a file with name filename from the data in memory at data with size size
     MemoryFileFactory(const std::string& filename, char* data, size_t size);
@@ -220,7 +220,7 @@ protected:
 /**
  * Reads content of a tar archive and creates TarFile objects for all files in it.
  */
-class TGT_API TarFileFactory : public FileFactory {
+class CGT_API TarFileFactory : public FileFactory {
 public:
     struct ArchivedFile {
         size_t size_;
@@ -249,13 +249,13 @@ protected:
 
 class FileSystem;
 #ifdef DLL_TEMPLATE_INST
-template class TGT_API Singleton<FileSystem>;
+template class CGT_API Singleton<FileSystem>;
 #endif
 
 /**
  * Provides transparent access to the filesystem overlayed with a virtual filesystem.
  */
-class TGT_API FileSystem : public Singleton<FileSystem> {
+class CGT_API FileSystem : public Singleton<FileSystem> {
 public:
     FileSystem();
     ~FileSystem();
@@ -489,10 +489,10 @@ public:
      * @param   srcFile     Path to the file to be copied.
      * @param   destFile    Path to the destination file. Its directory must exist.
      *
-     * @throw tgt::Exception if file copying failed.
+     * @throw cgt::Exception if file copying failed.
      */
     static void copyFile(const std::string& srcFile, const std::string& destFile)
-        throw (tgt::Exception);
+        throw (cgt::Exception);
 
 protected:
     std::map<std::string, FileFactory*> virtualFS_;
@@ -504,6 +504,6 @@ protected:
 
 } // namespace
 
-#define FileSys tgt::Singleton<tgt::FileSystem>::getRef()
+#define FileSys cgt::Singleton<cgt::FileSystem>::getRef()
 
-#endif //TGT_FILESYSTEM_H
+#endif //CGT_FILESYSTEM_H

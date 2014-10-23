@@ -74,7 +74,7 @@ protected:
     AbstractProcessorTest() 
         : _dataContainer("testContainer")
     {
-        this->_dataContainer.addData("ImageData", new ImageData(2, tgt::svec3(1,2,1), 4));
+        this->_dataContainer.addData("ImageData", new ImageData(2, cgt::svec3(1,2,1), 4));
     }
 
     ~AbstractProcessorTest() {

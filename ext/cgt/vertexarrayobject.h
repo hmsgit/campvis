@@ -9,7 +9,7 @@
 #include <vector>
 #include <map>
 
-namespace tgt {
+namespace cgt {
     class BufferObject;
     class Shader;
     class VertexArrayObject;
@@ -21,9 +21,9 @@ namespace tgt {
      * \note    Because all member methods require a valid locked OpenGL context, we have 
      *          implicit thread-safety.
      */
-    class TGT_API VertexArrayObject {
+    class CGT_API VertexArrayObject {
     public:
-        VertexArrayObject(bool autoBind = true) throw (tgt::Exception);
+        VertexArrayObject(bool autoBind = true) throw (cgt::Exception);
 
         /**
          * Destructor, deletes the whole VAO.

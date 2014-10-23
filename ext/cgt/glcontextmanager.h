@@ -13,13 +13,13 @@
 #include <set>
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class GLCanvas;
 
     /**
      * Manages multiple shared OpenGL contexts and offers methods to ensure that only one context is active at a time.
      */
-    class TGT_API GlContextManager : public Singleton<GlContextManager> {
+    class CGT_API GlContextManager : public Singleton<GlContextManager> {
     public:
         /**
          * Creates a new QtGLContext for the OpenGL context of \a canvas.
@@ -96,7 +96,7 @@ namespace tgt {
     /**
      * Scoped lockAndAcquire for a GLContext, that automatically unlocks the context on destruction.
      */
-    class TGT_API GLContextScopedLock {
+    class CGT_API GLContextScopedLock {
     public:
         GLContextScopedLock(GLCanvas* context)
             : _context(context)
@@ -113,9 +113,9 @@ namespace tgt {
         GLCanvas* _context;
     };
 
-} // namespace tgt
+} // namespace cgt
 
-#define GLCtxtMgr tgt::Singleton<tgt::GlContextManager>::getRef()
+#define GLCtxtMgr cgt::Singleton<cgt::GlContextManager>::getRef()
 
 
 #endif // GLCONTEXTMANAGER_H__

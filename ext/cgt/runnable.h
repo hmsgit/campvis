@@ -30,14 +30,14 @@
 #include <ext/threading.h>
 #include <tbb/atomic.h>
 
-namespace tgt {
+namespace cgt {
     /**
      * Abstract base class for objects that shall run in a separate thread.
      * Runnable object manage their own thread, which is created when calling start(). The new Thread starts
      * in the run() method which has to be overwritten in subclasses. Calling stop() sets _stopExecution to true
      * and waits for the thread to finish. Hence, you should test for _stopExecution in your run() method.
      */
-    class TGT_API Runnable {
+    class CGT_API Runnable {
     public:
         /**
          * Creates a new Runnable object

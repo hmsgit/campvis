@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_MANAGER_H
-#define TGT_MANAGER_H
+#ifndef CGT_MANAGER_H
+#define CGT_MANAGER_H
 
 #include <string>
 #include <map>
@@ -36,7 +36,7 @@
 #include "cgt/filesystem.h"
 #include "cgt/logmanager.h"
 
-namespace tgt {
+namespace cgt {
 
 template <class T>
 class ResourceManager {
@@ -85,7 +85,7 @@ protected:
     void reg(T *ptr, const std::string& filename);
     void increaseUsage(const std::string& filename);
 
-    // tgt logging category
+    // cgt logging category
     static const std::string loggerCat_;
 
     // getter - setter
@@ -94,9 +94,9 @@ protected:
 };
 
 template <class T>
-const std::string ResourceManager<T>::loggerCat_("tgt.Manager");
+const std::string ResourceManager<T>::loggerCat_("cgt.Manager");
 
-//#ifdef TGT_BUILD_DLL
+//#ifdef CGT_BUILD_DLL
 
 template <class T>
 T* ResourceManager<T>::get(const std::string& filename) {
@@ -127,7 +127,7 @@ void ResourceManager<T>::reg(T* ptr, const std::string& filename) {
 
 template <class T>
 void ResourceManager<T>::increaseUsage(const std::string& filename) {
-    tgtAssert(cacheResources_, "increaseUsage should not be called in non-caching mode!");
+    cgtAssert(cacheResources_, "increaseUsage should not be called in non-caching mode!");
     resourcesByFilename_[filename]->usedBy_++;
 }
 
@@ -140,7 +140,7 @@ ResourceManager<T>::ResourceManager(bool cacheResources) {
 template <class T>
 ResourceManager<T>::~ResourceManager() {
     while (!resourcesByFilename_.empty()) {
-#ifdef TGT_DEBUG
+#ifdef CGT_DEBUG
         LWARNING("Un-disposed Resource: " << (*resourcesByFilename_.begin()).second->filename_
                  << " in use by " << (*resourcesByFilename_.begin()).second->usedBy_);
 #endif
@@ -237,6 +237,6 @@ std::vector<std::string> ResourceManager<T>::getFilenames() {
 
 //#endif
 
-} // namespace tgt
+} // namespace cgt
 
-#endif //TGT_MANAGER_H
+#endif //CGT_MANAGER_H

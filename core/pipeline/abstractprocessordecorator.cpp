@@ -32,11 +32,11 @@ namespace campvis {
     void AbstractProcessorDecorator::addProperties(AbstractProcessor* propCollection) {
     }
 
-    void AbstractProcessorDecorator::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
+    void AbstractProcessorDecorator::renderProlog(const DataContainer& dataContainer, cgt::Shader* shader) {
 
     }
 
-    void AbstractProcessorDecorator::renderEpilog(tgt::Shader* shader) {
+    void AbstractProcessorDecorator::renderEpilog(cgt::Shader* shader) {
 
     }
 
@@ -53,7 +53,7 @@ namespace campvis {
     }
 
     void HasProcessorDecorators::addDecorator(AbstractProcessorDecorator* decorator) {
-        tgtAssert(decorator != 0, "Decorator must not be 0.");
+        cgtAssert(decorator != 0, "Decorator must not be 0.");
         _decorators.push_back(decorator);
     }
 
@@ -62,12 +62,12 @@ namespace campvis {
             (*it)->addProperties(propCollection);
     }
 
-    void HasProcessorDecorators::decorateRenderProlog(const DataContainer& dataContainer, tgt::Shader* shader) const {
+    void HasProcessorDecorators::decorateRenderProlog(const DataContainer& dataContainer, cgt::Shader* shader) const {
         for (std::vector<AbstractProcessorDecorator*>::const_iterator it = _decorators.begin(); it != _decorators.end(); ++it)
             (*it)->renderProlog(dataContainer, shader);
     }
 
-    void HasProcessorDecorators::decorateRenderEpilog(tgt::Shader* shader) const {
+    void HasProcessorDecorators::decorateRenderEpilog(cgt::Shader* shader) const {
         for (std::vector<AbstractProcessorDecorator*>::const_iterator it = _decorators.begin(); it != _decorators.end(); ++it)
             (*it)->renderEpilog(shader);
     }

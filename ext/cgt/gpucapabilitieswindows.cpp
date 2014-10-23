@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -38,18 +38,18 @@
 const std::string DRIVER_DLL_NVIDIA = "nvoglnt.dll";
 const std::string DRIVER_DLL_ATI = "atioglxx.dll";
 
-namespace tgt {
+namespace cgt {
 
 GpuCapabilitiesWindows::GpuCapabilitiesWindows()
-    : loggerCat_("tgt.GpuCapabilitiesWindows")
+    : loggerCat_("cgt.GpuCapabilitiesWindows")
     , GpuCapabilities()
     , videoRamSize_(-1)
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
     , pIWbemLocator_(0)
     , pWbemServices_(0)
 #endif
 {
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
     if (!WMIinit()) {
         LWARNING("WMI initialization failed");
     }
@@ -68,7 +68,7 @@ void GpuCapabilitiesWindows::logCapabilities(bool extensionsString, bool osStrin
 }
 
 GpuCapabilitiesWindows::~GpuCapabilitiesWindows() {
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
     if (isWMIinited())
         WMIdeinit();
 #endif
@@ -130,7 +130,7 @@ GpuCapabilitiesWindows::FileVersion GpuCapabilitiesWindows::getDriverVersion() {
         }
     }
 
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
     // unknown graphics board vendor or reading NVIDIA/Ati driver version failed:
     // get driver version from WMI
     LDEBUG("Reading driver version from WMI ...");
@@ -260,7 +260,7 @@ int GpuCapabilitiesWindows::getVideoRamSize() {
     if (videoRamSize_ != -1)
         return videoRamSize_;
 
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
     LDEBUG("Reading video ram size using WMI...");
 
     if (isWMIinited()) {
@@ -333,7 +333,7 @@ std::string GpuCapabilitiesWindows::getDriverDate() {
         }
     }
 
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
 
     // unknown vendor or reading driver date from vendor dll failed:
     // read driver date from WMI
@@ -378,7 +378,7 @@ std::string GpuCapabilitiesWindows::getDriverDate() {
 }
 
 
-#ifdef TGT_WITH_WMI
+#ifdef CGT_WITH_WMI
 VARIANT* GpuCapabilitiesWindows::WMIquery(std::string wmiClass, std::string attribute) {
 
     // Code based upon:  "Example: Getting WMI Data from the Local Computer"
@@ -655,7 +655,7 @@ std::string GpuCapabilitiesWindows::wstr2str(const std::wstring& wstr) {
 
 }
 
-#endif // TGT_WITH_WMI
+#endif // CGT_WITH_WMI
 
 GpuCapabilitiesWindows::FileVersion GpuCapabilitiesWindows::getFileVersion(std::string filename) {
     LDEBUG("Reading file version of file '" << filename << "' ...");
@@ -897,6 +897,6 @@ bool GpuCapabilitiesWindows::createVersionStringFromDigits(FileVersion &fileVers
     return true;
 }
 
-} // namespace tgt
+} // namespace cgt
 
 #endif //WIN32

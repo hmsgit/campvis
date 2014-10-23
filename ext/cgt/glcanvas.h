@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_GLCANVAS_H
-#define TGT_GLCANVAS_H
+#ifndef CGT_GLCANVAS_H
+#define CGT_GLCANVAS_H
 
 #include "cgt/tgt_gl.h"
 
@@ -35,19 +35,19 @@
 #include "cgt/event/keyevent.h"
 #include "cgt/event/eventhandler.h"
 
-namespace tgt {
+namespace cgt {
 
 class Camera;
 class Painter;
 
 /**
- * This class is the base class for all tgt-Canvases. It provides the functionality of using
+ * This class is the base class for all cgt-Canvases. It provides the functionality of using
  * Painter-objects to actually render things to the canvas. The methods one has to implement in a
- * subclass are, most importantly, those taking care of turning incoming events into tgt-events.
- * This makes sure that all kinds of APIs can be used with tgt without specializing
+ * subclass are, most importantly, those taking care of turning incoming events into cgt-events.
+ * This makes sure that all kinds of APIs can be used with cgt without specializing
  * a lot of code.
  */
-class TGT_API GLCanvas {
+class CGT_API GLCanvas {
 public:
     enum {
         DEFAULT_WINDOW_WIDTH  = 512,
@@ -224,4 +224,4 @@ protected:
 
 }
 
-#endif // TGT_GLCANVAS_H
+#endif // CGT_GLCANVAS_H

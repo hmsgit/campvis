@@ -64,7 +64,7 @@ namespace campvis {
          * Creates a new closed Interval<T> with the given vec2 as values
          * \param   vec     Vector with interval borders
          */
-        explicit Interval(const tgt::Vector2<T>& vec);
+        explicit Interval(const cgt::Vector2<T>& vec);
 
         /**
          * Destructor
@@ -251,7 +251,7 @@ namespace campvis {
     {}
 
     template<typename T>
-    Interval<T>::Interval(const tgt::Vector2<T>& vec)
+    Interval<T>::Interval(const cgt::Vector2<T>& vec)
         : _left(vec.x)
         , _right(vec.y)
         , _leftOpen(false)
@@ -301,7 +301,7 @@ namespace campvis {
 
     template<typename T>
     bool Interval<T>::contains(const T& value) const {
-        if (tgt::isNaN(value))
+        if (cgt::isNaN(value))
             return false;
         if ((value < _left) || (_leftOpen && value == _left))
             return false;
@@ -402,11 +402,11 @@ namespace campvis {
             return;
         }
 
-        if (tgt::isNaN(_left) || _left == std::numeric_limits<T>::infinity() || _left == -std::numeric_limits<T>::max()) {
+        if (cgt::isNaN(_left) || _left == std::numeric_limits<T>::infinity() || _left == -std::numeric_limits<T>::max()) {
             _left = rhs._left;
             _leftOpen = rhs._leftOpen;
         }
-        if (tgt::isNaN(_right) || _right == std::numeric_limits<T>::infinity() || _right == std::numeric_limits<T>::max()) {
+        if (cgt::isNaN(_right) || _right == std::numeric_limits<T>::infinity() || _right == std::numeric_limits<T>::max()) {
             _right = rhs._right;
             _rightOpen = rhs._rightOpen;
         }

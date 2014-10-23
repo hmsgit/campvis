@@ -32,24 +32,24 @@ namespace campvis {
     const std::string MWheelToNumericPropertyEventListener::loggerCat_ = "CAMPVis.core.eventhandler.MWheelToNumericPropertyEventListener";
 
     MWheelToNumericPropertyEventListener::MWheelToNumericPropertyEventListener(INumericProperty* property)
-        : tgt::EventListener()
+        : cgt::EventListener()
         , _prop(property)
     {
-        tgtAssert(_prop != 0, "Assigned property must not be 0.");
-        setEventTypes(tgt::Event::WHEELEVENT);
+        cgtAssert(_prop != 0, "Assigned property must not be 0.");
+        setEventTypes(cgt::Event::WHEELEVENT);
     }
 
     MWheelToNumericPropertyEventListener::~MWheelToNumericPropertyEventListener() {
 
     }
     
-    void MWheelToNumericPropertyEventListener::wheelEvent(tgt::MouseEvent* e) {
+    void MWheelToNumericPropertyEventListener::wheelEvent(cgt::MouseEvent* e) {
         switch (e->button()) {
-            case tgt::MouseEvent::MOUSE_WHEEL_UP:
+            case cgt::MouseEvent::MOUSE_WHEEL_UP:
                 _prop->increment();
                 e->ignore();
                 break;
-            case tgt::MouseEvent::MOUSE_WHEEL_DOWN:
+            case cgt::MouseEvent::MOUSE_WHEEL_DOWN:
                 _prop->decrement();
                 e->ignore();
                 break;

@@ -33,7 +33,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -48,7 +48,7 @@ namespace campvis {
      * 
      * The single thing to be implemented by subclasses is the way the actual image is rendered.
      */
-    class CAMPVIS_CORE_API SliceRenderProcessor : public VisualizationProcessor, public tgt::EventListener {
+    class CAMPVIS_CORE_API SliceRenderProcessor : public VisualizationProcessor, public cgt::EventListener {
     public:
         /// Slice Orientation to render
         enum SliceOrientation {
@@ -77,11 +77,11 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
         /// Signal emitted when a scribble was painted, parameter gives the position in image coordinates.
-        sigslot::signal1<tgt::vec3> s_scribblePainted;
+        sigslot::signal1<cgt::vec3> s_scribblePainted;
 
         DataNameProperty p_sourceImageID;                   ///< image ID for input image
         DataNameProperty p_geometryID;                      ///< ID for input geometry
@@ -145,7 +145,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader();
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         DataHandle _currentImage;                       ///< cached DataHandle to shown image (needed for scribbles)
         bool _inScribbleMode;                           ///< Flag whether processor is in scribble mode (i.e. mouse is pressed)
@@ -154,10 +154,10 @@ namespace campvis {
         const std::string _customGlslVersion;           ///< Custom GLSL version to pass to shader
 
 
-        tgt::mat4 _texCoordMatrix;                      ///< Transformation matrix applied to texture coordinates
-        tgt::mat4 _geometryModelMatrix;                 ///< Transformation to apply to geometry to transform into slice space
-        tgt::mat4 _geometryProjectionMatrix;            ///< Projection matrix to apply to geometry rendering
-        tgt::mat4 _viewMatrix;                          ///< View matrix applied to rendering (aspect ratio, zoom, shift)
+        cgt::mat4 _texCoordMatrix;                      ///< Transformation matrix applied to texture coordinates
+        cgt::mat4 _geometryModelMatrix;                 ///< Transformation to apply to geometry to transform into slice space
+        cgt::mat4 _geometryProjectionMatrix;            ///< Projection matrix to apply to geometry rendering
+        cgt::mat4 _viewMatrix;                          ///< View matrix applied to rendering (aspect ratio, zoom, shift)
 
         static const std::string loggerCat_;
     };

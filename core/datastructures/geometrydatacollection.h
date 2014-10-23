@@ -28,7 +28,7 @@
 #include "core/datastructures/geometrydata.h"
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class BufferObject;
     class GLCanvas;
 }
@@ -101,7 +101,7 @@ namespace campvis {
          * Returns the geometry extent in world coordinates.
          * \return  The geometry extent in world coordinates.
          */
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
 
         /**
          * Returns whether all geometries of the collection have texture coordinates.
@@ -119,7 +119,7 @@ namespace campvis {
          * Applies the transformation matrix \a t to each vertex of this geometry.
          * \param   t   Transformation matrix to apply
          */
-        virtual void applyTransformationToVertices(const tgt::mat4& t);
+        virtual void applyTransformationToVertices(const cgt::mat4& t);
 
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;

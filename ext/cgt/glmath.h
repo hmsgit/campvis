@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_GLMATH_H
-#define TGT_GLMATH_H
+#ifndef CGT_GLMATH_H
+#define CGT_GLMATH_H
 
 #include "cgt/tgt_gl.h"
 
@@ -34,14 +34,14 @@
     Files like vector.h should not contain any OpenGL dependencies.
 */
 
-namespace tgt {
+namespace cgt {
 
 /**
  * Transposes m and loads this matrix to the current matrix stack.
  * Thus a conversion from C++ to OpenGL has been accomplished.
  */
 inline void loadMatrix(const mat4& m) {
-#if defined(__APPLE__) || defined(TGT_WORKAROUND_GLLOADTRANSPOSEMATRIXF)
+#if defined(__APPLE__) || defined(CGT_WORKAROUND_GLLOADTRANSPOSEMATRIXF)
     glLoadMatrixf(transpose(m).elem);
 #else
     //glLoadTransposeMatrixf(m.elem);
@@ -441,6 +441,6 @@ inline void scale(const Vector2<double>& v) {
     glScaled(v.x, v.y, 1.0);
 }
 
-} // namespace tgt
+} // namespace cgt
 
-#endif //TGT_GLMATH_H
+#endif //CGT_GLMATH_H

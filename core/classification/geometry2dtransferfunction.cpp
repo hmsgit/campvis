@@ -36,8 +36,8 @@ namespace campvis {
 
     const std::string Geometry2DTransferFunction::loggerCat_ = "CAMPVis.core.classification.Geometry2DTransferFunction";
 
-    Geometry2DTransferFunction::Geometry2DTransferFunction(const tgt::svec2& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
-        : GenericGeometryTransferFunction<TFGeometry2D>(tgt::svec3(size, 1), intensityDomain)
+    Geometry2DTransferFunction::Geometry2DTransferFunction(const cgt::svec2& size, const cgt::vec2& intensityDomain /*= cgt::vec2(0.f, 1.f)*/) 
+        : GenericGeometryTransferFunction<TFGeometry2D>(cgt::svec3(size, 1), intensityDomain)
     {
     }
 

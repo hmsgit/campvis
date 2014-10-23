@@ -84,7 +84,7 @@
     }
 
 #define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MD_filterBody) \
-    tgtAssert(MA_WTP._numChannels == 1, "ItkWatershedFilter only supports single-channel images.") \
+    cgtAssert(MA_WTP._numChannels == 1, "ItkWatershedFilter only supports single-channel images.") \
     PERFORM_ITK_FILTER_WATERSHED(MA_baseType, MA_returnType, 1, MA_dimensionality, MD_filterBody)
 
 #define DISPATCH_ITK_FILTER_D(MA_WTP, MA_dimensionality, MD_filterBody) \
@@ -111,7 +111,7 @@
             DISPATCH_ITK_FILTER_BRD(MA_WTP, float, float, MA_dimensionality, MD_filterBody) \
             break; \
         default: \
-            tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+            cgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
 
@@ -127,7 +127,7 @@
         switch (MA_localRep->getDimensionality()) { \
             case 2: DISPATCH_ITK_FILTER_D(wtp, 2, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_D(wtp, 3, MD_filterBody) break; \
-            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+            default: cgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 

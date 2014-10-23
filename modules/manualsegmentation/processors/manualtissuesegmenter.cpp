@@ -141,10 +141,10 @@ namespace campvis {
         if (img != 0) {
             if (img->getDimensionality() == 3) {
                 _currentImage = img.getDataHandle();
-                tgt::vec3 imgSize(img->getSize());
+                cgt::vec3 imgSize(img->getSize());
 
                 if (getInvalidationLevel() & FIRST_FREE_TO_USE_INVALIDATION_LEVEL) {
-                    const tgt::svec3& size = img->getSize();
+                    const cgt::svec3& size = img->getSize();
                     ImageData* labelImage = new ImageData(3, size, 1);
                     GenericImageRepresentationLocal<uint8_t, 1>* rep = GenericImageRepresentationLocal<uint8_t, 1>::create(labelImage, 0);
                     labelImage->setMappingInformation(img->getParent()->getMappingInformation());
@@ -154,17 +154,17 @@ namespace campvis {
                             size_t yStart = 0;
 
                             for (size_t layer = 0; layer < _segmentation.getNumLayers(); ++layer) {
-                                size_t yEnd = static_cast<size_t>(tgt::clamp(_segmentation.getLayer(layer)._frames[z]._points[x].y, 0.f, static_cast<float>(size.y)));
+                                size_t yEnd = static_cast<size_t>(cgt::clamp(_segmentation.getLayer(layer)._frames[z]._points[x].y, 0.f, static_cast<float>(size.y)));
 
                                 for (size_t y = yStart; y < yEnd; ++y) {
-                                    rep->setElement(tgt::svec3(x, y, z), 1 << layer);
+                                    rep->setElement(cgt::svec3(x, y, z), 1 << layer);
                                 }
 
                                 yStart = yEnd;
                             }
 
                             for (size_t y = yStart; y < size.y; ++y) {
-                                rep->setElement(tgt::svec3(x, y, z), 1 << _segmentation.getNumLayers());
+                                rep->setElement(cgt::svec3(x, y, z), 1 << _segmentation.getNumLayers());
                             }
                         }
                     }
@@ -172,15 +172,15 @@ namespace campvis {
                     // write vessel
                     if (_segmentation._centerlines.size() >= size.z) {
                         for (size_t z = 0; z < size.z; ++z) {
-                            tgt::vec2 centerpoint = _segmentation._centerlines[z].xy();
-                            tgt::vec2 radius = _segmentation._centerlines[z].zw();
+                            cgt::vec2 centerpoint = _segmentation._centerlines[z].xy();
+                            cgt::vec2 radius = _segmentation._centerlines[z].zw();
 
-                            tgt::vec2 start = tgt::clamp(centerpoint - radius, tgt::vec2(0.f), tgt::vec2(size.xy()));
-                            tgt::vec2 end = tgt::clamp(centerpoint + radius, tgt::vec2(0.f), tgt::vec2(size.xy()));
+                            cgt::vec2 start = cgt::clamp(centerpoint - radius, cgt::vec2(0.f), cgt::vec2(size.xy()));
+                            cgt::vec2 end = cgt::clamp(centerpoint + radius, cgt::vec2(0.f), cgt::vec2(size.xy()));
 
                             for (size_t x = start.x; x < end.x; ++x) {
                                 for (size_t y = start.y; y < end.y; ++y) {
-                                    rep->getElement(tgt::svec3(x, y, z)) += 1 << (_segmentation.getNumLayers() + 1);
+                                    rep->getElement(cgt::svec3(x, y, z)) += 1 << (_segmentation.getNumLayers() + 1);
                                 }
                             }                            
                         }
@@ -193,7 +193,7 @@ namespace campvis {
                 // prepare OpenGL
                 _shader->activate();
 
-                tgt::TextureUnit inputUnit, tfUnit;
+                cgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
                 float zTexCoord = static_cast<float>(p_frameNumber.getValue())/static_cast<float>(imgSize.z) + .5f/static_cast<float>(imgSize.z);
@@ -208,9 +208,9 @@ namespace campvis {
                 QuadRdr.renderQuad();
 
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
 
-                tgt::ivec2 renderTargetSize = getEffectiveViewportSize();
+                cgt::ivec2 renderTargetSize = getEffectiveViewportSize();
 
                 glPushAttrib(GL_ALL_ATTRIB_BITS);
                 if (p_showSamples.getValue()) {
@@ -230,7 +230,7 @@ namespace campvis {
                         const TissueSegmentation::Layer& l  = _segmentation.getLayer(p_activeLayer.getValue());
                         if (l._frames.size() > p_frameNumber.getValue()) {
                             for (size_t i = 0; i < l._frames[p_frameNumber.getValue()]._points.size(); ++i) {
-                                const tgt::vec2& pt = l._frames[p_frameNumber.getValue()]._points[i];
+                                const cgt::vec2& pt = l._frames[p_frameNumber.getValue()]._points[i];
                                 glVertex2fv(pt.elem);
                             }
                         }
@@ -240,8 +240,8 @@ namespace campvis {
                     {
                         if (_segmentation._centerlines.size() >= p_frameNumber.getValue()) {
                             glColor4f(1.f, .5f, 0.f, 1.f);
-                            tgt::vec2 llf = (_segmentation._centerlines[p_frameNumber.getValue()].xy() - _segmentation._centerlines[p_frameNumber.getValue()].zw());
-                            tgt::vec2 urb = (_segmentation._centerlines[p_frameNumber.getValue()].xy() + _segmentation._centerlines[p_frameNumber.getValue()].zw());
+                            cgt::vec2 llf = (_segmentation._centerlines[p_frameNumber.getValue()].xy() - _segmentation._centerlines[p_frameNumber.getValue()].zw());
+                            cgt::vec2 urb = (_segmentation._centerlines[p_frameNumber.getValue()].xy() + _segmentation._centerlines[p_frameNumber.getValue()].zw());
 
                             glBegin(GL_LINE_LOOP);
                                 glVertex2f(llf.x, llf.y);
@@ -274,8 +274,8 @@ namespace campvis {
                             glBegin(GL_LINE_STRIP);
                             float stepsize = 1.f / it->second.size();
                             for (size_t i = 0; i < it->second.size(); ++i) {
-                                tgt::vec2 tmp(stepsize*i, it->second[i]);
-                                tmp *= tgt::vec2(renderTargetSize);
+                                cgt::vec2 tmp(stepsize*i, it->second[i]);
+                                tmp *= cgt::vec2(renderTargetSize);
                                 glVertex2fv(tmp.elem);
                             }
                             glEnd();
@@ -300,7 +300,7 @@ namespace campvis {
                             glColor4f(1.f, 1.f, 1.f, .5f);
                             glBegin(GL_POINTS);
                             for (size_t i = 0; i < it->second.size(); ++i) {
-                                tgt::vec2 tmp = it->second[i]._pixel * tgt::vec2(renderTargetSize);
+                                cgt::vec2 tmp = it->second[i]._pixel * cgt::vec2(renderTargetSize);
                                 glVertex2fv(tmp.elem);
                             }
                             glEnd();
@@ -310,7 +310,7 @@ namespace campvis {
                         }
                     }
                     {
-                        typedef std::map< int, tgt::vec4 > MapType;
+                        typedef std::map< int, cgt::vec4 > MapType;
                         MapType::const_iterator it = _vesselBounds.find(p_frameNumber.getValue());
                         if (it != _vesselBounds.end()) {
                             LGL_ERROR;
@@ -323,8 +323,8 @@ namespace campvis {
                             glOrtho(0, renderTargetSize.x, 0, renderTargetSize.y, -1, 1);
 
                             glColor4f(1.f, .5f, 0.f, 1.f);
-                            tgt::vec2 llf = (it->second.xy() - it->second.zw()) * tgt::vec2(renderTargetSize);
-                            tgt::vec2 urb = (it->second.xy() + it->second.zw()) * tgt::vec2(renderTargetSize);
+                            cgt::vec2 llf = (it->second.xy() - it->second.zw()) * cgt::vec2(renderTargetSize);
+                            cgt::vec2 urb = (it->second.xy() + it->second.zw()) * cgt::vec2(renderTargetSize);
                             glBegin(GL_LINE_LOOP);
                                 glVertex2f(llf.x, llf.y);
                                 glVertex2f(llf.x, urb.y);
@@ -362,14 +362,14 @@ namespace campvis {
         }
     }
 
-    void ManualTissueSegmenter::onEvent(tgt::Event* e) {
-        if (tgt::MouseEvent* me = dynamic_cast<tgt::MouseEvent*>(e)) {
-            tgt::vec2 renderTargetSize(_viewportSizeProperty->getValue());
-            tgt::vec2 texPos(static_cast<float>(me->x()) / renderTargetSize.x, 1.f - (static_cast<float>(me->y()) / renderTargetSize.y));
+    void ManualTissueSegmenter::onEvent(cgt::Event* e) {
+        if (cgt::MouseEvent* me = dynamic_cast<cgt::MouseEvent*>(e)) {
+            cgt::vec2 renderTargetSize(_viewportSizeProperty->getValue());
+            cgt::vec2 texPos(static_cast<float>(me->x()) / renderTargetSize.x, 1.f - (static_cast<float>(me->y()) / renderTargetSize.y));
 
-            if (me->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT && me->action() == tgt::MouseEvent::PRESSED && me->modifiers() & tgt::Event::CTRL) {
+            if (me->button() == cgt::MouseEvent::MOUSE_BUTTON_LEFT && me->action() == cgt::MouseEvent::PRESSED && me->modifiers() & cgt::Event::CTRL) {
                 _mousePressed = true;
-                _mouseDownPosition = tgt::ivec2(me->x(), me->y());
+                _mouseDownPosition = cgt::ivec2(me->x(), me->y());
 
                 std::vector<ControlPoint>& cps = _controlPoints[p_activeLayer.getValue()][p_frameNumber.getValue()];
                 cps.push_back(ControlPoint());
@@ -380,29 +380,29 @@ namespace campvis {
                 invalidate(INVALID_RESULT);
                 e->ignore();
             }
-            else if (me->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT && me->action() == tgt::MouseEvent::PRESSED && me->modifiers() & tgt::Event::ALT) {
+            else if (me->button() == cgt::MouseEvent::MOUSE_BUTTON_LEFT && me->action() == cgt::MouseEvent::PRESSED && me->modifiers() & cgt::Event::ALT) {
                 _mousePressed = true;
-                _mouseDownPosition = tgt::ivec2(me->x(), me->y());
+                _mouseDownPosition = cgt::ivec2(me->x(), me->y());
 
-                _vesselBounds[p_frameNumber.getValue()] = tgt::vec4(texPos, 1.f, 1.f);
+                _vesselBounds[p_frameNumber.getValue()] = cgt::vec4(texPos, 1.f, 1.f);
                 _currentBounds = &_vesselBounds[p_frameNumber.getValue()];
                 _currentControlPoint = 0;
 
                 invalidate(INVALID_RESULT);
                 e->ignore();
             }
-            else if (me->action() == tgt::MouseEvent::PRESSED && !(me->modifiers() & tgt::Event::CTRL)) {
-                _mouseDownPosition = tgt::ivec2(me->x(), me->y());
+            else if (me->action() == cgt::MouseEvent::PRESSED && !(me->modifiers() & cgt::Event::CTRL)) {
+                _mouseDownPosition = cgt::ivec2(me->x(), me->y());
 
                 std::vector<ControlPoint>& cps = _controlPoints[p_activeLayer.getValue()][p_frameNumber.getValue()];
                 for (size_t i = 0; i < cps.size(); ++i) {
-                    tgt::vec2 tmp = cps[i]._pixel * tgt::vec2(renderTargetSize);
+                    cgt::vec2 tmp = cps[i]._pixel * cgt::vec2(renderTargetSize);
                     if (std::abs(me->x() - tmp.x) < 6 && std::abs(renderTargetSize.y - me->y() - tmp.y) < 6) {
-                        if (me->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT) {
+                        if (me->button() == cgt::MouseEvent::MOUSE_BUTTON_LEFT) {
                             _currentControlPoint = &cps[i];
                             _mousePressed = true;
                         }
-                        else if (me->button() == tgt::MouseEvent::MOUSE_BUTTON_RIGHT) {
+                        else if (me->button() == cgt::MouseEvent::MOUSE_BUTTON_RIGHT) {
                             cps.erase(cps.begin() + i);
                             computeSpline();
                             invalidate(INVALID_RESULT);
@@ -411,7 +411,7 @@ namespace campvis {
                 }
 
             }
-            else if (_mousePressed && me->action() == tgt::MouseEvent::RELEASED) {
+            else if (_mousePressed && me->action() == cgt::MouseEvent::RELEASED) {
                 _mousePressed = false;
                 _currentControlPoint = 0;
                 _currentBounds = 0;
@@ -420,18 +420,18 @@ namespace campvis {
                 invalidate(INVALID_RESULT);
                 e->ignore();
             }
-            else if (_mousePressed && me->action() == tgt::MouseEvent::MOTION) {
+            else if (_mousePressed && me->action() == cgt::MouseEvent::MOTION) {
                 if (_currentBounds != 0) {
-                    tgt::ivec2 currentPosition(me->x(), me->y());
-                    tgt::ivec2 delta = currentPosition - _mouseDownPosition;
+                    cgt::ivec2 currentPosition(me->x(), me->y());
+                    cgt::ivec2 delta = currentPosition - _mouseDownPosition;
                     _currentBounds->z = std::abs(delta.x / renderTargetSize.x);
                     _currentBounds->w = std::abs(delta.y / renderTargetSize.y);
                     e->ignore();
                     invalidate(INVALID_RESULT);
                 }
                 else if (_currentControlPoint != 0) {
-                    tgt::ivec2 currentPosition(me->x(), me->y());
-                    tgt::ivec2 delta = currentPosition - _mouseDownPosition;
+                    cgt::ivec2 currentPosition(me->x(), me->y());
+                    cgt::ivec2 delta = currentPosition - _mouseDownPosition;
                     _currentControlPoint->_pixel = texPos;
 
                     computeSpline();
@@ -636,10 +636,10 @@ namespace campvis {
 
                         VectorType v; 
                         v = function->Evaluate(point);
-                        l._frames[i]._points.push_back(tgt::vec2(t * image->getSize().x, v[0] * image->getSize().y));
+                        l._frames[i]._points.push_back(cgt::vec2(t * image->getSize().x, v[0] * image->getSize().y));
 
                         EvalFunctionType::GradientType gt = function->EvaluateGradient(point);
-                        tgt::vec2 g(gt[0][0], gt[0][1]);
+                        cgt::vec2 g(gt[0][0], gt[0][1]);
                         l._frames[i]._gradients.push_back(g);
                     }
                 }
@@ -653,31 +653,31 @@ namespace campvis {
         // vessel centerlines
         _segmentation._centerlines.clear();
         if (! _vesselBounds.empty()) {
-            _segmentation._centerlines.resize(image->getSize().z, tgt::vec4(-1.f));
+            _segmentation._centerlines.resize(image->getSize().z, cgt::vec4(-1.f));
 
             for (int z = 0; z < image->getSize().z; ++z) {
-                std::map< int, tgt::vec4 >::iterator ub = _vesselBounds.lower_bound(z);
+                std::map< int, cgt::vec4 >::iterator ub = _vesselBounds.lower_bound(z);
 
                 if (ub == _vesselBounds.end()) {
                     --ub;
-                    _segmentation._centerlines[z] = ub->second * tgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
+                    _segmentation._centerlines[z] = ub->second * cgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
                 }
                 else if (ub->first == z) {
-                    _segmentation._centerlines[z] = ub->second * tgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
+                    _segmentation._centerlines[z] = ub->second * cgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
                 }
                 else if (ub != _vesselBounds.begin()) {
                     int ee = ub->first;
-                    tgt::vec4 end = ub->second * tgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
+                    cgt::vec4 end = ub->second * cgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
 
                     --ub;
-                    tgt::vec4 start = ub->second * tgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
+                    cgt::vec4 start = ub->second * cgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
                     int ss = ub->first;
 
                     float fraction = static_cast<float>(z - ss) / static_cast<float>(ee - ss);
                     _segmentation._centerlines[z] = start + fraction * (end-start);
                 }
                 else {
-                    _segmentation._centerlines[z] = ub->second * tgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
+                    _segmentation._centerlines[z] = ub->second * cgt::vec4(image->getSize().xy(), image->getSize().x, image->getSize().y);
                 }
             }
         }
@@ -722,11 +722,11 @@ namespace campvis {
         size_t numVessels = _vesselBounds.size();
         f.write(reinterpret_cast<char*>(&numVessels), sizeof(size_t));
 
-        typedef std::map< int, tgt::vec4 > MapType;
+        typedef std::map< int, cgt::vec4 > MapType;
         for (MapType::iterator it = _vesselBounds.begin(); it != _vesselBounds.end(); ++it) {
             int frame = it->first;
             f.write(reinterpret_cast<char*>(&frame), sizeof(int));
-            f.write(reinterpret_cast<char*>(&it->second), sizeof(tgt::vec4));
+            f.write(reinterpret_cast<char*>(&it->second), sizeof(cgt::vec4));
         }
 
         f.close();
@@ -774,8 +774,8 @@ namespace campvis {
             int frame = 0;
             f.read(reinterpret_cast<char*>(&frame), sizeof(int));
 
-            tgt::vec4 centerline(-1.f);
-            f.read(reinterpret_cast<char*>(&centerline), sizeof(tgt::vec4));
+            cgt::vec4 centerline(-1.f);
+            f.read(reinterpret_cast<char*>(&centerline), sizeof(cgt::vec4));
 
             _vesselBounds[frame] = centerline;
         }

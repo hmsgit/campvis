@@ -41,7 +41,7 @@
 #include <tbb/memory_pool.h>
 
 
-namespace tgt {
+namespace cgt {
     class GLCanvas;
 
     /**
@@ -51,8 +51,8 @@ namespace tgt {
      * and acquired OpenGL context. You can execute OpenGL calls asynchroniously using enqueueJob()
      * or synchronously using the ScopedSynchronousGlJobExecution guard.
      */
-    class TGT_API OpenGLJobProcessor : public tgt::Singleton<OpenGLJobProcessor>, public tgt::Runnable {
-        friend class tgt::Singleton<OpenGLJobProcessor>;    ///< CRTP
+    class CGT_API OpenGLJobProcessor : public cgt::Singleton<OpenGLJobProcessor>, public cgt::Runnable {
+        friend class cgt::Singleton<OpenGLJobProcessor>;    ///< CRTP
         friend class AbstractJob;                           ///< so the custom new/delete operator can access the memory pool
 
     public:
@@ -62,13 +62,13 @@ namespace tgt {
          * does nothing. If this thread is not the OpenGL thread, the OpenGLJobProcessor is paused,
          * an arbitrary OpenGL context acquired. Upon destruction the OpenGLJobProcessor is resumed.
          */
-        class TGT_API ScopedSynchronousGlJobExecution {
+        class CGT_API ScopedSynchronousGlJobExecution {
         public:
             ScopedSynchronousGlJobExecution();
             ~ScopedSynchronousGlJobExecution();
 
         private:
-            tgt::GLContextScopedLock* _lock;
+            cgt::GLContextScopedLock* _lock;
         };
 
 
@@ -82,13 +82,13 @@ namespace tgt {
          * Registers the given OpenGL context, so that it gets its own job queue.
          * \param   context     OpenGL context to register.
          */
-        void setContext(tgt::GLCanvas* context);
+        void setContext(cgt::GLCanvas* context);
 
         /**
          * Returns the OpenGL context of this object..
          * \return  _context
          */
-        tgt::GLCanvas* getContext();
+        cgt::GLCanvas* getContext();
 
         /// \see Runnable::stop
         void stop();
@@ -132,7 +132,7 @@ namespace tgt {
         // Protected constructor since it's a singleton
         OpenGLJobProcessor();
 
-        tgt::GLCanvas* _context;                        ///< The OpenGL context to use
+        cgt::GLCanvas* _context;                        ///< The OpenGL context to use
         tbb::concurrent_queue<AbstractJob*> _jobQueue;  ///< The OpenGL job queue
         tbb::atomic<bool> _performGarbageCollection;    ///< Flag whether to perform garbage cxollection
 
@@ -146,6 +146,6 @@ namespace tgt {
 
 }
 
-#define GLJobProc tgt::Singleton<tgt::OpenGLJobProcessor>::getRef()
+#define GLJobProc cgt::Singleton<cgt::OpenGLJobProcessor>::getRef()
 
 #endif // OPENGLJOBPROCESSOR_H__

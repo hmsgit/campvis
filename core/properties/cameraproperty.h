@@ -30,7 +30,7 @@
 
 namespace campvis {
 
-    class CAMPVIS_CORE_API CameraProperty : public GenericProperty<tgt::Camera> {
+    class CAMPVIS_CORE_API CameraProperty : public GenericProperty<cgt::Camera> {
     public:
         /**
          * Creates a new CameraProperty
@@ -38,7 +38,7 @@ namespace campvis {
          * \param title     Property title (e.g. used for GUI)
          * \param cam       Camera to initialize the property with
          */
-        CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam = tgt::Camera());
+        CameraProperty(const std::string& name, const std::string& title, cgt::Camera cam = cgt::Camera());
 
         /**
          * Virtual Destructor

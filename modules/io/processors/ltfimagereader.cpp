@@ -47,11 +47,11 @@ namespace campvis {
 
     LtfImageReader::LtfImageReader() 
         : AbstractImageReader()
-        , p_size("Size", "Image Size", tgt::ivec3(1), tgt::ivec3(1), tgt::ivec3(2048))
+        , p_size("Size", "Image Size", cgt::ivec3(1), cgt::ivec3(1), cgt::ivec3(2048))
         , p_numChannels("NumChannels", "Number of Channels per Element", 1, 1, 9)
         , p_baseType("BaseType", "Base Type", baseTypeOptions, 7)
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
     {
         this->_ext.push_back(".ltf");
         this->p_targetImageID.setValue("LtfImageReader.output");
@@ -75,7 +75,7 @@ namespace campvis {
             dimensionality = (p_size.getValue().y == 1) ? 1 : 2;
         }
 
-        std::string noExt = tgt::FileSystem::fullBaseName(p_url.getValue());
+        std::string noExt = cgt::FileSystem::fullBaseName(p_url.getValue());
         std::string::size_type offset = noExt.find_last_not_of("0123456789");
         if (offset != std::string::npos) {
             ++offset;
@@ -83,9 +83,9 @@ namespace campvis {
             int index = StringUtils::fromString<int>(noExt.substr(offset));
             ImageSeries* series = new ImageSeries();
 
-            while (tgt::FileSystem::fileExists(base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf")) {
+            while (cgt::FileSystem::fileExists(base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf")) {
                 ImageData* image = new ImageData(dimensionality, p_size.getValue(), p_numChannels.getValue());
-                ImageRepresentationDisk::create(image, base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf", p_baseType.getOptionValue(), 0, EndianHelper::getLocalEndianness(), tgt::svec3::zero, true);
+                ImageRepresentationDisk::create(image, base + StringUtils::toString(index, noExt.size() - offset, '0') + ".ltf", p_baseType.getOptionValue(), 0, EndianHelper::getLocalEndianness(), cgt::svec3::zero, true);
                 image->setMappingInformation(ImageMappingInformation(p_size.getValue(), p_imageOffset.getValue(), p_voxelSize.getValue()));
                 series->addImage(image);
                 ++index;

@@ -43,7 +43,7 @@ namespace campvis {
         , _brickSize(brickSize)
         , _bricks(0)
     {
-        tgtAssert(_referenceImage != 0, "Reference Image must not be 0!");
+        cgtAssert(_referenceImage != 0, "Reference Image must not be 0!");
 
         // perform ceiling integer division:
         _dimBricks = referenceImage->getSize();
@@ -53,12 +53,12 @@ namespace campvis {
         // since we will pack eight values along the x axis into one byte, the _dimBricks.x must be congruent 0 mod 8.
         if (_dimBricks.x % 8 != 0)
             _dimBricks.x += 8 - (_dimBricks.x % 8);
-        _numBrickIndices = tgt::hmul(_dimBricks);
+        _numBrickIndices = cgt::hmul(_dimBricks);
 
         _dimPackedBricks = _dimBricks;
         _dimPackedBricks.x = _dimPackedBricks.x / 8;
 
-        _numElementsInBricksArray = tgt::hmul(_dimPackedBricks);
+        _numElementsInBricksArray = cgt::hmul(_dimPackedBricks);
         _bricks = new uint8_t[_numElementsInBricksArray];
         memset(_bricks, 0, _numElementsInBricksArray);
     }
@@ -67,13 +67,13 @@ namespace campvis {
         delete _bricks;
     }
 
-    std::vector<tgt::svec3> BinaryBrickedVolume::getAllVoxelsForBrick(size_t brickIndex) const {
-        tgt::ivec3 refImageSize = _referenceImage->getSize();
-        std::vector<tgt::svec3> toReturn;
+    std::vector<cgt::svec3> BinaryBrickedVolume::getAllVoxelsForBrick(size_t brickIndex) const {
+        cgt::ivec3 refImageSize = _referenceImage->getSize();
+        std::vector<cgt::svec3> toReturn;
         toReturn.reserve((_brickSize+2) * (_brickSize+2) * (_brickSize+2));
 
         // traverse each dimension, check that voxel is within reference image size
-        tgt::ivec3 startVoxel = indexToBrick(brickIndex) * _brickSize;
+        cgt::ivec3 startVoxel = indexToBrick(brickIndex) * _brickSize;
         for (int x = -1; x < static_cast<int>(_brickSize + 1); ++x) {
             int xx = startVoxel.x + x;
             if (xx < 0)
@@ -95,7 +95,7 @@ namespace campvis {
                     else if (zz >= refImageSize.z)
                         break;
 
-                    toReturn.push_back(tgt::svec3(xx, yy, zz));
+                    toReturn.push_back(cgt::svec3(xx, yy, zz));
                 }
             }
         }
@@ -103,21 +103,21 @@ namespace campvis {
         return toReturn;
     }
 
-    tgt::svec3 BinaryBrickedVolume::indexToBrick(size_t brickIndex) const {
+    cgt::svec3 BinaryBrickedVolume::indexToBrick(size_t brickIndex) const {
         size_t z = brickIndex / (_dimBricks.x * _dimBricks.y);
         size_t y = (brickIndex % (_dimBricks.x * _dimBricks.y)) / _dimBricks.x;
         size_t x = brickIndex % _dimBricks.x;
-        return tgt::svec3(x, y, z);
+        return cgt::svec3(x, y, z);
     }
 
-    size_t BinaryBrickedVolume::brickToIndex(const tgt::svec3& brick) const {
+    size_t BinaryBrickedVolume::brickToIndex(const cgt::svec3& brick) const {
         return brick.x + (_dimBricks.x * brick.y) + (_dimBricks.x * _dimBricks.y * brick.z);
     }
 
     bool BinaryBrickedVolume::getValueForIndex(size_t brickIndex) const {
         size_t byte = brickIndex / 8;
         size_t bit = brickIndex % 8;
-        tgtAssert(brickIndex < _numElementsInBricksArray, "Brick brickIndex out of bounds!");
+        cgtAssert(brickIndex < _numElementsInBricksArray, "Brick brickIndex out of bounds!");
 
         return (_bricks[byte] & (1 << bit)) != 0;
     }
@@ -125,7 +125,7 @@ namespace campvis {
     void BinaryBrickedVolume::setValueForIndex(size_t brickIndex, bool value) {
         size_t byte = brickIndex / 8;
         size_t bit = brickIndex % 8;
-        tgtAssert(byte < _numElementsInBricksArray, "Brick brickIndex out of bounds!");
+        cgtAssert(byte < _numElementsInBricksArray, "Brick brickIndex out of bounds!");
 
         if (value)
             _bricks[byte] |= (1 << bit);
@@ -133,19 +133,19 @@ namespace campvis {
             _bricks[byte] &= ~(1 << bit);
     }
 
-    tgt::Texture* BinaryBrickedVolume::exportToImageData() const {
-        tgt::Texture* toReturn = new tgt::Texture(_bricks, _dimPackedBricks, GL_RED_INTEGER, GL_R8UI, GL_UNSIGNED_BYTE, tgt::Texture::NEAREST);
+    cgt::Texture* BinaryBrickedVolume::exportToImageData() const {
+        cgt::Texture* toReturn = new cgt::Texture(_bricks, _dimPackedBricks, GL_RED_INTEGER, GL_R8UI, GL_UNSIGNED_BYTE, cgt::Texture::NEAREST);
         LGL_ERROR;
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        tgt::TextureUnit tempUnit;
+        cgt::TextureUnit tempUnit;
         tempUnit.activate();
         toReturn->bind();
         toReturn->uploadTexture();
         LGL_ERROR;
-        toReturn->setWrapping(tgt::Texture::CLAMP);
+        toReturn->setWrapping(cgt::Texture::CLAMP);
         toReturn->setPixelData(0);
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
         return toReturn;
@@ -158,7 +158,7 @@ namespace campvis {
 //         return toReturn;
     }
 
-    const tgt::svec3& BinaryBrickedVolume::getNumBricks() const {
+    const cgt::svec3& BinaryBrickedVolume::getNumBricks() const {
         return _dimBricks;
     }
 

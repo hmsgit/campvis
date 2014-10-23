@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -32,7 +32,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace tgt {
+namespace cgt {
 
 // Constructor
 Camera::Camera(const vec3& position, const vec3& focus, const vec3& up,
@@ -156,8 +156,8 @@ vec3 Camera::project(ivec2 vp, vec3 point) const {
     GLdouble modelview[16];
     GLdouble projection[16];
 
-    tgt::mat4 projection_tgt = getProjectionMatrix();
-    tgt::mat4 modelview_tgt = getViewMatrix();
+    cgt::mat4 projection_tgt = getProjectionMatrix();
+    cgt::mat4 modelview_tgt = getViewMatrix();
     for (int i = 0; i < 4; ++i) {
         modelview[i+0]   = modelview_tgt[i].x;
         modelview[i+4]   = modelview_tgt[i].y;
@@ -177,9 +177,9 @@ vec3 Camera::project(ivec2 vp, vec3 point) const {
     gluProject(point.x, point.y, point.z, modelview, projection, viewport,
                &pointProjectedGL[0], &pointProjectedGL[1], &pointProjectedGL[2]);
 
-    return tgt::vec3(static_cast<float>(pointProjectedGL[0]),
+    return cgt::vec3(static_cast<float>(pointProjectedGL[0]),
                      static_cast<float>(pointProjectedGL[1]),
                      static_cast<float>(pointProjectedGL[2]));
 }
 
-} // namespace tgt
+} // namespace cgt

@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,11 +22,11 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_FRAMEBUFFEROBJECT_H
-#define TGT_FRAMEBUFFEROBJECT_H
+#ifndef CGT_FRAMEBUFFEROBJECT_H
+#define CGT_FRAMEBUFFEROBJECT_H
 
 /// if you run out of FBO color attachments, edit this value o_O
-#define TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS 6
+#define CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS 6
 
 #include "cgt/assert.h"
 #include "cgt/texture.h"
@@ -34,9 +34,9 @@
 
 #include <map>
 
-namespace tgt {
+namespace cgt {
 
-class TGT_API FramebufferObject {
+class CGT_API FramebufferObject {
 public:
     FramebufferObject();
     virtual ~FramebufferObject();
@@ -80,29 +80,29 @@ protected:
     size_t decodeAttachment(GLenum attachment) {
         switch (attachment) {
             case GL_DEPTH_ATTACHMENT:
-                return TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS;
+                return CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS;
             case GL_STENCIL_ATTACHMENT:
-                return TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS + 1;
+                return CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS + 1;
             default:
-                tgtAssert((attachment - GL_COLOR_ATTACHMENT0) < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS, "Color attachments out of bounds - adjust TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS define!");
+                cgtAssert((attachment - GL_COLOR_ATTACHMENT0) < CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS, "Color attachments out of bounds - adjust CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS define!");
                 return attachment - GL_COLOR_ATTACHMENT0;
         }
     }
 
     union {
         struct {
-            Texture* colorAttachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS];
+            Texture* colorAttachments_[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS];
             Texture* depthAttachment_;
             Texture* stencilAttachment_;
         };
 
-        Texture* attachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+2];
+        Texture* attachments_[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+2];
     };
 
     size_t numColorAttachments_;
     static const std::string loggerCat_; ///< category used in logging
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#endif // TGT_FRAMEBUFFEROBJECT_H
+#endif // CGT_FRAMEBUFFEROBJECT_H

@@ -31,7 +31,7 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -80,7 +80,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;       ///< Shader for gradient volume generation
+        cgt::Shader* _shader;       ///< Shader for gradient volume generation
 
         static const std::string loggerCat_;
     };

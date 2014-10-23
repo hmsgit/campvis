@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_STOPWATCH_H
-#define TGT_STOPWATCH_H
+#ifndef CGT_STOPWATCH_H
+#define CGT_STOPWATCH_H
 
 #include <ctime>
 #ifdef WIN32
@@ -34,7 +34,7 @@
 
 #include "cgt/types.h"
 
-namespace tgt {
+namespace cgt {
 
 /**
  *   This class can be used to time events within a program.  For example,
@@ -44,7 +44,7 @@ namespace tgt {
  *   started multiple times; the runtime is not affected by pauses in which the
  *   stopwatch was stopped.
  */
-class TGT_API Stopwatch {
+class CGT_API Stopwatch {
 protected:
     /// is the stopwatch currently running or not?
     bool isStopped_;
@@ -80,4 +80,4 @@ public:
 };
 
 }
-#endif  // TGT_STOPWATCH_H
+#endif  // CGT_STOPWATCH_H

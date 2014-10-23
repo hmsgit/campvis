@@ -30,12 +30,12 @@
 
 #include <functional>
 
-namespace tgt {
+namespace cgt {
 
     /**
      * Abstract base class for a job that can be executed.
      */
-    class TGT_API AbstractJob {
+    class CGT_API AbstractJob {
     public:
         /**
          * Pure virtual destructor.
@@ -86,8 +86,8 @@ namespace tgt {
             : _target(target)
             , _callee(callee)
         {
-            tgtAssert(_target != 0, "Target object must not be 0.");
-            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+            cgtAssert(_target != 0, "Target object must not be 0.");
+            cgtAssert(_callee != 0, "Target member function pointer must not be 0.");
         }
 
         /**
@@ -124,8 +124,8 @@ namespace tgt {
             , _callee(callee)
             , _arg1(arg1)
         {
-            tgtAssert(_target != 0, "Target object must not be 0.");
-            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+            cgtAssert(_target != 0, "Target object must not be 0.");
+            cgtAssert(_callee != 0, "Target member function pointer must not be 0.");
         }
 
         /**
@@ -162,7 +162,7 @@ namespace tgt {
             : _callee(callee)
             , _arg1(arg1)
         {
-            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+            cgtAssert(_callee != 0, "Target member function pointer must not be 0.");
         }
 
         /**
@@ -201,8 +201,8 @@ namespace tgt {
             , _arg1(arg1)
             , _arg2(arg2)
         {
-            tgtAssert(_target != 0, "Target object must not be 0.");
-            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+            cgtAssert(_target != 0, "Target object must not be 0.");
+            cgtAssert(_callee != 0, "Target member function pointer must not be 0.");
         }
 
         /**
@@ -241,7 +241,7 @@ namespace tgt {
             , _arg1(arg1)
             , _arg2(arg2)
         {
-            tgtAssert(_callee != 0, "Target member function pointer must not be 0.");
+            cgtAssert(_callee != 0, "Target member function pointer must not be 0.");
         }
 
         /**
@@ -266,7 +266,7 @@ namespace tgt {
     /**
      * specific job that evaluates a function object
      */
-    class TGT_API CallFunctionObjectJob : public AbstractJob {
+    class CGT_API CallFunctionObjectJob : public AbstractJob {
     public:
         CallFunctionObjectJob(std::function<void(void)> fn) 
         : _fn(fn)

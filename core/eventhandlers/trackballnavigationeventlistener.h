@@ -44,9 +44,9 @@ namespace campvis {
     class VisualizationProcessor;
 
     /**
-     * Wrapper to adapt a CameraProperty to the tgt::Trackball interface.
+     * Wrapper to adapt a CameraProperty to the cgt::Trackball interface.
      */
-    class CAMPVIS_CORE_API CamPropNavigationWrapper : public tgt::IHasCamera {
+    class CAMPVIS_CORE_API CamPropNavigationWrapper : public cgt::IHasCamera {
     public:
         /**
          * Constructor
@@ -57,17 +57,17 @@ namespace campvis {
         /// Virtual Destructor
         virtual ~CamPropNavigationWrapper();
 
-        /// \see tgt::IHasCamera::getCamera()
-        virtual tgt::Camera* getCamera();
+        /// \see cgt::IHasCamera::getCamera()
+        virtual cgt::Camera* getCamera();
 
-        /// \see tgt::IHasCamera::update()
+        /// \see cgt::IHasCamera::update()
         virtual void update();
 
     private:
         CameraProperty* _cameraProperty;    ///< CameraProperty this class wraps around
 
         /// Temporary copy of the property's camera which will be modified and written back to the property upon update().
-        tgt::Camera _localCopy;
+        cgt::Camera _localCopy;
         /// Flag whether _localCopy is dirty (needs to be written back)
         bool _dirty;
     };
@@ -79,7 +79,7 @@ namespace campvis {
      * \note    Also takes care of automatically adjusting the window ratio for the wrapped
      *          camera when the viewport size changes.
      */
-    class CAMPVIS_CORE_API TrackballNavigationEventListener : public tgt::EventListener, public sigslot::has_slots {
+    class CAMPVIS_CORE_API TrackballNavigationEventListener : public cgt::EventListener, public sigslot::has_slots {
     public:
         /**
          * Creates a TrackballNavigationEventListener.
@@ -96,8 +96,8 @@ namespace campvis {
         virtual ~TrackballNavigationEventListener();
 
 
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
         
 
         /**
@@ -122,7 +122,7 @@ namespace campvis {
          * 
          * \param   hwb     Data to use for reinitialization, must not be 0.
          */
-        void reinitializeCamera(const tgt::Bounds& worldBounds);
+        void reinitializeCamera(const cgt::Bounds& worldBounds);
 
         /**
          * Reinitalizes the camera by the given parameters.
@@ -130,30 +130,30 @@ namespace campvis {
          * \param   focus       New camera focus
          * \param   upVector    New camera up vector
          */
-        void reinitializeCamera(const tgt::vec3& position, const tgt::vec3& focus, const tgt::vec3& upVector);
+        void reinitializeCamera(const cgt::vec3& position, const cgt::vec3& focus, const cgt::vec3& upVector);
 
         /**
          * Sets the trackball's center.
          * \param   center  The new trackball's center.
          */
-        void setCenter(const tgt::vec3& center);
+        void setCenter(const cgt::vec3& center);
 
         /**
          * Sets the scene bounds for automatic near/far clipping plane adjustment.
          * \param   bounds  New bounds for the rendered scene.
          */
-        void setSceneBounds(const tgt::Bounds& bounds);
+        void setSceneBounds(const cgt::Bounds& bounds);
 
         /**
          * Returns the current scene bounds for this trackball.
          * \return  _sceneBounds
          */
-        const tgt::Bounds& getSceneBounds() const;
+        const cgt::Bounds& getSceneBounds() const;
 
         /**
          * Returns the trackball of the event handler.
          */
-        tgt::Trackball* getTrackball();
+        cgt::Trackball* getTrackball();
 
         /**
          * Adds \a vp to the list of LQ mode processors.
@@ -178,10 +178,10 @@ namespace campvis {
 
         CameraProperty* _cameraProperty;        ///< The CameraProperty to apply the navigation to
         IVec2Property* _viewportSizeProp;       ///< Pointer to the property defining the viewport size
-        CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the tgt::Trackball interface
+        CamPropNavigationWrapper _cpnw;         ///< The CamPropNavigationWrapper used to adapt to the cgt::Trackball interface
 
-        tgt::Trackball* _trackball;             ///< The tgt::Trackball for the navigation logic
-        tgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
+        cgt::Trackball* _trackball;             ///< The cgt::Trackball for the navigation logic
+        cgt::Bounds _sceneBounds;               ///< The extent of the scene (in world coordinates)
 
         /// List of processors for which to enable LQ mode during interaction
         std::vector<VisualizationProcessor*> _lqModeProcessors;

@@ -48,7 +48,7 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_camera("Camera", "Camera")
-        , p_planeNormal("PlaneNormal", "Clipping Plane Normal", tgt::vec3(0.f, 0.f, 1.f), tgt::vec3(-1.f), tgt::vec3(1.f), tgt::vec3(.1f), tgt::ivec3(2))
+        , p_planeNormal("PlaneNormal", "Clipping Plane Normal", cgt::vec3(0.f, 0.f, 1.f), cgt::vec3(-1.f), cgt::vec3(1.f), cgt::vec3(.1f), cgt::ivec3(2))
         , p_planeDistance("PlaneDistance", "Clipping Plane Distance", 0.f, -1000.f, 1000.f, 1.f, 1)
         , p_planeSize("PlaneSize", "Clipping Plane Size", 100.f, 0.f, 1000.f, 1.f, 1)
         , p_use2DProjection("Use3dRendering", "Use 3D Rendering instead of 2D", true)
@@ -88,24 +88,24 @@ namespace campvis {
 
         if (img != 0) {
             if (img->getDimensionality() == 3) {
-                const tgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = p_camera.getValue();
 
                 // Construct the clipping plane in world coordinates
-                tgt::vec3 n = tgt::normalize(p_planeNormal.getValue());
-                tgt::vec3 temp(1.0, 0.0, 0.0);
-                if (abs(tgt::dot(temp, n)) > 0.9)
-                    temp = tgt::vec3(0.0, 1.0, 0.0);
+                cgt::vec3 n = cgt::normalize(p_planeNormal.getValue());
+                cgt::vec3 temp(1.0, 0.0, 0.0);
+                if (abs(cgt::dot(temp, n)) > 0.9)
+                    temp = cgt::vec3(0.0, 1.0, 0.0);
 
-                tgt::vec3 inPlaneA = tgt::normalize(tgt::cross(n, temp)) * 0.5f * p_planeSize.getValue();
-                tgt::vec3 inPlaneB = tgt::normalize(tgt::cross(n, inPlaneA)) * 0.5f * p_planeSize.getValue();
-                tgt::vec3 base = (n * -p_planeDistance.getValue());
+                cgt::vec3 inPlaneA = cgt::normalize(cgt::cross(n, temp)) * 0.5f * p_planeSize.getValue();
+                cgt::vec3 inPlaneB = cgt::normalize(cgt::cross(n, inPlaneA)) * 0.5f * p_planeSize.getValue();
+                cgt::vec3 base = (n * -p_planeDistance.getValue());
 
                 // move to image center if wanted
                 if (p_relativeToImageCenter.getValue())
                     base += img->getParent()->getWorldBounds().center();
 
                 // construct the four texCoords
-                std::vector<tgt::vec3> texCoords;
+                std::vector<cgt::vec3> texCoords;
                 texCoords.push_back(base + inPlaneA + inPlaneB);
                 texCoords.push_back(base - inPlaneA + inPlaneB);
                 texCoords.push_back(base - inPlaneA - inPlaneB);
@@ -115,12 +115,12 @@ namespace campvis {
                 // perform the rendering
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
-                tgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
+                cgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
 
                 if (p_use2DProjection.getValue()) {
                     // generate a camera position that simulates 2D rendering
                     // this way it is easier to achieve the correct aspect ratio in all cases
-                    tgt::vec3 camPosition = base - p_planeSize.getValue() * n;
+                    cgt::vec3 camPosition = base - p_planeSize.getValue() * n;
                     float ratio = static_cast<float>(getEffectiveViewportSize().x) / getEffectiveViewportSize().y;
 
                     // experimentally discovered: 
@@ -128,7 +128,7 @@ namespace campvis {
                     // 54 allows to see everything
                     float fovy = 54.f;
 
-                    tgt::Camera c(camPosition, base, inPlaneA, fovy, ratio, 0.1f, 10000.f);
+                    cgt::Camera c(camPosition, base, inPlaneA, fovy, ratio, 0.1f, 10000.f);
                     _shader->setUniform("_projectionMatrix", c.getProjectionMatrix());
                     _shader->setUniform("_viewMatrix", c.getViewMatrix());
                 }
@@ -137,7 +137,7 @@ namespace campvis {
                     _shader->setUniform("_viewMatrix", cam.getViewMatrix());
                 }
 
-                tgt::TextureUnit inputUnit, tfUnit;
+                cgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
@@ -149,7 +149,7 @@ namespace campvis {
                 slice.render(GL_POLYGON);
 
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 glDisable(GL_DEPTH_TEST);
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));

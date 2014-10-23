@@ -36,7 +36,7 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
-namespace tgt {
+namespace cgt {
     class BufferObject;
     class Shader;
     class VertexArrayObject;
@@ -122,23 +122,23 @@ namespace campvis {
 
         float generateRandomFloat(float max = 1.f);
 
-        tgt::Shader* _shader;               ///< Shader for arrow rendering
+        cgt::Shader* _shader;               ///< Shader for arrow rendering
 
         GLuint _feedback[2];
         float _currentTime;
         GLuint _drawBuffer;
         GLuint _numParticles;
 
-        tgt::BufferObject* _positionBufferA;        ///< Buffers storing current position
-        tgt::BufferObject* _positionBufferB;        ///< Buffers storing current position
-        tgt::BufferObject* _velocityBufferA;        ///< Buffers storing current velocity
-        tgt::BufferObject* _velocityBufferB;        ///< Buffers storing current velocity
-        tgt::BufferObject* _startTimeBufferA;       ///< Buffers storing the start time
-        tgt::BufferObject* _startTimeBufferB;       ///< Buffers storing the start time
-        tgt::BufferObject* _initialPositionBuffer;  ///< Buffers storing the start time
+        cgt::BufferObject* _positionBufferA;        ///< Buffers storing current position
+        cgt::BufferObject* _positionBufferB;        ///< Buffers storing current position
+        cgt::BufferObject* _velocityBufferA;        ///< Buffers storing current velocity
+        cgt::BufferObject* _velocityBufferB;        ///< Buffers storing current velocity
+        cgt::BufferObject* _startTimeBufferA;       ///< Buffers storing the start time
+        cgt::BufferObject* _startTimeBufferB;       ///< Buffers storing the start time
+        cgt::BufferObject* _initialPositionBuffer;  ///< Buffers storing the start time
 
-        tgt::VertexArrayObject* _vaoA;
-        tgt::VertexArrayObject* _vaoB;
+        cgt::VertexArrayObject* _vaoA;
+        cgt::VertexArrayObject* _vaoB;
 
         std::default_random_engine _generator;
 

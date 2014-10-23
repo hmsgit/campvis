@@ -204,9 +204,9 @@ namespace campvis {
 
     typedef NumericProperty<int> IntProperty;
 
-    typedef NumericProperty<tgt::ivec2> IVec2Property;
-    typedef NumericProperty<tgt::ivec3> IVec3Property;
-    typedef NumericProperty<tgt::ivec4> IVec4Property;
+    typedef NumericProperty<cgt::ivec2> IVec2Property;
+    typedef NumericProperty<cgt::ivec3> IVec3Property;
+    typedef NumericProperty<cgt::ivec4> IVec4Property;
 
 // = Template Implementation ======================================================================
 
@@ -228,13 +228,13 @@ namespace campvis {
     template<typename T>
     void campvis::NumericProperty<T>::addSharedProperty(AbstractProperty* prop) {
         // make type check first, then call base method.
-        tgtAssert(prop != 0, "Shared property must not be 0!");
+        cgtAssert(prop != 0, "Shared property must not be 0!");
         if (NumericProperty<T>* tmp = dynamic_cast< NumericProperty<T>* >(prop)) {
             AbstractProperty::addSharedProperty(prop);
             tmp->setValue(GenericProperty<T>::getValue());
             return;
         }
-        tgtAssert(false, "Shared property must be of the same type as this property!");
+        cgtAssert(false, "Shared property must be of the same type as this property!");
     }
 
     template<typename T>

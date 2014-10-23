@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -102,7 +102,7 @@ size_t findDelim(char* buf, size_t size, char delim) {
 
 } // anonymous namespace
 
-namespace tgt {
+namespace cgt {
 
 File::File()
     : size_(0)
@@ -180,7 +180,7 @@ size_t File::skipLine(char delim) {
 
 //-----------------------------------------------------------------------------
 
-const std::string RegularFile::loggerCat_("tgt.RegularFile");
+const std::string RegularFile::loggerCat_("cgt.RegularFile");
 
 RegularFile::RegularFile(const std::string& filename)
     : File(filename)
@@ -353,7 +353,7 @@ bool MemoryFile::good() {
 
 //-----------------------------------------------------------------------------
 
-const std::string TarFile::loggerCat_("tgt.TarFile");
+const std::string TarFile::loggerCat_("cgt.TarFile");
 
 TarFile::TarFile(const std::string& filename, const std::string& tarfilename, size_t offset, size_t size)
     : File(filename)
@@ -375,7 +375,7 @@ TarFile::TarFile(const std::string& filename, const std::string& tarfilename, si
         return;
     }
 
-#ifdef TGT_DEBUG
+#ifdef CGT_DEBUG
     file_->seek(0, File::END);
     size_ = file_->tell();
     file_->seek(File::BEGIN);
@@ -388,7 +388,7 @@ TarFile::TarFile(const std::string& filename, const std::string& tarfilename, si
         file_ = 0;
         return;
     }
-#endif // TGT_DEBUG
+#endif // CGT_DEBUG
 
     size_ = size;
     offset_ = offset;
@@ -493,7 +493,7 @@ std::vector<std::string> MemoryFileFactory::getFilenames() {
 
 //-----------------------------------------------------------------------------
 
-const std::string TarFileFactory::loggerCat_("tgt.TarFileFactory");
+const std::string TarFileFactory::loggerCat_("cgt.TarFileFactory");
 
 TarFileFactory::TarFileFactory(const std::string& filename, const std::string& rootpath) {
     filename_ = filename;
@@ -577,7 +577,7 @@ std::vector<std::string> TarFileFactory::getFilenames() {
 
 //-----------------------------------------------------------------------------
 
-const std::string FileSystem::loggerCat_("tgt.FileSystem.FileSystem");
+const std::string FileSystem::loggerCat_("cgt.FileSystem.FileSystem");
 #ifdef WIN32
 const char FileSystem::goodSlash_ = '\\';
 const char FileSystem::badSlash_ = '/';
@@ -1036,30 +1036,30 @@ bool FileSystem::renameFile(const std::string& filename, const std::string& newN
     return res;
 }
 
-void FileSystem::copyFile(const std::string& srcFile, const std::string& destFile) throw (tgt::Exception) {
+void FileSystem::copyFile(const std::string& srcFile, const std::string& destFile) throw (cgt::Exception) {
     // check if input file/output dir exists
     if (!fileExists(srcFile))
-        throw tgt::FileNotFoundException("srcFile not found", srcFile);
+        throw cgt::FileNotFoundException("srcFile not found", srcFile);
     std::string destDir = dirName(destFile);
     if (destDir != "" && !dirExists(destDir))
-        throw tgt::FileNotFoundException("destination directory not found", destDir);
+        throw cgt::FileNotFoundException("destination directory not found", destDir);
 
     // open input and output files
     std::ifstream src(srcFile.c_str(), std::ios::in | std::ios::binary);
     if (!src.good())
-        throw tgt::FileAccessException("failed to open srcFile fir reading", srcFile);
+        throw cgt::FileAccessException("failed to open srcFile fir reading", srcFile);
     std::ofstream dest(destFile.c_str(), std::ios::trunc | std::ios::binary);
     if (!dest.good())
-        throw tgt::FileAccessException("failed to open dest file for writing", destFile);
+        throw cgt::FileAccessException("failed to open dest file for writing", destFile);
 
     // copy data
     dest << src.rdbuf();
 
     // check if copying succeeded
     if (!src.good())
-        throw tgt::FileException("reading from source file failed", srcFile);
+        throw cgt::FileException("reading from source file failed", srcFile);
     if (!dest.good())
-        throw tgt::FileException("writing to dest file failed", destFile);
+        throw cgt::FileException("writing to dest file failed", destFile);
 }
 
 bool FileSystem::fileExists(const std::string& filename) {

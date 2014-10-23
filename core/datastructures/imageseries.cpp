@@ -65,7 +65,7 @@ namespace campvis {
     }
 
     void ImageSeries::addImage(DataHandle dh) {
-        tgtAssert(dynamic_cast<const ImageData*>(dh.getData()) != 0, "DataHandle must contain ImageData!");
+        cgtAssert(dynamic_cast<const ImageData*>(dh.getData()) != 0, "DataHandle must contain ImageData!");
         _images.push_back(dh);
     }
 
@@ -74,7 +74,7 @@ namespace campvis {
     }
 
     DataHandle ImageSeries::getImage(size_t index) const {
-        tgtAssert(index < _images.size(), "Index out of bounds.");
+        cgtAssert(index < _images.size(), "Index out of bounds.");
         return _images[index];
     }
     

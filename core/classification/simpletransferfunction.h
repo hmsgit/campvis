@@ -39,7 +39,7 @@ namespace campvis {
          * \param   size            Size of the transfer function texture
          * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
          */
-        explicit SimpleTransferFunction(size_t size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        explicit SimpleTransferFunction(size_t size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
 
         /**
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
@@ -58,10 +58,10 @@ namespace campvis {
          */
         virtual size_t getDimensionality() const;
 
-        const tgt::col4& getLeftColor() const;
-        void setLeftColor(const tgt::col4& color);
-        const tgt::col4& getRightColor() const;
-        void setRightColor(const tgt::col4& color);
+        const cgt::col4& getLeftColor() const;
+        void setLeftColor(const cgt::col4& color);
+        const cgt::col4& getRightColor() const;
+        void setRightColor(const cgt::col4& color);
 
     protected:
         /**
@@ -70,8 +70,8 @@ namespace campvis {
          */
         virtual void createTexture();
 
-        tgt::col4 _leftColor;
-        tgt::col4 _rightColor;
+        cgt::col4 _leftColor;
+        cgt::col4 _rightColor;
 
         static const std::string loggerCat_;
 

@@ -46,21 +46,21 @@ namespace campvis {
             , _fh(fh)
             , _epsilon(epsilon)
         {
-            tgtAssert(_intensities->getDimensionality() == _gradients->getDimensionality(), "Dimensionality of intensities volumes must match!");
-            tgtAssert(_intensities->getSize() == _gradients->getSize(), "Size of intensities volumes must match!");
+            cgtAssert(_intensities->getDimensionality() == _gradients->getDimensionality(), "Dimensionality of intensities volumes must match!");
+            cgtAssert(_intensities->getSize() == _gradients->getSize(), "Size of intensities volumes must match!");
         }
 
         void operator() (const tbb::blocked_range<size_t>& range) const {
             for (size_t i = range.begin(); i != range.end(); ++i) {
-                tgt::svec3 pos = _intensities->getParent()->indexToPosition(i);
+                cgt::svec3 pos = _intensities->getParent()->indexToPosition(i);
 
-                const tgt::vec4& gradient = _gradients->getElement(i);
+                const cgt::vec4& gradient = _gradients->getElement(i);
                 float fl = _intensities->getElementNormalized(i, 0);
                 float fh = fl;
 
                 if (gradient.w > 0) {
-                    float forwardIntensity = integrateHeun(tgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient);
-                    float backwardIntensity = integrateHeun(tgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient * -1.f);
+                    float forwardIntensity = integrateHeun(cgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient);
+                    float backwardIntensity = integrateHeun(cgt::vec3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)), gradient * -1.f);
 
                     fh = std::max(forwardIntensity, backwardIntensity);
                     fl = std::min(forwardIntensity, backwardIntensity);
@@ -72,8 +72,8 @@ namespace campvis {
         }
 
     protected:
-        tgt::vec4 getGradientLinear(const tgt::vec3& position) const {
-            tgt::vec4 result;
+        cgt::vec4 getGradientLinear(const cgt::vec3& position) const {
+            cgt::vec4 result;
             result.x = _gradients->getElementNormalizedLinear(position, 0);
             result.y = _gradients->getElementNormalizedLinear(position, 1);
             result.z = _gradients->getElementNormalizedLinear(position, 2);
@@ -81,19 +81,19 @@ namespace campvis {
             return result;
         }
 
-        float integrateHeun(tgt::vec3 position, const tgt::vec4& direction) const {
-            tgt::vec4 gradient1 = direction;
-            tgt::vec3 stepSize(.25f);
-            tgt::vec3 size(_intensities->getSize());
+        float integrateHeun(cgt::vec3 position, const cgt::vec4& direction) const {
+            cgt::vec4 gradient1 = direction;
+            cgt::vec3 stepSize(.25f);
+            cgt::vec3 size(_intensities->getSize());
             size_t numSteps = 0;
 
             while (abs(gradient1.w) < _epsilon) {
-                tgt::vec4 gradient2 = getGradientLinear(position + tgt::normalize(gradient1.xyz()) * stepSize/2.f);
-                position += tgt::normalize((gradient1 + gradient2).xyz()) * stepSize;
+                cgt::vec4 gradient2 = getGradientLinear(position + cgt::normalize(gradient1.xyz()) * stepSize/2.f);
+                position += cgt::normalize((gradient1 + gradient2).xyz()) * stepSize;
                 gradient1 = getGradientLinear(position);
                 ++numSteps;
 
-                if (numSteps > 128 || tgt::hor(tgt::lessThan(position, tgt::vec3::zero)) || tgt::hor(tgt::greaterThan(position, size)))
+                if (numSteps > 128 || cgt::hor(cgt::lessThan(position, cgt::vec3::zero)) || cgt::hor(cgt::greaterThan(position, size)))
                     break;
             }
 
@@ -116,8 +116,8 @@ namespace campvis {
             , _fh(fh)
             , _histogram(histogram)
         {
-            tgtAssert(_fh->getDimensionality() == _fl->getDimensionality(), "Dimensionality of input volumes must match!");
-            tgtAssert(_fh->getSize() == _fl->getSize(), "Size of input volumes must match!");
+            cgtAssert(_fh->getDimensionality() == _fl->getDimensionality(), "Dimensionality of input volumes must match!");
+            cgtAssert(_fh->getSize() == _fl->getSize(), "Size of input volumes must match!");
         }
 
 
@@ -181,7 +181,7 @@ namespace campvis {
                 tmp[i] = static_cast<float>(lhHistogram.getBuckets()[i]) / static_cast<float>(lhHistogram.getMaxFilling());
 
             WeaklyTypedPointer wtp(WeaklyTypedPointer::FLOAT, 1, tmp);
-            ImageData* imgTex = new ImageData(2, tgt::svec3(256, 256, 1), 1);
+            ImageData* imgTex = new ImageData(2, cgt::svec3(256, 256, 1), 1);
             ImageRepresentationGL::create(imgTex, wtp);
             delete [] tmp;
 

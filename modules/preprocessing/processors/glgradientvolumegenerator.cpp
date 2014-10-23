@@ -77,13 +77,13 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            const tgt::svec3& size = img->getSize();
+            const cgt::svec3& size = img->getSize();
 
-            tgt::TextureUnit inputUnit;
+            cgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            tgt::Texture* resultTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, tgt::Texture::LINEAR);
+            cgt::Texture* resultTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, cgt::Texture::LINEAR);
             resultTexture->uploadTexture();
 
             // activate shader and bind textures
@@ -111,7 +111,7 @@ namespace campvis {
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputImage.getValue(), id);
 
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
         }
         else {

@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,15 +22,15 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_MOUSEEVENT_H
-#define TGT_MOUSEEVENT_H
+#ifndef CGT_MOUSEEVENT_H
+#define CGT_MOUSEEVENT_H
 
 #include "cgt/event/event.h"
 #include "cgt/vector.h"
 
-namespace tgt {
+namespace cgt {
 
-class TGT_API MouseEvent : public Event {
+class CGT_API MouseEvent : public Event {
 public:
     enum MouseButtons {
         MOUSE_BUTTON_NONE =     0,
@@ -59,7 +59,7 @@ public:
 
 public:
     MouseEvent(int x, int y, MouseAction action, Event::Modifier mod, MouseButtons button = MOUSE_BUTTON_NONE,
-        tgt::ivec2 viewport = tgt::ivec2(-1));
+        cgt::ivec2 viewport = cgt::ivec2(-1));
 
     ivec2 coord() const;
     int x() const;
@@ -84,4 +84,4 @@ protected:
 
 }
 
-#endif //TGT_MOUSEEVENT_H
+#endif //CGT_MOUSEEVENT_H

@@ -67,9 +67,9 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception);
 
-        void parsePolydata(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+        void parsePolydata(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception);
 
         static const std::string loggerCat_;
     };

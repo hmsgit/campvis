@@ -83,34 +83,34 @@ namespace campvis {
         createAndAttachColorTexture();
         createAndAttachDepthTexture();
 
-        tgt::TextureUnit colorUnit, depthUnit;
+        cgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
-        _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(.5f, .5f, .5f)));
+        _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(.5f, .5f, .5f)));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (inputImage1 != 0) {
             inputImage1->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(-.5f, .5f, 0.f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(-.5f, .5f, 0.f)));
             QuadRdr.renderQuad();
         }
         if (inputImage2 != 0) {
             inputImage2->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(.5f, .5f, 0.f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(.5f, .5f, 0.f)));
             QuadRdr.renderQuad();
         }
         if (inputImage3 != 0) {
             inputImage3->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(-.5f, -.5f, 0.f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(-.5f, -.5f, 0.f)));
             QuadRdr.renderQuad();
         }
         if (inputImage4 != 0) {
             inputImage4->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(.5f, -.5f, 0.f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(.5f, -.5f, 0.f)));
             QuadRdr.renderQuad();
         }
 
         _shader->deactivate();
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
         data.addData(p_outputImage.getValue(), new RenderData(_fbo));

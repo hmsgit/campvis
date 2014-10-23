@@ -58,7 +58,7 @@ namespace campvis {
         , p_glyphSize("GlyphSize", "Glyph Size", 1.f, .1f, 5.f)
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
-        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_camera("Camera", "Camera", cgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _ellipsoidGeometry(0)
@@ -86,7 +86,7 @@ namespace campvis {
         VisualizationProcessor::init();
 
         _shader = ShdrMgr.load("modules/tensor/glsl/tensorglyphrenderer.vert", "modules/tensor/glsl/tensorglyphrenderer.frag", generateGlslHeader());
-        _cubeGeometry = GeometryDataFactory::createCube(tgt::Bounds(tgt::vec3(-.5f), tgt::vec3(.5f)), tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
+        _cubeGeometry = GeometryDataFactory::createCube(cgt::Bounds(cgt::vec3(-.5f), cgt::vec3(.5f)), cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
         _ellipsoidGeometry = GeometryDataFactory::createSphere(8, 16);
     }
 
@@ -116,14 +116,14 @@ namespace campvis {
                 ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
                 if (p_enableShading.getValue() == false || light != nullptr) {
-                    const tgt::Camera& cam = p_camera.getValue();
-                    const tgt::svec3& imgSize = evals->getSize();
+                    const cgt::Camera& cam = p_camera.getValue();
+                    const cgt::svec3& imgSize = evals->getSize();
 
                     glEnable(GL_DEPTH_TEST);
                     _shader->activate();
 
                     _shader->setIgnoreUniformLocationError(true);
-                    _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                    _shader->setUniform("_viewportSizeRCP", 1.f / cgt::vec2(getEffectiveViewportSize()));
                     _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                     _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
@@ -140,21 +140,21 @@ namespace campvis {
                         case XY_PLANE:
                             for (size_t x = 0; x < imgSize.x; ++x) {
                                 for (size_t y = 0; y < imgSize.y; ++y) {
-                                    renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), p_sliceNumber.getValue()));
+                                    renderTensorGlyph(evals, evecs, cgt::ivec3(static_cast<int>(x), static_cast<int>(y), p_sliceNumber.getValue()));
                                 }
                             }
                             break;
                         case XZ_PLANE:
                             for (size_t x = 0; x < imgSize.x; ++x) {
                                 for (size_t z = 0; z < imgSize.z; ++z) {
-                                    renderTensorGlyph(evals, evecs, tgt::ivec3(static_cast<int>(x), p_sliceNumber.getValue(), static_cast<int>(z)));
+                                    renderTensorGlyph(evals, evecs, cgt::ivec3(static_cast<int>(x), p_sliceNumber.getValue(), static_cast<int>(z)));
                                 }
                             }
                             break;
                         case YZ_PLANE:
                             for (size_t y = 0; y < imgSize.y; ++y) {
                                 for (size_t z = 0; z < imgSize.z; ++z) {
-                                    renderTensorGlyph(evals, evecs, tgt::ivec3(p_sliceNumber.getValue(), static_cast<int>(y), static_cast<int>(z)));
+                                    renderTensorGlyph(evals, evecs, cgt::ivec3(p_sliceNumber.getValue(), static_cast<int>(y), static_cast<int>(z)));
                                 }
                             }
                             break;
@@ -215,54 +215,54 @@ namespace campvis {
         return toReturn;
     }
 
-    void TensorGlyphRenderer::renderTensorGlyph(const GenericImageRepresentationLocal<float, 3>* evals, const GenericImageRepresentationLocal<float, 9>* evecs, const tgt::vec3& position) {
+    void TensorGlyphRenderer::renderTensorGlyph(const GenericImageRepresentationLocal<float, 3>* evals, const GenericImageRepresentationLocal<float, 9>* evecs, const cgt::vec3& position) {
         /// minimum scale factor
         const float EPS = .1f;
 
         // gather value
-        const tgt::vec3& eigenvalues = evals->getElement(position);
-        const tgt::mat3& eigenvectors = evecs->getElement(position);
-        if (eigenvalues == tgt::vec3::zero || eigenvectors == tgt::mat3::zero)
+        const cgt::vec3& eigenvalues = evals->getElement(position);
+        const cgt::mat3& eigenvectors = evecs->getElement(position);
+        if (eigenvalues == cgt::vec3::zero || eigenvectors == cgt::mat3::zero)
             return;
 
         // compute rotation matrix
-        tgt::vec3 rotx = tgt::normalize(eigenvectors[0]);
-        tgt::vec3 roty = tgt::normalize(eigenvectors[1]);
-        tgt::vec3 rotz = tgt::normalize(eigenvectors[2]);
-        tgt::mat4 rotationMatrix(rotx[0], rotx[1], rotx[2], 0.f,
+        cgt::vec3 rotx = cgt::normalize(eigenvectors[0]);
+        cgt::vec3 roty = cgt::normalize(eigenvectors[1]);
+        cgt::vec3 rotz = cgt::normalize(eigenvectors[2]);
+        cgt::mat4 rotationMatrix(rotx[0], rotx[1], rotx[2], 0.f,
             roty[0], roty[1], roty[2], 0.f,
             rotz[0], rotz[1], rotz[2], 0.f,
             0.f    , 0.f    , 0.f    , 1.f);
 
         float divScale = (1.f - 2.f*EPS)/(eigenvalues[0]);
-        const tgt::mat4& voxelToWorldMatrix = evals->getParent()->getMappingInformation().getVoxelToWorldMatrix();
+        const cgt::mat4& voxelToWorldMatrix = evals->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 
         // compute model matrix (without glyph-related transformation
-        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix * tgt::mat4::createScale(tgt::vec3(p_glyphSize.getValue()));
+        cgt::mat4 modelMatrix = voxelToWorldMatrix * cgt::mat4::createTranslation(position) * rotationMatrix * cgt::mat4::createScale(cgt::vec3(p_glyphSize.getValue()));
 
         // setup shader
-        _shader->setUniform("_color", tgt::vec4(rotx, 1.f));
+        _shader->setUniform("_color", cgt::vec4(rotx, 1.f));
 
         switch (p_glyphType.getOptionValue()) {
             case CUBOID:
                 // render single cuboid
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3((1.f - EPS), (EPS + divScale*eigenvalues[1]), (EPS + divScale*eigenvalues[2]))));
+                _shader->setUniform("_modelMatrix", modelMatrix * cgt::mat4::createScale(cgt::vec3((1.f - EPS), (EPS + divScale*eigenvalues[1]), (EPS + divScale*eigenvalues[2]))));
                 _cubeGeometry->render(GL_POLYGON);
                 break;
 
             case ELLIPSOID:
                 // render single ellipsoid
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3((1.f - EPS), (EPS + divScale*eigenvalues[1]), (EPS + divScale*eigenvalues[2]))));
+                _shader->setUniform("_modelMatrix", modelMatrix * cgt::mat4::createScale(cgt::vec3((1.f - EPS), (EPS + divScale*eigenvalues[1]), (EPS + divScale*eigenvalues[2]))));
                 _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
                 break;
 
             case MULTI:
                 // render three ellipsoids in different shapes
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3(divScale*eigenvalues[2], divScale*eigenvalues[2], divScale*eigenvalues[2])));
+                _shader->setUniform("_modelMatrix", modelMatrix * cgt::mat4::createScale(cgt::vec3(divScale*eigenvalues[2], divScale*eigenvalues[2], divScale*eigenvalues[2])));
                 _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3(divScale*eigenvalues[1], divScale*eigenvalues[1], EPS)));
+                _shader->setUniform("_modelMatrix", modelMatrix * cgt::mat4::createScale(cgt::vec3(divScale*eigenvalues[1], divScale*eigenvalues[1], EPS)));
                 _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
-                _shader->setUniform("_modelMatrix", modelMatrix * tgt::mat4::createScale(tgt::vec3(divScale*eigenvalues[0], EPS, EPS)));
+                _shader->setUniform("_modelMatrix", modelMatrix * cgt::mat4::createScale(cgt::vec3(divScale*eigenvalues[0], EPS, EPS)));
                 _ellipsoidGeometry->render(GL_TRIANGLE_STRIP);
                 break;
         }

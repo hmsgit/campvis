@@ -37,8 +37,8 @@ namespace campvis {
         // A segmentation layer consists of a vector of Frames, each containing a vector of points.
         struct Layer {
             struct Frame {
-                std::vector<tgt::vec2> _points;
-                std::vector<tgt::vec2> _gradients;
+                std::vector<cgt::vec2> _points;
+                std::vector<cgt::vec2> _gradients;
             };
 
             std::vector<Frame> _frames;
@@ -65,7 +65,7 @@ namespace campvis {
         void saveToStream(std::ostream& s);
 
         // vector of centerlines
-        std::vector<tgt::vec4> _centerlines;
+        std::vector<cgt::vec4> _centerlines;
 
     protected:
         // Vector of segmentation layers

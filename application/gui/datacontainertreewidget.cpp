@@ -87,7 +87,7 @@ namespace campvis {
         , _dataHandle(dataHandle)
         , _name(name)
     {
-        tgtAssert(_dataHandle.getData() != 0, "WTF - QtDataHandle with empty data?");
+        cgtAssert(_dataHandle.getData() != 0, "WTF - QtDataHandle with empty data?");
         updateChildren();
     }
 
@@ -98,7 +98,7 @@ namespace campvis {
                 return QVariant(QString::fromStdString(_name));
             else if (column == COLUMN_TYPE) {
                 const AbstractData* data = _dataHandle.getData();
-                tgtAssert(data != 0, "WTF - QtDataHandle with empty data?");
+                cgtAssert(data != 0, "WTF - QtDataHandle with empty data?");
 
                 if (const ImageData* tester = dynamic_cast<const ImageData*>(data)) {
                 	return QVariant(QString("Image Data"));
@@ -295,7 +295,7 @@ namespace campvis {
     }
 
     void DataContainerTreeModel::onDataContainerChanged(const QString& key, QtDataHandle dh) {
-        tgtAssert(dh.getData() != 0, "WTF - QtDataHandle with empty data?");
+        cgtAssert(dh.getData() != 0, "WTF - QtDataHandle with empty data?");
 
         std::map<QString, DataHandleTreeItem*>::iterator it = _itemMap.lower_bound(key);
         if (it == _itemMap.end() || it->first != key) {
@@ -350,7 +350,7 @@ namespace campvis {
 
     void DataContainerTreeWidget::setupWidget() {
         _treeModel = new DataContainerTreeModel(this);
-        tgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
+        cgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
 
         setModel(_treeModel);
     }

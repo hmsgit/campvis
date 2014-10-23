@@ -1,25 +1,25 @@
 ################################################################################
-# Project file for the tgt library
+# Project file for the cgt library
 ################################################################################
-PROJECT(tgt)
+PROJECT(cgt)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 INCLUDE(../../cmake/commonconf.cmake)
 
-MESSAGE(STATUS "Configuring tgt Library")
+MESSAGE(STATUS "Configuring cgt Library")
 
 # configuration
-IF(TGT_WITH_WMI)
-	ADD_DEFINITIONS("-DTGT_WITH_WMI")
+IF(CGT_WITH_WMI)
+	ADD_DEFINITIONS("-DCGT_WITH_WMI")
 	ADD_DEFINITIONS("-D_WIN32_DCOM") #< for CoInitializeSecurity() to be defined
 	LIST(APPEND CampvisGlobalExternalLibs "WbemUuid")
-ENDIF(TGT_WITH_WMI)
+ENDIF(CGT_WITH_WMI)
 
 
 # headers
-FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h)
+FILE(GLOB CGT_HEADERS *.h event/*.h navigation/*.h)
 
 # sources
-SET(TGT_SOURCES
+SET(CGT_SOURCES
 	assert.cpp
 	bounds.cpp
 	buffer.cpp
@@ -58,42 +58,41 @@ SET(TGT_SOURCES
 #navigation 
 	navigation/navigation.cpp
 	navigation/trackball.cpp
-
 )
 
 
 # Qt related stuff:
-IF(TGT_WITH_QT)
-	LIST(APPEND TGT_HEADERS 
+IF(CGT_WITH_QT)
+	LIST(APPEND CGT_HEADERS 
 		qt/qtcanvas.h
 		qt/qtthreadedcanvas.h
 		qt/qttimer.h)
 	
-	LIST(APPEND TGT_SOURCES 
+	LIST(APPEND CGT_SOURCES 
 		qt/qtcanvas.cpp
 		qt/qtthreadedcanvas.cpp
 		qt/qttimer.cpp)
-ENDIF(TGT_WITH_QT)
+ENDIF(CGT_WITH_QT)
 
 
 ################################################################################
 # define library target
 ################################################################################
-ADD_LIBRARY(tgt ${TGT_SOURCES} ${TGT_HEADERS})
+ADD_LIBRARY(cgt ${CGT_SOURCES} ${CGT_HEADERS})
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(tgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(cgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
 
-# if TGT is built as a shared library, CMake will define the following flag to instruct the code to
+# if CGT is built as a shared library, CMake will define the following flag to instruct the code to
 # export DLL symbols
-SET_TARGET_PROPERTIES(tgt PROPERTIES DEFINE_SYMBOL "TGT_BUILD_DLL")
+SET_TARGET_PROPERTIES(cgt PROPERTIES DEFINE_SYMBOL "CGT_BUILD_DLL")
 
 
 ################################################################################
 # deployment
 ################################################################################
 IF(CAMPVIS_ADD_INSTALL_TARGET)
-	INSTALL(TARGETS tgt 
+	INSTALL(TARGETS cgt 
 		RUNTIME DESTINATION .
 	)
 ENDIF()

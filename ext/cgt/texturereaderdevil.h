@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,15 +22,15 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_TEXTUREREADERDEVIL_H
-#define TGT_TEXTUREREADERDEVIL_H
+#ifndef CGT_TEXTUREREADERDEVIL_H
+#define CGT_TEXTUREREADERDEVIL_H
 
-#ifdef TGT_HAS_DEVIL
+#ifdef CGT_HAS_DEVIL
 #include "cgt/texturereader.h"
 
-namespace tgt {
+namespace cgt {
 
-class TGT_API TextureReaderDevil : public TextureReader {
+class CGT_API TextureReaderDevil : public TextureReader {
     static const std::string loggerCat_;
 public:
     TextureReaderDevil();
@@ -40,7 +40,7 @@ public:
 };
 
 
-} // namespace tgt
+} // namespace cgt
 
-#endif // TGT_HAS_DEVIL
-#endif // TGT_TEXTUREREADERDEVIL_H
+#endif // CGT_HAS_DEVIL
+#endif // CGT_TEXTUREREADERDEVIL_H

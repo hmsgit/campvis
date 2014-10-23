@@ -58,15 +58,15 @@ namespace campvis {
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3)
         , p_xSliceNumber("XSliceNumber", "X Slice Number", 0, 0, 0)
-        , p_xSliceColor("XSliceColor", "X Slice Color", tgt::vec4(1.f, 0.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_xSliceColor("XSliceColor", "X Slice Color", cgt::vec4(1.f, 0.f, 0.f, 1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , p_ySliceNumber("YSliceNumber", "Y Slice Number", 0, 0, 0)
-        , p_ySliceColor("YSliceColor", "Y Slice Color", tgt::vec4(0.f, 1.f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_ySliceColor("YSliceColor", "Y Slice Color", cgt::vec4(0.f, 1.f, 0.f, 1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , p_zSliceNumber("ZSliceNumber", "Z Slice Number", 0, 0, 0)
-        , p_zSliceColor("ZSliceColor", "Z Slice Color", tgt::vec4(0.f, 0.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_zSliceColor("ZSliceColor", "Z Slice Color", cgt::vec4(0.f, 0.f, 1.f, 1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , p_renderCrosshair("RenderCrosshair", "Render Crosshair", true)
         , p_fitToWindow("FitToWindow", "Fit to Window", true)
         , p_scalingFactor("ScalingFactor", "Scaling Factor", 1.f, 0.f, 10.f, .1f, 2)
-        , p_offset("Offset", "Offset", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(100))
+        , p_offset("Offset", "Offset", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(100))
         , p_geometryRenderMode("GeometryRenderMode", "Geometry Render Mode", renderOptions, 4)
         , p_geometryRenderSize("GeometryRenderSize", "Geometry Render Size", 4.f, 1.f, 10.f, 1.f, 1)
         , _shader(nullptr)
@@ -132,7 +132,7 @@ namespace campvis {
         _currentImage = img.getDataHandle();
 
         if (img != 0) {
-            tgt::ivec3 imgSize = img->getSize();
+            cgt::ivec3 imgSize = img->getSize();
             if (p_xSliceNumber.getMaxValue() != imgSize.x - 1){
                 p_xSliceNumber.setMaxValue(imgSize.x - 1);
             }
@@ -143,8 +143,8 @@ namespace campvis {
                 p_zSliceNumber.setMaxValue(imgSize.z - 1);
             }
 
-            p_offset.setMinValue(tgt::ivec2(-tgt::max(imgSize)));
-            p_offset.setMaxValue(tgt::ivec2( tgt::max(imgSize)));
+            p_offset.setMinValue(cgt::ivec2(-cgt::max(imgSize)));
+            p_offset.setMaxValue(cgt::ivec2( cgt::max(imgSize)));
         }
 
         p_scalingFactor.setVisible(! p_fitToWindow.getValue());
@@ -157,7 +157,7 @@ namespace campvis {
         _shader->rebuild();
     }
 
-    void SliceRenderProcessor::onEvent(tgt::Event* e) {
+    void SliceRenderProcessor::onEvent(cgt::Event* e) {
         // if there is nobody listening to the scribble signal, we can save the expensive computations...
         if (! s_scribblePainted.has_connections())
             return;
@@ -167,26 +167,26 @@ namespace campvis {
             if (const ImageData* id = static_cast<const ImageData*>(_currentImage.getData())) {
 
                 // we only handle mouse events
-                if (tgt::MouseEvent* me = dynamic_cast<tgt::MouseEvent*>(e)) {
+                if (cgt::MouseEvent* me = dynamic_cast<cgt::MouseEvent*>(e)) {
                     // transform viewport coordinates to voxel coordinates
                     // this is the inverse computation performed by the shader during rendering
-                    tgt::vec2 viewportSize = getEffectiveViewportSize();
+                    cgt::vec2 viewportSize = getEffectiveViewportSize();
                     float renderTargetRatio = viewportSize.x / viewportSize.y;
-                    tgt::vec2 posNormalized = tgt::vec2(static_cast<float>(me->x()), static_cast<float>(me->y())) / tgt::vec2(_viewportSizeProperty->getValue());
-                    tgt::vec3 imgSize(id->getSize());
+                    cgt::vec2 posNormalized = cgt::vec2(static_cast<float>(me->x()), static_cast<float>(me->y())) / cgt::vec2(_viewportSizeProperty->getValue());
+                    cgt::vec3 imgSize(id->getSize());
 
-                    tgt::vec2 imageSize(0.f);
+                    cgt::vec2 imageSize(0.f);
                     switch (p_sliceOrientation.getOptionValue()) {
                         case XY_PLANE:
-                            imageSize = tgt::vec2((static_cast<float>(imgSize.x) * id->getMappingInformation().getVoxelSize().x),
+                            imageSize = cgt::vec2((static_cast<float>(imgSize.x) * id->getMappingInformation().getVoxelSize().x),
                                                   (static_cast<float>(imgSize.y) * id->getMappingInformation().getVoxelSize().y));
                             break;
                         case XZ_PLANE:
-                            imageSize = tgt::vec2((static_cast<float>(imgSize.x) * id->getMappingInformation().getVoxelSize().x),
+                            imageSize = cgt::vec2((static_cast<float>(imgSize.x) * id->getMappingInformation().getVoxelSize().x),
                                                   (static_cast<float>(imgSize.z) * id->getMappingInformation().getVoxelSize().z));
                             break;
                         case YZ_PLANE:
-                            imageSize = tgt::vec2((static_cast<float>(imgSize.y) * id->getMappingInformation().getVoxelSize().y),
+                            imageSize = cgt::vec2((static_cast<float>(imgSize.y) * id->getMappingInformation().getVoxelSize().y),
                                                   (static_cast<float>(imgSize.z) * id->getMappingInformation().getVoxelSize().z));
                             break;
                     }
@@ -194,42 +194,42 @@ namespace campvis {
                     if (p_fitToWindow.getValue()) {
                         float sliceRatio = imageSize.x / imageSize.y;
                         float ratioRatio = sliceRatio / renderTargetRatio;
-                        posNormalized -= (ratioRatio > 1) ? tgt::vec2(0.f, (1.f - (1.f / ratioRatio)) / 2.f) : tgt::vec2((1.f - ratioRatio) / 2.f, 0.f);
-                        posNormalized *= (ratioRatio > 1) ? tgt::vec2(1.f, ratioRatio) : tgt::vec2(1.f / ratioRatio, 1.f);
+                        posNormalized -= (ratioRatio > 1) ? cgt::vec2(0.f, (1.f - (1.f / ratioRatio)) / 2.f) : cgt::vec2((1.f - ratioRatio) / 2.f, 0.f);
+                        posNormalized *= (ratioRatio > 1) ? cgt::vec2(1.f, ratioRatio) : cgt::vec2(1.f / ratioRatio, 1.f);
                     }
                     else {
                         posNormalized -= .5f;
                         posNormalized *= viewportSize / (imageSize * p_scalingFactor.getValue());
-                        posNormalized -= tgt::vec2(p_offset.getValue()) / imageSize;
+                        posNormalized -= cgt::vec2(p_offset.getValue()) / imageSize;
                         posNormalized += .5f;
                     }
 
-                    tgt::vec3 voxel;
+                    cgt::vec3 voxel;
                     switch (p_sliceOrientation.getOptionValue()) {
                         case XY_PLANE:
-                            voxel = tgt::vec3(posNormalized.x * imgSize.x, posNormalized.y * imgSize.y, static_cast<float>(p_zSliceNumber.getValue()));
+                            voxel = cgt::vec3(posNormalized.x * imgSize.x, posNormalized.y * imgSize.y, static_cast<float>(p_zSliceNumber.getValue()));
                             break;
                         case XZ_PLANE:
-                            voxel = tgt::vec3(posNormalized.x * imgSize.x, static_cast<float>(p_ySliceNumber.getValue()), posNormalized.y * imgSize.z);
+                            voxel = cgt::vec3(posNormalized.x * imgSize.x, static_cast<float>(p_ySliceNumber.getValue()), posNormalized.y * imgSize.z);
                             break;
                         case YZ_PLANE:
-                            voxel = tgt::vec3(static_cast<float>(p_xSliceNumber.getValue()), posNormalized.x * imgSize.y, posNormalized.y * imgSize.z);
+                            voxel = cgt::vec3(static_cast<float>(p_xSliceNumber.getValue()), posNormalized.x * imgSize.y, posNormalized.y * imgSize.z);
                             break;
                     }
 
                     // okay, we computed the voxel under the mouse arrow, now we need to tell the outer world
-                    if ((me->action() == tgt::MouseEvent::PRESSED) && (me->button() == tgt::MouseEvent::MOUSE_BUTTON_LEFT)) {
+                    if ((me->action() == cgt::MouseEvent::PRESSED) && (me->button() == cgt::MouseEvent::MOUSE_BUTTON_LEFT)) {
                         _inScribbleMode = true;
-                        if (tgt::hand(tgt::greaterThanEqual(voxel, tgt::vec3(0.f))) && tgt::hand(tgt::lessThan(voxel, imgSize))) {
+                        if (cgt::hand(cgt::greaterThanEqual(voxel, cgt::vec3(0.f))) && cgt::hand(cgt::lessThan(voxel, imgSize))) {
                             s_scribblePainted(voxel);
                         }
                     }
-                    else if (_inScribbleMode && me->action() == tgt::MouseEvent::MOTION) {
-                        if (tgt::hand(tgt::greaterThanEqual(voxel, tgt::vec3(0.f))) && tgt::hand(tgt::lessThan(voxel, imgSize))) {
+                    else if (_inScribbleMode && me->action() == cgt::MouseEvent::MOTION) {
+                        if (cgt::hand(cgt::greaterThanEqual(voxel, cgt::vec3(0.f))) && cgt::hand(cgt::lessThan(voxel, imgSize))) {
                             s_scribblePainted(voxel);
                         }
                     }
-                    else if (_inScribbleMode && me->action() == tgt::MouseEvent::RELEASED) {
+                    else if (_inScribbleMode && me->action() == cgt::MouseEvent::RELEASED) {
                         _inScribbleMode = false;
                         return;
                     }
@@ -240,18 +240,18 @@ namespace campvis {
     }
 
     void SliceRenderProcessor::setupMatrices(const ImageRepresentationGL::ScopedRepresentation& img) {
-        tgt::vec3 imgSize(img->getSize());
+        cgt::vec3 imgSize(img->getSize());
 
         // current slices in texture coordinates
-        tgt::vec3 sliceTexCoord = tgt::vec3(.5f + p_xSliceNumber.getValue(), .5f + p_ySliceNumber.getValue(), .5f + p_zSliceNumber.getValue()) / imgSize;
+        cgt::vec3 sliceTexCoord = cgt::vec3(.5f + p_xSliceNumber.getValue(), .5f + p_ySliceNumber.getValue(), .5f + p_zSliceNumber.getValue()) / imgSize;
         float clip = 0.f;
 
-        tgt::ivec2 viewportSize = getEffectiveViewportSize();
-        tgt::vec2 imageSize(0.f);
+        cgt::ivec2 viewportSize = getEffectiveViewportSize();
+        cgt::vec2 imageSize(0.f);
         float renderTargetRatio = static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y);
 
-        _texCoordMatrix = tgt::mat4::zero;
-        _geometryModelMatrix = tgt::mat4::zero;
+        _texCoordMatrix = cgt::mat4::zero;
+        _geometryModelMatrix = cgt::mat4::zero;
         switch (p_sliceOrientation.getValue()) {
             case XY_PLANE:
                 // keep texture coordinates for x,y, shift z coordinates to slice value
@@ -261,13 +261,13 @@ namespace campvis {
                 _texCoordMatrix.t33 = 1.f;
                 _texCoordMatrix.t23 = sliceTexCoord.z;
 
-                _geometryModelMatrix = tgt::mat4::identity;
+                _geometryModelMatrix = cgt::mat4::identity;
 
                 // compute clip volume so that we only show the geometry at the current slice.
                 clip = (-2.f * static_cast<float>(p_zSliceNumber.getValue()) / imgSize.z) + 1.f;
-                _geometryProjectionMatrix = tgt::mat4::createOrtho(-1.f, 1.f, 1.f, -1.f, clip - (.5f / imgSize.z), clip + (.5f / imgSize.z));
+                _geometryProjectionMatrix = cgt::mat4::createOrtho(-1.f, 1.f, 1.f, -1.f, clip - (.5f / imgSize.z), clip + (.5f / imgSize.z));
 
-                imageSize = tgt::vec2((static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x),
+                imageSize = cgt::vec2((static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x),
                     (static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y));
                 break;
 
@@ -286,9 +286,9 @@ namespace campvis {
 
                 // compute clip volume so that we only show the geometry at the current slice.
                 clip = (-2.f * static_cast<float>(p_ySliceNumber.getValue()) / imgSize.y) + 1.f;
-                _geometryProjectionMatrix = tgt::mat4::createOrtho(-1.f, 1.f, 1.f, -1.f, clip - (.5f / imgSize.y), clip + (.5f / imgSize.y));
+                _geometryProjectionMatrix = cgt::mat4::createOrtho(-1.f, 1.f, 1.f, -1.f, clip - (.5f / imgSize.y), clip + (.5f / imgSize.y));
 
-                imageSize = tgt::vec2((static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x), 
+                imageSize = cgt::vec2((static_cast<float>(imgSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x), 
                     (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z));
                 break;
 
@@ -307,9 +307,9 @@ namespace campvis {
 
                 // compute clip volume so that we only show the geometry at the current slice.
                 clip = (-2.f * static_cast<float>(p_xSliceNumber.getValue()) / imgSize.x) + 1.f;
-                _geometryProjectionMatrix = tgt::mat4::createOrtho(-1.f, 1.f, 1.f, -1.f, clip - (.5f / imgSize.x), clip + (.5f / imgSize.x));
+                _geometryProjectionMatrix = cgt::mat4::createOrtho(-1.f, 1.f, 1.f, -1.f, clip - (.5f / imgSize.x), clip + (.5f / imgSize.x));
 
-                imageSize = tgt::vec2((static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y),
+                imageSize = cgt::vec2((static_cast<float>(imgSize.y) * img.getImageData()->getMappingInformation().getVoxelSize().y),
                     (static_cast<float>(imgSize.z) * img.getImageData()->getMappingInformation().getVoxelSize().z));
                 break;
         }
@@ -319,11 +319,11 @@ namespace campvis {
         float ratioRatio = sliceRatio / renderTargetRatio;
 
         if (p_fitToWindow.getValue()) {
-            _viewMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
+            _viewMatrix = (ratioRatio > 1) ? cgt::mat4::createScale(cgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : cgt::mat4::createScale(cgt::vec3(ratioRatio, 1.f, 1.f));
         }
         else {
-            _viewMatrix = tgt::mat4::createTranslation(tgt::vec3(2.f * p_offset.getValue().x * p_scalingFactor.getValue() / viewportSize.x, -2.f * p_offset.getValue().y * p_scalingFactor.getValue() / viewportSize.y, 0.f));
-            _viewMatrix *= tgt::mat4::createScale(tgt::vec3(p_scalingFactor.getValue() * imageSize.x / viewportSize.x, p_scalingFactor.getValue() * imageSize.y / viewportSize.y, 1.f));
+            _viewMatrix = cgt::mat4::createTranslation(cgt::vec3(2.f * p_offset.getValue().x * p_scalingFactor.getValue() / viewportSize.x, -2.f * p_offset.getValue().y * p_scalingFactor.getValue() / viewportSize.y, 0.f));
+            _viewMatrix *= cgt::mat4::createScale(cgt::vec3(p_scalingFactor.getValue() * imageSize.x / viewportSize.x, p_scalingFactor.getValue() * imageSize.y / viewportSize.y, 1.f));
         }
         _viewMatrix.t11 *= -1;
     }
@@ -336,8 +336,8 @@ namespace campvis {
         glLineWidth(2.f);
         _shader->setUniform("_useTexturing", false);
 
-        tgt::mat4 modelMatrix = tgt::mat4::identity;
-        tgt::vec3 sliceTexCoord = tgt::vec3(.5f + p_xSliceNumber.getValue(), .5f + p_ySliceNumber.getValue(), .5f + p_zSliceNumber.getValue()) / tgt::vec3(img->getSize());
+        cgt::mat4 modelMatrix = cgt::mat4::identity;
+        cgt::vec3 sliceTexCoord = cgt::vec3(.5f + p_xSliceNumber.getValue(), .5f + p_ySliceNumber.getValue(), .5f + p_zSliceNumber.getValue()) / cgt::vec3(img->getSize());
 
         switch (p_sliceOrientation.getValue()) {
             case XY_PLANE:
@@ -408,7 +408,7 @@ namespace campvis {
             // setup for geometry rendering
             _shader->setUniform("_projectionMatrix", _geometryProjectionMatrix);
             _shader->setUniform("_viewMatrix", _viewMatrix);
-            _shader->setUniform("_modelMatrix", _geometryModelMatrix * tgt::mat4::createTranslation(tgt::vec3(-1.f, -1.f, -1.f)) * tgt::mat4::createScale(2.f / tgt::vec3(img->getSize())));
+            _shader->setUniform("_modelMatrix", _geometryModelMatrix * cgt::mat4::createTranslation(cgt::vec3(-1.f, -1.f, -1.f)) * cgt::mat4::createScale(2.f / cgt::vec3(img->getSize())));
             _shader->setUniform("_useTexturing", false);
             _shader->setUniform("_useSolidColor", false);
 
@@ -419,8 +419,8 @@ namespace campvis {
             geometry->render(p_geometryRenderMode.getValue());
 
             // recover
-            _shader->setUniform("_projectionMatrix", tgt::mat4::identity);
-            _shader->setUniform("_modelMatrix", tgt::mat4::identity);
+            _shader->setUniform("_projectionMatrix", cgt::mat4::identity);
+            _shader->setUniform("_modelMatrix", cgt::mat4::identity);
             _shader->setUniform("_useSolidColor", true);
             glPointSize(1.f);
             glLineWidth(1.f);

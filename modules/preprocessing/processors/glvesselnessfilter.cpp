@@ -46,7 +46,7 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_inputImage("InputImage", "Input (Gaussian Filtered) Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Eigenvector Image", "GlVesselnessFilter.out", DataNameProperty::WRITE)
-        , p_lod("Lod", "Min/Max LOD for Multi-Level Texture Lookup", tgt::vec2(1.f, 3.f), tgt::vec2(0.f), tgt::vec2(10.f), tgt::vec2(.5f), tgt::ivec2(1))
+        , p_lod("Lod", "Min/Max LOD for Multi-Level Texture Lookup", cgt::vec2(1.f, 3.f), cgt::vec2(0.f), cgt::vec2(10.f), cgt::vec2(.5f), cgt::ivec2(1))
         , p_alpha("Alpha", "Alpha Value for Vesselness", .5f, .01f, 1.f, .1f, 2)
         , p_beta("Beta", "Beta Value for Vesselness", .5f, .01f, 1.f, .1f, 2)
         , p_gamma("Gamma", "Gamma Value for Vesselness", .001f, .0001f, .1f, .001f, 4)
@@ -88,16 +88,16 @@ namespace campvis {
 
         if (img != 0) {
             if (img.getImageData()->getNumChannels() == 1) {
-                const tgt::svec3& size = img->getSize();
+                const cgt::svec3& size = img->getSize();
 
-                tgt::TextureUnit inputUnit;
+                cgt::TextureUnit inputUnit;
                 inputUnit.activate();
 
                 // create texture for result
-                tgt::Texture* resultTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RED, p_halfPrecisionOutput.getValue() ? GL_R16F : GL_R32F, GL_FLOAT, tgt::Texture::LINEAR);
+                cgt::Texture* resultTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RED, p_halfPrecisionOutput.getValue() ? GL_R16F : GL_R32F, GL_FLOAT, cgt::Texture::LINEAR);
                 resultTexture->uploadTexture();
 
-                //tgt::Texture* eigenvalueTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, tgt::Texture::LINEAR);
+                //cgt::Texture* eigenvalueTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, cgt::Texture::LINEAR);
                 //eigenvalueTexture->uploadTexture();
 
                 // activate shader and bind textures
@@ -108,12 +108,12 @@ namespace campvis {
                 _shader->setUniform("_gamma", p_gamma.getValue());
                 _shader->setUniform("_theta", p_theta.getValue());
 
-                const tgt::Texture* tex = img->getTexture();
+                const cgt::Texture* tex = img->getTexture();
                 img->bind(_shader, inputUnit);
 
                 // enable mipmapping if not done yet
-                if (tex->getFilter() != tgt::Texture::MIPMAP) {
-                    const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+                if (tex->getFilter() != cgt::Texture::MIPMAP) {
+                    const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
                     LGL_ERROR;
                     glGenerateMipmap(GL_TEXTURE_3D);
                     LGL_ERROR;
@@ -154,7 +154,7 @@ namespace campvis {
                 //id2->setMappingInformation(img->getParent()->getMappingInformation());
                 //data.addData("eigenvalues", id2);
 
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 LGL_ERROR;
             }
             else {

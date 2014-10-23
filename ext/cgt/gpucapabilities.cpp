@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -39,9 +39,9 @@
 using std::string;
 using std::stringstream;
 
-namespace tgt {
+namespace cgt {
 
-const std::string GpuCapabilities::loggerCat_("tgt.GpuCapabilities");
+const std::string GpuCapabilities::loggerCat_("cgt.GpuCapabilities");
 
 GpuCapabilities::GpuCapabilities(bool detectCaps) {
     if (detectCaps) {
@@ -180,8 +180,8 @@ void GpuCapabilities::logCapabilities(bool extensionsString, bool osString) {
         LINFO("OpenGL Extensions:   " << glExtensionsString_);
 
     stringstream features;
-    features << "Texturing:           " << (isOpenGlVersionSupported(GlVersion::TGT_GL_VERSION_1_1) ? "yes" : "no");
-    if (isOpenGlVersionSupported(GlVersion::TGT_GL_VERSION_1_1))
+    features << "Texturing:           " << (isOpenGlVersionSupported(GlVersion::CGT_GL_VERSION_1_1) ? "yes" : "no");
+    if (isOpenGlVersionSupported(GlVersion::CGT_GL_VERSION_1_1))
         features << ", max size: " << getMaxTextureSize();
     features << ", 3D: " << (is3DTexturingSupported() ? "yes" : "no");
     if (is3DTexturingSupported())
@@ -284,7 +284,7 @@ void GpuCapabilities::detectCapabilities() {
     }
 
     // Shaders
-    shaderSupport_ = (glVersion_ >= GlVersion::TGT_GL_VERSION_2_0);
+    shaderSupport_ = (glVersion_ >= GlVersion::CGT_GL_VERSION_2_0);
     shaderSupportARB_ = (isExtensionSupported("GL_ARB_vertex_program") &&
                          isExtensionSupported("GL_ARB_fragment_program"));
 
@@ -303,18 +303,18 @@ void GpuCapabilities::detectCapabilities() {
     else if (isExtensionSupported("GL_NV_vertex_program3")  ||
              isExtensionSupported("GL_ATI_shader_texture_lod"))
         shaderModel_ = SHADER_MODEL_3;
-    else if (glVersion_ >= GlVersion::TGT_GL_VERSION_2_0)
+    else if (glVersion_ >= GlVersion::CGT_GL_VERSION_2_0)
         shaderModel_ = SHADER_MODEL_2;
     else
         shaderModel_ = SHADER_MODEL_UNKNOWN;
 
     // Texturing
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint *) &maxTexSize_);
-    texturing3D_ = (glVersion_ >= GlVersion::TGT_GL_VERSION_1_2 ||
+    texturing3D_ = (glVersion_ >= GlVersion::CGT_GL_VERSION_1_2 ||
                     isExtensionSupported("GL_EXT_texture3D"));
 
     if (texturing3D_) {
-        if (glVersion_ >= GlVersion::TGT_GL_VERSION_2_0)
+        if (glVersion_ >= GlVersion::CGT_GL_VERSION_2_0)
             glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, (GLint *) &max3DTexSize_);
         else
             glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE_EXT, (GLint *) &max3DTexSize_);
@@ -453,21 +453,21 @@ bool GpuCapabilities::overrideGLSLVersion(const std::string& versionString){
 //-----------------------------------------------------------------------------------
 
 
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_1_0(1,0,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_1_1(1,1,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_1_2(1,2,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_1_3(1,3,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_1_4(1,4,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_1_5(1,5,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_2_0(2,0,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_2_1(2,1,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_3_0(3,0,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_3_1(3,1,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_3_2(3,2,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3(3,3,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_4_0(4,0,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_4_1(4,1,0);
-const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::TGT_GL_VERSION_4_2(4,2,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_1_0(1,0,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_1_1(1,1,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_1_2(1,2,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_1_3(1,3,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_1_4(1,4,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_1_5(1,5,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_2_0(2,0,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_2_1(2,1,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_3_0(3,0,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_3_1(3,1,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_3_2(3,2,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_3_3(3,3,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_0(4,0,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_1(4,1,0);
+const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::CGT_GL_VERSION_4_2(4,2,0);
 
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_110(1,10); ///< GLSL version 1.10
 const GpuCapabilities::GlVersion GpuCapabilities::GlVersion::SHADER_VERSION_120(1,20); ///< GLSL version 1.20
@@ -632,4 +632,4 @@ std::ostream& operator<<(std::ostream& s, const GpuCapabilities::GlVersion& v) {
         return (s << v.major_ << "." << v.minor_ << "." << v.release_);
 }
 
-} // namespace tgt
+} // namespace cgt

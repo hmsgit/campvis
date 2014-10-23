@@ -65,12 +65,12 @@ namespace campvis {
         ~LogViewerWidget();
 
         /**
-         * Initializes the underlying log and registers it with tgt.
+         * Initializes the underlying log and registers it with cgt.
          */
         void init();
 
         /**
-         * Deinitializes the underlying log and deregisters it from tgt.
+         * Deinitializes the underlying log and deregisters it from cgt.
          */
         void deinit();
 

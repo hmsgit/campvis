@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -29,7 +29,7 @@
 
 using namespace std;
 
-namespace tgt {
+namespace cgt {
 
 bool Log::testFilter(const std::string &cat, LogLevel level) {
     for (size_t i = 0; i < filters_.size(); i++)     {
@@ -261,9 +261,9 @@ HtmlLog::HtmlLog(const std::string &filename, bool dateStamping, bool timeStampi
     if (!file_)
         return;
 
-    std::string output = "<html>\n\t<head>\n\t\t<title>TGT Logfile</title>\n\t</head>\n\t"
+    std::string output = "<html>\n\t<head>\n\t\t<title>CGT Logfile</title>\n\t</head>\n\t"
         "<body>\n\n\t<table cellpadding=3 cellspacing=0 border=1>\n\t\t"
-        "<CAPTION>TGT Logfile</CAPTION>\n\n\t\t<THEAD>\n\t\t\t<TR>\n";
+        "<CAPTION>CGT Logfile</CAPTION>\n\n\t\t<THEAD>\n\t\t\t<TR>\n";
     if (dateStamping_)
         output += "\t\t\t\t<th>Date</th>\n";
     if (timeStamping_)
@@ -345,4 +345,4 @@ void LogManager::removeLog(Log* log) {
     }
 }
 
-} // namespace tgt
+} // namespace cgt

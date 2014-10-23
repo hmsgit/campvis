@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -26,15 +26,15 @@
 #include "cgt/logmanager.h"
 #include "cgt/openglgarbagecollector.h"
 
-namespace tgt {
+namespace cgt {
 
-const std::string FramebufferObject::loggerCat_("tgt.FramebufferObject");
+const std::string FramebufferObject::loggerCat_("cgt.FramebufferObject");
 
 FramebufferObject::FramebufferObject()
   : id_(0)
   , numColorAttachments_(0)
 {
-    memset(attachments_, 0, sizeof(Texture*) * (TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+2));
+    memset(attachments_, 0, sizeof(Texture*) * (CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+2));
     generateId();
 }
 
@@ -45,8 +45,8 @@ FramebufferObject::~FramebufferObject()
 
 void FramebufferObject::activate()
 {
-#if TGT_DEBUG
-    if (tgt::getGlInt(GL_FRAMEBUFFER_BINDING) != 0)
+#if CGT_DEBUG
+    if (cgt::getGlInt(GL_FRAMEBUFFER_BINDING) != 0)
         LWARNING("Binding a new FBO while another FBO is bound. Do you really want to do this?");
 #endif
 
@@ -80,7 +80,7 @@ void FramebufferObject::attachTexture(Texture* texture, GLenum attachment, int m
 
     size_t index = decodeAttachment(attachment);
     attachments_[index] = texture;
-    if (index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
+    if (index < CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
         ++numColorAttachments_;
 
 #ifdef CAMPVIS_DEBUG
@@ -112,7 +112,7 @@ void FramebufferObject::detachTexture(GLenum attachment) {
         attachments_[index] = 0;
         LGL_ERROR;
 
-        if (index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
+        if (index < CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS)
             --numColorAttachments_;
     }
     else {
@@ -121,7 +121,7 @@ void FramebufferObject::detachTexture(GLenum attachment) {
 }
 
 void FramebufferObject::detachAll() {
-    for (GLenum i = 0; i < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
+    for (GLenum i = 0; i < CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
         if (colorAttachments_[i] != 0)
             detachTexture(GL_COLOR_ATTACHMENT0 + i);
     }
@@ -191,16 +191,16 @@ Texture* const * FramebufferObject::getAttachments() const {
 }
 
 const Texture* FramebufferObject::getColorAttachment(size_t index /*= 0*/) const {
-    tgtAssert(index < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS, "Index out of bounds!");
+    cgtAssert(index < CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS, "Index out of bounds!");
     return attachments_[index];
 }
 
 const Texture* FramebufferObject::getDepthAttachment() const {
-    return attachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS];
+    return attachments_[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS];
 }
 
 const Texture* FramebufferObject::getStencilAttachment() const {
-    return attachments_[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+1];
+    return attachments_[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS+1];
 }
 
 size_t FramebufferObject::getNumColorAttachments() const {

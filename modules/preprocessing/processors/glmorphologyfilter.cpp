@@ -94,8 +94,8 @@ namespace campvis {
                 ops = StringUtils::replaceAll(ops, "o", "ed"); // opening := erosion, dilation
                 ops = StringUtils::replaceAll(ops, "c", "de"); // closing := dilation, erosion
 
-                const tgt::Texture* inputTexture = img->getTexture();
-                tgt::Texture* outputTexture = nullptr;
+                const cgt::Texture* inputTexture = img->getTexture();
+                cgt::Texture* outputTexture = nullptr;
 
                 for (size_t i = 0; i < ops.length(); ++i) {
                     if (ops[i] == 'e') {
@@ -124,7 +124,7 @@ namespace campvis {
                     data.addDataHandle(p_outputImage.getValue(), img.getDataHandle());
                 }
 
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 LGL_ERROR;
             }
             else {
@@ -137,15 +137,15 @@ namespace campvis {
         }
     }
 
-    tgt::Texture* GlMorphologyFilter::applyFilter(const tgt::Texture* inputTexture, tgt::Shader* filter) const {
-        tgtAssert(inputTexture != 0, "Input texture must not be 0.");
-        const tgt::ivec3& size = inputTexture->getDimensions();
+    cgt::Texture* GlMorphologyFilter::applyFilter(const cgt::Texture* inputTexture, cgt::Shader* filter) const {
+        cgtAssert(inputTexture != 0, "Input texture must not be 0.");
+        const cgt::ivec3& size = inputTexture->getDimensions();
 
-        tgt::TextureUnit inputUnit;
+        cgt::TextureUnit inputUnit;
         inputUnit.activate();
 
         // create texture for result
-        tgt::Texture* resultTexture = new tgt::Texture(0, size, inputTexture->getFormat(), inputTexture->getInternalFormat(), inputTexture->getDataType(), inputTexture->getFilter());
+        cgt::Texture* resultTexture = new cgt::Texture(0, size, inputTexture->getFormat(), inputTexture->getInternalFormat(), inputTexture->getDataType(), inputTexture->getFilter());
         resultTexture->uploadTexture();
 
         // activate shader and bind textures

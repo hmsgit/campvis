@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,19 +22,19 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_BOUNDS_H
-#define TGT_BOUNDS_H
+#ifndef CGT_BOUNDS_H
+#define CGT_BOUNDS_H
 
 #include "cgt/types.h"
 #include "cgt/vector.h"
 #include "cgt/matrix.h"
 
-namespace tgt {
+namespace cgt {
 
 /**
 *   Axis-aligned bounding box
 */
-class TGT_API Bounds {
+class CGT_API Bounds {
     unsigned int points_;   //points added to the box
     vec3 llf_; //lower left front
     vec3 urb_; //upper right back
@@ -174,7 +174,7 @@ class TGT_API Bounds {
     Bounds transform(const mat4& m) const;
 };
 
-class TGT_API HasBounds {
+class CGT_API HasBounds {
 public:
     HasBounds(const Bounds& bounds)
       : boundingBox_(bounds)
@@ -196,8 +196,8 @@ protected:
 };
 
 /// ostream-operator
-TGT_API std::ostream& operator<< (std::ostream& o, const Bounds& b);
+CGT_API std::ostream& operator<< (std::ostream& o, const Bounds& b);
 
 } // namespace
 
-#endif //TGT_BOUNDS_H
+#endif //CGT_BOUNDS_H

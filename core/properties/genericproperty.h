@@ -139,13 +139,13 @@ namespace campvis {
     template<typename T>
     void campvis::GenericProperty<T>::addSharedProperty(AbstractProperty* prop) {
         // make type check first, then call base method.
-        tgtAssert(prop != 0, "Shared property must not be 0!");
+        cgtAssert(prop != 0, "Shared property must not be 0!");
         if (GenericProperty<T>* tmp = dynamic_cast< GenericProperty<T>* >(prop)) {
             AbstractProperty::addSharedProperty(prop);
             tmp->setValue(getValue());
             return;
         }
-        tgtAssert(false, "Shared property must be of the same type as this property!");
+        cgtAssert(false, "Shared property must be of the same type as this property!");
     }
 
     template<typename T>

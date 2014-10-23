@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -27,9 +27,9 @@
 #include "cgt/gpucapabilities.h"
 #include "cgt/logmanager.h"
 
-namespace tgt {
+namespace cgt {
 
-const std::string TextureReader::loggerCat_("tgt.Texture.Reader");
+const std::string TextureReader::loggerCat_("cgt.Texture.Reader");
 
 TextureReader::TextureReader()
 {}
@@ -247,4 +247,4 @@ bool TextureReader::create3DTexture(Texture* t, Texture::Filter filter, bool com
     return true;
 }
 
-} // namespace tgt
+} // namespace cgt

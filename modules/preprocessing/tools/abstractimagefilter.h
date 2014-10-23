@@ -38,8 +38,8 @@ namespace campvis {
             : _input(input)
             , _output(output)
         {
-            tgtAssert(input != 0, "Input image must not be 0.");
-            tgtAssert(output != 0, "Output image must not be 0.");
+            cgtAssert(input != 0, "Input image must not be 0.");
+            cgtAssert(output != 0, "Output image must not be 0.");
         }
 
         virtual void operator() (const tbb::blocked_range<size_t>& range) const = 0;

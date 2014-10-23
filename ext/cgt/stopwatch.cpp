@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -25,7 +25,7 @@
 #include "cgt/stopwatch.h"
 #include "cgt/assert.h"
 
-namespace tgt {
+namespace cgt {
 
 Stopwatch::Stopwatch() {
     reset();
@@ -41,7 +41,7 @@ uint64_t Stopwatch::getTicks() {
         if (!result)
             return static_cast<uint64_t>( (static_cast<uint64_t>(tp.tv_sec) ) * 1000 + (tp.tv_usec / 1000));
         else {
-            tgtAssert(false, "The system function gettimeofday returned an error code!");
+            cgtAssert(false, "The system function gettimeofday returned an error code!");
             return 0;
         }
     #endif

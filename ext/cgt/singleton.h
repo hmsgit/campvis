@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,15 +22,15 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_SINGLETON_H
-#define TGT_SINGLETON_H
+#ifndef CGT_SINGLETON_H
+#define CGT_SINGLETON_H
 
 #include <iostream>
 
 #include "cgt/assert.h"
 #include "cgt/types.h"
 
-namespace tgt {
+namespace cgt {
 
 /**
     This class helps to build the singleton design pattern.
@@ -45,7 +45,7 @@ public:
      * Must be called BEFORE the class is used, like this:
      */
     static void init() {
-        tgtAssert( !singletonClass_, "singletonClass_ has already been initialized." );
+        cgtAssert( !singletonClass_, "singletonClass_ has already been initialized." );
         singletonClass_ = new T;
     }
 
@@ -54,7 +54,7 @@ public:
      * Must be done at last.
      */
     static void deinit() {
-        tgtAssert( singletonClass_ != 0, "singletonClass_ has already been deinitialized." );
+        cgtAssert( singletonClass_ != 0, "singletonClass_ has already been deinitialized." );
         delete singletonClass_;
         singletonClass_ = 0;
     }
@@ -64,7 +64,7 @@ public:
      * @return Pointer of the actual class
      */
     static T* getPtr() {
-        tgtAssert( singletonClass_ != 0, "singletonClass_ has not been intitialized." );
+        cgtAssert( singletonClass_ != 0, "singletonClass_ has not been intitialized." );
         return singletonClass_;
     }
 
@@ -73,7 +73,7 @@ public:
      * @return reference of the actual class
     */
     static T& getRef() {
-        tgtAssert( singletonClass_ != 0 , "singletonClass_ has not been intitialized." );
+        cgtAssert( singletonClass_ != 0 , "singletonClass_ has not been intitialized." );
         return *singletonClass_;
     }
 
@@ -94,4 +94,4 @@ T* Singleton<T>::singletonClass_ = 0;
 
 } // namespace
 
-#endif // TGT_SINGLETON_H
+#endif // CGT_SINGLETON_H

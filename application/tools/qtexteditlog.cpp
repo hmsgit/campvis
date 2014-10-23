@@ -33,7 +33,7 @@ namespace campvis {
         : QObject(parent)
         , _logDisplay(logDisplay)
     {
-        tgtAssert(logDisplay != 0, "Log display widget must not be 0.");
+        cgtAssert(logDisplay != 0, "Log display widget must not be 0.");
 
         dateStamping_ = dateStamping;
         timeStamping_ = timeStamping;

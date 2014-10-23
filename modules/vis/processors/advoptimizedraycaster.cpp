@@ -84,11 +84,11 @@ namespace campvis {
         if (p_enableShading.getValue() == false || light != nullptr) {
             _shader->activate();
 
-            tgt::TextureUnit bbvUnit;
+            cgt::TextureUnit bbvUnit;
             bbvUnit.activate();
             _vhm->getTexture()->bind();
             {
-                tgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
+                cgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
                 _shader->setUniform("_vvTexture", bbvUnit.getUnitNumber());
                 _shader->setUniform("_vvVoxelSize", static_cast<int>(_vhm->getBrickSize()));
                 _shader->setUniform("_vvVoxelDepth", static_cast<int>(_vhm->getBrickDepth()));

@@ -31,7 +31,7 @@
 #include <QTextEdit>
 #include <QTextDocument>
 
-using namespace tgt;
+using namespace cgt;
 
 namespace campvis {
 

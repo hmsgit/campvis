@@ -139,7 +139,7 @@ namespace campvis {
 
     void PointPredicateHistogramPropertyWidget::onHueValueChanged(int value) {
         if (_selectedPredicate != nullptr) {
-            tgt::vec2 c = _selectedPredicate->p_color.getValue();
+            cgt::vec2 c = _selectedPredicate->p_color.getValue();
             c.x = static_cast<float>(value) / 100.f;
             _selectedPredicate->p_color.setValue(c);
         }
@@ -147,7 +147,7 @@ namespace campvis {
 
     void PointPredicateHistogramPropertyWidget::onSaturationValueChanged(int value) {
         if (_selectedPredicate != nullptr) {
-            tgt::vec2 c = _selectedPredicate->p_color.getValue();
+            cgt::vec2 c = _selectedPredicate->p_color.getValue();
             c.y = static_cast<float>(value) / 100.f;
             _selectedPredicate->p_color.setValue(c);
         }
@@ -191,18 +191,18 @@ namespace campvis {
         }
         else if (item->text() == tr("Gradient Orientation")) {
             vpToAdd = new RangePointPredicate("gradientAngle", "GradAngle", "Gradient Angle");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(180.f, 180.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(80.f, 100.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(180.f, 180.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(80.f, 100.f));
         }
         else if (item->text() == tr("Silhouette View")) {
             vpToAdd = new RangePointPredicate("viewAngle", "Silhouette", "Silhouette View");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(180.f, 180.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(85.f, 95.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(180.f, 180.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(85.f, 95.f));
         }
         else if (item->text() == tr("SNR Range")) {
             vpToAdd = new RangePointPredicate("snr", "SNR", "SNR Range");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(10.f, 10.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.f, 10.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(10.f, 10.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.f, 10.f));
         }
         else if (item->text() == tr("Vesselness Range")) {
             vpToAdd = new RangePointPredicate("vesselness", "Vesselness", "Vesselness Range");
@@ -214,7 +214,7 @@ namespace campvis {
             vpToAdd = new LabelBitPointPredicate("label", "Label" + StringUtils::toString(numPreds), "Label ID " + StringUtils::toString(numPreds));
         }
         else {
-            tgtAssert(false, "This should not happen.");
+            cgtAssert(false, "This should not happen.");
         }
 
         return vpToAdd;

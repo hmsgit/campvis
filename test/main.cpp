@@ -53,7 +53,7 @@ QApplication *app;
 /// Flag, whether CampVisApplication was correctly initialized
 bool _initialized;
 /// A local OpenGL context used for initialization
-tgt::GLCanvas* _localContext = nullptr;
+cgt::GLCanvas* _localContext = nullptr;
 static const std::string loggerCat_;
 
 
@@ -65,29 +65,29 @@ void init() {
     sigslot::signal_manager::getRef().setSignalHandlingMode(sigslot::signal_manager::FORCE_DIRECT);
     sigslot::signal_manager::getRef().start();
 
-    tgt::GlContextManager::init();
+    cgt::GlContextManager::init();
 
-    tgt::OpenGLJobProcessor::init();
+    cgt::OpenGLJobProcessor::init();
     campvis::SimpleJobProcessor::init();
 
-    tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
+    cgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
     
-    // Init TGT
-    tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
-    tgt::init(featureset);
-    LogMgr.getConsoleLog()->addCat("", true, tgt::Info);
+    // Init CGT
+    cgt::InitFeature::Features featureset = cgt::InitFeature::ALL;
+    cgt::init(featureset);
+    LogMgr.getConsoleLog()->addCat("", true, cgt::Info);
 
     // create a local OpenGL context and init GL
-    tgt::QtThreadedCanvas* backgroundCanvas = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
+    cgt::QtThreadedCanvas* backgroundCanvas = new cgt::QtThreadedCanvas("", cgt::ivec2(16, 16));
     GLCtxtMgr.registerContextAndInitGlew(backgroundCanvas, "Background Context");
     GLCtxtMgr.releaseContext(backgroundCanvas, false);
     GLJobProc.setContext(backgroundCanvas);
     GLJobProc.start();
     
-    _localContext = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
-    tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext, "Local Context");
+    _localContext = new cgt::QtThreadedCanvas("", cgt::ivec2(16, 16));
+    cgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext, "Local Context");
 
-    tgt::initGL(featureset);
+    cgt::initGL(featureset);
     ShdrMgr.setDefaultGlslVersion("330");
 
     campvis::QuadRenderer::init();
@@ -103,10 +103,10 @@ void init() {
     // ensure matching OpenGL specs
     LINFO("Using Graphics Hardware " << GpuCaps.getVendorAsString() << " " << GpuCaps.getGlRendererString() << " on " << GpuCaps.getOSVersionString());
     LINFO("Supported OpenGL " << GpuCaps.getGlVersion() << ", GLSL " << GpuCaps.getShaderVersion());
-    if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3) {
+    if (GpuCaps.getGlVersion() < cgt::GpuCapabilities::GlVersion::CGT_GL_VERSION_3_3) {
         LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intended.");
     }
-    if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
+    if (GpuCaps.getShaderVersion() < cgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
         LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
     }
 
@@ -116,24 +116,24 @@ void init() {
 }
 
 void deinit() {
-    tgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
+    cgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
     {
         // Deinit everything OpenGL related using the local context.
-        tgt::GLContextScopedLock lock(_localContext);
+        cgt::GLContextScopedLock lock(_localContext);
 
         campvis::QuadRenderer::deinit();
 
         campvis::SimpleJobProcessor::deinit();
         GLJobProc.stop();
-        tgt::OpenGLJobProcessor::deinit();
+        cgt::OpenGLJobProcessor::deinit();
 
-        tgt::deinitGL();
+        cgt::deinitGL();
     }
 
 
-    tgt::GlContextManager::deinit();
-    tgt::deinit();
+    cgt::GlContextManager::deinit();
+    cgt::deinit();
 
     sigslot::signal_manager::getRef().stop();
     sigslot::signal_manager::deinit();
@@ -158,7 +158,7 @@ GTEST_API_ int main(int argc, char **argv) {
 
     init();
     {
-        tgt::GLContextScopedLock lock(_localContext);
+        cgt::GLContextScopedLock lock(_localContext);
         ret= RUN_ALL_TESTS();
 
     }

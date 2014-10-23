@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_LOGMANAGER_H
-#define TGT_LOGMANAGER_H
+#ifndef CGT_LOGMANAGER_H
+#define CGT_LOGMANAGER_H
 
 #include <string>
 #include <sstream>
@@ -34,7 +34,7 @@
 #include "cgt/singleton.h"
 #include "cgt/types.h"
 
-namespace tgt {
+namespace cgt {
 
 /**
  * Specifies the severity of the log event.
@@ -53,7 +53,7 @@ enum LogLevel {
 /**
  * Holds the information for filtering messages.
  */
-struct TGT_API LogFilter {
+struct CGT_API LogFilter {
     std::string cat_;
     bool children_;
     LogLevel level_;
@@ -62,7 +62,7 @@ struct TGT_API LogFilter {
 /**
  * Abstract basis class for logging messages.
  */
-class TGT_API Log {
+class CGT_API Log {
 public:
     virtual ~Log() {}
 
@@ -74,7 +74,7 @@ public:
      * @param cat All messages with category = cat are accepted and logged in this log.
      * @param Children If true all messages of subcategories of cat are also accepted.
      * example:
-     * tgt.Texture.Reader is a subcategory of tgt.Texture
+     * cgt.Texture.Reader is a subcategory of cgt.Texture
      * @param level All messages below this LogLevel are discarded, even if the category matches.
      */
     virtual void addCat(const std::string &cat, bool Children = true, LogLevel level = Debug);
@@ -110,7 +110,7 @@ protected:
 
 
 /// Implements logging to a plain Textfile
-class TGT_API TextLog : public Log {
+class CGT_API TextLog : public Log {
 public:
     TextLog(const std::string &filename, bool dateStamping = true, bool timeStamping= true,
             bool showCat = true, bool showLevel = true);
@@ -127,7 +127,7 @@ protected:
  * Implements logging to stdout. Colored output on unix systems.
  * You can only have one ConsoleLog in the LogMgr
  */
-class TGT_API ConsoleLog : public Log {
+class CGT_API ConsoleLog : public Log {
 public:
     ConsoleLog(bool dateStamping = false, bool timeStamping= false, bool showCat = true, bool showLevel = true);
     ~ConsoleLog() {};
@@ -142,7 +142,7 @@ protected:
 };
 
 ///Implements a colored html log.
-class TGT_API HtmlLog : public Log {
+class CGT_API HtmlLog : public Log {
 public:
     HtmlLog(const std::string &filename, bool dateStamping = false, bool timeStamping= true,
             bool showCat = true, bool showLevel = true);
@@ -160,7 +160,7 @@ protected:
 
 class LogManager;
 #ifdef DLL_TEMPLATE_INST
-template class TGT_API Singleton<LogManager>;
+template class CGT_API Singleton<LogManager>;
 #endif
 
 /**
@@ -173,10 +173,10 @@ template class TGT_API Singleton<LogManager>;
  * LWARNING("Warning!");
  * Alternatively, LWARNINGC("Cat", "Warning!") may be used, which does not require the definition of loggerCat_.
  *
- * LDEBUG statements are removed if TGT_DEBUG is not defined!
+ * LDEBUG statements are removed if CGT_DEBUG is not defined!
  * @author Stefan Diepenbrock
  */
-class TGT_API LogManager : public Singleton<LogManager> {
+class CGT_API LogManager : public Singleton<LogManager> {
 public:
     LogManager(const std::string& logDir = "");
     ~LogManager();
@@ -209,20 +209,20 @@ protected:
 
 } // namespace
 
-#define LogMgr tgt::LogManager::getRef()
+#define LogMgr cgt::LogManager::getRef()
 
 // Use "do { ... } while (0)" to allow "if (foo) LINFO("bar"); else ...", which would fail
 // otherwise.
 // Compare: http://gcc.gnu.org/onlinedocs/cpp/Swallowing-the-Semicolon.html
 
-#ifdef TGT_DEBUG
+#ifdef CGT_DEBUG
     #ifdef __GNUC__
         #define LDEBUG(msg) \
         do { \
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Debug, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Debug, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LINFO(msg) \
@@ -230,7 +230,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Info, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Info, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LWARNING(msg) \
@@ -238,7 +238,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Warning, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Warning, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LERROR(msg) \
@@ -246,7 +246,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Error, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Error, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LFATAL(msg) \
@@ -254,7 +254,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Fatal, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Fatal, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         //with category parameter:
@@ -263,7 +263,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Debug, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Debug, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LINFOC(cat, msg) \
@@ -271,7 +271,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Info, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Info, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LWARNINGC(cat, msg) \
@@ -279,7 +279,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Warning, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Warning, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LERRORC(cat, msg) \
@@ -287,7 +287,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Error, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Error, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LFATALC(cat, msg) \
@@ -295,7 +295,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __PRETTY_FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Fatal, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Fatal, _tmp.str(), _tmp2.str()); \
         } while (0)
     #else
         #define LDEBUG(msg) \
@@ -303,7 +303,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Debug, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Debug, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LINFO(msg) \
@@ -311,7 +311,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Info, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Info, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LWARNING(msg) \
@@ -319,7 +319,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Warning, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Warning, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LERROR(msg) \
@@ -327,7 +327,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Error, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Error, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LFATAL(msg) \
@@ -335,7 +335,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(loggerCat_, tgt::Fatal, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(loggerCat_, cgt::Fatal, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         //with category parameter:
@@ -344,7 +344,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Debug, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Debug, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LINFOC(cat, msg) \
@@ -352,7 +352,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Info, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Info, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LWARNINGC(cat, msg) \
@@ -360,7 +360,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Warning, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Warning, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LERRORC(cat, msg) \
@@ -368,7 +368,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Error, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Error, _tmp.str(), _tmp2.str()); \
         } while (0)
 
         #define LFATALC(cat, msg) \
@@ -376,7 +376,7 @@ protected:
             std::ostringstream _tmp, _tmp2; \
             _tmp2 << __FUNCTION__  << " File: " << __FILE__ << "@" << __LINE__;\
             _tmp << msg; \
-            LogMgr.log(cat, tgt::Fatal, _tmp.str(), _tmp2.str()); \
+            LogMgr.log(cat, cgt::Fatal, _tmp.str(), _tmp2.str()); \
         } while (0)
      #endif
 #else
@@ -386,28 +386,28 @@ protected:
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(loggerCat_, tgt::Info, _tmp.str()); \
+        LogMgr.log(loggerCat_, cgt::Info, _tmp.str()); \
     } while (0)
 
     #define LWARNING(msg) \
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(loggerCat_, tgt::Warning, _tmp.str()); \
+        LogMgr.log(loggerCat_, cgt::Warning, _tmp.str()); \
     } while (0)
 
     #define LERROR(msg) \
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(loggerCat_, tgt::Error, _tmp.str()); \
+        LogMgr.log(loggerCat_, cgt::Error, _tmp.str()); \
     } while (0)
 
     #define LFATAL(msg) \
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(loggerCat_, tgt::Fatal, _tmp.str()); \
+        LogMgr.log(loggerCat_, cgt::Fatal, _tmp.str()); \
     } while (0)
 
     //
@@ -420,30 +420,30 @@ protected:
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(cat, tgt::Info, _tmp.str()); \
+        LogMgr.log(cat, cgt::Info, _tmp.str()); \
     } while (0)
 
     #define LWARNINGC(cat, msg) \
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(cat, tgt::Warning, _tmp.str()); \
+        LogMgr.log(cat, cgt::Warning, _tmp.str()); \
     } while (0)
 
     #define LERRORC(cat, msg) \
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(cat, tgt::Error, _tmp.str()); \
+        LogMgr.log(cat, cgt::Error, _tmp.str()); \
     } while (0)
 
     #define LFATALC(cat, msg) \
     do { \
         std::ostringstream _tmp; \
         _tmp << msg; \
-        LogMgr.log(cat, tgt::Fatal, _tmp.str()); \
+        LogMgr.log(cat, cgt::Fatal, _tmp.str()); \
     } while (0)
 
-#endif //TGT_DEBUG
+#endif //CGT_DEBUG
 
-#endif //TGT_LOGMANAGER_H
+#endif //CGT_LOGMANAGER_H

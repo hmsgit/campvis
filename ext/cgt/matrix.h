@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2005-2013 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_MATRIX_H
-#define TGT_MATRIX_H
+#ifndef CGT_MATRIX_H
+#define CGT_MATRIX_H
 
 #include <cstring>
 
@@ -54,7 +54,7 @@
     - it could be usefull to use options like -funroll-loops
 */
 
-namespace tgt {
+namespace cgt {
 
 /**
     Matrix2 class. Works basicly like the matrix stuff in GLSL.
@@ -163,13 +163,13 @@ struct Matrix2 {
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
     Vector2<T> operator [] (size_t i) const {
-        tgtAssert(i < size, "i must be less than size");
+        cgtAssert(i < size, "i must be less than size");
         return Vector2<T>(elemRowCol[i]);
     }
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
     Vector2<T> operator [] (size_t i) {
-        tgtAssert(i < size, "i must be less than size");
+        cgtAssert(i < size, "i must be less than size");
         return Vector2<T>(elemRowCol[i]);
     }
 };
@@ -362,13 +362,13 @@ struct Matrix3 {
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
     Vector3<T> operator [] (size_t i) const {
-        tgtAssert(i < size, "i must be less than size");
+        cgtAssert(i < size, "i must be less than size");
         return Vector3<T>(elemRowCol[i]);
     }
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
     Vector3<T> operator [] (size_t i) {
-        tgtAssert(i < size, "i must be less than size");
+        cgtAssert(i < size, "i must be less than size");
         return Vector3<T>(elemRowCol[i]);
     }
 };
@@ -631,13 +631,13 @@ struct Matrix4 {
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
     Vector4<T> operator [] (size_t i) const {
-        tgtAssert(i < size, "i must be less than size");
+        cgtAssert(i < size, "i must be less than size");
         return Vector4<T>(elemRowCol[i]);
     }
     /// return arbitrary row-vector similar to GLSL. <br>
     /// BUT REMEMBER: GLSL gives you COLS NOT ROWS!
     Vector4<T> operator [] (size_t i) {
-        tgtAssert(i < size, "i must be less than size");
+        cgtAssert(i < size, "i must be less than size");
         return Vector4<T>(elemRowCol[i]);
     }
 
@@ -695,12 +695,12 @@ typedef Matrix3f        dmat3;
 typedef Matrix4f        dmat4;
 
 #ifdef DLL_TEMPLATE_INST
-template struct TGT_API Matrix2<float>;
-template struct TGT_API Matrix3<float>;
-template struct TGT_API Matrix4<float>;
-template struct TGT_API Matrix2<double>;
-template struct TGT_API Matrix3<double>;
-template struct TGT_API Matrix4<double>;
+template struct CGT_API Matrix2<float>;
+template struct CGT_API Matrix3<float>;
+template struct CGT_API Matrix4<float>;
+template struct CGT_API Matrix2<double>;
+template struct CGT_API Matrix3<double>;
+template struct CGT_API Matrix4<double>;
 #endif
 
 /*
@@ -708,9 +708,9 @@ template struct TGT_API Matrix4<double>;
     the lazy way with evil voodoo macro magic
 */
 
-#define TGT_MAT_TRANSPOSE \
-template<class T> inline TGT_BASE_TYPE<T> transpose(const TGT_BASE_TYPE<T>& m) { \
-    TGT_BASE_TYPE<T> mRes; \
+#define CGT_MAT_TRANSPOSE \
+template<class T> inline CGT_BASE_TYPE<T> transpose(const CGT_BASE_TYPE<T>& m) { \
+    CGT_BASE_TYPE<T> mRes; \
     for (size_t row = 0; row < m.rows; ++row) \
         for (size_t col = 0; col < m.cols; ++col) \
             mRes.elemRowCol[col][row] = m.elemRowCol[row][col]; \
@@ -723,27 +723,27 @@ template<class T> inline TGT_BASE_TYPE<T> transpose(const TGT_BASE_TYPE<T>& m) {
     These are "correct" operations and do not go componentwisely
 */
 
-#define TGT_MAT_MUL_VEC \
-template<class T> inline typename TGT_BASE_TYPE<T>::RowType operator * (const TGT_BASE_TYPE<T>& m, const typename TGT_BASE_TYPE<T>::RowType& v) { \
-    typename TGT_BASE_TYPE<T>::RowType vRes; \
+#define CGT_MAT_MUL_VEC \
+template<class T> inline typename CGT_BASE_TYPE<T>::RowType operator * (const CGT_BASE_TYPE<T>& m, const typename CGT_BASE_TYPE<T>::RowType& v) { \
+    typename CGT_BASE_TYPE<T>::RowType vRes; \
     for (size_t i = 0; i < v.size; ++i) \
         vRes[i] = dot(m[i], v); \
     return vRes; \
 }
 
-#define TGT_VEC_MUL_MAT \
-template<class T> inline typename TGT_BASE_TYPE<T>::RowType operator * (const typename TGT_BASE_TYPE<T>::RowType& v, const TGT_BASE_TYPE<T>& m) { \
-    typename TGT_BASE_TYPE<T>::RowType vRes; \
-    TGT_BASE_TYPE<T> transposed = transpose(m); \
+#define CGT_VEC_MUL_MAT \
+template<class T> inline typename CGT_BASE_TYPE<T>::RowType operator * (const typename CGT_BASE_TYPE<T>::RowType& v, const CGT_BASE_TYPE<T>& m) { \
+    typename CGT_BASE_TYPE<T>::RowType vRes; \
+    CGT_BASE_TYPE<T> transposed = transpose(m); \
     for (size_t i = 0; i < v.size; ++i) \
         vRes[i] = dot(v, transposed[i]); \
     return vRes; \
 }
 
-#define TGT_MAT_MUL_MAT \
-template<class T> inline TGT_BASE_TYPE<T> operator * (const TGT_BASE_TYPE<T>& m1, const TGT_BASE_TYPE<T>& m2) { \
-    TGT_BASE_TYPE<T> mRes; \
-    TGT_BASE_TYPE<T> transposed = transpose(m2); \
+#define CGT_MAT_MUL_MAT \
+template<class T> inline CGT_BASE_TYPE<T> operator * (const CGT_BASE_TYPE<T>& m1, const CGT_BASE_TYPE<T>& m2) { \
+    CGT_BASE_TYPE<T> mRes; \
+    CGT_BASE_TYPE<T> transposed = transpose(m2); \
     for (size_t row = 0; row < m1.rows; ++row) \
         for (size_t col = 0; col < m1.cols; ++col) \
             mRes.elemRowCol[row][col] = \
@@ -751,16 +751,16 @@ template<class T> inline TGT_BASE_TYPE<T> operator * (const TGT_BASE_TYPE<T>& m1
     return mRes; \
 }
 
-#define TGT_MAT_MULEQ_MAT \
-template<class T> inline TGT_BASE_TYPE<T>& operator *= (TGT_BASE_TYPE<T>& m1, const TGT_BASE_TYPE<T>& m2) { \
-    TGT_BASE_TYPE<T> temp = m1; \
+#define CGT_MAT_MULEQ_MAT \
+template<class T> inline CGT_BASE_TYPE<T>& operator *= (CGT_BASE_TYPE<T>& m1, const CGT_BASE_TYPE<T>& m2) { \
+    CGT_BASE_TYPE<T> temp = m1; \
     m1 = temp * m2; \
     return m1; \
 }
 
-#define TGT_MAT_COMP_MUL \
-template<class T> inline TGT_BASE_TYPE<T> matrixCompMult (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_MAT_COMP_MUL \
+template<class T> inline CGT_BASE_TYPE<T> matrixCompMult (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v1.size; ++i) \
         vRes.elem[i] = v1.elem[i] * v2.elem[i]; \
     return vRes; \
@@ -776,223 +776,223 @@ m[0][0] * m[1][1] * m[2][2]
 - m[0][0] * m[1][2] * m[2][1]
 */
 
-#define TGT_IMPLEMENT_MAT_FUNCTIONS \
-    TGT_VEC_UNARY_MINUS \
-    TGT_VEC_MIN \
-    TGT_VEC_MAX \
-    TGT_VEC_FLOOR \
-    TGT_VEC_CEIL \
-    TGT_VEC_MIN_SINGLE \
-    TGT_VEC_MAX_SINGLE \
-    TGT_VEC_MIN_SELF \
-    TGT_VEC_MAX_SELF \
-    TGT_VEC_CLAMP \
-    TGT_VEC_CLAMP_SINGLE \
-    TGT_VEC_HADD \
-    TGT_VEC_HSUB \
-    TGT_VEC_HMUL \
-    TGT_VEC_HDIV \
-    TGT_VEC_HMOD \
-    TGT_VEC_HAND \
-    TGT_VEC_HOR \
-    TGT_VEC_HXOR \
-    TGT_VEC_REL_OP_EQUAL  \
-    TGT_VEC_REL_OP_NOT_EQUAL \
-    TGT_VEC_LESS_THAN \
-    TGT_VEC_LESS_THAN_EQUAL \
-    TGT_VEC_GREATER_THAN \
-    TGT_VEC_GREATER_THAN_EQUAL \
-    TGT_VEC_EQUAL \
-    TGT_VEC_NOT_EQUAL \
-    TGT_MAT_TRANSPOSE \
-    TGT_MAT_COMP_MUL \
-    TGT_MAT_MUL_VEC \
-    TGT_VEC_MUL_MAT \
-    TGT_MAT_MUL_MAT \
-    TGT_MAT_MULEQ_MAT
+#define CGT_IMPLEMENT_MAT_FUNCTIONS \
+    CGT_VEC_UNARY_MINUS \
+    CGT_VEC_MIN \
+    CGT_VEC_MAX \
+    CGT_VEC_FLOOR \
+    CGT_VEC_CEIL \
+    CGT_VEC_MIN_SINGLE \
+    CGT_VEC_MAX_SINGLE \
+    CGT_VEC_MIN_SELF \
+    CGT_VEC_MAX_SELF \
+    CGT_VEC_CLAMP \
+    CGT_VEC_CLAMP_SINGLE \
+    CGT_VEC_HADD \
+    CGT_VEC_HSUB \
+    CGT_VEC_HMUL \
+    CGT_VEC_HDIV \
+    CGT_VEC_HMOD \
+    CGT_VEC_HAND \
+    CGT_VEC_HOR \
+    CGT_VEC_HXOR \
+    CGT_VEC_REL_OP_EQUAL  \
+    CGT_VEC_REL_OP_NOT_EQUAL \
+    CGT_VEC_LESS_THAN \
+    CGT_VEC_LESS_THAN_EQUAL \
+    CGT_VEC_GREATER_THAN \
+    CGT_VEC_GREATER_THAN_EQUAL \
+    CGT_VEC_EQUAL \
+    CGT_VEC_NOT_EQUAL \
+    CGT_MAT_TRANSPOSE \
+    CGT_MAT_COMP_MUL \
+    CGT_MAT_MUL_VEC \
+    CGT_VEC_MUL_MAT \
+    CGT_MAT_MUL_MAT \
+    CGT_MAT_MULEQ_MAT
 
 /*
     Implementation of Matrix2<T> operators
 */
 
-#define TGT_BASE_TYPE Matrix2
-    #define TGT_VEC_OP +
-    #define TGT_VEC_OPEQ +=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+#define CGT_BASE_TYPE Matrix2
+    #define CGT_VEC_OP +
+    #define CGT_VEC_OPEQ +=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP -
-    #define TGT_VEC_OPEQ -=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP -
+    #define CGT_VEC_OPEQ -=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP *
-    #define TGT_VEC_OPEQ *=
+    #define CGT_VEC_OP *
+    #define CGT_VEC_OPEQ *=
         /*
             According to GLSL matrix * matrix should be exceptionally a
             "correct" algebraic multiplication.
             Instead use matrixCompMult if you need this operatrion.
         */
-        TGT_VEC_OP_BASE
-        TGT_BASE_OP_VEC
-        TGT_VEC_OPEQ_BASE
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+        CGT_VEC_OP_BASE
+        CGT_BASE_OP_VEC
+        CGT_VEC_OPEQ_BASE
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP /
-    #define TGT_VEC_OPEQ /=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP /
+    #define CGT_VEC_OPEQ /=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP &
-    #define TGT_VEC_OPEQ &=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP &
+    #define CGT_VEC_OPEQ &=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP |
-    #define TGT_VEC_OPEQ |=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP |
+    #define CGT_VEC_OPEQ |=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP ^
-    #define TGT_VEC_OPEQ ^=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP ^
+    #define CGT_VEC_OPEQ ^=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    TGT_IMPLEMENT_MAT_FUNCTIONS
-#undef TGT_BASE_TYPE
+    CGT_IMPLEMENT_MAT_FUNCTIONS
+#undef CGT_BASE_TYPE
 
 /*
     Implementation of Matrix3<T> operators
 */
 
-#define TGT_BASE_TYPE Matrix3
-    #define TGT_VEC_OP +
-    #define TGT_VEC_OPEQ +=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+#define CGT_BASE_TYPE Matrix3
+    #define CGT_VEC_OP +
+    #define CGT_VEC_OPEQ +=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP -
-    #define TGT_VEC_OPEQ -=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP -
+    #define CGT_VEC_OPEQ -=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP *
-    #define TGT_VEC_OPEQ *=
+    #define CGT_VEC_OP *
+    #define CGT_VEC_OPEQ *=
         /*
             According to GLSL matrix * matrix should be exceptionally a
             "correct" algebraic multiplication.
             Instead use matrixCompMult if you need this operatrion.
         */
-        TGT_VEC_OP_BASE
-        TGT_BASE_OP_VEC
-        TGT_VEC_OPEQ_BASE
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+        CGT_VEC_OP_BASE
+        CGT_BASE_OP_VEC
+        CGT_VEC_OPEQ_BASE
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP /
-    #define TGT_VEC_OPEQ /=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP /
+    #define CGT_VEC_OPEQ /=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP &
-    #define TGT_VEC_OPEQ &=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP &
+    #define CGT_VEC_OPEQ &=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP |
-    #define TGT_VEC_OPEQ |=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP |
+    #define CGT_VEC_OPEQ |=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP ^
-    #define TGT_VEC_OPEQ ^=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP ^
+    #define CGT_VEC_OPEQ ^=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    TGT_IMPLEMENT_MAT_FUNCTIONS
-#undef TGT_BASE_TYPE
+    CGT_IMPLEMENT_MAT_FUNCTIONS
+#undef CGT_BASE_TYPE
 
 /*
     Implementation of Matrix4<T> operators
 */
 
-#define TGT_BASE_TYPE Matrix4
-    #define TGT_VEC_OP +
-    #define TGT_VEC_OPEQ +=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+#define CGT_BASE_TYPE Matrix4
+    #define CGT_VEC_OP +
+    #define CGT_VEC_OPEQ +=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP -
-    #define TGT_VEC_OPEQ -=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP -
+    #define CGT_VEC_OPEQ -=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP *
-    #define TGT_VEC_OPEQ *=
+    #define CGT_VEC_OP *
+    #define CGT_VEC_OPEQ *=
         /*
             According to GLSL matrix * matrix should be exceptionally a
             "correct" algebraic multiplication.
             Instead use matrixCompMult if you need this operatrion.
         */
-        TGT_VEC_OP_BASE
-        TGT_BASE_OP_VEC
-        TGT_VEC_OPEQ_BASE
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+        CGT_VEC_OP_BASE
+        CGT_BASE_OP_VEC
+        CGT_VEC_OPEQ_BASE
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP /
-    #define TGT_VEC_OPEQ /=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP /
+    #define CGT_VEC_OPEQ /=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP &
-    #define TGT_VEC_OPEQ &=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP &
+    #define CGT_VEC_OPEQ &=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP |
-    #define TGT_VEC_OPEQ |=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP |
+    #define CGT_VEC_OPEQ |=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP ^
-    #define TGT_VEC_OPEQ ^=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP ^
+    #define CGT_VEC_OPEQ ^=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    TGT_IMPLEMENT_MAT_FUNCTIONS
-#undef TGT_BASE_TYPE
+    CGT_IMPLEMENT_MAT_FUNCTIONS
+#undef CGT_BASE_TYPE
 
 /*
     Undefine macros
 */
 
-#undef TGT_IMPLEMENT_MAT_FUNCTIONS
-#undef TGT_MAT_COMP_MUL
-#undef TGT_MAT_MULEQ_MAT
-#undef TGT_MAT_MUL_MAT
-#undef TGT_MAT_MUL_VEC
-#undef TGT_MAT_TRANSPOSE
-#undef TGT_VEC_MUL_MAT
+#undef CGT_IMPLEMENT_MAT_FUNCTIONS
+#undef CGT_MAT_COMP_MUL
+#undef CGT_MAT_MULEQ_MAT
+#undef CGT_MAT_MUL_MAT
+#undef CGT_MAT_MUL_VEC
+#undef CGT_MAT_TRANSPOSE
+#undef CGT_VEC_MUL_MAT
 
 
 //------------------------------------------------------------------------------
@@ -1065,12 +1065,12 @@ Matrix4<T> Matrix4<T>::createLookAt(const Vector3<T>& eye, const Vector3<T>& foc
 
 template<class T>
 Matrix4<T> Matrix4<T>::createFrustum(T left, T right, T bottom, T top, T pnear, T pfar) {
-#ifdef TGT_DEBUG
+#ifdef CGT_DEBUG
     if ((pnear == pfar) || (left == right) || (top == bottom)) {
-        tgtAssert(false, "The parameters passed to createFrustum cannot be used to form a projection matrix.");
+        cgtAssert(false, "The parameters passed to createFrustum cannot be used to form a projection matrix.");
         return Matrix4<T>::identity;
     }
-#endif // TGT_DEBUG
+#endif // CGT_DEBUG
 
     Matrix4<T> m(
         T(2)*pnear/(right-left),        T(0),               (right+left)/(right-left),             T(0),
@@ -1084,12 +1084,12 @@ Matrix4<T> Matrix4<T>::createFrustum(T left, T right, T bottom, T top, T pnear, 
 
 template<class T>
 Matrix4<T> Matrix4<T>::createPerspective(T fov, T aspect, T pnear, T pfar) {
-#ifdef TGT_DEBUG
+#ifdef CGT_DEBUG
     if ((pnear == pfar) || (rad2deg(fov) > T(355)) || (rad2deg(fov) < T(5)) || (aspect == T(0))) {
-        tgtAssert(false, "The parameters passed to createPerspective cannot be used to form a projection matrix.");
+        cgtAssert(false, "The parameters passed to createPerspective cannot be used to form a projection matrix.");
         return Matrix4<T>::identity;
     }
-#endif // TGT_DEBUG
+#endif // CGT_DEBUG
 
     T f = T(1) / tan( fov/T(2) );
     Matrix4<T> m(
@@ -1104,12 +1104,12 @@ Matrix4<T> Matrix4<T>::createPerspective(T fov, T aspect, T pnear, T pfar) {
 
 template<class T>
 Matrix4<T> Matrix4<T>::createOrtho(T left, T right, T top, T bottom, T pnear, T pfar) {
-#ifdef TGT_DEBUG
+#ifdef CGT_DEBUG
     if ((pnear == pfar) || (left == right) || (top == bottom)) {
-        tgtAssert(false, "The parameters passed to createOrthogonal cannot be used to form a projection matrix.");
+        cgtAssert(false, "The parameters passed to createOrthogonal cannot be used to form a projection matrix.");
         return Matrix4<T>::identity;
     }
-#endif // TGT_DEBUG
+#endif // CGT_DEBUG
 
     Matrix4<T> m(
         T(2)/(right-left),      T(0),              T(0),          -(right+left)/(right-left),
@@ -1218,4 +1218,4 @@ bool Matrix4<T>::invert(Matrix4<T>& result) const {
 
 };
 
-#endif //TGT_MATRIX_H
+#endif //CGT_MATRIX_H

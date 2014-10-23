@@ -87,7 +87,7 @@ namespace campvis {
         addProperty(p_hue);
 
         Geometry1DTransferFunction* tf = static_cast<Geometry1DTransferFunction*>(p_confidenceTF.getTF());
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 96), tgt::col4(0, 0, 0, 0)));
+        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 96), cgt::col4(0, 0, 0, 0)));
 
         decoratePropertyCollection(this);
     }
@@ -124,7 +124,7 @@ namespace campvis {
                 _shader->setUniform("_hue", p_hue.getValue());
                 _shader->setUniform("_blurredScale", 1.f / p_blurredScaling.getValue());
                 
-                tgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit, tf2Unit;
+                cgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit, tf2Unit;
                 img->bind(_shader, usUnit, "_usImage", "_usTextureParams");
                 blurred->bind(_shader, blurredUnit, "_blurredImage", "_blurredTextureParams");
                 confidence->bind(_shader, confidenceUnit, "_confidenceMap", "_confidenceTextureParams");
@@ -140,7 +140,7 @@ namespace campvis {
 
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
             }
@@ -157,8 +157,8 @@ namespace campvis {
         ScopedTypedData<ImageData> img(dc, p_usImageId.getValue());
 
         p_transferFunction.setImageHandle(img.getDataHandle());
-        const tgt::svec3& imgSize = img->getSize();
-        if (static_cast<tgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
+        const cgt::svec3& imgSize = img->getSize();
+        if (static_cast<cgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
             p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
         }
         p_use3DTexture.setValue(img->getDimensionality() == 3);

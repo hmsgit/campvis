@@ -50,7 +50,7 @@ namespace campvis {
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
         , p_inputConfidence("InputConfidence", "Input Confidence", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "predicatemask", DataNameProperty::WRITE)
-        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_camera("Camera", "Camera", cgt::Camera())
         , p_histogram("PredicateHistogram", "Point Predicate Histogram")
         , _shader(0)
     {
@@ -93,15 +93,15 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation confidence(dataContainer, p_inputConfidence.getValue());
 
         if (img && labels && snr && vesselness && confidence) {
-            const tgt::svec3& size = img->getSize();
-            tgt::ivec2 viewportSize = size.xy();
+            const cgt::svec3& size = img->getSize();
+            cgt::ivec2 viewportSize = size.xy();
 
-            tgt::TextureUnit inputUnit, labelUnit, snrUnit, vesselnessUnit, confidenceUnit;
+            cgt::TextureUnit inputUnit, labelUnit, snrUnit, vesselnessUnit, confidenceUnit;
             inputUnit.activate();
 
-            const tgt::Texture* tex = img->getTexture();
-            if (tex->getFilter() != tgt::Texture::MIPMAP) {
-                const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+            const cgt::Texture* tex = img->getTexture();
+            if (tex->getFilter() != cgt::Texture::MIPMAP) {
+                const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
                 LGL_ERROR;
                 glGenerateMipmap(GL_TEXTURE_3D);
                 LGL_ERROR;
@@ -112,9 +112,9 @@ namespace campvis {
             }
 
             // create texture for result
-            tgt::Texture* resultTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RED_INTEGER, GL_R8UI, GL_UNSIGNED_BYTE, tgt::Texture::NEAREST);
+            cgt::Texture* resultTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RED_INTEGER, GL_R8UI, GL_UNSIGNED_BYTE, cgt::Texture::NEAREST);
             resultTexture->uploadTexture();
-            resultTexture->setWrapping(tgt::Texture::CLAMP);
+            resultTexture->setWrapping(cgt::Texture::CLAMP);
 
             // activate shader and bind textures
             _shader->activate();
@@ -150,7 +150,7 @@ namespace campvis {
             id->setMappingInformation(img->getParent()->getMappingInformation());
             dataContainer.addData(p_outputImage.getValue(), id);
             
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
         }
         else {

@@ -41,7 +41,7 @@
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -51,7 +51,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public tgt::EventListener {
+    class VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
     public:
         /// Enumeration of the 4 views of the VolumeExplorer
         enum Views {
@@ -88,8 +88,8 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
         
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
         /**
          * Returns the VolumeRenderer processor.
@@ -142,14 +142,14 @@ namespace campvis {
          * Callback called from SliceExtractor when a scribble has been painted.
          * \param   voxel   Voxel position of scribble
          */
-        void onSliceExtractorScribblePainted(tgt::vec3 voxel);
+        void onSliceExtractorScribblePainted(cgt::vec3 voxel);
 
         void composeFinalRendering(DataContainer& data);
 
         /// \see    AbstractProcessor::updateProperties
         void updateProperties(DataContainer& dc);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
         FaceGeometry* _quad;
 
         VolumeRenderer _raycaster;
@@ -167,14 +167,14 @@ namespace campvis {
         bool _mousePressedInRaycaster;                  ///< Flag whether mouse was pressed in raycaster
 
         Views _viewUnderEvent;                          ///< View to apply events to
-        tgt::ivec2 _eventPositionOffset;                ///< Offset to be added to mouse event position
-        tgt::ivec2 _eventViewportSize;                  ///< Viewport of adjusted mouse event
+        cgt::ivec2 _eventPositionOffset;                ///< Offset to be added to mouse event position
+        cgt::ivec2 _eventViewportSize;                  ///< Viewport of adjusted mouse event
 
-        std::vector<tgt::vec3>* _scribblePointer;       ///< Pointer encoding whether the mouse was pressed (!= nullptr) and whether we have yes-scribbles or no-scribbles.
-        std::vector<tgt::vec3> _yesScribbles;           ///< All voxels of the current yes-scribbles
-        std::vector<tgt::vec3> _noScribbles;            ///< All voxels of the current no-scribbles
+        std::vector<cgt::vec3>* _scribblePointer;       ///< Pointer encoding whether the mouse was pressed (!= nullptr) and whether we have yes-scribbles or no-scribbles.
+        std::vector<cgt::vec3> _yesScribbles;           ///< All voxels of the current yes-scribbles
+        std::vector<cgt::vec3> _noScribbles;            ///< All voxels of the current no-scribbles
 
-        tgt::ivec3 _cachedImageSize;
+        cgt::ivec3 _cachedImageSize;
 
         static const std::string loggerCat_;
     };

@@ -40,7 +40,7 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -49,7 +49,7 @@ namespace campvis {
     /**
     * Applies a transfer function and other modifiers to a 2D input image and renders to screen buffer
     */
-    class SliceRenderer2D : public VisualizationProcessor, public tgt::EventListener {
+    class SliceRenderer2D : public VisualizationProcessor, public cgt::EventListener {
     public:
  
         /**
@@ -97,12 +97,12 @@ namespace campvis {
         /// \see    AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
 
     private:
-        tgt::ivec3 _lastImgSize;
+        cgt::ivec3 _lastImgSize;
     };
 
 }

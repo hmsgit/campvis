@@ -62,19 +62,19 @@ namespace campvis {
     }
 
     void TreeItem::insertChild(int row, TreeItem* child) {
-        tgtAssert(row < 0 || row > _children.size(), "Row index out of bounds!");
+        cgtAssert(row < 0 || row > _children.size(), "Row index out of bounds!");
 
         _children.insert(row, child);
         child->_parent = this;
     }
 
     void TreeItem::removeChild(int row) {
-        tgtAssert(row < 0 || row > _children.size(), "Row index out of bounds!");
+        cgtAssert(row < 0 || row > _children.size(), "Row index out of bounds!");
         delete _children.takeAt(row);
     }
 
     void TreeItem::replaceChild(int row, TreeItem* child) {
-        tgtAssert(row < getChildCount(), "Row out of bounds!");
+        cgtAssert(row < getChildCount(), "Row out of bounds!");
         delete _children[row];
         _children[row] = child;
         child->_parent = this;

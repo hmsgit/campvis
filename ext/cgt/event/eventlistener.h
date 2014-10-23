@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,12 +22,12 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_EVENTLISTENER_H
-#define TGT_EVENTLISTENER_H
+#ifndef CGT_EVENTLISTENER_H
+#define CGT_EVENTLISTENER_H
 
 #include "cgt/types.h"
 
-namespace tgt {
+namespace cgt {
 
 class Event;
 class KeyEvent;
@@ -35,13 +35,13 @@ class MouseEvent;
 class TimeEvent;
 
 /**
- * EventListener get called by tgt::EventHandlers to perform action with respect to the incoming events.
+ * EventListener get called by cgt::EventHandlers to perform action with respect to the incoming events.
  * 
- * To define your own event handling, derive your class from tgt::EventListener and override the
+ * To define your own event handling, derive your class from cgt::EventListener and override the
  * event handling methods you need. You can optimize by using setEventTypes() to filter unneeded
  * method calls for events not being handled.
  */
-class TGT_API EventListener {
+class CGT_API EventListener {
 public:
     /// Default constructor
     EventListener();
@@ -102,7 +102,7 @@ public:
 
     /**
      * Sets the bit mask of events this listener is listening to.
-     * Setting this to 0 will deactivate this event during broadcasting from tgt::EventHandler.
+     * Setting this to 0 will deactivate this event during broadcasting from cgt::EventHandler.
      * \note    Other event distributing systems may ignore this field.
      * \param   eventTypes  Bit mask of events this listener is listening to.
      */
@@ -124,4 +124,4 @@ private:
 
 }
 
-#endif //TGT_EVENTLISTENER_H
+#endif //CGT_EVENTLISTENER_H

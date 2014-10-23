@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_VECTOR_H
-#define TGT_VECTOR_H
+#ifndef CGT_VECTOR_H
+#define CGT_VECTOR_H
 
 #include <iostream>
 #include <algorithm>
@@ -50,7 +50,7 @@
       will optimize unnecessary constructor-overhead away.
 */
 
-namespace tgt {
+namespace cgt {
 
 /**
     This is a 2-dimensional Vector class similar to vec2 of GLSL.
@@ -562,23 +562,23 @@ typedef Vector3<bool>   bvec3;
 typedef Vector4<bool>   bvec4;
 
 #ifdef DLL_TEMPLATE_INST
-template struct TGT_API Vector2<float>;
-template struct TGT_API Vector3<float>;
-template struct TGT_API Vector4<float>;
-template struct TGT_API Vector2<double>;
-template struct TGT_API Vector3<double>;
-template struct TGT_API Vector4<double>;
-template struct TGT_API Vector2<int>;
-template struct TGT_API Vector3<int>;
-template struct TGT_API Vector4<int>;
-template struct TGT_API Vector2<size_t>;
-template struct TGT_API Vector3<size_t>;
-template struct TGT_API Vector4<size_t>;
-template struct TGT_API Vector2<bool>;
-template struct TGT_API Vector3<bool>;
-template struct TGT_API Vector4<bool>;
-template struct TGT_API Vector3<uint8_t>;
-template struct TGT_API Vector4<uint8_t>;
+template struct CGT_API Vector2<float>;
+template struct CGT_API Vector3<float>;
+template struct CGT_API Vector4<float>;
+template struct CGT_API Vector2<double>;
+template struct CGT_API Vector3<double>;
+template struct CGT_API Vector4<double>;
+template struct CGT_API Vector2<int>;
+template struct CGT_API Vector3<int>;
+template struct CGT_API Vector4<int>;
+template struct CGT_API Vector2<size_t>;
+template struct CGT_API Vector3<size_t>;
+template struct CGT_API Vector4<size_t>;
+template struct CGT_API Vector2<bool>;
+template struct CGT_API Vector3<bool>;
+template struct CGT_API Vector4<bool>;
+template struct CGT_API Vector3<uint8_t>;
+template struct CGT_API Vector4<uint8_t>;
 #endif
 
 /*
@@ -593,120 +593,120 @@ typedef Vector4<uint8_t> col4;
     the lazy way with evil voodoo macro magic
 */
 
-#define TGT_VEC_OP_VEC \
-template<class T> inline TGT_BASE_TYPE<T> operator TGT_VEC_OP (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_VEC_OP_VEC \
+template<class T> inline CGT_BASE_TYPE<T> operator CGT_VEC_OP (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v1.size; ++i) \
-        vRes.elem[i] = v1.elem[i] TGT_VEC_OP v2.elem[i]; \
+        vRes.elem[i] = v1.elem[i] CGT_VEC_OP v2.elem[i]; \
     return vRes; \
 }
 
-#define TGT_VEC_OP_BASE \
-template<class T> inline TGT_BASE_TYPE<T> operator TGT_VEC_OP (const TGT_BASE_TYPE<T>& v, T t) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_VEC_OP_BASE \
+template<class T> inline CGT_BASE_TYPE<T> operator CGT_VEC_OP (const CGT_BASE_TYPE<T>& v, T t) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v.size; ++i) \
-        vRes.elem[i] = v.elem[i] TGT_VEC_OP t; \
+        vRes.elem[i] = v.elem[i] CGT_VEC_OP t; \
     return vRes; \
 }
 
-#define TGT_BASE_OP_VEC \
-template<class T> inline TGT_BASE_TYPE<T> operator TGT_VEC_OP (T t, const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_BASE_OP_VEC \
+template<class T> inline CGT_BASE_TYPE<T> operator CGT_VEC_OP (T t, const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v.size; ++i) \
-        vRes.elem[i] = t TGT_VEC_OP v.elem[i]; \
+        vRes.elem[i] = t CGT_VEC_OP v.elem[i]; \
     return vRes; \
 }
 
-#define TGT_VEC_OPEQ_VEC \
-template<class T> inline TGT_BASE_TYPE<T>& operator TGT_VEC_OPEQ (TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
+#define CGT_VEC_OPEQ_VEC \
+template<class T> inline CGT_BASE_TYPE<T>& operator CGT_VEC_OPEQ (CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
     for (size_t i = 0; i < v1.size; ++i) \
-        v1.elem[i] TGT_VEC_OPEQ v2.elem[i]; \
+        v1.elem[i] CGT_VEC_OPEQ v2.elem[i]; \
     return v1; \
 }
 
-#define TGT_VEC_OPEQ_BASE \
-template<class T> inline TGT_BASE_TYPE<T>& operator TGT_VEC_OPEQ (TGT_BASE_TYPE<T>& v, T t) { \
+#define CGT_VEC_OPEQ_BASE \
+template<class T> inline CGT_BASE_TYPE<T>& operator CGT_VEC_OPEQ (CGT_BASE_TYPE<T>& v, T t) { \
     for (size_t i = 0; i < v.size; ++i) \
-        v.elem[i] TGT_VEC_OPEQ t; \
+        v.elem[i] CGT_VEC_OPEQ t; \
     return v; \
 }
 
-#define TGT_IMPLEMENT_OPERATORS \
-        TGT_VEC_OP_VEC \
-        TGT_VEC_OP_BASE \
-        TGT_BASE_OP_VEC \
-        TGT_VEC_OPEQ_VEC \
-        TGT_VEC_OPEQ_BASE
+#define CGT_IMPLEMENT_OPERATORS \
+        CGT_VEC_OP_VEC \
+        CGT_VEC_OP_BASE \
+        CGT_BASE_OP_VEC \
+        CGT_VEC_OPEQ_VEC \
+        CGT_VEC_OPEQ_BASE
 
 /*
     relational operators
 */
-#define TGT_VEC_LESS_THAN \
+#define CGT_VEC_LESS_THAN \
 template<class T> \
-inline TGT_BASE_TYPE<bool> lessThan (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<bool> vRes; \
+inline CGT_BASE_TYPE<bool> lessThan (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<bool> vRes; \
     for (size_t i = 0; i < vRes.size; ++i) \
         vRes.elem[i] = (v1.elem[i] < v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_LESS_THAN_EQUAL \
+#define CGT_VEC_LESS_THAN_EQUAL \
 template<class T> \
-inline TGT_BASE_TYPE<bool> lessThanEqual (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<bool> vRes; \
+inline CGT_BASE_TYPE<bool> lessThanEqual (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<bool> vRes; \
     for (size_t i = 0; i < vRes.size; ++i) \
         vRes.elem[i] = (v1.elem[i] <= v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_GREATER_THAN \
+#define CGT_VEC_GREATER_THAN \
 template<class T> \
-inline TGT_BASE_TYPE<bool> greaterThan (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<bool> vRes; \
+inline CGT_BASE_TYPE<bool> greaterThan (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<bool> vRes; \
     for (size_t i = 0; i < vRes.size; ++i) \
         vRes.elem[i] = (v1.elem[i] > v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_GREATER_THAN_EQUAL \
+#define CGT_VEC_GREATER_THAN_EQUAL \
 template<class T> \
-inline TGT_BASE_TYPE<bool> greaterThanEqual (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<bool> vRes; \
+inline CGT_BASE_TYPE<bool> greaterThanEqual (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<bool> vRes; \
     for (size_t i = 0; i < vRes.size; ++i) \
         vRes.elem[i] = (v1.elem[i] >= v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_EQUAL \
+#define CGT_VEC_EQUAL \
 template<class T> \
-inline TGT_BASE_TYPE<bool> equal (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<bool> vRes; \
+inline CGT_BASE_TYPE<bool> equal (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<bool> vRes; \
     for (size_t i = 0; i < vRes.size; ++i) \
         vRes.elem[i] = (v1.elem[i] == v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_NOT_EQUAL \
+#define CGT_VEC_NOT_EQUAL \
 template<class T> \
-inline TGT_BASE_TYPE<bool> notEqual (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<bool> vRes; \
+inline CGT_BASE_TYPE<bool> notEqual (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<bool> vRes; \
     for (size_t i = 0; i < vRes.size; ++i) \
         vRes.elem[i] = (v1.elem[i] != v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_REL_OP_EQUAL \
+#define CGT_VEC_REL_OP_EQUAL \
 template<class T> \
-inline bool operator == (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
+inline bool operator == (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
     bool result = true; \
     for (size_t i = 0; i < v1.size; ++i) \
         result &= (v1.elem[i] == v2.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_REL_OP_NOT_EQUAL \
+#define CGT_VEC_REL_OP_NOT_EQUAL \
 template<class T> \
-inline bool operator != (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
+inline bool operator != (const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
     return !(v1 == v2); \
 }
 
@@ -714,103 +714,103 @@ inline bool operator != (const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2)
     further vector functions
 */
 
-#define TGT_VEC_DOT_PRODUCT \
-template<class T> inline T dot(const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
+#define CGT_VEC_DOT_PRODUCT \
+template<class T> inline T dot(const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
     T result = 0; \
     for (size_t i = 0; i < v1.size; ++i) \
         result += v1.elem[i] * v2.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_LENGTH_SQ \
-template<class T> inline T lengthSq(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_LENGTH_SQ \
+template<class T> inline T lengthSq(const CGT_BASE_TYPE<T>& v) { \
     T result = 0; \
     for (size_t i = 0; i < v.size; ++i) \
         result += (v.elem[i] * v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_LENGTH \
-template<class T> inline T length(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_LENGTH \
+template<class T> inline T length(const CGT_BASE_TYPE<T>& v) { \
     return std::sqrt(lengthSq(v));                             \
 }
 
-#define TGT_VEC_NORMALIZE \
-template<class T> inline TGT_BASE_TYPE<T> normalize(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<T> vRes(v); \
+#define CGT_VEC_NORMALIZE \
+template<class T> inline CGT_BASE_TYPE<T> normalize(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<T> vRes(v); \
     T recipLength = 1 / length(v); \
     vRes *= recipLength; \
     return vRes; \
 }
 
-#define TGT_VEC_DISTANCE \
-template<class T> inline T distance(const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
+#define CGT_VEC_DISTANCE \
+template<class T> inline T distance(const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
     return length(v2 - v1); \
 }
 
-#define TGT_VEC_DISTANCE_SQ \
-template<class T> inline T distanceSq(const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
+#define CGT_VEC_DISTANCE_SQ \
+template<class T> inline T distanceSq(const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
     return lengthSq(v2 - v1); \
 }
 
-#define TGT_VEC_UNARY_MINUS \
-template<class T> inline TGT_BASE_TYPE<T> operator - (const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<T> vRes(v); \
+#define CGT_VEC_UNARY_MINUS \
+template<class T> inline CGT_BASE_TYPE<T> operator - (const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<T> vRes(v); \
     for (size_t i = 0; i < v.size; ++i) \
         vRes.elem[i] = -v.elem[i]; \
     return vRes; \
 }
 
-#define TGT_VEC_MIN \
-template<class T> inline TGT_BASE_TYPE<T> min(const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_VEC_MIN \
+template<class T> inline CGT_BASE_TYPE<T> min(const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v1.size; ++i) \
         vRes.elem[i] = std::min(v1.elem[i], v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_MAX \
-template<class T> inline TGT_BASE_TYPE<T> max(const TGT_BASE_TYPE<T>& v1, const TGT_BASE_TYPE<T>& v2) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_VEC_MAX \
+template<class T> inline CGT_BASE_TYPE<T> max(const CGT_BASE_TYPE<T>& v1, const CGT_BASE_TYPE<T>& v2) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v1.size; ++i) \
         vRes.elem[i] = std::max(v1.elem[i], v2.elem[i]); \
     return vRes; \
 }
 
-#define TGT_VEC_MIN_SINGLE \
-template<class T> inline TGT_BASE_TYPE<T> min(const TGT_BASE_TYPE<T>& v, T t) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_VEC_MIN_SINGLE \
+template<class T> inline CGT_BASE_TYPE<T> min(const CGT_BASE_TYPE<T>& v, T t) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v.size; ++i) \
         vRes.elem[i] = std::min(v.elem[i], t); \
     return vRes; \
 }
 
-#define TGT_VEC_MAX_SINGLE \
-template<class T> inline TGT_BASE_TYPE<T> max(const TGT_BASE_TYPE<T>& v, T t) { \
-    TGT_BASE_TYPE<T> vRes; \
+#define CGT_VEC_MAX_SINGLE \
+template<class T> inline CGT_BASE_TYPE<T> max(const CGT_BASE_TYPE<T>& v, T t) { \
+    CGT_BASE_TYPE<T> vRes; \
     for (size_t i = 0; i < v.size; ++i) \
         vRes.elem[i] = std::max(v.elem[i], t); \
     return vRes; \
 }
 
-#define TGT_VEC_MIN_SELF \
-template<class T> inline T min(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_MIN_SELF \
+template<class T> inline T min(const CGT_BASE_TYPE<T>& v) { \
     T res = v.elem[0]; \
     for (size_t i = 1; i < v.size; ++i) \
         res = std::min(v.elem[i], res); \
     return res; \
 }
 
-#define TGT_VEC_MAX_SELF \
-template<class T> inline T max(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_MAX_SELF \
+template<class T> inline T max(const CGT_BASE_TYPE<T>& v) { \
     T res = v.elem[0]; \
     for (size_t i = 1; i < v.size; ++i) \
         res = std::max(v.elem[i], res); \
     return res; \
 }
 
-#define TGT_VEC_MIN_ELEM \
-template<class T> inline T minElem(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_MIN_ELEM \
+template<class T> inline T minElem(const CGT_BASE_TYPE<T>& v) { \
     size_t minElem = 0; \
     for (size_t i = 1; i < v.size; ++i) \
         if(v.elem[i] > v.elem[minElem]) \
@@ -818,8 +818,8 @@ template<class T> inline T minElem(const TGT_BASE_TYPE<T>& v) { \
     return minElem; \
 }
 
-#define TGT_VEC_MAX_ELEM \
-template<class T> inline T maxElem(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_MAX_ELEM \
+template<class T> inline T maxElem(const CGT_BASE_TYPE<T>& v) { \
     size_t maxElem = 0; \
     for (size_t i = 1; i < v.size; ++i) \
         if(v.elem[i] > v.elem[maxElem]) \
@@ -827,101 +827,101 @@ template<class T> inline T maxElem(const TGT_BASE_TYPE<T>& v) { \
     return maxElem; \
 }
 
-#define TGT_VEC_CLAMP \
-template<class T> inline TGT_BASE_TYPE<T> clamp(const TGT_BASE_TYPE<T>& v, const TGT_BASE_TYPE<T>& minVal, const TGT_BASE_TYPE<T>& maxVal) { \
+#define CGT_VEC_CLAMP \
+template<class T> inline CGT_BASE_TYPE<T> clamp(const CGT_BASE_TYPE<T>& v, const CGT_BASE_TYPE<T>& minVal, const CGT_BASE_TYPE<T>& maxVal) { \
     return min( max(v, minVal), maxVal ); \
 }
 
-#define TGT_VEC_CLAMP_SINGLE \
-template<class T> inline TGT_BASE_TYPE<T> clamp(const TGT_BASE_TYPE<T>& v, T minVal, T maxVal) { \
+#define CGT_VEC_CLAMP_SINGLE \
+template<class T> inline CGT_BASE_TYPE<T> clamp(const CGT_BASE_TYPE<T>& v, T minVal, T maxVal) { \
     return min( max(v, minVal), maxVal ); \
 }
 
-#define TGT_VEC_CEIL \
-template<class T> inline TGT_BASE_TYPE<T> ceil(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_CEIL \
+template<class T> inline CGT_BASE_TYPE<T> ceil(const CGT_BASE_TYPE<T>& v) { \
     using std::ceil; \
-    TGT_BASE_TYPE<T> result; \
+    CGT_BASE_TYPE<T> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = ceil(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_FLOOR \
-template<class T> inline TGT_BASE_TYPE<T> floor(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_FLOOR \
+template<class T> inline CGT_BASE_TYPE<T> floor(const CGT_BASE_TYPE<T>& v) { \
     using std::floor; \
-    TGT_BASE_TYPE<T> result; \
+    CGT_BASE_TYPE<T> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = floor(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_FIX \
-template<class T> inline TGT_BASE_TYPE<T> fix(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<T> result; \
+#define CGT_VEC_FIX \
+template<class T> inline CGT_BASE_TYPE<T> fix(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<T> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = fix(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_ROUND \
-template<class T> inline TGT_BASE_TYPE<T> round(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<T> result; \
+#define CGT_VEC_ROUND \
+template<class T> inline CGT_BASE_TYPE<T> round(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<T> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = round(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_SIGN \
-template<class T> inline TGT_BASE_TYPE<T> sign(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<T> result; \
+#define CGT_VEC_SIGN \
+template<class T> inline CGT_BASE_TYPE<T> sign(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<T> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = sign(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_ICEIL \
-template<class T> inline TGT_BASE_TYPE<int> iceil(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<int> result; \
+#define CGT_VEC_ICEIL \
+template<class T> inline CGT_BASE_TYPE<int> iceil(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<int> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = iceil(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_IFLOOR \
-template<class T> inline TGT_BASE_TYPE<int> ifloor(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<int> result; \
+#define CGT_VEC_IFLOOR \
+template<class T> inline CGT_BASE_TYPE<int> ifloor(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<int> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = ifloor(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_IROUND \
-template<class T> inline TGT_BASE_TYPE<int> iround(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<int> result; \
+#define CGT_VEC_IROUND \
+template<class T> inline CGT_BASE_TYPE<int> iround(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<int> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = iround(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_IFIX \
-template<class T> inline TGT_BASE_TYPE<int> ifix(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<int> result; \
+#define CGT_VEC_IFIX \
+template<class T> inline CGT_BASE_TYPE<int> ifix(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<int> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = ifix(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_ISIGN \
-template<class T> inline TGT_BASE_TYPE<int> isign(const TGT_BASE_TYPE<T>& v) { \
-    TGT_BASE_TYPE<int> result; \
+#define CGT_VEC_ISIGN \
+template<class T> inline CGT_BASE_TYPE<int> isign(const CGT_BASE_TYPE<T>& v) { \
+    CGT_BASE_TYPE<int> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result[i] = isign(v.elem[i]); \
     return result; \
 }
 
-#define TGT_VEC_MIX \
-template<class T> inline TGT_BASE_TYPE<T> mix(const TGT_BASE_TYPE<T>& v, const TGT_BASE_TYPE<T>& v2, T t) { \
-    TGT_BASE_TYPE<T> result; \
+#define CGT_VEC_MIX \
+template<class T> inline CGT_BASE_TYPE<T> mix(const CGT_BASE_TYPE<T>& v, const CGT_BASE_TYPE<T>& v2, T t) { \
+    CGT_BASE_TYPE<T> result; \
     for (size_t i = 0; i < v.size; ++i) \
         result.elem[i] = (v.elem[i]*(1-t)) + (v2.elem[i]*t); \
     return result; \
@@ -931,284 +931,284 @@ template<class T> inline TGT_BASE_TYPE<T> mix(const TGT_BASE_TYPE<T>& v, const T
     horizontally working functions
 */
 
-#define TGT_VEC_HADD \
-template<class T> inline T hadd(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HADD \
+template<class T> inline T hadd(const CGT_BASE_TYPE<T>& v) { \
     T result = v.elem[0]; \
     for (size_t i = 1; i < v.size; ++i) \
         result += v.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_HSUB \
-template<class T> inline T hsub(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HSUB \
+template<class T> inline T hsub(const CGT_BASE_TYPE<T>& v) { \
     T result = v.elem[0]; \
     for (size_t i = 1; i < v.size; ++i) \
         result -= v.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_HMUL \
-template<class T> inline T hmul(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HMUL \
+template<class T> inline T hmul(const CGT_BASE_TYPE<T>& v) { \
     T result = v.elem[0]; \
     for (size_t i = 1; i < v.size; ++i) \
         result *= v.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_HDIV \
-template<class T> inline T hdiv(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HDIV \
+template<class T> inline T hdiv(const CGT_BASE_TYPE<T>& v) { \
     T result = v.elem[0]; \
     for (size_t i = 1; i < v.size; ++i) \
         result /= v.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_HMOD \
-template<class T> inline T hmod(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HMOD \
+template<class T> inline T hmod(const CGT_BASE_TYPE<T>& v) { \
     T result = v.elem[0]; \
     for (size_t i = 1; i < v.size; ++i) \
         result %= v.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_HAND \
-template<class T> inline bool hand(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HAND \
+template<class T> inline bool hand(const CGT_BASE_TYPE<T>& v) { \
     bool result = v.elem[0] && v.elem[1]; \
     for (size_t i = 2; i < v.size; ++i) \
         result &= v.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_HOR \
-template<class T> inline bool hor(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HOR \
+template<class T> inline bool hor(const CGT_BASE_TYPE<T>& v) { \
     T result = v.elem[0] || v.elem[1]; \
     for (size_t i = 2; i < v.size; ++i) \
         result |= v.elem[i]; \
     return result; \
 }
 
-#define TGT_VEC_HXOR \
-template<class T> inline bool hxor(const TGT_BASE_TYPE<T>& v) { \
+#define CGT_VEC_HXOR \
+template<class T> inline bool hxor(const CGT_BASE_TYPE<T>& v) { \
     T result = v.elem[0] ^ v.elem[1]; \
     for (size_t i = 2; i < v.size; ++i) \
         result ^= v.elem[i]; \
     return result; \
 }
 
-#define TGT_IMPLEMENT_VEC_FUNCTIONS \
-    TGT_VEC_DOT_PRODUCT  \
-    TGT_VEC_LENGTH_SQ \
-    TGT_VEC_LENGTH \
-    TGT_VEC_NORMALIZE \
-    TGT_VEC_DISTANCE \
-    TGT_VEC_DISTANCE_SQ \
-    TGT_VEC_UNARY_MINUS \
-    TGT_VEC_MIN \
-    TGT_VEC_MAX \
-    TGT_VEC_FLOOR \
-    TGT_VEC_CEIL \
-    TGT_VEC_FIX \
-    TGT_VEC_ROUND \
-    TGT_VEC_SIGN \
-    TGT_VEC_IFLOOR \
-    TGT_VEC_ICEIL \
-    TGT_VEC_IFIX \
-    TGT_VEC_IROUND \
-    TGT_VEC_ISIGN \
-    TGT_VEC_MIN_SINGLE \
-    TGT_VEC_MAX_SINGLE \
-    TGT_VEC_MIN_SELF \
-    TGT_VEC_MAX_SELF \
-    TGT_VEC_MIN_ELEM \
-    TGT_VEC_MAX_ELEM \
-    TGT_VEC_CLAMP \
-    TGT_VEC_CLAMP_SINGLE \
-    TGT_VEC_REL_OP_EQUAL  \
-    TGT_VEC_REL_OP_NOT_EQUAL \
-    TGT_VEC_LESS_THAN \
-    TGT_VEC_LESS_THAN_EQUAL \
-    TGT_VEC_GREATER_THAN \
-    TGT_VEC_GREATER_THAN_EQUAL \
-    TGT_VEC_EQUAL \
-    TGT_VEC_NOT_EQUAL \
-    TGT_VEC_HADD \
-    TGT_VEC_HSUB \
-    TGT_VEC_HMUL \
-    TGT_VEC_HDIV \
-    TGT_VEC_HMOD \
-    TGT_VEC_HAND \
-    TGT_VEC_HOR \
-    TGT_VEC_HXOR \
-    TGT_VEC_MIX
+#define CGT_IMPLEMENT_VEC_FUNCTIONS \
+    CGT_VEC_DOT_PRODUCT  \
+    CGT_VEC_LENGTH_SQ \
+    CGT_VEC_LENGTH \
+    CGT_VEC_NORMALIZE \
+    CGT_VEC_DISTANCE \
+    CGT_VEC_DISTANCE_SQ \
+    CGT_VEC_UNARY_MINUS \
+    CGT_VEC_MIN \
+    CGT_VEC_MAX \
+    CGT_VEC_FLOOR \
+    CGT_VEC_CEIL \
+    CGT_VEC_FIX \
+    CGT_VEC_ROUND \
+    CGT_VEC_SIGN \
+    CGT_VEC_IFLOOR \
+    CGT_VEC_ICEIL \
+    CGT_VEC_IFIX \
+    CGT_VEC_IROUND \
+    CGT_VEC_ISIGN \
+    CGT_VEC_MIN_SINGLE \
+    CGT_VEC_MAX_SINGLE \
+    CGT_VEC_MIN_SELF \
+    CGT_VEC_MAX_SELF \
+    CGT_VEC_MIN_ELEM \
+    CGT_VEC_MAX_ELEM \
+    CGT_VEC_CLAMP \
+    CGT_VEC_CLAMP_SINGLE \
+    CGT_VEC_REL_OP_EQUAL  \
+    CGT_VEC_REL_OP_NOT_EQUAL \
+    CGT_VEC_LESS_THAN \
+    CGT_VEC_LESS_THAN_EQUAL \
+    CGT_VEC_GREATER_THAN \
+    CGT_VEC_GREATER_THAN_EQUAL \
+    CGT_VEC_EQUAL \
+    CGT_VEC_NOT_EQUAL \
+    CGT_VEC_HADD \
+    CGT_VEC_HSUB \
+    CGT_VEC_HMUL \
+    CGT_VEC_HDIV \
+    CGT_VEC_HMOD \
+    CGT_VEC_HAND \
+    CGT_VEC_HOR \
+    CGT_VEC_HXOR \
+    CGT_VEC_MIX
 
 
 /*
     Implementation of Vector2<T> operators
 */
 
-#define TGT_BASE_TYPE Vector2
-    #define TGT_VEC_OP +
-    #define TGT_VEC_OPEQ +=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+#define CGT_BASE_TYPE Vector2
+    #define CGT_VEC_OP +
+    #define CGT_VEC_OPEQ +=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP -
-    #define TGT_VEC_OPEQ -=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP -
+    #define CGT_VEC_OPEQ -=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP *
-    #define TGT_VEC_OPEQ *=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP *
+    #define CGT_VEC_OPEQ *=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP /
-    #define TGT_VEC_OPEQ /=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP /
+    #define CGT_VEC_OPEQ /=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP %
-    #define TGT_VEC_OPEQ %=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP %
+    #define CGT_VEC_OPEQ %=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP &
-    #define TGT_VEC_OPEQ &=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP &
+    #define CGT_VEC_OPEQ &=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP |
-    #define TGT_VEC_OPEQ |=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP |
+    #define CGT_VEC_OPEQ |=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP ^
-    #define TGT_VEC_OPEQ ^=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP ^
+    #define CGT_VEC_OPEQ ^=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    TGT_IMPLEMENT_VEC_FUNCTIONS
-#undef TGT_BASE_TYPE
+    CGT_IMPLEMENT_VEC_FUNCTIONS
+#undef CGT_BASE_TYPE
 
 /*
     Implementation of Vector3<T> operators
 */
 
-#define TGT_BASE_TYPE Vector3
-    #define TGT_VEC_OP +
-    #define TGT_VEC_OPEQ +=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+#define CGT_BASE_TYPE Vector3
+    #define CGT_VEC_OP +
+    #define CGT_VEC_OPEQ +=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP -
-    #define TGT_VEC_OPEQ -=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP -
+    #define CGT_VEC_OPEQ -=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP *
-    #define TGT_VEC_OPEQ *=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP *
+    #define CGT_VEC_OPEQ *=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP /
-    #define TGT_VEC_OPEQ /=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP /
+    #define CGT_VEC_OPEQ /=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP %
-    #define TGT_VEC_OPEQ %=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP %
+    #define CGT_VEC_OPEQ %=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP &
-    #define TGT_VEC_OPEQ &=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP &
+    #define CGT_VEC_OPEQ &=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP |
-    #define TGT_VEC_OPEQ |=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP |
+    #define CGT_VEC_OPEQ |=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP ^
-    #define TGT_VEC_OPEQ ^=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP ^
+    #define CGT_VEC_OPEQ ^=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    TGT_IMPLEMENT_VEC_FUNCTIONS
-#undef TGT_BASE_TYPE
+    CGT_IMPLEMENT_VEC_FUNCTIONS
+#undef CGT_BASE_TYPE
 
 /*
     Implementation of Vector4<T> operators
 */
 
-#define TGT_BASE_TYPE Vector4
-    #define TGT_VEC_OP +
-    #define TGT_VEC_OPEQ +=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+#define CGT_BASE_TYPE Vector4
+    #define CGT_VEC_OP +
+    #define CGT_VEC_OPEQ +=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP -
-    #define TGT_VEC_OPEQ -=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP -
+    #define CGT_VEC_OPEQ -=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP *
-    #define TGT_VEC_OPEQ *=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP *
+    #define CGT_VEC_OPEQ *=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP /
-    #define TGT_VEC_OPEQ /=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP /
+    #define CGT_VEC_OPEQ /=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP %
-    #define TGT_VEC_OPEQ %=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP %
+    #define CGT_VEC_OPEQ %=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP &
-    #define TGT_VEC_OPEQ &=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP &
+    #define CGT_VEC_OPEQ &=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP |
-    #define TGT_VEC_OPEQ |=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP |
+    #define CGT_VEC_OPEQ |=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    #define TGT_VEC_OP ^
-    #define TGT_VEC_OPEQ ^=
-        TGT_IMPLEMENT_OPERATORS
-    #undef  TGT_VEC_OP
-    #undef  TGT_VEC_OPEQ
+    #define CGT_VEC_OP ^
+    #define CGT_VEC_OPEQ ^=
+        CGT_IMPLEMENT_OPERATORS
+    #undef  CGT_VEC_OP
+    #undef  CGT_VEC_OPEQ
 
-    TGT_IMPLEMENT_VEC_FUNCTIONS
-#undef TGT_BASE_TYPE
+    CGT_IMPLEMENT_VEC_FUNCTIONS
+#undef CGT_BASE_TYPE
 
 /**
     cross product
@@ -1375,4 +1375,4 @@ std::istream& operator >> (std::istream& s, Vector4<T>& v) {
 
 } // namespace
 
-#endif // TGT_VECTOR_H
+#endif // CGT_VECTOR_H

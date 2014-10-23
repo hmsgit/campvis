@@ -60,7 +60,7 @@ namespace campvis {
         , _logViewer(0)
         , _scriptingConsoleWidget(nullptr)
     {
-        tgtAssert(_application != 0, "Application must not be 0.");
+        cgtAssert(_application != 0, "Application must not be 0.");
         ui.setupUi(this);
         setup();
     }

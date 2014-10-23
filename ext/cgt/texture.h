@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,20 +22,20 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_TEXTURE_H
-#define TGT_TEXTURE_H
+#ifndef CGT_TEXTURE_H
+#define CGT_TEXTURE_H
 
 #include <string>
 #include "cgt/tgt_gl.h"
 #include "cgt/types.h"
 #include "cgt/vector.h"
 
-namespace tgt {
+namespace cgt {
 
 /**
  * OpenGL Texture
  */
-class TGT_API Texture {
+class CGT_API Texture {
 public:
     friend class TextureManager;
     friend class TextureReader;
@@ -66,28 +66,28 @@ public:
      * Without data and internalformat argument, type_ is calculated by
      * dimensions and a new chunk of data will be allocated on the heap.
      */
-    Texture(const tgt::ivec3& dimensions, GLint format = GL_RGBA,
+    Texture(const cgt::ivec3& dimensions, GLint format = GL_RGBA,
             GLenum dataType = GL_UNSIGNED_BYTE, Filter filter = LINEAR);
 
     /**
      * Without data and with internalformat argument, type_ is calculated by
      * dimensions and a new chunk of data will be allocated on the heap.
      */
-    Texture(const tgt::ivec3& dimensions, GLint format, GLint internalformat,
+    Texture(const cgt::ivec3& dimensions, GLint format, GLint internalformat,
             GLenum dataType  = GL_UNSIGNED_BYTE, Filter filter = LINEAR);
 
     /**
      * With data and without internalformat argument, type_ is calculated by
      * dimensions and no new chunk of data will be allocated on the heap.
      */
-    Texture(GLubyte* data, const tgt::ivec3& dimensions, GLint format = GL_RGBA,
+    Texture(GLubyte* data, const cgt::ivec3& dimensions, GLint format = GL_RGBA,
             GLenum dataType = GL_UNSIGNED_BYTE, Filter filter = LINEAR);
 
     /**
      * With data and internalformat argument, type_ is calculated by
      * dimensions and no new chunk of data will be allocated on the heap.
      */
-    Texture(GLubyte* data, const tgt::ivec3& dimensions, GLint format, GLint internalformat,
+    Texture(GLubyte* data, const cgt::ivec3& dimensions, GLint format, GLint internalformat,
             GLenum dataType = GL_UNSIGNED_BYTE, Filter filter = LINEAR);
 
     /**
@@ -193,7 +193,7 @@ public:
     */
     GLenum getType() const { return type_; }
 
-    tgt::ivec3 getDimensions() const { return dimensions_;}
+    cgt::ivec3 getDimensions() const { return dimensions_;}
     int getWidth() const { return dimensions_.x; };
     int getHeight() const { return dimensions_.y; }
     int getDepth() const { return dimensions_.z; }
@@ -204,7 +204,7 @@ public:
     size_t getArraySize() const { return arraySize_; }
     size_t getNumChannels() const { return calcNumChannels(format_); }
 
-    void setDimensions(tgt::ivec3 dimensions) { dimensions_ = dimensions; }
+    void setDimensions(cgt::ivec3 dimensions) { dimensions_ = dimensions; }
     void setBpp(GLubyte bpp) { bpp_ = bpp; }
     void setFormat(GLint format) { format_ = format; }
     void setInternalFormat(GLint internalformat) { internalformat_ = internalformat; }
@@ -321,14 +321,14 @@ public:
 */
     template <class T>
     inline T& texel(size_t i) {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( i < size_t(hmul(dimensions_)), "index out of range" );
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( i < size_t(hmul(dimensions_)), "index out of range" );
         return ((T*) pixels_)[i];
     }
     template <class T>
     inline const T& texel(size_t i) const {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( i < size_t(hmul(dimensions_)), "index out of range" );
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( i < size_t(hmul(dimensions_)), "index out of range" );
         return ((T*) pixels_)[i];
     }
 
@@ -337,30 +337,30 @@ public:
 */
     template <class T>
     inline T& texel(size_t x, size_t y) {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( dimensions_.x * y + x < size_t(hmul(dimensions_)), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( dimensions_.x * y + x < size_t(hmul(dimensions_)), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
         return ((T*) pixels_)[dimensions_.x * y + x];
     }
     template <class T>
     inline const T& texel(size_t x, size_t y) const {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( dimensions_.x * y + x < size_t(hmul(dimensions_)), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( dimensions_.x * y + x < size_t(hmul(dimensions_)), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
         return ((T*) pixels_)[dimensions_.x * y + x];
     }
     template <class T>
     inline T& texel(const ivec2& pos) {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( dimensions_.x * pos.y + pos.x < hmul(dimensions_), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( dimensions_.x * pos.y + pos.x < hmul(dimensions_), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
         return ((T*) pixels_)[dimensions_.x * pos.y + pos.x];
     }
     template <class T>
     inline const T& texel(const ivec2& pos) const {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( dimensions_.x * pos.y + pos.x < hmul(dimensions_), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( dimensions_.x * pos.y + pos.x < hmul(dimensions_), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_2D, "using 2d access, but it's not a GL_TEXTURE_2D");
         return ((T*) pixels_)[dimensions_.x * pos.y + pos.x];
     }
 
@@ -369,42 +369,42 @@ public:
 */
     template <class T>
     inline T& texel(size_t x, size_t y, size_t z) {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( z*dimensions_.x*dimensions_.y + y*dimensions_.x + x < size_t(hmul(dimensions_)), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( z*dimensions_.x*dimensions_.y + y*dimensions_.x + x < size_t(hmul(dimensions_)), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
         return ((T*) pixels_)[z*dimensions_.x*dimensions_.y + y*dimensions_.x + x];
     }
     template <class T>
     inline const T& texel(size_t x, size_t y, size_t z) const {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( z*dimensions_.x*dimensions_.y + y*dimensions_.x + x < size_t(hmul(dimensions_)), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( z*dimensions_.x*dimensions_.y + y*dimensions_.x + x < size_t(hmul(dimensions_)), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
         return ((T*) pixels_)[z*dimensions_.x*dimensions_.y + y*dimensions_.x + x];
     }
     template <class T>
     inline T& texel(const ivec3& pos) {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( pos.z*dimensions_.x*dimensions_.y + pos.y*dimensions_.x + pos.x < hmul(dimensions_), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( pos.z*dimensions_.x*dimensions_.y + pos.y*dimensions_.x + pos.x < hmul(dimensions_), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
         return ((T*) pixels_)[pos.z*dimensions_.x*dimensions_.y + pos.y*dimensions_.x + pos.x];
     }
     template <class T>
     inline const T& texel(const ivec3& pos) const {
-        tgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
-        tgtAssert( pos.z*dimensions_.x*dimensions_.y + pos.y*dimensions_.x + pos.x < hmul(dimensions_), "index out of range" );
-        tgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
+        cgtAssert( sizeof(T) == bpp_, "sizeof(T) != bytes per pixel here" );
+        cgtAssert( pos.z*dimensions_.x*dimensions_.y + pos.y*dimensions_.x + pos.x < hmul(dimensions_), "index out of range" );
+        cgtAssert( type_ == GL_TEXTURE_3D, "using 3d access, but it's not a GL_TEXTURE_3D");
         return ((T*) pixels_)[pos.z*dimensions_.x*dimensions_.y + pos.y*dimensions_.x + pos.x];
     }
 
-    ///Return texel as tgt::vec4 (slow!), downloadTexture() needs to be called first
-    tgt::vec4 texelAsFloat(size_t x, size_t y) const;
-    tgt::vec4 texelAsFloat(size_t x, size_t y, size_t z) const;
+    ///Return texel as cgt::vec4 (slow!), downloadTexture() needs to be called first
+    cgt::vec4 texelAsFloat(size_t x, size_t y) const;
+    cgt::vec4 texelAsFloat(size_t x, size_t y, size_t z) const;
     float depthAsFloat(size_t x, size_t y) const;
 
-    tgt::vec4 texelAsFloat(tgt::svec2 p) const { return texelAsFloat(p.x, p.y); }
-    float depthAsFloat(tgt::svec2 p) const { return depthAsFloat(p.x, p.y); }
+    cgt::vec4 texelAsFloat(cgt::svec2 p) const { return texelAsFloat(p.x, p.y); }
+    float depthAsFloat(cgt::svec2 p) const { return depthAsFloat(p.x, p.y); }
 protected:
-    tgt::ivec3 dimensions_;
+    cgt::ivec3 dimensions_;
     GLint format_;          ///< GL_RGB...
     GLint internalformat_;  ///< GL_RGB...
     GLenum dataType_;       ///< GL_UNSIGNED_BYTE
@@ -425,6 +425,6 @@ protected:
     void init(bool allocData);
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#endif // TGT_TEXTURE_H
+#endif // CGT_TEXTURE_H

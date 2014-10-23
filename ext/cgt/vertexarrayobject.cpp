@@ -4,16 +4,16 @@
 #include "cgt/buffer.h"
 #include "cgt/shadermanager.h"
 
-namespace tgt {
+namespace cgt {
 
-    const std::string VertexArrayObject::loggerCat_ = "tgt.VertexArrayObject";
+    const std::string VertexArrayObject::loggerCat_ = "cgt.VertexArrayObject";
 
-    VertexArrayObject::VertexArrayObject(bool autoBind) throw (tgt::Exception)
+    VertexArrayObject::VertexArrayObject(bool autoBind) throw (cgt::Exception)
         : _id(0)
     {
         glGenVertexArrays(1, &_id);
         if (_id == 0) {
-            throw new tgt::Exception("Could not create OpenGL Vertex Array.");
+            throw new cgt::Exception("Could not create OpenGL Vertex Array.");
         }
 
         if (autoBind)
@@ -33,15 +33,15 @@ namespace tgt {
     }
 
     void VertexArrayObject::bindIndexBuffer(BufferObject* bufferObject) {
-        tgtAssert(bufferObject->getTargetType() == BufferObject::ELEMENT_ARRAY_BUFFER, "Buffer needs to have target type ELEMENT_ARRAY_BUFFER!");
+        cgtAssert(bufferObject->getTargetType() == BufferObject::ELEMENT_ARRAY_BUFFER, "Buffer needs to have target type ELEMENT_ARRAY_BUFFER!");
 
         bind();
         bufferObject->bind();
     }
 
     void VertexArrayObject::setVertexAttributePointer(GLuint location, BufferObject* bufferObject, GLsizei stride /*= 0*/, size_t offset /*= 0*/, bool enableNow /*= true*/) {
-        tgtAssert(bufferObject != 0, "Pointer to buffer object must not be 0.");
-        tgtAssert(bufferObject->getTargetType() == BufferObject::ARRAY_BUFFER, "Buffer must be bound to the ARRAY_BUFFER target!");
+        cgtAssert(bufferObject != 0, "Pointer to buffer object must not be 0.");
+        cgtAssert(bufferObject->getTargetType() == BufferObject::ARRAY_BUFFER, "Buffer must be bound to the ARRAY_BUFFER target!");
 
         // Todo: implement normalized flag if needed
         bind();
@@ -64,7 +64,7 @@ namespace tgt {
         if (it != _locationMap.end())
             enableVertexAttribute(it->second);
         else
-            tgtAssert(false, "Could not find Vertex Attribute location for this BufferObject. You have to add it first using setVertexAttributePointer()!");
+            cgtAssert(false, "Could not find Vertex Attribute location for this BufferObject. You have to add it first using setVertexAttributePointer()!");
     }
 
     void VertexArrayObject::disableVertexAttribute(GLuint location) {
@@ -77,7 +77,7 @@ namespace tgt {
         if (it != _locationMap.end())
             disableVertexAttribute(it->second);
         else
-            tgtAssert(false, "Could not find Vertex Attribute location for this BufferObject. You have to add it first using setVertexAttributePointer()!");
+            cgtAssert(false, "Could not find Vertex Attribute location for this BufferObject. You have to add it first using setVertexAttributePointer()!");
     }
 
     GLuint VertexArrayObject::getId() const {

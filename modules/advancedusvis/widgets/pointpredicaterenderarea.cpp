@@ -50,7 +50,7 @@ namespace campvis {
         , _movingPredicate(-1)
         , _selectedPredicate(-1)
     {
-        tgtAssert(prop != 0, "Property must not be 0");
+        cgtAssert(prop != 0, "Property must not be 0");
 
         setBackgroundRole(QPalette::Base);
         setAutoFillBackground(true);
@@ -136,7 +136,7 @@ namespace campvis {
         if (_movingPredicate >= 0) {
             int hh = height() - MARGIN_TOP - MARGIN_BOTTOM;
             double y = height() - e->y() - MARGIN_BOTTOM;
-            float newValue = tgt::clamp(y/hh, 0.0, 1.0);
+            float newValue = cgt::clamp(y/hh, 0.0, 1.0);
             
             float diff = _originalImportances[_movingPredicate] - newValue;
             float addendum = diff / (_originalImportances.size() - 1);
@@ -291,7 +291,7 @@ namespace campvis {
     }
     AbstractPointPredicate* PointPredicateRenderArea::getPredicate(int i) {
         std::vector<AbstractPointPredicate*> preds = _prop->getPredicateHistogram()->getPredicates();
-        tgtAssert(i >= 0 && i < static_cast<int>(preds.size()), "Index out of bounds!");
+        cgtAssert(i >= 0 && i < static_cast<int>(preds.size()), "Index out of bounds!");
         
         return preds[i];
     }

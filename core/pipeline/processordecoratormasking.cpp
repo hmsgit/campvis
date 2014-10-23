@@ -33,7 +33,7 @@ namespace campvis {
         : AbstractProcessorDecorator()
         , _applyMask("applyMask", "Apply Mask to image", false)
         , _maskID("maskID", "Mask Image ID", "mask", DataNameProperty::READ)
-        , _maskColor("maskColor", "Mask Color", tgt::vec4(0.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , _maskColor("maskColor", "Mask Color", cgt::vec4(0.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , _texUnit(0)
         , _maskImage(0)
     {
@@ -54,8 +54,8 @@ namespace campvis {
         propCollection->addProperty(_maskColor);
     }
 
-    void ProcessorDecoratorMasking::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
-        _texUnit = new tgt::TextureUnit();
+    void ProcessorDecoratorMasking::renderProlog(const DataContainer& dataContainer, cgt::Shader* shader) {
+        _texUnit = new cgt::TextureUnit();
         if (_applyMask.getValue()) {
             shader->setUniform("_maskColor", _maskColor.getValue());
 
@@ -69,7 +69,7 @@ namespace campvis {
         }
     }
 
-    void ProcessorDecoratorMasking::renderEpilog(tgt::Shader* shader) {
+    void ProcessorDecoratorMasking::renderEpilog(cgt::Shader* shader) {
         delete _texUnit;
         _texUnit = 0;
 

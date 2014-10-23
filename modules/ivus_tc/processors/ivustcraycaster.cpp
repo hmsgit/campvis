@@ -80,9 +80,9 @@ namespace campvis {
             ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const tgt::Texture* tex = image->getTexture();
-                if (tex->getFilter() != tgt::Texture::MIPMAP) {
-                    const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+                const cgt::Texture* tex = image->getTexture();
+                if (tex->getFilter() != cgt::Texture::MIPMAP) {
+                    const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
                     LGL_ERROR;
                     glGenerateMipmap(GL_TEXTURE_3D);
                     LGL_ERROR;
@@ -92,7 +92,7 @@ namespace campvis {
                     LGL_ERROR;
                 }
 
-                tgt::TextureUnit cmUnit, tcUnit, plaqueUnit;
+                cgt::TextureUnit cmUnit, tcUnit, plaqueUnit;
                 cm->bind(_shader, cmUnit, "_cm", "_cmParams");
                 tc->bind(_shader, tcUnit, "_tc", "_tcParams");
                 plaque->bind(_shader, plaqueUnit, "_plaque", "_plaqueParams");

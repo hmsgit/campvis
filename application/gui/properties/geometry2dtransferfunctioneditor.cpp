@@ -56,14 +56,14 @@ namespace campvis {
         setupGUI();
         tf->s_geometryCollectionChanged.connect(this, &Geometry2DTransferFunctionEditor::onGeometryCollectionChanged);
         updateManipulators();
-        setEventTypes(tgt::Event::MOUSEPRESSEVENT);
+        setEventTypes(cgt::Event::MOUSEPRESSEVENT);
     }
 
     Geometry2DTransferFunctionEditor::~Geometry2DTransferFunctionEditor() {
         disconnectFromTf();
 
-        if (tgt::GlContextManager::isInited())
-            tgt::GlContextManager::getRef().removeContext(_canvas);
+        if (cgt::GlContextManager::isInited())
+            cgt::GlContextManager::getRef().removeContext(_canvas);
     }
 
     void Geometry2DTransferFunctionEditor::updateWidgetFromProperty() {
@@ -131,12 +131,12 @@ namespace campvis {
 
             // render selected geometry
             if (_selectedGeometry != 0) {
-                const std::vector<tgt::vec2>& helperPoints = _selectedGeometry->getHelperPoints();
+                const std::vector<cgt::vec2>& helperPoints = _selectedGeometry->getHelperPoints();
                 glColor4ub(0, 0, 0, 196);
                 glEnable(GL_LINE_STIPPLE);
                 glLineStipple(1, 0xFAFA);
                 glBegin(GL_LINE_LOOP);
-                for (std::vector<tgt::vec2>::const_iterator it = helperPoints.begin(); it != helperPoints.end(); ++it)
+                for (std::vector<cgt::vec2>::const_iterator it = helperPoints.begin(); it != helperPoints.end(); ++it)
                     glVertex2fv(it->elem);
                 glEnd();
                 glDisable(GL_LINE_STIPPLE);
@@ -157,7 +157,7 @@ namespace campvis {
         glPopAttrib();
     }
 
-    void Geometry2DTransferFunctionEditor::sizeChanged(const tgt::ivec2& size) {
+    void Geometry2DTransferFunctionEditor::sizeChanged(const cgt::ivec2& size) {
         {
             tbb::mutex::scoped_lock lock(_localMutex);
             for (std::vector<AbstractTFGeometryManipulator*>::iterator it = _manipulators.begin(); it != _manipulators.end(); ++it) {
@@ -167,11 +167,11 @@ namespace campvis {
         invalidate();
     }
 
-    void Geometry2DTransferFunctionEditor::mousePressEvent(tgt::MouseEvent* e) {
-        if (_selectedGeometry != 0 && e->modifiers() & tgt::Event::CTRL) {
+    void Geometry2DTransferFunctionEditor::mousePressEvent(cgt::MouseEvent* e) {
+        if (_selectedGeometry != 0 && e->modifiers() & cgt::Event::CTRL) {
 //             TFGeometry2D* g = _selectedGeometry->getGeometry();
 //             std::vector<TFGeometry2D::KeyPoint>& kpts = g->getKeyPoints();
-//             TFGeometry2D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), tgt::col4(255));
+//             TFGeometry2D::KeyPoint kp(static_cast<float>(e->x()) / static_cast<float>(_canvas->width()), cgt::col4(255));
 //             std::vector<TFGeometry2D::KeyPoint>::const_iterator lb = std::upper_bound(kpts.begin(), kpts.end(), kp);
 //             if (lb != kpts.end()) {
 //                 kp._color = lb->_color;
@@ -179,7 +179,7 @@ namespace campvis {
 //             else {
 //                 kp._color = kpts.back()._color;
 //             }
-//             float alpha = tgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
+//             float alpha = cgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
 //             kp._color.a = static_cast<uint8_t>(alpha * 255.f);
 //             kpts.insert(lb, kp);
 //             updateManipulators();
@@ -198,7 +198,7 @@ namespace campvis {
 
     void Geometry2DTransferFunctionEditor::invalidate() {
         // TODO: check, whether this should be done in an extra thread
-        tgt::GLContextScopedLock lock(_canvas);
+        cgt::GLContextScopedLock lock(_canvas);
         paint();
     }
 
@@ -215,7 +215,7 @@ namespace campvis {
         QLabel* lblOpacityBottom = new QLabel(tr("0%"), this);
         _layout->addWidget(lblOpacityBottom, 3, 0, 1, 1, Qt::AlignRight);
 
-        _canvas = new tgt::QtThreadedCanvas("", tgt::ivec2(256, 128), tgt::GLCanvas::RGBA_BUFFER, 0, false);
+        _canvas = new cgt::QtThreadedCanvas("", cgt::ivec2(256, 128), cgt::GLCanvas::RGBA_BUFFER, 0, false);
         GLCtxtMgr.registerContextAndInitGlew(_canvas, "Geometry2DTransferFunctionEditor");
         GLCtxtMgr.releaseContext(_canvas, false);
 
@@ -260,7 +260,7 @@ namespace campvis {
 
     void Geometry2DTransferFunctionEditor::onBtnAddGeometryClicked() {
         Geometry2DTransferFunction* gtf = static_cast<Geometry2DTransferFunction*>(_transferFunction);
-        gtf->addGeometry(TFGeometry2D::createQuad(tgt::vec2(.4f, .6f), tgt::vec2(0.f, .4f), tgt::col4(196)));
+        gtf->addGeometry(TFGeometry2D::createQuad(cgt::vec2(.4f, .6f), cgt::vec2(0.f, .4f), cgt::col4(196)));
     }
 
     void Geometry2DTransferFunctionEditor::onBtnRemoveGeometryClicked() {

@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_NAVIGATION_H
-#define TGT_NAVIGATION_H
+#ifndef CGT_NAVIGATION_H
+#define CGT_NAVIGATION_H
 
 #include "cgt/tgt_gl.h"
 
@@ -45,13 +45,13 @@
     in object space. Most deriving classes use these operations to do advanced navigations.
 */
 
-namespace tgt {
+namespace cgt {
 
 /**
- * Intermediate wrapper class for easier integration of tgt::Navigation into projects using
+ * Intermediate wrapper class for easier integration of cgt::Navigation into projects using
  * separated cameras and canvases.
  */
-class TGT_API IHasCamera {
+class CGT_API IHasCamera {
 public:
     /**
      * Pure virtual destructor
@@ -71,7 +71,7 @@ public:
 };
 
 
-class TGT_API Navigation : virtual public EventListener {
+class CGT_API Navigation : virtual public EventListener {
 
 protected:
 
@@ -101,13 +101,13 @@ public:
      * Sets the scene bounds for automatic near/far clipping plane adjustment.
      * \param   bounds  New bounds for the rendered scene.
      */
-    void setSceneBounds(const tgt::Bounds& bounds);
+    void setSceneBounds(const cgt::Bounds& bounds);
     
     /**
         * Returns the current scene bounds for this trackball.
         * \return  _sceneBounds
         */
-    const tgt::Bounds& getSceneBounds() const;
+    const cgt::Bounds& getSceneBounds() const;
 
     //     void setCanvas(GLCanvas* hcam) { hcam_ = hcam; }
 //     GLCanvas* getCanvas() const { return hcam_->; }
@@ -147,6 +147,6 @@ public:
 
 };
 
-} // namespace tgt
+} // namespace cgt
 
-#endif //TGT_NAVIGATION_H
+#endif //CGT_NAVIGATION_H

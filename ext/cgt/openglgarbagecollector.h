@@ -42,13 +42,13 @@
 
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     /**
      * Singleton class for collecting OpenGL stuff that is to be deleted.
      * 
      * This class is to be considered as thread-safe.
      */
-    class TGT_API OpenGLGarbageCollector : public Singleton<OpenGLGarbageCollector> {
+    class CGT_API OpenGLGarbageCollector : public Singleton<OpenGLGarbageCollector> {
         friend class Singleton<OpenGLGarbageCollector>;
 
     public:
@@ -93,6 +93,6 @@ namespace tgt {
 
 }
 
-#define GLGC tgt::Singleton<tgt::OpenGLGarbageCollector>::getRef()
+#define GLGC cgt::Singleton<cgt::OpenGLGarbageCollector>::getRef()
 
 #endif // OPENGLGARBAGECOLLECTOR_H__

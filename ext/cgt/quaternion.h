@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -22,8 +22,8 @@
  *                                                                    *
  **********************************************************************/
 
-#ifndef TGT_QUATERNION_H
-#define TGT_QUATERNION_H
+#ifndef CGT_QUATERNION_H
+#define CGT_QUATERNION_H
 
 #include <cmath>
 
@@ -38,7 +38,7 @@
     very useful for a lot of other things.
 */
 
-namespace tgt {
+namespace cgt {
 
 template<class T>
 struct Quaternion {
@@ -227,7 +227,7 @@ struct Quaternion {
     static Quaternion createQuat(T angle, const Vector3<T>& axis) {
         Quaternion res;
 
-        Vector3<T> newAxis = tgt::normalize(axis);
+        Vector3<T> newAxis = cgt::normalize(axis);
 
         res.x = newAxis.x * sinf(angle / 2);
         res.y = newAxis.y * sinf(angle / 2);
@@ -394,7 +394,7 @@ inline Quaternion<T> invert(const Quaternion<T>& q) {
 */
 template<class T>
 inline Quaternion<T> lerpQuat(const Quaternion<T>& a, const Quaternion<T>& b, T t) {
-    tgtAssert(!((t < 0.0) || (t > 1.0)), "running-parameter must be between 0 and 1");
+    cgtAssert(!((t < 0.0) || (t > 1.0)), "running-parameter must be between 0 and 1");
 
     return normalize((b - a)*t + a);
 }
@@ -408,7 +408,7 @@ inline Quaternion<T> lerpQuat(const Quaternion<T>& a, const Quaternion<T>& b, T 
 template<class T>
 Quaternion<T> slerpQuat(const Quaternion<T>& a, const Quaternion<T>& b, T t, bool inv = true) {
     using namespace std; // use overloaded cos and sin
-    tgtAssert(!((t < T(0.0)) || (t > T(1.0))), "running-parameter must be between 0 and 1");
+    cgtAssert(!((t < T(0.0)) || (t > T(1.0))), "running-parameter must be between 0 and 1");
 
     Quaternion<T> c = b;
     T tmp = a.w*b.w + a.x*b.x + a.y*b.y + a.z*b.z;
@@ -436,7 +436,7 @@ template<class T>
 inline Quaternion<T> squadQuat(const Quaternion<T>& p, const Quaternion<T>& q,
                                const Quaternion<T>& a, const Quaternion<T>& b, double t)
 {
-    tgtAssert(!((t < 0.0) || (t > 1.0)), "running-parameter must be between 0 and 1");
+    cgtAssert(!((t < 0.0) || (t > 1.0)), "running-parameter must be between 0 and 1");
 
     return slerpQuat<T>(slerpQuat<T>(p, q, static_cast<T>(t)), slerpQuat<T>(a, b, static_cast<T>(t)), static_cast<T>(2.0*t*(1.0 - t)), false);
 }
@@ -620,6 +620,6 @@ std::ostream& operator << (std::ostream& s, const Quaternion<T>& q) {
 typedef Quaternion<float>   quat;
 typedef Quaternion<double>  dquat;
 
-} // namespace tgt
+} // namespace cgt
 
 #endif //_QUATERNION_H

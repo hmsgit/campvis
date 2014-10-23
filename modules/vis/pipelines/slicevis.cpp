@@ -57,21 +57,21 @@ namespace campvis {
 
         _sliceExtractor.p_xSliceNumber.setValue(0);
 
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .08f));
+        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 0), cgt::col4(255, 255, 255, 255)));
         _sliceExtractor.p_transferFunction.replaceTF(tf);
 
         _renderTargetID.setValue("renderTarget");
         _renderTargetID.addSharedProperty(&(_sliceExtractor.p_targetImageID));
     }
 
-    void SliceVis::keyEvent(tgt::KeyEvent* e) {
+    void SliceVis::keyEvent(cgt::KeyEvent* e) {
         if (e->pressed()) {
             switch (e->keyCode()) {
-                case tgt::KeyEvent::K_UP:
+                case cgt::KeyEvent::K_UP:
                     _sliceExtractor.p_xSliceNumber.increment();
                     break;
-                case tgt::KeyEvent::K_DOWN:
+                case cgt::KeyEvent::K_DOWN:
                     _sliceExtractor.p_xSliceNumber.decrement();
                     break;
                 default:

@@ -43,9 +43,9 @@ namespace campvis {
     protected:
         void addProperties(AbstractProcessor* propCollection);
 
-        void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
+        void renderProlog(const DataContainer& dataContainer, cgt::Shader* shader);
 
-        void renderEpilog(tgt::Shader* shader);
+        void renderEpilog(cgt::Shader* shader);
 
         std::string generateHeader() const;
 
@@ -53,7 +53,7 @@ namespace campvis {
         DataNameProperty _maskID;           ///< ID for mask image (optional)
         Vec4Property _maskColor;            ///< Mask color
 
-        tgt::TextureUnit* _texUnit;
+        cgt::TextureUnit* _texUnit;
         ScopedTypedData<RenderData>* _maskImage;
 
     private:

@@ -1,12 +1,12 @@
 /**********************************************************************
  *                                                                    *
- * tgt - Tiny Graphics Toolbox                                        *
+ * cgt - Tiny Graphics Toolbox                                        *
  *                                                                    *
  * Copyright (C) 2006-2011 Visualization and Computer Graphics Group, *
  * Department of Computer Science, University of Muenster, Germany.   *
  * <http://viscg.uni-muenster.de>                                     *
  *                                                                    *
- * This file is part of the tgt library. This library is free         *
+ * This file is part of the cgt library. This library is free         *
  * software; you can redistribute it and/or modify it under the terms *
  * of the GNU Lesser General Public License version 2.1 as published  *
  * by the Free Software Foundation.                                   *
@@ -24,7 +24,7 @@
 
 #include "cgt/texturereaderdevil.h"
 
-#ifdef TGT_HAS_DEVIL
+#ifdef CGT_HAS_DEVIL
 
 #include <IL/il.h>
 
@@ -32,14 +32,14 @@
 #include "cgt/filesystem.h"
 #include <cstring>
 
-namespace tgt {
+namespace cgt {
 
 //------------------------------------------------------------------------------
 // TextureReaderDevil
 //------------------------------------------------------------------------------
 
 
-const std::string TextureReaderDevil::loggerCat_("tgt.Texture.Reader.Devil");
+const std::string TextureReaderDevil::loggerCat_("cgt.Texture.Reader.Devil");
 
 TextureReaderDevil::TextureReaderDevil() {
     name_ = "DevIL Reader";
@@ -217,13 +217,13 @@ Texture* TextureReaderDevil::loadTexture(const std::string& filename, Texture::F
         return 0;
     }
 
-    tgt::ivec3 dims;
+    cgt::ivec3 dims;
     dims.x = ilGetInteger(IL_IMAGE_WIDTH);
     dims.y = ilGetInteger(IL_IMAGE_HEIGHT);
     dims.z = ilGetInteger(IL_IMAGE_DEPTH);
     t->setDimensions(dims);
     LDEBUG("Image dimensions: " << t->getDimensions());
-    tgtAssert( dims.z == 1, "depth is not equal 1");
+    cgtAssert( dims.z == 1, "depth is not equal 1");
 
 #ifdef GL_TEXTURE_RECTANGLE_ARB
     if (textureRectangle)
@@ -262,6 +262,6 @@ Texture* TextureReaderDevil::loadTexture(const std::string& filename, Texture::F
     return t;
 }
 
-} // namespace tgt
+} // namespace cgt
 
-#endif // TGT_HAS_DEVIL
+#endif // CGT_HAS_DEVIL

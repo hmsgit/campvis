@@ -207,8 +207,8 @@ namespace campvis {
     campvis::GenericOptionProperty<T>::GenericOptionProperty(const std::string& name, const std::string& title, const GenericOption<T>* options, int count)
         : AbstractOptionProperty(name, title)
     {
-        tgtAssert(options != 0, "Pointer to options array must not be 0.")
-        tgtAssert(count > 0, "The number of options must be greater 0.");
+        cgtAssert(options != 0, "Pointer to options array must not be 0.")
+        cgtAssert(count > 0, "The number of options must be greater 0.");
 
         _options.assign(options, options + count);
         setMinValue(0);
@@ -258,7 +258,7 @@ namespace campvis {
 
     template<typename T>
     void campvis::GenericOptionProperty<T>::selectByIndex(int index) {
-        tgtAssert(index >= 0 && index < static_cast<int>(_options.size()), "Index out of bounds.");
+        cgtAssert(index >= 0 && index < static_cast<int>(_options.size()), "Index out of bounds.");
         setValue(index);
     }
 
