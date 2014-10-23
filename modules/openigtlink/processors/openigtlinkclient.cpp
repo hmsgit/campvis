@@ -48,8 +48,8 @@ namespace campvis {
         , p_targetImagePrefix("targetImageName", "Target Image Prefix", "IGTL.image.")
         , p_receiveTransforms("ReceiveTransforms", "Receive TRANSFORM Messages", true)
         , p_targetTransformPrefix("targetTransformPrefix", "Target Transform Prefix", "IGTL.transform.")
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
         , p_receivePositions("ReceivePositions", "Receive POSITION Messages", true)
         , p_targetPositionPrefix("targetPositionsPrefix", "Target Position Prefix", "IGTL.position.")
         , _stopExecution()
@@ -75,7 +75,7 @@ namespace campvis {
         addProperty(p_receivePositions, INVALID_PROPERTIES);
         addProperty(p_targetPositionPrefix, VALID);
 
-		invalidate(INVALID_PROPERTIES);
+        invalidate(INVALID_PROPERTIES);
 
 
     }
@@ -151,13 +151,13 @@ namespace campvis {
                     return;
                 }
 
-                tgt::vec3 imageOffset(0.f);
-                tgt::vec3 voxelSize(1.f);
-                tgt::ivec3 size_i(1);
+                cgt::vec3 imageOffset(0.f);
+                cgt::vec3 voxelSize(1.f);
+                cgt::ivec3 size_i(1);
 
                 imageMessage->GetSpacing(voxelSize.elem);
                 imageMessage->GetDimensions(size_i.elem);
-                tgt::svec3 size(size_i);                
+                cgt::svec3 size(size_i);                
                 imageMessage->GetOrigin(imageOffset.elem);
 
                 size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;
@@ -192,7 +192,7 @@ namespace campvis {
         p_imageOffset.setVisible(p_receiveImages.getValue());
         p_voxelSize.setVisible(p_receiveImages.getValue());
         p_targetTransformPrefix.setVisible(p_receiveImages.getValue() || p_receiveTransforms.getValue());
-		p_targetPositionPrefix.setVisible(p_receivePositions.getValue());
+        p_targetPositionPrefix.setVisible(p_receivePositions.getValue());
 
         validate(INVALID_PROPERTIES);
     }
@@ -246,7 +246,7 @@ namespace campvis {
 
         if (c & igtl::MessageHeader::UNPACK_BODY) // if CRC check is OK
         {
-            tgt::mat4 mtx;
+            cgt::mat4 mtx;
             // Retrieve the transform data (this cast is a bit dubious but should be ok judging from the respective class internals)
             transMsg->GetMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx.elem));
 #ifdef IGTL_CLIENT_DEBUGGING
@@ -346,7 +346,7 @@ namespace campvis {
             imgMsg->GetSpacing(spacing);
             imgMsg->GetSubVolume(svsize, svoffset);
 
-            tgt::mat4 mtx;
+            cgt::mat4 mtx;
             // Retrieve the transform data (this cast is a bit dubious but should be ok judging from the class internals)
             imgMsg->GetMatrix(*reinterpret_cast<igtl::Matrix4x4*>(mtx.elem));
             

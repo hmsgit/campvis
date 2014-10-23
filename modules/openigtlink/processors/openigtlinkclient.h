@@ -35,7 +35,7 @@
 #include <igtlMessageHeader.h>
 #include <igtlImageMessage.h>
 
-#include <tgt/matrix.h>
+#include <cgt/matrix.h>
 
 #include <ext/threading.h>
 #include <tbb/atomic.h>
@@ -118,8 +118,8 @@ namespace campvis {
     protected:
         /// Stores received data from a POSITION Message
         struct PositionMessageData {
-            tgt::vec3 _position;
-            tgt::vec4 _quaternion;
+            cgt::vec3 _position;
+            cgt::vec4 _quaternion;
         };
 
         /// Main method for the receiver thread. The new thread will
@@ -139,7 +139,7 @@ namespace campvis {
         igtl::ClientSocket::Pointer _socket;
         
         //data
-        std::map<std::string, tgt::mat4> _receivedTransforms;        ///< the transforms that has been received by the igtl worker thread, mapped by device name
+        std::map<std::string, cgt::mat4> _receivedTransforms;        ///< the transforms that has been received by the igtl worker thread, mapped by device name
         std::map<std::string, igtl::ImageMessage::Pointer> _receivedImages;  ///< the image messages received by the igtl worker thread, mapped by device name
         std::map<std::string, PositionMessageData> _receivedPositions; ///< position message data received by the igtl worker thread, mapped by device name        
 
