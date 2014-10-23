@@ -28,7 +28,6 @@
 #include "tgt/tgt_gl.h"
 
 #include "tgt/matrix.h"
-#include "tgt/plane.h"
 
 /*
     The purpose of this header is to divide math and OpenGL functionality.
@@ -132,17 +131,6 @@ inline mat4 getTransposeTextureMatrix() {
     mat4 m;
     glGetFloatv(GL_TEXTURE_MATRIX, m.elem);
     return m;
-}
-
-/// sets the current clip plane in OpenGL
-inline void setClipPlane(GLenum planeName, const plane& p) {
-    dplane dp(p);
-    glClipPlane(planeName, dp.n.elem);
-}
-
-/// sets the current clip plane in OpenGL
-inline void setClipPlane(GLenum planeName, const dplane& p) {
-    glClipPlane(planeName, p.n.elem);
 }
 
 /// gets the current viewport from OpenGL

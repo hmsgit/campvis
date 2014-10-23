@@ -33,8 +33,6 @@
 #ifdef _MSC_VER
     #include "tgt/gpucapabilitieswindows.h"
 #endif
-#include "tgt/tesselator.h"
-#include "tgt/texturemanager.h"
 #include "tgt/shadermanager.h"
 #include "tgt/event/eventhandler.h"
 
@@ -99,17 +97,6 @@ void initGL(InitFeature::Features featureset) {
 #ifdef _MSC_VER
         GpuCapabilitiesWindows::init();
 #endif
-    if (featureset & InitFeature::TESSELATOR)
-        Tesselator::init();
-    if (featureset & InitFeature::TEXTURE_MANAGER) {
-        TextureManager::init();
-        #ifdef TGT_HAS_DEVIL
-            TexMgr.registerReader(new TextureReaderDevil());
-        //devil has tga support so we do not need the built-in reader:
-        #else
-            TexMgr.registerReader(new TextureReaderTga());
-        #endif
-    }
 
     // starting shadermanager
     ShaderManager::init();
@@ -128,10 +115,6 @@ void deinitGL() {
 #endif
     if (ShaderManager::isInited())
         ShaderManager::deinit();
-    if (TextureManager::isInited())
-        TextureManager::deinit();
-    if (Tesselator::isInited())
-        Tesselator::deinit();
 }
 
 } // namespace

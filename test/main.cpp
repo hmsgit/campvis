@@ -30,14 +30,17 @@
 
 #include "gtest/gtest.h"
 #include <stdio.h>
+#include <QApplication>
 
-#include "tgt/gpucapabilities.h"
-#include "tgt/shadermanager.h"
+#include "sigslot/sigslot.h"
+
 #include "tgt/glcontextmanager.h"
-#include "tgt/opengljobprocessor.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "tgt/gpucapabilities.h"
+#include "tgt/init.h"
 #include "tgt/logmanager.h"
-#include "tgt/qt/qtapplication.h"
+#include "tgt/opengljobprocessor.h"
+#include "tgt/shadermanager.h"
+#include "tgt/qt/qtthreadedcanvas.h"
 
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"

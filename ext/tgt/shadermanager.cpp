@@ -25,7 +25,6 @@
 #include "tgt/shadermanager.h"
 
 #include "tgt/gpucapabilities.h"
-#include "tgt/texturemanager.h"
 
 #include <iostream>
 #include <fstream>

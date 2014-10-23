@@ -31,7 +31,6 @@
 #include "tgt/frustum.h"
 #include "tgt/types.h"
 #include "tgt/vector.h"
-#include "tgt/line.h"
 #include "tgt/matrix.h"
 #include "tgt/quaternion.h"
 #include "tgt/glcanvas.h"
@@ -274,7 +273,6 @@ public:
     /// This method returns the projection matrix
     virtual mat4 getProjectionMatrix() const;
 
-    line3 getViewRay(ivec2 vp, ivec2 pixel) const;
     vec3 project(ivec2 vp, vec3 point) const;
 
     bool operator==(const Camera& rhs) const;

@@ -33,8 +33,8 @@
 #include "tgt/vector.h"
 #include "tgt/types.h"
 #include "tgt/navigation/navigation.h"
-#include "tgt/timer.h"
 #include "tgt/stopwatch.h"
+#include "tgt/timer.h"
 
 
 namespace tgt {

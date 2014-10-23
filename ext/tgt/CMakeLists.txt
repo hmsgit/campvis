@@ -22,36 +22,26 @@ FILE(GLOB TGT_HEADERS *.h event/*.h navigation/*.h)
 SET(TGT_SOURCES
 	assert.cpp
 	bounds.cpp
-	bspline.cpp
 	buffer.cpp
 	camera.cpp
-	catmullromspline.cpp
-	curve.cpp
 	exception.cpp
 	filesystem.cpp
-	font.cpp
 	framebufferobject.cpp
 	frustum.cpp
 	glcanvas.cpp
 	glcontextmanager.cpp
 	gpucapabilities.cpp
 	gpucapabilitieswindows.cpp
-	guiapplication.cpp
 	init.cpp
-	light.cpp
 	logmanager.cpp
 	job.cpp
-	naturalcubicspline.cpp
 	openglgarbagecollector.cpp
 	opengljobprocessor.cpp
 	painter.cpp
 	runnable.cpp
 	shadermanager.cpp
-	spline.cpp
 	stopwatch.cpp
-	tesselator.cpp
 	texture.cpp
-	texturemanager.cpp
 	texturereader.cpp
 	texturereaderdevil.cpp
 	texturereadertga.cpp
@@ -75,13 +65,11 @@ SET(TGT_SOURCES
 # Qt related stuff:
 IF(TGT_WITH_QT)
 	LIST(APPEND TGT_HEADERS 
-		qt/qtapplication.h
 		qt/qtcanvas.h
 		qt/qtthreadedcanvas.h
 		qt/qttimer.h)
 	
 	LIST(APPEND TGT_SOURCES 
-		qt/qtapplication.cpp
 		qt/qtcanvas.cpp
 		qt/qtthreadedcanvas.cpp
 		qt/qttimer.cpp)

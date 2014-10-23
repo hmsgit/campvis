@@ -27,7 +27,6 @@
 #include "tgt/assert.h"
 #include "tgt/camera.h"
 #include "tgt/glcontextmanager.h"
-#include "tgt/quadric.h"
 #include "tgt/shadermanager.h"
 #include "tgt/texture.h"
 #include "tgt/textureunit.h"

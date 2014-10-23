@@ -34,6 +34,7 @@
 #include "tgt/matrix.h"
 #include "tgt/tgt_gl.h"
 #include "tgt/types.h"
+#include "tgt/singleton.h"
 #include "tgt/vector.h"
 
 namespace tgt {

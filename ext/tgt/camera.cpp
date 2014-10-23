@@ -27,7 +27,6 @@
 #include "tgt/assert.h"
 #include "tgt/glmath.h"
 #include "tgt/quaternion.h"
-#include "tgt/spline.h"
 #include "tgt/tgt_gl.h"
 
 #include <cmath>
@@ -150,46 +149,6 @@ mat4 Camera::getProjectionMatrix() const {
     }
     else
         return getFrustumMatrix();
-}
-
-line3 Camera::getViewRay(ivec2 vp, ivec2 pixel) const {
-    GLint viewport[4];
-    GLdouble modelview[16];
-    GLdouble projection[16];
-
-    tgt::mat4 projection_tgt = getProjectionMatrix();
-    tgt::mat4 modelview_tgt = getViewMatrix();
-    for (int i = 0; i < 4; ++i) {
-        modelview[i+0]   = modelview_tgt[i].x;
-        modelview[i+4]   = modelview_tgt[i].y;
-        modelview[i+8]   = modelview_tgt[i].z;
-        modelview[i+12]  = modelview_tgt[i].w;
-        projection[i+0]  = projection_tgt[i].x;
-        projection[i+4]  = projection_tgt[i].y;
-        projection[i+8]  = projection_tgt[i].z;
-        projection[i+12] = projection_tgt[i].w;
-    }
-    viewport[0] = 0;
-    viewport[1] = 0;
-    viewport[2] = static_cast<GLint>(vp.x);
-    viewport[3] = static_cast<GLint>(vp.y);
-
-    GLdouble winX, winY, winZ;
-    winX = pixel.x;
-    winY = vp.y - pixel.y;
-    winZ = 1.0f;
-
-    tgt::dvec3 posFar;
-    gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posFar.x, &posFar.y, &posFar.z);
-    LGL_ERROR;
-
-    winZ = 0.0f;
-    tgt::dvec3 posNear;
-    gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posNear.x, &posNear.y, &posNear.z);
-    LGL_ERROR;
-
-    tgt::line3 l(posNear, posFar);
-    return l;
 }
 
 vec3 Camera::project(ivec2 vp, vec3 point) const {
