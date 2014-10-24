@@ -445,7 +445,8 @@ bool ShaderObject::rebuildFromFile() {
 const string Shader::loggerCat_("cgt.Shader.Shader");
 
 Shader::Shader()
-    : isLinked_(false)
+    : id_(0)
+    , isLinked_(false)
     , ignoreError_(false)
 {
     id_ = glCreateProgram();

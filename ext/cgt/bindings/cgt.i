@@ -2,6 +2,7 @@
 %include "stdint.i"
 %{
 #include "ext/cgt/camera.h"
+#include "ext/cgt/navigation/navigation.h"
 #include "ext/cgt/vector.h"
 #include "ext/cgt/event/eventlistener.h"
 %}
@@ -91,5 +92,13 @@ namespace cgt {
                ProjectionMode pm    =  PERSPECTIVE);
 
         virtual ~Camera();
+    };
+
+    class IHasCamera {
+    public:
+        virtual ~IHasCamera();
+
+    virtual Camera* getCamera() = 0;
+    virtual void update() = 0;
     };
 }

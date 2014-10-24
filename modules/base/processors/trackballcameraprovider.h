@@ -46,7 +46,7 @@ namespace campvis {
     /**
      * Generates CameraData objects.
      */
-    class TrackballCameraProvider : public CameraProvider, public cgt::EventListener , public cgt::IHasCamera {
+    class TrackballCameraProvider : public CameraProvider, public cgt::EventListener, public cgt::IHasCamera {
     public:
         /// Trackball automation mode
         enum AutomationMode {

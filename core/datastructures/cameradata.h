@@ -38,7 +38,7 @@ namespace campvis {
     /**
      * Data object storing camera data.
      */
-    class CameraData : public AbstractData {
+    class CAMPVIS_CORE_API CameraData : public AbstractData {
     public:
         /**
          * Constructor, creating a new CameraData object initialized by \a camera.

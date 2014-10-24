@@ -14,6 +14,11 @@ namespace campvis {
     public:
         AbstractImageReader();
         ~AbstractImageReader();
+
+        %immutable;
+        campvis::StringProperty p_url;
+        campvis::DataNameProperty p_targetImageID;
+        %mutable;
     };
 
     class MhdImageReader : public AbstractImageReader {
@@ -22,10 +27,9 @@ namespace campvis {
         ~MhdImageReader();
 
         const std::string getName() const;
-
-        %immutable;
-        campvis::StringProperty p_url;
-        campvis::DataNameProperty p_targetImageID;
-        %mutable;
     };
+}
+
+%luacode {
+  print("Module campvis-io loaded")
 }

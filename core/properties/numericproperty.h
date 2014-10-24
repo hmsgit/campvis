@@ -340,7 +340,7 @@ namespace campvis {
 
     template<typename T>
     void campvis::NumericProperty<T>::unlock() {
-        if (NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::isNan(_backBuffer) && NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::isNan(_value))
+        if (NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::isNan(this->_backBuffer) && NumericPropertyTraits<T, std::numeric_limits<T>::is_specialized>::isNan(this->_value))
             AbstractProperty::unlock();
         else
             GenericProperty<T>::unlock();
