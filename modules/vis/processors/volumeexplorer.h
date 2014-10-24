@@ -28,16 +28,13 @@
 #include "cgt/event/eventlistener.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/allproperties.h"
 
-#include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/metaproperty.h"
-
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
 
@@ -117,10 +114,11 @@ namespace campvis {
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.
         enum ProcessorInvalidationLevel {
-            VR_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
-            SLICES_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
-            SCRIBBLE_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
-            LARGE_VIEW_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 3
+            CAMERA_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
+            VR_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
+            SLICES_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
+            SCRIBBLE_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 3,
+            LARGE_VIEW_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 4
         };
 
         /// \see AbstractProcessor::updateResult
@@ -152,6 +150,7 @@ namespace campvis {
         cgt::Shader* _shader;                           ///< Shader for slice rendering
         FaceGeometry* _quad;
 
+        TrackballCameraProvider _tcp;
         VolumeRenderer _raycaster;
         SliceRenderProcessor* _sliceRenderer;
 
@@ -163,7 +162,6 @@ namespace campvis {
         MWheelToNumericPropertyEventListener _ySliceHandler;
         MWheelToNumericPropertyEventListener _zSliceHandler;
         TransFuncWindowingEventListener _windowingHandler;
-        TrackballNavigationEventListener* _trackballEH;
         bool _mousePressedInRaycaster;                  ///< Flag whether mouse was pressed in raycaster
 
         Views _viewUnderEvent;                          ///< View to apply events to

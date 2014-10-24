@@ -29,11 +29,7 @@
 
 #include "core/classification/abstracttransferfunction.h"
 #include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/cameraproperty.h"
+#include "core/properties/allproperties.h"
 
 namespace campvis {
     /**
@@ -60,15 +56,15 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        DataNameProperty p_mirrorID;         ///< ID for output geometry
+        DataNameProperty p_camera;              ///< ID for camera input
+        DataNameProperty p_mirrorID;            ///< ID for output geometry
 
-        Vec3Property p_mirrorCenter;         ///< position of mirror center
-        Vec3Property p_mirrorNormal;         ///< normal of mirror
-        FloatProperty p_size;                ///< Mirror size
-        IntProperty p_numVertices;           ///< Number of vertices of mirror
+        Vec3Property p_mirrorCenter;            ///< position of mirror center
+        Vec3Property p_mirrorNormal;            ///< normal of mirror
+        FloatProperty p_size;                   ///< Mirror size
+        IntProperty p_numVertices;              ///< Number of vertices of mirror
 
-        Vec3Property p_poi;                  ///< Point of intereset
-        CameraProperty p_camera;
+        Vec3Property p_poi;                     ///< Point of intereset
 
     protected:
         /// \see AbstractProcessor::updateResult

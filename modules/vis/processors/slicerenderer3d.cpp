@@ -28,6 +28,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
@@ -46,15 +47,15 @@ namespace campvis {
     SliceRenderer3D::SliceRenderer3D(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_camera("Camera", "Camera")
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
         addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
-        addProperty(p_targetImageID);
         addProperty(p_camera);
+        addProperty(p_targetImageID);
         addProperty(p_sliceNumber);
         addProperty(p_transferFunction);
     }
@@ -77,10 +78,11 @@ namespace campvis {
 
     void SliceRenderer3D::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
 
-        if (img != 0) {
+        if (img != nullptr && camera != nullptr) {
             if (img->getDimensionality() == 3) {
-                const cgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = camera->getCamera();
 
                 // Creating the slice proxy geometry works as follows:
                 // Create the cube proxy geometry for the volume, then clip the cube against the slice plane.

@@ -475,9 +475,20 @@ namespace sigslot {
             _the_signal_handle->_callingFile = this->_callingFile; \
             _the_signal_handle->_callingLine = this->_callingLine; \
             }
+
+        // In debug mode, check that there is no connection to _target_slot so far.
+        #define assertSingleConnectionToDestination(_connection_type, _target_object, _target_func) \
+            typename connections_list::const_iterator it = this->m_connected_slots.begin(); \
+            typename connections_list::const_iterator itEnd = this->m_connected_slots.end(); \
+            while (it != itEnd) { \
+                cgtAssert((*it)->getdest() != _target_object || static_cast<_connection_type*>(*it)->getfunc() != _target_func, "Connected the same slot twice, you should not do this."); \
+                ++it; \
+            }            
+
 #else
-        // In release mode, this macro expands to a NOP.
-        #define writeDebugInfoToSignalHandle(_the_signal_handle) 
+        // In release mode, these macros expand to a NOP.
+        #define writeDebugInfoToSignalHandle(_the_signal_handle)
+        #define assertSingleConnectionToDestination(_connection_type, _target_object, _target_func)
 #endif
     };
 
@@ -1130,6 +1141,8 @@ namespace sigslot {
     class _connection0 : public _connection_base0
     {
     public:
+        typedef void (dest_type::*function_ptr_t)();
+
         _connection0()
         {
             m_pobject = 0;
@@ -1161,16 +1174,23 @@ namespace sigslot {
         {
             return m_pobject;
         }
-        
+
+        function_ptr_t getfunc() const 
+        {
+            return m_pmemfun;
+        }
+
     private:
         dest_type* m_pobject;
-        void (dest_type::* m_pmemfun)();
+        function_ptr_t m_pmemfun;
     };
     
     template<class dest_type, class arg1_type>
     class _connection1 : public _connection_base1<arg1_type>
     {
     public:
+        typedef void (dest_type::*function_ptr_t)(arg1_type);
+
         _connection1()
         {
             m_pobject = 0;
@@ -1202,16 +1222,23 @@ namespace sigslot {
         {
             return m_pobject;
         }
-        
+
+        function_ptr_t getfunc() const 
+        {
+            return m_pmemfun;
+        }
+
     private:
         dest_type* m_pobject;
-        void (dest_type::* m_pmemfun)(arg1_type);
+        function_ptr_t  m_pmemfun;
     };
     
     template<class dest_type, class arg1_type, class arg2_type>
     class _connection2 : public _connection_base2<arg1_type, arg2_type>
     {
     public:
+        typedef void (dest_type::* function_ptr_t)(arg1_type, arg2_type);
+
         _connection2()
         {
             m_pobject = 0;
@@ -1245,15 +1272,22 @@ namespace sigslot {
             return m_pobject;
         }
         
+        function_ptr_t getfunc() const 
+        {
+            return m_pmemfun;
+        }
+
     private:
         dest_type* m_pobject;
-        void (dest_type::* m_pmemfun)(arg1_type, arg2_type);
+        function_ptr_t m_pmemfun;
     };
-    
+
     template<class dest_type, class arg1_type, class arg2_type, class arg3_type>
     class _connection3 : public _connection_base3<arg1_type, arg2_type, arg3_type>
     {
     public:
+        typedef void (dest_type::* function_ptr_t)(arg1_type, arg2_type, arg3_type);
+
         _connection3()
         {
             m_pobject = 0;
@@ -1286,16 +1320,23 @@ namespace sigslot {
         {
             return m_pobject;
         }
-        
+
+        function_ptr_t getfunc() const 
+        {
+            return m_pmemfun;
+        }
+
     private:
         dest_type* m_pobject;
-        void (dest_type::* m_pmemfun)(arg1_type, arg2_type, arg3_type);
+        function_ptr_t m_pmemfun;
     };
     
     template<class dest_type, class arg1_type, class arg2_type, class arg3_type, class arg4_type>
     class _connection4 : public _connection_base4<arg1_type, arg2_type, arg3_type, arg4_type>
     {
     public:
+        typedef void (dest_type::* function_ptr_t)(arg1_type, arg2_type, arg3_type, arg4_type);
+
         _connection4()
         {
             m_pobject = 0;
@@ -1327,16 +1368,23 @@ namespace sigslot {
         {
             return m_pobject;
         }
-        
+
+        function_ptr_t getfunc() const 
+        {
+            return m_pmemfun;
+        }
+
     private:
         dest_type* m_pobject;
-        void (dest_type::* m_pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type);
+        function_ptr_t m_pmemfun;
     };
     
     template<class dest_type, class arg1_type, class arg2_type, class arg3_type, class arg4_type, class arg5_type>
     class _connection5 : public _connection_base5<arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>
     {
     public:
+        typedef void (dest_type::* function_ptr_t)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type);
+
         _connection5()
         {
             m_pobject = 0;
@@ -1369,9 +1417,14 @@ namespace sigslot {
             return m_pobject;
         }
         
+        function_ptr_t getfunc() const 
+        {
+            return m_pmemfun;
+        }
+
     private:
         dest_type* m_pobject;
-        void (dest_type::* m_pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type);
+        function_ptr_t m_pmemfun;
     };
     
 // ================================================================================================
@@ -1419,7 +1472,9 @@ namespace sigslot {
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)())
         {
-            _connection0<desttype>* conn = new _connection0<desttype>(pclass, pmemfun);
+            typedef _connection0<desttype> connection_type;
+            assertSingleConnectionToDestination(connection_type, pclass, pmemfun);
+            connection_type* conn = new connection_type(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1496,7 +1551,9 @@ namespace sigslot {
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type))
         {
-            _connection1<desttype, arg1_type>* conn = new _connection1<desttype, arg1_type>(pclass, pmemfun);
+            typedef _connection1<desttype, arg1_type> connection_type;
+            assertSingleConnectionToDestination(connection_type, pclass, pmemfun);
+            connection_type* conn = new connection_type(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1576,7 +1633,9 @@ namespace sigslot {
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type,
                                                                  arg2_type))
         {
-            _connection2<desttype, arg1_type, arg2_type>* conn = new _connection2<desttype, arg1_type, arg2_type>(pclass, pmemfun);
+            typedef _connection2<desttype, arg1_type, arg2_type> connection_type;
+            assertSingleConnectionToDestination(connection_type, pclass, pmemfun);
+            connection_type* conn = new connection_type(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1658,7 +1717,9 @@ namespace sigslot {
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type,
                                                                  arg2_type, arg3_type))
         {
-            _connection3<desttype, arg1_type, arg2_type, arg3_type>* conn = new _connection3<desttype, arg1_type, arg2_type, arg3_type>(pclass, pmemfun);
+            typedef _connection3<desttype, arg1_type, arg2_type, arg3_type> connection_type;
+            assertSingleConnectionToDestination(connection_type, pclass, pmemfun);
+            connection_type* conn = new connection_type(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1739,7 +1800,9 @@ namespace sigslot {
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type))
         {
-            _connection4<desttype, arg1_type, arg2_type, arg3_type, arg4_type>* conn = new _connection4<desttype, arg1_type, arg2_type, arg3_type, arg4_type>(pclass, pmemfun);
+            typedef _connection4<desttype, arg1_type, arg2_type, arg3_type, arg4_type> connection_type;
+            assertSingleConnectionToDestination(connection_type, pclass, pmemfun);
+            connection_type* conn = new connection_type(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }
@@ -1822,7 +1885,9 @@ namespace sigslot {
         template<class desttype>
         void connect(desttype* pclass, void (desttype::*pmemfun)(arg1_type, arg2_type, arg3_type, arg4_type, arg5_type))
         {
-            _connection5<desttype, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>* conn = new _connection5<desttype, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type>(pclass, pmemfun);
+            typedef _connection5<desttype, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type> connection_type;
+            assertSingleConnectionToDestination(connection_type, pclass, pmemfun);
+            connection_type* conn = new connection_type(pclass, pmemfun);
             m_connected_slots.push_back(conn);
             pclass->signal_connect(this);
         }

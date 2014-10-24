@@ -34,38 +34,32 @@ namespace campvis {
 
     VolumeRendererDemo::VolumeRendererDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
+        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
         , _vr(&_canvasSize)
-        , _trackballEH(0)
     {
-        addProperty(_camera);
+        _tcp.addLqModeProcessor(&_vr);
+        addEventListenerToBack(&_tcp);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballEH->addLqModeProcessor(&_vr);
-        addEventListenerToBack(_trackballEH);
-
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_vr);
     }
 
     VolumeRendererDemo::~VolumeRendererDemo() {
-        delete _trackballEH;
     }
 
     void VolumeRendererDemo::init() {
         AutoEvaluationPipeline::init();
         
-        _imageReader.s_validated.connect(this, &VolumeRendererDemo::onProcessorValidated);
-
-        _camera.addSharedProperty(&_vr.p_camera);
         _vr.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
 
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
         _imageReader.p_targetImageID.addSharedProperty(&_vr.p_inputVolume);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
@@ -75,21 +69,5 @@ namespace campvis {
         static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         static_cast<FloatProperty*>(_vr.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(4.f);
     }
-
-    void VolumeRendererDemo::deinit() {
-        _imageReader.s_validated.disconnect(this);
-        AutoEvaluationPipeline::deinit();
-    }
-
-    void VolumeRendererDemo::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor == &_imageReader) {
-            // update camera
-            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
-            if (img != 0) {
-                _trackballEH->reinitializeCamera(img);
-            }
-        }
-    }
-
 
 }

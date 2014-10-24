@@ -26,6 +26,8 @@
 #include "cgt/logmanager.h"
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
+#include "cgt/event/keyevent.h"
+#include "cgt/event/mouseevent.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
@@ -85,6 +87,7 @@ namespace campvis {
         , p_enableScribbling("EnableScribbling", "Enable Scribbling in Slice Views", false)
         , p_seProperties("SliceExtractorProperties", "Slice Extractor Properties")
         , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties")
+        , _tcp(viewportSizeProp)
         , _vr(viewportSizeProp, raycaster)
         , _sliceExtractor(viewportSizeProp)
         , p_rightPaneBlockSize("SliceRenderSize", "Right Pane Block Size", cgt::ivec2(32), cgt::ivec2(0), cgt::ivec2(10000), cgt::ivec2(1))
@@ -94,7 +97,6 @@ namespace campvis {
         , _ySliceHandler(&_sliceExtractor.p_ySliceNumber)
         , _zSliceHandler(&_sliceExtractor.p_zSliceNumber)
         , _windowingHandler(&_sliceExtractor.p_transferFunction)
-        , _trackballEH(0)
         , p_paintColor("PaintColor", "Change Color", cgt::vec4(255), cgt::vec4(0.0f), cgt::vec4(255))
         , p_axisScaling("AxisScaling", "Axis Scale", cgt::vec3(1), cgt::vec3(1), cgt::vec3(25), cgt::vec3(1))
         , p_fitToWindow("FitToWindow", "Fit to Window", true)
@@ -181,15 +183,13 @@ namespace campvis {
         addProperty(p_leftPaneSize, VALID);
 
         // Event-Handlers
-        _trackballEH = new TrackballNavigationEventListener(&_vr.p_camera, &p_leftPaneSize);
-        _trackballEH->addLqModeProcessor(&_vr);
+        _tcp.addLqModeProcessor(&_vr);
 
         editVoxel = false;
         insertNextVoxelAt = -1;
     }
 
     MicroscopyImageSegmentation::~MicroscopyImageSegmentation() {
-        delete _trackballEH;
         delete p_objectList;
     }
 
@@ -321,6 +321,7 @@ namespace campvis {
             _oldScaling = p_axisScaling.getValue();
         }
         if (getInvalidationLevel() & VR_INVALID) {
+            _tcp.process(data);
             _vr.process(data);
         }
         if (getInvalidationLevel() & SLICES_INVALID) {
@@ -468,7 +469,7 @@ namespace campvis {
                 _sliceExtractor.p_zSliceNumber.setValue(static_cast<int>(imgSize.z) / 2);
             }
 
-            _trackballEH->reinitializeCamera(img);
+            _tcp.reinitializeCamera(img->getWorldBounds());
         }
 
         validate(AbstractProcessor::INVALID_PROPERTIES);
@@ -616,7 +617,7 @@ namespace campvis {
                     //me->viewport() - cgt::ivec2(p_sliceRenderSize.getValue().x, 0)
                     //me->viewport() - p_volumeRenderSize.getValue());
                     p_rightPaneBlockSize.getValue());
-                _trackballEH->onEvent(&adjustedMe);
+                _tcp.onEvent(&adjustedMe);
             }
         }
     }

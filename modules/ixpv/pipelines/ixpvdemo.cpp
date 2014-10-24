@@ -34,6 +34,7 @@ namespace campvis {
 
     IxpvDemo::IxpvDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _tcp(&_canvasSize)
         , _xrayReader()
         , _ctReader()
         , _vrFull(&_canvasSize, new DRRRaycaster(&_canvasSize))
@@ -42,10 +43,9 @@ namespace campvis {
         , _usSliceRenderer(&_canvasSize)
         , _compositor(&_canvasSize)
         , _ixpvCompositor(&_canvasSize)
-        , _camera("camera", "Camera")
-        , _trackballHandler(0)
         , _wheelHandler(&_usSliceRenderer.p_sliceNumber)
     {
+        addProcessor(&_tcp);
         addProcessor(&_xrayReader);
 
         addProcessor(&_usReader);
@@ -58,26 +58,18 @@ namespace campvis {
         addProcessor(&_compositor);
         addProcessor(&_ixpvCompositor);
 
-        addProperty(_camera);
-
-        _trackballHandler = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballHandler->addLqModeProcessor(&_vrFull);
-        _trackballHandler->addLqModeProcessor(&_vrClipped);
+        _tcp.addLqModeProcessor(&_vrFull);
+        _tcp.addLqModeProcessor(&_vrClipped);
         addEventListenerToBack(&_wheelHandler);
-//        addEventListenerToBack(_trackballHandler);
+//        addEventListenerToBack(&_tcp);
     }
 
     IxpvDemo::~IxpvDemo() {
-        delete _trackballHandler;
+
     }
 
     void IxpvDemo::init() {
         AutoEvaluationPipeline::init();
-
-        // = Camera Setup =================================================================================
-        _camera.addSharedProperty(&_vrFull.p_camera);
-        _camera.addSharedProperty(&_vrClipped.p_camera);
-        _camera.addSharedProperty(&_usSliceRenderer.p_camera);
 
         // = X-Ray Setup ==================================================================================
         _xrayReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Cowleg_CarmXrayImages\\APView_1.jpg");
@@ -143,12 +135,11 @@ namespace campvis {
                 // update camera
                 cgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
 
-                _trackballHandler->setSceneBounds(volumeExtent);
-                _trackballHandler->setCenter(volumeExtent.center());
-                _trackballHandler->reinitializeCamera(
-                    cgt::vec3(17.6188f, -386.82f, 69.0831f), 
-                    cgt::vec3(-40.0402f, 0.1685f, 27.9503f), 
-                    cgt::vec3(0.9882f, 0.1504f, 0.0299f));
+                AbstractProcessor::ScopedLock lock(&_tcp);
+                _tcp.reinitializeCamera(volumeExtent);
+                _tcp.p_position.setValue(cgt::vec3(17.6188f, -386.82f, 69.0831f));
+                _tcp.p_focus.setValue(cgt::vec3(-40.0402f, 0.1685f, 27.9503f));
+                _tcp.p_upVector.setValue(cgt::vec3(0.9882f, 0.1504f, 0.0299f));
             }   
         }
         else if (processor == &_usReader) {

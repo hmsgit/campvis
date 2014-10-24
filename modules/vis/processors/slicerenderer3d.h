@@ -28,11 +28,7 @@
 #include <string>
 
 #include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-#include "core/properties/cameraproperty.h"
+#include "core/properties/allproperties.h"
 
 namespace cgt {
     class Shader;
@@ -71,12 +67,12 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        DataNameProperty p_sourceImageID;                  ///< image ID for input image
-        DataNameProperty p_targetImageID;                  ///< image ID for output image
+        DataNameProperty p_sourceImageID;                   ///< image ID for input image
+        DataNameProperty p_camera;                          ///< ID for camera input
+        DataNameProperty p_targetImageID;                   ///< image ID for output image
 
-        CameraProperty p_camera;
-        IntProperty p_sliceNumber;                       ///< number of the slice to extract
-        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+        IntProperty p_sliceNumber;                          ///< number of the slice to extract
+        TransferFunctionProperty p_transferFunction;        ///< Transfer function
 
         /// adapts the range of the p_sliceNumber property to the image
         /// \see AbstractProcessor::updateProperties

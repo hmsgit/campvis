@@ -166,10 +166,12 @@ void Navigation::setSceneBounds(const cgt::Bounds& bounds) {
 }
 
 void Navigation::updateClippingPlanes() {
-    float diag = cgt::length(_sceneBounds.diagonal()) * 0.75f;
-    float dist = cgt::distance(getCamera()->getPosition(), _sceneBounds.center());
-    getCamera()->setNearDist(std::max(dist - diag, 0.1f));
-    getCamera()->setFarDist(diag + 2 * dist);
+    if (_sceneBounds.isDefined()) {
+        float diag = length(_sceneBounds.diagonal()) * 0.75f;
+        float dist = distance(getCamera()->getPosition(), _sceneBounds.center());
+        getCamera()->setNearDist(std::max(dist - diag, 0.1f));
+        getCamera()->setFarDist(diag + 2 * dist);
+    }
 }
 
 const cgt::Bounds& Navigation::getSceneBounds() const {

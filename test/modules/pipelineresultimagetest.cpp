@@ -37,6 +37,7 @@
 
 #include "modules/pipelinefactory.h"
 #include "modules/devil/processors/devilimagewriter.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 
 using namespace campvis;
 
@@ -101,7 +102,8 @@ protected:
 
     void execute() {
         if (_pipeline != nullptr) {
-            _pipeline->executePipeline();
+            for (size_t i = 0; i < _pipeline->getProcessors().size(); ++i)
+                _pipeline->executePipeline();
 
             // write result image
             _imageWriter.p_inputImage.setValue(_pipeline->getRenderTargetID());
@@ -180,13 +182,13 @@ TEST_F(PipelineWriteResultImageTest, DVRVis) {
     init();
     execute();
 
-    AbstractProperty* p = _pipeline->getProperty("Camera");
-    if (CameraProperty* tester = dynamic_cast<CameraProperty*>(p)) {
-        cgt::Camera c = tester->getValue();
-        c.setPosition(cgt::vec3(417.f, 44.5f, -112.5f));
-        c.setFocus(cgt::vec3(91.f, 91.f, 80.f));
-        c.setUpVector(cgt::vec3(-0.487f, 0.142f, -0.861f));
-        tester->setValue(c);
+    auto properties = _pipeline->getProcessors();
+    for (auto it = properties.begin(); it != properties.end(); ++it) {
+        if (TrackballCameraProvider* tcp = dynamic_cast<TrackballCameraProvider*>(*it)) {
+            tcp->p_position.setValue(cgt::vec3(417.f, 44.5f, -112.5f));
+            tcp->p_focus.setValue(cgt::vec3(91.f, 91.f, 80.f));
+            tcp->p_upVector.setValue(cgt::vec3(-0.487f, 0.142f, -0.861f));
+        }
     }
     execute();
 

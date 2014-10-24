@@ -32,7 +32,6 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
-#include "core/properties/cameraproperty.h"
 
 namespace campvis {
     /**

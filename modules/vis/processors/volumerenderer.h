@@ -26,9 +26,7 @@
 #define VOLUMERENDERER_H__
 
 #include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/metaproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/properties/allproperties.h"
 
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -91,7 +89,7 @@ namespace campvis {
         RaycastingProcessor* getRaycastingProcessor();
 
         DataNameProperty p_inputVolume;             ///< image ID for first input image
-        CameraProperty p_camera;                    ///< Camera 
+        DataNameProperty p_camera;                  ///< Camera ID
         DataNameProperty p_outputImage;             ///< image ID for output image
 
         BoolProperty p_profileRaycaster;            ///< Flag whether the raycaster's execution time shall be profiled

@@ -29,6 +29,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
@@ -44,9 +45,9 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Input Proxy Geometry ID", "proxygeometry", DataNameProperty::READ)
         , p_geometryImageId("GeometryImageId", "Rendered Geometry to Integrate (optional)", "", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
         , p_exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
-        , p_camera("camera", "Camera")
         , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
         , p_mirrorID("mirrorID", "Input Mirror ID", "", DataNameProperty::READ)
         , _shader(0)
@@ -56,9 +57,9 @@ namespace campvis {
         addProperty(p_sourceImageID);
         addProperty(p_geometryID);
         addProperty(p_geometryImageId);
+        addProperty(p_camera);
         addProperty(p_entryImageID);
         addProperty(p_exitImageID);
-        addProperty(p_camera);
 
         addProperty(p_enableMirror, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_mirrorID);
@@ -89,17 +90,19 @@ namespace campvis {
     void EEPGenerator::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
         ScopedTypedData<MeshGeometry> proxyGeometry(data, p_geometryID.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
 
-        if (img != 0 && proxyGeometry != 0 && _shader != 0) {
+        if (img != nullptr && proxyGeometry != nullptr && _shader != nullptr && camera != nullptr) {
             if (img->getDimensionality() == 3) {
+                const cgt::Camera& cam = camera->getCamera();
                 ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
 
                 cgt::Bounds textureBounds(cgt::vec3(0.f), cgt::vec3(1.f));
 
                 // clip proxy geometry against near-plane to support camera in volume
                 // FIXME:   In some cases, the near plane is not rendered correctly...
-                float nearPlaneDistToOrigin = cgt::dot(p_camera.getValue().getPosition(), -p_camera.getValue().getLook()) - p_camera.getValue().getNearDist() - .002f;
-                MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -p_camera.getValue().getLook(), true, 0.02f);
+                float nearPlaneDistToOrigin = cgt::dot(cam.getPosition(), -cam.getLook()) - cam.getNearDist() - .002f;
+                MeshGeometry clipped = proxyGeometry->clipAgainstPlane(nearPlaneDistToOrigin, -cam.getLook(), true, 0.02f);
 
                 // start render setup
                 _shader->activate();
@@ -126,7 +129,6 @@ namespace campvis {
                     }
                 }
                 
-                const cgt::Camera& cam = p_camera.getValue();
                 cgt::TextureUnit geometryDepthUnit, entryDepthUnit;
 
                 _shader->setIgnoreUniformLocationError(true);

@@ -25,10 +25,10 @@
 #ifndef GEOMETRYRENDERERDEMO_H__
 #define GEOMETRYRENDERERDEMO_H__
 
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/vtkimagereader.h"
 #include "modules/vis/processors/geometryrenderer.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
@@ -65,8 +65,7 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
-        CameraProperty _camera;
-
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         VtkImageReader _geometryReader;
         GeometryRenderer _lvRenderer;
@@ -74,9 +73,6 @@ namespace campvis {
         GeometryRenderer _cubeRenderer;
         RenderTargetCompositor _compositor1;
         RenderTargetCompositor _compositor2;
-
-        TrackballNavigationEventListener* _trackballEH;
-
     };
 
 }

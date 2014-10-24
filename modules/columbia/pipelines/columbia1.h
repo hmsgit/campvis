@@ -25,12 +25,10 @@
 #ifndef COLUMBIA1_H__
 #define COLUMBIA1_H__
 
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
-
 
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/ltfimagereader.h"
 #include "modules/io/processors/vtkimagereader.h"
 #include "modules/columbia/processors/geometrystrainrenderer.h"
@@ -68,16 +66,9 @@ namespace campvis {
 
 
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
-        CameraProperty _camera;
         DataNameProperty _boundsData;
 
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         LtfImageReader _imageReader;
         ImageSeriesSplitter _imageSplitter;
@@ -95,8 +86,6 @@ namespace campvis {
         StrainFiberRenderer _sfr;
 
         RenderTargetCompositor _compositor;
-
-        TrackballNavigationEventListener* _trackballEH;
 
     };
 

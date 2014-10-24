@@ -39,9 +39,9 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/propertycollection.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/vis/processors/geometryrenderer.h"
 
 
@@ -220,8 +220,9 @@ namespace campvis {
 
         DataContainer _localDataContainer;          ///< Local DataContainer the GeometryRenderer works on
         IVec2Property p_viewportSize;
+
+        TrackballCameraProvider _tcp;               ///< TrackballCameraProvider to do camera stuff
         GeometryRenderer _geometryRenderer;         ///< GeometryRenderer used to render geometries
-        TrackballNavigationEventListener* _trackballEH;
     };
 }
 

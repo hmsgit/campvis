@@ -34,34 +34,27 @@ namespace campvis {
 
     MprDemo::MprDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
+        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
         , _mprRenderer(&_canvasSize)
         , _compositor(&_canvasSize)
-        , _trackballEH(0)
     {
-        addProperty(_camera);
-
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        addEventListenerToBack(_trackballEH);
-
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_mprRenderer);
         addProcessor(&_compositor);
+
+        addEventListenerToBack(&_tcp);
     }
 
     MprDemo::~MprDemo() {
-        delete _trackballEH;
     }
 
     void MprDemo::init() {
         AutoEvaluationPipeline::init();
         
-        _imageReader.s_validated.connect(this, &MprDemo::onProcessorValidated);
-
-        _camera.addSharedProperty(&_mprRenderer.p_camera);
         _mprRenderer.p_targetImageID.setValue("MPR");
         _mprRenderer.p_targetImageID.addSharedProperty(&_compositor.p_firstImageId);
         _mprRenderer.p_planeSize.setValue(250.f);
@@ -72,27 +65,12 @@ namespace campvis {
 
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
         _imageReader.p_targetImageID.addSharedProperty(&_mprRenderer.p_sourceImageID);
 
         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .08f));
         tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 255), cgt::col4(255, 255, 255, 255)));
         _mprRenderer.p_transferFunction.replaceTF(tf);
     }
-
-    void MprDemo::deinit() {
-        _canvasSize.s_changed.disconnect(this);
-        AutoEvaluationPipeline::deinit();
-    }
-
-    void MprDemo::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor == &_imageReader) {
-            // update camera
-            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
-            if (img != 0) {
-                _trackballEH->reinitializeCamera(img);
-            }
-        }
-    }
-
 
 }

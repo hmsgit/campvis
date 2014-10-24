@@ -34,7 +34,7 @@ namespace campvis {
 
     DVRVis::DVRVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("Camera", "Camera")
+        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
         , _pgGenerator()
@@ -46,16 +46,13 @@ namespace campvis {
         , _dvrVM(&_canvasSize)
         , _depthDarkening(&_canvasSize)
         , _combine(&_canvasSize)
-        , _trackballEH(0)
     {
-        addProperty(_camera);
+        _tcp.addLqModeProcessor(&_dvrNormal);
+        _tcp.addLqModeProcessor(&_dvrVM);
+        _tcp.addLqModeProcessor(&_depthDarkening);
+        addEventListenerToBack(&_tcp);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballEH->addLqModeProcessor(&_dvrNormal);
-        _trackballEH->addLqModeProcessor(&_dvrVM);
-        _trackballEH->addLqModeProcessor(&_depthDarkening);
-        addEventListenerToBack(_trackballEH);
-
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_pgGenerator);
@@ -70,20 +67,10 @@ namespace campvis {
     }
 
     DVRVis::~DVRVis() {
-        delete _trackballEH;
     }
 
     void DVRVis::init() {
         AutoEvaluationPipeline::init();
-        
-        _imageReader.s_validated.connect(this, &DVRVis::onProcessorValidated);
-
-        _camera.addSharedProperty(&_vmgGenerator.p_camera);
-        _camera.addSharedProperty(&_vmRenderer.p_camera);
-        _camera.addSharedProperty(&_eepGenerator.p_camera);
-        _camera.addSharedProperty(&_vmEepGenerator.p_camera);
-        _camera.addSharedProperty(&_dvrNormal.p_camera);
-        _camera.addSharedProperty(&_dvrVM.p_camera);
 
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
@@ -92,6 +79,7 @@ namespace campvis {
         _imageReader.p_targetImageID.addSharedProperty(&_dvrVM.p_sourceImageID);
         _imageReader.p_targetImageID.addSharedProperty(&_dvrNormal.p_sourceImageID);
         _imageReader.p_targetImageID.addSharedProperty(&_pgGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
 
         _dvrNormal.p_targetImageID.setValue("drr.output");
         _dvrVM.p_targetImageID.setValue("dvr.output");
@@ -139,21 +127,5 @@ namespace campvis {
         _dvrNormal.p_targetImageID.addSharedProperty(&_depthDarkening.p_inputImage);
         _depthDarkening.p_outputImage.addSharedProperty(&_combine.p_normalImageID);
     }
-
-    void DVRVis::deinit() {
-        _canvasSize.s_changed.disconnect(this);
-        AutoEvaluationPipeline::deinit();
-    }
-
-    void DVRVis::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor == &_imageReader) {
-            // update camera
-            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
-            if (img != 0) {
-                _trackballEH->reinitializeCamera(img);
-            }
-        }
-    }
-
 
 }

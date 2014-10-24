@@ -6,8 +6,6 @@
 %{
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/imagedata.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
-#include "core/properties/cameraproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 #include "core/properties/floatingpointproperty.h"
@@ -137,16 +135,6 @@ namespace campvis {
     %template(FloatProperty) FloatingPointProperty<float>;
     typedef FloatingPointProperty< float > FloatProperty;
 
-    /* CameraProperty */
-
-    %template(GenericProperty_Camera) GenericProperty<cgt::Camera>;
-
-    class CameraProperty : public GenericProperty<cgt::Camera> {
-    public:
-        CameraProperty(const std::string& name, const std::string& title, cgt::Camera cam = cgt::Camera());
-        virtual ~CameraProperty();
-    };
-
     /* TFGeometry1D */
 
     %nodefaultctor TFGeometry1D;
@@ -269,12 +257,12 @@ namespace campvis {
     /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getProperty,
              campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty, campvis::CameraProperty);
+             campvis::DataNameProperty, campvis::StringProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
              campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty, campvis::CameraProperty);
+             campvis::DataNameProperty, campvis::StringProperty);
 
     /* HasPropertyCollection */
 
@@ -338,20 +326,6 @@ namespace campvis {
     public:
         explicit VisualizationProcessor(IVec2Property* viewportSizeProp);
         ~VisualizationProcessor();
-    };
-
-    /* TrackballNavigationEventListener */
-
-    class TrackballNavigationEventListener : public cgt::EventListener {
-    public:
-        TrackballNavigationEventListener(CameraProperty* cameraProperty, IVec2Property* viewportSizeProp);
-        virtual ~TrackballNavigationEventListener();
-
-        void addLqModeProcessor(VisualizationProcessor* vp);
-        void removeLqModeProcessor(VisualizationProcessor* vp);
-
-        void reinitializeCamera(const IHasWorldBounds* hwb);
-        void reinitializeCamera(const cgt::Bounds& worldBounds);
     };
 }
 

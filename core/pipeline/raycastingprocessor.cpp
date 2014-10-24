@@ -28,6 +28,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/tools/glreduction.h"
@@ -43,7 +44,7 @@ namespace campvis {
         , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_camera("camera", "Camera")
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", 1.f, 0.f, 1.f)
         , p_samplingRate("SamplingRate", "Sampling Rate", 2.f, 0.1f, 10.f, 0.1f)
@@ -90,8 +91,9 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
         ScopedTypedData<RenderData> entryPoints(data, p_entryImageID.getValue());
         ScopedTypedData<RenderData> exitPoints(data, p_exitImageID.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
 
-        if (img != 0 && entryPoints != 0 && exitPoints != 0) {
+        if (img != nullptr && entryPoints != nullptr && exitPoints != nullptr && camera != nullptr) {
             if (img->getDimensionality() == 3) {
                 // little hack to support LOD texture lookup for the gradients:
                 // if texture does not yet have mipmaps, create them.
@@ -132,7 +134,7 @@ namespace campvis {
                 _shader->setUniform("_samplingStepSize", samplingStepSize);
 
                 // compute and set camera parameters
-                const cgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = camera->getCamera();
                 float n = cam.getNearDist();
                 float f = cam.getFarDist();
                 _shader->setUniform("_cameraPosition", cam.getPosition());

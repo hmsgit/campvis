@@ -39,6 +39,7 @@ namespace campvis {
 
     VectorFieldDemo::VectorFieldDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
+        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
         , _vectorFieldReader()
@@ -46,21 +47,18 @@ namespace campvis {
         , _vectorFieldRenderer(&_canvasSize)
         , _sliceRenderer(&_canvasSize)
         , _rtc(&_canvasSize)
-        , p_camera("Camera", "Camera", cgt::Camera())
         , p_sliceNumber("SliceNuber", "Slice Number", 0, 0, 1024)
         , p_viewSelection("ViewSelection", "Select 3D View", viewSelectionOptions, 2)
         , p_time("Time", "Time", 0, 0, 100)
-        , _trackballEH(0)
 
     {
-        addProperty(p_camera);
         addProperty(p_sliceNumber);
         addProperty(p_viewSelection);
         addProperty(p_time);
 
-        _trackballEH = new TrackballNavigationEventListener(&p_camera, &_canvasSize);
-        addEventListenerToBack(_trackballEH);
+        addEventListenerToBack(&_tcp);
 
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_vectorFieldReader);
@@ -76,10 +74,6 @@ namespace campvis {
     void VectorFieldDemo::init() {
         AutoEvaluationPipeline::init();
 
-        p_camera.addSharedProperty(&_vectorFieldRenderer.p_camera);
-        p_camera.addSharedProperty(&_pfr.p_camera);
-        p_camera.addSharedProperty(&_sliceRenderer.p_camera);
-
         p_sliceNumber.addSharedProperty(&_vectorFieldRenderer.p_sliceNumber);
         p_sliceNumber.addSharedProperty(&_sliceRenderer.p_sliceNumber);
 
@@ -87,6 +81,7 @@ namespace campvis {
         
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_sliceRenderer.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
         _imageReader.s_validated.connect(this, &VectorFieldDemo::onProcessorValidated);
 
         _vectorFieldReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vectorfield/sampledata/result_vec.mhd");
@@ -129,12 +124,16 @@ namespace campvis {
         p_time.addSharedProperty(&_pfr.p_Time);
     }
 
+    void VectorFieldDemo::deinit() {
+        _imageReader.s_validated.disconnect(this);
+        AutoEvaluationPipeline::deinit();
+    }
+
     void VectorFieldDemo::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             // update camera
             ScopedTypedData<ImageData> img(*_data, _sliceRenderer.p_sourceImageID.getValue());
             if (img) {
-                _trackballEH->reinitializeCamera(img);
                 p_sliceNumber.setMaxValue(static_cast<int>(img->getSize().z));
             }
         }

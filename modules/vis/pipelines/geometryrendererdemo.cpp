@@ -38,7 +38,7 @@ namespace campvis {
 
     GeometryRendererDemo::GeometryRendererDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
+        , _tcp(&_canvasSize)
         , _lsp()
         , _geometryReader()
         , _lvRenderer(&_canvasSize)
@@ -46,13 +46,10 @@ namespace campvis {
         , _cubeRenderer(&_canvasSize)
         , _compositor1(&_canvasSize)
         , _compositor2(&_canvasSize)
-        , _trackballEH(0)
     {
-        addProperty(_camera);
+        addEventListenerToBack(&_tcp);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        addEventListenerToBack(_trackballEH);
-
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_geometryReader);
         addProcessor(&_teapotRenderer);
@@ -64,7 +61,6 @@ namespace campvis {
 
     GeometryRendererDemo::~GeometryRendererDemo() {
         _geometryReader.s_validated.disconnect(this);
-        delete _trackballEH;
     }
 
     void GeometryRendererDemo::init() {
@@ -90,10 +86,6 @@ namespace campvis {
         getDataContainer().addData("cube", cube);
 
         // setup pipeline
-        _camera.addSharedProperty(&_lvRenderer.p_camera);
-        _camera.addSharedProperty(&_teapotRenderer.p_camera);
-        _camera.addSharedProperty(&_cubeRenderer.p_camera);
-
         _geometryReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/left_ventricle_mesh.vtk"));
         _geometryReader.p_targetImageID.setValue("reader.output");
 
@@ -146,7 +138,7 @@ namespace campvis {
                 unionBounds.addVolume(teapot->getWorldBounds());
                 unionBounds.addVolume(cube->getWorldBounds());
 
-                _trackballEH->reinitializeCamera(unionBounds);
+                _tcp.reinitializeCamera(unionBounds);
             }
         }
     }

@@ -29,11 +29,7 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/transferfunctionproperty.h"
+#include "core/properties/allproperties.h"
 
 #include "core/datastructures/imagerepresentationgl.h"
 
@@ -92,7 +88,7 @@ namespace campvis {
         DataNameProperty p_exitImageID;                  ///< image ID for output exit points image
         DataNameProperty p_targetImageID;                ///< image ID for output image
 
-        CameraProperty p_camera;                         ///< Camera used for ray casting
+        DataNameProperty p_camera;                       ///< Camera used for ray casting
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
         FloatProperty p_jitterStepSizeMultiplier;        ///< Step size multiplier for entry points jitter
         FloatProperty p_samplingRate;                    ///< Ray casting sampling rate

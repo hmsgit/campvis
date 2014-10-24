@@ -558,6 +558,7 @@ void Trackball::timerEvent(TimeEvent* e) {
 
 void Trackball::setWindowRatio(float r) {
     getCamera()->setWindowRatio(r);
+    getCamera()->setRatio(r);
     hcam_->update();
 }
 

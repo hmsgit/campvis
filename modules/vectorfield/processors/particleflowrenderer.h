@@ -81,6 +81,7 @@ namespace campvis {
         ButtonProperty p_resetButton;
 
         DataNameProperty p_inputVectors;        ///< ID for input vector image
+        DataNameProperty p_camera;              ///< ID for camera input
         DataNameProperty p_renderOutput;        ///< ID for output rendered image
 
         FloatProperty p_lenThresholdMin;                ///< Threshold minimum
@@ -101,8 +102,6 @@ namespace campvis {
 
         BoolProperty p_enableShading;               ///< Flag whether to enable shading
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
-
-        CameraProperty p_camera;                                    ///< camera
 
     protected:
         /// \see AbstractProcessor::updateResult

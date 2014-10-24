@@ -29,6 +29,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/lightsourcedata.h"
@@ -42,8 +43,8 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_geometryID("geometryID", "Input Geometry ID", "gr.geometry", DataNameProperty::READ)
         , p_strainId("StrainDataId", "Input Strain Data ID", "gr.strain", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
-        , p_camera("camera", "Camera")
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_color("color", "Rendering Color", cgt::vec4(1.f), cgt::vec4(0.f), cgt::vec4(1.f))
@@ -51,8 +52,8 @@ namespace campvis {
     {
 
         addProperty(p_geometryID);
-        addProperty(p_renderTargetID);
         addProperty(p_camera);
+        addProperty(p_renderTargetID);
 
         addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
         addProperty(p_lightId);
@@ -81,8 +82,9 @@ namespace campvis {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ImageRepresentationGL::ScopedRepresentation strainData(data, p_strainId.getValue());
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
 
-        if (proxyGeometry != 0 && strainData != 0 && _shader != 0) {
+        if (proxyGeometry && strainData && camera && _shader != nullptr) {
             if (p_enableShading.getValue() == false || light != nullptr) {
                 // set modelview and projection matrices
                 FramebufferActivationGuard fag(this);
@@ -93,8 +95,8 @@ namespace campvis {
                 if (p_enableShading.getValue() && light != nullptr) {
                     light->bind(_shader, "_lightSource");
                 }
-                _shader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
+                _shader->setUniform("_projectionMatrix", camera->getCamera().getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", camera->getCamera().getViewMatrix());
                 _shader->setUniform("_color", p_color.getValue());
 
                 cgt::TextureUnit strainUnit;

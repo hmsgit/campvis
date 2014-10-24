@@ -28,9 +28,9 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/tensor/processors/tensoranalyzer.h"
 #include "modules/tensor/processors/tensorglyphrenderer.h"
@@ -59,13 +59,7 @@ namespace campvis {
         static const std::string getId() { return "TensorDemo"; };
 
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         TensorAnalyzer _ta;
@@ -73,9 +67,7 @@ namespace campvis {
         SliceRenderer3D _sliceRenderer;
         RenderTargetCompositor _rtc;
 
-        CameraProperty p_camera;
         IntProperty p_sliceNumber;
-        TrackballNavigationEventListener* _trackballEH;
     };
 
 }

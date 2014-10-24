@@ -36,39 +36,34 @@ namespace campvis {
 
     AdvDVRVis::AdvDVRVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
+        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
         , _vr(&_canvasSize, new AdvOptimizedRaycaster(&_canvasSize))
-        , _trackballEH(0)
     {
-        addProperty(_camera);
+        _tcp.addLqModeProcessor(&_vr);
+        addEventListenerToBack(&_tcp);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballEH->addLqModeProcessor(&_vr);
-        addEventListenerToBack(_trackballEH);
-
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_vr);
     }
 
     AdvDVRVis::~AdvDVRVis() {
-        delete _trackballEH;
+
     }
 
     void AdvDVRVis::init() {
         AutoEvaluationPipeline::init();
 
-        _imageReader.s_validated.connect(this, &AdvDVRVis::onProcessorValidated);
-
-        _camera.addSharedProperty(&_vr.p_camera);
         _vr.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
 
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_vr.p_inputVolume);
+        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.12f, .15f), cgt::col4(85, 0, 0, 128), cgt::col4(255, 0, 0, 128)));
@@ -77,21 +72,5 @@ namespace campvis {
         static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         static_cast<FloatProperty*>(_vr.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(4.f);
     }
-
-    void AdvDVRVis::deinit() {
-        _canvasSize.s_changed.disconnect(this);
-        AutoEvaluationPipeline::deinit();
-    }
-
-    void AdvDVRVis::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor == &_imageReader) {
-            // update camera
-            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
-            if (img != 0) {
-                _trackballEH->reinitializeCamera(img);
-            }
-        }
-    }
-
 
 }

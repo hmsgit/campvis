@@ -50,7 +50,6 @@ SET(CampvisApplicationToBeMocced
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
     gui/properties/buttonpropertywidget.h
-    gui/properties/camerapropertywidget.h
     gui/properties/datanamepropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h

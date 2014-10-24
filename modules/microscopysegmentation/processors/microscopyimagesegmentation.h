@@ -28,7 +28,6 @@
 #include "cgt/event/eventlistener.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
@@ -39,6 +38,7 @@
 #include "core/properties/metaproperty.h"
 #include "core/properties/colorproperty.h"
 
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
 #include "core/properties/buttonproperty.h"
@@ -175,6 +175,7 @@ namespace campvis {
         cgt::Shader* _shader;                           ///< Shader for slice rendering
         FaceGeometry* _quad;
 
+        TrackballCameraProvider _tcp;
         VolumeRenderer _vr;
         SliceExtractor _sliceExtractor;
 
@@ -186,7 +187,6 @@ namespace campvis {
         MWheelToNumericPropertyEventListener _ySliceHandler;
         MWheelToNumericPropertyEventListener _zSliceHandler;
         TransFuncWindowingEventListener _windowingHandler;
-        TrackballNavigationEventListener* _trackballEH;
 
         ColorProperty p_paintColor;                     ///< Color picker for active object
         Vec3Property p_axisScaling;                     ///< Asis ratio. Used to change ImageMappingInformation

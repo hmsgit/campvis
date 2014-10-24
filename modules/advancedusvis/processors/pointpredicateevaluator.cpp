@@ -27,6 +27,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
@@ -49,8 +50,8 @@ namespace campvis {
         , p_inputSnr("InputSnr", "Input SNR", "", DataNameProperty::READ)
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
         , p_inputConfidence("InputConfidence", "Input Confidence", "", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "predicatemask", DataNameProperty::WRITE)
-        , p_camera("Camera", "Camera", cgt::Camera())
         , p_histogram("PredicateHistogram", "Point Predicate Histogram")
         , _shader(0)
     {
@@ -59,9 +60,9 @@ namespace campvis {
         addProperty(p_inputSnr);
         addProperty(p_inputVesselness);
         addProperty(p_inputConfidence);
+        addProperty(p_camera);
         addProperty(p_outputImage);
 
-        addProperty(p_camera);
         addProperty(p_histogram);
     }
 
