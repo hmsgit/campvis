@@ -24,10 +24,10 @@
 
 #include "geometrystrainrenderer.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -46,7 +46,7 @@ namespace campvis {
         , p_camera("camera", "Camera")
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
-        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_color("color", "Rendering Color", cgt::vec4(1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , _shader(0)
     {
 
@@ -97,7 +97,7 @@ namespace campvis {
                 _shader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
                 _shader->setUniform("_color", p_color.getValue());
 
-                tgt::TextureUnit strainUnit;
+                cgt::TextureUnit strainUnit;
                 strainData->bind(_shader, strainUnit, "_strainTexture");
 
                 glEnable(GL_DEPTH_TEST);

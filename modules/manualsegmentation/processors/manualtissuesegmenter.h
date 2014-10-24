@@ -28,8 +28,8 @@
 #include <string>
 #include <map>
 
-#include "tgt/bounds.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/bounds.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/datastructures/datahandle.h"
 #include "core/pipeline/visualizationprocessor.h"
@@ -43,7 +43,7 @@
 
 #include "modules/manualsegmentation/tools/tissuesegmentation.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -53,7 +53,7 @@ namespace campvis {
     /**
      * VERY EXPERIMENTAL processor for manual segmentation of tissue layers.
      */
-    class ManualTissueSegmenter : public VisualizationProcessor, public tgt::EventListener {
+    class ManualTissueSegmenter : public VisualizationProcessor, public cgt::EventListener {
     public:
         /**
          * Constructs a new ManualTissueSegmenter Processor
@@ -72,7 +72,7 @@ namespace campvis {
         virtual void deinit();
 
         /// \see AbstractEventHandler::execute()
-        virtual void onEvent(tgt::Event* e);
+        virtual void onEvent(cgt::Event* e);
 
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "ManualTissueSegmenter"; };
@@ -110,7 +110,7 @@ namespace campvis {
 
     protected:
         struct ControlPoint {
-            tgt::vec2 _pixel;
+            cgt::vec2 _pixel;
         };
 
         /// \see AbstractProcessor::updateResult()
@@ -134,18 +134,18 @@ namespace campvis {
 
         void onAddLayer();
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         bool _mousePressed;                 ///< Flag whether the mouse is currently pressed
-        tgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed
+        cgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed
         ControlPoint* _currentControlPoint;
-        tgt::vec4* _currentBounds;
+        cgt::vec4* _currentBounds;
 
         DataHandle _currentImage;
         std::vector< std::map< int, std::vector< ControlPoint > > > _controlPoints;
         std::map< int, std::vector< float > > _splines;
 
-        std::map< int, tgt::vec4 > _vesselBounds;
+        std::map< int, cgt::vec4 > _vesselBounds;
 
         TissueSegmentation _segmentation;
 

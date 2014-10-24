@@ -25,9 +25,9 @@
 #ifndef TRANSFUNCWINDOWINGEVENTHANDLER_H__
 #define TRANSFUNCWINDOWINGEVENTHANDLER_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/vector.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/logmanager.h"
+#include "cgt/vector.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/coreapi.h"
 
@@ -38,7 +38,7 @@ namespace campvis {
      * Event handler that maps mouse click-and-drag events to the windowing of a transfer function.
      * 
      */
-    class CAMPVIS_CORE_API TransFuncWindowingEventListener : public tgt::EventListener {
+    class CAMPVIS_CORE_API TransFuncWindowingEventListener : public cgt::EventListener {
     public:
         /**
          * Creates a TransFuncWindowingEventListener.
@@ -51,8 +51,8 @@ namespace campvis {
          **/
         virtual ~TransFuncWindowingEventListener();
 
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
         /**
          * Sets the target transfer function property.
@@ -64,8 +64,8 @@ namespace campvis {
         TransferFunctionProperty* _prop;    ///< The target transfer function property, may be 0
 
         bool _mousePressed;                 ///< Flag whether the mouse is currently pressed
-        tgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed
-        tgt::vec2 _originalIntensityDomain; ///< TF intensity domain when mouse was pressed
+        cgt::ivec2 _mouseDownPosition;      ///< Viewport coordinates where mouse button has been pressed
+        cgt::vec2 _originalIntensityDomain; ///< TF intensity domain when mouse was pressed
 
         static const std::string loggerCat_;
     };

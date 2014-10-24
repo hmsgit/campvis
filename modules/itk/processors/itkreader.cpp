@@ -95,9 +95,9 @@ namespace campvis {
             itk::ImageIORegion::IndexType ioStart = ioRegion.GetIndex();
             itk::ImageIORegion::SizeType ioSize = ioRegion.GetSize();
 
-            tgt::vec3 imageOffset(0.f);
-            tgt::vec3 voxelSize(1.f);
-            tgt::ivec3 size_i(1);
+            cgt::vec3 imageOffset(0.f);
+            cgt::vec3 voxelSize(1.f);
+            cgt::ivec3 size_i(1);
 
             //we assured above that numDimensions is < 3
             for (int i = 0; i < static_cast<int>(numDimensions); i++) {
@@ -108,7 +108,7 @@ namespace campvis {
                 ioSize[i] = size_i[i];
             }
 
-            tgt::svec3 size(size_i);
+            cgt::svec3 size(size_i);
             size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;
 
             LDEBUG("Image Size is " << size);
@@ -219,9 +219,9 @@ namespace campvis {
             itk::ImageIORegion::IndexType ioStart = ioRegion.GetIndex();
             itk::ImageIORegion::SizeType ioSize = ioRegion.GetSize();
 
-            tgt::vec3 imageOffset(0.f);
-            tgt::vec3 voxelSize(1.f);
-            tgt::ivec3 size_i(1);
+            cgt::vec3 imageOffset(0.f);
+            cgt::vec3 voxelSize(1.f);
+            cgt::ivec3 size_i(1);
 
             //we assured above that numDimensions is < 3
             for (int i = 0; i < static_cast<int>(numDimensions); i++) {
@@ -232,7 +232,7 @@ namespace campvis {
                 ioSize[i] = size_i[i];
             }
 
-            tgt::svec3 size(size_i);
+            cgt::svec3 size(size_i);
             size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;
             if (dimensionality > 2) {
                 LERROR("Error: Cannot load image series with more than two dimensions!");

@@ -25,10 +25,10 @@
 #ifndef TYPETRAITS_H__
 #define TYPETRAITS_H__
 
-#include "tgt/tgt_gl.h"
-#include "tgt/tgt_math.h"
-#include "tgt/matrix.h"
-#include "tgt/vector.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/cgt_math.h"
+#include "cgt/matrix.h"
+#include "cgt/vector.h"
 #include "core/datastructures/tensor.h"
 #include "core/tools/weaklytypedpointer.h"
 #include <limits>
@@ -232,57 +232,57 @@ namespace {
         typedef BASETYPE ElementType;
 
         static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
-            tgtAssert(channel == 0, "Channel out of bounds!");
+            cgtAssert(channel == 0, "Channel out of bounds!");
             return element;
         }
 
         static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
-            tgtAssert(channel == 0, "Channel out of bounds!");
+            cgtAssert(channel == 0, "Channel out of bounds!");
             element = value;
         }
     };
 
     template<typename BASETYPE>
     struct TypeTraitsHelperOfBasetypePerChannel<BASETYPE, 2> {
-        typedef tgt::Vector2< BASETYPE > ElementType;
+        typedef cgt::Vector2< BASETYPE > ElementType;
 
         static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
-            tgtAssert(channel >= 0 && channel <= 1, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 1, "Channel out of bounds!");
             return element[channel];
         }
 
         static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
-            tgtAssert(channel >= 0 && channel <= 1, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 1, "Channel out of bounds!");
             element[channel] = value;
         }
     };
 
     template<typename BASETYPE>
     struct TypeTraitsHelperOfBasetypePerChannel<BASETYPE, 3> {
-        typedef tgt::Vector3< BASETYPE > ElementType;
+        typedef cgt::Vector3< BASETYPE > ElementType;
 
         static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
-            tgtAssert(channel >= 0 && channel <= 2, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 2, "Channel out of bounds!");
             return element[channel];
         }
 
         static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
-            tgtAssert(channel >= 0 && channel <= 2, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 2, "Channel out of bounds!");
             element[channel] = value;
         }
     };
 
     template<typename BASETYPE>
     struct TypeTraitsHelperOfBasetypePerChannel<BASETYPE, 4> {
-        typedef tgt::Vector4< BASETYPE > ElementType;
+        typedef cgt::Vector4< BASETYPE > ElementType;
 
         static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
-            tgtAssert(channel >= 0 && channel <= 3, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 3, "Channel out of bounds!");
             return element[channel];
         }
 
         static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
-            tgtAssert(channel >= 0 && channel <= 3, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 3, "Channel out of bounds!");
             element[channel] = value;
         }
     };
@@ -292,27 +292,27 @@ namespace {
         typedef Tensor2< BASETYPE > ElementType;
 
         static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
-            tgtAssert(channel >= 0 && channel <= 5, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 5, "Channel out of bounds!");
             return element[channel];
         }
 
         static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
-            tgtAssert(channel >= 0 && channel <= 5, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 5, "Channel out of bounds!");
             element[channel] = value;
         }
     };
 
     template<typename BASETYPE>
     struct TypeTraitsHelperOfBasetypePerChannel<BASETYPE, 9> {
-        typedef tgt::Matrix3< BASETYPE > ElementType;
+        typedef cgt::Matrix3< BASETYPE > ElementType;
 
         static inline BASETYPE getChannel(const ElementType& element, size_t channel) {
-            tgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
             return element.elem[channel];
         }
 
         static inline void setChannel(ElementType& element, size_t channel, BASETYPE value) {
-            tgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
+            cgtAssert(channel >= 0 && channel <= 8, "Channel out of bounds!");
             element.elem[channel] = value;
         }
     };
@@ -358,7 +358,7 @@ namespace {
         }
 
         static T denormalizeFromFloat(float value) {
-            value = tgt::clamp(value, 0.0f, 1.0f);
+            value = cgt::clamp(value, 0.0f, 1.0f);
             return static_cast<T>(value * std::numeric_limits<T>::max());
         };
     };
@@ -376,7 +376,7 @@ namespace {
         }
 
         static T denormalizeFromFloat(float value) {
-            value = (tgt::clamp(value, 0.0f, 1.0f) - .5f) * 2.f;
+            value = (cgt::clamp(value, 0.0f, 1.0f) - .5f) * 2.f;
             if(value >= 0.0f)
                 return static_cast<T>(value * std::numeric_limits<T>::max());
             else

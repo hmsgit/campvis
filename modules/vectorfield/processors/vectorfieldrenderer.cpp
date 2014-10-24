@@ -24,9 +24,9 @@
 
 #include "vectorfieldrenderer.h"
 
-#include "tgt/tgt_math.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
+#include "cgt/cgt_math.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/lightsourcedata.h"
@@ -58,7 +58,7 @@ namespace campvis {
         , p_Time("time", "Time", 0, 0, 100)
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
-        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_camera("Camera", "Camera", cgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _arrowGeometry(0)
@@ -113,15 +113,15 @@ namespace campvis {
             ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const tgt::Camera& cam = p_camera.getValue();
-                const tgt::svec3& imgSize = vectors->getSize();
+                const cgt::Camera& cam = p_camera.getValue();
+                const cgt::svec3& imgSize = vectors->getSize();
                 const int sliceNumber = p_sliceNumber.getValue();
 
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
 
                 _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / cgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
@@ -144,21 +144,21 @@ namespace campvis {
                     case XY_PLANE:
                         for (size_t x = 0; x < imgSize.x; ++x) {
                             for (size_t y = 0; y < imgSize.y; ++y) {
-                                renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber), scale);
+                                renderVectorArrow(vectors, cgt::ivec3(static_cast<int>(x), static_cast<int>(y), sliceNumber), scale);
                             }
                         }
                         break;
                     case XZ_PLANE:
                         for (size_t x = 0; x < imgSize.x; ++x) {
                             for (size_t z = 0; z < imgSize.z; ++z) {
-                                renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)), scale);
+                                renderVectorArrow(vectors, cgt::ivec3(static_cast<int>(x), sliceNumber, static_cast<int>(z)), scale);
                             }
                         }
                         break;
                     case YZ_PLANE:
                         for (size_t y = 0; y < imgSize.y; ++y) {
                             for (size_t z = 0; z < imgSize.z; ++z) {
-                                renderVectorArrow(vectors, tgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)), scale);
+                                renderVectorArrow(vectors, cgt::ivec3(sliceNumber, static_cast<int>(y), static_cast<int>(z)), scale);
                             }
                         }
                         break;
@@ -166,7 +166,7 @@ namespace campvis {
                         for (size_t x = 0; x < imgSize.x; ++x) {
                             for (size_t y = 0; y < imgSize.y; ++y) {
                                 for (size_t z = 0; z < imgSize.z; ++z) {
-                                    renderVectorArrow(vectors, tgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
+                                    renderVectorArrow(vectors, cgt::ivec3(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)), scale);
                                 }
                             }
                         }
@@ -225,7 +225,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale) {
+    void VectorFieldRenderer::renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const cgt::vec3& position, float scale) {
 
         // avoid overflows
         if(position.x >= vectors->getSize().x || position.x < 0 ||
@@ -234,36 +234,36 @@ namespace campvis {
             return;
 
         // gather vector direction
-        const tgt::vec3& dir = vectors->getElement(position);
-        float len = tgt::length(dir);
+        const cgt::vec3& dir = vectors->getElement(position);
+        float len = cgt::length(dir);
 
         // threshold
         if(len < p_lenThresholdMin.getValue() || len > p_lenThresholdMax.getValue())
             return;
 
-        tgt::vec3 up(0.f, 0.f, 1.f);
-        tgt::vec3 dirNorm = tgt::normalize(dir);
-        tgt::vec3 axis = tgt::cross(up, dirNorm);
-        float dotPr = tgt::dot(up, dirNorm);
-        tgt::mat4 rotationMatrix;
+        cgt::vec3 up(0.f, 0.f, 1.f);
+        cgt::vec3 dirNorm = cgt::normalize(dir);
+        cgt::vec3 axis = cgt::cross(up, dirNorm);
+        float dotPr = cgt::dot(up, dirNorm);
+        cgt::mat4 rotationMatrix;
         if(abs(dotPr-1)<1.e-3f)
-            rotationMatrix = tgt::mat4::identity;
+            rotationMatrix = cgt::mat4::identity;
         else if(abs(dotPr+1)<1.e-3f)
-            rotationMatrix = tgt::mat4::createRotation(tgt::PIf, tgt::vec3(1.f, 0.f, 0.f));
+            rotationMatrix = cgt::mat4::createRotation(cgt::PIf, cgt::vec3(1.f, 0.f, 0.f));
         else {
-            rotationMatrix = tgt::mat4::createRotation(acos(dotPr), tgt::normalize(axis));
+            rotationMatrix = cgt::mat4::createRotation(acos(dotPr), cgt::normalize(axis));
         }
 
-        const tgt::mat4& voxelToWorldMatrix = vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix();
+        const cgt::mat4& voxelToWorldMatrix = vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix();
 
         // compute model matrix
-        tgt::mat4 modelMatrix = voxelToWorldMatrix * tgt::mat4::createTranslation(position) * rotationMatrix *
-            tgt::mat4::createScale(tgt::vec3(len * p_arrowSize.getValue())) * tgt::mat4::createScale(tgt::vec3(scale));
+        cgt::mat4 modelMatrix = voxelToWorldMatrix * cgt::mat4::createTranslation(position) * rotationMatrix *
+            cgt::mat4::createScale(cgt::vec3(len * p_arrowSize.getValue())) * cgt::mat4::createScale(cgt::vec3(scale));
 
         // setup shader
-        //_shader->setUniform("_color", tgt::vec4(dirNorm, 1.f));
+        //_shader->setUniform("_color", cgt::vec4(dirNorm, 1.f));
         float color = (len - p_lenThresholdMin.getValue()) / (p_lenThresholdMax.getValue() - p_lenThresholdMin.getValue());
-        _shader->setUniform("_color", tgt::vec4(1.f, 1-color, 1-color, 1.f));
+        _shader->setUniform("_color", cgt::vec4(1.f, 1-color, 1-color, 1.f));
 
         // render single ellipsoid
         _shader->setUniform("_modelMatrix", modelMatrix);

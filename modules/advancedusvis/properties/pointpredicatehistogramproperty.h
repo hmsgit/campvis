@@ -32,7 +32,7 @@
 #include <tbb/atomic.h>
 #include <memory>
 
-namespace tgt {
+namespace cgt {
     class Shader;
     class TextureUnit;
 }

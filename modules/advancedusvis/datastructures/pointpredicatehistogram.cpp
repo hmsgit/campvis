@@ -51,7 +51,7 @@ namespace campvis {
     }
 
     void PointPredicateHistogram::removePredicate(size_t i) {
-        tgtAssert(i < _predicates.size(), "Index out of bounds!");
+        cgtAssert(i < _predicates.size(), "Index out of bounds!");
 
         _predicates[i]->s_configurationChanged.disconnect(this);
         _predicates[i]->s_enabledChanged.disconnect(this);
@@ -67,7 +67,7 @@ namespace campvis {
         for (size_t i = 0; i < _predicates.size(); ++i) {
             _predicates[i]->p_importance.setValue(imp);
             if (resetColors)
-                _predicates[i]->p_color.setValue(tgt::vec2(0.f));
+                _predicates[i]->p_color.setValue(cgt::vec2(0.f));
         }
 
         s_configurationChanged.emitSignal();
@@ -174,7 +174,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void PointPredicateHistogram::setupRenderShader(tgt::Shader* shader) const {
+    void PointPredicateHistogram::setupRenderShader(cgt::Shader* shader) const {
         for (size_t i = 0; i < _predicates.size(); ++i) {
             //if (_predicates[i]->isEnabled())
                 _predicates[i]->setupShader(shader);

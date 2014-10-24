@@ -81,7 +81,7 @@ namespace campvis {
     }
 
     void OptimizedRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
-        tgt::TextureUnit bbvUnit;
+        cgt::TextureUnit bbvUnit;
 
         if (getInvalidationLevel() & INVALID_BBV){
             DataHandle dh = DataHandle(const_cast<ImageData*>(image->getParent())); // HACK HACK HACK
@@ -96,8 +96,8 @@ namespace campvis {
             _vvTex->bind();
             _shader->setIgnoreUniformLocationError(true);
             _shader->setUniform("_bbvTexture", bbvUnit.getUnitNumber());
-            _shader->setUniform("_bbvTextureParams._size", tgt::vec3(_vvTex->getDimensions()));
-            _shader->setUniform("_bbvTextureParams._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_vvTex->getDimensions()));
+            _shader->setUniform("_bbvTextureParams._size", cgt::vec3(_vvTex->getDimensions()));
+            _shader->setUniform("_bbvTextureParams._sizeRCP", cgt::vec3(1.f) / cgt::vec3(_vvTex->getDimensions()));
             _shader->setUniform("_bbvTextureParams._numChannels", static_cast<int>(1));
 
             _shader->setUniform("_bbvBrickSize", static_cast<int>(_bbv->getBrickSize()));
@@ -179,11 +179,11 @@ namespace campvis {
                     // parallelly traverse the bricks
                     // have minimum group size 8 to avoid race conditions (every 8 neighbor bricks write to the same byte)!
                     tbb::parallel_for(tbb::blocked_range<size_t>(0, _bbv->getNumBrickIndices(), 8), [&] (const tbb::blocked_range<size_t>& range) {
-                        const tgt::vec2& tfIntensityDomain = p_transferFunction.getTF()->getIntensityDomain();
+                        const cgt::vec2& tfIntensityDomain = p_transferFunction.getTF()->getIntensityDomain();
 
                         for (size_t i = range.begin(); i != range.end(); ++i){
                             // for each brick, get all corresponding voxels in the reference volume
-                            std::vector<tgt::svec3> voxels = _bbv->getAllVoxelsForBrick(i);
+                            std::vector<cgt::svec3> voxels = _bbv->getAllVoxelsForBrick(i);
 
                             // traverse the voxels to check whether their intensities are mapped to some opacity
                             for (size_t v = 0; v < voxels.size(); ++v){
@@ -214,7 +214,7 @@ namespace campvis {
                 }
             }
             else {
-                tgtAssert(false, "The data type in the given DataHandle is WRONG!");
+                cgtAssert(false, "The data type in the given DataHandle is WRONG!");
             }
         }
     }

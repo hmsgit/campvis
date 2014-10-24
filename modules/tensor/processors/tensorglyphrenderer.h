@@ -40,7 +40,7 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -118,9 +118,9 @@ namespace campvis {
          * \param   evecs       Eigenvector image
          * \param   position    Image position to render in voxel coordinates
          */
-        void renderTensorGlyph(const GenericImageRepresentationLocal<float, 3>* evals, const GenericImageRepresentationLocal<float, 9>* evecs, const tgt::vec3& position);
+        void renderTensorGlyph(const GenericImageRepresentationLocal<float, 3>* evals, const GenericImageRepresentationLocal<float, 9>* evecs, const cgt::vec3& position);
 
-        tgt::Shader* _shader;               ///< Shader for glyph rendering
+        cgt::Shader* _shader;               ///< Shader for glyph rendering
         GeometryData* _ellipsoidGeometry;   ///< Geometry for ellipsoid rendering
         GeometryData* _cubeGeometry;        ///< Geometry for cuboid rendering
 

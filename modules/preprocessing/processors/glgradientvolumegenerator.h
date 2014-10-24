@@ -31,7 +31,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -76,7 +76,7 @@ namespace campvis {
 
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;       ///< Shader for gradient volume generation
+        cgt::Shader* _shader;       ///< Shader for gradient volume generation
 
         static const std::string loggerCat_;
     };

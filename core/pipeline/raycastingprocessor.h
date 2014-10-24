@@ -37,7 +37,7 @@
 
 #include "core/datastructures/imagerepresentationgl.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -137,7 +137,7 @@ namespace campvis {
         const std::string _fragmentShaderFilename;      ///< Filename for the fragment shader being automatically loaded.
         const std::string _customGlslVersion;           ///< Custom GLSL version to pass to shader
         
-        tgt::Shader* _shader;                           ///< Shader for raycasting
+        cgt::Shader* _shader;                           ///< Shader for raycasting
         bool _bindEntryExitDepthTextures;               ///< Flag whether to also bind the depth textures of the entry-/exit points.
 
         GlReduction* _minReduction;

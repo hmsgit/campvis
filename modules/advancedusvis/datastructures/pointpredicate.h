@@ -31,7 +31,7 @@
 
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -76,7 +76,7 @@ namespace campvis {
          * Sets up the given shader for this voxel predicate (i.e. sets the uniforms)
          * \param   shader  Shader to set up.
          */
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
         /**
          * Returns the GLSL uniform name of this predicate's importance value.
@@ -144,7 +144,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
     protected:
         std::vector<AbstractPointPredicate*> _predicates;
@@ -161,7 +161,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
     protected:
         std::vector<AbstractPointPredicate*> _predicates;
@@ -178,7 +178,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
         const std::string& getRangeUniformname() const { return _rangeUniformName; };
 
@@ -200,7 +200,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
         IntProperty p_bit;
 

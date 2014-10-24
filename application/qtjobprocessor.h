@@ -25,8 +25,8 @@
 #ifndef QTJOBPROCESSOR_H__
 #define QTJOBPROCESSOR_H__
 
-#include "tgt/job.h"
-#include "tgt/singleton.h"
+#include "cgt/job.h"
+#include "cgt/singleton.h"
 #include <QWidget>
 #include <functional>
 
@@ -45,7 +45,7 @@ namespace campvis {
      * });
      * \endcode
      */
-    class QtJobProcessor : public QWidget, public tgt::Singleton<QtJobProcessor> {
+    class QtJobProcessor : public QWidget, public cgt::Singleton<QtJobProcessor> {
         Q_OBJECT;
 
     public:
@@ -57,7 +57,7 @@ namespace campvis {
         /**
          Enqueues a new job to be processed by the job processor
          */
-        void enqueueJob(tgt::AbstractJob* job);
+        void enqueueJob(cgt::AbstractJob* job);
 
         /**
          Convenience function to simplify the code, removing the necessity for a makeJobOnHeap() call
@@ -65,15 +65,15 @@ namespace campvis {
         void enqueueJob(std::function<void(void)> fn);
 
     signals:
-        void newJobSignal(tgt::AbstractJob* job);
+        void newJobSignal(cgt::AbstractJob* job);
 
     private slots:
-        void onJobArrived(tgt::AbstractJob* job);
+        void onJobArrived(cgt::AbstractJob* job);
     };
 
 }
 
-#define QtJobProc tgt::Singleton<campvis::QtJobProcessor>::getRef()
+#define QtJobProc cgt::Singleton<campvis::QtJobProcessor>::getRef()
 
 
 #endif // QTJOBPROCESSOR_H__

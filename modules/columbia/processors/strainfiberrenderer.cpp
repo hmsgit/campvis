@@ -24,10 +24,10 @@
 
 #include "strainfiberrenderer.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 
 #include "modules/columbia/datastructures/fiberdata.h"
@@ -51,7 +51,7 @@ namespace campvis {
         , p_camera("Camera", "Camera ID")
         , p_renderMode("RenderMode", "Render Mode", renderModeOptions, 2)
         , p_lineWidth("LineWidth", "Line width", 3.f, .5f, 10.f, 0.1f)
-        , p_color("color", "Rendering Color", tgt::vec4(1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_color("color", "Rendering Color", cgt::vec4(1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , _shader(0)
@@ -93,7 +93,7 @@ namespace campvis {
 
         if (strainData != 0 && _shader != 0) {
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const tgt::Camera& camera = p_camera.getValue();
+                const cgt::Camera& camera = p_camera.getValue();
 
                 // set modelview and projection matrices
                 FramebufferActivationGuard fag(this);

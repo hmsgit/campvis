@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "similaritymeasure.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"
@@ -54,17 +54,17 @@ namespace campvis {
         : VisualizationProcessor(0)
         , p_referenceId("ReferenceId", "Reference Image", "", DataNameProperty::READ)
         , p_movingId("MovingId", "Moving Image", "", DataNameProperty::READ)
-        , p_clipX("clipX", "X Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-        , p_clipY("clipY", "Y Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
-        , p_clipZ("clipZ", "Z Axis Clip Coordinates", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(0))
+        , p_clipX("clipX", "X Axis Clip Coordinates", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(0))
+        , p_clipY("clipY", "Y Axis Clip Coordinates", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(0))
+        , p_clipZ("clipZ", "Z Axis Clip Coordinates", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(0))
         , p_applyMask("ApplyMask", "Apply Mask", true)
-        , p_translation("Translation", "Moving Image Translation", tgt::vec3(0.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(1.f), tgt::vec3(5.f))
-        , p_rotation("Rotation", "Moving Image Rotation", tgt::vec3(0.f), tgt::vec3(-tgt::PIf), tgt::vec3(tgt::PIf), tgt::vec3(.01f), tgt::vec3(7.f))
+        , p_translation("Translation", "Moving Image Translation", cgt::vec3(0.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(1.f), cgt::vec3(5.f))
+        , p_rotation("Rotation", "Moving Image Rotation", cgt::vec3(0.f), cgt::vec3(-cgt::PIf), cgt::vec3(cgt::PIf), cgt::vec3(.01f), cgt::vec3(7.f))
         , p_metric("Metric", "Similarity Metric", metrics, 5)
         , p_computeSimilarity("ComputeSimilarity", "Compute Similarity")
         , p_differenceImageId("DifferenceImageId", "Difference Image", "difference", DataNameProperty::WRITE)
         , p_computeDifferenceImage("ComputeDifferenceImage", "Compute Difference Image")
-        , p_viewportSize("ViewportSize", "Viewport Size", tgt::ivec2(1), tgt::ivec2(1), tgt::ivec2(1000), tgt::ivec2(1))
+        , p_viewportSize("ViewportSize", "Viewport Size", cgt::ivec2(1), cgt::ivec2(1), cgt::ivec2(1000), cgt::ivec2(1))
         , _sadssdCostFunctionShader(0)
         , _nccsnrCostFunctionShader(0)
         , _differenceShader(0)
@@ -143,45 +143,45 @@ namespace campvis {
         if (referenceImage != 0) {
             p_viewportSize.setValue(referenceImage->getSize().xy());
 
-            p_clipX.setMaxValue(tgt::ivec2(static_cast<int>(referenceImage->getSize().x), static_cast<int>(referenceImage->getSize().x)));
-            p_clipY.setMaxValue(tgt::ivec2(static_cast<int>(referenceImage->getSize().y), static_cast<int>(referenceImage->getSize().y)));
-            p_clipZ.setMaxValue(tgt::ivec2(static_cast<int>(referenceImage->getSize().z), static_cast<int>(referenceImage->getSize().z)));
+            p_clipX.setMaxValue(cgt::ivec2(static_cast<int>(referenceImage->getSize().x), static_cast<int>(referenceImage->getSize().x)));
+            p_clipY.setMaxValue(cgt::ivec2(static_cast<int>(referenceImage->getSize().y), static_cast<int>(referenceImage->getSize().y)));
+            p_clipZ.setMaxValue(cgt::ivec2(static_cast<int>(referenceImage->getSize().z), static_cast<int>(referenceImage->getSize().z)));
 
-            p_clipX.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().x)));
-            p_clipY.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().y)));
-            p_clipZ.setValue(tgt::ivec2(0, static_cast<int>(referenceImage->getSize().z)));
+            p_clipX.setValue(cgt::ivec2(0, static_cast<int>(referenceImage->getSize().x)));
+            p_clipY.setValue(cgt::ivec2(0, static_cast<int>(referenceImage->getSize().y)));
+            p_clipZ.setValue(cgt::ivec2(0, static_cast<int>(referenceImage->getSize().z)));
         }
     }
 
-    float SimilarityMeasure::computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation) {
-        tgtAssert(referenceImage != 0, "Reference Image must not be 0.");
-        tgtAssert(movingImage != 0, "Moving Image must not be 0.");
+    float SimilarityMeasure::computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const cgt::vec3& translation, const cgt::vec3& rotation) {
+        cgtAssert(referenceImage != 0, "Reference Image must not be 0.");
+        cgtAssert(movingImage != 0, "Moving Image must not be 0.");
 
-        const tgt::svec3& size = referenceImage->getSize();
+        const cgt::svec3& size = referenceImage->getSize();
         p_viewportSize.setValue(size.xy());
 
         // reserve texture units
-        tgt::TextureUnit referenceUnit, movingUnit;
+        cgt::TextureUnit referenceUnit, movingUnit;
         referenceUnit.activate();
 
         // create temporary texture(s) for result
-        tgt::Shader* leShader = _sadssdCostFunctionShader;
-        tgt::Texture* similarityTex = 0;
-        tgt::Texture* similarityTex2 = 0;
-        similarityTex = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
+        cgt::Shader* leShader = _sadssdCostFunctionShader;
+        cgt::Texture* similarityTex = 0;
+        cgt::Texture* similarityTex2 = 0;
+        similarityTex = new cgt::Texture(0, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, cgt::Texture::NEAREST);
         similarityTex->uploadTexture();
-        similarityTex->setWrapping(tgt::Texture::CLAMP);
+        similarityTex->setWrapping(cgt::Texture::CLAMP);
         // NCC and SNR need a second texture and a different shader...
         if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
-            similarityTex2 = new tgt::Texture(0, tgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
+            similarityTex2 = new cgt::Texture(0, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, cgt::Texture::NEAREST);
             similarityTex2->uploadTexture();
-            similarityTex2->setWrapping(tgt::Texture::CLAMP);
+            similarityTex2->setWrapping(cgt::Texture::CLAMP);
             leShader = _nccsnrCostFunctionShader;
         }
 
         // activate FBO and attach texture
         _fbo->activate();
-        const tgt::ivec2& windowSize = p_viewportSize.getValue();
+        const cgt::ivec2& windowSize = p_viewportSize.getValue();
         glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
         _fbo->attachTexture(similarityTex);
         if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR")
@@ -191,9 +191,9 @@ namespace campvis {
         // bind input images
         leShader->activate();
         leShader->setUniform("_applyMask", p_applyMask.getValue());
-        leShader->setUniform("_xClampRange", tgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
-        leShader->setUniform("_yClampRange", tgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
-        leShader->setUniform("_zClampRange", tgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
+        leShader->setUniform("_xClampRange", cgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
+        leShader->setUniform("_yClampRange", cgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
+        leShader->setUniform("_zClampRange", cgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
         referenceImage->bind(leShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
         movingImage->bind(leShader, movingUnit, "_movingTexture", "_movingTextureParams");
 
@@ -258,14 +258,14 @@ namespace campvis {
 
         delete similarityTex;
         delete similarityTex2;
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
         return toReturn;
     }
 
 
-    tgt::mat4 SimilarityMeasure::euleranglesToMat4(const tgt::vec3& eulerAngles) {
+    cgt::mat4 SimilarityMeasure::euleranglesToMat4(const cgt::vec3& eulerAngles) {
         float sinX = sin(eulerAngles.x);
         float cosX = cos(eulerAngles.x);
         float sinY = sin(eulerAngles.y);
@@ -273,36 +273,36 @@ namespace campvis {
         float sinZ = sin(eulerAngles.z);
         float cosZ = cos(eulerAngles.z);
 
-        tgt::mat4 toReturn(cosY * cosZ,   cosZ * sinX * sinY - cosX * sinZ,   sinX * sinZ + cosX * cosZ * sinY,   0.f,
+        cgt::mat4 toReturn(cosY * cosZ,   cosZ * sinX * sinY - cosX * sinZ,   sinX * sinZ + cosX * cosZ * sinY,   0.f,
                            cosY * sinZ,   sinX * sinY * sinZ + cosX * cosZ,   cosX * sinY * sinZ - cosZ * sinX,   0.f,
                            (-1) * sinY,   cosY * sinX,                        cosX * cosY,                        0.f,
                            0.f,           0.f,                                0.f,                                1.f);
         return toReturn;
     }
 
-    void SimilarityMeasure::generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation) {
-        tgtAssert(dc != 0, "DataContainer must not be 0.");
-        tgtAssert(referenceImage != 0, "Reference Image must not be 0.");
-        tgtAssert(movingImage != 0, "Moving Image must not be 0.");
+    void SimilarityMeasure::generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const cgt::vec3& translation, const cgt::vec3& rotation) {
+        cgtAssert(dc != 0, "DataContainer must not be 0.");
+        cgtAssert(referenceImage != 0, "Reference Image must not be 0.");
+        cgtAssert(movingImage != 0, "Moving Image must not be 0.");
 
-        const tgt::svec3& size = referenceImage->getSize();
-        tgt::ivec2 viewportSize = size.xy();
+        const cgt::svec3& size = referenceImage->getSize();
+        cgt::ivec2 viewportSize = size.xy();
 
         // reserve texture units
-        tgt::TextureUnit referenceUnit, movingUnit;
+        cgt::TextureUnit referenceUnit, movingUnit;
         referenceUnit.activate();
 
         // create temporary texture for result
-        tgt::Texture* differenceImage = new tgt::Texture(0, tgt::ivec3(size), GL_RED, GL_R32F, GL_FLOAT, tgt::Texture::LINEAR);
+        cgt::Texture* differenceImage = new cgt::Texture(0, cgt::ivec3(size), GL_RED, GL_R32F, GL_FLOAT, cgt::Texture::LINEAR);
         differenceImage->uploadTexture();
-        differenceImage->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+        differenceImage->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
         // bind input images
         _differenceShader->activate();
         _differenceShader->setUniform("_applyMask", p_applyMask.getValue());
-        _differenceShader->setUniform("_xClampRange", tgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
-        _differenceShader->setUniform("_yClampRange", tgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
-        _differenceShader->setUniform("_zClampRange", tgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
+        _differenceShader->setUniform("_xClampRange", cgt::vec2(p_clipX.getValue()) / static_cast<float>(size.x));
+        _differenceShader->setUniform("_yClampRange", cgt::vec2(p_clipY.getValue()) / static_cast<float>(size.y));
+        _differenceShader->setUniform("_zClampRange", cgt::vec2(p_clipZ.getValue()) / static_cast<float>(size.z));
         referenceImage->bind(_differenceShader, referenceUnit, "_referenceTexture", "_referenceTextureParams");
         movingImage->bind(_differenceShader, movingUnit, "_movingTexture", "_movingTextureParams");
         _differenceShader->setUniform("_registrationInverse", computeRegistrationMatrix(referenceImage, movingImage, translation, rotation));
@@ -327,23 +327,23 @@ namespace campvis {
         id->setMappingInformation(referenceImage->getParent()->getMappingInformation());
         dc->addData(p_differenceImageId.getValue(), id);
 
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
         validate(COMPUTE_DIFFERENCE_IMAGE);
     }
 
-    tgt::mat4 SimilarityMeasure::computeRegistrationMatrix(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation) {
-        tgt::mat4 registrationMatrix = tgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
-        tgt::mat4 registrationInverse;
+    cgt::mat4 SimilarityMeasure::computeRegistrationMatrix(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const cgt::vec3& translation, const cgt::vec3& rotation) {
+        cgt::mat4 registrationMatrix = cgt::mat4::createTranslation(translation) * euleranglesToMat4(rotation);
+        cgt::mat4 registrationInverse;
         if (! registrationMatrix.invert(registrationInverse))
-            tgtAssert(false, "Could not invert registration matrix. This should not happen!");
+            cgtAssert(false, "Could not invert registration matrix. This should not happen!");
 
-        tgt::Bounds movingBounds = movingImage->getParent()->getWorldBounds();
-        tgt::vec3 halfDiagonal = movingBounds.getLLF() + (movingBounds.diagonal() / 2.f);
-        const tgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
-        const tgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
-        return w2t * tgt::mat4::createTranslation(halfDiagonal) * registrationInverse * tgt::mat4::createTranslation(-halfDiagonal) * t2w;
+        cgt::Bounds movingBounds = movingImage->getParent()->getWorldBounds();
+        cgt::vec3 halfDiagonal = movingBounds.getLLF() + (movingBounds.diagonal() / 2.f);
+        const cgt::mat4& w2t = movingImage->getParent()->getMappingInformation().getWorldToTextureMatrix();
+        const cgt::mat4& t2w = referenceImage->getParent()->getMappingInformation().getTextureToWorldMatrix();
+        return w2t * cgt::mat4::createTranslation(halfDiagonal) * registrationInverse * cgt::mat4::createTranslation(-halfDiagonal) * t2w;
     }
 
 

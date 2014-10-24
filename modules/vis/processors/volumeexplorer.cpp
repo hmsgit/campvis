@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "volumeexplorer.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
@@ -57,8 +57,8 @@ namespace campvis {
         , _quad(nullptr)
         , _raycaster(viewportSizeProp, raycaster)
         , _sliceRenderer(sliceRenderer)
-        , p_smallRenderSize("SmallRenderSize", "Small Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
-        , p_largeRenderSize("LargeRenderSize", "Large Render Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
+        , p_smallRenderSize("SmallRenderSize", "Small Render Size", cgt::ivec2(32), cgt::ivec2(0), cgt::ivec2(10000), cgt::ivec2(1))
+        , p_largeRenderSize("LargeRenderSize", "Large Render Size", cgt::ivec2(32), cgt::ivec2(0), cgt::ivec2(10000), cgt::ivec2(1))
         , _xSliceHandler(&_sliceRenderer->p_xSliceNumber)
         , _ySliceHandler(&_sliceRenderer->p_ySliceNumber)
         , _zSliceHandler(&_sliceRenderer->p_zSliceNumber)
@@ -71,8 +71,8 @@ namespace campvis {
         , _scribblePointer(nullptr)
         , _cachedImageSize(0)
     {
-        tgtAssert(raycaster != nullptr, "Raycasting Processor must not be 0.");
-        tgtAssert(_sliceRenderer != nullptr, "Slice Rendering Processor must not be 0.");
+        cgtAssert(raycaster != nullptr, "Raycasting Processor must not be 0.");
+        cgtAssert(_sliceRenderer != nullptr, "Slice Rendering Processor must not be 0.");
 
         p_largeView.selectByOption(VOLUME);
 
@@ -134,7 +134,7 @@ namespace campvis {
         _sliceRenderer->s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
         _raycaster.s_invalidated.connect(this, &VolumeExplorer::onProcessorInvalidated);
 
-        _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
+        _quad = GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(0.f), cgt::vec3(1.f));
         
         // force recalculation of p_smallRenderSize and p_largeRenderSize
         onPropertyChanged(_viewportSizeProperty);
@@ -166,19 +166,19 @@ namespace campvis {
             validate(LARGE_VIEW_INVALID);
         }
         if (getInvalidationLevel() & SCRIBBLE_INVALID) {
-            std::vector<tgt::vec3> vertices;
-            std::vector<tgt::vec4> colors;
+            std::vector<cgt::vec3> vertices;
+            std::vector<cgt::vec4> colors;
 
             for (size_t i = 0; i < _yesScribbles.size(); ++i) {
-                vertices.push_back(tgt::vec3(_yesScribbles[i]));
-                colors.push_back(tgt::vec4(.2f, .8f, 0.f, 1.f));
+                vertices.push_back(cgt::vec3(_yesScribbles[i]));
+                colors.push_back(cgt::vec4(.2f, .8f, 0.f, 1.f));
             }
             for (size_t i = 0; i < _noScribbles.size(); ++i) {
-                vertices.push_back(tgt::vec3(_noScribbles[i]));
-                colors.push_back(tgt::vec4(.85f, .2f, 0.f, 1.f));
+                vertices.push_back(cgt::vec3(_noScribbles[i]));
+                colors.push_back(cgt::vec4(.85f, .2f, 0.f, 1.f));
             }
 
-            FaceGeometry* g = new FaceGeometry(vertices, std::vector<tgt::vec3>(), colors);
+            FaceGeometry* g = new FaceGeometry(vertices, std::vector<cgt::vec3>(), colors);
             data.addData(p_outputImage.getValue() + ".scribbles", g);
             validate(SCRIBBLE_INVALID);
 
@@ -214,8 +214,8 @@ namespace campvis {
 
     void VolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == _viewportSizeProperty) {
-            p_smallRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
-            p_largeRenderSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
+            p_smallRenderSize.setValue(cgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
+            p_largeRenderSize.setValue(cgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
         }
         if (prop == &p_outputImage) {
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
@@ -251,14 +251,14 @@ namespace campvis {
         createAndAttachColorTexture();
         createAndAttachDepthTexture();
 
-        tgt::TextureUnit colorUnit, depthUnit;
+        cgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
 
-        tgt::vec2 rts(_viewportSizeProperty->getValue());
-        tgt::vec2 vrs(p_largeRenderSize.getValue());
-        tgt::vec2 srs(p_smallRenderSize.getValue());
+        cgt::vec2 rts(_viewportSizeProperty->getValue());
+        cgt::vec2 vrs(p_largeRenderSize.getValue());
+        cgt::vec2 srs(p_smallRenderSize.getValue());
 
-        _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, rts.x, rts.y, 0, -1, 1));
+        _shader->setUniform("_projectionMatrix", cgt::mat4::createOrtho(0, rts.x, rts.y, 0, -1, 1));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (vrImage != 0) {
@@ -268,20 +268,20 @@ namespace campvis {
             vrImage->bind(_shader, colorUnit, depthUnit);
             switch (p_largeView.getOptionValue()) {
                 case XY_PLANE:
-                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 2.f * srs.y, 0.f)));
+                    _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, 2.f * srs.y, 0.f)));
                     break;
                 case XZ_PLANE:
-                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, srs.y, 0.f)));
+                    _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, srs.y, 0.f)));
                     break;
                 case YZ_PLANE:
-                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 0.f, 0.f)));
+                    _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, 0.f, 0.f)));
                     break;
                 case VOLUME:
-                    _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
-                    _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+                    _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(vrs.x, vrs.y, .5f)));
+                    _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(srs.x, 0.f, 0.f)));
                     break;
             }
             _quad->render(GL_POLYGON);
@@ -292,42 +292,42 @@ namespace campvis {
         if (zSliceImage != 0) {
             zSliceImage->bind(_shader, colorUnit, depthUnit);
             if (p_largeView.getOptionValue() == XY_PLANE) {
-                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
-                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+                _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(vrs.x, vrs.y, .5f)));
+                _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(srs.x, 0.f, 0.f)));
             }
             else {
-                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 2.f * srs.y, 0.f)));
+                _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
+                _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, 2.f * srs.y, 0.f)));
             }
             _quad->render(GL_POLYGON);
         }
         if (ySliceImage != 0) {
             ySliceImage->bind(_shader, colorUnit, depthUnit);
             if (p_largeView.getOptionValue() == XZ_PLANE) {
-                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
-                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+                _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(vrs.x, vrs.y, .5f)));
+                _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(srs.x, 0.f, 0.f)));
             }
             else {
-                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, srs.y, 0.f)));
+                _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
+                _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, srs.y, 0.f)));
             }
             _quad->render(GL_POLYGON);
         }
         if (xSliceImage != 0) {
             xSliceImage->bind(_shader, colorUnit, depthUnit);
             if (p_largeView.getOptionValue() == YZ_PLANE) {
-                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(vrs.x, vrs.y, .5f)));
-                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(srs.x, 0.f, 0.f)));
+                _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(vrs.x, vrs.y, .5f)));
+                _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(srs.x, 0.f, 0.f)));
             }
             else {
-                _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(srs.x, srs.y, .5f)));
-                _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(0.f, 0.f, 0.f)));
+                _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
+                _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, 0.f, 0.f)));
             }
             _quad->render(GL_POLYGON);
         }
 
         _shader->deactivate();
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
         data.addData(p_outputImage.getValue(), new RenderData(_fbo));
@@ -352,7 +352,7 @@ namespace campvis {
         ScopedTypedData<ImageData> img(dc, p_inputVolume.getValue());
         static_cast<TransferFunctionProperty*>(_raycaster.getNestedProperty("RaycasterProps::TransferFunction"))->setImageHandle(img.getDataHandle());
 
-        if (img != 0 && _cachedImageSize != tgt::ivec3(img->getSize())) {
+        if (img != 0 && _cachedImageSize != cgt::ivec3(img->getSize())) {
             _cachedImageSize = img->getSize();
             if (_sliceRenderer->p_xSliceNumber.getMaxValue() != _cachedImageSize.x - 1){
                 _sliceRenderer->p_xSliceNumber.setMaxValue(_cachedImageSize.x - 1);
@@ -371,56 +371,56 @@ namespace campvis {
         }
     }
 
-    void VolumeExplorer::onEvent(tgt::Event* e) {
+    void VolumeExplorer::onEvent(cgt::Event* e) {
         // forward the event to the corresponding event listeners depending on the mouse position
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
+        if (typeid(*e) == typeid(cgt::MouseEvent)) {
+            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
 
             // if the mouse was pressed, we need to cache the view parameters of the view underneath
             // the pointer, so that we can adjust the MouseEvents to the corresponding subviews.
-            if (me->action() == tgt::MouseEvent::PRESSED || (!_mousePressedInRaycaster && me->action() == tgt::MouseEvent::WHEEL)) {
+            if (me->action() == cgt::MouseEvent::PRESSED || (!_mousePressedInRaycaster && me->action() == cgt::MouseEvent::WHEEL)) {
                 if (me->x() <= p_smallRenderSize.getValue().x) {
                     if (me->y() <= p_smallRenderSize.getValue().y) {
-                        _eventPositionOffset = tgt::ivec2(0, 0);
+                        _eventPositionOffset = cgt::ivec2(0, 0);
                         _eventViewportSize = p_smallRenderSize.getValue();
                         _viewUnderEvent = (p_largeView.getOptionValue() == XY_PLANE) ? VOLUME : XY_PLANE;
                     }
                     else if (me->y() <= 2*p_smallRenderSize.getValue().y) {
-                        _eventPositionOffset = tgt::ivec2(0, -p_smallRenderSize.getValue().y);
+                        _eventPositionOffset = cgt::ivec2(0, -p_smallRenderSize.getValue().y);
                         _eventViewportSize = p_smallRenderSize.getValue();
                         _viewUnderEvent = (p_largeView.getOptionValue() == XZ_PLANE) ? VOLUME : XZ_PLANE;
                     }
                     else {
-                        _eventPositionOffset = tgt::ivec2(0, -2 * p_smallRenderSize.getValue().y);
+                        _eventPositionOffset = cgt::ivec2(0, -2 * p_smallRenderSize.getValue().y);
                         _eventViewportSize = p_smallRenderSize.getValue();
                         _viewUnderEvent = (p_largeView.getOptionValue() == YZ_PLANE) ? VOLUME : YZ_PLANE;
                     }
                 }
                 else {
-                    _eventPositionOffset = tgt::ivec2(- p_smallRenderSize.getValue().x, 0);
+                    _eventPositionOffset = cgt::ivec2(- p_smallRenderSize.getValue().x, 0);
                     _eventViewportSize = p_largeRenderSize.getValue();
                     _viewUnderEvent = p_largeView.getOptionValue();
                 }
             }
 
             // create a new MouseEvent for the corresponding subview
-            tgt::MouseEvent adjustedMe(me->x() + _eventPositionOffset.x, me->y() + _eventPositionOffset.y,
+            cgt::MouseEvent adjustedMe(me->x() + _eventPositionOffset.x, me->y() + _eventPositionOffset.y,
                 me->action(), me->modifiers(), me->button(),
                 _eventViewportSize);
 
             // now divert the new MouseEvent to the corresponding handler
-            if (me->action() == tgt::MouseEvent::DOUBLECLICK) {
+            if (me->action() == cgt::MouseEvent::DOUBLECLICK) {
                 p_largeView.selectByOption(_viewUnderEvent);
             }
             else if (_mousePressedInRaycaster || _viewUnderEvent == VOLUME) {
                 // raycasting trackball navigation
-                if (me->action() == tgt::MouseEvent::PRESSED)
+                if (me->action() == cgt::MouseEvent::PRESSED)
                     _mousePressedInRaycaster = true;
-                else if (me->action() == tgt::MouseEvent::RELEASED)
+                else if (me->action() == cgt::MouseEvent::RELEASED)
                     _mousePressedInRaycaster = false;
                 _trackballEH->onEvent(&adjustedMe);
             }
-            else if (me->action() == tgt::MouseEvent::WHEEL) {
+            else if (me->action() == cgt::MouseEvent::WHEEL) {
                 // Mouse wheel has changed -> cycle slices
                 if (_viewUnderEvent == XY_PLANE) {
                     _zSliceHandler.onEvent(e);
@@ -432,14 +432,14 @@ namespace campvis {
                     _xSliceHandler.onEvent(e);
                 }
             }
-            else if (p_enableScribbling.getValue() && (me->modifiers() & tgt::Event::CTRL || me->modifiers() & tgt::Event::ALT)) {
+            else if (p_enableScribbling.getValue() && (me->modifiers() & cgt::Event::CTRL || me->modifiers() & cgt::Event::ALT)) {
                 // CTRL pressed -> forward to SliceExtractor's scribbling
-                if (me->action() == tgt::MouseEvent::PRESSED) {
-                    _scribblePointer = (me->modifiers() & tgt::Event::CTRL) ? &_yesScribbles : &_noScribbles;
-                    if (! (me->modifiers() & tgt::Event::SHIFT))
+                if (me->action() == cgt::MouseEvent::PRESSED) {
+                    _scribblePointer = (me->modifiers() & cgt::Event::CTRL) ? &_yesScribbles : &_noScribbles;
+                    if (! (me->modifiers() & cgt::Event::SHIFT))
                         _scribblePointer->clear();
                 }
-                else if (_scribblePointer != nullptr && me->action() == tgt::MouseEvent::RELEASED) {
+                else if (_scribblePointer != nullptr && me->action() == cgt::MouseEvent::RELEASED) {
                     _scribblePointer = nullptr;
                 }
 
@@ -464,7 +464,7 @@ namespace campvis {
         }
     }
 
-    void VolumeExplorer::onSliceExtractorScribblePainted(tgt::vec3 voxel) {
+    void VolumeExplorer::onSliceExtractorScribblePainted(cgt::vec3 voxel) {
         if (_scribblePointer != nullptr) {
             _scribblePointer->push_back(voxel);
             invalidate(INVALID_RESULT | SCRIBBLE_INVALID);

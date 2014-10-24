@@ -24,8 +24,8 @@
 
 #include "datacontainer.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
 #include "core/datastructures/abstractdata.h"
 
 namespace campvis {
@@ -47,8 +47,8 @@ namespace campvis {
             return DataHandle(0);
         }
 
-        tgtAssert(data != 0, "The Data must not be 0.");
-        tgtAssert(!name.empty(), "The data's name must not be empty.");
+        cgtAssert(data != 0, "The Data must not be 0.");
+        cgtAssert(!name.empty(), "The data's name must not be empty.");
 
         DataHandle dh(data);
         addDataHandle(name, dh);
@@ -61,8 +61,8 @@ namespace campvis {
             return;
         }
 
-        tgtAssert(dh.getData() != 0, "The data in the DataHandle must not be 0!");
-        tgtAssert(!name.empty(), "The data's name must not be empty.");
+        cgtAssert(dh.getData() != 0, "The data in the DataHandle must not be 0!");
+        cgtAssert(!name.empty(), "The data's name must not be empty.");
         _handles.erase(name);
         _handles.insert(std::make_pair(name, dh));
  

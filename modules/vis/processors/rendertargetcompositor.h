@@ -34,7 +34,7 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/optionproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -91,7 +91,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;                           ///< Shader for composition
+        cgt::Shader* _shader;                           ///< Shader for composition
 
         static const std::string loggerCat_;
     };

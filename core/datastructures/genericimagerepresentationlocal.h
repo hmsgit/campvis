@@ -178,16 +178,16 @@ namespace campvis {
         virtual float getElementNormalized(size_t index, size_t channel) const;
 
         /// \see ImageRepresentationLocal::getElementNormalized
-        virtual float getElementNormalized(const tgt::svec3& position, size_t channel) const;
+        virtual float getElementNormalized(const cgt::svec3& position, size_t channel) const;
 
         /// \see ImageRepresentationLocal::getElementNormalizedLinear
-        virtual float getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const;
+        virtual float getElementNormalizedLinear(const cgt::vec3& position, size_t channel) const;
 
         /// \see ImageRepresentationLocal::setElementNormalized
         virtual void setElementNormalized(size_t index, size_t channel, float value);
 
         /// \see ImageRepresentationLocal::setElementNormalized
-        virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value);
+        virtual void setElementNormalized(const cgt::svec3& position, size_t channel, float value);
 
 
         /**
@@ -202,7 +202,7 @@ namespace campvis {
          * \param   position    Pixel/voxel coordinates of the image element to return.
          * \return  Image element at the coordinates \a position.
          */
-        ElementType& getElement(const tgt::svec3& position);
+        ElementType& getElement(const cgt::svec3& position);
 
         /**
          * Returns the image element at the given index \a index.
@@ -216,7 +216,7 @@ namespace campvis {
          * \param   position    Pixel/voxel coordinates of the image element to return.
          * \return  Image element at the coordinates \a position.
          */
-        const ElementType& getElement(const tgt::svec3& position) const;
+        const ElementType& getElement(const cgt::svec3& position) const;
 
         /**
          * Sets the image element at the given index to the value \a value.
@@ -230,7 +230,7 @@ namespace campvis {
          * \param   position    Pixel/voxel coordinates of the image element to change.
          * \param   value       New value of the specified image element.
          */
-        void setElement(const tgt::svec3& position, const ElementType& value);
+        void setElement(const cgt::svec3& position, const ElementType& value);
 
         /**
          * Returns a pointer to the image data.
@@ -250,7 +250,7 @@ namespace campvis {
          * \param   position    Pixel/voxel coordinates of the image element to return.
          * \return  Bi-/Trilinear filtered image element at the specified coordinates.
          */
-        ElementType getElementLinear(const tgt::vec3 position) const;
+        ElementType getElementLinear(const cgt::vec3 position) const;
 
     protected:
         /**
@@ -284,7 +284,7 @@ namespace campvis {
         : ImageRepresentationLocal(parent, TypeTraits<BASETYPE, NUMCHANNELS>::weaklyTypedPointerBaseType)
         , _data(data)
     {
-        tgtAssert(_parent->getNumChannels() == NUMCHANNELS, "Number of channels must match parent image's number of channels!");
+        cgtAssert(_parent->getNumChannels() == NUMCHANNELS, "Number of channels must match parent image's number of channels!");
         if (_data == 0) {
             size_t numElements = getNumElements();
             _data = new ElementType[numElements];
@@ -323,57 +323,57 @@ namespace campvis {
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     float campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(size_t index, size_t channel) const {
-        tgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
+        cgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
         return TypeNormalizer::normalizeToFloat(TypeTraits<BASETYPE, NUMCHANNELS>::getChannel(getElement(index), channel));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    float campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(const tgt::svec3& position, size_t channel) const {
+    float campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementNormalized(const cgt::svec3& position, size_t channel) const {
         return getElementNormalized(_parent->positionToIndex(position), channel);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     void campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(size_t index, size_t channel, float value) {
-        tgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
+        cgtAssert(channel >= 0 && channel < NUMCHANNELS, "Channel out of bounds!");
         TypeTraits<BASETYPE, NUMCHANNELS>::setChannel(getElement(index), channel, TypeNormalizer::denormalizeFromFloat<BASETYPE>(value));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(const tgt::svec3& position, size_t channel, float value) {
+    void campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::setElementNormalized(const cgt::svec3& position, size_t channel, float value) {
         setElementNormalized(_parent->positionToIndex(position), channel, value);
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElement(size_t position) {
-        tgtAssert(position >= 0 && position < getNumElements(), "Position out of bounds!");
+        cgtAssert(position >= 0 && position < getNumElements(), "Position out of bounds!");
         return _data[position];
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElement(const tgt::svec3& position) {
+    typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElement(const cgt::svec3& position) {
         return getElement(_parent->positionToIndex(position));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     const typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElement(size_t position) const {
-        tgtAssert(position >= 0 && position < getNumElements(), "Position out of bounds!");
+        cgtAssert(position >= 0 && position < getNumElements(), "Position out of bounds!");
         return _data[position];
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    const typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElement(const tgt::svec3& position) const {
+    const typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType& campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElement(const cgt::svec3& position) const {
         return getElement(_parent->positionToIndex(position));
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
     void campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::setElement(size_t position, const ElementType& value) {
-        tgtAssert(position >= 0 && position < getNumElements(), "Position out of bounds!");
+        cgtAssert(position >= 0 && position < getNumElements(), "Position out of bounds!");
         _data[position] = value;
 
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    void campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::setElement(const tgt::svec3& position, const ElementType& value) {
+    void campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::setElement(const cgt::svec3& position, const ElementType& value) {
         _data[_parent->positionToIndex(position)] = value;
     }
 
@@ -388,34 +388,34 @@ namespace campvis {
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementLinear(const tgt::vec3 position) const {
+    typename campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::ElementType campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementLinear(const cgt::vec3 position) const {
         // yet to be implemented
         // TODO: Check wether pixel/voxel coordinates lie on the edges or on the center of the pixels/voxels
-        tgtAssert(false, "Yet to be implemented!");
+        cgtAssert(false, "Yet to be implemented!");
         return ElementType(0);
     }
 
 
     template<typename BASETYPE, size_t NUMCHANNELS>
-    float campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const {
-        tgt::vec3 posAbs = tgt::max(position - 0.5f, tgt::vec3::zero);
-        tgt::vec3 p = posAbs - floor(posAbs); // get decimal part
-        tgt::svec3 llb = tgt::svec3(posAbs);
-        tgt::svec3 urf = tgt::svec3(ceil(posAbs));
-        urf = min(urf, getSize() - tgt::svec3(1)); // clamp so the lookups do not exceed the dimensions
-        llb = min(llb, getSize() - tgt::svec3(1)); // dito
+    float campvis::GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::getElementNormalizedLinear(const cgt::vec3& position, size_t channel) const {
+        cgt::vec3 posAbs = cgt::max(position - 0.5f, cgt::vec3::zero);
+        cgt::vec3 p = posAbs - floor(posAbs); // get decimal part
+        cgt::svec3 llb = cgt::svec3(posAbs);
+        cgt::svec3 urf = cgt::svec3(ceil(posAbs));
+        urf = min(urf, getSize() - cgt::svec3(1)); // clamp so the lookups do not exceed the dimensions
+        llb = min(llb, getSize() - cgt::svec3(1)); // dito
 
         /*
             interpolate linearly
         */
-        return  getElementNormalized(tgt::svec3(llb.x, llb.y, llb.z), channel) * (1.f-p.x)*(1.f-p.y)*(1.f-p.z) // llB
-              + getElementNormalized(tgt::svec3(urf.x, llb.y, llb.z), channel) * (    p.x)*(1.f-p.y)*(1.f-p.z) // lrB
-              + getElementNormalized(tgt::svec3(urf.x, urf.y, llb.z), channel) * (    p.x)*(    p.y)*(1.f-p.z) // urB
-              + getElementNormalized(tgt::svec3(llb.x, urf.y, llb.z), channel) * (1.f-p.x)*(    p.y)*(1.f-p.z) // ulB
-              + getElementNormalized(tgt::svec3(llb.x, llb.y, urf.z), channel) * (1.f-p.x)*(1.f-p.y)*(    p.z) // llF
-              + getElementNormalized(tgt::svec3(urf.x, llb.y, urf.z), channel) * (    p.x)*(1.f-p.y)*(    p.z) // lrF
-              + getElementNormalized(tgt::svec3(urf.x, urf.y, urf.z), channel) * (    p.x)*(    p.y)*(    p.z) // urF
-              + getElementNormalized(tgt::svec3(llb.x, urf.y, urf.z), channel) * (1.f-p.x)*(    p.y)*(    p.z);// ulF
+        return  getElementNormalized(cgt::svec3(llb.x, llb.y, llb.z), channel) * (1.f-p.x)*(1.f-p.y)*(1.f-p.z) // llB
+              + getElementNormalized(cgt::svec3(urf.x, llb.y, llb.z), channel) * (    p.x)*(1.f-p.y)*(1.f-p.z) // lrB
+              + getElementNormalized(cgt::svec3(urf.x, urf.y, llb.z), channel) * (    p.x)*(    p.y)*(1.f-p.z) // urB
+              + getElementNormalized(cgt::svec3(llb.x, urf.y, llb.z), channel) * (1.f-p.x)*(    p.y)*(1.f-p.z) // ulB
+              + getElementNormalized(cgt::svec3(llb.x, llb.y, urf.z), channel) * (1.f-p.x)*(1.f-p.y)*(    p.z) // llF
+              + getElementNormalized(cgt::svec3(urf.x, llb.y, urf.z), channel) * (    p.x)*(1.f-p.y)*(    p.z) // lrF
+              + getElementNormalized(cgt::svec3(urf.x, urf.y, urf.z), channel) * (    p.x)*(    p.y)*(    p.z) // urF
+              + getElementNormalized(cgt::svec3(llb.x, urf.y, urf.z), channel) * (1.f-p.x)*(    p.y)*(    p.z);// ulF
     }
 
 }

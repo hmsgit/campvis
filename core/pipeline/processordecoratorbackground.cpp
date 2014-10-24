@@ -24,15 +24,15 @@
 
 #include "processordecoratorbackground.h"
 
-#include "tgt/shadermanager.h"
+#include "cgt/shadermanager.h"
 #include "core/properties/propertycollection.h"
 
 namespace campvis {
 
     ProcessorDecoratorBackground::ProcessorDecoratorBackground()
         : AbstractProcessorDecorator()
-        , _backgroundColor1("backgroundColor1", "Background Color 1", tgt::vec4(.9f, .9f, .9f, 1), tgt::vec4(0.f), tgt::vec4(1.f))
-        , _backgroundColor2("backgroundColor2", "Background Color 2", tgt::vec4(.6f, .6f, .6f, 1), tgt::vec4(0.f), tgt::vec4(1.f))
+        , _backgroundColor1("backgroundColor1", "Background Color 1", cgt::vec4(.9f, .9f, .9f, 1), cgt::vec4(0.f), cgt::vec4(1.f))
+        , _backgroundColor2("backgroundColor2", "Background Color 2", cgt::vec4(.6f, .6f, .6f, 1), cgt::vec4(0.f), cgt::vec4(1.f))
     {
     }
 
@@ -45,7 +45,7 @@ namespace campvis {
         propCollection->addProperty(_backgroundColor2);
     }
 
-    void ProcessorDecoratorBackground::renderProlog(const DataContainer& dataContainer, tgt::Shader* shader) {
+    void ProcessorDecoratorBackground::renderProlog(const DataContainer& dataContainer, cgt::Shader* shader) {
         shader->setUniform("_backgroundColor1", _backgroundColor1.getValue());
         shader->setUniform("_backgroundColor2", _backgroundColor2.getValue());
     }

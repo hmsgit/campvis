@@ -27,11 +27,11 @@
 
 #include <string>
 
-#include "tgt/framebufferobject.h"
-#include "tgt/shadermanager.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/shadermanager.h"
 #include "core/datastructures/facegeometry.h"
 
-namespace tgt {
+namespace cgt {
     class FramebufferObject;
     class Shader;
     class Texture;
@@ -62,7 +62,7 @@ namespace campvis {
         void createHierarchy(const ImageRepresentationGL* image, AbstractTransferFunction* transferFunction);
 
 
-        tgt::Texture* getTexture() { return _hierarchyTexture; }
+        cgt::Texture* getTexture() { return _hierarchyTexture; }
         size_t getBrickSize() { return _brickSize; }
         size_t getBrickDepth() { return _brickDepth; }
         GLuint getMaxMipmapLevel() { return _maxMipmapLevel; }
@@ -84,17 +84,17 @@ namespace campvis {
 
         void renderInitialHierarchy(const ImageRepresentationGL* image, AbstractTransferFunction* transferFunction);
 
-        tgt::svec3 _dimBricks;                      ///< number of bricks in each dimension
-        tgt::svec3 _dimPackedBricks;                ///< number of elements when bricks are tightly packed
+        cgt::svec3 _dimBricks;                      ///< number of bricks in each dimension
+        cgt::svec3 _dimPackedBricks;                ///< number of elements when bricks are tightly packed
         size_t _brickSize;                          ///< number of voxels a brick is covering in x, y dimension
         size_t _brickDepth;                         ///< number of voxel a brick is covering in its depth dimension
         GLuint _maxMipmapLevel;                     ///< Maximum mipmap level
 
-        tgt::Shader* _hierarchyRendererShader;      ///< Shader to render the initial hierarchy texture
-        tgt::Shader* _mimapRendererShader;          ///< Shader to render the mipmap pyramid
+        cgt::Shader* _hierarchyRendererShader;      ///< Shader to render the initial hierarchy texture
+        cgt::Shader* _mimapRendererShader;          ///< Shader to render the mipmap pyramid
 
-        tgt::FramebufferObject* _fbo;               ///< FBO used for rendering
-        tgt::Texture* _hierarchyTexture;            ///< The OpenGL texture storing the voxel hierarchy
+        cgt::FramebufferObject* _fbo;               ///< FBO used for rendering
+        cgt::Texture* _hierarchyTexture;            ///< The OpenGL texture storing the voxel hierarchy
 
         FaceGeometry* _quad;
 

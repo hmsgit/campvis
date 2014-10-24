@@ -24,10 +24,10 @@
 
 #include "multiindexedgeometry.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/buffer.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/buffer.h"
+#include "cgt/vertexarrayobject.h"
 
 #include <algorithm>
 #include <list>
@@ -39,10 +39,10 @@ namespace campvis {
 
 
     MultiIndexedGeometry::MultiIndexedGeometry(
-        const std::vector<tgt::vec3>& vertices, 
-        const std::vector<tgt::vec3>& textureCoordinates /*= std::vector<tgt::vec3>()*/, 
-        const std::vector<tgt::vec4>& colors /*= std::vector<tgt::vec4>()*/, 
-        const std::vector<tgt::vec3>& normals /*= std::vector<tgt::vec3>() */)
+        const std::vector<cgt::vec3>& vertices, 
+        const std::vector<cgt::vec3>& textureCoordinates /*= std::vector<cgt::vec3>()*/, 
+        const std::vector<cgt::vec4>& colors /*= std::vector<cgt::vec4>()*/, 
+        const std::vector<cgt::vec3>& normals /*= std::vector<cgt::vec3>() */)
         : GeometryData()
         , _vertices(vertices)
         , _textureCoordinates(textureCoordinates)
@@ -50,9 +50,9 @@ namespace campvis {
         , _normals(normals)
         , _indicesBuffer(0)
     {
-        tgtAssert(textureCoordinates.empty() || textureCoordinates.size() == vertices.size(), "Texture coordinates vector must be either empty or of the same size as the vertex vector.");
-        tgtAssert(colors.empty() || colors.size() == vertices.size(), "Colors vector must be either empty or of the same size as the vertex vector.");
-        tgtAssert(normals.empty() || normals.size() == vertices.size(), "Normals vector must be either empty or of the same size as the vertex vector.");
+        cgtAssert(textureCoordinates.empty() || textureCoordinates.size() == vertices.size(), "Texture coordinates vector must be either empty or of the same size as the vertex vector.");
+        cgtAssert(colors.empty() || colors.size() == vertices.size(), "Colors vector must be either empty or of the same size as the vertex vector.");
+        cgtAssert(normals.empty() || normals.size() == vertices.size(), "Normals vector must be either empty or of the same size as the vertex vector.");
 
     }
 
@@ -107,13 +107,13 @@ namespace campvis {
         size_t sum = 0;
 
         if (_indicesBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
+            sum += sizeof(cgt::BufferObject);
         for (size_t i = 0; i < NUM_BUFFERS; ++i) {
             if (_buffers[i] != nullptr)
-                sum += sizeof(tgt::BufferObject);
+                sum += sizeof(cgt::BufferObject);
         }
 
-        return sizeof(*this) + sum + (sizeof(size_t) * _indices.size()) + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * _colors.size());
+        return sizeof(*this) + sum + (sizeof(size_t) * _indices.size()) + (sizeof(cgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(cgt::vec4) * _colors.size());
     }
 
     size_t MultiIndexedGeometry::getVideoMemoryFootprint() const {
@@ -129,12 +129,12 @@ namespace campvis {
 
     }
 
-    const std::vector<tgt::col4>& MultiIndexedGeometry::getPickingInformation() const {
+    const std::vector<cgt::col4>& MultiIndexedGeometry::getPickingInformation() const {
         return _pickingInformation;
     }
 
-    void MultiIndexedGeometry::setPickingInformation(const std::vector<tgt::col4>& pickingInformation) {
-        tgtAssert(pickingInformation.size() == 0 || pickingInformation.size() == _vertices.size(), "Number of picking informations does not match number of vertices!");
+    void MultiIndexedGeometry::setPickingInformation(const std::vector<cgt::col4>& pickingInformation) {
+        cgtAssert(pickingInformation.size() == 0 || pickingInformation.size() == _vertices.size(), "Number of picking informations does not match number of vertices!");
         _pickingInformation = pickingInformation;
         _buffersDirty = true;
     }
@@ -149,7 +149,7 @@ namespace campvis {
             return;
         }
 
-        tgt::VertexArrayObject vao;
+        cgt::VertexArrayObject vao;
         if (_verticesBuffer)
             vao.setVertexAttributePointer(0, _verticesBuffer);
         if (_texCoordsBuffer)
@@ -174,30 +174,30 @@ namespace campvis {
             deleteIndicesBuffer();
 
             try {
-                _indicesBuffer = new tgt::BufferObject(tgt::BufferObject::ELEMENT_ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                _indicesBuffer->data(&_indices.front(), _indices.size() * sizeof(uint16_t), tgt::BufferObject::UNSIGNED_SHORT, 1);
+                _indicesBuffer = new cgt::BufferObject(cgt::BufferObject::ELEMENT_ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                _indicesBuffer->data(&_indices.front(), _indices.size() * sizeof(uint16_t), cgt::BufferObject::UNSIGNED_SHORT, 1);
 
-                _verticesBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                _verticesBuffer->data(&_vertices.front(), _vertices.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                _verticesBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                _verticesBuffer->data(&_vertices.front(), _vertices.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
 
                 if (! _textureCoordinates.empty()) {
-                    _texCoordsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _texCoordsBuffer->data(&_textureCoordinates.front(), _textureCoordinates.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _texCoordsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _texCoordsBuffer->data(&_textureCoordinates.front(), _textureCoordinates.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
                 }
                 if (! _colors.empty()) {
-                    _colorsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _colorsBuffer->data(&_colors.front(), _colors.size() * sizeof(tgt::vec4), tgt::BufferObject::FLOAT, 4);
+                    _colorsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _colorsBuffer->data(&_colors.front(), _colors.size() * sizeof(cgt::vec4), cgt::BufferObject::FLOAT, 4);
                 }
                 if (! _normals.empty()) {
-                    _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _normalsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
                 }
                 if (! _pickingInformation.empty()) {
-                    _pickingBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _pickingBuffer->data(&_pickingInformation.front(), _pickingInformation.size() * sizeof(tgt::col4), tgt::BufferObject::UNSIGNED_BYTE, 4);
+                    _pickingBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _pickingBuffer->data(&_pickingInformation.front(), _pickingInformation.size() * sizeof(cgt::col4), cgt::BufferObject::UNSIGNED_BYTE, 4);
                 }
             }
-            catch (tgt::Exception& e) {
+            catch (cgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
                 _buffersDirty = true;
                 return;
@@ -208,9 +208,9 @@ namespace campvis {
         }
     }
 
-    tgt::Bounds MultiIndexedGeometry::getWorldBounds() const {
-        tgt::Bounds toReturn;
-        for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
+    cgt::Bounds MultiIndexedGeometry::getWorldBounds() const {
+        cgt::Bounds toReturn;
+        for (std::vector<cgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
             toReturn.addPoint(*it);
         return toReturn;
     }
@@ -228,9 +228,9 @@ namespace campvis {
         _indicesBuffer = 0;
     }
 
-    void MultiIndexedGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+    void MultiIndexedGeometry::applyTransformationToVertices(const cgt::mat4& t) {
         for (size_t i = 0; i < _vertices.size(); ++i) {
-            tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
+            cgt::vec4 tmp = t * cgt::vec4(_vertices[i], 1.f);
             _vertices[i] = tmp.xyz() / tmp.w;
         }
 

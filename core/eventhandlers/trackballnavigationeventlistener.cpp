@@ -23,8 +23,8 @@
 // ================================================================================================
 
 #include "trackballnavigationeventlistener.h"
-#include "tgt/assert.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/assert.h"
+#include "cgt/event/mouseevent.h"
 #include "core/datastructures/abstractdata.h"
 #include "core/properties/cameraproperty.h"
 #include "core/pipeline/visualizationprocessor.h"
@@ -42,7 +42,7 @@ namespace campvis {
 
     }
 
-    tgt::Camera* CamPropNavigationWrapper::getCamera() {
+    cgt::Camera* CamPropNavigationWrapper::getCamera() {
         if (! _dirty) {
             // perform deep copy (hopefully thread-safe...)
             _localCopy = _cameraProperty->getValue();
@@ -61,17 +61,17 @@ namespace campvis {
     const std::string TrackballNavigationEventListener::loggerCat_ = "CAMPVis.core.eventhandler.TrackballNavigationEventListener";
 
     TrackballNavigationEventListener::TrackballNavigationEventListener(CameraProperty* cameraProperty, IVec2Property* viewportSizeProp)
-        : tgt::EventListener()
+        : cgt::EventListener()
         , _cameraProperty(cameraProperty)
         , _viewportSizeProp(viewportSizeProp)
         , _cpnw(cameraProperty)
         , _trackball(0)
-        , _sceneBounds(tgt::vec3(0.f))
+        , _sceneBounds(cgt::vec3(0.f))
     {
-        tgtAssert(_cameraProperty != 0, "Assigned camera property must not be 0.");
-        tgtAssert(_viewportSizeProp != 0, "Assigned viewport size property must not be 0.");
+        cgtAssert(_cameraProperty != 0, "Assigned camera property must not be 0.");
+        cgtAssert(_viewportSizeProp != 0, "Assigned viewport size property must not be 0.");
 
-        _trackball = new tgt::Trackball(&_cpnw, viewportSizeProp->getValue());
+        _trackball = new cgt::Trackball(&_cpnw, viewportSizeProp->getValue());
         _viewportSizeProp->s_changed.connect(this, &TrackballNavigationEventListener::onViewportSizePropChanged);
     }
 
@@ -80,31 +80,31 @@ namespace campvis {
         delete _trackball;
     }
 
-    void TrackballNavigationEventListener::onEvent(tgt::Event* e) {
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
+    void TrackballNavigationEventListener::onEvent(cgt::Event* e) {
+        if (typeid(*e) == typeid(cgt::MouseEvent)) {
+            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
             _trackball->setViewprtSize(me->viewport());
-            if (me->action() == tgt::MouseEvent::PRESSED) {
+            if (me->action() == cgt::MouseEvent::PRESSED) {
                 for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it)
                     (*it)->p_lqMode.setValue(true);
                 _trackball->mousePressEvent(me);
             }
-            else if (me->action() == tgt::MouseEvent::RELEASED) {
+            else if (me->action() == cgt::MouseEvent::RELEASED) {
                 for (std::vector<VisualizationProcessor*>::iterator it = _lqModeProcessors.begin(); it != _lqModeProcessors.end(); ++it)
                     (*it)->p_lqMode.setValue(false);
                 _trackball->mouseReleaseEvent(me);
             }
-            else if (me->action() == tgt::MouseEvent::MOTION)
+            else if (me->action() == cgt::MouseEvent::MOTION)
                 _trackball->mouseMoveEvent(me);
-            else if (me->action() == tgt::MouseEvent::WHEEL)
+            else if (me->action() == cgt::MouseEvent::WHEEL)
                 _trackball->wheelEvent(me);
         }
-        else if (typeid(*e) == typeid(tgt::KeyEvent)) {
-            _trackball->keyEvent(static_cast<tgt::KeyEvent*>(e));
+        else if (typeid(*e) == typeid(cgt::KeyEvent)) {
+            _trackball->keyEvent(static_cast<cgt::KeyEvent*>(e));
         }
     }
 
-    void TrackballNavigationEventListener::reinitializeCamera(const tgt::vec3& position, const tgt::vec3& focus, const tgt::vec3& upVector) {
+    void TrackballNavigationEventListener::reinitializeCamera(const cgt::vec3& position, const cgt::vec3& focus, const cgt::vec3& upVector) {
         _trackball->reinitializeCamera(position, focus, upVector);
     }
 
@@ -112,9 +112,9 @@ namespace campvis {
         reinitializeCamera(hwb->getWorldBounds());
     }
 
-    void TrackballNavigationEventListener::reinitializeCamera(const tgt::Bounds& worldBounds) {
+    void TrackballNavigationEventListener::reinitializeCamera(const cgt::Bounds& worldBounds) {
         if (_sceneBounds != worldBounds) {
-            tgt::vec3 pos = worldBounds.center() - tgt::vec3(0, 0, tgt::length(worldBounds.diagonal()));
+            cgt::vec3 pos = worldBounds.center() - cgt::vec3(0, 0, cgt::length(worldBounds.diagonal()));
 
             setSceneBounds(worldBounds);
             setCenter(worldBounds.center());
@@ -122,26 +122,26 @@ namespace campvis {
         }
     }
     
-    void TrackballNavigationEventListener::setCenter(const tgt::vec3& center) {
+    void TrackballNavigationEventListener::setCenter(const cgt::vec3& center) {
         _trackball->setCenter(center);
     }
     
-    void TrackballNavigationEventListener::setSceneBounds(const tgt::Bounds& bounds) {
+    void TrackballNavigationEventListener::setSceneBounds(const cgt::Bounds& bounds) {
         _sceneBounds = bounds;
         _trackball->setSceneBounds(bounds);
     }
 
-    const tgt::Bounds& TrackballNavigationEventListener::getSceneBounds() const {
+    const cgt::Bounds& TrackballNavigationEventListener::getSceneBounds() const {
         return _trackball->getSceneBounds();
     }
 
-    tgt::Trackball* TrackballNavigationEventListener::getTrackball() {
+    cgt::Trackball* TrackballNavigationEventListener::getTrackball() {
         return _trackball;
     }
 
     void TrackballNavigationEventListener::addLqModeProcessor(VisualizationProcessor* vp) {
-        tgtAssert(vp != 0, "Pointer to processor must not be 0.");
-        tgtAssert(std::find(_lqModeProcessors.begin(), _lqModeProcessors.end(), vp) == _lqModeProcessors.end(), "Processor already in list of LQ mode processors.");
+        cgtAssert(vp != 0, "Pointer to processor must not be 0.");
+        cgtAssert(std::find(_lqModeProcessors.begin(), _lqModeProcessors.end(), vp) == _lqModeProcessors.end(), "Processor already in list of LQ mode processors.");
 
         _lqModeProcessors.push_back(vp);
     }
@@ -156,7 +156,7 @@ namespace campvis {
     }
 
     void TrackballNavigationEventListener::onViewportSizePropChanged(const AbstractProperty* p) {
-        tgtAssert(p == _viewportSizeProp, "Signal from unexpected property! Expected p == _viewportSizeProp.");
+        cgtAssert(p == _viewportSizeProp, "Signal from unexpected property! Expected p == _viewportSizeProp.");
 
         _trackball->setViewprtSize(_viewportSizeProp->getValue());
         float ratio = static_cast<float>(_viewportSizeProp->getValue().x) / static_cast<float>(_viewportSizeProp->getValue().y);
@@ -172,7 +172,7 @@ namespace campvis {
     void TrackballNavigationEventListener::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
         _viewportSizeProp->s_changed.disconnect(this);
 
-        tgtAssert(viewportSizeProp != nullptr, "The property must not be 0.");
+        cgtAssert(viewportSizeProp != nullptr, "The property must not be 0.");
         _viewportSizeProp = viewportSizeProp;
         onViewportSizePropChanged(_viewportSizeProp);
         _viewportSizeProp->s_changed.connect(this, &TrackballNavigationEventListener::onViewportSizePropChanged);

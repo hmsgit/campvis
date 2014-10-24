@@ -27,11 +27,11 @@
 
 #include "sigslot/sigslot.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/runnable.h"
-#include "tgt/vector.h"
-#include "tgt/event/eventhandler.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/logmanager.h"
+#include "cgt/runnable.h"
+#include "cgt/vector.h"
+#include "cgt/event/eventhandler.h"
+#include "cgt/event/eventlistener.h"
 
 #include <tbb/spin_mutex.h>
 #include <tbb/mutex.h>
@@ -45,7 +45,7 @@
 #include <map>
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class GLCanvas;
 }
 
@@ -55,7 +55,7 @@ namespace campvis {
     /**
      * Abstract base class for CAMPVis Pipelines.
      */
-    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public tgt::Runnable, public tgt::EventHandler, public tgt::EventListener {
+    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public cgt::Runnable, public cgt::EventHandler, public cgt::EventListener {
     public:
         /**
          * Creates a AbstractPipeline.
@@ -113,7 +113,7 @@ namespace campvis {
          * Default behaviour is to execute all assigned EventHandlers, may be overwritten by subclasses.
          * \param e     event parameters
          */
-        virtual void onEvent(tgt::Event* e);
+        virtual void onEvent(cgt::Event* e);
 
         /**
          * Entrance point for the pipeline thread.
@@ -164,19 +164,19 @@ namespace campvis {
          * Sets the Canvas hosting the OpenGL context for this pipeline.
          * \param   canvas  Canvas hosting the OpenGL context for this pipeline
          */
-        void setCanvas(tgt::GLCanvas* canvas);
+        void setCanvas(cgt::GLCanvas* canvas);
 
         /**
          * Sets the size of the render target
          * \param size  New viewport dimensions
          */
-        void setRenderTargetSize(const tgt::ivec2& size);
+        void setRenderTargetSize(const cgt::ivec2& size);
 
         /**
          * Returns the viewport size of the target canvas
          * \return _canvasSize
          */
-        const tgt::ivec2& getRenderTargetSize() const;
+        const cgt::ivec2& getRenderTargetSize() const;
 
         /**
          * Returns the ID of the render target image to be rendered to the canvas
@@ -219,7 +219,7 @@ namespace campvis {
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
 
-        tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
+        cgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
         IVec2Property _canvasSize;                          ///< original canvas size
         bool _ignoreCanvasSizeUpdate;
 

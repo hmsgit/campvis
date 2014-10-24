@@ -1,4 +1,4 @@
-require("tgt")
+require("cgt")
 require("base")
 require("cvio")
 require("vis")
@@ -42,14 +42,14 @@ function pipeline:init()
     end
     self.image_reader.s_validated:connect(callback)
 
-    local geometry1 = campvis.TFGeometry1D_createQuad(tgt.vec2(0.12, 0.15), tgt.col4(85, 0, 0, 128),
-                                                      tgt.vec4(255, 0, 0, 128))
-    local geometry2 = campvis.TFGeometry1D_createQuad(tgt.vec2(.19, .28), tgt.col4(89, 89, 89, 155),
-                                                      tgt.vec4(89, 89, 89, 155))
-    local geometry3 = campvis.TFGeometry1D_createQuad(tgt.vec2(.41, .51), tgt.col4(170, 170, 128, 64),
-                                                      tgt.vec4(192, 192, 128, 64))
+    local geometry1 = campvis.TFGeometry1D_createQuad(cgt.vec2(0.12, 0.15), cgt.col4(85, 0, 0, 128),
+                                                      cgt.vec4(255, 0, 0, 128))
+    local geometry2 = campvis.TFGeometry1D_createQuad(cgt.vec2(.19, .28), cgt.col4(89, 89, 89, 155),
+                                                      cgt.vec4(89, 89, 89, 155))
+    local geometry3 = campvis.TFGeometry1D_createQuad(cgt.vec2(.41, .51), cgt.col4(170, 170, 128, 64),
+                                                      cgt.vec4(192, 192, 128, 64))
 
-    local dvrTF = campvis.Geometry1DTransferFunction(128, tgt.vec2(0, 0.05))
+    local dvrTF = campvis.Geometry1DTransferFunction(128, cgt.vec2(0, 0.05))
     dvrTF:addGeometry(geometry1)
     dvrTF:addGeometry(geometry2)
     dvrTF:addGeometry(geometry3)

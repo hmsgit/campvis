@@ -56,7 +56,7 @@ namespace campvis {
         /// \see AbstractPipeline::getId()
         static const std::string getId() { return "AdvancedUsVis"; };
 
-        virtual void keyEvent(tgt::KeyEvent* e);
+        virtual void keyEvent(cgt::KeyEvent* e);
 
     protected:
         MhdImageReader _usReader;

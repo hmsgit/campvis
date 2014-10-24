@@ -24,7 +24,7 @@
 
 #include "columbia1.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
@@ -100,7 +100,7 @@ namespace campvis {
         _renderTargetID.setValue("composited");
 
         _imageReader.p_url.setValue("D:/Medical Data/Columbia/inputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_diffused_crop_00.ltf");
-        _imageReader.p_size.setValue(tgt::ivec3(224, 176, 208));
+        _imageReader.p_size.setValue(cgt::ivec3(224, 176, 208));
         _imageReader.p_numChannels.setValue(1);
         _imageReader.p_baseType.selectById("uint8");
         _imageReader.p_targetImageID.setValue("image");
@@ -110,7 +110,7 @@ namespace campvis {
         _imageSplitter.p_outputID.addSharedProperty(&_vr.p_inputVolume);
 
         _flowReader.p_url.setValue("D:/Medical Data/Columbia/outputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_crop_flow_field_00_00.ltf");
-        _flowReader.p_size.setValue(tgt::ivec3(224, 176, 208));
+        _flowReader.p_size.setValue(cgt::ivec3(224, 176, 208));
         _flowReader.p_numChannels.setValue(3);
         _flowReader.p_baseType.selectById("float");
         _flowReader.p_targetImageID.setValue("flow");
@@ -125,9 +125,9 @@ namespace campvis {
         _vtkReader.p_url.setValue("D:/Medical Data/Columbia/inputs/Myocardium Meshes/FullVolumeLV_3D_25Hz_ED_Mesh_Endo.vtk");
         _vtkReader.p_targetImageID.addSharedProperty(&_gr.p_geometryID);
 
-        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, 1.f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.1f, .125f), cgt::col4(255, 0, 0, 32), cgt::col4(255, 0, 0, 32)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.4f, .5f), cgt::col4(0, 255, 0, 128), cgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         _vr.p_outputImage.addSharedProperty(&_compositor.p_secondImageId);
 

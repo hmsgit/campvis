@@ -31,7 +31,7 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -91,7 +91,7 @@ namespace campvis {
          */
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
         GlReduction* _glReduction;
 
         static const std::string loggerCat_;

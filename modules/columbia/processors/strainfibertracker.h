@@ -82,7 +82,7 @@ namespace campvis {
          * \param   strainData  Input strain data
          * \return  vector of seed points in voxel coordinates
          **/
-        std::vector<tgt::vec3> performUniformSeeding(const ImageRepresentationLocal& strainData) const;
+        std::vector<cgt::vec3> performUniformSeeding(const ImageRepresentationLocal& strainData) const;
 
         /**
          * Retrieves a vec3 from \a vol using trilinear interpolation.
@@ -90,7 +90,7 @@ namespace campvis {
          * \param   vol             volume to get data from
          * \param   position        voxel position
          **/
-        inline tgt::vec3 getVec3FloatLinear(const ImageRepresentationLocal& strainData, const tgt::vec3& position) const;
+        inline cgt::vec3 getVec3FloatLinear(const ImageRepresentationLocal& strainData, const cgt::vec3& position) const;
 
         static const std::string loggerCat_;
     };

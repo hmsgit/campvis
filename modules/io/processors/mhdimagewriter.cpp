@@ -26,7 +26,7 @@
 
 #include <fstream>
 
-#include "tgt/filesystem.h"
+#include "cgt/filesystem.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationdisk.h"
@@ -61,7 +61,7 @@ namespace campvis {
         if (image != 0) {
             if (image->getDimensionality() > 1 && image->getDimensionality() < 4) {
                 std::string mhdName = p_fileName.getValue();
-                std::string rawName = tgt::FileSystem::fullBaseName(mhdName) + ".raw";
+                std::string rawName = cgt::FileSystem::fullBaseName(mhdName) + ".raw";
                 WeaklyTypedPointer wtp = image->getWeaklyTypedPointer();
                 const ImageMappingInformation& imi = image->getParent()->getMappingInformation();
 
@@ -69,7 +69,7 @@ namespace campvis {
                 std::fstream rawStream(rawName.c_str(), std::ios::out | std::ios::binary);
 
                 if (!mhdStream.is_open() || !rawStream.is_open() || mhdStream.bad() || rawStream.bad())
-                    throw tgt::IOException();
+                    throw cgt::IOException();
 
                 // write MHD file
                 mhdStream << "ObjectType = Image\n";
@@ -113,13 +113,13 @@ namespace campvis {
                         mhdStream << "ElementType = MET_FLOAT\n";
                         break;
                     default:
-                        tgtAssert(false, "Should not reach this - wrong base data type!");
+                        cgtAssert(false, "Should not reach this - wrong base data type!");
                         break;
                 }
 
                 mhdStream << "ElementNumberOfChannels = " << image->getParent()->getNumChannels() << "\n";
                 mhdStream << "ElementByteOrderMSB = False\n";
-                mhdStream << "ElementDataFile = " << tgt::FileSystem::fileName(rawName) << "\n";
+                mhdStream << "ElementDataFile = " << cgt::FileSystem::fileName(rawName) << "\n";
 
                 // write raw file
                 const char* rawData = static_cast<const char*>(wtp._pointer);
@@ -127,7 +127,7 @@ namespace campvis {
                 rawStream.write(rawData, numBytes);
 
                 if (mhdStream.bad() || rawStream.bad())
-                    throw tgt::IOException();
+                    throw cgt::IOException();
 
                 mhdStream.close();
                 rawStream.close();

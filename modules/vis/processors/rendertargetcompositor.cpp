@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "rendertargetcompositor.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/renderdata.h"
 
@@ -100,7 +100,7 @@ namespace campvis {
             createAndAttachDepthTexture();
 
             _shader->activate();
-            tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
+            cgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 
             if (compositingMode != CompositingModeSecond)
                 firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
@@ -124,7 +124,7 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
 
             _shader->deactivate();
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
 
             data.addData(p_targetImageId.getValue(), new RenderData(_fbo));

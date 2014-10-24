@@ -25,15 +25,15 @@
 #ifndef IMAGEREPRESENTATIONGL_H__
 #define IMAGEREPRESENTATIONGL_H__
 
-#include "tgt/tgt_gl.h"
-#include "tgt/texture.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/texture.h"
 
 #include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/tools/weaklytypedpointer.h"
 
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
     class TextureUnit;
 }
@@ -47,7 +47,7 @@ namespace campvis {
     class CAMPVIS_CORE_API ImageRepresentationGL : public GenericAbstractImageRepresentation<ImageRepresentationGL> {
     public:
         /**
-         * Creates a new ImageRepresentationGL representation from a tgt::Texture and automatically
+         * Creates a new ImageRepresentationGL representation from a cgt::Texture and automatically
          * adds it to \a parent which will take ownerwhip.
          *
          * \note    You do \b not own the returned pointer.
@@ -56,10 +56,10 @@ namespace campvis {
          * \param   texture OpenGL texture to use, must not be 0, ImageRepresentationGL will take ownership of this texture.
          * \return  A pointer to the newly created ImageRepresentationGL, you do \b not own this pointer!
          */
-        static ImageRepresentationGL* create(ImageData* parent, tgt::Texture* texture);        
+        static ImageRepresentationGL* create(ImageData* parent, cgt::Texture* texture);        
 
         /**
-         * Creates a new ImageRepresentationGL representation from a tgt::Texture and automatically
+         * Creates a new ImageRepresentationGL representation from a cgt::Texture and automatically
          * adds it to \a parent which will take ownerwhip.
          *
          * \note    You do \b not own the returned pointer.
@@ -95,8 +95,8 @@ namespace campvis {
          * \param   texParamsUniform    Name for texture parameters struct uniform.
          */
         void bind(
-            tgt::Shader* shader,
-            const tgt::TextureUnit& texUnit, 
+            cgt::Shader* shader,
+            const cgt::TextureUnit& texUnit, 
             const std::string& texUniform = "_texture",
             const std::string& texParamsUniform = "_textureParams") const;
 
@@ -116,7 +116,7 @@ namespace campvis {
          * Gets the OpenGL texture.
          * \return  _texture
          */
-        const tgt::Texture* getTexture() const;
+        const cgt::Texture* getTexture() const;
 
 
         /**
@@ -149,12 +149,12 @@ namespace campvis {
 
     protected:
         /**
-         * Creates a new ImageRepresentationGL representation from a tgt::Texture.
+         * Creates a new ImageRepresentationGL representation from a cgt::Texture.
          * 
          * \param   parent      Image this representation represents, must not be 0.
          * \param   texture     OpenGL texture to use, must not be 0, ImageRepresentationGL will take ownership of this texture.
          */
-        ImageRepresentationGL(ImageData* parent, tgt::Texture* texture);
+        ImageRepresentationGL(ImageData* parent, cgt::Texture* texture);
 
         /**
          * Creates a new ImageRepresentationGL representation.
@@ -174,7 +174,7 @@ namespace campvis {
          * Activates the texture unit \a texUnit and binds the texture.
          * \param   texUnit     Texture unit to activate
          */
-        void bind(const tgt::TextureUnit& texUnit) const;
+        void bind(const cgt::TextureUnit& texUnit) const;
 
         /**
          * Creates the OpenGL texture from the given pointer \a wtp.
@@ -182,9 +182,9 @@ namespace campvis {
          */
         void createTexture(const WeaklyTypedPointer& wtp);
 
-        void setupAndUploadTexture(tgt::Texture* texture, bool isInteger, bool isSigned);
+        void setupAndUploadTexture(cgt::Texture* texture, bool isInteger, bool isSigned);
 
-        tgt::Texture* _texture;             //< OpenGL texture
+        cgt::Texture* _texture;             //< OpenGL texture
 
         static const std::string loggerCat_;
     };

@@ -30,7 +30,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -87,7 +87,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

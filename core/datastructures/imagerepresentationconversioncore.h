@@ -25,7 +25,7 @@
 #ifndef IMAGEREPRESENTATIONCONVERSIONCORE_H__
 #define IMAGEREPRESENTATIONCONVERSIONCORE_H__
 
-#include "tgt/opengljobprocessor.h"
+#include "cgt/opengljobprocessor.h"
 
 #include "core/coreapi.h"
 
@@ -96,7 +96,7 @@ namespace campvis {
 
             else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
                 // converting from GL representation
-                tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+                cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
 
                 if (tester->getTexture()->getDataType() != TypeTraits<BASETYPE, NUMCHANNELS>::glDataType)
                     LDEBUGC("CAMPVis.core.datastructures.GenericLocalConversion", "Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");

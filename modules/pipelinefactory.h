@@ -25,8 +25,8 @@
 #ifndef PIPELINEFACTORY_H__
 #define PIPELINEFACTORY_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/singleton.h"
+#include "cgt/logmanager.h"
+#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
@@ -77,7 +77,7 @@ namespace campvis {
                 _pipelineMap.insert(it, std::make_pair(T::getId(), callee));
             }
             else {
-                tgtAssert(false, "Registered two pipelines with the same ID.");
+                cgtAssert(false, "Registered two pipelines with the same ID.");
             }
             
             return _pipelineMap.size();

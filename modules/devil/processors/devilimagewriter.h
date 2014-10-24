@@ -35,7 +35,7 @@
 #include "core/properties/stringproperty.h"
 #include "core/tools/weaklytypedpointer.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
     class TextureReaderDevil;
 }
@@ -76,7 +76,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        void writeIlImage(const WeaklyTypedPointer& wtp, const tgt::ivec2& size, const std::string& filename) const;
+        void writeIlImage(const WeaklyTypedPointer& wtp, const cgt::ivec2& size, const std::string& filename) const;
 
         static const std::string loggerCat_;
     };

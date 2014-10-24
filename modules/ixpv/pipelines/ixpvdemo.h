@@ -66,7 +66,7 @@ namespace campvis {
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "IxpvDemo"; };
 
-        //virtual void keyEvent(tgt::KeyEvent* e);
+        //virtual void keyEvent(cgt::KeyEvent* e);
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.

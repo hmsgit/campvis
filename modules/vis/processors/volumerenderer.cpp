@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "volumerenderer.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -38,7 +38,7 @@ namespace campvis {
     VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ)
-        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_camera("Camera", "Camera", cgt::Camera())
         , p_outputImage("OutputImage", "Output Image", "vr.output", DataNameProperty::WRITE)
         , p_profileRaycaster("ProfileRaycaster", "Profile Raycaster's Execution Time", false)
         , _timerQueryRaycaster(0)

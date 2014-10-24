@@ -24,9 +24,9 @@
 
 #include "tfgeometry1d.h"
 
-#include "tgt/assert.h"
-#include "tgt/texture.h"
-#include "tgt/tgt_math.h"
+#include "cgt/assert.h"
+#include "cgt/texture.h"
+#include "cgt/cgt_math.h"
 
 #include "core/datastructures/facegeometry.h"
 
@@ -83,23 +83,23 @@ namespace campvis {
             return;
 
         // TODO: regenerating these buffers each time is slow as hell
-        std::vector<tgt::vec3> vertices;
-        std::vector<tgt::vec4> colors;
+        std::vector<cgt::vec3> vertices;
+        std::vector<cgt::vec4> colors;
 
         for (std::vector<KeyPoint>::const_iterator a = _keyPoints.begin(); a != _keyPoints.end(); ++a) {
-            vertices.push_back(tgt::vec3(a->_position, 0.f, 0.f));
-            vertices.push_back(tgt::vec3(a->_position, 1.f, 0.f));
+            vertices.push_back(cgt::vec3(a->_position, 0.f, 0.f));
+            vertices.push_back(cgt::vec3(a->_position, 1.f, 0.f));
 
-            colors.push_back(tgt::vec4(a->_color) / 255.f);
-            colors.push_back(tgt::vec4(a->_color) / 255.f);
+            colors.push_back(cgt::vec4(a->_color) / 255.f);
+            colors.push_back(cgt::vec4(a->_color) / 255.f);
         }
 
-        FaceGeometry fg(vertices, std::vector<tgt::vec3>(), colors);
+        FaceGeometry fg(vertices, std::vector<cgt::vec3>(), colors);
         fg.render(GL_TRIANGLE_STRIP);
     }
 
-    TFGeometry1D* TFGeometry1D::createQuad(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor) {
-        tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
+    TFGeometry1D* TFGeometry1D::createQuad(const cgt::vec2& interval, const cgt::col4& leftColor, const cgt::col4& rightColor) {
+        cgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds");
 
         std::vector<KeyPoint> keyPoints;
         keyPoints.push_back(KeyPoint(interval.x, leftColor));
@@ -107,33 +107,33 @@ namespace campvis {
         return new TFGeometry1D(keyPoints);
     }
 
-    TFGeometry1D* TFGeometry1D::crateRamp(const tgt::vec2& interval, const tgt::col4& color) {
-        return createQuad(interval, tgt::col4(color.xyz(), 0), tgt::col4(color.xyz(), 255));
+    TFGeometry1D* TFGeometry1D::crateRamp(const cgt::vec2& interval, const cgt::col4& color) {
+        return createQuad(interval, cgt::col4(color.xyz(), 0), cgt::col4(color.xyz(), 255));
     }
 
-    TFGeometry1D* TFGeometry1D::createDivergingColorMap(const tgt::vec2& interval, const tgt::col4& leftColor, const tgt::col4& rightColor, float bias /*= 0.5f*/) {
-        tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds, must be in [0, 1].");
-        tgtAssert(bias > 0.f && bias < 1.f, "Bias out of bounds, must be in (0, 1).");
+    TFGeometry1D* TFGeometry1D::createDivergingColorMap(const cgt::vec2& interval, const cgt::col4& leftColor, const cgt::col4& rightColor, float bias /*= 0.5f*/) {
+        cgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds, must be in [0, 1].");
+        cgtAssert(bias > 0.f && bias < 1.f, "Bias out of bounds, must be in (0, 1).");
 
         std::vector<KeyPoint> keyPoints;
         keyPoints.push_back(KeyPoint(interval.x, leftColor));
-        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * bias, tgt::col4(255, 255, 255, 255)));
+        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * bias, cgt::col4(255, 255, 255, 255)));
         keyPoints.push_back(KeyPoint(interval.y, rightColor));
         return new TFGeometry1D(keyPoints);
     }
 
-    TFGeometry1D* TFGeometry1D::createColdHotColorMap(const tgt::vec2& interval /*= tgt::vec2(0.f, 1.f)*/) {
-        return createDivergingColorMap(interval, tgt::col4(0, 0, 255, 255), tgt::col4(255, 0, 0, 255), 0.5f);
+    TFGeometry1D* TFGeometry1D::createColdHotColorMap(const cgt::vec2& interval /*= cgt::vec2(0.f, 1.f)*/) {
+        return createDivergingColorMap(interval, cgt::col4(0, 0, 255, 255), cgt::col4(255, 0, 0, 255), 0.5f);
     }
 
-    TFGeometry1D* TFGeometry1D::createHeatedBodyColorMap(const tgt::vec2& interval /*= tgt::vec2(0.f, 1.f)*/) {
-        tgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds, must be in [0, 1].");
+    TFGeometry1D* TFGeometry1D::createHeatedBodyColorMap(const cgt::vec2& interval /*= cgt::vec2(0.f, 1.f)*/) {
+        cgtAssert(interval.x >= 0.f && interval.y <= 1.f, "Interval out of bounds, must be in [0, 1].");
 
         std::vector<KeyPoint> keyPoints;
-        keyPoints.push_back(KeyPoint(interval.x, tgt::col4(0, 0, 0, 255)));
-        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * 0.35f, tgt::col4(224, 0, 0, 255)));
-        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * 0.85f, tgt::col4(255, 255, 0, 255)));
-        keyPoints.push_back(KeyPoint(interval.y, tgt::col4(255, 255, 255, 255)));
+        keyPoints.push_back(KeyPoint(interval.x, cgt::col4(0, 0, 0, 255)));
+        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * 0.35f, cgt::col4(224, 0, 0, 255)));
+        keyPoints.push_back(KeyPoint(interval.x + (interval.y - interval.x) * 0.85f, cgt::col4(255, 255, 0, 255)));
+        keyPoints.push_back(KeyPoint(interval.y, cgt::col4(255, 255, 255, 255)));
         return new TFGeometry1D(keyPoints);
     }
 

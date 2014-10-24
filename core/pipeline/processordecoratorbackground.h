@@ -38,7 +38,7 @@ namespace campvis {
     protected:
         void addProperties(HasPropertyCollection* propCollection);
 
-        virtual void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
+        virtual void renderProlog(const DataContainer& dataContainer, cgt::Shader* shader);
 
         Vec4Property _backgroundColor1;
         Vec4Property _backgroundColor2;

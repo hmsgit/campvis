@@ -24,23 +24,23 @@
 
 #include "tfgeometry2d.h"
 
-#include "tgt/assert.h"
-#include "tgt/texture.h"
-#include "tgt/tgt_math.h"
+#include "cgt/assert.h"
+#include "cgt/texture.h"
+#include "cgt/cgt_math.h"
 
 #include <algorithm>
 
 namespace {
-    tgt::col4 toCol(const tgt::vec4& c) {
-        return tgt::col4(
+    cgt::col4 toCol(const cgt::vec4& c) {
+        return cgt::col4(
             static_cast<uint8_t>(255 * c.r), 
             static_cast<uint8_t>(255 * c.g), 
             static_cast<uint8_t>(255 * c.b), 
             static_cast<uint8_t>(255 * c.a));
     }
 
-    tgt::vec4 toVec(const tgt::col4& c) {
-        return tgt::vec4(
+    cgt::vec4 toVec(const cgt::col4& c) {
+        return cgt::vec4(
             static_cast<float>(c.r) / 255.f, 
             static_cast<float>(c.g) / 255.f, 
             static_cast<float>(c.b) / 255.f, 
@@ -52,7 +52,7 @@ namespace campvis {
     
     TFGeometry2D::TFGeometry2D(const std::vector<KeyPoint>& keyPoints)
         : _keyPoints(keyPoints)
-        , _center(tgt::vec2::zero, tgt::col4(255))
+        , _center(cgt::vec2::zero, cgt::col4(255))
     {
         computeCenterAndSortKeyPoints();
     }
@@ -84,21 +84,21 @@ namespace campvis {
         glEnd();
     }
 
-    TFGeometry2D* TFGeometry2D::createQuad(const tgt::vec2& ll, const tgt::vec2& ur, const tgt::col4& color) {
-        tgtAssert(tgt::hand(tgt::greaterThanEqual(ll, tgt::vec2::zero)) && tgt::hand(tgt::lessThanEqual(ur, tgt::vec2(1.f))), "Interval out of bounds");
-        tgtAssert(tgt::hand(tgt::lessThan(ll, ur)), "Lower left corner coordinates must be smaller than the upper right ones!");
+    TFGeometry2D* TFGeometry2D::createQuad(const cgt::vec2& ll, const cgt::vec2& ur, const cgt::col4& color) {
+        cgtAssert(cgt::hand(cgt::greaterThanEqual(ll, cgt::vec2::zero)) && cgt::hand(cgt::lessThanEqual(ur, cgt::vec2(1.f))), "Interval out of bounds");
+        cgtAssert(cgt::hand(cgt::lessThan(ll, ur)), "Lower left corner coordinates must be smaller than the upper right ones!");
 
         std::vector<KeyPoint> keyPoints;
         keyPoints.push_back(KeyPoint(ll, color));
-        keyPoints.push_back(KeyPoint(tgt::vec2(ur.x, ll.y), color));
+        keyPoints.push_back(KeyPoint(cgt::vec2(ur.x, ll.y), color));
         keyPoints.push_back(KeyPoint(ur, color));
-        keyPoints.push_back(KeyPoint(tgt::vec2(ll.x, ur.y), color));
+        keyPoints.push_back(KeyPoint(cgt::vec2(ll.x, ur.y), color));
         return new TFGeometry2D(keyPoints);
     }
 
     namespace {
         struct KeyPointSorter {
-            KeyPointSorter(const tgt::vec2& center)
+            KeyPointSorter(const cgt::vec2& center)
                 : _center(center)
             {};
 
@@ -108,7 +108,7 @@ namespace campvis {
                 return angleLeft < angleRight;
             };
 
-            tgt::vec2 _center;
+            cgt::vec2 _center;
         };
     }
 
@@ -116,8 +116,8 @@ namespace campvis {
         if (_keyPoints.empty())
             return;
 
-        tgt::vec2 cPos(0.f);
-        tgt::vec4 cCol(0.f);
+        cgt::vec2 cPos(0.f);
+        cgt::vec4 cCol(0.f);
         for (std::vector<KeyPoint>::const_iterator it = _keyPoints.begin(); it != _keyPoints.end(); ++it) {
             cPos += it->_position;
             cCol += toVec(it->_color);

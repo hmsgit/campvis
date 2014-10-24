@@ -24,8 +24,8 @@
 
 #include "imagerepresentationconversioncore.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
 
 namespace campvis {
 
@@ -42,7 +42,7 @@ namespace campvis {
                 return nullptr;
             }
 
-            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
 
             switch (wtp._baseType) {
@@ -68,14 +68,14 @@ namespace campvis {
                 delete [] static_cast<float*>(wtp._pointer);
                 break;
             default:
-                tgtAssert(false, "Should not reach this - wrong base data type!");
+                cgtAssert(false, "Should not reach this - wrong base data type!");
                 break;
             }
 
             return toReturn;
         }
         else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
-            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
@@ -93,7 +93,7 @@ namespace campvis {
             return ImageRepresentationLocal::create(tester->getParent(), tester->getImageData());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
-            tgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
             if (wtp._pointer != nullptr)
                 return ImageRepresentationLocal::create(source->getParent(), wtp);

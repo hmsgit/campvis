@@ -64,7 +64,7 @@ namespace campvis {
         virtual void onProcessorValidated(AbstractProcessor *processor);
 
         OpenIGTLinkClient _igtlClient;
-		MatrixProcessor _matrixProcessor;
+        MatrixProcessor _matrixProcessor;
     };
 
 }

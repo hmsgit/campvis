@@ -33,7 +33,7 @@
 
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -88,7 +88,7 @@ namespace campvis {
     private:
         void onHistogramHeaderChanged();
 
-        tgt::Shader* _clusterShader;
+        cgt::Shader* _clusterShader;
 
         static const std::string loggerCat_;
     };

@@ -25,8 +25,8 @@
 #ifndef endianhelper_h__
 #define endianhelper_h__
 
-#include "tgt/logmanager.h"
-#include "tgt/types.h"
+#include "cgt/logmanager.h"
+#include "cgt/types.h"
 
 #include "core/coreapi.h"
 

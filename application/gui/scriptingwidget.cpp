@@ -37,7 +37,7 @@ namespace campvis {
         , _currentPosition(-1)
     {
         setupGUI();
-        addCat("", true, tgt::LuaInfo);
+        addCat("", true, cgt::LuaInfo);
     }
 
     ScriptingWidget::~ScriptingWidget() {
@@ -127,8 +127,8 @@ namespace campvis {
         return QObject::eventFilter(obj, event);
     }
 
-    void ScriptingWidget::logFiltered(const std::string &cat, tgt::LogLevel level, const std::string& msg, const std::string& extendedInfo/*=""*/) {
-        if (level == tgt::LuaInfo || level == tgt::LuaError) {
+    void ScriptingWidget::logFiltered(const std::string &cat, cgt::LogLevel level, const std::string& msg, const std::string& extendedInfo/*=""*/) {
+        if (level == cgt::LuaInfo || level == cgt::LuaError) {
             appendMessage(QString::fromStdString(msg));
         }
     }

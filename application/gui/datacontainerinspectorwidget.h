@@ -26,7 +26,7 @@
 #define DATACONTAINERINSPECTORWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/painter.h"
+#include "cgt/painter.h"
 #include "tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"
@@ -44,7 +44,7 @@
 class QModelIndex;
 class QItemSelection;
 
-namespace tgt {
+namespace cgt {
     class Texture;
     class TextureUnit;
     class Shader;
@@ -129,7 +129,7 @@ namespace campvis {
         void onBtnLoadFileClicked();
 
         /// Slot being called when the color under the mouse has changed
-        void onColorChanged(const tgt::vec4& color);
+        void onColorChanged(const cgt::vec4& color);
         /// Slot being called when the depth under the mouse has changed
         void onDepthChanged(float depth);
 

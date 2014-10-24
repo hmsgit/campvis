@@ -25,8 +25,6 @@
 #ifndef CAMPVIS_COREAPI_H__
 #define CAMPVIS_COREAPI_H__
 
-#include "sigslot/sigslot.h"
-
 #ifdef CAMPVIS_DYNAMIC_LIBS
     #ifdef CAMPVIS_CORE_BUILD_DLL
         // building library -> export symbols

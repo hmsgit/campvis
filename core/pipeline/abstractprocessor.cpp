@@ -23,7 +23,7 @@
 // ================================================================================================
 
 #include "abstractprocessor.h"
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include "core/properties/abstractproperty.h"
 
 #include <ext/threading.h>
@@ -63,7 +63,7 @@ namespace campvis {
     }
 
     void AbstractProcessor::unlockProcessor() {
-        tgtAssert(_locked == true, "Called AbstractProcessor::unlockProcessor() on unlocked processor!");
+        cgtAssert(_locked == true, "Called AbstractProcessor::unlockProcessor() on unlocked processor!");
         unlockAllProperties();
         int summed = VALID;
         int il;
@@ -140,7 +140,7 @@ namespace campvis {
 
         // use a scoped lock for exception safety
         AbstractProcessor::ScopedLock lock(this);
-        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
+        cgtAssert(_locked == true, "Processor not locked, this should not happen!");
 
         if (hasInvalidResult()) {
             updateResult(data);

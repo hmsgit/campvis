@@ -158,22 +158,22 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
     LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11")
 ENDIF()
 
-# tgt configuration
-LIST(APPEND CampvisGlobalDefinitions "-DTGT_WITHOUT_DEFINES") # don't use tgt's build system
+# cgt configuration
+LIST(APPEND CampvisGlobalDefinitions "-DCGT_WITHOUT_DEFINES") # don't use cgt's build system
 IF(WIN32)
-    SET(TGT_WITH_WMI TRUE)  #< enable Windows Management Instrumentation for hardware detection
+    SET(CGT_WITH_WMI TRUE)  #< enable Windows Management Instrumentation for hardware detection
 ENDIF()
 IF(CAMPVIS_DEBUG)
-#    SET_PROPERTY(GLOBAL PROPERTY COMPILE_DEFINITIONS_DEBUG TGT_DEBUG CAMPVIS_DEBUG)
-    LIST(APPEND CampvisGlobalDefinitions -DTGT_DEBUG -DCAMPVIS_DEBUG)
-#    set_property(GLOBAL PROPERTY COMPILE_DEFINITIONS_DEBUG "TGT_DEBUG CAMPVIS_DEBUG")
+#    SET_PROPERTY(GLOBAL PROPERTY COMPILE_DEFINITIONS_DEBUG CGT_DEBUG CAMPVIS_DEBUG)
+    LIST(APPEND CampvisGlobalDefinitions -DCGT_DEBUG -DCAMPVIS_DEBUG)
+#    set_property(GLOBAL PROPERTY COMPILE_DEFINITIONS_DEBUG "CGT_DEBUG CAMPVIS_DEBUG")
 ENDIF()
  
 # minimum Qt version
 IF(CAMPVIS_BUILD_APPLICATION)
     FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
     INCLUDE(${QT_USE_FILE})
-    SET(TGT_WITH_QT true)
+    SET(CGT_WITH_QT true)
     SET(CampvisRequiredQtVersion "4.8")
 ENDIF(CAMPVIS_BUILD_APPLICATION)
 

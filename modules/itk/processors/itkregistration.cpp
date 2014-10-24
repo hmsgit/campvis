@@ -24,8 +24,8 @@
 
 #include "itkregistration.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
 
 #include "modules/itk/core/genericimagerepresentationitk.h"
 
@@ -142,7 +142,7 @@
     }
 
 #define DISPATCH_ITK_REGISTRATION_BRD(MA_WTPF, MA_WTPM, MA_baseType, MA_returnType, MA_dimensionality, MA_registrationType, MA_transformationType, MD_registrationBody) \
-    tgtAssert(MA_WTPF._numChannels == 1, "ItkRegistration only supports single-channel images.") \
+    cgtAssert(MA_WTPF._numChannels == 1, "ItkRegistration only supports single-channel images.") \
     PERFORM_ITK_REGISTRATION(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_registrationType, MA_transformationType, MD_registrationBody)
 
 #define DISPATCH_ITK_REGISTRATION_D(MA_WTPF, MA_WTPM, MA_dimensionality, MA_registrationType, MA_transformationType, MD_registrationBody) \
@@ -169,7 +169,7 @@
     DISPATCH_ITK_REGISTRATION_BRD(MA_WTPF, MA_WTPM, float, float, MA_dimensionality, MA_registrationType, MA_transformationType, MD_registrationBody) \
     break; \
     default: \
-    tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+    cgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
 /**
@@ -187,7 +187,7 @@
     WeaklyTypedPointer wtpm = MA_localRepMoving->getWeaklyTypedPointer(); \
     switch (MA_localRepFixed->getDimensionality()) { \
     case 3: DISPATCH_ITK_REGISTRATION_D(wtpf, wtpm, 3, MA_registrationType, MA_transformationType, MD_registrationBody) break; \
-    default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+    default: cgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -249,7 +249,7 @@ namespace campvis {
                         );
                     }
                     else {
-                        tgtAssert(false, "Unsupported dimensionality!");
+                        cgtAssert(false, "Unsupported dimensionality!");
                     }
                 }
 

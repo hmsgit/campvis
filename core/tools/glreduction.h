@@ -25,16 +25,16 @@
 #ifndef GLREDUCTION_H__
 #define GLREDUCTION_H__
 
-#include "tgt/exception.h"
-#include "tgt/tgt_gl.h"
-#include "tgt/vector.h"
+#include "cgt/exception.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 
 #include <string>
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class FramebufferObject;
     class Shader;
     class Texture;
@@ -86,7 +86,7 @@ namespace campvis {
          * \param   image   Pointer to a texture to perform reduction on, must be two-dimensional.
          * \return  A vector of floats containing the reduction results for each channel of the input texture.
          */
-        std::vector<float> reduce(const tgt::Texture* texture);
+        std::vector<float> reduce(const cgt::Texture* texture);
 
 
     private:
@@ -99,10 +99,10 @@ namespace campvis {
 
 
         ReductionOperator _reductionOperator;   ///< Operation to be performed by reduction
-        tgt::Shader* _shader1d;                 ///< OpenGL shader performing 1D reduction
-        tgt::Shader* _shader2d;                 ///< OpenGL shader performing 2D reduction
-        tgt::Shader* _shader3d;                 ///< OpenGL shader performing 3D reduction
-        tgt::FramebufferObject* _fbo;           ///< FBO performing the reduction
+        cgt::Shader* _shader1d;                 ///< OpenGL shader performing 1D reduction
+        cgt::Shader* _shader2d;                 ///< OpenGL shader performing 2D reduction
+        cgt::Shader* _shader3d;                 ///< OpenGL shader performing 3D reduction
+        cgt::FramebufferObject* _fbo;           ///< FBO performing the reduction
 
         const static std::string loggerCat_;
     };

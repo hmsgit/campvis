@@ -25,9 +25,9 @@
 #ifndef TEXTFILEPARSER_H__
 #define TEXTFILEPARSER_H__
 
-#include "tgt/exception.h"
-#include "tgt/filesystem.h"
-#include "tgt/vector.h"
+#include "cgt/exception.h"
+#include "cgt/filesystem.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/tools/stringutils.h"
@@ -74,10 +74,10 @@ namespace campvis {
          * 
          * \sa TextFileParser::ItemSeparatorLines
          * \tparam  T   Functor for splitting the file into items, must implement std::unary_function<std::string, std::vector<std::string> >
-         * \throw   tgt::FileException if file not found/not readable, tgt::CorruptedFileException on parsing errors during key-value pair parsing.
+         * \throw   cgt::FileException if file not found/not readable, cgt::CorruptedFileException on parsing errors during key-value pair parsing.
          */
         template<class T>
-        void parse() throw (tgt::FileException, tgt::CorruptedFileException);
+        void parse() throw (cgt::FileException, cgt::CorruptedFileException);
 
         /**
          * Checks whether there exists a token with the given key \a key.
@@ -90,115 +90,115 @@ namespace campvis {
          * Returns the value to the given key \a key.
          * \param key   The key to search for.
          * \return      The corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent.
+         * \throw       cgt::CorruptedFileException if no such key existent.
          */
-        const std::string& getString(const std::string& key) const throw (tgt::CorruptedFileException);
+        const std::string& getString(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the bool representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      Boolean representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        bool getBool(const std::string& key) const throw (tgt::CorruptedFileException);
+        bool getBool(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the integer representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      Integer representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        int getInt(const std::string& key) const throw (tgt::CorruptedFileException);
+        int getInt(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the ivec2 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      ivec2 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::ivec2 getIvec2(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::ivec2 getIvec2(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the ivec3 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      ivec3 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::ivec3 getIvec3(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::ivec3 getIvec3(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the ivec4 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      ivec4 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::ivec4 getIvec4(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::ivec4 getIvec4(const std::string& key) const throw (cgt::CorruptedFileException);
 
 
         /**
          * Returns the size_t representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      size_t representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        size_t getSizeT(const std::string& key) const throw (tgt::CorruptedFileException);
+        size_t getSizeT(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the svec2 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      svec2 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::svec2 getSvec2(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::svec2 getSvec2(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the svec3 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      svec3 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::svec3 getSvec3(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::svec3 getSvec3(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the svec4 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      svec4 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::svec4 getSvec4(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::svec4 getSvec4(const std::string& key) const throw (cgt::CorruptedFileException);
 
 
         /**
          * Returns the float representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      Float representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        float getFloat(const std::string& key) const throw (tgt::CorruptedFileException);
+        float getFloat(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the vec2 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      vec2 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::vec2 getVec2(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::vec2 getVec2(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the vec3 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      vec3 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::vec3 getVec3(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::vec3 getVec3(const std::string& key) const throw (cgt::CorruptedFileException);
 
         /**
          * Returns the vec4 representation of the value for the given key \a key.
          * \param key   The key to search for.
          * \return      vec4 representation for the corresponding value to the given key.
-         * \throw       tgt::CorruptedFileException if no such key existent or conversion failed.
+         * \throw       cgt::CorruptedFileException if no such key existent or conversion failed.
          */
-        tgt::vec4 getVec4(const std::string& key) const throw (tgt::CorruptedFileException);
+        cgt::vec4 getVec4(const std::string& key) const throw (cgt::CorruptedFileException);
 
 
     protected:
@@ -208,10 +208,10 @@ namespace campvis {
          * 
          * \sa TextFileParser::ItemSeparatorLines
          * \tparam  T   Functor for splitting the file into items, must implement std::unary_function<std::string, std::vector<std::string> >
-         * \throw   tgt::FileException if file not found/not readable, tgt::CorruptedFileException on parsing errors during key-value pair parsing.
+         * \throw   cgt::FileException if file not found/not readable, cgt::CorruptedFileException on parsing errors during key-value pair parsing.
          */
         template<class T>
-        inline std::vector<std::string> readAndParseItems() const throw (tgt::FileException, tgt::CorruptedFileException) ;
+        inline std::vector<std::string> readAndParseItems() const throw (cgt::FileException, cgt::CorruptedFileException) ;
 
         std::string _url;                               ///< URL of file
         bool _caseSensitiveKeys;                        ///< Flag whether keys are case-sensitive or not
@@ -224,7 +224,7 @@ namespace campvis {
 // - Template definitions -------------------------------------------------------------------------
 
     template<typename T>
-    void TextFileParser::parse() throw (tgt::FileException, tgt::CorruptedFileException) {
+    void TextFileParser::parse() throw (cgt::FileException, cgt::CorruptedFileException) {
         _tokens.clear();
         std::vector<std::string> items = readAndParseItems<T>();
 
@@ -237,16 +237,16 @@ namespace campvis {
                     _tokens.insert(std::make_pair(StringUtils::lowercase(StringUtils::trim(tokens[0], _whitespace)), StringUtils::trim(tokens[1], _whitespace)));
             }
             else {
-                throw tgt::CorruptedFileException("Error parsing item '" + *it + "': expected delimiter.", _url);
+                throw cgt::CorruptedFileException("Error parsing item '" + *it + "': expected delimiter.", _url);
             }
         }
     }
 
     template<typename T>
-    inline std::vector<std::string> TextFileParser::readAndParseItems() const throw (tgt::FileException, tgt::CorruptedFileException) {
-        tgt::File* file = FileSys.open(_url);
+    inline std::vector<std::string> TextFileParser::readAndParseItems() const throw (cgt::FileException, cgt::CorruptedFileException) {
+        cgt::File* file = FileSys.open(_url);
         if (!file || !file->isOpen())
-            throw tgt::FileException("Could not open file " + _url + " for reading.", _url);
+            throw cgt::FileException("Could not open file " + _url + " for reading.", _url);
 
         // somewhat cumbersome but it works:
         // read file line-based, glue them back together and run item spitter.
@@ -266,7 +266,7 @@ namespace campvis {
 
     /// Template specialization for avoiding redundant split-join-split of lines.
     template<>
-    CAMPVIS_CORE_API std::vector<std::string> TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (tgt::FileException, tgt::CorruptedFileException);
+    CAMPVIS_CORE_API std::vector<std::string> TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (cgt::FileException, cgt::CorruptedFileException);
 
 }
 

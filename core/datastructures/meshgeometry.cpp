@@ -24,10 +24,10 @@
 
 #include "meshgeometry.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/buffer.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/buffer.h"
+#include "cgt/vertexarrayobject.h"
 
 #include <algorithm>
 #include <list>
@@ -58,7 +58,7 @@ namespace campvis {
 
         for (size_t i = 0; i < NUM_BUFFERS; ++i) {
             if (_buffers[i] != nullptr)
-                sum += sizeof(tgt::BufferObject);
+                sum += sizeof(cgt::BufferObject);
         }
 
         return sizeof(*this) + sum;
@@ -83,7 +83,7 @@ namespace campvis {
             return;
         }
 
-        tgt::VertexArrayObject vao;
+        cgt::VertexArrayObject vao;
         if (_verticesBuffer)
             vao.setVertexAttributePointer(0, _verticesBuffer);
         if (_texCoordsBuffer)
@@ -141,24 +141,24 @@ namespace campvis {
 
             try {
                 // Now, create all necessary VBOs and reserve data
-                _verticesBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                _verticesBuffer->data(0, totalVertices * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                _verticesBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                _verticesBuffer->data(0, totalVertices * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
 
                 if (createTexCoordsBuffer) {
-                    _texCoordsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _texCoordsBuffer->data(0, totalVertices * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _texCoordsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _texCoordsBuffer->data(0, totalVertices * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
                 }
                 if (createColorsBuffer) {
-                    _colorsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _colorsBuffer->data(0, totalVertices * sizeof(tgt::vec4), tgt::BufferObject::FLOAT, 4);
+                    _colorsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _colorsBuffer->data(0, totalVertices * sizeof(cgt::vec4), cgt::BufferObject::FLOAT, 4);
                 }
                 if (createNormalsBuffer) {
-                    _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _normalsBuffer->data(0, totalVertices * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _normalsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _normalsBuffer->data(0, totalVertices * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
                 }
                 if (createPickingBuffer) {
-                    _pickingBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _pickingBuffer->data(0, totalVertices * sizeof(tgt::vec4), tgt::BufferObject::FLOAT, 4);
+                    _pickingBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _pickingBuffer->data(0, totalVertices * sizeof(cgt::vec4), cgt::BufferObject::FLOAT, 4);
                 }
 
                 // Now start filling the VBOs with data, one face at a time...
@@ -168,22 +168,22 @@ namespace campvis {
                     if (numVertices == 0)
                         continue;
 
-                    _verticesBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getVertices().front()), numVertices * sizeof(tgt::vec3));
+                    _verticesBuffer->subdata(startIndex * sizeof(cgt::vec3), &(it->getVertices().front()), numVertices * sizeof(cgt::vec3));
 
                     if (createTexCoordsBuffer)
-                        _texCoordsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getTextureCoordinates().front()), numVertices * sizeof(tgt::vec3));
+                        _texCoordsBuffer->subdata(startIndex * sizeof(cgt::vec3), &(it->getTextureCoordinates().front()), numVertices * sizeof(cgt::vec3));
                     if (createColorsBuffer)
-                        _colorsBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getColors().front()), numVertices * sizeof(tgt::vec4));
+                        _colorsBuffer->subdata(startIndex * sizeof(cgt::vec4), &(it->getColors().front()), numVertices * sizeof(cgt::vec4));
                     if (createNormalsBuffer)
-                        _normalsBuffer->subdata(startIndex * sizeof(tgt::vec3), &(it->getNormals().front()), numVertices * sizeof(tgt::vec3));
+                        _normalsBuffer->subdata(startIndex * sizeof(cgt::vec3), &(it->getNormals().front()), numVertices * sizeof(cgt::vec3));
                     if (createPickingBuffer)
-                        _pickingBuffer->subdata(startIndex * sizeof(tgt::vec4), &(it->getPickingInformation().front()), numVertices * sizeof(tgt::vec4));
+                        _pickingBuffer->subdata(startIndex * sizeof(cgt::vec4), &(it->getPickingInformation().front()), numVertices * sizeof(cgt::vec4));
                 
                     startIndex += numVertices;
                 }
 
             }
-            catch (tgt::Exception& e) {
+            catch (cgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
                 _buffersDirty = true;
                 return;
@@ -195,8 +195,8 @@ namespace campvis {
     }
 
     namespace {
-        float distanceToPlane(const tgt::vec3& vertex, float p, const tgt::vec3& pNormal, float epsilon) {
-            float distance = tgt::dot(pNormal, vertex) - p;
+        float distanceToPlane(const cgt::vec3& vertex, float p, const cgt::vec3& pNormal, float epsilon) {
+            float distance = cgt::dot(pNormal, vertex) - p;
             if (std::abs(distance) <= epsilon)
                 return 0;
             else
@@ -212,10 +212,10 @@ namespace campvis {
             };
 
             bool operator() (const std::pair<size_t, size_t>& left, const std::pair<size_t, size_t>& right) const {
-                return (tgt::distance(_ref[left.first].getVertices()[left.second], _ref[right.first].getVertices()[right.second]) < _epsilon);
+                return (cgt::distance(_ref[left.first].getVertices()[left.second], _ref[right.first].getVertices()[right.second]) < _epsilon);
             };
 
-            const tgt::vec3& operator() (const std::pair<size_t, size_t>& index) const {
+            const cgt::vec3& operator() (const std::pair<size_t, size_t>& index) const {
                 return _ref[index.first].getVertices()[index.second];
             }
 
@@ -224,7 +224,7 @@ namespace campvis {
         };
     }
 
-    MeshGeometry MeshGeometry::clipAgainstPlane(float p, const tgt::vec3& normal, bool close /*= true*/, float epsilon /*= 1e-8f*/) const {
+    MeshGeometry MeshGeometry::clipAgainstPlane(float p, const cgt::vec3& normal, bool close /*= true*/, float epsilon /*= 1e-8f*/) const {
         std::vector<FaceGeometry> tmp;
         for (std::vector<FaceGeometry>::const_iterator it = _faces.begin(); it != _faces.end(); ++it) {
             FaceGeometry f = it->clipAgainstPlane(p, normal, epsilon);
@@ -281,16 +281,16 @@ namespace campvis {
 
                 if (sortedVertices.size() > 2) {
                     // make face ccw
-                    tgt::vec3 closingFaceNormal = tgt::normalize(tgt::cross(vce(sortedVertices.front()), vce(*(++sortedVertices.begin()))));
+                    cgt::vec3 closingFaceNormal = cgt::normalize(cgt::cross(vce(sortedVertices.front()), vce(*(++sortedVertices.begin()))));
 
-                    if (tgt::dot(normal, closingFaceNormal) < 0)
+                    if (cgt::dot(normal, closingFaceNormal) < 0)
                         std::reverse(sortedVertices.begin(), sortedVertices.end());
                 }
 
                 // build face
-                std::vector<tgt::vec3> verts, texCoords, norms;
-                std::vector<tgt::vec4> cols;
-                std::vector<tgt::col4> picks;
+                std::vector<cgt::vec3> verts, texCoords, norms;
+                std::vector<cgt::vec4> cols;
+                std::vector<cgt::col4> picks;
 
                 for (std::list< Vertex >::iterator it = sortedVertices.begin(); it != sortedVertices.end(); ++it) {
                     verts.push_back(tmp[it->first].getVertices()[it->second]);
@@ -311,10 +311,10 @@ namespace campvis {
         return MeshGeometry(tmp);
     }
 
-    tgt::Bounds MeshGeometry::getWorldBounds() const {
-        tgt::Bounds toReturn;
+    cgt::Bounds MeshGeometry::getWorldBounds() const {
+        cgt::Bounds toReturn;
         for (size_t i = 0; i < _faces.size(); ++i)
-            for (std::vector<tgt::vec3>::const_iterator it = _faces[i].getVertices().begin(); it != _faces[i].getVertices().end(); ++it)
+            for (std::vector<cgt::vec3>::const_iterator it = _faces[i].getVertices().begin(); it != _faces[i].getVertices().end(); ++it)
                 toReturn.addPoint(*it);
         return toReturn;
     }
@@ -335,7 +335,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void MeshGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+    void MeshGeometry::applyTransformationToVertices(const cgt::mat4& t) {
         for (size_t i = 0; i < _faces.size(); ++i) {
             _faces[i].applyTransformationToVertices(t);
         }

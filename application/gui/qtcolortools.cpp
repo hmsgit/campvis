@@ -30,11 +30,11 @@
 
 namespace campvis {
 
-    tgt::col4 QtColorTools::toTgtColor(const QColor& color) {
-        return tgt::col4(color.red(),color.green(),color.blue(), color.alpha());
+    cgt::col4 QtColorTools::toTgtColor(const QColor& color) {
+        return cgt::col4(color.red(),color.green(),color.blue(), color.alpha());
     }
 
-    QColor QtColorTools::toQColor(const tgt::col4& color) {
+    QColor QtColorTools::toQColor(const cgt::col4& color) {
         return QColor(color.r, color.g, color.b, color.a);
     }
 

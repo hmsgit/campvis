@@ -24,7 +24,7 @@
 
 #include "bufferinglog.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 namespace campvis {
 
@@ -39,7 +39,7 @@ namespace campvis {
         showLevel_ = showLevel;
     }
 
-    void BufferingLog::logFiltered(const std::string& cat, tgt::LogLevel level, const std::string& msg,
+    void BufferingLog::logFiltered(const std::string& cat, cgt::LogLevel level, const std::string& msg,
                                    const std::string& /*extendedInfo*/)
     {
         std::string output = "";

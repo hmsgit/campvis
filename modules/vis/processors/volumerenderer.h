@@ -35,7 +35,7 @@
 #include "modules/vis/processors/simpleraycaster.h"
 #include "core/pipeline/raycastingprocessor.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 

@@ -24,7 +24,7 @@
 
 #include "mainwindow.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include "application/campvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
@@ -60,7 +60,7 @@ namespace campvis {
         , _logViewer(0)
         , _scriptingConsoleWidget(nullptr)
     {
-        tgtAssert(_application != 0, "Application must not be 0.");
+        cgtAssert(_application != 0, "Application must not be 0.");
         ui.setupUi(this);
         setup();
     }

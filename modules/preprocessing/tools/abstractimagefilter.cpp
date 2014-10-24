@@ -35,15 +35,15 @@ namespace campvis {
         : AbstractImageFilter(input, output)
         , _kernelSize(kernelSize)
     {
-        tgtAssert(kernelSize > 0, "Kernel Size must be greater 0.");
+        cgtAssert(kernelSize > 0, "Kernel Size must be greater 0.");
     }
 
     void ImageFilterMedian::operator()(const tbb::blocked_range<size_t>& range) const {
         size_t halfKernelDim = static_cast<size_t>(_kernelSize / 2);
-        const tgt::svec3& size = _input->getSize();
+        const cgt::svec3& size = _input->getSize();
         
         for (size_t index = range.begin(); index < range.end(); ++index) {
-            tgt::svec3 position = _input->getParent()->indexToPosition(index);
+            cgt::svec3 position = _input->getParent()->indexToPosition(index);
 
             size_t zmin = position.z >= halfKernelDim ? position.z - halfKernelDim : 0;
             size_t zmax = std::min(position.z+halfKernelDim, size.z-1);
@@ -52,7 +52,7 @@ namespace campvis {
             size_t xmin = position.x >= halfKernelDim ? position.x - halfKernelDim : 0;
             size_t xmax = std::min(position.x+halfKernelDim, size.x-1);
 
-            tgt::svec3 npos;
+            cgt::svec3 npos;
             std::vector<float> values;
             for (npos.z=zmin; npos.z<=zmax; npos.z++) {
                 for (npos.y=ymin; npos.y<=ymax; npos.y++) {
@@ -77,7 +77,7 @@ namespace campvis {
         , _sigma(sigma)
         , _norm(0.f)
     {
-        tgtAssert(kernelSize > 0, "Kernel Size must be greater 0.");
+        cgtAssert(kernelSize > 0, "Kernel Size must be greater 0.");
 
         // compute Gauss kernel and corresponding norm
         // it is sufficient to compute only one half of the 1D kernel
@@ -94,11 +94,11 @@ namespace campvis {
 
     void ImageFilterGauss::operator()(const tbb::blocked_range<size_t>& range) const {
         size_t halfKernelDim = static_cast<size_t>(_kernelSize / 2);
-        const tgt::svec3& size = _input->getSize();
+        const cgt::svec3& size = _input->getSize();
 
         for (size_t index = range.begin(); index < range.end(); ++index) {
-            tgt::svec3 position = _input->getParent()->indexToPosition(index);
-            tgt::svec3 npos = position;
+            cgt::svec3 position = _input->getParent()->indexToPosition(index);
+            cgt::svec3 npos = position;
             float sum = 0.f;
 
             // The gauss convolution filter is separable so it is sufficient to perform

@@ -40,7 +40,7 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -123,10 +123,10 @@ namespace campvis {
          * \param   vectors     Input vector image
          * \param   position    Position to render
          */
-        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale);
+        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const cgt::vec3& position, float scale);
 
         GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
-        tgt::Shader* _shader;               ///< Shader for arrow rendering
+        cgt::Shader* _shader;               ///< Shader for arrow rendering
         
         static const std::string loggerCat_;
     };

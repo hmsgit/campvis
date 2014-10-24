@@ -25,8 +25,8 @@
 #ifndef MESHGEOMETRY_H__
 #define MESHGEOMETRY_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/facegeometry.h"
 
@@ -82,7 +82,7 @@ namespace campvis {
          * \param   epsilon Clipping precision
          * \return  The clipped MeshGeometry
          */
-        MeshGeometry clipAgainstPlane(float p, const tgt::vec3& normal, bool close = true, float epsilon = 1e-4f) const;
+        MeshGeometry clipAgainstPlane(float p, const cgt::vec3& normal, bool close = true, float epsilon = 1e-4f) const;
 
         /**
          * Renders this MeshGeometry.
@@ -92,13 +92,13 @@ namespace campvis {
         virtual void render(GLenum mode) const;
 
         /// \see GeometryData::getWorldBounds
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
         /// \see GeometryData::hasTextureCoordinates
         virtual bool hasTextureCoordinates() const;
         /// \see GeometryData::hasPickingInformation
         virtual bool hasPickingInformation() const;
         /// \see GeometryData::applyTransformationToVertices
-        virtual void applyTransformationToVertices(const tgt::mat4& t);
+        virtual void applyTransformationToVertices(const cgt::mat4& t);
 
     protected:
         /**

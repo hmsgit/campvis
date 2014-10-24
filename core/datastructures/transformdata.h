@@ -25,14 +25,14 @@
 #ifndef TRANSFORMDATA_H__
 #define TRANSFORMDATA_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
 
 namespace campvis {
 
     /**
-     * Data Container class for transforms. Stores a \a tgt::mat4 object.
+     * Data Container class for transforms. Stores a \a cgt::mat4 object.
      */
     class CAMPVIS_CORE_API TransformData : public AbstractData {
     public:
@@ -40,7 +40,7 @@ namespace campvis {
          * Constructor, Creates a new light source.
          * \param   transform       The transformation
          */
-        explicit TransformData(const tgt::mat4 & transform);
+        explicit TransformData(const cgt::mat4 & transform);
 
         /**
          * Virtual destructor
@@ -59,20 +59,20 @@ namespace campvis {
         * Gets the transformation
         * \return _transform
         **/
-        tgt::mat4 getTransform() const {
+        cgt::mat4 getTransform() const {
             return _transform;
         }
         /**
         * Sets the transformation.
         * \param _transformation New transformation matrix
         **/
-        void setTransform(const tgt::mat4 & val) {
+        void setTransform(const cgt::mat4 & val) {
             _transform = val;
         }
                 
 
     protected:
-        tgt::mat4 _transform;               ///< The transform
+        cgt::mat4 _transform;               ///< The transform
     };
 
 }

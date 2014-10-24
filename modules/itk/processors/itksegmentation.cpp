@@ -24,8 +24,8 @@
 
 #include "itksegmentation.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
 
 #include "modules/itk/core/genericimagerepresentationitk.h"
 
@@ -78,7 +78,7 @@
     }
 
 #define DISPATCH_ITK_SEGMENTATION_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
-    tgtAssert(MA_WTP._numChannels == 1, "ItkSegmentation only supports single-channel images.") \
+    cgtAssert(MA_WTP._numChannels == 1, "ItkSegmentation only supports single-channel images.") \
     PERFORM_ITK_SEGMENTATION(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 #define DISPATCH_ITK_SEGMENTATION_D(MA_WTP, MA_dimensionality, MA_filterType, MD_filterBody) \
@@ -105,7 +105,7 @@
     DISPATCH_ITK_SEGMENTATION_BRD(MA_WTP, float, float, MA_dimensionality, MA_filterType, MD_filterBody) \
     break; \
     default: \
-    tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+    cgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
 /**
@@ -120,7 +120,7 @@
     switch (MA_localRep->getDimensionality()) { \
     case 2: DISPATCH_ITK_SEGMENTATION_D(wtp, 2, MA_filterType, MD_filterBody) break; \
     case 3: DISPATCH_ITK_SEGMENTATION_D(wtp, 3, MA_filterType, MD_filterBody) break; \
-    default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+    default: cgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -198,7 +198,7 @@ namespace campvis {
                         filter->SetSeed(index); \
                         );
                 } else {
-                    tgtAssert(false, "Unsupported dimensionality!");
+                    cgtAssert(false, "Unsupported dimensionality!");
                 }
             }
 
@@ -221,11 +221,11 @@ namespace campvis {
         }
     }
 
-    void ItkSegmentation::onEvent(tgt::Event* e) {
+    void ItkSegmentation::onEvent(cgt::Event* e) {
         VolumeExplorer::onEvent(e);
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
-            if (p_enableScribbling.getValue() && (me->modifiers() & tgt::Event::CTRL || me->modifiers() & tgt::Event::ALT)) {
+        if (typeid(*e) == typeid(cgt::MouseEvent)) {
+            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
+            if (p_enableScribbling.getValue() && (me->modifiers() & cgt::Event::CTRL || me->modifiers() & cgt::Event::ALT)) {
 
                 //update the input image for the segmentation (take the one that is explored by the VolumeExplorer)
                 p_sourceImageID.setValue(p_inputVolume.getValue());
@@ -235,8 +235,8 @@ namespace campvis {
                 p_seedY.setMaxValue(_sliceRenderer->p_ySliceNumber.getMaxValue());
                 p_seedZ.setMaxValue(_sliceRenderer->p_zSliceNumber.getMaxValue());
 
-                tgt::svec3 voxel;
-                voxel = tgt::vec3(_yesScribbles[0]);
+                cgt::svec3 voxel;
+                voxel = cgt::vec3(_yesScribbles[0]);
                 p_seedX.setValue(voxel.x);
                 p_seedY.setValue(voxel.y);
                 p_seedZ.setValue(voxel.z);

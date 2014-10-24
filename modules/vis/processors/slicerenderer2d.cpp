@@ -23,10 +23,10 @@
 // ================================================================================================
 
 #include "slicerenderer2d.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/event/mouseevent.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/event/mouseevent.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"
@@ -90,13 +90,13 @@ namespace campvis {
 
         if (img != 0) {
             if (img->getDimensionality() == 2) {
-                tgt::vec3 imgSize(img->getSize());
+                cgt::vec3 imgSize(img->getSize());
              
                 float renderTargetRatio = static_cast<float>(getEffectiveViewportSize().x) / static_cast<float>(getEffectiveViewportSize().y);
 
-                tgt::vec2 topLeft_px(static_cast<float>(p_cropLeft.getValue()), static_cast<float>(p_cropTop.getValue()));
-                tgt::vec2 bottomRight_px(static_cast<float>(imgSize.x - p_cropRight.getValue()), static_cast<float>(imgSize.y - p_cropBottom.getValue()));
-                tgt::vec2 croppedSize = bottomRight_px - topLeft_px;
+                cgt::vec2 topLeft_px(static_cast<float>(p_cropLeft.getValue()), static_cast<float>(p_cropTop.getValue()));
+                cgt::vec2 bottomRight_px(static_cast<float>(imgSize.x - p_cropRight.getValue()), static_cast<float>(imgSize.y - p_cropBottom.getValue()));
+                cgt::vec2 croppedSize = bottomRight_px - topLeft_px;
 
                 float sliceRatio =
                     (static_cast<float>(croppedSize.x) * img.getImageData()->getMappingInformation().getVoxelSize().x)
@@ -104,24 +104,24 @@ namespace campvis {
        
                 // configure model matrix so that slices are rendered with correct aspect posNormalized
                 float ratioRatio = sliceRatio / renderTargetRatio;
-                tgt::mat4 viewMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
+                cgt::mat4 viewMatrix = (ratioRatio > 1) ? cgt::mat4::createScale(cgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : cgt::mat4::createScale(cgt::vec3(ratioRatio, 1.f, 1.f));
                 viewMatrix.t11 *= -1;
 
                 // prepare OpenGL
                 _shader->activate();
-                tgt::TextureUnit inputUnit, tfUnit;
+                cgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
                 if (p_invertXAxis.getValue())
-                    viewMatrix *= tgt::mat4::createScale(tgt::vec3(-1, 1, 1));
+                    viewMatrix *= cgt::mat4::createScale(cgt::vec3(-1, 1, 1));
 
                 if (p_invertYAxis.getValue())
-                    viewMatrix *= tgt::mat4::createScale(tgt::vec3(1, -1, 1));
+                    viewMatrix *= cgt::mat4::createScale(cgt::vec3(1, -1, 1));
 
 
-                tgt::vec2 topLeft = topLeft_px / imgSize.xy();
-                tgt::vec2 bottomRight = bottomRight_px / imgSize.xy();
+                cgt::vec2 topLeft = topLeft_px / imgSize.xy();
+                cgt::vec2 bottomRight = bottomRight_px / imgSize.xy();
 
                 _shader->setUniform("_viewMatrix", viewMatrix);
                 _shader->setUniform("_topLeft", topLeft);
@@ -136,7 +136,7 @@ namespace campvis {
 
 
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
             }
@@ -154,7 +154,7 @@ namespace campvis {
         p_transferFunction.setImageHandle(img.getDataHandle());
 
         if (img != 0) {
-            tgt::ivec3 size = img->getSize();
+            cgt::ivec3 size = img->getSize();
 
             /// NOTE: the setMaxValue calls create crashes, probably due to qt threading issues
             //          it is a lot more stable with this _lastImgSize check

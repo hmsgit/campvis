@@ -24,7 +24,7 @@
 
 #include "pipelinetreewidget.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QStringList>
@@ -44,7 +44,7 @@ namespace campvis {
         : TreeItem(parent)
         , _dataContainer(dc)
     {
-        tgtAssert(_dataContainer != 0, "Pipeline must not be 0.");
+        cgtAssert(_dataContainer != 0, "Pipeline must not be 0.");
     }
 
     QVariant DataContainerTreeItem::getData(int column, int role) const {
@@ -76,7 +76,7 @@ namespace campvis {
         : TreeItem(parent)
         , _pipeline(pipeline)
     {
-        tgtAssert(_pipeline != 0, "Pipeline must not be 0.");
+        cgtAssert(_pipeline != 0, "Pipeline must not be 0.");
     }
 
     QVariant PipelineTreeItem::getData(int column, int role) const {
@@ -117,7 +117,7 @@ namespace campvis {
         : TreeItem(parent)
         , _processor(processor)
     {
-        tgtAssert(_processor != 0, "Processor must not be 0.");
+        cgtAssert(_processor != 0, "Processor must not be 0.");
     }
 
     QVariant ProcessorTreeItem::getData(int column, int role) const {
@@ -307,7 +307,7 @@ namespace campvis {
                 }
             }
             else {
-                tgtAssert(false, "The DataContainer of this pipeline is not in the list of DataContainers, cannot add it to GUI!");
+                cgtAssert(false, "The DataContainer of this pipeline is not in the list of DataContainers, cannot add it to GUI!");
             }
         }
     }
@@ -367,7 +367,7 @@ namespace campvis {
 
     void PipelineTreeWidget::setupWidget() {
         _treeModel = new PipelineTreeModel(this);
-        tgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
+        cgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
 
         setModel(_treeModel);
     }

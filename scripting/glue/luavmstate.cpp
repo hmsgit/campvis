@@ -3,7 +3,7 @@
 #include <iostream>
 #include "globalluatable.h"
 
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 extern "C" {
 #include "lua.h"
@@ -32,7 +32,7 @@ static int lua_campvis_print(lua_State* L) {
         lua_pop(L, 1);  /* pop result */
     }
 
-    LogMgr.log("Lua", tgt::LuaInfo, str);
+    LogMgr.log("Lua", cgt::LuaInfo, str);
     return 0;
 }
 
@@ -80,9 +80,9 @@ namespace campvis {
         const char* errorMsg = lua_tostring(_luaState, -1);
 
         if (errorMsg == nullptr)
-            LogMgr.log("Lua", tgt::LuaError, "(error object is not a string)");
+            LogMgr.log("Lua", cgt::LuaError, "(error object is not a string)");
         else
-            LogMgr.log("Lua", tgt::LuaError, errorMsg);
+            LogMgr.log("Lua", cgt::LuaError, errorMsg);
 
         lua_pop(_luaState, 1);
     }

@@ -25,8 +25,8 @@
 #ifndef ABSTRACTIMAGEREPRESENTATION_H__
 #define ABSTRACTIMAGEREPRESENTATION_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
@@ -69,10 +69,10 @@ namespace campvis {
          * Size of this image (number of elements per dimension).
          * \return _size
          */
-        const tgt::svec3& getSize() const;
+        const cgt::svec3& getSize() const;
 
         /**
-         * Returns the number of elements (= tgt::hmul(getSize())).
+         * Returns the number of elements (= cgt::hmul(getSize())).
          * \return  _numElements
          */
         size_t getNumElements() const;

@@ -40,7 +40,7 @@
 #include "scripting/glue/luavmstate.h"
 #endif
 
-namespace tgt {
+namespace cgt {
     class GLCanvas;
     class QtThreadedCanvas;
     class Texture;
@@ -88,13 +88,13 @@ namespace campvis {
         ~CampVisApplication();
 
         /**
-         * Initializes tgt, OpenGL, and all pipelines, evaluators and painters.
+         * Initializes cgt, OpenGL, and all pipelines, evaluators and painters.
          * Make sure to have everything setup before calling init().
          */
         void init();
 
         /**
-         * Deinitializes tgt, OpenGL, and all pipelines, evaluators and painters.
+         * Deinitializes cgt, OpenGL, and all pipelines, evaluators and painters.
          */
         void deinit();
 
@@ -153,7 +153,7 @@ namespace campvis {
         sigslot::signal0 s_DataContainersChanged;
 
     private:
-        void initGlContextAndPipeline(tgt::GLCanvas* canvas, AbstractPipeline* pipeline);
+        void initGlContextAndPipeline(cgt::GLCanvas* canvas, AbstractPipeline* pipeline);
 
 
         /// All pipelines 
@@ -171,12 +171,12 @@ namespace campvis {
         void triggerShaderRebuild();
 
         /// A local OpenGL context used for initialization
-        tgt::GLCanvas* _localContext;
+        cgt::GLCanvas* _localContext;
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
 
         /// Error texture to show if there is no output found
-        tgt::Texture* _errorTexture;
+        cgt::Texture* _errorTexture;
 
         /// the global LuaVmState of this application
         LuaVmState* _luaVmState;

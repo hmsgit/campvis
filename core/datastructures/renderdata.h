@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class FramebufferObject;
     class Shader;
     class TextureUnit;
@@ -61,7 +61,7 @@ namespace campvis {
          * \note    Must be called from a valid OpenGL context.
          * \param   fbo     FBO to use textures from.
          */
-        explicit RenderData(const tgt::FramebufferObject* fbo);
+        explicit RenderData(const cgt::FramebufferObject* fbo);
 
         /**
          * Destructor
@@ -145,8 +145,8 @@ namespace campvis {
          * \param index                     Index of the color texture to bind.
          */
         void bindColorTexture(
-            tgt::Shader* shader,
-            const tgt::TextureUnit& colorTexUnit, 
+            cgt::Shader* shader,
+            const cgt::TextureUnit& colorTexUnit, 
             const std::string& colorTexUniform = "_colorTexture",
             const std::string& texParamsUniform = "_texParams",
             size_t index = 0) const;
@@ -160,8 +160,8 @@ namespace campvis {
          * \param texParamsUniform           Name for texture parameters struct uniform.
          */
         void bindDepthTexture(
-            tgt::Shader* shader,
-            const tgt::TextureUnit& depthTexUnit,
+            cgt::Shader* shader,
+            const cgt::TextureUnit& depthTexUnit,
             const std::string& depthTexUniform = "_depthTexture", 
             const std::string& texParamsUniform = "_texParams") const;
 
@@ -178,9 +178,9 @@ namespace campvis {
          * \param index                     Index of the color texture to bind.
          */
         void bind(
-            tgt::Shader* shader,
-            const tgt::TextureUnit& colorTexUnit, 
-            const tgt::TextureUnit& depthTexUnit, 
+            cgt::Shader* shader,
+            const cgt::TextureUnit& colorTexUnit, 
+            const cgt::TextureUnit& depthTexUnit, 
             const std::string& colorTexUniform = "_colorTexture",
             const std::string& depthTexUniform = "_depthTexture",
             const std::string& texParamsUniform = "_texParams",

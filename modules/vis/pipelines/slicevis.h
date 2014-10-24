@@ -53,7 +53,7 @@ namespace campvis {
         static const std::string getId() { return "SliceVis"; };
 
 
-        virtual void keyEvent(tgt::KeyEvent* e);
+        virtual void keyEvent(cgt::KeyEvent* e);
 
     protected:
         /**

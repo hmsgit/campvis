@@ -25,12 +25,12 @@
 #ifndef GEOMETRYDATA_H__
 #define GEOMETRYDATA_H__
 
-#include "tgt/tgt_gl.h"
-#include "tgt/bounds.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/bounds.h"
 #include "core/datastructures/abstractdata.h"
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class BufferObject;
     class GLCanvas;
 }
@@ -90,7 +90,7 @@ namespace campvis {
          * Returns the geometry extent in world coordinates.
          * \return  The geometry extent in world coordinates.
          */
-        virtual tgt::Bounds getWorldBounds() const = 0;
+        virtual cgt::Bounds getWorldBounds() const = 0;
 
 
         /**
@@ -109,42 +109,42 @@ namespace campvis {
          * Applies the transformation matrix \a t to each vertex of this geometry.
          * \param   t   Transformation matrix to apply
          */
-        virtual void applyTransformationToVertices(const tgt::mat4& t) = 0;
+        virtual void applyTransformationToVertices(const cgt::mat4& t) = 0;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex positions.
          * May be 0 if not yet created.
          * \return  _verticesBuffer
          */
-        const tgt::BufferObject* getVerticesBuffer() const;
+        const cgt::BufferObject* getVerticesBuffer() const;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex texture coordinates.
          * May be 0 if none are present or not yet created.
          * \return  _texCoordsBuffer
          */
-        const tgt::BufferObject* getTextureCoordinatesBuffer() const;
+        const cgt::BufferObject* getTextureCoordinatesBuffer() const;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex colors. 
          * May be 0 if none are present or not yet created.
          * \return  _colorsBuffer
          */
-        const tgt::BufferObject* getColorsBuffer() const;
+        const cgt::BufferObject* getColorsBuffer() const;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex normals.
          * May be 0 if none are present or not yet created.
          * \return  _normalsBuffer
          */
-        const tgt::BufferObject* getNormalsBuffer() const;
+        const cgt::BufferObject* getNormalsBuffer() const;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex normals.
          * May be 0 if none are present or not yet created.
          * \return  _normalsBuffer
          */
-        const tgt::BufferObject* getPickingBuffer() const;
+        const cgt::BufferObject* getPickingBuffer() const;
 
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
@@ -163,14 +163,14 @@ namespace campvis {
 
         union {
             struct {
-                mutable tgt::BufferObject* _verticesBuffer;     ///< Pointer to the OpenGL Buffer with the vertex positions
-                mutable tgt::BufferObject* _texCoordsBuffer;    ///< Pointer to the OpenGL Buffer with the vertex texture coordinates
-                mutable tgt::BufferObject* _colorsBuffer;       ///< Pointer to the OpenGL Buffer with the vertex colors
-                mutable tgt::BufferObject* _normalsBuffer;      ///< Pointer to the OpenGL Buffer with the vertex normals
-                mutable tgt::BufferObject* _pickingBuffer;      ///< Pointer to the OpenGL Buffer with the picking information
+                mutable cgt::BufferObject* _verticesBuffer;     ///< Pointer to the OpenGL Buffer with the vertex positions
+                mutable cgt::BufferObject* _texCoordsBuffer;    ///< Pointer to the OpenGL Buffer with the vertex texture coordinates
+                mutable cgt::BufferObject* _colorsBuffer;       ///< Pointer to the OpenGL Buffer with the vertex colors
+                mutable cgt::BufferObject* _normalsBuffer;      ///< Pointer to the OpenGL Buffer with the vertex normals
+                mutable cgt::BufferObject* _pickingBuffer;      ///< Pointer to the OpenGL Buffer with the picking information
             };
 
-            mutable tgt::BufferObject* _buffers[NUM_BUFFERS];   ///< Array of all buffers
+            mutable cgt::BufferObject* _buffers[NUM_BUFFERS];   ///< Array of all buffers
         };
 
     private:
@@ -211,7 +211,7 @@ struct GeometryDataTraits {};
 
 template<>
 struct GeometryDataTraits<GeometryDataBase::VERTEX> {
-    typedef tgt::vec3 HostType;
+    typedef cgt::vec3 HostType;
 };
 
 class CAMPVIS_CORE_API DraftNewGeometryData {

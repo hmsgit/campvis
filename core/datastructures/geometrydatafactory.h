@@ -25,8 +25,8 @@
 #ifndef GEOMETRYFACTORY_H__
 #define GEOMETRYFACTORY_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/facegeometry.h"
@@ -49,7 +49,7 @@ namespace campvis {
          * \param   texUrb  Texture coordinates of the upper right vertex
          * \return  A FaceGeometry building a quad with the given bounds and texture coordinates.
          */
-        static FaceGeometry* createQuad(const tgt::vec3& llf, const tgt::vec3& urb, const tgt::vec3& texLlf, const tgt::vec3& texUrb);
+        static FaceGeometry* createQuad(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb);
 
         /**
          * Creates a MeshGeometry building a cube with the given bounds and texture coordinates.
@@ -58,7 +58,7 @@ namespace campvis {
          * \param   texBounds   texture coordinates at the cube bounds
          * \return  A MeshGeometry building a cube with the given bounds and texture coordinates.
          */
-        static MeshGeometry* createCube(const tgt::Bounds& bounds, const tgt::Bounds& texBounds);
+        static MeshGeometry* createCube(const cgt::Bounds& bounds, const cgt::Bounds& texBounds);
 
         /**
          * Creates an MultiIndexedGeometry storing the famous Utah teapot.

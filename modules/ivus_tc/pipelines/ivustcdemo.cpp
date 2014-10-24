@@ -24,7 +24,7 @@
 
 #include "ivustcdemo.h"
 
-#include "tgt/filesystem.h"
+#include "cgt/filesystem.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
@@ -67,7 +67,7 @@ namespace campvis {
         _imageReader.init();
         p_readImagesButton.s_clicked.connect(this, &IvusTcDemo::readAndProcessImages);
 
-        _lsp.p_ambientColor.setValue(tgt::vec3(.75f));
+        _lsp.p_ambientColor.setValue(cgt::vec3(.75f));
         _lsp.p_shininess.setValue(8.f);
 
         _ve.p_inputVolume.setValue("image.ivus");
@@ -77,7 +77,7 @@ namespace campvis {
         _renderTargetID.setValue("combine");
         
         _imageReader.p_fileExtension.setValue("bmp");
-        _imageReader.p_imageSpacing.setValue(tgt::vec3(.1f, .1f, .6f));
+        _imageReader.p_imageSpacing.setValue(cgt::vec3(.1f, .1f, .6f));
 
         // initialize predicates with default config
         PointPredicateHistogramProperty* php = &p_predicateHistogram;
@@ -88,36 +88,36 @@ namespace campvis {
             AbstractPointPredicate* vpToAdd = 0;
 
             vpToAdd = new RangePointPredicate("ivus", "IvusIntensity", "IVUS Intensity");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.f, 1.f));
             histogram->addPredicate(vpToAdd);
 
 //             vpToAdd = new RangePointPredicate("cm", "ConfidenceMap", "Confidence");
-//             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.25f, 1.f));
+//             static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.25f, 1.f));
 //             histogram->addPredicate(vpToAdd);
 // 
             vpToAdd = new RangePointPredicate("tc.r", "Calcified", "Calcified Tissue");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.667f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(cgt::vec2(0.667f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("tc.g", "Fibrotic", "Fibrotic Tissue");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.165f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(cgt::vec2(0.165f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("tc.b", "Lipidic", "Lipidic Tissue");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.9f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(cgt::vec2(0.9f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("tc.a", "Necrotic", "Necrotic Tissue");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.15f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.15f, 1.f));
+            vpToAdd->p_color.setValue(cgt::vec2(0.f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("plaque", "Plaque", "Plaque Mask");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.5f, 1.f));
-            vpToAdd->p_color.setValue(tgt::vec2(0.35f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.5f, 1.f));
+            vpToAdd->p_color.setValue(cgt::vec2(0.35f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             histogram->resetPredicates(false);
@@ -130,9 +130,9 @@ namespace campvis {
             php->addSharedProperty(_ve.getNestedProperty("SliceExtractorProperties::PredicateHistogram"));
         }
 
-        SimpleTransferFunction* stf = new SimpleTransferFunction(128, tgt::vec2(.1f, 1.f));
-        stf->setLeftColor(tgt::vec4(0.f));
-        stf->setRightColor(tgt::vec4(255.f));
+        SimpleTransferFunction* stf = new SimpleTransferFunction(128, cgt::vec2(.1f, 1.f));
+        stf->setLeftColor(cgt::vec4(0.f));
+        stf->setRightColor(cgt::vec4(255.f));
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(stf);
 
     }
@@ -144,7 +144,7 @@ namespace campvis {
     }
 
     void IvusTcDemo::readAndProcessImages() {
-        std::string baseDir = tgt::FileSystem::cleanupPath(p_sourceDirectory.getValue());
+        std::string baseDir = cgt::FileSystem::cleanupPath(p_sourceDirectory.getValue());
 
         std::string ivusDir = baseDir + "/IVUS";
         std::string cmDir = baseDir + "/Confidence_Map";
@@ -175,10 +175,10 @@ namespace campvis {
         if (   (calcifiedRep && fibroticRep && lipidicRep && necroticRep) 
             && (calcifiedRep->getSize() == fibroticRep->getSize() && fibroticRep->getSize() == lipidicRep->getSize() && lipidicRep->getSize() == necroticRep->getSize())) {
             ImageData* id = new ImageData(3, calcifiedRep->getSize(), 4);
-            tgt::Vector4<ivus_t>* data = new tgt::Vector4<ivus_t>[tgt::hmul(calcifiedRep->getSize())];
+            cgt::Vector4<ivus_t>* data = new cgt::Vector4<ivus_t>[cgt::hmul(calcifiedRep->getSize())];
 
             for (size_t i = 0; i < calcifiedRep->getNumElements(); ++i) {
-                data[i] = tgt::Vector4<ivus_t>(calcifiedRep->getElement(i), fibroticRep->getElement(i), lipidicRep->getElement(i), necroticRep->getElement(i));
+                data[i] = cgt::Vector4<ivus_t>(calcifiedRep->getElement(i), fibroticRep->getElement(i), lipidicRep->getElement(i), necroticRep->getElement(i));
             }
 
             GenericImageRepresentationLocal<ivus_t, 4>::create(id, data);

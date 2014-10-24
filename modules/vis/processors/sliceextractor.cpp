@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "sliceextractor.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -52,11 +52,11 @@ namespace campvis {
 
         // prepare OpenGL
         _shader->activate();
-        tgt::TextureUnit inputUnit, tfUnit;
+        cgt::TextureUnit inputUnit, tfUnit;
         img->bind(_shader, inputUnit);
         p_transferFunction.getTF()->bind(_shader, tfUnit);
 
-        tgt::mat4 identity = tgt::mat4::identity;
+        cgt::mat4 identity = cgt::mat4::identity;
 
         _shader->setUniform("_texCoordsMatrix", _texCoordMatrix);
         _shader->setUniform("_modelMatrix", identity);
@@ -78,7 +78,7 @@ namespace campvis {
         renderGeometry(dataContainer, img);
 
         _shader->deactivate();
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
 
         dataContainer.addData(p_targetImageID.getValue(), new RenderData(_fbo));
     }

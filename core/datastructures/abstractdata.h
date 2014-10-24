@@ -27,7 +27,7 @@
 
 #include <memory>
 #include <tbb/atomic.h>
-#include "tgt/bounds.h"
+#include "cgt/bounds.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/scopedtypeddata.h" // not directly needed here but by many classes including AbstractData 
@@ -48,7 +48,7 @@ namespace campvis {
          * Returns the data extent in world coordinates.
          * \return  The data extent in world coordinates.
          */
-        virtual tgt::Bounds getWorldBounds() const = 0;
+        virtual cgt::Bounds getWorldBounds() const = 0;
     };
 
 // ================================================================================================

@@ -33,7 +33,7 @@
 
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -95,7 +95,7 @@ namespace campvis {
         void generateBbv(DataHandle dh);
 
         BinaryBrickedVolume* _bbv;
-        tgt::Texture* _vvTex;
+        cgt::Texture* _vvTex;
 
         static const std::string loggerCat_;
     };

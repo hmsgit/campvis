@@ -24,9 +24,9 @@
 
 #include "raycastingprocessor.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
@@ -95,9 +95,9 @@ namespace campvis {
             if (img->getDimensionality() == 3) {
                 // little hack to support LOD texture lookup for the gradients:
                 // if texture does not yet have mipmaps, create them.
-                const tgt::Texture* tex = img->getTexture();
-                if (tex->getFilter() != tgt::Texture::MIPMAP) {
-                    const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+                const cgt::Texture* tex = img->getTexture();
+                if (tex->getFilter() != cgt::Texture::MIPMAP) {
+                    const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
                     glGenerateMipmap(GL_TEXTURE_3D);
                     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -124,15 +124,15 @@ namespace campvis {
                 }
 
                 decorateRenderProlog(data, _shader);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / cgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
 
                 // compute sampling step size relative to volume size
-                float samplingStepSize = 1.f / (p_samplingRate.getValue() * tgt::max(img->getSize()));
+                float samplingStepSize = 1.f / (p_samplingRate.getValue() * cgt::max(img->getSize()));
                 _shader->setUniform("_samplingStepSize", samplingStepSize);
 
                 // compute and set camera parameters
-                const tgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = p_camera.getValue();
                 float n = cam.getNearDist();
                 float f = cam.getFarDist();
                 _shader->setUniform("_cameraPosition", cam.getPosition());
@@ -143,7 +143,7 @@ namespace campvis {
                 _shader->setIgnoreUniformLocationError(false);
 
                 // bind input textures
-                tgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
+                cgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
                 img->bind(_shader, volumeUnit, "_volume", "_volumeTextureParams");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
@@ -153,7 +153,7 @@ namespace campvis {
                     processImpl(data, img);
                 }
                 else {
-                    tgt::TextureUnit entryUnitDepth, exitUnitDepth;
+                    cgt::TextureUnit entryUnitDepth, exitUnitDepth;
                     entryPoints->bind(_shader, entryUnit, entryUnitDepth, "_entryPoints", "_entryPointsDepth", "_entryParams");
                     exitPoints->bind(_shader, exitUnit, exitUnitDepth, "_exitPoints", "_exitPointsDepth", "_exitParams");
                     processImpl(data, img);
@@ -161,7 +161,7 @@ namespace campvis {
 
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 LGL_ERROR;
             }
             else {

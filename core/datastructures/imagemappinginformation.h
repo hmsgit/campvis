@@ -25,8 +25,8 @@
 #ifndef imagemapping_h__
 #define imagemapping_h__
 
-#include "tgt/matrix.h"
-#include "tgt/vector.h"
+#include "cgt/matrix.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/tools/mapping.h"
@@ -49,46 +49,46 @@ namespace campvis {
          * \param   realWorldValueMapping   Linear mapping for mapping element values to real world values, defaults to identity.
          */
         ImageMappingInformation(
-            const tgt::vec3& size, 
-            const tgt::vec3& offset, 
-            const tgt::vec3& voxelSize, 
+            const cgt::vec3& size, 
+            const cgt::vec3& offset, 
+            const cgt::vec3& voxelSize, 
             const LinearMapping<float>& realWorldValueMapping = LinearMapping<float>::identity);
 
         /**
          * Returns the position of LLF corner in world coordinates (mm).
          * \return  _offset
          */
-        const tgt::vec3& getOffset() const;
+        const cgt::vec3& getOffset() const;
 
         /**
          * Returns the voxel size in mm.
          * \return  _voxelSize
          */
-        const tgt::vec3& getVoxelSize() const;
+        const cgt::vec3& getVoxelSize() const;
 
         /**
          * Gets the transformation matrix from texture to world coordinates.
          * \return  _textureToWorldTransformation
          */
-        const tgt::mat4& getTextureToWorldMatrix() const;
+        const cgt::mat4& getTextureToWorldMatrix() const;
 
         /**
          * Gets the transformation matrix from world to texture coordinates.
          * \return  _worldToTextureTransformation
          */
-        const tgt::mat4& getWorldToTextureMatrix() const;
+        const cgt::mat4& getWorldToTextureMatrix() const;
 
         /**
          * Gets the transformation matrix from voxel to world coordinates.
          * \return  _voxelToWorldTransformation
          */
-        const tgt::mat4& getVoxelToWorldMatrix() const;
+        const cgt::mat4& getVoxelToWorldMatrix() const;
 
         /**
          * Gets the transformation matrix from world to voxel coordinates.
          * \return  _worldToVoxelTransformation
          */
-        const tgt::mat4& getWorldToVoxelMatrix() const;
+        const cgt::mat4& getWorldToVoxelMatrix() const;
 
         /**
          * Get the real world value mapping.
@@ -114,17 +114,17 @@ namespace campvis {
          */
         void updateMatrices();
 
-        tgt::vec3 _size;                                ///< Image size (number of elements, redundant...)
-        tgt::vec3 _offset;                              ///< Position of LLF corner in world coordinates (mm)
-        tgt::vec3 _voxelSize;                           ///< Voxel size in (mm)
+        cgt::vec3 _size;                                ///< Image size (number of elements, redundant...)
+        cgt::vec3 _offset;                              ///< Position of LLF corner in world coordinates (mm)
+        cgt::vec3 _voxelSize;                           ///< Voxel size in (mm)
 
         LinearMapping<float> _realWorldValueMapping;     ///< Linear mapping for mapping element values to real world values
 
-        tgt::mat4 _textureToWorldTransformation;        ///< Transformation matrix from texture to world coordinates
-        tgt::mat4 _worldToTextureTransformation;        ///< Transformation matrix from world to texture coordinates
+        cgt::mat4 _textureToWorldTransformation;        ///< Transformation matrix from texture to world coordinates
+        cgt::mat4 _worldToTextureTransformation;        ///< Transformation matrix from world to texture coordinates
 
-        tgt::mat4 _voxelToWorldTransformation;        ///< Transformation matrix from voxel to world coordinates
-        tgt::mat4 _worldToVoxelTransformation;        ///< Transformation matrix from world to voxel coordinates
+        cgt::mat4 _voxelToWorldTransformation;        ///< Transformation matrix from voxel to world coordinates
+        cgt::mat4 _worldToVoxelTransformation;        ///< Transformation matrix from world to voxel coordinates
     };
 
 }

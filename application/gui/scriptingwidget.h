@@ -26,8 +26,8 @@
 #define SCRIPTINGWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/logmanager.h"
-#include "tgt/painter.h"
+#include "cgt/logmanager.h"
+#include "cgt/painter.h"
 #include "tbb/mutex.h"
 
 #include "application/tools/bufferinglog.h"
@@ -49,7 +49,7 @@ namespace campvis {
     /**
      * Qt widget providing a console-like interface to the Lua VM of CampvisApplication.
      */
-    class ScriptingWidget : public QWidget, tgt::Log {
+    class ScriptingWidget : public QWidget, cgt::Log {
         Q_OBJECT;
 
     public:
@@ -67,12 +67,12 @@ namespace campvis {
         bool isOpen() { return true; }
         
         /**
-         * Initializes the underlying log and registers it with tgt.
+         * Initializes the underlying log and registers it with cgt.
          */
         void init();
 
         /**
-         * Deinitializes the underlying log and deregisters it from tgt.
+         * Deinitializes the underlying log and deregisters it from cgt.
          */
         void deinit();
 
@@ -84,7 +84,7 @@ namespace campvis {
 
         bool eventFilter(QObject* obj, QEvent* event);
 
-        void logFiltered(const std::string &cat, tgt::LogLevel level, const std::string& msg, const std::string& extendedInfo="");
+        void logFiltered(const std::string &cat, cgt::LogLevel level, const std::string& msg, const std::string& extendedInfo="");
 
     public slots:
         /**

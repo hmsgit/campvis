@@ -24,9 +24,9 @@
 
 #include "renderdata.h"
 
-#include "tgt/framebufferobject.h"
-#include "tgt/textureunit.h"
-#include "tgt/shadermanager.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/textureunit.h"
+#include "cgt/shadermanager.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -42,21 +42,21 @@ namespace campvis {
 
     }
 
-    RenderData::RenderData(const tgt::FramebufferObject* fbo)
+    RenderData::RenderData(const cgt::FramebufferObject* fbo)
         : AbstractData()
         , _depthTexture(0)
     {
-        tgt::Texture* const * attachments = fbo->getAttachments();
-        for (size_t i = 0; i < TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
+        cgt::Texture* const * attachments = fbo->getAttachments();
+        for (size_t i = 0; i < CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS; ++i) {
             if (attachments[i] != 0) {
                 ImageData* img = new ImageData(2, attachments[i]->getDimensions(), attachments[i]->getNumChannels());
                 ImageRepresentationGL::create(img, attachments[i]);
                 _colorTextures.push_back(DataHandle(img));
             }
         }
-        if (attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS] != 0) {
-            ImageData* img = new ImageData(2, attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getDimensions(), attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getNumChannels());
-            ImageRepresentationGL::create(img, attachments[TGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]);
+        if (attachments[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS] != 0) {
+            ImageData* img = new ImageData(2, attachments[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getDimensions(), attachments[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]->getNumChannels());
+            ImageRepresentationGL::create(img, attachments[CGT_FRAMEBUFFEROBJECT_MAX_SUPPORTED_COLOR_ATTACHMENTS]);
             _depthTexture = DataHandle(img);
         }
     }
@@ -102,7 +102,7 @@ namespace campvis {
     }
 
     const ImageData* RenderData::getColorTexture(size_t index /*= 0*/) const {
-        tgtAssert(index < _colorTextures.size(), "Index out of bounds.");
+        cgtAssert(index < _colorTextures.size(), "Index out of bounds.");
         if (index >= _colorTextures.size())
             return 0;
 
@@ -110,7 +110,7 @@ namespace campvis {
     }
 
     campvis::DataHandle RenderData::getColorDataHandle(size_t index /*= 0*/) const {
-        tgtAssert(index < _colorTextures.size(), "Index out of bounds.");
+        cgtAssert(index < _colorTextures.size(), "Index out of bounds.");
         if (index >= _colorTextures.size())
             return DataHandle(0);
 
@@ -141,20 +141,20 @@ namespace campvis {
         _depthTexture = DataHandle(texture);
     }
 
-    void RenderData::bindColorTexture(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
-        tgtAssert(index < _colorTextures.size(), "Index out of bounds.");
+    void RenderData::bindColorTexture(cgt::Shader* shader, const cgt::TextureUnit& colorTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
+        cgtAssert(index < _colorTextures.size(), "Index out of bounds.");
         if (index >= _colorTextures.size())
             return;
 
         const ImageData* id = static_cast<const ImageData*>(_colorTextures[index].getData());
-        tgtAssert(id != 0, "WTF, color texture with 0 pointer?!");
+        cgtAssert(id != 0, "WTF, color texture with 0 pointer?!");
 
         const ImageRepresentationGL* rep = id->getRepresentation<ImageRepresentationGL>(true);
         rep->bind(shader, colorTexUnit, colorTexUniform, texParamsUniform);
     }
 
-    void RenderData::bindDepthTexture(tgt::Shader* shader, const tgt::TextureUnit& depthTexUnit, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/) const {
-        tgtAssert(_depthTexture.getData() != 0, "Empty Depth Texture!");
+    void RenderData::bindDepthTexture(cgt::Shader* shader, const cgt::TextureUnit& depthTexUnit, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/) const {
+        cgtAssert(_depthTexture.getData() != 0, "Empty Depth Texture!");
         if (_depthTexture.getData() == 0)
             return;
 
@@ -163,7 +163,7 @@ namespace campvis {
         rep->bind(shader, depthTexUnit, depthTexUniform, texParamsUniform);
     }
 
-    void RenderData::bind(tgt::Shader* shader, const tgt::TextureUnit& colorTexUnit, const tgt::TextureUnit& depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
+    void RenderData::bind(cgt::Shader* shader, const cgt::TextureUnit& colorTexUnit, const cgt::TextureUnit& depthTexUnit, const std::string& colorTexUniform /*= "_colorTexture"*/, const std::string& depthTexUniform /*= "_depthTexture"*/, const std::string& texParamsUniform /*= "_texParams"*/, size_t index /*= 0*/) const {
         if (hasDepthTexture())
             bindDepthTexture(shader, depthTexUnit, depthTexUniform, texParamsUniform);
         bindColorTexture(shader, colorTexUnit, colorTexUniform, texParamsUniform, index);

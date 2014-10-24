@@ -32,7 +32,7 @@
 
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 

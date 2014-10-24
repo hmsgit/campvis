@@ -24,7 +24,7 @@
 
 #include "pointpredicate.h"
 
-#include "tgt/shadermanager.h"
+#include "cgt/shadermanager.h"
 #include "core/tools/stringutils.h"
 
 
@@ -35,15 +35,15 @@ namespace campvis {
         : MetaProperty(name, title)
         , p_enable("Enable", "Enable Predicate", true)
         , p_importance("Importance", "Importance", 1.f, 0.f, 5.f, .1f, 1)
-        , p_color("Color", "Predicate-Specific Color", tgt::vec2(0.f), tgt::vec2(0.f), tgt::vec2(1.f), tgt::vec2(.01f, .1f), tgt::ivec2(2, 1))
+        , p_color("Color", "Predicate-Specific Color", cgt::vec2(0.f), cgt::vec2(0.f), cgt::vec2(1.f), cgt::vec2(.01f, .1f), cgt::ivec2(2, 1))
         , p_intensityHack("IntensityHack", "Intensity Hack", 0.f, 0.f, 1.f, 1)
         , _inputVariable(inputVariable)
         , _importanceUniformName("_vpImportance" + _name)
         , _colorUniformName("_vpColor" + _name)
         , _intensityHackUniformName("_vpIntensityHack" + _name)
     {
-        tgtAssert(inputVariable.find_first_of(" \t\r\n") == std::string::npos, "Input variable must not contain whitespace!");
-        tgtAssert(name.find_first_of(" \t\r\n") == std::string::npos, "Predicate name must not contain whitespace!");
+        cgtAssert(inputVariable.find_first_of(" \t\r\n") == std::string::npos, "Input variable must not contain whitespace!");
+        cgtAssert(name.find_first_of(" \t\r\n") == std::string::npos, "Predicate name must not contain whitespace!");
 
         p_enable.setVisible(false);
         p_importance.setVisible(false);
@@ -68,7 +68,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void AbstractPointPredicate::setupShader(tgt::Shader* shader) const {
+    void AbstractPointPredicate::setupShader(cgt::Shader* shader) const {
         shader->setUniform(_importanceUniformName, p_importance.getValue());
         shader->setUniform(_colorUniformName, p_color.getValue());
         shader->setUniform(_intensityHackUniformName, p_intensityHack.getValue());
@@ -150,7 +150,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void AndCombinedPointPredicate::setupShader(tgt::Shader* shader) const {
+    void AndCombinedPointPredicate::setupShader(cgt::Shader* shader) const {
         for (size_t i = 0; i < _predicates.size(); ++i)
             _predicates[i]->setupShader(shader);
 
@@ -190,7 +190,7 @@ namespace campvis {
         return toReturn;
     }
 
-    void OrCombinedPointPredicate::setupShader(tgt::Shader* shader) const {
+    void OrCombinedPointPredicate::setupShader(cgt::Shader* shader) const {
         for (size_t i = 0; i < _predicates.size(); ++i)
             _predicates[i]->setupShader(shader);
 
@@ -202,7 +202,7 @@ namespace campvis {
 
     RangePointPredicate::RangePointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title)
         : AbstractPointPredicate(inputVariable, name, title)
-        , p_range("Range", "Range", tgt::vec2(0.f, 1.f), tgt::vec2(0.f), tgt::vec2(1.f), tgt::vec2(.01f), tgt::ivec2(2))
+        , p_range("Range", "Range", cgt::vec2(0.f, 1.f), cgt::vec2(0.f), cgt::vec2(1.f), cgt::vec2(.01f), cgt::ivec2(2))
         , _rangeUniformName("_vpRange" + _name)
     {
         addProperty(p_range);
@@ -223,7 +223,7 @@ namespace campvis {
         return "(" + _inputVariable + " >= " + _rangeUniformName + ".x && " + _inputVariable + " <= " + _rangeUniformName + ".y)";
     }
 
-    void RangePointPredicate::setupShader(tgt::Shader* shader) const {
+    void RangePointPredicate::setupShader(cgt::Shader* shader) const {
         AbstractPointPredicate::setupShader(shader);
         shader->setUniform(_rangeUniformName, p_range.getValue());
     }
@@ -253,7 +253,7 @@ namespace campvis {
         return "(bitfieldExtract(" + _inputVariable + ", " + _bitUniformName + ", 1) != 0U)";
     }
 
-    void LabelBitPointPredicate::setupShader(tgt::Shader* shader) const {
+    void LabelBitPointPredicate::setupShader(cgt::Shader* shader) const {
         AbstractPointPredicate::setupShader(shader);
         shader->setUniform(_bitUniformName, p_bit.getValue());
     }

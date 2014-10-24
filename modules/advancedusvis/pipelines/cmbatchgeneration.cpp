@@ -24,9 +24,9 @@
 
 #include "cmbatchgeneration.h"
 
-#include "tgt/filesystem.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/event/keyevent.h"
+#include "cgt/filesystem.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/event/keyevent.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -53,7 +53,7 @@ namespace campvis {
         , p_sourcePath("SourcePath", "Source Files Path", "", StringProperty::DIRECTORY)
         , p_targetPathColor("TargetPathColor", "Target Path Color Files", "", StringProperty::DIRECTORY)
         , p_targetPathFuzzy("TargetPathFuzzy", "Target Path Fuzzy Files", "", StringProperty::DIRECTORY)
-        , p_range("Range", "Files Range", tgt::ivec2(0, 1), tgt::ivec2(0, 0), tgt::ivec2(10000, 10000))
+        , p_range("Range", "Files Range", cgt::ivec2(0, 1), cgt::ivec2(0, 0), cgt::ivec2(10000, 10000))
         , p_execute("Execute", "Execute Batch Pipeline")
     {
         addProcessor(&_usReader);
@@ -78,7 +78,7 @@ namespace campvis {
         p_sourcePath.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase");
         p_targetPathColor.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\color");
         p_targetPathFuzzy.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\fuzzy");
-        p_range.setValue(tgt::ivec2(0, 1));
+        p_range.setValue(cgt::ivec2(0, 1));
         p_execute.s_clicked.connect(this, &CmBatchGeneration::execute);
 
         _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\11_niere_re_durch_leber2\\original\\export0000.bmp");
@@ -91,12 +91,12 @@ namespace campvis {
         _confidenceGenerator.p_targetImageID.setValue("confidence.image.generated");
         _confidenceGenerator.p_targetImageID.addSharedProperty(&_usFusion.p_confidenceImageID);
         _confidenceGenerator.p_curvilinear.setValue(true);
-        _confidenceGenerator.p_origin.setValue(tgt::vec2(340.f, 540.f));
-        _confidenceGenerator.p_angles.setValue(tgt::vec2(4.064f, 5.363f));
-        //_confidenceGenerator.p_angles.setValue(tgt::vec2(232.f / 180.f * tgt::PIf, 307.f / 180.f * tgt::PIf));
-        //_confidenceGenerator.p_origin.setValue(tgt::vec2(320.f, 35.f));
-        //_confidenceGenerator.p_angles.setValue(tgt::vec2(45.f / 180.f * tgt::PIf, 135.f / 180.f * tgt::PIf));
-        _confidenceGenerator.p_lengths.setValue(tgt::vec2(116.f, 543.f));
+        _confidenceGenerator.p_origin.setValue(cgt::vec2(340.f, 540.f));
+        _confidenceGenerator.p_angles.setValue(cgt::vec2(4.064f, 5.363f));
+        //_confidenceGenerator.p_angles.setValue(cgt::vec2(232.f / 180.f * cgt::PIf, 307.f / 180.f * cgt::PIf));
+        //_confidenceGenerator.p_origin.setValue(cgt::vec2(320.f, 35.f));
+        //_confidenceGenerator.p_angles.setValue(cgt::vec2(45.f / 180.f * cgt::PIf, 135.f / 180.f * cgt::PIf));
+        _confidenceGenerator.p_lengths.setValue(cgt::vec2(116.f, 543.f));
 
         _usFusion.p_targetImageID.setValue("us.fused");
         _usFusion.p_view.selectById("mappingSharpness");
@@ -107,8 +107,8 @@ namespace campvis {
         _usBlurFilter.p_sigma.setValue(2.f);
 
 
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, 1.f));
+        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 255), cgt::col4(255, 255, 255, 255)));
         _usFusion.p_transferFunction.replaceTF(tf);
 
         _renderTargetID.setValue("us.fused");
@@ -124,7 +124,7 @@ namespace campvis {
 
         p_autoExecution.setValue(false);
 
-        tgt::GLContextScopedLock lock(_canvas);
+        cgt::GLContextScopedLock lock(_canvas);
         for (int i = p_range.getValue().x; i < p_range.getValue().y; ++i) {
             executePass(i);
         }
@@ -170,20 +170,20 @@ namespace campvis {
         const ImageRepresentationGL* rep = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>(false);
         if (rep != 0) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
-            if (! tgt::FileSystem::dirExists(basePath))
-                tgt::FileSystem::createDirectory(basePath);
+            if (! cgt::FileSystem::dirExists(basePath))
+                cgt::FileSystem::createDirectory(basePath);
 
             std::stringstream sss;
             sss << basePath << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
             std::string filename = sss.str();
-            if (tgt::FileSystem::fileExtension(filename).empty()) {
+            if (cgt::FileSystem::fileExtension(filename).empty()) {
                 LERROR("Filename has no extension");
                 return;
             }
 
             // get color buffer content
             GLubyte* colorBuffer = rep->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_SHORT);
-            tgt::ivec2 size = rep->getSize().xy();
+            cgt::ivec2 size = rep->getSize().xy();
 
             // create Devil image from image data and write it to file
             ILuint img;

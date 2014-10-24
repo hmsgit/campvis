@@ -39,10 +39,10 @@
 namespace campvis {
 
     AbstractTransferFunctionEditor* TransferFunctionEditorFactory::createEditor(TransferFunctionProperty* prop) {
-        tgtAssert(prop != 0, "Property must not be 0.");
+        cgtAssert(prop != 0, "Property must not be 0.");
 
         AbstractTransferFunction* tf = prop->getTF();
-        tgtAssert(tf != 0, "Transfer function must not be 0.");
+        cgtAssert(tf != 0, "Transfer function must not be 0.");
 
         if (SimpleTransferFunction* tester = dynamic_cast<SimpleTransferFunction*>(tf)) {
             return new SimpleTransferFunctionEditor(prop, tester);

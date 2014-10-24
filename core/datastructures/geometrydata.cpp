@@ -23,10 +23,10 @@
 // ================================================================================================
 
 #include "geometrydata.h"
-#include "tgt/buffer.h"
-#include "tgt/logmanager.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/buffer.h"
+#include "cgt/logmanager.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/vertexarrayobject.h"
 
 namespace campvis {
 
@@ -95,23 +95,23 @@ namespace campvis {
         return sum;
     }
 
-    const tgt::BufferObject* GeometryData::getVerticesBuffer() const {
+    const cgt::BufferObject* GeometryData::getVerticesBuffer() const {
         return _verticesBuffer;
     }
 
-    const tgt::BufferObject* GeometryData::getTextureCoordinatesBuffer() const {
+    const cgt::BufferObject* GeometryData::getTextureCoordinatesBuffer() const {
         return _texCoordsBuffer;
     }
 
-    const tgt::BufferObject* GeometryData::getColorsBuffer() const {
+    const cgt::BufferObject* GeometryData::getColorsBuffer() const {
         return _colorsBuffer;
     }
 
-    const tgt::BufferObject* GeometryData::getNormalsBuffer() const {
+    const cgt::BufferObject* GeometryData::getNormalsBuffer() const {
         return _normalsBuffer;
     }
 
-    const tgt::BufferObject* GeometryData::getPickingBuffer() const {
+    const cgt::BufferObject* GeometryData::getPickingBuffer() const {
         return _pickingBuffer;
     }
 

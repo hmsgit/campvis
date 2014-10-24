@@ -24,7 +24,7 @@
 
 #include "manualtissuesegmentation.h"
 
-#include "tgt/filesystem.h"
+#include "cgt/filesystem.h"
 #include "core/datastructures/imagerepresentationlocal.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL

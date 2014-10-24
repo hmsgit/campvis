@@ -24,12 +24,12 @@
 
 #include "voxelhierarchymapper.h"
 
-#include "tgt/assert.h"
-#include "tgt/framebufferobject.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
-#include "tgt/tgt_gl.h"
+#include "cgt/assert.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
+#include "cgt/cgt_gl.h"
 
 #include "core/classification/abstracttransferfunction.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -51,9 +51,9 @@ namespace campvis {
     {  
         _hierarchyRendererShader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/vis/glsl/hierarchyrenderer.frag", "", "400");
         _mimapRendererShader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/vis/glsl/mipmaprenderer.frag", "", "400");
-        _fbo = new tgt::FramebufferObject();
+        _fbo = new cgt::FramebufferObject();
 
-        _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(1.f, 1.f, 0.f), tgt::vec3(0.f, 0.f, 0.f));
+        _quad = GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(1.f, 1.f, 0.f), cgt::vec3(0.f, 0.f, 0.f));
     }
 
     VoxelHierarchyMapper::~VoxelHierarchyMapper() {
@@ -63,8 +63,8 @@ namespace campvis {
     }
 
     void VoxelHierarchyMapper::createHierarchy(const ImageRepresentationGL* image, AbstractTransferFunction* transferFunction) {
-        tgtAssert(image != nullptr, "Image must not be 0.");
-        tgtAssert(transferFunction != nullptr, "Transfer function must not be 0.");
+        cgtAssert(image != nullptr, "Image must not be 0.");
+        cgtAssert(transferFunction != nullptr, "Transfer function must not be 0.");
         
         // perform ceiling integer division:
         // z is not considered.
@@ -84,7 +84,7 @@ namespace campvis {
 
         _maxMipmapLevel = computeMaxLevel(_dimPackedBricks.x, _dimPackedBricks.y);
 
-        tgtAssert(_dimPackedBricks.z == 1, "This should not happen!");
+        cgtAssert(_dimPackedBricks.z == 1, "This should not happen!");
 
 
         // create initial texture:
@@ -113,9 +113,9 @@ namespace campvis {
 
         /// Activate the shader for geometry Rendering.
         _mimapRendererShader->activate();
-        _mimapRendererShader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
+        _mimapRendererShader->setUniform("_projectionMatrix", cgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
 
-        tgt::TextureUnit bbvUnit;
+        cgt::TextureUnit bbvUnit;
         bbvUnit.activate();
         _hierarchyTexture->bind();
         _mimapRendererShader->setUniform("_voxelTexture", bbvUnit.getUnitNumber());
@@ -149,14 +149,14 @@ namespace campvis {
         // delete old stuff
         delete _hierarchyTexture;
 
-        tgt::TextureUnit tempUnit;
+        cgt::TextureUnit tempUnit;
         tempUnit.activate();
 
         // create new texture
-        _hierarchyTexture = new tgt::Texture(0, _dimPackedBricks, GL_RED_INTEGER, GL_R32UI, GL_UNSIGNED_INT, tgt::Texture::NEAREST);
+        _hierarchyTexture = new cgt::Texture(0, _dimPackedBricks, GL_RED_INTEGER, GL_R32UI, GL_UNSIGNED_INT, cgt::Texture::NEAREST);
         _hierarchyTexture->bind();
         _hierarchyTexture->uploadTexture();
-        _hierarchyTexture->setWrapping(tgt::Texture::CLAMP);
+        _hierarchyTexture->setWrapping(cgt::Texture::CLAMP);
         LGL_ERROR;
 
         // attach mipmaps manually (as we want special ones)
@@ -179,11 +179,11 @@ namespace campvis {
         LDEBUG("Start computing voxel visibilities...");
 
         _hierarchyRendererShader->activate();
-        _hierarchyRendererShader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
+        _hierarchyRendererShader->setUniform("_projectionMatrix", cgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
         _hierarchyRendererShader->setUniform("_voxelDepth", static_cast<GLuint>(_brickDepth));
         _hierarchyRendererShader->setUniform("_voxelSize", static_cast<GLuint>(_brickSize));
 
-        tgt::TextureUnit volumeUnit, tfUnit;
+        cgt::TextureUnit volumeUnit, tfUnit;
         image->bind(_hierarchyRendererShader, volumeUnit, "_volume", "_volumeTextureParams");
         transferFunction->bind(_hierarchyRendererShader, tfUnit, "_transferFunction", "_transferFunctionParams");
 

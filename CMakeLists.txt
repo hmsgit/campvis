@@ -17,7 +17,7 @@ OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                 
 OPTION(CAMPVIS_BUILD_CORE           "Build CAMPVis Core"                                            ON)
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
 OPTION(CAMPVIS_ENABLE_SCRIPTING     "Add support for scripting CAMPVis using Lua"                   OFF)
-OPTION(CAMPVIS_BUILD_LIB_TGT        "Build TGT Library"                                             ON)
+OPTION(CAMPVIS_BUILD_LIB_CGT        "Build CGT Library"                                             ON)
 OPTION(CAMPVIS_BUILD_LIB_LUA        "Build Lua Library"                                             OFF)
 OPTION(CAMPVIS_BUILD_DOXYGEN        "Build Doxygen Documentation"                                   OFF)
 
@@ -43,8 +43,8 @@ include(cmake/parseModulesDir.cmake)
 
 MESSAGE(STATUS "--------------------------------------------------------------------------------")
 
-IF(CAMPVIS_BUILD_LIB_TGT)
-    ADD_SUBDIRECTORY(ext/tgt)
+IF(CAMPVIS_BUILD_LIB_CGT)
+    ADD_SUBDIRECTORY(ext/cgt)
     ADD_SUBDIRECTORY(ext/sigslot)
 ENDIF()
 

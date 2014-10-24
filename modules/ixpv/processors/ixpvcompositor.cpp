@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "ixpvcompositor.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
@@ -81,7 +81,7 @@ namespace campvis {
 
         if (xRayImage != 0 && sliceImage != 0 && drrFullImage != 0 && drrClippedImage != 0) {
             _shader->activate();
-            tgt::TextureUnit xRayColorUnit, xRayDepthUnit, sliceColorUnit, sliceDepthUnit, drrFullUnit, drrClippedUnit;
+            cgt::TextureUnit xRayColorUnit, xRayDepthUnit, sliceColorUnit, sliceDepthUnit, drrFullUnit, drrClippedUnit;
 
             xRayImage->bind(_shader, xRayColorUnit, xRayDepthUnit, "_xRayColor", "_xRayDepth", "_xRayTexParams");
             sliceImage->bind(_shader, sliceColorUnit, sliceDepthUnit, "_sliceColor", "_sliceDepth", "_sliceTexParams");
@@ -97,7 +97,7 @@ namespace campvis {
             QuadRdr.renderQuad();
 
             _shader->deactivate();
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
 
             data.addData(p_targetImageId.getValue(), new RenderData(_fbo));

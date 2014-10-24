@@ -88,7 +88,7 @@ namespace campvis {
          * Sets up \a shader for rendering (i.e. sets all uniform values).
          * \param   shader  Shader to setup.
          */
-        void setupRenderShader(tgt::Shader* shader) const;
+        void setupRenderShader(cgt::Shader* shader) const;
 
         /**
          * Sets the GLSL predicate function argument string.

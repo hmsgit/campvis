@@ -32,7 +32,7 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 

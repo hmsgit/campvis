@@ -37,7 +37,7 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -88,7 +88,7 @@ namespace campvis {
 
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

@@ -27,12 +27,12 @@
 
 #include "core/classification/abstracttransferfunction.h"
 
-#include "tgt/assert.h"
-#include "tgt/framebufferobject.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 #include <vector>
 
@@ -53,7 +53,7 @@ namespace campvis {
          * \param   size            Size of the transfer function texture
          * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
          */
-        GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        GenericGeometryTransferFunction(const cgt::vec3& size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
 
         /**
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
@@ -109,14 +109,14 @@ namespace campvis {
         virtual void createTexture();
 
         std::vector<T*> _geometries;        ///< The list of transfer function geometries.
-        tgt::FramebufferObject* _fbo;       ///< The FBO used for render into texture.
-        tgt::Shader* _shader;               ///< Shader for rendering the TF into a texture
+        cgt::FramebufferObject* _fbo;       ///< The FBO used for render into texture.
+        cgt::Shader* _shader;               ///< Shader for rendering the TF into a texture
     };
 
 // ================================================================================================
 
     template<class T>
-    campvis::GenericGeometryTransferFunction<T>::GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
+    campvis::GenericGeometryTransferFunction<T>::GenericGeometryTransferFunction(const cgt::vec3& size, const cgt::vec2& intensityDomain /*= cgt::vec2(0.f, 1.f)*/)
         : AbstractTransferFunction(size, intensityDomain)
         , _fbo(0)
         , _shader(0)
@@ -208,7 +208,7 @@ namespace campvis {
         }
 
         // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
-        tgt::TextureUnit tfUnit;
+        cgt::TextureUnit tfUnit;
         tfUnit.activate();
 
         // detach old texture from FBO and delete it
@@ -221,14 +221,14 @@ namespace campvis {
 
         // create FBO if needed
         if (_fbo == 0) 
-            _fbo = new tgt::FramebufferObject();
+            _fbo = new cgt::FramebufferObject();
         _fbo->activate();
         LGL_ERROR;
 
         // create texture
         GLenum dataType = GL_UNSIGNED_BYTE;
-        _texture = new tgt::Texture(_size, GL_RGBA, dataType, tgt::Texture::LINEAR);
-        _texture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+        _texture = new cgt::Texture(_size, GL_RGBA, dataType, cgt::Texture::LINEAR);
+        _texture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
         _texture->uploadTexture();
         LGL_ERROR;
 
@@ -247,7 +247,7 @@ namespace campvis {
         glClear(GL_COLOR_BUFFER_BIT);
 
         _shader->activate();
-        _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
+        _shader->setUniform("_projectionMatrix", cgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
         LGL_ERROR;
 
         for (typename std::vector<T*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
@@ -262,7 +262,7 @@ namespace campvis {
         _fbo->deactivate();
         LGL_ERROR;
 
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         _dirtyTexture = false;
     }
 }

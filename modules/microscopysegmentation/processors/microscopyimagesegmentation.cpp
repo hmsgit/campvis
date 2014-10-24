@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "microscopyimagesegmentation.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
@@ -45,7 +45,7 @@ namespace campvis {
 
     ContourObject::ContourObject(std::string name)
         : _objectName("objName", "Object Name", name)
-        , _color("color", "Color", tgt::vec4(1,1,1,1), tgt::vec4(0,0,0,0), tgt::vec4(1,1,1,1))
+        , _color("color", "Color", cgt::vec4(1,1,1,1), cgt::vec4(0,0,0,0), cgt::vec4(1,1,1,1))
         , _visibility("showContour", "Show Contour", true)
     {
     }
@@ -87,19 +87,19 @@ namespace campvis {
         , p_vrProperties("VolumeRendererProperties", "Volume Renderer Properties")
         , _vr(viewportSizeProp, raycaster)
         , _sliceExtractor(viewportSizeProp)
-        , p_rightPaneBlockSize("SliceRenderSize", "Right Pane Block Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
-        , p_leftPaneSize("VolumeRenderSize", "Left Pane Size Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
-        , p_zSize("ZSliceSize", "Main Slice View Size", tgt::ivec2(32), tgt::ivec2(0), tgt::ivec2(10000), tgt::ivec2(1))
+        , p_rightPaneBlockSize("SliceRenderSize", "Right Pane Block Size", cgt::ivec2(32), cgt::ivec2(0), cgt::ivec2(10000), cgt::ivec2(1))
+        , p_leftPaneSize("VolumeRenderSize", "Left Pane Size Size", cgt::ivec2(32), cgt::ivec2(0), cgt::ivec2(10000), cgt::ivec2(1))
+        , p_zSize("ZSliceSize", "Main Slice View Size", cgt::ivec2(32), cgt::ivec2(0), cgt::ivec2(10000), cgt::ivec2(1))
         , _xSliceHandler(&_sliceExtractor.p_xSliceNumber)
         , _ySliceHandler(&_sliceExtractor.p_ySliceNumber)
         , _zSliceHandler(&_sliceExtractor.p_zSliceNumber)
         , _windowingHandler(&_sliceExtractor.p_transferFunction)
         , _trackballEH(0)
-        , p_paintColor("PaintColor", "Change Color", tgt::vec4(255), tgt::vec4(0.0f), tgt::vec4(255))
-        , p_axisScaling("AxisScaling", "Axis Scale", tgt::vec3(1), tgt::vec3(1), tgt::vec3(25), tgt::vec3(1))
+        , p_paintColor("PaintColor", "Change Color", cgt::vec4(255), cgt::vec4(0.0f), cgt::vec4(255))
+        , p_axisScaling("AxisScaling", "Axis Scale", cgt::vec3(1), cgt::vec3(1), cgt::vec3(25), cgt::vec3(1))
         , p_fitToWindow("FitToWindow", "Fit to Window", true)
         , p_scalingFactor("ScalingFactor", "Scaling Factor", 1.f, 0.f, 10.f, .1f, 2)
-        , p_offset("Offset", "Offset", tgt::ivec2(0), tgt::ivec2(0), tgt::ivec2(100))
+        , p_offset("Offset", "Offset", cgt::ivec2(0), cgt::ivec2(0), cgt::ivec2(100))
         , p_addObject("addObjectButton", "Add Object")
         , p_deleteObject("deleteObjectButton", "Delete Current Object")
         , p_csvPath("csvPath", "File Name", "", StringProperty::SAVE_FILENAME)
@@ -172,8 +172,8 @@ namespace campvis {
         _vr.setViewportSizeProperty(&p_rightPaneBlockSize);
         p_zSize.setVisible(false);
         p_zSize.setValue(p_leftPaneSize.getValue().x < p_leftPaneSize.getValue().y ? 
-            tgt::vec2(p_leftPaneSize.getValue().x, p_leftPaneSize.getValue().x) 
-            : tgt::vec2(p_leftPaneSize.getValue().y, p_leftPaneSize.getValue().y));
+            cgt::vec2(p_leftPaneSize.getValue().x, p_leftPaneSize.getValue().x) 
+            : cgt::vec2(p_leftPaneSize.getValue().y, p_leftPaneSize.getValue().y));
 
         _sliceExtractor.setViewportSizeProperty(&p_zSize);
 
@@ -205,7 +205,7 @@ namespace campvis {
         _sliceExtractor.s_invalidated.connect(this, &MicroscopyImageSegmentation::onProcessorInvalidated);
         _vr.s_invalidated.connect(this, &MicroscopyImageSegmentation::onProcessorInvalidated);
 
-        _quad = GeometryDataFactory::createQuad(tgt::vec3(0.f), tgt::vec3(1.f), tgt::vec3(0.f), tgt::vec3(1.f));
+        _quad = GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(0.f), cgt::vec3(1.f));
 
         // force recalculation of p_sliceRenderSize and p_volumeRenderSize
         onPropertyChanged(_viewportSizeProperty);
@@ -226,8 +226,8 @@ namespace campvis {
             if (!(selectedObject._objectName == first[0]._value._objectName)) {
                 // Create a ProxyFaceGeometry and insert all geometry into that
                 ProxyFaceGeometry *pg = new ProxyFaceGeometry();
-                std::vector<tgt::vec3> vertices;
-                std::vector<tgt::vec4> colors;
+                std::vector<cgt::vec3> vertices;
+                std::vector<cgt::vec4> colors;
 
                 size_t size = selectedObject._points.size();
 
@@ -258,18 +258,18 @@ namespace campvis {
                         double x, y, z = selectedObject._points[0].z;
                         alglib::pspline2calc(p, pos, x, y);
                         pos += stepSize;
-                        vertices.push_back(tgt::vec3(x, y, z));
+                        vertices.push_back(cgt::vec3(x, y, z));
                         colors.push_back(selectedObject._color.getValue());
                     }
 
-                    pg->addGeometry(FaceGeometry(vertices, std::vector<tgt::vec3>(), colors));
+                    pg->addGeometry(FaceGeometry(vertices, std::vector<cgt::vec3>(), colors));
                 }
 
                 for (size_t i = 1; i < p_objectList->getOptionCount(); i++) {
                     for (size_t j = 0; j < p_objectList->getOptionReference(static_cast<int>(i))._objectsCoordinates.size(); j++) {
                         vertices.clear();
                         colors.clear();
-                        const std::vector<tgt::ivec3 >& it = p_objectList->getOptionReference(static_cast<int>(i))._objectsCoordinates[j];
+                        const std::vector<cgt::ivec3 >& it = p_objectList->getOptionReference(static_cast<int>(i))._objectsCoordinates[j];
                         
                         alglib::real_2d_array xy;
                         alglib::pspline2interpolant p;
@@ -296,10 +296,10 @@ namespace campvis {
                                 double x, y, z = it[0].z;
                                 alglib::pspline2calc(p, pos, x, y);
                                 pos += stepSize;
-                                vertices.push_back(tgt::vec3(x, y, z));
+                                vertices.push_back(cgt::vec3(x, y, z));
                                 colors.push_back(p_objectList->getOptionReference(static_cast<int>(i))._color.getValue());
                             }
-                            pg->addGeometry(FaceGeometry(vertices, std::vector<tgt::vec3>(), colors));
+                            pg->addGeometry(FaceGeometry(vertices, std::vector<cgt::vec3>(), colors));
                         }
                     }
                 }
@@ -344,12 +344,12 @@ namespace campvis {
 
     void MicroscopyImageSegmentation::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == _viewportSizeProperty) {
-            p_rightPaneBlockSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
-            p_leftPaneSize.setValue(tgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y/3, _viewportSizeProperty->getValue().y));
+            p_rightPaneBlockSize.setValue(cgt::ivec2(_viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y / 3));
+            p_leftPaneSize.setValue(cgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y/3, _viewportSizeProperty->getValue().y));
 
             p_zSize.setValue(p_leftPaneSize.getValue().x < p_leftPaneSize.getValue().y ? 
-                tgt::vec2(p_leftPaneSize.getValue().x, p_leftPaneSize.getValue().x) 
-                : tgt::vec2(p_leftPaneSize.getValue().y, p_leftPaneSize.getValue().y));
+                cgt::vec2(p_leftPaneSize.getValue().x, p_leftPaneSize.getValue().x) 
+                : cgt::vec2(p_leftPaneSize.getValue().y, p_leftPaneSize.getValue().y));
         }
         if (prop == &p_outputImage) {
             _vr.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
@@ -380,19 +380,19 @@ namespace campvis {
         createAndAttachColorTexture();
         createAndAttachDepthTexture();
 
-        tgt::TextureUnit colorUnit, depthUnit;
+        cgt::TextureUnit colorUnit, depthUnit;
         _shader->activate();
 
-        tgt::vec2 leftPane(p_leftPaneSize.getValue());
-        tgt::vec2 blockSize(p_rightPaneBlockSize.getValue());
-        tgt::vec2 zsize(p_zSize.getValue());
+        cgt::vec2 leftPane(p_leftPaneSize.getValue());
+        cgt::vec2 blockSize(p_rightPaneBlockSize.getValue());
+        cgt::vec2 zsize(p_zSize.getValue());
 
-        tgt::vec2 zsPos(tgt::vec2(0 + (leftPane.x - zsize.x) / 2, 0 + (leftPane.y - zsize.y) / 2));
-        tgt::vec2 xsPos(tgt::vec2(leftPane.x, blockSize.y*0));
-        tgt::vec2 ysPos(tgt::vec2(leftPane.x, blockSize.y*1));
-        tgt::vec2 vrPos(tgt::vec2(leftPane.x, blockSize.y*2));
+        cgt::vec2 zsPos(cgt::vec2(0 + (leftPane.x - zsize.x) / 2, 0 + (leftPane.y - zsize.y) / 2));
+        cgt::vec2 xsPos(cgt::vec2(leftPane.x, blockSize.y*0));
+        cgt::vec2 ysPos(cgt::vec2(leftPane.x, blockSize.y*1));
+        cgt::vec2 vrPos(cgt::vec2(leftPane.x, blockSize.y*2));
 
-        _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, _viewportSizeProperty->getValue().x, _viewportSizeProperty->getValue().y, 0, -1, 1));
+        _shader->setUniform("_projectionMatrix", cgt::mat4::createOrtho(0, _viewportSizeProperty->getValue().x, _viewportSizeProperty->getValue().y, 0, -1, 1));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (vrImage != 0) {
@@ -400,8 +400,8 @@ namespace campvis {
             _shader->setUniform("_renderBackground", true);
 
             vrImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(blockSize.x, blockSize.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(vrPos.x, vrPos.y, 0.f)));
+            _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(blockSize.x, blockSize.y, .5f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(vrPos.x, vrPos.y, 0.f)));
             _quad->render(GL_POLYGON);
 
             _shader->setUniform("_renderBackground", false);
@@ -409,25 +409,25 @@ namespace campvis {
         }
         if (zSliceImage != 0) {
             zSliceImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(zsize.x, zsize.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(zsPos.x, zsPos.y, 0.f)));
+            _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(zsize.x, zsize.y, .5f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(zsPos.x, zsPos.y, 0.f)));
             _quad->render(GL_POLYGON);
         }
         if (ySliceImage != 0) {
             ySliceImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(blockSize.x, blockSize.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(ysPos.x, ysPos.y, 0.f)));
+            _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(blockSize.x, blockSize.y, .5f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(ysPos.x, ysPos.y, 0.f)));
             _quad->render(GL_POLYGON);
         }
         if (xSliceImage != 0) {
             xSliceImage->bind(_shader, colorUnit, depthUnit);
-            _shader->setUniform("_modelMatrix", tgt::mat4::createScale(tgt::vec3(blockSize.x, blockSize.y, .5f)));
-            _shader->setUniform("_viewMatrix", tgt::mat4::createTranslation(tgt::vec3(xsPos.x, xsPos.y, 0.f)));
+            _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(blockSize.x, blockSize.y, .5f)));
+            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(xsPos.x, xsPos.y, 0.f)));
             _quad->render(GL_POLYGON);
         }
 
         _shader->deactivate();
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 
         data.addData(p_outputImage.getValue(), new RenderData(_fbo));
@@ -454,7 +454,7 @@ namespace campvis {
         static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->setImageHandle(img.getDataHandle());
 
         if (img != 0) {
-            const tgt::svec3& imgSize = img->getSize();
+            const cgt::svec3& imgSize = img->getSize();
             if (_sliceExtractor.p_xSliceNumber.getMaxValue() != static_cast<int>(imgSize.x) - 1){
                 _sliceExtractor.p_xSliceNumber.setMaxValue(static_cast<int>(imgSize.x) - 1);
                 _sliceExtractor.p_xSliceNumber.setValue(static_cast<int>(imgSize.x) / 2);
@@ -474,20 +474,20 @@ namespace campvis {
         validate(AbstractProcessor::INVALID_PROPERTIES);
     }
 
-    void MicroscopyImageSegmentation::onEvent(tgt::Event* e) {
-        tgt::vec2 leftPane(p_leftPaneSize.getValue());
-        tgt::vec2 blockSize(p_rightPaneBlockSize.getValue());
-        tgt::vec2 zsize(p_zSize.getValue());
+    void MicroscopyImageSegmentation::onEvent(cgt::Event* e) {
+        cgt::vec2 leftPane(p_leftPaneSize.getValue());
+        cgt::vec2 blockSize(p_rightPaneBlockSize.getValue());
+        cgt::vec2 zsize(p_zSize.getValue());
 
-        tgt::vec2 zsPos(tgt::vec2(0 + (leftPane.x - zsize.x) / 2, 0 + (leftPane.y - zsize.y) / 2));
-        tgt::vec2 xsPos(tgt::vec2(leftPane.x, blockSize.y*0));
-        tgt::vec2 ysPos(tgt::vec2(leftPane.x, blockSize.y*1));
-        tgt::vec2 vrPos(tgt::vec2(leftPane.x, blockSize.y*2));
+        cgt::vec2 zsPos(cgt::vec2(0 + (leftPane.x - zsize.x) / 2, 0 + (leftPane.y - zsize.y) / 2));
+        cgt::vec2 xsPos(cgt::vec2(leftPane.x, blockSize.y*0));
+        cgt::vec2 ysPos(cgt::vec2(leftPane.x, blockSize.y*1));
+        cgt::vec2 vrPos(cgt::vec2(leftPane.x, blockSize.y*2));
 
-        if (typeid(*e) == typeid(tgt::KeyEvent)) {
-            tgt::KeyEvent* ke = static_cast<tgt::KeyEvent*>(e);
+        if (typeid(*e) == typeid(cgt::KeyEvent)) {
+            cgt::KeyEvent* ke = static_cast<cgt::KeyEvent*>(e);
             ContourObject& selectedObject = this->p_objectList->getOptionReference();
-            if (ke->modifiers() & tgt::Event::CTRL && ke->pressed() && ke->keyCode() == 'z') {
+            if (ke->modifiers() & cgt::Event::CTRL && ke->pressed() && ke->keyCode() == 'z') {
                 if (selectedObject._points.size() == 0) {
                     if (selectedObject._objectsCoordinates.size() > 0) {
                         selectedObject._points = selectedObject._objectsCoordinates[selectedObject._objectsCoordinates.size() - 1];
@@ -497,7 +497,7 @@ namespace campvis {
                 if (selectedObject._points.size() > 0) 
                     selectedObject._points.erase(selectedObject._points.end()-1);
             }
-            else if (ke->keyCode() == tgt::KeyEvent::K_DELETE) {
+            else if (ke->keyCode() == cgt::KeyEvent::K_DELETE) {
                 if (true == editVoxel) {
                     selectedObject._points.erase(selectedObject._points.begin() + insertNextVoxelAt);
                     editVoxel = false;
@@ -505,31 +505,31 @@ namespace campvis {
                     invalidate(INVALID_RESULT | SCRIBBLE_INVALID);
                 }
             }
-            else if (ke->keyCode() == tgt::KeyEvent::K_UP) {
-                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() - tgt::ivec2(0, 5));
+            else if (ke->keyCode() == cgt::KeyEvent::K_UP) {
+                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() - cgt::ivec2(0, 5));
             }
-            else if (ke->keyCode() == tgt::KeyEvent::K_DOWN) {
-                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() + tgt::ivec2(0, 5));
+            else if (ke->keyCode() == cgt::KeyEvent::K_DOWN) {
+                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() + cgt::ivec2(0, 5));
             }
-            else if (ke->keyCode() == tgt::KeyEvent::K_LEFT) {
-                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() - tgt::ivec2(5, 0));
+            else if (ke->keyCode() == cgt::KeyEvent::K_LEFT) {
+                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() - cgt::ivec2(5, 0));
             }
-            else if (ke->keyCode() == tgt::KeyEvent::K_RIGHT) {
-                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() + tgt::ivec2(5, 0));
+            else if (ke->keyCode() == cgt::KeyEvent::K_RIGHT) {
+                _sliceExtractor.p_offset.setValue(_sliceExtractor.p_offset.getValue() + cgt::ivec2(5, 0));
             }
             invalidate(INVALID_RESULT | SCRIBBLE_INVALID);
         }
 
         // forward the event to the corresponding event listeners depending on the mouse position
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
+        if (typeid(*e) == typeid(cgt::MouseEvent)) {
+            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
 
             ContourObject& selectedObject = this->p_objectList->getOptionReference();
 
             // we're currently on the slice view (left-hand) side and not in the process of changing the camera trackball
             if (!_mousePressedInRaycaster && (me->x() <= leftPane.x || me->y() >= blockSize.y)) {
                 // Mouse wheel has changed -> cycle slices
-                if (me->action() == tgt::MouseEvent::WHEEL && !(me->modifiers() & tgt::Event::CTRL)) {
+                if (me->action() == cgt::MouseEvent::WHEEL && !(me->modifiers() & cgt::Event::CTRL)) {
                     if (me->y() >= blockSize.y*2 && me->x() >= leftPane.x)
                         _xSliceHandler.onEvent(e);
                     else if (me->y() >= blockSize.y && me->x() >= leftPane.x)
@@ -538,17 +538,17 @@ namespace campvis {
                         _zSliceHandler.onEvent(e);
                 }
                 // CTRL+wheel -> adjust zooming
-                else if (me->action() == tgt::MouseEvent::WHEEL && me->modifiers() & tgt::Event::CTRL) {
+                else if (me->action() == cgt::MouseEvent::WHEEL && me->modifiers() & cgt::Event::CTRL) {
                     if (_sliceExtractor.p_fitToWindow.getValue() == false) {
-                        if (me->button() & tgt::MouseEvent::MOUSE_WHEEL_DOWN)
+                        if (me->button() & cgt::MouseEvent::MOUSE_WHEEL_DOWN)
                             _sliceExtractor.p_scalingFactor.setValue(_sliceExtractor.p_scalingFactor.getValue() * 0.9f);
                         else 
                             _sliceExtractor.p_scalingFactor.setValue(_sliceExtractor.p_scalingFactor.getValue() * 1.11f);
                     }
                 }
                 else if (p_enableScribbling.getValue() ) {
-                    if (me->action() == tgt::MouseEvent::PRESSED) {
-                        if (me->button() & tgt::MouseEvent::MOUSE_BUTTON_RIGHT) {
+                    if (me->action() == cgt::MouseEvent::PRESSED) {
+                        if (me->button() & cgt::MouseEvent::MOUSE_BUTTON_RIGHT) {
                             selectedObject.addObject();
                             //_sliceExtractor.onEvent(me);
                             invalidate(INVALID_RESULT | SCRIBBLE_INVALID);
@@ -560,7 +560,7 @@ namespace campvis {
 
                     if (me->y() <= blockSize.y * 2 && me->x() >= leftPane.x) {
                         _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::XZ_PLANE);//xz
-                        tgt::MouseEvent adjustedMe(
+                        cgt::MouseEvent adjustedMe(
                             me->x() - p_leftPaneSize.getValue().x, me->y() - p_rightPaneBlockSize.getValue().y,
                             me->action(), me->modifiers(), me->button(),
                             p_rightPaneBlockSize.getValue()
@@ -571,7 +571,7 @@ namespace campvis {
                     }
                     else if (me->y() >= blockSize.y * 2 && me->x() >= leftPane.x) {
                         _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::YZ_PLANE);//yz
-                        tgt::MouseEvent adjustedMe(
+                        cgt::MouseEvent adjustedMe(
                             me->x() - p_leftPaneSize.getValue().x, me->y() - p_rightPaneBlockSize.getValue().y *2,
                             me->action(), me->modifiers(), me->button(),
                             p_rightPaneBlockSize.getValue()
@@ -587,11 +587,11 @@ namespace campvis {
                     }
                     else {
                         // If ALT is pressed mark for edit. next scribble is edit scribble. the location of insert is insertNextVoxelAt
-                        if (me->modifiers() & tgt::Event::ALT)
+                        if (me->modifiers() & cgt::Event::ALT)
                             editVoxel = true;
 
                         _sliceExtractor.p_sliceOrientation.selectByOption(SliceExtractor::XY_PLANE);
-                        tgt::MouseEvent adjustedMe(
+                        cgt::MouseEvent adjustedMe(
                             me->x() -  (leftPane.x - zsize.x) / 2, me->y() -  (leftPane.y - zsize.y) / 2,
                             me->action(), me->modifiers(), me->button(),
                             p_zSize.getValue()
@@ -602,18 +602,18 @@ namespace campvis {
             }
             else {
                 // raycasting trackball navigation
-                if (me->action() == tgt::MouseEvent::PRESSED)
+                if (me->action() == cgt::MouseEvent::PRESSED)
                     _mousePressedInRaycaster = true;
-                else if (me->action() == tgt::MouseEvent::RELEASED)
+                else if (me->action() == cgt::MouseEvent::RELEASED)
                     _mousePressedInRaycaster = false;
 
-                tgt::MouseEvent adjustedMe(
+                cgt::MouseEvent adjustedMe(
                     me->x() - p_leftPaneSize.getValue().x,
                     me->y(),
                     me->action(),
                     me->modifiers(),
                     me->button(),
-                    //me->viewport() - tgt::ivec2(p_sliceRenderSize.getValue().x, 0)
+                    //me->viewport() - cgt::ivec2(p_sliceRenderSize.getValue().x, 0)
                     //me->viewport() - p_volumeRenderSize.getValue());
                     p_rightPaneBlockSize.getValue());
                 _trackballEH->onEvent(&adjustedMe);
@@ -621,7 +621,7 @@ namespace campvis {
         }
     }
 
-    void MicroscopyImageSegmentation::onSliceExtractorScribblePainted(tgt::vec3 voxel) {
+    void MicroscopyImageSegmentation::onSliceExtractorScribblePainted(cgt::vec3 voxel) {
         ContourObject& selectedObject = this->p_objectList->getOptionReference();
 
         if (!(selectedObject._objectName == first[0]._value._objectName)) {
@@ -658,7 +658,7 @@ namespace campvis {
         std::string name = _objectNamePrefix;
         name += StringUtils::toString(++_objectNameSuffix, 2, '0');
         ContourObject obj(name);
-        obj._color.setValue(tgt::vec4(
+        obj._color.setValue(cgt::vec4(
             static_cast<float>(0.9 - 0.2 * (_objectNameSuffix%3) + 0.15 *(_objectNameSuffix/3)),
             static_cast<float>(0.2 + 0.2 * (_objectNameSuffix%3) - 0.15 *(_objectNameSuffix/3)), 
             static_cast<float>(0.5 + 0.2 * (_objectNameSuffix%3) - 0.15 *(_objectNameSuffix/3)), 1));
@@ -685,7 +685,7 @@ namespace campvis {
         invalidate(INVALID_RESULT | SCRIBBLE_INVALID);
     }
 
-    double MicroscopyImageSegmentation::distanceSqr(tgt::vec3 src, tgt::vec3 dest) {
+    double MicroscopyImageSegmentation::distanceSqr(cgt::vec3 src, cgt::vec3 dest) {
         return (src.x - dest.x)*(src.x - dest.x) 
             + (src.y - dest.y)*(src.y - dest.y) 
             + (src.z - dest.z)*(src.z - dest.z);
@@ -703,7 +703,7 @@ namespace campvis {
             for (size_t i = 1; i < p_objectList->getOptionCount(); i++) {
                 csvFile << i<<",,,,\n";
                 for (size_t j = 0; j < p_objectList->getOptionReference(static_cast<int>(i))._objectsCoordinates.size(); j++) {
-                    const std::vector<tgt::ivec3 >& it = p_objectList->getOptionReference(static_cast<int>(i))._objectsCoordinates[j];
+                    const std::vector<cgt::ivec3 >& it = p_objectList->getOptionReference(static_cast<int>(i))._objectsCoordinates[j];
 
                     csvFile << "," <<j << ",,,\n";
                     for (size_t k = 0; k <  it.size(); k++) {

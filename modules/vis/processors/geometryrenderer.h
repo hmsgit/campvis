@@ -35,7 +35,7 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/optionproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -110,8 +110,8 @@ namespace campvis {
          */
         std::string generateGlslHeader(bool hasGeometryShader) const;
 
-        tgt::Shader* _pointShader;
-        tgt::Shader* _meshShader;
+        cgt::Shader* _pointShader;
+        cgt::Shader* _meshShader;
 
     private:
         static const std::string loggerCat_;

@@ -31,12 +31,12 @@ namespace campvis {
     LightSourceProvider::LightSourceProvider() 
         : AbstractProcessor()
         , p_lightId("LightId", "Light Name/ID", "lightsource", DataNameProperty::WRITE)
-        , p_lightPosition("LightPosition", "Light Position", tgt::vec3(-100.f), tgt::vec3(-500.f), tgt::vec3(500.f), tgt::vec3(1.f))
-        , p_ambientColor("AmbientColor", "Ambient Light Color", tgt::vec3(0.4f), tgt::vec3(0.f), tgt::vec3(1.f))
-        , p_diffuseColor("DiffuseColor", "Diffuse Light Color", tgt::vec3(0.75f), tgt::vec3(0.f), tgt::vec3(1.f))
-        , p_specularColor("SpecularColor", "Specular Light Color", tgt::vec3(0.6f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , p_lightPosition("LightPosition", "Light Position", cgt::vec3(-100.f), cgt::vec3(-500.f), cgt::vec3(500.f), cgt::vec3(1.f))
+        , p_ambientColor("AmbientColor", "Ambient Light Color", cgt::vec3(0.4f), cgt::vec3(0.f), cgt::vec3(1.f))
+        , p_diffuseColor("DiffuseColor", "Diffuse Light Color", cgt::vec3(0.75f), cgt::vec3(0.f), cgt::vec3(1.f))
+        , p_specularColor("SpecularColor", "Specular Light Color", cgt::vec3(0.6f), cgt::vec3(0.f), cgt::vec3(1.f))
         , p_shininess("Shininess", "Specular Shininess", 24.f, 0.f, 64.f, 0.5f)
-        , p_attenuation("Attenuation", "Attenuation Factors", tgt::vec3(0.f), tgt::vec3(0.f), tgt::vec3(1.f))
+        , p_attenuation("Attenuation", "Attenuation Factors", cgt::vec3(0.f), cgt::vec3(0.f), cgt::vec3(1.f))
     {
         addProperty(p_lightId);
         addProperty(p_lightPosition);

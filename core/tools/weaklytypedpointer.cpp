@@ -32,7 +32,7 @@ namespace campvis {
         , _numChannels(numChannels)
         , _pointer(ptr)
     {
-        tgtAssert(_numChannels > 0, "Number of channels out of bounds!");
+        cgtAssert(_numChannels > 0, "Number of channels out of bounds!");
     };
 
     WeaklyTypedPointer::WeaklyTypedPointer()
@@ -60,7 +60,7 @@ namespace campvis {
             case WeaklyTypedPointer::FLOAT:
                 return sizeof(float) * numChannels;
             default:
-                tgtAssert(false, "Should not reach this - called WeaklyTypedPointer::numBytes() with wrong argument!");
+                cgtAssert(false, "Should not reach this - called WeaklyTypedPointer::numBytes() with wrong argument!");
                 return 1;
         }
     };
@@ -80,7 +80,7 @@ namespace campvis {
             case 4:
                 return GL_RGBA;
             default:
-                tgtAssert(false, "Should not reach this, wrong number of channels!");
+                cgtAssert(false, "Should not reach this, wrong number of channels!");
                 return GL_RED;
         }
     }
@@ -102,7 +102,7 @@ namespace campvis {
             case WeaklyTypedPointer::FLOAT:
                 return GL_FLOAT;
             default:
-                tgtAssert(false, "Should not reach this - wrong base data type!");
+                cgtAssert(false, "Should not reach this - wrong base data type!");
                 return GL_BYTE;
         }
     }
@@ -122,7 +122,7 @@ namespace campvis {
                     case WeaklyTypedPointer::FLOAT:
                         return GL_R32F;
                     default:
-                        tgtAssert(false, "Should not reach this - wrong base data type!");
+                        cgtAssert(false, "Should not reach this - wrong base data type!");
                         return GL_RED;
                 }
             case 2:
@@ -139,7 +139,7 @@ namespace campvis {
                     case WeaklyTypedPointer::FLOAT:
                         return GL_RG32F;
                     default:
-                        tgtAssert(false, "Should not reach this - wrong base data type!");
+                        cgtAssert(false, "Should not reach this - wrong base data type!");
                         return GL_RG;
                 }
             case 3:
@@ -156,7 +156,7 @@ namespace campvis {
                     case WeaklyTypedPointer::FLOAT:
                         return GL_RGB32F;
                     default:
-                        tgtAssert(false, "Should not reach this - wrong base data type!");
+                        cgtAssert(false, "Should not reach this - wrong base data type!");
                         return GL_RGB;
                 }
             case 4:
@@ -173,11 +173,11 @@ namespace campvis {
                     case WeaklyTypedPointer::FLOAT:
                         return GL_RGBA32F;
                     default:
-                        tgtAssert(false, "Should not reach this - wrong base data type!");
+                        cgtAssert(false, "Should not reach this - wrong base data type!");
                         return GL_RGBA;
                 }
             default:
-                tgtAssert(false, "Should not reach hier, wrong number of channels!");
+                cgtAssert(false, "Should not reach hier, wrong number of channels!");
                 return GL_RED;
         }
     }
@@ -272,7 +272,7 @@ namespace campvis {
                 break;
 
             default:
-                tgtAssert(false, "Should not reach this, wrong number of gl format!");
+                cgtAssert(false, "Should not reach this, wrong number of gl format!");
                 return 0;
         }
     }
@@ -294,7 +294,7 @@ namespace campvis {
             case GL_FLOAT:
                 return WeaklyTypedPointer::FLOAT;
             default:
-                tgtAssert(false, "Unsupported OpenGL data type.");
+                cgtAssert(false, "Unsupported OpenGL data type.");
                 return WeaklyTypedPointer::INT8;
         }
     }
@@ -323,7 +323,7 @@ namespace campvis {
             case 4:
                 return IL_RGBA;
             default:
-                tgtAssert(false, "Should not reach this, wrong number of channels!");
+                cgtAssert(false, "Should not reach this, wrong number of channels!");
                 return IL_ALPHA;
         }
     }
@@ -345,7 +345,7 @@ namespace campvis {
             case WeaklyTypedPointer::FLOAT:
                 return IL_FLOAT;
             default:
-                tgtAssert(false, "Should not reach this - wrong base data type!");
+                cgtAssert(false, "Should not reach this - wrong base data type!");
                 return GL_BYTE;
         }
     }

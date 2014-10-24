@@ -24,7 +24,7 @@
 
 #include "ixpvdemo.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
@@ -91,15 +91,15 @@ namespace campvis {
         _ctReader.p_targetImageID.setValue("ct.image");
         _ctReader.s_validated.connect(this, &IxpvDemo::onProcessorValidated);
 
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(0, 0, 0, 180)));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .08f));
+        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.5f, 1.f), cgt::col4(0, 0, 0, 0), cgt::col4(0, 0, 0, 180)));
         static_cast<TransferFunctionProperty*>(_vrFull.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(tf);
         _vrFull.p_outputImage.setValue("ct.drr.full");
         static_cast<FloatProperty*>(_vrFull.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(1.f);
         static_cast<BoolProperty*>(_vrFull.getNestedProperty("RaycasterProps::InvertMapping"))->setValue(true);
         
-        Geometry1DTransferFunction* tf2 = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .08f));
-        tf2->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.5f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(0, 0, 0, 180)));
+        Geometry1DTransferFunction* tf2 = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .08f));
+        tf2->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.5f, 1.f), cgt::col4(0, 0, 0, 0), cgt::col4(0, 0, 0, 180)));
         static_cast<TransferFunctionProperty*>(_vrClipped.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(tf2);
         _vrClipped.p_outputImage.setValue("ct.drr.clipped");
         static_cast<FloatProperty*>(_vrClipped.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(1.f);
@@ -111,8 +111,8 @@ namespace campvis {
         _usReader.p_url.setValue("D:\\Medical Data\\XrayDepthPerception\\DataCowLeg\\Ultrasound\\gaussianSmoothedUS_UChar.mhd");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_targetImageID.addSharedProperty(&_usSliceRenderer.p_sourceImageID);
-        _usReader.p_imageOffset.setValue(tgt::vec3(-80.f, 0.f, -80.f));
-        _usReader.p_voxelSize.setValue(tgt::vec3(1.f, 1.f, 1.3f));
+        _usReader.p_imageOffset.setValue(cgt::vec3(-80.f, 0.f, -80.f));
+        _usReader.p_voxelSize.setValue(cgt::vec3(1.f, 1.f, 1.3f));
 
         _usSliceRenderer.p_targetImageID.setValue("us.slice");
         _usSliceRenderer.p_targetImageID.addSharedProperty(_vrClipped.getNestedProperty("EEPProps::GeometryImageId"));
@@ -141,14 +141,14 @@ namespace campvis {
             ImageRepresentationLocal::ScopedRepresentation local(*_data, _ctReader.p_targetImageID.getValue());
             if (local != 0) {
                 // update camera
-                tgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
+                cgt::Bounds volumeExtent = local->getParent()->getWorldBounds();
 
                 _trackballHandler->setSceneBounds(volumeExtent);
                 _trackballHandler->setCenter(volumeExtent.center());
                 _trackballHandler->reinitializeCamera(
-                    tgt::vec3(17.6188f, -386.82f, 69.0831f), 
-                    tgt::vec3(-40.0402f, 0.1685f, 27.9503f), 
-                    tgt::vec3(0.9882f, 0.1504f, 0.0299f));
+                    cgt::vec3(17.6188f, -386.82f, 69.0831f), 
+                    cgt::vec3(-40.0402f, 0.1685f, 27.9503f), 
+                    cgt::vec3(0.9882f, 0.1504f, 0.0299f));
             }   
         }
         else if (processor == &_usReader) {
@@ -156,7 +156,7 @@ namespace campvis {
             ImageRepresentationLocal::ScopedRepresentation local(*_data, _usReader.p_targetImageID.getValue());
             if (local != 0) {
                 Interval<float> ii = local->getNormalizedIntensityRange();
-                _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                _usSliceRenderer.p_transferFunction.getTF()->setIntensityDomain(cgt::vec2(ii.getLeft(), ii.getRight()));
                 _usSliceRenderer.p_sliceNumber.setValue(125);
             }
         }

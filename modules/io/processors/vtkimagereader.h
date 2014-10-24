@@ -28,7 +28,7 @@
 #include <string>
 #include "abstractimagereader.h"
 
-#include "tgt/exception.h"
+#include "cgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
@@ -67,9 +67,9 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception);
 
-        void parsePolydata(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+        void parsePolydata(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception);
 
         static const std::string loggerCat_;
     };

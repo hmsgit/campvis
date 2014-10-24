@@ -23,11 +23,11 @@
 // ================================================================================================
 
 #include "lightsourcedata.h"
-#include "tgt/shadermanager.h"
+#include "cgt/shadermanager.h"
 
 namespace campvis {
     
-    LightSourceData::LightSourceData(const tgt::vec3& lightPosition, const tgt::vec3& ambientColor /*= tgt::vec3(.4f)*/, const tgt::vec3& diffuseColor /*= tgt::vec3(.75f)*/, const tgt::vec3& specularColor /*= tgt::vec3(.6f)*/, float shininess /*= 24.f*/, const tgt::vec3& attenuation /*= tgt::vec3(0.f)*/)
+    LightSourceData::LightSourceData(const cgt::vec3& lightPosition, const cgt::vec3& ambientColor /*= cgt::vec3(.4f)*/, const cgt::vec3& diffuseColor /*= cgt::vec3(.75f)*/, const cgt::vec3& specularColor /*= cgt::vec3(.6f)*/, float shininess /*= 24.f*/, const cgt::vec3& attenuation /*= cgt::vec3(0.f)*/)
         : AbstractData()
         , _lightPosition(lightPosition)
         , _ambientColor(ambientColor)
@@ -55,8 +55,8 @@ namespace campvis {
         return 0;
     }
 
-    void LightSourceData::bind(tgt::Shader* shader, const std::string& uniformName) const {
-        tgt::Shader::IgnoreUniformLocationErrorGuard guard(shader);
+    void LightSourceData::bind(cgt::Shader* shader, const std::string& uniformName) const {
+        cgt::Shader::IgnoreUniformLocationErrorGuard guard(shader);
 
         shader->setUniform(uniformName + "._position", _lightPosition);
         shader->setUniform(uniformName + "._ambientColor", _ambientColor);

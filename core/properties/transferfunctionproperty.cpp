@@ -38,7 +38,7 @@ namespace campvis {
         , _imageHandle(0)
         , _autoFitWindowToData(true)
     {
-        tgtAssert(tf != 0, "Assigned transfer function must not be 0.");
+        cgtAssert(tf != 0, "Assigned transfer function must not be 0.");
         
         tf->s_changed.connect(this, &TransferFunctionProperty::onTFChanged);
         tf->s_intensityDomainChanged.connect(this, &TransferFunctionProperty::onTfIntensityDomainChanged);
@@ -68,7 +68,7 @@ namespace campvis {
     }
 
     void TransferFunctionProperty::replaceTF(AbstractTransferFunction* tf) {
-        tgtAssert(tf != 0, "Transfer function must not be 0.");
+        cgtAssert(tf != 0, "Transfer function must not be 0.");
         s_BeforeTFReplace.triggerSignal(_transferFunction); // use trigger to force blocking signal handling in same thread
 
         if (_transferFunction != 0) {
@@ -89,7 +89,7 @@ namespace campvis {
     }
 
     void TransferFunctionProperty::addSharedProperty(AbstractProperty* prop) {
-        tgtAssert(false, "Sharing of TF properties not supported!");
+        cgtAssert(false, "Sharing of TF properties not supported!");
     }
 
     campvis::DataHandle TransferFunctionProperty::getImageHandle() const {
@@ -97,7 +97,7 @@ namespace campvis {
     }
 
     void TransferFunctionProperty::setImageHandle(DataHandle imageHandle) {
-        tgtAssert(
+        cgtAssert(
             imageHandle.getData() == 0 || dynamic_cast<const ImageData*>(imageHandle.getData()) != 0, 
             "The data in the image handle must either be 0 or point to a valid ImageData object!");
 
@@ -106,7 +106,7 @@ namespace campvis {
             	const ImageRepresentationLocal* localRep = id->getRepresentation<ImageRepresentationLocal>();
                 if (localRep != 0) {
                     const Interval<float>& ii = localRep->getNormalizedIntensityRange();
-                    _transferFunction->setIntensityDomain(tgt::vec2(ii.getLeft(), ii.getRight()));
+                    _transferFunction->setIntensityDomain(cgt::vec2(ii.getLeft(), ii.getRight()));
                 }
             }
         }

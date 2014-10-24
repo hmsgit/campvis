@@ -101,7 +101,7 @@ namespace campvis {
                 case WeaklyTypedPointer::FLOAT: \
                     CONVERT_DISK_TO_GENERIC_LOCAL(float, (numChannels)) \
                 default: \
-                    tgtAssert(false, "Should not reach this - wrong base data type!"); \
+                    cgtAssert(false, "Should not reach this - wrong base data type!"); \
                     return 0; \
             } \
         }
@@ -112,7 +112,7 @@ namespace campvis {
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(4)
         else DISPATCH_DISK_TO_GENERIC_LOCAL_CONVERSION(6)
         else {
-            tgtAssert(false, "Should not reach this - wrong number of channel!");
+            cgtAssert(false, "Should not reach this - wrong number of channel!");
             return 0;
         }
     }

@@ -100,7 +100,7 @@ namespace campvis {
     void TransferFunctionPropertyWidget::updateWidgetFromProperty() {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         AbstractTransferFunction* tf = prop->getTF();
-        const tgt::vec2& domain = tf->getIntensityDomain();
+        const cgt::vec2& domain = tf->getIntensityDomain();
 
         _spinDomainLeft->blockSignals(true);
         _spinDomainLeft->setMaximum(domain.y);
@@ -122,7 +122,7 @@ namespace campvis {
         ++_ignorePropertyUpdates;
         _spinDomainLeft->setMaximum(_spinDomainRight->value());
         _spinDomainRight->setMinimum(_spinDomainLeft->value());
-        tgt::vec2 newDomain(static_cast<float>(_spinDomainLeft->value()), static_cast<float>(_spinDomainRight->value()));
+        cgt::vec2 newDomain(static_cast<float>(_spinDomainLeft->value()), static_cast<float>(_spinDomainRight->value()));
         prop->getTF()->setIntensityDomain(newDomain);
         --_ignorePropertyUpdates;
     }
@@ -150,7 +150,7 @@ namespace campvis {
             const ImageRepresentationLocal* idl = static_cast<const ImageData*>(dh.getData())->getRepresentation<ImageRepresentationLocal>();
             if (idl != 0) {
                 Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
-                tf->setIntensityDomain(tgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));
+                tf->setIntensityDomain(cgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));
             }
         }
     }

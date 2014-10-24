@@ -30,7 +30,7 @@
 
 #include "core/coreapi.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -64,14 +64,14 @@ namespace campvis {
          * \param   dataContainer   The current processor's DataContainer
          * \param   shader          Shader object used during rendering.
          */
-        virtual void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
+        virtual void renderProlog(const DataContainer& dataContainer, cgt::Shader* shader);
 
         /**
          * Gets called by the processor after the actual rendering took place.
          * Here is the place to clean up and deinit created resources.
          * \param   shader          Shader object used during rendering.
          */
-        virtual void renderEpilog(tgt::Shader* shader);
+        virtual void renderEpilog(cgt::Shader* shader);
 
         /**
          * Returns an additional header that will be linked into the fragment shader.
@@ -114,14 +114,14 @@ namespace campvis {
          * \param   dataContainer   DataContainer to work on
          * \param   shader          Shader to decorate
          */
-        void decorateRenderProlog(const DataContainer& dataContainer, tgt::Shader* shader) const;
+        void decorateRenderProlog(const DataContainer& dataContainer, cgt::Shader* shader) const;
 
         /**
          * Calls renderProlog() on each held decorator.
          * To be called after rendering to decorate \a shader.
          * \param   shader          Shader to decorate
          */
-        void decorateRenderEpilog(tgt::Shader* shader) const;
+        void decorateRenderEpilog(cgt::Shader* shader) const;
 
         /**
          * Concatenates and returns the GLSL headers of all held decorators.

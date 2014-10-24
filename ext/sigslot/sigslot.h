@@ -55,7 +55,7 @@
 #include <set>
 #include <list>
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include <ext/threading.h>
 
 #define TBB_PREVIEW_MEMORY_POOL 1
@@ -64,8 +64,8 @@
 #include <tbb/memory_pool.h>
 #include <tbb/spin_mutex.h>
 
-#include "ext/tgt/runnable.h"
-#include "ext/tgt/singleton.h"
+#include "ext/cgt/runnable.h"
+#include "ext/cgt/singleton.h"
 
 namespace sigslot {
     
@@ -298,8 +298,8 @@ namespace sigslot {
      * 
      * signal_manager can be considered as thread-safe.
      */
-    class SIGSLOT_API signal_manager : public tgt::Singleton<signal_manager>, public tgt::Runnable {
-        friend class tgt::Singleton<signal_manager>;    ///< CRTP
+    class SIGSLOT_API signal_manager : public cgt::Singleton<signal_manager>, public cgt::Runnable {
+        friend class cgt::Singleton<signal_manager>;    ///< CRTP
         friend class _signal_handle_base;               ///< so the custom new/delete operator can access the memory pool
 
     public:

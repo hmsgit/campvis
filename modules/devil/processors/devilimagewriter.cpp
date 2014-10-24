@@ -27,11 +27,11 @@
 
 #include <cstring>
 
-#include "tgt/logmanager.h"
-#include "tgt/filesystem.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texturereaderdevil.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/filesystem.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texturereaderdevil.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationlocal.h"
@@ -62,8 +62,8 @@ namespace campvis {
 
         if (image != 0) {
             std::string filename = p_url.getValue();
-            std::string extension = tgt::FileSystem::fileExtension(filename);
-            std::string filebase = tgt::FileSystem::fullBaseName(filename);
+            std::string extension = cgt::FileSystem::fileExtension(filename);
+            std::string filebase = cgt::FileSystem::fullBaseName(filename);
             if (extension.empty()) {
                 LINFO("Filename has no extension, defaulting to .PNG.");
                 extension = "png";
@@ -95,7 +95,7 @@ namespace campvis {
         }
     }
 
-    void DevilImageWriter::writeIlImage(const WeaklyTypedPointer& wtp, const tgt::ivec2& size, const std::string& filename) const {
+    void DevilImageWriter::writeIlImage(const WeaklyTypedPointer& wtp, const cgt::ivec2& size, const std::string& filename) const {
         // create Devil image from image data and write it to file
         ILuint img;
         ilGenImages(1, &img);

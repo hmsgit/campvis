@@ -29,11 +29,11 @@
 #include <cstring>
 #include <vector>
 
-#include "tgt/logmanager.h"
-#include "tgt/filesystem.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texturereaderdevil.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/filesystem.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texturereaderdevil.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -72,7 +72,7 @@ namespace campvis {
         addProperty(p_importType);
         addProperty(p_importSimilar);
 
-        _devilTextureReader = new tgt::TextureReaderDevil();
+        _devilTextureReader = new cgt::TextureReaderDevil();
     }
 
     DevilImageReader::~DevilImageReader() {
@@ -93,9 +93,9 @@ namespace campvis {
 
     void DevilImageReader::updateResult(DataContainer& data) {
         const std::string& url = p_url.getValue();
-        std::string directory = tgt::FileSystem::dirName(url);
-        std::string base = tgt::FileSystem::baseName(url);
-        std::string ext = tgt::FileSystem::fileExtension(url);
+        std::string directory = cgt::FileSystem::dirName(url);
+        std::string base = cgt::FileSystem::baseName(url);
+        std::string ext = cgt::FileSystem::fileExtension(url);
 
         // check whether we open an image series
         size_t suffixPos = base.find_last_not_of("0123456789");
@@ -112,16 +112,16 @@ namespace campvis {
             std::string prefix = base.substr(0, suffixPos);
             int index = StringUtils::fromString<int>(base.substr(suffixPos));
 
-            while (tgt::FileSystem::fileExists(directory + "/" + prefix + StringUtils::toString(index, suffixLength, '0') + "." + ext)) {
+            while (cgt::FileSystem::fileExists(directory + "/" + prefix + StringUtils::toString(index, suffixLength, '0') + "." + ext)) {
                 files.push_back(directory + "/" + prefix + StringUtils::toString(index, suffixLength, '0') + "." + ext);
                 ++index;
             }
         }
 
-		if (files.empty())
-			return;
+        if (files.empty())
+            return;
 
-        tgt::ivec3 imageSize(0, 0, static_cast<int>(files.size()));
+        cgt::ivec3 imageSize(0, 0, static_cast<int>(files.size()));
         uint8_t* buffer = nullptr;
 
         ILint devilFormat = 0;
@@ -133,7 +133,7 @@ namespace campvis {
             devilFormat = IL_RGBA;
 
         ILint devilDataType = 0;
-		WeaklyTypedPointer::BaseType campvisDataType = WeaklyTypedPointer::UINT8;
+        WeaklyTypedPointer::BaseType campvisDataType = WeaklyTypedPointer::UINT8;
         size_t numChannels = 1;
 
         // start reading
@@ -209,7 +209,7 @@ namespace campvis {
                         LERROR("unsupported image format: " << devilFormat << " (" << files[i] << ")");
                         return;
                 }
-                buffer = new uint8_t[tgt::hmul(imageSize) * WeaklyTypedPointer::numBytes(campvisDataType, numChannels)];
+                buffer = new uint8_t[cgt::hmul(imageSize) * WeaklyTypedPointer::numBytes(campvisDataType, numChannels)];
             }
             else {
                 if (imageSize.x != ilGetInteger(IL_IMAGE_WIDTH)) {
@@ -253,10 +253,10 @@ namespace campvis {
             rd->addColorTexture(id);
 
             // create fake depth image
-			// TODO: think of a better solution to this...
+            // TODO: think of a better solution to this...
             ImageData* idDepth = new ImageData(dimensionality, imageSize, 1);
-            float* ptr = new float[tgt::hmul(imageSize)];
-			memset(ptr, 0, tgt::hmul(imageSize) * sizeof(float));
+            float* ptr = new float[cgt::hmul(imageSize)];
+            memset(ptr, 0, cgt::hmul(imageSize) * sizeof(float));
             WeaklyTypedPointer wtpDepth(campvisDataType, 1, ptr);
             ImageRepresentationLocal::create(idDepth, wtpDepth);
             rd->setDepthTexture(idDepth);

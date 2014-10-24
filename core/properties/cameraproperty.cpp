@@ -29,8 +29,8 @@ namespace campvis {
 
     const std::string CameraProperty::loggerCat_ = "CAMPVis.core.datastructures.CameraProperty";
 
-    CameraProperty::CameraProperty(const std::string& name, const std::string& title, tgt::Camera cam /*= tgt::Camera()*/)
-        : GenericProperty<tgt::Camera>(name, title, cam)
+    CameraProperty::CameraProperty(const std::string& name, const std::string& title, cgt::Camera cam /*= cgt::Camera()*/)
+        : GenericProperty<cgt::Camera>(name, title, cam)
     {
     }
 

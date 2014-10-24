@@ -24,7 +24,7 @@
 
 #include "vectorfielddemo.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -46,7 +46,7 @@ namespace campvis {
         , _vectorFieldRenderer(&_canvasSize)
         , _sliceRenderer(&_canvasSize)
         , _rtc(&_canvasSize)
-        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_camera("Camera", "Camera", cgt::Camera())
         , p_sliceNumber("SliceNuber", "Slice Number", 0, 0, 1024)
         , p_viewSelection("ViewSelection", "Select 3D View", viewSelectionOptions, 2)
         , p_time("Time", "Time", 0, 0, 100)
@@ -113,8 +113,8 @@ namespace campvis {
         _pfr.p_renderOutput.setValue("particles");
         _pfr.setEnabled(false);
 
-        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
-        tf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 255), tgt::col4(255, 255, 255, 255)));
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, 1.f));
+        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 255), cgt::col4(255, 255, 255, 255)));
         _sliceRenderer.p_transferFunction.replaceTF(tf);
         _sliceRenderer.p_targetImageID.setValue("slice");
 

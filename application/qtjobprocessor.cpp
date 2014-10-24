@@ -28,7 +28,7 @@ namespace campvis {
     QtJobProcessor::QtJobProcessor() 
         : QWidget() 
     {
-        connect(this, SIGNAL(newJobSignal(tgt::AbstractJob*)), this, SLOT(onJobArrived(tgt::AbstractJob*)));
+        connect(this, SIGNAL(newJobSignal(cgt::AbstractJob*)), this, SLOT(onJobArrived(cgt::AbstractJob*)));
     }
 
     QtJobProcessor::~QtJobProcessor()
@@ -36,18 +36,18 @@ namespace campvis {
 
     }
 
-    void QtJobProcessor::enqueueJob(tgt::AbstractJob* job) {
+    void QtJobProcessor::enqueueJob(cgt::AbstractJob* job) {
         emit newJobSignal(job);
     }
 
     void QtJobProcessor::enqueueJob(std::function<void(void)> fn)
     {
-        emit newJobSignal(tgt::makeJobOnHeap(fn));
+        emit newJobSignal(cgt::makeJobOnHeap(fn));
     }
 
-    void QtJobProcessor::onJobArrived(tgt::AbstractJob* job)
+    void QtJobProcessor::onJobArrived(cgt::AbstractJob* job)
     {
-        tgtAssert(job, "Job must not be null!");
+        cgtAssert(job, "Job must not be null!");
 
         (*job)();
         delete job;

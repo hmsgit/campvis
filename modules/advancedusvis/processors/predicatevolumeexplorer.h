@@ -66,8 +66,8 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
         
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
         DataNameProperty p_inputLabels;
         DataNameProperty p_inputSnr;
@@ -107,7 +107,7 @@ namespace campvis {
          * \param   voxels  List of voxels to compute the bit histogram for.
          * \return  A histogram where each bit corresponds to the number of voxels in \a voxels where the corresponding predicate yields true.
          */
-        std::vector<int> computeBitHistogram(const std::vector<tgt::vec3>& voxels);
+        std::vector<int> computeBitHistogram(const std::vector<cgt::vec3>& voxels);
 
         PointPredicateEvaluator _predicateEvaluation;   ///< Processor to perform the point predicate evaluation on.
         DataHandle _bitmaskHandle;                      ///< DataHandle storing the predicate bitmask

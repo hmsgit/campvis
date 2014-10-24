@@ -61,8 +61,8 @@ namespace campvis {
         _itkFilter.p_targetImageID.setValue("filtered");
         _itkFilter.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
     
-        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(32, 192, 0, 128), tgt::col4(32, 192, 0, 128)));
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.4f, .5f), cgt::col4(32, 192, 0, 128), cgt::col4(32, 192, 0, 128)));
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
     }
 

@@ -26,8 +26,8 @@
 #define GEOMETRY2DTRANSFERFUNCTIONEDITOR_H__
 
 #include "tbb/mutex.h"
-#include "tgt/painter.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/painter.h"
+#include "cgt/event/eventlistener.h"
 #include "core/classification/tfgeometry2d.h"
 #include "application/gui/properties/abstracttransferfunctioneditor.h"
 
@@ -35,7 +35,7 @@ class QGridLayout;
 class QLabel;
 class QPushButton;
 
-namespace tgt {
+namespace cgt {
     class QtThreadedCanvas;
     class Shader;
 }
@@ -49,7 +49,7 @@ namespace campvis {
     /**
      * Editor widget for a Geometry2DTransferFunction.
      */
-    class Geometry2DTransferFunctionEditor : public AbstractTransferFunctionEditor, public tgt::EventListener, public tgt::Painter {
+    class Geometry2DTransferFunctionEditor : public AbstractTransferFunctionEditor, public cgt::EventListener, public cgt::Painter {
         Q_OBJECT;
 
     public:
@@ -71,11 +71,11 @@ namespace campvis {
          */
         virtual void repaint();
 
-        /// \see tgt::Painter::sizeChanged
-        virtual void sizeChanged(const tgt::ivec2&);
+        /// \see cgt::Painter::sizeChanged
+        virtual void sizeChanged(const cgt::ivec2&);
 
-        /// \see tgt::EventListener::mousePressEvent
-        virtual void mousePressEvent(tgt::MouseEvent* e);
+        /// \see cgt::EventListener::mousePressEvent
+        virtual void mousePressEvent(cgt::MouseEvent* e);
 
         /**
          * Slot to be called when the geometry vector of the transfer function has changed.
@@ -142,7 +142,7 @@ namespace campvis {
 
         QGridLayout* _layout;
 
-        tgt::QtThreadedCanvas* _canvas;
+        cgt::QtThreadedCanvas* _canvas;
         QLabel* _lblIntensityLeft;
         QLabel* _lblIntensityRight;
         QPushButton* _btnAddGeometry;

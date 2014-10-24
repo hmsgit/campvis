@@ -24,12 +24,12 @@
 
 #include "particleflowrenderer.h"
 
-#include "tgt/buffer.h"
-#include "tgt/tgt_math.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/buffer.h"
+#include "cgt/cgt_math.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/vertexarrayobject.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -70,7 +70,7 @@ namespace campvis {
         , p_transferFunction("TransferFunction", "Coloring Transfer Function", new Geometry1DTransferFunction(256))
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
-        , p_camera("Camera", "Camera", tgt::Camera())
+        , p_camera("Camera", "Camera", cgt::Camera())
         , _shader(nullptr)
         , _positionBufferA(nullptr)
         , _positionBufferB(nullptr)
@@ -119,7 +119,7 @@ namespace campvis {
         const char* outputNames[] = { "ex_Position", "ex_Velocity", "ex_StartTime" };
         glTransformFeedbackVaryings(_shader->getID(), 3, outputNames, GL_SEPARATE_ATTRIBS);
         _shader->linkProgram();
-        tgtAssert(_shader->isLinked(), "Shader not linked!");
+        cgtAssert(_shader->isLinked(), "Shader not linked!");
         LGL_ERROR;
     }
 
@@ -153,7 +153,7 @@ namespace campvis {
             ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const tgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = p_camera.getValue();
 
                 float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
                     p_flowProfile1.getValue(),
@@ -168,7 +168,7 @@ namespace campvis {
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
                 _shader->setUniform("_modelMatrix", vectors->getParent()->getMappingInformation().getVoxelToWorldMatrix());
                 _shader->setUniform("_scale", scale);
-                _shader->setUniform("_threshold", tgt::vec2(p_lenThresholdMin.getValue(), p_lenThresholdMax.getValue()));
+                _shader->setUniform("_threshold", cgt::vec2(p_lenThresholdMin.getValue(), p_lenThresholdMax.getValue()));
 
                 if (p_enableShading.getValue() && light != nullptr) {
                     light->bind(_shader, "_lightSource");
@@ -176,12 +176,12 @@ namespace campvis {
 
                 if (getInvalidationLevel() & FIRST_FREE_TO_USE_INVALIDATION_LEVEL) {
                     // stage 1: perform 1 step of particle simulation
-                    _shader->selectSubroutine(tgt::ShaderObject::VERTEX_SHADER, "update");
+                    _shader->selectSubroutine(cgt::ShaderObject::VERTEX_SHADER, "update");
                     _shader->setUniform("_time", _currentTime);
                     _shader->setUniform("_frameLength", frameLength);
                     _shader->setUniform("_lifetime", p_lifetime.getValue());
 
-                    tgt::TextureUnit flowUnit;
+                    cgt::TextureUnit flowUnit;
                     vectors->bind(_shader, flowUnit, "_volume", "_volumeTextureParams");
 
                     glEnable(GL_RASTERIZER_DISCARD);
@@ -202,8 +202,8 @@ namespace campvis {
                 }
 
                 // stage 2: render particles
-                tgt::TextureUnit tfUnit;
-                _shader->selectSubroutine(tgt::ShaderObject::VERTEX_SHADER, "render");
+                cgt::TextureUnit tfUnit;
+                _shader->selectSubroutine(cgt::ShaderObject::VERTEX_SHADER, "render");
                 _shader->setUniform("_coloringMode", p_coloring.getValue());
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
@@ -318,19 +318,19 @@ namespace campvis {
         _initialPositionBuffer = nullptr;
 
         LINFO("Starting generating particles, this may take a while...");
-        std::vector<tgt::vec3> initialPositions;
-        std::vector<tgt::vec3> initialVelocities;
+        std::vector<cgt::vec3> initialPositions;
+        std::vector<cgt::vec3> initialVelocities;
         std::vector<float> startTimes;
 
-        tgt::vec3 imageSize = vectors->getSize();
+        cgt::vec3 imageSize = vectors->getSize();
         _numParticles = static_cast<GLuint>(p_numParticles.getValue());
 
         for (GLuint i = 0; i < _numParticles; ++i) {
-            tgt::vec3 position, velocity;
+            cgt::vec3 position, velocity;
             size_t emergencyStopCounter = 0;
 
             do {
-                position = tgt::vec3(generateRandomFloat(imageSize.x), generateRandomFloat(imageSize.y), generateRandomFloat(imageSize.z));
+                position = cgt::vec3(generateRandomFloat(imageSize.x), generateRandomFloat(imageSize.y), generateRandomFloat(imageSize.z));
                 velocity.x = vectors->getElementNormalizedLinear(position, 0);
                 velocity.y = vectors->getElementNormalizedLinear(position, 1);
                 velocity.z = vectors->getElementNormalizedLinear(position, 2);
@@ -338,7 +338,7 @@ namespace campvis {
                     LERROR("Could not create enough particles that match flow threshold range");
                     return;
                 }
-            } while (tgt::length(velocity) < p_lenThresholdMin.getValue() || tgt::length(velocity) > p_lenThresholdMax.getValue());
+            } while (cgt::length(velocity) < p_lenThresholdMin.getValue() || cgt::length(velocity) > p_lenThresholdMax.getValue());
 
             float startTime = generateRandomFloat(p_lifetime.getValue());
 
@@ -347,23 +347,23 @@ namespace campvis {
             startTimes.push_back(startTime);
         }
 
-        _positionBufferA = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_DYNAMIC_COPY);
-        _positionBufferB = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_DYNAMIC_COPY);
-        _positionBufferA->data(&initialPositions.front(), _numParticles * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
-        _positionBufferB->data(&initialPositions.front(), _numParticles * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+        _positionBufferA = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_DYNAMIC_COPY);
+        _positionBufferB = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_DYNAMIC_COPY);
+        _positionBufferA->data(&initialPositions.front(), _numParticles * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
+        _positionBufferB->data(&initialPositions.front(), _numParticles * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
 
-        _initialPositionBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STREAM_READ);
-        _initialPositionBuffer->data(&initialPositions.front(), _numParticles * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+        _initialPositionBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STREAM_READ);
+        _initialPositionBuffer->data(&initialPositions.front(), _numParticles * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
 
-        _velocityBufferA = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_DYNAMIC_COPY);
-        _velocityBufferB = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_DYNAMIC_COPY);
-        _velocityBufferA->data(&initialVelocities.front(), _numParticles * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
-        _velocityBufferB->data(&initialVelocities.front(), _numParticles * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+        _velocityBufferA = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_DYNAMIC_COPY);
+        _velocityBufferB = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_DYNAMIC_COPY);
+        _velocityBufferA->data(&initialVelocities.front(), _numParticles * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
+        _velocityBufferB->data(&initialVelocities.front(), _numParticles * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
 
-        _startTimeBufferA = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_DYNAMIC_COPY);
-        _startTimeBufferB = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_DYNAMIC_COPY);
-        _startTimeBufferA->data(&startTimes.front(), _numParticles * sizeof(float), tgt::BufferObject::FLOAT, 1);
-        _startTimeBufferB->data(&startTimes.front(), _numParticles * sizeof(float), tgt::BufferObject::FLOAT, 1);
+        _startTimeBufferA = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_DYNAMIC_COPY);
+        _startTimeBufferB = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_DYNAMIC_COPY);
+        _startTimeBufferA->data(&startTimes.front(), _numParticles * sizeof(float), cgt::BufferObject::FLOAT, 1);
+        _startTimeBufferB->data(&startTimes.front(), _numParticles * sizeof(float), cgt::BufferObject::FLOAT, 1);
 
 
         glGenTransformFeedbacks(2, _feedback);
@@ -380,13 +380,13 @@ namespace campvis {
 
         glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
-        _vaoA = new tgt::VertexArrayObject();
+        _vaoA = new cgt::VertexArrayObject();
         _vaoA->setVertexAttributePointer(0, _positionBufferA);
         _vaoA->setVertexAttributePointer(1, _velocityBufferA);
         _vaoA->setVertexAttributePointer(2, _startTimeBufferA);
         _vaoA->setVertexAttributePointer(3, _initialPositionBuffer);
 
-        _vaoB = new tgt::VertexArrayObject();
+        _vaoB = new cgt::VertexArrayObject();
         _vaoB->setVertexAttributePointer(0, _positionBufferB);
         _vaoB->setVertexAttributePointer(1, _velocityBufferB);
         _vaoB->setVertexAttributePointer(2, _startTimeBufferB);
