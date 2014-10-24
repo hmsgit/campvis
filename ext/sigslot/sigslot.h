@@ -478,8 +478,8 @@ namespace sigslot {
 
         // In debug mode, check that there is no connection to _target_slot so far.
         #define assertSingleConnectionToDestination(_connection_type, _target_object, _target_func) \
-            connections_list::const_iterator it = this->m_connected_slots.begin(); \
-            connections_list::const_iterator itEnd = this->m_connected_slots.end(); \
+            typename connections_list::const_iterator it = this->m_connected_slots.begin(); \
+            typename connections_list::const_iterator itEnd = this->m_connected_slots.end(); \
             while (it != itEnd) { \
                 cgtAssert((*it)->getdest() != _target_object || static_cast<_connection_type*>(*it)->getfunc() != _target_func, "Connected the same slot twice, you should not do this."); \
                 ++it; \
