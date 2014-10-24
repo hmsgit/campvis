@@ -28,9 +28,9 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vectorfield/processors/particleflowrenderer.h"
 #include "modules/vectorfield/processors/vectorfieldrenderer.h"
@@ -53,6 +53,9 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
+        /// \see AutoEvaluationPipeline::deinit()
+        virtual void deinit();
+
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
         /// \see AbstractPipeline::getId()
@@ -69,6 +72,7 @@ namespace campvis {
         /// \see HasPropertyCollection::onPropertyChanged
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         MhdImageReader _vectorFieldReader;
@@ -77,12 +81,9 @@ namespace campvis {
         SliceRenderer3D _sliceRenderer;
         RenderTargetCompositor _rtc;
 
-        CameraProperty p_camera;
         IntProperty p_sliceNumber;
         GenericOptionProperty<std::string> p_viewSelection;
         IntProperty p_time;
-
-        TrackballNavigationEventListener* _trackballEH;
     };
 
 }

@@ -107,9 +107,18 @@ namespace campvis {
          */
         void setViewportSizeProperty(IVec2Property* viewportSizeProp);
 
+        /**
+         * Reinitializes the camera using the given world bounds.
+         * If the scene bounds have changed, the camera setup is reinitialized positioning the 
+         * camera in front of the data along the z-axis and looking at the center of the data.
+         * 
+         * \param   bounds  The world bounds to use for reinitializing the camera.
+         */
+        void reinitializeCamera(const cgt::Bounds& worldBounds);
+
         GenericOptionProperty<AutomationMode> p_automationMode;
 
-        DataNameProperty p_image;
+        DataNameProperty p_image;   ///< Reference Image to use to determine bounding box (optional)
 
         Vec3Property p_llf;
         Vec3Property p_urb;

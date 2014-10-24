@@ -28,6 +28,7 @@
 #include "cgt/logmanager.h"
 #include "cgt/shadermanager.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/geometrydatafactory.h"
@@ -47,6 +48,7 @@ namespace campvis {
     VectorFieldRenderer::VectorFieldRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVectors("InputImage", "Input Image Vectors", "vectors", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_renderOutput("RenderOutput", "Output Image", "VectorFieldRenderer.output", DataNameProperty::WRITE)
         , p_arrowSize("ArrowSize", "Arrow Size", 1.f, .001f, 5.f)
         , p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1000.f, 0.005f)
@@ -58,17 +60,16 @@ namespace campvis {
         , p_Time("time", "Time", 0, 0, 100)
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
-        , p_camera("Camera", "Camera", cgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 4)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _arrowGeometry(0)
     {
         addProperty(p_inputVectors, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_camera);
         addProperty(p_renderOutput);
         addProperty(p_arrowSize);
         addProperty(p_lenThresholdMin);
         addProperty(p_lenThresholdMax);
-        addProperty(p_camera);
         addProperty(p_sliceOrientation, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_sliceNumber);
         addProperty(p_Time);
@@ -108,12 +109,13 @@ namespace campvis {
         }
 
         GenericImageRepresentationLocal<float, 3>::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
+        ScopedTypedData<CameraData> camera(dataContainer, p_camera.getValue());
 
-        if (vectors) {
+        if (vectors && camera) {
             ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const cgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = camera->getCamera();
                 const cgt::svec3& imgSize = vectors->getSize();
                 const int sliceNumber = p_sliceNumber.getValue();
 

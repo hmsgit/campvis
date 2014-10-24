@@ -28,6 +28,7 @@
 #include "cgt/logmanager.h"
 #include "cgt/shadermanager.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/geometrydatafactory.h"
@@ -53,12 +54,12 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_inputEigenvalues("InputEigenvalues", "Input Eigenvalues Image", "eigenvalues", DataNameProperty::READ)
         , p_inputEigenvectors("InputEigenvectors", "Input Eigenvectors Image", "eigenvectors", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_renderOutput("RenderOutput", "Output Image", "TensorGlyphRenderer.output", DataNameProperty::WRITE)
         , p_glyphType("GlyphType", "Glyph Type to Render", glyphTypes, 3)
         , p_glyphSize("GlyphSize", "Glyph Size", 1.f, .1f, 5.f)
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
-        , p_camera("Camera", "Camera", cgt::Camera())
         , p_sliceOrientation("SliceOrientation", "Slice Orientation", sliceOrientationOptions, 3)
         , p_sliceNumber("SliceNumber", "Slice Number", 0, 0, 0)
         , _ellipsoidGeometry(0)
@@ -66,14 +67,15 @@ namespace campvis {
     {
         addProperty(p_inputEigenvalues, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_inputEigenvectors, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_camera);
         addProperty(p_renderOutput);
+
         addProperty(p_glyphType);
         addProperty(p_glyphSize);
 
         addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
         addProperty(p_lightId);
 
-        addProperty(p_camera);
         addProperty(p_sliceOrientation, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_sliceNumber);
     }
@@ -110,13 +112,14 @@ namespace campvis {
 
         GenericImageRepresentationLocal<float, 3>::ScopedRepresentation evals(dataContainer, p_inputEigenvalues.getValue());
         GenericImageRepresentationLocal<float, 9>::ScopedRepresentation evecs(dataContainer, p_inputEigenvectors.getValue());
+        ScopedTypedData<CameraData> camera(dataContainer, p_camera.getValue());
 
-        if (evals && evecs) {
+        if (evals && evecs && camera) {
             if (evals->getSize() == evecs->getSize()) {
                 ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
                 if (p_enableShading.getValue() == false || light != nullptr) {
-                    const cgt::Camera& cam = p_camera.getValue();
+                    const cgt::Camera& cam = camera->getCamera();
                     const cgt::svec3& imgSize = evals->getSize();
 
                     glEnable(GL_DEPTH_TEST);

@@ -33,13 +33,7 @@
 
 #include "core/datastructures/datahandle.h"
 #include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/buttonproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-#include "core/properties/cameraproperty.h"
-#include "core/properties/stringproperty.h"
+#include "core/properties/allproperties.h"
 
 #include "modules/manualsegmentation/tools/tissuesegmentation.h"
 

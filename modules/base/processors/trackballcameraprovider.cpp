@@ -168,14 +168,7 @@ namespace campvis {
         // convert data
         ScopedTypedData<ImageData> img(data, p_image.getValue());
         if (img != 0) {
-            cgt::Bounds volumeExtent = img->getWorldBounds();
-            cgt::vec3 pos = volumeExtent.center() - cgt::vec3(0, 0, cgt::length(volumeExtent.diagonal()));
-
-            if (_trackball->getSceneBounds() != volumeExtent) {
-                _trackball->setSceneBounds(volumeExtent);
-                _trackball->setCenter(volumeExtent.center());
-                _trackball->reinitializeCamera(pos, volumeExtent.center(), p_upVector.getValue());
-            }
+            reinitializeCamera(img->getWorldBounds());
         }
     }
 
@@ -206,6 +199,17 @@ namespace campvis {
         _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
         setPropertyInvalidationLevel(*viewportSizeProp, INVALID_RESULT);
         onRenderTargetSizeChanged(viewportSizeProp);
+    }
+
+    void TrackballCameraProvider::reinitializeCamera(const cgt::Bounds& worldBounds) {
+        cgt::vec3 pos = worldBounds.center() - cgt::vec3(0, 0, cgt::length(worldBounds.diagonal()));
+
+        if (_trackball->getSceneBounds() != worldBounds) {
+            _trackball->setSceneBounds(worldBounds);
+            _trackball->setCenter(worldBounds.center());
+            _trackball->reinitializeCamera(pos, worldBounds.center(), p_upVector.getValue());
+        }
+
     }
 
 }

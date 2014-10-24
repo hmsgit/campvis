@@ -29,11 +29,7 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/optionproperty.h"
+#include "core/properties/allproperties.h"
 
 namespace cgt {
     class Shader;
@@ -79,8 +75,8 @@ namespace campvis {
 
         DataNameProperty p_geometryID;              ///< ID for input geometry
         DataNameProperty p_textureID;               ///< ID for input texture (optional)
+        DataNameProperty p_camera;                  ///< ID for camera input
         DataNameProperty p_renderTargetID;          ///< image ID for output image
-        CameraProperty p_camera;
 
         BoolProperty p_enableShading;               ///< Flag whether to enable shading
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use

@@ -61,8 +61,8 @@ namespace campvis {
         , _quadSize(0, 0)
         , _localDataContainer("Local DataContainer for DataContainerInspectorCanvas")
         , p_viewportSize("ViewportSize", "Viewport Size", cgt::ivec2(200), cgt::ivec2(0, 0), cgt::ivec2(10000))
+        , _tcp(&p_viewportSize)
         , _geometryRenderer(&p_viewportSize)
-        , _trackballEH(nullptr)
     {
         static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 255), cgt::col4(255, 255, 255, 255)));
 
@@ -127,9 +127,6 @@ namespace campvis {
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);
         }
-
-        delete _trackballEH;
-        _trackballEH = nullptr;
 
         _geometryRenderer.deinit();
 
@@ -254,9 +251,12 @@ namespace campvis {
     void DataContainerInspectorCanvas::invalidate() {
         // only if inited
         if (_quad != 0 && _paintShader != 0) {
-            // TODO: check, whether this should be done in an extra thread
-            cgt::GLContextScopedLock lock(this);
-            paint();
+            // avoid recursive paints.
+            if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
+                // TODO: check, whether this should be done in an extra thread
+                cgt::GLContextScopedLock lock(this);
+                paint();
+            }
         }
     }
 
@@ -320,8 +320,9 @@ namespace campvis {
     void DataContainerInspectorCanvas::onEvent(cgt::Event* e) {
         cgt::EventListener::onEvent(e);
         
-        if (_trackballEH && !e->isAccepted()) {
-            _trackballEH->onEvent(e);
+        if (!e->isAccepted()) {
+            _tcp.onEvent(e);
+            _tcp.process(_localDataContainer);
             e->accept();
             _geometriesDirty = true;
             invalidate();
@@ -445,6 +446,7 @@ namespace campvis {
         _geometryRenderer.p_geometryID.setValue(name + ".geometry");
         _geometryRenderer.p_renderTargetID.setValue(name + ".rendered");
         _geometryRenderer.validate(AbstractProcessor::INVALID_PROPERTIES);
+        _geometryRenderer.invalidate(AbstractProcessor::INVALID_RESULT);
         _geometryRenderer.process(_localDataContainer);
 
         // grab render result texture from local DataContainer and push into texture vector.
@@ -469,12 +471,8 @@ namespace campvis {
             cgtAssert(false, "The rendered geometry does exist. Something went wrong.");
         }
     }
-
+    
     void DataContainerInspectorCanvas::resetTrackball() {
-        // delete old trackball
-        delete _trackballEH;
-        _trackballEH = nullptr;
-
         // check whether we have to render geometries
         cgt::Bounds unionBounds;
         for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
@@ -485,9 +483,11 @@ namespace campvis {
 
         // if so, create a new trackball
         if (unionBounds.isDefined()) {
-            _trackballEH = new TrackballNavigationEventListener(&_geometryRenderer.p_camera, &p_viewportSize);
-            _trackballEH->reinitializeCamera(unionBounds);
+            _tcp.reinitializeCamera(unionBounds);
         }
+
+        _tcp.invalidate(AbstractProcessor::INVALID_RESULT);
+        _tcp.process(_localDataContainer);
     }
 
 }

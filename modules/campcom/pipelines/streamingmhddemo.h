@@ -27,7 +27,6 @@
 
 #include "modules/campcom/processors/campcommhdreceiver.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {

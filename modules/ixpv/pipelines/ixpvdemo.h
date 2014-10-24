@@ -26,11 +26,10 @@
 #define IXPVDEMO_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/properties/cameraproperty.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
@@ -75,6 +74,7 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        TrackballCameraProvider _tcp;
         DevilImageReader _xrayReader;
 
         MhdImageReader _ctReader;
@@ -88,9 +88,6 @@ namespace campvis {
         RenderTargetCompositor _compositor;
         IxpvCompositor _ixpvCompositor;
 
-        CameraProperty _camera;
-
-        TrackballNavigationEventListener* _trackballHandler;
         MWheelToNumericPropertyEventListener _wheelHandler;
     };
 

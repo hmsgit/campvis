@@ -45,9 +45,9 @@ namespace campvis {
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
         , p_geometryID("geometryID", "Input Proxy Geometry ID", "proxygeometry", DataNameProperty::READ)
         , p_geometryImageId("GeometryImageId", "Rendered Geometry to Integrate (optional)", "", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_entryImageID("entryImageID", "Output Entry Points Image", "eep.entry", DataNameProperty::WRITE)
         , p_exitImageID("exitImageID", "Output Exit Points Image", "eep.exit", DataNameProperty::WRITE)
-        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_enableMirror("enableMirror", "Enable Virtual Mirror Feature", false)
         , p_mirrorID("mirrorID", "Input Mirror ID", "", DataNameProperty::READ)
         , _shader(0)
@@ -57,9 +57,9 @@ namespace campvis {
         addProperty(p_sourceImageID);
         addProperty(p_geometryID);
         addProperty(p_geometryImageId);
+        addProperty(p_camera);
         addProperty(p_entryImageID);
         addProperty(p_exitImageID);
-        addProperty(p_camera);
 
         addProperty(p_enableMirror, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_mirrorID);

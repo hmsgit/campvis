@@ -84,15 +84,6 @@ namespace campvis {
     CampVisApplication::~CampVisApplication() {
         cgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
-        // delete everything in the right order:
-        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            delete it->_painter;
-            delete it->_pipeline;
-        }
-        for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
-            delete *it;
-        }
-
         sigslot::signal_manager::getRef().stop();
         sigslot::signal_manager::deinit();
     }
@@ -215,6 +206,15 @@ namespace campvis {
 
             _mainWindow->deinit();
             QuadRenderer::deinit();
+
+            // now delete everything in the right order:
+            for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+                delete it->_painter;
+                delete it->_pipeline;
+            }
+            for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
+                delete *it;
+            }
 
             // deinit OpenGL and cgt
             cgt::deinitGL();

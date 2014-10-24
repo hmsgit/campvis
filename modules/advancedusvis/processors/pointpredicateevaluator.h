@@ -29,14 +29,7 @@
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
-
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/transferfunctionproperty.h"
+#include "core/properties/allproperties.h"
 
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
@@ -81,10 +74,10 @@ namespace campvis {
         DataNameProperty p_inputSnr;            ///< Input SNR image
         DataNameProperty p_inputVesselness;     ///< Input Vesselness image
         DataNameProperty p_inputConfidence;     ///< Input confidence image
+        DataNameProperty p_camera;              ///< Input camera (for silhouette view predicate)
             
         DataNameProperty p_outputImage;         ///< Output bitmask image
 
-        CameraProperty p_camera;                        ///< Camera for silhouette view predicate
         PointPredicateHistogramProperty p_histogram;    ///< Point Predicate Histogram to evaluate
 
     protected:

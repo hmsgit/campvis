@@ -29,6 +29,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
@@ -58,8 +59,8 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
         , p_textureID("TextureId", "Input Texture ID (optional)", "gr.inputtexture", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
-        , p_camera("camera", "Camera")
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_renderMode("RenderMode", "Render Mode", renderOptions, 7)
@@ -76,8 +77,8 @@ namespace campvis {
 
         addProperty(p_geometryID);
         addProperty(p_textureID);
-        addProperty(p_renderTargetID);
         addProperty(p_camera);
+        addProperty(p_renderTargetID);
 
         addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
         addProperty(p_lightId);
@@ -114,6 +115,7 @@ namespace campvis {
     void GeometryRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
         ScopedTypedData<RenderData> rd(data, p_textureID.getValue());
         ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue());
 
@@ -130,13 +132,14 @@ namespace campvis {
             }
         }
 
-        if (proxyGeometry != 0 
+        if (proxyGeometry != nullptr
+            && camera != nullptr
             && (p_enableShading.getValue() == false || light != nullptr)
             && (p_coloringMode.getOptionValue() != TEXTURE_COLOR || texture != nullptr) 
-            && _pointShader != 0 && _meshShader != 0)
+            && _pointShader != nullptr && _meshShader != nullptr)
             {
             // select correct shader
-            cgt::Shader* leShader = 0;
+            cgt::Shader* leShader = nullptr;
             if (p_renderMode.getOptionValue() == GL_POINTS || p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
                 leShader = _pointShader;
             else
@@ -161,8 +164,8 @@ namespace campvis {
                 light->bind(leShader, "_lightSource");
             }
 
-            leShader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
-            leShader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
+            leShader->setUniform("_projectionMatrix", camera->getCamera().getProjectionMatrix());
+            leShader->setUniform("_viewMatrix", camera->getCamera().getViewMatrix());
             leShader->setUniform("_viewportMatrix", viewportMatrix);
 
             leShader->setUniform("_computeNormals", proxyGeometry->getNormalsBuffer() == 0);
@@ -172,7 +175,7 @@ namespace campvis {
             leShader->setUniform("_wireframeColor", p_wireframeColor.getValue());
             leShader->setUniform("_lineWidth", p_lineWidth.getValue());
 
-            leShader->setUniform("_cameraPosition", p_camera.getValue().getPosition());
+            leShader->setUniform("_cameraPosition", camera->getCamera().getPosition());
             leShader->setIgnoreUniformLocationError(false);
 
             FramebufferActivationGuard fag(this);

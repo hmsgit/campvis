@@ -34,6 +34,7 @@
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/lightsourcedata.h"
@@ -55,6 +56,7 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_resetButton("ResetButton", "Reset")
         , p_inputVectors("InputImage", "Input Image Vectors", "vectors", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_renderOutput("RenderOutput", "Output Image", "ParticleFlowRenderer.output", DataNameProperty::WRITE)
         , p_lenThresholdMin("LenThresholdMin", "Length Threshold Min", .001f, 0.f, 1000.f, 0.005f)
         , p_lenThresholdMax("LenThresholdMax", "Length Threshold Max", 10.f, 0.f, 10000.f, 10.f)
@@ -70,7 +72,6 @@ namespace campvis {
         , p_transferFunction("TransferFunction", "Coloring Transfer Function", new Geometry1DTransferFunction(256))
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
-        , p_camera("Camera", "Camera", cgt::Camera())
         , _shader(nullptr)
         , _positionBufferA(nullptr)
         , _positionBufferB(nullptr)
@@ -86,13 +87,13 @@ namespace campvis {
         addProperty(p_Time, INVALID_RESULT | FIRST_FREE_TO_USE_INVALIDATION_LEVEL);
 
         addProperty(p_inputVectors, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_camera);
         addProperty(p_renderOutput);
         addProperty(p_lenThresholdMin);
         addProperty(p_lenThresholdMax);
 
         addProperty(p_numParticles);
         addProperty(p_lifetime);
-        addProperty(p_camera);
         addProperty(p_flowProfile1);
         addProperty(p_flowProfile2);
         addProperty(p_flowProfile3);
@@ -149,11 +150,13 @@ namespace campvis {
         }
 
         ImageRepresentationGL::ScopedRepresentation vectors(dataContainer, p_inputVectors.getValue());
-        if (vectors) {
+        ScopedTypedData<CameraData> camera(dataContainer, p_camera.getValue());
+
+        if (vectors && camera) {
             ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const cgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = camera->getCamera();
 
                 float scale = getTemporalFlowScaling((float)p_Time.getValue() / 100.f,
                     p_flowProfile1.getValue(),

@@ -34,8 +34,8 @@ namespace campvis {
 
     Columbia1::Columbia1(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
         , _boundsData("BoundsData", "Bounds Data", "sfr", DataNameProperty::READ)
+        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
         , _flowReader()
@@ -47,17 +47,15 @@ namespace campvis {
         , _sft()
         , _sfr(&_canvasSize)
         , _compositor(&_canvasSize)
-        , _trackballEH(0)
     {
-        addProperty(_camera);
         addProperty(_boundsData);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballEH->addLqModeProcessor(&_vr);
-        _trackballEH->addLqModeProcessor(&_src);
-        _trackballEH->addLqModeProcessor(&_sfr);
-        addEventListenerToBack(_trackballEH);
+        _tcp.addLqModeProcessor(&_vr);
+        _tcp.addLqModeProcessor(&_src);
+        _tcp.addLqModeProcessor(&_sfr);
+        addEventListenerToBack(&_tcp);
 
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_imageSplitter);
@@ -79,19 +77,12 @@ namespace campvis {
     }
 
     Columbia1::~Columbia1() {
-        delete _trackballEH;
+
     }
 
     void Columbia1::init() {
         AutoEvaluationPipeline::init();
         
-        _imageSplitter.s_validated.connect(this, &Columbia1::onProcessorValidated);
-
-        _camera.addSharedProperty(&_vr.p_camera);
-        _camera.addSharedProperty(&_src.p_camera);
-        _camera.addSharedProperty(&_gr.p_camera);
-        _camera.addSharedProperty(&_sfr.p_camera);
-
         _vr.p_outputImage.setValue("vr");
         _sr.p_targetImageID.setValue("sr");
         _src.p_targetImageID.setValue("src");
@@ -108,6 +99,7 @@ namespace campvis {
 
         _imageSplitter.p_outputID.setValue("image.single");
         _imageSplitter.p_outputID.addSharedProperty(&_vr.p_inputVolume);
+        _imageSplitter.p_outputID.addSharedProperty(&_tcp.p_image);
 
         _flowReader.p_url.setValue("D:/Medical Data/Columbia/outputs/FullVolumeLV_3D_25Hz_[IM_0004]_NIF_crop_flow_field_00_00.ltf");
         _flowReader.p_size.setValue(cgt::ivec3(224, 176, 208));
@@ -137,23 +129,12 @@ namespace campvis {
         _sft.p_outputID.addSharedProperty(&_sfr.p_strainId);
 
         _sfr.p_renderTargetID.setValue("sfr");
-     //   _sfr.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vr.getProperty("GeometryImageId")));
+        // _sfr.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vr.getProperty("GeometryImageId")));
         _sfr.p_renderTargetID.addSharedProperty(&_compositor.p_firstImageId);
     }
 
     void Columbia1::deinit() {
-        _canvasSize.s_changed.disconnect(this);
         AutoEvaluationPipeline::deinit();
     }
 
-    void Columbia1::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor == &_imageSplitter) {
-            // update camera
-            ScopedTypedData<ImageData> img(*_data, _imageSplitter.p_outputID.getValue());
-            if (img != 0) {
-                _trackballEH->reinitializeCamera(img);
-            }
-        }
-    }
-    
 }

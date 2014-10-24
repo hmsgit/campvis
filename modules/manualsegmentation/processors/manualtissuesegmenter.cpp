@@ -28,6 +28,7 @@
 #include "cgt/shadermanager.h"
 #include "cgt/texture.h"
 #include "cgt/textureunit.h"
+#include "cgt/event/mouseevent.h"
 
 #include "core/tools/interval.h"
 

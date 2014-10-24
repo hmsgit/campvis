@@ -31,6 +31,7 @@
 
 
 #include "modules/columbia/datastructures/fiberdata.h"
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/meshgeometry.h"
@@ -47,8 +48,8 @@ namespace campvis {
     StrainFiberRenderer::StrainFiberRenderer(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_strainId("StrainDataId", "Input Strain Data ID", "gr.strain", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
-        , p_camera("Camera", "Camera ID")
         , p_renderMode("RenderMode", "Render Mode", renderModeOptions, 2)
         , p_lineWidth("LineWidth", "Line width", 3.f, .5f, 10.f, 0.1f)
         , p_color("color", "Rendering Color", cgt::vec4(1.f), cgt::vec4(0.f), cgt::vec4(1.f))
@@ -57,8 +58,8 @@ namespace campvis {
         , _shader(0)
     {
         addProperty(p_strainId);
-        addProperty(p_renderTargetID);
         addProperty(p_camera);
+        addProperty(p_renderTargetID);
         addProperty(p_color);
         addProperty(p_renderMode, INVALID_RESULT | INVALID_SHADER);
         addProperty(p_lineWidth);
@@ -90,10 +91,11 @@ namespace campvis {
     void StrainFiberRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<FiberData> strainData(data, p_strainId.getValue());
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
 
-        if (strainData != 0 && _shader != 0) {
+        if (strainData != nullptr && camera != nullptr && _shader != nullptr) {
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const cgt::Camera& camera = p_camera.getValue();
+                const cgt::Camera& cam = camera->getCamera();
 
                 // set modelview and projection matrices
                 FramebufferActivationGuard fag(this);
@@ -105,9 +107,9 @@ namespace campvis {
                 if (p_enableShading.getValue() && light != nullptr) {
                     light->bind(_shader, "_lightSource");
                 }
-                _shader->setUniform("_projectionMatrix", camera.getProjectionMatrix());
-                _shader->setUniform("_viewMatrix", camera.getViewMatrix());
-                _shader->setUniform("_cameraPosition", camera.getPosition());
+                _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
+                _shader->setUniform("_viewMatrix", cam.getViewMatrix());
+                _shader->setUniform("_cameraPosition", cam.getPosition());
                 _shader->setUniform("_fiberWidth", p_lineWidth.getValue()/4.f);
                 _shader->setIgnoreUniformLocationError(false); 
 

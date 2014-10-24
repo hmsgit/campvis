@@ -339,7 +339,7 @@ namespace campvis {
          * \param   dataContainer   The DataContainer to work on.
          */
         virtual void updateResult(DataContainer& dataContainer) = 0;
-                
+        
         /**
          * 
          * Locks all properties in the processor's PropertyCollection and marks them as "in use".
