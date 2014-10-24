@@ -102,7 +102,8 @@ protected:
 
     void execute() {
         if (_pipeline != nullptr) {
-            _pipeline->executePipeline();
+            for (size_t i = 0; i < _pipeline->getProcessors().size(); ++i)
+                _pipeline->executePipeline();
 
             // write result image
             _imageWriter.p_inputImage.setValue(_pipeline->getRenderTargetID());

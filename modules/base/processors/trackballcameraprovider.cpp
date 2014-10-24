@@ -158,9 +158,9 @@ namespace campvis {
     }
 
     void TrackballCameraProvider::onRenderTargetSizeChanged(const AbstractProperty* prop) {
-        _trackball->setViewprtSize(_canvasSize->getValue());
         float ratio = static_cast<float>(_canvasSize->getValue().x) / static_cast<float>(_canvasSize->getValue().y);
-        p_aspectRatio.setValue(ratio);
+        _trackball->setViewprtSize(_canvasSize->getValue());
+        _trackball->setWindowRatio(ratio);
         invalidate(INVALID_RESULT);
     }
 
