@@ -39,6 +39,12 @@
 #include "modules/pipelinefactory.h"
 
 #include <QScrollBar>
+#include <QFileDialog>
+
+#include <fstream>
+
+#include "scripting/luagen/properties/propertycollectionlua.h"
+#include "scripting/luagen/properties/abstractpropertylua.h"
 
 
 namespace campvis {
@@ -141,6 +147,20 @@ namespace campvis {
         ui.scriptingConsoleDock->setVisible(false);
 #endif
 
+#ifdef CAMPVIS_HAS_SCRIPTING
+        _btnLuaLoad = new QPushButton("Load Script", _pipelinePropertiesWidget);
+        rightLayout->addWidget(_btnLuaLoad);
+        _btnLuaSave = new QPushButton("Save Script", _pipelinePropertiesWidget);
+        rightLayout->addWidget(_btnLuaSave);
+        connect(
+            _btnLuaLoad, SIGNAL(clicked()), 
+            this, SLOT(onBtnLuaLoadClicked()));
+        connect(
+            _btnLuaSave, SIGNAL(clicked()), 
+            this, SLOT(onBtnLuaSaveClicked()));
+#else
+#endif
+
         _dcInspectorWidget = new DataContainerInspectorWidget();
         this->populateMainMenu();
 
@@ -167,6 +187,7 @@ namespace campvis {
 
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
         _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
+
     }
 
     void MainWindow::populateMainMenu() {
@@ -235,11 +256,13 @@ namespace campvis {
                 }
 
                 emit updatePropCollectionWidget(ptr, &_selectedPipeline->getDataContainer());
+
             }
             else {
                 emit updatePropCollectionWidget(0, 0);
                 _selectedDataContainer = 0;
             }
+
         }
         else {
             emit updatePropCollectionWidget(0, 0);
@@ -262,6 +285,62 @@ namespace campvis {
                 (*it)->invalidate(AbstractProcessor::INVALID_RESULT);
             }
         }
+    }
+
+    void MainWindow::onBtnLuaLoadClicked() {
+#ifdef CAMPVIS_HAS_SCRIPTING
+        const QString dialogCaption = QString::fromStdString("Select File");
+        const QString directory = QString::fromStdString(".");
+        const QString fileFilter = tr("All files (*)");
+
+        QString filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
+        if (filename != nullptr && _application->getLuaVmState() != nullptr) {
+            std::ifstream file;
+            file.open(filename.toStdString());
+            if (!file.fail()) {
+                _application->getLuaVmState()->execString("local proc = pipelines[\"" +_selectedPipeline->getName()+"\"]");
+
+                std::string script;
+                while (!file.eof()) {
+                    script = "";
+                    std::getline(file, script);
+                    if (script == "")
+                        continue;
+
+                    printf("%s\n", script.c_str());
+                    //if (_application->getLuaVmState() != nullptr) {
+                    _application->getLuaVmState()->execString(script.c_str());
+                    //}
+                }
+                printf("Load lua script");
+            }
+        }
+#endif
+    }
+
+    void MainWindow::onBtnLuaSaveClicked() {
+#ifdef CAMPVIS_HAS_SCRIPTING
+        const QString dialogCaption = QString::fromStdString("Save File as");
+        const QString directory = QString::fromStdString(".");
+        const QString fileFilter = tr("All files (*)");
+
+        QString filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
+
+        if (filename != nullptr) {
+            PropertyCollectionLua *_pcLua = new PropertyCollectionLua();
+            if (_selectedProcessor != 0 && _selectedPipeline != 0) {
+                _pcLua->updatePropCollection(_selectedProcessor, &_selectedPipeline->getDataContainer());
+                std::string script = _pcLua->getLuaScript();
+                if (script != "") {
+                    std::ofstream file;
+                    file.open(filename.toStdString());
+                    file << script.c_str();
+                    file.close();
+                    printf("Saved Lua script");
+                }
+            }
+        }
+#endif
     }
 
     void MainWindow::onBtnShowDataContainerInspectorClicked() {

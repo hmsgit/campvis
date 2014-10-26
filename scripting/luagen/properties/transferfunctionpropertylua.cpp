@@ -22,39 +22,30 @@
 // 
 // ================================================================================================
 
-#ifndef BUTTONPROPERTYLUA_H__
-#define BUTTONPROPERTYLUA_H__
+#include "transferfunctionpropertylua.h"
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
-#include "core/properties/buttonproperty.h"
-
-class QPushButton;
+#include "core/tools/stringutils.h"
 
 namespace campvis {
-    /**
-     * Lua for a Camera.
-     * For now just offering read-access.
-     */
-    class ButtonPropertyLua : public AbstractPropertyLua {
-    public:
-        /**
-         * Creates a new ButtonPropertyLua for the property \a property.
-         * \param   property    The property the lua shall handle
-         * \param   parent      Parent Qt lua
-         */
-        ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer = nullptr);
+    TransferFunctionPropertyLua::TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer /*= nullptr*/)
+        : AbstractPropertyLua(property, true, dataContainer)
+        , _editor(0)
+    {
+    }
 
-        /**
-         * Destructor
-         */
-        virtual ~ButtonPropertyLua();
+    TransferFunctionPropertyLua::~TransferFunctionPropertyLua() {
+    }
 
-        std::string getLuaScript();
-    };
+    std::string TransferFunctionPropertyLua::getLuaScript() {
+        TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
+        AbstractTransferFunction* tf = prop->getTF();
+        const tgt::vec2& domain = tf->getIntensityDomain();
 
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    //template class PropertyLuaRegistrar<ButtonPropertyLua, ButtonProperty>;
+        std::string ret = "";
+        ret += "getProperty(\"" + _property->getName() + "\"):setIntensityDomain(tgt.vec2(" 
+            + StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))";
+        return ret;
+    }
+
 }
 
-#endif // BUTTONPROPERTYLUA_H__

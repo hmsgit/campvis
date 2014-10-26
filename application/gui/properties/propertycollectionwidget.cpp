@@ -33,8 +33,6 @@
 #include <QPushButton>
 
 namespace campvis {
-
-
     PropertyCollectionWidget::PropertyCollectionWidget(QWidget* parent /*= 0*/)
         : QWidget(parent)
         , _propCollection(0)

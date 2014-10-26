@@ -22,39 +22,42 @@
 // 
 // ================================================================================================
 
-#ifndef BUTTONPROPERTYLUA_H__
-#define BUTTONPROPERTYLUA_H__
+#ifndef TRANSFERFUNCTIONPROPERTYLUA_H__
+#define TRANSFERFUNCTIONPROPERTYLUA_H__
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
-#include "core/properties/buttonproperty.h"
-
-class QPushButton;
+#include "core/properties/transferfunctionproperty.h"
 
 namespace campvis {
+    class AbstractTransferFunctionEditor;
+
     /**
-     * Lua for a Camera.
-     * For now just offering read-access.
+     * Widget for a TransferFunctionProperty
      */
-    class ButtonPropertyLua : public AbstractPropertyLua {
+    class TransferFunctionPropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new ButtonPropertyLua for the property \a property.
-         * \param   property    The property the lua shall handle
-         * \param   parent      Parent Qt lua
+         * Creates a new PropertyWidget for the property \a property.
+         * \param   property        The property the widget shall handle
+         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * \param   parent          Parent Qt widget
          */
-        ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer = nullptr);
+        TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer = nullptr);
 
         /**
          * Destructor
          */
-        virtual ~ButtonPropertyLua();
+        virtual ~TransferFunctionPropertyLua();
 
         std::string getLuaScript();
+
+    private:
+        AbstractTransferFunctionEditor* _editor;    ///< Transfer function editor
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    //template class PropertyLuaRegistrar<ButtonPropertyLua, ButtonProperty>;
+    template class PropertyLuaRegistrar<TransferFunctionPropertyLua, TransferFunctionProperty>;
 }
 
-#endif // BUTTONPROPERTYLUA_H__
+#endif // TRANSFERFUNCTIONPROPERTYLUA_H__

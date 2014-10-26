@@ -14,6 +14,7 @@
 #include "scripting/luagen/properties/metapropertylua.h"
 
 #include "scripting/luagen/properties/propertycollectionlua.h"
+#include "scripting/luagen/properties/transferfunctionpropertylua.h"
 
 namespace campvis {
 

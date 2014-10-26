@@ -112,7 +112,7 @@ namespace campvis {
          * \param   index   Index of the selected item
          */
         void onPipelineWidgetItemClicked(const QModelIndex& index);
-
+        
         /**
          * Slot to be called when _btnExecute was clicked.
          */
@@ -122,6 +122,16 @@ namespace campvis {
          * Slot to be called when _btnShowDataContainerInspector was clicked.
          */
         void onBtnShowDataContainerInspectorClicked();
+
+        /**
+         * Slot to be called when _btnExecute was clicked.
+         */
+        void onBtnLuaLoadClicked();
+
+        /**
+         * Slot to be called when _btnShowDataContainerInspector was clicked.
+         */
+        void onBtnLuaSaveClicked();
 
         /// Slot to be called when _btnPipelineFactory was clicked;
         void onBtnPipelineFactoryClicked();
@@ -190,6 +200,9 @@ namespace campvis {
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+
+        QPushButton* _btnLuaLoad;
+        QPushButton* _btnLuaSave;
 
         std::vector<QDockWidget*> _primaryDocks;            ///< Docks located in top docking area of the main window
     };

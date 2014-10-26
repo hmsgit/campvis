@@ -56,6 +56,8 @@
 #include <QFileDialog>
 #include <QScrollArea>
 
+#include "scripting/luagen/properties/propertyluafactory.h"
+
 namespace campvis {
 
     const std::string DataContainerInspectorWidget::loggerCat_ = "CAMPVis.application.DataContainerInspectorWidget";
@@ -213,6 +215,10 @@ namespace campvis {
         _pcWidget = new PropertyCollectionWidget(_pipelinePropertiesScrollArea);
         _pcWidget->updatePropCollection(_canvas, _dataContainer);
         _pipelinePropertiesScrollArea->setWidget(_pcWidget);
+
+        PropertyCollectionLua *_pcLua = new PropertyCollectionLua();
+        _pcLua->updatePropCollection(_canvas, _dataContainer);
+        std::cout << _pcLua->getLuaScript();
 
         _infoWidgetLayout->addWidget(_pipelinePropertiesScrollArea, 6, 0, 1, 2);
 
