@@ -211,9 +211,9 @@ namespace campvis {
         cgtAssert(count > 0, "The number of options must be greater 0.");
 
         _options.assign(options, options + count);
-        setMinValue(0);
         setMaxValue(count - 1);
         setValue(0);
+        setMinValue(0);
     }
 
     template<typename T>
