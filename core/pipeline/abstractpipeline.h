@@ -149,6 +149,13 @@ namespace campvis {
         const std::vector<AbstractProcessor*>& getProcessors() const;
 
         /**
+         * Returns the first processor of this pipeline whose name matches \a name.
+         * \param   name    The name of the processor to find
+         * \return  The first processor whose name matches \a name, 0 if no such processor exists.
+         */
+        AbstractProcessor* getProcessor(const std::string& name) const;
+
+        /**
          * Gets the flag whether this pipeline is currently enabled.
          * \return _enabled
          */

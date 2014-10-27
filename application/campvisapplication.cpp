@@ -154,6 +154,8 @@ namespace campvis {
         // Let Lua know where CAMPVis modules are located
         if (! _luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
             LERROR("Error setting up Lua VM.");
+        if (! _luaVmState->execString("package.path = package.path .. ';" CAMPVIS_LUA_SCRIPTS_PATH "'"))
+            LERROR("Error setting up Lua VM.");
 
         // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
         if (! _luaVmState->execString("require(\"campvis\")"))
@@ -207,21 +209,21 @@ namespace campvis {
             _mainWindow->deinit();
             QuadRenderer::deinit();
 
-            // now delete everything in the right order:
-            for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-                delete it->_painter;
-                delete it->_pipeline;
-            }
-            for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
-                delete *it;
-            }
-
             // deinit OpenGL and cgt
             cgt::deinitGL();
         }
 
         // MainWindow dtor needs a valid CampVisApplication, so we need to call it here instead of during destruction.
         delete _mainWindow;
+
+        // now delete everything in the right order:
+        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            delete it->_painter;
+            delete it->_pipeline;
+        }
+        for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
+            delete *it;
+        }
 
         GLJobProc.stop();
         OpenGLJobProcessor::deinit();

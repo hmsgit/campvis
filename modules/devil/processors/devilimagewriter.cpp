@@ -111,7 +111,7 @@ namespace campvis {
         if (! success) {
             ILenum errorcode;
             while ((errorcode = ilGetError()) != IL_NO_ERROR) {
-                LERROR("Error while writing '" << filename << "': "<< iluErrorString(errorcode));
+                LERROR("Error while writing '" << filename << "': "<< (errorcode));
             } 
         }
 

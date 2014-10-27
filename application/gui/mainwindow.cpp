@@ -25,6 +25,8 @@
 #include "mainwindow.h"
 
 #include "cgt/assert.h"
+#include "cgt/opengljobprocessor.h"
+
 #include "application/campvisapplication.h"
 #include "application/gui/datacontainerinspectorwidget.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
@@ -338,6 +340,7 @@ namespace campvis {
     void MainWindow::onLuaCommandExecuted(const QString& cmd) {
 #ifdef CAMPVIS_HAS_SCRIPTING
         if (_application->getLuaVmState() != nullptr) {
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             _application->getLuaVmState()->execString(cmd.toStdString());
         }
 #endif

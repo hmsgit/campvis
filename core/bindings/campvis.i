@@ -108,9 +108,23 @@ namespace campvis {
         virtual ~NumericProperty();
     };
 
+    %template(IntGenericProperty) GenericProperty< int >;
+    %template(IntProperty) NumericProperty< int >;
+    typedef NumericProperty< int > IntProperty;
+
     %template(Ivec2GenericProperty) GenericProperty< cgt::Vector2<int> >;
     %template(IVec2Property) NumericProperty< cgt::Vector2<int> >;
     typedef NumericProperty< cgt::Vector2<int> > IVec2Property;
+
+    %template(Ivec3GenericProperty) GenericProperty< cgt::Vector3<int> >;
+    %template(IVec3Property) NumericProperty< cgt::Vector3<int> >;
+    typedef NumericProperty< cgt::Vector3<int> > IVec3Property;
+
+    %template(Ivec4GenericProperty) GenericProperty< cgt::Vector4<int> >;
+    %template(IVec4Property) NumericProperty< cgt::Vector4<int> >;
+    typedef NumericProperty< cgt::Vector4<int> > IVec4Property;
+
+
 
     template<typename T>
     struct FloatingPointPropertyTraits {};
@@ -144,6 +158,20 @@ namespace campvis {
     %template(FloatProperty) FloatingPointProperty<float>;
     typedef FloatingPointProperty< float > FloatProperty;
 
+    %template(Vec2GenericProperty) GenericProperty< cgt::Vector2<float> >;
+    %template(Vec2NumericProperty) NumericProperty< cgt::Vector2<float> >;
+    %template(Vec2Property) FloatingPointProperty< cgt::Vector2<float> >;
+    typedef FloatingPointProperty< cgt::Vector2<float> > Vec2Property;
+
+    %template(Vec3GenericProperty) GenericProperty< cgt::Vector3<float> >;
+    %template(Vec3NumericProperty) NumericProperty< cgt::Vector3<float> >;
+    %template(Vec3Property) FloatingPointProperty< cgt::Vector3<float> >;
+    typedef FloatingPointProperty< cgt::Vector3<float> > Vec3Property;
+
+    %template(Vec4GenericProperty) GenericProperty< cgt::Vector4<float> >;
+    %template(Vec4NumericProperty) NumericProperty< cgt::Vector4<float> >;
+    %template(Vec4Property) FloatingPointProperty< cgt::Vector4<float> >;
+    typedef FloatingPointProperty< cgt::Vector4<float> > Vec4Property;
     /* TFGeometry1D */
 
     %nodefaultctor TFGeometry1D;
@@ -265,12 +293,16 @@ namespace campvis {
 
     /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getProperty,
-             campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
+		     campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
+			 campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
-             campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
+		     campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
+			 campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* HasPropertyCollection */
@@ -302,6 +334,8 @@ namespace campvis {
         void addProperty(AbstractProperty& prop, int invalidationLevel);
         void setPropertyInvalidationLevel(AbstractProperty& prop, int invalidationLevel);
 
+		void process(DataContainer& data);
+
         %immutable;
         sigslot::signal1<AbstractProcessor*> s_validated;
         %mutable;
@@ -318,6 +352,10 @@ namespace campvis {
 
         const DataContainer& getDataContainer() const;
         DataContainer& getDataContainer();
+
+		virtual void addProcessor(AbstractProcessor* processor);
+		virtual void executePipeline() = 0;
+        AbstractProcessor* getProcessor(const std::string& name) const;
     };
 
     /* AutoEvaluationPipeline */

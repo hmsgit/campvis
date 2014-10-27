@@ -262,4 +262,16 @@ namespace campvis {
         if (_enabled)
             _evaluationCondition.notify_all();
     }
+
+    AbstractProcessor* AbstractPipeline::getProcessor(const std::string& name) const {
+        for (auto it = _processors.begin(); it != _processors.end(); ++it) {
+            if ((*it)->getName() == name)
+                return *it;
+        }
+
+        return nullptr;
+    }
+
+
+
 }

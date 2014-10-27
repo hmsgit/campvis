@@ -31,6 +31,7 @@ SET(CampvisLuaModulesDirectory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_IN
 # Lua modules will be placed in a sub-directory that won't be picked up by Lua automatically. Let
 # the code know via a #define what that sub-directory is so that it can instruct Lua to search it.
 LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModulesDirectory}?${CMAKE_SHARED_MODULE_SUFFIX}\"")
+LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_SCRIPTS_PATH=\"${CampvisLuaModulesDirectory}?.lua\"")
 SET(CampvisGlobalDefinitions "${CampvisGlobalDefinitions}" PARENT_SCOPE)
 
 SET(CampvisBindingDirs ext/cgt core)

@@ -127,3 +127,10 @@ IF(CAMPVIS_DEPLOY_SHADERS)
         )
     ENDFOREACH()
 ENDIF(CAMPVIS_DEPLOY_SHADERS)
+
+
+# copy over Lua stuff
+ADD_CUSTOM_COMMAND(
+    TARGET campvis-application
+    COMMAND ${CMAKE_COMMAND} -E copy "${CampvisHome}/application/lua/inspect.lua" "$<TARGET_FILE_DIR:campvis-application>/lua-mods/inspect.lua"
+)

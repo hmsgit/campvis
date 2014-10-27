@@ -92,6 +92,9 @@ namespace campvis {
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);
         }
+
+        delete _pcWidget;
+        _pcWidget = nullptr;
     }
 
     void DataContainerInspectorWidget::setDataContainer(DataContainer* dataContainer) {
