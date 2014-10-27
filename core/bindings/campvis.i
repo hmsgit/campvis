@@ -6,11 +6,7 @@
 %{
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/imagedata.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/transferfunctionproperty.h"
+#include "core/properties/allproperties.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/pipeline/visualizationprocessor.h"
@@ -56,6 +52,16 @@ namespace campvis {
         virtual void addSharedProperty(AbstractProperty* prop);
     };
 
+    class ButtonProperty : public AbstractProperty {
+    public:
+        ButtonProperty(const std::string& name, const std::string& title);
+        virtual ~ButtonProperty();
+
+        void click();
+
+        sigslot::signal0 s_clicked;
+    };
+
     template<typename T>
     class GenericProperty : public AbstractProperty {
     public:
@@ -65,6 +71,9 @@ namespace campvis {
         const T& getValue() const;
         virtual void setValue(const T& value);
     };
+
+    %template(BoolProperty) GenericProperty<bool>;
+    typedef GenericProperty<bool> BoolProperty;
 
     %template(StringProperty) GenericProperty<std::string>;
     typedef GenericProperty<std::string> StringProperty;
@@ -257,12 +266,12 @@ namespace campvis {
     /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getProperty,
              campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty);
+             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
              campvis::FloatProperty, campvis::IVec2Property, campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty);
+             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* HasPropertyCollection */
 

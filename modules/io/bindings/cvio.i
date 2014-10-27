@@ -5,6 +5,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/io/processors/mhdimagereader.h"
+#include "modules/io/processors/mhdimagewriter.h"
 %}
 
 
@@ -28,8 +29,23 @@ namespace campvis {
 
         const std::string getName() const;
     };
+
+    class MhdImageWriter : public AbstractProcessor {
+    public:
+        MhdImageWriter();
+        virtual ~MhdImageWriter();
+
+        virtual const std::string getName() const;
+
+        %immutable;
+        DataNameProperty p_inputImage;
+        StringProperty p_fileName;
+        ButtonProperty p_saveFile;
+        %mutable;
+    };
 }
 
 %luacode {
   print("Module campvis-io loaded")
 }
+
