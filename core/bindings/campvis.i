@@ -1,8 +1,13 @@
 %module campvis
+
 %include factory.i
+%include std_pair.i
 %include std_string.i
+%include std_vector.i
+
 %import "ext/cgt/bindings/cgt.i"
 %include "ext/sigslot/sigslot.i"
+
 %{
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/imagedata.h"
@@ -31,6 +36,9 @@ namespace sigslot {
 
 
 %template(sigslot_signal1_AbstractProcessor) sigslot::signal1<campvis::AbstractProcessor*>;
+
+%template(PairStringDataHandle) std::pair<std::string, campvis::DataHandle>;
+%template(VectorOfPairStringDataHandle) std::vector< std::pair< std::string, campvis::DataHandle> >;
 
 
 namespace campvis {
@@ -286,6 +294,8 @@ namespace campvis {
         void removeData(const std::string& name);
         void clear();
 
+        std::vector< std::pair< std::string, DataHandle> > getDataHandlesCopy() const;
+
         %immutable;
         sigslot::signal0 s_changed;
         %mutable;
@@ -293,16 +303,16 @@ namespace campvis {
 
     /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getProperty,
-		     campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
-			 campvis::TransferFunctionProperty,
+             campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
-		     campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
-			 campvis::TransferFunctionProperty,
+             campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* HasPropertyCollection */
@@ -334,7 +344,7 @@ namespace campvis {
         void addProperty(AbstractProperty& prop, int invalidationLevel);
         void setPropertyInvalidationLevel(AbstractProperty& prop, int invalidationLevel);
 
-		void process(DataContainer& data);
+        void process(DataContainer& data);
 
         %immutable;
         sigslot::signal1<AbstractProcessor*> s_validated;
@@ -353,8 +363,8 @@ namespace campvis {
         const DataContainer& getDataContainer() const;
         DataContainer& getDataContainer();
 
-		virtual void addProcessor(AbstractProcessor* processor);
-		virtual void executePipeline() = 0;
+        virtual void addProcessor(AbstractProcessor* processor);
+        virtual void executePipeline() = 0;
         AbstractProcessor* getProcessor(const std::string& name) const;
     };
 

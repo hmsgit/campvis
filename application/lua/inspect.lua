@@ -288,6 +288,21 @@ function inspect.inspect(rootObject, options)
     return toReturn
   end
   
+  local function gatherSwigGettersSetters(mt)
+    local toReturn = {}
+    local getters = mt[".get"]
+    
+    if getters then
+      table.sort(getters, sortKeys)
+      
+      for _,k in ipairs(getDictionaryKeys(getters)) do
+        table.insert(toReturn, k)
+      end
+    end
+    
+    return toReturn
+  end
+  
   local function putSwigMetatable(v, path)
     local mt = getmetatable(v)
     local info = {}
@@ -297,8 +312,12 @@ function inspect.inspect(rootObject, options)
     table.sort(funcs, sortKeys)
     tableAppearances[funcs] = 1
     
+    local gettersSetters = gatherSwigGettersSetters(mt)
+    tableAppearances[gettersSetters] = 1
+    
     info.ClassType = mt[".type"]
     info.Methods = funcs
+    info.Fields = gettersSetters
     
     puts('<',type(v),' ',getId(v),' ')
     down(function()
@@ -325,8 +344,9 @@ function inspect.inspect(rootObject, options)
           puts('<',tv,' ',getId(v),'>')
         else
           putSwigMetatable(v, path)
+          --putTable(getmetatable(v), path)
         end
-        -- putTable(getmetatable(v), path)
+        
       else
         puts('<',tv,' ',getId(v),'>')
       end
