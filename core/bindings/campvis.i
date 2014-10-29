@@ -116,9 +116,14 @@ namespace campvis {
         virtual ~NumericProperty();
     };
 
+    
     %template(IntGenericProperty) GenericProperty< int >;
     %template(IntProperty) NumericProperty< int >;
     typedef NumericProperty< int > IntProperty;
+
+    %template(Ivec2GenericProperty) GenericProperty< tgt::Vector2<int> >;
+    %template(IVec2Property) NumericProperty< tgt::Vector2<int> >;
+    typedef NumericProperty< tgt::Vector2<int> > IVec2Property;
 
     %template(Ivec2GenericProperty) GenericProperty< cgt::Vector2<int> >;
     %template(IVec2Property) NumericProperty< cgt::Vector2<int> >;
@@ -306,14 +311,14 @@ namespace campvis {
              campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
+             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty, campvis::CameraProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
              campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
+             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty, campvis::CameraProperty);
 
     /* HasPropertyCollection */
 
@@ -362,7 +367,7 @@ namespace campvis {
 
         const DataContainer& getDataContainer() const;
         DataContainer& getDataContainer();
-		
+        
         virtual void addProcessor(AbstractProcessor* processor);
         virtual void executePipeline() = 0;
         AbstractProcessor* getProcessor(const std::string& name) const;
