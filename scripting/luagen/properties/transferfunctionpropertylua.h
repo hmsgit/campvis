@@ -50,7 +50,7 @@ namespace campvis {
          */
         virtual ~TransferFunctionPropertyLua();
 
-        std::string getLuaScript();
+        std::string getLuaScript(std::string prefix);
 
     private:
         AbstractTransferFunctionEditor* _editor;    ///< Transfer function editor

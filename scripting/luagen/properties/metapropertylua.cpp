@@ -31,13 +31,14 @@ namespace campvis {
         : PropertyCollectionLua(property, dc)
     {
         //_pcl = static_cast<PropertyCollectionLua*> (this);
+        _xproperty = property;
     }
 
     MetaPropertyLua::~MetaPropertyLua() {
     }
 
-    std::string MetaPropertyLua::getLuaScript() {
-        return PropertyCollectionLua::getLuaScript("");
+    std::string MetaPropertyLua::getLuaScript(std::string prefix) {
+        return PropertyCollectionLua::getLuaScript(_xproperty->getName()+"::", true);
     }
 
 

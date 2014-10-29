@@ -50,7 +50,7 @@ namespace campvis {
          */
         virtual ~ColorPropertyLua();
 
-        std::string getLuaScript();
+        std::string getLuaScript(std::string prefix);
     }; 
 
 // ================================================================================================

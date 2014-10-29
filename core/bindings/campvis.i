@@ -362,10 +362,11 @@ namespace campvis {
 
         const DataContainer& getDataContainer() const;
         DataContainer& getDataContainer();
-
+		
         virtual void addProcessor(AbstractProcessor* processor);
         virtual void executePipeline() = 0;
         AbstractProcessor* getProcessor(const std::string& name) const;
+        AbstractProcessor* getProcessor(int index) const;
 
         sigslot::signal0 s_init;
         sigslot::signal0 s_deinit;

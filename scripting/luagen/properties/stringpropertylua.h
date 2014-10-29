@@ -51,7 +51,7 @@ namespace campvis {
          */
         virtual ~StringPropertyLua();
 
-        virtual std::string getLuaScript();
+        virtual std::string getLuaScript(std::string prefix);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

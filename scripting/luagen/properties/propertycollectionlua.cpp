@@ -65,21 +65,21 @@ namespace campvis {
         }
     }
 
-    std::string PropertyCollectionLua::getLuaScript() {
+    std::string PropertyCollectionLua::getLuaScript(std::string prefix) {
         std::string ret = "";
-        std::string prefix = "proc:";
+        std::string _prefix = "proc:";
         for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
-            ret += prefix + it->second->getLuaScript() + "\n";
+            ret += _prefix + it->second->getLuaScript(prefix) + "\n";
         }
         return ret;
     }
 
-    std::string PropertyCollectionLua::getLuaScript(std::string prefix) {
+    std::string PropertyCollectionLua::getLuaScript(std::string prefix, bool dummy) {
         std::string ret = "";
-        prefix = "";
+        std::string _prefix = "";
         for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
-            ret += prefix + it->second->getLuaScript() + "\n";
-            prefix = "proc:";
+            ret += _prefix + it->second->getLuaScript(prefix) + "\n";
+            _prefix = "proc:";
         }
         return ret;
     }

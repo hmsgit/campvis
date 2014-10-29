@@ -35,7 +35,7 @@ namespace campvis {
     ButtonPropertyLua::~ButtonPropertyLua() {
     }
 
-    std::string ButtonPropertyLua::getLuaScript() {
+    std::string ButtonPropertyLua::getLuaScript(std::string prefix) {
         return "-- Not necessary ButtonProperty";
     }
 }

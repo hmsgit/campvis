@@ -51,7 +51,7 @@ namespace campvis {
          */
         virtual ~CameraPropertyLua();
 
-        std::string getLuaScript();
+        std::string getLuaScript(std::string prefix);
 
     private:
         QLabel* _lblCameraPosition;

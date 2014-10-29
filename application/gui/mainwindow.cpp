@@ -295,25 +295,26 @@ namespace campvis {
 
         QString filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
         if (filename != nullptr && _application->getLuaVmState() != nullptr) {
-            std::ifstream file;
-            file.open(filename.toStdString());
-            if (!file.fail()) {
-                _application->getLuaVmState()->execString("local proc = pipelines[\"" +_selectedPipeline->getName()+"\"]");
-
-                std::string script;
-                while (!file.eof()) {
-                    script = "";
-                    std::getline(file, script);
-                    if (script == "")
-                        continue;
-
-                    printf("%s\n", script.c_str());
-                    //if (_application->getLuaVmState() != nullptr) {
-                    _application->getLuaVmState()->execString(script.c_str());
-                    //}
-                }
-                printf("Load lua script");
-            }
+            _application->getLuaVmState()->execFile(filename.toStdString());
+            //std::ifstream file;
+            //file.open(filename.toStdString());
+            //if (!file.fail()) {
+            //    _application->getLuaVmState()->execString("proc = pipelines[\"" +_selectedPipeline->getName()+"\"]");
+            //
+            //    std::string script;
+            //    while (!file.eof()) {
+            //        script = "";
+            //        std::getline(file, script);
+            //        if (script == "")
+            //            continue;
+            //
+            //        printf("%s\n", script.c_str());
+            //        //if (_application->getLuaVmState() != nullptr) {
+            //        _application->getLuaVmState()->execString(script.c_str());
+            //        //}
+            //    }
+            //    printf("Load lua script");
+            //}
         }
 #endif
     }
@@ -327,17 +328,26 @@ namespace campvis {
         QString filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
 
         if (filename != nullptr) {
-            PropertyCollectionLua *_pcLua = new PropertyCollectionLua();
             if (_selectedProcessor != 0 && _selectedPipeline != 0) {
-                _pcLua->updatePropCollection(_selectedProcessor, &_selectedPipeline->getDataContainer());
-                std::string script = _pcLua->getLuaScript();
-                if (script != "") {
+                PropertyCollectionLua *_pcLua = new PropertyCollectionLua();
+                
+                std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n";
+                for (int i = 0; i < _selectedPipeline->getProcessors().size(); i++) {
+                    pipeScript += "proc = pipeline:getProcessor(" + StringUtils::toString(i) + ")\n";
+                    AbstractProcessor *proc = _selectedPipeline->getProcessor(i);
+
+                    _pcLua->updatePropCollection(proc, &_selectedPipeline->getDataContainer());
+                    pipeScript += _pcLua->getLuaScript("");
+                }
+                if (pipeScript != "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n") {
                     std::ofstream file;
                     file.open(filename.toStdString());
-                    file << script.c_str();
+                    file << pipeScript.c_str();
                     file.close();
                     printf("Saved Lua script");
                 }
+                
+                delete _pcLua;
             }
         }
 #endif

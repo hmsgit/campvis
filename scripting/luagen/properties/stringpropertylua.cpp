@@ -37,9 +37,9 @@ namespace campvis {
 
     }
 
-    std::string StringPropertyLua::getLuaScript() {
+    std::string StringPropertyLua::getLuaScript(std::string prefix) {
         std::string ret = "";
-        ret += "getProperty(\"" + _property->getName() + "\"):setValue(\"" + static_cast<StringProperty*>(_property)->getValue() + "\")";
+        ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(\"" + static_cast<StringProperty*>(_property)->getValue() + "\")";
         return ret;
     }
 }

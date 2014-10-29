@@ -56,7 +56,7 @@ namespace campvis {
          */
         virtual ~AbstractPropertyLua();
     public:
-        virtual std::string getLuaScript() = 0;
+        virtual std::string getLuaScript(std::string prefix = "") = 0;
 
     protected:
         AbstractProperty* _property;    ///< The property this widget handles

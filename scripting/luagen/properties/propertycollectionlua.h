@@ -52,14 +52,14 @@ namespace campvis {
          */
         ~PropertyCollectionLua();
 
-        std::string getLuaScript();
+        std::string getLuaScript(std::string prefix);
 
         void updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc);
 
         void addProperty(AbstractProperty* prop);
         
     protected:
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string prefix, bool dummy);
 
         HasPropertyCollection* _propCollection; ///< The HasPropertyCollection instance this widget is currently working on.
         

@@ -53,10 +53,11 @@ namespace campvis {
          */
         virtual ~MetaPropertyLua();
 
-        std::string getLuaScript();
+        std::string getLuaScript(std::string prefix);
 
     private:
         PropertyCollectionLua* _pcl;
+        MetaProperty* _xproperty;
 
     };
 

@@ -36,13 +36,13 @@ namespace campvis {
     TransferFunctionPropertyLua::~TransferFunctionPropertyLua() {
     }
 
-    std::string TransferFunctionPropertyLua::getLuaScript() {
+    std::string TransferFunctionPropertyLua::getLuaScript(std::string prefix) {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         AbstractTransferFunction* tf = prop->getTF();
         const tgt::vec2& domain = tf->getIntensityDomain();
 
         std::string ret = "";
-        ret += "getProperty(\"" + _property->getName() + "\"):setIntensityDomain(tgt.vec2(" 
+        ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setIntensityDomain(tgt.vec2(" 
             + StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))";
         return ret;
     }

@@ -44,6 +44,9 @@ namespace cgt {
 
     %template(svec3) Vector3<size_t>;
     typedef Vector3<size_t> svec3;
+	
+    %template(ivec3) Vector3<int>;
+    typedef Vector3<int> ivec3;
 
     /* Vector4 */
 
