@@ -366,6 +366,9 @@ namespace campvis {
         virtual void addProcessor(AbstractProcessor* processor);
         virtual void executePipeline() = 0;
         AbstractProcessor* getProcessor(const std::string& name) const;
+
+        sigslot::signal0 s_init;
+        sigslot::signal0 s_deinit;
     };
 
     /* AutoEvaluationPipeline */

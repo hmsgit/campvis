@@ -191,8 +191,10 @@ namespace campvis {
          */
         const std::string& getRenderTargetID() const;
 
-        /// Signal emitted when the pipeline's render target has changed
-        sigslot::signal0 s_renderTargetChanged;
+        /// Signal emitted at the end of AbstractPipeline::init()
+        sigslot::signal0 s_init;
+        /// Signal emitted at the beginning of AbstractPipeline::deinit()
+        sigslot::signal0 s_deinit;
 
     protected:
         /**

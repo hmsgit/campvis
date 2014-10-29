@@ -21,28 +21,28 @@ function pipeline:ctor()
     self.vr = vis.VolumeRenderer(canvas_size)
     self.addProcessor(instance, self.vr)
 
-    -- alternative 1 to automatically adjust the camera to the data
     self.tcp:addLqModeProcessor(self.vr)
-
     self.addEventListenerToBack(instance, self.tcp)
 end
 
-function pipeline:init()
-    self.vr.p_outputImage:setValue("combine")
-    self.getProperty(instance, "renderTargetID"):setValue("combine")
+local initCallback = function()
+    pipeline.vr.p_outputImage:setValue("combine")
+    pipeline.getProperty(instance, "renderTargetID"):setValue("combine")
 
-    self.image_reader.p_url:setValue(campvis.SOURCE_DIR .. "/modules/vis/sampledata/smallHeart.mhd")
-    self.image_reader.p_targetImageID:setValue("reader.output")
-    self.image_reader.p_targetImageID:addSharedProperty(self.vr.p_inputVolume)
-    self.image_reader.p_targetImageID:addSharedProperty(self.tcp.p_image)
+    pipeline.image_reader.p_url:setValue(campvis.SOURCE_DIR .. "/modules/vis/sampledata/smallHeart.mhd")
+    pipeline.image_reader.p_targetImageID:setValue("reader.output")
+    pipeline.image_reader.p_targetImageID:addSharedProperty(pipeline.vr.p_inputVolume)
+    
+    -- alternative 1 to automatically adjust the camera to the data
+    pipeline.image_reader.p_targetImageID:addSharedProperty(pipeline.tcp.p_image)
 
     -- alternative 2 to automatically adjust the camera to the data
     local callback = function(arg)
-        local data_container = self.getDataContainer(instance)
-        local img_data = data_container:getData(self.image_reader.p_targetImageID:getValue()):getData()
-        self.tcp:reinitializeCamera(img_data:getWorldBounds())
+        local data_container = pipeline.getDataContainer(instance)
+        local img_data = data_container:getData(pipeline.image_reader.p_targetImageID:getValue()):getData()
+        pipeline.tcp:reinitializeCamera(img_data:getWorldBounds())
     end
-    self.image_reader.s_validated:connect(callback)
+    pipeline.image_reader.s_validated:connect(callback)
 
     local geometry1 = campvis.TFGeometry1D_createQuad(cgt.vec2(0.12, 0.15), cgt.col4(85, 0, 0, 128),
                                                       cgt.vec4(255, 0, 0, 128))
@@ -56,9 +56,9 @@ function pipeline:init()
     dvrTF:addGeometry(geometry2)
     dvrTF:addGeometry(geometry3)
 
-    self.vr:getNestedProperty("RaycasterProps::TransferFunction"):replaceTF(dvrTF)
-    self.vr:getNestedProperty("RaycasterProps::SamplingRate"):setValue(4.0)
+    pipeline.vr:getNestedProperty("RaycasterProps::TransferFunction"):replaceTF(dvrTF)
+    pipeline.vr:getNestedProperty("RaycasterProps::SamplingRate"):setValue(4.0)
 end
 
-function pipeline:deinit()
-end
+pipeline.s_init:connect(initCallback)
+

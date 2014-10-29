@@ -64,7 +64,6 @@ namespace campvis {
     }
 
     void AbstractPipeline::init() {
-
         initAllProperties();
 
         // initialize all processors:
@@ -76,9 +75,15 @@ namespace campvis {
                 LERROR("Caught Exception during initialization of processor: " << e.what());
             }
         }
+
+        // use trigger signal to enforce blocking call
+        s_init.triggerSignal();
     }
 
     void AbstractPipeline::deinit() {
+        // use trigger signal to enforce blocking call
+        s_deinit.triggerSignal();
+
         deinitAllProperties();
 
         // deinitialize all processors:

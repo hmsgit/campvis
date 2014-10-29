@@ -81,7 +81,8 @@ namespace sigslot {
             }
             else {
                 // there currently is no event in this queue -> go sleep
-                _evaluationCondition.wait(lock);
+                if (! _stopExecution)
+                    _evaluationCondition.wait(lock);
             }
         }
     }
