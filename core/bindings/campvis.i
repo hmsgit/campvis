@@ -121,10 +121,6 @@ namespace campvis {
     %template(IntProperty) NumericProperty< int >;
     typedef NumericProperty< int > IntProperty;
 
-    %template(Ivec2GenericProperty) GenericProperty< tgt::Vector2<int> >;
-    %template(IVec2Property) NumericProperty< tgt::Vector2<int> >;
-    typedef NumericProperty< tgt::Vector2<int> > IVec2Property;
-
     %template(Ivec2GenericProperty) GenericProperty< cgt::Vector2<int> >;
     %template(IVec2Property) NumericProperty< cgt::Vector2<int> >;
     typedef NumericProperty< cgt::Vector2<int> > IVec2Property;
@@ -311,14 +307,14 @@ namespace campvis {
              campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty, campvis::CameraProperty);
+             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
              campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
-             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty, campvis::CameraProperty);
+             campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* HasPropertyCollection */
 

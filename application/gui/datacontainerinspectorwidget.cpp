@@ -225,7 +225,7 @@ namespace campvis {
         _mainLayout->addWidget(_infoWidget, 0, 1, 3, 1);
 
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
-        qRegisterMetaType<cgt::vec4>("tgt_vec4");
+        qRegisterMetaType<cgt::vec4>("cgt_vec4");
         connect(
             _dctWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), 
             this, SLOT(onDCTWidgetSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&)));

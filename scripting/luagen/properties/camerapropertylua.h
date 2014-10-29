@@ -27,9 +27,7 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
-#include "core/properties/cameraproperty.h"
-
-class QLabel;
+//#include "core/properties/cameraproperty.h"
 
 namespace campvis {
     /**
@@ -44,7 +42,7 @@ namespace campvis {
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          * \param   parent      Parent Qt lua
          */
-        CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer);
+        //CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer);
 
         /**
          * Destructor
@@ -53,16 +51,10 @@ namespace campvis {
 
         std::string getLuaScript(std::string prefix);
 
-    private:
-        QLabel* _lblCameraPosition;
-        QLabel* _lblFocusPosition;
-        QLabel* _lblLookDirection;
-        QLabel* _lblUpVector;
-
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<CameraPropertyLua, CameraProperty>;
+    //template class PropertyLuaRegistrar<CameraPropertyLua, CameraProperty>;
 }
 
 #endif // CAMERAPROPERTYLUA_H__

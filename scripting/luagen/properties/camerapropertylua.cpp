@@ -27,10 +27,10 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    CameraPropertyLua::CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, true, dataContainer)
-    {
-    }
+    //CameraPropertyLua::CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer)
+    //    : AbstractPropertyLua(property, true, dataContainer)
+    //{
+    //}
 
     CameraPropertyLua::~CameraPropertyLua() {
     }
@@ -45,28 +45,28 @@ namespace campvis {
 
     std::string CameraPropertyLua::getLuaScript(std::string prefix) {
         std::string ret = "";
-        tgt::Camera cam =  static_cast<CameraProperty*>(_property)->getValue();
-        tgt::vec3 pos = cam.getPosition();
-        tgt::vec3 focus = cam.getFocus();
-        tgt::vec3 up = cam.getUpVector();
-        float fovy = cam.getFovy();
-        float ratio = cam.getRatio();
-        float distn = cam.getNearDist();
-        float distf = cam.getFarDist();
-        int pm = cam.getProjectionMode();
+    //    cgt::Camera cam =  static_cast<CameraProperty*>(_property)->getValue();
+    //    cgt::vec3 pos = cam.getPosition();
+    //    cgt::vec3 focus = cam.getFocus();
+    //    cgt::vec3 up = cam.getUpVector();
+    //    float fovy = cam.getFovy();
+    //    float ratio = cam.getRatio();
+    //    float distn = cam.getNearDist();
+    //    float distf = cam.getFarDist();
+    //    int pm = cam.getProjectionMode();
 
-        ret += "getNestedProperty(\"" + prefix+ _property->getName() + "\"):setValue(tgt.Camera("
-            + "tgt.vec3(" + StringUtils::toString(pos.x) + "," + StringUtils::toString(pos.y) + "," + StringUtils::toString(pos.z) + ")"
-            + "," + "tgt.vec3(" + StringUtils::toString(focus.x) + "," + StringUtils::toString(focus.y) + "," + StringUtils::toString(focus.z) + ")"
-            + "," + "tgt.vec3(" + StringUtils::toString(up.x) + "," + StringUtils::toString(up.y) + "," + StringUtils::toString(up.z) + ")"
-            + "," + StringUtils::toString(fovy)
-            + "," + StringUtils::toString(ratio)
-            + "," + StringUtils::toString(distn)
-            + "," + StringUtils::toString(distf)
-            + "," + StringUtils::toString(pm)
-            +"))";
+    //    ret += "getNestedProperty(\"" + prefix+ _property->getName() + "\"):setValue(cgt.Camera("
+    //        + "cgt.vec3(" + StringUtils::toString(pos.x) + "," + StringUtils::toString(pos.y) + "," + StringUtils::toString(pos.z) + ")"
+    //        + "," + "cgt.vec3(" + StringUtils::toString(focus.x) + "," + StringUtils::toString(focus.y) + "," + StringUtils::toString(focus.z) + ")"
+    //        + "," + "cgt.vec3(" + StringUtils::toString(up.x) + "," + StringUtils::toString(up.y) + "," + StringUtils::toString(up.z) + ")"
+    //        + "," + StringUtils::toString(fovy)
+    //        + "," + StringUtils::toString(ratio)
+    //        + "," + StringUtils::toString(distn)
+    //        + "," + StringUtils::toString(distf)
+    //        + "," + StringUtils::toString(pm)
+    //        +"))";
 
-        //ret = "-- If required need to implement lua interface for tgt:Camera";
+    //    //ret = "-- If required need to implement lua interface for cgt:Camera";
         return ret;
     }
 

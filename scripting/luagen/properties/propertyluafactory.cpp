@@ -59,7 +59,7 @@ namespace campvis {
                 _propertyWidgetMap.insert(it, std::make_pair(typeIndex, ptr));
             }
             else {
-                tgtAssert(false, "Double-registered a property widget for the same type.");
+                cgtAssert(false, "Double-registered a property widget for the same type.");
             }
         }
         if (fallbackPtr != nullptr) {

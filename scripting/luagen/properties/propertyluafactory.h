@@ -25,8 +25,8 @@
 #ifndef PROPERTYLUAFACTORY_H__
 #define PROPERTYLUAFACTORY_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/singleton.h"
+#include "cgt/logmanager.h"
+#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
@@ -123,7 +123,7 @@ namespace campvis {
          * \return  The newly created property widget.
          */
         static AbstractPropertyLua* create(AbstractProperty* property, DataContainer* dc = nullptr) {
-            tgtAssert(dynamic_cast<PropertyType*>(property) != nullptr, "Incompatible types - this should not happen!");
+            cgtAssert(dynamic_cast<PropertyType*>(property) != nullptr, "Incompatible types - this should not happen!");
             return new PropertyLuaType(static_cast<PropertyType*>(property), dc);
         }
 

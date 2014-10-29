@@ -19,7 +19,7 @@ namespace campvis {
     };
     
 
-    class MicroscopyImageSegmentation : public VisualizationProcessor, public HasProcessorDecorators, public tgt::EventListener {
+    class MicroscopyImageSegmentation : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
     public:
         MicroscopyImageSegmentation(campvis::IVec2Property* viewportSizeProp, campvis::RaycastingProcessor* raycaster);
         virtual ~MicroscopyImageSegmentation();

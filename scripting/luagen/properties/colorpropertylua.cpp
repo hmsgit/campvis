@@ -36,9 +36,9 @@ namespace campvis {
     }
 
     std::string ColorPropertyLua::getLuaScript(std::string prefix) {
-        tgt::vec4 value = static_cast<ColorProperty*>(_property)->getValue();
+        cgt::vec4 value = static_cast<ColorProperty*>(_property)->getValue();
         std::string ret = "";
-        ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(tgt.vec4(" 
+        ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(cgt.vec4(" 
             + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
             + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
         return ret;

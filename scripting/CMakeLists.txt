@@ -127,7 +127,8 @@ ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}
 )
 
 ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
-TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisScriptingSources ${CampvisHome} "")

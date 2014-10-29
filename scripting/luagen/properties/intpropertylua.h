@@ -64,19 +64,19 @@ namespace campvis {
         template<>
         struct IVecPropertyLuaTraits<2> {
             typedef IVec2Property PropertyType;
-            typedef tgt::ivec2 BaseType;
+            typedef cgt::ivec2 BaseType;
         };
 
         template<>
         struct IVecPropertyLuaTraits<3> {
             typedef IVec3Property PropertyType;
-            typedef tgt::ivec3 BaseType;
+            typedef cgt::ivec3 BaseType;
         };
 
         template<>
         struct IVecPropertyLuaTraits<4> {
             typedef IVec4Property PropertyType;
-            typedef tgt::ivec4 BaseType;
+            typedef cgt::ivec4 BaseType;
         };
     }
 
@@ -137,9 +137,9 @@ namespace campvis {
         }
 
         std::string campvis::IVec2PropertyLua::getLuaScript(std::string prefix) {
-            tgt::ivec2 value = static_cast<IVec2Property*>(_property)->getValue();
+            cgt::ivec2 value = static_cast<IVec2Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(tgt.ivec2(" 
+            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(cgt.ivec2(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) + "))";
             return ret;
         }
@@ -155,9 +155,9 @@ namespace campvis {
         }
 
         std::string campvis::IVec3PropertyLua::getLuaScript(std::string prefix) {
-            tgt::ivec3 value = static_cast<IVec3Property*>(_property)->getValue();
+            cgt::ivec3 value = static_cast<IVec3Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(tgt.ivec3(" 
+            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(cgt.ivec3(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
                 + StringUtils::toString(value.z) + "))";
             return ret;
@@ -174,9 +174,9 @@ namespace campvis {
         }
 
         std::string campvis::IVec4PropertyLua::getLuaScript(std::string prefix) {
-            tgt::ivec4 value = static_cast<IVec4Property*>(_property)->getValue();
+            cgt::ivec4 value = static_cast<IVec4Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(tgt.ivec4(" 
+            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(cgt.ivec4(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
                 + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
             return ret;

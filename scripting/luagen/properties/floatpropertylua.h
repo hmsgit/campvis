@@ -65,19 +65,19 @@ namespace campvis {
         template<>
         struct VecPropertyLuaTraits<2> {
             typedef Vec2Property PropertyType;
-            typedef tgt::vec2 BaseType;
+            typedef cgt::vec2 BaseType;
         };
 
         template<>
         struct VecPropertyLuaTraits<3> {
             typedef Vec3Property PropertyType;
-            typedef tgt::vec3 BaseType;
+            typedef cgt::vec3 BaseType;
         };
 
         template<>
         struct VecPropertyLuaTraits<4> {
             typedef Vec4Property PropertyType;
-            typedef tgt::vec4 BaseType;
+            typedef cgt::vec4 BaseType;
         };
     }
 
@@ -139,9 +139,9 @@ namespace campvis {
         }
 
         std::string campvis::Vec2PropertyLua::getLuaScript(std::string prefix) {
-            tgt::vec2 value = static_cast<Vec2Property*>(_property)->getValue();
+            cgt::vec2 value = static_cast<Vec2Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(tgt.vec2(" 
+            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(cgt.vec2(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) + "))";
             return ret;
         }
@@ -156,9 +156,9 @@ namespace campvis {
         {
         }
         std::string campvis::Vec3PropertyLua::getLuaScript(std::string prefix) {
-            tgt::vec3 value = static_cast<Vec3Property*>(_property)->getValue();
+            cgt::vec3 value = static_cast<Vec3Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(tgt.vec3(" 
+            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(cgt.vec3(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) 
                 +", " + StringUtils::toString(value.z) + "))";
             return ret;
@@ -175,9 +175,9 @@ namespace campvis {
         }
 
         std::string campvis::Vec4PropertyLua::getLuaScript(std::string prefix) {
-            tgt::vec4 value = static_cast<Vec4Property*>(_property)->getValue();
+            cgt::vec4 value = static_cast<Vec4Property*>(_property)->getValue();
             std::string ret = "";
-            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(tgt.vec4(" 
+            ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(cgt.vec4(" 
                 + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
                 + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
             return ret;
