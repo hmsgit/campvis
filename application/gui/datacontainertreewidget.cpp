@@ -31,6 +31,7 @@
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/abstractdata.h"
+#include "core/datastructures/dataseries.h"
 #include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/meshgeometry.h"
@@ -130,6 +131,9 @@ namespace campvis {
                     return QVariant(QString("Render Data"));
                 }
 
+                else if (const DataSeries* tester = dynamic_cast<const DataSeries*>(data)) {
+                    return QVariant(QString("Data Series"));
+                }
                 else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
                     return QVariant(QString("Image Series"));
                 }
@@ -166,6 +170,11 @@ namespace campvis {
                 }
                 if (tester->hasDepthTexture()) {
                     new DataHandleTreeItem(QtDataHandle(tester->getDepthDataHandle()), _name + "::DepthTexture", this);
+                }
+            }
+            else if (const DataSeries* tester = dynamic_cast<const DataSeries*>(data)) {
+                for (size_t i = 0; i < tester->getNumDatas(); ++i) {
+                    new DataHandleTreeItem(QtDataHandle(tester->getData(i)), _name + "::Data" + StringUtils::toString(i), this);
                 }
             }
             else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {

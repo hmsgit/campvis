@@ -694,9 +694,9 @@ typedef Matrix2f        mat2;
 typedef Matrix3f        mat3;
 typedef Matrix4f        mat4;
 
-typedef Matrix2f        dmat2;
-typedef Matrix3f        dmat3;
-typedef Matrix4f        dmat4;
+typedef Matrix2d        dmat2;
+typedef Matrix3d        dmat3;
+typedef Matrix4d        dmat4;
 
 #ifdef DLL_TEMPLATE_INST
 template struct CGT_API Matrix2<float>;
