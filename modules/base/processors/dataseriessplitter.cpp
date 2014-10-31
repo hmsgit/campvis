@@ -56,7 +56,7 @@ namespace campvis {
     void DataSeriesSplitter::updateProperties(DataContainer& dataContainer) {
         ScopedTypedData<DataSeries> series(dataContainer, p_inputID.getValue());
         if (series != 0)
-            p_imageIndex.setMaxValue(static_cast<int>(series->getNumDatas()));
+            p_imageIndex.setMaxValue(static_cast<int>(series->getNumDatas()) - 1);
     }
 
 }
