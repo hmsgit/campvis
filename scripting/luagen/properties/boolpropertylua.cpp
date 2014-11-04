@@ -37,7 +37,7 @@ namespace campvis {
     std::string BoolPropertyLua::getLuaScript(std::string prefix) {
         std::string ret = "";
         ret += "getNestedProperty(\"" + prefix +_property->getName() + "\"):setValue(" 
-            + StringUtils::toString( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
+            + (static_cast<BoolProperty*>(_property)->getValue() == 1? "true" : "false") + ")";
         return ret;
     }
 }

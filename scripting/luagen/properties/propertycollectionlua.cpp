@@ -59,6 +59,7 @@ namespace campvis {
 
         // create widgets for the new PropertyCollection
         if (propertyCollection != 0) {
+            _luaMap.clear();
             for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
                 addProperty(*it);
             }

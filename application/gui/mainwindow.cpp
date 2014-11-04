@@ -332,12 +332,14 @@ namespace campvis {
                 PropertyCollectionLua *_pcLua = new PropertyCollectionLua();
                 
                 std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n";
-                for (int i = 0; i < _selectedPipeline->getProcessors().size(); i++) {
+                for (int i = 1; i < _selectedPipeline->getProcessors().size(); i++) {
                     pipeScript += "proc = pipeline:getProcessor(" + StringUtils::toString(i) + ")\n";
                     AbstractProcessor *proc = _selectedPipeline->getProcessor(i);
 
                     _pcLua->updatePropCollection(proc, &_selectedPipeline->getDataContainer());
-                    pipeScript += _pcLua->getLuaScript("");
+                    std::string res = _pcLua->getLuaScript("");
+                    pipeScript += res;
+                    std::cout << "\n\n" + pipeScript + "\n\n";
                 }
                 if (pipeScript != "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n") {
                     std::ofstream file;
