@@ -134,17 +134,11 @@ namespace campvis {
     }
 
     cgt::Texture* BinaryBrickedVolume::exportToImageData() const {
-        cgt::Texture* toReturn = new cgt::Texture(_bricks, _dimPackedBricks, GL_RED_INTEGER, GL_R8UI, GL_UNSIGNED_BYTE, cgt::Texture::NEAREST);
-        LGL_ERROR;
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
         cgt::TextureUnit tempUnit;
         tempUnit.activate();
-        toReturn->bind();
-        toReturn->uploadTexture();
-        LGL_ERROR;
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        cgt::Texture* toReturn = new cgt::Texture(GL_TEXTURE_3D, _dimPackedBricks, GL_R8UI, _bricks, GL_RED_INTEGER, GL_UNSIGNED_BYTE, cgt::Texture::NEAREST);
         toReturn->setWrapping(cgt::Texture::CLAMP);
-        toReturn->setPixelData(0);
         cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
 

@@ -107,26 +107,11 @@ namespace campvis {
         void unbind() const;
 
         /**
-         * Download the OpenGL texture from the GPU memory to the texture cpu buffer.
-         * \return  _texture
-         */
-        void downloadTexture() const;
-
-        /**
          * Gets the OpenGL texture.
          * \return  _texture
          */
         const cgt::Texture* getTexture() const;
 
-
-        /**
-         * Returns a WeaklyTypedPointer to the data of this representation.
-         * You do \b not own the pointer - do \b not modify its content!
-         * \see     ImageRepresentationGL::getWeaklyTypedPointerCopy()
-         * \note    Make sure to call this method from a valid OpenGL context.
-         * \return  A WeaklyTypedPointer to the data of this representation. Neither you own nor you may modify its data!
-         */
-        const WeaklyTypedPointer getWeaklyTypedPointer() const;
 
         /**
          * Returns a WeaklyTypedPointer to the data of this representation.

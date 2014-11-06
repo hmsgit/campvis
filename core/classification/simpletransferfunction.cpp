@@ -60,19 +60,20 @@ namespace campvis {
         delete _texture;
 
         GLenum dataType = GL_UNSIGNED_BYTE;
-        _texture = new cgt::Texture(_size, GL_RGBA, dataType, cgt::Texture::LINEAR);
+        _texture = new cgt::Texture(GL_TEXTURE_1D, _size, GL_RGBA8, cgt::Texture::LINEAR);
         _texture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
+        cgt::col4* texels = new cgt::col4[_size.x];
         cgt::col4 diff = _rightColor - _leftColor;
         for (size_t i = 0; i < _size.x; ++i) {
             float multiplier = static_cast<float>(i) / (_size.x - 1);
-            cgt::col4& texel = _texture->texel<cgt::col4>(i);
+            cgt::col4& texel = texels[i];
             for (size_t j = 0; j < 4; ++j) {
                 texel[j] = static_cast<uint8_t>(_leftColor[j] + (static_cast<float>(diff[j]) * multiplier));
             }
         }
 
-        _texture->uploadTexture();
+        _texture->uploadTexture(reinterpret_cast<GLubyte*>(texels), GL_RGBA, GL_UNSIGNED_BYTE);
         _dirtyTexture = false;
     }
 

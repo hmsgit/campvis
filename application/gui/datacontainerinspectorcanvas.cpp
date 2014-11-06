@@ -32,6 +32,7 @@
 #include "core/datastructures/datahandle.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
+#include "core/datastructures/imagerepresentationlocal.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
 #include "core/classification/tfgeometry1d.h"
@@ -283,6 +284,7 @@ namespace campvis {
 
             const ImageData* id = static_cast<const ImageData*>(_textures[texIndx].getData());
             const cgt::Texture* tex = id->getRepresentation<ImageRepresentationGL>()->getTexture();
+            const ImageRepresentationLocal* localRep = id->getRepresentation<ImageRepresentationLocal>();
             cgt::ivec2 imageSize = id->getSize().xy();
 
             cgt::vec2 lookupTexelFloat = cgt::vec2((e->coord() % _quadSize) * imageSize) / cgt::vec2(_quadSize);
@@ -295,19 +297,28 @@ namespace campvis {
 
             lookupTexelFloat /= (ratioRatio > 1) ? cgt::vec2(1.f, 1.f / ratioRatio) : cgt::vec2(ratioRatio, 1.f);
             
-            cgt::ivec2 lookupTexel(lookupTexelFloat);
+            cgt::svec3 lookupTexel(lookupTexelFloat.x, imageSize.y - lookupTexelFloat.y, 0);
             if (lookupTexel.x >= 0 && lookupTexel.y >= 0 && lookupTexel.x < imageSize.x && lookupTexel.y < imageSize.y) {
-                if(tex->isDepthTexture()) {
-                    emit s_depthChanged(tex->depthAsFloat(lookupTexel.x, imageSize.y - lookupTexel.y - 1));
+                if (tex->isDepthTexture()) {
+                    emit s_depthChanged(localRep->getElementNormalized(lookupTexel, 0));
                 }
                 else {
                     if (tex->getDimensions().z != 1) {
                         if (p_currentSlice.getValue() >= 0 && p_currentSlice.getValue() < tex->getDimensions().z) {
-                            emit s_colorChanged(tex->texelAsFloat(lookupTexel.x, imageSize.y - lookupTexel.y - 1, p_currentSlice.getValue()));
+                            lookupTexel.z = static_cast<size_t>(p_currentSlice.getValue());
+                            cgt::vec4 texel(0.f);
+                            for (size_t i = 0; i < id->getNumChannels(); ++i) {
+                                texel[i] = localRep->getElementNormalized(lookupTexel, i);
+                            }
+                            emit s_colorChanged(texel);
                         }
                     }
                     else if (tex->getDimensions().y != 1) {
-                        emit s_colorChanged(tex->texelAsFloat(lookupTexel.x, imageSize.y - lookupTexel.y - 1));
+                        cgt::vec4 texel(0.f);
+                        for (size_t i = 0; i < id->getNumChannels(); ++i) {
+                            texel[i] = localRep->getElementNormalized(lookupTexel, i);
+                        }
+                        emit s_colorChanged(texel);
                     }
                 }
             }
@@ -386,7 +397,6 @@ namespace campvis {
         for (std::map<QString, QtDataHandle>::iterator it = _handles.begin(); it != _handles.end(); ++it) {
             if (const ImageData* img = dynamic_cast<const ImageData*>(it->second.getData())) {
                 if (const ImageRepresentationGL* imgGL = img->getRepresentation<ImageRepresentationGL>()) {
-                    imgGL->downloadTexture();
                     _textures.push_back(it->second);
                     maxSlices = std::max(maxSlices, imgGL->getTexture()->getDimensions().z);
                 }
@@ -395,14 +405,12 @@ namespace campvis {
                 for (size_t i = 0; i < rd->getNumColorTextures(); ++i) {
                     const ImageRepresentationGL* imgGL = rd->getColorTexture(i)->getRepresentation<ImageRepresentationGL>();
                     if (imgGL) {
-                        imgGL->downloadTexture();
                         _textures.push_back(rd->getColorDataHandle(i));
                     }
                 }
                 if (rd->hasDepthTexture()) {
                     const ImageRepresentationGL* imgGL = rd->getDepthTexture()->getRepresentation<ImageRepresentationGL>();
                     if (imgGL) {
-                        imgGL->downloadTexture();
                         _textures.push_back(rd->getDepthDataHandle());
                     }
 
@@ -454,8 +462,6 @@ namespace campvis {
         if (rd != nullptr && rd->getNumColorTextures() > 0) {
             auto rep = rd->getColorTexture(0)->getRepresentation<ImageRepresentationGL>();
             if (rep != nullptr) {
-                const_cast<cgt::Texture*>(rep->getTexture())->downloadTexture();
-
                 if (textureIndex < 0 || textureIndex >= static_cast<int>(_textures.size())) {
                     _textures.push_back(rd->getColorDataHandle(0));
                 }

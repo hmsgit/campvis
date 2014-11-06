@@ -53,27 +53,7 @@ protected:
 
     std::vector<std::string> extensions_;
     std::string name_;
-
-    /**
-     *   Create OpenGL texture
-     */
-    bool create1DTexture(Texture* t, Texture::Filter filter, bool compress, bool createOGLTex = true);
-
-    /**
-     *   Create OpenGL texture
-     */
-    bool create2DTexture(Texture* t, Texture::Filter filter, bool compress, bool createOGLTex = true);
-
-    /**
-     *   Create OpenGL texture
-     */
-    bool createRectangleTexture(Texture* t, Texture::Filter filter, bool compress, bool createOGLTex = true);
-
-    /**
-     *   Create OpenGL texture
-     */
-    bool create3DTexture(Texture* t, Texture::Filter filter, bool compress, bool createOGLTex = true);
-
+    
     /**
      *   Find nearest (larger) power-of-2 value
      */

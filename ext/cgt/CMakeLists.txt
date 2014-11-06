@@ -43,7 +43,6 @@ SET(CGT_SOURCES
 	stopwatch.cpp
 	texture.cpp
 	texturereader.cpp
-	texturereaderdevil.cpp
 	texturereadertga.cpp
 	textureunit.cpp
 	cgt_gl.cpp

@@ -1,4 +1,4 @@
-/**********************************************************************
+﻿/**********************************************************************
  *                                                                    *
  * cgt - CAMP Graphics Toolbox, Copyright (C) 2012-2014               *
  *     Chair for Computer Aided Medical Procedures                    *
@@ -35,90 +35,42 @@
 
 namespace cgt {
 
-//------------------------------------------------------------------------------
-// Texture
-//------------------------------------------------------------------------------
-
-Texture::Texture(const cgt::ivec3& dimensions, GLint format, GLint internalformat,
-                GLenum dataType, Filter filter)
+Texture::Texture(GLenum type, const cgt::ivec3& dimensions, GLint internalFormat, Filter filter /*= LINEAR*/) 
     : dimensions_(dimensions)
-    , format_(format)
-    , internalformat_(internalformat)
-    , dataType_(dataType)
+    , internalformat_(internalFormat)
     , filter_(filter)
     , wrapping_(CLAMP)
-    , priority_(-1.f)
-    , pixels_(0)
+    , id_(0)
+    , type_(type)
+    , bpp_(0)
 {
-    init(true);
+    init();
+    uploadTexture(nullptr, calcMatchingFormat(internalFormat), calcMatchingDataType(internalFormat));
 }
 
-Texture::Texture(const cgt::ivec3& dimensions, GLint format,
-                GLenum dataType, Filter filter)
+Texture::Texture(GLenum type, const cgt::ivec3& dimensions, GLint internalFormat, GLubyte* data, GLint format, GLenum dataType, Filter filter /*= LINEAR*/) 
     : dimensions_(dimensions)
-    , format_(format)
-    , internalformat_(format)
-    , dataType_(dataType)
+    , internalformat_(internalFormat)
     , filter_(filter)
     , wrapping_(CLAMP)
-    , priority_(-1.f)
-    , pixels_(0)
+    , id_(0)
+    , type_(type)
+    , bpp_(0)
 {
-    init(true);
+    init();
+    uploadTexture(data, format, dataType);
 }
 
-Texture::Texture(GLubyte* data, const cgt::ivec3& dimensions, GLint format, GLint internalformat,
-                GLenum dataType, Filter filter)
-    : dimensions_(dimensions)
-    , format_(format)
-    , internalformat_(internalformat)
-    , dataType_(dataType)
-    , filter_(filter)
-    , wrapping_(CLAMP)
-    , priority_(-1.f)
-    , pixels_(data)
-{
-    init(false);
-    arraySize_ = hmul(dimensions_) * bpp_;
-}
-
-Texture::Texture(GLubyte* data, const cgt::ivec3& dimensions, GLint format,
-                GLenum dataType, Filter filter)
-    : dimensions_(dimensions)
-    , format_(format)
-    , internalformat_(format)
-    , dataType_(dataType)
-    , filter_(filter)
-    , wrapping_(CLAMP)
-    , priority_(-1.f)
-    , pixels_(data)
-{
-    init(false);
-    arraySize_ = hmul(dimensions_) * bpp_;
-}
 
 Texture::~Texture() {
     if (id_)
         GLGC.addGarbageTexture(id_);
-
-    if (pixels_)
-        delete[] pixels_;
 }
 
 
-void Texture::init(bool allocData) {
-#ifndef GL_TEXTURE_RECTANGLE_ARB
-    textureRectangle = false;
-#endif
-
-    calcType();
-    bpp_ = calcBpp(format_, dataType_);
-
+void Texture::init() {
+    bpp_ = calcBpp(internalformat_);
     generateId();
-
-    if (allocData)
-        alloc();
-
     applyFilter();
 }
 
@@ -152,7 +104,7 @@ int Texture::calcBpp(GLint format, GLenum dataType) {
 }
 
 int Texture::calcBpp(GLint internalformat) {
-    // supports all formats from http://www.opengl.org/sdk/docs/man/xhtml/glTexImage2D.xml
+    // supports all formats from https://www.opengl.org/wiki/GLAPI/glTexImage2D
 
     int bpp = 0;
     switch (internalformat) {
@@ -170,6 +122,7 @@ int Texture::calcBpp(GLint internalformat) {
 
         case 2:
         case GL_DEPTH_COMPONENT16:
+        case GL_R16:
         case GL_R16_SNORM:
         case GL_R16F:
         case GL_R16I:
@@ -256,21 +209,26 @@ int Texture::calcBpp(GLint internalformat) {
             break;
 
         default:
-            LWARNINGC("cgt.Texture", "unknown internal format");
+            cgtAssert(false, "Unknown internal format, this should not happen!");
             break;
     }
 
     return bpp;
 }
 
-int Texture::calcNumChannels(GLint format) {
-    // supports all formats from http://www.opengl.org/sdk/docs/man/xhtml/glTexImage2D.xml
-    switch (format) {
+int Texture::calcNumChannels(GLint internalFormat) {
+    // supports all formats from https://www.opengl.org/wiki/GLAPI/glTexImage2D
+    switch (internalFormat) {
         case 1:
         case GL_DEPTH_COMPONENT:
+        case GL_DEPTH_COMPONENT16:
+        case GL_DEPTH_COMPONENT24:
+        case GL_DEPTH_COMPONENT32:
+        case GL_DEPTH_COMPONENT32F:
         case GL_RED:
         case GL_R8:
         case GL_R8_SNORM:
+        case GL_R16:
         case GL_R16_SNORM:
         case GL_R16F:
         case GL_R32F:
@@ -353,7 +311,7 @@ int Texture::calcNumChannels(GLint format) {
             break;
 
         default:
-            LWARNINGC("cgt.Texture", "unknown format");
+            cgtAssert(false, "Unknown internal format, this should not happen!");
             return 0;
     }
 }
@@ -361,25 +319,6 @@ int Texture::calcNumChannels(GLint format) {
 int Texture::getSizeOnGPU() const {
     int bpp = calcBpp(internalformat_);
     return bpp * hmul(dimensions_);
-}
-
-GLenum Texture::calcType(bool textureRectangle) {
-    if (dimensions_.z == 1)    {
-        if (dimensions_.y == 1)
-            type_ = GL_TEXTURE_1D;
-        else
-            type_ = GL_TEXTURE_2D;
-    }
-    else {
-        type_ = GL_TEXTURE_3D;
-    }
-
-#ifdef GL_TEXTURE_RECTANGLE_ARB
-    if (type_ == GL_TEXTURE_2D && textureRectangle)
-        type_ = GL_TEXTURE_RECTANGLE_ARB;
-#endif
-
-    return type_;
 }
 
 void Texture::setFilter(Filter filter) {
@@ -420,389 +359,41 @@ void Texture::applyWrapping() {
     bind();
     GLint wrap = wrapping_;
 
-    /*
-        set wrapping for all diminesions
-    */
+    // set wrapping for all diminesions
     glTexParameteri(type_, GL_TEXTURE_WRAP_S, wrap);
 
-    if (type_ == GL_TEXTURE_2D || type_ == GL_TEXTURE_3D)
+    if (type_ == GL_TEXTURE_2D || type_ == GL_TEXTURE_2D_ARRAY || type_ == GL_TEXTURE_3D )
         glTexParameteri(type_, GL_TEXTURE_WRAP_T, wrap);
     if (GL_TEXTURE_3D)
         glTexParameteri(type_, GL_TEXTURE_WRAP_R, wrap);
 }
 
-void Texture::uploadTexture() {
+void Texture::uploadTexture(GLubyte* data, GLint format, GLenum dataType) {
     bind();
 
-    switch(type_) {
+    switch (type_) {
         case GL_TEXTURE_1D:
-            glTexImage1D(GL_TEXTURE_1D, 0, internalformat_, dimensions_.x, 0,
-                         format_, dataType_, pixels_);
+            glTexImage1D(type_, 0, internalformat_, dimensions_.x, 0, format, dataType, data);
             if (filter_ == MIPMAP)
                 glGenerateMipmap(GL_TEXTURE_1D);
             break;
 
+        case GL_TEXTURE_1D_ARRAY: // fallthrough
         case GL_TEXTURE_2D:
-            glTexImage2D(GL_TEXTURE_2D, 0, internalformat_, dimensions_.x, dimensions_.y, 0,
-                         format_, dataType_, pixels_);
+            glTexImage2D(type_, 0, internalformat_, dimensions_.x, dimensions_.y, 0, format, dataType, data);
             if (filter_ == MIPMAP)
                 glGenerateMipmap(GL_TEXTURE_2D);
             break;
 
+        case GL_TEXTURE_2D_ARRAY: // fallthrough
         case GL_TEXTURE_3D:
-            glTexImage3D(GL_TEXTURE_3D, 0, internalformat_,
-                         dimensions_.x, dimensions_.y, dimensions_.z, 0,
-                         format_, dataType_, pixels_);
+            glTexImage3D(type_, 0, internalformat_, dimensions_.x, dimensions_.y, dimensions_.z, 0, format, dataType, data);
             if (filter_ == MIPMAP)
                 glGenerateMipmap(GL_TEXTURE_3D);
             break;
-
-#ifdef GL_TEXTURE_RECTANGLE_ARB
-        case GL_TEXTURE_RECTANGLE_ARB:
-            glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, internalformat_, dimensions_.x, dimensions_.y, 0,
-                            format_, dataType_, pixels_);
-            break;
-#endif
     }
 
     LGL_ERROR;
-}
-
-cgt::vec4 Texture::texelAsFloat(size_t x, size_t y) const {
-    cgt::vec4 ret = cgt::vec4(0.0f);
-
-    switch (getNumChannels()) {
-        case 4:
-            switch(dataType_) {
-                case GL_BYTE:
-                    ret = cgt::vec4(texel< cgt::Vector4<int8_t> >(x, y)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    ret = cgt::vec4(texel< cgt::Vector4<uint8_t> >(x, y)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    ret = cgt::vec4(texel< cgt::Vector4<int16_t> >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    ret = cgt::vec4(texel< cgt::Vector4<uint16_t> >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    ret = cgt::vec4(texel< cgt::Vector4<int32_t> >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    ret = cgt::vec4(texel< cgt::Vector4<uint32_t> >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    ret = texel< cgt::vec4 >(x, y);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-            }
-            break;
-
-        case 3: {
-            cgt::vec3 tmp;
-            switch(dataType_) {
-                case GL_BYTE:
-                    tmp = cgt::vec3(texel< cgt::Vector3<int8_t> >(x, y)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    tmp = cgt::vec3(texel< cgt::Vector3<uint8_t> >(x, y)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<int16_t> >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<uint16_t> >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<int32_t> >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<uint32_t> >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    tmp = texel< cgt::vec3 >(x, y);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-                    break;
-            }
-            ret.x = tmp.x;
-            ret.y = tmp.y;
-            ret.z = tmp.z;
-            break;
-        }
-
-        case 2: {
-            cgt::vec2 tmp;
-            switch(dataType_) {
-                case GL_BYTE:
-                    tmp = cgt::vec2(texel< cgt::Vector2<int8_t> >(x, y)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    tmp = cgt::vec2(texel< cgt::Vector2<uint8_t> >(x, y)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<int16_t> >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<uint16_t> >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<int32_t> >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<uint32_t> >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    tmp = texel< cgt::vec2 >(x, y);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-                    break;
-            }
-            ret.x = tmp.x;
-            ret.y = tmp.y;
-            break;
-        }
-
-        case 1:
-            switch(dataType_) {
-                case GL_BYTE:
-                    ret.x = static_cast<float>(texel< int8_t >(x, y)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    ret.x = static_cast<float>(texel< uint8_t >(x, y)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    ret.x = static_cast<float>(texel< int16_t >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    ret.x = static_cast<float>(texel< uint16_t >(x, y)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    ret.x = static_cast<float>(texel< int32_t >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    ret.x = static_cast<float>(texel< uint32_t >(x, y)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    ret.x = texel<float>(x, y);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-            }
-            break;
-
-        default:
-            LWARNINGC("cgt.texture", "texelAsFloat: Unknown format!");
-    }
-
-    return ret;
-}
-
-
-cgt::vec4 Texture::texelAsFloat(size_t x, size_t y, size_t z) const {
-    cgt::vec4 ret = cgt::vec4(0.0f);
-
-    switch (getNumChannels()) {
-        case 4:
-            switch(dataType_) {
-                case GL_BYTE:
-                    ret = cgt::vec4(texel< cgt::Vector4<int8_t> >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    ret = cgt::vec4(texel< cgt::Vector4<uint8_t> >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    ret = cgt::vec4(texel< cgt::Vector4<int16_t> >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    ret = cgt::vec4(texel< cgt::Vector4<uint16_t> >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    ret = cgt::vec4(texel< cgt::Vector4<int32_t> >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    ret = cgt::vec4(texel< cgt::Vector4<uint32_t> >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    ret = texel< cgt::vec4 >(x,y,z);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-            }
-            break;
-
-        case 3: {
-            cgt::vec3 tmp;
-            switch(dataType_) {
-                case GL_BYTE:
-                    tmp = cgt::vec3(texel< cgt::Vector3<int8_t> >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    tmp = cgt::vec3(texel< cgt::Vector3<uint8_t> >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<int16_t> >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<uint16_t> >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<int32_t> >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    tmp = cgt::vec3(texel< cgt::Vector3<uint32_t> >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    tmp = texel< cgt::vec3 >(x,y,z);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-                    break;
-            }
-            ret.x = tmp.x;
-            ret.y = tmp.y;
-            ret.z = tmp.z;
-            break;
-        }
-
-        case 2: {
-            cgt::vec2 tmp;
-            switch(dataType_) {
-                case GL_BYTE:
-                    tmp = cgt::vec2(texel< cgt::Vector2<int8_t> >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    tmp = cgt::vec2(texel< cgt::Vector2<uint8_t> >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<int16_t> >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<uint16_t> >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<int32_t> >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    tmp = cgt::vec2(texel< cgt::Vector2<uint32_t> >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    tmp = texel< cgt::vec2 >(x,y,z);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-                    break;
-            }
-            ret.x = tmp.x;
-            ret.y = tmp.y;
-            break;
-        }
-
-        case 1:
-            switch(dataType_) {
-                case GL_BYTE:
-                    ret.x = static_cast<float>(texel< int8_t >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_UNSIGNED_BYTE:
-                    ret.x = static_cast<float>(texel< uint8_t >(x,y,z)) / float(0xFF);
-                    break;
-                case GL_SHORT:
-                    ret.x = static_cast<float>(texel< int16_t >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    ret.x = static_cast<float>(texel< uint16_t >(x,y,z)) / float(0xFFFF);
-                    break;
-                case GL_INT:
-                    ret.x = static_cast<float>(texel< int32_t >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_UNSIGNED_INT:
-                    ret.x = static_cast<float>(texel< uint32_t >(x,y,z)) / float(0xFFFFFFFF);
-                    break;
-                case GL_FLOAT:
-                    ret.x = texel<float>(x,y,z);
-                    break;
-                default:
-                    LWARNINGC("cgt.texture", "texelAsFloat: Unknown data type!");
-            }
-            break;
-
-        default:
-            LWARNINGC("cgt.texture", "texelAsFloat: Unknown format!");
-    }
-
-    return ret;
-}
-
-float Texture::depthAsFloat(size_t x, size_t y) const {
-    float ret = 0.0f;
-
-    switch (format_) {
-        case GL_DEPTH_COMPONENT:    // fallthrough
-        case GL_DEPTH_COMPONENT16:  // fallthrough
-        case GL_DEPTH_COMPONENT24:  // fallthrough
-        case GL_DEPTH_COMPONENT32:  // fallthrough
-        case GL_DEPTH_COMPONENT32F:
-            switch (dataType_) {
-                case GL_UNSIGNED_BYTE: {
-                    ret = (float )(texel<uint8_t>(x,y) / 0xFF);
-                    break;
-                }
-                case GL_UNSIGNED_SHORT: {
-                    ret = (float )(texel<uint16_t>(x,y) / 0xFFFF);
-                    break;
-                }
-                case GL_FLOAT: {
-                    ret = texel<GLfloat>(x,y);
-                    break;
-                }
-                default:
-                    LWARNINGC("cgt.texture", "depthAsFloat: Unknown format!");
-            }
-            break;
-        default:
-            LWARNINGC("cgt.texture", "depthAsFloat: Unknown format!");
-            break;
-    }
-
-    return ret;
-}
-
-void Texture::downloadTexture() {
-    bind();
-
-    if (pixels_ == 0)
-        alloc();
-
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glGetTexImage(type_, 0, format_, dataType_, pixels_);
-}
-
-GLubyte* Texture::downloadTextureToBuffer() const {
-    bind();
-
-    int arraySize = hmul(dimensions_) * bpp_;
-    GLubyte* pixels = new GLubyte[arraySize];
-
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glGetTexImage(type_, 0, format_, dataType_, pixels);
-    return pixels;
-}
-
-void Texture::downloadTextureToBuffer(GLubyte* pixels, size_t numBytesAllocated) const {
-    bind();
-
-    size_t arraySize = hmul(dimensions_) * bpp_;
-    if(numBytesAllocated < arraySize) {
-        LWARNINGC("cgt.texture", "downloadTextureToBuffer: allocated buffer is too small");
-    }
-    else {
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glGetTexImage(type_, 0, format_, dataType_, pixels);
-    }
 }
 
 GLubyte* Texture::downloadTextureToBuffer(GLint format, GLenum dataType) const {
@@ -816,20 +407,307 @@ GLubyte* Texture::downloadTextureToBuffer(GLint format, GLenum dataType) const {
     return pixels;
 }
 
-bool Texture::isTextureRectangle() const {
-#ifdef GL_TEXTURE_RECTANGLE_ARB
-    return (type_ == GL_TEXTURE_RECTANGLE_ARB);
-#else
-    return false;
-#endif
-}
-
 bool Texture::isDepthTexture() const {
     return internalformat_ == GL_DEPTH_COMPONENT
         || internalformat_ == GL_DEPTH_COMPONENT16 
         || internalformat_ == GL_DEPTH_COMPONENT24
         || internalformat_ == GL_DEPTH_COMPONENT32
         || internalformat_ == GL_DEPTH_COMPONENT32F;
+}
+
+void Texture::setPriority(GLclampf p) {
+    glPrioritizeTextures(1, &id_, &p);
+}
+
+bool Texture::isResident() const {
+    GLboolean resident;
+    return glAreTexturesResident(1, &id_, &resident) == GL_TRUE;
+}
+
+GLint Texture::calcInternalFormat(GLint format, GLenum dataType) {
+    switch (format) {
+        case GL_RED:
+            switch (dataType) {
+                case GL_UNSIGNED_BYTE:
+                case GL_BYTE:
+                    return GL_R8;
+                case GL_UNSIGNED_SHORT:
+                case GL_SHORT:
+                    return GL_R16;
+                case GL_UNSIGNED_INT:
+                case GL_INT:
+                    return GL_R32F;
+                case GL_FLOAT:
+                    return GL_R32F;
+                default:
+                    cgtAssert(false, "Should not reach this - wrong base data type!");
+                    return GL_RED;
+            }
+        case GL_RG:
+            switch (dataType) {
+                case GL_UNSIGNED_BYTE:
+                case GL_BYTE:
+                    return GL_RG8;
+                case GL_UNSIGNED_SHORT:
+                case GL_SHORT:
+                    return GL_RG16;
+                case GL_UNSIGNED_INT:
+                case GL_INT:
+                    return GL_RG32F;
+                case GL_FLOAT:
+                    return GL_RG32F;
+                default:
+                    cgtAssert(false, "Should not reach this - wrong base data type!");
+                    return GL_RG;
+            }
+        case GL_RGB:
+            switch (dataType) {
+                case GL_UNSIGNED_BYTE:
+                case GL_BYTE:
+                    return GL_RGB8;
+                case GL_UNSIGNED_SHORT:
+                case GL_SHORT:
+                    return GL_RGB16;
+                case GL_UNSIGNED_INT:
+                case GL_INT:
+                    return GL_RGB32F;
+                case GL_FLOAT:
+                    return GL_RGB32F;
+                default:
+                    cgtAssert(false, "Should not reach this - wrong base data type!");
+                    return GL_RGB;
+            }
+        case GL_RGBA:
+            switch (dataType) {
+                case GL_UNSIGNED_BYTE:
+                case GL_BYTE:
+                    return GL_RGBA8;
+                case GL_UNSIGNED_SHORT:
+                case GL_SHORT:
+                    return GL_RGBA16;
+                case GL_UNSIGNED_INT:
+                case GL_INT:
+                    return GL_RGBA32F;
+                case GL_FLOAT:
+                    return GL_RGBA32F;
+                default:
+                    cgtAssert(false, "Should not reach this - wrong base data type!");
+                    return GL_RGBA;
+            }
+        default:
+            cgtAssert(false, "Should not reach this, wrong number of channels!");
+            return GL_RED;
+    }
+}
+
+GLint Texture::calcMatchingFormat(GLint internalFormat) {
+    // supports all formats from http://www.opengl.org/sdk/docs/man/xhtml/glTexImage2D.xml
+    switch (internalFormat) {
+        case GL_DEPTH_COMPONENT:
+        case GL_DEPTH_COMPONENT16:
+        case GL_DEPTH_COMPONENT24:
+        case GL_DEPTH_COMPONENT32:
+        case GL_DEPTH_COMPONENT32F:
+            return GL_DEPTH_COMPONENT;
+
+        case GL_RED:
+        case GL_R8:
+        case GL_R8_SNORM:
+        case GL_R16:
+        case GL_R16_SNORM:
+        case GL_R16F:
+        case GL_R32F:
+            return GL_RED;
+            break;
+        case GL_R8I:
+        case GL_R8UI:
+        case GL_R16I:
+        case GL_R16UI:
+        case GL_R32I:
+        case GL_R32UI:
+            return GL_RED_INTEGER;
+            break;
+
+        case 2:
+        case GL_DEPTH_STENCIL:
+        case GL_RG:
+        case GL_RG8:
+        case GL_RG8_SNORM:
+        case GL_RG16:
+        case GL_RG16_SNORM:
+        case GL_RG16F:
+        case GL_RG32F:
+            return GL_RG;
+            break;
+        case GL_RG8I:
+        case GL_RG8UI:
+        case GL_RG16I:
+        case GL_RG16UI:
+        case GL_RG32I:
+        case GL_RG32UI:
+            return GL_RG_INTEGER;
+            break;
+
+        case 3:
+        case GL_RGB:
+        case GL_R3_G3_B2:
+        case GL_RGB4:
+        case GL_RGB5:
+        case GL_RGB8:
+        case GL_RGB8_SNORM:
+        case GL_RGB10:
+        case GL_RGB12:
+        case GL_RGB16_SNORM:
+        case GL_SRGB8:
+        case GL_RGB16:
+        case GL_RGB16F:
+        case GL_RGB32F:
+        case GL_R11F_G11F_B10F:
+        case GL_RGB9_E5:
+            return GL_RGB;
+            break;
+        case GL_RGB8I:
+        case GL_RGB8UI:
+        case GL_RGB16I:
+        case GL_RGB16UI:
+        case GL_RGB32I:
+        case GL_RGB32UI:
+            return GL_RGB_INTEGER;
+            break;
+
+        case 4:
+        case GL_RGBA:
+        case GL_RGBA2:
+        case GL_RGBA4:
+        case GL_RGB5_A1:
+        case GL_RGBA8:
+        case GL_RGBA8_SNORM:
+        case GL_RGB10_A2:
+        case GL_RGB10_A2UI:
+        case GL_RGBA12:
+        case GL_RGBA16:
+        case GL_SRGB8_ALPHA8:
+        case GL_RGBA16F:
+        case GL_RGBA32F:
+            return GL_RGBA;
+            break;
+        case GL_RGBA8I:
+        case GL_RGBA8UI:
+        case GL_RGBA16I:
+        case GL_RGBA16UI:
+        case GL_RGBA32I:
+        case GL_RGBA32UI:
+            return GL_RGBA_INTEGER;
+            break;
+
+        default:
+            cgtAssert(false, "Unknown internal format, this should not happen!");
+            return 0;
+    }
+}
+
+GLenum Texture::calcMatchingDataType(GLint internalFormat) {
+    // supports all formats from http://www.opengl.org/sdk/docs/man/xhtml/glTexImage2D.xml
+    switch (internalFormat) {
+        case GL_R8:
+        case GL_R8UI:
+        case GL_RG8:
+        case GL_RG8UI:
+        case GL_RGB8:
+        case GL_RGB8UI:
+        case GL_RGBA8:
+        case GL_RGBA8UI:
+        case GL_RGB4:
+        case GL_SRGB8:
+        case GL_RGBA2:
+        case GL_RGBA4:
+        case GL_SRGB8_ALPHA8:
+            return GL_UNSIGNED_BYTE;
+            break;
+
+
+        case GL_R8_SNORM:
+        case GL_R8I:
+        case GL_RG8_SNORM:
+        case GL_RG8I:
+        case GL_RGB8_SNORM:
+        case GL_RGB8I:
+        case GL_RGBA8_SNORM:
+        case GL_RGBA8I:
+            return GL_BYTE;
+            break;
+
+
+        case GL_R16:
+        case GL_R16UI:
+        case GL_RG16:
+        case GL_RG16UI:
+        case GL_RGB16:
+        case GL_RGB16UI:
+        case GL_RGBA16:
+        case GL_RGBA16UI:
+            return GL_UNSIGNED_SHORT;
+            break;
+
+
+        case GL_R16_SNORM:
+        case GL_R16I:
+        case GL_RG16_SNORM:
+        case GL_RG16I:
+        case GL_RGB16_SNORM:
+        case GL_RGB16I:
+        case GL_RGBA16_SNORM:
+        case GL_RGBA16I:
+            return GL_SHORT;
+            break;
+
+
+        case GL_R32UI:
+        case GL_RG32UI:
+        case GL_RGB32UI:
+        case GL_RGBA32UI:
+            return GL_UNSIGNED_INT;
+            break;
+
+
+        case GL_R32I:
+        case GL_RG32I:
+        case GL_RGB32I:
+        case GL_RGBA32I:
+            return GL_INT;
+            break;
+
+        case GL_DEPTH_COMPONENT:
+        case GL_DEPTH_COMPONENT16:
+        case GL_DEPTH_COMPONENT24:
+        case GL_DEPTH_COMPONENT32:
+        case GL_DEPTH_COMPONENT32F:
+        case GL_DEPTH_STENCIL:
+        case GL_R16F:
+        case GL_R32F:
+        case GL_RG16F:
+        case GL_RG32F:
+        case GL_RGB16F:
+        case GL_RGB32F:
+        case GL_RGBA16F:
+        case GL_RGBA32F:
+        case GL_R3_G3_B2:
+        case GL_RGB5:
+        case GL_RGB10:
+        case GL_RGB12:
+        case GL_R11F_G11F_B10F:
+        case GL_RGB9_E5:
+        case GL_RGB5_A1:
+        case GL_RGB10_A2:
+        case GL_RGB10_A2UI:
+        case GL_RGBA12:
+            return GL_FLOAT;
+            break;
+
+        default:
+            cgtAssert(false, "Unknown internal format, this should not happen!");
+            return 0;
+    }
 }
 
 

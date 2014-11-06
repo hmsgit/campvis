@@ -51,13 +51,6 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
                                        bool textureRectangle)
 {
 
-#ifndef GL_TEXTURE_RECTANGLE_ARB
-    if (textureRectangle) {
-        LERROR("Texture Rectangles not supported!");
-        textureRectangle = false;
-    }
-#endif
-
     GLubyte TGAheader[12];
     GLubyte header[6];
 //    GLuint  bytesPerPixel;//FIXME: this is never initialized!
@@ -92,15 +85,11 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
         return 0;
     }
 
-    Texture* t = new Texture();
-    t->setName(filename);
-
     ivec3 dimensions;
     dimensions.x = header[1] * 256 + header[0];           // determine the TGA width  (highbyte*256+lowbyte)
     dimensions.y = header[3] * 256 + header[2];           // determine the TGA height (highbyte*256+lowbyte)
     dimensions.z = 1;
-    t->setDimensions(dimensions);
-    LDEBUG("Image dimensions: " << t->getDimensions());
+    LDEBUG("Image dimensions: " << dimensions);
 
     if (dimensions.x <= 0 || dimensions.y <= 0) {
         delete file;
@@ -115,70 +104,67 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
     }
 
     int bpp = header[4];
-    t->setBpp(bpp / 8);  // divide by 8 to get the bytes per pixel
+    bpp /= 8;  // divide by 8 to get the bytes per pixel
 
-    switch (t->getBpp()) {
-//         case 1:
-//             t->setFormat(GL_RGB);
+    GLint format = GL_RGBA;
+    switch (bpp) {
+        case 1:
+            format = GL_RED;
+            LDEBUG("GL_RED");
+            break;
         case 3:
-            t->setFormat(GL_RGB);
+            format = GL_RGB;
             LDEBUG("RGB");
             break;
-
         case 4:
-            t->setFormat(GL_RGBA);
+            format = GL_RGBA;
             LDEBUG("RGBA");
             break;
 
         default:
             LERROR("unsupported bpp " << filename);
+            break;
     }
 
-#ifdef GL_TEXTURE_RECTANGLE_ARB
-    if (textureRectangle)
-        t->setType( GL_TEXTURE_RECTANGLE_ARB );
-    else
-#endif
-        t->setType( GL_TEXTURE_2D );
+    GLenum dataType = GL_UNSIGNED_BYTE;
 
-    t->setDataType( GL_UNSIGNED_BYTE );
-    t->alloc();
+    int numBytes = bpp * cgt::hmul(dimensions);
+    GLubyte* buffer = new GLubyte[numBytes];
 
     if (TGAheader[2] == 2) {
         // file is not compressed
         LDEBUG("Reading uncompressed TGA file...");
-        if (file->read(reinterpret_cast<char*>(t->getPixelData()), t->getArraySize()) != t->getArraySize()) {
+        if (file->read(buffer, numBytes) != numBytes) {
             LERROR("Failed to read uncompressed image! file: " << filename);
             delete file;
-            delete t;
             return 0;
         }
-    } else {
+    } 
+    else {
         // file is compressed
         LDEBUG("Reading compressed TGA file " << filename << " ...");
 
         //TODO: error handling
         unsigned char chunk[4];
-        unsigned char* at = t->getPixelData();
-        int Bpp = bpp / 8;
-        for (unsigned int bytesDone=0; bytesDone < t->getArraySize(); ) {
+        unsigned char* at = buffer;
+        for (int bytesDone=0; bytesDone < numBytes; /* nothing here */) {
             unsigned char packetHead;
             file->read(reinterpret_cast<char*>(&packetHead), 1);
             if (packetHead > 128) {
                 //RLE
                 packetHead -= 127;
-                file->read(reinterpret_cast<char*>(&chunk), Bpp);
+                file->read(reinterpret_cast<char*>(&chunk), bpp);
                 for (unsigned char b=0; b < packetHead; b++) {
-                        std::memcpy(at, chunk, Bpp);
-                        bytesDone += Bpp;
-                        at += Bpp;
+                        std::memcpy(at, chunk, bpp);
+                        bytesDone += bpp;
+                        at += bpp;
                 }
             } else {
                 //RAW
                 packetHead++;
-                file->read(reinterpret_cast<char*>(at), Bpp * packetHead);
-                bytesDone += packetHead * Bpp;
-                at += packetHead * Bpp;
+                file->read(reinterpret_cast<char*>(at), bpp * packetHead);
+                bytesDone += packetHead * bpp;
+                at += packetHead * bpp;
             }
         }
     }
@@ -187,44 +173,18 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
     delete file;
 
     // switch r & b
-    GLubyte temp;
-    for (int i=0; i < (dimensions.x*dimensions.y); ++i) {
-        temp = t->texel<col3>(i).r;
-        t->texel<col3>(i).r = t->texel<col3>(i).b;
-        t->texel<col3>(i).b = temp;
+    if (bpp >= 3) {
+        GLubyte* at = buffer;
+        while (at - buffer < numBytes) {
+            std::swap(at[0], at[2]);
+            at += bpp;
+        }
     }
 
-    // flip image horizontally
-    //col3 tmp;
-    //for (int y=0; y < dimensions.y/2; ++y) {
-        //for (int x=0; x < dimensions.x; ++x) {
-            //tmp = t->texel<col3>(x,y);
-            //t->texel<col3>(x,y) = t->texel<col3>(x,dimensions.y-1-y);
-            //t->texel<col3>(x,dimensions.y-1-y) = tmp;
-        //}
-    //}
+    Texture* t = new Texture(GL_TEXTURE_2D, dimensions, Texture::calcInternalFormat(format, dataType), filter);
+    t->uploadTexture(buffer, format, dataType);
+    t->setName(filename);
 
-
-    bool success;
-    if (textureRectangle) {
-        success = createRectangleTexture(t, filter, compress, createOGLTex);
-    } else {
-        if (dimensions.y == 1)
-            success = create1DTexture(t, filter, compress, createOGLTex);
-        else
-            success = create2DTexture(t, filter, compress, createOGLTex);
-    }
-
-    if (!success) {
-        LERROR("Failed to create texture for " << filename);
-        delete t;
-        return 0;
-    }
-
-    if (!keepPixels) {
-        delete[] t->getPixelData();
-        t->setPixelData(0);
-    }
     return t;
 }
 

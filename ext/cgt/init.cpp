@@ -40,9 +40,6 @@
 #include "cgt/shadermanager.h"
 #include "cgt/event/eventhandler.h"
 
-#ifdef CGT_HAS_DEVIL
-#include "cgt/texturereaderdevil.h"
-#endif
 #include "cgt/texturereadertga.h"
 
 namespace cgt {

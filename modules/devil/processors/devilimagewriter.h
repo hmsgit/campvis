@@ -37,7 +37,6 @@
 
 namespace cgt {
     class Shader;
-    class TextureReaderDevil;
 }
 
 namespace campvis {

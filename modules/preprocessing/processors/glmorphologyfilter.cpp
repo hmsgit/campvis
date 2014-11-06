@@ -145,8 +145,7 @@ namespace campvis {
         inputUnit.activate();
 
         // create texture for result
-        cgt::Texture* resultTexture = new cgt::Texture(0, size, inputTexture->getFormat(), inputTexture->getInternalFormat(), inputTexture->getDataType(), inputTexture->getFilter());
-        resultTexture->uploadTexture();
+        cgt::Texture* resultTexture = new cgt::Texture(inputTexture->getType(), size, inputTexture->getInternalFormat(), inputTexture->getFilter());
 
         // activate shader and bind textures
         inputTexture->bind();

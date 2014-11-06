@@ -94,11 +94,8 @@ namespace campvis {
                 inputUnit.activate();
 
                 // create texture for result
-                cgt::Texture* resultTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RED, p_halfPrecisionOutput.getValue() ? GL_R16F : GL_R32F, GL_FLOAT, cgt::Texture::LINEAR);
-                resultTexture->uploadTexture();
-
+                cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, cgt::ivec3(size), p_halfPrecisionOutput.getValue() ? GL_R16F : GL_R32F, cgt::Texture::LINEAR);
                 //cgt::Texture* eigenvalueTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, cgt::Texture::LINEAR);
-                //eigenvalueTexture->uploadTexture();
 
                 // activate shader and bind textures
                 _shader->activate();

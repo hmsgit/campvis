@@ -497,14 +497,9 @@ namespace campvis {
 
         // extract the data
         WeaklyTypedPointer wtp(WeaklyTypedPointer::UINT8, 1, 0);
-        const ImageRepresentationGL* repGL = id->getRepresentation<ImageRepresentationGL>(false);
-        if (repGL != 0) // if it's a GL texture, download it (we do not want to use the automatic conversion method here)
-            wtp = repGL->getWeaklyTypedPointer();
-        else {
-            const ImageRepresentationLocal* repLocal = id->getRepresentation<ImageRepresentationLocal>(true);
-            if (repLocal != 0)
-                wtp = repLocal->getWeaklyTypedPointer();
-        }
+        const ImageRepresentationLocal* repLocal = id->getRepresentation<ImageRepresentationLocal>(true);
+        if (repLocal != 0)
+            wtp = repLocal->getWeaklyTypedPointer();
 
         if (wtp._pointer == 0) {
             LERROR("Could not extract image to save.");

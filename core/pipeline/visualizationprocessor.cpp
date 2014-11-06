@@ -78,46 +78,7 @@ namespace campvis {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         // create texture
-        cgt::Texture* tex = 0;
-        switch(internalFormat) {
-            case GL_RGB:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, cgt::Texture::LINEAR);
-                break;
-            case GL_RGB16F_ARB:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_RGB, GL_RGB16F_ARB, GL_FLOAT, cgt::Texture::LINEAR);
-                break;
-            case GL_RGBA:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, cgt::Texture::LINEAR);
-                break;
-            case GL_RGBA8:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, cgt::Texture::LINEAR);
-                break;
-            case GL_RGBA16:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, cgt::Texture::LINEAR);
-                break;
-            case GL_RGBA16F:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA16F, GL_FLOAT, cgt::Texture::LINEAR);
-                break;
-            case GL_RGBA32F:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA32F, GL_FLOAT, cgt::Texture::LINEAR);
-                break;
-
-            case GL_DEPTH_COMPONENT16:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, cgt::Texture::LINEAR);
-                break;
-            case GL_DEPTH_COMPONENT24:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, cgt::Texture::LINEAR);
-                break;
-#ifdef GL_DEPTH_COMPONENT32F
-            case GL_DEPTH_COMPONENT32F:
-                tex = new cgt::Texture(0, getRenderTargetSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, cgt::Texture::LINEAR);
-                break;
-#endif
-
-            default:
-                cgtAssert(false, "Unknown internal format!");
-        }
-        tex->uploadTexture();
+        cgt::Texture* tex = new cgt::Texture(GL_TEXTURE_2D, getRenderTargetSize(), internalFormat, cgt::Texture::LINEAR);
         tex->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
         // attach texture to FBO

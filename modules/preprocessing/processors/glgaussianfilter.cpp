@@ -107,8 +107,7 @@ namespace campvis {
                 // create texture for result
                 cgt::Texture* resultTextures[2];
                 for (size_t i = 0; i < 2; ++i) {
-                    resultTextures[i] = new cgt::Texture(0, size, img->getTexture()->getFormat(), img->getTexture()->getInternalFormat(), img->getTexture()->getDataType(), cgt::Texture::LINEAR);
-                    resultTextures[i]->uploadTexture();
+                    resultTextures[i] = new cgt::Texture(img->getTexture()->getType(), size, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
                 }
 
                 // create and upload kernel buffer

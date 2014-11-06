@@ -83,8 +83,7 @@ namespace campvis {
             inputUnit.activate();
 
             // create texture for result
-            cgt::Texture* resultTexture = new cgt::Texture(0, cgt::ivec3(size), GL_RGB, GL_RGB16F, GL_FLOAT, cgt::Texture::LINEAR);
-            resultTexture->uploadTexture();
+            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, cgt::ivec3(size), GL_RGB16F, cgt::Texture::LINEAR);
 
             // activate shader and bind textures
             _shader->activate();

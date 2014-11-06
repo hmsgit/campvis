@@ -32,7 +32,6 @@
 #include "cgt/logmanager.h"
 #include "cgt/filesystem.h"
 #include "cgt/shadermanager.h"
-#include "cgt/texturereaderdevil.h"
 #include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
@@ -59,7 +58,6 @@ namespace campvis {
         , p_importType("ImportType", "Import Type", importOptions, 3)
         , p_importSimilar("ImportSimilar", "Import All Similar Files", false)
         , _shader(nullptr)
-        , _devilTextureReader(nullptr)
     {
         this->_ext.push_back(".bmp");
         this->_ext.push_back(".jpg");
@@ -71,12 +69,9 @@ namespace campvis {
         addProperty(p_targetImageID);
         addProperty(p_importType);
         addProperty(p_importSimilar);
-
-        _devilTextureReader = new cgt::TextureReaderDevil();
     }
 
     DevilImageReader::~DevilImageReader() {
-        delete _devilTextureReader;
     }
 
     void DevilImageReader::init() {

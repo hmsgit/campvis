@@ -153,9 +153,7 @@ namespace campvis {
         tempUnit.activate();
 
         // create new texture
-        _hierarchyTexture = new cgt::Texture(0, _dimPackedBricks, GL_RED_INTEGER, GL_R32UI, GL_UNSIGNED_INT, cgt::Texture::NEAREST);
-        _hierarchyTexture->bind();
-        _hierarchyTexture->uploadTexture();
+        _hierarchyTexture = new cgt::Texture(GL_TEXTURE_2D, _dimPackedBricks, GL_R32UI, cgt::Texture::NEAREST);
         _hierarchyTexture->setWrapping(cgt::Texture::CLAMP);
         LGL_ERROR;
 
@@ -166,11 +164,13 @@ namespace campvis {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _maxMipmapLevel);  
+        LGL_ERROR;
 
         int div = 2;
         for (GLuint level = 1; level <= _maxMipmapLevel; ++level) {
             glTexImage2D(GL_TEXTURE_2D, level, GL_R32UI, _hierarchyTexture->getWidth()/div, _hierarchyTexture->getHeight()/div, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
             div = div << 1;
+            LGL_ERROR;
         }
         LGL_ERROR;
     }
