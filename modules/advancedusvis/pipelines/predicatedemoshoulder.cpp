@@ -75,7 +75,6 @@ namespace campvis {
         //_imageReader.p_targetImageID.addSharedProperty(&_gaussian.p_inputImage);
         _imageReader.p_targetImageID.addSharedProperty(&_snrFilter.p_inputImage);
         _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
-        _imageReader.s_validated.connect(this, &PredicateDemoShoulder::onProcessorValidated);
 
         _labelReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/advancedusvis/sampledata/layers_0_small_cropped.mhd");
         //_labelReader.p_url.setValue("D:/Medical Data/us_carotid_2014-02/christian/christian_bmode_2D_compounded_cropped_layers.mhd");
@@ -105,8 +104,6 @@ namespace campvis {
 
 //         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor1"))->setValue(cgt::vec4(1.f));
 //         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor2"))->setValue(cgt::vec4(1.f));
-
-        _canvasSize.s_changed.connect<PredicateDemoShoulder>(this, &PredicateDemoShoulder::onRenderTargetSizeChanged);
 
         _canvasSize.setVisible(false);
         _renderTargetID.setVisible(false);

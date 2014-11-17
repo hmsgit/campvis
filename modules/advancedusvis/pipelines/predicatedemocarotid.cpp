@@ -77,7 +77,6 @@ namespace campvis {
         _imageReader.p_targetImageID.addSharedProperty(&_gaussian.p_inputImage);
         _imageReader.p_targetImageID.addSharedProperty(&_snrFilter.p_inputImage);
         _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
-        _imageReader.s_validated.connect(this, &PredicateDemoCarotid::onProcessorValidated);
 
         _labelReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/advancedusvis/sampledata/carotid_layers.mhd");
         //_labelReader.p_url.setValue("D:/Medical Data/us_carotid_2014-02/christian/christian_bmode_2D_compounded_cropped_layers.mhd");

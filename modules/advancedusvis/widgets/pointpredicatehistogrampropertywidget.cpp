@@ -48,7 +48,7 @@ namespace campvis {
         predicateList.push_back(tr("Intensity Range"));
         predicateList.push_back(tr("Gradient Magnitude Range"));
         predicateList.push_back(tr("Gradient Orientation"));
-        //predicateList.push_back(tr("Silhouette View"));
+        predicateList.push_back(tr("Silhouette View"));
         predicateList.push_back(tr("SNR Range"));
         predicateList.push_back(tr("Vesselness Range"));
         //predicateList.push_back(tr("Ultrasound Confidence Range"));
@@ -74,8 +74,8 @@ namespace campvis {
 
         layout->addWidget(narf, 1, 0, 1, 3);
 
-        _lwPredicates->setVisible(false);
-        narf->setVisible(false);
+        //_lwPredicates->setVisible(false);
+        //narf->setVisible(false);
         
         _slHue = new QSlider(Qt::Vertical, mainWidget);
         _slHue->setMinimum(0);

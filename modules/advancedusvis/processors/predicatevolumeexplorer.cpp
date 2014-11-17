@@ -112,7 +112,7 @@ namespace campvis {
 
     void PredicateVolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &p_inputVolume || prop == &p_histogram) {
-            invalidate(BITSET_INVALID);
+            invalidate(BITSET_INVALID | VR_INVALID);
         }
 
         VolumeExplorer::onPropertyChanged(prop);
