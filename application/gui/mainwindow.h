@@ -119,8 +119,8 @@ namespace campvis {
          * Slot to be called by the PipelineWidget when the selected item changes.
          * \param   index   Index of the selected item
          */
-        void onPipelineWidgetItemClicked(const QModelIndex& index);
-        
+        void onPipelineWidgetItemChanged(const QModelIndex& index);
+
         /**
          * Slot to be called when _btnExecute was clicked.
          */

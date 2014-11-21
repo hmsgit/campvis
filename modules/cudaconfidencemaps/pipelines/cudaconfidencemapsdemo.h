@@ -29,6 +29,7 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
+#include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
 
 #include "core/properties/buttonproperty.h"
@@ -59,11 +60,12 @@ namespace campvis {
 
         void onRenderTargetSizeChanged(const AbstractProperty *prop);
 
-        void execute();
+        //void execute();
 
     protected:
         DevilImageReader _usReader;
         GlGaussianFilter _usBlurFilter;
+        //GlImageResampler _usResampler;
         CudaConfidenceMapsSolver _usMapsSolver;
     };
 

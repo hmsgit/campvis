@@ -32,10 +32,12 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _usReader()
         , _usBlurFilter(&_canvasSize)
+        //, _usResampler(&_canvasSize)
         , _usMapsSolver()
     {
         addProcessor(&_usReader);
         addProcessor(&_usBlurFilter);
+        //addProcessor(&_usResampler);
         addProcessor(&_usMapsSolver);
 
     }
@@ -54,6 +56,9 @@ namespace campvis {
         
         _usBlurFilter.p_outputImage.setValue("us.blurred");
         _usBlurFilter.p_outputImage.addSharedProperty(&_usMapsSolver.p_inputImage);
+
+        //_usResampler.p_outputImage.setValue("us.resampled");
+        //_usResampler.p_outputImage.addSharedProperty(&_usMapsSolver.p_inputImage);
 
         _usMapsSolver.p_outputConfidenceMap.setValue("us.confidence");
 

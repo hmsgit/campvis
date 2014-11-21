@@ -176,8 +176,8 @@ namespace campvis {
             this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
             _pipelineWidget, SLOT(update(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)));
         connect(
-            _pipelineWidget, SIGNAL(clicked(const QModelIndex&)), 
-            this, SLOT(onPipelineWidgetItemClicked(const QModelIndex&)));
+            _pipelineWidget, SIGNAL(itemChanged(const QModelIndex&)), 
+            this, SLOT(onPipelineWidgetItemChanged(const QModelIndex&)));
         connect(
             this, SIGNAL(updatePropCollectionWidget(HasPropertyCollection*, DataContainer*)),
             _propCollectionWidget, SLOT(updatePropCollection(HasPropertyCollection*, DataContainer*)));
@@ -239,7 +239,7 @@ namespace campvis {
         emit updatePipelineWidget(_application->_dataContainers, pipelines);
     }
 
-    void MainWindow::onPipelineWidgetItemClicked(const QModelIndex& index) {
+    void MainWindow::onPipelineWidgetItemChanged(const QModelIndex& index) {
         if (index.isValid()) {
             // Yak, this is so ugly - another reason why GUI programming sucks...
             QVariant item = index.data(Qt::UserRole);
