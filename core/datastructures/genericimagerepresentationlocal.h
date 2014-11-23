@@ -58,8 +58,9 @@ namespace campvis {
              * Creates a new DataHandle to the data item with the key \a name in \a dc, that behaves like a const GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>*.
              * \param   dc      DataContainer to grab data from
              * \param   name    Key of the DataHandle to search for
+             * \param   silent  Flag whether debug messages when no matching data is found should be silenced (defaults to false).
              */
-            ScopedRepresentation(const DataContainer& dc, const std::string& name)
+            ScopedRepresentation(const DataContainer& dc, const std::string& name, bool silent = false)
                 : dh(dc.getData(name))
                 , data(0)
                 , representation(0) 
@@ -69,9 +70,18 @@ namespace campvis {
                     if (data != 0) {
                         representation = data->getRepresentation< GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS> >();
                     }
+                    else {
+                        if (!silent)
+                            LDEBUGC("CAMPVis.core.ScopedTypedData", "Found DataHandle with id '" << name << "', but it is of wrong type (" << typeid(*dh.getData()).name() << " instead of " << typeid(GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>).name() << ").");
+                    }
+
                     if (data == 0 || representation == 0) {
                         dh = DataHandle(0);
                     }
+                }
+                else {
+                    if (!silent)
+                        LDEBUGC("CAMPVis.core.ScopedRepresentation", "Could not find a DataHandle with id '" << name << "' in DataContainer '" << dc.getName() << "'.");
                 }
             };
             

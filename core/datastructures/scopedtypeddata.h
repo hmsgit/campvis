@@ -25,7 +25,10 @@
 #ifndef SCOPEDTYPEDDATA_H__
 #define SCOPEDTYPEDDATA_H__
 
+#include "cgt/logmanager.h"
 #include "core/datastructures/datacontainer.h"
+
+#include <typeinfo>
 
 namespace campvis {
 
@@ -43,15 +46,24 @@ namespace campvis {
          * Creates a new DataHandle to the data item with the key \a name in \a dc, that behaves like a T*.
          * \param   dc      DataContainer to grab data from
          * \param   name    Key of the DataHandle to search for
+         * \param   silent  Flag whether debug messages when no matching data is found should be silenced (defaults to false).
          */
-        ScopedTypedData(const DataContainer& dc, const std::string& name)
+        ScopedTypedData(const DataContainer& dc, const std::string& name, bool silent = false)
             : dh(dc.getData(name))
             , data(0)
         {
             if (dh.getData() != 0) {
                 data = dynamic_cast<const T*>(dh.getData());
-                if (data == 0)
+                if (data == 0) {
+                    if (!silent)
+                        LDEBUGC("CAMPVis.core.ScopedTypedData", "Found DataHandle with id '" << name << "', but it is of wrong type (" << typeid(*dh.getData()).name() << " instead of " << typeid(T).name() << ").");
+                    
                     dh = DataHandle(0);
+                }
+            }
+            else {
+                if (! silent)
+                    LDEBUGC("CAMPVis.core.ScopedTypedData", "Could not find a DataHandle with id '" << name << "' in DataContainer '" << dc.getName() << "'.");
             }
         };
 

@@ -69,8 +69,14 @@ namespace campvis {
         glViewport(0, 0, size.x, size.y);
 
         // try get Data
-        ScopedTypedData<RenderData> rd(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
-        ImageRepresentationGL::ScopedRepresentation repGL(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
+        DataHandle dh = _pipeline->getDataContainer().getData(_pipeline->getRenderTargetID());
+        const RenderData* rd = nullptr;
+        const ImageRepresentationGL* repGL = nullptr;
+        if (dh.getData() != nullptr) {
+            rd = dynamic_cast<const RenderData*>(dh.getData());
+            repGL = dynamic_cast<const ImageRepresentationGL*>(dh.getData());
+        }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // activate the shader

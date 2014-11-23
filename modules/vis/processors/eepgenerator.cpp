@@ -95,7 +95,7 @@ namespace campvis {
         if (img != nullptr && proxyGeometry != nullptr && _shader != nullptr && camera != nullptr) {
             if (img->getDimensionality() == 3) {
                 const cgt::Camera& cam = camera->getCamera();
-                ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue());
+                ScopedTypedData<RenderData> geometryImage(data, p_geometryImageId.getValue(), true);
 
                 cgt::Bounds textureBounds(cgt::vec3(0.f), cgt::vec3(1.f));
 

@@ -116,8 +116,8 @@ namespace campvis {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
         ScopedTypedData<CameraData> camera(data, p_camera.getValue());
-        ScopedTypedData<RenderData> rd(data, p_textureID.getValue());
-        ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue());
+        ScopedTypedData<RenderData> rd(data, p_textureID.getValue(), true);
+        ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue(), true);
 
         const ImageRepresentationGL* texture = nullptr;
         if (p_coloringMode.getOptionValue() == TEXTURE_COLOR) {
@@ -126,6 +126,8 @@ namespace campvis {
                     texture = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>();
                 else if (repGl != nullptr)
                     texture = repGl;
+                else
+                    LERROR("Could not find suitable texture in DataConatiner.");
             }
             else {
                 LERROR("Cannot use textured rendering since input geometry has no texture coordinates!");
@@ -220,7 +222,7 @@ namespace campvis {
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
         }
         else {
-            LDEBUG("No suitable input geometry found.");
+            LDEBUG("No suitable input data found.");
         }
     }
 
