@@ -31,6 +31,8 @@
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
+#include "modules/openigtlink/processors/openigtlinkclient.h"
+
 
 #include "core/properties/buttonproperty.h"
 
@@ -63,6 +65,7 @@ namespace campvis {
         //void execute();
 
     protected:
+        OpenIGTLinkClient _usIgtlReader;
         DevilImageReader _usReader;
         GlGaussianFilter _usBlurFilter;
         //GlImageResampler _usResampler;

@@ -38,6 +38,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputConfidenceMap("OutputConfidenceMap", "Output Confidence Map", "us.confidence", DataNameProperty::WRITE)
+        , _solver(512, 512, 2.0f, 2.0f, 20.0f, 0.03f)
     {
 
         addProperty(p_inputImage);
@@ -91,13 +92,16 @@ namespace campvis {
         ImageRepresentationLocal::ScopedRepresentation img(data, p_inputImage.getValue());
         if (img != 0) {
             cgt::ivec3 size = img->getSize();
+            _solver.createSystem((unsigned char*)img->getWeaklyTypedPointer()._pointer, size.x, size.y);
+            _solver.solve();
+            const float *solution = _solver.getSolution(size.x, size.y);
+
             ImageData *id = new ImageData(img->getParent()->getDimensionality(), size, img->getParent()->getNumChannels());
             size_t elementCount = cgt::hmul(size);
-            uint8_t *imgData = new uint8_t[elementCount];
-            std::cout << "imgcount: " << elementCount << std::endl;
-            for (size_t i = 0; i < elementCount; ++i)
-                imgData[i] = (uint8_t)i;
-            WeaklyTypedPointer wtpData(WeaklyTypedPointer::UINT8, 1, imgData);
+            float *imgData = new float[elementCount];
+            memcpy(imgData, solution, sizeof(float)*elementCount);
+
+            WeaklyTypedPointer wtpData(WeaklyTypedPointer::FLOAT, 1, imgData);
             ImageRepresentationLocal::create(id, wtpData);
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputConfidenceMap.getValue(), id);

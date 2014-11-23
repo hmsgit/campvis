@@ -30,12 +30,12 @@ namespace campvis {
 
     CudaConfidenceMapsDemo::CudaConfidenceMapsDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _usReader()
+        , _usIgtlReader()
         , _usBlurFilter(&_canvasSize)
         //, _usResampler(&_canvasSize)
         , _usMapsSolver()
     {
-        addProcessor(&_usReader);
+        addProcessor(&_usIgtlReader);
         addProcessor(&_usBlurFilter);
         //addProcessor(&_usResampler);
         addProcessor(&_usMapsSolver);
@@ -49,11 +49,12 @@ namespace campvis {
         AutoEvaluationPipeline::init();
 
         // Create connectors
-        _usReader.p_url.setValue("/home/denis/projects/confidence_maps/build/data/gallbladder/392.png");
-        _usReader.p_importType.selectById("localIntensity");
-        _usReader.p_targetImageID.setValue("us.image");
-        _usReader.p_targetImageID.addSharedProperty(&_usBlurFilter.p_inputImage);
-        
+        _usIgtlReader.p_receiveImages.setValue(true);
+        _usIgtlReader.p_receiveTransforms.setValue(false);
+        _usIgtlReader.p_receivePositions.setValue(false);
+        _usIgtlReader.p_targetImagePrefix.setValue("us.igtl.");
+
+        _usBlurFilter.p_inputImage.setValue("us.igtl.ImageClient");
         _usBlurFilter.p_outputImage.setValue("us.blurred");
         _usBlurFilter.p_outputImage.addSharedProperty(&_usMapsSolver.p_inputImage);
 

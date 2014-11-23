@@ -1,11 +1,9 @@
 #pragma once
 
-#include "cm.h"
+#include <vector>
 
 class CuspGPUData;
-
-/* Laplacian construction parameters */
-class CuspConfidenceMapSolver : public ConfidenceMapSolver
+class CuspConfidenceMapSolver
 {
 public:
 	CuspConfidenceMapSolver(int width, int height, float gradientScaling,
@@ -13,7 +11,7 @@ public:
 
 	virtual ~CuspConfidenceMapSolver();
 
-	virtual void createSystem(const uint8* image, int width, int height);
+	virtual void createSystem(const unsigned char* image, int width, int height);
 	virtual void setInitialSolution(const std::vector<float> &val);
 	virtual void solve();
 
@@ -24,8 +22,8 @@ private:
 	int width, height;
 
 	// Solver parameters
-	float alpha, beta, gamma;
 	float gradientScaling;
+	float alpha, beta, gamma;
 
 	// Matrices and Vectors
 	CuspGPUData* gpuData;

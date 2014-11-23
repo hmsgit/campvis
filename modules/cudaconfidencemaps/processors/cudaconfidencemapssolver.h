@@ -41,6 +41,8 @@
 
 #include "core/datastructures/imagedata.h"
 
+#include "modules/cudaconfidencemaps/core/cm_cusp.h"
+
 
 namespace campvis {
     /**
@@ -93,6 +95,7 @@ namespace campvis {
         
     protected:
 
+        CuspConfidenceMapSolver _solver;
         
         static const std::string loggerCat_;
 

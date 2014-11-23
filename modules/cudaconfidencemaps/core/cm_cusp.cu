@@ -60,25 +60,6 @@ void CUSP_CM_setInitialSolution(CuspGPUData& data, const std::vector<float>& val
 
 void CUSP_CM_uploadSystem(CuspGPUData &data)
 {
-	// Check for NaN values
-	/*
-	for (int r = 0; r < data.x_h.size(); ++r) {
-		for (int d = 0; d < 9; ++d) {
-			if (std::isnan(data.L_h.values(r, d))) {
-				std::cout << "NaN detected in A: " << r << std::endl;
-				break;
-			}
-		}
-
-		if (std::isnan(data.x_h[r])) {
-			std::cout << "NaN detected in x: " << r << std::endl;
-		}
-
-		if (std::isnan(data.b_h[r])) {
-			std::cout << "NaN detected in b: " << r << std::endl;
-		}
-	}*/
-
 	data.x_d = data.x_h;
 	data.b_d = data.b_h;
 	data.L_d = data.L_h;

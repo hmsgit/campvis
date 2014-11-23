@@ -11,7 +11,7 @@ CuspConfidenceMapSolver::~CuspConfidenceMapSolver()
 	CUSP_CM_destroyGpuData(gpuData);
 }
 
-void CuspConfidenceMapSolver::createSystem(const uint8* image, int width, int height)
+void CuspConfidenceMapSolver::createSystem(const unsigned char* image, int width, int height)
 {
 	if (width != this->width || height != this->height) {
 		CUSP_CM_resizeGpuData(*gpuData, width, height);
@@ -30,15 +30,9 @@ void CuspConfidenceMapSolver::setInitialSolution(const std::vector<float> &val)
 
 void CuspConfidenceMapSolver::solve()
 {
-	measureExecution(" . uploading system", [=]() {
-		CUSP_CM_uploadSystem(*gpuData);
-	});
-	measureExecution(" . solving system", [=]() {
-		CUSP_CM_solveSystem(*gpuData, 100, 1e-20);
-	});
-	measureExecution(" . downloading solution", [=]() {
-		CUSP_CM_downloadSolution(*gpuData);
-	});
+	CUSP_CM_uploadSystem(*gpuData);
+	CUSP_CM_solveSystem(*gpuData, 100, 1e-20);
+	CUSP_CM_downloadSolution(*gpuData);
 }
 
 const float* CuspConfidenceMapSolver::getSolution(int &width, int &height) const

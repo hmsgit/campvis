@@ -7,6 +7,7 @@ IF(${ModuleEnabled})
     if(CUDA_FOUND)
 		# Source files:
 		FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
+			modules/cudaconfidencemaps/core/*.cpp
 			modules/cudaconfidencemaps/pipelines/*.cpp
 			modules/cudaconfidencemaps/processors/*.cpp
 		)
@@ -19,6 +20,15 @@ IF(${ModuleEnabled})
 			modules/cudaconfidencemaps/pipelines/*.h
 			modules/cudaconfidencemaps/processors/*.h
 		)
+
+		# Build CUDA sources
+		set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3)
+		file(GLOB cuda_SOURCES modules/cudaconfidencemaps/core/*.cu)
+		cuda_add_library(
+			CudaConfidenceMaps_CUDA
+			${cuda_SOURCES}
+			)
+		LIST(APPEND ThisModExternalLibs CudaConfidenceMaps_CUDA)
 
 		SET(ThisModShaderDirectories "modules/cudaconfidencemaps/glsl")
 		SET(ThisModDependencies base io)
