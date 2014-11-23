@@ -37,8 +37,8 @@ namespace campvis {
     MetaPropertyLua::~MetaPropertyLua() {
     }
 
-    std::string MetaPropertyLua::getLuaScript(std::string prefix) {
-        return PropertyCollectionLua::getLuaScript(_xproperty->getName()+"::", true);
+    std::string MetaPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        return PropertyCollectionLua::getLuaScript(propNamePrefix+_xproperty->getName()+"::", luaProc);
     }
 
 

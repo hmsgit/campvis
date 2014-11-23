@@ -28,14 +28,14 @@
 
 namespace campvis {
     ButtonPropertyLua::ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, false, dataContainer)
+        : AbstractPropertyLua(property, dataContainer)
     {
     }
 
     ButtonPropertyLua::~ButtonPropertyLua() {
     }
 
-    std::string ButtonPropertyLua::getLuaScript(std::string prefix) {
+    std::string ButtonPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
         return "-- Not necessary ButtonProperty";
     }
 }

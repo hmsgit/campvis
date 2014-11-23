@@ -22,42 +22,26 @@
 // 
 // ================================================================================================
 
-#ifndef TRANSFERFUNCTIONPROPERTYLUA_H__
-#define TRANSFERFUNCTIONPROPERTYLUA_H__
+#include "simpletransferfunctionlua.h"
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
+#include "application/gui/qtcolortools.h"
+#include "core/classification/simpletransferfunction.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "abstracttransferfunctionlua.h"
+
+#include <QGridLayout>
+#include <QLabel>
 
 namespace campvis {
-    class AbstractTransferFunctionEditor;
 
-    /**
-     * Widget for a TransferFunctionProperty
-     */
-    class TransferFunctionPropertyLua : public AbstractPropertyLua {
-    public:
-        /**
-         * Creates a new PropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         */
-        TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer = nullptr);
+    SimpleTransferFunctionLua::SimpleTransferFunctionLua(TransferFunctionProperty* prop, SimpleTransferFunction* tf)
+        : AbstractTransferFunctionLua(prop, tf) {
 
-        /**
-         * Destructor
-         */
-        virtual ~TransferFunctionPropertyLua();
+    }
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+    SimpleTransferFunctionLua::~SimpleTransferFunctionLua() {
+    }
 
-    private:
-        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
-    };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<TransferFunctionPropertyLua, TransferFunctionProperty>;
+    std::string SimpleTransferFunctionLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        return "";
+    }
 }
-
-#endif // TRANSFERFUNCTIONPROPERTYLUA_H__

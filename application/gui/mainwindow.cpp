@@ -337,7 +337,7 @@ namespace campvis {
                     AbstractProcessor *proc = _selectedPipeline->getProcessor(i);
 
                     _pcLua->updatePropCollection(proc, &_selectedPipeline->getDataContainer());
-                    std::string res = _pcLua->getLuaScript("");
+                    std::string res = _pcLua->getLuaScript("", "proc:");
                     pipeScript += res;
                     std::cout << "\n\n" + pipeScript + "\n\n";
                 }

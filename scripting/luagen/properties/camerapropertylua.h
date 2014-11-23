@@ -27,11 +27,10 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
-//#include "core/properties/cameraproperty.h"
 
 namespace campvis {
     /**
-     * Lua for a Camera.
+     * Lua generator for a Camera.
      * For now just offering read-access.
      */
     class CameraPropertyLua : public AbstractPropertyLua {
@@ -40,7 +39,6 @@ namespace campvis {
          * Creates a new CameraPropertyLua for the property \a property.
          * \param   property    The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent      Parent Qt lua
          */
         //CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer);
 
@@ -49,7 +47,7 @@ namespace campvis {
          */
         virtual ~CameraPropertyLua();
 
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
 
     };
 

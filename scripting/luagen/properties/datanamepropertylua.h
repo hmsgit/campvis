@@ -38,7 +38,7 @@ namespace campvis {
     class DataHandle;
 
     /**
-     * Lua for a DataNameProperty
+     * Lua generator for a DataNameProperty
      */
     class DataNamePropertyLua : public AbstractPropertyLua {
     public:
@@ -46,7 +46,6 @@ namespace campvis {
          * Creates a new PropertyLua for the property \a property.
          * \param   property    The property the lua shall handle
          * \param   dc          DataContainer this property uses to populate the combo box (may be 0).
-         * \param   parent      Parent Qt lua
          */
         DataNamePropertyLua(DataNameProperty* property, DataContainer* dc);
 
@@ -55,7 +54,7 @@ namespace campvis {
          */
         virtual ~DataNamePropertyLua();
 
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

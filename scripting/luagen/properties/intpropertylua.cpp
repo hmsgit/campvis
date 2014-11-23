@@ -27,16 +27,17 @@
 
 namespace campvis {
     IntPropertyLua::IntPropertyLua(IntProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, false, dataContainer)
+        : AbstractPropertyLua(property, dataContainer)
     {
     }
 
     IntPropertyLua::~IntPropertyLua() {
     }
 
-    std::string IntPropertyLua::getLuaScript(std::string prefix) {
+    std::string IntPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
         std::string ret = "";
-        ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(" 
+        ret += luaProc;
+        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 
             + StringUtils::toString( static_cast<IntProperty*>(_property)->getValue() ) + ")";
         return ret;
     }

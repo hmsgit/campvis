@@ -26,11 +26,10 @@
 #include "core/properties/abstractproperty.h"
 
 namespace campvis {
-    AbstractPropertyLua::AbstractPropertyLua(AbstractProperty* property, bool displayBoxed, DataContainer* dataContainer)
+    AbstractPropertyLua::AbstractPropertyLua(AbstractProperty* property, DataContainer* dataContainer)
         : _property(property)
         , _dataContainer(dataContainer)
     {
-        //_ignorePropertyUpdates = 0;
     }
 
     AbstractPropertyLua::~AbstractPropertyLua() {

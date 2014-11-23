@@ -29,11 +29,9 @@
 #include "propertyluafactory.h"
 #include "core/properties/buttonproperty.h"
 
-class QPushButton;
-
 namespace campvis {
     /**
-     * Lua for a Camera.
+     * Lua generator for a ButtonProperty.
      * For now just offering read-access.
      */
     class ButtonPropertyLua : public AbstractPropertyLua {
@@ -41,7 +39,6 @@ namespace campvis {
         /**
          * Creates a new ButtonPropertyLua for the property \a property.
          * \param   property    The property the lua shall handle
-         * \param   parent      Parent Qt lua
          */
         ButtonPropertyLua(ButtonProperty* property, DataContainer* dataContainer = nullptr);
 
@@ -50,7 +47,7 @@ namespace campvis {
          */
         virtual ~ButtonPropertyLua();
 
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

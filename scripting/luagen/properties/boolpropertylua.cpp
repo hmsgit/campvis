@@ -27,16 +27,17 @@
 
 namespace campvis {
     BoolPropertyLua::BoolPropertyLua(BoolProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, false, dataContainer)
+        : AbstractPropertyLua(property, dataContainer)
     {
     }
 
     BoolPropertyLua::~BoolPropertyLua() {
     }
 
-    std::string BoolPropertyLua::getLuaScript(std::string prefix) {
+    std::string BoolPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
         std::string ret = "";
-        ret += "getNestedProperty(\"" + prefix +_property->getName() + "\"):setValue(" 
+        ret += luaProc;
+        ret += "getNestedProperty(\"" + propNamePrefix +_property->getName() + "\"):setValue(" 
             + (static_cast<BoolProperty*>(_property)->getValue() == 1? "true" : "false") + ")";
         return ret;
     }

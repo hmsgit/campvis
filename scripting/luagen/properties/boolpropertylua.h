@@ -31,14 +31,13 @@
 
 namespace campvis {
     /**
-     * Widget for a IntProperty
+     * Lua generator for a BoolProperty
      */
     class BoolPropertyLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new BoolPropertyLua for the property \a property.
          * \param   property    The property the widget shall handle
-         * \param   parent      Parent Qt widget
          */
         BoolPropertyLua(BoolProperty* property, DataContainer* dataContainer = nullptr);
 
@@ -47,7 +46,7 @@ namespace campvis {
          */
         virtual ~BoolPropertyLua();
 
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

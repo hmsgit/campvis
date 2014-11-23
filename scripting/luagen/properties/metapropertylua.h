@@ -35,8 +35,8 @@ namespace campvis {
     class DataContainer;
 
     /**
-     * Lua for a Camera.
-     * For now just offering read-access.
+     * Lua for a MetaProperty.
+     * Forwards the call to the PropertyCollectionLua
      */
     class MetaPropertyLua : public PropertyCollectionLua {
     public:
@@ -44,7 +44,6 @@ namespace campvis {
          * Creates a new MetaPropertyLua for the property \a property.
          * \param   property        The property the lua shall handle
          * \param   dataContainer   DataContainer to use, must not be 0.
-         * \param   parent          Parent Qt lua
          */
         MetaPropertyLua(MetaProperty* property, DataContainer* dataContainer);
 
@@ -53,7 +52,7 @@ namespace campvis {
          */
         virtual ~MetaPropertyLua();
 
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
 
     private:
         PropertyCollectionLua* _pcl;

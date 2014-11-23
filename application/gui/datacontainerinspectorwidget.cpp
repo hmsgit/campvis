@@ -218,7 +218,7 @@ namespace campvis {
 
         PropertyCollectionLua *_pcLua = new PropertyCollectionLua();
         _pcLua->updatePropCollection(_canvas, _dataContainer);
-        std::cout << _pcLua->getLuaScript("");
+        std::cout << _pcLua->getLuaScript("", "proc:");
 
         _infoWidgetLayout->addWidget(_pipelinePropertiesScrollArea, 6, 0, 1, 2);
 

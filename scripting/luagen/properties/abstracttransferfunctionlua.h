@@ -22,42 +22,45 @@
 // 
 // ================================================================================================
 
-#ifndef TRANSFERFUNCTIONPROPERTYLUA_H__
-#define TRANSFERFUNCTIONPROPERTYLUA_H__
+#ifndef ABSTRACTTRANSFERFUNCTIONLUA_H__
+#define ABSTRACTTRANSFERFUNCTIONLUA_H__
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
+
 #include "core/properties/transferfunctionproperty.h"
-#include "abstracttransferfunctionlua.h"
+
 
 namespace campvis {
-    class AbstractTransferFunctionEditor;
+    class AbstractProperty;
+    class AbstractTransferFunction;
 
     /**
-     * Widget for a TransferFunctionProperty
+     * Abstract base class for transfer function lua generators.
      */
-    class TransferFunctionPropertyLua : public AbstractPropertyLua {
+    class AbstractTransferFunctionLua {
+
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * Creates a new transfer function lua for the for the AbstractTransferFunction \a tf.
+         * \param   prop        TransferFunctionProperty to generate the lua script for.
+         * \param   tf          The transfer function the lua script shall handle.
          */
-        TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer = nullptr);
+        AbstractTransferFunctionLua(TransferFunctionProperty* prop, AbstractTransferFunction* tf);
 
         /**
          * Destructor
          */
-        virtual ~TransferFunctionPropertyLua();
+        virtual ~AbstractTransferFunctionLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        virtual std::string getLuaScript(std::string propNamePrefix, std::string luaProc) = 0;
+
+    protected:
+        const TransferFunctionProperty::IntensityHistogramType* getIntensityHistogram() const;
+
+        TransferFunctionProperty* _tfProperty;          ///< The parent TransferFunctionProperty of this editor
+        AbstractTransferFunction* _transferFunction;    ///< The transfer function this lua handles
 
     private:
-        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<TransferFunctionPropertyLua, TransferFunctionProperty>;
 }
 
-#endif // TRANSFERFUNCTIONPROPERTYLUA_H__
+#endif // ABSTRACTTRANSFERFUNCTIONLUA_H__

@@ -124,6 +124,7 @@ namespace campvis {
         /// Signal emitted when the intensity domain has changed
         sigslot::signal0 s_intensityDomainChanged;
 
+        cgt::svec3 getSize();
     protected:
         /**
          * Computes the intensity histogram;

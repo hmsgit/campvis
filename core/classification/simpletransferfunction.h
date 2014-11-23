@@ -80,3 +80,4 @@ namespace campvis {
 }
 
 #endif // SIMPLETRANSFERFUNCTION_H__
+

@@ -22,42 +22,52 @@
 // 
 // ================================================================================================
 
-#ifndef TRANSFERFUNCTIONPROPERTYLUA_H__
-#define TRANSFERFUNCTIONPROPERTYLUA_H__
+#ifndef GEOMETRY2DTRANSFERFUNCTIONLUA_H__
+#define GEOMETRY2DTRANSFERFUNCTIONLUA_H__
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
-#include "core/properties/transferfunctionproperty.h"
+#include "tbb/mutex.h"
+#include "cgt/painter.h"
+#include "cgt/event/eventlistener.h"
+#include "core/classification/tfgeometry2d.h"
 #include "abstracttransferfunctionlua.h"
 
+class QGridLayout;
+class QLabel;
+class QPushButton;
+
+namespace tgt {
+    class QtThreadedCanvas;
+    class Shader;
+}
+
 namespace campvis {
-    class AbstractTransferFunctionEditor;
+    class ColorPickerWidget;
+    class Geometry2DTransferFunction;
+    class AbstractTFGeometryManipulator;
+    class WholeTFGeometryManipulator;
 
     /**
-     * Widget for a TransferFunctionProperty
+     * Lua generator for a Geometry2DTransferFunction.
      */
-    class TransferFunctionPropertyLua : public AbstractPropertyLua {
+    class Geometry2DTransferFunctionLua : public AbstractTransferFunctionLua {
+
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * Creates a new lua generator for the TransferFunctionProperty \a property.
+         * \param   prop        TransferFunctionProperty to generate the lua for.
+         * \param   tf          The transfer function the lua shall handle.
+         * \param   parent      Parent Qt widget
          */
-        TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer = nullptr);
+        Geometry2DTransferFunctionLua(TransferFunctionProperty* prop, Geometry2DTransferFunction* tf);
 
         /**
          * Destructor
          */
-        virtual ~TransferFunctionPropertyLua();
+        virtual ~Geometry2DTransferFunctionLua();
 
         std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
 
-    private:
-        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<TransferFunctionPropertyLua, TransferFunctionProperty>;
 }
 
-#endif // TRANSFERFUNCTIONPROPERTYLUA_H__
+#endif // GEOMETRY2DTRANSFERFUNCTIONLUA_H__

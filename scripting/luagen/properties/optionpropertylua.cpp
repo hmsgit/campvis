@@ -28,16 +28,17 @@
 
 namespace campvis {
     OptionPropertyLua::OptionPropertyLua(AbstractOptionProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, false, dataContainer)
+        : AbstractPropertyLua(property, dataContainer)
     {
     }
 
     OptionPropertyLua::~OptionPropertyLua() {
     }
 
-    std::string OptionPropertyLua::getLuaScript(std::string prefix) {
+    std::string OptionPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
         std::string ret = "";
-        ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setValue(" 
+        ret += luaProc;
+        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 
             + StringUtils::toString( static_cast<AbstractOptionProperty*>(_property)->getValue() ) + ")";
         return ret;
     }

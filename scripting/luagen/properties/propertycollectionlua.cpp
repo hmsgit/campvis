@@ -36,7 +36,7 @@ namespace campvis {
 
 
     PropertyCollectionLua::PropertyCollectionLua(HasPropertyCollection* propertyCollection, DataContainer* dc)
-        : AbstractPropertyLua(nullptr, false, dc)
+        : AbstractPropertyLua(nullptr, dc)
         , _propCollection(propertyCollection)
     {
         _propCollection = propertyCollection;
@@ -66,24 +66,23 @@ namespace campvis {
         }
     }
 
-    std::string PropertyCollectionLua::getLuaScript(std::string prefix) {
+    std::string PropertyCollectionLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
         std::string ret = "";
-        std::string _prefix = "proc:";
         for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
-            ret += _prefix + it->second->getLuaScript(prefix) + "\n";
+            ret +=  it->second->getLuaScript(propNamePrefix, luaProc) + "\n";
         }
         return ret;
     }
 
-    std::string PropertyCollectionLua::getLuaScript(std::string prefix, bool dummy) {
-        std::string ret = "";
-        std::string _prefix = "";
-        for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
-            ret += _prefix + it->second->getLuaScript(prefix) + "\n";
-            _prefix = "proc:";
-        }
-        return ret;
-    }
+    //std::string PropertyCollectionLua::getLuaScript(std::string propNamePrefix, std::string luaProc, bool dummy) {
+    //    std::string ret = "";
+    //    std::string _scriptPrefix = "";
+    //    for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
+    //        ret += it->second->getLuaScript(propNamePrefix, luaProc) + "\n";
+    //        //_scriptPrefix = luaProc;
+    //    }
+    //    return ret;
+    //}
 
     void PropertyCollectionLua::addProperty(AbstractProperty* prop) {
         AbstractPropertyLua* propWidget = PropertyLuaFactory::getRef().createPropertyLua(prop, _dataContainer);

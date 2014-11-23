@@ -28,7 +28,7 @@
 
 namespace campvis {
     //CameraPropertyLua::CameraPropertyLua(CameraProperty* property, DataContainer* dataContainer)
-    //    : AbstractPropertyLua(property, true, dataContainer)
+    //    : AbstractPropertyLua(property, dataContainer)
     //{
     //}
 
@@ -43,7 +43,7 @@ namespace campvis {
     //    _lblUpVector->setText("Up Vector: " + QString::fromStdString(StringUtils::toString(prop->getValue().getUpVector())));
     //}
 
-    std::string CameraPropertyLua::getLuaScript(std::string prefix) {
+    std::string CameraPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
         std::string ret = "";
     //    cgt::Camera cam =  static_cast<CameraProperty*>(_property)->getValue();
     //    cgt::vec3 pos = cam.getPosition();
@@ -55,7 +55,7 @@ namespace campvis {
     //    float distf = cam.getFarDist();
     //    int pm = cam.getProjectionMode();
 
-    //    ret += "getNestedProperty(\"" + prefix+ _property->getName() + "\"):setValue(cgt.Camera("
+    //    ret += "getNestedProperty(\"" + propNamePrefix+ _property->getName() + "\"):setValue(cgt.Camera("
     //        + "cgt.vec3(" + StringUtils::toString(pos.x) + "," + StringUtils::toString(pos.y) + "," + StringUtils::toString(pos.z) + ")"
     //        + "," + "cgt.vec3(" + StringUtils::toString(focus.x) + "," + StringUtils::toString(focus.y) + "," + StringUtils::toString(focus.z) + ")"
     //        + "," + "cgt.vec3(" + StringUtils::toString(up.x) + "," + StringUtils::toString(up.y) + "," + StringUtils::toString(up.z) + ")"

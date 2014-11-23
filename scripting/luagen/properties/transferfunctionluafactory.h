@@ -22,42 +22,32 @@
 // 
 // ================================================================================================
 
-#ifndef TRANSFERFUNCTIONPROPERTYLUA_H__
-#define TRANSFERFUNCTIONPROPERTYLUA_H__
-
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
-#include "core/properties/transferfunctionproperty.h"
-#include "abstracttransferfunctionlua.h"
+#ifndef TRANSFERFUNCTIONLUAFACTORY_H__
+#define TRANSFERFUNCTIONLUAFACTORY_H__
 
 namespace campvis {
-    class AbstractTransferFunctionEditor;
+    class AbstractTransferFunction;
+    class AbstractTransferFunctionLua;
+    class TransferFunctionProperty;
 
     /**
-     * Widget for a TransferFunctionProperty
+     * Factory class offering the static method createLua to create transfer function editors
+     * for a given transfer function (depending on its type).
      */
-    class TransferFunctionPropertyLua : public AbstractPropertyLua {
+    class TransferFunctionLuaFactory {
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * Creates the corresponding TransferFunctionLua for the given transfer function \a tf.
+         * \note    The callee has to take the ownership of the returned pointer.
+         * \param   prop    TransferFunctionProperty to generate the editor for.
+         * \return  A new transfer function editor for the given transfer function (depending on its type).
          */
-        TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer = nullptr);
-
-        /**
-         * Destructor
-         */
-        virtual ~TransferFunctionPropertyLua();
-
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        static AbstractTransferFunctionLua* createTransferFunctionLua(TransferFunctionProperty* prop);
 
     private:
-        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
+        /// Shall not instantiate
+        TransferFunctionLuaFactory();
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<TransferFunctionPropertyLua, TransferFunctionProperty>;
 }
 
-#endif // TRANSFERFUNCTIONPROPERTYLUA_H__
+#endif // TRANSFERFUNCTIONLUAFACTORY_H__

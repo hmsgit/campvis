@@ -69,11 +69,11 @@ namespace campvis {
         static void deinit();
 
         /**
-         * Registers the the property of type \a type to have widgets created with the given function pointers.
+         * Registers the the property of type \a type to have luas created with the given function pointers.
          * \note    The template instantiation of PropertyLuaRegistrar takes care of calling this method.
          * \param   type        Property type to register.
-         * \param   ptr         Pointer to a function creating the appropriate widget for the property without making type checks (fast).
-         * \param   fallbackPtr Pointer to a function creating the appropriate widget for the property only if the type matches - added costs due to the type checks, but also works for unknown types.
+         * \param   ptr         Pointer to a function creating the appropriate lua for the property without making type checks (fast).
+         * \param   fallbackPtr Pointer to a function creating the appropriate lua for the property only if the type matches - added costs due to the type checks, but also works for unknown types.
          * \param   priority    Priority of \a fallbackPtr compared to other properties' fallbackPtrs to allow semantic ordering.
          * \return 
          */
@@ -81,11 +81,10 @@ namespace campvis {
 
         /**
          * Create a PropertyLua for the given property.
-         * Checkes all registered widgets, wether they match the type of \a property.
-         * \param   property        The property the widget shall handle.
+         * Checkes all registered luas, wether they match the type of \a property.
+         * \param   property        The property the lua shall handle.
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
-         * \param   parent          Parent Qt widget, defaults to nullptr.
-         * \return  The created property widget for the property - nullptr, if there was no matching widget found.
+         * \return  The created property lua for the property - nullptr, if there was no matching lua found.
          */
         AbstractPropertyLua* createPropertyLua(AbstractProperty* property, DataContainer* dataContainer = nullptr);
 
@@ -106,9 +105,9 @@ namespace campvis {
 // ================================================================================================
 
     /**
-     * Templated class exploiting the CRTP to allow easy registration of property widgets crossing
+     * Templated class exploiting the CRTP to allow easy registration of property luas crossing
      * DLL bounds using a single template instantiation.
-     * \tparam  PropertyLuaType      Property widget type to register.
+     * \tparam  PropertyLuaType      Property lua type to register.
      * \tparam  PropertyType    Corresponding property type.
      * \tparam  PRIORITY        Priority for fallback factory instantiation using dynamic_cast type checks.
      */
@@ -116,11 +115,10 @@ namespace campvis {
     class PropertyLuaRegistrar {
     public:
         /**
-         * Static factory method for creating the widget if we know the property type exactly.
-         * \param   property        The property the widget shall handle.
+         * Static factory method for creating the lua if we know the property type exactly.
+         * \param   property        The property the lua shall handle.
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
-         * \param   parent          Parent Qt widget, defaults to nullptr.
-         * \return  The newly created property widget.
+         * \return  The newly created property lua.
          */
         static AbstractPropertyLua* create(AbstractProperty* property, DataContainer* dc = nullptr) {
             cgtAssert(dynamic_cast<PropertyType*>(property) != nullptr, "Incompatible types - this should not happen!");
@@ -128,12 +126,11 @@ namespace campvis {
         }
 
         /**
-         * Static factory method for creating the widget if we don't know the property type.
+         * Static factory method for creating the lua if we don't know the property type.
          * Performs a dynamic type check to see whether the property type matches.
-         * \param   property        The property the widget shall handle.
+         * \param   property        The property the lua shall handle.
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
-         * \param   parent          Parent Qt widget, defaults to nullptr.
-         * \return  The newly created property widget, may be nullptr in case the types do not match.
+         * \return  The newly created property lua, may be nullptr in case the types do not match.
          */
         static AbstractPropertyLua* tryCreate(AbstractProperty* property, DataContainer* dc = nullptr) {
             if (PropertyType* tester = dynamic_cast<PropertyType*>(property))

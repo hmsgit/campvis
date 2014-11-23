@@ -33,7 +33,7 @@
 
 namespace campvis {
     /**
-     * Lua for a ColorProperty
+     * Lua generator for a ColorProperty
      */
     class ColorPropertyLua : public AbstractPropertyLua {
     public:
@@ -41,7 +41,6 @@ namespace campvis {
          * Creates a new FloatPropertyLua for the property \a property.
          * \param   property    The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent      Parent Qt lua
          */
         ColorPropertyLua(ColorProperty* property, DataContainer* dataContainer);
 
@@ -50,7 +49,7 @@ namespace campvis {
          */
         virtual ~ColorPropertyLua();
 
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
     }; 
 
 // ================================================================================================

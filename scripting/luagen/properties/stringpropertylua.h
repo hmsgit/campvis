@@ -29,12 +29,9 @@
 #include "propertyluafactory.h"
 #include "core/properties/stringproperty.h"
 
-class QLineEdit;
-class QPushButton;
-
 namespace campvis {
     /**
-     * Lua for a StringProperty
+     * Lua generator for a StringProperty
      */
     class StringPropertyLua : public AbstractPropertyLua {
     public:
@@ -42,7 +39,6 @@ namespace campvis {
          * Creates a new PropertyLua for the property \a property.
          * \param   property        The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent          Parent Qt lua
          */
         StringPropertyLua(StringProperty* property, DataContainer* dataContainer = nullptr);
 
@@ -51,7 +47,7 @@ namespace campvis {
          */
         virtual ~StringPropertyLua();
 
-        virtual std::string getLuaScript(std::string prefix);
+        virtual std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

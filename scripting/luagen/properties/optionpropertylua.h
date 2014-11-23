@@ -29,13 +29,11 @@
 #include "propertyluafactory.h"
 #include "core/properties/optionproperty.h"
 
-class QComboBox;
-
 namespace campvis {
     class AbstractOptionProperty;
 
     /**
-     * Lua for a IntProperty
+     * Lua generator for a IntProperty
      */
     class OptionPropertyLua : public AbstractPropertyLua {
 
@@ -44,7 +42,6 @@ namespace campvis {
          * Creates a new OptionPropertyLua for the property \a property.
          * \param   property        The property the lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
-         * \param   parent          Parent Qt lua
          */
         OptionPropertyLua(AbstractOptionProperty* property, DataContainer* dataContainer = nullptr);
 
@@ -53,7 +50,7 @@ namespace campvis {
          */
         virtual ~OptionPropertyLua();
 
-        std::string getLuaScript(std::string prefix);
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

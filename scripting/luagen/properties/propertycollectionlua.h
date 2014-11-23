@@ -36,14 +36,13 @@ namespace campvis {
     class HasPropertyCollection;
 
     /**
-     * Main Window for the CAMPVis application.
-     * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
+     * Main lua generator for the CAMPVis application.
+     * Calls individual properties for their own scripts and assembles all responses.
      */
     class PropertyCollectionLua : public AbstractPropertyLua {
     public:
         /**
          * Creates a new PropertyCollectionLua.
-         * \param   parent  Parent widget, may be 0.
          */
         PropertyCollectionLua(HasPropertyCollection* propertyCollection = nullptr, DataContainer* dc = nullptr);
 
@@ -52,17 +51,14 @@ namespace campvis {
          */
         ~PropertyCollectionLua();
 
-        std::string getLuaScript(std::string prefix);
-
+        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
         void updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc);
-
         void addProperty(AbstractProperty* prop);
         
     protected:
-        std::string getLuaScript(std::string prefix, bool dummy);
+        //std::string getLuaScript(std::string prefix, std::string luaProc, bool dummy);
 
         HasPropertyCollection* _propCollection; ///< The HasPropertyCollection instance this widget is currently working on.
-        
         std::map<AbstractProperty*, AbstractPropertyLua*> _luaMap;
     };
 }

@@ -24,26 +24,108 @@
 
 #include "transferfunctionpropertylua.h"
 
+#include "transferfunctionluafactory.h"
 #include "core/tools/stringutils.h"
+#include "core/classification/simpletransferfunction.h"
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/geometry2dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
+#include "core/classification/tfgeometry2d.h"
 
 namespace campvis {
     TransferFunctionPropertyLua::TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer /*= nullptr*/)
-        : AbstractPropertyLua(property, true, dataContainer)
+        : AbstractPropertyLua(property, dataContainer)
         , _editor(0)
     {
+        _editor = TransferFunctionLuaFactory::createTransferFunctionLua(property);
     }
 
     TransferFunctionPropertyLua::~TransferFunctionPropertyLua() {
+        delete _editor;
     }
 
-    std::string TransferFunctionPropertyLua::getLuaScript(std::string prefix) {
+    std::string TransferFunctionPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         AbstractTransferFunction* tf = prop->getTF();
         const cgt::vec2& domain = tf->getIntensityDomain();
 
         std::string ret = "";
-        ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):setIntensityDomain(cgt.vec2(" 
-            + StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))";
+
+        if (SimpleTransferFunction* tester = dynamic_cast<SimpleTransferFunction*>(tf)) {
+            // dvrTF = ...
+            ret += "tf = campvis.SimpleTransferFunction(" + StringUtils::toString(tf->getSize().x)
+                +", cgt.vec2("+StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))\n";
+        }
+
+        if (Geometry1DTransferFunction* tester = dynamic_cast<Geometry1DTransferFunction*>(tf)) {
+            // dvrTF = ...
+            ret += "tf = campvis.Geometry1DTransferFunction(" + StringUtils::toString(tf->getSize().x)
+                +", cgt.vec2("+StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))\n";
+
+            const std::vector<TFGeometry1D*>& _geometries = tester->getGeometries();
+            for (int i = 0; i < _geometries.size(); i++) {
+                std::vector<TFGeometry1D::KeyPoint>& kp = _geometries[i]->getKeyPoints();
+                //cgtAssert(kp.size() < 2, "There should be at least two key points");
+                float x = kp[0]._position;
+                float y = kp[1]._position;
+                cgt::col4 lc = kp[0]._color;
+                cgt::col4 rc = kp[1]._color;
+
+                // geometry = ...
+                ret += "geometry = campvis.TFGeometry1D_createQuad(cgt.vec2("+ StringUtils::toString(x)
+                    + "," + StringUtils::toString(y) + "), " 
+
+                    + "cgt.col4(" + StringUtils::toString((float)lc.r) + ", "
+                    + StringUtils::toString((float)lc.g) + ", "
+                    + StringUtils::toString((float)lc.b) + ", "
+                    + StringUtils::toString((float)lc.a) + "), "
+
+                    + "cgt.col4(" + StringUtils::toString((float)rc.r) + ", "
+                    + StringUtils::toString((float)rc.g) + ", "
+                    + StringUtils::toString((float)rc.b) + ", "
+                    + StringUtils::toString((float)rc.a) + "))\n";
+                // dvrTF.addGeo ...
+                ret += "tf:addGeometry(geometry)\n";
+            }
+        }
+
+        if (Geometry2DTransferFunction* tester = dynamic_cast<Geometry2DTransferFunction*>(tf)) {
+            // dvrTF = ...
+            ret += "tf = campvis.Geometry2DTransferFunction(" + StringUtils::toString(tf->getSize().x)
+                +", cgt.vec2("+StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))\n";
+
+            const std::vector<TFGeometry2D*>& _geometries = tester->getGeometries();
+            for (int i = 0; i < _geometries.size(); i++) {
+                std::vector<TFGeometry2D::KeyPoint>& kp = _geometries[i]->getKeyPoints();
+                //cgtAssert(kp.size() < 4, "There should be at least two key points");
+                cgt::vec2 ll = kp[0]._position;
+                cgt::vec2 ur = kp[2]._position;
+                cgt::col4 col = kp[0]._color;
+
+                // geometry = ...
+                ret += "geometry = campvis.TFGeometry1D_createQuad(cgt.vec2("+ StringUtils::toString(ll.x)
+                    + "," + StringUtils::toString(ll.y) + "), " 
+
+                    + "cgt.vec2(" + StringUtils::toString(ur.x) + ", "
+                    + StringUtils::toString(ur.y) + "), "
+
+                    + "cgt.col4(" + StringUtils::toString((float)col.r) + ", "
+                    + StringUtils::toString((float)col.g) + ", "
+                    + StringUtils::toString((float)col.b) + ", "
+                    + StringUtils::toString((float)col.a) + "))\n";
+                // dvrTF.addGeo ...
+                ret += "tf:addGeometry(geometry)\n";
+            }
+        }
+
+        // replaceTF
+        ret += luaProc;
+        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):replaceTF(tf)\n";
+
+        //std::string ret = "";
+        //ret += luaProc;
+        //ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):getTF():setIntensityDomain(cgt.vec2(" 
+        //    + StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))";
         return ret;
     }
 

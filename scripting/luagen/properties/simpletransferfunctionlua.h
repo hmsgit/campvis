@@ -22,42 +22,35 @@
 // 
 // ================================================================================================
 
-#ifndef TRANSFERFUNCTIONPROPERTYLUA_H__
-#define TRANSFERFUNCTIONPROPERTYLUA_H__
+#ifndef SIMPLETRANSFERFUNCTIONLUA_H__
+#define SIMPLETRANSFERFUNCTIONLUA_H__
 
-#include "abstractpropertylua.h"
-#include "propertyluafactory.h"
-#include "core/properties/transferfunctionproperty.h"
 #include "abstracttransferfunctionlua.h"
 
 namespace campvis {
-    class AbstractTransferFunctionEditor;
+    class SimpleTransferFunction;
 
     /**
-     * Widget for a TransferFunctionProperty
+     * Lua generator for a SimpleTransferFunction.
      */
-    class TransferFunctionPropertyLua : public AbstractPropertyLua {
+    class SimpleTransferFunctionLua : public AbstractTransferFunctionLua {
+
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
-         * \param   property        The property the widget shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
+         * Creates a new lua widget for the for the TransferFunctionProperty \a property.
+         * \param   prop        TransferFunctionProperty to generate the lua for.
+         * \param   tf          The transfer function the lua shall handle.
          */
-        TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer = nullptr);
+        SimpleTransferFunctionLua(TransferFunctionProperty* prop, SimpleTransferFunction* tf);
 
         /**
          * Destructor
          */
-        virtual ~TransferFunctionPropertyLua();
+        virtual ~SimpleTransferFunctionLua();
 
         std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
 
-    private:
-        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
     };
-
-    // explicitly instantiate template, so that it gets registered also over DLL boundaries.
-    template class PropertyLuaRegistrar<TransferFunctionPropertyLua, TransferFunctionProperty>;
 }
 
-#endif // TRANSFERFUNCTIONPROPERTYLUA_H__
+#endif // SIMPLETRANSFERFUNCTIONLUA_H__

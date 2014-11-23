@@ -1,6 +1,6 @@
 // ================================================================================================
 // 
-// This file is part of the CAMPVis Software Framework.
+// This file is part of the CAMPVis Software Framework.Lua
 // 
 // If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
@@ -22,26 +22,23 @@
 // 
 // ================================================================================================
 
-#include "colorpropertylua.h"
-#include "core/properties/colorproperty.h"
-#include "core/tools/stringutils.h"
+#include "abstracttransferfunctionlua.h"
+#include "core/classification/abstracttransferfunction.h"
+#include "core/properties/transferfunctionproperty.h"
 
 namespace campvis {
-    ColorPropertyLua::ColorPropertyLua(ColorProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, dataContainer)
+
+    AbstractTransferFunctionLua::AbstractTransferFunctionLua(TransferFunctionProperty* prop, AbstractTransferFunction* tf)
+        : _tfProperty(prop)
+        , _transferFunction(tf)
     {
     }
 
-    ColorPropertyLua::~ColorPropertyLua() {
+    AbstractTransferFunctionLua::~AbstractTransferFunctionLua() {
     }
 
-    std::string ColorPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
-        cgt::vec4 value = static_cast<ColorProperty*>(_property)->getValue();
-        std::string ret = "";
-        ret += luaProc;
-        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(cgt.vec4(" 
-            + StringUtils::toString(value.x) +", " + StringUtils::toString(value.y) +", "
-            + StringUtils::toString(value.z) +", " + StringUtils::toString(value.w) + "))";
-        return ret;
+    const TransferFunctionProperty::IntensityHistogramType* AbstractTransferFunctionLua::getIntensityHistogram() const {
+        return _tfProperty->getIntensityHistogram();
     }
+
 }
