@@ -56,8 +56,6 @@ namespace campvis {
         void addProperty(AbstractProperty* prop);
         
     protected:
-        //std::string getLuaScript(std::string prefix, std::string luaProc, bool dummy);
-
         HasPropertyCollection* _propCollection; ///< The HasPropertyCollection instance this widget is currently working on.
         std::map<AbstractProperty*, AbstractPropertyLua*> _luaMap;
     };

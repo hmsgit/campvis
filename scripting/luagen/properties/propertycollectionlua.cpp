@@ -74,20 +74,9 @@ namespace campvis {
         return ret;
     }
 
-    //std::string PropertyCollectionLua::getLuaScript(std::string propNamePrefix, std::string luaProc, bool dummy) {
-    //    std::string ret = "";
-    //    std::string _scriptPrefix = "";
-    //    for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
-    //        ret += it->second->getLuaScript(propNamePrefix, luaProc) + "\n";
-    //        //_scriptPrefix = luaProc;
-    //    }
-    //    return ret;
-    //}
-
     void PropertyCollectionLua::addProperty(AbstractProperty* prop) {
         AbstractPropertyLua* propWidget = PropertyLuaFactory::getRef().createPropertyLua(prop, _dataContainer);
         if (propWidget == 0) {
-            printf("NOT IMPLEMENTED LUA PROPERTY !! %s\n", prop->getName().c_str());
             return;
         }
         _luaMap.insert(std::make_pair(prop, propWidget));
