@@ -53,19 +53,29 @@ namespace campvis {
 
         if (SimpleTransferFunction* tester = dynamic_cast<SimpleTransferFunction*>(tf)) {
             // dvrTF = ...
-            ret += "tf = campvis.SimpleTransferFunction(" + StringUtils::toString(tf->getSize().x)
-                +", cgt.vec2("+StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))\n";
+            ret += "tf = campvis.SimpleTransferFunction(" + StringUtils::toString((float)tf->getSize().x)
+                +", cgt.vec2("+StringUtils::toString((float)domain.x) +", " + StringUtils::toString((float)domain.y) + "))\n";
+
+            ret += "tf:setLeftColor(cgt.col4(" + StringUtils::toString((float)tester->getLeftColor().r)
+                + ", " + StringUtils::toString((float)tester->getLeftColor().g)
+                + ", " + StringUtils::toString((float)tester->getLeftColor().b)
+                + ", " + StringUtils::toString((float)tester->getLeftColor().a) + "))\n";
+
+            ret += "tf:setRightColor(cgt.col4(" + StringUtils::toString((float)tester->getRightColor().r)
+                + ", " + StringUtils::toString((float)tester->getRightColor().g)
+                + ", " + StringUtils::toString((float)tester->getRightColor().b)
+                + ", " + StringUtils::toString((float)tester->getRightColor().a) + "))\n";
         }
 
         if (Geometry1DTransferFunction* tester = dynamic_cast<Geometry1DTransferFunction*>(tf)) {
             // dvrTF = ...
-            ret += "tf = campvis.Geometry1DTransferFunction(" + StringUtils::toString(tf->getSize().x)
-                +", cgt.vec2("+StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))\n";
+            ret += "tf = campvis.Geometry1DTransferFunction(" + StringUtils::toString((float)tf->getSize().x)
+                +", cgt.vec2("+StringUtils::toString((float)domain.x) +", " + StringUtils::toString((float)domain.y) + "))\n";
 
             const std::vector<TFGeometry1D*>& _geometries = tester->getGeometries();
             for (int i = 0; i < _geometries.size(); i++) {
                 std::vector<TFGeometry1D::KeyPoint>& kp = _geometries[i]->getKeyPoints();
-                //cgtAssert(kp.size() < 2, "There should be at least two key points");
+                cgtAssert(kp.size() >= 2, "There should be at least two key points");
                 float x = kp[0]._position;
                 float y = kp[1]._position;
                 cgt::col4 lc = kp[0]._color;
@@ -84,25 +94,34 @@ namespace campvis {
                     + StringUtils::toString((float)rc.g) + ", "
                     + StringUtils::toString((float)rc.b) + ", "
                     + StringUtils::toString((float)rc.a) + "))\n";
+
+                for (int i = 2; i < kp.size(); i++) {
+                    ret += "geometry:addKeyPoint(" + StringUtils::toString(kp[i]._position)
+                        + ", cgt.col4(" + StringUtils::toString((float)kp[i]._color.r) + ", "
+                        + StringUtils::toString((float)kp[i]._color.g) + ", "
+                        + StringUtils::toString((float)kp[i]._color.b) + ", "
+                        + StringUtils::toString((float)kp[i]._color.a) + "))\n";
+                }
                 // dvrTF.addGeo ...
                 ret += "tf:addGeometry(geometry)\n";
             }
         }
 
         if (Geometry2DTransferFunction* tester = dynamic_cast<Geometry2DTransferFunction*>(tf)) {
-            // dvrTF = ...
+            //TODO: fix me when 2D geometry is fully implemented
+            //FIXME: things to do
+            cgtAssert(1 != 1, "Fix Geometry2DTransferFunction lua scripting first");
             ret += "tf = campvis.Geometry2DTransferFunction(" + StringUtils::toString(tf->getSize().x)
                 +", cgt.vec2("+StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))\n";
 
             const std::vector<TFGeometry2D*>& _geometries = tester->getGeometries();
             for (int i = 0; i < _geometries.size(); i++) {
                 std::vector<TFGeometry2D::KeyPoint>& kp = _geometries[i]->getKeyPoints();
-                //cgtAssert(kp.size() < 4, "There should be at least two key points");
+                cgtAssert(kp.size() >= 4, "There should be at least four key points");
                 cgt::vec2 ll = kp[0]._position;
                 cgt::vec2 ur = kp[2]._position;
                 cgt::col4 col = kp[0]._color;
 
-                // geometry = ...
                 ret += "geometry = campvis.TFGeometry1D_createQuad(cgt.vec2("+ StringUtils::toString(ll.x)
                     + "," + StringUtils::toString(ll.y) + "), " 
 
@@ -113,7 +132,6 @@ namespace campvis {
                     + StringUtils::toString((float)col.g) + ", "
                     + StringUtils::toString((float)col.b) + ", "
                     + StringUtils::toString((float)col.a) + "))\n";
-                // dvrTF.addGeo ...
                 ret += "tf:addGeometry(geometry)\n";
             }
         }

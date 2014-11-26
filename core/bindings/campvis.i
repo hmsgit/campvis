@@ -193,6 +193,9 @@ namespace campvis {
     public:
         virtual ~TFGeometry1D();
         static TFGeometry1D* createQuad(const cgt::vec2& interval, const cgt::col4& leftColor, const cgt::col4& rightColor);
+    
+        void addKeyPoint(float position, float alpha);
+        void addKeyPoint(float position, const cgt::col4& color);
     };
 
     /* TFGeometry2D */
@@ -221,6 +224,8 @@ namespace campvis {
         SimpleTransferFunction(size_t size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
         virtual ~SimpleTransferFunction();
         virtual SimpleTransferFunction* clone() const;
+        void setLeftColor(const cgt::col4& color);
+        void setRightColor(const cgt::col4& color);
 
     };
 
