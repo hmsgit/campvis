@@ -431,7 +431,7 @@ namespace campvis {
         }
 
         if (maxSlices == 1)
-            maxSlices = -1;
+            maxSlices = 0;
         p_currentSlice.setMaxValue(maxSlices - 1);
         _texturesDirty = false;
         _geometriesDirty = false;
