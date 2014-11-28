@@ -146,6 +146,11 @@ void main() {
                 vec4 lodTexel = texture(_usImage, texCoord, lod);
                 out_Color = lookupTF(_transferFunction, _transferFunctionParams, lodTexel.r);   
                 break;
+            case 12:
+                out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
+                vec3 color = hsv2rgb(vec3(_hue, uncertainty, 1));
+                out_Color.xyz = (uncertainty) * color + (1-uncertainty)*out_Color.xyz;
+                break;
         }
     }
 }

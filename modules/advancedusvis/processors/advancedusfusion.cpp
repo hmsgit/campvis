@@ -41,7 +41,7 @@
 namespace campvis {
     const std::string AdvancedUsFusion::loggerCat_ = "CAMPVis.modules.vis.AdvancedUsFusion";
 
-    GenericOption<std::string> viewOptions[12] = {
+    GenericOption<std::string> viewOptions[13] = {
         GenericOption<std::string>("us", "Ultrasound Only"),
         GenericOption<std::string>("smoothed", "Smoothed US Only"),
         GenericOption<std::string>("cm", "Confidence Map US Only"),
@@ -53,7 +53,8 @@ namespace campvis {
         GenericOption<std::string>("mappingLAB", "Mapping Uncertainty L*a*b*"),
         GenericOption<std::string>("mappingHunterLAB", "Mapping Uncertainty Hunter L*a*b*"),
         GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness"),
-        GenericOption<std::string>("pixelate", "Pixelate (Experimental)")
+        GenericOption<std::string>("pixelate", "Pixelate (Experimental)"),
+        GenericOption<std::string>("colorOverlay", "Color Overlay")
     };
 
     AdvancedUsFusion::AdvancedUsFusion(IVec2Property* viewportSizeProp)
@@ -66,7 +67,7 @@ namespace campvis {
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
-        , p_view("View", "Image to Render", viewOptions, 12)
+        , p_view("View", "Image to Render", viewOptions, 13)
         , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
