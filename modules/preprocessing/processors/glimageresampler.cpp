@@ -61,11 +61,11 @@ namespace campvis {
     void GlImageResampler::init() {
         VisualizationProcessor::init();
 
-        _shader2D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "#define GLRESAMPLER_3D\n");
+        _shader2D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "#define GLRESAMPLER_2D\n");
         _shader2D->setAttributeLocation(0, "in_Position");
         _shader2D->setAttributeLocation(1, "in_TexCoord");
 
-        _shader3D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "#define GLRESAMPLER_2D\n");
+        _shader3D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "#define GLRESAMPLER_3D\n");
         _shader3D->setAttributeLocation(0, "in_Position");
         _shader3D->setAttributeLocation(1, "in_TexCoord");
     }
