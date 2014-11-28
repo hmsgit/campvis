@@ -45,12 +45,7 @@
 
 
 namespace campvis {
-    /**
-     * OpenIGTLink Client processor. Connects to a specified server and receives all OpenIGTLink messages.
-     * Processes the messages according to the currently set properties p_receiveTransform, p_receivePositions
-     * and p_receiveImage and puts them into the received data into the respective data containers.
-     * This Class contains modified code from the OpenIGTLink ReceiveClient example.
-     */
+
     class CudaConfidenceMapsSolver : public AbstractProcessor {
     public:
         /**
@@ -85,22 +80,24 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
-        /// Callback slot for connect button. can also be called from outside.
-        void connect();
-        /// Callback slot for disconnect button. can also be called from outside.
-        void disconnect();
-
-        DataNameProperty p_inputImage;      ///< ID for input volume
+        DataNameProperty p_inputImage;              ///< ID for input volume
         DataNameProperty p_outputConfidenceMap;     ///< ID for output gradient volume
+
+        ButtonProperty p_resetResult;
+
+        NumericProperty<int> p_iterations;          /// < Number of CG-Iterations to do
+
+        FloatProperty p_gradientScaling;
+        FloatProperty p_paramAlpha;
+        FloatProperty p_paramBeta;
+        FloatProperty p_paramGamma;
+
         
     protected:
 
         CuspConfidenceMapSolver _solver;
         
         static const std::string loggerCat_;
-
-        // this is thread management stuff
-        // very similar to the Runnable base class
     };
 
 }

@@ -38,34 +38,24 @@ namespace campvis {
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputConfidenceMap("OutputConfidenceMap", "Output Confidence Map", "us.confidence", DataNameProperty::WRITE)
-        , _solver(512, 512, 2.0f, 2.0f, 20.0f, 0.03f)
+        , p_resetResult("ResetSolution", "Reset solution vector")
+        , p_iterations("IterationCount", "Conjugate Gradient Iterations", 200, 1, 10000)
+        , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001, 10)
+        , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001, 10)
+        , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001, 200)
+        , p_paramGamma("Gamma", "Gamma (Diagonal penalty)", 0.03f, 0.001, 0.5)
+        , _solver(128, 128)
     {
 
         addProperty(p_inputImage);
         addProperty(p_outputConfidenceMap);
-        /*
-        _stopExecution = false;
-        _receiverRunning = false;
 
-        addProperty(p_address, VALID);
-        addProperty(p_port, VALID);
-        addProperty(p_deviceName, VALID);
-
-        addProperty(p_connect, VALID);
-        addProperty(p_disconnect, VALID);
-
-        addProperty(p_receiveTransforms, INVALID_PROPERTIES);
-        addProperty(p_receiveImages, INVALID_PROPERTIES);
-        addProperty(p_targetTransformPrefix, VALID);
-        addProperty(p_targetImagePrefix, VALID);
-        addProperty(p_imageOffset, VALID);
-        addProperty(p_voxelSize, VALID);
-        addProperty(p_receivePositions, INVALID_PROPERTIES);
-        addProperty(p_targetPositionPrefix, VALID);
-
-		invalidate(INVALID_PROPERTIES);*/
-
-
+        addProperty(p_resetResult);
+        addProperty(p_iterations);
+        addProperty(p_gradientScaling);
+        addProperty(p_paramAlpha);
+        addProperty(p_paramBeta);
+        addProperty(p_paramGamma);
     }
 
     CudaConfidenceMapsSolver::~CudaConfidenceMapsSolver() {
@@ -91,15 +81,30 @@ namespace campvis {
     void CudaConfidenceMapsSolver::updateResult(DataContainer& data) {
         ImageRepresentationLocal::ScopedRepresentation img(data, p_inputImage.getValue());
         if (img != 0) {
+            int iterations = p_iterations.getValue();
+            float gradientScaling = p_gradientScaling.getValue();
+            float alpha = p_paramAlpha.getValue();
+            float beta = p_paramBeta.getValue();
+            float gamma = p_paramGamma.getValue();
+
             cgt::ivec3 size = img->getSize();
-            _solver.createSystem((unsigned char*)img->getWeaklyTypedPointer()._pointer, size.x, size.y);
-            _solver.solve();
+            size_t elementCount = cgt::hmul(size);
+            unsigned char *flippedData = new unsigned char[elementCount];
+            for (size_t i = 0; i < elementCount; ++i) {
+                flippedData[elementCount-i-1] = ((unsigned char*)img->getWeaklyTypedPointer()._pointer)[i];
+            }
+            _solver.createSystem(flippedData, size.x, size.y,
+                                 gradientScaling, alpha, beta, gamma);
+            delete[] flippedData;
+
+            _solver.solve(iterations);
             const float *solution = _solver.getSolution(size.x, size.y);
 
             ImageData *id = new ImageData(img->getParent()->getDimensionality(), size, img->getParent()->getNumChannels());
-            size_t elementCount = cgt::hmul(size);
             float *imgData = new float[elementCount];
-            memcpy(imgData, solution, sizeof(float)*elementCount);
+            for (size_t i = 0; i < elementCount; ++i) {
+                imgData[elementCount-i-1] = solution[i];
+            }
 
             WeaklyTypedPointer wtpData(WeaklyTypedPointer::FLOAT, 1, imgData);
             ImageRepresentationLocal::create(id, wtpData);

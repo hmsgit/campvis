@@ -22,6 +22,7 @@ IF(${ModuleEnabled})
 		)
 
 		# Build CUDA sources
+		set(CUDA_PROPAGATE_HOST_FLAGS OFF) # Otherwise -std=c++11 is passed, which does not work with cuda compilers
 		set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3)
 		file(GLOB cuda_SOURCES modules/cudaconfidencemaps/core/*.cu)
 		cuda_add_library(

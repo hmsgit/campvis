@@ -32,7 +32,7 @@
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
 #include "modules/openigtlink/processors/openigtlinkclient.h"
-
+#include "modules/advancedusvis/processors/advancedusfusion.h"
 
 #include "core/properties/buttonproperty.h"
 
@@ -68,8 +68,9 @@ namespace campvis {
         OpenIGTLinkClient _usIgtlReader;
         DevilImageReader _usReader;
         GlGaussianFilter _usBlurFilter;
-        //GlImageResampler _usResampler;
+        GlImageResampler _usResampler;
         CudaConfidenceMapsSolver _usMapsSolver;
+        AdvancedUsFusion _usFusion;
     };
 
 }

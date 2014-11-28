@@ -32,14 +32,15 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _usIgtlReader()
         , _usBlurFilter(&_canvasSize)
-        //, _usResampler(&_canvasSize)
+        , _usResampler(&_canvasSize)
         , _usMapsSolver()
+        , _usFusion(&_canvasSize)
     {
         addProcessor(&_usIgtlReader);
         addProcessor(&_usBlurFilter);
-        //addProcessor(&_usResampler);
+        addProcessor(&_usResampler);
         addProcessor(&_usMapsSolver);
-
+        addProcessor(&_usFusion);
     }
 
     CudaConfidenceMapsDemo::~CudaConfidenceMapsDemo() {
@@ -48,22 +49,31 @@ namespace campvis {
     void CudaConfidenceMapsDemo::init() {
         AutoEvaluationPipeline::init();
 
-        // Create connectors
+        // Set intial options
         _usIgtlReader.p_receiveImages.setValue(true);
         _usIgtlReader.p_receiveTransforms.setValue(false);
         _usIgtlReader.p_receivePositions.setValue(false);
+        _usResampler.p_resampleScale.setValue(0.25f);
+
+        // Create connectors
         _usIgtlReader.p_targetImagePrefix.setValue("us.igtl.");
 
         _usBlurFilter.p_inputImage.setValue("us.igtl.ImageClient");
         _usBlurFilter.p_outputImage.setValue("us.blurred");
-        _usBlurFilter.p_outputImage.addSharedProperty(&_usMapsSolver.p_inputImage);
+        _usBlurFilter.p_outputImage.addSharedProperty(&_usResampler.p_inputImage);
+        _usBlurFilter.p_outputImage.addSharedProperty(&_usFusion.p_blurredImageId);
 
-        //_usResampler.p_outputImage.setValue("us.resampled");
-        //_usResampler.p_outputImage.addSharedProperty(&_usMapsSolver.p_inputImage);
+        _usResampler.p_outputImage.setValue("us.resampled");
+        _usResampler.p_outputImage.addSharedProperty(&_usMapsSolver.p_inputImage);
 
         _usMapsSolver.p_outputConfidenceMap.setValue("us.confidence");
+        _usMapsSolver.p_outputConfidenceMap.addSharedProperty(&_usFusion.p_confidenceImageID);
 
-        _renderTargetID.setValue("us.blurred");
+        _usFusion.p_usImageId.setValue("us.igtl.ImageClient");
+        _usFusion.p_targetImageID.setValue("us.fusion");
+        _usFusion.p_view.setValue(12);
+
+        _renderTargetID.setValue("us.fusion");
     }
 
     void CudaConfidenceMapsDemo::deinit() {

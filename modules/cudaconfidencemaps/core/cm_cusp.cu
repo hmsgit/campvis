@@ -139,7 +139,7 @@ void CUSP_CM_buildEquationSystem(CuspGPUData &gpudata, const unsigned char* imag
 	// Gather all of the options together
 	ComputeLaplacianData data;
 	data.alpha = alpha; data.beta = beta; data.gamma = gamma;
-	data.gradientScaling = 1.0f / 0.1764f;
+	data.gradientScaling = gradientScaling;
 	data.image = image;
 	data.width = width; data.height = height;
 	data.centralDiagonal = 4;
