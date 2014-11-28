@@ -45,7 +45,8 @@ namespace campvis {
         , p_outputImage("OutputImage", "Output Image", "GlImageResampler.out", DataNameProperty::WRITE)
         , p_resampleScale("ResampleScale", "Resampling Scale", .5f, .01f, 10.f)
         , p_targetSize("TargetSize", "Size of Resampled Image", cgt::ivec3(128), cgt::ivec3(1), cgt::ivec3(1024))
-        , _shader(0)
+        , _shader2D(0)
+        , _shader3D(0)
     {
         addProperty(p_inputImage, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_outputImage);
@@ -60,13 +61,18 @@ namespace campvis {
     void GlImageResampler::init() {
         VisualizationProcessor::init();
 
-        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
+        _shader2D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "#define GLRESAMPLER_3D\n");
+        _shader2D->setAttributeLocation(0, "in_Position");
+        _shader2D->setAttributeLocation(1, "in_TexCoord");
+
+        _shader3D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimageresampler.frag", "#define GLRESAMPLER_2D\n");
+        _shader3D->setAttributeLocation(0, "in_Position");
+        _shader3D->setAttributeLocation(1, "in_TexCoord");
     }
 
     void GlImageResampler::deinit() {
-        ShdrMgr.dispose(_shader);
+        ShdrMgr.dispose(_shader2D);
+        ShdrMgr.dispose(_shader3D);
         VisualizationProcessor::deinit();
     }
 
@@ -76,34 +82,46 @@ namespace campvis {
         if (img != 0) {
             cgt::vec3 originalSize(img->getSize());
             const cgt::ivec3& resampledSize = p_targetSize.getValue();
+            bool isTexture2D = img->getParent()->getDimensionality() == 2;
+
+            // 2D textures should not be scaled along the z axis
+            if (isTexture2D) {
+                resampledSize.z = 1;
+            }
 
             cgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, resampledSize, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
+            cgt::Texture* resultTexture = new cgt::Texture(isTexture2D ? GL_TEXTURE_2D : GL_TEXTURE_3D, resampledSize, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
+
+            // Select the right shader for the 2D and 3D case
+            cgt::Shader *shader = isTexture2D ? _shader2D : _shader3D;
 
             // activate shader and bind textures
-            _shader->activate();
-            img->bind(_shader, inputUnit);
-
+            shader->activate();
+            img->bind(shader, inputUnit);
+            
             // activate FBO and attach texture
             _fbo->activate();
             glViewport(0, 0, static_cast<GLsizei>(resampledSize.x), static_cast<GLsizei>(resampledSize.y));
 
             // render quad to compute difference measure by shader
             for (int z = 0; z < resampledSize.z; ++z) {
-                float zTexCoord = static_cast<float>(z)/static_cast<float>(resampledSize.z) + .5f/static_cast<float>(resampledSize.z);
-                _shader->setUniform("_zTexCoord", zTexCoord);
+                if (!isTexture2D) {    
+                    float zTexCoord = static_cast<float>(z)/static_cast<float>(resampledSize.z) + .5f/static_cast<float>(resampledSize.z);
+                    shader->setUniform("_zTexCoord", zTexCoord);
+                }
                 _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, z);
+                LGL_ERROR;
                 QuadRdr.renderQuad();
             }
             _fbo->detachAll();
             _fbo->deactivate();
-            _shader->deactivate();
+            shader->deactivate();
 
             // put resulting image into DataContainer
-            ImageData* id = new ImageData(3, resampledSize, 1);
+            ImageData* id = new ImageData(img->getParent()->getDimensionality(), resampledSize, img->getParent()->getNumChannels());
             ImageRepresentationGL::create(id, resultTexture);
             const ImageMappingInformation& imi = img->getParent()->getMappingInformation();
             id->setMappingInformation(ImageMappingInformation(img->getSize(), imi.getOffset(), imi.getVoxelSize() / p_resampleScale.getValue(), imi.getCustomTransformation()));
