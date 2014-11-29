@@ -27,8 +27,8 @@
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
+//#include "abstracttransferfunctionlua.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "abstracttransferfunctionlua.h"
 
 namespace campvis {
     class AbstractTransferFunctionEditor;
@@ -53,7 +53,7 @@ namespace campvis {
         std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
 
     private:
-        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
+//        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

@@ -24,7 +24,7 @@
 
 #include "transferfunctionpropertylua.h"
 
-#include "transferfunctionluafactory.h"
+//#include "transferfunctionluafactory.h"
 #include "core/tools/stringutils.h"
 #include "core/classification/simpletransferfunction.h"
 #include "core/classification/geometry1dtransferfunction.h"
@@ -35,13 +35,13 @@
 namespace campvis {
     TransferFunctionPropertyLua::TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer /*= nullptr*/)
         : AbstractPropertyLua(property, dataContainer)
-        , _editor(0)
+        //, _editor(0)
     {
-        _editor = TransferFunctionLuaFactory::createTransferFunctionLua(property);
+        //_editor = TransferFunctionLuaFactory::createTransferFunctionLua(property);
     }
 
     TransferFunctionPropertyLua::~TransferFunctionPropertyLua() {
-        delete _editor;
+        //delete _editor;
     }
 
     std::string TransferFunctionPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
@@ -140,10 +140,6 @@ namespace campvis {
         ret += luaProc;
         ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):replaceTF(tf)\n";
 
-        //std::string ret = "";
-        //ret += luaProc;
-        //ret += "getNestedProperty(\"" + prefix + _property->getName() + "\"):getTF():setIntensityDomain(cgt.vec2(" 
-        //    + StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))";
         return ret;
     }
 
