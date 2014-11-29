@@ -109,6 +109,26 @@ namespace campvis {
         _containerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
         _cwLayout->addWidget(_pipelineWidget, 1, 0, 1, 2);
 
+        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", _containerWidget);
+        _cwLayout->addWidget(_btnExecute, 2, 0, 1, 2);
+
+        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", _containerWidget);
+        _cwLayout->addWidget(_btnShowDataContainerInspector, 3, 0, 1, 2);
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+        _btnLuaLoad = new QPushButton("Load Script", _containerWidget);
+        _cwLayout->addWidget(_btnLuaLoad, 4, 0, 1, 2);
+        _btnLuaSave = new QPushButton("Save Script", _containerWidget);
+        _cwLayout->addWidget(_btnLuaSave, 5, 0, 1, 2);
+        connect(
+            _btnLuaLoad, SIGNAL(clicked()), 
+            this, SLOT(onBtnLuaLoadClicked()));
+        connect(
+            _btnLuaSave, SIGNAL(clicked()), 
+            this, SLOT(onBtnLuaSaveClicked()));
+#else
+#endif
+
         _containerWidget->setLayout(_cwLayout);
         ui.pipelineTreeDock->setWidget(_containerWidget);
 
@@ -126,12 +146,6 @@ namespace campvis {
         rightLayout->setSpacing(4);
         _pipelinePropertiesWidget->setLayout(rightLayout);
 
-        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", _pipelinePropertiesWidget);
-        rightLayout->addWidget(_btnExecute);
-
-        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", _pipelinePropertiesWidget);
-        rightLayout->addWidget(_btnShowDataContainerInspector);
-
         _propCollectionWidget = new PropertyCollectionWidget(this);
         rightLayout->addWidget(_propCollectionWidget);
         rightLayout->addStretch();
@@ -145,20 +159,6 @@ namespace campvis {
         connect(_scriptingConsoleWidget, SIGNAL(s_commandExecuted(const QString&)), this, SLOT(onLuaCommandExecuted(const QString&)));
 #else
         ui.scriptingConsoleDock->setVisible(false);
-#endif
-
-#ifdef CAMPVIS_HAS_SCRIPTING
-        _btnLuaLoad = new QPushButton("Load Script", _pipelinePropertiesWidget);
-        rightLayout->addWidget(_btnLuaLoad);
-        _btnLuaSave = new QPushButton("Save Script", _pipelinePropertiesWidget);
-        rightLayout->addWidget(_btnLuaSave);
-        connect(
-            _btnLuaLoad, SIGNAL(clicked()), 
-            this, SLOT(onBtnLuaLoadClicked()));
-        connect(
-            _btnLuaSave, SIGNAL(clicked()), 
-            this, SLOT(onBtnLuaSaveClicked()));
-#else
 #endif
 
         _dcInspectorWidget = new DataContainerInspectorWidget();
