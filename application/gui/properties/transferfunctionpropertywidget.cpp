@@ -89,7 +89,13 @@ namespace campvis {
         connect(_btnFitDomainToImage, SIGNAL(clicked(bool)), this, SLOT(onFitClicked(bool)));
         connect(_cbAutoFitDomainToImage, SIGNAL(stateChanged(int)), this, SLOT(onAutoFitDomainToImageChanged(int)));
 
+        property->s_BeforeTFReplace.connect(this, &TransferFunctionPropertyWidget::onBeforeTFReplace);
+        property->s_AfterTFReplace.connect(this, &TransferFunctionPropertyWidget::onAfterTFReplace);
+        bool b = connect(this, SIGNAL(s_beforeTFReplace(AbstractTransferFunction*)), this, SLOT(execBeforeTFReplace(AbstractTransferFunction*)));
+        b = connect(this, SIGNAL(s_afterTFReplace(AbstractTransferFunction*)), this, SLOT(execAfterTFReplace(AbstractTransferFunction*)));
+
         property->s_autoFitWindowToDataChanged.connect(this, &TransferFunctionPropertyWidget::onTransferFunctionAutoFitWindowToDataChanged);
+        wasVisible = false;
     }
 
     TransferFunctionPropertyWidget::~TransferFunctionPropertyWidget() {
@@ -128,7 +134,7 @@ namespace campvis {
     }
 
     void TransferFunctionPropertyWidget::onEditClicked(bool checked) {
-        if (_editor == 0) {
+        if (_editor == nullptr) {
             TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
             _editor = TransferFunctionEditorFactory::createEditor(prop);
 
@@ -162,6 +168,48 @@ namespace campvis {
 
     void TransferFunctionPropertyWidget::onTransferFunctionAutoFitWindowToDataChanged() {
         emit s_propertyChanged(_property);
+    }
+
+    void TransferFunctionPropertyWidget::execBeforeTFReplace(AbstractTransferFunction *tf ) {
+        if (!_dockWidget && !_editor)
+            return;
+        if (_dockWidget) {
+            wasVisible = _dockWidget->isVisible();
+            _dockWidget->setVisible(false);
+        }
+        if (_editor) {
+            delete _editor;
+            _editor = nullptr;
+        }
+        if (_dockWidget) {
+            //delete _dockWidget;
+            //_dockWidget = nullptr;
+        }
+    }
+
+    void TransferFunctionPropertyWidget::execAfterTFReplace(AbstractTransferFunction *tf ) {
+        if (!_dockWidget && !_editor)
+            return;
+        if (_editor == nullptr && _dockWidget != nullptr) {
+            TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
+            _editor = TransferFunctionEditorFactory::createEditor(prop);
+
+            //_dockWidget = new QDockWidget("Transfer Function Editor");
+            _dockWidget->setWidget(_editor);
+
+            _dockWidget->setVisible(wasVisible);
+            //static_cast<CampVisApplication*>(qApp)->registerDockWidget(Qt::BottomDockWidgetArea, _dockWidget);
+        } else {
+            _dockWidget->setVisible(true);
+        }
+    }
+
+    void TransferFunctionPropertyWidget::onBeforeTFReplace( AbstractTransferFunction *tf ) {
+        emit s_beforeTFReplace(tf);
+    }
+
+    void TransferFunctionPropertyWidget::onAfterTFReplace( AbstractTransferFunction *tf ) {
+        emit s_afterTFReplace(tf);
     }
 
 
