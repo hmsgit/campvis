@@ -31,6 +31,7 @@
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
+#include "modules/cudaconfidencemaps/processors/usfanrenderer.h"
 #include "modules/openigtlink/processors/openigtlinkclient.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 
@@ -71,6 +72,7 @@ namespace campvis {
         GlImageResampler _usResampler;
         CudaConfidenceMapsSolver _usMapsSolver;
         AdvancedUsFusion _usFusion;
+        UsFanRenderer _usFanRenderer;
     };
 
 }

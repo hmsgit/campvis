@@ -35,12 +35,14 @@ namespace campvis {
         , _usResampler(&_canvasSize)
         , _usMapsSolver()
         , _usFusion(&_canvasSize)
+        , _usFanRenderer(&_canvasSize)
     {
         addProcessor(&_usIgtlReader);
         addProcessor(&_usBlurFilter);
         addProcessor(&_usResampler);
         addProcessor(&_usMapsSolver);
         addProcessor(&_usFusion);
+        addProcessor(&_usFanRenderer);
     }
 
     CudaConfidenceMapsDemo::~CudaConfidenceMapsDemo() {
@@ -71,9 +73,15 @@ namespace campvis {
 
         _usFusion.p_usImageId.setValue("us.igtl.ImageClient");
         _usFusion.p_targetImageID.setValue("us.fusion");
+        //_usFusion.p_targetImageID.addSharedProperty(&_usFanRenderer.p_inputImage);
         _usFusion.p_view.setValue(12);
 
-        _renderTargetID.setValue("us.fusion");
+        _usFanRenderer.p_inputImage.setValue("us.confidence");
+        _usFanRenderer.p_renderTargetID.setValue("us.fused_fan");
+        _usFanRenderer.p_innerRadius.setValue(120.0f/540.0f);
+        _usFanRenderer.p_halfAngle.setValue(37);
+
+        _renderTargetID.setValue("us.fused_fan");
     }
 
     void CudaConfidenceMapsDemo::deinit() {
