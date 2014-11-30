@@ -46,6 +46,50 @@ namespace campvis {
         return new FaceGeometry(vertices, texCorods);
     }
 
+    MultiIndexedGeometry* GeometryDataFactory::createGrid(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb, int xSegments, int ySegments) {
+        cgtAssert(xSegments > 0 && ySegments > 1, "Grid must have at least one segment in each direction");
+
+        int numVertices = (xSegments + 1) * (ySegments + 1);
+        std::vector<cgt::vec3> vertices(numVertices);
+        std::vector<cgt::vec3> textureCoordinates(numVertices);
+        std::vector<cgt::vec3> normals(numVertices);
+
+        // Compute vertices of the grid in x-major order
+        for (int y = 0; y <= ySegments; ++y) {
+            for (int x = 0; x <= xSegments; ++x) {
+                int idx = y * (xSegments + 1) + x;
+
+                float ux = x / static_cast<float>(xSegments);
+                float uy = y / static_cast<float>(ySegments);
+
+                vertices[idx] = cgt::vec3(llf.x * (1-ux) + urb.x * ux,
+                                          llf.y * (1-uy) + urb.y * uy,
+                                          llf.z);
+                textureCoordinates[idx] = cgt::vec3(texLlf.x * (1-ux) + texUrb.x * ux,
+                                                    texLlf.y * (1-uy) + texUrb.y * uy,
+                                                    texLlf.z);
+                normals[idx] = cgt::vec3(0, 0, 1);
+            }
+        }
+
+        MultiIndexedGeometry* result = new MultiIndexedGeometry(vertices, textureCoordinates, std::vector<cgt::vec4>(), normals);
+
+        // For each horizontal stripe, construct the indeces for triangle strips
+        int verticesPerStrip = (xSegments + 1) * 2;
+        for (int y = 0; y < ySegments; ++y) {
+            std::vector<uint16_t> indices(verticesPerStrip);
+            for (uint16_t x = 0; x <= xSegments; ++x) {
+                indices[x*2 + 0] = (y + 0) * (xSegments + 1) + x;
+                indices[x*2 + 1] = (y + 1) * (xSegments + 1) + x;
+            }
+
+            result->addPrimitive(indices);
+        }
+
+        return result;
+    }
+
+
     MeshGeometry* GeometryDataFactory::createCube(const cgt::Bounds& bounds, const cgt::Bounds& texBounds) {
         const cgt::vec3& llf = bounds.getLLF();
         const cgt::vec3& urb = bounds.getURB();

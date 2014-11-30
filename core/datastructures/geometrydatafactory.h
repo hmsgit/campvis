@@ -52,6 +52,22 @@ namespace campvis {
         static FaceGeometry* createQuad(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb);
 
         /**
+         * Creates a MultiIndexedGeometry building an axis-aligned rectangular gird in the YX plane
+         * with the given bounds and texture coordinates. This primitive is useful to display a distorted
+         * texture without noticeable artefacts.
+         * \note    Caller has to take ownership of the returned pointer.
+         * \param   llf       Coordinates of the lower left vertex
+         * \param   urb       Coordinates of the upper right vertex
+         * \param   texLlf    Texture coordinates of the lower left vertex
+         * \param   texUrb    Texture coordinates of the upper right vertex
+         * \param   xSegments Number of segments along x direction
+         * \param   ySegments Number of segments along y direction
+         * \return  A MultiIndexedGeometry building a grid with the given bounds and texture coordinates.
+         */
+        static MultiIndexedGeometry* createGrid(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb,
+                                                int xSegments = 4, int ySegments = 4);
+
+        /**
          * Creates a MeshGeometry building a cube with the given bounds and texture coordinates.
          * \note    Caller has to take ownership of the returned pointer.
          * \param   bounds      coordinates of the cube bounds
