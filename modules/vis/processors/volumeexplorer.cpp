@@ -150,7 +150,7 @@ namespace campvis {
         _sliceRenderer->deinit();
         VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
-        delete _quad;
+        _quad = nullptr;
     }
 
     void VolumeExplorer::updateResult(DataContainer& data) {

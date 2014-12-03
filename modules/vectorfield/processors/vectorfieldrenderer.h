@@ -26,6 +26,7 @@
 #define VECTORFIELDRENDERER_H__
 
 #include <string>
+#include <memory>
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
@@ -125,7 +126,7 @@ namespace campvis {
          */
         void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const cgt::vec3& position, float scale);
 
-        GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
+        std::shared_ptr<GeometryData> _arrowGeometry;		///< Geometry for arrow rendering
         cgt::Shader* _shader;               ///< Shader for arrow rendering
         
         static const std::string loggerCat_;

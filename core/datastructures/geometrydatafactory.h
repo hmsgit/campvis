@@ -34,6 +34,7 @@
 #include "core/datastructures/multiindexedgeometry.h"
 
 #include <vector>
+#include <memory>
 
 namespace campvis {
 
@@ -49,7 +50,7 @@ namespace campvis {
          * \param   texUrb  Texture coordinates of the upper right vertex
          * \return  A FaceGeometry building a quad with the given bounds and texture coordinates.
          */
-        static FaceGeometry* createQuad(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb);
+        static std::unique_ptr<FaceGeometry> createQuad(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb);
 
         /**
          * Creates a MultiIndexedGeometry building an axis-aligned rectangular gird in the YX plane
@@ -64,8 +65,7 @@ namespace campvis {
          * \param   ySegments Number of segments along y direction
          * \return  A MultiIndexedGeometry building a grid with the given bounds and texture coordinates.
          */
-        static MultiIndexedGeometry* createGrid(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb,
-                                                int xSegments = 4, int ySegments = 4);
+        static std::unique_ptr<MultiIndexedGeometry> createGrid(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb, int xSegments = 4, int ySegments = 4);
 
         /**
          * Creates a MeshGeometry building a cube with the given bounds and texture coordinates.
@@ -74,13 +74,13 @@ namespace campvis {
          * \param   texBounds   texture coordinates at the cube bounds
          * \return  A MeshGeometry building a cube with the given bounds and texture coordinates.
          */
-        static MeshGeometry* createCube(const cgt::Bounds& bounds, const cgt::Bounds& texBounds);
+        static std::unique_ptr<MeshGeometry> createCube(const cgt::Bounds& bounds, const cgt::Bounds& texBounds);
 
         /**
          * Creates an MultiIndexedGeometry storing the famous Utah teapot.
          * \return  MultiIndexedGeometry storing the famous Utah teapot.
          */
-        static MultiIndexedGeometry* createTeapot();
+        static std::unique_ptr<MultiIndexedGeometry> createTeapot();
 
         /**
          * Creates an MultiIndexedGeometry storing a unit sphere around the origin.
@@ -89,7 +89,7 @@ namespace campvis {
          * \param   exponents   Exponent for each dimension to define a supersphere (defines the roundness)
          * \return  MultiIndexedGeometry storing a unit sphere around the origin.
          */
-        static MultiIndexedGeometry* createSphere(uint16_t numStacks = 6, uint16_t numSlices = 12, const cgt::vec3& exponents = cgt::vec3(1.f));
+        static std::unique_ptr<MultiIndexedGeometry> createSphere(uint16_t numStacks = 6, uint16_t numSlices = 12, const cgt::vec3& exponents = cgt::vec3(1.f));
 
 
         /**
@@ -100,7 +100,7 @@ namespace campvis {
          * \param	tipRadius	Radius of the bottom of the arrow tip
          * \return  MultiIndexedGeometry storing a unit arrow in Z direction starting from the origin.
          */
-        static MultiIndexedGeometry* createArrow(uint16_t numSlices = 12, float tipLen = 0.35, float cylRadius = 0.05, float tipRadius = 0.15);
+        static std::unique_ptr<MultiIndexedGeometry> createArrow(uint16_t numSlices = 12, float tipLen = 0.35, float cylRadius = 0.05, float tipRadius = 0.15);
     };
 
 }

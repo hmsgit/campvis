@@ -30,6 +30,8 @@
 
 #include "core/coreapi.h"
 
+#include <memory>
+
 namespace campvis {
     class FaceGeometry;
 
@@ -71,8 +73,8 @@ namespace campvis {
         /// Private Constructor, must be called from valid OpenGL context.
         QuadRenderer();
 
-        FaceGeometry* _quad11;  ///< The FaceGeometry that renders the [-1, 1] quad.
-        FaceGeometry* _quad01;  ///< The FaceGeometry that renders the [0, 1] quad.
+        std::unique_ptr<FaceGeometry> _quad11;  ///< The FaceGeometry that renders the [-1, 1] quad.
+        std::unique_ptr<FaceGeometry> _quad01;  ///< The FaceGeometry that renders the [0, 1] quad.
     };
 
 #define QuadRdr cgt::Singleton<campvis::QuadRenderer>::getRef()

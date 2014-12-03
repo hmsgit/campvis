@@ -30,7 +30,7 @@
 
 namespace campvis {
 
-    FaceGeometry* GeometryDataFactory::createQuad(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb) {
+    std::unique_ptr<FaceGeometry> GeometryDataFactory::createQuad(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb) {
         std::vector<cgt::vec3> vertices, texCorods;
 
         vertices.push_back(cgt::vec3(llf.x, llf.y, llf.z));
@@ -43,10 +43,10 @@ namespace campvis {
         texCorods.push_back(cgt::vec3(texUrb.x, texUrb.y, texLlf.z));
         texCorods.push_back(cgt::vec3(texLlf.x, texUrb.y, texLlf.z));
 
-        return new FaceGeometry(vertices, texCorods);
+        return std::unique_ptr<FaceGeometry>(new FaceGeometry(vertices, texCorods));
     }
 
-    MultiIndexedGeometry* GeometryDataFactory::createGrid(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb, int xSegments, int ySegments) {
+    std::unique_ptr<MultiIndexedGeometry> GeometryDataFactory::createGrid(const cgt::vec3& llf, const cgt::vec3& urb, const cgt::vec3& texLlf, const cgt::vec3& texUrb, int xSegments, int ySegments) {
         cgtAssert(xSegments > 0 && ySegments > 1, "Grid must have at least one segment in each direction");
 
         int numVertices = (xSegments + 1) * (ySegments + 1);
@@ -72,7 +72,7 @@ namespace campvis {
             }
         }
 
-        MultiIndexedGeometry* result = new MultiIndexedGeometry(vertices, textureCoordinates, std::vector<cgt::vec4>(), normals);
+        auto result = new MultiIndexedGeometry(vertices, textureCoordinates, std::vector<cgt::vec4>(), normals);
 
         // For each horizontal stripe, construct the indeces for triangle strips
         int verticesPerStrip = (xSegments + 1) * 2;
@@ -86,11 +86,11 @@ namespace campvis {
             result->addPrimitive(indices);
         }
 
-        return result;
+        return std::unique_ptr<MultiIndexedGeometry>(result);
     }
 
 
-    MeshGeometry* GeometryDataFactory::createCube(const cgt::Bounds& bounds, const cgt::Bounds& texBounds) {
+    std::unique_ptr<MeshGeometry> GeometryDataFactory::createCube(const cgt::Bounds& bounds, const cgt::Bounds& texBounds) {
         const cgt::vec3& llf = bounds.getLLF();
         const cgt::vec3& urb = bounds.getURB();
         const cgt::vec3& tLlf = texBounds.getLLF();
@@ -178,10 +178,10 @@ namespace campvis {
         vertices.clear();
         texCoords.clear();
 
-        return new MeshGeometry(faces);
+        return std::unique_ptr<MeshGeometry>(new MeshGeometry(faces));
     }
 
-    MultiIndexedGeometry* GeometryDataFactory::createTeapot() {
+    std::unique_ptr<MultiIndexedGeometry> GeometryDataFactory::createTeapot() {
         std::vector<cgt::vec3> vertices, normals;
         vertices.reserve(Teapot::num_teapot_vertices);
         normals.reserve(Teapot::num_teapot_vertices);
@@ -201,10 +201,10 @@ namespace campvis {
             currentOffset += count + 1;
         }
 
-        return toReturn;
+        return std::unique_ptr<MultiIndexedGeometry>(toReturn);
     }
 
-    MultiIndexedGeometry* GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/, const cgt::vec3& exponents /*= cgt::vec3(1.f)*/) {
+    std::unique_ptr<MultiIndexedGeometry> GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/, const cgt::vec3& exponents /*= cgt::vec3(1.f)*/) {
         cgtAssert(numStacks > 1 && numSlices > 2, "Sphere must have minimum 2 stacks and 3 slices!");
         std::vector<cgt::vec3> vertices;
         std::vector<cgt::vec3> textureCoordinates;
@@ -285,10 +285,10 @@ namespace campvis {
             toReturn->addPrimitive(indices);
         }
 
-        return toReturn;
+        return std::unique_ptr<MultiIndexedGeometry>(toReturn);
     }
 
-    MultiIndexedGeometry* GeometryDataFactory::createArrow(uint16_t numSlices, float tipLen, float cylRadius, float tipRadius) {
+    std::unique_ptr<MultiIndexedGeometry> GeometryDataFactory::createArrow(uint16_t numSlices, float tipLen, float cylRadius, float tipRadius) {
         cgtAssert(numSlices > 2, "Arrow shaft must have minimum 3 slices!");
         cgtAssert(tipRadius > cylRadius, "Tip radius must exceed cyclinder radius (for correct normals)!");
         cgtAssert(tipLen > 0, "Tip length must be between 0 and 1!");
@@ -395,7 +395,7 @@ namespace campvis {
             toReturn->addPrimitive(indices);
         }
 
-        return toReturn;
+        return std::unique_ptr<MultiIndexedGeometry>(toReturn);
     }
 
 }

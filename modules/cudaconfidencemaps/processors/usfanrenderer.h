@@ -26,6 +26,7 @@
 #define USFANRENDERER_H__
 
 #include <string>
+#include <memory>
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
@@ -77,7 +78,7 @@ namespace campvis {
         virtual void updateResult(DataContainer& dataContainer);
 
         cgt::Shader* _shader;
-        MultiIndexedGeometry *_grid;
+        std::unique_ptr<MultiIndexedGeometry> _grid;
 
     private:
         static const std::string loggerCat_;

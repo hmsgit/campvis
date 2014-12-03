@@ -38,8 +38,6 @@ namespace campvis {
     }
 
     QuadRenderer::~QuadRenderer() {
-        delete _quad11;
-        delete _quad01;
     }
 
     void QuadRenderer::renderQuad11(GLenum mode) {

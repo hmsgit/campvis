@@ -45,7 +45,7 @@ namespace campvis {
         , p_halfAngle("HalfAngle", "Fan Half Angle", 45.0f, 1.0f, 90.0f)
         , p_innerRadius("InnerRadius", "Fan Inner Radius", 0.2f, 0.0f, 0.99f)
         , _shader(0)
-        , _grid(0)
+        , _grid(nullptr)
     {
         addProperty(p_inputImage);
         addProperty(p_renderTargetID);
@@ -67,9 +67,8 @@ namespace campvis {
 
     void UsFanRenderer::deinit() {
         ShdrMgr.dispose(_shader);
-        _shader = 0;
-        delete _grid;
-        _grid = 0;
+        _shader = nullptr;
+        _grid = nullptr;
 
         VisualizationProcessor::deinit();
     }
@@ -77,55 +76,59 @@ namespace campvis {
     void UsFanRenderer::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation texture(data, p_inputImage.getValue());
 
+        // Check that the needed resources have been initialized. Error should never happen.
         if (_shader == 0 || _grid == 0) {
             LDEBUG("Shader or Grid are not initialized.");
             return;
         }
 
-        float halfAngle = cgt::deg2rad(p_halfAngle.getValue());
-        float innerRadius = p_innerRadius.getValue();
+        // Only display the fan if there exists a valid input texture
+        if (texture != nullptr) {
+            float halfAngle = cgt::deg2rad(p_halfAngle.getValue());
+            float innerRadius = p_innerRadius.getValue();
 
-        // calculate bounding box of the US fan
-        cgt::vec3 bbCenter = cgt::vec3(0, cos(halfAngle)*innerRadius/2.0f + 0.5, 0.0f);
-        float bbHeight = 1.0f - cos(halfAngle)*innerRadius;
-        float bbWidth = sin(halfAngle) * 2.0f;
+            // calculate bounding box of the US fan
+            cgt::vec3 bbCenter = cgt::vec3(0, cos(halfAngle)*innerRadius/2.0f + 0.5, 0.0f);
+            float bbHeight = 1.0f - cos(halfAngle)*innerRadius;
+            float bbWidth = sin(halfAngle) * 2.0f;
 
-        cgt::vec2 viewportSize = cgt::vec2(getEffectiveViewportSize());
+            cgt::vec2 viewportSize = cgt::vec2(getEffectiveViewportSize());
 
-        // Flip y axis and add a little border
-        cgt::mat4 viewportMatrix = cgt::mat4::createScale(cgt::vec3(1, -1, 1) * 0.95f);
+            // Flip y axis and add a little border
+            cgt::mat4 viewportMatrix = cgt::mat4::createScale(cgt::vec3(1, -1, 1) * 0.95f);
 
-        // Adjust the size of the fan to the size of the viewport 
-        if (viewportSize.y / bbHeight * bbWidth > viewportSize.x) {
-            viewportMatrix *= cgt::mat4::createScale(cgt::vec3(1.0f, viewportSize.x / viewportSize.y, 1.0f) * (1.0f / bbWidth * 2.0f));
-        } else {
-            viewportMatrix *= cgt::mat4::createScale(cgt::vec3(viewportSize.y / viewportSize.x, 1.0f, 1.0f) * (1.0f / bbHeight * 2.0f));
+            // Adjust the size of the fan to the size of the viewport 
+            if (viewportSize.y / bbHeight * bbWidth > viewportSize.x) {
+                viewportMatrix *= cgt::mat4::createScale(cgt::vec3(1.0f, viewportSize.x / viewportSize.y, 1.0f) * (1.0f / bbWidth * 2.0f));
+            } else {
+                viewportMatrix *= cgt::mat4::createScale(cgt::vec3(viewportSize.y / viewportSize.x, 1.0f, 1.0f) * (1.0f / bbHeight * 2.0f));
+            }
+
+            // Move the fan center
+            viewportMatrix *= cgt::mat4::createTranslation(-bbCenter);
+
+            _shader->activate();
+            cgt::TextureUnit textureUnit;
+            textureUnit.activate();
+            if (texture != nullptr)
+                texture->bind(_shader, textureUnit, "_texture", "_textureParams");
+
+            _shader->setUniform("_projectionMatrix", viewportMatrix);
+            _shader->setUniform("halfAngle", halfAngle);
+            _shader->setUniform("innerRadius", innerRadius);
+            _shader->setUniform("isMonochromatic", (texture == nullptr || texture->getParent()->getNumChannels()) == 1);
+
+            FramebufferActivationGuard fag(this);
+            createAndAttachColorTexture();
+
+            glClearColor(0.1, 0.1, 0.1, 0.0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            _grid->render(GL_TRIANGLE_STRIP);
+            _shader->deactivate();
+
+            LGL_ERROR;
+
+            data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
         }
-
-        // Move the fan center
-        viewportMatrix *= cgt::mat4::createTranslation(-bbCenter);
-
-        _shader->activate();
-        cgt::TextureUnit textureUnit;
-        textureUnit.activate();
-        if (texture != nullptr)
-            texture->bind(_shader, textureUnit, "_texture", "_textureParams");
-
-        _shader->setUniform("_projectionMatrix", viewportMatrix);
-        _shader->setUniform("halfAngle", halfAngle);
-        _shader->setUniform("innerRadius", innerRadius);
-        _shader->setUniform("isMonochromatic", (texture == nullptr || texture->getParent()->getNumChannels()) == 1);
-
-        FramebufferActivationGuard fag(this);
-        createAndAttachColorTexture();
-
-        glClearColor(0.1, 0.1, 0.1, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        _grid->render(GL_TRIANGLE_STRIP);
-        _shader->deactivate();
-
-        LGL_ERROR;
-
-        data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
     }
 }
