@@ -116,7 +116,6 @@ namespace campvis {
             _shader->setUniform("_projectionMatrix", viewportMatrix);
             _shader->setUniform("halfAngle", halfAngle);
             _shader->setUniform("innerRadius", innerRadius);
-            _shader->setUniform("isMonochromatic", (texture == nullptr || texture->getParent()->getNumChannels()) == 1);
 
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();

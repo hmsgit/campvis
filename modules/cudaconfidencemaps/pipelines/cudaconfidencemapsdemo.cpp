@@ -73,10 +73,10 @@ namespace campvis {
 
         _usFusion.p_usImageId.setValue("us.igtl.ImageClient");
         _usFusion.p_targetImageID.setValue("us.fusion");
-        //_usFusion.p_targetImageID.addSharedProperty(&_usFanRenderer.p_inputImage);
         _usFusion.p_view.setValue(12);
+        _usFusion.p_renderToTexture.setValue(true);
+        _usFusion.p_targetImageID.addSharedProperty(&_usFanRenderer.p_inputImage);
 
-        _usFanRenderer.p_inputImage.setValue("us.confidence");
         _usFanRenderer.p_renderTargetID.setValue("us.fused_fan");
         _usFanRenderer.p_innerRadius.setValue(120.0f/540.0f);
         _usFanRenderer.p_halfAngle.setValue(37);

@@ -26,7 +26,6 @@
 
 uniform sampler2D _texture;
 uniform TextureParameters2D _textureParams;
-uniform bool isMonochromatic = false; // FIXME: Control from processor
 
 in vec3 ex_TexCoord;
 
@@ -34,7 +33,7 @@ out vec4 out_Color;
 
 void main() {
     vec4 sample = texture(_texture, vec2(ex_TexCoord.x, 1-ex_TexCoord.y));
-    if (isMonochromatic) {  
+    if (_textureParams._numChannels == 1) {  
         out_Color = vec4(sample.rrr, 1);
     } else {
         out_Color = sample;
