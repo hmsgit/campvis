@@ -154,15 +154,17 @@ namespace campvis {
         }
     }
 
-    void AdvancedUsFusion::updateProperties(DataContainer dc) {
+    void AdvancedUsFusion::updateProperties(DataContainer& dc) {
         ScopedTypedData<ImageData> img(dc, p_usImageId.getValue());
 
         p_transferFunction.setImageHandle(img.getDataHandle());
-        const cgt::svec3& imgSize = img->getSize();
-        if (static_cast<cgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
-            p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+        if (img != nullptr) {
+            const cgt::svec3& imgSize = img->getSize();
+            if (static_cast<cgt::svec3::ElemType> (p_sliceNumber.getMaxValue()) != imgSize.z - 1){
+                p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
+            }
+            p_use3DTexture.setValue(img->getDimensionality() == 3);
         }
-        p_use3DTexture.setValue(img->getDimensionality() == 3);
     }
 
     std::string AdvancedUsFusion::generateHeader() const {

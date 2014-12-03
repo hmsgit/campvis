@@ -94,7 +94,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
         /// adapts the range of the p_sliceNumber property to the image
-        virtual void updateProperties(DataContainer dc);
+        virtual void updateProperties(DataContainer& dc);
 
         std::string generateHeader() const;
 
