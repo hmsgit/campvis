@@ -81,6 +81,7 @@ namespace campvis {
         DataNameProperty p_confidenceImageID;
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
+        BoolProperty p_renderToTexture;
         IntProperty p_sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
         TransferFunctionProperty p_confidenceTF;         ///< Transfer function confidence to uncertainty

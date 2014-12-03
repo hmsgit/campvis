@@ -64,6 +64,7 @@ namespace campvis {
         , p_gradientImageID("GradientImageId", "Gradient Input Image", "", DataNameProperty::READ)
         , p_confidenceImageID("ConfidenceImageId", "Confidence Map Input", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
+        , p_renderToTexture("RenderToTexture", "Render to an OpenGL Texture", false)
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
@@ -79,6 +80,7 @@ namespace campvis {
         addProperty(p_gradientImageID);
         addProperty(p_confidenceImageID);
         addProperty(p_blurredScaling);
+        addProperty(p_renderToTexture);
         addProperty(p_targetImageID);
         addProperty(p_sliceNumber);
         addProperty(p_transferFunction);
@@ -132,18 +134,44 @@ namespace campvis {
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
                 p_confidenceTF.getTF()->bind(_shader, tf2Unit, "_confidenceTF", "_confidenceTFParams");
 
-                FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
-                createAndAttachDepthTexture();
+                if (p_renderToTexture.getValue() == true) {
+                    cgt::vec3 size = img->getSize();
+                    cgt::Texture* resultTexture = new cgt::Texture(0, size, GL_RGB, GL_RGBA, GL_UNSIGNED_BYTE, cgt::Texture::LINEAR);
+                    resultTexture->uploadTexture();
 
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                QuadRdr.renderQuad();
+                    _fbo->activate();
+                    glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));
+                    _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, 0);
+                    LGL_ERROR;
 
-                decorateRenderEpilog(_shader);
-                _shader->deactivate();
-                cgt::TextureUnit::setZeroUnit();
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    QuadRdr.renderQuad();
 
-                data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+                    _fbo->detachAll();
+                    _fbo->deactivate();
+                    _shader->deactivate();
+                    ImageData* id = new ImageData(img->getParent()->getDimensionality(), size, 3);
+                    ImageRepresentationGL::create(id, resultTexture);
+                    const ImageMappingInformation& imi = img->getParent()->getMappingInformation();
+                    id->setMappingInformation(img->getParent()->getMappingInformation());
+                    cgt::TextureUnit::setZeroUnit();
+
+                    data.addData(p_targetImageID.getValue(), id);
+                }
+                else {
+                    FramebufferActivationGuard fag(this);
+                    createAndAttachColorTexture();
+                    createAndAttachDepthTexture();
+
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    QuadRdr.renderQuad();
+
+                    decorateRenderEpilog(_shader);
+                    _shader->deactivate();
+                    cgt::TextureUnit::setZeroUnit();
+
+                    data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
+                }
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");
