@@ -103,7 +103,7 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
         return 0;
     }
 
-    int bpp = header[4];
+    size_t bpp = static_cast<size_t>(header[4]);
     bpp /= 8;  // divide by 8 to get the bytes per pixel
 
     GLint format = GL_RGBA;
@@ -128,7 +128,7 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
 
     GLenum dataType = GL_UNSIGNED_BYTE;
 
-    int numBytes = bpp * cgt::hmul(dimensions);
+    size_t numBytes = static_cast<size_t>(bpp * cgt::hmul(dimensions));
     GLubyte* buffer = new GLubyte[numBytes];
 
     if (TGAheader[2] == 2) {
@@ -137,6 +137,7 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
         if (file->read(buffer, numBytes) != numBytes) {
             LERROR("Failed to read uncompressed image! file: " << filename);
             delete file;
+            delete [] buffer;
             return 0;
         }
     } 
@@ -147,7 +148,7 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
         //TODO: error handling
         unsigned char chunk[4];
         unsigned char* at = buffer;
-        for (int bytesDone=0; bytesDone < numBytes; /* nothing here */) {
+        for (size_t bytesDone = 0; bytesDone < numBytes; /* nothing here */) {
             unsigned char packetHead;
             file->read(reinterpret_cast<char*>(&packetHead), 1);
             if (packetHead > 128) {
@@ -175,7 +176,7 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
     // switch r & b
     if (bpp >= 3) {
         GLubyte* at = buffer;
-        while (at - buffer < numBytes) {
+        while (at - buffer < static_cast<ptrdiff_t>(numBytes)) {
             std::swap(at[0], at[2]);
             at += bpp;
         }
@@ -185,6 +186,7 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
     t->uploadTexture(buffer, format, dataType);
     t->setName(filename);
 
+    delete [] buffer;
     return t;
 }
 

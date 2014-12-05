@@ -76,7 +76,6 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            cgt::ivec3 inputSize = img->getSize();
             cgt::ivec3 outputSize = cgt::abs(p_urb.getValue() - p_llf.getValue());
 
             cgt::TextureUnit inputUnit;

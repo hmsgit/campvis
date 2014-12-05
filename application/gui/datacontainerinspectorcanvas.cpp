@@ -285,9 +285,9 @@ namespace campvis {
             const ImageData* id = static_cast<const ImageData*>(_textures[texIndx].getData());
             const cgt::Texture* tex = id->getRepresentation<ImageRepresentationGL>()->getTexture();
             const ImageRepresentationLocal* localRep = id->getRepresentation<ImageRepresentationLocal>();
-            cgt::ivec2 imageSize = id->getSize().xy();
+            cgt::svec2 imageSize = id->getSize().xy();
 
-            cgt::vec2 lookupTexelFloat = cgt::vec2((e->coord() % _quadSize) * imageSize) / cgt::vec2(_quadSize);
+            cgt::vec2 lookupTexelFloat = cgt::vec2((e->coord() % _quadSize) * cgt::ivec2(imageSize)) / cgt::vec2(_quadSize);
 
             // compute transformation matrices
             float renderTargetRatio = static_cast<float>(_quadSize.x) / static_cast<float>(_quadSize.y);
