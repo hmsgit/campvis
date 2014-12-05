@@ -42,6 +42,13 @@
 
 #include "cgt/texturereadertga.h"
 
+#ifdef CGT_HAS_DEVIL
+#include <IL/il.h>
+#include <IL/ilu.h>
+#endif
+
+
+
 namespace cgt {
 
 void init(InitFeature::Features featureset, LogLevel logLevel) {
@@ -65,6 +72,11 @@ void init(InitFeature::Features featureset, LogLevel logLevel) {
 
     if (featureset & InitFeature::FILE_SYSTEM)
         FileSystem::init();
+
+#ifdef CGT_HAS_DEVIL
+    ilInit();
+    iluInit();
+#endif
 }
 
 void deinit() {
