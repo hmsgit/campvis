@@ -35,6 +35,8 @@
 #include <list>
 #include <iostream>
 
+#include <tbb/spin_mutex.h>
+
 #include "cgt/types.h"
 #include "cgt/assert.h"
 #include "cgt/filesystem.h"
@@ -86,6 +88,8 @@ protected:
 
     std::list<std::string> pathList_;
 
+    tbb::spin_mutex mutex_;
+
     void reg(T *ptr, const std::string& filename);
     void increaseUsage(const std::string& filename);
 
@@ -104,6 +108,7 @@ const std::string ResourceManager<T>::loggerCat_("cgt.Manager");
 
 template <class T>
 T* ResourceManager<T>::get(const std::string& filename) {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
     return resourcesByFilename_[filename]->data_;
 }
 
@@ -114,6 +119,8 @@ T* ResourceManager<T>::get(const std::string& filename) {
 
 template <class T>
 void ResourceManager<T>::reg(T* ptr, const std::string& filename) {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
+
     if (cacheResources_ && isLoaded(filename)) {
         Resource* r = resourcesByFilename_[filename];
         r->data_ = ptr;
@@ -131,6 +138,7 @@ void ResourceManager<T>::reg(T* ptr, const std::string& filename) {
 
 template <class T>
 void ResourceManager<T>::increaseUsage(const std::string& filename) {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
     cgtAssert(cacheResources_, "increaseUsage should not be called in non-caching mode!");
     resourcesByFilename_[filename]->usedBy_++;
 }
@@ -156,11 +164,14 @@ ResourceManager<T>::~ResourceManager() {
 
 template <class T>
 bool ResourceManager<T>::isLoaded(const std::string& filename) {
-    return(cacheResources_ && (resourcesByFilename_.find(filename) != resourcesByFilename_.end()));
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
+    return (cacheResources_ && (resourcesByFilename_.find(filename) != resourcesByFilename_.end()));
 }
 
 template <class T>
 void ResourceManager<T>::dispose(T* ptr) {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
+
     if (ptr == 0 || resourcesByPtr_.find(ptr) == resourcesByPtr_.end())
         return;
 
@@ -183,6 +194,8 @@ void ResourceManager<T>::dispose(T* ptr) {
 
 template <class T>
 void ResourceManager<T>::addPath(std::string path) {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
+
     pathList_.push_front(path);
     // remove duplicates
     //TODO: better use std::set<> here
@@ -192,6 +205,8 @@ void ResourceManager<T>::addPath(std::string path) {
 
 template <class T>
 void ResourceManager<T>::removePath(std::string path) {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
+
     std::list<std::string>::iterator it;
     for (it = pathList_.begin(); it != pathList_.end(); ++it) {
         if (*it == path) {
@@ -203,6 +218,7 @@ void ResourceManager<T>::removePath(std::string path) {
 
 template <class T>
 std::string ResourceManager<T>::completePath(std::string filename) {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
     std::string cplFileName = filename;
 
     if(FileSys.exists(filename))
@@ -230,6 +246,8 @@ std::string ResourceManager<T>::completePath(std::string filename) {
 
 template <class T>
 std::vector<std::string> ResourceManager<T>::getFilenames() {
+    tbb::spin_mutex::scoped_lock lock(this->mutex_);
+
     std::vector<std::string> filenames;
     for (typename std::map<std::string, Resource*>::const_iterator iter = resourcesByFilename_.begin();
          iter != resourcesByFilename_.end(); iter++)

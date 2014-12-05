@@ -37,6 +37,7 @@ unsigned short TextureUnit::totalActive_ = 0;
 unsigned short TextureUnit::maxTexUnits_ = 0;
 unsigned short TextureUnit::numKeptUnits_ = 0;
 std::vector<bool> TextureUnit::busyUnits_ = std::vector<bool>();
+tbb::spin_mutex TextureUnit::mutex_ = tbb::spin_mutex();
 
 TextureUnit::TextureUnit(bool keep)
     : number_(0)
@@ -78,6 +79,8 @@ void TextureUnit::setZeroUnit() {
 }
 
 void TextureUnit::cleanup() {
+    tbb::spin_mutex::scoped_lock lock(mutex_);
+
     for (size_t i = 0; i < maxTexUnits_; i++) {
         if (busyUnits_.at(i))
             busyUnits_.at(i) = false;
@@ -96,6 +99,7 @@ unsigned short TextureUnit::numLocalActive() {
 }
 
 void TextureUnit::assignUnit() const {
+    tbb::spin_mutex::scoped_lock lock(mutex_);
     cgtAssert(totalActive_ <= maxTexUnits_, "No more texture units available");
 
     assigned_ = true;
@@ -115,10 +119,14 @@ void TextureUnit::assignUnit() const {
 }
 
 void TextureUnit::init() {
+    tbb::spin_mutex::scoped_lock lock(mutex_);
+    if (initialized_)
+        return;
+
     maxTexUnits_ = GpuCaps.getNumTextureUnits();
     busyUnits_ = std::vector<bool>(maxTexUnits_, false);
-    initialized_ = true;
     numKeptUnits_ = 0;
+    initialized_ = true;
 }
 
 } // namespace

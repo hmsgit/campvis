@@ -30,6 +30,8 @@
 #define CGT_TEXTUREUNIT_H
 
 #include <string>
+
+#include <tbb/spin_mutex.h>
 #include "cgt/cgt_gl.h"
 #include "cgt/shadermanager.h"
 
@@ -72,6 +74,7 @@ protected:
     static unsigned short maxTexUnits_;
     static unsigned short numKeptUnits_;
     static std::vector<bool> busyUnits_;
+    static tbb::spin_mutex mutex_;
 };
 
 } // namespace cgt
