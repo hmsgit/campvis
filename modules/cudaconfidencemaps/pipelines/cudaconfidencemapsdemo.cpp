@@ -25,6 +25,8 @@
 #include "cudaconfidencemapsdemo.h"
 
 #include "core/datastructures/imagedata.h"
+#include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/tfgeometry1d.h"
 
 namespace campvis {
 
@@ -56,6 +58,10 @@ namespace campvis {
         _usIgtlReader.p_receiveTransforms.setValue(false);
         _usIgtlReader.p_receivePositions.setValue(false);
         _usResampler.p_resampleScale.setValue(0.25f);
+        // Set transfer function
+        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 0.5f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
+        _usFusion.p_confidenceTF.replaceTF(tf);
 
         // Create connectors
         _usIgtlReader.p_targetImagePrefix.setValue("us.igtl.");
@@ -76,6 +82,8 @@ namespace campvis {
         _usFusion.p_view.setValue(12);
         _usFusion.p_renderToTexture.setValue(true);
         _usFusion.p_targetImageID.addSharedProperty(&_usFanRenderer.p_inputImage);
+
+
 
         _usFanRenderer.p_renderTargetID.setValue("us.fused_fan");
         _usFanRenderer.p_innerRadius.setValue(120.0f/540.0f);

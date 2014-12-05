@@ -148,7 +148,7 @@ void main() {
                 break;
             case 12:
                 out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
-                vec3 color = hsv2rgb(vec3(_hue, uncertainty, 1));
+                vec3 color = hsv2rgb(vec3(_hue, uncertainty, 0.8));
                 out_Color.xyz = (uncertainty) * color + (1-uncertainty)*out_Color.xyz;
                 break;
         }
