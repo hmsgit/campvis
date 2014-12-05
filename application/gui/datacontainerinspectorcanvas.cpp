@@ -225,7 +225,7 @@ namespace campvis {
             return;
 
         _paintShader->setIgnoreUniformLocationError(true);
-        if (texture->getDimensions().z == 1) {
+        if (texture->getType() == GL_TEXTURE_2D) {
             unit2d.activate();
             texture->bind();
             _paintShader->setUniform("_is3d", false);
@@ -234,7 +234,7 @@ namespace campvis {
             _paintShader->setUniform("_2dTextureParams._sizeRCP", cgt::vec2(1.f) / cgt::vec2(texture->getDimensions().xy()));
             _paintShader->setUniform("_2dTextureParams._numChannels", static_cast<int>(texture->getNumChannels()));
         }
-        else {
+        else if (texture->getType() == GL_TEXTURE_3D) {
             unit3d.activate();
             texture->bind();
             _paintShader->setUniform("_is3d", true);

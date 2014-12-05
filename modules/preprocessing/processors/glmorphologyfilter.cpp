@@ -115,7 +115,7 @@ namespace campvis {
 
                 // put resulting image into DataContainer
                 if (outputTexture != 0) {
-                    ImageData* id = new ImageData(3, img->getSize(), 1);
+                    ImageData* id = new ImageData(3, img->getSize(), img->getParent()->getNumChannels());
                     ImageRepresentationGL::create(id, outputTexture);
                     id->setMappingInformation(img->getParent()->getMappingInformation());
                     data.addData(p_outputImage.getValue(), id);

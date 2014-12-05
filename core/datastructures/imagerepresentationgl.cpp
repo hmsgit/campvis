@@ -52,8 +52,6 @@ namespace campvis {
         , _texture(texture)
     {
         cgtAssert(texture != 0, "Given texture must not be 0.");
-        cgtAssert(parent->getDimensionality() >= 3 || texture->getDimensions().z == 1, "Dimensionality of Parent and texture mismatch!");
-        cgtAssert(parent->getDimensionality() >= 2 || texture->getDimensions().y == 1, "Dimensionality of Parent and texture mismatch!");
         cgtAssert(parent->getNumChannels() == texture->getNumChannels(), "Number of Channels of parent and texture mismatch!");
     }
 
