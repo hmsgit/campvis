@@ -101,40 +101,30 @@ struct ComputeLaplacianData
 	int centralDiagonal;
 	int offsets[9];
 	float gammaList[9];
+
+	std::vector<float> attenuationLUT;
 };
 
-
-static inline float _getAttenuation(int y, int height, float alpha) {
-	return (1 - exp(-alpha * ((float)y / (float)(height-1))));
-}
-
-static inline float _getGradient(const ComputeLaplacianData &data, int idx, int offset)
+static inline float _getWeight(const ComputeLaplacianData &data, int x, int y, int diagonal, bool isUpsideDown)
 {
 	const unsigned char *image = data.image;
-	int y1 = idx / data.width;
-	int y2 = (idx+offset) / data.width;
 
-	float a1 = _getAttenuation(y1, data.height, data.alpha);
-	float a2 = _getAttenuation(y2, data.height, data.alpha);
+	int idx1 = y * data.width + x;
+	int idx2 = idx1 + data.offsets[diagonal];
 
-	return abs(image[idx]*a1/255.0f - image[idx+offset]*a2/255.0f);
-}
+	float attenuation1 = data.attenuationLUT[idx1 / data.width];
+	float attenuation2 = data.attenuationLUT[idx2 / data.width];
 
-static inline float _calculateWeight(float gradient, float beta, float gamma, float scaling)
-{
-	return exp(-beta * (gradient*scaling + gamma));
-}
+	float gradient = abs(image[idx1]*attenuation1/255.0f - image[idx2]*attenuation2/255.0f) * data.gradientScaling;
 
-static inline float _getWeight(const ComputeLaplacianData &data, int x, int y, int diagonal)
-{
-	float gradient = _getGradient(data, y * data.width + x, data.offsets[diagonal]);
-	float weight = _calculateWeight(gradient, data.beta, data.gammaList[diagonal], data.gradientScaling);
+	float weight = exp(-data.beta * (gradient + data.gammaList[diagonal]));
 	return weight + 1e-4;
 }
 
 void CUSP_CM_buildEquationSystem(CuspGPUData &gpudata, const unsigned char* image, int width, int height,
                                  float alpha, float beta, float gamma,
-                                 float gradientScaling)
+                                 float gradientScaling,
+                                 bool isUpsideDown)
 {
 	// Gather all of the options together
 	ComputeLaplacianData data;
@@ -155,38 +145,46 @@ void CUSP_CM_buildEquationSystem(CuspGPUData &gpudata, const unsigned char* imag
 		gpudata.L_h.diagonal_offsets[i] = data.offsets[i];
 	}
 
-	// Reset B
+	// Precompute attenuation tables
+	data.attenuationLUT = std::vector<float>(height);
+	for (int i = 0; i < height; ++i) {
+		float y = (float)i / (float)(height-1);
+		if (isUpsideDown) y = 1 - y;
+		data.attenuationLUT[i] = 1 - exp(-alpha * y);
+	}
+
+	// Initialize B
 	for (int x = 0; x < width * height; ++x) {
-		gpudata.b_h[x] = 0.0f;
-	}
-
-	// Fill in first row of b, which sholud be one
-	for (int x = 0; x < width; ++x) {
-		gpudata.b_h[x] = 1.0f;
-	}
-
-	// Fill in rows of A corresponding to first and last row of the image
-	for (int x = 0; x < width; ++x) {
-		for (int d = 0; d < 9; ++d) {
-			gpudata.L_h.values(x, d) = (d == data.centralDiagonal ? 1.0f : 0.0f);
-			gpudata.L_h.values(width*(height-1) + x, d) = (d == data.centralDiagonal ? 1.0f : 0.0f);
-		}
+		if (x < width)
+			gpudata.b_h[x] = isUpsideDown ? 0.0f : 1.0f;
+		else if (x >= (width*(height-1)))
+			gpudata.b_h[x] = isUpsideDown ? 1.0f : 0.0f;
+		else
+			gpudata.b_h[x] = 0.0f;
 	}
 
 	// Fill in the rest of the matrix
-	for (int y = 1; y < height-1; ++y) {
+	for (int y = 0; y < height; ++y) {
 		for (int x = 0; x < width; ++x) {
 			int idx = y * width + x;
 
 			// Filter off out-of-bounds edges
 			unsigned short filter = 495; // 111 101 111
 
+			// 8 - neighbourhood filter
 			if (x == 0)        filter &= 203; // 011 001 011
 			if (x == width-1)  filter &= 422; // 110 100 110
-			if (y == 1)        filter &=  47; // 000 101 111
-			if (y == height-2) filter &= 488; // 111 101 000
+			if (y == 0)        filter &=  47; // 000 101 111
+			if (y == height-1) filter &= 488; // 111 101 000
+
+			// 4 - neighbourhood filter
+			//if (x == 0)        filter &= 138; // 010 001 010
+			//if (x == width-1)  filter &= 162; // 010 100 010
+			//if (y == 0)        filter &=  42; // 000 101 010
+			//if (y == height-1) filter &= 168; // 010 101 000
 
 			float valueSum = 0.0f;
+			if (y == 0 || y == height - 1) valueSum = 1.0f;
 
 			for (int d = 0; d < 9; ++d) {
 				gpudata.L_h.values(idx, d) = 0;
@@ -194,17 +192,8 @@ void CUSP_CM_buildEquationSystem(CuspGPUData &gpudata, const unsigned char* imag
 				float value = 0.0f;
 				
 				if (((256>>d) & filter) != 0) {
-					value = _getWeight(data, x, y, d);
+					value = _getWeight(data, x, y, d, isUpsideDown);
 					gpudata.L_h.values(idx, d) = -value;
-				} else if(y == 1 || y == height - 2) {
-					unsigned short filter2 = 495; // 111 101 11
-					if (x == 0)        filter2 &= 203; // 011 001 011
-					if (x == width-1)  filter2 &= 422; // 110 100 110
-					if (((256>>d) & filter2) != 0) {
-						value = _getWeight(data, x, y, d);
-
-						if (y == 1) gpudata.b_h[idx] += value;
-					}
 				}
 
 				valueSum += value;
