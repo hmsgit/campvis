@@ -83,9 +83,6 @@ namespace campvis {
     OpenIGTLinkClient::~OpenIGTLinkClient() {
         if (_receiverRunning)
             stopReceiver();
-
-        if (_receiverThread)
-        delete _receiverThread;
     }
 
     void OpenIGTLinkClient::init() {
@@ -507,6 +504,7 @@ namespace campvis {
 
             _receiverRunning = false;
             delete _receiverThread;
+            _receiverThread = nullptr;
         }
         catch (std::exception& e) {
             LERRORC("CAMPVis.modules.base.MatrixProcessor", "Caught exception during _thread.join: " << e.what());
