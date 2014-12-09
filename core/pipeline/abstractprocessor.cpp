@@ -101,6 +101,9 @@ namespace campvis {
     }
 
     void AbstractProcessor::invalidate(int level) {
+        if (level == 0)
+            return;
+
         if (_locked) {
             // TODO: this is not 100% thread-safe - an invalidation might slip through if the processor is unlocked during invalidation
             _queuedInvalidations.push(level);

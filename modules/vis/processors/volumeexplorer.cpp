@@ -104,6 +104,8 @@ namespace campvis {
         p_inputVolume.addSharedProperty(&_raycaster.p_inputVolume);
         p_inputVolume.addSharedProperty(&_sliceRenderer->p_sourceImageID);
 
+        _tcp.p_cameraId.addSharedProperty(&_raycaster.p_camera);
+
         _tcp.setViewportSizeProperty(&p_largeRenderSize);
         _sliceRenderer->setViewportSizeProperty(&p_smallRenderSize);
         _raycaster.setViewportSizeProperty(&p_largeRenderSize);
@@ -227,6 +229,7 @@ namespace campvis {
             p_largeRenderSize.setValue(cgt::ivec2(_viewportSizeProperty->getValue().x - _viewportSizeProperty->getValue().y / 3, _viewportSizeProperty->getValue().y));
         }
         if (prop == &p_outputImage) {
+            _tcp.p_cameraId.setValue(p_outputImage.getValue() + ".camera");
             _raycaster.p_outputImage.setValue(p_outputImage.getValue() + ".raycaster");
             _sliceRenderer->p_geometryID.setValue(p_outputImage.getValue() + ".scribbles");
         }

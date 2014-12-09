@@ -22,18 +22,16 @@
 // 
 // ================================================================================================
 
-#ifndef DEVILIMAGEWRITER_H__
-#define DEVILIMAGEWRITER_H__
-
+#ifndef GLIMAGECROP_H__
+#define GLIMAGECROP_H__
 
 #include <string>
 
-#include "core/pipeline/abstractprocessor.h"
+#include "core/pipeline/abstractprocessordecorator.h"
+#include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/stringproperty.h"
-#include "core/tools/weaklytypedpointer.h"
+#include "core/properties/transferfunctionproperty.h"
+#include "core/properties/numericproperty.h"
 
 namespace cgt {
     class Shader;
@@ -41,45 +39,51 @@ namespace cgt {
 
 namespace campvis {
     /**
-     * Writes render results (RenderData) from the pipeline into an image file using the DevIL library.
-     * DevIL supports most common 2D image formats. 
-     *
-     * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
+     * Quantizes image intensities into a fixed number of bins using the GPU.
      */
-    class DevilImageWriter : public AbstractProcessor {
+    class GlImageCrop : public VisualizationProcessor {
     public:
         /**
-         * Constructs a new DevilImageWriter Processor
+         * Constructs a new GlImageCrop Processor
          **/
-        DevilImageWriter();
+        GlImageCrop(IVec2Property* viewportSizeProp);
 
         /**
          * Destructor
          **/
-        virtual ~DevilImageWriter();
+        virtual ~GlImageCrop();
+
+        /// \see AbstractProcessor::init
+        virtual void init();
+        /// \see AbstractProcessor::deinit
+        virtual void deinit();
 
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "DevilImageWriter"; };
+        virtual const std::string getName() const { return "GlImageCrop"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Writes render results (RenderData) from the pipeline into an image file using the DevIL library."; };
+        virtual const std::string getDescription() const { return "Quantizes image intensities into a fixed number of bins using the GPU."; };
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
-        virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        DataNameProperty p_inputImage;      ///< image ID for image to write
-        StringProperty p_url;               ///< URL for file to write
-        BoolProperty p_writeDepthImage;     ///< Flag whether to save also depth image
+        DataNameProperty p_inputImage;      ///< ID for input volume
+        DataNameProperty p_outputImage;     ///< ID for output gradient volume
+
+        IVec3Property p_llf;                ///< LLF of cropped region
+        IVec3Property p_urb;                ///< URB of cropped region
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
 
-        void writeIlImage(const WeaklyTypedPointer& wtp, const cgt::ivec2& size, const std::string& filename) const;
+        cgt::Shader* _shader;               ///< Shader for resampling
 
         static const std::string loggerCat_;
     };
 
 }
 
-#endif // DEVILIMAGEWRITER_H__
+#endif // GLIMAGECROP_H__

@@ -98,7 +98,7 @@ namespace campvis {
                 // converting from GL representation
                 cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
 
-                if (tester->getTexture()->getDataType() != TypeTraits<BASETYPE, NUMCHANNELS>::glDataType)
+                if (cgt::Texture::calcMatchingDataType(tester->getTexture()->getInternalFormat()) != TypeTraits<BASETYPE, NUMCHANNELS>::glDataType)
                     LDEBUGC("CAMPVis.core.datastructures.GenericLocalConversion", "Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");
 
                 WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerConvert(TypeTraits<BASETYPE, NUMCHANNELS>::glDataType);

@@ -73,14 +73,13 @@ namespace campvis {
 
         if (img != 0) {
             cgt::vec3 originalSize(img->getSize());
-            cgt::ivec3 resampledSize(originalSize * p_resampleScale.getValue());
+            cgt::ivec3 resampledSize(cgt::ceil(originalSize * p_resampleScale.getValue()));
 
             cgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            cgt::Texture* resultTexture = new cgt::Texture(0, resampledSize, img->getTexture()->getFormat(), img->getTexture()->getInternalFormat(), img->getTexture()->getDataType(), cgt::Texture::LINEAR);
-            resultTexture->uploadTexture();
+            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, resampledSize, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
 
             // activate shader and bind textures
             _shader->activate();

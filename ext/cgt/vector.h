@@ -819,7 +819,7 @@ template<class T> inline T minElem(const CGT_BASE_TYPE<T>& v) { \
     for (size_t i = 1; i < v.size; ++i) \
         if(v.elem[i] > v.elem[minElem]) \
             minElem = i; \
-    return minElem; \
+    return v.elem[minElem]; \
 }
 
 #define CGT_VEC_MAX_ELEM \
@@ -828,7 +828,7 @@ template<class T> inline T maxElem(const CGT_BASE_TYPE<T>& v) { \
     for (size_t i = 1; i < v.size; ++i) \
         if(v.elem[i] > v.elem[maxElem]) \
             maxElem = i; \
-    return maxElem; \
+    return v.elem[maxElem]; \
 }
 
 #define CGT_VEC_CLAMP \

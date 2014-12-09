@@ -22,64 +22,51 @@
 // 
 // ================================================================================================
 
-#ifndef DEVILIMAGEWRITER_H__
-#define DEVILIMAGEWRITER_H__
-
-
-#include <string>
+#ifndef DATASERIESSPLITTER_H__
+#define DATASERIESSPLITTER_H__
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/stringproperty.h"
-#include "core/tools/weaklytypedpointer.h"
-
-namespace cgt {
-    class Shader;
-}
+#include "core/properties/numericproperty.h"
 
 namespace campvis {
     /**
-     * Writes render results (RenderData) from the pipeline into an image file using the DevIL library.
-     * DevIL supports most common 2D image formats. 
-     *
-     * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
+     * Extracts a single AbstractData instance from a DataSeries.
      */
-    class DevilImageWriter : public AbstractProcessor {
+    class DataSeriesSplitter : public AbstractProcessor {
     public:
         /**
-         * Constructs a new DevilImageWriter Processor
+         * Constructs a new DataSeriesSplitter Processor
          **/
-        DevilImageWriter();
+        DataSeriesSplitter();
 
         /**
          * Destructor
          **/
-        virtual ~DevilImageWriter();
+        virtual ~DataSeriesSplitter();
 
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "DevilImageWriter"; };
+        virtual const std::string getName() const { return "DataSeriesSplitter"; };
         /// \see AbstractProcessor::getDescription()
-        virtual const std::string getDescription() const { return "Writes render results (RenderData) from the pipeline into an image file using the DevIL library."; };
+        virtual const std::string getDescription() const { return "Extracts a single AbstractData instance from a DataSeries."; };
         /// \see AbstractProcessor::getAuthor()
         virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
         /// \see AbstractProcessor::getProcessorState()
-        virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::STABLE; };
 
-        DataNameProperty p_inputImage;      ///< image ID for image to write
-        StringProperty p_url;               ///< URL for file to write
-        BoolProperty p_writeDepthImage;     ///< Flag whether to save also depth image
+        DataNameProperty p_inputID;         ///< image ID for input data series
+        DataNameProperty p_outputID;        ///< image ID for output data
+        IntProperty p_imageIndex;           ///< index of the image to select
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
-
-        void writeIlImage(const WeaklyTypedPointer& wtp, const cgt::ivec2& size, const std::string& filename) const;
+        /// \see    AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dc);
 
         static const std::string loggerCat_;
     };
 
 }
 
-#endif // DEVILIMAGEWRITER_H__
+#endif // DATASERIESSPLITTER_H__

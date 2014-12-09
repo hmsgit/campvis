@@ -227,9 +227,21 @@ namespace campvis {
 
         // create texture
         GLenum dataType = GL_UNSIGNED_BYTE;
-        _texture = new cgt::Texture(_size, GL_RGBA, dataType, cgt::Texture::LINEAR);
+        GLenum type = GL_TEXTURE_1D;
+        switch (getDimensionality()) {
+            case 1:
+                type = GL_TEXTURE_1D;
+                break;
+            case 2:
+                type = GL_TEXTURE_2D;
+                break;
+            default:
+                cgtAssert(false, "This TF dimensionality is currently not supported - you have to implement it yourself!");
+                break;
+        }
+
+        _texture = new cgt::Texture(type, _size, GL_RGBA8, cgt::Texture::LINEAR);
         _texture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
-        _texture->uploadTexture();
         LGL_ERROR;
 
         // attach texture to FBO

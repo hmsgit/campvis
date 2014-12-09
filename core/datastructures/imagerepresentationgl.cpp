@@ -52,8 +52,6 @@ namespace campvis {
         , _texture(texture)
     {
         cgtAssert(texture != 0, "Given texture must not be 0.");
-        cgtAssert(parent->getDimensionality() >= 3 || texture->getDimensions().z == 1, "Dimensionality of Parent and texture mismatch!");
-        cgtAssert(parent->getDimensionality() >= 2 || texture->getDimensions().y == 1, "Dimensionality of Parent and texture mismatch!");
         cgtAssert(parent->getNumChannels() == texture->getNumChannels(), "Number of Channels of parent and texture mismatch!");
     }
 
@@ -69,46 +67,40 @@ namespace campvis {
     }
 
     ImageRepresentationGL* ImageRepresentationGL::clone(ImageData* newParent) const {
-        GLubyte* data = _texture->downloadTextureToBuffer();
-        WeaklyTypedPointer wtp(WeaklyTypedPointer::baseType(_texture->getDataType()), WeaklyTypedPointer::numChannels(_texture->getFormat()), data);
+        WeaklyTypedPointer wtp = getWeaklyTypedPointerCopy();
         ImageRepresentationGL* toReturn = ImageRepresentationGL::create(newParent, wtp);
-        delete data;
+        delete static_cast<GLubyte*>(wtp._pointer);
         return toReturn;
     }
 
     void ImageRepresentationGL::createTexture(const WeaklyTypedPointer& wtp) {
         cgtAssert(wtp._pointer != 0, "Pointer to image data must not be 0!");
 
-        _texture = new cgt::Texture(reinterpret_cast<GLubyte*>(wtp._pointer), getSize(), wtp.getGlFormat(), wtp.getGlInternalFormat(), wtp.getGlDataType(), cgt::Texture::LINEAR);
-        setupAndUploadTexture(_texture, wtp.isInteger(), wtp.isSigned());
-
-    }
-
-    void ImageRepresentationGL::setupAndUploadTexture(cgt::Texture* texture, bool isInteger, bool isSigned) {
-        // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        switch (getDimensionality()) {
+        GLenum type = GL_TEXTURE_1D;
+        switch (_parent->getDimensionality()) {
             case 1:
-                _texture->setType(GL_TEXTURE_1D);
+                type = GL_TEXTURE_1D;
                 break;
             case 2:
-                _texture->setType(GL_TEXTURE_2D);
+                type = GL_TEXTURE_2D;
                 break;
             case 3:
-                _texture->setType(GL_TEXTURE_3D);
+                type = GL_TEXTURE_3D;
                 break;
             default:
-                cgtAssert(false, "Unsupported dimensionality of image.");
+                cgtAssert(false, "This dimensionality is not supported!");
                 break;
         }
+
+        _texture = new cgt::Texture(type, getSize(), wtp.getGlInternalFormat(), cgt::Texture::LINEAR);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         cgt::TextureUnit tempUnit;
         tempUnit.activate();
         _texture->bind();
 
         // map signed integer types from [-1.0:1.0] to [0.0:1.0] in order to avoid clamping of negative values
-        if (isInteger && isSigned) {
+        if (wtp.isInteger() && wtp.isSigned()) {
             glPixelTransferf(GL_RED_SCALE,   0.5f);
             glPixelTransferf(GL_GREEN_SCALE, 0.5f);
             glPixelTransferf(GL_BLUE_SCALE,  0.5f);
@@ -122,10 +114,10 @@ namespace campvis {
             //_mappingInformation.setRealWorldMapping(LinearMapping<float>(.5f, .5f));
         }
 
-        _texture->uploadTexture();
+        _texture->uploadTexture(reinterpret_cast<GLubyte*>(wtp._pointer), wtp.getGlFormat(), wtp.getGlDataType());
         _texture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
-        if (isInteger && isSigned) {
+        if (wtp.isInteger() && wtp.isSigned()) {
             // restore default
             glPixelTransferf(GL_RED_SCALE,   1.0f);
             glPixelTransferf(GL_GREEN_SCALE, 1.0f);
@@ -137,9 +129,6 @@ namespace campvis {
             glPixelTransferf(GL_BLUE_BIAS,   0.0f);
             glPixelTransferf(GL_ALPHA_BIAS,  0.0f);
         }
-
-        // revoke ownership of local pixel data from the texture
-        _texture->setPixelData(0);
 
         cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
@@ -191,12 +180,7 @@ namespace campvis {
         LGL_ERROR;
     }
 
-    void ImageRepresentationGL::downloadTexture() const {
-        _texture->downloadTexture();
-    }
-
     const cgt::Texture* ImageRepresentationGL::getTexture() const {
-
         return _texture;
     }
 
@@ -204,9 +188,6 @@ namespace campvis {
         size_t sum = 0;
         if (_texture != 0) {
             sum += sizeof(cgt::Texture);
-            if (_texture->getPixelData() != 0) {
-                sum += _texture->getBpp() + _texture->getArraySize();
-            }
         }
 
         return sizeof(*this) + sum;
@@ -216,25 +197,23 @@ namespace campvis {
         return _texture->getSizeOnGPU();
     }
 
-    const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointer() const {
-        if (_texture->getPixelData() == 0) {
-            _texture->downloadTexture();
-        }
-        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), _texture->getPixelData());
-    }
-
     void ImageRepresentationGL::unbind() const {
         _texture->unbind();
     }
 
     const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointerCopy() const {
-        void* ptr = _texture->downloadTextureToBuffer(_texture->getFormat(), _texture->getDataType());
-        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), ptr);
+        GLint format = cgt::Texture::calcMatchingFormat(_texture->getInternalFormat());
+        GLenum dataType = cgt::Texture::calcMatchingDataType(_texture->getInternalFormat());
+        GLubyte* data = _texture->downloadTextureToBuffer(format, dataType);
+
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(dataType), _texture->getNumChannels(), data);
     }
 
     const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointerConvert(GLenum dataType) const {
-        void* ptr = _texture->downloadTextureToBuffer(_texture->getFormat(), dataType);
-        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(dataType), _texture->getNumChannels(), ptr);
+        GLint format = cgt::Texture::calcMatchingFormat(_texture->getInternalFormat());
+        GLubyte* data = _texture->downloadTextureToBuffer(format, dataType);
+
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(dataType), _texture->getNumChannels(), data);
     }
 
 }

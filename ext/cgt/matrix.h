@@ -508,6 +508,26 @@ struct Matrix4 {
         return result;
     }
 
+    /// Returns a vector representing the result when applying the matrix' rotation to a x unit vector.
+    /// (This is equivalent to the first column vector of this matrix)
+    Vector3<T> getXRotation() const {
+        return Vector3<T>(t00, t10, t20);
+    }
+
+    /// Returns a vector representing the result when applying the matrix' rotation to a y unit vector.
+    /// (This is equivalent to the second column vector of this matrix)
+    Vector3<T> getYRotation() const {
+        return Vector3<T>(t01, t11, t21);
+    }
+
+    /// Returns a vector representing the result when applying the matrix' rotation to a z unit vector.
+    /// (This is equivalent to the third column vector of this matrix)
+    Vector3<T> getZRotation() const {
+        return Vector3<T>(t02, t12, t22);
+    }
+
+
+
     /// Returns a vector representing the scaling applied to unit vectors by this matrix.
     Vector3<T> getScalingPart() const {
         Vector3<T> result(T(0));
@@ -516,7 +536,13 @@ struct Matrix4 {
         result.elem[2] = length(Vector3<T>(t02, t12, t22));
         return result;
     }
-/*
+
+    /// Returns a vector representing the translational part of this matrix.
+    Vector3<T> getTranslationPart() const {
+        return Vector3<T>(t03, t13, t23);
+    }
+
+    /*
     create special matrices
 */
     static const Matrix4<T> zero;
@@ -694,9 +720,9 @@ typedef Matrix2f        mat2;
 typedef Matrix3f        mat3;
 typedef Matrix4f        mat4;
 
-typedef Matrix2f        dmat2;
-typedef Matrix3f        dmat3;
-typedef Matrix4f        dmat4;
+typedef Matrix2d        dmat2;
+typedef Matrix3d        dmat3;
+typedef Matrix4d        dmat4;
 
 #ifdef DLL_TEMPLATE_INST
 template struct CGT_API Matrix2<float>;

@@ -30,7 +30,6 @@
 #include "cgt/logmanager.h"
 #include "cgt/filesystem.h"
 #include "cgt/shadermanager.h"
-#include "cgt/texturereaderdevil.h"
 #include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"

@@ -10,6 +10,7 @@
 
 %{
 #include "core/datastructures/abstractdata.h"
+#include "core/datastructures/dataseries.h"
 #include "core/datastructures/imagedata.h"
 #include "core/properties/allproperties.h"
 #include "core/pipeline/abstractprocessor.h"
@@ -251,7 +252,39 @@ namespace campvis {
         AbstractData();
         virtual ~AbstractData();
 
+        virtual size_t getLocalMemoryFootprint() const = 0;
+        virtual size_t getVideoMemoryFootprint() const = 0;
         virtual AbstractData* clone() const = 0;
+    };
+	
+    /* DataHandle */
+
+    class DataHandle {
+    public:
+        explicit DataHandle(AbstractData* data = 0);
+        DataHandle(const DataHandle& rhs);
+        DataHandle& operator=(const DataHandle& rhs);
+        virtual ~DataHandle();
+
+        const AbstractData* getData() const;
+    };
+
+    /* DataSeries */
+
+    class DataSeries : public AbstractData {
+    public:
+        DataSeries();
+        virtual ~DataSeries();
+        virtual DataSeries* clone() const;
+        
+        void addData(AbstractData* data);
+        void addData(DataHandle dh);
+
+        size_t getNumDatas() const;
+        DataHandle getData(size_t index) const;
+
+    protected:
+        std::vector<DataHandle> _data;    ///< the images of this series
     };
 
     /* ImageData */
@@ -267,18 +300,6 @@ namespace campvis {
 
     /* Downcast the return value of DataHandle::getData to appropriate subclass */
     %factory(AbstractData* campvis::DataHandle::getData, campvis::ImageData);
-
-    /* DataHandle */
-
-    class DataHandle {
-    public:
-        explicit DataHandle(AbstractData* data = 0);
-        DataHandle(const DataHandle& rhs);
-        DataHandle& operator=(const DataHandle& rhs);
-        virtual ~DataHandle();
-
-        const AbstractData* getData() const;
-    };
 
     /* DataContainer */
 

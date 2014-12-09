@@ -62,16 +62,18 @@ protected:
 
         // download texture
         const cgt::Texture* tex = _glRep->getTexture();
-        const_cast<cgt::Texture*>(tex)->downloadTexture();
+        GLubyte* buffer = tex->downloadTextureToBuffer(GL_RED, GL_UNSIGNED_SHORT);
+        uint16_t* voxels = reinterpret_cast<uint16_t*>(buffer);
 
         // compare both representations voxel-wise
         for (size_t i = 0; i < _image->getNumElements(); ++i) {
             uint16_t localVoxel = _ushortRep->getElement(i);
-            uint16_t glVoxel = tex->texel<uint16_t>(_image->indexToPosition(i));
+            uint16_t glVoxel = voxels[i];
 
             EXPECT_EQ(localVoxel, glVoxel);
         }
 
+        delete [] buffer;
     }
 
     void convertLocalGl() {

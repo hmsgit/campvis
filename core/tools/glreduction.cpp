@@ -119,8 +119,7 @@ namespace campvis {
         // create temporary textures
         cgt::Texture* tempTextures[2];
         for (size_t i = 0; i < 2; ++i) {
-            tempTextures[i] = new cgt::Texture(0, cgt::ivec3(texSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, cgt::Texture::NEAREST);
-            tempTextures[i]->uploadTexture();
+            tempTextures[i] = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(texSize, 1), GL_RGBA32F, cgt::Texture::NEAREST);
             tempTextures[i]->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
         }
 
@@ -184,7 +183,7 @@ namespace campvis {
         }
 
         // read back stuff
-        GLenum readBackFormat = outputTex->getFormat();
+        GLenum readBackFormat = cgt::Texture::calcMatchingFormat(outputTex->getInternalFormat());
         size_t channels = outputTex->getNumChannels();
         toReturn.resize(channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
