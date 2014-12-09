@@ -17,9 +17,10 @@ public:
 
     virtual const float* getSolution(int &width, int &height) const;
 
-private:
     // Input image data
     int width, height;
+    
+private:
 
     // Matrices and Vectors
     CuspGPUData* gpuData;

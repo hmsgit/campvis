@@ -94,6 +94,7 @@ namespace campvis {
 
         
     protected:
+        void resetSolutionVector();
 
         CuspConfidenceMapSolver _solver;
         

@@ -64,10 +64,13 @@ namespace campvis {
     CudaConfidenceMapsSolver::~CudaConfidenceMapsSolver() { }
 
     void CudaConfidenceMapsSolver::init() {
-        //CUSP_CM_initCuda();
+        p_resetResult.s_clicked.connect(this, &CudaConfidenceMapsSolver::resetSolutionVector);
+        resetSolutionVector();
     }
 
-    void CudaConfidenceMapsSolver::deinit() { }
+    void CudaConfidenceMapsSolver::deinit() {
+        p_resetResult.s_clicked.disconnect(this);
+    }
 
     void CudaConfidenceMapsSolver::updateResult(DataContainer& data) {
 
@@ -101,4 +104,17 @@ namespace campvis {
     }
 
     void CudaConfidenceMapsSolver::updateProperties(DataContainer& dataContainer) { }
+
+    void CudaConfidenceMapsSolver::resetSolutionVector() {
+        // Create a linear gradient image of the same size as the input image
+        size_t elementCount = _solver.width * _solver.height;
+        std::vector<float> gradient(elementCount);
+
+        for(size_t i = 0; i < elementCount; ++i) {
+            float value = static_cast<float>(i / _solver.width) / static_cast<float>(_solver.height-1);
+            gradient[i] = value;
+        }
+
+        _solver.setInitialSolution(gradient);
+    }
 }
