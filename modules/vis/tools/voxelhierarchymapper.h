@@ -106,7 +106,7 @@ namespace campvis {
         cgt::Texture* _xorBitmaskTexture;           ///< Texture holding the 128x128 possible combinations of uvec4 bitmasks
         cgt::Texture* _hierarchyTexture;            ///< The OpenGL texture storing the voxel hierarchy
 
-        std::shared_ptr<FaceGeometry> _quad;
+        std::unique_ptr<FaceGeometry> _quad;
 
 
         static std::string loggerCat_;

@@ -215,7 +215,7 @@ namespace campvis {
         tbb::mutex _localMutex;                     ///< Mutex protecting the local members
 
         cgt::Shader* _paintShader;                  ///< GLSL shader for rendering the textures
-        std::shared_ptr<FaceGeometry> _quad;       ///< Quad used for rendering
+        std::unique_ptr<FaceGeometry> _quad;        ///< Quad used for rendering
 
         cgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
         cgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview
