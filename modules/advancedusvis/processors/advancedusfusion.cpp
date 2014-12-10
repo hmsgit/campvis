@@ -136,8 +136,7 @@ namespace campvis {
 
                 if (p_renderToTexture.getValue() == true) {
                     cgt::vec3 size = img->getSize();
-                    cgt::Texture* resultTexture = new cgt::Texture(0, size, GL_RGB, GL_RGBA, GL_UNSIGNED_BYTE, cgt::Texture::LINEAR);
-                    resultTexture->uploadTexture();
+                    cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_2D, size, GL_RGB8, cgt::Texture::LINEAR);
 
                     _fbo->activate();
                     glViewport(0, 0, static_cast<GLsizei>(size.x), static_cast<GLsizei>(size.y));

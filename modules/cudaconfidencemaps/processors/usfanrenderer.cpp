@@ -117,6 +117,9 @@ namespace campvis {
             _shader->setUniform("halfAngle", halfAngle);
             _shader->setUniform("innerRadius", innerRadius);
 
+            // Set wrapping mode to mirror, in order to avoid artefacts at the edges of the fan
+            const_cast<cgt::Texture*>(texture->getTexture())->setWrapping(cgt::Texture::MIRRORED_REPEAT);
+
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
 
