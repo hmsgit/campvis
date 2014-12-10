@@ -39,21 +39,19 @@ namespace campvis {
     class TransferFunctionPropertyLua : public AbstractPropertyLua {
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
+         * Creates a new Lua Property for the property \a property.
          * \param   property        The property the widget shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          */
-        TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer = nullptr);
+        TransferFunctionPropertyLua(TransferFunctionProperty* property);
 
         /**
          * Destructor
          */
         virtual ~TransferFunctionPropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
 
     private:
-//        AbstractTransferFunctionLua* _editor;    ///< Transfer function editor
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

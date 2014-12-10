@@ -37,28 +37,26 @@ namespace campvis {
     /**
      * Abstract base class for property luas.
      */
-    class AbstractPropertyLua : public sigslot::has_slots {
+    class AbstractPropertyLua {
     public:
         /**
-         * Creates a new PropertyWidget for the property \a property.
+         * Creates a new Lua Property for the property \a property.
          *
          * If displayBoxed is true, the lua is displayed vertically in a QGroupBox.
          *
          * \param   property        The property the lua shall handle.
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
          */
-        AbstractPropertyLua(AbstractProperty* property, DataContainer* dataContainer = nullptr);
+        AbstractPropertyLua(AbstractProperty* property);
 
         /**
          * Destructor
          */
         virtual ~AbstractPropertyLua();
     public:
-        virtual std::string getLuaScript(std::string propNamePrefix, std::string luaProc) = 0;
+        virtual std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc) = 0;
 
     protected:
         AbstractProperty* _property;    ///< The property this lua handles
-        DataContainer* _dataContainer;  ///< DataContainer to use (e.g. to populate GUI), may be 0!
     };
 }
 

@@ -28,14 +28,14 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    DataNamePropertyLua::DataNamePropertyLua(DataNameProperty* property, DataContainer* dc)
-        : AbstractPropertyLua(property, dc)
+    DataNamePropertyLua::DataNamePropertyLua(DataNameProperty* property)
+        : AbstractPropertyLua(property)
     {
     }
 
     DataNamePropertyLua::~DataNamePropertyLua() {
     }
-    std::string DataNamePropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string DataNamePropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         const std::string value = static_cast<DataNameProperty*>(_property)->getValue();
         std::string ret = "";
         ret += luaProc;

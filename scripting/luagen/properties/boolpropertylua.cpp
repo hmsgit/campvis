@@ -26,15 +26,15 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    BoolPropertyLua::BoolPropertyLua(BoolProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, dataContainer)
+    BoolPropertyLua::BoolPropertyLua(BoolProperty* property)
+        : AbstractPropertyLua(property)
     {
     }
 
     BoolPropertyLua::~BoolPropertyLua() {
     }
 
-    std::string BoolPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string BoolPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         std::string ret = "";
         ret += luaProc;
         ret += "getNestedProperty(\"" + propNamePrefix +_property->getName() + "\"):setValue(" 

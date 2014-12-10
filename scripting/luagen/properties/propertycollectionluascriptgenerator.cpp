@@ -22,7 +22,7 @@
 // 
 // ================================================================================================
 
-#include "propertycollectionlua.h"
+#include "propertycollectionluascriptgenerator.h"
 
 #include "abstractpropertylua.h"
 #include "propertyluafactory.h"
@@ -35,12 +35,11 @@
 namespace campvis {
 
 
-    PropertyCollectionLua::PropertyCollectionLua(HasPropertyCollection* propertyCollection, DataContainer* dc)
-        : AbstractPropertyLua(nullptr, dc)
+    PropertyCollectionLuaScriptGenerator::PropertyCollectionLuaScriptGenerator(HasPropertyCollection* propertyCollection)
+        : AbstractPropertyLua(nullptr)
         , _propCollection(propertyCollection)
     {
         _propCollection = propertyCollection;
-        _dataContainer = dc;
 
         // create widgets for the new PropertyCollection
         if (propertyCollection != 0) {
@@ -50,14 +49,13 @@ namespace campvis {
         }
     }
 
-    PropertyCollectionLua::~PropertyCollectionLua() {
+    PropertyCollectionLuaScriptGenerator::~PropertyCollectionLuaScriptGenerator() {
     }
 
-    void PropertyCollectionLua::updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc) {
+    void PropertyCollectionLuaScriptGenerator::updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc) {
         _propCollection = propertyCollection;
-        _dataContainer = dc;
 
-        // create widgets for the new PropertyCollection
+        // create lua script for the new PropertyCollection
         if (propertyCollection != 0) {
             _luaMap.clear();
             for (std::vector<AbstractProperty*>::const_iterator it = propertyCollection->getProperties().begin(); it != propertyCollection->getProperties().end(); ++it) {
@@ -66,7 +64,7 @@ namespace campvis {
         }
     }
 
-    std::string PropertyCollectionLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string PropertyCollectionLuaScriptGenerator::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         std::string ret = "";
         for (std::map<AbstractProperty*, AbstractPropertyLua*>::iterator it = _luaMap.begin(); it != _luaMap.end(); ++it) {
             ret +=  it->second->getLuaScript(propNamePrefix, luaProc) + "\n";
@@ -74,8 +72,8 @@ namespace campvis {
         return ret;
     }
 
-    void PropertyCollectionLua::addProperty(AbstractProperty* prop) {
-        AbstractPropertyLua* propWidget = PropertyLuaFactory::getRef().createPropertyLua(prop, _dataContainer);
+    void PropertyCollectionLuaScriptGenerator::addProperty(AbstractProperty* prop) {
+        AbstractPropertyLua* propWidget = PropertyLuaFactory::getRef().createPropertyLua(prop);
         if (propWidget == 0) {
             return;
         }

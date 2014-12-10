@@ -33,18 +33,14 @@
 #include "core/classification/tfgeometry2d.h"
 
 namespace campvis {
-    TransferFunctionPropertyLua::TransferFunctionPropertyLua(TransferFunctionProperty* property, DataContainer* dataContainer /*= nullptr*/)
-        : AbstractPropertyLua(property, dataContainer)
-        //, _editor(0)
-    {
-        //_editor = TransferFunctionLuaFactory::createTransferFunctionLua(property);
+    TransferFunctionPropertyLua::TransferFunctionPropertyLua(TransferFunctionProperty* property)
+        : AbstractPropertyLua(property)     {
     }
 
     TransferFunctionPropertyLua::~TransferFunctionPropertyLua() {
-        //delete _editor;
     }
 
-    std::string TransferFunctionPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string TransferFunctionPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         AbstractTransferFunction* tf = prop->getTF();
         const cgt::vec2& domain = tf->getIntensityDomain();
@@ -73,7 +69,7 @@ namespace campvis {
                 +", cgt.vec2("+StringUtils::toString((float)domain.x) +", " + StringUtils::toString((float)domain.y) + "))\n";
 
             const std::vector<TFGeometry1D*>& _geometries = tester->getGeometries();
-            for (int i = 0; i < _geometries.size(); i++) {
+            for (size_t i = 0; i < _geometries.size(); i++) {
                 std::vector<TFGeometry1D::KeyPoint>& kp = _geometries[i]->getKeyPoints();
                 cgtAssert(kp.size() >= 2, "There should be at least two key points");
                 float x = kp[0]._position;
@@ -95,7 +91,7 @@ namespace campvis {
                     + StringUtils::toString((float)rc.b) + ", "
                     + StringUtils::toString((float)rc.a) + "))\n";
 
-                for (int i = 2; i < kp.size(); i++) {
+                for (size_t i = 2; i < kp.size(); i++) {
                     ret += "geometry:addKeyPoint(" + StringUtils::toString(kp[i]._position)
                         + ", cgt.col4(" + StringUtils::toString((float)kp[i]._color.r) + ", "
                         + StringUtils::toString((float)kp[i]._color.g) + ", "
@@ -109,13 +105,12 @@ namespace campvis {
 
         if (Geometry2DTransferFunction* tester = dynamic_cast<Geometry2DTransferFunction*>(tf)) {
             //TODO: fix me when 2D geometry is fully implemented
-            //FIXME: things to do
-            cgtAssert(1 != 1, "Fix Geometry2DTransferFunction lua scripting first");
+            cgtAssert(false, "Fix Geometry2DTransferFunction lua scripting first");
             ret += "tf = campvis.Geometry2DTransferFunction(" + StringUtils::toString(tf->getSize().x)
                 +", cgt.vec2("+StringUtils::toString(domain.x) +", " + StringUtils::toString(domain.y) + "))\n";
 
             const std::vector<TFGeometry2D*>& _geometries = tester->getGeometries();
-            for (int i = 0; i < _geometries.size(); i++) {
+            for (size_t i = 0; i < _geometries.size(); i++) {
                 std::vector<TFGeometry2D::KeyPoint>& kp = _geometries[i]->getKeyPoints();
                 cgtAssert(kp.size() >= 4, "There should be at least four key points");
                 cgt::vec2 ll = kp[0]._position;

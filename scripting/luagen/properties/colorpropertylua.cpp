@@ -27,15 +27,15 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    ColorPropertyLua::ColorPropertyLua(ColorProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, dataContainer)
+    ColorPropertyLua::ColorPropertyLua(ColorProperty* property)
+        : AbstractPropertyLua(property)
     {
     }
 
     ColorPropertyLua::~ColorPropertyLua() {
     }
 
-    std::string ColorPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string ColorPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         cgt::vec4 value = static_cast<ColorProperty*>(_property)->getValue();
         std::string ret = "";
         ret += luaProc;

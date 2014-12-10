@@ -33,8 +33,6 @@
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/properties/propertycollectionwidget.h"
 
-#include "scripting/luagen/properties/propertycollectionlua.h"
-
 #include <QLabel>
 #include <QWidget>
 #include <QVBoxLayout>

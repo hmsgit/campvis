@@ -38,16 +38,15 @@ namespace campvis {
         /**
          * Creates a new PropertyLua for the property \a property.
          * \param   property        The property the lua shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          */
-        StringPropertyLua(StringProperty* property, DataContainer* dataContainer = nullptr);
+        StringPropertyLua(StringProperty* property);
 
         /**
          * Destructor
          */
         virtual ~StringPropertyLua();
 
-        virtual std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        virtual std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

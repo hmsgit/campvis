@@ -69,17 +69,17 @@ namespace campvis {
         return _propertyWidgetMap.size() + _fallbackCreatorMap.size();
     }
 
-    AbstractPropertyLua* PropertyLuaFactory::createPropertyLua(AbstractProperty* prop, DataContainer* dc /*= 0*/) {
+    AbstractPropertyLua* PropertyLuaFactory::createPropertyLua(AbstractProperty* prop) {
         // look if we find a direct a direct match
         PropertyLuaMapType::iterator it = _propertyWidgetMap.find(std::type_index(typeid(*prop)));
         if (it != _propertyWidgetMap.end()) {
-            return it->second(prop, dc);
+            return it->second(prop);
         }
 
         // otherwise we have to do this kind of slow search
         for (std::multimap<int, FallbackPropertyLuaCreateFunctionPointer>::iterator it = _fallbackCreatorMap.begin(); it != _fallbackCreatorMap.end(); ++it) {
             // let each registered widget try to create a widget for the property
-            AbstractPropertyLua* toReturn = it->second(prop, dc);
+            AbstractPropertyLua* toReturn = it->second(prop);
             if (toReturn != nullptr)
                 return toReturn;
         }

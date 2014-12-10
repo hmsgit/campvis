@@ -27,19 +27,19 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    OptionPropertyLua::OptionPropertyLua(AbstractOptionProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, dataContainer)
+    OptionPropertyLua::OptionPropertyLua(AbstractOptionProperty* property)
+        : AbstractPropertyLua(property)
     {
     }
 
     OptionPropertyLua::~OptionPropertyLua() {
     }
 
-    std::string OptionPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string OptionPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         std::string ret = "";
         ret += luaProc;
         ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 
-            + StringUtils::toString( static_cast<AbstractOptionProperty*>(_property)->getValue() ) + ")";
+            + StringUtils::toString(static_cast<AbstractOptionProperty*>(_property)->getValue() ) + ")";
         return ret;
     }
 

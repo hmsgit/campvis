@@ -26,8 +26,8 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    FloatPropertyLua::FloatPropertyLua(FloatProperty* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, dataContainer)
+    FloatPropertyLua::FloatPropertyLua(FloatProperty* property)
+        : AbstractPropertyLua(property)
     {
     }
 
@@ -35,7 +35,7 @@ namespace campvis {
         FloatProperty* property = static_cast<FloatProperty*>(_property);
     }
 
-    std::string FloatPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string FloatPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         std::string ret = "";
         ret += luaProc;
         ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 

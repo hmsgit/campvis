@@ -40,16 +40,15 @@ namespace campvis {
         /**
          * Creates a new FloatPropertyLua for the property \a property.
          * \param   property    The property the lua shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          */
-        ColorPropertyLua(ColorProperty* property, DataContainer* dataContainer);
+        ColorPropertyLua(ColorProperty* property);
 
         /**
          * Destructor
          */
         virtual ~ColorPropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
     }; 
 
 // ================================================================================================

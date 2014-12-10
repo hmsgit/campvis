@@ -26,9 +26,8 @@
 #include "core/properties/abstractproperty.h"
 
 namespace campvis {
-    AbstractPropertyLua::AbstractPropertyLua(AbstractProperty* property, DataContainer* dataContainer)
+    AbstractPropertyLua::AbstractPropertyLua(AbstractProperty* property)
         : _property(property)
-        , _dataContainer(dataContainer)
     {
     }
 

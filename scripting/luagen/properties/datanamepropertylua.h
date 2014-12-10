@@ -45,16 +45,15 @@ namespace campvis {
         /**
          * Creates a new PropertyLua for the property \a property.
          * \param   property    The property the lua shall handle
-         * \param   dc          DataContainer this property uses to populate the combo box (may be 0).
          */
-        DataNamePropertyLua(DataNameProperty* property, DataContainer* dc);
+        DataNamePropertyLua(DataNameProperty* property);
 
         /**
          * Destructor
          */
         virtual ~DataNamePropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

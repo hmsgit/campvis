@@ -151,9 +151,8 @@ namespace campvis {
     }
 
     void TFGeometry1D::addKeyPoint( float position, const cgt::col4& color ) {
-        TFGeometry1D::KeyPoint kp(position, cgt::col4(255));
+        TFGeometry1D::KeyPoint kp(position, color);
         std::vector<TFGeometry1D::KeyPoint>::iterator lb = std::upper_bound(_keyPoints.begin(), _keyPoints.end(), kp);
-        kp._color = color;  // Check implementation of upper_bound to set this in constructor
         _keyPoints.insert(lb, kp);
     }
 

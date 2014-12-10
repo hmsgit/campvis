@@ -27,18 +27,17 @@
 #include "core/tools/stringutils.h"
 
 namespace campvis {
-    MetaPropertyLua::MetaPropertyLua(MetaProperty* property, DataContainer* dc)
-        : PropertyCollectionLua(property, dc)
+    MetaPropertyLua::MetaPropertyLua(MetaProperty* property)
+        : PropertyCollectionLuaScriptGenerator(property)
     {
-        //_pcl = static_cast<PropertyCollectionLua*> (this);
-        _xproperty = property;
+        _property = property;
     }
 
     MetaPropertyLua::~MetaPropertyLua() {
     }
 
-    std::string MetaPropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
-        return PropertyCollectionLua::getLuaScript(propNamePrefix+_xproperty->getName()+"::", luaProc);
+    std::string MetaPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+        return PropertyCollectionLuaScriptGenerator::getLuaScript(propNamePrefix + _property->getName() + "::", luaProc);
     }
 
 

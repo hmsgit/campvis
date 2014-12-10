@@ -135,12 +135,18 @@ namespace campvis {
          * \return  _options[_value]
          */
         const GenericOption<T>& getOption() const;
-
+        
         /**
          * Returns the value of the currently selected option.
          * \return  _options[_value]._value
          */
         T getOptionValue() const;
+
+        /**
+         * Returns the id of the currently selected option.
+         * \return  _options[_value]._id
+         */
+        std::string& getOptionId() const;
 
 
         /**
@@ -243,6 +249,11 @@ namespace campvis {
     template<typename T>
     T campvis::GenericOptionProperty<T>::getOptionValue() const {
         return _options[_value]._value;
+    }
+
+    template<typename T>
+    std::string& campvis::GenericOptionProperty<T>::getOptionId() const {
+        return _options[_value]._id;
     }
 
     template<typename T>

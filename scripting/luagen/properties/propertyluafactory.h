@@ -43,8 +43,8 @@ namespace campvis {
     class DataContainer;
 
     /**
-     * Factory for creating PropertyWidgets depending on the Property type.
-     * Using some template-magic, PropertyLuaFactory is able to register PropertyWidgets during static 
+     * Factory for creating Lua Property depending on the Property type.
+     * Using some template-magic, PropertyLuaFactory is able to register Lua Property during static 
      * initialization in cooperation with the PropertyLuaRegistrar.
      * 
      * \note    PropertyLuaFactory is a thread-safe lazy-instantiated singleton.
@@ -52,9 +52,9 @@ namespace campvis {
     class PropertyLuaFactory {
     public:
         /// Typedef for a function pointer to create a PropertyLua if you know exactly its type.
-        typedef AbstractPropertyLua* (*PropertyLuaCreateFunctionPointer) (AbstractProperty*, DataContainer*);
+        typedef AbstractPropertyLua* (*PropertyLuaCreateFunctionPointer) (AbstractProperty*);
         /// Typedef for a function pointer to create a PropertyLua using dynamic_casts as a fallback solution
-        typedef AbstractPropertyLua* (*FallbackPropertyLuaCreateFunctionPointer) (AbstractProperty*, DataContainer*);
+        typedef AbstractPropertyLua* (*FallbackPropertyLuaCreateFunctionPointer) (AbstractProperty*);
 
         /**
          * Returns a reference to the PipelineFactory singleton.
@@ -86,7 +86,7 @@ namespace campvis {
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
          * \return  The created property lua for the property - nullptr, if there was no matching lua found.
          */
-        AbstractPropertyLua* createPropertyLua(AbstractProperty* property, DataContainer* dataContainer = nullptr);
+        AbstractPropertyLua* createPropertyLua(AbstractProperty* property);
 
     private:
         mutable tbb::spin_mutex _mutex;                         ///< Mutex protecting the singleton during initialization
@@ -120,9 +120,9 @@ namespace campvis {
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
          * \return  The newly created property lua.
          */
-        static AbstractPropertyLua* create(AbstractProperty* property, DataContainer* dc = nullptr) {
+        static AbstractPropertyLua* create(AbstractProperty* property) {
             cgtAssert(dynamic_cast<PropertyType*>(property) != nullptr, "Incompatible types - this should not happen!");
-            return new PropertyLuaType(static_cast<PropertyType*>(property), dc);
+            return new PropertyLuaType(static_cast<PropertyType*>(property));
         }
 
         /**
@@ -132,9 +132,9 @@ namespace campvis {
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr. However, some derived classed might need a valid pointer here!
          * \return  The newly created property lua, may be nullptr in case the types do not match.
          */
-        static AbstractPropertyLua* tryCreate(AbstractProperty* property, DataContainer* dc = nullptr) {
+        static AbstractPropertyLua* tryCreate(AbstractProperty* property) {
             if (PropertyType* tester = dynamic_cast<PropertyType*>(property))
-                return new PropertyLuaType(tester, dc);
+                return new PropertyLuaType(tester);
 
             return nullptr;
         }

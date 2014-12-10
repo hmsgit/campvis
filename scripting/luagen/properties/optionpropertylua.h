@@ -33,7 +33,7 @@ namespace campvis {
     class AbstractOptionProperty;
 
     /**
-     * Lua generator for a IntProperty
+     * Lua generator for a OptionProperty
      */
     class OptionPropertyLua : public AbstractPropertyLua {
 
@@ -41,16 +41,15 @@ namespace campvis {
         /**
          * Creates a new OptionPropertyLua for the property \a property.
          * \param   property        The property the lua shall handle
-         * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          */
-        OptionPropertyLua(AbstractOptionProperty* property, DataContainer* dataContainer = nullptr);
+        OptionPropertyLua(AbstractOptionProperty* property);
 
         /**
          * Destructor
          */
         virtual ~OptionPropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

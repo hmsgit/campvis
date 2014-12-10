@@ -43,7 +43,7 @@
 
 #include <fstream>
 
-#include "scripting/luagen/properties/propertycollectionlua.h"
+#include "scripting/luagen/properties/propertycollectionluascriptgenerator.h"
 #include "scripting/luagen/properties/abstractpropertylua.h"
 
 
@@ -296,25 +296,6 @@ namespace campvis {
         QString filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
         if (filename != nullptr && _application->getLuaVmState() != nullptr) {
             _application->getLuaVmState()->execFile(filename.toStdString());
-            //std::ifstream file;
-            //file.open(filename.toStdString());
-            //if (!file.fail()) {
-            //    _application->getLuaVmState()->execString("proc = pipelines[\"" +_selectedPipeline->getName()+"\"]");
-            //
-            //    std::string script;
-            //    while (!file.eof()) {
-            //        script = "";
-            //        std::getline(file, script);
-            //        if (script == "")
-            //            continue;
-            //
-            //        printf("%s\n", script.c_str());
-            //        //if (_application->getLuaVmState() != nullptr) {
-            //        _application->getLuaVmState()->execString(script.c_str());
-            //        //}
-            //    }
-            //    printf("Load lua script");
-            //}
         }
 #endif
     }
@@ -329,24 +310,22 @@ namespace campvis {
 
         if (filename != nullptr) {
             if (_selectedProcessor != 0 && _selectedPipeline != 0) {
-                PropertyCollectionLua *_pcLua = new PropertyCollectionLua();
+                PropertyCollectionLuaScriptGenerator* _pcLua = new PropertyCollectionLuaScriptGenerator();
                 
                 std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n";
                 for (int i = 1; i < _selectedPipeline->getProcessors().size(); i++) {
                     pipeScript += "proc = pipeline:getProcessor(" + StringUtils::toString(i) + ")\n";
-                    AbstractProcessor *proc = _selectedPipeline->getProcessor(i);
+                    AbstractProcessor* proc = _selectedPipeline->getProcessor(i);
 
                     _pcLua->updatePropCollection(proc, &_selectedPipeline->getDataContainer());
-                    std::string res = _pcLua->getLuaScript("", "proc:");
+                    std::string res = _pcLua->getLuaScript(std::string(""), std::string("proc:"));
                     pipeScript += res;
-                    std::cout << "\n\n" + pipeScript + "\n\n";
                 }
                 if (pipeScript != "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n") {
                     std::ofstream file;
                     file.open(filename.toStdString());
                     file << pipeScript.c_str();
                     file.close();
-                    printf("Saved Lua script");
                 }
                 
                 delete _pcLua;

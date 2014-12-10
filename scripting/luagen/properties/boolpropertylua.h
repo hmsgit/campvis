@@ -39,14 +39,14 @@ namespace campvis {
          * Creates a new BoolPropertyLua for the property \a property.
          * \param   property    The property the widget shall handle
          */
-        BoolPropertyLua(BoolProperty* property, DataContainer* dataContainer = nullptr);
+        BoolPropertyLua(BoolProperty* property);
 
         /**
          * Destructor
          */
         virtual ~BoolPropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

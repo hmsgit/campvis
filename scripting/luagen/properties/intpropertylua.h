@@ -41,14 +41,14 @@ namespace campvis {
          * \param   property        The property the Lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          */
-        IntPropertyLua(IntProperty* property, DataContainer* dataContainer = nullptr);
+        IntPropertyLua(IntProperty* property);
 
         /**
          * Destructor
          */
         virtual ~IntPropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
@@ -101,14 +101,14 @@ namespace campvis {
          */
         virtual ~IVecPropertyLua();
 
-        virtual std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        virtual std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
     };
 
 // ================================================================================================
 
     template<size_t SIZE>
     campvis::IVecPropertyLua<SIZE>::IVecPropertyLua(PropertyType* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, dataContainer)
+        : AbstractPropertyLua(property)
     {
     }
 
@@ -117,9 +117,8 @@ namespace campvis {
     }
 
     template<size_t SIZE>
-    std::string campvis::IVecPropertyLua<SIZE>::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string IVecPropertyLua<SIZE>::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         std::string ret = "-- NOT IMPLEMENTED IVecProperty";
-        //ret += "getNestedProperty(" + prefix + _property->getName() + "):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
         return ret;
     }
 
@@ -132,7 +131,7 @@ namespace campvis {
         {
         }
 
-        std::string campvis::IVec2PropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        std::string IVec2PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
             cgt::ivec2 value = static_cast<IVec2Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -151,7 +150,7 @@ namespace campvis {
         {
         }
 
-        std::string campvis::IVec3PropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        std::string IVec3PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
             cgt::ivec3 value = static_cast<IVec3Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -171,7 +170,7 @@ namespace campvis {
         {
         }
 
-        std::string campvis::IVec4PropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        std::string IVec4PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
             cgt::ivec4 value = static_cast<IVec4Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;

@@ -28,7 +28,7 @@
 
 #include "core/properties/metaproperty.h"
 #include "abstractpropertylua.h"
-#include "propertycollectionlua.h"
+#include "propertycollectionluascriptgenerator.h"
 #include "propertyluafactory.h"
 
 namespace campvis {
@@ -38,25 +38,23 @@ namespace campvis {
      * Lua for a MetaProperty.
      * Forwards the call to the PropertyCollectionLua
      */
-    class MetaPropertyLua : public PropertyCollectionLua {
+    class MetaPropertyLua : public PropertyCollectionLuaScriptGenerator {
     public:
         /**
          * Creates a new MetaPropertyLua for the property \a property.
          * \param   property        The property the lua shall handle
-         * \param   dataContainer   DataContainer to use, must not be 0.
          */
-        MetaPropertyLua(MetaProperty* property, DataContainer* dataContainer);
+        MetaPropertyLua(MetaProperty* property);
 
         /**
          * Destructor
          */
         virtual ~MetaPropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
 
     private:
-        PropertyCollectionLua* _pcl;
-        MetaProperty* _xproperty;
+        MetaProperty* _property;
 
     };
 

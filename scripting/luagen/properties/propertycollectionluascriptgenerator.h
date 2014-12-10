@@ -25,7 +25,7 @@
 #ifndef PROPERTYCOLLECTIONLUA_H__
 #define PROPERTYCOLLECTIONLUA_H__
 
-#include "propertycollectionlua.h"
+#include "propertycollectionluascriptgenerator.h"
 #include "abstractpropertylua.h"
 
 #include <map>
@@ -39,19 +39,19 @@ namespace campvis {
      * Main lua generator for the CAMPVis application.
      * Calls individual properties for their own scripts and assembles all responses.
      */
-    class PropertyCollectionLua : public AbstractPropertyLua {
+    class PropertyCollectionLuaScriptGenerator : public AbstractPropertyLua {
     public:
         /**
          * Creates a new PropertyCollectionLua.
          */
-        PropertyCollectionLua(HasPropertyCollection* propertyCollection = nullptr, DataContainer* dc = nullptr);
+        PropertyCollectionLuaScriptGenerator(HasPropertyCollection* propertyCollection = nullptr);
 
         /**
          * Destructor.
          */
-        ~PropertyCollectionLua();
+        ~PropertyCollectionLuaScriptGenerator();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
         void updatePropCollection(HasPropertyCollection* propertyCollection, DataContainer* dc);
         void addProperty(AbstractProperty* prop);
         

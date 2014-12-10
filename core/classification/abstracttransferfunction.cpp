@@ -116,7 +116,7 @@ namespace campvis {
         }
         return _texture;
     }
-    cgt::svec3 AbstractTransferFunction::getSize() {
+    const cgt::svec3& AbstractTransferFunction::getSize() {
         return _size;
     }
 }

@@ -41,14 +41,14 @@ namespace campvis {
          * \param   property    The property the Lua shall handle
          * \param   dataContainer   DataContainer to use (optional), defaults to nullptr.
          */
-        FloatPropertyLua(FloatProperty* property, DataContainer* dataContainer);
+        FloatPropertyLua(FloatProperty* property);
 
         /**
          * Destructor
          */
         virtual ~FloatPropertyLua();
 
-        std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
         
     };
 
@@ -102,7 +102,7 @@ namespace campvis {
          */
         virtual ~VecPropertyLua();
 
-        virtual std::string getLuaScript(std::string propNamePrefix, std::string luaProc);
+        virtual std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
 
     };
 
@@ -110,7 +110,7 @@ namespace campvis {
 
     template<size_t SIZE>
     campvis::VecPropertyLua<SIZE>::VecPropertyLua(PropertyType* property, DataContainer* dataContainer)
-        : AbstractPropertyLua(property, dataContainer)
+        : AbstractPropertyLua(property)
     {
     }
 
@@ -120,9 +120,8 @@ namespace campvis {
     }
 
     template<size_t SIZE>
-    std::string campvis::VecPropertyLua<SIZE>::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+    std::string VecPropertyLua<SIZE>::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
         std::string ret = "-- NOT IMPLEMENTED VecProperty";
-        //ret += "getNestedProperty(" + prefix + _property->getName() + "):setValue(" + StringUtils::toString<bool>( static_cast<BoolProperty*>(_property)->getValue() ) + ")";
         return ret;
     }
 // ================================================================================================
@@ -134,7 +133,7 @@ namespace campvis {
         {
         }
 
-        std::string campvis::Vec2PropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        std::string Vec2PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
             cgt::vec2 value = static_cast<Vec2Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -152,7 +151,7 @@ namespace campvis {
             : VecPropertyLua<3>(property, dataContainer)
         {
         }
-        std::string campvis::Vec3PropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        std::string Vec3PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
             cgt::vec3 value = static_cast<Vec3Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -172,7 +171,7 @@ namespace campvis {
         {
         }
 
-        std::string campvis::Vec4PropertyLua::getLuaScript(std::string propNamePrefix, std::string luaProc) {
+        std::string Vec4PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
             cgt::vec4 value = static_cast<Vec4Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
