@@ -146,6 +146,7 @@ namespace campvis {
 
         qRegisterMetaType< std::vector<DataContainer*> >("std::vector<DataContainer*>");
         qRegisterMetaType< std::vector<AbstractPipeline*> >("std::vector<AbstractPipeline*>");
+        qRegisterMetaType< std::map<AbstractProperty*, QWidget*>::iterator >("PropertyWidgetMapIterator");
         connect(
             this, SIGNAL(updatePipelineWidget(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)), 
             _pipelineWidget, SLOT(update(const std::vector<DataContainer*>&, const std::vector<AbstractPipeline*>&)));

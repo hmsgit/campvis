@@ -44,6 +44,10 @@ namespace campvis {
         setValueImpl(value);
     }
 
+    int DoubleAdjusterWidget::decimals() const {
+        return _spinBox->decimals();
+    }
+
     void DoubleAdjusterWidget::setDecimals(int prec) {
         _spinBox->setDecimals(prec);
         setSliderProperties(_spinBox->singleStep(), _spinBox->minimum(), _spinBox->maximum());
@@ -93,6 +97,5 @@ namespace campvis {
     void DoubleAdjusterWidget::onSingleStepChanged(double value) {
         setSingleStepImpl(value);
     }
-
 
 }

@@ -25,6 +25,7 @@
 #include "pipelinetreewidget.h"
 
 #include "cgt/assert.h"
+#include <QApplication>
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QStringList>
@@ -35,7 +36,6 @@ namespace campvis {
         const int COLUMN_NAME = 0;
         const int COLUMN_ENABLED_STATE = 1;
         const int COLUMN_CLOCK_STATE = 2;
-        const int COLUMN_DESCRIPTION = 3;
     }
 
 // = TreeModel items ==============================================================================
@@ -58,6 +58,8 @@ namespace campvis {
             return QVariant();
         case Qt::UserRole:
             return QVariant();
+        case Qt::BackgroundRole:
+            return QVariant(QApplication::palette().alternateBase());
         default:
             return QVariant();
         }
@@ -91,6 +93,13 @@ namespace campvis {
                     return _pipeline->getEnabled() ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
                 else
                     return QVariant();
+            case Qt::SizeHintRole:
+                if (column == COLUMN_ENABLED_STATE || column == COLUMN_CLOCK_STATE)
+                    return QVariant(QSize());
+                else
+                    return QVariant();
+            case Qt::BackgroundRole:
+                return QVariant(QApplication::palette().alternateBase());
             case Qt::UserRole:
                 return qVariantFromValue(static_cast<void*>(_pipeline));
             default:
@@ -125,8 +134,6 @@ namespace campvis {
             case Qt::DisplayRole:
                 if (column == COLUMN_NAME)
                     return QVariant(QString::fromStdString(_processor->getName()));
-                else if (column == COLUMN_DESCRIPTION)
-                    return QVariant(QString::fromStdString(_processor->getDescription()));
                 else
                     return QVariant();
             case Qt::CheckStateRole:
@@ -138,6 +145,8 @@ namespace campvis {
                     return QVariant();
             case Qt::UserRole:
                 return qVariantFromValue(static_cast<void*>(_processor));
+            case Qt::ToolTipRole:
+                return QVariant(QString::fromStdString(_processor->getDescription()));
             default:
                 return QVariant();
         }
@@ -170,12 +179,18 @@ namespace campvis {
         if (role == Qt::DisplayRole) {
             if (column == COLUMN_NAME)
                 return QVariant(QString("Pipeline/Processor"));
-            else if (column == COLUMN_DESCRIPTION)
-                return QVariant(QString("Description"));
+            else if (column == COLUMN_ENABLED_STATE)
+                return QVariant(QString("E"));
+            else if (column == COLUMN_CLOCK_STATE)
+                return QVariant(QString("P"));
+        }
+        else if (role == Qt::ToolTipRole) {
+            if (column == COLUMN_NAME)
+                return QVariant(QString("Name of Pipeline/Processor"));
             else if (column == COLUMN_ENABLED_STATE)
                 return QVariant(QString("Enabled"));
             else if (column == COLUMN_CLOCK_STATE)
-                return QVariant(QString("Clock"));
+                return QVariant(QString("Profile Processor's execution time"));
         }
 
         return QVariant();
@@ -218,8 +233,6 @@ namespace campvis {
             return 0;
 
         switch (index.column()) {
-            case COLUMN_DESCRIPTION:
-                return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
             case COLUMN_NAME:
                 return QAbstractItemModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
             case COLUMN_ENABLED_STATE:
@@ -283,7 +296,7 @@ namespace campvis {
     }
 
     int PipelineTreeModel::columnCount(const QModelIndex &parent /*= QModelIndex()*/) const {
-        return 4;
+        return 3;
     }
 
     void PipelineTreeModel::setData(const std::vector<DataContainer*>& dataContainers, const std::vector<AbstractPipeline*>& pipelines) {
@@ -349,7 +362,7 @@ namespace campvis {
         height += 2 * header()->sizeHint().height();
         height += 2 * frameWidth();
 
-        return QSize(QTreeView::sizeHint().width(), height);
+        return QSize(QTreeView::sizeHint().width(), std::max(height, 200));
     }
 
     void PipelineTreeWidget::update(const std::vector<DataContainer*>& dataContainers, const std::vector<AbstractPipeline*>& pipelines) {
@@ -360,6 +373,7 @@ namespace campvis {
         expandAll();
         resizeColumnToContents(0);
         resizeColumnToContents(1);
+        resizeColumnToContents(2);
 
         // The widget's size hint might have changed, notify the layout
         updateGeometry();

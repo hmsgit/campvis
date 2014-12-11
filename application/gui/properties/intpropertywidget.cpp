@@ -86,7 +86,8 @@ namespace campvis {
     void IntPropertyWidget::updateWidgetFromProperty() {
         IntProperty* prop = static_cast<IntProperty*>(_property);
         _adjuster->blockSignals(true);
-        _adjuster->setValue(prop->getValue());
+        if (_adjuster->value() != prop->getValue())
+            _adjuster->setValue(prop->getValue());
         _adjuster->blockSignals(false);
     }
 
@@ -100,8 +101,10 @@ namespace campvis {
     void IntPropertyWidget::onPropertyMinMaxChanged(const AbstractProperty* property) {
         if (_ignorePropertyUpdates == 0) {
             IntProperty* prop = static_cast<IntProperty*>(_property);
-            _adjuster->setMinimum(prop->getMinValue());
-            _adjuster->setMaximum(prop->getMaxValue());
+            if (_adjuster->minimum() != prop->getMinValue())
+                _adjuster->setMinimum(prop->getMinValue());
+            if (_adjuster->maximum() != prop->getMaxValue())
+                _adjuster->setMaximum(prop->getMaxValue());
         }
     }
 
