@@ -47,11 +47,4 @@ GLCanvas* Painter::getCanvas() const {
     return canvas_;
 }
 
-Camera* Painter::getCamera() const {
-    if (canvas_)
-        return canvas_->getCamera();
-    else
-        return 0;
-}
-
 } // namespace cgt

@@ -28,7 +28,6 @@
 
 #include "cgt/glcanvas.h"
 #include "cgt/glcontextmanager.h"
-#include "cgt/camera.h"
 #include "cgt/painter.h"
 
 #include <cstdlib>
@@ -50,7 +49,6 @@ GLCanvas::GLCanvas(const std::string& title,
       fullscreen_(false),
       autoFlush_(true),
       initialized_(false),
-      camera_(0),
       painter_(0) ,
       eventHandler_(new EventHandler())
 {}
@@ -143,14 +141,6 @@ int GLCanvas::getHeight() const {
 
 GLCanvas::Buffers GLCanvas::getBuffers() const {
     return buffers_;
-}
-
-void GLCanvas::setCamera(Camera* cam) {
-    camera_ = cam;
-}
-
-Camera* GLCanvas::getCamera() const {
-    return camera_;
 }
 
 } // namespace

@@ -41,7 +41,6 @@
 
 namespace cgt {
 
-class Camera;
 class Painter;
 
 /**
@@ -177,17 +176,6 @@ public:
     /// Getter
     Buffers getBuffers() const;
 
-    /*
-        FIXME It is stupid to have the camera included in the GLCanvas
-        or the Painter. If you need the canvas in a Navigation or a class which
-        inherits from Painter, GLCanvas or what not include it there! (rl)
-    */
-    /// Setter
-    void setCamera(Camera* cam);
-
-    /// Getter
-    Camera* getCamera() const;
-
     /// Getter
     bool isDoubleBuffered() const { return doubleBuffered_; }
 
@@ -217,8 +205,6 @@ protected:
     bool    fullscreen_;
     bool    autoFlush_; ///< whether to call glFlush or swap automatically
     bool    initialized_; // FIXME: does this make sense?
-
-    Camera* camera_; ///< the camera is used to look around
 
     Painter* painter_;  ///< the painter that will be used for rendering
 

@@ -35,7 +35,6 @@
 namespace cgt {
 
 class GLCanvas;
-class Camera;
 
 /**
  * Base class for all rendering on a canvas. Every canvas has a painter and use its
@@ -78,10 +77,6 @@ public:
 
     /// Get the associated Canvas
     GLCanvas* getCanvas() const;
-
-    /// A wrapper to get the camera from the Canvas
-    Camera* getCamera() const;
-
 
     /**
      * This is meant be overridden to do the according openGL paintings
