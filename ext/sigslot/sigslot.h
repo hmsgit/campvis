@@ -298,7 +298,7 @@ namespace sigslot {
      * 
      * signal_manager can be considered as thread-safe.
      */
-    class SIGSLOT_API signal_manager : public cgt::Singleton<signal_manager>, public cgt::Runnable {
+    class SIGSLOT_API signal_manager : public cgt::Singleton<signal_manager>, public cgt::RunnableWithConditionalWait {
         friend class cgt::Singleton<signal_manager>;    ///< CRTP
         friend class _signal_handle_base;               ///< so the custom new/delete operator can access the memory pool
 
@@ -345,8 +345,6 @@ namespace sigslot {
 
         /// \see Runnable:run
         virtual void run();
-        /// \see Runnable:stop
-        virtual void stop();
 
     private:
         /// Private constructor only for singleton
@@ -360,9 +358,7 @@ namespace sigslot {
         SignalHandlingMode _handlingMode;               ///< Mode for handling signals
         SignalQueue _signalQueue;                       ///< Queue for signals to be dispatched
 
-        std::condition_variable _evaluationCondition;   ///< conditional wait to be used when there are currently no jobs to process
         std::mutex _ecMutex;                            ///< Mutex for protecting _evaluationCondition
-
         std::thread::id _this_thread_id;
 
         typedef std::allocator<_signal_handle_base> pool_allocator_t;

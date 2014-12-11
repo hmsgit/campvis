@@ -128,13 +128,6 @@ namespace campvis {
         cgt::GlContextManager::getRef().releaseContext(_canvas, false);
     }
 
-    void AbstractPipeline::stop() {
-        _stopExecution = true;
-        _evaluationCondition.notify_all();
-
-        Runnable::stop();
-    }
-
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &_renderTargetID) {
             setPipelineDirty();

@@ -81,15 +81,9 @@ namespace sigslot {
             }
             else {
                 // there currently is no event in this queue -> go sleep
-                if (! _stopExecution)
-                    _evaluationCondition.wait(lock);
+                _evaluationCondition.wait(lock);
             }
         }
-    }
-
-    void signal_manager::stop() {
-        _evaluationCondition.notify_all(); 
-        cgt::Runnable::stop();
     }
 
     bool signal_manager::isCurrentThreadSignalManagerThread() const {

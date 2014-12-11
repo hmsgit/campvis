@@ -55,7 +55,7 @@ namespace campvis {
     /**
      * Abstract base class for CAMPVis Pipelines.
      */
-    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public cgt::Runnable, public cgt::EventHandler, public cgt::EventListener {
+    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public cgt::RunnableWithConditionalWait, public cgt::EventHandler, public cgt::EventListener {
     public:
         /**
          * Creates a AbstractPipeline.
@@ -120,9 +120,6 @@ namespace campvis {
          * \see Runnable::run
          */
         virtual void run();
-
-        /// \see Runnable::stop
-        virtual void stop();
 
         /**
          * Executes this pipeline.
@@ -235,7 +232,6 @@ namespace campvis {
         DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
 
     private:
-        std::condition_variable _evaluationCondition;       ///< conditional wait to be used when the pipeline currently does not need to be executed.
         tbb::atomic<bool> _enabled;                         ///< flag whether this pipeline is currently enabled
         tbb::atomic<bool> _pipelineDirty;                   ///< Flag whether this pipeline is dirty and executePipeline() needs to be called.
 

@@ -26,30 +26,6 @@
  *                                                                    *
  **********************************************************************/
 
-// ================================================================================================
-// 
-// This file is part of the CAMPVis Software Framework.
-// 
-// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
-//      Christian Schulte zu Berge <christian.szb@in.tum.de>
-//      Chair for Computer Aided Medical Procedures
-//      Technische Universitaet Muenchen
-//      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
-// 
-// For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
-// 
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
-// except in compliance with the License. You may obtain a copy of the License at
-// 
-// http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed under the 
-// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
-// either express or implied. See the License for the specific language governing permissions 
-// and limitations under the License.
-// 
-// ================================================================================================
-
 #ifndef RUNNABLE_H__
 #define RUNNABLE_H__
 
@@ -59,6 +35,8 @@
 #include <tbb/atomic.h>
 
 namespace cgt {
+    class RunnableWithConditionalWait;
+
     /**
      * Abstract base class for objects that shall run in a separate thread.
      * Runnable object manage their own thread, which is created when calling start(). The new Thread starts
@@ -66,6 +44,9 @@ namespace cgt {
      * and waits for the thread to finish. Hence, you should test for _stopExecution in your run() method.
      */
     class CGT_API Runnable {
+        friend void invokeThread(Runnable* r);
+        friend class RunnableWithConditionalWait;
+
     public:
         /**
          * Creates a new Runnable object
@@ -73,7 +54,7 @@ namespace cgt {
         Runnable();
 
         /**
-         * Destructor, stops and waits the thread if the thread is still running.
+         * Destructor, stops and waits for the thread to finish if the thread is still running.
          */
         virtual ~Runnable();
 
@@ -104,6 +85,37 @@ namespace cgt {
 
         std::thread* _thread;                    ///< Thread of the Runnable
         tbb::atomic<bool> _running;
+    };
+
+
+
+    /**
+     * Extension of the Runnable interface for threads that should use conditional wait to pause
+     * their work when there's nothing to do.
+     * This version adds a protected std::condition_variable to be used for conditional wait and
+     * further overloads the stop() method to cleanly halt the thread by repeatedly notifying
+     * the condition variable (as notifications may get lost due to race conditions).
+     */
+    class CGT_API RunnableWithConditionalWait : public Runnable {
+    public:
+        /**
+         * Creates a new RunnableWithConditionalWait object
+         */
+        RunnableWithConditionalWait();
+
+        /**
+         * Destructor, stops and waits for thread to finish if the thread is still running.
+         */
+        virtual ~RunnableWithConditionalWait();
+
+        /**
+         * Sets the _stopExecution flag and waits for the thread to finish.
+         */
+        virtual void stop();
+
+    protected:
+        /// conditional wait to be used when there are currently no jobs to process
+        std::condition_variable _evaluationCondition;
     };
 
 }
