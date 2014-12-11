@@ -61,6 +61,9 @@ namespace campvis {
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
 
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
+
 
         /**
          * Const getter for the camera settings.

@@ -219,4 +219,8 @@ namespace campvis {
         _buffersDirty = true;
     }
 
+    std::string IndexedMeshGeometry::getTypeAsString() const {
+        return "Indexed Geometry Data";
+    }
+
 }

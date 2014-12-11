@@ -77,5 +77,10 @@ namespace campvis {
         cgtAssert(index < _images.size(), "Index out of bounds.");
         return _images[index];
     }
-    
+
+    std::string ImageSeries::getTypeAsString() const {
+        return "Image Series";
+    }
+
+
 }

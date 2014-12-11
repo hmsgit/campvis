@@ -237,4 +237,8 @@ namespace campvis {
         _buffersDirty = true;
     }
 
+    std::string MultiIndexedGeometry::getTypeAsString() const {
+        return "MultiIndexedGeometry Data";
+    }
+
 }

@@ -82,6 +82,12 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
         /**
+         * Returns a human readable representation of the data type that can be used for the GUI.
+         * \return  A string with the type name to be used for the GUI.
+         */
+        virtual std::string getTypeAsString() const;
+
+        /**
          * Dimensionality of this image.
          * \return _dimensionality
          */

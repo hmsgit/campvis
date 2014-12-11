@@ -50,4 +50,8 @@ namespace campvis {
         return 0;
     }
 
+    std::string PositionData::getTypeAsString() const {
+        return "Position Data";
+    }
+
 }

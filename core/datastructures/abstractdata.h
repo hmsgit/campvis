@@ -91,6 +91,12 @@ namespace campvis {
          */
         virtual size_t getVideoMemoryFootprint() const = 0;
 
+        /**
+         * Returns a human readable representation of the data type that can be used for the GUI.
+         * \return  A string with the type name to be used for the GUI.
+         */
+        virtual std::string getTypeAsString() const = 0;
+
     private:
         /// This weak_ptr points to the shared_ptr owning group of this object, if existant.
         /// Should be only accessed by DataHandle (therefore the friendship) in order to avoid

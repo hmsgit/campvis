@@ -341,4 +341,8 @@ namespace campvis {
         }
     }
 
+    std::string MeshGeometry::getTypeAsString() const {
+        return "Mesh Geometry Data";
+    }
+
 }

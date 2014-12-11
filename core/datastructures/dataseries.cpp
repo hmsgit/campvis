@@ -77,5 +77,10 @@ namespace campvis {
         cgtAssert(index < _data.size(), "Index out of bounds.");
         return _data[index];
     }
-    
+
+    std::string DataSeries::getTypeAsString() const {
+        return "Data Series";
+    }
+
+
 }

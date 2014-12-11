@@ -50,4 +50,8 @@ namespace campvis {
         return 0;
     }
 
+    std::string TransformData::getTypeAsString() const {
+        return "Transformation Data";
+    }
+
 }

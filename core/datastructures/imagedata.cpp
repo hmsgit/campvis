@@ -128,4 +128,8 @@ namespace campvis {
         addRepresentation(representation);
     }
 
+    std::string ImageData::getTypeAsString() const {
+        return "Image Data";
+    }
+
 }

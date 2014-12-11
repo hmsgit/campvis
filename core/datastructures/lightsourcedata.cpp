@@ -66,4 +66,8 @@ namespace campvis {
         shader->setUniform(uniformName + "._attenuation", _attenuation);
     }
 
+    std::string LightSourceData::getTypeAsString() const {
+        return "Light Source Data";
+    }
+
 }

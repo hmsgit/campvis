@@ -101,46 +101,7 @@ namespace campvis {
                 const AbstractData* data = _dataHandle.getData();
                 cgtAssert(data != 0, "WTF - QtDataHandle with empty data?");
 
-                if (const ImageData* tester = dynamic_cast<const ImageData*>(data)) {
-                	return QVariant(QString("Image Data"));
-                }
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-                else if (const FiberData* tester = dynamic_cast<const FiberData*>(data)) {
-                    return QVariant(QString("Fiber Geometry"));
-                }
-#endif
-
-                else if (const IndexedMeshGeometry* tester = dynamic_cast<const IndexedMeshGeometry*>(data)) {
-                    return QVariant(QString("Indexed Geometry"));
-                }
-                else if (const MultiIndexedGeometry* tester = dynamic_cast<const MultiIndexedGeometry*>(data)) {
-                	return QVariant(QString("Multi Indexed Geometry"));
-                }
-                else if (const FaceGeometry* tester = dynamic_cast<const FaceGeometry*>(data)) {
-                	return QVariant(QString("Face Geometry"));
-                }
-                else if (const MeshGeometry* tester = dynamic_cast<const MeshGeometry*>(data)) {
-                    return QVariant(QString("Mesh Geometry"));
-                }
-                else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(data)) {
-                    return QVariant(QString("Geometry"));
-                }
-
-                else if (const RenderData* tester = dynamic_cast<const RenderData*>(data)) {
-                    return QVariant(QString("Render Data"));
-                }
-
-                else if (const DataSeries* tester = dynamic_cast<const DataSeries*>(data)) {
-                    return QVariant(QString("Data Series"));
-                }
-                else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
-                    return QVariant(QString("Image Series"));
-                }
-
-                else if (const LightSourceData* tester = dynamic_cast<const LightSourceData*>(data)) {
-                    return QVariant(QString("Light Source"));
-                }
+                return QVariant(QString::fromStdString(data->getTypeAsString()));
             }
             else
                 return QVariant();

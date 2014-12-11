@@ -67,4 +67,8 @@ namespace campvis {
         _camera = camera;
     }
 
+    std::string CameraData::getTypeAsString() const {
+        return "Camera Data";
+    }
+
 }

@@ -123,9 +123,10 @@ namespace campvis {
 
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
-
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
     protected:
         /// Collection of the geometries this object has.

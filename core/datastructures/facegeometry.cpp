@@ -274,5 +274,9 @@ namespace campvis {
         _buffersDirty = true;
     }
 
+    std::string FaceGeometry::getTypeAsString() const {
+        return "Face Geometry Data";
+    }
+
 
 }

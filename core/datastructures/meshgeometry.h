@@ -54,9 +54,10 @@ namespace campvis {
 
         /// \see AbstractData::clone()
         virtual MeshGeometry* clone() const;
-
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
         /**
          * Returns the number of faces of this mesh.

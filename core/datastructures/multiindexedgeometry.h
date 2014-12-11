@@ -78,12 +78,12 @@ namespace campvis {
 
         /// \see AbstractData::clone()
         virtual MultiIndexedGeometry* clone() const;
-
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
-
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
         /**
          * Add a render primitive given by a list of indices.

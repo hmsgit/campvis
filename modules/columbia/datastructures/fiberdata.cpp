@@ -221,4 +221,8 @@ namespace campvis {
         return toReturn;
     }
 
+    std::string FiberData::getTypeAsString() const {
+        return "Fiber Data";
+    }
+
 }

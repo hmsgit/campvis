@@ -169,4 +169,8 @@ namespace campvis {
         bindColorTexture(shader, colorTexUnit, colorTexUniform, texParamsUniform, index);
     }
 
+    std::string RenderData::getTypeAsString() const {
+        return "Render Data";
+    }
+
 }

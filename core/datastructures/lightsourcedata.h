@@ -69,6 +69,8 @@ namespace campvis {
         virtual size_t getLocalMemoryFootprint() const;
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
         /**
          * Binds this light source to the given shader by setting the corresponding uniforms.

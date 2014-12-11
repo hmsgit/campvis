@@ -145,4 +145,9 @@ namespace campvis {
 
         return sum;
     }
+
+    std::string GeometryDataCollection::getTypeAsString() const {
+        return "Collection of Geometry Data";
+    }
+
 }

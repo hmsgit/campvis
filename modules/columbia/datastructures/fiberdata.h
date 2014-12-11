@@ -146,12 +146,12 @@ namespace campvis {
         
         /// \see AbstractData::clone()
         virtual FiberData* clone() const;
-
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
-
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
+        /// \see AbstractData::getReadableType()
+        virtual std::string getTypeAsString() const;
 
     protected:
         /**

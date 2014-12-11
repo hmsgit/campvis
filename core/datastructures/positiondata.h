@@ -55,6 +55,8 @@ namespace campvis {
         virtual size_t getLocalMemoryFootprint() const;;
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
         /**
         * Gets the quaternion

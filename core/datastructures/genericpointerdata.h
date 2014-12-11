@@ -114,6 +114,11 @@ namespace campvis {
             return 0;
         };
 
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const {
+            return "Pointer to " + typeid(T).name();
+        }
+
     protected:
         std::shared_ptr<T> _data;       ///< Shared pointer to the data.
     };
