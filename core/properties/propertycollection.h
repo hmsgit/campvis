@@ -64,6 +64,12 @@ namespace campvis {
         void removeProperty(AbstractProperty& prop);
 
         /**
+         * Unregisters all properties from this property collection.
+         * Same as calling removeProperty() for each property, but faster.
+         */
+        void clearProperties();
+
+        /**
          * Returns the property with the given name \a name.
          * If no such property exists, the result will be 0.
          * \param name  Name of the property to return.
