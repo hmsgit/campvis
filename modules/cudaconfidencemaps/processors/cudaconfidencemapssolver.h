@@ -41,7 +41,7 @@
 
 #include "core/datastructures/imagedata.h"
 
-#include "modules/cudaconfidencemaps/core/cm_cusp.h"
+#include "modules/cudaconfidencemaps/core/cudaconfidencemaps_cuda.h"
 
 
 namespace campvis {
@@ -96,7 +96,7 @@ namespace campvis {
     protected:
         void resetSolutionVector();
 
-        CuspConfidenceMapSolver _solver;
+        cuda::CudaConfidenceMapsSystemSolver _solver;
         
         static const std::string loggerCat_;
     };

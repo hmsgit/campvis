@@ -47,7 +47,7 @@ namespace campvis {
         , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001, 10)
         , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001, 200)
         , p_paramGamma("Gamma", "Gamma (Diagonal penalty)", 0.03f, 0.001, 0.5)
-        , _solver(128, 128)
+        , _solver()
     {
 
         addProperty(p_inputImage);
@@ -87,9 +87,9 @@ namespace campvis {
             size_t elementCount = cgt::hmul(size);
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
-            _solver.createSystem(image, size.x, size.y, gradientScaling, alpha, beta, gamma);
+            _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma);
+            _solver.solve(iterations, 1e-10);
 
-            _solver.solve(iterations);
             const float *solution = _solver.getSolution(size.x, size.y);
 
             float *solutionCopy = new float[elementCount];
@@ -100,6 +100,8 @@ namespace campvis {
             ImageRepresentationLocal::create(id, wtpData);
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputConfidenceMap.getValue(), id);
+
+            std::cout << "Residual: " << _solver.getSolutionResidualNorm() << std::endl;
         }
     }
 
@@ -107,14 +109,6 @@ namespace campvis {
 
     void CudaConfidenceMapsSolver::resetSolutionVector() {
         // Create a linear gradient image of the same size as the input image
-        size_t elementCount = _solver.width * _solver.height;
-        std::vector<float> gradient(elementCount);
-
-        for(size_t i = 0; i < elementCount; ++i) {
-            float value = static_cast<float>(i / _solver.width) / static_cast<float>(_solver.height-1);
-            gradient[i] = value;
-        }
-
-        _solver.setInitialSolution(gradient);
+        _solver.resetSolution();
     }
 }
