@@ -40,7 +40,7 @@ namespace campvis {
     TransferFunctionPropertyLua::~TransferFunctionPropertyLua() {
     }
 
-    std::string TransferFunctionPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+    std::string TransferFunctionPropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         AbstractTransferFunction* tf = prop->getTF();
         const cgt::vec2& domain = tf->getIntensityDomain();

@@ -51,7 +51,7 @@ namespace campvis {
          */
         virtual ~MetaPropertyLua();
 
-        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc);
 
     private:
         MetaProperty* _property;

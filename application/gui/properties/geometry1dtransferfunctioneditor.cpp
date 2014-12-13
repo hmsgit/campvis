@@ -190,9 +190,7 @@ namespace campvis {
                 tbb::mutex::scoped_lock lock(_localMutex);
 
                 float pos = static_cast<float>(e->x()) / static_cast<float>(_canvas->width());
-                cgt::col4 col = cgt::col4(255);
                 float alpha = cgt::clamp(static_cast<float>(_canvas->height() - e->y()) / static_cast<float>(_canvas->height()), 0.f, 1.f);
-                col.a = static_cast<uint8_t>(alpha * 255.f);
                 
                 g->addKeyPoint(pos, alpha);
             }

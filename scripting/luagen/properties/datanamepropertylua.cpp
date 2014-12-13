@@ -35,7 +35,7 @@ namespace campvis {
 
     DataNamePropertyLua::~DataNamePropertyLua() {
     }
-    std::string DataNamePropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+    std::string DataNamePropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         const std::string value = static_cast<DataNameProperty*>(_property)->getValue();
         std::string ret = "";
         ret += luaProc;

@@ -185,6 +185,37 @@ namespace campvis {
     %template(Vec4Property) FloatingPointProperty< cgt::Vector4<float> >;
     typedef FloatingPointProperty< cgt::Vector4<float> > Vec4Property;
 
+    /* OptionProperty */
+        
+    class AbstractOptionProperty : public IntProperty {
+    public:
+        AbstractOptionProperty(const std::string& name, const std::string& title);
+        virtual ~AbstractOptionProperty();
+        virtual const std::string& getOptionId() = 0;
+        virtual void selectById(const std::string& id) = 0;
+    };
+
+    template<typename T>
+    class GenericOptionProperty : public AbstractOptionProperty {
+    public:		
+        GenericOptionProperty(
+            const std::string& name, 
+            const std::string& title, 
+            const GenericOption<T>* options,
+            int count);		
+        virtual ~GenericOptionProperty();		
+        const std::string& getOptionId();
+        void selectById(const std::string& id);
+    };
+
+    /* Downcast the return value of selectById to appropriate subclass */
+    %factory(void campvis::AbstractOptionProperty::selectById,
+             campvis::GenericOptionProperty);
+
+    /* Downcast the return value of getOptionId to appropriate subclass */
+    %factory(void campvis::AbstractOptionProperty::getOptionId,
+             campvis::GenericOptionProperty);
+
     /* TFGeometry1D */
 
     %nodefaultctor TFGeometry1D;
@@ -341,17 +372,22 @@ namespace campvis {
         sigslot::signal0 s_changed;
         %mutable;
     };
+    
+    /* Down casting or super classes.
+     * Down casting follows the order of declaration.
+     * Declare the classes as child first according to the class hierarchy.
+     */
 
     /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getProperty,
-             campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::AbstractOptionProperty, campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
-             campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::AbstractOptionProperty, campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);

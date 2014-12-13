@@ -48,7 +48,7 @@ namespace campvis {
          */
         virtual ~IntPropertyLua();
 
-        std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc);
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.
@@ -101,7 +101,7 @@ namespace campvis {
          */
         virtual ~IVecPropertyLua();
 
-        virtual std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc);
+        virtual std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc);
     };
 
 // ================================================================================================
@@ -117,7 +117,7 @@ namespace campvis {
     }
 
     template<size_t SIZE>
-    std::string IVecPropertyLua<SIZE>::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+    std::string IVecPropertyLua<SIZE>::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         std::string ret = "-- NOT IMPLEMENTED IVecProperty";
         return ret;
     }
@@ -131,7 +131,7 @@ namespace campvis {
         {
         }
 
-        std::string IVec2PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+        std::string IVec2PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::ivec2 value = static_cast<IVec2Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -150,7 +150,7 @@ namespace campvis {
         {
         }
 
-        std::string IVec3PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+        std::string IVec3PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::ivec3 value = static_cast<IVec3Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -170,7 +170,7 @@ namespace campvis {
         {
         }
 
-        std::string IVec4PropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+        std::string IVec4PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::ivec4 value = static_cast<IVec4Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;

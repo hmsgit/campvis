@@ -35,11 +35,11 @@ namespace campvis {
     OptionPropertyLua::~OptionPropertyLua() {
     }
 
-    std::string OptionPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+    std::string OptionPropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         std::string ret = "";
         ret += luaProc;
-        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 
-            + StringUtils::toString(static_cast<AbstractOptionProperty*>(_property)->getValue() ) + ")";
+        ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):selectById(\"" 
+            + StringUtils::toString(static_cast<AbstractOptionProperty*>(_property)->getOptionId() ) + "\")";
         return ret;
     }
 

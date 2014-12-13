@@ -52,6 +52,19 @@ namespace campvis {
          * Pure virtual destructor.
          */
         virtual ~AbstractOptionProperty() {};
+        
+        /**
+         * Returns the id of the currently selected option.
+         * \return  _options[_value]._id
+         */
+        virtual const std::string& getOptionId() = 0;
+
+        /**
+         * Sets the selected option to the first option with the given id.
+         * If no such option is found, the selected option will not change.
+         * \param   id  Id of the option to select.
+         */
+        virtual void selectById(const std::string& id) = 0;
 
         /**
          * Returns all Options als pair of std::strings.
@@ -146,7 +159,7 @@ namespace campvis {
          * Returns the id of the currently selected option.
          * \return  _options[_value]._id
          */
-        std::string& getOptionId() const;
+        const std::string& getOptionId();
 
 
         /**
@@ -252,7 +265,7 @@ namespace campvis {
     }
 
     template<typename T>
-    std::string& campvis::GenericOptionProperty<T>::getOptionId() const {
+    const std::string& campvis::GenericOptionProperty<T>::getOptionId() {
         return _options[_value]._id;
     }
 

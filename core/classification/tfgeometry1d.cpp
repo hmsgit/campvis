@@ -139,15 +139,16 @@ namespace campvis {
 
     void TFGeometry1D::addKeyPoint( float position, float alpha) {
         TFGeometry1D::KeyPoint kp(position, cgt::col4(255));
+        cgt::col4 color(255);
         std::vector<TFGeometry1D::KeyPoint>::iterator lb = std::upper_bound(_keyPoints.begin(), _keyPoints.end(), kp);
         if (lb != _keyPoints.end()) {
-            kp._color = lb->_color;
+            color = lb->_color;
         }
         else {
-            kp._color = _keyPoints.back()._color;
+            color = _keyPoints.back()._color;
         }
-        kp._color.a = static_cast<uint8_t>(alpha * 255.f);
-        _keyPoints.insert(lb, kp);
+        color.a = static_cast<uint8_t>(alpha * 255.f);
+        addKeyPoint(position, color);
     }
 
     void TFGeometry1D::addKeyPoint( float position, const cgt::col4& color ) {

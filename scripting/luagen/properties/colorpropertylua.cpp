@@ -35,7 +35,7 @@ namespace campvis {
     ColorPropertyLua::~ColorPropertyLua() {
     }
 
-    std::string ColorPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+    std::string ColorPropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         cgt::vec4 value = static_cast<ColorProperty*>(_property)->getValue();
         std::string ret = "";
         ret += luaProc;

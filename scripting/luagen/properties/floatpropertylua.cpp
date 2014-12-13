@@ -35,7 +35,7 @@ namespace campvis {
         FloatProperty* property = static_cast<FloatProperty*>(_property);
     }
 
-    std::string FloatPropertyLua::getLuaScript(std::string& propNamePrefix, std::string& luaProc) {
+    std::string FloatPropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
         std::string ret = "";
         ret += luaProc;
         ret += "getNestedProperty(\"" + propNamePrefix + _property->getName() + "\"):setValue(" 

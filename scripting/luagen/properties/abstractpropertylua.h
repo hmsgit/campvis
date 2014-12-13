@@ -53,7 +53,7 @@ namespace campvis {
          */
         virtual ~AbstractPropertyLua();
     public:
-        virtual std::string getLuaScript(std::string& propNamePrefix, std::string& luaProc) = 0;
+        virtual std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) = 0;
 
     protected:
         AbstractProperty* _property;    ///< The property this lua handles
