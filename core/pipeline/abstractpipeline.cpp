@@ -277,8 +277,8 @@ namespace campvis {
         return nullptr;
     }
 
-    AbstractProcessor* AbstractPipeline::getProcessor( int index ) const {
-        if (index < 0 || index >= _processors.size())
+    AbstractProcessor* AbstractPipeline::getProcessor(int index ) const {
+        if (index < 0 || (size_t) index >= _processors.size())
             return nullptr;
         return _processors[index];
     }
