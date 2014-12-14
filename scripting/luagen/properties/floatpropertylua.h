@@ -109,13 +109,13 @@ namespace campvis {
 // ================================================================================================
 
     template<size_t SIZE>
-    campvis::VecPropertyLua<SIZE>::VecPropertyLua(PropertyType* property, DataContainer* dataContainer)
+    VecPropertyLua<SIZE>::VecPropertyLua(PropertyType* property, DataContainer* dataContainer)
         : AbstractPropertyLua(property)
     {
     }
 
     template<size_t SIZE>
-    campvis::VecPropertyLua<SIZE>::~VecPropertyLua() {
+    VecPropertyLua<SIZE>::~VecPropertyLua() {
         PropertyType* property = static_cast<PropertyType*>(_property);
     }
 

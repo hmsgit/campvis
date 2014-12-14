@@ -107,13 +107,13 @@ namespace campvis {
 // ================================================================================================
 
     template<size_t SIZE>
-    campvis::IVecPropertyLua<SIZE>::IVecPropertyLua(PropertyType* property, DataContainer* dataContainer)
+    IVecPropertyLua<SIZE>::IVecPropertyLua(PropertyType* property, DataContainer* dataContainer)
         : AbstractPropertyLua(property)
     {
     }
 
     template<size_t SIZE>
-    campvis::IVecPropertyLua<SIZE>::~IVecPropertyLua() {
+    IVecPropertyLua<SIZE>::~IVecPropertyLua() {
     }
 
     template<size_t SIZE>
