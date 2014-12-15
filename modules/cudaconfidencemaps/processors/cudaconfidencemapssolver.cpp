@@ -40,7 +40,7 @@ namespace campvis {
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputConfidenceMap("OutputConfidenceMap", "Output Confidence Map", "us.confidence", DataNameProperty::WRITE)
         , p_resetResult("ResetSolution", "Reset solution vector")
-        , p_iterations("IterationCount", "Conjugate Gradient Iterations", 200, 1, 10000)
+        , p_iterations("IterationCount", "Conjugate Gradient Iterations", 200, 1, 500)
         , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001, 10)
         , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001, 10)
         , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001, 200)
@@ -107,7 +107,7 @@ namespace campvis {
             if (p_printStatistics.getValue()) {
                 std::cout << "Residual:             " << _solver.getSolutionResidualNorm() << std::endl;
                 std::cout << "System Creation Time: " << _solver.getSystemCreationTime() << std::endl;
-                std::cout << "System Solve Time:    " << _solver.getSystemSolveTime() << std::endl;
+                std::cout << "System Solve Time:    " << _solver.getSystemSolveTime() << " (" << _solver.getSolutionIterationCount() << " iterations)" << std::endl;
             }
         }
     }

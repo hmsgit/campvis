@@ -53,6 +53,7 @@ namespace cuda {
         bool isUpsideDown;
         int imageWidth;
         int imageHeight;
+        int iterationCount;
         float solutionResidualNorm;
         float systemCreationTime;
         float systemSolveTime;
@@ -66,6 +67,12 @@ namespace cuda {
         _gpuData->solutionResidualNorm = 0.0f;
         _gpuData->systemCreationTime = 0.0f;
         _gpuData->systemSolveTime = 0.0f;
+    }
+
+    CudaConfidenceMapsSystemSolver::~CudaConfidenceMapsSystemSolver()
+    {
+        // This also frees all the memory reserved on the GPU
+        delete _gpuData;
     }
 
     void CudaConfidenceMapsSystemSolver::uploadImage(const unsigned char* imageData, int imageWidth, int imageHeight,
@@ -95,7 +102,7 @@ namespace cuda {
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 float value;
-                if (!isUpsideDown) {
+                if (isUpsideDown) {
                     value = y / (height - 1.0f);
                 }
                 else {
@@ -108,6 +115,7 @@ namespace cuda {
 
         // Uplaod solution vector on the GPU
         _gpuData->x_d = _gpuData->x_h;
+        std::cout << "Reset!" << std::endl;
     }
 
     void CudaConfidenceMapsSystemSolver::solve(int maximumIterations, float errorTolerance) {
@@ -119,6 +127,7 @@ namespace cuda {
         cusp::precond::diagonal<float, cusp::device_memory> M(_gpuData->L_d);
         cusp::krylov::cg(_gpuData->L_d, _gpuData->x_d, _gpuData->b_d, monitor, M);
         _gpuData->solutionResidualNorm = monitor.residual_norm();
+        _gpuData->iterationCount = monitor.iteration_count();
 
         // Downlaod the solution, which has been computed on the GPU to the CPU
         _gpuData->x_h = _gpuData->x_d;
@@ -131,6 +140,11 @@ namespace cuda {
         height = _gpuData->imageHeight;
         return thrust::raw_pointer_cast(&_gpuData->x_h[0]);
     }
+
+    int CudaConfidenceMapsSystemSolver::getSolutionIterationCount() const {
+        return _gpuData->iterationCount;
+    }
+
 
     float CudaConfidenceMapsSystemSolver::getSolutionResidualNorm() const {
         return _gpuData->solutionResidualNorm;
@@ -152,6 +166,7 @@ namespace cuda {
             // Resize the system vectors and matrices to accomodate the different image size
             _gpuData->imageWidth = imageWidth;
             _gpuData->imageHeight = imageHeight;
+            _gpuData->isUpsideDown = isUpsideDown;
             int numElements = imageWidth * imageHeight;
             _gpuData->x_h.resize(numElements);
             _gpuData->b_d.resize(numElements);
@@ -301,7 +316,7 @@ namespace cuda {
     }
 
     static __global__ void k_buildSystem(float* L, int pitch, const unsigned char* image, int width, int height,
-                                  float gradientScaling, float alpha, float beta, float gamma)
+                                  float gradientScaling, float alpha, float beta, float gamma, bool isUpsideDown)
     {
 
         const int x = blockDim.x * blockIdx.x + threadIdx.x;
@@ -313,11 +328,17 @@ namespace cuda {
         const int offsets[] = {-width-1, -width, -width+1, -1, 0, 1, width-1, width, width+1};
         const float gammas[] = {gamma_sq2, 0.0f, gamma_sq2, gamma, 0.0f, gamma, gamma_sq2, 0.0f, gamma_sq2};
 
-        const float attenuations[] = {
-            1.0f - exp(-alpha * (1.0f - (y - 1.0f) / (height - 1.0f))),
-            1.0f - exp(-alpha * (1.0f - (y       ) / (height - 1.0f))),
-            1.0f - exp(-alpha * (1.0f - (y + 1.0f) / (height - 1.0f)))
-        };
+        // Precompute the three attenuation values for the curernt pixel (the row above, current row, and row below)
+        float attenuations[3];
+        if (isUpsideDown) {
+            attenuations[0] = 1.0f - exp(-alpha * (1.0f - (y - 1.0f) / (height - 1.0f)));
+            attenuations[1] = 1.0f - exp(-alpha * (1.0f - (y       ) / (height - 1.0f)));
+            attenuations[2] = 1.0f - exp(-alpha * (1.0f - (y + 1.0f) / (height - 1.0f)));
+        } else {
+            attenuations[0] = 1.0f - exp(-alpha * (y - 1.0f) / (height - 1.0f));
+            attenuations[1] = 1.0f - exp(-alpha * (y       ) / (height - 1.0f));
+            attenuations[2] = 1.0f - exp(-alpha * (y + 1.0f) / (height - 1.0f));
+        }
 
         // Filter off out-of-bounds edges
         unsigned short filter = 495; // 111 101 111
@@ -373,7 +394,7 @@ namespace cuda {
         k_buildSystem<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), _gpuData->L_d.values.pitch,
                                              thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]),
                                              imageWidth, imageHeight,
-                                             gradientScaling, alpha, beta, gamma);
+                                             gradientScaling, alpha, beta, gamma, _gpuData->isUpsideDown);
     }
 
 } // cuda

@@ -10,6 +10,7 @@ namespace cuda {
     public:
 
         CudaConfidenceMapsSystemSolver();
+        ~CudaConfidenceMapsSystemSolver();
 
         /**
          * Uploads an image to the solver. Additionally the matrices and  vectors that are needed to
@@ -51,6 +52,12 @@ namespace cuda {
          * \return a pointer to a float buffer containing the confidence map
          */
         const float* getSolution(int& width, int& height);
+
+        /**
+         * Returns the number of CG iterations that were actually performed when solving the system
+         * \see solve() was called
+         */
+        int getSolutionIterationCount() const;
 
         /**
          * Returns the residual norm of the solution as a measure of error;
