@@ -32,8 +32,6 @@
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/tools/stringutils.h"
 
-#include "modules/cudaconfidencemaps/core/cm_cusp_cuda_exports.h"
-
 namespace campvis {
     const std::string CudaConfidenceMapsSolver::loggerCat_ = "CAMPVis.modules.cudaconfidencemaps.solver";
 
@@ -47,6 +45,8 @@ namespace campvis {
         , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001, 10)
         , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001, 200)
         , p_paramGamma("Gamma", "Gamma (Diagonal penalty)", 0.03f, 0.001, 0.5)
+        , p_createSystemOnGPU("CreateSystemOnGPU", "Use the GPU to build the equation system", true)
+        , p_printStatistics("PrintStatistics", "Print execution times and residual values", false)
         , _solver()
     {
 
@@ -59,6 +59,9 @@ namespace campvis {
         addProperty(p_paramAlpha);
         addProperty(p_paramBeta);
         addProperty(p_paramGamma);
+        
+        addProperty(p_createSystemOnGPU);
+        addProperty(p_printStatistics);
     }
 
     CudaConfidenceMapsSolver::~CudaConfidenceMapsSolver() { }
@@ -87,7 +90,7 @@ namespace campvis {
             size_t elementCount = cgt::hmul(size);
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
-            _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma);
+            _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma, p_createSystemOnGPU.getValue());
             _solver.solve(iterations, 1e-10);
 
             const float *solution = _solver.getSolution(size.x, size.y);
@@ -101,7 +104,11 @@ namespace campvis {
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputConfidenceMap.getValue(), id);
 
-            std::cout << "Residual: " << _solver.getSolutionResidualNorm() << std::endl;
+            if (p_printStatistics.getValue()) {
+                std::cout << "Residual:             " << _solver.getSolutionResidualNorm() << std::endl;
+                std::cout << "System Creation Time: " << _solver.getSystemCreationTime() << std::endl;
+                std::cout << "System Solve Time:    " << _solver.getSystemSolveTime() << std::endl;
+            }
         }
     }
 

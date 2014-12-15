@@ -91,6 +91,8 @@ namespace campvis {
         FloatProperty p_paramAlpha;
         FloatProperty p_paramBeta;
         FloatProperty p_paramGamma;
+        BoolProperty  p_createSystemOnGPU;
+        BoolProperty  p_printStatistics;
 
         
     protected:
