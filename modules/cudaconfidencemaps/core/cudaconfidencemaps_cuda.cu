@@ -1,4 +1,5 @@
 #include "cudaconfidencemaps_cuda.h"
+#include "cudautils.h"
 
 #include <cusp/dia_matrix.h>
 #include <cusp/krylov/cg.h>
@@ -8,6 +9,22 @@ typedef cusp::dia_matrix<int, float, cusp::host_memory> CuspHostDiaMatrix;
 typedef cusp::dia_matrix<int, float, cusp::device_memory> CuspDeviceDiaMatrix;
 typedef cusp::array1d<float, cusp::host_memory> CuspHostVector;
 typedef cusp::array1d<float, cusp::device_memory> CuspDeviceVector;
+typedef cusp::array1d<unsigned char, cusp::device_memory> CuspDeviceByteVector;
+
+/* The implicit graph created by this class to solve the confidence maps problem is as follows
+ *
+ *   1   1   1   1
+ *   |   |   |   |  << These edges have always value 1
+ *   #---#---#---#  \
+ *   | X | X | X |  |   The graph here is densly connected (8 neighbourhood). The weight
+ *   #---#---#---#  |   of all the edges here are computed based on the intensity differences
+ *   | X | X | X |  >   of neighbouring pixels. Each node (#) maps to one pixel in the image.
+ *   #---#---#---#  |   Overall, the equation system Lx = b represents a diffusion problem.
+ *   | X | X | X |  |   By construction L is SPD.
+ *   #---#---#---#  /
+ *   |   |   |   |  << These edges have always value 1
+ *   0   0   0   0
+ */
 
 namespace campvis {
 namespace cuda {
@@ -27,6 +44,11 @@ namespace cuda {
         CuspDeviceVector b_d;
         CuspDeviceVector x_d;
 
+        // An additional image-sized 8-bit buffer allocated on the gpu that can be used as intermediate
+        // storage when needed (e.g. when creating the system of equations on the gpu)
+        // This avoids allocations on the GPU on every iteration
+        CuspDeviceByteVector imageBuffer_d;
+
         // Information about the system as well as statistics of the solution
         bool isUpsideDown;
         int imageWidth;
@@ -42,6 +64,8 @@ namespace cuda {
         _gpuData->imageWidth = 0;
         _gpuData->imageHeight = 0;
         _gpuData->solutionResidualNorm = 0.0f;
+        _gpuData->systemCreationTime = 0.0f;
+        _gpuData->systemSolveTime = 0.0f;
     }
 
     void CudaConfidenceMapsSystemSolver::uploadImage(const unsigned char* imageData, int imageWidth, int imageHeight,
@@ -49,11 +73,8 @@ namespace cuda {
                                                      bool useGPU, bool isUpsideDown) {
         resizeDataStructures(imageWidth, imageHeight, isUpsideDown);
 
-        // Measure execution time
-        cudaEvent_t start, stop;
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
-        cudaEventRecord(start, 0);
+        // Measure execution time and record it in the _gpuData datastructure
+        CUDAClock clock; clock.start();
 
         if (useGPU) {
             createSystemGPU(imageData, imageWidth, imageHeight, gradientScaling, alpha, beta, gamma, isUpsideDown);
@@ -61,10 +82,7 @@ namespace cuda {
             createSystemCPU(imageData, imageWidth, imageHeight, gradientScaling, alpha, beta, gamma, isUpsideDown);
         }
 
-        cudaEventRecord(stop, 0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&_gpuData->systemCreationTime, start, stop);
-
+        _gpuData->systemCreationTime = clock.getElapsedMilliseconds();
     }
 
     void CudaConfidenceMapsSystemSolver::resetSolution() {
@@ -72,13 +90,17 @@ namespace cuda {
         int height = _gpuData->imageHeight;
         bool isUpsideDown = _gpuData->isUpsideDown;
 
+        // Compute a linear transition image from white to black and set it as current
+        // solution vector
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 float value;
-                if (!isUpsideDown)
+                if (!isUpsideDown) {
                     value = y / (height - 1.0f);
-                else
+                }
+                else {
                     value = 1.0f - y / (height - 1.0f);
+                }
 
                 _gpuData->x_h[y * width + x] = value;
             }
@@ -89,30 +111,25 @@ namespace cuda {
     }
 
     void CudaConfidenceMapsSystemSolver::solve(int maximumIterations, float errorTolerance) {
-        // Measure execution time
-        cudaEvent_t start, stop;
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
-        cudaEventRecord(start, 0);
+        // Measure execution time and record it in the _gpuData datastructure
+        CUDAClock clock; clock.start();
 
+        // The solution is computed using Conjugate Gradient with a Diagonal (Jacobi) preconditioner
         cusp::default_monitor<float> monitor(_gpuData->b_d, maximumIterations, errorTolerance);
         cusp::precond::diagonal<float, cusp::device_memory> M(_gpuData->L_d);
         cusp::krylov::cg(_gpuData->L_d, _gpuData->x_d, _gpuData->b_d, monitor, M);
-
-        // Downlaod data
-        _gpuData->x_h = _gpuData->x_d;
-
         _gpuData->solutionResidualNorm = monitor.residual_norm();
 
-        cudaEventRecord(stop, 0);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&_gpuData->systemSolveTime, start, stop);        
+        // Downlaod the solution, which has been computed on the GPU to the CPU
+        _gpuData->x_h = _gpuData->x_d;
+
+        _gpuData->systemSolveTime = clock.getElapsedMilliseconds();
     }
 
     const float* CudaConfidenceMapsSystemSolver::getSolution(int& width, int& height) {
         width = _gpuData->imageWidth;
         height = _gpuData->imageHeight;
-        return &_gpuData->x_h[0];
+        return thrust::raw_pointer_cast(&_gpuData->x_h[0]);
     }
 
     float CudaConfidenceMapsSystemSolver::getSolutionResidualNorm() const {
@@ -129,15 +146,17 @@ namespace cuda {
 
 
     void CudaConfidenceMapsSystemSolver::resizeDataStructures(int imageWidth, int imageHeight, bool isUpsideDown) {
-        // If the problem size changed, reset the solution vector, as well as resizing the vectors and matrices
+        // If the problem size changed, reset the solution vector, as well as all
+        // the vectors and matrices
         if (_gpuData->imageWidth != imageWidth || _gpuData->imageHeight != imageHeight || _gpuData->isUpsideDown != isUpsideDown) {
-            // Resize the system vectors and matrices to accomodate the different image sze
+            // Resize the system vectors and matrices to accomodate the different image size
             _gpuData->imageWidth = imageWidth;
             _gpuData->imageHeight = imageHeight;
             int numElements = imageWidth * imageHeight;
             _gpuData->x_h.resize(numElements);
             _gpuData->b_d.resize(numElements);
             _gpuData->x_d.resize(numElements);
+            _gpuData->imageBuffer_d.resize(numElements);
             _gpuData->L_d.resize(numElements, numElements, numElements * 9, 9);
             _gpuData->L_h.resize(numElements, numElements, numElements * 9, 9);
 
@@ -162,17 +181,30 @@ namespace cuda {
     // Utility Structure to group together all the data that is needed to compute the equation system
     struct ComputeLaplacianData
     {
+        // User-tweakable parameters
         float alpha, beta, gamma;
         float gradientScaling;
+
+        // Image Data
         const unsigned char *image;
         int width, height;
+
+        // DIA matrix structure
         int centralDiagonal;
         int offsets[9];
+
+        // Penalty terms for each neighbour
         float gammaList[9];
 
+        // Cached values for the image attenuation (controlled by alpha), so that they don't need to
+        // be recomputed at each pixel
         std::vector<float> attenuationLUT;
     };
 
+    /**
+     * Returns the weight of the edge corresponding to the pixel at (x, y) and it's neighbour, specified
+     * by the diagonal parameter (0: top-left, 8: bottom-right)
+     */
     static inline float _getWeight(const ComputeLaplacianData &data, int x, int y, int diagonal)
     {
         const unsigned char *image = data.image;
@@ -209,10 +241,10 @@ namespace cuda {
             data.offsets[i] = offsets[i];
             data.gammaList[i] = gammaList[i];
             _gpuData->L_h.diagonal_offsets[i] = offsets[i];
-            _gpuData->L_d.diagonal_offsets[i] = offsets[i];
         }
 
-        // Precompute attenuation tables
+        // Precompute attenuation tables (controlled by the alpha parameter) so that they don't need
+        // to be recomputed for each pixel
         data.attenuationLUT = std::vector<float>(imageHeight);
         for (int i = 0; i < imageHeight; ++i) {
             float y = (float)i / (float)(imageHeight-1);
@@ -225,15 +257,21 @@ namespace cuda {
             for (int x = 0; x < imageWidth; ++x) {
                 int idx = y * imageWidth + x;
 
-                // Filter off out-of-bounds edges
+                // The filter indicates which edges are currently valid. (E.g. when the current pixel
+                // has x = 0, all the edges facing left are invalid).
+                // The 9th bit corresponds to the top-left edge, while the least-significant-bit corresponds
+                // to the bottom-right corner 
                 unsigned short filter = 495; // 111 101 111
 
                 // 8 - neighbourhood filter
-                if (x == 0)        filter &= 203; // 011 001 011
+                if (x == 0)             filter &= 203; // 011 001 011
                 if (x == imageWidth-1)  filter &= 422; // 110 100 110
-                if (y == 0)        filter &=  47; // 000 101 111
+                if (y == 0)             filter &=  47; // 000 101 111
                 if (y == imageHeight-1) filter &= 488; // 111 101 000
 
+                // If the pixel is in the first or last row, one edge is virtually missing (the one extending
+                // vertically to the seed poits). Its value is accounted for in the b vector, however it still
+                // needs to be accounted for here in the diagonal of the matrix.
                 float valueSum = 0.0f;
                 if (y == 0 || y == imageHeight - 1) valueSum = 1.0f;
 
@@ -320,24 +358,22 @@ namespace cuda {
     void CudaConfidenceMapsSystemSolver::createSystemGPU(const unsigned char* imageData, int imageWidth, int imageHeight,
                                                      float gradientScaling, float alpha, float beta, float gamma,
                                                      bool isUpsideDown) {
-
+        // Initialize the DIA matrix diagonal offsets
         int offsets[9] = {-imageWidth-1, -imageWidth, -imageWidth+1, -1, 0, 1, imageWidth-1, imageWidth, imageWidth+1};
-
         for (int i = 0; i < 9; ++i) {
             _gpuData->L_d.diagonal_offsets[i] = offsets[i];
         }
 
         int numElements = imageWidth * imageHeight;
-
         dim3 dimBlock(32, 32, 1);
         dim3 dimGrid((imageWidth + 31) / 32, (imageHeight + 31) / 32, 1);
-        unsigned char *deviceImage;
-        cudaMalloc((void**)&deviceImage, numElements);
-        cudaMemcpy(deviceImage, imageData, numElements, cudaMemcpyHostToDevice);
+
+        // Since the image will be needed by the CUDA kernel, it needs to be copied on the GPU first
+        cudaMemcpy(thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]), imageData, numElements, cudaMemcpyHostToDevice);
         k_buildSystem<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), _gpuData->L_d.values.pitch,
-                                             deviceImage, imageWidth, imageHeight,
+                                             thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]),
+                                             imageWidth, imageHeight,
                                              gradientScaling, alpha, beta, gamma);
-        cudaFree(deviceImage);
     }
 
 } // cuda
