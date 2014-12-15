@@ -61,6 +61,7 @@ namespace campvis {
         , _selectedDataContainer(0)
         , _logViewer(0)
         , _scriptingConsoleWidget(nullptr)
+        , _workflowWidget(nullptr)
     {
         cgtAssert(_application != 0, "Application must not be 0.");
         ui.setupUi(this);
@@ -141,6 +142,9 @@ namespace campvis {
         ui.scriptingConsoleDock->setVisible(false);
 #endif
 
+        _workflowWidget = new WorkflowControllerWidget(this);
+        ui.workflowDock->setWidget(_workflowWidget);
+
         _dcInspectorWidget = new DataContainerInspectorWidget();
         this->populateMainMenu();
 
@@ -187,6 +191,7 @@ namespace campvis {
         toolsMenu->addAction(ui.pipelineTreeDock->toggleViewAction());
         toolsMenu->addAction(ui.pipelinePropertiesDock->toggleViewAction());
         toolsMenu->addAction(ui.logViewerDock->toggleViewAction());
+        toolsMenu->addAction(ui.workflowDock->toggleViewAction());
     }
 
     bool MainWindow::eventFilter(QObject* watched, QEvent* event) {

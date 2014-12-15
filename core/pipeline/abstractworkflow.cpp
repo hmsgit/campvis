@@ -28,7 +28,7 @@
 #include "cgt/assert.h"
 
 namespace campvis {
-    const std::string AbstractPipeline::loggerCat_ = "CAMPVis.core.pipeline.AbstractWorkflow";
+    const std::string AbstractWorkflow::loggerCat_ = "CAMPVis.core.pipeline.AbstractWorkflow";
 
     AbstractWorkflow::AbstractWorkflow() 
         : _currentStage(0)

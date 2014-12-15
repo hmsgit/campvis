@@ -32,6 +32,7 @@
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
 #include "application/gui/scriptingwidget.h"
+#include "application/gui/workflowcontrollerwidget.h"
 #include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
 
@@ -190,6 +191,7 @@ namespace campvis {
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+        WorkflowControllerWidget* _workflowWidget;          ///< Widget showing the workflow controller
 
         std::vector<QDockWidget*> _primaryDocks;            ///< Docks located in top docking area of the main window
     };
