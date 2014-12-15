@@ -22,6 +22,7 @@ namespace cuda {
          * \param   alpha       controls the depth attenuation correction
          * \param   beta        controls the non-linear mapping of gradients to weights
          * \param   gamma       controls how much diagonal connections are penalized
+         * \param   useGPU      wether or not the equation system should be computed using CUDA
          * \param   isUpsideDown if set to true, the image is interpreted as being upside down (as common in OpenGL)
          */
         void uploadImage(const unsigned char* imageData, int imageWidth, int imageHeight,

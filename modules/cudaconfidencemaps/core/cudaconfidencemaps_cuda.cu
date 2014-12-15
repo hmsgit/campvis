@@ -9,11 +9,14 @@ typedef cusp::dia_matrix<int, float, cusp::device_memory> CuspDeviceDiaMatrix;
 typedef cusp::array1d<float, cusp::host_memory> CuspHostVector;
 typedef cusp::array1d<float, cusp::device_memory> CuspDeviceVector;
 
-#define CUDACONFIDENCEMAPS_USE_GPU_FOR_SYSTEM_CREATION 1;
-
 namespace campvis {
 namespace cuda {
 
+    /**
+     * This struct is used as a sort of Private Implementation of the \see CudaConfidenceMapsSystemSolver
+     * class (PIMPL idiom). This is necessary, since it is not possible to expose CUSP types, such as
+     * vectors and matrices to code that is not compiled using the CUDA compilers
+     */
     struct CudaConfidenceMapsSystemGPUData {
         // Data on the host (only solution vector x and matrix L)
         CuspHostDiaMatrix L_h;
@@ -24,26 +27,13 @@ namespace cuda {
         CuspDeviceVector b_d;
         CuspDeviceVector x_d;
 
-        // Information about the system
+        // Information about the system as well as statistics of the solution
         bool isUpsideDown;
         int imageWidth;
         int imageHeight;
         float solutionResidualNorm;
         float systemCreationTime;
         float systemSolveTime;
-    };
-
-    struct ComputeLaplacianData
-    {
-        float alpha, beta, gamma;
-        float gradientScaling;
-        const unsigned char *image;
-        int width, height;
-        int centralDiagonal;
-        int offsets[9];
-        float gammaList[9];
-
-        std::vector<float> attenuationLUT;
     };
 
     CudaConfidenceMapsSystemSolver::CudaConfidenceMapsSystemSolver()
@@ -167,7 +157,21 @@ namespace cuda {
 
             resetSolution();
         }
-    }
+    }    
+
+    // Utility Structure to group together all the data that is needed to compute the equation system
+    struct ComputeLaplacianData
+    {
+        float alpha, beta, gamma;
+        float gradientScaling;
+        const unsigned char *image;
+        int width, height;
+        int centralDiagonal;
+        int offsets[9];
+        float gammaList[9];
+
+        std::vector<float> attenuationLUT;
+    };
 
     static inline float _getWeight(const ComputeLaplacianData &data, int x, int y, int diagonal)
     {
@@ -272,9 +276,9 @@ namespace cuda {
         const float gammas[] = {gamma_sq2, 0.0f, gamma_sq2, gamma, 0.0f, gamma, gamma_sq2, 0.0f, gamma_sq2};
 
         const float attenuations[] = {
-            1.0f - (y - 1.0f) / (height - 1.0f),
-            1.0f - (y       ) / (height - 1.0f),
-            1.0f - (y + 1.0f) / (height - 1.0f)
+            1.0f - exp(-alpha * (1.0f - (y - 1.0f) / (height - 1.0f))),
+            1.0f - exp(-alpha * (1.0f - (y       ) / (height - 1.0f))),
+            1.0f - exp(-alpha * (1.0f - (y + 1.0f) / (height - 1.0f)))
         };
 
         // Filter off out-of-bounds edges
@@ -304,6 +308,9 @@ namespace cuda {
                 value = d_getWeight(centralValue, v, gradientScaling, beta, gammas[d]);
             }
 
+            // The matrix stores the data, so that values on the same diagonal are sequential.
+            // This means that all the values from [0, pitch) are on the first diagonal, [pitch, 2*pitch)
+            // are on the second diagonal and so on...
             L[d * pitch + pidx] = -value;
             valueSum += value;
         }
