@@ -133,7 +133,7 @@ namespace campvis {
         {
         }
 
-        std::string Vec2PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::vec2 value = static_cast<Vec2Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -151,7 +151,7 @@ namespace campvis {
             : VecPropertyLua<3>(property, dataContainer)
         {
         }
-        std::string Vec3PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::vec3 value = static_cast<Vec3Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -171,7 +171,7 @@ namespace campvis {
         {
         }
 
-        std::string Vec4PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::vec4 value = static_cast<Vec4Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;

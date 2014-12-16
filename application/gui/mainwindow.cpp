@@ -313,7 +313,7 @@ namespace campvis {
                 PropertyCollectionLuaScriptGenerator* _pcLua = new PropertyCollectionLuaScriptGenerator();
                 
                 std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n";
-                for (int i = 1; i < _selectedPipeline->getProcessors().size(); i++) {
+                for (size_t i = 0; i < _selectedPipeline->getProcessors().size(); i++) {
                     pipeScript += "proc = pipeline:getProcessor(" + StringUtils::toString(i) + ")\n";
                     AbstractProcessor* proc = _selectedPipeline->getProcessor(i);
 

@@ -1,6 +1,6 @@
 %module cvio
 %include std_string.i
-%import "core/bindings/campvis.i"
+%include "core/bindings/campvis.i"
 %{
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/autoevaluationpipeline.h"

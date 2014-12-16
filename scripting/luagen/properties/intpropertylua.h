@@ -131,7 +131,7 @@ namespace campvis {
         {
         }
 
-        std::string IVec2PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::ivec2 value = static_cast<IVec2Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -150,7 +150,7 @@ namespace campvis {
         {
         }
 
-        std::string IVec3PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::ivec3 value = static_cast<IVec3Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;
@@ -170,7 +170,7 @@ namespace campvis {
         {
         }
 
-        std::string IVec4PropertyLua::getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
+        std::string getLuaScript(const std::string& propNamePrefix, const std::string& luaProc) {
             cgt::ivec4 value = static_cast<IVec4Property*>(_property)->getValue();
             std::string ret = "";
             ret += luaProc;

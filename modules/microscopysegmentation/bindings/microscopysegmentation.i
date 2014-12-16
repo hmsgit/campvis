@@ -1,6 +1,6 @@
 %module microscopysegmentation
 %include std_string.i
-%import "core/bindings/campvis.i"
+%include "core/bindings/campvis.i"
 
 %{
 #include "core/pipeline/autoevaluationpipeline.h"
