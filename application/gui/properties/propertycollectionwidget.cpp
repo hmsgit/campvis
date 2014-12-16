@@ -30,6 +30,7 @@
 #include "core/properties/abstractproperty.h"
 #include "core/properties/propertycollection.h"
 
+#include <QMetaType>
 #include <QPushButton>
 
 namespace campvis {
@@ -74,12 +75,13 @@ namespace campvis {
         setLayout(_layout);
         connect(this, SIGNAL(s_widgetVisibilityChanged(QWidget*, bool)), this, SLOT(onWidgetVisibilityChanged(QWidget*, bool)));
         connect(this, SIGNAL(propertyAdded(AbstractProperty*)), this, SLOT(addProperty(AbstractProperty*)));
-        connect(this, SIGNAL(propertyRemoved(std::map<AbstractProperty*, QWidget*>::iterator)), this, SLOT(removeProperty(std::map<AbstractProperty*, QWidget*>::iterator)));
+        connect(this, SIGNAL(propertyRemoved(AbstractProperty*, QWidget*)), this, SLOT(removeProperty(AbstractProperty*, QWidget*)));
     }
 
     void PropertyCollectionWidget::clearWidgetMap() {
         for (std::map<AbstractProperty*, QWidget*>::iterator it = _widgetMap.begin(); it != _widgetMap.end(); ++it) {
-            removeProperty(it);
+            it->first->s_visibilityChanged.disconnect(this);
+            removeProperty(it->first, it->second);
         }
 
         _widgetMap.clear();
@@ -107,8 +109,10 @@ namespace campvis {
 
     void PropertyCollectionWidget::onPropCollectionPropRemoved(AbstractProperty* prop) {
         std::map<AbstractProperty*, QWidget*>::iterator it = _widgetMap.find(prop);
-        if (it != _widgetMap.end())
-            emit propertyRemoved(it);
+        if (it != _widgetMap.end()) {
+            emit propertyRemoved(it->first, it->second);
+            _widgetMap.erase(it);
+        }
     }
 
     void PropertyCollectionWidget::addProperty(AbstractProperty* prop) {
@@ -123,10 +127,10 @@ namespace campvis {
         prop->s_visibilityChanged.emitSignal(prop);
     }
 
-    void PropertyCollectionWidget::removeProperty(std::map<AbstractProperty*, QWidget*>::iterator it) {
-        it->first->s_visibilityChanged.disconnect(this);
-        _layout->removeWidget(it->second);
-        delete it->second;
+    void PropertyCollectionWidget::removeProperty(AbstractProperty* prop, QWidget* widget) {
+        prop->s_visibilityChanged.disconnect(this);
+        _layout->removeWidget(widget);
+        delete widget;
     }
 
 }

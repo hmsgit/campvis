@@ -25,6 +25,7 @@
 #include "workflowcontrollerwidget.h"
 
 #include "cgt/assert.h"
+#include "application/campvisapplication.h"
 #include "application/qtjobprocessor.h"
 
 #include <QLabel>
@@ -39,10 +40,11 @@ namespace campvis {
     const std::string WorkflowControllerWidget::loggerCat_ = "CAMPVis.application.WorkflowControllerWidget";
 
 
-    WorkflowControllerWidget::WorkflowControllerWidget(QWidget* parent /*= nullptr*/)
+    WorkflowControllerWidget::WorkflowControllerWidget(CampVisApplication* application, QWidget* parent /*= nullptr*/)
         : QWidget(parent)
+        , _application(application)
         , _workflow(nullptr)
-        , _isBackWardsStep(false)
+        , _isBackWardsStep(true)
         , _signalMapper(nullptr)
         , _lblWorkflowStage(nullptr)
         , _propertyCollectionWidget(nullptr)
@@ -78,7 +80,7 @@ namespace campvis {
         QtJobProc.enqueueJob([&]() {
             if (_workflow != nullptr) {
                 // FIXME: Taking the first of the DataContainers here is not really beautiful!
-                _propertyCollectionWidget->updatePropCollection(_workflow, _workflow->getDataContainers().front());
+                _propertyCollectionWidget->updatePropCollection(_workflow, _workflow->getDataContainer());
 
                 _workflow->s_stageChanged.connect(this, &WorkflowControllerWidget::onStageChanged);
                 _workflow->s_stageAvailabilityChanged.connect(this, &WorkflowControllerWidget::onStageAvailabilityChanged);
@@ -156,6 +158,15 @@ namespace campvis {
                 connect(theButton, SIGNAL(clicked()), _signalMapper, SLOT(map()));
             }
 
+            if (_stageHistory.empty()) {
+                _btnPrevStage->setEnabled(false);
+                _btnPrevStage->setText(tr("<< n/a"));
+            }
+            else {
+                _btnPrevStage->setEnabled(true);
+                _btnPrevStage->setText(tr("<< ") + QString::fromStdString(_workflow->getStage(_stageHistory.back())._title));
+            }
+
             onStageAvailabilityChanged();
         }
     }
@@ -165,20 +176,30 @@ namespace campvis {
             _stageHistory.push_back(previousStage);
         _isBackWardsStep = false;
 
-        QtJobProc.enqueueJob([=]() {
+        QtJobProc.enqueueJob([&]() {
             populateNextStagesLayout();
 
             const AbstractWorkflow::Stage& s = _workflow->getCurrentStage();
             _lblWorkflowStage->setText(QString::fromStdString(s._title));
+
+            for (auto it = s._pipelineCanvasVisibilities.begin(); it != s._pipelineCanvasVisibilities.end(); ++it) {
+                _application->setPipelineVisibility(it->first, it->second);
+            }
         });
 
     }
 
     void WorkflowControllerWidget::onStageAvailabilityChanged() {
-        for (auto it = _nextButtons.begin(); it != _nextButtons.end(); ++it) {
-            int theStage = it->second;
-            it->first->setEnabled(_workflow->isStageAvailable(theStage));
-        }
+        QtJobProc.enqueueJob([&]() {
+            for (auto it = _nextButtons.begin(); it != _nextButtons.end(); ++it) {
+                int theStage = it->second;
+                it->first->setEnabled(_workflow->isStageAvailable(theStage));
+            }
+        });
+    }
+
+    QSize WorkflowControllerWidget::sizeHint() const {
+        return QSize(300, 400);
     }
 
 }

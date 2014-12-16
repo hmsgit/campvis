@@ -48,6 +48,7 @@ namespace cgt {
 
 namespace campvis {
     class AbstractPipeline;
+    class AbstractWorkflow;
     class MainWindow;
     class CampVisPainter;
     class MdiDockableWindow;
@@ -138,6 +139,14 @@ namespace campvis {
         void rebuildAllShadersFromFiles();
 
 
+        /**
+         * Sets the visibility of the given pipeline's canvas to \a visibility.
+         * \param   pipeline    Pipeline whose canvas' visibility should be changed.
+         * \param   visibility  New visibility of the canvas.
+         */
+        void setPipelineVisibility(AbstractPipeline* pipeline, bool visibility);
+
+
 #ifdef CAMPVIS_HAS_SCRIPTING
         /**
          * Returns the global LuaVmState of this application.
@@ -148,18 +157,20 @@ namespace campvis {
 
         /// Signal emitted when the collection of pipelines has changed.
         sigslot::signal0 s_PipelinesChanged;
-
         /// Signal emitted when the collection of DataContainers has changed.
         sigslot::signal0 s_DataContainersChanged;
 
     private:
         void initGlContextAndPipeline(cgt::GLCanvas* canvas, AbstractPipeline* pipeline);
 
+        /// All workflows
+        std::vector<AbstractWorkflow*> _workflows;
 
         /// All pipelines 
         std::vector<PipelineRecord> _pipelines;
 
-        std::map<AbstractPipeline *, MdiDockableWindow *> _pipelineWindows;
+        /// Map of all pipelines with their MDI windows
+        std::map<AbstractPipeline*, MdiDockableWindow*> _pipelineWindows;
 
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;

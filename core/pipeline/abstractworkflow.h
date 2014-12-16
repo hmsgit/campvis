@@ -47,9 +47,9 @@ namespace campvis {
      * states.
      * 
      * To implement your own workflow, subclass this class and populate it with your needs. 
-     * Implement the two pure virtual methods getDataContainers() and getPipelines() accordingly
-     * in order to allow the outside world (i.e. campvis-application) access to the DataContainers
-     * and Pipelines, for instance to create and initialize canvases and stuff. 
+     * Implement the pure virtual method getPipelines() accordingly in order to allow the outside 
+     * world (i.e. campvis-application) access to the Pipelines, for instance to create and 
+     * initialize canvases and stuff. 
      * \b Beware: This way you will transfer ownership of the returned pointers to the caller 
      * (usually the owner of the workflow object). Every owner of a workflow has to make sure to 
      * call these functions and take ownership of those pointers. Furthermore, it has to guarantee 
@@ -75,6 +75,9 @@ namespace campvis {
             /// Possible workflow stages following this stage
             std::vector<Stage*> _possibleTransitions;
 
+            /// Visibilities of the pipeline's canvases
+            std::vector< std::pair<AbstractPipeline*, bool> > _pipelineCanvasVisibilities;
+
             /// Visible properties for this stage
             std::vector<AbstractProperty*> _visibleProperties;
         };
@@ -83,23 +86,12 @@ namespace campvis {
         /**
          * Default constructor
          */
-        AbstractWorkflow();
+        AbstractWorkflow(const std::string& title);
 
         /**
          * Default virtual destructor.
          */
         virtual ~AbstractWorkflow();
-
-        /**
-         * Returns a list of all DataContainers, which are used by this workflow and should appear
-         * in campvis-application. This method is to be called once by the owner of the workflow 
-         * object. Implement this method to your needs when subclassing AbstractWorkflow.
-         * 
-         * \note    Be aware that the caller will take ownership of all pointers in the returned vector!
-         * 
-         * \return  A vector of all DataContainers used in this workflow, caller will take ownership of the pointers.
-         */
-        virtual std::vector<DataContainer*> getDataContainers() = 0;
 
         /**
          * Returns a list of all Pipelines, which are used by this workflow and should appear 
@@ -112,6 +104,12 @@ namespace campvis {
          * \return  A vector of all Pipelines used in this workflow, caller will take ownership of the pointers.
          */
         virtual std::vector<AbstractPipeline*> getPipelines() = 0;
+                
+        /**
+         * Gets the name of this very workflow. To be defined by every subclass.
+         * \return  The name of this workflow.
+         */
+        virtual const std::string getName() const = 0;
 
         /**
          * This method gets called by the owner of the workflow object after it has initialized
@@ -129,6 +127,14 @@ namespace campvis {
          * The default implementation does nothing.
          */
         virtual void deinit();
+
+        /**
+         * Returns the DataContainer of this workflow.
+         * 
+         * \note    Be aware that the caller will take ownership of this pointer!
+         * \return  _dataContainer
+         */
+        DataContainer* getDataContainer();
 
         /**
          * Performs an additional check, whether the stage with ID \a stage is currently available.
@@ -149,10 +155,17 @@ namespace campvis {
         int getCurrentStageId() const;
 
         /**
-         * Returns a const reference to the current workflow stage;
+         * Returns a const reference to the current workflow stage.
          * \return  _stages[_currentStage]
          */
         const Stage& getCurrentStage() const;
+
+        /**
+         * Returns a const reference to the workflow stage with the given id.
+         * \param   id  Id of the workflow stage to return
+         * \return  _stages[id]
+         */
+        const Stage& getStage(int id) const;
 
         /**
          * Sets the current workflow stage to the one with the given ID.
@@ -169,18 +182,20 @@ namespace campvis {
         /// Signal emitted when the current stage has changed, passes the IDs of the former and the new workflow stage.
         sigslot::signal2<int, int> s_stageChanged;
 
-        /// signal emitted each time the availability of any stage has changed
+        /// Signal emitted each time the availability of any stage has changed.
+        /// \note   You should emit this signal according to your overload of isStageAvailable().
         sigslot::signal0 s_stageAvailabilityChanged;
 
     protected:
         /**
          * Registers a new workflow stage with the given ID, title and optionally visible parameters.
          * \note    You should not call this method somewhere else than in the constructor.
-         * \param   id                  Integer ID of the new stage. I \b strongly recommend to use enums for this.
-         * \param   title               Title of the stage to display in the GUI.
-         * \param   visibleProperties   Vector of visible properties, when this stage is active. Defaults to an empty list.
+         * \param   id                          Integer ID of the new stage. I \b strongly recommend to use enums for this.
+         * \param   title                       Title of the stage to display in the GUI.
+         * \param   pipelineCanvasVisibilities  Visibilities of the pipeline's canvases.
+         * \param   visibleProperties           Vector of visible properties, when this stage is active. Defaults to an empty list.
          */
-        void addStage(int id, const std::string& title, const std::vector<AbstractProperty*>& visibleProperties = std::vector<AbstractProperty*>());
+        void addStage(int id, const std::string& title, const std::vector< std::pair<AbstractPipeline*, bool> >& pipelineCanvasVisibilities, const std::vector<AbstractProperty*>& visibleProperties = std::vector<AbstractProperty*>());
 
         /**
          * Registers a new transition between the two given workflow stages.
@@ -189,7 +204,7 @@ namespace campvis {
          */
         void addStageTransition(int from, int to);
 
-
+        DataContainer* _dataContainer;      ///< DataContainer of this workflow. BEWARE: You do not own this pointer!
         int _currentStage;                  ///< currently active workflow stage
         std::map<int, Stage*> _stages;      ///< Map of all workflow stages by ID
 

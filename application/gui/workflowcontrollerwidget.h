@@ -41,6 +41,7 @@ class QSignalMapper;
 class QVBoxLayout;
 
 namespace campvis {
+    class CampVisApplication;
 
     /**
      * This widget is used to offer a user interface to an \a AbstractWorkflow instance.
@@ -55,9 +56,10 @@ namespace campvis {
 
         /**
          * Creates a new WorkflowControllerWidget.
+         * \param   application     Pointer to the CampvisApplication owning this widget, must not be 0.
          * \param   parent          Parent Qt widget, may be 0 (default)
          */
-        explicit WorkflowControllerWidget(QWidget* parent = nullptr);
+        explicit WorkflowControllerWidget(CampVisApplication* application, QWidget* parent = nullptr);
 
         /**
          * Destructor.
@@ -69,6 +71,8 @@ namespace campvis {
 
         /// dummy. may be useful at some point
         void deinit();
+
+        QSize sizeHint() const;
 
         /**
          * Sets the AbstractWorkflow that should be handled by this widget.
@@ -93,6 +97,7 @@ namespace campvis {
         /// connects to \a AbstractWorkflow::s_stageAvailabilityChanged signal
         void onStageAvailabilityChanged();
 
+        CampVisApplication* _application;       ///< Pointer to the CampvisApplication owning this widget, must not be 0.
         AbstractWorkflow* _workflow;            ///< the currently associated \a WorkflowController
         std::list<int> _stageHistory;           ///< History of the visited stages, used to provide "go back" functionality
         bool _isBackWardsStep;                  ///< Flag whether current stage selection is a backwards step (then don't add previous stage to history)

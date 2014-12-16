@@ -30,10 +30,11 @@
 namespace campvis {
     const std::string AbstractWorkflow::loggerCat_ = "CAMPVis.core.pipeline.AbstractWorkflow";
 
-    AbstractWorkflow::AbstractWorkflow() 
-        : _currentStage(0)
+    AbstractWorkflow::AbstractWorkflow(const std::string& title) 
+        : _dataContainer(nullptr)
+        , _currentStage(-1)
     {
-
+        _dataContainer = new DataContainer(title);
     }
 
     AbstractWorkflow::~AbstractWorkflow() {
@@ -47,7 +48,7 @@ namespace campvis {
 
         // default initialize the workflow with the stage with the lowest ID
         if (_stages.find(_currentStage) == _stages.end())
-            _currentStage = _stages.begin()->first;
+            setCurrentStage(_stages.begin()->first);
     }
 
     void AbstractWorkflow::deinit() {
@@ -64,10 +65,14 @@ namespace campvis {
     }
 
     const AbstractWorkflow::Stage& AbstractWorkflow::getCurrentStage() const {
-        cgtAssert(_stages.find(_currentStage) != _stages.end(), "Could not find current stage in workflow stage map. This must not happen!");
+        return getStage(_currentStage);
+    }
+
+    const AbstractWorkflow::Stage& AbstractWorkflow::getStage(int id) const {
+        cgtAssert(_stages.find(id) != _stages.end(), "Could not find current stage in workflow stage map. This must not happen!");
 
         // use at() since there is no const overload of operator[]...
-        const Stage* toReturn = _stages.at(_currentStage);
+        const Stage* toReturn = _stages.at(id);
         return *toReturn;
     }
 
@@ -86,22 +91,28 @@ namespace campvis {
         s_stageChanged.emitSignal(oldStage, _currentStage);
     }
 
-    void AbstractWorkflow::addStage(int id, const std::string& title, const std::vector<AbstractProperty*>& visibleProperties /*= std::vector<AbstractProperty*>()*/) {
-        cgtAssert(_stages.find(id) == _stages.end(), "Tried two stages with the same ID.");
+    void AbstractWorkflow::addStage(int id, const std::string& title, const std::vector< std::pair<AbstractPipeline*, bool> >& pipelineCanvasVisibilities, const std::vector<AbstractProperty*>& visibleProperties /*= std::vector<AbstractProperty*>()*/) {
+        cgtAssert(_stages.find(id) == _stages.end(), "Tried to add two stages with the same ID.");
 
         Stage* s = new Stage();
         s->_id = id;
         s->_title = title;
+        s->_pipelineCanvasVisibilities = pipelineCanvasVisibilities;
         s->_visibleProperties = visibleProperties;
 
         _stages[id] = s;
     }
 
     void AbstractWorkflow::addStageTransition(int from, int to) {
-        cgtAssert(_stages.find(from) == _stages.end(), "Tried to register a stage transition with an ivalid stage ID.");
-        cgtAssert(_stages.find(to) == _stages.end(), "Tried to register a stage transition with an ivalid stage ID.");
+        cgtAssert(_stages.find(from) != _stages.end(), "Tried to register a stage transition with an ivalid stage ID.");
+        cgtAssert(_stages.find(to) != _stages.end(), "Tried to register a stage transition with an ivalid stage ID.");
 
         _stages[from]->_possibleTransitions.push_back(_stages[to]);
     }
-    
+
+    DataContainer* AbstractWorkflow::getDataContainer() {
+        return _dataContainer;
+    }
+
+
 }

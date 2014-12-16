@@ -92,6 +92,13 @@ namespace campvis {
          */
         MdiDockableWindow * addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
 
+
+        /**
+         * Sets the workflow of this Mainwindow to \a w.
+         * \param   w   The workflow to display for this window.
+         */
+        void setWorkflow(AbstractWorkflow* w);
+
     protected:
         /**
          * Listens to resize events on _pipelinePropertiesWidget and resizes _pipelinePropertiesScrollArea accordingly

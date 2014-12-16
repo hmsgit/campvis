@@ -142,8 +142,9 @@ namespace campvis {
         ui.scriptingConsoleDock->setVisible(false);
 #endif
 
-        _workflowWidget = new WorkflowControllerWidget(this);
+        _workflowWidget = new WorkflowControllerWidget(_application, this);
         ui.workflowDock->setWidget(_workflowWidget);
+        ui.workflowDock->setVisible(! _application->_workflows.empty());
 
         _dcInspectorWidget = new DataContainerInspectorWidget();
         this->populateMainMenu();
@@ -350,6 +351,11 @@ namespace campvis {
             _application->getLuaVmState()->execString(cmd.toStdString());
         }
 #endif
+    }
+
+    void MainWindow::setWorkflow(AbstractWorkflow* w) {
+        ui.workflowDock->setVisible(true);
+        _workflowWidget->setWorkflow(w);
     }
 
 }
