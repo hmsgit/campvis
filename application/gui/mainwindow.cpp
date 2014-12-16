@@ -39,6 +39,12 @@
 #include "modules/pipelinefactory.h"
 
 #include <QScrollBar>
+#include <QFileDialog>
+
+#include <fstream>
+
+#include "scripting/luagen/properties/propertycollectionluascriptgenerator.h"
+#include "scripting/luagen/properties/abstractpropertylua.h"
 
 
 namespace campvis {
@@ -103,6 +109,26 @@ namespace campvis {
         _containerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
         _cwLayout->addWidget(_pipelineWidget, 1, 0, 1, 2);
 
+        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", _containerWidget);
+        _cwLayout->addWidget(_btnExecute, 2, 0, 1, 2);
+
+        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", _containerWidget);
+        _cwLayout->addWidget(_btnShowDataContainerInspector, 3, 0, 1, 2);
+
+#ifdef CAMPVIS_HAS_SCRIPTING
+        _btnLuaLoad = new QPushButton("Load Script", _containerWidget);
+        _cwLayout->addWidget(_btnLuaLoad, 4, 0, 1, 2);
+        _btnLuaSave = new QPushButton("Save Script", _containerWidget);
+        _cwLayout->addWidget(_btnLuaSave, 5, 0, 1, 2);
+        connect(
+            _btnLuaLoad, SIGNAL(clicked()), 
+            this, SLOT(onBtnLuaLoadClicked()));
+        connect(
+            _btnLuaSave, SIGNAL(clicked()), 
+            this, SLOT(onBtnLuaSaveClicked()));
+#else
+#endif
+
         _containerWidget->setLayout(_cwLayout);
         ui.pipelineTreeDock->setWidget(_containerWidget);
 
@@ -119,12 +145,6 @@ namespace campvis {
         QVBoxLayout* rightLayout = new QVBoxLayout(_pipelinePropertiesWidget);
         rightLayout->setSpacing(4);
         _pipelinePropertiesWidget->setLayout(rightLayout);
-
-        _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", _pipelinePropertiesWidget);
-        rightLayout->addWidget(_btnExecute);
-
-        _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", _pipelinePropertiesWidget);
-        rightLayout->addWidget(_btnShowDataContainerInspector);
 
         _propCollectionWidget = new PropertyCollectionWidget(this);
         rightLayout->addWidget(_propCollectionWidget);
@@ -168,6 +188,7 @@ namespace campvis {
 
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
         _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
+
     }
 
     void MainWindow::populateMainMenu() {
@@ -236,11 +257,13 @@ namespace campvis {
                 }
 
                 emit updatePropCollectionWidget(ptr, &_selectedPipeline->getDataContainer());
+
             }
             else {
                 emit updatePropCollectionWidget(0, 0);
                 _selectedDataContainer = 0;
             }
+
         }
         else {
             emit updatePropCollectionWidget(0, 0);
@@ -263,6 +286,53 @@ namespace campvis {
                 (*it)->invalidate(AbstractProcessor::INVALID_RESULT);
             }
         }
+    }
+
+    void MainWindow::onBtnLuaLoadClicked() {
+#ifdef CAMPVIS_HAS_SCRIPTING
+        const QString dialogCaption = QString::fromStdString("Select File");
+        const QString directory = QString::fromStdString(".");
+        const QString fileFilter = tr("All files (*)");
+
+        QString filename = QFileDialog::getOpenFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
+        if (filename != nullptr && _application->getLuaVmState() != nullptr) {
+            _application->getLuaVmState()->execFile(filename.toStdString());
+        }
+#endif
+    }
+
+    void MainWindow::onBtnLuaSaveClicked() {
+#ifdef CAMPVIS_HAS_SCRIPTING
+        const QString dialogCaption = QString::fromStdString("Save File as");
+        const QString directory = QString::fromStdString(".");
+        const QString fileFilter = tr("All files (*)");
+
+        QString filename = QFileDialog::getSaveFileName(QWidget::parentWidget(), dialogCaption, directory, fileFilter);
+
+        if (filename != nullptr) {
+            if (_selectedProcessor != 0 && _selectedPipeline != 0) {
+                PropertyCollectionLuaScriptGenerator* _pcLua = new PropertyCollectionLuaScriptGenerator();
+                
+                std::string pipeScript = "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n";
+                for (size_t i = 0; i < _selectedPipeline->getProcessors().size(); i++) {
+                    pipeScript += "proc = pipeline:getProcessor(" + StringUtils::toString(i) + ")\n";
+                    AbstractProcessor* proc = _selectedPipeline->getProcessor(i);
+
+                    _pcLua->updatePropCollection(proc, &_selectedPipeline->getDataContainer());
+                    std::string res = _pcLua->getLuaScript(std::string(""), std::string("proc:"));
+                    pipeScript += res;
+                }
+                if (pipeScript != "pipeline = pipelines[\"" + _selectedPipeline->getName()+"\"]\n\n") {
+                    std::ofstream file;
+                    file.open(filename.toStdString());
+                    file << pipeScript.c_str();
+                    file.close();
+                }
+                
+                delete _pcLua;
+            }
+        }
+#endif
     }
 
     void MainWindow::onBtnShowDataContainerInspectorClicked() {

@@ -278,6 +278,9 @@ namespace campvis {
         //if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", name))
             LERROR("Could not inject the pipeline into the Lua VM.");
 
+        if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", pipeline->getName()))
+            LERROR("Could not inject the pipeline into the Lua VM.");
+
         _luaVmState->execString("inspect(pipelines)");
 #endif
 

@@ -160,17 +160,17 @@ vec3 Camera::project(ivec2 vp, vec3 point) const {
     GLdouble modelview[16];
     GLdouble projection[16];
 
-    cgt::mat4 projection_tgt = getProjectionMatrix();
-    cgt::mat4 modelview_tgt = getViewMatrix();
+    cgt::mat4 projection_cgt = getProjectionMatrix();
+    cgt::mat4 modelview_cgt = getViewMatrix();
     for (int i = 0; i < 4; ++i) {
-        modelview[i+0]   = modelview_tgt[i].x;
-        modelview[i+4]   = modelview_tgt[i].y;
-        modelview[i+8]   = modelview_tgt[i].z;
-        modelview[i+12]  = modelview_tgt[i].w;
-        projection[i+0]  = projection_tgt[i].x;
-        projection[i+4]  = projection_tgt[i].y;
-        projection[i+8]  = projection_tgt[i].z;
-        projection[i+12] = projection_tgt[i].w;
+        modelview[i+0]   = modelview_cgt[i].x;
+        modelview[i+4]   = modelview_cgt[i].y;
+        modelview[i+8]   = modelview_cgt[i].z;
+        modelview[i+12]  = modelview_cgt[i].w;
+        projection[i+0]  = projection_cgt[i].x;
+        projection[i+4]  = projection_cgt[i].y;
+        projection[i+8]  = projection_cgt[i].z;
+        projection[i+12] = projection_cgt[i].w;
     }
     viewport[0] = 0;
     viewport[1] = 0;

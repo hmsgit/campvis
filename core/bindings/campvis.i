@@ -17,7 +17,10 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/classification/tfgeometry1d.h"
+#include "core/classification/tfgeometry2d.h"
 #include "core/classification/geometry1dtransferfunction.h"
+#include "core/classification/simpletransferfunction.h"
+#include "core/classification/geometry2dtransferfunction.h"
 %}
 
 
@@ -117,6 +120,7 @@ namespace campvis {
         virtual ~NumericProperty();
     };
 
+    
     %template(IntGenericProperty) GenericProperty< int >;
     %template(IntProperty) NumericProperty< int >;
     typedef NumericProperty< int > IntProperty;
@@ -181,6 +185,38 @@ namespace campvis {
     %template(Vec4NumericProperty) NumericProperty< cgt::Vector4<float> >;
     %template(Vec4Property) FloatingPointProperty< cgt::Vector4<float> >;
     typedef FloatingPointProperty< cgt::Vector4<float> > Vec4Property;
+
+    /* OptionProperty */
+        
+    class AbstractOptionProperty : public IntProperty {
+    public:
+        AbstractOptionProperty(const std::string& name, const std::string& title);
+        virtual ~AbstractOptionProperty();
+        virtual const std::string& getOptionId() = 0;
+        virtual void selectById(const std::string& id) = 0;
+    };
+
+    template<typename T>
+    class GenericOptionProperty : public AbstractOptionProperty {
+    public:		
+        GenericOptionProperty(
+            const std::string& name, 
+            const std::string& title, 
+            const GenericOption<T>* options,
+            int count);		
+        virtual ~GenericOptionProperty();		
+        const std::string& getOptionId();
+        void selectById(const std::string& id);
+    };
+
+    /* Downcast the return value of selectById to appropriate subclass */
+    %factory(void campvis::AbstractOptionProperty::selectById,
+             campvis::GenericOptionProperty);
+
+    /* Downcast the return value of getOptionId to appropriate subclass */
+    %factory(void campvis::AbstractOptionProperty::getOptionId,
+             campvis::GenericOptionProperty);
+
     /* TFGeometry1D */
 
     %nodefaultctor TFGeometry1D;
@@ -188,7 +224,20 @@ namespace campvis {
     class TFGeometry1D {
     public:
         virtual ~TFGeometry1D();
-        static TFGeometry1D* createQuad(const cgt::vec2& interval, const cgt::col4& leftColor, const cgt::vec4& rightColor);
+        static TFGeometry1D* createQuad(const cgt::vec2& interval, const cgt::col4& leftColor, const cgt::col4& rightColor);
+    
+        void addKeyPoint(float position, float alpha);
+        void addKeyPoint(float position, const cgt::col4& color);
+    };
+
+    /* TFGeometry2D */
+
+    %nodefaultctor TFGeometry2D;
+
+    class TFGeometry2D {
+    public:
+        virtual ~TFGeometry2D();
+        static TFGeometry2D* createQuad(const cgt::vec2& ll, const cgt::vec2& ur, const cgt::col4& color);
     };
 
     /* AbstractTransferFunction */
@@ -201,6 +250,17 @@ namespace campvis {
         virtual AbstractTransferFunction* clone() const = 0;
     };
 
+    /* SimpleTransferFunction */
+    class SimpleTransferFunction : public AbstractTransferFunction {
+    public: 
+        SimpleTransferFunction(size_t size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
+        virtual ~SimpleTransferFunction();
+        virtual SimpleTransferFunction* clone() const;
+        void setLeftColor(const cgt::col4& color);
+        void setRightColor(const cgt::col4& color);
+
+    };
+
     /* GenericGeometryTransferFunction */
 
     template<class T>
@@ -211,7 +271,7 @@ namespace campvis {
 
         void addGeometry(T* geometry);
     };
-
+    
     /* Geometry1DTransferFunction */
 
     %template(GenericGeometryTransferFunction_TFGeometry1D) GenericGeometryTransferFunction<TFGeometry1D>;
@@ -222,6 +282,18 @@ namespace campvis {
         virtual ~Geometry1DTransferFunction();
 
         virtual Geometry1DTransferFunction* clone() const;
+    };
+
+    /* Geometry2DTransferFunction */
+
+    %template(GenericGeometryTransferFunction_TFGeometry2D) GenericGeometryTransferFunction<TFGeometry2D>;
+
+    class Geometry2DTransferFunction : public GenericGeometryTransferFunction<TFGeometry2D> {
+    public:
+        Geometry2DTransferFunction(const cgt::svec2& size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
+        virtual ~Geometry2DTransferFunction();
+
+        virtual Geometry2DTransferFunction* clone() const;
     };
 
     /* TransferFunctionProperty */
@@ -321,17 +393,22 @@ namespace campvis {
         sigslot::signal0 s_changed;
         %mutable;
     };
+    
+    /* Down casting or super classes.
+     * Down casting follows the order of declaration.
+     * Declare the classes as child first according to the class hierarchy.
+     */
 
     /* Downcast the return value of HasPropertyCollection::getProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getProperty,
-             campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::AbstractOptionProperty, campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
 
     /* Downcast the return value of HasPropertyCollection::getNestedProperty to appropriate subclass */
     %factory(AbstractProperty* campvis::HasPropertyCollection::getNestedProperty,
-             campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
+             campvis::AbstractOptionProperty, campvis::IntProperty, campvis::IVec2Property, campvis::IVec3Property, campvis::IVec4Property,
              campvis::FloatProperty, campvis::Vec2Property, campvis::Vec3Property, campvis::Vec4Property,
              campvis::TransferFunctionProperty,
              campvis::DataNameProperty, campvis::StringProperty, campvis::ButtonProperty, campvis::BoolProperty);
@@ -383,10 +460,11 @@ namespace campvis {
 
         const DataContainer& getDataContainer() const;
         DataContainer& getDataContainer();
-
+        
         virtual void addProcessor(AbstractProcessor* processor);
         virtual void executePipeline() = 0;
         AbstractProcessor* getProcessor(const std::string& name) const;
+        AbstractProcessor* getProcessor(int index) const;
 
         sigslot::signal0 s_init;
         sigslot::signal0 s_deinit;

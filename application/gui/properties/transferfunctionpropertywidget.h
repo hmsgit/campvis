@@ -71,6 +71,11 @@ namespace campvis {
          */
         void onTransferFunctionAutoFitWindowToDataChanged();
 
+    
+    signals:
+        void s_beforeTFReplace(AbstractTransferFunction* tf);
+        void s_afterTFReplace(AbstractTransferFunction* tf);
+
     private slots:
         /// slot called when one of the intensity domain spin edits has changed
         void onDomainChanged(double value);
@@ -80,6 +85,18 @@ namespace campvis {
         void onFitClicked(bool checked);
         /// slot called when _cbAutoFitDomainToImage changed
         void onAutoFitDomainToImageChanged(int state);
+
+    protected slots:
+        /// slot called when transfer function is about to be replaced
+        void execBeforeTFReplace(AbstractTransferFunction *tf);
+        /// slot called when transfer function just has replaced
+        void execAfterTFReplace(AbstractTransferFunction *tf);
+    
+    private:
+        /// catch slot for tf replace action
+        void onBeforeTFReplace(AbstractTransferFunction *tf);
+        /// catch slot for tf replace action
+        void onAfterTFReplace(AbstractTransferFunction *tf);
 
     private:
         QWidget* _widget;                   ///< Widget grouping the widgets together
@@ -94,6 +111,8 @@ namespace campvis {
 
         QDockWidget* _dockWidget;                   ///< DockWidget for transfer function editor
         AbstractTransferFunctionEditor* _editor;    ///< Transfer function editor
+
+        bool wasVisible;                    ///< remembers whether _docWidget was visible or not
     };
 
     // explicitly instantiate template, so that it gets registered also over DLL boundaries.

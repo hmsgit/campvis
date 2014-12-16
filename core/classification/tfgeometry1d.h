@@ -95,6 +95,20 @@ namespace campvis {
 
         /// Signal to be emitted when this TF geometry has changed.
         sigslot::signal0 s_changed;
+        
+        /**
+         * Adds a new KeyPoint
+         * \param   position    Position of new KeyPoint
+         * \param   color       Alpha of color of new KeyPoint. Color is interpolated from neighbors
+         */
+        void addKeyPoint(float position, float alpha);
+
+        /**
+         * Adds a new KeyPoint
+         * \param   position    Position of new KeyPoint
+         * \param   alpha       Color for left KeyPoint
+         */
+        void addKeyPoint(float position, const cgt::col4& color);
 
         /**
          * Creates a simple quad geometry for the given interval.

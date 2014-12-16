@@ -1,7 +1,7 @@
 %module base
 %include std_string.i
 %import "ext/cgt/bindings/cgt.i"
-%import "core/bindings/campvis.i"
+%include "core/bindings/campvis.i"
 %{
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "core/pipeline/visualizationprocessor.h"
