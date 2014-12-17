@@ -37,13 +37,12 @@ MACRO(WRITE_PIPELINE_REGISTRATION FileName)
         LIST(APPEND PipelineRegistrationSource "#include \"${IncludeFile}\"\n" )
     ENDFOREACH()
     
-    LIST(APPEND PipelineRegistrationSource "\nnamespace campvis {\n" )
-    LIST(APPEND PipelineRegistrationSource "\t// Instantiate templated PipelineRegistrars to register the pipelines.\n" )
+    LIST(APPEND PipelineRegistrationSource "\n// Instantiate templated PipelineRegistrars to register the pipelines.\n" )
     FOREACH(ClassName ${PipelineRegistrationClassNames})
-        LIST(APPEND PipelineRegistrationSource "\ttemplate class PipelineRegistrar<${ClassName}>\;\n" )
+        LIST(APPEND PipelineRegistrationSource "template class campvis::PipelineRegistrar<${ClassName}>\;\n" )
     ENDFOREACH()
 
-    LIST(APPEND PipelineRegistrationSource "}\n\n" )
+    LIST(APPEND PipelineRegistrationSource "\n" )
 
     FILE(WRITE ${FileName} ${PipelineRegistrationSource})
 ENDMACRO(WRITE_PIPELINE_REGISTRATION)
@@ -55,7 +54,17 @@ MACRO(PARSE_HEADER_FOR_PIPELINE FileName)
     SET(NameRegex "[A-Za-z0-9_]+")
     SET(FullyQualifiedNameRegex "(::)?(${NameRegex}::)*${NameRegex}")
     SET(BaseClassListRegex "((public|private|protected)( virtual)? ${FullyQualifiedNameRegex}, )*")
+    SET(NamespaceRegex "namespace (${NameRegex}) {")
     SET(ClassRegex "class (${NameRegex}) ?: ${BaseClassListRegex}public ${FullyQualifiedNameRegex}Pipeline")
+
+    # Find the namespace nesting of this class (very simplified parsing)
+    SET(FullNamespace "")
+    STRING(REGEX MATCHALL ${NamespaceRegex} namespaces ${content})
+    FOREACH(n ${namespaces})
+        # Extract namespace name and concatenate
+        STRING(REGEX REPLACE ${NamespaceRegex} "\\1" RESULT ${n})
+        SET(FullNamespace "${FullNamespace}${RESULT}::")
+    ENDFOREACH()
 
     # Find all class definitions inheriting from a Pipeline
     STRING(REGEX MATCHALL ${ClassRegex} matches ${content})
@@ -63,7 +72,7 @@ MACRO(PARSE_HEADER_FOR_PIPELINE FileName)
     FOREACH(m ${matches})
         # Extract class name and register
         STRING(REGEX REPLACE ${ClassRegex} "\\1" RESULT ${m})
-        ADD_PIPELINE_REGISTRATION(${FileName} ${RESULT})
+        ADD_PIPELINE_REGISTRATION(${FileName} "${FullNamespace}${RESULT}")
     ENDFOREACH()
 ENDMACRO(PARSE_HEADER_FOR_PIPELINE)
 
