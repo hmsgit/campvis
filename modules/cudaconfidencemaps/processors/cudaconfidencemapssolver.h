@@ -85,12 +85,17 @@ namespace campvis {
 
         ButtonProperty p_resetResult;
 
-        NumericProperty<int> p_iterations;          /// < Number of CG-Iterations to do
+        NumericProperty<int> p_iterations;          ///< Number of CG-Iterations to do
 
         FloatProperty p_gradientScaling;
         FloatProperty p_paramAlpha;
         FloatProperty p_paramBeta;
         FloatProperty p_paramGamma;
+
+        BoolProperty  p_useAlphaBetaFilter;
+        FloatProperty p_filterAlpha;                ///< Alpha parameter for Alpha-Beta Filter
+        FloatProperty p_filterBeta;                 ///< Beta parameter for Alpha-Beta Filter
+
         BoolProperty  p_createSystemOnGPU;
         BoolProperty  p_printStatistics;
 

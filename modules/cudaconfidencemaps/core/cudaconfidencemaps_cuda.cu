@@ -1,6 +1,7 @@
 #include "cudaconfidencemaps_cuda.h"
 #include "cudautils.h"
 
+#include <cusp/blas.h>
 #include <cusp/dia_matrix.h>
 #include <cusp/krylov/cg.h>
 #include <cusp/precond/diagonal.h>
@@ -44,6 +45,13 @@ namespace cuda {
         CuspDeviceVector b_d;
         CuspDeviceVector x_d;
 
+        // Additional data needed to perform the alpha-beta filtering
+        CuspDeviceVector abFilterX_d; // Solution estimate
+        CuspDeviceVector abFilterV_d; // Velocity
+        CuspDeviceVector abFilterR_d; // Residual
+        float abFilterAlpha;
+        float abFilterBeta;
+
         // An additional image-sized 8-bit buffer allocated on the gpu that can be used as intermediate
         // storage when needed (e.g. when creating the system of equations on the gpu)
         // This avoids allocations on the GPU on every iteration
@@ -51,6 +59,7 @@ namespace cuda {
 
         // Information about the system as well as statistics of the solution
         bool isUpsideDown;
+        bool useAlphaBetaFiltering;
         int imageWidth;
         int imageHeight;
         int iterationCount;
@@ -67,6 +76,11 @@ namespace cuda {
         _gpuData->solutionResidualNorm = 0.0f;
         _gpuData->systemCreationTime = 0.0f;
         _gpuData->systemSolveTime = 0.0f;
+        _gpuData->isUpsideDown = true;
+
+        _gpuData->useAlphaBetaFiltering = false;
+        _gpuData->abFilterAlpha = 0.125;
+        _gpuData->abFilterBeta = 0.250;
     }
 
     CudaConfidenceMapsSystemSolver::~CudaConfidenceMapsSystemSolver()
@@ -77,17 +91,13 @@ namespace cuda {
 
     void CudaConfidenceMapsSystemSolver::uploadImage(const unsigned char* imageData, int imageWidth, int imageHeight,
                                                      float gradientScaling, float alpha, float beta, float gamma,
-                                                     bool useGPU, bool isUpsideDown) {
+                                                     bool isUpsideDown) {
         resizeDataStructures(imageWidth, imageHeight, isUpsideDown);
 
         // Measure execution time and record it in the _gpuData datastructure
         CUDAClock clock; clock.start();
 
-        if (useGPU) {
-            createSystemGPU(imageData, imageWidth, imageHeight, gradientScaling, alpha, beta, gamma, isUpsideDown);
-        } else {
-            createSystemCPU(imageData, imageWidth, imageHeight, gradientScaling, alpha, beta, gamma, isUpsideDown);
-        }
+        createSystemGPU(imageData, imageWidth, imageHeight, gradientScaling, alpha, beta, gamma, isUpsideDown);
 
         _gpuData->systemCreationTime = clock.getElapsedMilliseconds();
     }
@@ -115,8 +125,25 @@ namespace cuda {
 
         // Uplaod solution vector on the GPU
         _gpuData->x_d = _gpuData->x_h;
-        std::cout << "Reset!" << std::endl;
+
+        // Prepare data structures for alpha-beta filtering
+        _gpuData->abFilterX_d = _gpuData->x_d;
+        cusp::blas::fill(_gpuData->abFilterV_d, 0.0f);
     }
+
+    bool CudaConfidenceMapsSystemSolver::alphaBetaFilterEnabled() const {
+        return _gpuData->useAlphaBetaFiltering;
+    }
+
+    void CudaConfidenceMapsSystemSolver::enableAlphaBetaFilter(bool enabled) {
+        _gpuData->useAlphaBetaFiltering = enabled;
+    }
+
+    void CudaConfidenceMapsSystemSolver::setAlphaBetaFilterParameters(float alpha, float beta) {
+        _gpuData->abFilterAlpha = alpha;
+        _gpuData->abFilterBeta = beta;
+    }
+
 
     void CudaConfidenceMapsSystemSolver::solve(int maximumIterations, float errorTolerance) {
         // Measure execution time and record it in the _gpuData datastructure
@@ -129,8 +156,24 @@ namespace cuda {
         _gpuData->solutionResidualNorm = monitor.residual_norm();
         _gpuData->iterationCount = monitor.iteration_count();
 
-        // Downlaod the solution, which has been computed on the GPU to the CPU
-        _gpuData->x_h = _gpuData->x_d;
+        if (alphaBetaFilterEnabled()) {
+            // X' = X' + V'
+            cusp::blas::axpy(_gpuData->abFilterV_d, _gpuData->abFilterX_d, 1.0f);
+            // R' = X - X'
+            cusp::blas::axpby(_gpuData->x_d, _gpuData->abFilterX_d, _gpuData->abFilterR_d, 1.0f, -1.0f);
+
+            // X' = X' + alpha * R'
+            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterX_d, _gpuData->abFilterAlpha);
+            // V' = V' + beta * R'
+            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterV_d, _gpuData->abFilterBeta);
+
+            // Download the smoothed solution to the host
+            _gpuData->x_h = _gpuData->abFilterX_d;
+        }
+        else {
+            // Downlaod the actual solution, which has been computed to the host
+            _gpuData->x_h = _gpuData->x_d;
+        }
 
         _gpuData->systemSolveTime = clock.getElapsedMilliseconds();
     }
@@ -174,6 +217,8 @@ namespace cuda {
             _gpuData->imageBuffer_d.resize(numElements);
             _gpuData->L_d.resize(numElements, numElements, numElements * 9, 9);
             _gpuData->L_h.resize(numElements, numElements, numElements * 9, 9);
+            _gpuData->abFilterR_d.resize(numElements);
+            _gpuData->abFilterV_d.resize(numElements);
 
             // Set the b vector to 0 (except for the row corresponding to the seed points set to 1)
             if (isUpsideDown) {
@@ -189,6 +234,7 @@ namespace cuda {
                 cusp::blas::fill(rest,     0.0f);
             }
 
+            // Reset x_d to be a linear gradient
             resetSolution();
         }
     }    
@@ -215,99 +261,6 @@ namespace cuda {
         // be recomputed at each pixel
         std::vector<float> attenuationLUT;
     };
-
-    /**
-     * Returns the weight of the edge corresponding to the pixel at (x, y) and it's neighbour, specified
-     * by the diagonal parameter (0: top-left, 8: bottom-right)
-     */
-    static inline float _getWeight(const ComputeLaplacianData &data, int x, int y, int diagonal)
-    {
-        const unsigned char *image = data.image;
-
-        int idx1 = y * data.width + x;
-        int idx2 = idx1 + data.offsets[diagonal];
-
-        float attenuation1 = data.attenuationLUT[idx1 / data.width];
-        float attenuation2 = data.attenuationLUT[idx2 / data.width];
-
-        float gradient = abs(image[idx1]*attenuation1/255.0f - image[idx2]*attenuation2/255.0f) * data.gradientScaling;
-
-        float weight = exp(-data.beta * (gradient + data.gammaList[diagonal]));
-        return weight + 1e-4;
-    }
-
-    void CudaConfidenceMapsSystemSolver::createSystemCPU(const unsigned char* imageData, int imageWidth, int imageHeight,
-                                                        float gradientScaling, float alpha, float beta, float gamma,
-                                                        bool isUpsideDown) {
-        // Gather all the parameters needed to create the system in one place
-        ComputeLaplacianData data;
-        data.alpha = alpha;
-        data.beta = beta;
-        data.gamma = gamma;
-        data.gradientScaling = gradientScaling;
-        data.image = imageData;
-        data.width = imageWidth;
-        data.height = imageHeight;
-        data.centralDiagonal = 4;
-        int offsets[9] = {-imageWidth-1, -imageWidth, -imageWidth+1, -1, 0, 1, imageWidth-1, imageWidth, imageWidth+1};
-        float gammaList[9] = {sqrt(2.0f)*gamma, 0.0f, sqrt(2.0f)*gamma, gamma, 0.0f, gamma, sqrt(2.0f)*gamma, 0.0f, sqrt(2.0f)*gamma};
-
-        for (int i = 0; i < 9; ++i) {
-            data.offsets[i] = offsets[i];
-            data.gammaList[i] = gammaList[i];
-            _gpuData->L_h.diagonal_offsets[i] = offsets[i];
-        }
-
-        // Precompute attenuation tables (controlled by the alpha parameter) so that they don't need
-        // to be recomputed for each pixel
-        data.attenuationLUT = std::vector<float>(imageHeight);
-        for (int i = 0; i < imageHeight; ++i) {
-            float y = (float)i / (float)(imageHeight-1);
-            if (isUpsideDown) y = 1 - y;
-            data.attenuationLUT[i] = 1 - exp(-alpha * y);
-        }
-
-        // Fill in the rest of the matrix
-        for (int y = 0; y < imageHeight; ++y) {
-            for (int x = 0; x < imageWidth; ++x) {
-                int idx = y * imageWidth + x;
-
-                // The filter indicates which edges are currently valid. (E.g. when the current pixel
-                // has x = 0, all the edges facing left are invalid).
-                // The 9th bit corresponds to the top-left edge, while the least-significant-bit corresponds
-                // to the bottom-right corner 
-                unsigned short filter = 495; // 111 101 111
-
-                // 8 - neighbourhood filter
-                if (x == 0)             filter &= 203; // 011 001 011
-                if (x == imageWidth-1)  filter &= 422; // 110 100 110
-                if (y == 0)             filter &=  47; // 000 101 111
-                if (y == imageHeight-1) filter &= 488; // 111 101 000
-
-                // If the pixel is in the first or last row, one edge is virtually missing (the one extending
-                // vertically to the seed poits). Its value is accounted for in the b vector, however it still
-                // needs to be accounted for here in the diagonal of the matrix.
-                float valueSum = 0.0f;
-                if (y == 0 || y == imageHeight - 1) valueSum = 1.0f;
-
-                for (int d = 0; d < 9; ++d) {
-                    float value = 0.0f;
-                    
-                    if (((256>>d) & filter) != 0) {
-                        value = _getWeight(data, x, y, d);
-                    }
-
-                    _gpuData->L_h.values(idx, d) = -value;
-                    valueSum += value;
-                }
-
-                _gpuData->L_h.values(idx, data.centralDiagonal) = valueSum;
-            }
-        }
-
-        // Upload system
-        _gpuData->L_d = _gpuData->L_h;
-    }
 
     static __device__ float d_getWeight(float v1, float v2, float gradientScaling, float beta, float gamma)
     {

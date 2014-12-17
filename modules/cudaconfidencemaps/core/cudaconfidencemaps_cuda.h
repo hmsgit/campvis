@@ -23,11 +23,10 @@ namespace cuda {
          * \param   alpha       controls the depth attenuation correction
          * \param   beta        controls the non-linear mapping of gradients to weights
          * \param   gamma       controls how much diagonal connections are penalized
-         * \param   useGPU      wether or not the equation system should be computed using CUDA
          * \param   isUpsideDown if set to true, the image is interpreted as being upside down (as common in OpenGL)
          */
         void uploadImage(const unsigned char* imageData, int imageWidth, int imageHeight,
-                         float gradientScaling, float alpha, float beta, float gamma, bool useGPU, bool isUpsideDown=true);
+                         float gradientScaling, float alpha, float beta, float gamma, bool isUpsideDown=true);
 
         /**
          * Resets the current solution vector to a linear fallof from white (top of the image) to black
@@ -35,6 +34,24 @@ namespace cuda {
          * image size, also results in the solution being reset.
          */
         void resetSolution();
+
+        /**
+         * Returns wether or not the final image is smoothed using the alpha beta filter
+         * \param  alpha  controls the changes in X. Must be in the range (0, 1)
+         * \param  beta   controls the changes in V. Must be in the range (0, 2) and < 1 if one aims at reducing noise
+         */
+        bool alphaBetaFilterEnabled() const;
+
+        /**
+         * Enables or disables the alpha-beta filtering of the output
+         * \param  enabled  wether or not to enable the alpha-beta filtering
+         */
+        void enableAlphaBetaFilter(bool enabled);
+
+        /**
+         * Sets the parameters needed by the alpha-beta filter
+         */
+        void setAlphaBetaFilterParameters(float alpha, float beta);
 
         /**
          * After calling \see uploadImage(), this functions launches a solver on the GPU that will solve

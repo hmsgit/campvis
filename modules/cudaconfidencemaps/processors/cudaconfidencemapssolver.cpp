@@ -45,6 +45,9 @@ namespace campvis {
         , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001, 10)
         , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001, 200)
         , p_paramGamma("Gamma", "Gamma (Diagonal penalty)", 0.03f, 0.001, 0.5)
+        , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Use Alpha-Beta-Filter", true)
+        , p_filterAlpha("FilterAlpha", "Filter Alpha", 0.36f, 0.0, 1.0)
+        , p_filterBeta("FilterBeta", "Filter Beta", 0.005f, 0.0, 1.0)
         , p_createSystemOnGPU("CreateSystemOnGPU", "Use the GPU to build the equation system", true)
         , p_printStatistics("PrintStatistics", "Print execution times and residual values", false)
         , _solver()
@@ -59,7 +62,11 @@ namespace campvis {
         addProperty(p_paramAlpha);
         addProperty(p_paramBeta);
         addProperty(p_paramGamma);
-        
+
+        addProperty(p_useAlphaBetaFilter);
+        addProperty(p_filterAlpha);
+        addProperty(p_filterBeta);
+
         addProperty(p_createSystemOnGPU);
         addProperty(p_printStatistics);
     }
@@ -85,6 +92,10 @@ namespace campvis {
             float beta = p_paramBeta.getValue();
             float gamma = p_paramGamma.getValue();
             bool isFlipped = true;
+
+            // Setup the solver with the current Alpha-Beta-Filter settings
+            _solver.enableAlphaBetaFilter(p_useAlphaBetaFilter.getValue());
+            _solver.setAlphaBetaFilterParameters(p_filterAlpha.getValue(), p_filterBeta.getValue());
 
             cgt::ivec3 size = img->getSize();
             size_t elementCount = cgt::hmul(size);
