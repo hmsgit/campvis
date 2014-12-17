@@ -27,7 +27,7 @@
 namespace campvis {
     AbstractImageReader::AbstractImageReader() 
         : AbstractProcessor()
-        , p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
+        , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
         , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
     {
     }

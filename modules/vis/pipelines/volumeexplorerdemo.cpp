@@ -54,9 +54,9 @@ namespace campvis {
         _ve.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
         
-        _imageReader.setURL(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
-        _imageReader.setTargetImageId("reader.output");
-        _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
+        _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
+        _imageReader.p_targetImageID.setValue("reader.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
         
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
