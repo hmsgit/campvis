@@ -139,4 +139,13 @@ namespace campvis {
         // nothing to do here, method is just provided as convenience for child classes.
     }
 
+    void HasPropertyCollection::clearProperties() {
+        for (auto it = _properties.begin(); it != _properties.end(); ++it) {
+            (*it)->s_changed.disconnect(this);
+            s_propertyRemoved.emitSignal(*it);
+        }
+
+        _properties.clear();
+    }
+
 }

@@ -401,7 +401,7 @@ namespace campvis {
     }
 
     void SliceRenderProcessor::renderGeometry(DataContainer& dataContainer, const ImageRepresentationGL::ScopedRepresentation& img) {
-        ScopedTypedData<GeometryData> geometry(dataContainer, p_geometryID.getValue());
+        ScopedTypedData<GeometryData> geometry(dataContainer, p_geometryID.getValue(), true);
 
         // render optional geometry
         if (geometry) {

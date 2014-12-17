@@ -22,26 +22,39 @@
 // 
 // ================================================================================================
 
-#include "abstractimagereader.h"
+#ifndef IMAGEVIS_H__
+#define IMAGEVIS_H__
+
+#include "core/pipeline/autoevaluationpipeline.h"
+#include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
-    AbstractImageReader::AbstractImageReader() 
-        : AbstractProcessor()
-        , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
-        , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
-    {
-    }
+namespace workflowdemo {
 
-    AbstractImageReader::~AbstractImageReader() {
-    }
+    class ImageVis : public AutoEvaluationPipeline {
+    public:
+        /**
+         * Creates a AutoEvaluationPipeline.
+         */
+        ImageVis(DataContainer* dc);
 
-    bool AbstractImageReader::acceptsExtension(const std::string& extension) const {
-        for (std::vector<std::string>::const_iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
-            if (*it == extension) {
-                return true;
-            }
-        }
-        return false;
-    }
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~ImageVis();
+
+        /// \see AutoEvaluationPipeline::init()
+        virtual void init();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "WorkflowDemo::ImageVis"; };
+
+
+        VolumeExplorer _ve;
+    };
 
 }
+}
+
+#endif // IMAGEVIS_H__

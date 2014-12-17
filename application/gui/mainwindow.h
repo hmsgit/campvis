@@ -32,6 +32,7 @@
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
 #include "application/gui/scriptingwidget.h"
+#include "application/gui/workflowcontrollerwidget.h"
 #include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
 
@@ -90,6 +91,13 @@ namespace campvis {
          * \param   canvas     the pipeline's canvas
          */
         MdiDockableWindow * addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
+
+
+        /**
+         * Sets the workflow of this Mainwindow to \a w.
+         * \param   w   The workflow to display for this window.
+         */
+        void setWorkflow(AbstractWorkflow* w);
 
     protected:
         /**
@@ -200,6 +208,7 @@ namespace campvis {
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+        WorkflowControllerWidget* _workflowWidget;          ///< Widget showing the workflow controller
 
         QPushButton* _btnLuaLoad;
         QPushButton* _btnLuaSave;

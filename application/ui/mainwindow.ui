@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="dockNestingEnabled">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -58,15 +61,24 @@
    </attribute>
    <widget class="QWidget" name="logViewerDockContents"/>
   </widget>
-   <widget class="QDockWidget" name="scriptingConsoleDock">
-     <property name="windowTitle">
-       <string>Scripting Console</string>
-     </property>
-     <attribute name="dockWidgetArea">
-       <number>8</number>
-     </attribute>
-     <widget class="QWidget" name="scriptingConsoleDockContents"/>
-   </widget>
+  <widget class="QDockWidget" name="scriptingConsoleDock">
+   <property name="windowTitle">
+    <string>Scripting Console</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="scriptingConsoleDockContents"/>
+  </widget>
+  <widget class="QDockWidget" name="workflowDock">
+   <property name="windowTitle">
+    <string>Workflow</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="workflowDockContents"/>
+  </widget>
  </widget>
  <resources/>
  <connections/>

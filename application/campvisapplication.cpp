@@ -44,6 +44,7 @@
 #include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/pipeline/abstractworkflow.h"
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
@@ -174,10 +175,33 @@ namespace campvis {
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
         for (int i = 1; i < pipelinesToAdd.size(); ++i) {
-            DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
-            AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
-            if (p != 0)
-                addPipeline(pipelinesToAdd[i].toStdString(), p);
+            if (pipelinesToAdd[i] == "-w" && i+1 < pipelinesToAdd.size()) {
+                // create workflow
+                AbstractWorkflow* w = PipelineFactory::getRef().createWorkflow(pipelinesToAdd[i+1].toStdString());
+
+                if (w != nullptr) {
+                    // get DataContainers and Pipelines from workflow, take ownership and initialize them where necessary
+                    _dataContainers.push_back(w->getDataContainer());
+                    s_DataContainersChanged.emitSignal();
+
+                    std::vector<AbstractPipeline*> pipelines = w->getPipelines();
+                    for (auto it = pipelines.begin(); it != pipelines.end(); ++it) {
+                        addPipeline((*it)->getName(), *it);
+                    }
+
+                    _workflows.push_back(w);
+                    _mainWindow->setWorkflow(w);
+                    w->init();
+                }
+
+                ++i;
+            }
+            else {
+                DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
+                AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
+                if (p != nullptr)
+                    addPipeline(pipelinesToAdd[i].toStdString(), p);
+            }
         }
 
         GLJobProc.setContext(_localContext);
@@ -193,6 +217,9 @@ namespace campvis {
         for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
             it->_pipeline->stop();
         }
+
+        for (auto it = _workflows.begin(); it != _workflows.end(); ++it)
+            (*it)->deinit();
 
         {
             // Deinit everything OpenGL related using the local context.
@@ -344,7 +371,13 @@ namespace campvis {
     LuaVmState* CampVisApplication::getLuaVmState() {
         return _luaVmState;
     }
-
 #endif
+
+    void CampVisApplication::setPipelineVisibility(AbstractPipeline* pipeline, bool visibility) {
+        auto it = _pipelineWindows.find(pipeline);
+        if (it != _pipelineWindows.end()) {
+            it->second->setVisible(visibility);
+        }
+    }
 
 }

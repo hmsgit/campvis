@@ -57,7 +57,7 @@ namespace campvis {
         _ve.p_outputImage.setValue("mscopy");
         _renderTargetID.setValue("mscopy");
 
-        _imageReader.setURL(CAMPVIS_SOURCE_DIR "/../lymph/LymphP1_0086.tif");
+        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/../lymph/LymphP1_0086.tif");
         MetaProperty *metaProp = dynamic_cast<MetaProperty*>(_imageReader.getProperty("DevilImageReaderMetaProp"));
         cgtAssert(nullptr != metaProp, "This should not happen.");
         BoolProperty *bp = dynamic_cast<BoolProperty*>(metaProp->getProperty("ImportSimilar"));
@@ -67,8 +67,8 @@ namespace campvis {
         if (GenericOptionProperty<std::string>* tester = dynamic_cast<GenericOptionProperty<std::string>*>(_imageReader.getNestedProperty("DevilImageReaderMetaProp::ImportType")))
             tester->selectById("localIntensity3");
 
-        _imageReader.setTargetImageId("mscopy.output");
-        _imageReader.setTargetImageIdSharedProperty(&_ve.p_inputVolume);
+        _imageReader.p_targetImageID.setValue("mscopy.output");
+        _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.12f, .15f), cgt::col4(85, 0, 0, 128), cgt::col4(255, 0, 0, 128)));

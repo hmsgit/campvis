@@ -22,26 +22,43 @@
 // 
 // ================================================================================================
 
-#include "abstractimagereader.h"
+#ifndef IMAGEFILTERING_H__
+#define IMAGEFILTERING_H__
+
+#include "core/pipeline/autoevaluationpipeline.h"
+#include "modules/base/processors/lightsourceprovider.h"
+#include "modules/preprocessing/processors/glimagecrop.h"
+#include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
-    AbstractImageReader::AbstractImageReader() 
-        : AbstractProcessor()
-        , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
-        , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
-    {
-    }
+namespace workflowdemo {
 
-    AbstractImageReader::~AbstractImageReader() {
-    }
+    class ImageFiltering : public AutoEvaluationPipeline {
+    public:
+        /**
+         * Creates a AutoEvaluationPipeline.
+         */
+        ImageFiltering(DataContainer* dc);
 
-    bool AbstractImageReader::acceptsExtension(const std::string& extension) const {
-        for (std::vector<std::string>::const_iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
-            if (*it == extension) {
-                return true;
-            }
-        }
-        return false;
-    }
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~ImageFiltering();
+
+        /// \see AutoEvaluationPipeline::init()
+        virtual void init();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "WorkflowDemo::ImageFiltering"; };
+
+
+        LightSourceProvider _lsp;
+        GlImageCrop _glCrop;
+        VolumeExplorer _ve;
+    };
 
 }
+}
+
+#endif // IMAGEFILTERING_H__

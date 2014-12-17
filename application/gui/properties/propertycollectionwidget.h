@@ -84,13 +84,13 @@ namespace campvis {
          * Removes the property widget for \a prop, disconnects all neccesary signals, etc.
          * \param   prop    Iterator to widget map for the property to remove.
          */
-        void removeProperty(std::map<AbstractProperty*, QWidget*>::iterator prop);
+        void removeProperty(AbstractProperty* prop, QWidget* widget);
 
     signals:
         void s_widgetVisibilityChanged(QWidget* widget, bool visibility);
 
         void propertyAdded(AbstractProperty* prop);
-        void propertyRemoved(std::map<AbstractProperty*, QWidget*>::iterator prop);
+        void propertyRemoved(AbstractProperty* prop, QWidget* widget);
 
     private:
         /**

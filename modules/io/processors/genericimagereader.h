@@ -76,19 +76,10 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        /// functions to set the property of the readers
-        void setURL(std::string p_url);
-        void setURL(StringProperty p_url);
-        void setURL(const char* p_url);
-        void setTargetImageId(DataNameProperty& targetImageId);
-        void setTargetImageId(std::string imageId);
-        void setTargetImageId(const char* imageId);
-        void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
-
-
         void setVisibibility(const std::string& extention, bool visibility);
 
-        StringProperty p_url;
+        StringProperty p_url;               ///< URL for file to read
+        DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:
         /// \see AbstractProcessor::updateResult

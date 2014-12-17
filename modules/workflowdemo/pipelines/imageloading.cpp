@@ -22,26 +22,29 @@
 // 
 // ================================================================================================
 
-#include "abstractimagereader.h"
+#include "imageloading.h"
+
+#include "cgt/shadermanager.h"
+#include "modules/workflowdemo/workflows/demoworkflow.h"
 
 namespace campvis {
-    AbstractImageReader::AbstractImageReader() 
-        : AbstractProcessor()
-        , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
-        , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
+namespace workflowdemo {
+
+    ImageLoading::ImageLoading(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
+        , _imageReader()
     {
+        addProcessor(&_imageReader);
     }
 
-    AbstractImageReader::~AbstractImageReader() {
+    ImageLoading::~ImageLoading() {
     }
 
-    bool AbstractImageReader::acceptsExtension(const std::string& extension) const {
-        for (std::vector<std::string>::const_iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
-            if (*it == extension) {
-                return true;
-            }
-        }
-        return false;
+    void ImageLoading::init() {
+        AutoEvaluationPipeline::init();
+
+        _imageReader.p_targetImageID.setValue("image.original");
     }
 
+}
 }

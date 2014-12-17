@@ -22,26 +22,39 @@
 // 
 // ================================================================================================
 
-#include "abstractimagereader.h"
+#include "imagefiltering.h"
+#include "cgt/shadermanager.h"
 
 namespace campvis {
-    AbstractImageReader::AbstractImageReader() 
-        : AbstractProcessor()
-        , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
-        , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
-    {
-    }
+    namespace workflowdemo {
 
-    AbstractImageReader::~AbstractImageReader() {
-    }
+        ImageFiltering::ImageFiltering(DataContainer* dc)
+            : AutoEvaluationPipeline(dc)
+            , _lsp()
+            , _glCrop(&_canvasSize)
+            , _ve(&_canvasSize)
+        {
+            addProcessor(&_lsp);
+            addProcessor(&_glCrop);
+            addProcessor(&_ve);
 
-    bool AbstractImageReader::acceptsExtension(const std::string& extension) const {
-        for (std::vector<std::string>::const_iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
-            if (*it == extension) {
-                return true;
-            }
+            addEventListenerToBack(&_ve);
         }
-        return false;
-    }
 
+        ImageFiltering::~ImageFiltering() {
+        }
+
+        void ImageFiltering::init() {
+            AutoEvaluationPipeline::init();
+
+            _glCrop.p_inputImage.setValue("image.original");
+            _glCrop.p_outputImage.setValue("image.cropped");
+
+            _ve.p_inputVolume.setValue("image.cropped");
+            _ve.p_outputImage.setValue("image.cropped.rendered");
+
+            _renderTargetID.setValue("image.cropped.rendered");
+        }
+
+    }
 }

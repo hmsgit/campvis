@@ -22,26 +22,38 @@
 // 
 // ================================================================================================
 
-#include "abstractimagereader.h"
+#ifndef IMAGELOADING_H__
+#define IMAGELOADING_H__
+
+#include "core/pipeline/autoevaluationpipeline.h"
+#include "modules/io/processors/genericimagereader.h"
 
 namespace campvis {
-    AbstractImageReader::AbstractImageReader() 
-        : AbstractProcessor()
-        , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
-        , p_targetImageID("targetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
-    {
-    }
+namespace workflowdemo {
 
-    AbstractImageReader::~AbstractImageReader() {
-    }
+    class ImageLoading : public AutoEvaluationPipeline {
+    public:
+        /**
+         * Creates a AutoEvaluationPipeline.
+         */
+        ImageLoading(DataContainer* dc);
 
-    bool AbstractImageReader::acceptsExtension(const std::string& extension) const {
-        for (std::vector<std::string>::const_iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
-            if (*it == extension) {
-                return true;
-            }
-        }
-        return false;
-    }
+        /**
+         * Virtual Destructor
+         **/
+        virtual ~ImageLoading();
+
+        /// \see AutoEvaluationPipeline::init()
+        virtual void init();
+
+        /// \see AbstractPipeline::getName()
+        virtual const std::string getName() const { return getId(); };
+        static const std::string getId() { return "WorkflowDemo::ImageLoading"; };
+
+        campvis::GenericImageReader _imageReader;
+    };
 
 }
+}
+
+#endif // IMAGELOADING_H__
