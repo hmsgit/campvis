@@ -48,7 +48,6 @@ namespace campvis {
         , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Use Alpha-Beta-Filter", true)
         , p_filterAlpha("FilterAlpha", "Filter Alpha", 0.36f, 0.0, 1.0)
         , p_filterBeta("FilterBeta", "Filter Beta", 0.005f, 0.0, 1.0)
-        , p_createSystemOnGPU("CreateSystemOnGPU", "Use the GPU to build the equation system", true)
         , p_printStatistics("PrintStatistics", "Print execution times and residual values", false)
         , _solver()
     {
@@ -67,7 +66,6 @@ namespace campvis {
         addProperty(p_filterAlpha);
         addProperty(p_filterBeta);
 
-        addProperty(p_createSystemOnGPU);
         addProperty(p_printStatistics);
     }
 
@@ -101,7 +99,7 @@ namespace campvis {
             size_t elementCount = cgt::hmul(size);
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
-            _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma, p_createSystemOnGPU.getValue());
+            _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma);
             _solver.solve(iterations, 1e-10);
 
             const float *solution = _solver.getSolution(size.x, size.y);

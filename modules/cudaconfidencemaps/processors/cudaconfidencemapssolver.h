@@ -96,7 +96,6 @@ namespace campvis {
         FloatProperty p_filterAlpha;                ///< Alpha parameter for Alpha-Beta Filter
         FloatProperty p_filterBeta;                 ///< Beta parameter for Alpha-Beta Filter
 
-        BoolProperty  p_createSystemOnGPU;
         BoolProperty  p_printStatistics;
 
         
