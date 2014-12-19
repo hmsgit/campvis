@@ -24,6 +24,7 @@
 
 #include "fontatlas.h"
 
+#include "cgt/exception.h"
 #include "cgt/logmanager.h"
 #include "cgt/textureunit.h"
 
@@ -47,12 +48,12 @@ namespace campvis {
             // Initialize the FreeType2 library 
             if (FT_Init_FreeType(&_ftLibrary)) {
                 LERROR("Could not init freetype library.");
-                throw std::exception("Could not init freetype library.");
+                throw cgt::Exception("Could not init freetype library.");
             }
             // Load a font
             if (FT_New_Face(_ftLibrary, fontFileName.c_str(), 0, &_ftFace)) {
                 LERROR("Could not open font " << fontFileName);
-                throw std::exception("Could not open font file.");
+                throw cgt::Exception("Could not open font file.");
             }
 
             FT_Set_Pixel_Sizes(_ftFace, 0, height);

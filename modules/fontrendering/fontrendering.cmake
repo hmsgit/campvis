@@ -2,12 +2,14 @@
 
 IF(${ModuleEnabled})
 	# dirty, dirty hack to force freetype to build stastic lib
-	SET(foo ${BUILD_SHARED_LIBS})
-	SET(BUILD_SHARED_LIBS 0)
+	SET(bsl ${BUILD_SHARED_LIBS})
+	IF(${CampvisSharedStaticModulesFix})
+		SET(BUILD_SHARED_LIBS 0)
+	ENDIF()
 	
 	# build RadomWalksLib library
 	ADD_SUBDIRECTORY(modules/fontrendering/ext/freetype-2.5.4)
-	SET(BUILD_SHARED_LIBS ${foo})
+	SET(BUILD_SHARED_LIBS ${bsl})
 
 	SET(ThisModExternalLibs "freetype")
 	SET(ThisModIncludeDirs "${CampvisHome}/modules/fontrendering/ext/freetype-2.5.4/include")
