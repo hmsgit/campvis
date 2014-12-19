@@ -149,7 +149,6 @@ namespace campvis {
             vertices.reserve(6 * text.length());
             texCoords.reserve(6 * text.length());
 
-            int c = 0;
             cgt::vec2 pos = position;
 
             // Loop through all characters
