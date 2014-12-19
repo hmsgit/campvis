@@ -62,9 +62,10 @@ namespace campvis {
             int rowh = 0;
             int w = 0;
             int h = 0;
-            memset(_glyphParameters, 0, sizeof(_glyphParameters));
-            /* Find minimum size for a texture holding all visible ASCII characters */
-            for (int i = 32; i < 128; i++) {
+            memset(_glyphs, 0, sizeof(_glyphs));
+
+            // Find minimum size for a texture holding all visible ASCII characters
+            for (int i = 32; i < 256; i++) {
                 if (FT_Load_Char(_ftFace, i, FT_LOAD_RENDER)) {
                     LERROR("Loading character " << i << " failed!");
                     continue;
@@ -91,7 +92,7 @@ namespace campvis {
             int ox = 0;
             int oy = 0;
             rowh = 0;
-            for (int i = 32; i < 128; i++) {
+            for (int i = 32; i < 256; i++) {
                 if (FT_Load_Char(_ftFace, i, FT_LOAD_RENDER)) {
                     LERROR("Loading character " << i << " failed!");
                     continue;
@@ -101,11 +102,12 @@ namespace campvis {
                     rowh = 0;
                     ox = 0;
                 }
+
                 glTexSubImage2D(GL_TEXTURE_2D, 0, ox, oy, g->bitmap.width, g->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer);
-                _glyphParameters[i].advance = cgt::vec2(static_cast<float>(g->advance.x >> 6), static_cast<float>(g->advance.y >> 6));
-                _glyphParameters[i].bitmapSize = cgt::vec2(static_cast<float>(g->bitmap.width), static_cast<float>(g->bitmap.rows));
-                _glyphParameters[i].bitmapOffset = cgt::vec2(static_cast<float>(g->bitmap_left), static_cast<float>(g->bitmap_top));
-                _glyphParameters[i].offset = cgt::vec2(ox / static_cast<float>(w), oy / static_cast<float>(h));
+                _glyphs[i].advance = cgt::vec2(static_cast<float>(g->advance.x >> 6), static_cast<float>(g->advance.y >> 6));
+                _glyphs[i].bitmapSize = cgt::vec2(static_cast<float>(g->bitmap.width), static_cast<float>(g->bitmap.rows));
+                _glyphs[i].bitmapOffset = cgt::vec2(static_cast<float>(g->bitmap_left), static_cast<float>(g->bitmap_top));
+                _glyphs[i].offset = cgt::vec2(ox / static_cast<float>(w), oy / static_cast<float>(h));
                 rowh = std::max(rowh, static_cast<int>(g->bitmap.rows));
                 ox += g->bitmap.width + 1;
             }
@@ -125,7 +127,12 @@ namespace campvis {
             ShdrMgr.dispose(_shader);
         }
 
-        void FontAtlas::renderText(const std::string& text, const cgt::vec2& position, const cgt::vec4& color, const cgt::vec2& scale /*= cgt::vec2(1.f)*/) {
+        void FontAtlas::renderText(const std::string& text, const cgt::vec2& position, const cgt::vec4& color, const cgt::mat4& transformationMatrix /*= cgt::mat4::identity*/) {
+            if (_shader == nullptr || _texture == nullptr) {
+                LERROR("Cannot render text, FontAtlas not correctly initialized.");
+                return;
+            }
+
             cgt::TextureUnit fontUnit;
             fontUnit.activate();
             _texture->bind();
@@ -133,7 +140,7 @@ namespace campvis {
             _shader->activate();
             _shader->setUniform("_fontTexture", fontUnit.getUnitNumber());
             _shader->setUniform("_color", color);
-            _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(-1.f, -1.f, 0.f)) * cgt::mat4::createScale(cgt::vec3(2.f, 2.f, 1.f)));
+            _shader->setUniform("_viewMatrix", transformationMatrix);
 
             // create billboard vertices
             std::vector<cgt::vec3> vertices;
@@ -141,19 +148,18 @@ namespace campvis {
             vertices.reserve(6 * text.length());
             texCoords.reserve(6 * text.length());
 
-            /* Set up the VBO for our vertex data */
             int c = 0;
-            cgt::vec2 pos = position * scale;
+            cgt::vec2 pos = position;
 
-            /* Loop through all characters */
+            // Loop through all characters
             for (size_t i = 0; i < text.length(); ++i) {
-                char p = text[i];
-                if (p >= 32 && p < 128) {
-                    cgt::vec2 pos2(pos.x + (_glyphParameters[p].bitmapOffset.x * scale.x), -pos.y - (_glyphParameters[p].bitmapOffset.y * scale.y));
-                    cgt::vec2 size = _glyphParameters[p].bitmapSize * scale;
+                unsigned char p = text[i];
+                if (p >= 32 && p < 256) {
+                    cgt::vec2 pos2(pos.x + _glyphs[p].bitmapOffset.x, -pos.y - _glyphs[p].bitmapOffset.y);
+                    cgt::vec2 size = _glyphs[p].bitmapSize;
 
                     // Advance the cursor to the start of the next character
-                    pos += _glyphParameters[p].advance * scale;
+                    pos += _glyphs[p].advance;
 
                     // Skip glyphs that have no pixels
                     if (size.x == 0.f || size.y == 0.f)
@@ -164,25 +170,24 @@ namespace campvis {
 
                     // Calculate the vertex and texture coordinates
                     vertices.push_back(cgt::vec3(pos2.x, -pos2.y, 0.f));
-                    texCoords.push_back(cgt::vec3(_glyphParameters[p].offset, 0.f));
+                    texCoords.push_back(cgt::vec3(_glyphs[p].offset, 0.f));
 
                     vertices.push_back(cgt::vec3(pos2.x + size.x, -pos2.y, 0.f));
-                    texCoords.push_back(cgt::vec3(_glyphParameters[p].offset.x + _glyphParameters[p].bitmapSize.x / tw, _glyphParameters[p].offset.y, 0.f));
+                    texCoords.push_back(cgt::vec3(_glyphs[p].offset.x + _glyphs[p].bitmapSize.x / tw, _glyphs[p].offset.y, 0.f));
 
                     vertices.push_back(cgt::vec3(pos2.x, -pos2.y - size.y, 0.f));
-                    texCoords.push_back(cgt::vec3(_glyphParameters[p].offset.x, _glyphParameters[p].offset.y + _glyphParameters[p].bitmapSize.y / th, 0.f));
+                    texCoords.push_back(cgt::vec3(_glyphs[p].offset.x, _glyphs[p].offset.y + _glyphs[p].bitmapSize.y / th, 0.f));
 
 
                     vertices.push_back(cgt::vec3(pos2.x + size.x, -pos2.y, 0.f));
-                    texCoords.push_back(cgt::vec3(_glyphParameters[p].offset.x + _glyphParameters[p].bitmapSize.x / tw, _glyphParameters[p].offset.y, 0.f));
+                    texCoords.push_back(cgt::vec3(_glyphs[p].offset.x + _glyphs[p].bitmapSize.x / tw, _glyphs[p].offset.y, 0.f));
 
                     vertices.push_back(cgt::vec3(pos2.x, -pos2.y - size.y, 0.f));
-                    texCoords.push_back(cgt::vec3(_glyphParameters[p].offset.x, _glyphParameters[p].offset.y + _glyphParameters[p].bitmapSize.y / th, 0.f));
+                    texCoords.push_back(cgt::vec3(_glyphs[p].offset.x, _glyphs[p].offset.y + _glyphs[p].bitmapSize.y / th, 0.f));
 
                     vertices.push_back(cgt::vec3(pos2.x + size.x, -pos2.y - size.y, 0.f));
-                    texCoords.push_back(cgt::vec3(_glyphParameters[p].offset.x + _glyphParameters[p].bitmapSize.x / tw, _glyphParameters[p].offset.y + _glyphParameters[p].bitmapSize.y / th, 0.f));
-                }
-                
+                    texCoords.push_back(cgt::vec3(_glyphs[p].offset.x + _glyphs[p].bitmapSize.x / tw, _glyphs[p].offset.y + _glyphs[p].bitmapSize.y / th, 0.f));
+                }                
             }
 
             FaceGeometry face(vertices, texCoords);

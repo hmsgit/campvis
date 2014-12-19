@@ -30,6 +30,4 @@ uniform vec4 _color = vec4(1.0, 1.0, 1.0, 1.0);
 
 void main() {
     out_Color = vec4(texture2D(_fontTexture, ex_TexCoord.xy).r) * _color;
-    //out_Color = vec4(ex_TexCoord, 1.f);
-
 }

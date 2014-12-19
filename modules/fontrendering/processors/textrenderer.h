@@ -61,11 +61,12 @@ namespace fontrendering {
 
 
         virtual void init();
-        virtual void denit();
+        virtual void deinit();
 
         StringProperty p_text;              ///< Text to render
         IVec2Property p_position;           ///< Position of text in viewport coordinates
-        IntProperty p_fontSize;           ///< Font size to use
+        StringProperty p_fontFileName;      ///< Path to the font file to use
+        IntProperty p_fontSize;             ///< Font size to use
         Vec4Property p_color;               ///< Color to use
         DataNameProperty p_outputImage;     ///< Name/ID for the output image with the rendered image
 
@@ -74,6 +75,11 @@ namespace fontrendering {
         virtual void updateResult(DataContainer& dataContainer);
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
+
+        /// Initializes the FontAtlas used.
+        void initializeFontAtlas();
+        /// Callback when _viewportSizeProperty has changed
+        void onViewportSizeChanged(const AbstractProperty* prop);
 
         FontAtlas* _atlas;
 

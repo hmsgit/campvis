@@ -23,6 +23,7 @@
 // ================================================================================================
 
 #include "fontrenderingdemo.h"
+#include "cgt/shadermanager.h"
 
 namespace campvis {
     namespace fontrendering {
@@ -38,6 +39,9 @@ namespace campvis {
         }
 
         void FontRenderingDemo::init() {
+            // set font before initing the pipeline to avoid error due to missing font.
+            _tr.p_fontFileName.setValue(ShdrMgr.completePath("/modules/fontrendering/fonts/FreeSans.ttf"));
+
             AutoEvaluationPipeline::init();
 
             _tr.p_outputImage.setValue("text.rendered");
