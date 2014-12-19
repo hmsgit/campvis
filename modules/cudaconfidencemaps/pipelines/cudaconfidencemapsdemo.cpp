@@ -38,6 +38,18 @@ namespace campvis {
         , _usMapsSolver()
         , _usFusion(&_canvasSize)
         , _usFanRenderer(&_canvasSize)
+        , p_iterations("Iterations", "Number of CG Iterations", 150, 1, 500)
+        , p_autoIterationCount("AutoIterationCount", "Estimate iteration count based on time slot", false)
+        , p_timeSlot("TimeSlot", "Milliseconds per frame", 32.0f, 10.0f, 250.0f)
+        , p_connectToIGTLinkServer("ConnectToIGTLink", "Connect/Disconnect to IGTLink")
+        , p_gaussianFilterSize("GaussianSigma", "Blur amount", 2.5f, 1.0f, 10.0f)
+        , p_resamplingScale("ResampleScale", "Resample Scale", 0.25f, 0.01f, 1.0f)
+        , p_alpha("Alpha", "Alpha", 2.0f, 0.0f, 10.0f)
+        , p_beta("Beta", "Beta", 20.0f, 1.0f, 200.0f)
+        , p_gamma("Gamma", "Gamma", 0.03f, 0.0f, 0.4f, 0.001, 4)
+        , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Alpha-Beta-Filter", true)
+        , p_fanHalfAngle("FanHalfAngle", "Fan Half Angle", 37.0f, 1.0f, 90.0f)
+        , p_fanInnerRadius("FanInnerRadius", "Fan Inner Radius", 0.222f, 0.001f, 0.999f)
     {
         addProcessor(&_usIgtlReader);
         addProcessor(&_usBlurFilter);
@@ -45,6 +57,19 @@ namespace campvis {
         addProcessor(&_usMapsSolver);
         addProcessor(&_usFusion);
         addProcessor(&_usFanRenderer);
+
+        addProperty(p_iterations);
+        addProperty(p_autoIterationCount);
+        addProperty(p_timeSlot);
+        addProperty(p_connectToIGTLinkServer);
+        addProperty(p_gaussianFilterSize);
+        addProperty(p_resamplingScale);
+        addProperty(p_alpha);
+        addProperty(p_beta);
+        addProperty(p_gamma);
+        addProperty(p_useAlphaBetaFilter);
+        addProperty(p_fanHalfAngle);
+        addProperty(p_fanInnerRadius);
     }
 
     CudaConfidenceMapsDemo::~CudaConfidenceMapsDemo() {
@@ -83,13 +108,25 @@ namespace campvis {
         _usFusion.p_renderToTexture.setValue(true);
         _usFusion.p_targetImageID.addSharedProperty(&_usFanRenderer.p_inputImage);
 
-
-
         _usFanRenderer.p_renderTargetID.setValue("us.fused_fan");
         _usFanRenderer.p_innerRadius.setValue(120.0f/540.0f);
         _usFanRenderer.p_halfAngle.setValue(37);
 
         _renderTargetID.setValue("us.fused_fan");
+
+        // Bind pipeline proeprties to processor properties
+        p_iterations.addSharedProperty(&_usMapsSolver.p_iterations);
+        //p_autoIterationCount.addSharedProperty();
+        //p_timeSlot.addSharedProperty();
+        p_connectToIGTLinkServer.addSharedProperty(&_usIgtlReader.p_connect);
+        p_gaussianFilterSize.addSharedProperty(&_usBlurFilter.p_sigma);
+        p_resamplingScale.addSharedProperty(&_usResampler.p_resampleScale);
+        p_alpha.addSharedProperty(&_usMapsSolver.p_paramAlpha);
+        p_beta.addSharedProperty(&_usMapsSolver.p_paramBeta);
+        p_gamma.addSharedProperty(&_usMapsSolver.p_paramGamma);
+        p_useAlphaBetaFilter.addSharedProperty(&_usMapsSolver.p_useAlphaBetaFilter);
+        p_fanHalfAngle.addSharedProperty(&_usFanRenderer.p_halfAngle);
+        p_fanInnerRadius.addSharedProperty(&_usFanRenderer.p_innerRadius);
     }
 
     void CudaConfidenceMapsDemo::deinit() {

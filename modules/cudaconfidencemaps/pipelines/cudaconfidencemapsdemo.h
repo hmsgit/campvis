@@ -73,6 +73,23 @@ namespace campvis {
         CudaConfidenceMapsSolver _usMapsSolver;
         AdvancedUsFusion _usFusion;
         UsFanRenderer _usFanRenderer;
+
+        NumericProperty<int> p_iterations;
+        BoolProperty   p_autoIterationCount;
+        FloatProperty  p_timeSlot;
+
+        ButtonProperty p_connectToIGTLinkServer;
+
+        FloatProperty  p_gaussianFilterSize;
+        FloatProperty  p_resamplingScale;
+
+        FloatProperty  p_alpha;
+        FloatProperty  p_beta;
+        FloatProperty  p_gamma;
+        BoolProperty   p_useAlphaBetaFilter;
+
+        FloatProperty  p_fanHalfAngle;
+        FloatProperty  p_fanInnerRadius;
     };
 
 }

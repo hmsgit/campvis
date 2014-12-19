@@ -158,13 +158,13 @@ namespace cuda {
 
         if (alphaBetaFilterEnabled()) {
             // X' = X' + V'
-            cusp::blas::axpy(_gpuData->abFilterV_d, _gpuData->abFilterX_d, 1.0f);
             // R' = X - X'
+            cusp::blas::axpy(_gpuData->abFilterV_d, _gpuData->abFilterX_d, 1.0f);
             cusp::blas::axpby(_gpuData->x_d, _gpuData->abFilterX_d, _gpuData->abFilterR_d, 1.0f, -1.0f);
 
             // X' = X' + alpha * R'
-            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterX_d, _gpuData->abFilterAlpha);
             // V' = V' + beta * R'
+            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterX_d, _gpuData->abFilterAlpha);
             cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterV_d, _gpuData->abFilterBeta);
 
             // Download the smoothed solution to the host
