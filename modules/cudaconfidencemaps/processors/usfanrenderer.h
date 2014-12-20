@@ -33,6 +33,8 @@
 #include "core/properties/allproperties.h"
 #include "core/datastructures/multiindexedgeometry.h"
 
+#include "modules/fontrendering/tools/fontatlas.h"
+
 namespace cgt {
     class Shader;
 }
@@ -69,16 +71,23 @@ namespace campvis {
         DataNameProperty p_inputImage;
         DataNameProperty p_renderTargetID;
 
-        FloatProperty p_halfAngle;
+        FloatProperty p_halfAngle;          ///< Half of the fan's opening angle in degrees
         FloatProperty p_innerRadius;
 
+        StringProperty p_text;              ///< Text to render
+        StringProperty p_fontFileName;      ///< Path to the font file to use
+        IntProperty p_fontSize;             ///< Font size to use
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
+        void updateFontAtlas();
+
         cgt::Shader* _shader;
         std::unique_ptr<MultiIndexedGeometry> _grid;
+
+        std::unique_ptr<fontrendering::FontAtlas> _atlas;
 
     private:
         static const std::string loggerCat_;

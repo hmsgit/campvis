@@ -57,6 +57,9 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::deinit()
         virtual void deinit();
 
+        /// \see AbstractPipeline::executePipeline()
+        virtual void executePipeline();
+
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "CudaConfidenceMapsDemo"; };

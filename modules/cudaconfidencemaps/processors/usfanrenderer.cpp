@@ -44,6 +44,9 @@ namespace campvis {
         , p_renderTargetID("RenderTargetID", "Render Target ID", "us.output", DataNameProperty::WRITE)
         , p_halfAngle("HalfAngle", "Fan Half Angle", 45.0f, 1.0f, 90.0f)
         , p_innerRadius("InnerRadius", "Fan Inner Radius", 0.2f, 0.0f, 0.99f)
+        , p_text("Text", "Text", "Ultrasound Title")
+        , p_fontFileName("FontFileName", "Path to the Font File to Use", "", StringProperty::OPEN_FILENAME)
+        , p_fontSize("FontSize", "Font Size", 20, 4, 100)
         , _shader(0)
         , _grid(nullptr)
     {
@@ -51,6 +54,12 @@ namespace campvis {
         addProperty(p_renderTargetID);
         addProperty(p_halfAngle);
         addProperty(p_innerRadius);
+
+        addProperty(p_text);
+        addProperty(p_fontFileName);
+        addProperty(p_fontSize);
+
+        p_fontFileName.setValue(ShdrMgr.completePath("/modules/fontrendering/fonts/FreeSans.ttf"));
     }
 
     UsFanRenderer::~UsFanRenderer() {
@@ -63,12 +72,16 @@ namespace campvis {
         _grid = GeometryDataFactory::createGrid(cgt::vec3(-0.5f, 1.0f, 0.0f), cgt::vec3(0.5f, 0.0f, 0.0f),
                                                 cgt::vec3(0.0f, 1.0f, 0.0f), cgt::vec3(1.0f, 0.0f, 0.0f),
                                                 16, 4);
+
+        // Initialize font rendering
+        updateFontAtlas();
     }
 
     void UsFanRenderer::deinit() {
         ShdrMgr.dispose(_shader);
         _shader = nullptr;
         _grid = nullptr;
+        _atlas = nullptr;
 
         VisualizationProcessor::deinit();
     }
@@ -128,9 +141,27 @@ namespace campvis {
             _grid->render(GL_TRIANGLE_STRIP);
             _shader->deactivate();
 
+            // Render text (if any)
+            if (_atlas != nullptr) {
+                const cgt::mat4 transformation = cgt::mat4::createTranslation(cgt::vec3(-1.f, -1.f, 0.f))
+                                               * cgt::mat4::createScale(cgt::vec3(2.f / _viewportSizeProperty->getValue().x, 2.f / _viewportSizeProperty->getValue().y, 1.f));
+                cgt::vec2 pos(32.0f, static_cast<float>(_viewportSizeProperty->getValue().y - 32.0f));
+                _atlas->renderText(p_text.getValue(), pos, cgt::vec4(1.0f), transformation);
+            }
+
             LGL_ERROR;
 
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
+        }
+    }
+
+    void UsFanRenderer::updateFontAtlas() {
+        _atlas = nullptr;
+        try {
+            _atlas = std::unique_ptr<fontrendering::FontAtlas>(new fontrendering::FontAtlas(p_fontFileName.getValue(), p_fontSize.getValue()));
+        }
+        catch (...) {
+            LERROR("Could not create FontAtlas, UsFanRenderer will not display any text.");                
         }
     }
 }

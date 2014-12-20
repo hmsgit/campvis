@@ -24,6 +24,8 @@
 
 #include "cudaconfidencemapsdemo.h"
 
+#include <tbb/tick_count.h>
+
 #include "core/datastructures/imagedata.h"
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -39,7 +41,7 @@ namespace campvis {
         , _usFusion(&_canvasSize)
         , _usFanRenderer(&_canvasSize)
         , p_iterations("Iterations", "Number of CG Iterations", 150, 1, 500)
-        , p_autoIterationCount("AutoIterationCount", "Estimate iteration count based on time slot", false)
+        , p_autoIterationCount("AutoIterationCount", "Estimate iteration count based on time slot", true)
         , p_timeSlot("TimeSlot", "Milliseconds per frame", 32.0f, 10.0f, 250.0f)
         , p_connectToIGTLinkServer("ConnectToIGTLink", "Connect/Disconnect to IGTLink")
         , p_gaussianFilterSize("GaussianSigma", "Blur amount", 2.5f, 1.0f, 10.0f)
@@ -131,6 +133,63 @@ namespace campvis {
 
     void CudaConfidenceMapsDemo::deinit() {
         AutoEvaluationPipeline::deinit();
+    }
+
+    void CudaConfidenceMapsDemo::executePipeline() {
+        static float iterationsPerMsAverage = 1.0f;
+        static unsigned char frame = 0;
+
+        if (p_autoIterationCount.getValue() == false) {
+            AutoEvaluationPipeline::executePipeline();
+        }
+        else {
+            // Only launch the pipeline if the IgtlReader has recieved new data
+            if (!_usIgtlReader.isValid()) {
+                auto startTime = tbb::tick_count::now();
+
+                // Make sure that the whole pipeline gets invalidated
+                _usBlurFilter.invalidate(AbstractProcessor::INVALID_RESULT);
+                _usBlurFilter.invalidate(AbstractProcessor::INVALID_RESULT);
+                _usResampler.invalidate(AbstractProcessor::INVALID_RESULT);
+                _usMapsSolver.invalidate(AbstractProcessor::INVALID_RESULT);
+                _usFusion.invalidate(AbstractProcessor::INVALID_RESULT);
+
+                executeProcessorAndCheckOpenGLState(&_usIgtlReader);
+                executeProcessorAndCheckOpenGLState(&_usBlurFilter);
+                executeProcessorAndCheckOpenGLState(&_usResampler);
+
+                auto solverStartTime = tbb::tick_count::now();
+                executeProcessorAndCheckOpenGLState(&_usMapsSolver);
+                executeProcessorAndCheckOpenGLState(&_usFusion);
+                executeProcessorAndCheckOpenGLState(&_usFanRenderer);
+
+                if (frame % 16 == 0) {
+                    tbb::tick_count endTime = tbb::tick_count::now();
+                    auto ms = (endTime - startTime).seconds() * 1000.0f;
+                    std::stringstream string;
+                    string << "Execution time: " << static_cast<int>(ms) << "ms" << std::endl;
+                    string << "CG Iterations: " << _usMapsSolver.getActualConjugentGradientIterations() << std::endl;
+                    string << "Error: " << _usMapsSolver.getResidualNorm() << std::endl;
+                    _usFanRenderer.p_text.setValue(string.str());
+                }
+                frame++;
+
+
+                // Get the total end time (including fanRenderer) and calculate the number of
+                // cg iterations that can be afforded
+                auto endTime = tbb::tick_count::now();
+                auto ms = (endTime - startTime).seconds() * 1000.0f;
+                auto iterationsPerMs = _usMapsSolver.getActualConjugentGradientIterations() / ms;
+
+                float mixRatio = 0.85f;
+                iterationsPerMsAverage = iterationsPerMsAverage * mixRatio + iterationsPerMs * (1.0f - mixRatio);
+
+                // Factor out the time needed for preprocessing the image from the time slot
+                float timeSlot = (p_timeSlot.getValue() - (solverStartTime - startTime).seconds() / 1000.0f);
+                int iterations = std::round(p_timeSlot.getValue() * iterationsPerMsAverage);
+                p_iterations.setValue(iterations);
+            }
+        }
     }
 
     void CudaConfidenceMapsDemo::onRenderTargetSizeChanged(const AbstractProperty *prop) {

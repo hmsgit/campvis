@@ -123,6 +123,16 @@ namespace campvis {
 
     void CudaConfidenceMapsSolver::updateProperties(DataContainer& dataContainer) { }
 
+    int CudaConfidenceMapsSolver::getActualConjugentGradientIterations() const
+    {
+        return _solver.getSolutionIterationCount();
+    }
+
+    float CudaConfidenceMapsSolver::getResidualNorm() const
+    {
+        return _solver.getSolutionResidualNorm();
+    }
+
     void CudaConfidenceMapsSolver::resetSolutionVector() {
         // Create a linear gradient image of the same size as the input image
         _solver.resetSolution();

@@ -80,6 +80,9 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
+        int getActualConjugentGradientIterations() const;
+        float getResidualNorm() const;
+
         DataNameProperty p_inputImage;              ///< ID for input volume
         DataNameProperty p_outputConfidenceMap;     ///< ID for output gradient volume
 
