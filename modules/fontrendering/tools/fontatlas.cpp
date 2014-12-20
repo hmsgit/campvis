@@ -44,6 +44,7 @@ namespace campvis {
             , _ftFace(nullptr)
             , _texture(nullptr)
             , _shader(nullptr)
+            , _height(height)
         {
             // Initialize the FreeType2 library 
             if (FT_Init_FreeType(&_ftLibrary)) {
@@ -154,6 +155,12 @@ namespace campvis {
             // Loop through all characters
             for (size_t i = 0; i < text.length(); ++i) {
                 unsigned char p = text[i];
+
+                // Hanlde "\n"
+                if (p == 10) {
+                    pos = cgt::vec2(position.x, pos.y - _height * 1.2f);
+                }
+
                 if (p >= 32 && p < 256) {
                     cgt::vec2 pos2(pos.x + _glyphs[p].bitmapOffset.x, -pos.y - _glyphs[p].bitmapOffset.y);
                     cgt::vec2 size = _glyphs[p].bitmapSize;
