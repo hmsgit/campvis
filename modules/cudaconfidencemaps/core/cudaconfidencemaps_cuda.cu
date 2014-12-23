@@ -239,29 +239,6 @@ namespace cuda {
         }
     }    
 
-    // Utility Structure to group together all the data that is needed to compute the equation system
-    struct ComputeLaplacianData
-    {
-        // User-tweakable parameters
-        float alpha, beta, gamma;
-        float gradientScaling;
-
-        // Image Data
-        const unsigned char *image;
-        int width, height;
-
-        // DIA matrix structure
-        int centralDiagonal;
-        int offsets[9];
-
-        // Penalty terms for each neighbour
-        float gammaList[9];
-
-        // Cached values for the image attenuation (controlled by alpha), so that they don't need to
-        // be recomputed at each pixel
-        std::vector<float> attenuationLUT;
-    };
-
     static __device__ float d_getWeight(float v1, float v2, float gradientScaling, float beta, float gamma)
     {
         float grad = abs(v1 - v2) * gradientScaling / 255.0f;
@@ -307,26 +284,26 @@ namespace cuda {
 
         // If the pixel is at the top or at the bottom, add a value of 1 to the diagonal, to
         // account for the edge to the seed points
-        float valueSum = 0.0f;
+        float weightSum = 0.0f;
         if (y == 0 || y == height - 1)
-            valueSum = 1.0f;
+            weightSum = 1.0f;
 
         for (int d = 0; d < 9; ++d) {
-            float value = 0.0f;
+            float weight = 0.0f;
             
             if (((256>>d) & filter) != 0) {
                 int pidx_2 = pidx + offsets[d];
                 float v = image[pidx_2] * attenuations[d/3];
-                value = d_getWeight(centralValue, v, gradientScaling, beta, gammas[d]);
+                weight = d_getWeight(centralValue, v, gradientScaling, beta, gammas[d]);
             }
 
             // The matrix stores the data, so that values on the same diagonal are sequential.
             // This means that all the values from [0, pitch) are on the first diagonal, [pitch, 2*pitch)
             // are on the second diagonal and so on...
-            L[d * pitch + pidx] = -value;
-            valueSum += value;
+            L[d * pitch + pidx] = -weight;
+            weightSum += weight;
         }
-        L[4 * pitch + pidx] = valueSum;
+        L[4 * pitch + pidx] = weightSum;
     }
 
     void CudaConfidenceMapsSystemSolver::createSystemGPU(const unsigned char* imageData, int imageWidth, int imageHeight,

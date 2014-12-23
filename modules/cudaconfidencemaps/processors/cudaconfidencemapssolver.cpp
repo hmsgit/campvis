@@ -48,7 +48,6 @@ namespace campvis {
         , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Use Alpha-Beta-Filter", true)
         , p_filterAlpha("FilterAlpha", "Filter Alpha", 0.36f, 0.0, 1.0)
         , p_filterBeta("FilterBeta", "Filter Beta", 0.005f, 0.0, 1.0)
-        , p_printStatistics("PrintStatistics", "Print execution times and residual values", false)
         , _solver()
     {
 
@@ -65,8 +64,6 @@ namespace campvis {
         addProperty(p_useAlphaBetaFilter);
         addProperty(p_filterAlpha);
         addProperty(p_filterBeta);
-
-        addProperty(p_printStatistics);
     }
 
     CudaConfidenceMapsSolver::~CudaConfidenceMapsSolver() { }
@@ -89,7 +86,6 @@ namespace campvis {
             float alpha = p_paramAlpha.getValue();
             float beta = p_paramBeta.getValue();
             float gamma = p_paramGamma.getValue();
-            bool isFlipped = true;
 
             // Setup the solver with the current Alpha-Beta-Filter settings
             _solver.enableAlphaBetaFilter(p_useAlphaBetaFilter.getValue());
@@ -104,20 +100,21 @@ namespace campvis {
 
             const float *solution = _solver.getSolution(size.x, size.y);
 
-            float *solutionCopy = new float[elementCount];
-            memcpy(solutionCopy, solution, sizeof(float) * elementCount);
-            WeaklyTypedPointer wtpData(WeaklyTypedPointer::FLOAT, 1, solutionCopy);
-            
+            // FIXME: Instead of copying the solution to a local representation first it would make
+            // sense to directly create an opengl representation!
             ImageData *id = new ImageData(img->getParent()->getDimensionality(), size, img->getParent()->getNumChannels());
-            ImageRepresentationLocal::create(id, wtpData);
+            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_2D, size, GL_R32F, cgt::Texture::LINEAR);
+            resultTexture->setWrapping(cgt::Texture::MIRRORED_REPEAT);
+            resultTexture->uploadTexture(reinterpret_cast<const GLubyte*>(solution), GL_RED, GL_FLOAT);
+            ImageRepresentationGL::create(id, resultTexture);
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputConfidenceMap.getValue(), id);
 
-            if (p_printStatistics.getValue()) {
-                std::cout << "Residual:             " << _solver.getSolutionResidualNorm() << std::endl;
-                std::cout << "System Creation Time: " << _solver.getSystemCreationTime() << std::endl;
-                std::cout << "System Solve Time:    " << _solver.getSystemSolveTime() << " (" << _solver.getSolutionIterationCount() << " iterations)" << std::endl;
-            }
+            /*float *solutionCopy = new float[elementCount];
+            memcpy(solutionCopy, solution, sizeof(float) * elementCount);
+            WeaklyTypedPointer wtpData(WeaklyTypedPointer::FLOAT, 1, solutionCopy);
+            
+            ImageRepresentationLocal::create(id, wtpData);*/
         }
     }
 

@@ -25,6 +25,8 @@
 #ifndef CUDACONFIDENCEMAPSDEMO_H__
 #define CUDACONFIDENCEMAPSDEMO_H__
 
+#include <tbb/tick_count.h>
+
 #include "modules/base/processors/matrixprocessor.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/devil/processors/devilimagereader.h"
@@ -77,6 +79,7 @@ namespace campvis {
         AdvancedUsFusion _usFusion;
         UsFanRenderer _usFanRenderer;
 
+
         NumericProperty<int> p_iterations;
         BoolProperty   p_autoIterationCount;
         FloatProperty  p_timeSlot;
@@ -86,6 +89,7 @@ namespace campvis {
         FloatProperty  p_gaussianFilterSize;
         FloatProperty  p_resamplingScale;
 
+        FloatProperty  p_gradientScaling;
         FloatProperty  p_alpha;
         FloatProperty  p_beta;
         FloatProperty  p_gamma;
@@ -93,6 +97,11 @@ namespace campvis {
 
         FloatProperty  p_fanHalfAngle;
         FloatProperty  p_fanInnerRadius;
+
+
+        float _cgIterationsPerMsRunningAverage;
+        float _cgTimeslotRunningAverage;
+        tbb::tick_count _statisticsLastUpdateTime;
     };
 
 }

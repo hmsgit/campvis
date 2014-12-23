@@ -24,8 +24,6 @@
 
 #include "cudaconfidencemapsdemo.h"
 
-#include <tbb/tick_count.h>
-
 #include "core/datastructures/imagedata.h"
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -46,12 +44,16 @@ namespace campvis {
         , p_connectToIGTLinkServer("ConnectToIGTLink", "Connect/Disconnect to IGTLink")
         , p_gaussianFilterSize("GaussianSigma", "Blur amount", 2.5f, 1.0f, 10.0f)
         , p_resamplingScale("ResampleScale", "Resample Scale", 0.25f, 0.01f, 1.0f)
+        , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001, 10)
         , p_alpha("Alpha", "Alpha", 2.0f, 0.0f, 10.0f)
         , p_beta("Beta", "Beta", 20.0f, 1.0f, 200.0f)
         , p_gamma("Gamma", "Gamma", 0.03f, 0.0f, 0.4f, 0.001, 4)
         , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Alpha-Beta-Filter", true)
         , p_fanHalfAngle("FanHalfAngle", "Fan Half Angle", 37.0f, 1.0f, 90.0f)
         , p_fanInnerRadius("FanInnerRadius", "Fan Inner Radius", 0.222f, 0.001f, 0.999f)
+        , _cgIterationsPerMsRunningAverage(1.0f)
+        , _cgTimeslotRunningAverage(1.0f)
+        , _statisticsLastUpdateTime()
     {
         addProcessor(&_usIgtlReader);
         addProcessor(&_usBlurFilter);
@@ -66,6 +68,7 @@ namespace campvis {
         addProperty(p_connectToIGTLinkServer);
         addProperty(p_gaussianFilterSize);
         addProperty(p_resamplingScale);
+        addProperty(p_gradientScaling);
         addProperty(p_alpha);
         addProperty(p_beta);
         addProperty(p_gamma);
@@ -123,6 +126,7 @@ namespace campvis {
         p_connectToIGTLinkServer.addSharedProperty(&_usIgtlReader.p_connect);
         p_gaussianFilterSize.addSharedProperty(&_usBlurFilter.p_sigma);
         p_resamplingScale.addSharedProperty(&_usResampler.p_resampleScale);
+        p_gradientScaling.addSharedProperty(&_usMapsSolver.p_gradientScaling);
         p_alpha.addSharedProperty(&_usMapsSolver.p_paramAlpha);
         p_beta.addSharedProperty(&_usMapsSolver.p_paramBeta);
         p_gamma.addSharedProperty(&_usMapsSolver.p_paramGamma);
@@ -136,9 +140,6 @@ namespace campvis {
     }
 
     void CudaConfidenceMapsDemo::executePipeline() {
-        static float iterationsPerMsAverage = 1.0f;
-        static unsigned char frame = 0;
-
         if (p_autoIterationCount.getValue() == false) {
             AutoEvaluationPipeline::executePipeline();
         }
@@ -160,10 +161,14 @@ namespace campvis {
 
                 auto solverStartTime = tbb::tick_count::now();
                 executeProcessorAndCheckOpenGLState(&_usMapsSolver);
+                auto solverEndTime = tbb::tick_count::now();
+
                 executeProcessorAndCheckOpenGLState(&_usFusion);
                 executeProcessorAndCheckOpenGLState(&_usFanRenderer);
 
-                if (frame % 16 == 0) {
+                if ((startTime - _statisticsLastUpdateTime).seconds() > 0.5f) {
+                    _statisticsLastUpdateTime = startTime;
+
                     tbb::tick_count endTime = tbb::tick_count::now();
                     auto ms = (endTime - startTime).seconds() * 1000.0f;
                     std::stringstream string;
@@ -172,21 +177,24 @@ namespace campvis {
                     string << "Error: " << _usMapsSolver.getResidualNorm() << std::endl;
                     _usFanRenderer.p_text.setValue(string.str());
                 }
-                frame++;
 
 
-                // Get the total end time (including fanRenderer) and calculate the number of
-                // cg iterations that can be afforded
                 auto endTime = tbb::tick_count::now();
-                auto ms = (endTime - startTime).seconds() * 1000.0f;
+                auto ms = (solverEndTime - solverStartTime).seconds() * 1000.0f;
                 auto iterationsPerMs = _usMapsSolver.getActualConjugentGradientIterations() / ms;
 
-                float mixRatio = 0.85f;
-                iterationsPerMsAverage = iterationsPerMsAverage * mixRatio + iterationsPerMs * (1.0f - mixRatio);
 
-                // Factor out the time needed for preprocessing the image from the time slot
-                float timeSlot = (p_timeSlot.getValue() - (solverStartTime - startTime).seconds() / 1000.0f);
-                int iterations = std::round(p_timeSlot.getValue() * iterationsPerMsAverage);
+                // Factor out the time needed for pre- and postprocessing the image from the time slot
+                float timeSlot = (p_timeSlot.getValue() -
+                                 (solverStartTime - startTime).seconds() * 1000.0f -
+                                 (endTime - solverEndTime).seconds() * 1000.0f);
+
+                // Compute the running average using an exponential filter
+                float expAlpha = 0.05f;
+                _cgIterationsPerMsRunningAverage = _cgIterationsPerMsRunningAverage * (1.0f - expAlpha) + iterationsPerMs * expAlpha;
+                _cgTimeslotRunningAverage = _cgTimeslotRunningAverage * (1.0f - expAlpha) + timeSlot * expAlpha;
+
+                int iterations = static_cast<int>(_cgTimeslotRunningAverage * _cgIterationsPerMsRunningAverage);
                 p_iterations.setValue(iterations);
             }
         }
