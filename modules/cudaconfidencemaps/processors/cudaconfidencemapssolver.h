@@ -88,6 +88,8 @@ namespace campvis {
 
         ButtonProperty p_resetResult;
 
+        BoolProperty  p_use8Neighbourhood;          ///< Wether to use 8- or 4-neighbourhood
+
         NumericProperty<int> p_iterations;          ///< Number of CG-Iterations to do
 
         FloatProperty p_gradientScaling;

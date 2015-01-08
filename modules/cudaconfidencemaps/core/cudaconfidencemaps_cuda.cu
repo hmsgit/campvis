@@ -60,6 +60,7 @@ namespace cuda {
         // Information about the system as well as statistics of the solution
         bool isUpsideDown;
         bool useAlphaBetaFiltering;
+        bool use8Neighbourhood; ///< If set to true the full 8-neighbourhood is used, otherwise only the 4-neighbourhood
         int imageWidth;
         int imageHeight;
         int iterationCount;
@@ -77,6 +78,7 @@ namespace cuda {
         _gpuData->systemCreationTime = 0.0f;
         _gpuData->systemSolveTime = 0.0f;
         _gpuData->isUpsideDown = true;
+        _gpuData->use8Neighbourhood = true;
 
         _gpuData->useAlphaBetaFiltering = false;
         _gpuData->abFilterAlpha = 0.125;
@@ -91,8 +93,8 @@ namespace cuda {
 
     void CudaConfidenceMapsSystemSolver::uploadImage(const unsigned char* imageData, int imageWidth, int imageHeight,
                                                      float gradientScaling, float alpha, float beta, float gamma,
-                                                     bool isUpsideDown) {
-        resizeDataStructures(imageWidth, imageHeight, isUpsideDown);
+                                                     bool use8Neighbourhood, bool isUpsideDown) {
+        resizeDataStructures(imageWidth, imageHeight, isUpsideDown, use8Neighbourhood);
 
         // Measure execution time and record it in the _gpuData datastructure
         CUDAClock clock; clock.start();
@@ -202,21 +204,24 @@ namespace cuda {
     }
 
 
-    void CudaConfidenceMapsSystemSolver::resizeDataStructures(int imageWidth, int imageHeight, bool isUpsideDown) {
+    void CudaConfidenceMapsSystemSolver::resizeDataStructures(int imageWidth, int imageHeight, bool isUpsideDown, bool use8Neighbourhood) {
         // If the problem size changed, reset the solution vector, as well as all
         // the vectors and matrices
-        if (_gpuData->imageWidth != imageWidth || _gpuData->imageHeight != imageHeight || _gpuData->isUpsideDown != isUpsideDown) {
+        if (_gpuData->imageWidth != imageWidth || _gpuData->imageHeight != imageHeight ||
+            _gpuData->isUpsideDown != isUpsideDown || _gpuData->use8Neighbourhood != use8Neighbourhood) {
             // Resize the system vectors and matrices to accomodate the different image size
             _gpuData->imageWidth = imageWidth;
             _gpuData->imageHeight = imageHeight;
             _gpuData->isUpsideDown = isUpsideDown;
+            _gpuData->use8Neighbourhood = use8Neighbourhood;
             int numElements = imageWidth * imageHeight;
+            int numDiagonals = use8Neighbourhood ? 9 : 5;
             _gpuData->x_h.resize(numElements);
             _gpuData->b_d.resize(numElements);
             _gpuData->x_d.resize(numElements);
             _gpuData->imageBuffer_d.resize(numElements);
-            _gpuData->L_d.resize(numElements, numElements, numElements * 9, 9);
-            _gpuData->L_h.resize(numElements, numElements, numElements * 9, 9);
+            _gpuData->L_d.resize(numElements, numElements, numElements * numDiagonals, numDiagonals);
+            _gpuData->L_h.resize(numElements, numElements, numElements * numDiagonals, numDiagonals);
             _gpuData->abFilterR_d.resize(numElements);
             _gpuData->abFilterV_d.resize(numElements);
 
@@ -306,13 +311,82 @@ namespace cuda {
         L[4 * pitch + pidx] = weightSum;
     }
 
+    // TODO: Unify system creation kernel code for 4 and 8 neighbourhood. DRYness!
+    static __global__ void k_buildSystem4Neighbourhood(float* L, int pitch, const unsigned char* image, int width, int height,
+                                  float gradientScaling, float alpha, float beta, float gamma, bool isUpsideDown)
+    {
+
+        const int x = blockDim.x * blockIdx.x + threadIdx.x;
+        const int y = blockDim.y * blockIdx.y + threadIdx.y;
+        const int pidx = y * width + x;
+        if (x >= width || y >= height) return;
+
+        const int offsets[] = {-width, -1, 0, 1, width};
+        const float gammas[] = {0.0f, gamma, 0.0f, gamma, 0.0f};
+
+        // Precompute the three attenuation values for the curernt pixel (the row above, current row, and row below)
+        float attenuations[3];
+        if (isUpsideDown) {
+            attenuations[0] = 1.0f - exp(-alpha * (1.0f - (y - 1.0f) / (height - 1.0f)));
+            attenuations[1] = 1.0f - exp(-alpha * (1.0f - (y       ) / (height - 1.0f)));
+            attenuations[2] = 1.0f - exp(-alpha * (1.0f - (y + 1.0f) / (height - 1.0f)));
+        } else {
+            attenuations[0] = 1.0f - exp(-alpha * (y - 1.0f) / (height - 1.0f));
+            attenuations[1] = 1.0f - exp(-alpha * (y       ) / (height - 1.0f));
+            attenuations[2] = 1.0f - exp(-alpha * (y + 1.0f) / (height - 1.0f));
+        }
+
+        // Filter off out-of-bounds edges
+        unsigned char filter = 27; // 1 101 1
+
+        // 4 - neighbourhood filter
+        if (x == 0)        filter &= 19; // 1 001 1
+        if (x == width-1)  filter &= 25; // 1 100 1
+        if (y == 0)        filter &= 11; // 0 101 1
+        if (y == height-1) filter &= 26; // 1 101 0
+
+        // get central pixel
+        float centralValue = image[pidx] * attenuations[1];
+
+        // If the pixel is at the top or at the bottom, add a value of 1 to the diagonal, to
+        // account for the edge to the seed points
+        float weightSum = 0.0f;
+        if (y == 0 || y == height - 1)
+            weightSum = 1.0f;
+
+        for (int d = 0; d < 5; ++d) {
+            float weight = 0.0f;
+            
+            if (((16>>d) & filter) != 0) {
+                int pidx_2 = pidx + offsets[d];
+                float v = image[pidx_2] * attenuations[(d+2)/3];
+                weight = d_getWeight(centralValue, v, gradientScaling, beta, gammas[d]);
+            }
+
+            // The matrix stores the data, so that values on the same diagonal are sequential.
+            // This means that all the values from [0, pitch) are on the first diagonal, [pitch, 2*pitch)
+            // are on the second diagonal and so on...
+            L[d * pitch + pidx] = -weight;
+            weightSum += weight;
+        }
+        // Store sum of weights in the central diagonal
+        L[2 * pitch + pidx] = weightSum;
+    }
+
     void CudaConfidenceMapsSystemSolver::createSystemGPU(const unsigned char* imageData, int imageWidth, int imageHeight,
                                                      float gradientScaling, float alpha, float beta, float gamma,
                                                      bool isUpsideDown) {
         // Initialize the DIA matrix diagonal offsets
-        int offsets[9] = {-imageWidth-1, -imageWidth, -imageWidth+1, -1, 0, 1, imageWidth-1, imageWidth, imageWidth+1};
-        for (int i = 0; i < 9; ++i) {
-            _gpuData->L_d.diagonal_offsets[i] = offsets[i];
+        if (_gpuData->use8Neighbourhood) {
+            int offsets[9] = {-imageWidth-1, -imageWidth, -imageWidth+1, -1, 0, 1, imageWidth-1, imageWidth, imageWidth+1};
+            for (int i = 0; i < 9; ++i) {
+                _gpuData->L_d.diagonal_offsets[i] = offsets[i];
+            }
+        } else {
+            int offsets[5] = {-imageWidth, -1, 0, 1, imageWidth};
+            for (int i = 0; i < 5; ++i) {
+                _gpuData->L_d.diagonal_offsets[i] = offsets[i];
+            }
         }
 
         int numElements = imageWidth * imageHeight;
@@ -321,10 +395,18 @@ namespace cuda {
 
         // Since the image will be needed by the CUDA kernel, it needs to be copied on the GPU first
         cudaMemcpy(thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]), imageData, numElements, cudaMemcpyHostToDevice);
-        k_buildSystem<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), _gpuData->L_d.values.pitch,
-                                             thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]),
-                                             imageWidth, imageHeight,
-                                             gradientScaling, alpha, beta, gamma, _gpuData->isUpsideDown);
+        if (_gpuData->use8Neighbourhood) {   
+            k_buildSystem<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), _gpuData->L_d.values.pitch,
+                                                 thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]),
+                                                 imageWidth, imageHeight,
+                                                 gradientScaling, alpha, beta, gamma, _gpuData->isUpsideDown);
+        }
+        else {
+            k_buildSystem4Neighbourhood<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), _gpuData->L_d.values.pitch,
+                                                 thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]),
+                                                 imageWidth, imageHeight,
+                                                 gradientScaling, alpha, beta, gamma, _gpuData->isUpsideDown);            
+        }
     }
 
 } // cuda

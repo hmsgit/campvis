@@ -40,6 +40,7 @@ namespace campvis {
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputConfidenceMap("OutputConfidenceMap", "Output Confidence Map", "us.confidence", DataNameProperty::WRITE)
         , p_resetResult("ResetSolution", "Reset solution vector")
+        , p_use8Neighbourhood("Use8Neighbourhood", "Use 8 Neighbourhood (otherwise 4)", true)
         , p_iterations("IterationCount", "Conjugate Gradient Iterations", 200, 1, 500)
         , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001, 10)
         , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001, 10)
@@ -55,6 +56,7 @@ namespace campvis {
         addProperty(p_outputConfidenceMap);
 
         addProperty(p_resetResult);
+        addProperty(p_use8Neighbourhood);
         addProperty(p_iterations);
         addProperty(p_gradientScaling);
         addProperty(p_paramAlpha);
@@ -81,6 +83,7 @@ namespace campvis {
 
         ImageRepresentationLocal::ScopedRepresentation img(data, p_inputImage.getValue());
         if (img != 0) {
+            bool use8Neighbourhood = p_use8Neighbourhood.getValue();
             int iterations = p_iterations.getValue();
             float gradientScaling = p_gradientScaling.getValue();
             float alpha = p_paramAlpha.getValue();
@@ -95,7 +98,7 @@ namespace campvis {
             size_t elementCount = cgt::hmul(size);
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
-            _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma);
+            _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma, use8Neighbourhood);
             _solver.solve(iterations, 1e-10);
 
             const float *solution = _solver.getSolution(size.x, size.y);
@@ -109,12 +112,6 @@ namespace campvis {
             ImageRepresentationGL::create(id, resultTexture);
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputConfidenceMap.getValue(), id);
-
-            /*float *solutionCopy = new float[elementCount];
-            memcpy(solutionCopy, solution, sizeof(float) * elementCount);
-            WeaklyTypedPointer wtpData(WeaklyTypedPointer::FLOAT, 1, solutionCopy);
-            
-            ImageRepresentationLocal::create(id, wtpData);*/
         }
     }
 

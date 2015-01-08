@@ -23,10 +23,12 @@ namespace cuda {
          * \param   alpha       controls the depth attenuation correction
          * \param   beta        controls the non-linear mapping of gradients to weights
          * \param   gamma       controls how much diagonal connections are penalized
+         * \param   use8Neighbourhood wether to use a graph connecting all 8 neighbours of a pixel or not. The original
+         *                      confidence maps problem formulation uses 8 neighbours. 
          * \param   isUpsideDown if set to true, the image is interpreted as being upside down (as common in OpenGL)
          */
         void uploadImage(const unsigned char* imageData, int imageWidth, int imageHeight,
-                         float gradientScaling, float alpha, float beta, float gamma, bool isUpsideDown=true);
+                         float gradientScaling, float alpha, float beta, float gamma, bool use8Neighbourhood=false, bool isUpsideDown=true);
 
         /**
          * Resets the current solution vector to a linear fallof from white (top of the image) to black
@@ -94,9 +96,7 @@ namespace cuda {
         float getSystemSolveTime() const;
 
     private:
-        void resizeDataStructures(int imageWidth, int imageHeight, bool isUpsideDown);
-        void createSystemCPU(const unsigned char* imageData, int imageWidth, int imageHeight,
-                             float gradientScaling, float alpha, float beta, float gamma, bool isUpsideDown=true);
+        void resizeDataStructures(int imageWidth, int imageHeight, bool isUpsideDown, bool use8Neighbourhood);
         void createSystemGPU(const unsigned char* imageData, int imageWidth, int imageHeight,
                              float gradientScaling, float alpha, float beta, float gamma, bool isUpsideDown=true);
 
