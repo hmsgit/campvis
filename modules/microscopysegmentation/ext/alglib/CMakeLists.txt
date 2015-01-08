@@ -57,8 +57,7 @@ LIST(APPEND AlglibSources
 
 # Defines the alglib librarie.  
 
-ADD_LIBRARY(alglib STATIC 
-    ${AlglibSources} ${AlglibHeaders} )
+ADD_LIBRARY(alglib ${AlglibSources} ${AlglibHeaders})
 #cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 #$target_link_libraries(gtest_main alglib)
 
