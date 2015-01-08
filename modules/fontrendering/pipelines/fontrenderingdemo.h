@@ -58,11 +58,11 @@ namespace fontrendering {
         TextRenderer _tr;
     };
 
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<FontRenderingDemo>;
-
 }
+
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<fontrendering::FontRenderingDemo>;
+
 }
 
 #endif // FONTRENDERINGDEMO_H__

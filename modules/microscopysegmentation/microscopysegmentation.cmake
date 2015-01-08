@@ -5,8 +5,10 @@ IF(${ModuleEnabled})
 
 	# dirty, dirty hack to force AlgLib to build stastic lib on MSVC
 	SET(bsl ${BUILD_SHARED_LIBS})
-	IF(${CampvisSharedStaticModulesFix} STREQUAL "STATIC")
-		SET(BUILD_SHARED_LIBS OFF)
+	IF(CampvisSharedStaticModulesFix)
+		IF(${CampvisSharedStaticModulesFix} STREQUAL "STATIC")
+			SET(BUILD_SHARED_LIBS OFF)
+		ENDIF()
 	ENDIF()
 	
 	ADD_SUBDIRECTORY(modules/microscopysegmentation/ext/alglib)

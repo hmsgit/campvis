@@ -54,10 +54,11 @@ namespace workflowdemo {
 
         campvis::GenericImageReader _imageReader;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<ImageLoading>;
 }
+
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<workflowdemo::ImageLoading>;
+
 }
 
 #endif // IMAGELOADING_H__

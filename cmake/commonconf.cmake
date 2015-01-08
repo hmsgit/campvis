@@ -151,6 +151,7 @@ ELSEIF(UNIX)
     LIST(APPEND CampvisGlobalDefinitions "-DUNIX")
     LIST(APPEND CampvisGlobalDefinitions "-Wall -Wno-unused-local-typedefs -Wno-unused-variable -Wno-unknown-pragmas")
     LIST(APPEND CampvisGlobalDefinitions "-D__STDC_CONSTANT_MACROS")
+ELSE()
 ENDIF(WIN32)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)

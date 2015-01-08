@@ -60,10 +60,11 @@ namespace workflowdemo {
         GlImageCrop _glCrop;
         VolumeExplorer _ve;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<ImageFiltering>;
 }
+
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<workflowdemo::ImageFiltering>;
+
 }
 
 #endif // IMAGEFILTERING_H__

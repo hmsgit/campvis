@@ -55,10 +55,11 @@ namespace workflowdemo {
 
         VolumeExplorer _ve;
     };
-
-    // Instantiate template to register the pipelines.
-    template class PipelineRegistrar<ImageVis>;
 }
+
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<workflowdemo::ImageVis>;
+
 }
 
 #endif // IMAGEVIS_H__
