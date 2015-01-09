@@ -26,12 +26,13 @@
 #define VOLUMERENDERER_H__
 
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/raycastingprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
-#include "core/pipeline/raycastingprocessor.h"
 
 namespace cgt {
     class Shader;
@@ -42,7 +43,7 @@ namespace campvis {
      * Combines proxy geometry generator, entry/exit point generator and raycasting into one
      * easy-to-use volume renderer.
      */
-    class VolumeRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API VolumeRenderer : public VisualizationProcessor {
     public:
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.

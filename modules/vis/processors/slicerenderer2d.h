@@ -40,6 +40,8 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -49,7 +51,7 @@ namespace campvis {
     /**
     * Applies a transfer function and other modifiers to a 2D input image and renders to screen buffer
     */
-    class SliceRenderer2D : public VisualizationProcessor, public cgt::EventListener {
+    class CAMPVIS_MODULES_API SliceRenderer2D : public VisualizationProcessor, public cgt::EventListener {
     public:
  
         /**

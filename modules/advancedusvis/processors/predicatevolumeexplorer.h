@@ -25,6 +25,7 @@
 #ifndef PREDICATEVOLUMEEXPLORER_H__
 #define PREDICATEVOLUMEEXPLORER_H__
 
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/advancedusvis/processors/pointpredicateraycaster.h"
 #include "modules/advancedusvis/processors/pointpredicateevaluator.h"
@@ -34,7 +35,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class PredicateVolumeExplorer : public VolumeExplorer {
+    class CAMPVIS_MODULES_API PredicateVolumeExplorer : public VolumeExplorer {
         /// voxel type of the bitmask image (hardcoding this is not the most beautiful design though...)
         typedef uint8_t BitmaskType;
 

@@ -35,6 +35,7 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/base/processors/trackballcameraprovider.h"
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
 
@@ -48,7 +49,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
+    class CAMPVIS_MODULES_API VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
     public:
         /// Enumeration of the 4 views of the VolumeExplorer
         enum Views {

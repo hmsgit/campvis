@@ -26,12 +26,14 @@
 #define IMAGEVIS_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
 namespace workflowdemo {
 
-    class ImageVis : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API ImageVis : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -53,8 +55,11 @@ namespace workflowdemo {
 
         VolumeExplorer _ve;
     };
-
 }
+
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<workflowdemo::ImageVis>;
+
 }
 
 #endif // IMAGEVIS_H__

@@ -30,6 +30,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
 namespace fontrendering {
 
@@ -38,7 +40,7 @@ namespace fontrendering {
     /**
      * Renders a text using OpenGL
      */
-    class TextRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API TextRenderer : public VisualizationProcessor {
     public:
         /**
          * Constructs a new TextRenderer Processor.

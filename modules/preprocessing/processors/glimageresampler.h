@@ -32,6 +32,8 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Resamples am image on the GPU using OpenGL.
      */
-    class GlImageResampler : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlImageResampler : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlImageResampler Processor

@@ -30,6 +30,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class SliceRenderer3D : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API SliceRenderer3D : public VisualizationProcessor {
     public:
         /**
          * Constructs a new SliceRenderer3D Processor

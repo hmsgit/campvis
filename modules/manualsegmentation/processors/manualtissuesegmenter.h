@@ -35,6 +35,7 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
 #include "modules/manualsegmentation/tools/tissuesegmentation.h"
 
 namespace cgt {
@@ -47,7 +48,7 @@ namespace campvis {
     /**
      * VERY EXPERIMENTAL processor for manual segmentation of tissue layers.
      */
-    class ManualTissueSegmenter : public VisualizationProcessor, public cgt::EventListener {
+    class CAMPVIS_MODULES_API ManualTissueSegmenter : public VisualizationProcessor, public cgt::EventListener {
     public:
         /**
          * Constructs a new ManualTissueSegmenter Processor

@@ -33,13 +33,14 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/preprocessing/tools/abstractimagefilter.h"
 
 namespace campvis {
     /**
      * Performs watershed image filter on input image using ITK.
      */
-    class ItkWatershedFilter : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ItkWatershedFilter : public AbstractProcessor {
     public:
         /**
          * Constructs a new ItkWatershedFilter Processor

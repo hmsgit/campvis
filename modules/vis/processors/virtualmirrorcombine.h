@@ -32,6 +32,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Performs the composition of a rendering, a virtual mirror rendering and the corresponding mirror.
      */
-    class VirtualMirrorCombine : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API VirtualMirrorCombine : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new VirtualMirrorCombine Processor

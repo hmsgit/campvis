@@ -29,6 +29,10 @@
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
+#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -38,7 +42,7 @@
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
-    class VectorFieldDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API VectorFieldDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Small demo pipeline for vector field visualization.
@@ -86,6 +90,8 @@ namespace campvis {
         IntProperty p_time;
     };
 
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<VectorFieldDemo>;
 }
 
 #endif // VECTORFIELDDEMO_H__

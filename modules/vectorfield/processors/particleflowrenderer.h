@@ -36,6 +36,8 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class BufferObject;
     class Shader;
@@ -46,7 +48,7 @@ namespace campvis {
     /**
      * Renders a vector field with arrows.
      */
-    class ParticleFlowRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API ParticleFlowRenderer : public VisualizationProcessor {
     public:
         enum ColoringMode {
             COLORING_AGE = 0,

@@ -22,43 +22,28 @@
 // 
 // ================================================================================================
 
-#ifndef IMAGELOADING_H__
-#define IMAGELOADING_H__
+#ifndef CAMPVIS_MODULESAPI_H__
+#define CAMPVIS_MODULESAPI_H__
 
-#include "core/pipeline/autoevaluationpipeline.h"
-#include "modules/modulesapi.h"
-#include "modules/pipelinefactory.h"
-#include "modules/io/processors/genericimagereader.h"
+#ifdef CAMPVIS_DYNAMIC_LIBS
+    #ifdef CAMPVIS_MODULES_BUILD_DLL
+        // building library -> export symbols
+        #ifdef WIN32
+            #define CAMPVIS_MODULES_API __declspec(dllexport)
+        #else
+            #define CAMPVIS_MODULES_API
+        #endif
+    #else
+        // including library -> import symbols
+        #ifdef WIN32
+            #define CAMPVIS_MODULES_API __declspec(dllimport)
+        #else
+            #define CAMPVIS_MODULES_API
+        #endif
+    #endif
+#else
+    // building/including static library -> do nothing
+    #define CAMPVIS_MODULES_API
+#endif
 
-namespace campvis {
-namespace workflowdemo {
-
-    class CAMPVIS_MODULES_API ImageLoading : public AutoEvaluationPipeline {
-    public:
-        /**
-         * Creates a AutoEvaluationPipeline.
-         */
-        ImageLoading(DataContainer* dc);
-
-        /**
-         * Virtual Destructor
-         **/
-        virtual ~ImageLoading();
-
-        /// \see AutoEvaluationPipeline::init()
-        virtual void init();
-
-        /// \see AbstractPipeline::getName()
-        virtual const std::string getName() const { return getId(); };
-        static const std::string getId() { return "WorkflowDemo::ImageLoading"; };
-
-        campvis::GenericImageReader _imageReader;
-    };
-}
-
-// Instantiate template to register the pipelines.
-template class PipelineRegistrar<workflowdemo::ImageLoading>;
-
-}
-
-#endif // IMAGELOADING_H__
+#endif // CAMPVIS_MODULESAPI_H__

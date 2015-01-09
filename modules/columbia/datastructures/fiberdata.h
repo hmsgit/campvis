@@ -30,6 +30,7 @@
 #include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
+#include "modules/modulesapi.h"
 
 #include <deque>
 #include <vector>
@@ -43,7 +44,7 @@ namespace campvis {
     /**
      * Data object storing fiber data.
      */
-    class FiberData : public AbstractData, public IHasWorldBounds {
+    class CAMPVIS_MODULES_API FiberData : public AbstractData, public IHasWorldBounds {
     public:
         /**
          * Struct storing meta information about a single fiber.

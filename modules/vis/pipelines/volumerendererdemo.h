@@ -27,12 +27,16 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 #include "modules/base/processors/trackballcameraprovider.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/volumerenderer.h"
 
 namespace campvis {
-    class VolumeRendererDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API VolumeRendererDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -59,6 +63,9 @@ namespace campvis {
         MhdImageReader _imageReader;
         VolumeRenderer _vr;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<VolumeRendererDemo>;
 
 }
 

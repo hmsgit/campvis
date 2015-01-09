@@ -32,6 +32,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Performs IXPV composition of a 3D slice rendering and a X-Ray image.
      */
-    class IxpvCompositor : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API IxpvCompositor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new IxpvCompositor Processor

@@ -31,11 +31,13 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Generates proxy geometry for a virtual mirror.
      */
-    class VirtualMirrorGeometryGenerator : public AbstractProcessor {
+    class CAMPVIS_MODULES_API VirtualMirrorGeometryGenerator : public AbstractProcessor {
     public:
         /**
          * Constructs a new VirtualMirrorGeometryGenerator Processor

@@ -31,6 +31,8 @@
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
 
+#include "modules/modulesapi.h"
+
 #include <map>
 #include <string>
 #include <vector>
@@ -48,7 +50,7 @@ namespace campvis {
      * 
      * \note    PipelineFactory is a thread-safe lazy-instantiated singleton.
      */
-    class PipelineFactory {
+    class CAMPVIS_MODULES_API PipelineFactory {
     public:
         /**
          * Returns a reference to the PipelineFactory singleton.

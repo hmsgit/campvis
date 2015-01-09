@@ -29,6 +29,7 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
 #include <string>
@@ -41,7 +42,7 @@ namespace campvis {
     /**
      * Performs a Predicate Histogram-based volume ray casting for IVUS Tissue Classification.
      */
-    class IvusTcRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API IvusTcRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new IvusTcRaycaster Processor

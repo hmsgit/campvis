@@ -33,6 +33,8 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -41,7 +43,7 @@ namespace campvis {
     /**
      * Creates the gradient volume for the given intensity volume using OpenGL.
      */
-    class GlMorphologyFilter : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlMorphologyFilter : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlMorphologyFilter Processor

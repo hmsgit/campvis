@@ -29,6 +29,9 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/devil/processors/devilimagereader.h"
@@ -46,7 +49,7 @@
 
 
 namespace campvis {
-    class IxpvDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API IxpvDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -90,6 +93,9 @@ namespace campvis {
 
         MWheelToNumericPropertyEventListener _wheelHandler;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<IxpvDemo>;
 
 }
 

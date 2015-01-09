@@ -37,6 +37,8 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -47,7 +49,7 @@ namespace campvis {
     /**
      * Computes the intensity distribution profile for each voxel along the scanline.
      */
-    class ScanlineDistributionComputation : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API ScanlineDistributionComputation : public VisualizationProcessor {
     public:
         /**
          * Constructs a new ScanlineDistributionComputation Processor

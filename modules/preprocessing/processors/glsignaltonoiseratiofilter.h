@@ -31,6 +31,8 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Creates the gradient volume for the given intensity volume using OpenGL.
      */
-    class GlSignalToNoiseRatioFilter : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlSignalToNoiseRatioFilter : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlSignalToNoiseRatioFilter Processor

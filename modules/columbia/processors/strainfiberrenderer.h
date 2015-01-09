@@ -32,6 +32,8 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Renders Strain Fibers
      */
-    class StrainFiberRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API StrainFiberRenderer : public VisualizationProcessor {
     public:
         enum RenderMode {
             STRIPES,

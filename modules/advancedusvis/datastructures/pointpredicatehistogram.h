@@ -26,6 +26,7 @@
 
 #include "sigslot/sigslot.h"
 
+#include "modules/modulesapi.h"
 #include "modules/advancedusvis/datastructures/pointpredicate.h"
 
 #include <vector>
@@ -35,7 +36,7 @@ namespace campvis {
     /**
      * Data object storing information about selected predicates and their settings.
      */
-    class PointPredicateHistogram : public sigslot::has_slots {
+    class CAMPVIS_MODULES_API PointPredicateHistogram : public sigslot::has_slots {
     public:
 
         /**

@@ -33,11 +33,13 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Creates Lookup volumes vor generation LH-Histograms of volumes as well as the LH histogram.
      */
-    class LHHistogram : public AbstractProcessor {
+    class CAMPVIS_MODULES_API LHHistogram : public AbstractProcessor {
     public:
         /**
          * Constructs a new LHHistogram Processor

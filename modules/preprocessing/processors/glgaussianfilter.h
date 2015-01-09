@@ -33,6 +33,8 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class BufferObject;
     class Shader;
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Performs a gaussian filtering on the input image using OpenGL.
      */
-    class GlGaussianFilter : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlGaussianFilter : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlGaussianFilter Processor

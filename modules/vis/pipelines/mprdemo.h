@@ -28,13 +28,17 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "modules/base/processors/trackballcameraprovider.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/mprrenderer.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
-    class MprDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API MprDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -62,6 +66,9 @@ namespace campvis {
         RenderTargetCompositor _compositor;
 
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<MprDemo>;
 
 }
 

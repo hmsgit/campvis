@@ -27,6 +27,8 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/vtkimagereader.h"
@@ -34,7 +36,7 @@
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
-    class GeometryRendererDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API GeometryRendererDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -74,6 +76,9 @@ namespace campvis {
         RenderTargetCompositor _compositor1;
         RenderTargetCompositor _compositor2;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<GeometryRendererDemo>;
 
 }
 

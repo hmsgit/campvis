@@ -29,11 +29,15 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
 
 namespace campvis {
-    class SliceVis : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API SliceVis : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -70,6 +74,9 @@ namespace campvis {
         TransFuncWindowingEventListener _tfWindowingHandler;
 
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<SliceVis>;
 
 }
 

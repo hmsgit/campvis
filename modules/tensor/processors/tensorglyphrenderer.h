@@ -34,6 +34,8 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Renders axis-aligned slices with tensor glyphs.
      */
-    class TensorGlyphRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API TensorGlyphRenderer : public VisualizationProcessor {
     public:
         /// Glyph type to render
         enum GlyphType {

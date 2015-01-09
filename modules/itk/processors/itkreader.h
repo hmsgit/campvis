@@ -27,7 +27,7 @@
 
 
 #include "core/properties/allproperties.h"
-
+#include "modules/modulesapi.h"
 
 namespace campvis {
     /**
@@ -35,7 +35,7 @@ namespace campvis {
      * 
      * Should support all image types that are supported by the ITK library. Image Sequences are not supported.
      */
-    class ItkReader : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ItkReader : public AbstractProcessor {
     public:
         /**
          * Constructs a new ItkReader Processor

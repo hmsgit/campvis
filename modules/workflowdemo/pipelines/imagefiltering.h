@@ -26,6 +26,9 @@
 #define IMAGEFILTERING_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/preprocessing/processors/glimagecrop.h"
 #include "modules/vis/processors/volumeexplorer.h"
@@ -33,7 +36,7 @@
 namespace campvis {
 namespace workflowdemo {
 
-    class ImageFiltering : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API ImageFiltering : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -57,8 +60,11 @@ namespace workflowdemo {
         GlImageCrop _glCrop;
         VolumeExplorer _ve;
     };
-
 }
+
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<workflowdemo::ImageFiltering>;
+
 }
 
 #endif // IMAGEFILTERING_H__

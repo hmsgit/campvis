@@ -40,11 +40,13 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Generates CameraData objects.
      */
-    class CameraProvider : public AbstractProcessor {
+    class CAMPVIS_MODULES_API CameraProvider : public AbstractProcessor {
     public:
         /**
          * Constructs a new CameraProvider Processor

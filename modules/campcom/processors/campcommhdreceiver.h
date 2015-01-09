@@ -39,12 +39,15 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/modulesapi.h"
+
+
 namespace campvis {
     /**
      * Experimental demo implementation how to receive MHD files via CAMPCom, convert it to
      * CAMPVis ImageData and store it into the DataContainer.
      */
-    class CampcomMhdReceiver : public AbstractProcessor {
+    class CAMPVIS_MODULES_API CampcomMhdReceiver : public AbstractProcessor {
     public:
         /**
          * Constructs a new CampcomMhdReceiver Processor

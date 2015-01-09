@@ -26,13 +26,16 @@
 #define FONTRENDERINGDEMO_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 #include "modules/fontrendering/processors/textrenderer.h"
 
 
 namespace campvis {
 namespace fontrendering {
 
-    class FontRenderingDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API FontRenderingDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -56,6 +59,10 @@ namespace fontrendering {
     };
 
 }
+
+// Instantiate template to register the pipelines.
+template class PipelineRegistrar<fontrendering::FontRenderingDemo>;
+
 }
 
 #endif // FONTRENDERINGDEMO_H__

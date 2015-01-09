@@ -33,17 +33,16 @@
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
 
-#include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/metaproperty.h"
+#include "core/properties/allproperties.h"
 #include "core/properties/colorproperty.h"
+#include "core/datastructures/facegeometry.h"
 
+#include "modules/modulesapi.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
-#include "core/properties/buttonproperty.h"
+
 #include <vector>
-#include "core/datastructures/facegeometry.h"
 
 namespace cgt {
     class Shader;
@@ -55,7 +54,7 @@ namespace campvis {
     /**
      * Structure to store the informations related to a contour object.
      */
-    class ContourObject {
+    class CAMPVIS_MODULES_API ContourObject {
     public:
         ContourObject(std::string name);
         virtual ~ContourObject();
@@ -81,7 +80,7 @@ namespace campvis {
      * Defines a proxy FaceGeometry to pass to SliceExtractor and render()
      * Thus also overloads the render() function.
      */
-    class ProxyFaceGeometry : public FaceGeometry {
+    class CAMPVIS_MODULES_API ProxyFaceGeometry : public FaceGeometry {
     public:
         void addGeometry(FaceGeometry geometry);
         void render(GLenum mode) const;
@@ -95,7 +94,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for graphical segmentation of slices through user input.
      */
-    class MicroscopyImageSegmentation : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
+    class CAMPVIS_MODULES_API MicroscopyImageSegmentation : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
     public:
         /**
          * Constructs a new MicroscopyImageSegmentation Processor

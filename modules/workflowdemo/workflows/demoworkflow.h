@@ -79,8 +79,7 @@ namespace workflowdemo {
     };
 
 }
-
-    template class WorkflowRegistrar<workflowdemo::DemoWorkflow>;
+template class WorkflowRegistrar<workflowdemo::DemoWorkflow>;
 }
 
 #endif // DEMOWORKFLOW_H__

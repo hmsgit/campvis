@@ -29,6 +29,8 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
+
+#include "modules/modulesapi.h"
 #include "modules/vis/tools/voxelhierarchymapper.h"
 
 #include <string>
@@ -44,7 +46,7 @@ namespace campvis {
      * can store 32 ). Then, a hierarchy is generated to increase the ray-rendering
      * [THGM11] Sinje Thiedemann, Niklas Henrich, Thorsten Grosch, and Stefan Müller. 2011. Voxel-based global illumination. In Symposium on Interactive 3D Graphics and Games (I3D '11). ACM, New York, NY, USA, 103-110. DOI=10.1145/1944745.1944763 http://doi.acm.org/10.1145/1944745.1944763
      */
-    class AdvOptimizedRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API AdvOptimizedRaycaster : public RaycastingProcessor {
     public:
         enum AdditionalInvalidationLevels {
             INVALID_BBV = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL

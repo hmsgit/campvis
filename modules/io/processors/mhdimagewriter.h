@@ -32,13 +32,15 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Writes an image into an MHD file.
      *
      * \note    Full format specification at http://www.itk.org/Wiki/MetaIO/Documentation
      */
-    class MhdImageWriter : public AbstractProcessor {
+    class CAMPVIS_MODULES_API MhdImageWriter : public AbstractProcessor {
     public:
         /**
          * Constructs a new MhdImageWriter Processor

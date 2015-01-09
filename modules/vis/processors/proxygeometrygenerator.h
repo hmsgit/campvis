@@ -33,11 +33,13 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/numericproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class ProxyGeometryGenerator : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ProxyGeometryGenerator : public AbstractProcessor {
     public:
         /**
          * Constructs a new ProxyGeometryGenerator Processor

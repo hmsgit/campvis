@@ -34,6 +34,8 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
+#include "modules/modulesapi.h"
+
 namespace cgt {
     class Shader;
 }
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Renders a vector field with arrows.
      */
-    class VectorFieldRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API VectorFieldRenderer : public VisualizationProcessor {
     public:
         /// Slice orientation
         enum SliceOrientation {
