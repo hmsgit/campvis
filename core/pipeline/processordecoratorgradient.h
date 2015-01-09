@@ -26,7 +26,7 @@
 #define PROCESSORDECORATORGRADIENT_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/properties/floatingpointproperty.h"
@@ -41,7 +41,7 @@ namespace campvis {
      * generateHeader() to define computeGradient(tex, texParams, texCoords) in GLSL calling
      * the selected function.
      */
-    class CAMPVIS_CORE_API ProcessorDecoratorGradient : public AbstractProcessorDecorator, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API ProcessorDecoratorGradient : public AbstractProcessorDecorator, public sigslot::has_slots {
     public:
         /// Method for online-calculating gradients
         enum GradientMethod {
@@ -60,7 +60,7 @@ namespace campvis {
         /// \see AbstractProcessorDecorator::addProperties()
         void addProperties(AbstractProcessor* propCollection);
         /// \see AbstractProcessorDecorator::renderProlog()
-        virtual void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
+        virtual void renderProlog(const DataContainer& dataContainer, cgt::Shader* shader);
         /// \see AbstractProcessorDecorator::generateHeader()
         std::string generateHeader() const;
 

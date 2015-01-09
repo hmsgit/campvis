@@ -25,8 +25,9 @@
 #ifndef IMAGEREPRESENTATIONCONVERSIONCORE_H__
 #define IMAGEREPRESENTATIONCONVERSIONCORE_H__
 
+#include "cgt/opengljobprocessor.h"
+
 #include "core/coreapi.h"
-#include "core/tools/opengljobprocessor.h"
 
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/datastructures/imagerepresentationdisk.h"
@@ -95,9 +96,9 @@ namespace campvis {
 
             else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
                 // converting from GL representation
-                OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+                cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
 
-                if (tester->getTexture()->getDataType() != TypeTraits<BASETYPE, NUMCHANNELS>::glDataType)
+                if (cgt::Texture::calcMatchingDataType(tester->getTexture()->getInternalFormat()) != TypeTraits<BASETYPE, NUMCHANNELS>::glDataType)
                     LDEBUGC("CAMPVis.core.datastructures.GenericLocalConversion", "Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");
 
                 WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerConvert(TypeTraits<BASETYPE, NUMCHANNELS>::glDataType);

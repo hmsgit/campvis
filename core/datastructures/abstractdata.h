@@ -27,7 +27,7 @@
 
 #include <memory>
 #include <tbb/atomic.h>
-#include "tgt/bounds.h"
+#include "cgt/bounds.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/scopedtypeddata.h" // not directly needed here but by many classes including AbstractData 
@@ -48,7 +48,7 @@ namespace campvis {
          * Returns the data extent in world coordinates.
          * \return  The data extent in world coordinates.
          */
-        virtual tgt::Bounds getWorldBounds() const = 0;
+        virtual cgt::Bounds getWorldBounds() const = 0;
     };
 
 // ================================================================================================
@@ -90,6 +90,12 @@ namespace campvis {
          * \return  Number of bytes occupied in video memory by the data.
          */
         virtual size_t getVideoMemoryFootprint() const = 0;
+
+        /**
+         * Returns a human readable representation of the data type that can be used for the GUI.
+         * \return  A string with the type name to be used for the GUI.
+         */
+        virtual std::string getTypeAsString() const = 0;
 
     private:
         /// This weak_ptr points to the shared_ptr owning group of this object, if existant.

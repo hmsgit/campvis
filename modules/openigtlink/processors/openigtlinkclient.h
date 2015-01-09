@@ -35,7 +35,7 @@
 #include <igtlMessageHeader.h>
 #include <igtlImageMessage.h>
 
-#include <tgt/matrix.h>
+#include <cgt/matrix.h>
 
 #include <ext/threading.h>
 #include <tbb/atomic.h>
@@ -45,8 +45,9 @@
 #include "core/properties/buttonproperty.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
-
 #include "core/datastructures/imagedata.h"
+
+#include "modules/modulesapi.h"
 
 
 namespace campvis {
@@ -56,7 +57,7 @@ namespace campvis {
      * and p_receiveImage and puts them into the received data into the respective data containers.
      * This Class contains modified code from the OpenIGTLink ReceiveClient example.
      */
-    class OpenIGTLinkClient : public AbstractProcessor {
+    class CAMPVIS_MODULES_API OpenIGTLinkClient : public AbstractProcessor {
     public:
         /**
          * Constructs a new CampcomMhdReceiver Processor
@@ -118,8 +119,8 @@ namespace campvis {
     protected:
         /// Stores received data from a POSITION Message
         struct PositionMessageData {
-            tgt::vec3 _position;
-            tgt::vec4 _quaternion;
+            cgt::vec3 _position;
+            cgt::vec4 _quaternion;
         };
 
         /// Main method for the receiver thread. The new thread will
@@ -139,7 +140,7 @@ namespace campvis {
         igtl::ClientSocket::Pointer _socket;
         
         //data
-        std::map<std::string, tgt::mat4> _receivedTransforms;        ///< the transforms that has been received by the igtl worker thread, mapped by device name
+        std::map<std::string, cgt::mat4> _receivedTransforms;        ///< the transforms that has been received by the igtl worker thread, mapped by device name
         std::map<std::string, igtl::ImageMessage::Pointer> _receivedImages;  ///< the image messages received by the igtl worker thread, mapped by device name
         std::map<std::string, PositionMessageData> _receivedPositions; ///< position message data received by the igtl worker thread, mapped by device name        
 

@@ -27,12 +27,12 @@
 
 #include "core/classification/abstracttransferfunction.h"
 
-#include "tgt/assert.h"
-#include "tgt/framebufferobject.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 #include <vector>
 
@@ -43,7 +43,7 @@ namespace campvis {
      * \tparam  T   Type of the base geometry class.
      */
     template<class T>
-    class  GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots<> {
+    class GenericGeometryTransferFunction : public AbstractTransferFunction, public sigslot::has_slots {
     public:
         /// Typedef for the geometry class this transfer function is built from.
         typedef T GeometryType;
@@ -53,7 +53,7 @@ namespace campvis {
          * \param   size            Size of the transfer function texture
          * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
          */
-        GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        GenericGeometryTransferFunction(const cgt::vec3& size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
 
         /**
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
@@ -96,7 +96,10 @@ namespace campvis {
         void onGeometryChanged();
 
         /// Signal to be emitted when the vector of T objects (_geometries) changed (The collection, not the actual geometry).
-        sigslot::signal0<> s_geometryCollectionChanged;
+        sigslot::signal0 s_geometryCollectionChanged;
+
+        /// Signal to be emitted when this TF object is about to be deleted.
+        sigslot::signal0 s_aboutToBeDeleted;
 
     protected:
         /**
@@ -106,14 +109,14 @@ namespace campvis {
         virtual void createTexture();
 
         std::vector<T*> _geometries;        ///< The list of transfer function geometries.
-        tgt::FramebufferObject* _fbo;       ///< The FBO used for render into texture.
-        tgt::Shader* _shader;               ///< Shader for rendering the TF into a texture
+        cgt::FramebufferObject* _fbo;       ///< The FBO used for render into texture.
+        cgt::Shader* _shader;               ///< Shader for rendering the TF into a texture
     };
 
 // ================================================================================================
 
     template<class T>
-    campvis::GenericGeometryTransferFunction<T>::GenericGeometryTransferFunction(const tgt::vec3& size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/)
+    campvis::GenericGeometryTransferFunction<T>::GenericGeometryTransferFunction(const cgt::vec3& size, const cgt::vec2& intensityDomain /*= cgt::vec2(0.f, 1.f)*/)
         : AbstractTransferFunction(size, intensityDomain)
         , _fbo(0)
         , _shader(0)
@@ -139,6 +142,8 @@ namespace campvis {
 
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::deinit() {
+        s_aboutToBeDeleted.triggerSignal(); // use trigger to force blocking signal handling in same thread
+
         for (typename std::vector<T*>::iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
             (*it)->s_changed.disconnect(this);
             delete *it;
@@ -168,8 +173,8 @@ namespace campvis {
         }
         geometry->s_changed.connect(this, &GenericGeometryTransferFunction<T>::onGeometryChanged);
         _dirtyTexture = true;
-        s_geometryCollectionChanged();
-        s_changed();
+        s_geometryCollectionChanged.emitSignal();
+        s_changed.emitSignal();
     }
 
     template<class T>
@@ -186,14 +191,14 @@ namespace campvis {
         geometry->s_changed.disconnect(this);
         delete geometry;
         _dirtyTexture = true;
-        s_geometryCollectionChanged();
-        s_changed();
+        s_geometryCollectionChanged.emitSignal();
+        s_changed.emitSignal();
     }
 
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::onGeometryChanged() {
         _dirtyTexture = true;
-        s_changed();
+        s_changed.emitSignal();
     }
 
     template<class T>
@@ -203,7 +208,7 @@ namespace campvis {
         }
 
         // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
-        tgt::TextureUnit tfUnit;
+        cgt::TextureUnit tfUnit;
         tfUnit.activate();
 
         // detach old texture from FBO and delete it
@@ -216,15 +221,27 @@ namespace campvis {
 
         // create FBO if needed
         if (_fbo == 0) 
-            _fbo = new tgt::FramebufferObject();
+            _fbo = new cgt::FramebufferObject();
         _fbo->activate();
         LGL_ERROR;
 
         // create texture
         GLenum dataType = GL_UNSIGNED_BYTE;
-        _texture = new tgt::Texture(_size, GL_RGBA, dataType, tgt::Texture::LINEAR);
-        _texture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
-        _texture->uploadTexture();
+        GLenum type = GL_TEXTURE_1D;
+        switch (getDimensionality()) {
+            case 1:
+                type = GL_TEXTURE_1D;
+                break;
+            case 2:
+                type = GL_TEXTURE_2D;
+                break;
+            default:
+                cgtAssert(false, "This TF dimensionality is currently not supported - you have to implement it yourself!");
+                break;
+        }
+
+        _texture = new cgt::Texture(type, _size, GL_RGBA8, cgt::Texture::LINEAR);
+        _texture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
         LGL_ERROR;
 
         // attach texture to FBO
@@ -242,7 +259,7 @@ namespace campvis {
         glClear(GL_COLOR_BUFFER_BIT);
 
         _shader->activate();
-        _shader->setUniform("_projectionMatrix", tgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
+        _shader->setUniform("_projectionMatrix", cgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
         LGL_ERROR;
 
         for (typename std::vector<T*>::const_iterator it = _geometries.begin(); it != _geometries.end(); ++it) {
@@ -257,7 +274,7 @@ namespace campvis {
         _fbo->deactivate();
         LGL_ERROR;
 
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         _dirtyTexture = false;
     }
 }

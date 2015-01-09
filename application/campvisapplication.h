@@ -35,11 +35,12 @@
 
 #include "core/datastructures/datacontainer.h"
 
+
 #ifdef CAMPVIS_HAS_SCRIPTING
 #include "scripting/glue/luavmstate.h"
 #endif
 
-namespace tgt {
+namespace cgt {
     class GLCanvas;
     class QtThreadedCanvas;
     class Texture;
@@ -47,8 +48,10 @@ namespace tgt {
 
 namespace campvis {
     class AbstractPipeline;
+    class AbstractWorkflow;
     class MainWindow;
     class CampVisPainter;
+    class MdiDockableWindow;
     class LuaVmState;
 
     /**
@@ -86,13 +89,13 @@ namespace campvis {
         ~CampVisApplication();
 
         /**
-         * Initializes tgt, OpenGL, and all pipelines, evaluators and painters.
+         * Initializes cgt, OpenGL, and all pipelines, evaluators and painters.
          * Make sure to have everything setup before calling init().
          */
         void init();
 
         /**
-         * Deinitializes tgt, OpenGL, and all pipelines, evaluators and painters.
+         * Deinitializes cgt, OpenGL, and all pipelines, evaluators and painters.
          */
         void deinit();
 
@@ -136,6 +139,14 @@ namespace campvis {
         void rebuildAllShadersFromFiles();
 
 
+        /**
+         * Sets the visibility of the given pipeline's canvas to \a visibility.
+         * \param   pipeline    Pipeline whose canvas' visibility should be changed.
+         * \param   visibility  New visibility of the canvas.
+         */
+        void setPipelineVisibility(AbstractPipeline* pipeline, bool visibility);
+
+
 #ifdef CAMPVIS_HAS_SCRIPTING
         /**
          * Returns the global LuaVmState of this application.
@@ -145,17 +156,21 @@ namespace campvis {
 
 
         /// Signal emitted when the collection of pipelines has changed.
-        sigslot::signal0<> s_PipelinesChanged;
-
+        sigslot::signal0 s_PipelinesChanged;
         /// Signal emitted when the collection of DataContainers has changed.
-        sigslot::signal0<> s_DataContainersChanged;
+        sigslot::signal0 s_DataContainersChanged;
 
     private:
-        void initGlContextAndPipeline(tgt::GLCanvas* canvas, AbstractPipeline* pipeline);
+        void initGlContextAndPipeline(cgt::GLCanvas* canvas, AbstractPipeline* pipeline);
 
+        /// All workflows
+        std::vector<AbstractWorkflow*> _workflows;
 
         /// All pipelines 
         std::vector<PipelineRecord> _pipelines;
+
+        /// Map of all pipelines with their MDI windows
+        std::map<AbstractPipeline*, MdiDockableWindow*> _pipelineWindows;
 
         /// All DataContainers
         std::vector<DataContainer*> _dataContainers;
@@ -167,12 +182,12 @@ namespace campvis {
         void triggerShaderRebuild();
 
         /// A local OpenGL context used for initialization
-        tgt::GLCanvas* _localContext;
+        cgt::GLCanvas* _localContext;
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
 
         /// Error texture to show if there is no output found
-        tgt::Texture* _errorTexture;
+        cgt::Texture* _errorTexture;
 
         /// the global LuaVmState of this application
         LuaVmState* _luaVmState;

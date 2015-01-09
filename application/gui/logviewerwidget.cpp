@@ -33,7 +33,7 @@ namespace campvis {
         setupGUI();
 
         _log = new BufferingLog(100, this);
-        _log->addCat("", true, tgt::Debug);
+        _log->addCat("", true, cgt::Debug);
 
         connect(_log, SIGNAL(s_messageAppended(const QString&, int)),
                 this, SLOT(appendMessage(const QString&, int)));
@@ -62,11 +62,11 @@ namespace campvis {
         _controls_layout->addWidget(_filter_line_edit);
 
         _cbLogLevel = new QComboBox(this);
-        _cbLogLevel->addItem("Debug",   static_cast<int>(tgt::Debug));
-        _cbLogLevel->addItem("Info",    static_cast<int>(tgt::Info));
-        _cbLogLevel->addItem("Warning", static_cast<int>(tgt::Warning));
-        _cbLogLevel->addItem("Error",   static_cast<int>(tgt::Error));
-        _cbLogLevel->addItem("Fatal",   static_cast<int>(tgt::Fatal));
+        _cbLogLevel->addItem("Debug",   static_cast<int>(cgt::Debug));
+        _cbLogLevel->addItem("Info",    static_cast<int>(cgt::Info));
+        _cbLogLevel->addItem("Warning", static_cast<int>(cgt::Warning));
+        _cbLogLevel->addItem("Error",   static_cast<int>(cgt::Error));
+        _cbLogLevel->addItem("Fatal",   static_cast<int>(cgt::Fatal));
         _cbLogLevel->setCurrentIndex(1);
 
         QLabel* lblLogLevel = new QLabel("Minimum Log Level:");

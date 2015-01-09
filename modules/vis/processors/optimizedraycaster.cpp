@@ -45,7 +45,7 @@ namespace campvis {
         , p_enableIntersectionRefinement("EnableIntersectionRefinement", "Enable Intersection Refinement", false)
         , p_useEmptySpaceSkipping("EnableEmptySpaceSkipping", "Enable Empty Space Skipping", true)
         , _bbv(0)
-        , _t(0)
+        , _vvTex(0)
     {
         addDecorator(new ProcessorDecoratorGradient());
 
@@ -76,40 +76,35 @@ namespace campvis {
 
     void OptimizedRaycaster::deinit() {
         delete _bbv;
-        delete _t;
+        delete _vvTex;
         RaycastingProcessor::deinit();
     }
 
     void OptimizedRaycaster::processImpl(DataContainer& data, ImageRepresentationGL::ScopedRepresentation& image) {
-        tgt::TextureUnit bbvUnit;
+        cgt::TextureUnit bbvUnit;
 
-        if (getInvalidationLevel() & INVALID_BBV) {
+        if (getInvalidationLevel() & INVALID_BBV){
             DataHandle dh = DataHandle(const_cast<ImageData*>(image->getParent())); // HACK HACK HACK
             generateBbv(dh);
-
-//             tgt::Texture* batman = _bbv->exportToImageData();
-//             ImageData* robin = new ImageData(3, batman->getDimensions(), 1);
-//             ImageRepresentationGL::create(robin, batman);
-//             data.addData("All glory to the HYPNOTOAD!", robin);
 
             validate(INVALID_BBV);
         }
 
-        if (_t != 0 && p_useEmptySpaceSkipping.getValue()) {
+        if (_vvTex != 0 && p_useEmptySpaceSkipping.getValue()){
             // bind
             bbvUnit.activate();
-            _t->bind();
+            _vvTex->bind();
             _shader->setIgnoreUniformLocationError(true);
             _shader->setUniform("_bbvTexture", bbvUnit.getUnitNumber());
-            _shader->setUniform("_bbvTextureParams._size", tgt::vec3(_t->getDimensions()));
-            _shader->setUniform("_bbvTextureParams._sizeRCP", tgt::vec3(1.f) / tgt::vec3(_t->getDimensions()));
+            _shader->setUniform("_bbvTextureParams._size", cgt::vec3(_vvTex->getDimensions()));
+            _shader->setUniform("_bbvTextureParams._sizeRCP", cgt::vec3(1.f) / cgt::vec3(_vvTex->getDimensions()));
             _shader->setUniform("_bbvTextureParams._numChannels", static_cast<int>(1));
 
             _shader->setUniform("_bbvBrickSize", static_cast<int>(_bbv->getBrickSize()));
             _shader->setUniform("_hasBbv", true);
             _shader->setIgnoreUniformLocationError(false);
         }
-        else {
+        else{
             _shader->setUniform("_hasBbv", false);
         }
 
@@ -166,15 +161,15 @@ namespace campvis {
     void OptimizedRaycaster::generateBbv(DataHandle dh) {
         delete _bbv;
         _bbv = 0;
-        delete _t;
-        _t = 0;
+        delete _vvTex;
+        _vvTex = 0;
 
-        if (dh.getData() == 0) {
+        if (dh.getData() == 0){
             return;
         }
-        else {
-            if (const ImageData* id = dynamic_cast<const ImageData*>(dh.getData())) {
-                if (const ImageRepresentationLocal* rep = id->getRepresentation<ImageRepresentationLocal>(true)) {
+        else{
+            if (const ImageData* id = dynamic_cast<const ImageData*>(dh.getData())){
+                if (const ImageRepresentationLocal* rep = id->getRepresentation<ImageRepresentationLocal>(true)){
             	    _bbv = new BinaryBrickedVolume(rep->getParent(), 4);
 
                     GLubyte* tfBuffer = p_transferFunction.getTF()->getTexture()->downloadTextureToBuffer(GL_RGBA, GL_UNSIGNED_BYTE);
@@ -184,25 +179,23 @@ namespace campvis {
                     // parallelly traverse the bricks
                     // have minimum group size 8 to avoid race conditions (every 8 neighbor bricks write to the same byte)!
                     tbb::parallel_for(tbb::blocked_range<size_t>(0, _bbv->getNumBrickIndices(), 8), [&] (const tbb::blocked_range<size_t>& range) {
-                        const tgt::vec2& tfIntensityDomain = p_transferFunction.getTF()->getIntensityDomain();
+                        const cgt::vec2& tfIntensityDomain = p_transferFunction.getTF()->getIntensityDomain();
 
-                        for (size_t i = range.begin(); i != range.end(); ++i) {
+                        for (size_t i = range.begin(); i != range.end(); ++i){
                             // for each brick, get all corresponding voxels in the reference volume
-                            std::vector<tgt::svec3> voxels = _bbv->getAllVoxelsForBrick(i);
+                            std::vector<cgt::svec3> voxels = _bbv->getAllVoxelsForBrick(i);
 
                             // traverse the voxels to check whether their intensities are mapped to some opacity
-                            for (size_t v = 0; v < voxels.size(); ++v) {
+                            for (size_t v = 0; v < voxels.size(); ++v){
                                 // apply same TF lookup as in shader...
                                 float intensity = rep->getElementNormalized(voxels[v], 0);
-                                if (intensity >= tfIntensityDomain.x || intensity <= tfIntensityDomain.y) {
+                                if (intensity >= tfIntensityDomain.x || intensity <= tfIntensityDomain.y){
                                     float mappedIntensity = (intensity - tfIntensityDomain.x) / (tfIntensityDomain.y - tfIntensityDomain.x);
-                                    tgtAssert(mappedIntensity >= 0.f && mappedIntensity <= 1.f, "Mapped intensity out of bounds!");
-
+                                   
                                     // ...but with nearest neighbour interpolation
                                     size_t scaled = static_cast<size_t>(mappedIntensity * static_cast<float>(tfNumElements - 1));
-                                    tgtAssert(scaled < tfNumElements, "Somebody did the math wrong...");
                                     GLubyte opacity = tfBuffer[(4 * (scaled)) + 3];
-                                    if (opacity != 0) {
+                                    if (opacity != 0){
                                         _bbv->setValueForIndex(i, true);
                                         break;
                                     }
@@ -214,14 +207,14 @@ namespace campvis {
                     LDEBUG("...finished computing brick visibilities.");
 
                     // export to texture:
-                    _t = _bbv->exportToImageData();
+                    _vvTex = _bbv->exportToImageData();
                 }
                 else {
                     LERROR("Could not convert to a local representation.");
                 }
             }
             else {
-                tgtAssert(false, "The data type in the given DataHandle is WRONG!");
+                cgtAssert(false, "The data type in the given DataHandle is WRONG!");
             }
         }
     }

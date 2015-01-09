@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
@@ -26,6 +26,10 @@
 #define ITKREGISTRATIONDEMO_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/itk/processors/itkreader.h"
@@ -33,7 +37,7 @@
 #include "modules/itk/processors/itkregistration.h"
 
 namespace campvis {
-    class ItkRegistrationDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API ItkRegistrationDemo : public AutoEvaluationPipeline {
     public:
         /**
         * Creates a AutoEvaluationPipeline.
@@ -62,6 +66,9 @@ namespace campvis {
         VolumeExplorer _ve;
         ItkRegistration _itkRegistration;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<ItkRegistrationDemo>;
 
 }
 

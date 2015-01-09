@@ -25,16 +25,17 @@
 #ifndef FIBERDATA_H__
 #define FIBERDATA_H__
 
-#include "tgt/bounds.h"
-#include "tgt/tgt_gl.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
+#include "modules/modulesapi.h"
 
 #include <deque>
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class BufferObject;
 }
 
@@ -43,7 +44,7 @@ namespace campvis {
     /**
      * Data object storing fiber data.
      */
-    class FiberData : public AbstractData, public IHasWorldBounds {
+    class CAMPVIS_MODULES_API FiberData : public AbstractData, public IHasWorldBounds {
     public:
         /**
          * Struct storing meta information about a single fiber.
@@ -91,13 +92,13 @@ namespace campvis {
          * Generates a new fiber from the given vertices and adds it to this data structure.
          * \param   vertices    Coordinates of the fiber points.
          */
-        void addFiber(const std::deque<tgt::vec3>& vertices);
+        void addFiber(const std::deque<cgt::vec3>& vertices);
 
         /**
          * Generates a new fiber from the given vertices and adds it to this data structure.
          * \param   vertices    Coordinates of the fiber points.
          */
-        void addFiber(const std::vector<tgt::vec3>& vertices);
+        void addFiber(const std::vector<cgt::vec3>& vertices);
 
         /**
          * Clears this data structure.
@@ -134,7 +135,7 @@ namespace campvis {
          * \note    Caution: Calling this method is expensive as the bounds are computed each time.
          * \return  The fiber data extent in world coordinates.
          */
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
 
         /**
          * Renders the Fiber geometry of this data set in the current OpenGL context.
@@ -146,12 +147,12 @@ namespace campvis {
         
         /// \see AbstractData::clone()
         virtual FiberData* clone() const;
-
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
-
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
+        /// \see AbstractData::getReadableType()
+        virtual std::string getTypeAsString() const;
 
     protected:
         /**
@@ -159,11 +160,11 @@ namespace campvis {
          */
         void createGlBuffers() const;
 
-        std::vector<tgt::vec3> _vertices;   ///< The fiber vertex (coordinates) data
+        std::vector<cgt::vec3> _vertices;   ///< The fiber vertex (coordinates) data
         std::vector<Fiber> _fibers;         ///< The fiber meta data
 
-        mutable tgt::BufferObject* _vertexBuffer;   ///< Pointer to OpenGL buffer with vertex data (lazy-instantiated)
-        mutable tgt::BufferObject* _tangentBuffer;  ///< Pointer to OpenGL buffer with tangent data (lazy-instantiated)
+        mutable cgt::BufferObject* _vertexBuffer;   ///< Pointer to OpenGL buffer with vertex data (lazy-instantiated)
+        mutable cgt::BufferObject* _tangentBuffer;  ///< Pointer to OpenGL buffer with tangent data (lazy-instantiated)
         mutable bool _buffersInitialized;           ///< flag whether all OpenGL buffers were successfully initialized
 
         mutable GLint* _vboFiberStartIndices;       ///< VBO start indices for each fiber

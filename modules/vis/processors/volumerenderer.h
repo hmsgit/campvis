@@ -26,16 +26,15 @@
 #define VOLUMERENDERER_H__
 
 #include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/metaproperty.h"
-#include "core/properties/numericproperty.h"
+#include "core/pipeline/raycastingprocessor.h"
+#include "core/properties/allproperties.h"
 
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
-#include "core/pipeline/raycastingprocessor.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -44,7 +43,7 @@ namespace campvis {
      * Combines proxy geometry generator, entry/exit point generator and raycasting into one
      * easy-to-use volume renderer.
      */
-    class VolumeRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API VolumeRenderer : public VisualizationProcessor {
     public:
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.
@@ -91,7 +90,7 @@ namespace campvis {
         RaycastingProcessor* getRaycastingProcessor();
 
         DataNameProperty p_inputVolume;             ///< image ID for first input image
-        CameraProperty p_camera;                    ///< Camera 
+        DataNameProperty p_camera;                  ///< Camera ID
         DataNameProperty p_outputImage;             ///< image ID for output image
 
         BoolProperty p_profileRaycaster;            ///< Flag whether the raycaster's execution time shall be profiled

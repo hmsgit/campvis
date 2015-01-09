@@ -67,10 +67,10 @@ protected:
     }
 
     ~ConcurrentHistogramNDUniform() {
-        delete max;
-        delete min;
-        delete numBuckets;
-        delete histogram;
+        delete [] max;
+        delete [] min;
+        delete [] numBuckets;
+        delete [] histogram;
     }
 
     virtual void SetUp() {
@@ -202,10 +202,10 @@ protected:
     }
 
     ~ConcurrentHistogramNDSpecific() {
-        delete max;
-        delete min;
-        delete numBuckets;
-        delete histogram;
+        delete [] max;
+        delete [] min;
+        delete [] numBuckets;
+        delete [] histogram;
     }
 
     virtual void SetUp() {

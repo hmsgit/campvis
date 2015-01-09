@@ -10,6 +10,12 @@ IF(${ModuleEnabled})
         LIST(APPEND CampvisGlobalIncludeDirs ${ITK_INCLUDE_DIRS})
         LIST(APPEND CampvisGlobalExternalLibs ${ITK_LIBRARIES})
         
+        IF(${BUILD_SHARED_LIBS} AND WIN32)
+            LIST(APPEND CampvisExternalDllsDebug "${ITK_DIR}/bin/Debug/ITKCommon-${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.dll")
+            LIST(APPEND CampvisExternalDllsRelease "${ITK_DIR}/bin/Release/ITKCommon-${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.dll")
+        ENDIF(${BUILD_SHARED_LIBS} AND WIN32)
+        
+        
         IF("${ITK_VERSION_MAJOR}" LESS 4)
             MESSAGE(FATAL_ERROR "Found ITK Version ${ITK_VERSION_MAJOR} < 4. CAMPVis needs ITK version >= 4.")
         ELSE()

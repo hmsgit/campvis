@@ -27,15 +27,16 @@
 
 #include <string>
 
-#include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/genericproperty.h"
 #include "core/properties/optionproperty.h"
 #include "core/properties/stringproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+#include "modules/io/processors/abstractimagereader.h"
+
+namespace cgt {
     class Shader;
-    class TextureReaderDevil;
 }
 
 namespace campvis {
@@ -45,12 +46,12 @@ namespace campvis {
      *
      * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
      */
-    class DevilImageReader : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API DevilImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new DevilImageReader Processor
          **/
-        DevilImageReader(IVec2Property* viewportSizeProp);
+        DevilImageReader();
 
         /**
          * Destructor
@@ -73,16 +74,14 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        StringProperty p_url;               ///< URL for file to read
-        DataNameProperty p_targetImageID;   ///< image ID for read image
         GenericOptionProperty<std::string> p_importType;
+        BoolProperty p_importSimilar;
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;
-        tgt::TextureReaderDevil* _devilTextureReader;
+        cgt::Shader* _shader;
 
         static const std::string loggerCat_;
     };

@@ -30,13 +30,11 @@
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/cameraproperty.h"
+#include "core/properties/allproperties.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -44,7 +42,7 @@ namespace campvis {
     /**
      * Renders Strain Fibers
      */
-    class StrainFiberRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API StrainFiberRenderer : public VisualizationProcessor {
     public:
         enum RenderMode {
             STRIPES,
@@ -76,13 +74,13 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        DataNameProperty p_strainId;        ///< ID for input strain data
-        DataNameProperty p_renderTargetID;   ///< image ID for output image
-        CameraProperty p_camera;
+        DataNameProperty p_strainId;                ///< ID for input strain data
+        DataNameProperty p_camera;                  ///< ID for camera input
+        DataNameProperty p_renderTargetID;          ///< image ID for output image
 
         GenericOptionProperty<RenderMode> p_renderMode;
         FloatProperty p_lineWidth;
-        Vec4Property p_color;                ///< rendering color
+        Vec4Property p_color;                       ///< rendering color
 
         BoolProperty p_enableShading;               ///< Flag whether to enable shading
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
@@ -100,7 +98,7 @@ namespace campvis {
          */
         std::string generateGlslHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for EEP generation
+        cgt::Shader* _shader;                           ///< Shader for EEP generation
 
         static const std::string loggerCat_;
     };

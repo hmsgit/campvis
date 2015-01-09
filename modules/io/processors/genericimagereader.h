@@ -33,11 +33,16 @@
 #include "core/properties/metaproperty.h"
 #include "core/properties/stringproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/io/processors/csvdimagereader.h"
 #include "modules/io/processors/ltfimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/rawimagereader.h"
 #include "modules/io/processors/vtkimagereader.h"
+
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+#include "modules/devil/processors/devilimagereader.h"
+#endif
 
 namespace campvis {
     /**
@@ -45,7 +50,7 @@ namespace campvis {
      * the other image reader implemented for its tasks.
      *
      */
-    class GenericImageReader : public AbstractProcessor {
+    class CAMPVIS_MODULES_API GenericImageReader : public AbstractProcessor {
     public:
         /**
          * Constructs a new GenericImageReader Processor
@@ -72,19 +77,10 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        /// functions to set the property of the readers
-        void setURL(std::string p_url);
-        void setURL(StringProperty p_url);
-        void setURL(const char* p_url);
-        void setTargetImageId(DataNameProperty& targetImageId);
-        void setTargetImageId(std::string imageId);
-        void setTargetImageId(const char* imageId);
-        void setTargetImageIdSharedProperty(DataNameProperty* sharedProperty);
-
-
         void setVisibibility(const std::string& extention, bool visibility);
 
-        StringProperty p_url;
+        StringProperty p_url;               ///< URL for file to read
+        DataNameProperty p_targetImageID;   ///< image ID for read image
 
     protected:
         /// \see AbstractProcessor::updateResult
@@ -93,7 +89,7 @@ namespace campvis {
         static const std::string loggerCat_;
         
     private:
-        void onUrlPropertyChanged(const AbstractProperty*);
+        void onUrlPropertyChanged(const AbstractProperty* prop);
 
         void adjustToNewExtension();
 

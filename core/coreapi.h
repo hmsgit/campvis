@@ -25,8 +25,6 @@
 #ifndef CAMPVIS_COREAPI_H__
 #define CAMPVIS_COREAPI_H__
 
-#include "sigslot/sigslot.h"
-
 #ifdef CAMPVIS_DYNAMIC_LIBS
     #ifdef CAMPVIS_CORE_BUILD_DLL
         // building library -> export symbols
@@ -42,11 +40,6 @@
         #else
             #define CAMPVIS_CORE_API
         #endif
-    #endif
-    #ifdef DLL_TEMPLATE_INST
-        // declare and instantiate sigslot templates for symbol ex-/import
-        class CAMPVIS_CORE_API sigslot::SIGSLOT_DEFAULT_MT_POLICY;
-        template class CAMPVIS_CORE_API sigslot::has_slots<sigslot::SIGSLOT_DEFAULT_MT_POLICY>;
     #endif
 #else
     // building/including static library -> do nothing

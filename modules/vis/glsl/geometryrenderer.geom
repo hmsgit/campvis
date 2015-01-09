@@ -32,11 +32,13 @@ in vec3 vert_Position[];
 in vec3 vert_TexCoord[];           ///< incoming texture coordinate
 in vec4 vert_Color[];
 in vec3 vert_Normal[];
+in vec4 vert_Picking[];
 
 out vec3 geom_Position;
 out vec3 geom_TexCoord;
 out vec4 geom_Color;         ///< outgoing fragment color
 out vec3 geom_Normal;
+out vec4 geom_Picking;
 noperspective out vec3 geom_EdgeDistance;
 
 /// Matrix defining viewport transformation
@@ -67,6 +69,7 @@ void main() {
     geom_Position = vert_Position[0];
     geom_TexCoord = vert_TexCoord[0];
     geom_Color = vert_Color[0];
+    geom_Picking = vert_Picking[0];
     gl_Position = gl_in[0].gl_Position;
     EmitVertex();
 
@@ -75,6 +78,7 @@ void main() {
     geom_Position = vert_Position[1];
     geom_TexCoord = vert_TexCoord[1];
     geom_Color = vert_Color[1];
+    geom_Picking = vert_Picking[1];
     gl_Position = gl_in[1].gl_Position;
     EmitVertex();
 
@@ -83,6 +87,7 @@ void main() {
     geom_Position = vert_Position[2];
     geom_TexCoord = vert_TexCoord[2];
     geom_Color = vert_Color[2];
+    geom_Picking = vert_Picking[2];
     gl_Position = gl_in[2].gl_Position;
     EmitVertex();
 

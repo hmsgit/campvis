@@ -25,41 +25,15 @@
 #ifndef SLICEEXTRACTOR_H__
 #define SLICEEXTRACTOR_H__
 
-#include <string>
-
-#include "tgt/buffer.h"
-#include "tgt/vertexarrayobject.h"
-#include "tgt/event/eventlistener.h"
-
-#include "core/pipeline/abstractprocessordecorator.h"
-#include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-
-namespace tgt {
-    class Shader;
-}
+#include "core/pipeline/slicerenderprocessor.h"
+#include "modules/modulesapi.h"
 
 namespace campvis {
-    class FaceGeometry;
-    class ImageData;
-
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class SliceExtractor : public VisualizationProcessor, public tgt::EventListener {
+    class CAMPVIS_MODULES_API SliceExtractor : public SliceRenderProcessor {
     public:
-        /// Slice Orientation to render
-        enum SliceOrientation {
-            XY_PLANE = 0,
-            XZ_PLANE = 1,
-            YZ_PLANE = 2
-        };
-
         /**
          * Constructs a new SliceExtractor Processor
          **/
@@ -70,12 +44,6 @@ namespace campvis {
          **/
         virtual ~SliceExtractor();
 
-        /// \see AbstractProcessor::init
-        virtual void init();
-
-        /// \see AbstractProcessor::deinit
-        virtual void deinit();
-
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "SliceExtractor"; };
         /// \see AbstractProcessor::getDescription()
@@ -85,50 +53,15 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
-
-        /// Signal emitted when a scribble was painted, parameter gives the position in image coordinates.
-        sigslot::signal1<tgt::vec3> s_scribblePainted;
-
-        DataNameProperty p_sourceImageID;                  ///< image ID for input image
-        DataNameProperty p_geometryID;                     ///< ID for input geometry
-        DataNameProperty p_targetImageID;                  ///< image ID for output image
-
-        /// orientation of the slice to extract
-        GenericOptionProperty<SliceOrientation> p_sliceOrientation;
-
-        IntProperty p_xSliceNumber;                         ///< number of the slice in X direction
-        Vec4Property p_xSliceColor;                         ///< color for x marker
-        IntProperty p_ySliceNumber;                         ///< number of the slice in Y direction
-        Vec4Property p_ySliceColor;                         ///< color for y marker
-        IntProperty p_zSliceNumber;                         ///< number of the slice in Z direction
-        Vec4Property p_zSliceColor;                         ///< color for z marker
-
-        BoolProperty p_fitToWindow;                         ///< Flag whether fit image to window or use scaling and offset
-        FloatProperty p_scalingFactor;                      ///< Image scaling factor
-        IVec2Property p_offset;                             ///< Image offset
-
         TransferFunctionProperty p_transferFunction;        ///< Transfer function
 
-        GenericOptionProperty<GLenum> p_geometryRenderMode; ///< Render mode for the geometry
-        FloatProperty p_geometryRenderSize;                 ///< Size of rendered elements
-
     protected:
-        /// \see AbstractProcessor::updateResult
-        virtual void updateResult(DataContainer& dataContainer);
         /// \see    AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
-
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
-
-        DataHandle _currentImage;                       ///< cached DataHandle to shown image (needed for scribbles)
-        bool _inScribbleMode;                           ///< Flag whether processor is in scribble mode (i.e. mouse is pressed)
+        /// \see SliceRenderProcessor::renderImageImpl
+        virtual void renderImageImpl(DataContainer& dataContainer, const ImageRepresentationGL::ScopedRepresentation& img);
 
         static const std::string loggerCat_;
-
-    private:
-        clock_t _sourceImageTimestamp;
     };
 
 }

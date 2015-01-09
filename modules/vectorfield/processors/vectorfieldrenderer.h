@@ -30,17 +30,13 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
 
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/optionproperty.h"
-
+#include "core/properties/allproperties.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -48,7 +44,7 @@ namespace campvis {
     /**
      * Renders a vector field with arrows.
      */
-    class VectorFieldRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API VectorFieldRenderer : public VisualizationProcessor {
     public:
         /// Slice orientation
         enum SliceOrientation {
@@ -82,8 +78,8 @@ namespace campvis {
         /// \see AbstractProcessor::deinit()
         virtual void deinit();
         
-        DataNameProperty p_inputVectors;   ///< ID for input vector image
-
+        DataNameProperty p_inputVectors;        ///< ID for input vector image
+        DataNameProperty p_camera;              ///< ID for camera input
         DataNameProperty p_renderOutput;        ///< ID for output rendered image
 
         FloatProperty p_arrowSize;                      ///< Arrow size size
@@ -100,7 +96,6 @@ namespace campvis {
         BoolProperty p_enableShading;               ///< Flag whether to enable shading
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
-        CameraProperty p_camera;                                    ///< camera
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
         IntProperty p_sliceNumber;                                  ///< slice number
 
@@ -123,10 +118,10 @@ namespace campvis {
          * \param   vectors     Input vector image
          * \param   position    Position to render
          */
-        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const tgt::vec3& position, float scale);
+        void renderVectorArrow(const GenericImageRepresentationLocal<float, 3>* vectors, const cgt::vec3& position, float scale);
 
         GeometryData* _arrowGeometry;		///< Geometry for arrow rendering
-        tgt::Shader* _shader;               ///< Shader for arrow rendering
+        cgt::Shader* _shader;               ///< Shader for arrow rendering
         
         static const std::string loggerCat_;
     };

@@ -67,6 +67,7 @@ namespace campvis {
          * \return  _accessInfo
          */
         DataAccessInfo getAccessInfo() const;
+        void setAccessInfo(DataAccessInfo access);
 
     protected:
 

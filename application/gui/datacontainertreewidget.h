@@ -62,7 +62,7 @@ namespace campvis {
          * \param   name        Name of the QtDataHandle
          * \param   parent      Parent TreeItem
          */
-        DataHandleTreeItem(const QtDataHandle& dataHandle, const std::string& name, TreeItem* parent);
+        DataHandleTreeItem(QtDataHandle dataHandle, const std::string& name, TreeItem* parent);
 
         /**
          * Destructor, deletes the QtDataHandle
@@ -77,7 +77,7 @@ namespace campvis {
          * \note    DataHandleTreeItem takes ownership of this pointer.
          * \param   dataHandle  The QtDataHandle to wrap around, DataHandleTreeItem takes ownership of this pointer!
          */
-        void setDataHandle(const QtDataHandle& dataHandle);
+        void setDataHandle(QtDataHandle dataHandle);
 
     private:
         /**

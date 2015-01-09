@@ -27,13 +27,16 @@
 
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/vis/processors/quadview.h"
 
 namespace campvis {
-    class AdvancedUsVis : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API AdvancedUsVis : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a VisualizationPipeline. 
@@ -56,7 +59,7 @@ namespace campvis {
         /// \see AbstractPipeline::getId()
         static const std::string getId() { return "AdvancedUsVis"; };
 
-        virtual void keyEvent(tgt::KeyEvent* e);
+        virtual void keyEvent(cgt::KeyEvent* e);
 
     protected:
         MhdImageReader _usReader;
@@ -70,6 +73,9 @@ namespace campvis {
 
         QuadView _quadView;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<AdvancedUsVis>;
 
 }
 

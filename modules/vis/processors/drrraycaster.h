@@ -32,7 +32,9 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Creates a Digitally Reconstructed Radiograph.
      */
-    class DRRRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API DRRRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new DRRRaycaster Processor

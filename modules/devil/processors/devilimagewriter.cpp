@@ -27,11 +27,10 @@
 
 #include <cstring>
 
-#include "tgt/logmanager.h"
-#include "tgt/filesystem.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texturereaderdevil.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/filesystem.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationlocal.h"
@@ -46,10 +45,12 @@ namespace campvis {
     DevilImageWriter::DevilImageWriter()
         : AbstractProcessor()
         , p_inputImage("InputImage", "Input Image ID", "DevilImageWriter.input", DataNameProperty::READ)
-        , p_url("url", "Image URL", "", StringProperty::SAVE_FILENAME)
+        , p_url("Url", "Image URL", "", StringProperty::SAVE_FILENAME)
+        , p_writeDepthImage("WriteDepthImage", "Write Depth Image", false)
     {
         addProperty(p_inputImage);
         addProperty(p_url);
+        addProperty(p_writeDepthImage);
     }
 
     DevilImageWriter::~DevilImageWriter() {
@@ -60,11 +61,11 @@ namespace campvis {
 
         if (image != 0) {
             std::string filename = p_url.getValue();
-            std::string extension = tgt::FileSystem::fileExtension(filename);
-            std::string filebase = tgt::FileSystem::fullBaseName(filename);
+            std::string extension = cgt::FileSystem::fileExtension(filename);
+            std::string filebase = cgt::FileSystem::fullBaseName(filename);
             if (extension.empty()) {
                 LINFO("Filename has no extension, defaulting to .PNG.");
-                extension = ".png";
+                extension = "png";
             }
 
             for (size_t i = 0; i < image->getNumColorTextures(); ++i) {
@@ -75,16 +76,16 @@ namespace campvis {
                 }
 
                 WeaklyTypedPointer wtp = id->getWeaklyTypedPointer();
-                writeIlImage(wtp, id->getSize().xy(), filebase + ".color" + ((image->getNumColorTextures() > 1) ? StringUtils::toString(i) : "") + extension);
+                writeIlImage(wtp, id->getSize().xy(), filebase + ((image->getNumColorTextures() > 1) ? StringUtils::toString(i) : "") + "." + extension);
             }
-            if (image->hasDepthTexture()) {
+            if (p_writeDepthImage.getValue() && image->hasDepthTexture()) {
                 const ImageRepresentationLocal* id = image->getDepthTexture()->getRepresentation<ImageRepresentationLocal>(true);
                 if (id == 0) {
                     LERROR("Could not download depth texture from RenderData, skipping.");
                 }
                 else {
                     WeaklyTypedPointer wtp = id->getWeaklyTypedPointer();
-                    writeIlImage(wtp, id->getSize().xy(), filebase + ".depth" + extension);
+                    writeIlImage(wtp, id->getSize().xy(), filebase + ".depth." + extension);
                 }
             }
         }
@@ -93,7 +94,7 @@ namespace campvis {
         }
     }
 
-    void DevilImageWriter::writeIlImage(const WeaklyTypedPointer& wtp, const tgt::ivec2& size, const std::string& filename) const {
+    void DevilImageWriter::writeIlImage(const WeaklyTypedPointer& wtp, const cgt::ivec2& size, const std::string& filename) const {
         // create Devil image from image data and write it to file
         ILuint img;
         ilGenImages(1, &img);
@@ -106,12 +107,13 @@ namespace campvis {
         ILboolean success = ilSaveImage(filename.c_str());
         ilDeleteImages(1, &img);
 
-        if (success != IL_NO_ERROR) {
+        if (! success) {
             ILenum errorcode;
             while ((errorcode = ilGetError()) != IL_NO_ERROR) {
-                LERROR("Error while writing '" << filename << "': "<< iluErrorString(errorcode));
+                LERROR("Error while writing '" << filename << "': "<< (errorcode));
             } 
         }
+
     }
 
 }

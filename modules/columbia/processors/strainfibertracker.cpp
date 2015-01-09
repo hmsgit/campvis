@@ -36,7 +36,7 @@ namespace campvis {
 
     class ApplyFiberTracking {
     public:
-        ApplyFiberTracking(const ImageRepresentationLocal* input, const std::vector<tgt::vec3>& seeds, FiberData* output, int numSteps, float stepSize, float strainThreshold, float maximumAngle, tbb::spin_mutex& mutex)
+        ApplyFiberTracking(const ImageRepresentationLocal* input, const std::vector<cgt::vec3>& seeds, FiberData* output, int numSteps, float stepSize, float strainThreshold, float maximumAngle, tbb::spin_mutex& mutex)
             : _input(input)
             , _seeds(seeds)
             , _output(output)
@@ -46,15 +46,15 @@ namespace campvis {
             , _maxAngle(maximumAngle)
             , _mutex(mutex)
         {
-            _voxelSize = tgt::length(_input->getParent()->getMappingInformation().getVoxelSize());
+            _voxelSize = cgt::length(_input->getParent()->getMappingInformation().getVoxelSize());
         }
         
         /**
          * Retrieves a vec3 from \a vol using trilinear interpolation.
          * \param   position        voxel position
          **/
-        inline tgt::vec3 getVec3FloatLinear(const tgt::vec3& position) const {
-            tgt::vec3 result;
+        inline cgt::vec3 getVec3FloatLinear(const cgt::vec3& position) const {
+            cgt::vec3 result;
             result.x = _input->getElementNormalizedLinear(position, 0);
             result.y = _input->getElementNormalizedLinear(position, 1);
             result.z = _input->getElementNormalizedLinear(position, 2);
@@ -69,8 +69,8 @@ namespace campvis {
          *
          * \return  true, if angle is below the threshold.
          **/
-        inline bool testTortuosity(const tgt::vec3& a, const tgt::vec3& b) const {
-            float angle = fabs(acos(tgt::dot(a, b) / (tgt::length(a) * tgt::length(b))));
+        inline bool testTortuosity(const cgt::vec3& a, const cgt::vec3& b) const {
+            float angle = fabs(acos(cgt::dot(a, b) / (cgt::length(a) * cgt::length(b))));
             return (angle < _maxAngle);
         }
 
@@ -81,10 +81,10 @@ namespace campvis {
          *
          * true, if \a position is within bounds of eigenvalues volume.
          **/
-        inline bool testBounds(const tgt::vec3& position) const {
-            const tgt::svec3& dim = _input->getParent()->getSize();
-            tgt::svec3 pos(tgt::ceil(position));
-            return (tgt::hand(tgt::greaterThanEqual(pos, tgt::svec3::zero)) && tgt::hand(tgt::lessThanEqual(pos, dim)));
+        inline bool testBounds(const cgt::vec3& position) const {
+            const cgt::svec3& dim = _input->getParent()->getSize();
+            cgt::svec3 pos(cgt::ceil(position));
+            return (cgt::hand(cgt::greaterThanEqual(pos, cgt::svec3::zero)) && cgt::hand(cgt::lessThanEqual(pos, dim)));
         }
         /**
          * Performs fiber tracking of a single fiber to a single direction starting at \a worldPosition 
@@ -95,30 +95,30 @@ namespace campvis {
          * \param   maxAngle        maximum angle between two fiber points to continue tracking
          * \param   result          fiber points will be stored in here - forward tracking will append, backward tracking push front
          **/
-        void performSingleTracking(tgt::vec3 worldPosition, bool forwards, std::deque<tgt::vec3>& result) const {
-            const tgt::mat4& WtV = _input->getParent()->getMappingInformation().getWorldToVoxelMatrix();
+        void performSingleTracking(cgt::vec3 worldPosition, bool forwards, std::deque<cgt::vec3>& result) const {
+            const cgt::mat4& WtV = _input->getParent()->getMappingInformation().getWorldToVoxelMatrix();
 
-            tgt::vec3 voxelPosition = (WtV * tgt::vec4(worldPosition, 1.f)).xyz();
-            tgt::vec3 direction = getVec3FloatLinear(voxelPosition);
+            cgt::vec3 voxelPosition = (WtV * cgt::vec4(worldPosition, 1.f)).xyz();
+            cgt::vec3 direction = getVec3FloatLinear(voxelPosition);
             if (! forwards)
                 direction *= -1.f;
 
             for (int i = 0; i < _numSteps; ++i) {
                 // apply second order runge-kutta integration (Heun method)
-                tgt::vec3 dir1 = getVec3FloatLinear((WtV * tgt::vec4(worldPosition, 1.f)).xyz()) * _stepSize * _voxelSize;
-                if (tgt::dot(direction, dir1) < 0)
+                cgt::vec3 dir1 = getVec3FloatLinear((WtV * cgt::vec4(worldPosition, 1.f)).xyz()) * _stepSize * _voxelSize;
+                if (cgt::dot(direction, dir1) < 0)
                     dir1 *= -1.f;
 
-                tgt::vec3 dir2 = getVec3FloatLinear((WtV * tgt::vec4(worldPosition + dir1, 1.f)).xyz()) * _stepSize * _voxelSize;
-                if (tgt::dot(direction, dir2) < 0)
+                cgt::vec3 dir2 = getVec3FloatLinear((WtV * cgt::vec4(worldPosition + dir1, 1.f)).xyz()) * _stepSize * _voxelSize;
+                if (cgt::dot(direction, dir2) < 0)
                     dir2 *= -1.f;
 
-                tgt::vec3 vProp = (dir1 + dir2) * .5f;
+                cgt::vec3 vProp = (dir1 + dir2) * .5f;
                 worldPosition += vProp;
-                voxelPosition = (WtV * tgt::vec4(worldPosition, 1.f)).xyz();
+                voxelPosition = (WtV * cgt::vec4(worldPosition, 1.f)).xyz();
 
                 // check termination criteria
-                if (tgt::lengthSq(vProp) < _strainThreshold || !testBounds(voxelPosition) || !testTortuosity(direction, vProp))
+                if (cgt::lengthSq(vProp) < _strainThreshold || !testBounds(voxelPosition) || !testTortuosity(direction, vProp))
                     break;
 
                 direction = vProp;
@@ -131,10 +131,10 @@ namespace campvis {
 
         void operator() (const tbb::blocked_range<size_t>& range) const {
             for (size_t i = range.begin(); i != range.end(); ++i) {
-                const tgt::vec3& position = _seeds[i];
+                const cgt::vec3& position = _seeds[i];
 
                 // perform fiber tracking in both directions
-                std::deque<tgt::vec3> vertices;
+                std::deque<cgt::vec3> vertices;
                 performSingleTracking(position, false, vertices);
                 vertices.push_back(position);
                 performSingleTracking(position, true, vertices);
@@ -148,7 +148,7 @@ namespace campvis {
 
     protected:
         const ImageRepresentationLocal* _input;
-        const std::vector<tgt::vec3>& _seeds;
+        const std::vector<cgt::vec3>& _seeds;
         FiberData* _output;
         int _numSteps;
         float _stepSize;
@@ -191,7 +191,7 @@ namespace campvis {
         if (strainData != 0) {
             if (strainData.getImageData()->getNumChannels() == 3) {
                 LDEBUG("Generating seeds...");
-                std::vector<tgt::vec3> seeds = performUniformSeeding(*strainData);
+                std::vector<cgt::vec3> seeds = performUniformSeeding(*strainData);
 
                 LDEBUG("Generating fibers...");
                 FiberData* fibers = new FiberData();
@@ -213,18 +213,18 @@ namespace campvis {
         }
     }
 
-    std::vector<tgt::vec3> StrainFiberTracker::performUniformSeeding(const ImageRepresentationLocal& strainData) const {
-        std::vector<tgt::vec3> seeds;
-        const tgt::mat4& VtW = strainData.getParent()->getMappingInformation().getVoxelToWorldMatrix();
+    std::vector<cgt::vec3> StrainFiberTracker::performUniformSeeding(const ImageRepresentationLocal& strainData) const {
+        std::vector<cgt::vec3> seeds;
+        const cgt::mat4& VtW = strainData.getParent()->getMappingInformation().getVoxelToWorldMatrix();
         float threshold = p_strainThreshold.getValue() * p_strainThreshold.getValue();
         int inc = p_seedDistance.getValue();
 
         for (size_t z = 0; z < strainData.getSize().z; z += inc) {
             for (size_t y = 0; y < strainData.getSize().y; y += inc) {
                 for (size_t x = 0; x < strainData.getSize().x; x += inc) {
-                    tgt::vec3 pos(x, y, z);
-                    if (tgt::lengthSq(getVec3FloatLinear(strainData, pos)) > threshold) {
-                        seeds.push_back((VtW * tgt::vec4(pos, 1.f)).xyz());
+                    cgt::vec3 pos(x, y, z);
+                    if (cgt::lengthSq(getVec3FloatLinear(strainData, pos)) > threshold) {
+                        seeds.push_back((VtW * cgt::vec4(pos, 1.f)).xyz());
                     }
                 }
             }
@@ -233,8 +233,8 @@ namespace campvis {
         return seeds;
     }
 
-    tgt::vec3 StrainFiberTracker::getVec3FloatLinear(const ImageRepresentationLocal& strainData, const tgt::vec3& position) const {
-        tgt::vec3 result;
+    cgt::vec3 StrainFiberTracker::getVec3FloatLinear(const ImageRepresentationLocal& strainData, const cgt::vec3& position) const {
+        cgt::vec3 result;
         result.x = strainData.getElementNormalizedLinear(position, 0);
         result.y = strainData.getElementNormalizedLinear(position, 1);
         result.z = strainData.getElementNormalizedLinear(position, 2);

@@ -33,7 +33,9 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/optionproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class BufferObject;
     class Shader;
 }
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Performs a gaussian filtering on the input image using OpenGL.
      */
-    class GlGaussianFilter : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlGaussianFilter : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlGaussianFilter Processor
@@ -83,12 +85,12 @@ namespace campvis {
          * \param   filter          Filter to apply (should be _erosionFilter or _dilationFilter or compatible)
          * \return  An OpenGL texture with the filtered image
          */
-        tgt::Texture* applyFilter(const tgt::Texture* inputTexture, tgt::Shader* filter) const;
+        cgt::Texture* applyFilter(const cgt::Texture* inputTexture, cgt::Shader* filter) const;
 
 
-        tgt::Shader* _shader2D;             ///< Shader for performing 2D Gaussian blur
-        tgt::Shader* _shader3D;             ///< Shader for performing 3D Gaussian blur
-        tgt::BufferObject* _kernelBuffer;   ///< Texture Buffer ID storing the kernel
+        cgt::Shader* _shader2D;             ///< Shader for performing 2D Gaussian blur
+        cgt::Shader* _shader3D;             ///< Shader for performing 3D Gaussian blur
+        cgt::BufferObject* _kernelBuffer;   ///< Texture Buffer ID storing the kernel
         GLuint _kernelBufferTexture;
 
         static const std::string loggerCat_;

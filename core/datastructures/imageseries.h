@@ -65,6 +65,9 @@ namespace campvis {
          * \return  Number of bytes occupied in video memory by the data.
          */
         virtual size_t getVideoMemoryFootprint() const;
+
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
         
         /**
          * Appends the image \a image to the series.

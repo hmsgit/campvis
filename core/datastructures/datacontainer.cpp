@@ -24,8 +24,8 @@
 
 #include "datacontainer.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
 #include "core/datastructures/abstractdata.h"
 
 namespace campvis {
@@ -47,27 +47,27 @@ namespace campvis {
             return DataHandle(0);
         }
 
-        tgtAssert(data != 0, "The Data must not be 0.");
-        tgtAssert(!name.empty(), "The data's name must not be empty.");
+        cgtAssert(data != 0, "The Data must not be 0.");
+        cgtAssert(!name.empty(), "The data's name must not be empty.");
 
         DataHandle dh(data);
         addDataHandle(name, dh);
         return dh;
     }
 
-    void DataContainer::addDataHandle(const std::string& name, const DataHandle& dh) {
+    void DataContainer::addDataHandle(const std::string& name, DataHandle dh) {
         if (name.empty()) {
             LERROR("Tried to add data with empty name to DataContainer.");
             return;
         }
 
-        tgtAssert(dh.getData() != 0, "The data in the DataHandle must not be 0!");
-        tgtAssert(!name.empty(), "The data's name must not be empty.");
+        cgtAssert(dh.getData() != 0, "The data in the DataHandle must not be 0!");
+        cgtAssert(!name.empty(), "The data's name must not be empty.");
         _handles.erase(name);
         _handles.insert(std::make_pair(name, dh));
  
-        s_dataAdded(name, dh);
-        s_changed();
+        s_dataAdded.emitSignal(name, dh);
+        s_changed.emitSignal();
     }
 
     bool DataContainer::hasData(const std::string& name) const {

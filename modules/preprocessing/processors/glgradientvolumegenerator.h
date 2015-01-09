@@ -31,7 +31,9 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Creates the gradient volume for the given intensity volume using OpenGL.
      */
-    class GlGradientVolumeGenerator : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API GlGradientVolumeGenerator : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new GlGradientVolumeGenerator Processor
@@ -76,7 +78,7 @@ namespace campvis {
 
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;       ///< Shader for gradient volume generation
+        cgt::Shader* _shader;       ///< Shader for gradient volume generation
 
         static const std::string loggerCat_;
     };

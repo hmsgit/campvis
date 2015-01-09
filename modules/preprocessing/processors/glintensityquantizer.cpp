@@ -24,10 +24,10 @@
 
 #include "glintensityquantizer.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/texture.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/texture.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
@@ -56,7 +56,7 @@ namespace campvis {
         addProperty(p_transferFunction);
 
         Geometry1DTransferFunction* gtf = static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF());
-        gtf->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        gtf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 0), cgt::col4(255, 255, 255, 255)));
     }
 
     GlIntensityQuantizer::~GlIntensityQuantizer() {
@@ -80,14 +80,13 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            tgt::ivec3 size = img->getSize();
+            cgt::ivec3 size = img->getSize();
 
-            tgt::TextureUnit inputUnit, tfUnit;
+            cgt::TextureUnit inputUnit, tfUnit;
             inputUnit.activate();
 
             // create texture for result
-            tgt::Texture* resultTexture = new tgt::Texture(0, size, img->getTexture()->getFormat(), img->getTexture()->getInternalFormat(), img->getTexture()->getDataType(), tgt::Texture::LINEAR);
-            resultTexture->uploadTexture();
+            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, size, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
 
             // activate shader and bind textures
             _shader->activate();
@@ -117,11 +116,11 @@ namespace campvis {
             id->setMappingInformation(ImageMappingInformation(img->getSize(), imi.getOffset(), imi.getVoxelSize(), imi.getRealWorldMapping()));
             data.addData(p_outputImage.getValue(), id);
 
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 

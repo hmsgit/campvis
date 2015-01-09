@@ -25,8 +25,8 @@
 #ifndef FACEGEOMETRY_H__
 #define FACEGEOMETRY_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 #include "core/datastructures/geometrydata.h"
 
 #include <vector>
@@ -59,10 +59,10 @@ namespace campvis {
          * \param   normals             The list of vertex normals, may be empty.
          */
         explicit FaceGeometry(
-            const std::vector<tgt::vec3>& vertices,
-            const std::vector<tgt::vec3>& textureCoordinates = std::vector<tgt::vec3>(),
-            const std::vector<tgt::vec4>& colors = std::vector<tgt::vec4>(),
-            const std::vector<tgt::vec3>& normals = std::vector<tgt::vec3>()
+            const std::vector<cgt::vec3>& vertices,
+            const std::vector<cgt::vec3>& textureCoordinates = std::vector<cgt::vec3>(),
+            const std::vector<cgt::vec4>& colors = std::vector<cgt::vec4>(),
+            const std::vector<cgt::vec3>& normals = std::vector<cgt::vec3>()
             );
 
         /**
@@ -72,9 +72,10 @@ namespace campvis {
 
         /// \see AbstractData::clone()
         virtual FaceGeometry* clone() const;
-
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
         /**
          * Returns the number of vertices of this face.
@@ -86,31 +87,43 @@ namespace campvis {
          * The list of the vertex positions of the face.
          * \return _vertices
          */
-        const std::vector<tgt::vec3>& getVertices() const;
+        const std::vector<cgt::vec3>& getVertices() const;
 
         /**
          * The list of vertex colors, may be empty.
          * \return _colors
          */
-        const std::vector<tgt::vec4>& getColors() const;
+        const std::vector<cgt::vec4>& getColors() const;
 
         /**
          * The list of vertex normals, may be empty.
          * \return _normals
          */
-        const std::vector<tgt::vec3>& getNormals() const;
+        const std::vector<cgt::vec3>& getNormals() const;
 
         /**
          * The list of vertex texture coordinates, may be empty.
          * \return _textureCoordinates
          */
-        const std::vector<tgt::vec3>& getTextureCoordinates() const;
+        const std::vector<cgt::vec3>& getTextureCoordinates() const;
+        
+        /**
+         * The list of picking information colors, may be empty.
+         * \return  _pickingInformation
+         */
+        const std::vector<cgt::col4>& getPickingInformation() const;
+
+        /**
+         * Sets the picking information of this geometry to \a pickingInformation
+         * \param   pickingInformation  The new list of picking information for this geometry
+         */
+        void setPickingInformation(const std::vector<cgt::col4>& pickingInformation);
 
         /**
          * The normal vector of this face.
          * \return _faceNormal
          */
-        const tgt::vec3& getFaceNormal() const;
+        const cgt::vec3& getFaceNormal() const;
 
         /**
          * Clips this FaceGeometry against an aribtrary clip plane.
@@ -121,7 +134,7 @@ namespace campvis {
          * \param   epsilon Clipping precision
          * \return  The clipped FaceGeometry
          */
-        FaceGeometry clipAgainstPlane(float p, const tgt::vec3& normal, float epsilon = 1e-4f) const;
+        FaceGeometry clipAgainstPlane(float p, const cgt::vec3& normal, float epsilon = 1e-4f) const;
 
         /**
          * Renders this FaceGeometry.
@@ -131,11 +144,13 @@ namespace campvis {
         virtual void render(GLenum mode) const;
                 
         /// \see GeometryData::getWorldBounds
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
         /// \see GeometryData::hasTextureCoordinates
         virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::hasPickingInformation
+        virtual bool hasPickingInformation() const;
         /// \see GeometryData::applyTransformationToVertices
-        virtual void applyTransformationToVertices(const tgt::mat4& t);
+        virtual void applyTransformationToVertices(const cgt::mat4& t);
 
     protected:
         /**
@@ -144,12 +159,14 @@ namespace campvis {
          */
         void createGLBuffers() const;
 
-        std::vector<tgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
-        std::vector<tgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
-        std::vector<tgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
-        std::vector<tgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
+        std::vector<cgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
+        std::vector<cgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
+        std::vector<cgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
+        std::vector<cgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
 
-        tgt::vec3 _faceNormal;                          ///< The normal vector of this face.
+        std::vector<cgt::col4> _pickingInformation;     ///< The list of picking information colors, max be empty.
+
+        cgt::vec3 _faceNormal;                          ///< The normal vector of this face.
 
         static const std::string loggerCat_;
     };

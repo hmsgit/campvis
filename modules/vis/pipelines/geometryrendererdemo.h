@@ -25,16 +25,18 @@
 #ifndef GEOMETRYRENDERERDEMO_H__
 #define GEOMETRYRENDERERDEMO_H__
 
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/vtkimagereader.h"
 #include "modules/vis/processors/geometryrenderer.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
-    class GeometryRendererDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API GeometryRendererDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -65,8 +67,7 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
-        CameraProperty _camera;
-
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         VtkImageReader _geometryReader;
         GeometryRenderer _lvRenderer;
@@ -74,10 +75,10 @@ namespace campvis {
         GeometryRenderer _cubeRenderer;
         RenderTargetCompositor _compositor1;
         RenderTargetCompositor _compositor2;
-
-        TrackballNavigationEventListener* _trackballEH;
-
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<GeometryRendererDemo>;
 
 }
 

@@ -89,7 +89,13 @@ namespace campvis {
         connect(_btnFitDomainToImage, SIGNAL(clicked(bool)), this, SLOT(onFitClicked(bool)));
         connect(_cbAutoFitDomainToImage, SIGNAL(stateChanged(int)), this, SLOT(onAutoFitDomainToImageChanged(int)));
 
+        property->s_BeforeTFReplace.connect(this, &TransferFunctionPropertyWidget::onBeforeTFReplace);
+        property->s_AfterTFReplace.connect(this, &TransferFunctionPropertyWidget::onAfterTFReplace);
+        connect(this, SIGNAL(s_beforeTFReplace(AbstractTransferFunction*)), this, SLOT(execBeforeTFReplace(AbstractTransferFunction*)));
+        connect(this, SIGNAL(s_afterTFReplace(AbstractTransferFunction*)), this, SLOT(execAfterTFReplace(AbstractTransferFunction*)));
+
         property->s_autoFitWindowToDataChanged.connect(this, &TransferFunctionPropertyWidget::onTransferFunctionAutoFitWindowToDataChanged);
+        wasVisible = false;
     }
 
     TransferFunctionPropertyWidget::~TransferFunctionPropertyWidget() {
@@ -100,7 +106,7 @@ namespace campvis {
     void TransferFunctionPropertyWidget::updateWidgetFromProperty() {
         TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
         AbstractTransferFunction* tf = prop->getTF();
-        const tgt::vec2& domain = tf->getIntensityDomain();
+        const cgt::vec2& domain = tf->getIntensityDomain();
 
         _spinDomainLeft->blockSignals(true);
         _spinDomainLeft->setMaximum(domain.y);
@@ -122,13 +128,13 @@ namespace campvis {
         ++_ignorePropertyUpdates;
         _spinDomainLeft->setMaximum(_spinDomainRight->value());
         _spinDomainRight->setMinimum(_spinDomainLeft->value());
-        tgt::vec2 newDomain(static_cast<float>(_spinDomainLeft->value()), static_cast<float>(_spinDomainRight->value()));
+        cgt::vec2 newDomain(static_cast<float>(_spinDomainLeft->value()), static_cast<float>(_spinDomainRight->value()));
         prop->getTF()->setIntensityDomain(newDomain);
         --_ignorePropertyUpdates;
     }
 
     void TransferFunctionPropertyWidget::onEditClicked(bool checked) {
-        if (_editor == 0) {
+        if (_editor == nullptr) {
             TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
             _editor = TransferFunctionEditorFactory::createEditor(prop);
 
@@ -150,7 +156,7 @@ namespace campvis {
             const ImageRepresentationLocal* idl = static_cast<const ImageData*>(dh.getData())->getRepresentation<ImageRepresentationLocal>();
             if (idl != 0) {
                 Interval<float> intensityInterval = idl->getNormalizedIntensityRange();
-                tf->setIntensityDomain(tgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));
+                tf->setIntensityDomain(cgt::vec2(intensityInterval.getLeft(), intensityInterval.getRight()));
             }
         }
     }
@@ -162,6 +168,42 @@ namespace campvis {
 
     void TransferFunctionPropertyWidget::onTransferFunctionAutoFitWindowToDataChanged() {
         emit s_propertyChanged(_property);
+    }
+
+    void TransferFunctionPropertyWidget::execBeforeTFReplace(AbstractTransferFunction *tf ) {
+        if (!_dockWidget && !_editor)
+            return;
+        if (_dockWidget) {
+            wasVisible = _dockWidget->isVisible();
+            _dockWidget->setVisible(false);
+        }
+        if (_editor) {
+            delete _editor;
+            _editor = nullptr;
+        }
+    }
+
+    void TransferFunctionPropertyWidget::execAfterTFReplace(AbstractTransferFunction *tf ) {
+        if (!_dockWidget && !_editor)
+            return;
+        if (_editor == nullptr && _dockWidget != nullptr) {
+            TransferFunctionProperty* prop = static_cast<TransferFunctionProperty*>(_property);
+            _editor = TransferFunctionEditorFactory::createEditor(prop);
+
+            _dockWidget->setWidget(_editor);
+
+            _dockWidget->setVisible(wasVisible);
+        } else {
+            _dockWidget->setVisible(true);
+        }
+    }
+
+    void TransferFunctionPropertyWidget::onBeforeTFReplace( AbstractTransferFunction *tf ) {
+        emit s_beforeTFReplace(tf);
+    }
+
+    void TransferFunctionPropertyWidget::onAfterTFReplace( AbstractTransferFunction *tf ) {
+        emit s_afterTFReplace(tf);
     }
 
 

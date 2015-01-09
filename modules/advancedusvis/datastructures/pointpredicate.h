@@ -29,16 +29,34 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/metaproperty.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
 namespace campvis {
 
-    class AbstractPointPredicate : public MetaProperty {
+    class CAMPVIS_MODULES_API AbstractPointPredicate : public MetaProperty {
     public:
+//         class AbstractColorModulationDecorator {
+//         public:
+//             AbstractColorModulationDecorator(AbstractPointPredicate* parent)
+//                 : _parent(parent)
+//             {}
+// 
+//             virtual ~AbstractColorModulationDecorator() {}
+// 
+//             virtual const std::string& getHuePart() const = 0;
+//             virtual const std::string& getSaturationPart() const = 0;
+//             virtual const std::string& getIntensityPart() const = 0;
+//         protected:
+//             AbstractPointPredicate* _parent;
+//         };
+
+
         AbstractPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
         virtual ~AbstractPointPredicate();
@@ -60,7 +78,7 @@ namespace campvis {
          * Sets up the given shader for this voxel predicate (i.e. sets the uniforms)
          * \param   shader  Shader to set up.
          */
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
         /**
          * Returns the GLSL uniform name of this predicate's importance value.
@@ -93,9 +111,9 @@ namespace campvis {
         const std::string& getInputVariable() const;
 
         /// Signal emitted when this predicate's configuration (importance, color, ...) has changed
-        sigslot::signal0<> s_configurationChanged;
+        sigslot::signal0 s_configurationChanged;
         /// Signal emitted when this predicate's enabled state has changed
-        sigslot::signal0<> s_enabledChanged;
+        sigslot::signal0 s_enabledChanged;
 
         BoolProperty p_enable;
         FloatProperty p_importance;
@@ -119,7 +137,7 @@ namespace campvis {
     
 // ================================================================================================
 
-    class AndCombinedPointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API AndCombinedPointPredicate : public AbstractPointPredicate {
     public:
         AndCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates);
 
@@ -128,7 +146,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
     protected:
         std::vector<AbstractPointPredicate*> _predicates;
@@ -136,7 +154,7 @@ namespace campvis {
 
     // ================================================================================================
 
-    class OrCombinedPointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API OrCombinedPointPredicate : public AbstractPointPredicate {
     public:
         OrCombinedPointPredicate(const std::string& name, const std::string& title, const std::vector<AbstractPointPredicate*>& predicates);
 
@@ -145,7 +163,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
     protected:
         std::vector<AbstractPointPredicate*> _predicates;
@@ -153,7 +171,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    class RangePointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API RangePointPredicate : public AbstractPointPredicate {
     public:
         RangePointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
@@ -162,7 +180,9 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
+
+        const std::string& getRangeUniformname() const { return _rangeUniformName; };
 
         Vec2Property p_range;
 
@@ -173,7 +193,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    class LabelBitPointPredicate : public AbstractPointPredicate {
+    class CAMPVIS_MODULES_API LabelBitPointPredicate : public AbstractPointPredicate {
     public:
         LabelBitPointPredicate(const std::string& inputVariable, const std::string& name, const std::string& title);
 
@@ -182,7 +202,7 @@ namespace campvis {
 
         virtual std::string getGlslHeader() const;
         virtual std::string getPredicateEvaluationGlslString() const;
-        virtual void setupShader(tgt::Shader* shader) const;
+        virtual void setupShader(cgt::Shader* shader) const;
 
         IntProperty p_bit;
 

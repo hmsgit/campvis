@@ -26,9 +26,9 @@
 #define CONCURRENTHISTOGRAM_H__
 
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/tgt_math.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/cgt_math.h"
 #include <tbb/atomic.h>
 
 namespace campvis {
@@ -138,7 +138,7 @@ namespace campvis {
         for (size_t i = 0; i < ND; ++i) {
             _min[i] = mins[i];
             _max[i] = maxs[i];
-            tgtAssert(_min[i] < _max[i], "Min must be smaller than Max!");
+            cgtAssert(_min[i] < _max[i], "Min must be smaller than Max!");
             _numBuckets[i] = numBuckets[i];
             _arraySize *= _numBuckets[i];
         }
@@ -157,7 +157,7 @@ namespace campvis {
 
     template<typename T, size_t ND>
     size_t campvis::ConcurrentGenericHistogramND<T, ND>::getNumBuckets(size_t dimension) const {
-        tgtAssert(dimension < ND, "Dimension out of bounds.");
+        cgtAssert(dimension < ND, "Dimension out of bounds.");
         return _numBuckets[dimension];
     }
 
@@ -182,7 +182,7 @@ namespace campvis {
 
     template<typename T, size_t ND>
     size_t campvis::ConcurrentGenericHistogramND<T, ND>::getBucketNumber(size_t dimension, T sample) const {
-        tgtAssert(dimension < ND, "Dimension out of bounds.");
+        cgtAssert(dimension < ND, "Dimension out of bounds.");
 
         if (sample < _min[dimension] || sample > _max[dimension]) {
             return _numBuckets[dimension];

@@ -32,7 +32,9 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Resamples am image on the GPU using OpenGL.
      */
-    class GlImageResampler : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlImageResampler : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlImageResampler Processor
@@ -75,7 +77,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;               ///< Shader for resampling
+        cgt::Shader* _shader;               ///< Shader for resampling
 
         static const std::string loggerCat_;
     };

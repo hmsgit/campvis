@@ -30,17 +30,13 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
 
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/optionproperty.h"
-
+#include "core/properties/allproperties.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/geometrydata.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -48,7 +44,7 @@ namespace campvis {
     /**
      * Renders axis-aligned slices with tensor glyphs.
      */
-    class TensorGlyphRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API TensorGlyphRenderer : public VisualizationProcessor {
     public:
         /// Glyph type to render
         enum GlyphType {
@@ -90,6 +86,7 @@ namespace campvis {
 
         DataNameProperty p_inputEigenvalues;    ///< ID for input eigenvalues
         DataNameProperty p_inputEigenvectors;   ///< ID for input eigenvectors
+        DataNameProperty p_camera;              ///< ID for camera input
         DataNameProperty p_renderOutput;        ///< ID for output rendered image
 
         GenericOptionProperty<GlyphType> p_glyphType;   ///< Glyph type to render
@@ -98,7 +95,6 @@ namespace campvis {
         BoolProperty p_enableShading;               ///< Flag whether to enable shading
         DataNameProperty p_lightId;                 ///< Name/ID for the LightSource to use
 
-        CameraProperty p_camera;                                    ///< camera
         GenericOptionProperty<SliceOrientation> p_sliceOrientation; ///< orientation of the slice to extract
         IntProperty p_sliceNumber;                                  ///< slice number
 
@@ -118,9 +114,9 @@ namespace campvis {
          * \param   evecs       Eigenvector image
          * \param   position    Image position to render in voxel coordinates
          */
-        void renderTensorGlyph(const GenericImageRepresentationLocal<float, 3>* evals, const GenericImageRepresentationLocal<float, 9>* evecs, const tgt::vec3& position);
+        void renderTensorGlyph(const GenericImageRepresentationLocal<float, 3>* evals, const GenericImageRepresentationLocal<float, 9>* evecs, const cgt::vec3& position);
 
-        tgt::Shader* _shader;               ///< Shader for glyph rendering
+        cgt::Shader* _shader;               ///< Shader for glyph rendering
         GeometryData* _ellipsoidGeometry;   ///< Geometry for ellipsoid rendering
         GeometryData* _cubeGeometry;        ///< Geometry for cuboid rendering
 

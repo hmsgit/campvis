@@ -72,7 +72,7 @@
 #ifndef TEAPOT_H
 #define TEAPOT_H
 
-#include "tgt/types.h"
+#include "cgt/types.h"
 
 namespace Teapot {
 

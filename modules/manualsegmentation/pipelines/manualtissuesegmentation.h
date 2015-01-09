@@ -29,6 +29,9 @@
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/mhdimagewriter.h"
 #include "modules/manualsegmentation/processors/manualtissuesegmenter.h"
@@ -37,7 +40,7 @@ namespace campvis {
     /**
      * VERY EXPERIMENTAL pipeline for manual segmentation of tissue layers.
      */
-    class ManualTissueSegmentation : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API ManualTissueSegmentation : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a VisualizationPipeline. 
@@ -69,6 +72,10 @@ namespace campvis {
         MWheelToNumericPropertyEventListener _wheelHandler;
 
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<ManualTissueSegmentation>;
+
 }
 
 #endif // MANUALTISSUESEGMENTATION_H__

@@ -39,7 +39,7 @@
 class ImageSeriesTest : public testing::Test {
 protected:
     ImageSeriesTest() {
-        _image = new campvis::ImageData(2, tgt::svec3(1,2,1), 4);
+        _image = new campvis::ImageData(2, cgt::svec3(1,2,1), 4);
         _dh = campvis::DataHandle(_image);
 
         _imgSeries2.addImage(_image);

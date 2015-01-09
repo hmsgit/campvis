@@ -32,7 +32,7 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
     {
         addProcessor(&_igtlClient);
-		addProcessor(&_matrixProcessor);
+        addProcessor(&_matrixProcessor);
 
         //addEventListenerToBack(&_ve);
     }
@@ -44,12 +44,12 @@ namespace campvis {
         AutoEvaluationPipeline::init();
         
         _igtlClient.s_validated.connect(this, &StreamingOIGTLDemo::onProcessorValidated);
-		_matrixProcessor.s_validated.connect(this, &StreamingOIGTLDemo::onProcessorValidated);
+        _matrixProcessor.s_validated.connect(this, &StreamingOIGTLDemo::onProcessorValidated);
 
         _renderTargetID.setValue("IGTL.image.ImagerClient");
-		_matrixProcessor.p_matrixAID.setValue("IGTL.transform.ProbeToTracker");
+        _matrixProcessor.p_matrixAID.setValue("IGTL.transform.ProbeToTracker");
         _matrixProcessor.p_matrixAType.selectByOption("data");
-		_matrixProcessor.p_matrixBID.setValue("IGTL.transform.ReferenceToTracker");
+        _matrixProcessor.p_matrixBID.setValue("IGTL.transform.ReferenceToTracker");
         _matrixProcessor.p_matrixBType.selectByOption("data");
 
         _igtlClient.p_address.setValue("127.0.0.1");

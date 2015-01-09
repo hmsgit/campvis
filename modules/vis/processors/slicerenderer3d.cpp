@@ -23,11 +23,12 @@
 // ================================================================================================
 
 #include "slicerenderer3d.h"
-#include "tgt/bounds.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/bounds.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/datastructures/renderdata.h"
@@ -46,15 +47,15 @@ namespace campvis {
     SliceRenderer3D::SliceRenderer3D(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
         , p_sourceImageID("sourceImageID", "Input Image", "", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_camera("Camera", "Camera")
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , _shader(0)
     {
         addProperty(p_sourceImageID, INVALID_RESULT | INVALID_PROPERTIES);
-        addProperty(p_targetImageID);
         addProperty(p_camera);
+        addProperty(p_targetImageID);
         addProperty(p_sliceNumber);
         addProperty(p_transferFunction);
     }
@@ -77,19 +78,20 @@ namespace campvis {
 
     void SliceRenderer3D::updateResult(DataContainer& data) {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
 
-        if (img != 0) {
+        if (img != nullptr && camera != nullptr) {
             if (img->getDimensionality() == 3) {
-                const tgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = camera->getCamera();
 
                 // Creating the slice proxy geometry works as follows:
                 // Create the cube proxy geometry for the volume, then clip the cube against the slice plane.
                 // The closing face is the slice proxy geometry.
                 // This is probably not the fastest, but an elegant solution, which also supports arbitrary slice orientations. :)
-                tgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
-                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
+                cgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
+                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
 
-                tgt::vec3 normal(0.f, 0.f, 1.f);
+                cgt::vec3 normal(0.f, 0.f, 1.f);
                 float p = img->getParent()->getMappingInformation().getOffset().z + (p_sliceNumber.getValue() * img->getParent()->getMappingInformation().getVoxelSize().z);
                 MeshGeometry clipped = cube->clipAgainstPlane(p, normal, true);
                 const FaceGeometry& slice = clipped.getFaces().back(); // the last face is the closing face
@@ -99,11 +101,11 @@ namespace campvis {
                 _shader->activate();
 
                 _shader->setIgnoreUniformLocationError(true);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / cgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_projectionMatrix", cam.getProjectionMatrix());
                 _shader->setUniform("_viewMatrix", cam.getViewMatrix());
 
-                tgt::TextureUnit inputUnit, tfUnit;
+                cgt::TextureUnit inputUnit, tfUnit;
                 img->bind(_shader, inputUnit);
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
@@ -114,7 +116,7 @@ namespace campvis {
                 slice.render(GL_POLYGON);
 
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 glDisable(GL_DEPTH_TEST);
 
                 data.addData(p_targetImageID.getValue(), new RenderData(_fbo));
@@ -124,7 +126,7 @@ namespace campvis {
             }
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 
@@ -132,7 +134,7 @@ namespace campvis {
         ScopedTypedData<ImageData> img(dc, p_sourceImageID.getValue());
 
         if (img != 0) {
-            const tgt::svec3& imgSize = img->getSize();
+            const cgt::svec3& imgSize = img->getSize();
             if (p_sliceNumber.getMaxValue() != static_cast<int>(imgSize.z) - 1){
                 p_sliceNumber.setMaxValue(static_cast<int>(imgSize.z) - 1);
             }

@@ -26,8 +26,10 @@
 #define IMAGEDATA_H__
 
 #include <tbb/concurrent_vector.h>
-#include "tgt/logmanager.h"
-#include "tgt/vector.h"
+#include <tbb/spin_mutex.h>
+
+#include "cgt/logmanager.h"
+#include "cgt/vector.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/abstractdata.h"
@@ -55,7 +57,7 @@ namespace campvis {
          * \param size              Size of this image (number of elements per dimension)
          * \param numChannels       Number of channels per element
          */
-        explicit ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels);
+        explicit ImageData(size_t dimensionality, const cgt::svec3& size, size_t numChannels);
 
         /// Destructor
         virtual ~ImageData();
@@ -80,6 +82,12 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const;
 
         /**
+         * Returns a human readable representation of the data type that can be used for the GUI.
+         * \return  A string with the type name to be used for the GUI.
+         */
+        virtual std::string getTypeAsString() const;
+
+        /**
          * Dimensionality of this image.
          * \return _dimensionality
          */
@@ -89,7 +97,7 @@ namespace campvis {
          * Size of this image (number of elements per dimension).
          * \return _size
          */
-        const tgt::svec3& getSize() const;
+        const cgt::svec3& getSize() const;
 
         /**
          * Returns the number of channels per element.
@@ -98,7 +106,7 @@ namespace campvis {
         size_t getNumChannels() const;
 
         /**
-         * Returns the number of elements (= tgt::hmul(getSize())).
+         * Returns the number of elements (= cgt::hmul(getSize())).
          * \return  _numElements
          */
         size_t getNumElements() const;
@@ -119,7 +127,7 @@ namespace campvis {
          * Returns the image extent in world coordinates.
          * \return  The image extent in world coordinates.
          */
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
 
         /**
          * Returns the image extent in world coordinates for the given voxel coordinates.
@@ -127,7 +135,7 @@ namespace campvis {
          * \param   urb     Upper-right-back in voxel coordinates.
          * \return  The image extent in world coordinates for the given voxel coordinates.
          */
-        tgt::Bounds getWorldBounds(const tgt::svec3& llf, const tgt::svec3& urb) const;
+        cgt::Bounds getWorldBounds(const cgt::svec3& llf, const cgt::svec3& urb) const;
 
         /**
          * Transforms a vector based position to the corresponding array index.
@@ -136,7 +144,7 @@ namespace campvis {
          * \param   position    Vector based image coordinates
          * \return  Array index when image is stored continuously.
          */
-        size_t positionToIndex(const tgt::svec3& position) const;
+        size_t positionToIndex(const cgt::svec3& position) const;
 
         /**
          * Transforms an array index to the corresponding vector based position.
@@ -145,7 +153,7 @@ namespace campvis {
          * \param   index   Array index when image is stored continuously.
          * \return  Vector based image coordinates.
          */
-        tgt::svec3 indexToPosition(size_t index) const;
+        cgt::svec3 indexToPosition(size_t index) const;
 
         /**
          * Returns a representation of this image of type \a T.
@@ -190,10 +198,13 @@ namespace campvis {
         mutable tbb::concurrent_vector<const AbstractImageRepresentation*> _representations;
 
         const size_t _dimensionality;                   ///< Dimensionality of this image
-        const tgt::svec3 _size;                         ///< Size of this image (number of elements per dimension)
+        const cgt::svec3 _size;                         ///< Size of this image (number of elements per dimension)
         const size_t _numChannels;                      ///< Number of channels per element
-        const size_t _numElements;                      ///< number of elements (= tgt::hmul(size))
+        const size_t _numElements;                      ///< number of elements (= cgt::hmul(size))
         ImageMappingInformation _mappingInformation;    ///< Mapping information of this image
+
+        /// Mutex protecting the representation conversions to ensure that there is only one conversion happening at a time.
+        mutable tbb::spin_mutex _conversionMutex;
 
         static const std::string loggerCat_;
     };
@@ -212,6 +223,15 @@ namespace campvis {
 
         // no representation found, create a new one
         if (performConversion) {
+            tbb::spin_mutex::scoped_lock lock(_conversionMutex);
+
+            // in the meantime, there something might have changed, so check again whether there is a new rep.
+            for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
+                if (const T* tester = dynamic_cast<const T*>(*it)) {
+                    return tester;
+                }
+            }
+
             return tryPerformConversion<T>();
         }
 
@@ -220,18 +240,16 @@ namespace campvis {
 
     template<typename T>
     const T* campvis::ImageData::tryPerformConversion() const {
-        // TODO: Currently, we do not check, for multiple parallel conversions into the same
-        //       target type. This does not harm thread-safety but may lead to multiple 
-        //       representations of the same type for a single image.
         for (tbb::concurrent_vector<const AbstractImageRepresentation*>::const_iterator it = _representations.begin(); it != _representations.end(); ++it) {
             const T* tester = ImageRepresentationConverter::getRef().tryConvertFrom<T>(*it);
             if (tester != 0) {
+                //LDEBUG("Performed a image representation conversion from " + std::string(typeid(**it).name()) + " to " + std::string(typeid(T).name()) + ".");
                 return tester;
             }
         }
 
         // could not create a suitable representation
-        LWARNING("Could not create a " + std::string(typeid(T*).name()) + " representation.");
+        LWARNING("Could not create a " + std::string(typeid(T).name()) + " representation.");
         return 0;
     }
 

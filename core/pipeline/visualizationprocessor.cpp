@@ -24,7 +24,7 @@
 
 #include "visualizationprocessor.h"
 
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 #include "core/datastructures/imagedata.h"
 
 namespace campvis {
@@ -39,6 +39,10 @@ namespace campvis {
         , _fbo(0)
         , _viewportSizeProperty(viewportSizeProp)
     {
+        if (_viewportSizeProperty) {
+            _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
+            setPropertyInvalidationLevel(*_viewportSizeProperty, INVALID_RESULT);
+        }
     }
 
     VisualizationProcessor::~VisualizationProcessor() {
@@ -47,72 +51,35 @@ namespace campvis {
     void VisualizationProcessor::init() {
         AbstractProcessor::init();
 
-        tgtAssert(_viewportSizeProperty != 0, "The pointer to the viewport size property must not be 0!");
+        cgtAssert(_viewportSizeProperty != 0, "The pointer to the viewport size property must not be 0!");
         addProperty(p_lqMode);
 
-        _fbo = new tgt::FramebufferObject();
-        _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
-        setPropertyInvalidationLevel(*_viewportSizeProperty, INVALID_RESULT);
+        _fbo = new cgt::FramebufferObject();
     }
 
     void VisualizationProcessor::deinit() {
-        _viewportSizeProperty->s_changed.disconnect(this);
+        if (_viewportSizeProperty) {
+            _viewportSizeProperty->s_changed.disconnect(this);
+            _viewportSizeProperty = nullptr;
+        }
+
         delete _fbo;
         AbstractProcessor::deinit();
     }
 
     void VisualizationProcessor::createAndAttachTexture(GLint internalFormat, GLenum attachment) {
-        tgtAssert(_fbo->isActive(), "Trying to attach a texture while FBO is not bound!");
+        cgtAssert(_fbo->isActive(), "Trying to attach a texture while FBO is not bound!");
 
         // acqiure a new TextureUnit, so that we don't mess with other currently bound textures during texture upload...
-        tgt::TextureUnit rtUnit;
+        cgt::TextureUnit rtUnit;
         rtUnit.activate();
 
         // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         // create texture
-        tgt::Texture* tex = 0;
-        switch(internalFormat) {
-            case GL_RGB:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                break;
-            case GL_RGB16F_ARB:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_RGB, GL_RGB16F_ARB, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA8:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA16:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA16, GL_UNSIGNED_SHORT, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA16F:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA16F, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            case GL_RGBA32F:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-
-            case GL_DEPTH_COMPONENT16:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-            case GL_DEPTH_COMPONENT24:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT24, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-#ifdef GL_DEPTH_COMPONENT32F
-            case GL_DEPTH_COMPONENT32F:
-                tex = new tgt::Texture(0, getRenderTargetSize(), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_FLOAT, tgt::Texture::LINEAR);
-                break;
-#endif
-
-            default:
-                tgtAssert(false, "Unknown internal format!");
-        }
-        tex->uploadTexture();
-        tex->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+        cgt::Texture* tex = new cgt::Texture(GL_TEXTURE_2D, getRenderTargetSize(), internalFormat, cgt::Texture::LINEAR);
+        tex->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
         // attach texture to FBO
         _fbo->attachTexture(tex, attachment);
@@ -129,7 +96,7 @@ namespace campvis {
             case GL_RGBA16F:
             case GL_RGBA32F:
                 if (_fbo->getNumColorAttachments() >= static_cast<size_t>(GpuCaps.getMaxColorAttachments())) {
-                    tgtAssert(false, "Tried to attach more color textures to FBO than supported!");
+                    cgtAssert(false, "Tried to attach more color textures to FBO than supported!");
                     LWARNING("Tried to attach more color textures to FBO than supported, aborted.");
                     return;
                 }
@@ -141,22 +108,22 @@ namespace campvis {
 #ifdef GL_DEPTH_COMPONENT32F
             case GL_DEPTH_COMPONENT32F:
 #endif
-                tgtAssert(_fbo->getDepthAttachment() == 0, "Tried to attach more than one depth texture.");
+                cgtAssert(_fbo->getDepthAttachment() == 0, "Tried to attach more than one depth texture.");
                 attachment = GL_DEPTH_ATTACHMENT;
                 break;
 
             default:
-                tgtAssert(false, "Unknown internal format!");
+                cgtAssert(false, "Unknown internal format!");
         }
         createAndAttachTexture(internalFormat, attachment);
     }
 
-    tgt::ivec2 VisualizationProcessor::getEffectiveViewportSize() const {
+    cgt::ivec2 VisualizationProcessor::getEffectiveViewportSize() const {
         return (p_lqMode.getValue() ? _viewportSizeProperty->getValue() / 2 : _viewportSizeProperty->getValue());
     }
 
-    tgt::ivec3 VisualizationProcessor::getRenderTargetSize() const {
-        return tgt::ivec3(getEffectiveViewportSize(), 1);
+    cgt::ivec3 VisualizationProcessor::getRenderTargetSize() const {
+        return cgt::ivec3(getEffectiveViewportSize(), 1);
     }
 
     void VisualizationProcessor::createAndAttachColorTexture() {
@@ -168,15 +135,16 @@ namespace campvis {
     }
 
     void VisualizationProcessor::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
-        tgtAssert(viewportSizeProp != 0, "Pointer must not be 0.");
+        cgtAssert(viewportSizeProp != nullptr, "Pointer must not be nullptr.");
 
-        if (_viewportSizeProperty != 0) {
+        if (_viewportSizeProperty != nullptr) {
             _viewportSizeProperty->s_changed.disconnect(this);
         }
 
         _viewportSizeProperty = viewportSizeProp;
         _viewportSizeProperty->s_changed.connect<VisualizationProcessor>(this, &VisualizationProcessor::onPropertyChanged);
         setPropertyInvalidationLevel(*viewportSizeProp, INVALID_RESULT);
+        invalidate(INVALID_RESULT);
     }
 
 }

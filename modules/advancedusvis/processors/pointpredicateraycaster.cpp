@@ -24,7 +24,7 @@
 
 #include "pointpredicateraycaster.h"
 
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/lightsourcedata.h"
@@ -62,8 +62,10 @@ namespace campvis {
     }
 
     void PointPredicateRaycaster::init() {
-        p_predicateHistogram.s_headerChanged.connect(this, &PointPredicateRaycaster::onHistogramHeaderChanged);
+        p_predicateHistogram.getPredicateHistogram()->setPredicateFunctionArgumentString("in float intensity, in float gradientMagnitude, in float gradientAngle, float viewAngle, in float snr, in float vesselness, in float confidence, in uint label");
+
         RaycastingProcessor::init();
+        p_predicateHistogram.s_headerChanged.connect(this, &PointPredicateRaycaster::onHistogramHeaderChanged);
     }
 
     void PointPredicateRaycaster::deinit() {
@@ -81,14 +83,14 @@ namespace campvis {
             ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
             if (p_enableShading.getValue() == false || light != nullptr) {
-                const tgt::Texture* lt = labels->getTexture();
-                if (lt->getFilter() != tgt::Texture::NEAREST) {
-                    const_cast<tgt::Texture*>(lt)->setFilter(tgt::Texture::NEAREST);
+                const cgt::Texture* lt = labels->getTexture();
+                if (lt->getFilter() != cgt::Texture::NEAREST) {
+                    const_cast<cgt::Texture*>(lt)->setFilter(cgt::Texture::NEAREST);
                 }
 
-                const tgt::Texture* tex = image->getTexture();
-                if (tex->getFilter() != tgt::Texture::MIPMAP) {
-                    const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+                const cgt::Texture* tex = image->getTexture();
+                if (tex->getFilter() != cgt::Texture::MIPMAP) {
+                    const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
                     LGL_ERROR;
                     glGenerateMipmap(GL_TEXTURE_3D);
                     LGL_ERROR;
@@ -98,7 +100,7 @@ namespace campvis {
                     LGL_ERROR;
                 }
 
-                tgt::TextureUnit labelUnit, snrUnit, vesselnessUnit, confidenceUnit;
+                cgt::TextureUnit labelUnit, snrUnit, vesselnessUnit, confidenceUnit;
                 labels->bind(_shader, labelUnit, "_labels", "_labelsParams");
                 snr->bind(_shader, snrUnit, "_snr", "_snrParams");
                 vesselness->bind(_shader, vesselnessUnit, "_vesselness", "_vesselnessParams");
@@ -138,7 +140,7 @@ namespace campvis {
             }
         }
         else {
-            LERROR("Could not load Voxel Predicate Mask Image.");
+            LDEBUG("Could not load Voxel Predicate Mask Image.");
         }
     }
 

@@ -35,9 +35,10 @@
 #include "core/properties/stringproperty.h"
 #include "core/tools/weaklytypedpointer.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
-    class TextureReaderDevil;
 }
 
 namespace campvis {
@@ -47,7 +48,7 @@ namespace campvis {
      *
      * \note    Full list of supported formats: http://openil.sourceforge.net/features.php
      */
-    class DevilImageWriter : public AbstractProcessor {
+    class CAMPVIS_MODULES_API DevilImageWriter : public AbstractProcessor {
     public:
         /**
          * Constructs a new DevilImageWriter Processor
@@ -70,12 +71,13 @@ namespace campvis {
 
         DataNameProperty p_inputImage;      ///< image ID for image to write
         StringProperty p_url;               ///< URL for file to write
+        BoolProperty p_writeDepthImage;     ///< Flag whether to save also depth image
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        void writeIlImage(const WeaklyTypedPointer& wtp, const tgt::ivec2& size, const std::string& filename) const;
+        void writeIlImage(const WeaklyTypedPointer& wtp, const cgt::ivec2& size, const std::string& filename) const;
 
         static const std::string loggerCat_;
     };

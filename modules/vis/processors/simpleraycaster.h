@@ -30,9 +30,11 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Performs a simple volume ray casting.
      */
-    class SimpleRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API SimpleRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new SimpleRaycaster Processor

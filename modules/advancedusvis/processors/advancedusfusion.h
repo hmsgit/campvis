@@ -36,7 +36,9 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -46,7 +48,7 @@ namespace campvis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class AdvancedUsFusion : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API AdvancedUsFusion : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new AdvancedUsFusion Processor
@@ -96,7 +98,7 @@ namespace campvis {
 
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

@@ -30,10 +30,10 @@
 #include <ext/threading.h>
 #include <tbb/atomic.h>
 
-#include "tgt/logmanager.h"
-#include "tgt/painter.h"
+#include "cgt/logmanager.h"
+#include "cgt/painter.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
     class QtThreadedCanvas;
     class Texture;
@@ -45,14 +45,14 @@ namespace campvis {
     /**
      * Painter class for CAMPVis, rendering the render target of an AbstractPipeline.
      */
-    class CampVisPainter : public tgt::Painter, public sigslot::has_slots<> {
+    class CampVisPainter : public cgt::Painter, public sigslot::has_slots {
     public:
         /**
          * Creates a new CampVisPainter rendering the render target of \a pipeline on \a canvas.
          * \param   canvas      Canvas to render on
          * \param   pipeline    Pipeline to render
          */
-        CampVisPainter(tgt::GLCanvas* canvas, AbstractPipeline* pipeline);
+        CampVisPainter(cgt::GLCanvas* canvas, AbstractPipeline* pipeline);
 
         /**
          * Destructor, stops and waits for the rendering thread if it's still running.
@@ -64,8 +64,8 @@ namespace campvis {
          */
         virtual void repaint();
 
-        /// \see tgt::Painter::sizeChanged
-        virtual void sizeChanged(const tgt::ivec2& size);
+        /// \see cgt::Painter::sizeChanged
+        virtual void sizeChanged(const cgt::ivec2& size);
 
         /**
          * Initializes the painter, i.e. loads the OpenGL shader.
@@ -81,7 +81,7 @@ namespace campvis {
          * Sets the target canvas for rendering
          * \param   canvas  Canvas to render on, must be of type QtThreadedCanvas
          */
-        virtual void setCanvas(tgt::GLCanvas* canvas);
+        virtual void setCanvas(cgt::GLCanvas* canvas);
 
         /**
          * Pipeline with the render target to render.
@@ -89,12 +89,8 @@ namespace campvis {
          */
         void setPipeline(AbstractPipeline* pipeline);
 
-        void setErrorTexture(tgt::Texture* texture);
+        void setErrorTexture(cgt::Texture* texture);
 
-        /**
-         * Slot being notified when the pipeline's render target changed.
-         */
-        void onRenderTargetChanged();
 
     private:
         /**
@@ -105,11 +101,8 @@ namespace campvis {
         static const std::string loggerCat_;
 
         AbstractPipeline* _pipeline;                        ///< Pipeline to render
-        tgt::Shader* _copyShader;                           ///< Shader for copying the render target to the framebuffer.
-        tbb::atomic<bool> _dirty;                           ///< Flag whether render result is dirty and needs to be rerendered.
-        std::condition_variable _renderCondition;           ///< conditional wait condition for rendering
-
-        tgt::Texture* _errorTexture;
+        cgt::Shader* _copyShader;                           ///< Shader for copying the render target to the framebuffer.
+        cgt::Texture* _errorTexture;                        ///< Pointer to error texture
     };
 
 }

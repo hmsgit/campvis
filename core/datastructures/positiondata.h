@@ -25,7 +25,7 @@
 #ifndef POSITIONDATA_H__
 #define POSITIONDATA_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/abstractdata.h"
 
@@ -41,7 +41,7 @@ namespace campvis {
          * \param   position       The initial position
          * \param   quaternion     The initial quaternion/orientation
          */
-        explicit PositionData(const tgt::vec3 &position, const tgt::vec4 &quaternion = tgt::vec4(0.f, 0.f, 0.f, 0.f) );;
+        explicit PositionData(const cgt::vec3 &position, const cgt::vec4 &quaternion = cgt::vec4(0.f, 0.f, 0.f, 0.f) );;
 
         /**
          * Virtual destructor
@@ -55,12 +55,14 @@ namespace campvis {
         virtual size_t getLocalMemoryFootprint() const;;
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
         /**
         * Gets the quaternion
         * \return _quaternion
         **/
-        tgt::vec4 getQuaternion() const {
+        cgt::vec4 getQuaternion() const {
             return _quaternion;
         }
 
@@ -68,7 +70,7 @@ namespace campvis {
         * Sets the quaternion.
         * \param val New quaternion vector
         **/
-        void setQuaternion(const tgt::vec4 &val) {
+        void setQuaternion(const cgt::vec4 &val) {
             _quaternion = val;
         }
         
@@ -76,7 +78,7 @@ namespace campvis {
         * Gets the position
         * \return _position
         **/
-        tgt::vec3 getPosition() const {
+        cgt::vec3 getPosition() const {
             return _position;
         }
 
@@ -84,14 +86,14 @@ namespace campvis {
         * Sets the position.
         * \param val New position vector
         **/
-        void setPosition(const tgt::vec3 &val) {
+        void setPosition(const cgt::vec3 &val) {
             _position = val;
         }
         
 
     protected:
-        tgt::vec3 _position;                ///< the position
-        tgt::vec4 _quaternion;              ///< The orientation quaternion
+        cgt::vec3 _position;                ///< the position
+        cgt::vec4 _quaternion;              ///< The orientation quaternion
     };
 
 }

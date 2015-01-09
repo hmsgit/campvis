@@ -24,12 +24,8 @@
 
 #include "imagerepresentationconversioncore.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/glcontextmanager.h"
-
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/job.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
 
 namespace campvis {
 
@@ -46,6 +42,7 @@ namespace campvis {
                 return nullptr;
             }
 
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
 
             switch (wtp._baseType) {
@@ -71,13 +68,14 @@ namespace campvis {
                 delete [] static_cast<float*>(wtp._pointer);
                 break;
             default:
-                tgtAssert(false, "Should not reach this - wrong base data type!");
+                cgtAssert(false, "Should not reach this - wrong base data type!");
                 break;
             }
 
             return toReturn;
         }
         else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
             return toReturn;
         }
@@ -95,7 +93,7 @@ namespace campvis {
             return ImageRepresentationLocal::create(tester->getParent(), tester->getImageData());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
-            OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
             if (wtp._pointer != nullptr)
                 return ImageRepresentationLocal::create(source->getParent(), wtp);

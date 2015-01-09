@@ -25,13 +25,13 @@
 #ifndef QTEXTEDITLOG_H__
 #define QTEXTEDITLOG_H__
 
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 #include <QObject>
 #include <QTextEdit>
 #include <QTextDocument>
 
-using namespace tgt;
+using namespace cgt;
 
 namespace campvis {
 

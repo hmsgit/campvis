@@ -66,7 +66,7 @@ namespace campvis {
 
         // We ensure all shared properties to be of correct type the base class method.
         // Hence, static_cast ist safe.
-        setHistogramPointer(static_cast<PointPredicateHistogramProperty*>(prop)->_histogram);
+        static_cast<PointPredicateHistogramProperty*>(prop)->setHistogramPointer(this->_histogram);
     }
 
     PointPredicateHistogram* PointPredicateHistogramProperty::getPredicateHistogram() {
@@ -78,7 +78,7 @@ namespace campvis {
     }
 
     void PointPredicateHistogramProperty::setHistogramPointer(std::shared_ptr<PointPredicateHistogram> histogram) {
-        tgtAssert(histogram != nullptr, "Must not be nullptr!");
+        cgtAssert(histogram != nullptr, "Must not be nullptr!");
 
         if (_histogram != nullptr) {
             _histogram->s_configurationChanged.disconnect(this);
@@ -98,12 +98,12 @@ namespace campvis {
 
     void PointPredicateHistogramProperty::onHistogramConfigurationChanged() {
         if (_ignoreSignals == 0)
-            s_changed(this);
+            s_changed.emitSignal(this);
     }
 
     void PointPredicateHistogramProperty::onHistogramHeaderChanged() {
         if (_ignoreSignals == 0)
-            s_headerChanged();
+            s_headerChanged.emitSignal();
     }
 
     std::vector<float> PointPredicateHistogramProperty::getCurrentHistogramDistribution() const {
@@ -116,8 +116,8 @@ namespace campvis {
 
     void PointPredicateHistogramProperty::adjustImportances(std::vector<float> deltas, const std::vector<float>& baseHistogram, int fixedIndex) {
         std::vector<AbstractPointPredicate*> predicates = _histogram->getPredicates();
-        tgtAssert(deltas.size() == baseHistogram.size(), "Size of deltas mismatches the size of baseHistogram!");
-        tgtAssert(deltas.size() == predicates.size(), "Number of deltas mismatches the number of predicates!");
+        cgtAssert(deltas.size() == baseHistogram.size(), "Size of deltas mismatches the size of baseHistogram!");
+        cgtAssert(deltas.size() == predicates.size(), "Number of deltas mismatches the number of predicates!");
 
         // first pass of normalization: ensure sum of deltas = 0:
         float sum = 0.f;
@@ -146,7 +146,10 @@ namespace campvis {
         do {
             // set each underflowed value to 0 and adjust the other importances by an according fraction.
             std::for_each(underflowIndices.begin(), underflowIndices.end(), [&] (int underflowIndex) {
-                tgtAssert(! adjustableIndices.empty(), "The vector of adjustable indices is empty, but we need at least one. This should not happen!");
+                if (adjustableIndices.empty()) {
+                    LERROR("The vector of adjustable indices is empty, but we need at least one. This should not happen!");
+                    return;
+                }
 
                 float delta = newImportances[underflowIndex] / adjustableIndices.size();
                 std::for_each(adjustableIndices.begin(), adjustableIndices.end(), [&] (int index) { 
@@ -178,10 +181,13 @@ namespace campvis {
             predicates[i]->p_importance.setValue(newImportances[i]);
             sum += newImportances[i];
         }
-        tgtAssert(std::abs(sum - 1.f) < 0.0001f, "Sum of importances is not 1 - sth. went wrong!");
+
+        if (std::abs(sum - 1.f) > 0.001f)
+            LERROR("Sum of importances is not 1 - sth. went wrong!");
+
         --_ignoreSignals;
 
-        s_changed(this);
+        s_changed.emitSignal(this);
     }
 
 }

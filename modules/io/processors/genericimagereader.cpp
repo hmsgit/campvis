@@ -26,7 +26,7 @@
 
 #include <fstream>
 
-#include "tgt/filesystem.h"
+#include "cgt/filesystem.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -34,13 +34,15 @@
 
 
 namespace campvis {
-    const std::string GenericImageReader::loggerCat_ = "CAMPVis.modules.io.MhdImageReader";
+    const std::string GenericImageReader::loggerCat_ = "CAMPVis.modules.io.GenericImageReader";
 
     GenericImageReader::GenericImageReader() 
         : AbstractProcessor()
-        , p_url("url", "Image URL", "", StringProperty::OPEN_FILENAME)
+        , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
+        , p_targetImageID("TargetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
     {
         addProperty(p_url);
+        addProperty(p_targetImageID);
         p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);
 
         this->addReader(new CsvdImageReader());        
@@ -49,12 +51,19 @@ namespace campvis {
         this->addReader(new RawImageReader());
         this->addReader(new VtkImageReader());
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
+        this->addReader(new DevilImageReader());
+#endif
 
         this->_ext = "";
         this->_currentlyVisible = nullptr;
     }
     
     GenericImageReader::~GenericImageReader() {
+        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); ++it) {
+            delete it->second;
+            delete it->first;
+        }
     }
 
     void GenericImageReader::init() {
@@ -63,8 +72,14 @@ namespace campvis {
 
     void GenericImageReader::deinit() {
         for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); ++it) {
-            if (nullptr != it->first) delete it->first;
-            if (nullptr != it->second) delete it->second;
+            // deinit MetaProperty first!
+            if (nullptr != it->second) {
+                it->second->deinit();
+            }
+            // then we can delete the reader!
+            if (nullptr != it->first) {
+                it->first->deinit();
+            }
         }
     }
 
@@ -78,7 +93,7 @@ namespace campvis {
                 (it->second)->setVisible(true);
                 this->_currentlyVisible = it->second;
             }
-            (it->first)->process(data);
+            it->first->process(data);
         }
     }
 
@@ -95,80 +110,22 @@ namespace campvis {
         }
     }
 
-    void GenericImageReader::setURL(std::string p_url) {
-        this->p_url.setValue(p_url);
-
-        std::string url = this->p_url.getValue();
-        size_t extPos = url.rfind('.');
-        if (extPos != std::string::npos) {
-            this->_ext = url.substr(extPos);
-        }
-
-        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
-        if(it != this->_readers.end()) {
-            (it->first)->p_url.setValue(this->p_url.getValue());
-        }
-        return;
-    }
-
-    void GenericImageReader::setURL(StringProperty p_url) {
-        return this->setURL(p_url.getValue());
-    }
-    
-    void GenericImageReader::setURL(const char* p_url) {
-        return this->setURL(std::string(p_url));
-    }
-
-    void GenericImageReader::setTargetImageId(DataNameProperty& targetImageId) {
-        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
-        if(it != this->_readers.end()) {
-            (it->first)->p_targetImageID.setValue(targetImageId.getValue());
-            std::set<AbstractProperty*> sharedProperties = targetImageId.getSharedProperties();
-            for(std::set<AbstractProperty*>::iterator jt = sharedProperties.begin(); jt != sharedProperties.end(); ++jt) {
-                (it->first)->p_targetImageID.addSharedProperty(*jt);
-            }
-        }
-        return;
-    }
-    
-    void GenericImageReader::setTargetImageId(const char* imageId) {
-        return this->setTargetImageId(std::string(imageId));
-    }
-    void GenericImageReader::setTargetImageId(std::string imageId) {
-        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
-        if(it != this->_readers.end()) {
-            (it->first)->p_targetImageID.setValue(imageId);
-        }
-        return;
-    }
-
-    void GenericImageReader::setTargetImageIdSharedProperty(DataNameProperty* sharedProperty) {
-        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
-        if(it != this->_readers.end()) {
-            (it->first)->p_targetImageID.addSharedProperty(sharedProperty);
-        }
-        return;
-    }
-
     int GenericImageReader::addReader(AbstractImageReader* reader) {
-        MetaProperty* meta = new MetaProperty(reader->getName()+"MetaProp", reader->getName());
+        MetaProperty* meta = new MetaProperty(reader->getName() + "MetaProp", reader->getName());
         meta->addPropertyCollection(*reader);
         meta->setVisible(false);
-
-
-        StringProperty* sp = dynamic_cast<StringProperty*>(meta->getProperty("url"));
-        tgtAssert(sp != 0, "This should not happen.");
-        if (sp != 0) {
-            p_url.addSharedProperty(sp);
-            sp->setVisible(false);
-        }
-
         this->addProperty(*meta);
+
+        p_url.addSharedProperty(&reader->p_url);
+        reader->p_url.setVisible(false);
+        p_targetImageID.addSharedProperty(&reader->p_targetImageID);
+        reader->p_targetImageID.setVisible(false);
+
         this->_readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
         return 0;
     }
 
-    void GenericImageReader::onUrlPropertyChanged(const AbstractProperty*) {
+    void GenericImageReader::onUrlPropertyChanged(const AbstractProperty* prop) {
         // first set visibility of old extension to false
         setVisibibility(_ext, false);
 

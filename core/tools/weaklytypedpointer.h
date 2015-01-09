@@ -25,11 +25,11 @@
 #ifndef WEAKLYTYPEDPOINTER_H__
 #define WEAKLYTYPEDPOINTER_H__
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/texture.h"
-#include "tgt/tgt_gl.h"
-#include "tgt/types.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/texture.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/types.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>

@@ -96,19 +96,19 @@ namespace campvis {
         template<>
         struct IVecPropertyWidgetTraits<2> {
             typedef IVec2Property PropertyType;
-            typedef tgt::ivec2 BaseType;
+            typedef cgt::ivec2 BaseType;
         };
 
         template<>
         struct IVecPropertyWidgetTraits<3> {
             typedef IVec3Property PropertyType;
-            typedef tgt::ivec3 BaseType;
+            typedef cgt::ivec3 BaseType;
         };
 
         template<>
         struct IVecPropertyWidgetTraits<4> {
             typedef IVec4Property PropertyType;
-            typedef tgt::ivec4 BaseType;
+            typedef cgt::ivec4 BaseType;
         };
     }
 

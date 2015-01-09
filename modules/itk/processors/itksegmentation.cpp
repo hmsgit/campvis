@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
@@ -24,8 +24,8 @@
 
 #include "itksegmentation.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
 
 #include "modules/itk/core/genericimagerepresentationitk.h"
 
@@ -33,6 +33,7 @@
 #include <itkCastImageFilter.h>
 #include <itkConnectedThresholdImageFilter.h>
 #include <itkMaskImageFilter.h>
+#include <itkRescaleIntensityImageFilter.h>
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
@@ -56,11 +57,17 @@
         itk::MA_filterType<InputImageType, OutputImageType>::Pointer filter = itk::MA_filterType<InputImageType, OutputImageType>::New(); \
         typedef itk::Image<itk::IdentifierType, MA_dimensionality> LabelImageType; \
         typedef itk::MaskImageFilter< OutputImageType, OutputImageType > MaskFilterType;\
-        MaskFilterType::Pointer maskFilter = MaskFilterType::New();\
+        /*rescale the intensity values for the interval [0,255] (some images yield intensities outside this range)*/ \
+        typedef itk::RescaleIntensityImageFilter< InputImageType, InputImageType > RescaleFilterType;\
+        RescaleFilterType::Pointer rescaleFilter = RescaleFilterType::New(); \
+        rescaleFilter->SetInput(itkRep->getItkImage()); \
+        rescaleFilter->SetOutputMinimum(0); \
+        rescaleFilter->SetOutputMaximum(255); \
+        MaskFilterType::Pointer maskFilter = MaskFilterType::New(); \
         MD_filterBody \
-        filter->SetInput(itkRep->getItkImage()); \
+        filter->SetInput(rescaleFilter->GetOutput()); \
         filter->Update(); \
-        maskFilter->SetInput(itkRep->getItkImage()); \
+        maskFilter->SetInput(rescaleFilter->GetOutput()); \
         maskFilter->SetMaskImage(filter->GetOutput());\
         itk::CastImageFilter<OutputImageType, OutputImageType>::Pointer caster = itk::CastImageFilter<OutputImageType, OutputImageType>::New(); \
         caster->SetInput(maskFilter->GetOutput()); \
@@ -71,7 +78,7 @@
     }
 
 #define DISPATCH_ITK_SEGMENTATION_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
-    tgtAssert(MA_WTP._numChannels == 1, "ItkSegmentation only supports single-channel images.") \
+    cgtAssert(MA_WTP._numChannels == 1, "ItkSegmentation only supports single-channel images.") \
     PERFORM_ITK_SEGMENTATION(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 #define DISPATCH_ITK_SEGMENTATION_D(MA_WTP, MA_dimensionality, MA_filterType, MD_filterBody) \
@@ -98,7 +105,7 @@
     DISPATCH_ITK_SEGMENTATION_BRD(MA_WTP, float, float, MA_dimensionality, MA_filterType, MD_filterBody) \
     break; \
     default: \
-    tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+    cgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
 /**
@@ -113,7 +120,7 @@
     switch (MA_localRep->getDimensionality()) { \
     case 2: DISPATCH_ITK_SEGMENTATION_D(wtp, 2, MA_filterType, MD_filterBody) break; \
     case 3: DISPATCH_ITK_SEGMENTATION_D(wtp, 3, MA_filterType, MD_filterBody) break; \
-    default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+    default: cgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -191,7 +198,7 @@ namespace campvis {
                         filter->SetSeed(index); \
                         );
                 } else {
-                    tgtAssert(false, "Unsupported dimensionality!");
+                    cgtAssert(false, "Unsupported dimensionality!");
                 }
             }
 
@@ -214,22 +221,22 @@ namespace campvis {
         }
     }
 
-    void ItkSegmentation::onEvent(tgt::Event* e) {
+    void ItkSegmentation::onEvent(cgt::Event* e) {
         VolumeExplorer::onEvent(e);
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
-            if (p_enableScribbling.getValue() && (me->modifiers() & tgt::Event::CTRL || me->modifiers() & tgt::Event::ALT)) {
+        if (typeid(*e) == typeid(cgt::MouseEvent)) {
+            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
+            if (p_enableScribbling.getValue() && (me->modifiers() & cgt::Event::CTRL || me->modifiers() & cgt::Event::ALT)) {
 
                 //update the input image for the segmentation (take the one that is explored by the VolumeExplorer)
                 p_sourceImageID.setValue(p_inputVolume.getValue());
 
                 // update the maximum size
-                p_seedX.setMaxValue(_sliceExtractor.p_xSliceNumber.getMaxValue());
-                p_seedY.setMaxValue(_sliceExtractor.p_ySliceNumber.getMaxValue());
-                p_seedZ.setMaxValue(_sliceExtractor.p_zSliceNumber.getMaxValue());
+                p_seedX.setMaxValue(_sliceRenderer->p_xSliceNumber.getMaxValue());
+                p_seedY.setMaxValue(_sliceRenderer->p_ySliceNumber.getMaxValue());
+                p_seedZ.setMaxValue(_sliceRenderer->p_zSliceNumber.getMaxValue());
 
-                tgt::svec3 voxel;
-                voxel = tgt::vec3(_yesScribbles[0]);
+                cgt::svec3 voxel;
+                voxel = cgt::vec3(_yesScribbles[0]);
                 p_seedX.setValue(voxel.x);
                 p_seedY.setValue(voxel.y);
                 p_seedZ.setValue(voxel.z);

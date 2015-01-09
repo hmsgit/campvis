@@ -38,7 +38,8 @@ namespace campvis {
     }
 
     AbstractTransferFunctionEditor::~AbstractTransferFunctionEditor() {
-        _transferFunction->s_changed.disconnect(this);
+        if (_transferFunction != nullptr)
+            _transferFunction->s_changed.disconnect(this);
     }
     
     void AbstractTransferFunctionEditor::onTFChanged() {

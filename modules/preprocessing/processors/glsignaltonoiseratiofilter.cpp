@@ -24,9 +24,9 @@
 
 #include "glsignaltonoiseratiofilter.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -75,14 +75,13 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            const tgt::svec3& size = img->getSize();
+            const cgt::svec3& size = img->getSize();
 
-            tgt::TextureUnit inputUnit;
+            cgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            tgt::Texture* resultTexture = new tgt::Texture(0, tgt::ivec3(size), GL_RED, p_halfPrecisionOutput.getValue() ? GL_R16F : GL_R32F, GL_FLOAT, tgt::Texture::LINEAR);
-            resultTexture->uploadTexture();
+            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, cgt::ivec3(size), p_halfPrecisionOutput.getValue() ? GL_R16F : GL_R32F, cgt::Texture::LINEAR);
 
             // activate shader and bind textures
             _shader->activate();
@@ -109,11 +108,11 @@ namespace campvis {
             id->setMappingInformation(img->getParent()->getMappingInformation());
             data.addData(p_outputImage.getValue(), id);
 
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 

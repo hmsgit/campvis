@@ -55,11 +55,16 @@ namespace campvis {
     void FloatPropertyWidget::updateWidgetFromProperty() {
         FloatProperty* prop = static_cast<FloatProperty*>(_property);
         _adjuster->blockSignals(true);
-        _adjuster->setValue(prop->getValue());
-        _adjuster->setMinimum(prop->getMinValue());
-        _adjuster->setMaximum(prop->getMaxValue());
-        _adjuster->setSingleStep(prop->getStepValue());
-        _adjuster->setDecimals(prop->getDecimals());
+        if (static_cast<float>(_adjuster->value()) != prop->getValue())
+            _adjuster->setValue(prop->getValue());
+        if (static_cast<float>(_adjuster->minimum()) != prop->getMinValue())
+            _adjuster->setMinimum(prop->getMinValue());
+        if (static_cast<float>(_adjuster->maximum()) != prop->getMaxValue())
+            _adjuster->setMaximum(prop->getMaxValue());
+        if (static_cast<float>(_adjuster->singleStep()) != prop->getStepValue())
+            _adjuster->setSingleStep(prop->getStepValue());
+        if (_adjuster->decimals() != prop->getDecimals())
+            _adjuster->setDecimals(prop->getDecimals());
         _adjuster->blockSignals(false);
     }
 

@@ -25,38 +25,16 @@
 
 #include "abstractpipeline.h"
 
-#include "tgt/exception.h"
-#include "tgt/glcanvas.h"
-#include "tgt/tgt_gl.h"
+#include <tbb/tick_count.h>
+
+#include "cgt/exception.h"
+#include "cgt/glcanvas.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/painter.h"
+#include "cgt/cgt_gl.h"
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessor.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
-
-#include <ctime>
-
-// Anonymous OpenGL helper functions
-namespace {
-    GLboolean getGlBool(GLenum param) {
-        GLboolean toReturn;
-        glGetBooleanv(param, &toReturn);
-        return toReturn;
-    };
-
-    GLint getGlInt(GLenum param) {
-        GLint toReturn;
-        glGetIntegerv(param, &toReturn);
-        return toReturn;
-    };
-
-    GLfloat getGlFloat(GLenum param) {
-        GLfloat toReturn;
-        glGetFloatv(param, &toReturn);
-        return toReturn;
-    }
-}
 
 
 namespace campvis {
@@ -64,29 +42,28 @@ namespace campvis {
 
     AbstractPipeline::AbstractPipeline(DataContainer* dc) 
         : HasPropertyCollection()
-        , tgt::EventHandler()
-        , tgt::EventListener()
+        , cgt::EventHandler()
+        , cgt::EventListener()
         , _data(dc)
         , _canvas(0)
-        , _canvasSize("CanvasSize", "Canvas Size", tgt::ivec2(128, 128), tgt::ivec2(1, 1), tgt::ivec2(4096, 4096))
+        , _canvasSize("CanvasSize", "Canvas Size", cgt::ivec2(128, 128), cgt::ivec2(1, 1), cgt::ivec2(4096, 4096))
         , _ignoreCanvasSizeUpdate(false)
         , _renderTargetID("renderTargetID", "Render Target ID", "AbstractPipeline.renderTarget", DataNameProperty::READ)
     {
-        tgtAssert(_data != 0, "Pointer to the DataContainer for this pipeline must not be 0!");
+        cgtAssert(_data != 0, "Pointer to the DataContainer for this pipeline must not be 0!");
 
         _enabled = false;
+        _pipelineDirty = true;
 
         addProperty(_renderTargetID);
         addProperty(_canvasSize);
     }
 
     AbstractPipeline::~AbstractPipeline() {
+
     }
 
     void AbstractPipeline::init() {
-        _renderTargetID.s_changed.connect<AbstractPipeline>(this, &AbstractPipeline::onPropertyChanged);
-        _data->s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
-
         initAllProperties();
 
         // initialize all processors:
@@ -94,13 +71,19 @@ namespace campvis {
             try {
                 (*it)->init();
             }
-            catch (tgt::Exception& e) {
+            catch (cgt::Exception& e) {
                 LERROR("Caught Exception during initialization of processor: " << e.what());
             }
         }
+
+        // use trigger signal to enforce blocking call
+        s_init.triggerSignal();
     }
 
     void AbstractPipeline::deinit() {
+        // use trigger signal to enforce blocking call
+        s_deinit.triggerSignal();
+
         deinitAllProperties();
 
         // deinitialize all processors:
@@ -109,23 +92,47 @@ namespace campvis {
                 (*it)->s_invalidated.disconnect(this);
                 (*it)->deinit();
             }
-            catch (tgt::Exception& e) {
+            catch (cgt::Exception& e) {
                 LERROR("Caught Exception during deinitialization of processor: " << e.what());
             }
         }
 
-        _data->s_dataAdded.disconnect(this);
-        _renderTargetID.s_changed.disconnect(this);
 
         // clear DataContainer
         _data->clear();
     }
 
+    void AbstractPipeline::run() {
+        std::unique_lock<std::mutex> lock(*cgt::GlContextManager::getRef().getGlMutexForContext(_canvas));
+        cgt::GlContextManager::getRef().acquireContext(_canvas, false);
+
+        while (! _stopExecution) {
+            if (_enabled && _pipelineDirty) {
+                // mark pipeline as not dirty
+                _pipelineDirty = false;
+
+                // execute pipeline
+                executePipeline();
+
+                // paint on canvas
+                _canvas->getPainter()->paint();
+            }
+
+            if (!_stopExecution && (!_enabled || !_pipelineDirty)) {
+                cgt::GlContextManager::getRef().releaseContext(_canvas, false);
+                _evaluationCondition.wait(lock);
+                cgt::GlContextManager::getRef().acquireContext(_canvas, false);
+            }
+        }
+
+        cgt::GlContextManager::getRef().releaseContext(_canvas, false);
+    }
+
     void AbstractPipeline::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &_renderTargetID) {
-            s_renderTargetChanged();
+            setPipelineDirty();
         }
-        else if (prop == &_canvasSize && _canvas != 0 && !_ignoreCanvasSizeUpdate) {
+        else if (prop == &_canvasSize && _canvas != nullptr && !_ignoreCanvasSizeUpdate) {
             if (_canvasSize.getValue() != _canvas->getSize()) {
                 _ignoreCanvasSizeUpdate = true;
                 _canvas->setSize(_canvasSize.getValue());
@@ -142,13 +149,15 @@ namespace campvis {
         return *_data;
     }
 
-    void AbstractPipeline::executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred) {
-        tgtAssert(processor != 0, "Processor must not be 0.");
+    void AbstractPipeline::executeProcessor(AbstractProcessor* processor) {
+        cgtAssert(processor != 0, "Processor must not be 0.");
 
         // execute processor if needed
         if (processor->getEnabled() && !processor->isLocked()) {
             if (! processor->isValid()) {
-                clock_t startTime = clock();
+                tbb::tick_count startTime;
+                if (processor->getClockExecutionTime())
+                    startTime = tbb::tick_count::now();
 
                 try {
                     processor->process(*_data);
@@ -161,11 +170,35 @@ namespace campvis {
                 }
 
                 if (processor->getClockExecutionTime()) {
-                    clock_t endTime = clock();
-                    LINFO("Executed processor " << processor->getName() << " duration: " << (endTime - startTime));
+                    tbb::tick_count endTime = tbb::tick_count::now();
+                    LINFO("Executed processor " << processor->getName() << " duration: " << (endTime - startTime).seconds());
                 }
             }
         }
+    }
+
+    void AbstractPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
+        AbstractPipeline::executeProcessor(processor);
+
+#ifdef CAMPVIS_DEBUG
+        cgtAssert(cgt::getGlBool(GL_DEPTH_TEST) == false, "Invalid OpenGL state after processor execution, GL_DEPTH_TEST != false.");
+        cgtAssert(cgt::getGlBool(GL_SCISSOR_TEST) == false, "Invalid OpenGL state after processor execution, GL_SCISSOR_TEST != false.");
+
+        cgtAssert(cgt::getGlInt(GL_CULL_FACE_MODE) == GL_BACK, "Invalid OpenGL state after processor execution, GL_CULL_FACE_MODE != GL_BACk.");
+        cgtAssert(cgt::getGlInt(GL_DEPTH_FUNC) == GL_LESS, "Invalid OpenGL state after processor execution, GL_DEPTH_FUNC != GL_LESS.");
+
+        cgtAssert(cgt::getGlFloat(GL_DEPTH_CLEAR_VALUE) == 1.f, "Invalid OpenGL state after processor execution, GL_DEPTH_CLEAR_VALUE != 1.f.");
+
+        cgtAssert(cgt::getGlFloat(GL_RED_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_RED_SCALE != 1.f.");
+        cgtAssert(cgt::getGlFloat(GL_GREEN_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_GREEN_SCALE != 1.f.");
+        cgtAssert(cgt::getGlFloat(GL_BLUE_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_BLUE_SCALE != 1.f.");
+        cgtAssert(cgt::getGlFloat(GL_ALPHA_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_ALPHA_SCALE != 1.f.");
+
+        cgtAssert(cgt::getGlFloat(GL_RED_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_RED_BIAS != 0.f.");
+        cgtAssert(cgt::getGlFloat(GL_GREEN_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_GREEN_BIAS != 0.f.");
+        cgtAssert(cgt::getGlFloat(GL_BLUE_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_BLUE_BIAS != 0.f.");
+        cgtAssert(cgt::getGlFloat(GL_ALPHA_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_ALPHA_BIAS != 0.f.");
+#endif
     }
 
     const std::vector<AbstractProcessor*>& AbstractPipeline::getProcessors() const {
@@ -178,31 +211,37 @@ namespace campvis {
 
     void AbstractPipeline::setEnabled(bool enabled) {
         _enabled = enabled;
+        setPipelineDirty();
     }
 
-    void AbstractPipeline::onEvent(tgt::Event* e) {
-        // copy and paste from tgt::EventHandler::onEvent() but without deleting e
+    void AbstractPipeline::onEvent(cgt::Event* e) {
+        // copy and paste from cgt::EventHandler::onEvent() but without deleting e
         for (size_t i = 0 ; i < listeners_.size() ; ++i) {
-            // check if current listener listens to the eventType of e
-            if(listeners_[i]->getEventTypes() & e->getEventType() ){
-                listeners_[i]->onEvent(e);
-                if (e->isAccepted())
-                    break;
+            // don't forward this event to ourselves - otherwise we'll end up with an endless loop.
+            if (listeners_[i] == this) {
+                cgt::EventListener::onEvent(e);
             }
+            // check if current listener listens to the eventType of e
+            else if (listeners_[i]->getEventTypes() & e->getEventType() ){
+                listeners_[i]->onEvent(e);
+            }
+
+            if (e->isAccepted())
+                break;
         }
     }
 
-    void AbstractPipeline::setCanvas(tgt::GLCanvas* canvas) {
+    void AbstractPipeline::setCanvas(cgt::GLCanvas* canvas) {
         _canvas = canvas;
     }
 
-    void AbstractPipeline::setRenderTargetSize(const tgt::ivec2& size) {
+    void AbstractPipeline::setRenderTargetSize(const cgt::ivec2& size) {
         if (_canvasSize.getValue() != size && !_ignoreCanvasSizeUpdate) {
             _canvasSize.setValue(size);
         }
     }
 
-    const tgt::ivec2& AbstractPipeline::getRenderTargetSize() const {
+    const cgt::ivec2& AbstractPipeline::getRenderTargetSize() const {
         return _canvasSize.getValue();
     }
 
@@ -211,46 +250,30 @@ namespace campvis {
     }
 
     void AbstractPipeline::addProcessor(AbstractProcessor* processor) {
-        tgtAssert(processor != 0, "Processor must not be 0.")
+        cgtAssert(processor != 0, "Processor must not be 0.")
         _processors.push_back(processor);
     }
 
-    void AbstractPipeline::lockGLContextAndExecuteProcessor(AbstractProcessor* processor) {
-        tgtAssert(_canvas != 0, "Set a valid canvas before calling this method!");
-        GLJobProc.enqueueJob(
-            _canvas, 
-            makeJobOnHeap<AbstractPipeline, AbstractProcessor*, bool>(this, &AbstractPipeline::executeProcessor, processor, true),
-            OpenGLJobProcessor::SerialJob);
+    void AbstractPipeline::setPipelineDirty() {
+        _pipelineDirty = true;
+
+        if (_enabled)
+            _evaluationCondition.notify_all();
     }
 
-    void AbstractPipeline::executeProcessorAndCheckOpenGLState(AbstractProcessor* processor) {
-        AbstractPipeline::executeProcessor(processor, true);
-
-#ifdef CAMPVIS_DEBUG
-        tgtAssert(getGlBool(GL_DEPTH_TEST) == false, "Invalid OpenGL state after processor execution, GL_DEPTH_TEST != false.");
-        tgtAssert(getGlBool(GL_SCISSOR_TEST) == false, "Invalid OpenGL state after processor execution, GL_SCISSOR_TEST != false.");
-
-        tgtAssert(getGlInt(GL_CULL_FACE_MODE) == GL_BACK, "Invalid OpenGL state after processor execution, GL_CULL_FACE_MODE != GL_BACk.");
-        tgtAssert(getGlInt(GL_DEPTH_FUNC) == GL_LESS, "Invalid OpenGL state after processor execution, GL_DEPTH_FUNC != GL_LESS.");
-
-        tgtAssert(getGlFloat(GL_DEPTH_CLEAR_VALUE) == 1.f, "Invalid OpenGL state after processor execution, GL_DEPTH_CLEAR_VALUE != 1.f.");
-
-        tgtAssert(getGlFloat(GL_RED_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_RED_SCALE != 1.f.");
-        tgtAssert(getGlFloat(GL_GREEN_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_GREEN_SCALE != 1.f.");
-        tgtAssert(getGlFloat(GL_BLUE_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_BLUE_SCALE != 1.f.");
-        tgtAssert(getGlFloat(GL_ALPHA_SCALE) == 1.f, "Invalid OpenGL state after processor execution, GL_ALPHA_SCALE != 1.f.");
-
-        tgtAssert(getGlFloat(GL_RED_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_RED_BIAS != 0.f.");
-        tgtAssert(getGlFloat(GL_GREEN_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_GREEN_BIAS != 0.f.");
-        tgtAssert(getGlFloat(GL_BLUE_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_BLUE_BIAS != 0.f.");
-        tgtAssert(getGlFloat(GL_ALPHA_BIAS) == 0.f, "Invalid OpenGL state after processor execution, GL_ALPHA_BIAS != 0.f.");
-#endif
-    }
-
-    void AbstractPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
-        if (name == _renderTargetID.getValue()) {
-            s_renderTargetChanged();
+    AbstractProcessor* AbstractPipeline::getProcessor(const std::string& name) const {
+        for (auto it = _processors.begin(); it != _processors.end(); ++it) {
+            if ((*it)->getName() == name)
+                return *it;
         }
+
+        return nullptr;
+    }
+
+    AbstractProcessor* AbstractPipeline::getProcessor(int index ) const {
+        if (index < 0 || (size_t) index >= _processors.size())
+            return nullptr;
+        return _processors[index];
     }
 
 

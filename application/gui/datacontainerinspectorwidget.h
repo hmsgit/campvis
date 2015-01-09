@@ -26,13 +26,12 @@
 #define DATACONTAINERINSPECTORWIDGET_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/painter.h"
+#include "cgt/painter.h"
 #include "tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"
 #include "application/gui/datacontainerinspectorcanvas.h"
 #include "application/gui/properties/propertycollectionwidget.h"
-#include "core/tools/opengljobprocessor.h"
 
 #include <QLabel>
 #include <QWidget>
@@ -45,7 +44,7 @@
 class QModelIndex;
 class QItemSelection;
 
-namespace tgt {
+namespace cgt {
     class Texture;
     class TextureUnit;
     class Shader;
@@ -58,7 +57,7 @@ namespace campvis {
     class FaceGeometry;
     class DataContainerFileLoaderWidget;
 
-    class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots<> {
+    class DataContainerInspectorWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:
@@ -87,7 +86,7 @@ namespace campvis {
         /**
          * Slot called when _dataContainer has changed and emitted the s_dataAdded signal.
          */
-        void onDataContainerDataAdded(const std::string&, const DataHandle&);
+        void onDataContainerDataAdded(std::string, DataHandle);
 
         /**
          * Size hint for the default window size
@@ -130,7 +129,7 @@ namespace campvis {
         void onBtnLoadFileClicked();
 
         /// Slot being called when the color under the mouse has changed
-        void onColorChanged(const tgt::vec4& color);
+        void onColorChanged(const cgt::vec4& color);
         /// Slot being called when the depth under the mouse has changed
         void onDepthChanged(float depth);
 

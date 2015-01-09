@@ -33,7 +33,9 @@
 #include "core/properties/transferfunctionproperty.h"
 #include "core/properties/numericproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -41,7 +43,7 @@ namespace campvis {
     /**
      * Quantizes image intensities into a fixed number of bins using the GPU.
      */
-    class GlIntensityQuantizer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlIntensityQuantizer : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlIntensityQuantizer Processor
@@ -77,7 +79,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;               ///< Shader for resampling
+        cgt::Shader* _shader;               ///< Shader for resampling
 
         static const std::string loggerCat_;
     };

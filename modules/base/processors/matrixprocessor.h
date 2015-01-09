@@ -30,10 +30,11 @@
 #include <string>
 #include <set>
 
-#include <tgt/matrix.h>
+#include <cgt/matrix.h>
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/allproperties.h"
+#include "modules/modulesapi.h"
 
 namespace campvis {
     /**
@@ -58,7 +59,7 @@ namespace campvis {
 	 * to compute the "ProbeToReference" matrix. If an additional calibration matrix is needed, this can be achieved by
 	 * adding a new MatrixProcessor that multiplies a hardcoded calibration matrix to the result or the inputs.
      */
-    class MatrixProcessor : public AbstractProcessor {
+    class CAMPVIS_MODULES_API MatrixProcessor : public AbstractProcessor {
     public:
         enum SourceType {
             FIXED = 0,
@@ -101,9 +102,7 @@ namespace campvis {
 
         DataNameProperty p_targetMatrixID;   ///< name for the output matrix
 
-        CameraProperty p_cameraProperty;
-
-		void DataContainerDataAdded(const std::string& name, const DataHandle& data);
+		void DataContainerDataAdded(std::string name, DataHandle data);
 
     protected:
         /// \see AbstractProcessor::updateResult()
@@ -120,13 +119,13 @@ namespace campvis {
 		 *		Possible Modifiers are:
 		 *		 - _I_: invert matrix
 		 *		 - _T_: transpose matrix
-		 *		 - _r_: extract rotational part \see tgt::mat4::getRotationalPart()
-		 *		 - _s_: extract scaling part \see tgt::mat4::getScalingPart()
+		 *		 - _r_: extract rotational part \see cgt::mat4::getRotationalPart()
+		 *		 - _s_: extract scaling part \see cgt::mat4::getScalingPart()
 		 *		 - _-_: negate componentwise
 		 *
 		 * i.e. a call with a modifier string "IT" will calculate the transpose of the inverse.
 		 */
-		tgt::mat4 processModifierString(tgt::mat4 matrix, std::string modifiers);
+		cgt::mat4 processModifierString(cgt::mat4 matrix, std::string modifiers);
 
 		/**
 		 * Processes a matrix string and returns the resulting matrix.
@@ -144,7 +143,7 @@ namespace campvis {
 		 *    string "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 creates a matrix with first row 1,2,3,4, second row 
 		 *    5,6,7,8 and so on
 		 *  - "rot <angle> <ax> <ay> <az>" creates a rotation matrix around axis (ax,ay,az) with specified angle in radians.
-		 *    \see tgt::mat4::createRotation()
+		 *    \see cgt::mat4::createRotation()
 		 *  - "trans <tx> <ty> <tz>" creates a translation matrix with translation (tx,ty,tz)
 		 *  - "scale <sx> [<sy> <sz>]" creates a scaling matrix. if only one coefficient is specified, a uniform scaling
 		 *    is created, otherwise all three scaling factors are used.
@@ -152,7 +151,7 @@ namespace campvis {
 		 *  - if none of the above cases apply, the name is assumed to be a name of a data handle in the supplied data container
 		 *    or the localDefs map, containing an entry of type \a TransformData
 		 */
-        tgt::mat4 processMatrixString(std::string matrixString, DataContainer& data, std::map<std::string, tgt::mat4> *localDefs = nullptr);
+        cgt::mat4 processMatrixString(std::string matrixString, DataContainer& data, std::map<std::string, cgt::mat4> *localDefs = nullptr);
 
 
         /**

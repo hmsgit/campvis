@@ -24,7 +24,7 @@
 
 #include "streamingmhddemo.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
@@ -58,9 +58,9 @@ namespace campvis {
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
 
-        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, 1.f));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.1f, .125f), tgt::col4(255, 0, 0, 32), tgt::col4(255, 0, 0, 32)));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .5f), tgt::col4(0, 255, 0, 128), tgt::col4(0, 255, 0, 128)));
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, 1.f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.1f, .125f), cgt::col4(255, 0, 0, 32), cgt::col4(255, 0, 0, 32)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.4f, .5f), cgt::col4(0, 255, 0, 128), cgt::col4(0, 255, 0, 128)));
         static_cast<TransferFunctionProperty*>(_ve.getProperty("TransferFunction"))->replaceTF(dvrTF);
 
         _canvasSize.s_changed.connect<StreamingMhdDemo>(this, &StreamingMhdDemo::onRenderTargetSizeChanged);

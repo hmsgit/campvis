@@ -30,7 +30,7 @@
 #include <tbb/spin_rw_mutex.h>
 
 #include "sigslot/sigslot.h"
-#include "tgt/logmanager.h"
+#include "cgt/logmanager.h"
 
 #include "core/coreapi.h"
 #include "core/datastructures/datacontainer.h"
@@ -66,16 +66,21 @@ namespace campvis {
             /**
              * Constructs a new Scoped lock, locking \a p and unlocking \a p on destruction.
              * \param   p                   Processor to lock
-             * \param   unlockInExtraThread Unlock \a p in extra thread (since this might be an expensive operation)
              */
-            ScopedLock(AbstractProcessor* p, bool unlockInExtraThread);
+            ScopedLock(AbstractProcessor* p) 
+                : _p(p)
+            {
+                _p->lockProcessor();
+            };
 
             /// Destructor, unlocks the processor
-            ~ScopedLock();
+            ~ScopedLock() {
+                _p->unlockProcessor();    
+            };
 
             AbstractProcessor* _p;      ///< The processor to lock
-            bool _unlockInExtraThread;  ///< Unlock _p in extra thread (since this might be an expensive operation)
         };
+        
 
         /**
          * Available invalidation levels
@@ -175,9 +180,8 @@ namespace campvis {
          * with respect to the current invalidation level.
          * 
          * \param   data                DataContainer to work on.
-         * \param   unlockInExtraThread Flag whether the processor shall be unlockedin an extra thread (since unlock might be expensive).
          **/
-        void process(DataContainer& data, bool unlockInExtraThread = false);
+        void process(DataContainer& data);
 
         /**
          * Gets the flag whether this processor is currently enabled.
@@ -287,6 +291,18 @@ namespace campvis {
             validate(static_cast<int>(il));
         }
 
+        /**
+         * Sets that incoming change signals from properties are ignored.
+         * \see observePropertyChanges()
+         */
+        void ignorePropertyChanges();
+
+        /**
+         * Sets that incoming signals from properties are no longer ignored.
+         * \see ignorePropertyChanges()
+         */
+        void observePropertyChanges();
+
         /// Signal emitted when the processor has been invalidated.
         sigslot::signal1<AbstractProcessor*> s_invalidated;
 
@@ -323,7 +339,7 @@ namespace campvis {
          * \param   dataContainer   The DataContainer to work on.
          */
         virtual void updateResult(DataContainer& dataContainer) = 0;
-                
+        
         /**
          * 
          * Locks all properties in the processor's PropertyCollection and marks them as "in use".
@@ -347,6 +363,7 @@ namespace campvis {
 
         tbb::atomic<bool> _enabled;                 ///< flag whether this processor is currently enabled
         tbb::atomic<bool> _clockExecutionTime;      ///< flag whether to measure the execution time of this processor
+        tbb::atomic<int> _ignorePropertyChanges;    ///< flag whether signals from properties shall be ignored
 
         /// Flag whether this processor is currently locked
         /// (This implies, that all properties are locked and it is not valid to call process())

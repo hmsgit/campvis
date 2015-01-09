@@ -26,10 +26,14 @@
 #define DVRVIS_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
+
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/vis/processors/virtualmirrorgeometrygenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
@@ -41,7 +45,7 @@
 #include "modules/vis/processors/virtualmirrorcombine.h"
 
 namespace campvis {
-    class DVRVis : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API DVRVis : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -56,23 +60,12 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
-        /// \see AutoEvaluationPipeline::deinit()
-        virtual void deinit();
-
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "DVRVis"; };
 
-
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
-        CameraProperty _camera;
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
 
         MhdImageReader _imageReader;
@@ -85,9 +78,10 @@ namespace campvis {
         SimpleRaycaster _dvrVM;
         DepthDarkening _depthDarkening;
         VirtualMirrorCombine _combine;
-
-        TrackballNavigationEventListener* _trackballEH;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<DVRVis>;
 
 }
 

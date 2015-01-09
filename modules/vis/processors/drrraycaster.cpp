@@ -24,7 +24,7 @@
 
 #include "drrraycaster.h"
 
-#include "tgt/shadermanager.h"
+#include "cgt/shadermanager.h"
 #include "core/tools/quadrenderer.h"
 #include "core/datastructures/renderdata.h"
 

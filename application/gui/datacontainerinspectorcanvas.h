@@ -26,11 +26,11 @@
 #define DATACONTAINERINSPECTORCANVAS_H__
 
 #include "sigslot/sigslot.h"
-#include "tgt/painter.h"
-#include "tgt/event/eventlistener.h"
-#include "tgt/event/mouseevent.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/painter.h"
+#include "cgt/event/eventlistener.h"
+#include "cgt/event/mouseevent.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 #include "tbb/mutex.h"
 
 #include "application/gui/qtdatahandle.h"
@@ -39,14 +39,13 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/propertycollection.h"
 #include "core/properties/transferfunctionproperty.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/vis/processors/geometryrenderer.h"
 
 
-namespace tgt {
+namespace cgt {
     class Shader;
     class Texture;
     class TextureUnit;
@@ -61,7 +60,7 @@ namespace campvis {
     class GeometryData;
     class DataContainerInspectorWidget;
 
-    class DataContainerInspectorCanvas : public tgt::QtThreadedCanvas, tgt::Painter, public tgt::EventListener, public HasPropertyCollection {
+    class DataContainerInspectorCanvas : public cgt::QtThreadedCanvas, cgt::Painter, public cgt::EventListener, public HasPropertyCollection {
         Q_OBJECT;
 
     public:
@@ -106,15 +105,15 @@ namespace campvis {
         void repaint();
 
         /// This is meant be overridden to adjust camera settings to new canvas dimensions
-        virtual void sizeChanged(const tgt::ivec2&);
+        virtual void sizeChanged(const cgt::ivec2&);
 
         /**
          * Called on mouse move event on this canvas
          * \param   e   Mouse event arguments
          */
-        virtual void mouseMoveEvent(tgt::MouseEvent* e);
+        virtual void mouseMoveEvent(cgt::MouseEvent* e);
 
-        virtual void onEvent(tgt::Event* e);
+        virtual void onEvent(cgt::Event* e);
         
         IntProperty p_currentSlice;                     ///< Currently selected slice to show
         TransferFunctionProperty p_transferFunction;    ///< Transfer function
@@ -127,7 +126,7 @@ namespace campvis {
         MetaProperty p_geometryRendererProperties;      ///< MetaProperty for the GeometryRenderer
 
     signals:
-        void s_colorChanged(const tgt::vec4&);
+        void s_colorChanged(const cgt::vec4&);
         void s_depthChanged(float depth);
 
     private slots:
@@ -150,7 +149,7 @@ namespace campvis {
          * \param   name    Name of the added data.
          * \param   dh      DataHandle to the newly added data.
          */
-        void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+        void onDataContainerDataAdded(const std::string& name, DataHandle dh);
 
         /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
@@ -182,7 +181,7 @@ namespace campvis {
          * \param   uint2d      The texture unit that will be attached to rendering pipeline (2D for 2D textures).
          * \param   uint2d      The texture unit that will be attached to rendering pipeline (3D for 3D textures).
          */
-        void paintTexture(const tgt::Texture* texture, const tgt::TextureUnit& unit2d, const tgt::TextureUnit& unit3d);
+        void paintTexture(const cgt::Texture* texture, const cgt::TextureUnit& unit2d, const cgt::TextureUnit& unit3d);
 
         /**
          * Renders \a geometry into a texture.
@@ -213,16 +212,17 @@ namespace campvis {
         DataContainer* _dataContainer;              ///< The DataContainer this widget is inspecting
         tbb::mutex _localMutex;                     ///< Mutex protecting the local members
 
-        tgt::Shader* _paintShader;                  ///< GLSL shader for rendering the textures
+        cgt::Shader* _paintShader;                  ///< GLSL shader for rendering the textures
         FaceGeometry* _quad;                        ///< Quad used for rendering
 
-        tgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
-        tgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview
+        cgt::ivec2 _numTiles;                       ///< number of tiles on texture overview
+        cgt::ivec2 _quadSize;                       ///< size in pixels for each tile in overview
 
         DataContainer _localDataContainer;          ///< Local DataContainer the GeometryRenderer works on
         IVec2Property p_viewportSize;
+
+        TrackballCameraProvider _tcp;               ///< TrackballCameraProvider to do camera stuff
         GeometryRenderer _geometryRenderer;         ///< GeometryRenderer used to render geometries
-        TrackballNavigationEventListener* _trackballEH;
     };
 }
 

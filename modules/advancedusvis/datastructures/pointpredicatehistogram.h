@@ -26,6 +26,7 @@
 
 #include "sigslot/sigslot.h"
 
+#include "modules/modulesapi.h"
 #include "modules/advancedusvis/datastructures/pointpredicate.h"
 
 #include <vector>
@@ -35,7 +36,7 @@ namespace campvis {
     /**
      * Data object storing information about selected predicates and their settings.
      */
-    class PointPredicateHistogram : public sigslot::has_slots<> {
+    class CAMPVIS_MODULES_API PointPredicateHistogram : public sigslot::has_slots {
     public:
 
         /**
@@ -70,7 +71,7 @@ namespace campvis {
         /**
          * Resets the predicate histogram to default setting.
          */
-        void resetPredicates();
+        void resetPredicates(bool resetColors = true);
 
         /**
          * Returns the vector of predicates.
@@ -88,13 +89,21 @@ namespace campvis {
          * Sets up \a shader for rendering (i.e. sets all uniform values).
          * \param   shader  Shader to setup.
          */
-        void setupRenderShader(tgt::Shader* shader) const;
+        void setupRenderShader(cgt::Shader* shader) const;
+
+        /**
+         * Sets the GLSL predicate function argument string.
+         * \param   pfas    the GLSL predicate function argument string (without parentheses)
+         */
+        void setPredicateFunctionArgumentString(const std::string& pfas);
 
 
         /// Signal emitted when this predicate histogram's configuration (importance, color, ...) has changed
-        sigslot::signal0<> s_configurationChanged;
+        sigslot::signal0 s_configurationChanged;
         /// Signal emitted when this predicate histogram's GLSL header has changed
-        sigslot::signal0<> s_headerChanged;
+        sigslot::signal0 s_headerChanged;
+
+        bool _glslModulationHackForIvus;
 
     private:
         /// Slot called when a predicate's configuration has changed
@@ -104,6 +113,9 @@ namespace campvis {
 
         /// vector of all voxel predicates
         std::vector<AbstractPointPredicate*> _predicates;
+        /// The GLSL predicate function argument string (without parentheses).
+        std::string _predicateFunctionArgumentString;
+
 
         static const std::string loggerCat_;
 

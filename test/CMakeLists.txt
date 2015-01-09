@@ -10,7 +10,8 @@ FILE(GLOB TestCampvisSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     core/datastructures/*.cpp
     core/properties/*.cpp
     core/tools/*.cpp
-	core/pipeline/*.cpp
+    core/pipeline/*.cpp
+    modules/*.cpp
 )
 
 # Summary of tuple support for Microsoft Visual Studio:
@@ -31,9 +32,10 @@ ADD_EXECUTABLE(test-campvis
 
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs} ${CampvisHome}/ext/gtest-1.7.0/ ${CampvisHome}/ext/gtest-1.7.0/include)
-TARGET_LINK_LIBRARIES(test-campvis campvis-modules campvis-core tgt gtest ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(test-campvis gtest sigslot cgt campvis-core campvis-modules ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
 if (CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisSources ${CampvisHome}/test "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisHeaders ${CampvisHome}/test "")
 ENDIF()
+

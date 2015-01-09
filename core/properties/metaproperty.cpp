@@ -36,8 +36,14 @@ namespace campvis {
     MetaProperty::~MetaProperty() {
     }
 
+    void MetaProperty::deinit() {
+        for (size_t i = 0; i < _properties.size(); ++i) {
+            removeProperty(*_properties[i]);
+        }
+    }
+
     void MetaProperty::onPropertyChanged(const AbstractProperty* prop) {
-        s_changed(this);
+        s_changed.emitSignal(this);
     }
 
     void MetaProperty::addPropertyCollection(HasPropertyCollection& pc) {

@@ -63,7 +63,11 @@ namespace campvis {
         /// \see AbstractPipeline::addProcessor()
         virtual void addProcessor(AbstractProcessor* processor);
 
+        /// \see AbstractPipeline::executePipeline()
+        virtual void executePipeline();
+
     protected:
+
         /**
          * Slot getting called when one of the observed processors got invalidated.
          * The default behaviour is to dispatch a job to execute the invalidated processor and emit the s_invalidated signal.
@@ -86,7 +90,7 @@ namespace campvis {
          * \param   name    Name of the added data.
          * \param   dh      DataHandle to the newly added data.
          */
-        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
+        virtual void onDataContainerDataAdded(std::string name, DataHandle dh);
 
         /**
          * Recursively looks for all DataNameProperties in \a pc and adds them to the port map.

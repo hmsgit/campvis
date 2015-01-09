@@ -31,12 +31,14 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Creates Confidence Maps for Ultrasound Images.
      * TODO: Clean up pre-MICCAI mess!
      */
-    class ConfidenceMapGenerator : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ConfidenceMapGenerator : public AbstractProcessor {
     public:
         /**
          * Constructs a new ConfidenceMapGenerator Processor

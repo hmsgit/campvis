@@ -22,15 +22,11 @@
 // 
 // ================================================================================================
 
-#include "tgt/assert.h"
+#include "abstractprocessor.h"
+#include "cgt/assert.h"
+#include "core/properties/abstractproperty.h"
 
 #include <ext/threading.h>
-
-#include "abstractprocessor.h"
-#include "core/properties/abstractproperty.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
 
 namespace campvis {
 
@@ -42,6 +38,7 @@ namespace campvis {
     {
         _enabled = true;
         _clockExecutionTime = false;
+        _ignorePropertyChanges = 0;
         _locked = 0;
         _level = VALID;
     }
@@ -67,7 +64,7 @@ namespace campvis {
     }
 
     void AbstractProcessor::unlockProcessor() {
-        tgtAssert(_locked == true, "Called AbstractProcessor::unlockProcessor() on unlocked processor!");
+        cgtAssert(_locked == true, "Called AbstractProcessor::unlockProcessor() on unlocked processor!");
         unlockAllProperties();
         int summed = VALID;
         int il;
@@ -85,12 +82,14 @@ namespace campvis {
     }
 
     void AbstractProcessor::onPropertyChanged(const AbstractProperty* prop) {
-        tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, false);
-        auto it = _invalidationMap.find(prop);
-        if (it != _invalidationMap.end())
-            invalidate(it->second);
-        else
-            LDEBUG("Caught an property changed signal that was not registered with an invalidation level. Did you forget to call addProperty()?");
+        if (_ignorePropertyChanges == 0) {
+            tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, false);
+            auto it = _invalidationMap.find(prop);
+            if (it != _invalidationMap.end())
+                invalidate(it->second);
+            else
+                LDEBUG("Caught an property changed signal that was not registered with an invalidation level. Did you forget to call addProperty()?");
+        }
     }
 
     bool AbstractProcessor::getEnabled() const {
@@ -102,6 +101,9 @@ namespace campvis {
     }
 
     void AbstractProcessor::invalidate(int level) {
+        if (level == 0)
+            return;
+
         if (_locked) {
             // TODO: this is not 100% thread-safe - an invalidation might slip through if the processor is unlocked during invalidation
             _queuedInvalidations.push(level);
@@ -111,7 +113,7 @@ namespace campvis {
             do {
                 tmp = _level;
             } while (_level.compare_and_swap(tmp | level, tmp) != tmp);
-            s_invalidated(this);
+            s_invalidated.emitSignal(this);
         }
     }
 
@@ -120,7 +122,7 @@ namespace campvis {
         do {
             tmp = _level;
         } while (_level.compare_and_swap(tmp & (~level), tmp) != tmp);
-        s_validated(this);
+        s_validated.emitSignal(this);
     }
 
     bool AbstractProcessor::getClockExecutionTime() const {
@@ -132,7 +134,7 @@ namespace campvis {
     }
 
 
-    void AbstractProcessor::process(DataContainer& data, bool unlockInExtraThread) {
+    void AbstractProcessor::process(DataContainer& data) {
         if (hasInvalidShader()) {
             updateShader();
             validate(INVALID_SHADER);
@@ -143,8 +145,8 @@ namespace campvis {
         }
 
         // use a scoped lock for exception safety
-        AbstractProcessor::ScopedLock lock(this, unlockInExtraThread);
-        tgtAssert(_locked == true, "Processor not locked, this should not happen!");
+        AbstractProcessor::ScopedLock lock(this);
+        cgtAssert(_locked == true, "Processor not locked, this should not happen!");
 
         if (hasInvalidResult()) {
             updateResult(data);
@@ -173,23 +175,11 @@ namespace campvis {
         tbb::spin_rw_mutex::scoped_lock lock(_mtxInvalidationMap, true);
         _invalidationMap[&prop] = invalidationLevel;
     }
-
-// ================================================================================================
-
-    AbstractProcessor::ScopedLock::ScopedLock(AbstractProcessor* p, bool unlockInExtraThread)
-        : _p(p)
-        , _unlockInExtraThread(unlockInExtraThread) 
-    {
-        _p->lockProcessor();
+    void AbstractProcessor::ignorePropertyChanges() {
+        ++_ignorePropertyChanges;
     }
 
-    AbstractProcessor::ScopedLock::~ScopedLock() {
-        // Unlocking processors might be expensive, since a long chain of invalidations might be started
-        // -> do this in another thread...
-        if (_unlockInExtraThread)
-            SimpleJobProc.enqueueJob(makeJob(_p, &AbstractProcessor::unlockProcessor));
-        else
-            _p->unlockProcessor();    
+    void AbstractProcessor::observePropertyChanges() {
+        --_ignorePropertyChanges;
     }
-
 }

@@ -24,11 +24,11 @@
 
 #include "imagemappinginformation.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 namespace campvis {
 
-    ImageMappingInformation::ImageMappingInformation(const tgt::vec3& size, const tgt::vec3& offset, const tgt::vec3& voxelSize, const LinearMapping<float>& realWorldValueMapping /*= LinearMapping<float>::identity*/)
+    ImageMappingInformation::ImageMappingInformation(const cgt::vec3& size, const cgt::vec3& offset, const cgt::vec3& voxelSize, const LinearMapping<float>& realWorldValueMapping /*= LinearMapping<float>::identity*/)
         : _size(size)
         , _offset(offset)
         , _voxelSize(voxelSize)
@@ -37,11 +37,11 @@ namespace campvis {
         updateMatrices();
     }
 
-    const tgt::vec3& ImageMappingInformation::getOffset() const {
+    const cgt::vec3& ImageMappingInformation::getOffset() const {
         return _offset;
     }
 
-    const tgt::vec3& ImageMappingInformation::getVoxelSize() const {
+    const cgt::vec3& ImageMappingInformation::getVoxelSize() const {
         return _voxelSize;
     }
 
@@ -54,28 +54,28 @@ namespace campvis {
     }
 
     void ImageMappingInformation::updateMatrices() {
-        _textureToWorldTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize * _size);
+        _textureToWorldTransformation = cgt::mat4::createTranslation(_offset) * cgt::mat4::createScale(_voxelSize * _size);
         if (! _textureToWorldTransformation.invert(_worldToTextureTransformation))
-            tgtAssert(false, "Could not invert texture-to-world matrix. That should not happen!");
+            cgtAssert(false, "Could not invert texture-to-world matrix. That should not happen!");
 
-        _voxelToWorldTransformation = tgt::mat4::createTranslation(_offset) * tgt::mat4::createScale(_voxelSize);
+        _voxelToWorldTransformation = cgt::mat4::createTranslation(_offset) * cgt::mat4::createScale(_voxelSize);
         if (! _voxelToWorldTransformation.invert(_worldToVoxelTransformation))
-            tgtAssert(false, "Could not invert voxel-to-world matrix. That should not happen!");
+            cgtAssert(false, "Could not invert voxel-to-world matrix. That should not happen!");
     }
 
-    const tgt::mat4& ImageMappingInformation::getTextureToWorldMatrix() const {
+    const cgt::mat4& ImageMappingInformation::getTextureToWorldMatrix() const {
         return _textureToWorldTransformation;
     }
 
-    const tgt::mat4& ImageMappingInformation::getWorldToTextureMatrix() const {
+    const cgt::mat4& ImageMappingInformation::getWorldToTextureMatrix() const {
         return _worldToTextureTransformation;
     }
 
-    const tgt::mat4& ImageMappingInformation::getVoxelToWorldMatrix() const {
+    const cgt::mat4& ImageMappingInformation::getVoxelToWorldMatrix() const {
         return _voxelToWorldTransformation;
     }
 
-    const tgt::mat4& ImageMappingInformation::getWorldToVoxelMatrix() const {
+    const cgt::mat4& ImageMappingInformation::getWorldToVoxelMatrix() const {
         return _worldToVoxelTransformation;
     }
 

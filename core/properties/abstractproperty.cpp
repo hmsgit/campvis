@@ -49,16 +49,16 @@ namespace campvis {
     }
 
     void AbstractProperty::addSharedProperty(AbstractProperty* prop) {
-        tgtAssert(prop != 0, "Shared property must not be 0!");
-        tgtAssert(prop != this, "Shared property must not be this!");
-        tgtAssert(typeid(this) == typeid(prop), "Shared property must be of the same type as this property.");
+        cgtAssert(prop != 0, "Shared property must not be 0!");
+        cgtAssert(prop != this, "Shared property must not be this!");
+        cgtAssert(typeid(this) == typeid(prop), "Shared property must be of the same type as this property.");
 
         tbb::spin_mutex::scoped_lock lock(_localMutex);
         _sharedProperties.insert(prop);
     }
 
     void AbstractProperty::removeSharedProperty(AbstractProperty* prop) {
-        tgtAssert(prop != 0, "Shared property must not be 0!");
+        cgtAssert(prop != 0, "Shared property must not be 0!");
         tbb::spin_mutex::scoped_lock lock(_localMutex);
         _sharedProperties.erase(prop);
     }
@@ -89,7 +89,7 @@ namespace campvis {
 
     void AbstractProperty::setVisible(bool isVisible) {
         _isVisible = isVisible;
-        s_visibilityChanged(this);
+        s_visibilityChanged.emitSignal(this);
     }
 
 }

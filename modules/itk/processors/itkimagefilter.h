@@ -34,13 +34,14 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/preprocessing/tools/abstractimagefilter.h"
 
 namespace campvis {
     /**
      * Performs different filter operations on images.
      */
-    class ItkImageFilter : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ItkImageFilter : public AbstractProcessor {
     public:
         /**
          * Constructs a new ItkImageFilter Processor

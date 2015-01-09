@@ -24,7 +24,7 @@
 
 #include "geometryrendererdemo.h"
 
-#include "tgt/texturereadertga.h"
+#include "cgt/texturereadertga.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -38,7 +38,7 @@ namespace campvis {
 
     GeometryRendererDemo::GeometryRendererDemo(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
+        , _tcp(&_canvasSize)
         , _lsp()
         , _geometryReader()
         , _lvRenderer(&_canvasSize)
@@ -46,13 +46,10 @@ namespace campvis {
         , _cubeRenderer(&_canvasSize)
         , _compositor1(&_canvasSize)
         , _compositor2(&_canvasSize)
-        , _trackballEH(0)
     {
-        addProperty(_camera);
+        addEventListenerToBack(&_tcp);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        addEventListenerToBack(_trackballEH);
-
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_geometryReader);
         addProcessor(&_teapotRenderer);
@@ -64,15 +61,14 @@ namespace campvis {
 
     GeometryRendererDemo::~GeometryRendererDemo() {
         _geometryReader.s_validated.disconnect(this);
-        delete _trackballEH;
     }
 
     void GeometryRendererDemo::init() {
         AutoEvaluationPipeline::init();
 
         // load textureData from file
-        tgt::TextureReaderTga trt;
-        tgt::Texture* campTexture = trt.loadTexture(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/camplogo.tga", tgt::Texture::LINEAR);
+        cgt::TextureReaderTga trt;
+        cgt::Texture* campTexture = trt.loadTexture(ShdrMgr.completePath("/modules/vis/sampledata/camplogo.tga"), cgt::Texture::LINEAR);
         ImageData* textureData = new ImageData(2, campTexture->getDimensions(), campTexture->getNumChannels());
         ImageRepresentationGL::create(textureData, campTexture);
         getDataContainer().addData("CampTexture", textureData);
@@ -82,31 +78,27 @@ namespace campvis {
 
         // create Teapot
         MultiIndexedGeometry* teapot = GeometryDataFactory::createTeapot();
-        teapot->applyTransformationToVertices(tgt::mat4::createTranslation(tgt::vec3(5.f, 10.f, 5.f)) * tgt::mat4::createScale(tgt::vec3(16.f)));
+        teapot->applyTransformationToVertices(cgt::mat4::createTranslation(cgt::vec3(5.f, 10.f, 5.f)) * cgt::mat4::createScale(cgt::vec3(16.f)));
         getDataContainer().addData("teapot", teapot);
 
         // create cube
-        MeshGeometry* cube = GeometryDataFactory::createCube(tgt::Bounds(tgt::vec3(7.f), tgt::vec3(9.f)), tgt::Bounds(tgt::vec3(0.f), tgt::vec3(1.f)));
+        MeshGeometry* cube = GeometryDataFactory::createCube(cgt::Bounds(cgt::vec3(7.f), cgt::vec3(9.f)), cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
         getDataContainer().addData("cube", cube);
 
         // setup pipeline
-        _camera.addSharedProperty(&_lvRenderer.p_camera);
-        _camera.addSharedProperty(&_teapotRenderer.p_camera);
-        _camera.addSharedProperty(&_cubeRenderer.p_camera);
-
-        _geometryReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/left_ventricle_mesh.vtk");
+        _geometryReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/left_ventricle_mesh.vtk"));
         _geometryReader.p_targetImageID.setValue("reader.output");
 
         _lvRenderer.p_geometryID.setValue("reader.output");
         _lvRenderer.p_renderTargetID.setValue("lv.render");
         _lvRenderer.p_renderMode.selectById("triangles");
-        _lvRenderer.p_solidColor.setValue(tgt::vec4(0.8f, 0.f, 0.f, .9f));
+        _lvRenderer.p_solidColor.setValue(cgt::vec4(0.8f, 0.f, 0.f, .9f));
 
         _teapotRenderer.p_geometryID.setValue("teapot");
         _teapotRenderer.p_renderTargetID.setValue("teapot.render");
         _teapotRenderer.p_renderMode.selectById("trianglestrip");
         _teapotRenderer.p_showWireframe.setValue(false);
-        _teapotRenderer.p_solidColor.setValue(tgt::vec4(1.f, 0.5f, 0.f, 1.f));
+        _teapotRenderer.p_solidColor.setValue(cgt::vec4(1.f, 0.5f, 0.f, 1.f));
     
         _cubeRenderer.p_geometryID.setValue("cube");
         _cubeRenderer.p_renderTargetID.setValue("cube.render");
@@ -141,12 +133,12 @@ namespace campvis {
             ScopedTypedData<IHasWorldBounds> teapot(*_data, "teapot");
             ScopedTypedData<IHasWorldBounds> cube(*_data, "cube");
             if (lv != 0 && teapot != 0) {
-                tgt::Bounds unionBounds;
+                cgt::Bounds unionBounds;
                 unionBounds.addVolume(lv->getWorldBounds());
                 unionBounds.addVolume(teapot->getWorldBounds());
                 unionBounds.addVolume(cube->getWorldBounds());
 
-                _trackballEH->reinitializeCamera(unionBounds);
+                _tcp.reinitializeCamera(unionBounds);
             }
         }
     }

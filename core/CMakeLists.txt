@@ -53,7 +53,7 @@ ADD_LIBRARY(campvis-core
 )
 ADD_DEFINITIONS(${CampvisGlobalDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-core tgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-core cgt sigslot ${CampvisGlobalExternalLibs})
 
 # if campvis-core is built as a shared library, CMake will define the following flag to instruct
 # the code to export DLL symbols

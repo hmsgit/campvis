@@ -25,17 +25,18 @@
 #ifndef GEOMETRYDATA_H__
 #define GEOMETRYDATA_H__
 
-#include "tgt/tgt_gl.h"
-#include "tgt/bounds.h"
+#include "cgt/cgt_gl.h"
+#include "cgt/bounds.h"
 #include "core/datastructures/abstractdata.h"
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class BufferObject;
     class GLCanvas;
 }
 
 namespace campvis {
+
     /**
      * Abstract base class for geometry data in CAMPVis.
      * 
@@ -77,7 +78,7 @@ namespace campvis {
         GeometryData& operator=(const GeometryData& rhs);
 
         /// \see AbstractData::clone()
-        virtual AbstractData* clone() const = 0;
+        virtual GeometryData* clone() const = 0;
 
         /**
          * Renders this GeometryData.
@@ -89,7 +90,8 @@ namespace campvis {
          * Returns the geometry extent in world coordinates.
          * \return  The geometry extent in world coordinates.
          */
-        virtual tgt::Bounds getWorldBounds() const = 0;
+        virtual cgt::Bounds getWorldBounds() const = 0;
+
 
         /**
          * Returns whether the geometry has texture coordinates.
@@ -98,38 +100,51 @@ namespace campvis {
         virtual bool hasTextureCoordinates() const = 0;
 
         /**
+         * Returns whether this geometry has picking information.
+         * \return  True if this geometry sets picking information during rendering.
+         */
+        virtual bool hasPickingInformation() const = 0;
+
+        /**
          * Applies the transformation matrix \a t to each vertex of this geometry.
          * \param   t   Transformation matrix to apply
          */
-        virtual void applyTransformationToVertices(const tgt::mat4& t) = 0;
+        virtual void applyTransformationToVertices(const cgt::mat4& t) = 0;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex positions.
          * May be 0 if not yet created.
          * \return  _verticesBuffer
          */
-        const tgt::BufferObject* getVerticesBuffer() const;
+        const cgt::BufferObject* getVerticesBuffer() const;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex texture coordinates.
          * May be 0 if none are present or not yet created.
          * \return  _texCoordsBuffer
          */
-        const tgt::BufferObject* getTextureCoordinatesBuffer() const;
+        const cgt::BufferObject* getTextureCoordinatesBuffer() const;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex colors. 
          * May be 0 if none are present or not yet created.
          * \return  _colorsBuffer
          */
-        const tgt::BufferObject* getColorsBuffer() const;
+        const cgt::BufferObject* getColorsBuffer() const;
 
         /**
          * Returns the Pointer to the OpenGL Buffer with the vertex normals.
          * May be 0 if none are present or not yet created.
          * \return  _normalsBuffer
          */
-        const tgt::BufferObject* getNormalsBuffer() const;
+        const cgt::BufferObject* getNormalsBuffer() const;
+
+        /**
+         * Returns the Pointer to the OpenGL Buffer with the vertex normals.
+         * May be 0 if none are present or not yet created.
+         * \return  _normalsBuffer
+         */
+        const cgt::BufferObject* getPickingBuffer() const;
 
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
@@ -140,20 +155,22 @@ namespace campvis {
          */
         void deleteBuffers() const;
 
+
         // mutable to support const lazy initialization
         mutable bool _buffersDirty;             ///< Flag whether the buffers are dirty (i.e. need to be (re)initialized)
 
-        enum { NUM_BUFFERS = 4 };               ///< Number of buffers in _buffers array
+        enum { NUM_BUFFERS = 5 };               ///< Number of buffers in _buffers array
 
         union {
             struct {
-                mutable tgt::BufferObject* _verticesBuffer;     ///< Pointer to the OpenGL Buffer with the vertex positions
-                mutable tgt::BufferObject* _texCoordsBuffer;    ///< Pointer to the OpenGL Buffer with the vertex texture coordinates
-                mutable tgt::BufferObject* _colorsBuffer;       ///< Pointer to the OpenGL Buffer with the vertex colors
-                mutable tgt::BufferObject* _normalsBuffer;      ///< Pointer to the OpenGL Buffer with the vertex normals
+                mutable cgt::BufferObject* _verticesBuffer;     ///< Pointer to the OpenGL Buffer with the vertex positions
+                mutable cgt::BufferObject* _texCoordsBuffer;    ///< Pointer to the OpenGL Buffer with the vertex texture coordinates
+                mutable cgt::BufferObject* _colorsBuffer;       ///< Pointer to the OpenGL Buffer with the vertex colors
+                mutable cgt::BufferObject* _normalsBuffer;      ///< Pointer to the OpenGL Buffer with the vertex normals
+                mutable cgt::BufferObject* _pickingBuffer;      ///< Pointer to the OpenGL Buffer with the picking information
             };
 
-            mutable tgt::BufferObject* _buffers[NUM_BUFFERS];   ///< Array of all buffers
+            mutable cgt::BufferObject* _buffers[NUM_BUFFERS];   ///< Array of all buffers
         };
 
     private:
@@ -162,5 +179,76 @@ namespace campvis {
     };
 
 }
+
+/*
+=== This is a draft for a new, generic GeometryData class design that manages arbitrary OpenGL buffers ====
+
+class CAMPVIS_CORE_API GeometryDataBase {
+public:
+    /// Enumeration for defining semantics of stored buffer data
+    enum ElementSemantic {
+        VERTEX                  = 0,    ///< Vextex data
+        TEXTURE_COORDINATE      = 1,    ///< Texture coordinate data
+        COLOR                   = 2,    ///< Color data
+        NORMAL                  = 3,    ///< Normal data
+        PICKING_INFORMATION     = 4     ///< Picking information
+    };
+
+    /// Enumeration for defining the host data type of the element
+    enum ElementHostType {
+        UINT8,
+        UINT16,
+        UINT32,
+        FLOAT,
+        VEC2,
+        VEC3,
+        VEC4
+    };
+};
+
+template<GeometryDataBase::ElementSemantic SEMANTIC>
+struct GeometryDataTraits {};
+
+template<>
+struct GeometryDataTraits<GeometryDataBase::VERTEX> {
+    typedef cgt::vec3 HostType;
+};
+
+class CAMPVIS_CORE_API DraftNewGeometryData {
+public:
+    template<GeometryDataBase::ElementSemantic SEMANTIC>
+    const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* getElementData() const;
+
+    template<GeometryDataBase::ElementSemantic SEMANTIC>
+    void setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData);
+
+protected:
+    std::vector<void*> _elementPointers;
+};
+
+
+template<GeometryDataBase::ElementSemantic SEMANTIC>
+const std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* GeometryData::getElementData() const {
+    if (_elementPointers.size() >= SEMANTIC) {
+        return static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(_elementPointers[SEMANTIC]);
+    }
+
+    return nullptr;
+}
+
+template<GeometryDataBase::ElementSemantic SEMANTIC>
+void GeometryData::setElementData(std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* elementData) {
+    if (_elementPointers.size() < SEMANTIC + 1)
+        _elementPointers.resize(SEMANTIC, nullptr);
+
+    void* oldPtr = _elementPointers[SEMANTIC];
+    if (oldPtr != elementData)
+        delete static_cast< std::vector<typename GeometryDataTraits<SEMANTIC>::HostType>* >(oldPtr);
+
+    _elementPointers[SEMANTIC] = elementData;
+}
+
+*/
+
 
 #endif // GEOMETRYDATA_H__

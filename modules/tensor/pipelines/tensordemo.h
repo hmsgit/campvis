@@ -28,9 +28,12 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/tensor/processors/tensoranalyzer.h"
 #include "modules/tensor/processors/tensorglyphrenderer.h"
@@ -38,7 +41,7 @@
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
-    class TensorDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API TensorDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Small demo pipeline for tensor data visualization.
@@ -59,13 +62,7 @@ namespace campvis {
         static const std::string getId() { return "TensorDemo"; };
 
     protected:
-        /**
-         * Slot getting called when one of the observed processors got validated.
-         * Updates the camera properties, when the input image has changed.
-         * \param   processor   The processor that emitted the signal
-         */
-        virtual void onProcessorValidated(AbstractProcessor* processor);
-
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         TensorAnalyzer _ta;
@@ -73,10 +70,11 @@ namespace campvis {
         SliceRenderer3D _sliceRenderer;
         RenderTargetCompositor _rtc;
 
-        CameraProperty p_camera;
         IntProperty p_sliceNumber;
-        TrackballNavigationEventListener* _trackballEH;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<TensorDemo>;
 
 }
 

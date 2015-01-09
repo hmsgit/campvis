@@ -23,7 +23,7 @@
 // ================================================================================================
 
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 #include "pointpredicatehistogrampropertywidget.h"
 #include "core/tools/stringutils.h"
@@ -48,7 +48,7 @@ namespace campvis {
         predicateList.push_back(tr("Intensity Range"));
         predicateList.push_back(tr("Gradient Magnitude Range"));
         predicateList.push_back(tr("Gradient Orientation"));
-        //predicateList.push_back(tr("Silhouette View"));
+        predicateList.push_back(tr("Silhouette View"));
         predicateList.push_back(tr("SNR Range"));
         predicateList.push_back(tr("Vesselness Range"));
         //predicateList.push_back(tr("Ultrasound Confidence Range"));
@@ -74,6 +74,9 @@ namespace campvis {
 
         layout->addWidget(narf, 1, 0, 1, 3);
 
+        //_lwPredicates->setVisible(false);
+        //narf->setVisible(false);
+        
         _slHue = new QSlider(Qt::Vertical, mainWidget);
         _slHue->setMinimum(0);
         _slHue->setMaximum(100);
@@ -136,7 +139,7 @@ namespace campvis {
 
     void PointPredicateHistogramPropertyWidget::onHueValueChanged(int value) {
         if (_selectedPredicate != nullptr) {
-            tgt::vec2 c = _selectedPredicate->p_color.getValue();
+            cgt::vec2 c = _selectedPredicate->p_color.getValue();
             c.x = static_cast<float>(value) / 100.f;
             _selectedPredicate->p_color.setValue(c);
         }
@@ -144,7 +147,7 @@ namespace campvis {
 
     void PointPredicateHistogramPropertyWidget::onSaturationValueChanged(int value) {
         if (_selectedPredicate != nullptr) {
-            tgt::vec2 c = _selectedPredicate->p_color.getValue();
+            cgt::vec2 c = _selectedPredicate->p_color.getValue();
             c.y = static_cast<float>(value) / 100.f;
             _selectedPredicate->p_color.setValue(c);
         }
@@ -188,18 +191,18 @@ namespace campvis {
         }
         else if (item->text() == tr("Gradient Orientation")) {
             vpToAdd = new RangePointPredicate("gradientAngle", "GradAngle", "Gradient Angle");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(180.f, 180.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(80.f, 100.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(180.f, 180.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(80.f, 100.f));
         }
         else if (item->text() == tr("Silhouette View")) {
             vpToAdd = new RangePointPredicate("viewAngle", "Silhouette", "Silhouette View");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(180.f, 180.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(85.f, 95.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(180.f, 180.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(85.f, 95.f));
         }
         else if (item->text() == tr("SNR Range")) {
             vpToAdd = new RangePointPredicate("snr", "SNR", "SNR Range");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(10.f, 10.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(0.f, 10.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(10.f, 10.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(0.f, 10.f));
         }
         else if (item->text() == tr("Vesselness Range")) {
             vpToAdd = new RangePointPredicate("vesselness", "Vesselness", "Vesselness Range");
@@ -211,7 +214,7 @@ namespace campvis {
             vpToAdd = new LabelBitPointPredicate("label", "Label" + StringUtils::toString(numPreds), "Label ID " + StringUtils::toString(numPreds));
         }
         else {
-            tgtAssert(false, "This should not happen.");
+            cgtAssert(false, "This should not happen.");
         }
 
         return vpToAdd;

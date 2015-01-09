@@ -24,11 +24,11 @@
 
 #include "glreduction.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/framebufferobject.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/imagedata.h"
@@ -74,7 +74,7 @@ namespace campvis {
     }
 
     std::vector<float> GlReduction::reduce(const ImageData* image) {
-        tgtAssert(image != 0, "Image must not be 0!");
+        cgtAssert(image != 0, "Image must not be 0!");
         if (_shader1d == 0 || _shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return std::vector<float>();
@@ -93,10 +93,10 @@ namespace campvis {
         return reduce(repGl->getTexture());
     }
     
-    std::vector<float> GlReduction::reduce(const tgt::Texture* texture) {
+    std::vector<float> GlReduction::reduce(const cgt::Texture* texture) {
         std::vector<float> toReturn;
 
-        tgtAssert(texture != 0, "Image must not be 0!");
+        cgtAssert(texture != 0, "Image must not be 0!");
         if (_shader1d == 0 || _shader2d == 0 || _shader3d == 0) {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return toReturn;
@@ -106,29 +106,28 @@ namespace campvis {
             return toReturn;
         }
 
-        const tgt::ivec3& size = texture->getDimensions();
-        tgt::ivec2 texSize = size.xy();
+        const cgt::ivec3& size = texture->getDimensions();
+        cgt::ivec2 texSize = size.xy();
 
         // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         // get a free texture unit
-        tgt::TextureUnit inputUnit;
+        cgt::TextureUnit inputUnit;
         inputUnit.activate();
 
         // create temporary textures
-        tgt::Texture* tempTextures[2];
+        cgt::Texture* tempTextures[2];
         for (size_t i = 0; i < 2; ++i) {
-            tempTextures[i] = new tgt::Texture(0, tgt::ivec3(texSize, 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, tgt::Texture::NEAREST);
-            tempTextures[i]->uploadTexture();
-            tempTextures[i]->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+            tempTextures[i] = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(texSize, 1), GL_RGBA32F, cgt::Texture::NEAREST);
+            tempTextures[i]->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
         }
 
-        const tgt::Texture* inputTex = texture;
-        tgt::Texture* outputTex = tempTextures[1];
+        const cgt::Texture* inputTex = texture;
+        cgt::Texture* outputTex = tempTextures[1];
 
         // create and initialize FBO
-        _fbo = new tgt::FramebufferObject();
+        _fbo = new cgt::FramebufferObject();
         _fbo->activate();
         LGL_ERROR;
 
@@ -184,7 +183,7 @@ namespace campvis {
         }
 
         // read back stuff
-        GLenum readBackFormat = outputTex->getFormat();
+        GLenum readBackFormat = cgt::Texture::calcMatchingFormat(outputTex->getInternalFormat());
         size_t channels = outputTex->getNumChannels();
         toReturn.resize(channels);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -233,7 +232,7 @@ namespace campvis {
                     "#define REDUCTION_OP_4(a, b, c, d) vec4(min(a.r, min(b.r, min(c.r, d.r))), max(a.g, max(b.g, max(c.g, d.g))), 0.0, 0.0)\n";
                 break;
             default:
-                tgtAssert(false, "Should not reach this, wrong enum value?");
+                cgtAssert(false, "Should not reach this, wrong enum value?");
                 return "";
                 break;
         }

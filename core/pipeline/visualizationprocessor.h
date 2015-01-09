@@ -25,9 +25,9 @@
 #ifndef VISUALIZATIONPROCESSOR_H__
 #define VISUALIZATIONPROCESSOR_H__
 
-#include "tgt/framebufferobject.h"
-#include "tgt/texture.h"
-#include "tgt/vector.h"
+#include "cgt/framebufferobject.h"
+#include "cgt/texture.h"
+#include "cgt/vector.h"
 
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/numericproperty.h"
@@ -51,9 +51,9 @@ namespace campvis {
     class CAMPVIS_CORE_API VisualizationProcessor : public AbstractProcessor {
     public:
         /**
-         * Utility struct to encapuslate off-screen rendering with this processor using FBOs.
+         * Utility struct to encapsulate off-screen rendering with this processor using FBOs.
          * This guard essentially activates the VisualizationProcessor's FBO and sets the OpenGL
-         * viewport size. Upon destruction it detaches all texutres and deactivates the FBO again.
+         * viewport size. Upon destruction it detaches all textures and deactivates the FBO again.
          */
         struct CAMPVIS_CORE_API FramebufferActivationGuard {
         public:
@@ -66,10 +66,11 @@ namespace campvis {
                 : _parentProcessor(vp)
                 , _fbo(vp->_fbo)
             {
-                tgtAssert(_fbo != 0, "FBO must not be 0.");
+                cgtAssert(_fbo != nullptr, "FBO must not be 0.");
+                cgtAssert(_fbo->getId() != 0, "The FBO's OpenGL ID is 0, this is wrong.");
                 _fbo->activate();
 
-                const tgt::ivec2& windowSize = vp->getEffectiveViewportSize();
+                const cgt::ivec2& windowSize = vp->getEffectiveViewportSize();
                 glViewport(0, 0, static_cast<GLsizei>(windowSize.x), static_cast<GLsizei>(windowSize.y));
             }
 
@@ -84,7 +85,7 @@ namespace campvis {
 
         private:
             VisualizationProcessor* _parentProcessor;
-            tgt::FramebufferObject* _fbo;
+            cgt::FramebufferObject* _fbo;
         };
 
         /**
@@ -158,16 +159,16 @@ namespace campvis {
          * Returns the effective viewport size considering LQ mode.
          * \return  lqMode ? _viewportSize/2 : _viewportSize
          */
-        tgt::ivec2 getEffectiveViewportSize() const;
+        cgt::ivec2 getEffectiveViewportSize() const;
 
         /**
          * Returns the current viewport size as ivec3.
-         * \return  tgt::ivec3(getEffectiveViewportSize(), 1)
+         * \return  cgt::ivec3(getEffectiveViewportSize(), 1)
          */
-        tgt::ivec3 getRenderTargetSize() const;
+        cgt::ivec3 getRenderTargetSize() const;
 
 
-        tgt::FramebufferObject* _fbo;               ///< The FBO used by this VisualizationProcessor
+        cgt::FramebufferObject* _fbo;               ///< The FBO used by this VisualizationProcessor
         IVec2Property* _viewportSizeProperty;       ///< Pointer to the property defining the viewport (canvas) size.
 
         static const std::string loggerCat_;

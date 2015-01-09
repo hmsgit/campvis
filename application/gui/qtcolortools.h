@@ -25,7 +25,7 @@
 #ifndef QTCOLORTOOLS_H__
 #define QTCOLORTOOLS_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include <QColor>
 #include <QLabel>
 
@@ -35,18 +35,18 @@ namespace campvis {
      */
     struct QtColorTools {
         /**
-         * Converts the QColor \a color to a tgt::col4.
+         * Converts the QColor \a color to a cgt::col4.
          * \param   color   Color to convert
-         * \return  tgt::col4 version of \a color.
+         * \return  cgt::col4 version of \a color.
          */
-        static tgt::col4 toTgtColor(const QColor& color);
+        static cgt::col4 toTgtColor(const QColor& color);
 
         /**
-         * Converts the tgt::col4 color \a color to a QColor.
+         * Converts the cgt::col4 color \a color to a QColor.
          * \param   color   Color to convert
          * \return  QColor version of \a color.
          */
-        static QColor toQColor(const tgt::col4& color);
+        static QColor toQColor(const cgt::col4& color);
     };
 
     /**

@@ -25,9 +25,9 @@
 #ifndef TFGEOMETRYMANIPULATOR_H__
 #define TFGEOMETRYMANIPULATOR_H__
 
-#include "tgt/vector.h"
-#include "tgt/matrix.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/vector.h"
+#include "cgt/matrix.h"
+#include "cgt/event/eventlistener.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/classification/tfgeometry2d.h"
 
@@ -38,15 +38,15 @@ namespace campvis {
      * Abstract base class for TFGeometry1D manipulators.
      * TFGeometry1D manipulators encapsulate a TF Geometry (or a part of it) and offer methods
      * for manipulating the TFGeometry1D (which is handy e.g. for TF editors...). Therefore, it
-     * extends the tgt::EventListener class and should implement its methods as necessary.
+     * extends the cgt::EventListener class and should implement its methods as necessary.
      */
-    class AbstractTFGeometryManipulator : public tgt::EventListener {
+    class AbstractTFGeometryManipulator : public cgt::EventListener {
     public:
         /**
          * Creates a new AbstractTFGeometryManipulator for the given Geometry1DTransferFunction.
          * \param   viewportSize    Viewport size (extent of the OpenGL rendering canvas)
          */
-        AbstractTFGeometryManipulator(const tgt::ivec2& viewportSize);
+        AbstractTFGeometryManipulator(const cgt::ivec2& viewportSize);
 
         /**
          * Pure virtual Destructor
@@ -57,7 +57,7 @@ namespace campvis {
          * Sets the new viewport size.
          * \param   viewportSize    The new Viewport size (extent of the OpenGL rendering canvas)
          */
-        void setViewportSize(const tgt::ivec2& viewportSize);
+        void setViewportSize(const cgt::ivec2& viewportSize);
 
         /**
          * Renders the manipulator to the current OpenGL context.
@@ -71,16 +71,16 @@ namespace campvis {
          * \param   pos     Coordinates in TF coordinate system.
          * \return  \a pos converted to viewport coordinates.
          */
-        tgt::ivec2 tfToViewport(const tgt::vec2& pos) const;
+        cgt::ivec2 tfToViewport(const cgt::vec2& pos) const;
 
         /**
          * Transforms viewport coordinates to TF coordinates.
          * \param   pos     Coordnates in viewport coordinate system
          * \return  \a pos converted to TF coordinates
          */
-        tgt::vec2 viewportToTF(const tgt::ivec2& pos) const;
+        cgt::vec2 viewportToTF(const cgt::ivec2& pos) const;
 
-        tgt::ivec2 _viewportSize;               ///< Viewport size (extent of the OpenGL rendering canvas)
+        cgt::ivec2 _viewportSize;               ///< Viewport size (extent of the OpenGL rendering canvas)
     };
 
 // ================================================================================================
@@ -96,19 +96,19 @@ namespace campvis {
          * \param   geometry        Parent geometry of the KeyPoint to manipulate
          * \param   keyPoint        Iterator to the KeyPoint to manipulate
          */
-        KeyPointManipulator(const tgt::ivec2& viewportSize, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint);
+        KeyPointManipulator(const cgt::ivec2& viewportSize, TFGeometry1D* geometry, const std::vector<TFGeometry1D::KeyPoint>::iterator& keyPoint);
 
         /// \see AbstractTFGeometryManipulator::render
         void render();
 
-        /// \see tgt::EventListener::mousePressEvent
-        virtual void mousePressEvent(tgt::MouseEvent* e);
-        /// \see tgt::EventListener::mouseReleaseEvent
-        virtual void mouseReleaseEvent(tgt::MouseEvent* e);
-        /// \see tgt::EventListener::mouseMoveEvent
-        virtual void mouseMoveEvent(tgt::MouseEvent* e);
-        /// \see tgt::EventListener::mouseDoubleClickEvent
-        virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
+        /// \see cgt::EventListener::mousePressEvent
+        virtual void mousePressEvent(cgt::MouseEvent* e);
+        /// \see cgt::EventListener::mouseReleaseEvent
+        virtual void mouseReleaseEvent(cgt::MouseEvent* e);
+        /// \see cgt::EventListener::mouseMoveEvent
+        virtual void mouseMoveEvent(cgt::MouseEvent* e);
+        /// \see cgt::EventListener::mouseDoubleClickEvent
+        virtual void mouseDoubleClickEvent(cgt::MouseEvent* e);
 
     protected:
         static const int MANIPULATOR_SIZE;                          ///< Size of the manipulator
@@ -125,14 +125,14 @@ namespace campvis {
     /**
      * Class for manipulating the whole TFGeometry1D at once.
      */
-    class WholeTFGeometryManipulator : public AbstractTFGeometryManipulator, public sigslot::has_slots<> {
+    class WholeTFGeometryManipulator : public AbstractTFGeometryManipulator, public sigslot::has_slots {
     public:
         /**
          * Creates a new KeyPointManipulator
          * \param   viewportSize    Viewport size (extent of the OpenGL rendering canvas)
          * \param   geometry        Parent geometry of the KeyPoint to manipulate
          */
-        WholeTFGeometryManipulator(const tgt::ivec2& viewportSize, TFGeometry1D* geometry);
+        WholeTFGeometryManipulator(const cgt::ivec2& viewportSize, TFGeometry1D* geometry);
 
         /**
          * Destructor
@@ -149,19 +149,19 @@ namespace campvis {
          * Returns the vector caching the 2D coordinates of the TF key points.
          * \return  _helperPoints
          */
-        const std::vector<tgt::vec2>& getHelperPoints() const;
+        const std::vector<cgt::vec2>& getHelperPoints() const;
 
         /// \see AbstractTFGeometryManipulator::render
         void render();
 
-        /// \see tgt::EventListener::mousePressEvent
-        virtual void mousePressEvent(tgt::MouseEvent* e);
-        /// \see tgt::EventListener::mouseReleaseEvent
-        virtual void mouseReleaseEvent(tgt::MouseEvent* e);
-        /// \see tgt::EventListener::mouseMoveEvent
-        virtual void mouseMoveEvent(tgt::MouseEvent* e);
-        /// \see tgt::EventListener::mouseDoubleClickEvent
-        virtual void mouseDoubleClickEvent(tgt::MouseEvent* e);
+        /// \see cgt::EventListener::mousePressEvent
+        virtual void mousePressEvent(cgt::MouseEvent* e);
+        /// \see cgt::EventListener::mouseReleaseEvent
+        virtual void mouseReleaseEvent(cgt::MouseEvent* e);
+        /// \see cgt::EventListener::mouseMoveEvent
+        virtual void mouseMoveEvent(cgt::MouseEvent* e);
+        /// \see cgt::EventListener::mouseDoubleClickEvent
+        virtual void mouseDoubleClickEvent(cgt::MouseEvent* e);
 
         /**
          * Slot to be called when the geometry has changed.
@@ -177,7 +177,7 @@ namespace campvis {
          * \param   position    Position to check in TF coordinate system
          * \return  true if \a position is within the bounds of this geometry.
          */
-        bool insideGeometry(const tgt::vec2& position) const;
+        bool insideGeometry(const cgt::vec2& position) const;
 
         /**
          * Updates the helper points.
@@ -185,11 +185,11 @@ namespace campvis {
         void updateHelperPoints();
 
         TFGeometry1D* _geometry;                                ///< Parent geometry of the KeyPoint to manipulate
-        std::vector<tgt::vec2> _helperPoints;                   ///< vector caching the 2D coordinates of the TF key points
+        std::vector<cgt::vec2> _helperPoints;                   ///< vector caching the 2D coordinates of the TF key points
 
         // event handling stuff:
         bool _mousePressed;                                     ///< Flag whether the mouse button is currently pressed
-        tgt::vec2 _pressedPosition;                             ///< Position where mousedown occured, in TF coordinates
+        cgt::vec2 _pressedPosition;                             ///< Position where mousedown occured, in TF coordinates
         std::vector<TFGeometry1D::KeyPoint> _valuesWhenPressed; ///< KeyPoints when pressed
     };
 

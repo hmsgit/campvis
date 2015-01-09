@@ -25,7 +25,7 @@
 #ifndef IMAGEREPRESENTATIONLOCAL_H__
 #define IMAGEREPRESENTATIONLOCAL_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 
 #include "core/datastructures/genericabstractimagerepresentation.h"
 #include "core/tools/concurrenthistogram.h"
@@ -90,7 +90,7 @@ namespace campvis {
          * \param   channel     Image channel
          * \return  A normalized float representation of the element at the given position and channel.
          */
-        virtual float getElementNormalized(const tgt::svec3& position, size_t channel) const = 0;
+        virtual float getElementNormalized(const cgt::svec3& position, size_t channel) const = 0;
 
         /**
          * Returns the normalized value of the element at the given position and channel using linear interpolation.
@@ -107,7 +107,7 @@ namespace campvis {
          * \param   channel     Image channel
          * \return  A normalized float representation of the element at the given position and channel.
          */
-        virtual float getElementNormalizedLinear(const tgt::vec3& position, size_t channel) const = 0;
+        virtual float getElementNormalizedLinear(const cgt::vec3& position, size_t channel) const = 0;
 
         /**
          * Sets the element at the given index and channel denormalized from the given value \a value.
@@ -142,7 +142,7 @@ namespace campvis {
          * \param   channel     Image channel
          * \param   value       Normalized Value to set
          */
-        virtual void setElementNormalized(const tgt::svec3& position, size_t channel, float value) = 0;
+        virtual void setElementNormalized(const cgt::svec3& position, size_t channel, float value) = 0;
 
         /**
          * Returns the range of normalized intensities.

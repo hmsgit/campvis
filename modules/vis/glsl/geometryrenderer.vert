@@ -26,17 +26,20 @@ layout (location = 0) in vec3 in_Position;        ///< incoming vertex position
 layout (location = 1) in vec3 in_TexCoord;        ///< incoming texture coordinate
 layout (location = 2) in vec4 in_Color;           ///< incoming color
 layout (location = 3) in vec3 in_Normal;          ///< incoming normals
+layout (location = 4) in vec4 in_Picking;         ///< incoming picking information
 
 #ifdef HAS_GEOMETRY_SHADER
 out vec3 vert_Position;       ///< outgoing world coordinates
 out vec3 vert_TexCoord;       ///< outgoing texture coordinate
 out vec4 vert_Color;          ///< outgoing color
 out vec3 vert_Normal;         ///< outgoing world normals
+out vec4 vert_Picking;        ///< outgoing picking information
 #else
 out vec3 geom_Position;       ///< outgoing texture coordinate
 out vec3 geom_TexCoord;       ///< outgoing color
 out vec4 geom_Color;          ///< outgoing world coordinates
 out vec3 geom_Normal;         ///< outgoing world normals
+out vec4 geom_Picking;        ///< outgoing picking information
 #endif
 
 
@@ -72,7 +75,7 @@ void main() {
     vert_TexCoord = in_TexCoord;
     vert_Color = in_Color;
     vert_Normal = in_Normal;
-
+    vert_Picking = in_Picking / 255;
 #else
 
     // set outputs for fragment shader
@@ -82,7 +85,7 @@ void main() {
     geom_TexCoord = in_TexCoord;
     geom_Color = in_Color;
     geom_Normal = in_Normal;
-
+    geom_Picking = in_Picking / 255;
 #endif
 }
 

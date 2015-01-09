@@ -24,10 +24,10 @@
 
 #include "glimageresampler.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/texture.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/texture.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -72,15 +72,14 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_inputImage.getValue());
 
         if (img != 0) {
-            tgt::vec3 originalSize(img->getSize());
-            tgt::ivec3 resampledSize(originalSize * p_resampleScale.getValue());
+            cgt::vec3 originalSize(img->getSize());
+            cgt::ivec3 resampledSize(cgt::ceil(originalSize * p_resampleScale.getValue()));
 
-            tgt::TextureUnit inputUnit;
+            cgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            tgt::Texture* resultTexture = new tgt::Texture(0, resampledSize, img->getTexture()->getFormat(), img->getTexture()->getInternalFormat(), img->getTexture()->getDataType(), tgt::Texture::LINEAR);
-            resultTexture->uploadTexture();
+            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, resampledSize, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
 
             // activate shader and bind textures
             _shader->activate();
@@ -108,11 +107,11 @@ namespace campvis {
             id->setMappingInformation(ImageMappingInformation(img->getSize(), imi.getOffset(), imi.getVoxelSize() / p_resampleScale.getValue(), imi.getRealWorldMapping()));
             data.addData(p_outputImage.getValue(), id);
 
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 

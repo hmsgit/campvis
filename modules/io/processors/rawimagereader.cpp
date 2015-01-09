@@ -50,13 +50,13 @@ namespace campvis {
 
     RawImageReader::RawImageReader() 
         : AbstractImageReader()
-        , p_size("Size", "Image Size", tgt::ivec3(1), tgt::ivec3(1), tgt::ivec3(2048))
+        , p_size("Size", "Image Size", cgt::ivec3(1), cgt::ivec3(1), cgt::ivec3(2048))
         , p_numChannels("NumChannels", "Number of Channels per Element", 1, 1, 9)
         , p_baseType("BaseType", "Base Type", baseTypeOptions, 7)
         , p_offset("Offset", "Byte Offset", 0, 0, std::numeric_limits<int>::max())
         , p_endianness("Endianess", "Endianess", endianOptions, 2)
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
     {
         this->_ext.push_back(".raw");
         this->p_targetImageID.setValue("RawImageReader.output");

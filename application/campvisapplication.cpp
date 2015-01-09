@@ -24,27 +24,34 @@
 
 #include "campvisapplication.h"
 
-#include "tgt/assert.h"
-#include "tgt/exception.h"
-#include "tgt/glcanvas.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/gpucapabilities.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texturereadertga.h"
-#include "tgt/qt/qtapplication.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/assert.h"
+#include "cgt/exception.h"
+#include "cgt/glcanvas.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/gpucapabilities.h"
+#include "cgt/init.h"
+#include "cgt/opengljobprocessor.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texturereadertga.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 
 #include "application/campvispainter.h"
+#include "application/gui/properties/propertywidgetfactory.h"
 #include "application/gui/mainwindow.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
+#include "application/gui/mdi/mdidockablewindow.h"
+
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
+#include "core/pipeline/abstractworkflow.h"
+#include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
 #include "modules/pipelinefactory.h"
+#include "qtjobprocessor.h"
+
+#include <QApplication>
 
 #ifdef CAMPVIS_HAS_SCRIPTING
 #include "scripting/gen_pipelineregistration.h"
@@ -67,41 +74,36 @@ namespace campvis {
         // Make Xlib and GLX thread safe under X11
         QApplication::setAttribute(Qt::AA_X11InitThreads);
 
-        _mainWindow = new MainWindow(this);
-        tgt::GlContextManager::init();
-
+        sigslot::signal_manager::init();
+        sigslot::signal_manager::getRef().start();
+        cgt::GlContextManager::init();
         OpenGLJobProcessor::init();
         SimpleJobProcessor::init();
+        QtJobProcessor::init();
     }
 
     CampVisApplication::~CampVisApplication() {
-        tgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
+        cgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
 
-        // delete everything in the right order:
-        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            delete it->_painter;
-            delete it->_pipeline;
-        }
-        for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
-            delete *it;
-        }
+        sigslot::signal_manager::getRef().stop();
+        sigslot::signal_manager::deinit();
     }
 
     void CampVisApplication::init() {
-        tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
+        cgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
 
-        // Init TGT
-        tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
-        tgt::init(featureset);
+        // Init CGT
+        cgt::InitFeature::Features featureset = cgt::InitFeature::ALL;
+        cgt::init(featureset);
         LogMgr.getConsoleLog()->addCat("", true);
 
+        _mainWindow = new MainWindow(this);
+
         // create a local OpenGL context and init GL
-        _localContext = new QtThreadedCanvas("", tgt::ivec2(16, 16));
+        _localContext = new QtThreadedCanvas("", cgt::ivec2(16, 16));
+        cgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext, "Local Context");
 
-        tgt::GLContextScopedLock lock(_localContext);
-        tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
-
-        tgt::initGL(featureset);
+        cgt::initGL(featureset);
         ShdrMgr.setDefaultGlslVersion("330");
         LGL_ERROR;
 
@@ -110,11 +112,11 @@ namespace campvis {
         if (_argc > 0) {
             // ugly hack
             std::string basePath(_argv[0]);
-            basePath = tgt::FileSystem::parentDir(basePath);
+            basePath = cgt::FileSystem::parentDir(basePath);
             ShdrMgr.addPath(basePath);
             ShdrMgr.addPath(basePath + "/core/glsl");
 
-            basePath = tgt::FileSystem::parentDir(tgt::FileSystem::parentDir(basePath));
+            basePath = cgt::FileSystem::parentDir(cgt::FileSystem::parentDir(basePath));
             ShdrMgr.addPath(basePath);
             ShdrMgr.addPath(basePath + "/core/glsl");
 
@@ -132,19 +134,17 @@ namespace campvis {
         // ensure matching OpenGL specs
         LINFO("Using Graphics Hardware " << GpuCaps.getVendorAsString() << " " << GpuCaps.getGlRendererString() << " on " << GpuCaps.getOSVersionString());
         LINFO("Supported OpenGL " << GpuCaps.getGlVersion() << ", GLSL " << GpuCaps.getShaderVersion());
-        if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3) {
+        if (GpuCaps.getGlVersion() < cgt::GpuCapabilities::GlVersion::CGT_GL_VERSION_3_3) {
             LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intended.");
         }
-        if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
+        if (GpuCaps.getShaderVersion() < cgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
             LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
         }
 
-        GLJobProc.start();
-        GLJobProc.registerContext(_localContext);
 
         // load textureData from file
-        tgt::TextureReaderTga trt;
-        _errorTexture = trt.loadTexture(CAMPVIS_SOURCE_DIR "/application/data/no_input.tga", tgt::Texture::LINEAR);
+        cgt::TextureReaderTga trt;
+        _errorTexture = trt.loadTexture(ShdrMgr.completePath("application/data/no_input.tga"), cgt::Texture::LINEAR);
 
 
 #ifdef CAMPVIS_HAS_SCRIPTING
@@ -155,11 +155,13 @@ namespace campvis {
         // Let Lua know where CAMPVis modules are located
         if (! _luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
             LERROR("Error setting up Lua VM.");
+        if (! _luaVmState->execString("package.path = package.path .. ';" CAMPVIS_LUA_SCRIPTS_PATH "'"))
+            LERROR("Error setting up Lua VM.");
 
         // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
         if (! _luaVmState->execString("require(\"campvis\")"))
             LERROR("Error setting up Lua VM.");
-        if (! _luaVmState->execString("require(\"tgt\")"))
+        if (! _luaVmState->execString("require(\"cgt\")"))
             LERROR("Error setting up Lua VM.");
 
         if (! _luaVmState->execString("pipelines = {}"))
@@ -168,27 +170,60 @@ namespace campvis {
         if (! _luaVmState->execString("inspect = require 'inspect'"))
             LERROR("Error setting up Lua VM.");
 #endif
+        GLCtxtMgr.releaseContext(_localContext, false);
 
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
         for (int i = 1; i < pipelinesToAdd.size(); ++i) {
-            DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
-            AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
-            if (p != 0)
-                addPipeline(pipelinesToAdd[i].toStdString(), p);
+            if (pipelinesToAdd[i] == "-w" && i+1 < pipelinesToAdd.size()) {
+                // create workflow
+                AbstractWorkflow* w = PipelineFactory::getRef().createWorkflow(pipelinesToAdd[i+1].toStdString());
+
+                if (w != nullptr) {
+                    // get DataContainers and Pipelines from workflow, take ownership and initialize them where necessary
+                    _dataContainers.push_back(w->getDataContainer());
+                    s_DataContainersChanged.emitSignal();
+
+                    std::vector<AbstractPipeline*> pipelines = w->getPipelines();
+                    for (auto it = pipelines.begin(); it != pipelines.end(); ++it) {
+                        addPipeline((*it)->getName(), *it);
+                    }
+
+                    _workflows.push_back(w);
+                    _mainWindow->setWorkflow(w);
+                    w->init();
+                }
+
+                ++i;
+            }
+            else {
+                DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
+                AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);
+                if (p != nullptr)
+                    addPipeline(pipelinesToAdd[i].toStdString(), p);
+            }
         }
+
+        GLJobProc.setContext(_localContext);
+        GLJobProc.start();
 
         _initialized = true;
     }
 
     void CampVisApplication::deinit() {
-        tgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
+        cgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
-        GLJobProc.stop();
+        // Stop all pipeline threads.
+        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            it->_pipeline->stop();
+        }
+
+        for (auto it = _workflows.begin(); it != _workflows.end(); ++it)
+            (*it)->deinit();
 
         {
             // Deinit everything OpenGL related using the local context.
-            tgt::GLContextScopedLock lock(_localContext);
+            cgt::GLContextScopedLock lock(_localContext);
 
             delete _errorTexture;
 
@@ -201,28 +236,41 @@ namespace campvis {
             _mainWindow->deinit();
             QuadRenderer::deinit();
 
-            // deinit OpenGL and tgt
-            tgt::deinitGL();
+            // deinit OpenGL and cgt
+            cgt::deinitGL();
         }
-
-        SimpleJobProcessor::deinit();
-        OpenGLJobProcessor::deinit();
-        PipelineFactory::deinit();
-
-        tgt::GlContextManager::deinit();
-        tgt::deinit();
 
         // MainWindow dtor needs a valid CampVisApplication, so we need to call it here instead of during destruction.
         delete _mainWindow;
+
+        // now delete everything in the right order:
+        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            delete it->_painter;
+            delete it->_pipeline;
+        }
+        for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
+            delete *it;
+        }
+
+        GLJobProc.stop();
+        OpenGLJobProcessor::deinit();
+        SimpleJobProcessor::deinit();
+
+        cgt::GlContextManager::deinit();
+        cgt::deinit();
+
+        PropertyWidgetFactory::deinit();
+        ImageRepresentationConverter::deinit();
+        PipelineFactory::deinit();
 
         _initialized = false;
     }
 
     int CampVisApplication::run() {
-        tgtAssert(_initialized, "Tried to run uninitialized CampVisApplication.");
+        cgtAssert(_initialized, "Tried to run uninitialized CampVisApplication.");
 
         // disconnect OpenGL context from this thread so that the other threads can acquire an OpenGL context.
-        tgt::GlContextManager::getRef().releaseCurrentContext();
+        //cgt::GlContextManager::getRef().releaseCurrentContext();
 
         _mainWindow->show();
 
@@ -233,11 +281,10 @@ namespace campvis {
     }
 
     void CampVisApplication::addPipeline(const std::string& name, AbstractPipeline* pipeline) {
-        tgtAssert(pipeline != 0, "Pipeline must not be 0.");
+        cgtAssert(pipeline != 0, "Pipeline must not be 0.");
 
         // create canvas and painter for the pipeline and connect all together
-        tgt::QtThreadedCanvas* canvas = new tgt::QtThreadedCanvas("CAMPVis", tgt::ivec2(512, 512));
-        GLJobProc.registerContext(canvas);
+        cgt::QtThreadedCanvas* canvas = new cgt::QtThreadedCanvas("CAMPVis", cgt::ivec2(512, 512));
         canvas->init();
 
         CampVisPainter* painter = new CampVisPainter(canvas, pipeline);
@@ -248,27 +295,29 @@ namespace campvis {
         PipelineRecord pr = { pipeline, painter };
         _pipelines.push_back(pr);
 
-        _mainWindow->addVisualizationPipelineWidget(name, canvas);
+        _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(name, canvas);
 
         // initialize context (GLEW) and pipeline in OpenGL thread)
-        GLJobProc.enqueueJob(
-            canvas, 
-            makeJobOnHeap<CampVisApplication, tgt::GLCanvas*, AbstractPipeline*>(this, &CampVisApplication::initGlContextAndPipeline, canvas, pipeline), 
-            OpenGLJobProcessor::SerialJob);
+        initGlContextAndPipeline(canvas, pipeline);
 
 #ifdef CAMPVIS_HAS_SCRIPTING
         if (! _luaVmState->injectObjectPointerToTable(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", static_cast<int>(_pipelines.size())))
         //if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", name))
             LERROR("Could not inject the pipeline into the Lua VM.");
 
+        if (! _luaVmState->injectObjectPointerToTableField(pipeline, "campvis::AutoEvaluationPipeline *", "pipelines", pipeline->getName()))
+            LERROR("Could not inject the pipeline into the Lua VM.");
+
         _luaVmState->execString("inspect(pipelines)");
 #endif
 
-        s_PipelinesChanged();
+        GLCtxtMgr.releaseContext(canvas, false);
+        s_PipelinesChanged.emitSignal();
+        pipeline->start();
     }
 
-    void CampVisApplication::initGlContextAndPipeline(tgt::GLCanvas* canvas, AbstractPipeline* pipeline) {
-        tgt::GlContextManager::getRef().registerContextAndInitGlew(canvas);
+    void CampVisApplication::initGlContextAndPipeline(cgt::GLCanvas* canvas, AbstractPipeline* pipeline) {
+        cgt::GlContextManager::getRef().registerContextAndInitGlew(canvas, pipeline->getName());
 
         pipeline->init();
         LGL_ERROR;
@@ -283,7 +332,7 @@ namespace campvis {
     }
 
     void CampVisApplication::registerDockWidget(Qt::DockWidgetArea area, QDockWidget* dock) {
-        tgtAssert(dock != 0, "Dock widget must not be 0.");
+        cgtAssert(dock != 0, "Dock widget must not be 0.");
 
         _mainWindow->addDockWidget(area, dock);
     }
@@ -291,17 +340,16 @@ namespace campvis {
     DataContainer* CampVisApplication::createAndAddDataContainer(const std::string& name) {
         DataContainer* dc = new DataContainer(name);
         _dataContainers.push_back(dc);
-        s_DataContainersChanged();
+        s_DataContainersChanged.emitSignal();
         return dc;
     }
 
     void CampVisApplication::rebuildAllShadersFromFiles() {
         // rebuilding all shaders has to be done from OpenGL context, use the local one.
-        GLJobProc.enqueueJob(_localContext, makeJobOnHeap(this, &CampVisApplication::triggerShaderRebuild), OpenGLJobProcessor::SerialJob);
+        GLJobProc.enqueueJob(makeJobOnHeap(this, &CampVisApplication::triggerShaderRebuild));
     }
 
     void CampVisApplication::triggerShaderRebuild() {
-
         if (! ShdrMgr.rebuildAllShadersFromFile()) {
             LERROR("Could not rebuild all shaders from file.");
             return;
@@ -323,7 +371,13 @@ namespace campvis {
     LuaVmState* CampVisApplication::getLuaVmState() {
         return _luaVmState;
     }
-
 #endif
+
+    void CampVisApplication::setPipelineVisibility(AbstractPipeline* pipeline, bool visibility) {
+        auto it = _pipelineWindows.find(pipeline);
+        if (it != _pipelineWindows.end()) {
+            it->second->setVisible(visibility);
+        }
+    }
 
 }

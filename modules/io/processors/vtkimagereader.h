@@ -28,10 +28,12 @@
 #include <string>
 #include "abstractimagereader.h"
 
-#include "tgt/exception.h"
+#include "cgt/exception.h"
 #include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
+
+#include "modules/modulesapi.h"
 
 namespace campvis {
     /**
@@ -39,7 +41,7 @@ namespace campvis {
      *
      * \note    Full format specification at http://www.vtk.org/VTK/img/file-formats.pdf
      */
-    class VtkImageReader : public AbstractImageReader {
+    class CAMPVIS_MODULES_API VtkImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new VtkImageReader Processor
@@ -67,9 +69,9 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+        void parseStructuredPoints(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception);
 
-        void parsePolydata(DataContainer& data, std::ifstream& file) throw (tgt::Exception, std::exception);
+        void parsePolydata(DataContainer& data, std::ifstream& file) throw (cgt::Exception, std::exception);
 
         static const std::string loggerCat_;
     };

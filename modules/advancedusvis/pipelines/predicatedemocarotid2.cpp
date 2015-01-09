@@ -24,7 +24,7 @@
 
 #include "predicatedemocarotid2.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/imagedata.h"
 
@@ -77,7 +77,6 @@ namespace campvis {
         _imageReader.p_targetImageID.addSharedProperty(&_gaussian.p_inputImage);
         _imageReader.p_targetImageID.addSharedProperty(&_snrFilter.p_inputImage);
         _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
-        _imageReader.s_validated.connect(this, &PredicateDemoCarotid2::onProcessorValidated);
 
         _labelReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/advancedusvis/sampledata/christian_bmode_2D_compounded_cropped_layers.mhd");
         //_labelReader.p_url.setValue("D:/Medical Data/us_carotid_2014-02/christian/christian_bmode_2D_compounded_cropped_layers.mhd");
@@ -95,7 +94,7 @@ namespace campvis {
         _gaussian.p_outputImage.addSharedProperty(&_vesselnesFilter.p_inputImage);
 
         _vesselnesFilter.p_outputImage.setValue("vesselness");
-        _vesselnesFilter.p_lod.setValue(tgt::vec2(3.f, 4.f));
+        _vesselnesFilter.p_lod.setValue(cgt::vec2(3.f, 4.f));
         _vesselnesFilter.p_alpha.setValue(0.2f);
         _vesselnesFilter.p_beta.setValue(0.8f);
         _vesselnesFilter.p_gamma.setValue(.0018f);
@@ -106,16 +105,14 @@ namespace campvis {
         _morphology.p_structuringElement.setValue(1);
         _morphology.p_outputImage.addSharedProperty(&_ve.p_inputVesselness);
 
-        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.05f, .8f));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.05f, .8f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 0), cgt::col4(255, 255, 255, 255)));
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->setAutoFitWindowToData(false);
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::GradientLod"))->setValue(0.5f);
 
-//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor1"))->setValue(tgt::vec4(1.f));
-//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor2"))->setValue(tgt::vec4(1.f));
-
-        _canvasSize.s_changed.connect<PredicateDemoCarotid2>(this, &PredicateDemoCarotid2::onRenderTargetSizeChanged);
+//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor1"))->setValue(cgt::vec4(1.f));
+//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor2"))->setValue(cgt::vec4(1.f));
 
         _canvasSize.setVisible(false);
         _renderTargetID.setVisible(false);
@@ -128,13 +125,13 @@ namespace campvis {
 
             AbstractPointPredicate* vpToAdd = 0;
             vpToAdd = new RangePointPredicate("intensity", "Intensity", "Intensity Range");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(.05f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(.05f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             AbstractPointPredicate* a = new LabelBitPointPredicate("label", "Vessel2", "Vessel Layer");
             static_cast<LabelBitPointPredicate*>(a)->p_bit.setValue(2);
             AbstractPointPredicate* b = new RangePointPredicate("gradientMagnitude", "GradMag", "Gradient Magnitude Range");
-            static_cast<RangePointPredicate*>(b)->p_range.setValue(tgt::vec2(.25f, 1.f));
+            static_cast<RangePointPredicate*>(b)->p_range.setValue(cgt::vec2(.25f, 1.f));
             std::vector<AbstractPointPredicate*> v;
             v.push_back(a);
             v.push_back(b);
@@ -144,7 +141,7 @@ namespace campvis {
             AbstractPointPredicate* foo = new LabelBitPointPredicate("label", "Carotid", "Carotid");
             static_cast<LabelBitPointPredicate*>(foo)->p_bit.setValue(4);
             AbstractPointPredicate* bar = new RangePointPredicate("vesselness", "Vesselness", "Vesselness Range");
-            static_cast<RangePointPredicate*>(bar)->p_range.setValue(tgt::vec2(.22f, 1.f));
+            static_cast<RangePointPredicate*>(bar)->p_range.setValue(cgt::vec2(.22f, 1.f));
             v.clear();
             v.push_back(foo);
             v.push_back(bar);
@@ -188,7 +185,7 @@ namespace campvis {
     void PredicateDemoCarotid2::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             if (IVec2Property* tester = dynamic_cast<IVec2Property*>(_ve.getNestedProperty("VolumeRendererProperties::PGGProps::clipX"))) {
-                tester->setValue(tgt::ivec2(42, 210));
+                tester->setValue(cgt::ivec2(42, 210));
             }
         }
     }

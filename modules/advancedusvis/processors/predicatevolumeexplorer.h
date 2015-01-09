@@ -25,6 +25,7 @@
 #ifndef PREDICATEVOLUMEEXPLORER_H__
 #define PREDICATEVOLUMEEXPLORER_H__
 
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/volumeexplorer.h"
 #include "modules/advancedusvis/processors/pointpredicateraycaster.h"
 #include "modules/advancedusvis/processors/pointpredicateevaluator.h"
@@ -34,7 +35,7 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class PredicateVolumeExplorer : public VolumeExplorer {
+    class CAMPVIS_MODULES_API PredicateVolumeExplorer : public VolumeExplorer {
         /// voxel type of the bitmask image (hardcoding this is not the most beautiful design though...)
         typedef uint8_t BitmaskType;
 
@@ -66,8 +67,8 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
         
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
         DataNameProperty p_inputLabels;
         DataNameProperty p_inputSnr;
@@ -107,7 +108,7 @@ namespace campvis {
          * \param   voxels  List of voxels to compute the bit histogram for.
          * \return  A histogram where each bit corresponds to the number of voxels in \a voxels where the corresponding predicate yields true.
          */
-        std::vector<int> computeBitHistogram(const std::vector<tgt::vec3>& voxels);
+        std::vector<int> computeBitHistogram(const std::vector<cgt::vec3>& voxels);
 
         PointPredicateEvaluator _predicateEvaluation;   ///< Processor to perform the point predicate evaluation on.
         DataHandle _bitmaskHandle;                      ///< DataHandle storing the predicate bitmask

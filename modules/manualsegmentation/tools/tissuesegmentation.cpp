@@ -80,8 +80,8 @@ void TissueSegmentation::loadFromStream(std::istream& s) {
             frame._gradients.resize(numSamples);
 
             if (numSamples > 0) {
-                s.read(reinterpret_cast<char*>(&(frame._points.front())), numSamples * sizeof(tgt::vec2));
-                s.read(reinterpret_cast<char*>(&(frame._gradients.front())), numSamples * sizeof(tgt::vec2));
+                s.read(reinterpret_cast<char*>(&(frame._points.front())), numSamples * sizeof(cgt::vec2));
+                s.read(reinterpret_cast<char*>(&(frame._gradients.front())), numSamples * sizeof(cgt::vec2));
             }
 
             layer._frames.push_back(frame);
@@ -105,8 +105,8 @@ void TissueSegmentation::saveToStream(std::ostream& s) {
             s.write(reinterpret_cast<char*>(&numSamples), sizeof(size_t));
 
             if (numSamples > 0) {
-                s.write(reinterpret_cast<char*>(&layer._frames[i]._points.front()), numSamples * sizeof(tgt::vec2));
-                s.write(reinterpret_cast<char*>(&layer._frames[i]._gradients.front()), numSamples * sizeof(tgt::vec2));
+                s.write(reinterpret_cast<char*>(&layer._frames[i]._points.front()), numSamples * sizeof(cgt::vec2));
+                s.write(reinterpret_cast<char*>(&layer._frames[i]._gradients.front()), numSamples * sizeof(cgt::vec2));
             }
         }
     }

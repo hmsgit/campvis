@@ -25,7 +25,7 @@
 #ifndef STRINGUTILS_H__
 #define STRINGUTILS_H__
 
-#include "tgt/exception.h"
+#include "cgt/exception.h"
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -129,10 +129,10 @@ namespace campvis {
          * Converts the string \a str to its original value.
          * \param str   The string to convert
          * \return  The back-converted value of \a str, type must be compatible with std::stringstream.
-         * \throw   tgt::Exception on conversion failure
+         * \throw   cgt::Exception on conversion failure
          */
         template<class T>
-        static T fromString(const std::string& str) throw (tgt::Exception);
+        static T fromString(const std::string& str) throw (cgt::Exception);
 
         /**
          * Joins the substrings in \a tokens together using \a delimiter in between.
@@ -160,12 +160,12 @@ namespace campvis {
         return stream.str();
     }
     template<class T>
-    T StringUtils::fromString(const std::string& str) throw (tgt::Exception) {
+    T StringUtils::fromString(const std::string& str) throw (cgt::Exception) {
         T toReturn;
         std::istringstream stream;
         stream.str(str);
         if (!(stream >> toReturn))
-            throw tgt::Exception("Failed to convert string '" + str + "'");
+            throw cgt::Exception("Failed to convert string '" + str + "'");
         return toReturn;
     }
 

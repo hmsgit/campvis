@@ -37,7 +37,7 @@
 
 namespace campvis {
 
-    class DataContainerFileLoaderWidget : public QWidget, public sigslot::has_slots<> {
+    class DataContainerFileLoaderWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:

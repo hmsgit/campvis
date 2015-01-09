@@ -24,10 +24,10 @@
 
 #include "imagerepresentationgl.h"
 
-#include "tgt/assert.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
-#include "tgt/tgt_gl.h"
+#include "cgt/assert.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
+#include "cgt/cgt_gl.h"
 
 #include "core/datastructures/imagedata.h"
 
@@ -35,7 +35,7 @@ namespace campvis {
 
     const std::string ImageRepresentationGL::loggerCat_ = "CAMPVis.core.datastructures.ImageRepresentationGL";
 
-    ImageRepresentationGL* ImageRepresentationGL::create(ImageData* parent, tgt::Texture* texture) {
+    ImageRepresentationGL* ImageRepresentationGL::create(ImageData* parent, cgt::Texture* texture) {
         ImageRepresentationGL* toReturn = new ImageRepresentationGL(parent, texture);
         toReturn->addToParent();
         return toReturn;
@@ -47,20 +47,18 @@ namespace campvis {
         return toReturn;
     }
 
-    ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, tgt::Texture* texture)
+    ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, cgt::Texture* texture)
         : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
         , _texture(texture)
     {
-        tgtAssert(texture != 0, "Given texture must not be 0.");
-        tgtAssert(parent->getDimensionality() >= 3 || texture->getDimensions().z == 1, "Dimensionality of Parent and texture mismatch!");
-        tgtAssert(parent->getDimensionality() >= 2 || texture->getDimensions().y == 1, "Dimensionality of Parent and texture mismatch!");
-        tgtAssert(parent->getNumChannels() == texture->getNumChannels(), "Number of Channels of parent and texture mismatch!");
+        cgtAssert(texture != 0, "Given texture must not be 0.");
+        cgtAssert(parent->getNumChannels() == texture->getNumChannels(), "Number of Channels of parent and texture mismatch!");
     }
 
     ImageRepresentationGL::ImageRepresentationGL(ImageData* parent, const WeaklyTypedPointer& wtp) 
         : GenericAbstractImageRepresentation<ImageRepresentationGL>(parent)
     {
-        tgtAssert(wtp._numChannels == parent->getNumChannels(), "Number of Channels of parent and texture mismatch!");
+        cgtAssert(wtp._numChannels == parent->getNumChannels(), "Number of Channels of parent and texture mismatch!");
         createTexture(wtp);
     }
 
@@ -69,46 +67,40 @@ namespace campvis {
     }
 
     ImageRepresentationGL* ImageRepresentationGL::clone(ImageData* newParent) const {
-        GLubyte* data = _texture->downloadTextureToBuffer();
-        WeaklyTypedPointer wtp(WeaklyTypedPointer::baseType(_texture->getDataType()), WeaklyTypedPointer::numChannels(_texture->getFormat()), data);
+        WeaklyTypedPointer wtp = getWeaklyTypedPointerCopy();
         ImageRepresentationGL* toReturn = ImageRepresentationGL::create(newParent, wtp);
-        delete data;
+        delete static_cast<GLubyte*>(wtp._pointer);
         return toReturn;
     }
 
     void ImageRepresentationGL::createTexture(const WeaklyTypedPointer& wtp) {
-        tgtAssert(wtp._pointer != 0, "Pointer to image data must not be 0!");
+        cgtAssert(wtp._pointer != 0, "Pointer to image data must not be 0!");
 
-        _texture = new tgt::Texture(reinterpret_cast<GLubyte*>(wtp._pointer), getSize(), wtp.getGlFormat(), wtp.getGlInternalFormat(), wtp.getGlDataType(), tgt::Texture::LINEAR);
-        setupAndUploadTexture(_texture, wtp.isInteger(), wtp.isSigned());
-
-    }
-
-    void ImageRepresentationGL::setupAndUploadTexture(tgt::Texture* texture, bool isInteger, bool isSigned) {
-        // Set OpenGL pixel alignment to 1 to avoid problems with NPOT textures
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        switch (getDimensionality()) {
+        GLenum type = GL_TEXTURE_1D;
+        switch (_parent->getDimensionality()) {
             case 1:
-                _texture->setType(GL_TEXTURE_1D);
+                type = GL_TEXTURE_1D;
                 break;
             case 2:
-                _texture->setType(GL_TEXTURE_2D);
+                type = GL_TEXTURE_2D;
                 break;
             case 3:
-                _texture->setType(GL_TEXTURE_3D);
+                type = GL_TEXTURE_3D;
                 break;
             default:
-                tgtAssert(false, "Unsupported dimensionality of image.");
+                cgtAssert(false, "This dimensionality is not supported!");
                 break;
         }
 
-        tgt::TextureUnit tempUnit;
+        _texture = new cgt::Texture(type, getSize(), wtp.getGlInternalFormat(), cgt::Texture::LINEAR);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        cgt::TextureUnit tempUnit;
         tempUnit.activate();
         _texture->bind();
 
         // map signed integer types from [-1.0:1.0] to [0.0:1.0] in order to avoid clamping of negative values
-        if (isInteger && isSigned) {
+        if (wtp.isInteger() && wtp.isSigned()) {
             glPixelTransferf(GL_RED_SCALE,   0.5f);
             glPixelTransferf(GL_GREEN_SCALE, 0.5f);
             glPixelTransferf(GL_BLUE_SCALE,  0.5f);
@@ -122,10 +114,10 @@ namespace campvis {
             //_mappingInformation.setRealWorldMapping(LinearMapping<float>(.5f, .5f));
         }
 
-        _texture->uploadTexture();
-        _texture->setWrapping(tgt::Texture::CLAMP_TO_EDGE);
+        _texture->uploadTexture(reinterpret_cast<GLubyte*>(wtp._pointer), wtp.getGlFormat(), wtp.getGlDataType());
+        _texture->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
-        if (isInteger && isSigned) {
+        if (wtp.isInteger() && wtp.isSigned()) {
             // restore default
             glPixelTransferf(GL_RED_SCALE,   1.0f);
             glPixelTransferf(GL_GREEN_SCALE, 1.0f);
@@ -138,10 +130,7 @@ namespace campvis {
             glPixelTransferf(GL_ALPHA_BIAS,  0.0f);
         }
 
-        // revoke ownership of local pixel data from the texture
-        _texture->setPixelData(0);
-
-        tgt::TextureUnit::setZeroUnit();
+        cgt::TextureUnit::setZeroUnit();
         LGL_ERROR;
     }
 
@@ -149,12 +138,12 @@ namespace campvis {
         _texture->bind();
     }
 
-    void ImageRepresentationGL::bind(const tgt::TextureUnit& texUnit) const {
+    void ImageRepresentationGL::bind(const cgt::TextureUnit& texUnit) const {
         texUnit.activate();
         _texture->bind();
     }
 
-    void ImageRepresentationGL::bind(tgt::Shader* shader, const tgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/, const std::string& texParamsUniform) const {
+    void ImageRepresentationGL::bind(cgt::Shader* shader, const cgt::TextureUnit& texUnit, const std::string& texUniform /*= "_texture"*/, const std::string& texParamsUniform) const {
         bind(texUnit);
         bool tmp = shader->getIgnoreUniformLocationError();
         shader->setIgnoreUniformLocationError(true);
@@ -166,47 +155,39 @@ namespace campvis {
 
             case 2:
                 shader->setUniform(texUniform, texUnit.getUnitNumber());
-                shader->setUniform(texParamsUniform + "._size", tgt::vec2(getSize().xy()));
-                shader->setUniform(texParamsUniform + "._sizeRCP", tgt::vec2(1.f) / tgt::vec2(getSize().xy()));
+                shader->setUniform(texParamsUniform + "._size", cgt::vec2(getSize().xy()));
+                shader->setUniform(texParamsUniform + "._sizeRCP", cgt::vec2(1.f) / cgt::vec2(getSize().xy()));
                 shader->setUniform(texParamsUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
                 break;
 
             case 3:
                 shader->setUniform(texUniform, texUnit.getUnitNumber());
-                shader->setUniform(texParamsUniform + "._size", tgt::vec3(getSize()));
-                shader->setUniform(texParamsUniform + "._sizeRCP", tgt::vec3(1.f) / tgt::vec3(getSize()));
+                shader->setUniform(texParamsUniform + "._size", cgt::vec3(getSize()));
+                shader->setUniform(texParamsUniform + "._sizeRCP", cgt::vec3(1.f) / cgt::vec3(getSize()));
                 shader->setUniform(texParamsUniform + "._numChannels", static_cast<int>(_parent->getNumChannels()));
                 shader->setUniform(texParamsUniform + "._voxelSize", _parent->getMappingInformation().getVoxelSize());
-                shader->setUniform(texParamsUniform + "._voxelSizeRCP", tgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
+                shader->setUniform(texParamsUniform + "._voxelSizeRCP", cgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texParamsUniform + "._textureToWorldMatrix", _parent->getMappingInformation().getTextureToWorldMatrix());
                 shader->setUniform(texParamsUniform + "._worldToTextureMatrix", _parent->getMappingInformation().getWorldToTextureMatrix());
-                shader->setUniform(texParamsUniform + "._realWorldMapping", tgt::vec2(_parent->getMappingInformation().getRealWorldMapping()._shift, _parent->getMappingInformation().getRealWorldMapping()._scale));
+                shader->setUniform(texParamsUniform + "._realWorldMapping", cgt::vec2(_parent->getMappingInformation().getRealWorldMapping()._shift, _parent->getMappingInformation().getRealWorldMapping()._scale));
                 break;
 
             default:
-                tgtAssert(false, "Should not reach this!");
+                cgtAssert(false, "Should not reach this!");
                 break;
         }
         shader->setIgnoreUniformLocationError(tmp);
         LGL_ERROR;
     }
 
-    void ImageRepresentationGL::downloadTexture() const {
-        _texture->downloadTexture();
-    }
-
-    const tgt::Texture* ImageRepresentationGL::getTexture() const {
-
+    const cgt::Texture* ImageRepresentationGL::getTexture() const {
         return _texture;
     }
 
     size_t ImageRepresentationGL::getLocalMemoryFootprint() const {
         size_t sum = 0;
         if (_texture != 0) {
-            sum += sizeof(tgt::Texture);
-            if (_texture->getPixelData() != 0) {
-                sum += _texture->getBpp() + _texture->getArraySize();
-            }
+            sum += sizeof(cgt::Texture);
         }
 
         return sizeof(*this) + sum;
@@ -216,25 +197,23 @@ namespace campvis {
         return _texture->getSizeOnGPU();
     }
 
-    const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointer() const {
-        if (_texture->getPixelData() == 0) {
-            _texture->downloadTexture();
-        }
-        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), _texture->getPixelData());
-    }
-
     void ImageRepresentationGL::unbind() const {
         _texture->unbind();
     }
 
     const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointerCopy() const {
-        void* ptr = _texture->downloadTextureToBuffer(_texture->getFormat(), _texture->getDataType());
-        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(_texture->getDataType()), _texture->getNumChannels(), ptr);
+        GLint format = cgt::Texture::calcMatchingFormat(_texture->getInternalFormat());
+        GLenum dataType = cgt::Texture::calcMatchingDataType(_texture->getInternalFormat());
+        GLubyte* data = _texture->downloadTextureToBuffer(format, dataType);
+
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(dataType), _texture->getNumChannels(), data);
     }
 
     const WeaklyTypedPointer ImageRepresentationGL::getWeaklyTypedPointerConvert(GLenum dataType) const {
-        void* ptr = _texture->downloadTextureToBuffer(_texture->getFormat(), dataType);
-        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(dataType), _texture->getNumChannels(), ptr);
+        GLint format = cgt::Texture::calcMatchingFormat(_texture->getInternalFormat());
+        GLubyte* data = _texture->downloadTextureToBuffer(format, dataType);
+
+        return WeaklyTypedPointer(WeaklyTypedPointer::baseType(dataType), _texture->getNumChannels(), data);
     }
 
 }

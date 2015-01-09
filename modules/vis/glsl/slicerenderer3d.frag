@@ -39,6 +39,6 @@ void main() {
     out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
     // don't write fragment if fully transparent (in particular don't write to depth buffer!)
-    if (out_Color == 0.0)
+    if (out_Color.a == 0.0)
         discard;
 }

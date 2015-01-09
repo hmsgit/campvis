@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "predicatevolumeexplorer.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/geometrydatafactory.h"
@@ -43,7 +43,7 @@ namespace campvis {
     const std::string PredicateVolumeExplorer::loggerCat_ = "CAMPVis.modules.vis.PredicateVolumeExplorer";
 
     PredicateVolumeExplorer::PredicateVolumeExplorer(IVec2Property* viewportSizeProp)
-        : VolumeExplorer(viewportSizeProp, new PointPredicateRaycaster(0))
+        : VolumeExplorer(viewportSizeProp, new SliceExtractor(0), new PointPredicateRaycaster(0))
         , p_inputLabels("InputLabels", "Input Label Image", "", DataNameProperty::READ)
         , p_inputSnr("InputSnr", "Input SNR", "", DataNameProperty::READ)
         , p_inputVesselness("InputVesselness", "Input Vesselness", "", DataNameProperty::READ)
@@ -112,7 +112,7 @@ namespace campvis {
 
     void PredicateVolumeExplorer::onPropertyChanged(const AbstractProperty* prop) {
         if (prop == &p_inputVolume || prop == &p_histogram) {
-            invalidate(BITSET_INVALID);
+            invalidate(BITSET_INVALID | VR_INVALID);
         }
 
         VolumeExplorer::onPropertyChanged(prop);
@@ -132,13 +132,13 @@ namespace campvis {
         VolumeExplorer::onProcessorInvalidated(processor);
     }
 
-    void PredicateVolumeExplorer::onEvent(tgt::Event* e) {
+    void PredicateVolumeExplorer::onEvent(cgt::Event* e) {
         bool doHistogramUpdateFromScribbles = false;
 
         // intercept the finishing of a scribble paint, so that we can trigger the predicate histogram update.
-        if (typeid(*e) == typeid(tgt::MouseEvent)) {
-            tgt::MouseEvent* me = static_cast<tgt::MouseEvent*>(e);
-            if (_scribblePointer != nullptr && me->action() == tgt::MouseEvent::RELEASED) {
+        if (typeid(*e) == typeid(cgt::MouseEvent)) {
+            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
+            if (_scribblePointer != nullptr && me->action() == cgt::MouseEvent::RELEASED) {
                 doHistogramUpdateFromScribbles = true;
             }
         }
@@ -171,7 +171,7 @@ namespace campvis {
         invalidate(INVALID_RESULT);
     }
 
-    std::vector<int> PredicateVolumeExplorer::computeBitHistogram(const std::vector<tgt::vec3>& voxels) {
+    std::vector<int> PredicateVolumeExplorer::computeBitHistogram(const std::vector<cgt::vec3>& voxels) {
         std::vector<int> toReturn = std::vector<int>(p_histogram.getPredicateHistogram()->getPredicates().size(), 0);
 
         if (_bitmaskHandle.getData() != nullptr) {

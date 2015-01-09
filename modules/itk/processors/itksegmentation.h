@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
@@ -32,13 +32,14 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
     /**
     * Performs segmentation on input image using ITK.
     */
-    class ItkSegmentation : public VolumeExplorer {
+    class CAMPVIS_MODULES_API ItkSegmentation : public VolumeExplorer {
     public:
         /**
         * Constructs a new ItkSegmentation Processor
@@ -51,7 +52,7 @@ namespace campvis {
         virtual ~ItkSegmentation();
 
         /// \see AbstractEventHandler::execute()
-        virtual void onEvent(tgt::Event* e);
+        virtual void onEvent(cgt::Event* e);
 
         /// \see AbstractProcessor::getName()
         virtual const std::string getName() const { return "ItkSegmentation"; };

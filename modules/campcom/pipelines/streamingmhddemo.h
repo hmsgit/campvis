@@ -25,13 +25,13 @@
 #ifndef STREAMINGMHDDEMO_H__
 #define STREAMINGMHDDEMO_H__
 
-#include "modules/campcom/processors/campcommhdreceiver.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
+#include "modules/modulesapi.h"
+#include "modules/campcom/processors/campcommhdreceiver.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
-    class StreamingMhdDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API StreamingMhdDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.

@@ -40,7 +40,7 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the TumVisApplication instance given during creation.
      */
-    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots<> {
+    class PropertyCollectionWidget : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:
@@ -84,13 +84,13 @@ namespace campvis {
          * Removes the property widget for \a prop, disconnects all neccesary signals, etc.
          * \param   prop    Iterator to widget map for the property to remove.
          */
-        void removeProperty(std::map<AbstractProperty*, QWidget*>::iterator prop);
+        void removeProperty(AbstractProperty* prop, QWidget* widget);
 
     signals:
         void s_widgetVisibilityChanged(QWidget* widget, bool visibility);
 
         void propertyAdded(AbstractProperty* prop);
-        void propertyRemoved(std::map<AbstractProperty*, QWidget*>::iterator prop);
+        void propertyRemoved(AbstractProperty* prop, QWidget* widget);
 
     private:
         /**

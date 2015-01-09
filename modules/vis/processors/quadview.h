@@ -29,7 +29,9 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -37,7 +39,7 @@ namespace campvis {
     /**
      * Combines up to four render targets into a single one.
      */
-    class QuadView : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API QuadView : public VisualizationProcessor {
     public:
         /**
          * Constructs a new QuadView Processor
@@ -76,7 +78,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

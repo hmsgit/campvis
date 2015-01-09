@@ -24,9 +24,9 @@
 
 #include "glmorphologyfilter.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/imagerepresentationgl.h"
@@ -94,8 +94,8 @@ namespace campvis {
                 ops = StringUtils::replaceAll(ops, "o", "ed"); // opening := erosion, dilation
                 ops = StringUtils::replaceAll(ops, "c", "de"); // closing := dilation, erosion
 
-                const tgt::Texture* inputTexture = img->getTexture();
-                tgt::Texture* outputTexture = nullptr;
+                const cgt::Texture* inputTexture = img->getTexture();
+                cgt::Texture* outputTexture = nullptr;
 
                 for (size_t i = 0; i < ops.length(); ++i) {
                     if (ops[i] == 'e') {
@@ -115,7 +115,7 @@ namespace campvis {
 
                 // put resulting image into DataContainer
                 if (outputTexture != 0) {
-                    ImageData* id = new ImageData(3, img->getSize(), 1);
+                    ImageData* id = new ImageData(3, img->getSize(), img->getParent()->getNumChannels());
                     ImageRepresentationGL::create(id, outputTexture);
                     id->setMappingInformation(img->getParent()->getMappingInformation());
                     data.addData(p_outputImage.getValue(), id);
@@ -124,7 +124,7 @@ namespace campvis {
                     data.addDataHandle(p_outputImage.getValue(), img.getDataHandle());
                 }
 
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 LGL_ERROR;
             }
             else {
@@ -133,20 +133,19 @@ namespace campvis {
             }
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 
-    tgt::Texture* GlMorphologyFilter::applyFilter(const tgt::Texture* inputTexture, tgt::Shader* filter) const {
-        tgtAssert(inputTexture != 0, "Input texture must not be 0.");
-        const tgt::ivec3& size = inputTexture->getDimensions();
+    cgt::Texture* GlMorphologyFilter::applyFilter(const cgt::Texture* inputTexture, cgt::Shader* filter) const {
+        cgtAssert(inputTexture != 0, "Input texture must not be 0.");
+        const cgt::ivec3& size = inputTexture->getDimensions();
 
-        tgt::TextureUnit inputUnit;
+        cgt::TextureUnit inputUnit;
         inputUnit.activate();
 
         // create texture for result
-        tgt::Texture* resultTexture = new tgt::Texture(0, size, inputTexture->getFormat(), inputTexture->getInternalFormat(), inputTexture->getDataType(), inputTexture->getFilter());
-        resultTexture->uploadTexture();
+        cgt::Texture* resultTexture = new cgt::Texture(inputTexture->getType(), size, inputTexture->getInternalFormat(), inputTexture->getFilter());
 
         // activate shader and bind textures
         inputTexture->bind();

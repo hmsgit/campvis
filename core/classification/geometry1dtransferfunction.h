@@ -43,7 +43,7 @@ namespace campvis {
          * \param   size            Size of the transfer function texture
          * \param   intensityDomain Intensity Domain where the transfer function is mapped to during classification
          */
-        explicit Geometry1DTransferFunction(size_t size, const tgt::vec2& intensityDomain = tgt::vec2(0.f, 1.f));
+        explicit Geometry1DTransferFunction(size_t size, const cgt::vec2& intensityDomain = cgt::vec2(0.f, 1.f));
 
         /**
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!

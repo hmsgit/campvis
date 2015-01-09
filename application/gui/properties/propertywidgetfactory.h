@@ -25,8 +25,8 @@
 #ifndef PROPERTYWIDGETFACTORY_H__
 #define PROPERTYWIDGETFACTORY_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/singleton.h"
+#include "cgt/logmanager.h"
+#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
@@ -125,7 +125,7 @@ namespace campvis {
          * \return  The newly created property widget.
          */
         static AbstractPropertyWidget* create(AbstractProperty* property, DataContainer* dc = nullptr, QWidget* parent = nullptr) {
-            tgtAssert(dynamic_cast<PropertyType*>(property) != nullptr, "Incompatible types - this should not happen!");
+            cgtAssert(dynamic_cast<PropertyType*>(property) != nullptr, "Incompatible types - this should not happen!");
             return new WidgetType(static_cast<PropertyType*>(property), dc, parent);
         }
 

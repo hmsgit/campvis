@@ -39,14 +39,14 @@ namespace campvis {
         PropertyCollection::iterator it = findProperty(prop.getName());
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
-            s_propertyRemoved(*it);
+            s_propertyRemoved.emitSignal(*it);
             *it = &prop;
         }
         else {
             _properties.push_back(&prop);
         }
         prop.s_changed.connect(this, &HasPropertyCollection::onPropertyChanged);
-        s_propertyAdded(&prop);
+        s_propertyAdded.emitSignal(&prop);
     }
 
     void HasPropertyCollection::removeProperty(AbstractProperty& prop) {
@@ -54,7 +54,7 @@ namespace campvis {
         if (it != _properties.end()) {
             (*it)->s_changed.disconnect(this);
             _properties.erase(it);
-            s_propertyRemoved(&prop);
+            s_propertyRemoved.emitSignal(&prop);
         }
     }
 
@@ -131,11 +131,21 @@ namespace campvis {
     void HasPropertyCollection::deinitAllProperties() {
         for (PropertyCollection::iterator it = _properties.begin(); it != _properties.end(); ++it) {
             (*it)->deinit();
+            (*it)->s_changed.disconnect(this);
         }
     }
 
     void HasPropertyCollection::onPropertyChanged(const AbstractProperty* /*prop*/) {
         // nothing to do here, method is just provided as convenience for child classes.
+    }
+
+    void HasPropertyCollection::clearProperties() {
+        for (auto it = _properties.begin(); it != _properties.end(); ++it) {
+            (*it)->s_changed.disconnect(this);
+            s_propertyRemoved.emitSignal(*it);
+        }
+
+        _properties.clear();
     }
 
 }

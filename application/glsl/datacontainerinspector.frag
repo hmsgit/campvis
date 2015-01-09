@@ -75,7 +75,7 @@ void main() {
                 out_Color = vec4((abs(texel.rgb) - vec3(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x), 1.0);
             }
             else if (_3dTextureParams._numChannels == 4) {
-                out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
+                out_Color = vec4((abs(texel.rgb) - vec3(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x), texel.a);
             }
             else {
                 out_Color = vec4(0.1, 0.6, 1.0, 0.75);
@@ -89,10 +89,10 @@ void main() {
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
         }
         else if (_2dTextureParams._numChannels == 3) {
-            out_Color = vec4(abs(texel.rgb), 1.0);
+            out_Color = vec4((abs(texel.rgb) - vec3(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x), 1.0);
         }
         else if (_2dTextureParams._numChannels == 4) {
-            out_Color = (abs(texel) - vec4(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x);
+            out_Color = vec4((abs(texel.rgb) - vec3(_transferFunctionParams._intensityDomain.x)) / (_transferFunctionParams._intensityDomain.y - _transferFunctionParams._intensityDomain.x), texel.a);
         }
         else {
             out_Color = vec4(0.1, 0.6, 1.0, 0.75);

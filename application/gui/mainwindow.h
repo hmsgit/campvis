@@ -32,6 +32,7 @@
 #include "application/gui/properties/propertycollectionwidget.h"
 #include "application/gui/logviewerwidget.h"
 #include "application/gui/scriptingwidget.h"
+#include "application/gui/workflowcontrollerwidget.h"
 #include "application/tools/qtexteditlog.h"
 #include "application/ui_mainwindow.h"
 
@@ -52,7 +53,7 @@ namespace campvis {
      * Main Window for the CAMPVis application.
      * Wraps a nice Qt GUI around the CampVisApplication instance given during creation.
      */
-    class MainWindow : public QMainWindow, public sigslot::has_slots<> {
+    class MainWindow : public QMainWindow, public sigslot::has_slots {
         Q_OBJECT
 
     public:
@@ -89,7 +90,14 @@ namespace campvis {
          * \param   name       the name of the visualization pipeline
          * \param   canvas     the pipeline's canvas
          */
-        void addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
+        MdiDockableWindow * addVisualizationPipelineWidget(const std::string& name, QWidget* canvas);
+
+
+        /**
+         * Sets the workflow of this Mainwindow to \a w.
+         * \param   w   The workflow to display for this window.
+         */
+        void setWorkflow(AbstractWorkflow* w);
 
     protected:
         /**
@@ -112,7 +120,7 @@ namespace campvis {
          * \param   index   Index of the selected item
          */
         void onPipelineWidgetItemClicked(const QModelIndex& index);
-
+        
         /**
          * Slot to be called when _btnExecute was clicked.
          */
@@ -122,6 +130,16 @@ namespace campvis {
          * Slot to be called when _btnShowDataContainerInspector was clicked.
          */
         void onBtnShowDataContainerInspectorClicked();
+
+        /**
+         * Slot to be called when _btnExecute was clicked.
+         */
+        void onBtnLuaLoadClicked();
+
+        /**
+         * Slot to be called when _btnShowDataContainerInspector was clicked.
+         */
+        void onBtnLuaSaveClicked();
 
         /// Slot to be called when _btnPipelineFactory was clicked;
         void onBtnPipelineFactoryClicked();
@@ -190,6 +208,10 @@ namespace campvis {
 
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
+        WorkflowControllerWidget* _workflowWidget;          ///< Widget showing the workflow controller
+
+        QPushButton* _btnLuaLoad;
+        QPushButton* _btnLuaSave;
 
         std::vector<QDockWidget*> _primaryDocks;            ///< Docks located in top docking area of the main window
     };

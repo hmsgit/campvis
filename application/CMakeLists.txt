@@ -28,6 +28,7 @@ FILE(GLOB CampvisApplicationForms
 )
 
 SET(CampvisApplicationToBeMocced
+    qtjobprocessor.h
     gui/mainwindow.h
     gui/datacontainerinspectorcanvas.h
     gui/datacontainerinspectorwidget.h
@@ -39,6 +40,7 @@ SET(CampvisApplicationToBeMocced
     gui/logviewerwidget.h
     gui/loghighlighter.h
     gui/scriptingwidget.h
+    gui/workflowcontrollerwidget.h
     gui/mdi/mdidockarea.h
     gui/mdi/mdidockablewindow.h
     gui/mdi/mdidockedwindow.h
@@ -49,10 +51,10 @@ SET(CampvisApplicationToBeMocced
     gui/properties/abstracttransferfunctioneditor.h
     gui/properties/boolpropertywidget.h
     gui/properties/buttonpropertywidget.h
-    gui/properties/camerapropertywidget.h
     gui/properties/datanamepropertywidget.h
     gui/properties/intpropertywidget.h
     gui/properties/floatpropertywidget.h
+    gui/properties/colorpropertywidget.h
     gui/properties/geometry1dtransferfunctioneditor.h
     gui/properties/geometry2dtransferfunctioneditor.h
     gui/properties/metapropertywidget.h
@@ -60,6 +62,7 @@ SET(CampvisApplicationToBeMocced
     gui/properties/propertycollectionwidget.h
     gui/properties/simpletransferfunctioneditor.h
     gui/properties/stringpropertywidget.h
+    gui/properties/statuspropertywidget.h
     gui/properties/transferfunctionpropertywidget.h
     tools/qtexteditlog.h
     tools/bufferinglog.h
@@ -94,7 +97,7 @@ LIST(APPEND CampvisApplicationSources ${CampvisApplicationFormsHeaders})
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
 
-SET(CampvisMainLibs campvis-core campvis-modules tgt)
+SET(CampvisMainLibs campvis-core campvis-modules cgt sigslot)
 
 IF(CAMPVIS_ENABLE_SCRIPTING)
     LIST(APPEND CampvisMainLibs campvis-scripting)
@@ -114,6 +117,7 @@ IF(CAMPVIS_GROUP_SOURCE_FILES)
 ENDIF()
 
 IF(CAMPVIS_DEPLOY_SHADERS)
+    LIST(APPEND CampvisShaderDirectories "application/data")
     LIST(APPEND CampvisShaderDirectories "application/glsl")
     LIST(APPEND CampvisShaderDirectories "core/glsl")
 
@@ -124,3 +128,10 @@ IF(CAMPVIS_DEPLOY_SHADERS)
         )
     ENDFOREACH()
 ENDIF(CAMPVIS_DEPLOY_SHADERS)
+
+
+# copy over Lua stuff
+ADD_CUSTOM_COMMAND(
+    TARGET campvis-application
+    COMMAND ${CMAKE_COMMAND} -E copy "${CampvisHome}/application/lua/inspect.lua" "$<TARGET_FILE_DIR:campvis-application>/lua-mods/inspect.lua"
+)

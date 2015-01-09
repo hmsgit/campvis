@@ -23,12 +23,10 @@
 // ================================================================================================
 
 #include "geometrydata.h"
-#include "tgt/buffer.h"
-#include "tgt/logmanager.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/vertexarrayobject.h"
-
-#include "core/tools/opengljobprocessor.h"
+#include "cgt/buffer.h"
+#include "cgt/logmanager.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/vertexarrayobject.h"
 
 namespace campvis {
 
@@ -37,20 +35,22 @@ namespace campvis {
     GeometryData::GeometryData() 
         : AbstractData()
         , _buffersDirty(true)
-        , _verticesBuffer(0)
-        , _texCoordsBuffer(0)
-        , _colorsBuffer(0)
-        , _normalsBuffer(0)
+        , _verticesBuffer(nullptr)
+        , _texCoordsBuffer(nullptr)
+        , _colorsBuffer(nullptr)
+        , _normalsBuffer(nullptr)
+        , _pickingBuffer(nullptr)
     {
     }
 
     GeometryData::GeometryData(const GeometryData& rhs)
         : AbstractData(rhs)
         , _buffersDirty(true)
-        , _verticesBuffer(0)
-        , _texCoordsBuffer(0)
-        , _colorsBuffer(0)
-        , _normalsBuffer(0)
+        , _verticesBuffer(nullptr)
+        , _texCoordsBuffer(nullptr)
+        , _colorsBuffer(nullptr)
+        , _normalsBuffer(nullptr)
+        , _pickingBuffer(nullptr)
     {
 
     }
@@ -74,39 +74,45 @@ namespace campvis {
     void GeometryData::deleteBuffers() const {
         for (int i = 0; i < NUM_BUFFERS; ++i) {
             delete _buffers[i];
-            _buffers[i] = 0;
+            _buffers[i] = nullptr;
         }
     }
 
     size_t GeometryData::getVideoMemoryFootprint() const {
         size_t sum = 0;
 
-        if (_verticesBuffer != 0)
+        if (_verticesBuffer != nullptr)
             sum += _verticesBuffer->getBufferSize();
-        if (_texCoordsBuffer != 0)
+        if (_texCoordsBuffer != nullptr)
             sum += _texCoordsBuffer->getBufferSize();
-        if (_colorsBuffer != 0)
+        if (_colorsBuffer != nullptr)
             sum += _colorsBuffer->getBufferSize();
-        if (_normalsBuffer != 0)
+        if (_normalsBuffer != nullptr)
             sum += _normalsBuffer->getBufferSize();
+        if (_pickingBuffer != nullptr)
+            sum += _pickingBuffer->getBufferSize();
 
         return sum;
     }
 
-    const tgt::BufferObject* GeometryData::getVerticesBuffer() const {
+    const cgt::BufferObject* GeometryData::getVerticesBuffer() const {
         return _verticesBuffer;
     }
 
-    const tgt::BufferObject* GeometryData::getTextureCoordinatesBuffer() const {
+    const cgt::BufferObject* GeometryData::getTextureCoordinatesBuffer() const {
         return _texCoordsBuffer;
     }
 
-    const tgt::BufferObject* GeometryData::getColorsBuffer() const {
+    const cgt::BufferObject* GeometryData::getColorsBuffer() const {
         return _colorsBuffer;
     }
 
-    const tgt::BufferObject* GeometryData::getNormalsBuffer() const {
+    const cgt::BufferObject* GeometryData::getNormalsBuffer() const {
         return _normalsBuffer;
+    }
+
+    const cgt::BufferObject* GeometryData::getPickingBuffer() const {
+        return _pickingBuffer;
     }
 
 }

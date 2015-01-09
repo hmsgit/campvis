@@ -26,20 +26,21 @@
 #define ABSTRACTIMAGEFILTER_H__
 
 #include <tbb/tbb.h>
-#include "tgt/assert.h"
+#include "cgt/assert.h"
+#include "modules/modulesapi.h"
 
 #include <vector>
 
 namespace campvis {
     class ImageRepresentationLocal;
 
-    struct AbstractImageFilter {
+    struct CAMPVIS_MODULES_API AbstractImageFilter {
         AbstractImageFilter(const ImageRepresentationLocal* input, ImageRepresentationLocal* output)
             : _input(input)
             , _output(output)
         {
-            tgtAssert(input != 0, "Input image must not be 0.");
-            tgtAssert(output != 0, "Output image must not be 0.");
+            cgtAssert(input != 0, "Input image must not be 0.");
+            cgtAssert(output != 0, "Output image must not be 0.");
         }
 
         virtual void operator() (const tbb::blocked_range<size_t>& range) const = 0;
@@ -51,7 +52,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    struct ImageFilterMedian : public AbstractImageFilter {
+    struct CAMPVIS_MODULES_API ImageFilterMedian : public AbstractImageFilter {
     public:
         ImageFilterMedian(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize);
 
@@ -63,7 +64,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    struct ImageFilterGauss : public AbstractImageFilter {
+    struct CAMPVIS_MODULES_API ImageFilterGauss : public AbstractImageFilter {
     public:
         ImageFilterGauss(const ImageRepresentationLocal* input, ImageRepresentationLocal* output, size_t kernelSize, float sigma);
 

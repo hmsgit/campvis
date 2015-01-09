@@ -29,11 +29,12 @@
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/genericproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -41,7 +42,7 @@ namespace campvis {
     /**
      * Performs a predicate-based volume ray casting.
      */
-    class PointPredicateRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API PointPredicateRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new PointPredicateRaycaster Processor
@@ -88,7 +89,7 @@ namespace campvis {
     private:
         void onHistogramHeaderChanged();
 
-        tgt::Shader* _clusterShader;
+        cgt::Shader* _clusterShader;
 
         static const std::string loggerCat_;
     };

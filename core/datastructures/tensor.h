@@ -25,7 +25,7 @@
 #ifndef TENSOR_H__
 #define TENSOR_H__
 
-#include "tgt/matrix.h"
+#include "cgt/matrix.h"
 
 namespace campvis {
 
@@ -110,10 +110,10 @@ namespace campvis {
 
         /**
          * Returns a 3x3 matrix representation of this rank-2 Tensor
-         * \return  tgt::Matrix3<T>(Dxx, Dxy, Dxz, Dxy, Dyy, Dyz, Dxz, Dyz, Dzz)
+         * \return  cgt::Matrix3<T>(Dxx, Dxy, Dxz, Dxy, Dyy, Dyz, Dxz, Dyz, Dzz)
          */
-        tgt::Matrix3<T> getMatrix() const {
-            return tgt::Matrix3<T>(Dxx, Dxy, Dxz, Dxy, Dyy, Dyz, Dxz, Dyz, Dzz);
+        cgt::Matrix3<T> getMatrix() const {
+            return cgt::Matrix3<T>(Dxx, Dxy, Dxz, Dxy, Dyy, Dyz, Dxz, Dyz, Dzz);
         }
 
         /**

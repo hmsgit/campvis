@@ -12,12 +12,20 @@ INCLUDE(${SWIG_USE_FILE})
 FILE(GLOB CampvisScriptingSources
     *.cpp
     glue/*.cpp
+	luagen/*.cpp
+	luagen/properties/*.cpp
 )
 
 FILE(GLOB CampvisScriptingHeaders
     *.h
     glue/*.h
+	luagen/*.h
+	luagen/properties/*.h
 )
+
+IF(WIN32)
+    LIST(APPEND CampvisScriptingDefinitions /wd4267)
+ENDIF(WIN32)
 
 
 # Place all of CAMPVis' Lua modules in one sub-directory and shorten their names. This is done to
@@ -27,9 +35,10 @@ SET(CampvisLuaModulesDirectory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_IN
 # Lua modules will be placed in a sub-directory that won't be picked up by Lua automatically. Let
 # the code know via a #define what that sub-directory is so that it can instruct Lua to search it.
 LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_MODS_PATH=\"${CampvisLuaModulesDirectory}?${CMAKE_SHARED_MODULE_SUFFIX}\"")
+LIST(APPEND CampvisGlobalDefinitions "-DCAMPVIS_LUA_SCRIPTS_PATH=\"${CampvisLuaModulesDirectory}?.lua\"")
 SET(CampvisGlobalDefinitions "${CampvisGlobalDefinitions}" PARENT_SCOPE)
 
-SET(CampvisBindingDirs ext/tgt core)
+SET(CampvisBindingDirs ext/cgt core)
 
 # Look for bindings for all enabled CAMPVis modules
 FOREACH(ModName ${CampvisModules})
@@ -61,7 +70,7 @@ MACRO(DECLARE_LUA_MODULE InterfaceFile)
     SET_SOURCE_FILES_PROPERTIES(${InterfaceFile} PROPERTIES SWIG_FLAGS "-I${CampvisHome}")
     LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
     SWIG_ADD_MODULE(${LuaModName} lua ${InterfaceFile})
-    SWIG_LINK_LIBRARIES(${LuaModName} tgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
+    SWIG_LINK_LIBRARIES(${LuaModName} cgt campvis-core campvis-modules ${CampvisGlobalExternalLibs})
 
     SET(LuaModFullPath "${CampvisLuaModulesDirectory}${LuaModShortName}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
@@ -118,4 +127,10 @@ ADD_LIBRARY(campvis-scripting ${CampvisSharedStaticModulesFix}
 )
 
 ADD_DEPENDENCIES(campvis-scripting ${CampvisLuaModules})
-TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules tgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})
+TARGET_LINK_LIBRARIES(campvis-scripting campvis-core campvis-modules cgt ${CampvisGlobalExternalLibs})
+
+IF(CAMPVIS_GROUP_SOURCE_FILES)
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisScriptingSources ${CampvisHome} "")
+    DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisScriptingHeaders ${CampvisHome} "")
+ENDIF()

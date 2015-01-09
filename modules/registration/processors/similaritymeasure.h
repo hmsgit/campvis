@@ -27,9 +27,9 @@
 
 #include <string>
 
-#include "tgt/buffer.h"
-#include "tgt/matrix.h"
-#include "tgt/vertexarrayobject.h"
+#include "cgt/buffer.h"
+#include "cgt/matrix.h"
+#include "cgt/vertexarrayobject.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
@@ -41,7 +41,9 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -54,7 +56,7 @@ namespace campvis {
     /**
      * Computes a Similarity Measure using OpenGL
      */
-    class SimilarityMeasure : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API SimilarityMeasure : public VisualizationProcessor {
     public:
         enum AdditionalInvalidationLevels {
             PERFORM_OPTIMIZATION = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 0,
@@ -94,7 +96,7 @@ namespace campvis {
          * \param   rotation        Rotation to apply to \a movingImage
          * \return  The similarity
          */
-        float computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
+        float computeSimilarity(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const cgt::vec3& translation, const cgt::vec3& rotation);
 
         /**
          * Computes the difference image between \a movingImage and \a referenceImage using the given 
@@ -105,7 +107,7 @@ namespace campvis {
          * \param   translation     Translation to apply to \a movingImage
          * \param   rotation        Rotation to apply to \a movingImage
          */
-        void generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
+        void generateDifferenceImage(DataContainer* dc, const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const cgt::vec3& translation, const cgt::vec3& rotation);
 
         DataNameProperty p_referenceId;                 ///< image ID for reference image
         DataNameProperty p_movingId;                    ///< image ID for moving image
@@ -135,7 +137,7 @@ namespace campvis {
          * \param   eulerAngles     A vec3 with euler angles
          * \return  The corresponding 4x4 rotation matrix.
          */
-        static tgt::mat4 euleranglesToMat4(const tgt::vec3& eulerAngles);
+        static cgt::mat4 euleranglesToMat4(const cgt::vec3& eulerAngles);
 
         /**
          * Computes the registration matrix to align \a movingImage to \a referenceImage with the 
@@ -148,13 +150,13 @@ namespace campvis {
          * \param   rotation        Rotation to apply to \a movingImage
          * \return  The registration matrix to align \a movingImage to \a referenceImage in texture coordinates.
          */
-        static tgt::mat4 computeRegistrationMatrix(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const tgt::vec3& translation, const tgt::vec3& rotation);
+        static cgt::mat4 computeRegistrationMatrix(const ImageRepresentationGL* referenceImage, const ImageRepresentationGL* movingImage, const cgt::vec3& translation, const cgt::vec3& rotation);
 
         IVec2Property p_viewportSize;
 
-        tgt::Shader* _sadssdCostFunctionShader;         ///< Shader for computing SAD/SSD
-        tgt::Shader* _nccsnrCostFunctionShader;         ///< Shader for computing NCC/SNR
-        tgt::Shader* _differenceShader;                 ///< Shader for computing the difference image
+        cgt::Shader* _sadssdCostFunctionShader;         ///< Shader for computing SAD/SSD
+        cgt::Shader* _nccsnrCostFunctionShader;         ///< Shader for computing NCC/SNR
+        cgt::Shader* _differenceShader;                 ///< Shader for computing the difference image
         GlReduction* _glr;                              ///< Pointer to GlReduction object
 
         static const std::string loggerCat_;

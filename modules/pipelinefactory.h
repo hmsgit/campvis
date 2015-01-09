@@ -25,11 +25,13 @@
 #ifndef PIPELINEFACTORY_H__
 #define PIPELINEFACTORY_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/singleton.h"
+#include "cgt/logmanager.h"
+#include "cgt/singleton.h"
 
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
+
+#include "modules/modulesapi.h"
 
 #include <map>
 #include <string>
@@ -38,6 +40,7 @@
 
 namespace campvis {
     class AbstractPipeline;
+    class AbstractWorkflow;
     class DataContainer;
 
     /**
@@ -47,7 +50,7 @@ namespace campvis {
      * 
      * \note    PipelineFactory is a thread-safe lazy-instantiated singleton.
      */
-    class PipelineFactory {
+    class CAMPVIS_MODULES_API PipelineFactory {
     public:
         /**
          * Returns a reference to the PipelineFactory singleton.
@@ -62,6 +65,8 @@ namespace campvis {
 
         AbstractPipeline* createPipeline(const std::string& id, DataContainer* dc) const;
 
+        AbstractWorkflow* createWorkflow(const std::string& id) const;
+
         /**
          * Statically registers the pipeline of type T using \a callee as factory method.
          * \note    The template instantiation of PipelineRegistrar takes care of calling this method.
@@ -72,15 +77,36 @@ namespace campvis {
         size_t registerPipeline(std::function<AbstractPipeline*(DataContainer*)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
-            std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> >::iterator it = _pipelineMap.lower_bound(T::getId());
+            auto it = _pipelineMap.lower_bound(T::getId());
             if (it == _pipelineMap.end() || it->first != T::getId()) {
                 _pipelineMap.insert(it, std::make_pair(T::getId(), callee));
             }
             else {
-                tgtAssert(false, "Registered two pipelines with the same ID.");
+                cgtAssert(false, "Registered two pipelines with the same ID.");
             }
             
             return _pipelineMap.size();
+        }
+        
+        /**
+         * Statically registers the workflow of type T using \a callee as factory method.
+         * \note    The template instantiation of WorkflowRegistrar takes care of calling this method.
+         * \param   callee  Factory method to call to create an instance of type T
+         * \return  The registration index.
+         */
+        template<typename T>
+        size_t registerWorkflow(std::function<AbstractWorkflow*()> callee) {
+            tbb::spin_mutex::scoped_lock lock(_mutex);
+
+            auto it = _workflowMap.lower_bound(T::getId());
+            if (it == _workflowMap.end() || it->first != T::getId()) {
+                _workflowMap.insert(it, std::make_pair(T::getId(), callee));
+            }
+            else {
+                cgtAssert(false, "Registered two workflows with the same ID.");
+            }
+            
+            return _workflowMap.size();
         }
 
     private:
@@ -88,6 +114,8 @@ namespace campvis {
         static tbb::atomic<PipelineFactory*> _singleton;    ///< the singleton object
 
         std::map< std::string, std::function<AbstractPipeline*(DataContainer*)> > _pipelineMap;
+
+        std::map< std::string, std::function<AbstractWorkflow*()> > _workflowMap;
     };
 
 
@@ -112,6 +140,29 @@ namespace campvis {
 
     template<typename T>
     const size_t PipelineRegistrar<T>::_factoryId = PipelineFactory::getRef().registerPipeline<T>(&PipelineRegistrar<T>::create);
+
+
+// ================================================================================================
+
+    template<typename T>
+    class WorkflowRegistrar {
+    public:
+        /**
+         * Static factory method for creating the pipeline of type T.
+         * \param   dc  DataContainer for the created pipeline to work on.
+         * \return  A newly created pipeline of type T. Caller has to take ownership of the pointer.
+         */
+        static AbstractWorkflow* create() {
+            return new T();
+        }
+
+    private:
+        /// static helper field to ensure registration at static initialization time.
+        static const size_t _factoryId;
+    };
+
+    template<typename T>
+    const size_t WorkflowRegistrar<T>::_factoryId = PipelineFactory::getRef().registerWorkflow<T>(&WorkflowRegistrar<T>::create);
 
 }
 

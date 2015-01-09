@@ -22,7 +22,7 @@
 // 
 // ================================================================================================
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include "metapropertywidget.h"
 
 namespace campvis {
@@ -30,7 +30,7 @@ namespace campvis {
         : AbstractPropertyWidget(property, true, dc, parent)
         , _pcw(0)
     {
-        //tgtAssert(_dataContainer != 0, "Pointer to DataContainer must not be 0.");
+        //cgtAssert(_dataContainer != 0, "Pointer to DataContainer must not be 0.");
 
         _pcw = new PropertyCollectionWidget(this);
         _pcw->updatePropCollection(property, _dataContainer);

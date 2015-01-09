@@ -24,8 +24,8 @@
 
 #include "itkimagefilter.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
 
 #include "modules/itk/core/genericimagerepresentationitk.h"
 #include <itkMedianImageFilter.h>
@@ -98,11 +98,11 @@
 
 // Multi-channel images not supported by most ITK processors...
 #define DISPATCH_ITK_FILTER_BRD(MA_WTP, MA_baseType, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
-    tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
+    cgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
     PERFORM_ITK_FILTER_SPECIFIC(MA_baseType, MA_returnType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 #define DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, MA_baseType, MA_dimensionality, MA_filterType, MD_filterBody) \
-    tgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
+    cgtAssert(MA_WTP._numChannels == 1, "ItkImageFilter only supports single-channel images.") \
     PERFORM_ITK_FILTER_SPECIFIC_INPLACE(MA_baseType, 1, MA_dimensionality, MA_filterType, MD_filterBody)
 
 
@@ -130,7 +130,7 @@
             DISPATCH_ITK_FILTER_BRD(MA_WTP, float, MA_returnType, MA_dimensionality, MA_filterType, MD_filterBody) \
             break; \
         default: \
-            tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+            cgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
 #define DISPATCH_ITK_FILTER_D(MA_WTP, MA_dimensionality, MA_filterType, MD_filterBody) \
@@ -157,7 +157,7 @@
             DISPATCH_ITK_FILTER_BRD(MA_WTP, float, float, MA_dimensionality, MA_filterType, MD_filterBody) \
             break; \
         default: \
-            tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+            cgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
 #define DISPATCH_ITK_FILTER_INPLACE_D(MA_WTP, MA_dimensionality, MA_filterType, MD_filterBody) \
@@ -184,7 +184,7 @@
             DISPATCH_ITK_FILTER_INPLACE_BD(MA_WTP, float, MA_dimensionality, MA_filterType, MD_filterBody) \
             break; \
         default: \
-            tgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
+            cgtAssert(false, "Should not reach this - wrong base type in WeaklyTypedPointer!"); \
     } \
 
 /**
@@ -201,7 +201,7 @@
         switch (MA_localRep->getDimensionality()) { \
             case 2: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 2, MA_filterType, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_RD(wtp, MA_returnType, 3, MA_filterType, MD_filterBody) break; \
-            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+            default: cgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -217,7 +217,7 @@
         switch (MA_localRep->getDimensionality()) { \
             case 2: DISPATCH_ITK_FILTER_D(wtp, 2, MA_filterType, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_D(wtp, 3, MA_filterType, MD_filterBody) break; \
-            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+            default: cgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 
@@ -233,7 +233,7 @@
         switch (MA_localRep->getDimensionality()) { \
             case 2: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 2, MA_filterType, MD_filterBody) break; \
             case 3: DISPATCH_ITK_FILTER_INPLACE_D(wtp, 3, MA_filterType, MD_filterBody) break; \
-            default: tgtAssert(false, "Unsupported dimensionality!"); break; \
+            default: cgtAssert(false, "Unsupported dimensionality!"); break; \
         } \
     } while (0)
 

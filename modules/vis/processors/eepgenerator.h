@@ -30,13 +30,11 @@
 #include "core/classification/abstracttransferfunction.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/transferfunctionproperty.h"
+#include "core/properties/allproperties.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -44,7 +42,7 @@ namespace campvis {
     /**
      * Genereates entry-/exit point textures for the given image and camera.
      */
-    class EEPGenerator : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API EEPGenerator : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new EEPGenerator Processor
@@ -74,10 +72,10 @@ namespace campvis {
         DataNameProperty p_sourceImageID;    ///< image ID for input image
         DataNameProperty p_geometryID;       ///< ID for input geometry
         DataNameProperty p_geometryImageId;  ///< image ID for the optional rendered geometry to integrate into the EEP
+        DataNameProperty p_camera;           ///< input camra
         DataNameProperty p_entryImageID;     ///< image ID for output entry points image
         DataNameProperty p_exitImageID;      ///< image ID for output exit points image
 
-        CameraProperty p_camera;
 
         BoolProperty p_enableMirror;         ///< Enable Virtual Mirror Feature
         DataNameProperty p_mirrorID;         ///< ID for input mirror geometry
@@ -97,7 +95,7 @@ namespace campvis {
          */
         virtual std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for EEP generation
+        cgt::Shader* _shader;                           ///< Shader for EEP generation
 
         static const std::string loggerCat_;
     };

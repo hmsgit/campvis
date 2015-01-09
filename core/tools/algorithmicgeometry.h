@@ -25,7 +25,7 @@
 #ifndef ALGORITHMICGEOMETRY_H__
 #define ALGORITHMICGEOMETRY_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include "core/coreapi.h"
 
 namespace campvis {
@@ -43,7 +43,7 @@ namespace campvis {
          * \return  Left turn: &lt; 0, collinear: = 0, right turn: &gt; 0
          */
         template<typename T>
-        static T orientation2D(const tgt::Vector2<T>& a, const tgt::Vector2<T>& b, const tgt::Vector2<T>& c) {
+        static T orientation2D(const cgt::Vector2<T>& a, const cgt::Vector2<T>& b, const cgt::Vector2<T>& c) {
             return a.x * b.y + a.y * c.x + b.x * c.y - c.x * b.y - c.y * a.x - b.x * a.y;
         };
 
@@ -55,7 +55,7 @@ namespace campvis {
          * \return  True, when a, b, c are collinear.
          */
         template<typename T>
-        static bool collinear2D(const tgt::Vector2<T>& a, const tgt::Vector2<T>& b, const tgt::Vector2<T>& c) {
+        static bool collinear2D(const cgt::Vector2<T>& a, const cgt::Vector2<T>& b, const cgt::Vector2<T>& c) {
             return (orientation2D(a, b, c) == 0);
         };
 
@@ -67,7 +67,7 @@ namespace campvis {
          * \return  True, when a, b, c build a left turn.
          */
         template<typename T>
-        static bool leftTurn2D(const tgt::Vector2<T>& a, const tgt::Vector2<T>& b, const tgt::Vector2<T>& c) {
+        static bool leftTurn2D(const cgt::Vector2<T>& a, const cgt::Vector2<T>& b, const cgt::Vector2<T>& c) {
             return (orientation2D(a, b, c) > 0);
         };
 
@@ -79,7 +79,7 @@ namespace campvis {
          * \return  True, when a, b, c build a right turn.
          */
         template<typename T>
-        static bool rightTurn2D(const tgt::Vector2<T>& a, const tgt::Vector2<T>& b, const tgt::Vector2<T>& c) {
+        static bool rightTurn2D(const cgt::Vector2<T>& a, const cgt::Vector2<T>& b, const cgt::Vector2<T>& c) {
             return (orientation2D(a, b, c) < 0);
         };
     };

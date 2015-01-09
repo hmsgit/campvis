@@ -24,7 +24,7 @@
 
 #include "predicatedemoachilles.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/datastructures/imagedata.h"
 
@@ -64,8 +64,6 @@ namespace campvis {
     void PredicateDemoAchilles::init() {
         AutoEvaluationPipeline::init();
         
-        _imageReader.s_validated.connect(this, &PredicateDemoAchilles::onProcessorValidated);
-
         _ve.p_outputImage.setValue("ve");
         _renderTargetID.setValue("ve");
 
@@ -95,17 +93,15 @@ namespace campvis {
         _vesselnesFilter.p_outputImage.setValue("vesselness");
         _vesselnesFilter.p_outputImage.addSharedProperty(&_ve.p_inputVesselness);
 
-        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.05f, .8f));
-        dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(0.f, 1.f), tgt::col4(0, 0, 0, 0), tgt::col4(255, 255, 255, 255)));
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.05f, .8f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 0), cgt::col4(255, 255, 255, 255)));
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->setAutoFitWindowToData(false);
         static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
         static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::GradientLod"))->setValue(0.5f);
         static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(1.f);
 
-//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor1"))->setValue(tgt::vec4(1.f));
-//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor2"))->setValue(tgt::vec4(1.f));
-
-        _canvasSize.s_changed.connect<PredicateDemoAchilles>(this, &PredicateDemoAchilles::onRenderTargetSizeChanged);
+//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor1"))->setValue(cgt::vec4(1.f));
+//         static_cast<Vec4Property*>(_ve.getNestedProperty("backgroundColor2"))->setValue(cgt::vec4(1.f));
 
         _canvasSize.setVisible(false);
         _renderTargetID.setVisible(false);
@@ -118,17 +114,17 @@ namespace campvis {
 
             AbstractPointPredicate* vpToAdd = 0;
             vpToAdd = new RangePointPredicate("intensity", "Intensity", "Intensity Range");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(.05f, 1.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(.05f, 1.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("gradientAngle", "GradAngle", "Gradient Angle");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(180.f, 180.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(80.f, 100.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(180.f, 180.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(80.f, 100.f));
             histogram->addPredicate(vpToAdd);
 
             vpToAdd = new RangePointPredicate("snr", "SNR", "SNR Range");
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(tgt::vec2(10.f, 10.f));
-            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(tgt::vec2(1.15f, 10.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setMaxValue(cgt::vec2(10.f, 10.f));
+            static_cast<RangePointPredicate*>(vpToAdd)->p_range.setValue(cgt::vec2(1.15f, 10.f));
             vpToAdd->p_intensityHack.setValue(0.25f);
             histogram->addPredicate(vpToAdd);
 
@@ -155,7 +151,7 @@ namespace campvis {
     void PredicateDemoAchilles::onProcessorValidated(AbstractProcessor* processor) {
         if (processor == &_imageReader) {
             if (IVec2Property* tester = dynamic_cast<IVec2Property*>(_ve.getNestedProperty("VolumeRendererProperties::PGGProps::clipX"))) {
-                tester->setValue(tgt::ivec2(42, 210));
+                tester->setValue(cgt::ivec2(42, 210));
             }
         }
     }

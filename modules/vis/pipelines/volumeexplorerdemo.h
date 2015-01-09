@@ -26,14 +26,18 @@
 #define VolumeExplorerDemo_H__
 
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
+
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/io/processors/genericimagereader.h"
 #include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
-    class VolumeExplorerDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API VolumeExplorerDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -61,6 +65,9 @@ namespace campvis {
         GenericImageReader _imageReader;
         VolumeExplorer _ve;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<VolumeExplorerDemo>;
 
 }
 

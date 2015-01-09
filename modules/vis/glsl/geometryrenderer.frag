@@ -30,10 +30,12 @@ in vec3 geom_Position;
 in vec3 geom_TexCoord;
 in vec4 geom_Color;
 in vec3 geom_Normal;
+in vec4 geom_Picking;
 noperspective in vec3 geom_EdgeDistance;
 
 // output fragment color
 out vec4 out_Color;
+out vec4 out_Picking;
 
 // additional uniforms
 uniform int _coloringMode;
@@ -76,5 +78,7 @@ void main() {
     // Mix the surface color with the line color
     out_Color = mix(_wireframeColor, out_Color, mixVal);    
 #endif
+
+    out_Picking = geom_Picking;
 
 }

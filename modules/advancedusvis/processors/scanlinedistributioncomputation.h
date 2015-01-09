@@ -37,7 +37,9 @@
 #include "core/properties/optionproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -47,7 +49,7 @@ namespace campvis {
     /**
      * Computes the intensity distribution profile for each voxel along the scanline.
      */
-    class ScanlineDistributionComputation : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API ScanlineDistributionComputation : public VisualizationProcessor {
     public:
         /**
          * Constructs a new ScanlineDistributionComputation Processor
@@ -88,7 +90,7 @@ namespace campvis {
 
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

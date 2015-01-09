@@ -24,11 +24,11 @@
 
 #include "geometry1dtransferfunction.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
 
 #include "core/classification/tfgeometry1d.h"
 
@@ -36,8 +36,8 @@ namespace campvis {
 
     const std::string Geometry1DTransferFunction::loggerCat_ = "CAMPVis.core.classification.Geometry1DTransferFunction";
 
-    Geometry1DTransferFunction::Geometry1DTransferFunction(size_t size, const tgt::vec2& intensityDomain /*= tgt::vec2(0.f, 1.f)*/) 
-        : GenericGeometryTransferFunction<TFGeometry1D>(tgt::svec3(size, 1, 1), intensityDomain)
+    Geometry1DTransferFunction::Geometry1DTransferFunction(size_t size, const cgt::vec2& intensityDomain /*= cgt::vec2(0.f, 1.f)*/) 
+        : GenericGeometryTransferFunction<TFGeometry1D>(cgt::svec3(size, 1, 1), intensityDomain)
     {
     }
 

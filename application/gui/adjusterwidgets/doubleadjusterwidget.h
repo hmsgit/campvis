@@ -46,6 +46,11 @@ namespace campvis {
         DoubleAdjusterWidget(QWidget* parent = 0);
 
         /**
+         * Returns how many decimals the adjuster will use for displaying and doubleerpreting doubles.
+         */
+        int decimals() const;
+
+        /**
          * Set how many decimals the adjuster will use for displaying and doubleerpreting doubles.
          * \param   prec      number of decimals the adjuster will use
          */

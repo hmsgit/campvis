@@ -25,23 +25,21 @@
 #ifndef VOLUMEEXPLORER_H__
 #define VOLUMEEXPLORER_H__
 
-#include "tgt/event/eventlistener.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/transfuncwindowingeventlistener.h"
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/allproperties.h"
 
-#include "core/properties/datanameproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/metaproperty.h"
-
+#include "modules/base/processors/trackballcameraprovider.h"
+#include "modules/modulesapi.h"
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -51,14 +49,22 @@ namespace campvis {
     /**
      * Combines a volume raycaster and 3 slice views for explorative volume visualization.
      */
-    class VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public tgt::EventListener {
+    class CAMPVIS_MODULES_API VolumeExplorer : public VisualizationProcessor, public HasProcessorDecorators, public cgt::EventListener {
     public:
+        /// Enumeration of the 4 views of the VolumeExplorer
+        enum Views {
+            XY_PLANE,
+            XZ_PLANE,
+            YZ_PLANE,
+            VOLUME
+        };
+
         /**
          * Constructs a new VolumeExplorer Processor
          * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          * \param   raycaster           Raycaster to use for rendering, must not be 0, VolumeRenderer will take ownership.
          **/
-        VolumeExplorer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster = new SimpleRaycaster(0));
+        VolumeExplorer(IVec2Property* viewportSizeProp, SliceRenderProcessor* sliceRenderer = new SliceExtractor(0), RaycastingProcessor* raycaster = new SimpleRaycaster(0));
 
         /**
          * Destructor
@@ -80,12 +86,25 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
         
-        /// \see tgt::EventListener::onEvent()
-        virtual void onEvent(tgt::Event* e);
+        /// \see cgt::EventListener::onEvent()
+        virtual void onEvent(cgt::Event* e);
+
+        /**
+         * Returns the VolumeRenderer processor.
+         * \return	&_raycaster
+         */
+        VolumeRenderer* getVolumeRenderer();
+
+        /**
+         * Returns the SliceRenderProcessor.
+         * \return	_sliceRenderer
+         */
+        SliceRenderProcessor* getSliceRenderer();
 
         DataNameProperty p_inputVolume;     ///< image ID for first input image
         DataNameProperty p_outputImage;     ///< image ID for output image
 
+        GenericOptionProperty<Views> p_largeView;   ///< View to be shown in the large render target
         BoolProperty p_enableScribbling;    ///< Enable Scribbling in Slice Views
 
         MetaProperty p_seProperties;        ///< MetaProperty for SliceExtractor properties
@@ -96,9 +115,11 @@ namespace campvis {
         /// Additional invalidation levels for this processor.
         /// Not the most beautiful design though.
         enum ProcessorInvalidationLevel {
-            VR_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
-            SLICES_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
-            SCRIBBLE_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
+            CAMERA_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
+            VR_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
+            SLICES_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2,
+            SCRIBBLE_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 3,
+            LARGE_VIEW_INVALID = FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 4
         };
 
         /// \see AbstractProcessor::updateResult
@@ -120,33 +141,39 @@ namespace campvis {
          * Callback called from SliceExtractor when a scribble has been painted.
          * \param   voxel   Voxel position of scribble
          */
-        void onSliceExtractorScribblePainted(tgt::vec3 voxel);
+        void onSliceExtractorScribblePainted(cgt::vec3 voxel);
 
         void composeFinalRendering(DataContainer& data);
 
         /// \see    AbstractProcessor::updateProperties
         void updateProperties(DataContainer& dc);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
         FaceGeometry* _quad;
 
+        TrackballCameraProvider _tcp;
         VolumeRenderer _raycaster;
-        SliceExtractor _sliceExtractor;
+        SliceRenderProcessor* _sliceRenderer;
 
-        IVec2Property p_sliceRenderSize;
-        IVec2Property p_volumeRenderSize;
+        IVec2Property p_smallRenderSize;
+        IVec2Property p_largeRenderSize;
 
 
         MWheelToNumericPropertyEventListener _xSliceHandler;
         MWheelToNumericPropertyEventListener _ySliceHandler;
         MWheelToNumericPropertyEventListener _zSliceHandler;
         TransFuncWindowingEventListener _windowingHandler;
-        TrackballNavigationEventListener* _trackballEH;
         bool _mousePressedInRaycaster;                  ///< Flag whether mouse was pressed in raycaster
 
-        std::vector<tgt::vec3>* _scribblePointer;       ///< Pointer encoding whether the mouse was pressed (!= nullptr) and whether we have yes-scribbles or no-scribbles.
-        std::vector<tgt::vec3> _yesScribbles;           ///< All voxels of the current yes-scribbles
-        std::vector<tgt::vec3> _noScribbles;            ///< All voxels of the current no-scribbles
+        Views _viewUnderEvent;                          ///< View to apply events to
+        cgt::ivec2 _eventPositionOffset;                ///< Offset to be added to mouse event position
+        cgt::ivec2 _eventViewportSize;                  ///< Viewport of adjusted mouse event
+
+        std::vector<cgt::vec3>* _scribblePointer;       ///< Pointer encoding whether the mouse was pressed (!= nullptr) and whether we have yes-scribbles or no-scribbles.
+        std::vector<cgt::vec3> _yesScribbles;           ///< All voxels of the current yes-scribbles
+        std::vector<cgt::vec3> _noScribbles;            ///< All voxels of the current no-scribbles
+
+        cgt::ivec3 _cachedImageSize;
 
         static const std::string loggerCat_;
     };

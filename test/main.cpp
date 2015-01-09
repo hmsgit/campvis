@@ -30,16 +30,19 @@
 
 #include "gtest/gtest.h"
 #include <stdio.h>
+#include <QApplication>
 
-#include "tgt/gpucapabilities.h"
-#include "tgt/shadermanager.h"
-#include "tgt/glcontextmanager.h"
-#include "tgt/qt/qtthreadedcanvas.h"
-#include "tgt/logmanager.h"
-#include "tgt/qt/qtapplication.h"
+#include "sigslot/sigslot.h"
+
+#include "cgt/glcontextmanager.h"
+#include "cgt/gpucapabilities.h"
+#include "cgt/init.h"
+#include "cgt/logmanager.h"
+#include "cgt/opengljobprocessor.h"
+#include "cgt/shadermanager.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 
 #include "core/tools/simplejobprocessor.h"
-#include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
 #ifdef Q_WS_X11
@@ -50,7 +53,7 @@ QApplication *app;
 /// Flag, whether CampVisApplication was correctly initialized
 bool _initialized;
 /// A local OpenGL context used for initialization
-tgt::GLCanvas* _localContext = nullptr;
+cgt::GLCanvas* _localContext = nullptr;
 static const std::string loggerCat_;
 
 
@@ -58,25 +61,33 @@ void init() {
     // Make Xlib and GLX thread safe under X11
     QApplication::setAttribute(Qt::AA_X11InitThreads);
 
-    tgt::GlContextManager::init();
+    sigslot::signal_manager::init();
+    sigslot::signal_manager::getRef().setSignalHandlingMode(sigslot::signal_manager::FORCE_DIRECT);
+    sigslot::signal_manager::getRef().start();
 
-    campvis::OpenGLJobProcessor::init();
+    cgt::GlContextManager::init();
+
+    cgt::OpenGLJobProcessor::init();
     campvis::SimpleJobProcessor::init();
 
-    tgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
+    cgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
     
-    // Init TGT
-    tgt::InitFeature::Features featureset = tgt::InitFeature::ALL;
-    tgt::init(featureset);
-    LogMgr.getConsoleLog()->addCat("", true, tgt::Info);
+    // Init CGT
+    cgt::InitFeature::Features featureset = cgt::InitFeature::ALL;
+    cgt::init(featureset);
+    LogMgr.getConsoleLog()->addCat("", true, cgt::Info);
 
     // create a local OpenGL context and init GL
-    _localContext = new tgt::QtThreadedCanvas("", tgt::ivec2(16, 16));
+    cgt::QtThreadedCanvas* backgroundCanvas = new cgt::QtThreadedCanvas("", cgt::ivec2(16, 16));
+    GLCtxtMgr.registerContextAndInitGlew(backgroundCanvas, "Background Context");
+    GLCtxtMgr.releaseContext(backgroundCanvas, false);
+    GLJobProc.setContext(backgroundCanvas);
+    GLJobProc.start();
     
-    tgt::GLContextScopedLock lock(_localContext);
-    tgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext);
+    _localContext = new cgt::QtThreadedCanvas("", cgt::ivec2(16, 16));
+    cgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext, "Local Context");
 
-    tgt::initGL(featureset);
+    cgt::initGL(featureset);
     ShdrMgr.setDefaultGlslVersion("330");
 
     campvis::QuadRenderer::init();
@@ -92,34 +103,40 @@ void init() {
     // ensure matching OpenGL specs
     LINFO("Using Graphics Hardware " << GpuCaps.getVendorAsString() << " " << GpuCaps.getGlRendererString() << " on " << GpuCaps.getOSVersionString());
     LINFO("Supported OpenGL " << GpuCaps.getGlVersion() << ", GLSL " << GpuCaps.getShaderVersion());
-    if (GpuCaps.getGlVersion() < tgt::GpuCapabilities::GlVersion::TGT_GL_VERSION_3_3) {
+    if (GpuCaps.getGlVersion() < cgt::GpuCapabilities::GlVersion::CGT_GL_VERSION_3_3) {
         LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intended.");
     }
-    if (GpuCaps.getShaderVersion() < tgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
+    if (GpuCaps.getShaderVersion() < cgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
         LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
     }
-    
+
+    GLCtxtMgr.releaseContext(_localContext, false);
+
     _initialized = true;
 }
 
 void deinit() {
-    tgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
+    cgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
     {
         // Deinit everything OpenGL related using the local context.
-        tgt::GLContextScopedLock lock(_localContext);
+        cgt::GLContextScopedLock lock(_localContext);
 
         campvis::QuadRenderer::deinit();
 
-        tgt::deinitGL();
+        campvis::SimpleJobProcessor::deinit();
+        GLJobProc.stop();
+        cgt::OpenGLJobProcessor::deinit();
+
+        cgt::deinitGL();
     }
 
-    campvis::SimpleJobProcessor::deinit();
-    campvis::OpenGLJobProcessor::deinit();
 
+    cgt::GlContextManager::deinit();
+    cgt::deinit();
 
-    tgt::GlContextManager::deinit();
-    tgt::deinit();
+    sigslot::signal_manager::getRef().stop();
+    sigslot::signal_manager::deinit();
 
     _initialized = false;
 }
@@ -131,15 +148,17 @@ GTEST_API_ int main(int argc, char **argv) {
     XInitThreads();
 #endif
 
-
     app = new QApplication(argc, argv);
-    testing::InitGoogleTest(&argc, argv);
 
+    // Make Xlib and GLX thread safe under X11
+    QApplication::setAttribute(Qt::AA_X11InitThreads);
+
+    testing::InitGoogleTest(&argc, argv);
     int ret;
 
     init();
     {
-        tgt::GLContextScopedLock lock(_localContext);
+        cgt::GLContextScopedLock lock(_localContext);
         ret= RUN_ALL_TESTS();
 
     }

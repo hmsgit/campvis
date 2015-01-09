@@ -24,7 +24,7 @@
 
 #include "datahandle.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 #include "core/datastructures/abstractdata.h"
 
 namespace campvis {

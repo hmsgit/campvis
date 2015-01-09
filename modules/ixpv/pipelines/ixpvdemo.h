@@ -26,11 +26,13 @@
 #define IXPVDEMO_H__
 
 #include "core/datastructures/imagerepresentationlocal.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/properties/cameraproperty.h"
 #include "core/pipeline/autoevaluationpipeline.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/vis/processors/sliceextractor.h"
@@ -47,7 +49,7 @@
 
 
 namespace campvis {
-    class IxpvDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API IxpvDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -66,7 +68,7 @@ namespace campvis {
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "IxpvDemo"; };
 
-        //virtual void keyEvent(tgt::KeyEvent* e);
+        //virtual void keyEvent(cgt::KeyEvent* e);
     protected:
         /**
          * Slot getting called when one of the observed processors got validated.
@@ -75,6 +77,7 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        TrackballCameraProvider _tcp;
         DevilImageReader _xrayReader;
 
         MhdImageReader _ctReader;
@@ -88,11 +91,11 @@ namespace campvis {
         RenderTargetCompositor _compositor;
         IxpvCompositor _ixpvCompositor;
 
-        CameraProperty _camera;
-
-        TrackballNavigationEventListener* _trackballHandler;
         MWheelToNumericPropertyEventListener _wheelHandler;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<IxpvDemo>;
 
 }
 

@@ -32,7 +32,9 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -42,7 +44,7 @@ namespace campvis {
     /**
      * Performs IXPV composition of a 3D slice rendering and a X-Ray image.
      */
-    class IxpvCompositor : public VisualizationProcessor, public HasProcessorDecorators {
+    class CAMPVIS_MODULES_API IxpvCompositor : public VisualizationProcessor, public HasProcessorDecorators {
     public:
         /**
          * Constructs a new IxpvCompositor Processor
@@ -79,7 +81,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

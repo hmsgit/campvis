@@ -42,4 +42,8 @@ namespace campvis {
         return _accessInfo;
     }
 
+    void DataNameProperty::setAccessInfo(DataAccessInfo access) {
+        _accessInfo = access;
+    }
+
 }

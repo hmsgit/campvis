@@ -25,7 +25,7 @@
 #ifndef PROCESSORDECORATORMASKING_H__
 #define PROCESSORDECORATORMASKING_H__
 
-#include "tgt/textureunit.h"
+#include "cgt/textureunit.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/renderdata.h"
 #include "core/pipeline/abstractprocessordecorator.h"
@@ -35,7 +35,7 @@
 
 namespace campvis {
 
-    class CAMPVIS_CORE_API ProcessorDecoratorMasking : public AbstractProcessorDecorator, public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API ProcessorDecoratorMasking : public AbstractProcessorDecorator, public sigslot::has_slots {
     public:
         ProcessorDecoratorMasking();
         virtual ~ProcessorDecoratorMasking();
@@ -43,9 +43,9 @@ namespace campvis {
     protected:
         void addProperties(AbstractProcessor* propCollection);
 
-        void renderProlog(const DataContainer& dataContainer, tgt::Shader* shader);
+        void renderProlog(const DataContainer& dataContainer, cgt::Shader* shader);
 
-        void renderEpilog(tgt::Shader* shader);
+        void renderEpilog(cgt::Shader* shader);
 
         std::string generateHeader() const;
 
@@ -53,7 +53,7 @@ namespace campvis {
         DataNameProperty _maskID;           ///< ID for mask image (optional)
         Vec4Property _maskColor;            ///< Mask color
 
-        tgt::TextureUnit* _texUnit;
+        cgt::TextureUnit* _texUnit;
         ScopedTypedData<RenderData>* _maskImage;
 
     private:

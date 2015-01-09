@@ -23,15 +23,13 @@
 // ================================================================================================
 
 #include "autoevaluationpipeline.h"
-#include "tgt/tgt_gl.h"
-#include "tgt/glcanvas.h"
+
+#include "cgt/cgt_gl.h"
+#include "cgt/glcanvas.h"
+
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/metaproperty.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
-#include "core/tools/simplejobprocessor.h"
-
 
 namespace campvis {
     const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";
@@ -51,9 +49,13 @@ namespace campvis {
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
         }
+
+        _data->s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
     }
 
     void AutoEvaluationPipeline::deinit() {
+        _data->s_dataAdded.disconnect(this);
+
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.disconnect(this);
         }
@@ -62,26 +64,10 @@ namespace campvis {
     }
 
     void AutoEvaluationPipeline::onProcessorInvalidated(AbstractProcessor* processor) {
-        if (_canvas == 0 || _enabled == false)
+        if (_canvas == nullptr || getEnabled() == false)
             return;
 
-        tbb::concurrent_hash_map<AbstractProcessor*, bool>::const_accessor a;
-        if (_isVisProcessorMap.find(a, processor)) {
-            if (a->second) {
-                // is VisualizationProcessor
-                GLJobProc.enqueueJob(
-                    _canvas, 
-                    makeJobOnHeap<AutoEvaluationPipeline, AbstractProcessor*>(this, &AutoEvaluationPipeline::executeProcessorAndCheckOpenGLState, processor), 
-                    OpenGLJobProcessor::SerialJob);
-            }
-            else {
-                SimpleJobProc.enqueueJob(makeJob<AutoEvaluationPipeline, AbstractProcessor*, bool>(this, &AutoEvaluationPipeline::executeProcessor, processor, false));
-            }
-        }
-        else {
-            tgtAssert(false, "Could not find processor in processor map.");
-            LWARNING("Caught invalidation of a non-registered processor!");
-        }
+        setPipelineDirty();
     }
 
     void AutoEvaluationPipeline::addProcessor(AbstractProcessor* processor) {
@@ -89,6 +75,14 @@ namespace campvis {
         findDataNamePropertiesAndAddToPortMap(processor);
 
         AbstractPipeline::addProcessor(processor);
+    }
+
+    void AutoEvaluationPipeline::executePipeline() {
+        // execute each processor once 
+        // (AbstractProcessor::process() takes care of executing only invalid processors)
+        for (size_t i = 0; i < _processors.size(); ++i) {
+            executeProcessorAndCheckOpenGLState(_processors[i]);
+        }
     }
 
     void AutoEvaluationPipeline::onDataNamePropertyChanged(const AbstractProperty* prop) {
@@ -118,16 +112,27 @@ namespace campvis {
                 }
 
                 // sanity check, if this assertion fails, we have a problem...
-                tgtAssert(result.second, "Could not insert Property into port map!");
+                cgtAssert(result.second, "Could not insert Property into port map!");
             }
         }
         else {
             // this should not happen, otherwise we did something wrong before.
-            tgtAssert(false, "Could not find Property in iterator map!");
+            cgtAssert(false, "Could not find Property in iterator map!");
         }
     }
 
-    void AutoEvaluationPipeline::onDataContainerDataAdded(const std::string& name, const DataHandle& dh) {
+    namespace {
+        /// Local helper function to recursively emit the s_changed signal for the given
+        /// properties and all of its shared properties.
+        void recursiveEmitSignal(DataNameProperty* p) {
+            std::set<AbstractProperty*> v = p->getSharedProperties();
+            for (auto it = v.begin(); it != v.end(); ++it)
+                recursiveEmitSignal(static_cast<DataNameProperty*>(*it));
+            p->s_changed.emitSignal(p);
+        }
+    }
+
+    void AutoEvaluationPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
         {
             // acquire read lock
             tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
@@ -136,12 +141,10 @@ namespace campvis {
             PortMapType::const_iterator it = _portMap.find(name);
             while (it != _portMap.end() && it->first == name) {
                 // invalidate those properties by emitting changed signal
-                it->second->s_changed(it->second);
+                recursiveEmitSignal(it->second);
                 ++it;
             }
         }
-
-        AbstractPipeline::onDataContainerDataAdded(name, dh);
     }
 
     void AutoEvaluationPipeline::findDataNamePropertiesAndAddToPortMap(const HasPropertyCollection* hpc) {
@@ -154,7 +157,7 @@ namespace campvis {
                 if (dnp->getAccessInfo() == DataNameProperty::READ) {
                     tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
                     std::pair<PortMapType::iterator, bool> result = _portMap.insert(std::make_pair(dnp->getValue(), dnp));
-                    tgtAssert(result.second, "Could not insert Property into port map!");
+                    cgtAssert(result.second, "Could not insert Property into port map!");
                     if (result.second) {
                         _iteratorMap[dnp] = result.first;
                         dnp->s_changed.connect(this, &AutoEvaluationPipeline::onDataNamePropertyChanged);

@@ -25,7 +25,7 @@
 #ifndef FLOATINGPOINTPROPERTY_H__
 #define FLOATINGPOINTPROPERTY_H__
 
-#include "tgt/vector.h"
+#include "cgt/vector.h"
 #include "core/properties/numericproperty.h"
 
 namespace {
@@ -45,18 +45,18 @@ namespace {
     };
 
     template<>
-    struct FloatingPointPropertyTraits<tgt::vec2> {
-        typedef tgt::ivec2 DecimalsType;
+    struct FloatingPointPropertyTraits<cgt::vec2> {
+        typedef cgt::ivec2 DecimalsType;
     };
 
     template<>
-    struct FloatingPointPropertyTraits<tgt::vec3> {
-        typedef tgt::ivec3 DecimalsType;
+    struct FloatingPointPropertyTraits<cgt::vec3> {
+        typedef cgt::ivec3 DecimalsType;
     };
 
     template<>
-    struct FloatingPointPropertyTraits<tgt::vec4> {
-        typedef tgt::ivec4 DecimalsType;
+    struct FloatingPointPropertyTraits<cgt::vec4> {
+        typedef cgt::ivec4 DecimalsType;
     };
 
 }
@@ -129,9 +129,9 @@ namespace campvis {
 
     typedef FloatingPointProperty<float> FloatProperty;
 
-    typedef FloatingPointProperty<tgt::vec2> Vec2Property;
-    typedef FloatingPointProperty<tgt::vec3> Vec3Property;
-    typedef FloatingPointProperty<tgt::vec4> Vec4Property;
+    typedef FloatingPointProperty<cgt::vec2> Vec2Property;
+    typedef FloatingPointProperty<cgt::vec3> Vec3Property;
+    typedef FloatingPointProperty<cgt::vec4> Vec4Property;
 
 // = Template Implementation ======================================================================
 
@@ -149,13 +149,13 @@ namespace campvis {
     template<typename T>
     void campvis::FloatingPointProperty<T>::addSharedProperty(AbstractProperty* prop) {
         // make type check first, then call base method.
-        tgtAssert(prop != 0, "Shared property must not be 0!");
+        cgtAssert(prop != 0, "Shared property must not be 0!");
         if (FloatingPointProperty<T>* tmp = dynamic_cast< FloatingPointProperty<T>* >(prop)) {
             AbstractProperty::addSharedProperty(prop);
             tmp->setValue(GenericProperty<T>::getValue());
             return;
         }
-        tgtAssert(false, "Shared property must be of the same type as this property!");
+        cgtAssert(false, "Shared property must be of the same type as this property!");
     }
 
     template<typename T>
@@ -174,7 +174,7 @@ namespace campvis {
             child->setDecimals(decimals);
         }
 
-        this->s_decimalsChanged(this);
+        this->s_decimalsChanged.emitSignal(this);
     }
 }
 

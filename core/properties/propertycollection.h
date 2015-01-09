@@ -41,7 +41,7 @@ namespace campvis {
     /**
      * Abstract base class for classes having a PropertyCollection.
      */
-    class CAMPVIS_CORE_API HasPropertyCollection : public sigslot::has_slots<> {
+    class CAMPVIS_CORE_API HasPropertyCollection : public sigslot::has_slots {
     public:
         HasPropertyCollection();
 
@@ -62,6 +62,12 @@ namespace campvis {
          * \param   prop  Property to unregister.
          */
         void removeProperty(AbstractProperty& prop);
+
+        /**
+         * Unregisters all properties from this property collection.
+         * Same as calling removeProperty() for each property, but faster.
+         */
+        void clearProperties();
 
         /**
          * Returns the property with the given name \a name.

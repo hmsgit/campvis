@@ -2,7 +2,7 @@
 // 
 // This file is part of the CAMPVis Software Framework.
 // 
-// If not explicitly stated otherwise: Copyright (C) 2012-2013, all rights reserved,
+// If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universität München
@@ -34,13 +34,14 @@
 #include "core/properties/numericproperty.h"
 #include "core/properties/optionproperty.h"
 
+#include "modules/modulesapi.h"
 #include "modules/preprocessing/tools/abstractimagefilter.h"
 
 namespace campvis {
     /**
     * Performs watershed image filter on input image using ITK.
     */
-    class ItkRegistration : public AbstractProcessor {
+    class CAMPVIS_MODULES_API ItkRegistration : public AbstractProcessor {
     public:
         /**
         * Constructs a new ItkRegistration Processor

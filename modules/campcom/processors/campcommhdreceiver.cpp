@@ -38,8 +38,8 @@ namespace campvis {
         , p_address("ServerAddress", "Server Address", "127.0.0.1", StringProperty::BASIC_STRING)
         , p_connect("Connect", "Connect to Server")
         , p_targetImageID("targetImageName", "Target Image ID", "CampcomMhdReceiver.output", DataNameProperty::WRITE)
-        , p_imageOffset("ImageOffset", "Image Offset in mm", tgt::vec3(0.f), tgt::vec3(-10000.f), tgt::vec3(10000.f), tgt::vec3(0.1f))
-        , p_voxelSize("VoxelSize", "Voxel Size in mm", tgt::vec3(1.f), tgt::vec3(-100.f), tgt::vec3(100.f), tgt::vec3(0.1f))
+        , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
+        , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
         , _ccclient(0)
     {
         _incomingMhd = 0;
@@ -79,7 +79,7 @@ namespace campvis {
         // Transform campcom::MHDImageData to campvis::ImageData
         int numChannels = 1;
         size_t dimensionality = mid->NDims;
-        tgt::svec3 size(1);
+        cgt::svec3 size(1);
         for (int i = 0; i < mid->DimSize.size(); ++i)
             size.elem[i] = mid->DimSize[i];
 
@@ -107,8 +107,8 @@ namespace campvis {
             return;
         }
 
-        tgt::vec3 imageOffset(0.f);
-        tgt::vec3 voxelSize(1.f);
+        cgt::vec3 imageOffset(0.f);
+        cgt::vec3 voxelSize(1.f);
 
         // all parsing done - lets create the image:
         ImageData* image = new ImageData(dimensionality, size, numChannels);

@@ -31,9 +31,11 @@
 #include "core/properties/transferfunctionproperty.h"
 #include "core/tools/volumebricking.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -41,7 +43,7 @@ namespace campvis {
     /**
      * Performs a simple volume ray casting.
      */
-    class OptimizedRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API OptimizedRaycaster : public RaycastingProcessor {
     public:
         enum AdditionalInvalidationLevels {
             INVALID_BBV = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL
@@ -95,7 +97,7 @@ namespace campvis {
         void generateBbv(DataHandle dh);
 
         BinaryBrickedVolume* _bbv;
-        tgt::Texture* _t;
+        cgt::Texture* _vvTex;
 
         static const std::string loggerCat_;
     };

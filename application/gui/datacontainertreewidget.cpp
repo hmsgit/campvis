@@ -26,11 +26,12 @@
 
 #include "datacontainertreewidget.h"
 
-#include "tgt/assert.h"
+#include "cgt/assert.h"
 
 #include "application/gui/qtdatahandle.h"
 #include "core/datastructures/datacontainer.h"
 #include "core/datastructures/abstractdata.h"
+#include "core/datastructures/dataseries.h"
 #include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/facegeometry.h"
 #include "core/datastructures/meshgeometry.h"
@@ -82,12 +83,12 @@ namespace campvis {
 
 // ================================================================================================
 
-    DataHandleTreeItem::DataHandleTreeItem(const QtDataHandle& dataHandle, const std::string& name, TreeItem* parent)
+    DataHandleTreeItem::DataHandleTreeItem(QtDataHandle dataHandle, const std::string& name, TreeItem* parent)
         : TreeItem(parent)
         , _dataHandle(dataHandle)
         , _name(name)
     {
-        tgtAssert(_dataHandle.getData() != 0, "WTF - QtDataHandle with empty data?");
+        cgtAssert(_dataHandle.getData() != 0, "WTF - QtDataHandle with empty data?");
         updateChildren();
     }
 
@@ -98,45 +99,9 @@ namespace campvis {
                 return QVariant(QString::fromStdString(_name));
             else if (column == COLUMN_TYPE) {
                 const AbstractData* data = _dataHandle.getData();
-                tgtAssert(data != 0, "WTF - QtDataHandle with empty data?");
+                cgtAssert(data != 0, "WTF - QtDataHandle with empty data?");
 
-                if (const ImageData* tester = dynamic_cast<const ImageData*>(data)) {
-                	return QVariant(QString("Image Data"));
-                }
-
-#ifdef CAMPVIS_HAS_MODULE_COLUMBIA
-                else if (const FiberData* tester = dynamic_cast<const FiberData*>(data)) {
-                    return QVariant(QString("Fiber Geometry"));
-                }
-#endif
-
-                else if (const IndexedMeshGeometry* tester = dynamic_cast<const IndexedMeshGeometry*>(data)) {
-                    return QVariant(QString("Indexed Geometry"));
-                }
-                else if (const MultiIndexedGeometry* tester = dynamic_cast<const MultiIndexedGeometry*>(data)) {
-                	return QVariant(QString("Multi Indexed Geometry"));
-                }
-                else if (const FaceGeometry* tester = dynamic_cast<const FaceGeometry*>(data)) {
-                	return QVariant(QString("Face Geometry"));
-                }
-                else if (const MeshGeometry* tester = dynamic_cast<const MeshGeometry*>(data)) {
-                    return QVariant(QString("Mesh Geometry"));
-                }
-                else if (const GeometryData* tester = dynamic_cast<const GeometryData*>(data)) {
-                    return QVariant(QString("Geometry"));
-                }
-
-                else if (const RenderData* tester = dynamic_cast<const RenderData*>(data)) {
-                    return QVariant(QString("Render Data"));
-                }
-
-                else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
-                    return QVariant(QString("Image Series"));
-                }
-
-                else if (const LightSourceData* tester = dynamic_cast<const LightSourceData*>(data)) {
-                    return QVariant(QString("Light Source"));
-                }
+                return QVariant(QString::fromStdString(data->getTypeAsString()));
             }
             else
                 return QVariant();
@@ -150,7 +115,7 @@ namespace campvis {
     DataHandleTreeItem::~DataHandleTreeItem() {
     }
 
-    void DataHandleTreeItem::setDataHandle(const QtDataHandle& dataHandle) {
+    void DataHandleTreeItem::setDataHandle(QtDataHandle dataHandle) {
         _dataHandle = dataHandle;
         updateChildren();
     }
@@ -166,6 +131,11 @@ namespace campvis {
                 }
                 if (tester->hasDepthTexture()) {
                     new DataHandleTreeItem(QtDataHandle(tester->getDepthDataHandle()), _name + "::DepthTexture", this);
+                }
+            }
+            else if (const DataSeries* tester = dynamic_cast<const DataSeries*>(data)) {
+                for (size_t i = 0; i < tester->getNumDatas(); ++i) {
+                    new DataHandleTreeItem(QtDataHandle(tester->getData(i)), _name + "::Data" + StringUtils::toString(i), this);
                 }
             }
             else if (const ImageSeries* tester = dynamic_cast<const ImageSeries*>(data)) {
@@ -295,7 +265,7 @@ namespace campvis {
     }
 
     void DataContainerTreeModel::onDataContainerChanged(const QString& key, QtDataHandle dh) {
-        tgtAssert(dh.getData() != 0, "WTF - QtDataHandle with empty data?");
+        cgtAssert(dh.getData() != 0, "WTF - QtDataHandle with empty data?");
 
         std::map<QString, DataHandleTreeItem*>::iterator it = _itemMap.lower_bound(key);
         if (it == _itemMap.end() || it->first != key) {
@@ -350,7 +320,7 @@ namespace campvis {
 
     void DataContainerTreeWidget::setupWidget() {
         _treeModel = new DataContainerTreeModel(this);
-        tgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
+        cgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");
 
         setModel(_treeModel);
     }

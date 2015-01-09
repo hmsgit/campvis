@@ -27,7 +27,9 @@
 
 
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "core/properties/cameraproperty.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -46,7 +48,7 @@
 
 
 namespace campvis {
-    class PredicateDemoCarotid2 : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API PredicateDemoCarotid2 : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.
@@ -92,6 +94,9 @@ namespace campvis {
         PredicateVolumeExplorer _ve;
 
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<PredicateDemoCarotid2>;
 
 }
 

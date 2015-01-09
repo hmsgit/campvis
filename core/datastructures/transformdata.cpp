@@ -27,7 +27,7 @@
 namespace campvis {
 
 
-    TransformData::TransformData(const tgt::mat4 & transform)
+    TransformData::TransformData(const cgt::mat4 & transform)
         : AbstractData()
         , _transform(transform)
     {
@@ -48,6 +48,10 @@ namespace campvis {
 
     size_t TransformData::getVideoMemoryFootprint() const {
         return 0;
+    }
+
+    std::string TransformData::getTypeAsString() const {
+        return "Transformation Data";
     }
 
 }

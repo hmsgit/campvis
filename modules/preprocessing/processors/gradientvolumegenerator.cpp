@@ -24,8 +24,8 @@
 
 #include "gradientvolumegenerator.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
 
 #include <tbb/tbb.h>
 
@@ -58,31 +58,31 @@ namespace campvis {
 
             tbb::parallel_for(tbb::blocked_range<size_t>(0, input->getNumElements()), [&] (const tbb::blocked_range<size_t>& range) {
                 for (size_t i = range.begin(); i != range.end(); ++i) {
-                    tgt::svec3 pos = input->getParent()->indexToPosition(i);
-                    const tgt::svec3& size = input->getSize();
+                    cgt::svec3 pos = input->getParent()->indexToPosition(i);
+                    const cgt::svec3& size = input->getSize();
 
                     float dx, dy, dz, mdx, mdy, mdz;
                     dx = dy = dz = mdx = mdy = mdz = 0.f;
 
                     if (pos.x != size.x - 1)
-                        dx = input->getElementNormalized(pos + tgt::svec3(1, 0, 0), 0);
+                        dx = input->getElementNormalized(pos + cgt::svec3(1, 0, 0), 0);
                     if (pos.y != size.y - 1)
-                        dy = input->getElementNormalized(pos + tgt::svec3(0, 1, 0), 0);
+                        dy = input->getElementNormalized(pos + cgt::svec3(0, 1, 0), 0);
                     if (pos.z != size.z - 1)
-                        dz = input->getElementNormalized(pos + tgt::svec3(0, 0, 1), 0);
+                        dz = input->getElementNormalized(pos + cgt::svec3(0, 0, 1), 0);
 
                     if (pos.x != 0)
-                        mdx = input->getElementNormalized(pos + tgt::svec3(-1, 0, 0), 0);
+                        mdx = input->getElementNormalized(pos + cgt::svec3(-1, 0, 0), 0);
                     if (pos.y != 0)
-                        mdy = input->getElementNormalized(pos + tgt::svec3(0, -1, 0), 0);
+                        mdy = input->getElementNormalized(pos + cgt::svec3(0, -1, 0), 0);
                     if (pos.z != 0)
-                        mdz = input->getElementNormalized(pos + tgt::svec3(0, 0, -1), 0);
+                        mdz = input->getElementNormalized(pos + cgt::svec3(0, 0, -1), 0);
 
 
-                    tgt::vec3 gradient(mdx - dx, mdy - dy, mdz - dz);
-                    gradient /= input->getParent()->getMappingInformation().getVoxelSize() * tgt::vec3(2.f);
+                    cgt::vec3 gradient(mdx - dx, mdy - dy, mdz - dz);
+                    gradient /= input->getParent()->getMappingInformation().getVoxelSize() * cgt::vec3(2.f);
 
-                    output->setElement(i, tgt::vec4(gradient, tgt::length(gradient)));
+                    output->setElement(i, cgt::vec4(gradient, cgt::length(gradient)));
                 }
             });
 

@@ -30,7 +30,9 @@
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/allproperties.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -40,7 +42,7 @@ namespace campvis {
     /**
      * Extracts arbitrary MPRs from images using a single clip plane.
      */
-    class MprRenderer : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API MprRenderer : public VisualizationProcessor {
     public:
         /**
          * Constructs a new MprRenderer Processor
@@ -70,7 +72,7 @@ namespace campvis {
         DataNameProperty p_sourceImageID;               ///< image ID for input image
         DataNameProperty p_targetImageID;               ///< image ID for output image
 
-        CameraProperty p_camera;
+        DataNameProperty p_camera;
 
         Vec3Property p_planeNormal;                     ///< Clipping plane normal
         FloatProperty p_planeDistance;                  ///< Clipping plane distance
@@ -87,7 +89,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

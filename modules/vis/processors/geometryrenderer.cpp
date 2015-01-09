@@ -24,11 +24,12 @@
 
 #include "geometryrenderer.h"
 
-#include "tgt/glmath.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/glmath.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/lightsourcedata.h"
 #include "core/datastructures/renderdata.h"
@@ -58,17 +59,17 @@ namespace campvis {
         : VisualizationProcessor(viewportSizeProp)
         , p_geometryID("geometryID", "Input Geometry ID", "gr.input", DataNameProperty::READ)
         , p_textureID("TextureId", "Input Texture ID (optional)", "gr.inputtexture", DataNameProperty::READ)
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_renderTargetID("p_renderTargetID", "Output Image", "gr.output", DataNameProperty::WRITE)
-        , p_camera("camera", "Camera")
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_renderMode("RenderMode", "Render Mode", renderOptions, 7)
         , p_coloringMode("ColoringMode", "ColoringMode", coloringOptions, 3)
-        , p_solidColor("SolidColor", "Solid Color", tgt::vec4(1.f, .5f, 0.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_solidColor("SolidColor", "Solid Color", cgt::vec4(1.f, .5f, 0.f, 1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , p_pointSize("PointSize", "Point Size", 3.f, .1f, 10.f)
         , p_lineWidth("LineWidth", "Line Width", 1.f, .1f, 10.f)
         , p_showWireframe("ShowWireframe", "Show Wireframe", true)
-        , p_wireframeColor("WireframeColor", "Wireframe Color", tgt::vec4(1.f, 1.f, 1.f, 1.f), tgt::vec4(0.f), tgt::vec4(1.f))
+        , p_wireframeColor("WireframeColor", "Wireframe Color", cgt::vec4(1.f, 1.f, 1.f, 1.f), cgt::vec4(0.f), cgt::vec4(1.f))
         , _pointShader(0)
         , _meshShader(0)
     {
@@ -76,8 +77,8 @@ namespace campvis {
 
         addProperty(p_geometryID);
         addProperty(p_textureID);
-        addProperty(p_renderTargetID);
         addProperty(p_camera);
+        addProperty(p_renderTargetID);
 
         addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
         addProperty(p_lightId);
@@ -114,8 +115,9 @@ namespace campvis {
     void GeometryRenderer::updateResult(DataContainer& data) {
         ScopedTypedData<GeometryData> proxyGeometry(data, p_geometryID.getValue());
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
-        ScopedTypedData<RenderData> rd(data, p_textureID.getValue());
-        ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
+        ScopedTypedData<RenderData> rd(data, p_textureID.getValue(), true);
+        ImageRepresentationGL::ScopedRepresentation repGl(data, p_textureID.getValue(), true);
 
         const ImageRepresentationGL* texture = nullptr;
         if (p_coloringMode.getOptionValue() == TEXTURE_COLOR) {
@@ -124,32 +126,35 @@ namespace campvis {
                     texture = rd->getColorTexture()->getRepresentation<ImageRepresentationGL>();
                 else if (repGl != nullptr)
                     texture = repGl;
+                else
+                    LERROR("Could not find suitable texture in DataConatiner.");
             }
             else {
                 LERROR("Cannot use textured rendering since input geometry has no texture coordinates!");
             }
         }
 
-        if (proxyGeometry != 0 
+        if (proxyGeometry != nullptr
+            && camera != nullptr
             && (p_enableShading.getValue() == false || light != nullptr)
             && (p_coloringMode.getOptionValue() != TEXTURE_COLOR || texture != nullptr) 
-            && _pointShader != 0 && _meshShader != 0)
+            && _pointShader != nullptr && _meshShader != nullptr)
             {
             // select correct shader
-            tgt::Shader* leShader = 0;
+            cgt::Shader* leShader = nullptr;
             if (p_renderMode.getOptionValue() == GL_POINTS || p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
                 leShader = _pointShader;
             else
                 leShader = _meshShader;
 
             // calculate viewport matrix for NDC -> viewport conversion
-            tgt::vec2 halfViewport = tgt::vec2(getEffectiveViewportSize()) / 2.f;
-            tgt::mat4 viewportMatrix = tgt::mat4::createTranslation(tgt::vec3(halfViewport, 0.f)) * tgt::mat4::createScale(tgt::vec3(halfViewport, 1.f));
+            cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
+            cgt::mat4 viewportMatrix = cgt::mat4::createTranslation(cgt::vec3(halfViewport, 0.f)) * cgt::mat4::createScale(cgt::vec3(halfViewport, 1.f));
 
             leShader->activate();
 
             // bind texture if needed
-            tgt::TextureUnit tut, narf, blub, textureUnit;
+            cgt::TextureUnit tut, narf, blub, textureUnit;
             tut.activate();
             if (texture != nullptr)
                 texture->bind(leShader, textureUnit, "_texture", "_textureParams");
@@ -161,8 +166,8 @@ namespace campvis {
                 light->bind(leShader, "_lightSource");
             }
 
-            leShader->setUniform("_projectionMatrix", p_camera.getValue().getProjectionMatrix());
-            leShader->setUniform("_viewMatrix", p_camera.getValue().getViewMatrix());
+            leShader->setUniform("_projectionMatrix", camera->getCamera().getProjectionMatrix());
+            leShader->setUniform("_viewMatrix", camera->getCamera().getViewMatrix());
             leShader->setUniform("_viewportMatrix", viewportMatrix);
 
             leShader->setUniform("_computeNormals", proxyGeometry->getNormalsBuffer() == 0);
@@ -172,12 +177,18 @@ namespace campvis {
             leShader->setUniform("_wireframeColor", p_wireframeColor.getValue());
             leShader->setUniform("_lineWidth", p_lineWidth.getValue());
 
-            leShader->setUniform("_cameraPosition", p_camera.getValue().getPosition());
+            leShader->setUniform("_cameraPosition", camera->getCamera().getPosition());
             leShader->setIgnoreUniformLocationError(false);
 
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
+
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
+            if (proxyGeometry->hasPickingInformation()) {
+                createAndAttachColorTexture();
+                glDrawBuffers(3, buffers);
+            }
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -197,6 +208,11 @@ namespace campvis {
             else if (p_renderMode.getOptionValue() == GL_LINES || p_renderMode.getOptionValue() == GL_LINE_STRIP)
                 glLineWidth(1.f);
 
+
+            if (proxyGeometry->hasPickingInformation()) {
+                glDrawBuffers(1, buffers);
+            }
+
             leShader->deactivate();
             glDepthFunc(GL_LESS);
             glDisable(GL_DEPTH_TEST);
@@ -206,7 +222,7 @@ namespace campvis {
             data.addData(p_renderTargetID.getValue(), new RenderData(_fbo));
         }
         else {
-            LERROR("No suitable input geometry found.");
+            LDEBUG("No suitable input data found.");
         }
     }
 

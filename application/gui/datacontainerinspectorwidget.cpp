@@ -24,19 +24,16 @@
 
 #include "datacontainerinspectorwidget.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/filesystem.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/filesystem.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>
 #include <IL/ilu.h>
 #endif
-
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
 
 #include "core/datastructures/abstractdata.h"
 #include "core/datastructures/datacontainer.h"
@@ -95,6 +92,9 @@ namespace campvis {
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);
         }
+
+        delete _pcWidget;
+        _pcWidget = nullptr;
     }
 
     void DataContainerInspectorWidget::setDataContainer(DataContainer* dataContainer) {
@@ -115,7 +115,7 @@ namespace campvis {
         return _dataContainer;
     }
 
-    void DataContainerInspectorWidget::onDataContainerDataAdded(const std::string& key, const DataHandle& dh) {
+    void DataContainerInspectorWidget::onDataContainerDataAdded(std::string key, DataHandle dh) {
         // copy QtDataHandle because signal will be handled by a different thread an indefinite amount of time later:
         emit dataContainerChanged(QString::fromStdString(key), QtDataHandle(dh));
     }
@@ -219,7 +219,7 @@ namespace campvis {
         _mainLayout->addWidget(_infoWidget, 0, 1, 3, 1);
 
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
-        qRegisterMetaType<tgt::vec4>("tgt_vec4");
+        qRegisterMetaType<cgt::vec4>("cgt_vec4");
         connect(
             _dctWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), 
             this, SLOT(onDCTWidgetSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&)));
@@ -227,8 +227,8 @@ namespace campvis {
             this, SIGNAL(dataContainerChanged(const QString&, QtDataHandle)),
             _canvas, SLOT(onDataContainerChanged(const QString&, QtDataHandle)));
         connect(
-            _canvas, SIGNAL(s_colorChanged(const tgt::vec4&)),
-            this, SLOT(onColorChanged(const tgt::vec4&)));
+            _canvas, SIGNAL(s_colorChanged(const cgt::vec4&)),
+            this, SLOT(onColorChanged(const cgt::vec4&)));
         connect(
             _canvas, SIGNAL(s_depthChanged(float)),
             this, SLOT(onDepthChanged(float)));
@@ -413,6 +413,7 @@ namespace campvis {
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
         updateInfoWidget();
 
+#ifdef CAMPVIS_HAS_MODULE_DEVIL
         // get the selection from the tree widget
         const QModelIndexList& indices = _dctWidget->selectionModel()->selectedRows();
 
@@ -424,6 +425,7 @@ namespace campvis {
             }
         }
         _btnSaveToFile->setDisabled(true);
+#endif
     }
 
     void DataContainerInspectorWidget::onBtnSaveToFileClicked() {
@@ -465,10 +467,8 @@ namespace campvis {
 
                     if (! filename.isEmpty()) {
                         // Texture access needs OpenGL context - dispatch method call:
-                        GLJobProc.enqueueJob(
-                            _canvas, 
-                            makeJobOnHeap(&DataContainerInspectorWidget::saveToFile, handle, filename.toStdString()), 
-                            OpenGLJobProcessor::SerialJob);
+                        cgt::GLContextScopedLock lock(_canvas);
+                        saveToFile(handle, filename.toStdString());
                     }
                 }
             }
@@ -477,7 +477,7 @@ namespace campvis {
 
     void DataContainerInspectorWidget::saveToFile(DataHandle handle, std::string filename) {
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
-        if (tgt::FileSystem::fileExtension(filename).empty()) {
+        if (cgt::FileSystem::fileExtension(filename).empty()) {
             LERRORC("CAMPVis.application.DataContainerInspectorWidget", "Filename has no extension");
             return;
         }
@@ -497,14 +497,9 @@ namespace campvis {
 
         // extract the data
         WeaklyTypedPointer wtp(WeaklyTypedPointer::UINT8, 1, 0);
-        const ImageRepresentationGL* repGL = id->getRepresentation<ImageRepresentationGL>(false);
-        if (repGL != 0) // if it's a GL texture, download it (we do not want to use the automatic conversion method here)
-            wtp = repGL->getWeaklyTypedPointer();
-        else {
-            const ImageRepresentationLocal* repLocal = id->getRepresentation<ImageRepresentationLocal>(true);
-            if (repLocal != 0)
-                wtp = repLocal->getWeaklyTypedPointer();
-        }
+        const ImageRepresentationLocal* repLocal = id->getRepresentation<ImageRepresentationLocal>(true);
+        if (repLocal != 0)
+            wtp = repLocal->getWeaklyTypedPointer();
 
         if (wtp._pointer == 0) {
             LERROR("Could not extract image to save.");
@@ -518,7 +513,7 @@ namespace campvis {
         ilBindImage(img);
 
         // put pixels into IL-Image
-        tgt::ivec2 size = id->getSize().xy();
+        cgt::ivec2 size = id->getSize().xy();
         ilTexImage(size.x, size.y, 1, static_cast<ILubyte>(wtp._numChannels), wtp.getIlFormat(), wtp.getIlDataType(), wtp._pointer);
         ilEnable(IL_FILE_OVERWRITE);
         ilResetWrite();
@@ -545,10 +540,10 @@ namespace campvis {
         
     }
 
-    void DataContainerInspectorWidget::onColorChanged(const tgt::vec4& color) {
+    void DataContainerInspectorWidget::onColorChanged(const cgt::vec4& color) {
         _lblColorVal->setText(QString("Color: [%1, %2, %3, %4]").arg(QString::number(color.r), QString::number(color.g), QString::number(color.b), QString::number(color.a)));
 
-        tgt::ivec4 clamped(tgt::clamp(color * 255.f, 0.f, 255.f));
+        cgt::ivec4 clamped(cgt::clamp(color * 255.f, 0.f, 255.f));
         _colorValWidgetPalette.setColor(QPalette::Background, QColor(clamped.r, clamped.g, clamped.b, clamped.a));
         _colorValWidget->setPalette(_colorValWidgetPalette);
     }
@@ -556,7 +551,7 @@ namespace campvis {
     void DataContainerInspectorWidget::onDepthChanged(float depth) {
         _lblColorVal->setText(QString("Depth: %1").arg(QString::number(depth)));
 
-        tgt::ivec4 clamped(tgt::clamp(depth * 255.f, 0.f, 255.f));
+        cgt::ivec4 clamped(cgt::clamp(depth * 255.f, 0.f, 255.f));
         _colorValWidgetPalette.setColor(QPalette::Background, QColor(clamped.r, clamped.g, clamped.b, clamped.a));
         _colorValWidget->setPalette(_colorValWidgetPalette);
     }

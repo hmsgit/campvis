@@ -27,10 +27,11 @@
 
 #include "sigslot/sigslot.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/vector.h"
-#include "tgt/event/eventhandler.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/logmanager.h"
+#include "cgt/runnable.h"
+#include "cgt/vector.h"
+#include "cgt/event/eventhandler.h"
+#include "cgt/event/eventlistener.h"
 
 #include <tbb/spin_mutex.h>
 #include <tbb/mutex.h>
@@ -44,7 +45,7 @@
 #include <map>
 #include <vector>
 
-namespace tgt {
+namespace cgt {
     class GLCanvas;
 }
 
@@ -54,7 +55,7 @@ namespace campvis {
     /**
      * Abstract base class for CAMPVis Pipelines.
      */
-    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public tgt::EventHandler, public tgt::EventListener {
+    class CAMPVIS_CORE_API AbstractPipeline : public HasPropertyCollection, public cgt::RunnableWithConditionalWait, public cgt::EventHandler, public cgt::EventListener {
     public:
         /**
          * Creates a AbstractPipeline.
@@ -112,8 +113,19 @@ namespace campvis {
          * Default behaviour is to execute all assigned EventHandlers, may be overwritten by subclasses.
          * \param e     event parameters
          */
-        virtual void onEvent(tgt::Event* e);
+        virtual void onEvent(cgt::Event* e);
 
+        /**
+         * Entrance point for the pipeline thread.
+         * \see Runnable::run
+         */
+        virtual void run();
+
+        /**
+         * Executes this pipeline.
+         * To be implemented in the subclass.
+         */
+        virtual void executePipeline() = 0;
 
         /**
          * Returns the DataContainer of this pipeline, const version.
@@ -134,6 +146,20 @@ namespace campvis {
         const std::vector<AbstractProcessor*>& getProcessors() const;
 
         /**
+         * Returns the first processor of this pipeline whose name matches \a name.
+         * \param   name    The name of the processor to find
+         * \return  The first processor whose name matches \a name, 0 if no such processor exists.
+         */
+        AbstractProcessor* getProcessor(const std::string& name) const;
+
+        /**
+         * Returns the first processor of this pipeline whose name matches \a name.
+         * \param   index    The index of the processor to get
+         * \return  The first processor whose name matches \a name, 0 if no such processor exists.
+         */
+        AbstractProcessor* getProcessor(int index) const;
+
+        /**
          * Gets the flag whether this pipeline is currently enabled.
          * \return _enabled
          */
@@ -149,19 +175,19 @@ namespace campvis {
          * Sets the Canvas hosting the OpenGL context for this pipeline.
          * \param   canvas  Canvas hosting the OpenGL context for this pipeline
          */
-        void setCanvas(tgt::GLCanvas* canvas);
+        void setCanvas(cgt::GLCanvas* canvas);
 
         /**
          * Sets the size of the render target
          * \param size  New viewport dimensions
          */
-        void setRenderTargetSize(const tgt::ivec2& size);
+        void setRenderTargetSize(const cgt::ivec2& size);
 
         /**
          * Returns the viewport size of the target canvas
          * \return _canvasSize
          */
-        const tgt::ivec2& getRenderTargetSize() const;
+        const cgt::ivec2& getRenderTargetSize() const;
 
         /**
          * Returns the ID of the render target image to be rendered to the canvas
@@ -169,24 +195,22 @@ namespace campvis {
          */
         const std::string& getRenderTargetID() const;
 
-
-        /// Signal emitted when the pipeline's render target has changed
-        sigslot::signal0<> s_renderTargetChanged;
+        /// Signal emitted at the end of AbstractPipeline::init()
+        sigslot::signal0 s_init;
+        /// Signal emitted at the beginning of AbstractPipeline::deinit()
+        sigslot::signal0 s_deinit;
 
     protected:
         /**
+         * Sets the resultDirty flag of this pipeline and starts its execution if necessary.
+         */
+        void setPipelineDirty();
+
+        /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
-         * \param   unlockInExtraThred  If true, the call to processor->unlock() will be done in an extra thread.
          */
-        void executeProcessor(AbstractProcessor* processor, bool unlockInExtraThred);
-        
-        /**
-         * Acquires and locks the OpenGL context, executes the processor \a processor on the pipeline's data 
-         * and locks its properties meanwhile.
-         * \param   processor   Processor to execute.
-         */
-        void lockGLContextAndExecuteProcessor(AbstractProcessor* processor);
+        void executeProcessor(AbstractProcessor* processor);
         
         /**
          * Executes \a processor and afterwards checks the OpenGL state to be valid.
@@ -202,25 +226,21 @@ namespace campvis {
          */
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
-        /**
-         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
-         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
-         * \param   name    Name of the added data.
-         * \param   dh      DataHandle to the newly added data.
-         */
-        virtual void onDataContainerDataAdded(const std::string& name, const DataHandle& dh);
 
         /// Pointer to the DataContainer containing local working set of data for this Pipeline, must not be 0.
         DataContainer* _data;
 
         std::vector<AbstractProcessor*> _processors;        ///< List of all processors of this pipeline
-        tbb::atomic<bool> _enabled;                         ///< flag whether this pipeline is currently enabled
 
-        tgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
+        cgt::GLCanvas* _canvas;                             ///< Canvas hosting the OpenGL context for this pipeline.
         IVec2Property _canvasSize;                          ///< original canvas size
         bool _ignoreCanvasSizeUpdate;
 
         DataNameProperty _renderTargetID;                   ///< ID of the render target image to be rendered to the canvas
+
+    private:
+        tbb::atomic<bool> _enabled;                         ///< flag whether this pipeline is currently enabled
+        tbb::atomic<bool> _pipelineDirty;                   ///< Flag whether this pipeline is dirty and executePipeline() needs to be called.
 
         static const std::string loggerCat_;
 

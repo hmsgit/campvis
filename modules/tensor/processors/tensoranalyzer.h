@@ -37,11 +37,13 @@
 
 #include "core/datastructures/genericimagerepresentationlocal.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Performs eigensystem decomposition of a tensor image and also computes different anisotropy measures.
      */
-    class TensorAnalyzer : public AbstractProcessor {
+    class CAMPVIS_MODULES_API TensorAnalyzer : public AbstractProcessor {
     public:
         enum AdditionalInvalidationLevels {
             EIGENSYSTEM_INVALID = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL

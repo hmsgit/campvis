@@ -24,10 +24,11 @@
 
 #include "raycastingprocessor.h"
 
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
+#include "core/datastructures/cameradata.h"
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/tools/glreduction.h"
@@ -43,7 +44,7 @@ namespace campvis {
         , p_entryImageID("entryImageID", "Input Entry Points Image", "", DataNameProperty::READ)
         , p_exitImageID("exitImageID", "Input Exit Points Image", "", DataNameProperty::READ)
         , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
-        , p_camera("camera", "Camera")
+        , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_transferFunction("TransferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", 1.f, 0.f, 1.f)
         , p_samplingRate("SamplingRate", "Sampling Rate", 2.f, 0.1f, 10.f, 0.1f)
@@ -90,14 +91,15 @@ namespace campvis {
         ImageRepresentationGL::ScopedRepresentation img(data, p_sourceImageID.getValue());
         ScopedTypedData<RenderData> entryPoints(data, p_entryImageID.getValue());
         ScopedTypedData<RenderData> exitPoints(data, p_exitImageID.getValue());
+        ScopedTypedData<CameraData> camera(data, p_camera.getValue());
 
-        if (img != 0 && entryPoints != 0 && exitPoints != 0) {
+        if (img != nullptr && entryPoints != nullptr && exitPoints != nullptr && camera != nullptr) {
             if (img->getDimensionality() == 3) {
                 // little hack to support LOD texture lookup for the gradients:
                 // if texture does not yet have mipmaps, create them.
-                const tgt::Texture* tex = img->getTexture();
-                if (tex->getFilter() != tgt::Texture::MIPMAP) {
-                    const_cast<tgt::Texture*>(tex)->setFilter(tgt::Texture::MIPMAP);
+                const cgt::Texture* tex = img->getTexture();
+                if (tex->getFilter() != cgt::Texture::MIPMAP) {
+                    const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
                     glGenerateMipmap(GL_TEXTURE_3D);
                     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -124,15 +126,15 @@ namespace campvis {
                 }
 
                 decorateRenderProlog(data, _shader);
-                _shader->setUniform("_viewportSizeRCP", 1.f / tgt::vec2(getEffectiveViewportSize()));
+                _shader->setUniform("_viewportSizeRCP", 1.f / cgt::vec2(getEffectiveViewportSize()));
                 _shader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
 
                 // compute sampling step size relative to volume size
-                float samplingStepSize = 1.f / (p_samplingRate.getValue() * tgt::max(img->getSize()));
+                float samplingStepSize = 1.f / (p_samplingRate.getValue() * cgt::max(img->getSize()));
                 _shader->setUniform("_samplingStepSize", samplingStepSize);
 
                 // compute and set camera parameters
-                const tgt::Camera& cam = p_camera.getValue();
+                const cgt::Camera& cam = camera->getCamera();
                 float n = cam.getNearDist();
                 float f = cam.getFarDist();
                 _shader->setUniform("_cameraPosition", cam.getPosition());
@@ -143,7 +145,7 @@ namespace campvis {
                 _shader->setIgnoreUniformLocationError(false);
 
                 // bind input textures
-                tgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
+                cgt::TextureUnit volumeUnit, entryUnit, exitUnit, tfUnit;
                 img->bind(_shader, volumeUnit, "_volume", "_volumeTextureParams");
                 p_transferFunction.getTF()->bind(_shader, tfUnit);
 
@@ -153,7 +155,7 @@ namespace campvis {
                     processImpl(data, img);
                 }
                 else {
-                    tgt::TextureUnit entryUnitDepth, exitUnitDepth;
+                    cgt::TextureUnit entryUnitDepth, exitUnitDepth;
                     entryPoints->bind(_shader, entryUnit, entryUnitDepth, "_entryPoints", "_entryPointsDepth", "_entryParams");
                     exitPoints->bind(_shader, exitUnit, exitUnitDepth, "_exitPoints", "_exitPointsDepth", "_exitParams");
                     processImpl(data, img);
@@ -161,7 +163,7 @@ namespace campvis {
 
                 decorateRenderEpilog(_shader);
                 _shader->deactivate();
-                tgt::TextureUnit::setZeroUnit();
+                cgt::TextureUnit::setZeroUnit();
                 LGL_ERROR;
             }
             else {
@@ -169,7 +171,7 @@ namespace campvis {
             }
         }
         else {
-            LERROR("No suitable input image found.");
+            LDEBUG("No suitable input image found.");
         }
     }
 

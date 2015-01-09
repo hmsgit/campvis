@@ -57,7 +57,7 @@ namespace campvis {
             WeaklyTypedPointer::BaseType type,
             size_t offset = 0,
             EndianHelper::Endianness endianness = EndianHelper::IS_LITTLE_ENDIAN,
-            const tgt::svec3& stride = tgt::svec3::zero,
+            const cgt::svec3& stride = cgt::svec3::zero,
             bool multichannelSideBySide = false
             );
 
@@ -120,7 +120,7 @@ namespace campvis {
             WeaklyTypedPointer::BaseType type,
             size_t offset = 0,
             EndianHelper::Endianness endianness = EndianHelper::IS_LITTLE_ENDIAN,
-            const tgt::svec3& stride = tgt::svec3::zero,
+            const cgt::svec3& stride = cgt::svec3::zero,
             bool multichannelSideBySide = false
             );
 
@@ -129,7 +129,7 @@ namespace campvis {
          * \param size  Image size (number of elements per dimension).
          * \return      (0, size.x, size.x * size.y)
          */
-        tgt::svec3 getCanonicStride(const tgt::svec3& size) const;
+        cgt::svec3 getCanonicStride(const cgt::svec3& size) const;
 
         std::string _url;                       ///< path to file with raw data
         size_t _offset;                         ///< offset of first data element in file (in bytes)
@@ -141,7 +141,7 @@ namespace campvis {
          * If the stride is 0 for a dimension, the elements are assumed to be tightly packed, hence for
          * the x-dimension 0, for the y-dimension _size.x and for the z-dimension (_size.x * _size.y).
          **/
-        tgt::svec3 _stride;
+        cgt::svec3 _stride;
 
         bool _multichannelSideBySide;           ///< Flag whether multichannel images are stored side by side
 

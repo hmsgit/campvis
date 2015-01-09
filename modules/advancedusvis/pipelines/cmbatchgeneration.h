@@ -27,17 +27,18 @@
 
 #include "core/datastructures/imagerepresentationlocal.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/properties/allproperties.h"
+
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
 #include "modules/devil/processors/devilimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/randomwalk/processors/confidencemapgenerator.h"
 
-#include "core/properties/buttonproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/stringproperty.h"
-
 namespace campvis {
-    class CmBatchGeneration : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API CmBatchGeneration : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline. 
@@ -89,6 +90,9 @@ namespace campvis {
 
         ButtonProperty p_execute;
     };
+
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<CmBatchGeneration>;
 
 }
 

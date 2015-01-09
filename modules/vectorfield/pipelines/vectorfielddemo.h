@@ -28,16 +28,21 @@
 #include "core/pipeline/autoevaluationpipeline.h"
 
 #include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
-#include "core/eventhandlers/trackballnavigationeventlistener.h"
 
+#include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
+
+#include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
+#include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/mhdimagereader.h"
+#include "modules/vectorfield/processors/particleflowrenderer.h"
 #include "modules/vectorfield/processors/vectorfieldrenderer.h"
 #include "modules/vis/processors/slicerenderer3d.h"
 #include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
-    class VectorFieldDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API VectorFieldDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Small demo pipeline for vector field visualization.
@@ -52,6 +57,9 @@ namespace campvis {
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
 
+        /// \see AutoEvaluationPipeline::deinit()
+        virtual void deinit();
+
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
         /// \see AbstractPipeline::getId()
@@ -65,18 +73,25 @@ namespace campvis {
          */
         virtual void onProcessorValidated(AbstractProcessor* processor);
 
+        /// \see HasPropertyCollection::onPropertyChanged
+        virtual void onPropertyChanged(const AbstractProperty* prop);
+
+        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
         MhdImageReader _imageReader;
         MhdImageReader _vectorFieldReader;
+        ParticleFlowRenderer _pfr;
         VectorFieldRenderer _vectorFieldRenderer;
         SliceRenderer3D _sliceRenderer;
         RenderTargetCompositor _rtc;
 
-        CameraProperty p_camera;
         IntProperty p_sliceNumber;
-        TrackballNavigationEventListener* _trackballEH;
+        GenericOptionProperty<std::string> p_viewSelection;
+        IntProperty p_time;
     };
 
+    // Instantiate template to register the pipelines.
+    template class PipelineRegistrar<VectorFieldDemo>;
 }
 
 #endif // VECTORFIELDDEMO_H__

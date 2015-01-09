@@ -64,7 +64,7 @@ protected:
     campvis::ImageData *_imgData0, *_imgData1;
     campvis::AbstractData * _absData1;
 
-    tgt::svec3 _size;
+    cgt::svec3 _size;
 };
 
 /**
@@ -82,19 +82,19 @@ TEST_F(ImageDataTest, miscellaneousTest) {
 
     EXPECT_EQ(2U, _imgData0->getDimensionality());
     EXPECT_EQ(4U, _imgData0->getNumChannels());
-    EXPECT_EQ(tgt::hmul(_size), _imgData0->getNumElements());
+    EXPECT_EQ(cgt::hmul(_size), _imgData0->getNumElements());
 
-    tgt::Bounds bound0 = _imgData0->getWorldBounds();
-    tgt::Bounds bound1 = _imgData1->getWorldBounds();
+    cgt::Bounds bound0 = _imgData0->getWorldBounds();
+    cgt::Bounds bound1 = _imgData1->getWorldBounds();
     EXPECT_EQ(bound0, bound1);
 
-    campvis::ImageData temp = campvis::ImageData(3, tgt::svec3(3,2,1), 5);
+    campvis::ImageData temp = campvis::ImageData(3, cgt::svec3(3,2,1), 5);
     temp.setMappingInformation(_imgData0->getMappingInformation());
 
     EXPECT_TRUE(temp.getMappingInformation() == _imgData0->getMappingInformation());
 
     for (size_t i = 0; i < _imgData0->getNumElements(); ++i) {
-        tgt::svec3 position = _imgData0->indexToPosition(i);
+        cgt::svec3 position = _imgData0->indexToPosition(i);
         EXPECT_EQ(_imgData0->positionToIndex(position), i);
     }
     

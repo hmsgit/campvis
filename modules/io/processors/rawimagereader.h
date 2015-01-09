@@ -29,6 +29,7 @@
 
 #include "abstractimagereader.h"
 
+#include "core/pipeline/abstractprocessor.h"
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 #include "core/properties/numericproperty.h"
@@ -36,11 +37,13 @@
 #include "core/tools/endianhelper.h"
 #include "core/tools/weaklytypedpointer.h"
 
+#include "modules/modulesapi.h"
+
 namespace campvis {
     /**
      * Reads raw images into the pipeline.
      */
-    class RawImageReader : public AbstractImageReader {
+    class CAMPVIS_MODULES_API RawImageReader : public AbstractImageReader {
     public:
         /**
          * Constructs a new RawImageReader Processor

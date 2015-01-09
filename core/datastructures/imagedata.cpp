@@ -27,17 +27,15 @@
 namespace campvis {
     const std::string ImageData::loggerCat_ = "CAMPVis.core.datastructures.ImageData";
 
-    ImageData::ImageData(size_t dimensionality, const tgt::svec3& size, size_t numChannels) 
+    ImageData::ImageData(size_t dimensionality, const cgt::svec3& size, size_t numChannels) 
         : AbstractData()
         , _dimensionality(dimensionality)
         , _size(size)
         , _numChannels(numChannels)
-        , _numElements(tgt::hmul(size))
-        , _mappingInformation(size, tgt::vec3(0.f), tgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
+        , _numElements(cgt::hmul(size))
+        , _mappingInformation(size, cgt::vec3(0.f), cgt::vec3(1.f)) // TODO: get offset/voxel size as parameter or put default values into ImageMappingInformation ctor.
     {
-        tgtAssert(numChannels > 0, "Number of channels must be greater than 0!");
-        tgtAssert(_dimensionality >= 3 || _size.z == 1, "Dimensionality and size mismatch: A 2D image must have size.z = 1!");
-        tgtAssert(_dimensionality >= 2 || _size.y == 1, "Dimensionality and size mismatch: A 1D image must have size.y = 1!");
+        cgtAssert(numChannels > 0, "Number of channels must be greater than 0!");
     }
 
     ImageData::~ImageData() {
@@ -73,7 +71,7 @@ namespace campvis {
         return _dimensionality;
     }
 
-    const tgt::svec3& ImageData::getSize() const {
+    const cgt::svec3& ImageData::getSize() const {
         return _size;
     }
 
@@ -89,29 +87,29 @@ namespace campvis {
         _mappingInformation = imi;
     }
 
-    tgt::Bounds ImageData::getWorldBounds() const {
-        return tgt::Bounds(_mappingInformation.getOffset(), _mappingInformation.getOffset() + (tgt::vec3(_size) * _mappingInformation.getVoxelSize()));
+    cgt::Bounds ImageData::getWorldBounds() const {
+        return cgt::Bounds(_mappingInformation.getOffset(), _mappingInformation.getOffset() + (cgt::vec3(_size) * _mappingInformation.getVoxelSize()));
     }
 
-    tgt::Bounds ImageData::getWorldBounds(const tgt::svec3& llf, const tgt::svec3& urb) const {
-        return tgt::Bounds(
-            _mappingInformation.getOffset() + (tgt::vec3(llf) * _mappingInformation.getVoxelSize()),
-            _mappingInformation.getOffset() + (tgt::vec3(urb) * _mappingInformation.getVoxelSize()));
+    cgt::Bounds ImageData::getWorldBounds(const cgt::svec3& llf, const cgt::svec3& urb) const {
+        return cgt::Bounds(
+            _mappingInformation.getOffset() + (cgt::vec3(llf) * _mappingInformation.getVoxelSize()),
+            _mappingInformation.getOffset() + (cgt::vec3(urb) * _mappingInformation.getVoxelSize()));
     }
 
     size_t ImageData::getNumElements() const {
         return _numElements;
     }
 
-    size_t ImageData::positionToIndex(const tgt::svec3& position) const {
+    size_t ImageData::positionToIndex(const cgt::svec3& position) const {
         return position.x + (position.y * _size.x) + (position.z * _size.x * _size.y);
     }
 
-    tgt::svec3 ImageData::indexToPosition(size_t index) const {
+    cgt::svec3 ImageData::indexToPosition(size_t index) const {
         size_t z = index / (_size.x * _size.y);
         size_t y = (index % (_size.x * _size.y)) / _size.x;
         size_t x = index % _size.x;
-        return tgt::svec3(x, y, z);
+        return cgt::svec3(x, y, z);
     }
 
     void ImageData::clearRepresentations() {
@@ -121,13 +119,17 @@ namespace campvis {
     }
 
     void ImageData::addRepresentation(const AbstractImageRepresentation* representation) {
-        tgtAssert(representation != 0, "Representation must not be 0.");
+        cgtAssert(representation != 0, "Representation must not be 0.");
         _representations.push_back(representation);
     }
 
     void ImageData::setInitialRepresentation(const AbstractImageRepresentation* representation) {
         clearRepresentations();
         addRepresentation(representation);
+    }
+
+    std::string ImageData::getTypeAsString() const {
+        return "Image Data";
     }
 
 }

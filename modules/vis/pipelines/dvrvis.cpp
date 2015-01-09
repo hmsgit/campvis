@@ -24,7 +24,7 @@
 
 #include "dvrvis.h"
 
-#include "tgt/event/keyevent.h"
+#include "cgt/event/keyevent.h"
 #include "core/datastructures/imagedata.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
@@ -34,7 +34,7 @@ namespace campvis {
 
     DVRVis::DVRVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _camera("camera", "Camera")
+        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
         , _pgGenerator()
@@ -46,16 +46,13 @@ namespace campvis {
         , _dvrVM(&_canvasSize)
         , _depthDarkening(&_canvasSize)
         , _combine(&_canvasSize)
-        , _trackballEH(0)
     {
-        addProperty(_camera);
+        _tcp.addLqModeProcessor(&_dvrNormal);
+        _tcp.addLqModeProcessor(&_dvrVM);
+        _tcp.addLqModeProcessor(&_depthDarkening);
+        addEventListenerToBack(&_tcp);
 
-        _trackballEH = new TrackballNavigationEventListener(&_camera, &_canvasSize);
-        _trackballEH->addLqModeProcessor(&_dvrNormal);
-        _trackballEH->addLqModeProcessor(&_dvrVM);
-        _trackballEH->addLqModeProcessor(&_depthDarkening);
-        addEventListenerToBack(_trackballEH);
-
+        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
         addProcessor(&_pgGenerator);
@@ -70,41 +67,32 @@ namespace campvis {
     }
 
     DVRVis::~DVRVis() {
-        delete _trackballEH;
     }
 
     void DVRVis::init() {
         AutoEvaluationPipeline::init();
-        
-        _imageReader.s_validated.connect(this, &DVRVis::onProcessorValidated);
 
-        _camera.addSharedProperty(&_vmgGenerator.p_camera);
-        _camera.addSharedProperty(&_vmRenderer.p_camera);
-        _camera.addSharedProperty(&_eepGenerator.p_camera);
-        _camera.addSharedProperty(&_vmEepGenerator.p_camera);
-        _camera.addSharedProperty(&_dvrNormal.p_camera);
-        _camera.addSharedProperty(&_dvrVM.p_camera);
-
-        _imageReader.p_url.setValue(CAMPVIS_SOURCE_DIR "/modules/vis/sampledata/smallHeart.mhd");
+        _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
         _imageReader.p_targetImageID.addSharedProperty(&_eepGenerator.p_sourceImageID);
         _imageReader.p_targetImageID.addSharedProperty(&_vmEepGenerator.p_sourceImageID);
         _imageReader.p_targetImageID.addSharedProperty(&_dvrVM.p_sourceImageID);
         _imageReader.p_targetImageID.addSharedProperty(&_dvrNormal.p_sourceImageID);
         _imageReader.p_targetImageID.addSharedProperty(&_pgGenerator.p_sourceImageID);
+        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
 
         _dvrNormal.p_targetImageID.setValue("drr.output");
         _dvrVM.p_targetImageID.setValue("dvr.output");
 
-         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-         dvrTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrNormal.p_transferFunction.replaceTF(dvrTF);
+        Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.12f, .15f), cgt::col4(85, 0, 0, 128), cgt::col4(255, 0, 0, 128)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.19f, .28f), cgt::col4(89, 89, 89, 155), cgt::col4(89, 89, 89, 155)));
+        dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.41f, .51f), cgt::col4(170, 170, 128, 64), cgt::col4(192, 192, 128, 64)));
+        _dvrNormal.p_transferFunction.replaceTF(dvrTF);
 
-         Geometry1DTransferFunction* vmTF = new Geometry1DTransferFunction(128, tgt::vec2(0.f, .05f));
-         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.4f, .42f), tgt::col4(255, 0, 0, 255), tgt::col4(255, 0, 0, 255)));
-         vmTF->addGeometry(TFGeometry1D::createQuad(tgt::vec2(.45f, .5f), tgt::col4(0, 255, 0, 255), tgt::col4(0, 255, 0, 255)));
-         _dvrVM.p_transferFunction.replaceTF(vmTF);
+        Geometry1DTransferFunction* vmTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
+        vmTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.41f, .51f), cgt::col4(170, 170, 128, 64), cgt::col4(192, 192, 128, 64)));
+        _dvrVM.p_transferFunction.replaceTF(vmTF);
 
         _vmRenderer.p_renderTargetID.addSharedProperty(&_combine.p_mirrorRenderID);
         _vmEepGenerator.p_entryImageID.setValue("vm.eep.entry");
@@ -123,9 +111,9 @@ namespace campvis {
         _pgGenerator.p_geometryID.addSharedProperty(&_eepGenerator.p_geometryID);
         _vmgGenerator.p_mirrorID.addSharedProperty(&_vmEepGenerator.p_mirrorID);
         _vmgGenerator.p_mirrorID.addSharedProperty(&_vmRenderer.p_geometryID);
-        _vmgGenerator.p_mirrorCenter.setValue(tgt::vec3(0.f, 0.f, -20.f));
-        _vmgGenerator.p_poi.setValue(tgt::vec3(40.f, 40.f, 40.f));
-        _vmgGenerator.p_size.setValue(60.f);
+        _vmgGenerator.p_mirrorCenter.setValue(cgt::vec3(0.f, 0.f, -20.f));
+        _vmgGenerator.p_poi.setValue(cgt::vec3(50.f, 80.f, 15.f));
+        _vmgGenerator.p_size.setValue(128.f);
 
         _eepGenerator.p_entryImageID.addSharedProperty(&_dvrNormal.p_entryImageID);
         _vmEepGenerator.p_entryImageID.addSharedProperty(&_dvrVM.p_entryImageID);
@@ -139,21 +127,5 @@ namespace campvis {
         _dvrNormal.p_targetImageID.addSharedProperty(&_depthDarkening.p_inputImage);
         _depthDarkening.p_outputImage.addSharedProperty(&_combine.p_normalImageID);
     }
-
-    void DVRVis::deinit() {
-        _canvasSize.s_changed.disconnect(this);
-        AutoEvaluationPipeline::deinit();
-    }
-
-    void DVRVis::onProcessorValidated(AbstractProcessor* processor) {
-        if (processor == &_imageReader) {
-            // update camera
-            ScopedTypedData<ImageData> img(*_data, _imageReader.p_targetImageID.getValue());
-            if (img != 0) {
-                _trackballEH->reinitializeCamera(img);
-            }
-        }
-    }
-
 
 }

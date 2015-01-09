@@ -40,7 +40,7 @@ namespace campvis {
     /**
      * Abstract base class for transfer function editors.
      */
-    class AbstractTransferFunctionEditor : public QWidget, public sigslot::has_slots<> {
+    class AbstractTransferFunctionEditor : public QWidget, public sigslot::has_slots {
         Q_OBJECT;
 
     public:

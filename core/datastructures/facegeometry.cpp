@@ -24,11 +24,11 @@
 
 #include "facegeometry.h"
 
-#include "tgt/assert.h"
-#include "tgt/logmanager.h"
-#include "tgt/buffer.h"
-#include "tgt/vertexarrayobject.h"
-#include "tgt/vector.h"
+#include "cgt/assert.h"
+#include "cgt/logmanager.h"
+#include "cgt/buffer.h"
+#include "cgt/vertexarrayobject.h"
+#include "cgt/vector.h"
 
 namespace campvis {
 
@@ -41,7 +41,7 @@ namespace campvis {
 
     }
 
-    FaceGeometry::FaceGeometry(const std::vector<tgt::vec3>& vertices, const std::vector<tgt::vec3>& textureCoordinates /*= std::vector<tgt::vec3>()*/, const std::vector<tgt::vec4>& colors /*= std::vector<tgt::vec4>()*/, const std::vector<tgt::vec3>& normals /*= std::vector<tgt::vec3>() */)
+    FaceGeometry::FaceGeometry(const std::vector<cgt::vec3>& vertices, const std::vector<cgt::vec3>& textureCoordinates /*= std::vector<cgt::vec3>()*/, const std::vector<cgt::vec4>& colors /*= std::vector<cgt::vec4>()*/, const std::vector<cgt::vec3>& normals /*= std::vector<cgt::vec3>() */)
         : GeometryData()
         , _vertices(vertices)
         , _textureCoordinates(textureCoordinates)
@@ -49,13 +49,13 @@ namespace campvis {
         , _normals(normals)
         , _faceNormal(0.f)
     {
-        tgtAssert(textureCoordinates.empty() || textureCoordinates.size() == vertices.size(), "Texture coordinates vector must be either empty or of the same size as the vertex vector.");
-        tgtAssert(colors.empty() || colors.size() == vertices.size(), "Colors vector must be either empty or of the same size as the vertex vector.");
-        tgtAssert(normals.empty() || normals.size() == vertices.size(), "Normals vector must be either empty or of the same size as the vertex vector.");
+        cgtAssert(textureCoordinates.empty() || textureCoordinates.size() == vertices.size(), "Texture coordinates vector must be either empty or of the same size as the vertex vector.");
+        cgtAssert(colors.empty() || colors.size() == vertices.size(), "Colors vector must be either empty or of the same size as the vertex vector.");
+        cgtAssert(normals.empty() || normals.size() == vertices.size(), "Normals vector must be either empty or of the same size as the vertex vector.");
 
         // compute normal (class invariant states, that all vertices lie in the same plane):
         if (_vertices.size() > 2) {
-            _faceNormal = tgt::normalize(tgt::cross(vertices[1] - vertices[0], vertices[2] - vertices[0]));
+            _faceNormal = cgt::normalize(cgt::cross(vertices[1] - vertices[0], vertices[2] - vertices[0]));
         }
     }
 
@@ -64,44 +64,52 @@ namespace campvis {
     }
 
     FaceGeometry* FaceGeometry::clone() const {
-        return new FaceGeometry(_vertices, _textureCoordinates, _colors, _normals);
+        FaceGeometry* toReturn = new FaceGeometry(_vertices, _textureCoordinates, _colors, _normals);
+        toReturn->setPickingInformation(_pickingInformation);
+        return toReturn;
     }
 
     size_t FaceGeometry::getLocalMemoryFootprint() const {
         size_t sum = 0;
-        if (_verticesBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_texCoordsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_colorsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
-        if (_normalsBuffer != 0)
-            sum += sizeof(tgt::BufferObject);
+        for (size_t i = 0; i < NUM_BUFFERS; ++i) {
+            if (_buffers[i] != nullptr)
+                sum += sizeof(cgt::BufferObject);
+        }
 
-        return sizeof(*this) + sum + (sizeof(tgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(tgt::vec4) * _colors.size());
+        return sizeof(*this) + sum + (sizeof(cgt::vec3) * (_vertices.size() + _textureCoordinates.size() + _normals.size())) + (sizeof(cgt::vec4) * (_colors.size() + _pickingInformation.size()));
     }
 
     size_t FaceGeometry::size() const {
         return _vertices.size();
     }
 
-    const std::vector<tgt::vec3>& FaceGeometry::getVertices() const {
+    const std::vector<cgt::vec3>& FaceGeometry::getVertices() const {
         return _vertices;
     }
 
-    const std::vector<tgt::vec4>& FaceGeometry::getColors() const {
+    const std::vector<cgt::vec4>& FaceGeometry::getColors() const {
         return _colors;
     }
 
-    const std::vector<tgt::vec3>& FaceGeometry::getNormals() const {
+    const std::vector<cgt::vec3>& FaceGeometry::getNormals() const {
         return _normals;
     }
 
-    const std::vector<tgt::vec3>& FaceGeometry::getTextureCoordinates() const {
+    const std::vector<cgt::vec3>& FaceGeometry::getTextureCoordinates() const {
         return _textureCoordinates;
     }
 
-    const tgt::vec3& FaceGeometry::getFaceNormal() const {
+    const std::vector<cgt::col4>& FaceGeometry::getPickingInformation() const {
+        return _pickingInformation;
+    }
+
+    void FaceGeometry::setPickingInformation(const std::vector<cgt::col4>& pickingInformation) {
+        cgtAssert(pickingInformation.size() == 0 || pickingInformation.size() == _vertices.size(), "Number of picking informations does not match number of vertices!");
+        _pickingInformation = pickingInformation;
+        _buffersDirty = true;
+    }
+
+    const cgt::vec3& FaceGeometry::getFaceNormal() const {
         return _faceNormal;
     }
 
@@ -115,7 +123,7 @@ namespace campvis {
             return;
         }
 
-        tgt::VertexArrayObject vao;
+        cgt::VertexArrayObject vao;
         if (_verticesBuffer)
             vao.setVertexAttributePointer(0, _verticesBuffer);
         if (_texCoordsBuffer)
@@ -124,6 +132,8 @@ namespace campvis {
             vao.setVertexAttributePointer(2, _colorsBuffer);
         if (_normalsBuffer)
             vao.setVertexAttributePointer(3, _normalsBuffer);
+        if (_pickingBuffer)
+            vao.setVertexAttributePointer(4, _pickingBuffer);
         LGL_ERROR;
 
         glDrawArrays(mode, 0, static_cast<GLsizei>(_vertices.size()));
@@ -135,23 +145,27 @@ namespace campvis {
             deleteBuffers();
 
             try {
-                _verticesBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                _verticesBuffer->data(&_vertices.front(), _vertices.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                _verticesBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                _verticesBuffer->data(&_vertices.front(), _vertices.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
 
                 if (! _textureCoordinates.empty()) {
-                    _texCoordsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _texCoordsBuffer->data(&_textureCoordinates.front(), _textureCoordinates.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _texCoordsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _texCoordsBuffer->data(&_textureCoordinates.front(), _textureCoordinates.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
                 }
                 if (! _colors.empty()) {
-                    _colorsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _colorsBuffer->data(&_colors.front(), _colors.size() * sizeof(tgt::vec4), tgt::BufferObject::FLOAT, 4);
+                    _colorsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _colorsBuffer->data(&_colors.front(), _colors.size() * sizeof(cgt::vec4), cgt::BufferObject::FLOAT, 4);
                 }
                 if (! _normals.empty()) {
-                    _normalsBuffer = new tgt::BufferObject(tgt::BufferObject::ARRAY_BUFFER, tgt::BufferObject::USAGE_STATIC_DRAW);
-                    _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(tgt::vec3), tgt::BufferObject::FLOAT, 3);
+                    _normalsBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _normalsBuffer->data(&_normals.front(), _normals.size() * sizeof(cgt::vec3), cgt::BufferObject::FLOAT, 3);
+                }
+                if (! _pickingInformation.empty()) {
+                    _pickingBuffer = new cgt::BufferObject(cgt::BufferObject::ARRAY_BUFFER, cgt::BufferObject::USAGE_STATIC_DRAW);
+                    _pickingBuffer->data(&_pickingInformation.front(), _pickingInformation.size() * sizeof(cgt::col4), cgt::BufferObject::UNSIGNED_BYTE, 4);
                 }
             }
-            catch (tgt::Exception& e) {
+            catch (cgt::Exception& e) {
                 LERROR("Error creating OpenGL Buffer objects: " << e.what());
                 _buffersDirty = true;
                 return;
@@ -163,8 +177,8 @@ namespace campvis {
     }
 
     namespace {
-        float distanceToPlane(const tgt::vec3& vertex, float p, const tgt::vec3& pNormal, float epsilon) {
-            float distance = tgt::dot(pNormal, vertex) - p;
+        float distanceToPlane(const cgt::vec3& vertex, float p, const cgt::vec3& pNormal, float epsilon) {
+            float distance = cgt::dot(pNormal, vertex) - p;
             if (std::abs(distance) <= epsilon)
                 return 0;
             else
@@ -172,11 +186,12 @@ namespace campvis {
         }
     }
 
-    campvis::FaceGeometry FaceGeometry::clipAgainstPlane(float p, const tgt::vec3& pNormal, float epsilon /*= 1e-4f*/) const {
-        tgtAssert(epsilon >= 0, "Epsilon must be positive.");
+    campvis::FaceGeometry FaceGeometry::clipAgainstPlane(float p, const cgt::vec3& pNormal, float epsilon /*= 1e-4f*/) const {
+        cgtAssert(epsilon >= 0, "Epsilon must be positive.");
 
-        std::vector<tgt::vec3> verts, texCoords, norms;
-        std::vector<tgt::vec4> cols;
+        std::vector<cgt::vec3> verts, texCoords, norms;
+        std::vector<cgt::vec4> cols;
+        std::vector<cgt::col4> picks;
         size_t lastIndex = _vertices.size() - 1;
         float lastDistance = distanceToPlane(_vertices.back(), p, pNormal, epsilon);
 
@@ -188,25 +203,29 @@ namespace campvis {
             if (lastDistance > 0 && currrentDistance <= 0) {
                 float t = lastDistance / (lastDistance - currrentDistance);
                 
-                verts.push_back(tgt::mix(_vertices[lastIndex], _vertices[i], t));
+                verts.push_back(cgt::mix(_vertices[lastIndex], _vertices[i], t));
                 if (!_textureCoordinates.empty())
-                    texCoords.push_back(tgt::mix(_textureCoordinates[lastIndex], _textureCoordinates[i], t));
+                    texCoords.push_back(cgt::mix(_textureCoordinates[lastIndex], _textureCoordinates[i], t));
                 if (!_colors.empty())
-                    cols.push_back(tgt::mix(_colors[lastIndex], _colors[i], t));
+                    cols.push_back(cgt::mix(_colors[lastIndex], _colors[i], t));
                 if (!_normals.empty())
-                    norms.push_back(tgt::mix(_normals[lastIndex], _normals[i], t));
+                    norms.push_back(cgt::mix(_normals[lastIndex], _normals[i], t));
+                if (!_pickingInformation.empty())
+                    picks.push_back(_pickingInformation[i]);
             }
             // case 2: last vertex inside, this vertex outside clip region => clip
             else if (lastDistance <= 0 && currrentDistance > 0) {
                 float t = lastDistance / (lastDistance - currrentDistance);
 
-                verts.push_back(tgt::mix(_vertices[lastIndex], _vertices[i], t));
+                verts.push_back(cgt::mix(_vertices[lastIndex], _vertices[i], t));
                 if (!_textureCoordinates.empty())
-                    texCoords.push_back(tgt::mix(_textureCoordinates[lastIndex], _textureCoordinates[i], t));
+                    texCoords.push_back(cgt::mix(_textureCoordinates[lastIndex], _textureCoordinates[i], t));
                 if (!_colors.empty())
-                    cols.push_back(tgt::mix(_colors[lastIndex], _colors[i], t));
+                    cols.push_back(cgt::mix(_colors[lastIndex], _colors[i], t));
                 if (!_normals.empty())
-                    norms.push_back(tgt::mix(_normals[lastIndex], _normals[i], t));
+                    norms.push_back(cgt::mix(_normals[lastIndex], _normals[i], t));
+                if (!_pickingInformation.empty())
+                    picks.push_back(_pickingInformation[lastIndex]);
             }
 
             // case 1.2 + case 3: current vertix in front of plane => keep
@@ -218,18 +237,22 @@ namespace campvis {
                     cols.push_back(_colors[i]);
                 if (!_normals.empty())
                     norms.push_back(_normals[i]);
+                if (!_pickingInformation.empty())
+                    picks.push_back(_pickingInformation[i]);
             }
 
             lastIndex = i;
             lastDistance = currrentDistance;
         }
 
-        return FaceGeometry(verts, texCoords, cols, norms);
+        FaceGeometry toReturn(verts, texCoords, cols, norms);
+        toReturn.setPickingInformation(picks);
+        return toReturn;
     }
 
-    tgt::Bounds FaceGeometry::getWorldBounds() const {
-        tgt::Bounds toReturn;
-        for (std::vector<tgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
+    cgt::Bounds FaceGeometry::getWorldBounds() const {
+        cgt::Bounds toReturn;
+        for (std::vector<cgt::vec3>::const_iterator it = _vertices.begin(); it != _vertices.end(); ++it)
             toReturn.addPoint(*it);
         return toReturn;
     }
@@ -238,13 +261,22 @@ namespace campvis {
         return ! _textureCoordinates.empty();
     }
 
-    void FaceGeometry::applyTransformationToVertices(const tgt::mat4& t) {
+    bool FaceGeometry::hasPickingInformation() const {
+        return !_pickingInformation.empty();
+    }
+
+    void FaceGeometry::applyTransformationToVertices(const cgt::mat4& t) {
         for (size_t i = 0; i < _vertices.size(); ++i) {
-            tgt::vec4 tmp = t * tgt::vec4(_vertices[i], 1.f);
+            cgt::vec4 tmp = t * cgt::vec4(_vertices[i], 1.f);
             _vertices[i] = tmp.xyz() / tmp.w;
         }
 
         _buffersDirty = true;
     }
+
+    std::string FaceGeometry::getTypeAsString() const {
+        return "Face Geometry Data";
+    }
+
 
 }

@@ -25,8 +25,8 @@
 #ifndef MULTIINDEXEDGEOMETRY_H__
 #define MULTIINDEXEDGEOMETRY_H__
 
-#include "tgt/bounds.h"
-#include "tgt/vector.h"
+#include "cgt/bounds.h"
+#include "cgt/vector.h"
 #include "core/datastructures/geometrydata.h"
 #include "core/datastructures/facegeometry.h"
 
@@ -52,10 +52,10 @@ namespace campvis {
          * \param   normals             The list of vertex normals, may be empty.
          */
         explicit MultiIndexedGeometry(
-            const std::vector<tgt::vec3>& vertices,
-            const std::vector<tgt::vec3>& textureCoordinates = std::vector<tgt::vec3>(),
-            const std::vector<tgt::vec4>& colors = std::vector<tgt::vec4>(),
-            const std::vector<tgt::vec3>& normals = std::vector<tgt::vec3>()
+            const std::vector<cgt::vec3>& vertices,
+            const std::vector<cgt::vec3>& textureCoordinates = std::vector<cgt::vec3>(),
+            const std::vector<cgt::vec4>& colors = std::vector<cgt::vec4>(),
+            const std::vector<cgt::vec3>& normals = std::vector<cgt::vec3>()
             );
         
         /**
@@ -78,18 +78,30 @@ namespace campvis {
 
         /// \see AbstractData::clone()
         virtual MultiIndexedGeometry* clone() const;
-
         /// \see AbstractData::getLocalMemoryFootprint()
         virtual size_t getLocalMemoryFootprint() const;
-
         /// \see AbstractData::getVideoMemoryFootprint()
         virtual size_t getVideoMemoryFootprint() const;
+        /// \see AbstractData::getTypeAsString()
+        virtual std::string getTypeAsString() const;
 
         /**
          * Add a render primitive given by a list of indices.
          * \param   indices     Index list defining the faces.
          */
         void addPrimitive(const std::vector<uint16_t>& indices);
+        
+        /**
+         * The list of picking information colors, may be empty.
+         * \return  _pickingInformation
+         */
+        const std::vector<cgt::col4>& getPickingInformation() const;
+
+        /**
+         * Sets the picking information of this geometry to \a pickingInformation
+         * \param   pickingInformation  The new list of picking information for this geometry
+         */
+        void setPickingInformation(const std::vector<cgt::col4>& pickingInformation);
 
         /**
          * Renders this MultiIndexedGeometry.
@@ -99,11 +111,13 @@ namespace campvis {
         virtual void render(GLenum mode) const;
 
         /// \see GeometryData::getWorldBounds
-        virtual tgt::Bounds getWorldBounds() const;
+        virtual cgt::Bounds getWorldBounds() const;
         /// \see GeometryData::hasTextureCoordinates
         virtual bool hasTextureCoordinates() const;
+        /// \see GeometryData::hasPickingInformation
+        virtual bool hasPickingInformation() const;
         /// \see GeometryData::applyTransformationToVertices
-        virtual void applyTransformationToVertices(const tgt::mat4& t);
+        virtual void applyTransformationToVertices(const cgt::mat4& t);
 
     protected:
         /**
@@ -119,12 +133,14 @@ namespace campvis {
         std::vector<void*> _offsets;                    ///< Byte offsets for each primitive to render
         std::vector<GLsizei> _counts;                   ///< Numer of vertices for each primitive to render
 
-        std::vector<tgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
-        std::vector<tgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
-        std::vector<tgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
-        std::vector<tgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
+        std::vector<cgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
+        std::vector<cgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.
+        std::vector<cgt::vec4> _colors;                 ///< The list of vertex colors, may be empty.
+        std::vector<cgt::vec3> _normals;                ///< The list of vertex normals, may be empty.
 
-        mutable tgt::BufferObject* _indicesBuffer;
+        std::vector<cgt::col4> _pickingInformation;     ///< The list of picking information colors, max be empty.
+
+        mutable cgt::BufferObject* _indicesBuffer;
 
         static const std::string loggerCat_;
     };

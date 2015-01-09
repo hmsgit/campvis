@@ -24,34 +24,31 @@
 
 #include "campvispainter.h"
 
-#include "tgt/assert.h"
-#include "tgt/camera.h"
-#include "tgt/quadric.h"
-#include "tgt/shadermanager.h"
-#include "tgt/texture.h"
-#include "tgt/textureunit.h"
-#include "tgt/qt/qtthreadedcanvas.h"
+#include "cgt/assert.h"
+#include "cgt/camera.h"
+#include "cgt/glcontextmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/texture.h"
+#include "cgt/textureunit.h"
+#include "cgt/qt/qtthreadedcanvas.h"
 
 
 #include "core/datastructures/imagedata.h"
 #include "core/datastructures/renderdata.h"
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/pipeline/abstractpipeline.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
 namespace campvis {
     const std::string CampVisPainter::loggerCat_ = "CAMPVis.core.CampVisPainter";
 
-    CampVisPainter::CampVisPainter(tgt::GLCanvas* canvas, AbstractPipeline* pipeline)
-        : tgt::Painter(canvas)
+    CampVisPainter::CampVisPainter(cgt::GLCanvas* canvas, AbstractPipeline* pipeline)
+        : cgt::Painter(canvas)
         , _pipeline(nullptr)
         , _copyShader(nullptr)
         , _errorTexture(nullptr)
     {
-        tgtAssert(getCanvas() != 0, "The given canvas must not be 0!");
-        _dirty = true;
+        cgtAssert(getCanvas() != nullptr, "The given canvas must not be 0!");
         setPipeline(pipeline);
     }
 
@@ -60,7 +57,7 @@ namespace campvis {
     }
 
     void CampVisPainter::paint() {
-        if (getCanvas() == 0)
+        if (getCanvas() == nullptr)
             return;
 
         if (_copyShader == nullptr) {
@@ -68,24 +65,30 @@ namespace campvis {
             return;
         }
 
-        const tgt::ivec2& size = getCanvas()->getSize();
+        const cgt::ivec2& size = getCanvas()->getSize();
         glViewport(0, 0, size.x, size.y);
 
         // try get Data
-        ScopedTypedData<RenderData> rd(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
-        ImageRepresentationGL::ScopedRepresentation repGL(_pipeline->getDataContainer(), _pipeline->getRenderTargetID());
+        DataHandle dh = _pipeline->getDataContainer().getData(_pipeline->getRenderTargetID());
+        const RenderData* rd = nullptr;
+        const ImageRepresentationGL* repGL = nullptr;
+        if (dh.getData() != nullptr) {
+            rd = dynamic_cast<const RenderData*>(dh.getData());
+            repGL = dynamic_cast<const ImageRepresentationGL*>(dh.getData());
+        }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // activate the shader
         _copyShader->activate();
-        tgt::Shader::IgnoreUniformLocationErrorGuard guard(_copyShader);
+        cgt::Shader::IgnoreUniformLocationErrorGuard guard(_copyShader);
 
         // render whatever there is to render
-        if (rd != 0 || (repGL != 0 && repGL->getDimensionality() == 2)) {
-            _copyShader->setUniform("_viewMatrix", tgt::mat4::identity);
+        if (rd != nullptr || (repGL != nullptr && repGL->getDimensionality() == 2)) {
+            _copyShader->setUniform("_viewMatrix", cgt::mat4::identity);
 
             // bind input textures
-            tgt::TextureUnit colorUnit;
+            cgt::TextureUnit colorUnit;
             if (rd)
                 rd->bindColorTexture(_copyShader, colorUnit);
             else if (repGL)
@@ -97,11 +100,11 @@ namespace campvis {
         // if there is nothing to render, render the error texture
         else if (_errorTexture != nullptr) {
             float ratioRatio = static_cast<float>(size.y) / size.x;
-            tgt::mat4 viewMatrix = (ratioRatio > 1) ? tgt::mat4::createScale(tgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : tgt::mat4::createScale(tgt::vec3(ratioRatio, 1.f, 1.f));
+            cgt::mat4 viewMatrix = (ratioRatio > 1) ? cgt::mat4::createScale(cgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : cgt::mat4::createScale(cgt::vec3(ratioRatio, 1.f, 1.f));
             _copyShader->setUniform("_viewMatrix", viewMatrix);
 
             // bind input textures
-            tgt::TextureUnit colorUnit;
+            cgt::TextureUnit colorUnit;
             colorUnit.activate();
             _errorTexture->bind();
             _copyShader->setUniform("_colorTexture", colorUnit.getUnitNumber());
@@ -119,7 +122,7 @@ namespace campvis {
         getCanvas()->swap();
     }
 
-    void CampVisPainter::sizeChanged(const tgt::ivec2& size) {
+    void CampVisPainter::sizeChanged(const cgt::ivec2& size) {
         _pipeline->setRenderTargetSize(size);
     }
 
@@ -129,51 +132,45 @@ namespace campvis {
             _copyShader->setAttributeLocation(0, "in_Position");
             _copyShader->setAttributeLocation(1, "in_TexCoords");
         }
-        catch (tgt::Exception& e) {
-            LFATAL("Encountered tgt::Exception: " << e.what());
+        catch (cgt::Exception& e) {
+            LFATAL("Encountered cgt::Exception: " << e.what());
         }
     }
 
     void CampVisPainter::deinit() {
         ShdrMgr.dispose(_copyShader);
 
-        if (_pipeline != 0) {
-            _pipeline->s_renderTargetChanged.disconnect(this);
-            if (getCanvas()->getEventHandler() != 0)
+        if (_pipeline != nullptr) {
+            if (getCanvas()->getEventHandler() != nullptr)
                 getCanvas()->getEventHandler()->removeEventListener(_pipeline);
-            _pipeline = 0;
+            _pipeline = nullptr;
         }
     }
 
     void CampVisPainter::setPipeline(AbstractPipeline* pipeline) {
-        tgtAssert(pipeline != 0, "The given pipeline must not be 0.");
-        if (_pipeline != 0) {
-            _pipeline->s_renderTargetChanged.disconnect(this);
-            if (getCanvas()->getEventHandler() != 0)
+        cgtAssert(pipeline != nullptr, "The given pipeline must not be 0.");
+
+        if (_pipeline != nullptr) {
+            if (getCanvas()->getEventHandler() != nullptr)
                 getCanvas()->getEventHandler()->removeEventListener(_pipeline);
         }
 
         _pipeline = pipeline;
-        _pipeline->s_renderTargetChanged.connect(this, &CampVisPainter::onRenderTargetChanged);
         _pipeline->setRenderTargetSize(getCanvas()->getSize());
-        if (getCanvas()->getEventHandler() != 0)
+        if (getCanvas()->getEventHandler() != nullptr)
             getCanvas()->getEventHandler()->addEventListenerToFront(_pipeline);
     }
 
     void CampVisPainter::repaint() {
-        GLJobProc.enqueueJob(getCanvas(), makeJobOnHeap(this, &CampVisPainter::paint), OpenGLJobProcessor::PaintJob);
+        // do nothing, as the painting is entirely managed by the pipeline.
     }
 
-    void CampVisPainter::onRenderTargetChanged() {
-        repaint();
-    }
-
-    void CampVisPainter::setCanvas(tgt::GLCanvas* canvas) {
-        tgtAssert(dynamic_cast<tgt::QtThreadedCanvas*>(canvas) != 0, "Canvas must be of type QtThreadedCanvas!");
+    void CampVisPainter::setCanvas(cgt::GLCanvas* canvas) {
+        cgtAssert(dynamic_cast<cgt::QtThreadedCanvas*>(canvas) != nullptr, "Canvas must be of type QtThreadedCanvas!");
         Painter::setCanvas(canvas);
     }
 
-    void CampVisPainter::setErrorTexture(tgt::Texture* texture) {
+    void CampVisPainter::setErrorTexture(cgt::Texture* texture) {
         _errorTexture = texture;
     }
 

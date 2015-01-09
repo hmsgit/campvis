@@ -29,18 +29,12 @@
 
 #include "core/pipeline/abstractprocessordecorator.h"
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/properties/allproperties.h"
 
-#include "core/properties/cameraproperty.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/floatingpointproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/optionproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-
+#include "modules/modulesapi.h"
 #include "modules/advancedusvis/properties/pointpredicatehistogramproperty.h"
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -50,7 +44,7 @@ namespace campvis {
     /**
      * Evaluates the Point Predicate Histogram and stores the results in a bitmask image.
      */
-    class PointPredicateEvaluator : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API PointPredicateEvaluator : public VisualizationProcessor {
     public:
         /**
          * Constructs a new PointPredicateEvaluator Processor
@@ -81,10 +75,10 @@ namespace campvis {
         DataNameProperty p_inputSnr;            ///< Input SNR image
         DataNameProperty p_inputVesselness;     ///< Input Vesselness image
         DataNameProperty p_inputConfidence;     ///< Input confidence image
+        DataNameProperty p_camera;              ///< Input camera (for silhouette view predicate)
             
         DataNameProperty p_outputImage;         ///< Output bitmask image
 
-        CameraProperty p_camera;                        ///< Camera for silhouette view predicate
         PointPredicateHistogramProperty p_histogram;    ///< Point Predicate Histogram to evaluate
 
     protected:
@@ -101,7 +95,7 @@ namespace campvis {
         /// Generates the GLSL header
         std::string generateHeader() const;
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
     private:
         static const std::string loggerCat_;

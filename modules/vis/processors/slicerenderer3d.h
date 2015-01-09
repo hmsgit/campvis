@@ -28,13 +28,11 @@
 #include <string>
 
 #include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/datanameproperty.h"
-#include "core/properties/genericproperty.h"
-#include "core/properties/numericproperty.h"
-#include "core/properties/transferfunctionproperty.h"
-#include "core/properties/cameraproperty.h"
+#include "core/properties/allproperties.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -44,7 +42,7 @@ namespace campvis {
     /**
      * Extracts a slice from a 3D image and renders it into a rendertarget.
      */
-    class SliceRenderer3D : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API SliceRenderer3D : public VisualizationProcessor {
     public:
         /**
          * Constructs a new SliceRenderer3D Processor
@@ -71,12 +69,12 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::EXPERIMENTAL; };
 
-        DataNameProperty p_sourceImageID;                  ///< image ID for input image
-        DataNameProperty p_targetImageID;                  ///< image ID for output image
+        DataNameProperty p_sourceImageID;                   ///< image ID for input image
+        DataNameProperty p_camera;                          ///< ID for camera input
+        DataNameProperty p_targetImageID;                   ///< image ID for output image
 
-        CameraProperty p_camera;
-        IntProperty p_sliceNumber;                       ///< number of the slice to extract
-        TransferFunctionProperty p_transferFunction;     ///< Transfer function
+        IntProperty p_sliceNumber;                          ///< number of the slice to extract
+        TransferFunctionProperty p_transferFunction;        ///< Transfer function
 
         /// adapts the range of the p_sliceNumber property to the image
         /// \see AbstractProcessor::updateProperties
@@ -86,7 +84,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;                           ///< Shader for slice rendering
+        cgt::Shader* _shader;                           ///< Shader for slice rendering
 
         static const std::string loggerCat_;
     };

@@ -238,8 +238,8 @@ namespace campvis {
         : AbstractImageRepresentationItk(parent)
         , _itkImage(itkImage)
     {
-        tgtAssert(_parent->getNumChannels() == NUMCHANNELS, "Number of channels must match parent image's number of channels!");
-        tgtAssert(_parent->getDimensionality() == DIMENSIONALITY, "The dimensionality must match parent image's dimensionality!");
+        cgtAssert(_parent->getNumChannels() == NUMCHANNELS, "Number of channels must match parent image's number of channels!");
+        cgtAssert(_parent->getDimensionality() == DIMENSIONALITY, "The dimensionality must match parent image's dimensionality!");
     }
 
     template<typename BASETYPE, size_t NUMCHANNELS, size_t DIMENSIONALITY>

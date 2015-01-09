@@ -25,8 +25,8 @@
 #ifndef MWHEELTONUMERICPROPERTYEVENTHANDLER_H__
 #define MWHEELTONUMERICPROPERTYEVENTHANDLER_H__
 
-#include "tgt/logmanager.h"
-#include "tgt/event/eventlistener.h"
+#include "cgt/logmanager.h"
+#include "cgt/event/eventlistener.h"
 
 #include "core/coreapi.h"
 
@@ -36,7 +36,7 @@ namespace campvis {
     /**
      * Event handler that maps mouse wheel events to a numeric property.
      */
-    class CAMPVIS_CORE_API MWheelToNumericPropertyEventListener : public tgt::EventListener {
+    class CAMPVIS_CORE_API MWheelToNumericPropertyEventListener : public cgt::EventListener {
     public:
         /**
          * Creates a MWheelToNumericPropertyEventListener.
@@ -48,8 +48,8 @@ namespace campvis {
          **/
         virtual ~MWheelToNumericPropertyEventListener();
 
-        /// \see tgt::EventListener::wheelEvent()
-        virtual void wheelEvent(tgt::MouseEvent* e);
+        /// \see cgt::EventListener::wheelEvent()
+        virtual void wheelEvent(cgt::MouseEvent* e);
 
     protected:
         INumericProperty* _prop;        ///< The Property to map the event to

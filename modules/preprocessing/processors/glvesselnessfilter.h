@@ -31,7 +31,9 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/floatingpointproperty.h"
 
-namespace tgt {
+#include "modules/modulesapi.h"
+
+namespace cgt {
     class Shader;
 }
 
@@ -39,7 +41,7 @@ namespace campvis {
     /**
      * Computes a Vesselness Measure very similar to the one proposed by Frangi.
      */
-    class GlVesselnessFilter : public VisualizationProcessor {
+    class CAMPVIS_MODULES_API GlVesselnessFilter : public VisualizationProcessor {
     public:
         /**
          * Constructs a new GlVesselnessFilter Processor
@@ -80,7 +82,7 @@ namespace campvis {
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
 
-        tgt::Shader* _shader;       ///< Shader for gradient volume generation
+        cgt::Shader* _shader;       ///< Shader for gradient volume generation
 
         static const std::string loggerCat_;
     };

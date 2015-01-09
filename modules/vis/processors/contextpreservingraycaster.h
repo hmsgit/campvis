@@ -30,9 +30,11 @@
 #include "core/properties/genericproperty.h"
 #include "core/properties/transferfunctionproperty.h"
 
+#include "modules/modulesapi.h"
+
 #include <string>
 
-namespace tgt {
+namespace cgt {
     class Shader;
 }
 
@@ -41,7 +43,7 @@ namespace campvis {
      * Performs a illustrative context-preserving volume ray casting.
      * Implementation of "Illustrative Context-Preserving Volume Rendering" by Bruckner et al., IEEE VGTC 2005
      */
-    class ContextPreservingRaycaster : public RaycastingProcessor {
+    class CAMPVIS_MODULES_API ContextPreservingRaycaster : public RaycastingProcessor {
     public:
         /**
          * Constructs a new ContextPreservingRaycaster Processor

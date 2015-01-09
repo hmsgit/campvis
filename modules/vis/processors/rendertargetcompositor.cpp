@@ -23,9 +23,9 @@
 // ================================================================================================
 
 #include "rendertargetcompositor.h"
-#include "tgt/logmanager.h"
-#include "tgt/shadermanager.h"
-#include "tgt/textureunit.h"
+#include "cgt/logmanager.h"
+#include "cgt/shadermanager.h"
+#include "cgt/textureunit.h"
 
 #include "core/datastructures/renderdata.h"
 
@@ -88,20 +88,26 @@ namespace campvis {
         ScopedTypedData<RenderData> firstImage(data, p_firstImageId.getValue());
         ScopedTypedData<RenderData> secondImage(data, p_secondImageId.getValue());
 
-        if ((p_compositingMethod.getOptionValue() == CompositingModeSecond || firstImage != nullptr) && (p_compositingMethod.getOptionValue() == CompositingModeFirst || secondImage != nullptr)) {
+        CompositingMode compositingMode = p_compositingMethod.getOptionValue();
+        if (firstImage != nullptr && secondImage == nullptr && compositingMode != CompositingModeSecond) 
+            compositingMode = CompositingModeFirst;
+        if (firstImage == nullptr && secondImage != nullptr && compositingMode != CompositingModeFirst) 
+            compositingMode = CompositingModeSecond;
+
+        if ((compositingMode == CompositingModeSecond || firstImage != nullptr) && (compositingMode == CompositingModeFirst || secondImage != nullptr)) {
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
 
             _shader->activate();
-            tgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
+            cgt::TextureUnit firstColorUnit, firstDepthUnit, secondColorUnit, secondDepthUnit;
 
-            if (p_compositingMethod.getOptionValue() != CompositingModeSecond)
+            if (compositingMode != CompositingModeSecond)
                 firstImage->bind(_shader, firstColorUnit, firstDepthUnit, "_firstColor", "_firstDepth", "_firstTexParams");
-            if (p_compositingMethod.getOptionValue() != CompositingModeFirst)
+            if (compositingMode != CompositingModeFirst)
                 secondImage->bind(_shader, secondColorUnit, secondDepthUnit, "_secondColor", "_secondDepth", "_secondTexParams");
 
-            _shader->setUniform("_compositingMethod", p_compositingMethod.getOptionValue());
+            _shader->setUniform("_compositingMethod", compositingMode);
             _shader->setUniform("_alpha", p_alphaValue.getValue());
             _shader->setUniform("_enableBackground", p_enableBackground.getValue());
 
@@ -118,13 +124,13 @@ namespace campvis {
             glDisable(GL_DEPTH_TEST);
 
             _shader->deactivate();
-            tgt::TextureUnit::setZeroUnit();
+            cgt::TextureUnit::setZeroUnit();
             LGL_ERROR;
 
             data.addData(p_targetImageId.getValue(), new RenderData(_fbo));
         }
         else {
-            LERROR("No suitable input images found.");
+            LDEBUG("No suitable input images found.");
         }
     }
 
