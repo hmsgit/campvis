@@ -1449,7 +1449,8 @@ namespace sigslot {
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->processSignal();
+                    if (*it != nullptr)
+                        (*it)->processSignal();
                     it = itNext;
                 }
             };
@@ -1528,7 +1529,8 @@ namespace sigslot {
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->processSignal(_a1);
+                    if (*it != nullptr)
+                        (*it)->processSignal(_a1);
                     it = itNext;
                 }
             };
@@ -1608,7 +1610,8 @@ namespace sigslot {
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->processSignal(_a1, _a2);
+                    if (*it != nullptr)
+                        (*it)->processSignal(_a1, _a2);
                     it = itNext;
                 }
             };
@@ -1691,7 +1694,8 @@ namespace sigslot {
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->processSignal(_a1, _a2, _a3);
+                    if (*it != nullptr)
+                        (*it)->processSignal(_a1, _a2, _a3);
                     it = itNext;
                 }
             };
@@ -1774,7 +1778,8 @@ namespace sigslot {
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->processSignal(_a1, _a2, _a3, _a4);
+                    if (*it != nullptr)
+                        (*it)->processSignal(_a1, _a2, _a3, _a4);
                     it = itNext;
                 }
             };
@@ -1858,7 +1863,8 @@ namespace sigslot {
                 while (it != itEnd) {
                     itNext = it;
                     ++itNext;
-                    (*it)->processSignal(_a1, _a2, _a3, _a4, _a5);
+                    if (*it != nullptr)
+                        (*it)->processSignal(_a1, _a2, _a3, _a4, _a5);
                     it = itNext;
                 }
             };

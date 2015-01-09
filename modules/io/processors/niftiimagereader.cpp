@@ -473,7 +473,7 @@ namespace campvis {
         dimensions.y = dimension.dim[2];
         dimensions.z = dimension.dim[3];
 
-        int numVolumes = dimension.dim[4];
+        size_t numVolumes = static_cast<size_t>(dimension.dim[4]);
 
         if (cgt::hor(cgt::lessThanEqual(dimensions, cgt::ivec3(0)))) {
             LERROR("Invalid resolution or resolution not specified: " << dimensions);
@@ -486,22 +486,22 @@ namespace campvis {
         spacing.z = dimension.pixdim[3];
 
         size_t numChannels = 1;
-        WeaklyTypedPointer::BaseType voreenVoxelType;
+        WeaklyTypedPointer::BaseType baseType;
         switch(dimension.datatype) {
             case DT_UNSIGNED_CHAR:
-                voreenVoxelType = WeaklyTypedPointer::UINT8;
+                baseType = WeaklyTypedPointer::UINT8;
                 break;
             case DT_SIGNED_SHORT:
-                voreenVoxelType = WeaklyTypedPointer::INT16;
+                baseType = WeaklyTypedPointer::INT16;
                 break;
             case DT_SIGNED_INT:
-                voreenVoxelType = WeaklyTypedPointer::INT32;
+                baseType = WeaklyTypedPointer::INT32;
                 break;
             case DT_FLOAT:
-                voreenVoxelType = WeaklyTypedPointer::FLOAT;
+                baseType = WeaklyTypedPointer::FLOAT;
                 break;
             case DT_RGB:
-                voreenVoxelType = WeaklyTypedPointer::UINT8;
+                baseType = WeaklyTypedPointer::UINT8;
                 numChannels = 3;
                 break;
             case DT_ALL:
@@ -515,7 +515,7 @@ namespace campvis {
         cgt::svec3 imageSize(dimensions);
         if (numVolumes <= 1) {
             ImageData* image = new ImageData(3, imageSize, numChannels);
-            ImageRepresentationDisk::create(image, hdrFileName, voreenVoxelType, 0, e);
+            ImageRepresentationDisk::create(image, hdrFileName, baseType, 0, e);
             // Nifti transformations give us the center of the first voxel, we translate to correct:
             image->setMappingInformation(ImageMappingInformation(imageSize, cgt::vec3(-.5f) + p_imageOffset.getValue(), spacing * p_voxelSize.getValue()));
             dataContainer.addData(p_targetImageID.getValue(), image);
@@ -525,7 +525,7 @@ namespace campvis {
             size_t numBytes = hmul(imageSize) * (dimension.bitpix / 8);
             for (size_t i = 0; i < numVolumes; ++i) {
                 ImageData* image = new ImageData(3, imageSize, numChannels);
-                ImageRepresentationDisk::create(image, hdrFileName, voreenVoxelType, i * numBytes, e);
+                ImageRepresentationDisk::create(image, hdrFileName, baseType, i * numBytes, e);
                 // Nifti transformations give us the center of the first voxel, we translate to correct:
                 image->setMappingInformation(ImageMappingInformation(imageSize, cgt::vec3(-.5f) + p_imageOffset.getValue(), spacing * p_voxelSize.getValue()));
                 is->addImage(image);
@@ -579,7 +579,7 @@ namespace campvis {
         dimensions.y = header.dim[2];
         dimensions.z = header.dim[3];
 
-        int numVolumes = header.dim[4];
+        size_t numVolumes = static_cast<size_t>(header.dim[4]);
 
         if (cgt::hor(cgt::lessThanEqual(dimensions, cgt::ivec3(0)))) {
             LERROR("Invalid resolution or resolution not specified: " << dimensions);
@@ -591,24 +591,24 @@ namespace campvis {
         spacing.y = header.pixdim[2];
         spacing.z = header.pixdim[3];
 
-        int timeunit = XYZT_TO_TIME(header.xyzt_units);
+//        int timeunit = XYZT_TO_TIME(header.xyzt_units);
         int spaceunit = XYZT_TO_SPACE(header.xyzt_units);
 
-        float dt = header.pixdim[4];
-        float toffset = header.toffset;
-        switch(timeunit) {
-            case NIFTI_UNITS_SEC:
-                dt *= 1000.0f;
-                toffset *= 1000.0f;
-                break;
-            case NIFTI_UNITS_MSEC:
-                //nothing to do
-                break;
-            case NIFTI_UNITS_USEC:
-                dt /= 1000.0f;
-                toffset /= 1000.0f;
-                break;
-        }
+//         float dt = header.pixdim[4];
+//         float toffset = header.toffset;
+//         switch(timeunit) {
+//             case NIFTI_UNITS_SEC:
+//                 dt *= 1000.0f;
+//                 toffset *= 1000.0f;
+//                 break;
+//             case NIFTI_UNITS_MSEC:
+//                 //nothing to do
+//                 break;
+//             case NIFTI_UNITS_USEC:
+//                 dt /= 1000.0f;
+//                 toffset /= 1000.0f;
+//                 break;
+//         }
 
         switch(spaceunit) {
             case NIFTI_UNITS_MM:
@@ -627,61 +627,37 @@ namespace campvis {
         }
 
         size_t numChannels = 1;
-        WeaklyTypedPointer::BaseType voreenVoxelType;
-
-//         switch(header.intent_code) {
-//             case IC_INTENT_SYMMATRIX:  /* parameter at each voxel is symmetrical matrix */
-//                 //TODO: should be relatively easy (=> tensors)
-//             case IC_INTENT_DISPVECT:   /* parameter at each voxel is displacement vector */
-//             case IC_INTENT_VECTOR:     /* parameter at each voxel is vector */
-//                 //TODO: should be relatively easy
-//             case IC_INTENT_GENMATRIX:  /* parameter at each voxel is matrix */
-//                 //TODO: should be relatively easy
-//             case IC_INTENT_POINTSET:   /* value at each voxel is spatial coordinate (vertices/nodes of surface mesh) */
-//             case IC_INTENT_TRIANGLE:   /* value at each voxel is spatial coordinate (vertices/nodes of surface mesh) */
-//             case IC_INTENT_QUATERNION:
-//                 throw cgt::UnsupportedFormatException("Unsupported intent code!");
-//                 break;
-//             case IC_INTENT_ESTIMATE:   /* parameter for estimate in intent_name */
-//             case IC_INTENT_LABEL:      /* parameter at each voxel is index to label defined in aux_file */
-//             case IC_INTENT_NEURONAME:  /* parameter at each voxel is index to label in NeuroNames label set */
-//             case IC_INTENT_DIMLESS:    /* dimensionless value */
-//             case IC_INTENT_NONE:
-//                 break;
-//             default:
-//                 LWARNING("Unhandled intent code");
-//                 break;
-//         }
+        WeaklyTypedPointer::BaseType baseType;
 
         switch(header.datatype) {
             case DT_UNSIGNED_CHAR:
-                voreenVoxelType = WeaklyTypedPointer::UINT8;
+                baseType = WeaklyTypedPointer::UINT8;
                 break;
             case DT_SIGNED_SHORT:
-                voreenVoxelType = WeaklyTypedPointer::INT16;
+                baseType = WeaklyTypedPointer::INT16;
                 break;
             case DT_SIGNED_INT:
-                voreenVoxelType = WeaklyTypedPointer::INT32;
+                baseType = WeaklyTypedPointer::INT32;
                 break;
             case DT_FLOAT:
-                voreenVoxelType = WeaklyTypedPointer::FLOAT;
+                baseType = WeaklyTypedPointer::FLOAT;
                 break;
             case DT_RGB:
-                voreenVoxelType = WeaklyTypedPointer::UINT8;
+                baseType = WeaklyTypedPointer::UINT8;
                 numChannels = 3;
                 break;
             case DT_RGBA32:         /* 4 byte RGBA (32 bits/voxel)  */
-                voreenVoxelType = WeaklyTypedPointer::UINT8;
+                baseType = WeaklyTypedPointer::UINT8;
                 numChannels = 4;
                 break;
             case DT_INT8:           /* signed char (8 bits)         */
-                voreenVoxelType = WeaklyTypedPointer::INT8;
+                baseType = WeaklyTypedPointer::INT8;
                 break;
             case DT_UINT16:         /* unsigned short (16 bits)     */
-                voreenVoxelType = WeaklyTypedPointer::UINT16;
+                baseType = WeaklyTypedPointer::UINT16;
                 break;
             case DT_UINT32:         /* unsigned int (32 bits)       */
-                voreenVoxelType = WeaklyTypedPointer::UINT32;
+                baseType = WeaklyTypedPointer::UINT32;
                 break;
             case DT_INT64:          /* long long (64 bits)          */
             case DT_UINT64:         /* unsigned long long (64 bits) */
@@ -748,9 +724,9 @@ namespace campvis {
         cgt::svec3 imageSize(dimensions);
         if (numVolumes <= 1) {
             ImageData* image = new ImageData(3, imageSize, numChannels);
-            ImageRepresentationDisk::create(image, hdrFileName, voreenVoxelType, headerskip, e);
+            ImageRepresentationDisk::create(image, hdrFileName, baseType, headerskip, e);
             // Nifti transformations give us the center of the first voxel, we translate to correct:
-            image->setMappingInformation(ImageMappingInformation(imageSize, cgt::vec3(-.5f) + p_imageOffset.getValue(), spacing * p_voxelSize.getValue()));
+            image->setMappingInformation(ImageMappingInformation(imageSize, cgt::vec3(-.5f) + p_imageOffset.getValue(), spacing * p_voxelSize.getValue(), pToW));
             dataContainer.addData(p_targetImageID.getValue(), image);
         }
         else {
@@ -758,9 +734,9 @@ namespace campvis {
             size_t numBytes = hmul(imageSize) * (header.bitpix / 8);
             for (size_t i = 0; i < numVolumes; ++i) {
                 ImageData* image = new ImageData(3, imageSize, numChannels);
-                ImageRepresentationDisk::create(image, hdrFileName, voreenVoxelType, headerskip + i * numBytes, e);
+                ImageRepresentationDisk::create(image, hdrFileName, baseType, headerskip + i * numBytes, e);
                 // Nifti transformations give us the center of the first voxel, we translate to correct:
-                image->setMappingInformation(ImageMappingInformation(imageSize, cgt::vec3(-.5f) + p_imageOffset.getValue(), spacing * p_voxelSize.getValue()));
+                image->setMappingInformation(ImageMappingInformation(imageSize, cgt::vec3(-.5f) + p_imageOffset.getValue(), spacing * p_voxelSize.getValue(), pToW));
                 is->addImage(image);
             }
             dataContainer.addData(p_targetImageID.getValue(), is);
