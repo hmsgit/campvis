@@ -46,13 +46,13 @@ namespace campvis {
          * \param   size                    Image size (number of elements, redundant...)
          * \param   offset                  Position of LLF corner in world coordinates (mm)
          * \param   voxelSize               Voxel size in (mm)
-         * \param   realWorldValueMapping   Linear mapping for mapping element values to real world values, defaults to identity.
+         * \param   customTransformation    Additional custom transformation from voxel to world coordinates, defaults to identity.
          */
         ImageMappingInformation(
             const cgt::vec3& size, 
             const cgt::vec3& offset, 
             const cgt::vec3& voxelSize, 
-            const LinearMapping<float>& realWorldValueMapping = LinearMapping<float>::identity);
+            const cgt::mat4& customTransformation = cgt::mat4::identity);
 
         /**
          * Returns the position of LLF corner in world coordinates (mm).
@@ -65,6 +65,12 @@ namespace campvis {
          * \return  _voxelSize
          */
         const cgt::vec3& getVoxelSize() const;
+
+        /**
+         * Returns the additional custom transformation from voxel to world coordinates.
+         * \return  _customTransformation
+         */
+        const cgt::mat4 getCustomTransformation() const;
 
         /**
          * Gets the transformation matrix from texture to world coordinates.
@@ -91,18 +97,6 @@ namespace campvis {
         const cgt::mat4& getWorldToVoxelMatrix() const;
 
         /**
-         * Get the real world value mapping.
-         * \return  Linear mapping for mapping element values to real world values.
-         */
-        const LinearMapping<float>& getRealWorldMapping() const;
-        
-        /**
-         * Set the real world value mapping.
-         * \param   rwvm    Linear mapping for mapping element values to real world values.
-         */
-        void setRealWorldMapping(const LinearMapping<float>& rwvm);
-
-        /**
          * Overloaded equal operator
          * \param   obj    Object to compare with.
          */
@@ -117,8 +111,7 @@ namespace campvis {
         cgt::vec3 _size;                                ///< Image size (number of elements, redundant...)
         cgt::vec3 _offset;                              ///< Position of LLF corner in world coordinates (mm)
         cgt::vec3 _voxelSize;                           ///< Voxel size in (mm)
-
-        LinearMapping<float> _realWorldValueMapping;     ///< Linear mapping for mapping element values to real world values
+        cgt::mat4 _customTransformation;                ///< Additional custom transformation from voxel to world coordinates
 
         cgt::mat4 _textureToWorldTransformation;        ///< Transformation matrix from texture to world coordinates
         cgt::mat4 _worldToTextureTransformation;        ///< Transformation matrix from world to texture coordinates

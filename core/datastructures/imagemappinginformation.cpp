@@ -25,15 +25,22 @@
 #include "imagemappinginformation.h"
 
 #include "cgt/assert.h"
+#include "cgt/logmanager.h"
 
 namespace campvis {
 
-    ImageMappingInformation::ImageMappingInformation(const cgt::vec3& size, const cgt::vec3& offset, const cgt::vec3& voxelSize, const LinearMapping<float>& realWorldValueMapping /*= LinearMapping<float>::identity*/)
+    ImageMappingInformation::ImageMappingInformation(const cgt::vec3& size, const cgt::vec3& offset, const cgt::vec3& voxelSize, const cgt::mat4& customTransformation /*= LinearMapping<float>::identity*/)
         : _size(size)
         , _offset(offset)
         , _voxelSize(voxelSize)
-        , _realWorldValueMapping(realWorldValueMapping)
+        , _customTransformation(customTransformation)
     {
+        cgt::mat4 invTrafo;
+        if (! _customTransformation.invert(invTrafo)) {
+            LERRORC("CAMPVis.core.ImageMappingInformation", "Custom transformation is not invertable! Resetting to identity tranformation.");
+            _customTransformation = cgt::mat4::identity;
+        }            
+
         updateMatrices();
     }
 
@@ -45,20 +52,12 @@ namespace campvis {
         return _voxelSize;
     }
 
-    const LinearMapping<float>& ImageMappingInformation::getRealWorldMapping() const {
-        return _realWorldValueMapping;
-    }
-
-    void ImageMappingInformation::setRealWorldMapping(const LinearMapping<float>& rwvm) {
-        _realWorldValueMapping = rwvm;
-    }
-
     void ImageMappingInformation::updateMatrices() {
-        _textureToWorldTransformation = cgt::mat4::createTranslation(_offset) * cgt::mat4::createScale(_voxelSize * _size);
+        _textureToWorldTransformation = cgt::mat4::createTranslation(_offset) * _customTransformation * cgt::mat4::createScale(_voxelSize * _size);
         if (! _textureToWorldTransformation.invert(_worldToTextureTransformation))
             cgtAssert(false, "Could not invert texture-to-world matrix. That should not happen!");
 
-        _voxelToWorldTransformation = cgt::mat4::createTranslation(_offset) * cgt::mat4::createScale(_voxelSize);
+        _voxelToWorldTransformation = cgt::mat4::createTranslation(_offset) * _customTransformation * cgt::mat4::createScale(_voxelSize);
         if (! _voxelToWorldTransformation.invert(_worldToVoxelTransformation))
             cgtAssert(false, "Could not invert voxel-to-world matrix. That should not happen!");
     }
@@ -83,10 +82,15 @@ namespace campvis {
         return (this->_offset == obj._offset)
             && (this->_size == obj._size)
             && (this->_voxelSize == obj._voxelSize)
-            && (this->_realWorldValueMapping == obj._realWorldValueMapping)
+            && (this->_customTransformation == obj._customTransformation)
             && (this->_textureToWorldTransformation == obj._textureToWorldTransformation)
             && (this->_voxelToWorldTransformation == obj._voxelToWorldTransformation)
             && (this->_worldToTextureTransformation == obj._worldToTextureTransformation)
             && (this->_worldToVoxelTransformation == obj._worldToVoxelTransformation);
     }
+
+    const cgt::mat4 ImageMappingInformation::getCustomTransformation() const {
+        return _customTransformation;
+    }
+
 }
