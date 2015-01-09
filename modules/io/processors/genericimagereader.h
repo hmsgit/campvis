@@ -34,11 +34,6 @@
 #include "core/properties/stringproperty.h"
 
 #include "modules/modulesapi.h"
-#include "modules/io/processors/csvdimagereader.h"
-#include "modules/io/processors/ltfimagereader.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/io/processors/rawimagereader.h"
-#include "modules/io/processors/vtkimagereader.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include "modules/devil/processors/devilimagereader.h"

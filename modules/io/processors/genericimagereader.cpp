@@ -32,6 +32,12 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/textfileparser.h"
 
+#include "modules/io/processors/csvdimagereader.h"
+#include "modules/io/processors/ltfimagereader.h"
+#include "modules/io/processors/mhdimagereader.h"
+#include "modules/io/processors/niftiimagereader.h"
+#include "modules/io/processors/rawimagereader.h"
+#include "modules/io/processors/vtkimagereader.h"
 
 namespace campvis {
     const std::string GenericImageReader::loggerCat_ = "CAMPVis.modules.io.GenericImageReader";
@@ -48,6 +54,7 @@ namespace campvis {
         this->addReader(new CsvdImageReader());        
         this->addReader(new LtfImageReader());
         this->addReader(new MhdImageReader());
+        this->addReader(new NiftiImageReader());
         this->addReader(new RawImageReader());
         this->addReader(new VtkImageReader());
 
