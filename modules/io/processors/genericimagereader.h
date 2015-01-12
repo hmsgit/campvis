@@ -72,7 +72,7 @@ namespace campvis {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        void setVisibibility(const std::string& extention, bool visibility);
+        void updateVisibility(const std::string& extension);
 
         StringProperty p_url;               ///< URL for file to read
         DataNameProperty p_targetImageID;   ///< image ID for read image
@@ -86,10 +86,7 @@ namespace campvis {
     private:
         void onUrlPropertyChanged(const AbstractProperty* prop);
 
-        void adjustToNewExtension();
-
         std::map<AbstractImageReader*, MetaProperty*> _readers;
-        std::string _ext;
         MetaProperty* _currentlyVisible;
 
         /**
@@ -99,19 +96,18 @@ namespace campvis {
         * 
         * /param reader    pointer to the reader to be added
         */
-        int addReader(AbstractImageReader* reader);
+        void addReader(AbstractImageReader* reader);
+
+        /**
+         * Returns an iterator to the corresponding reader-property pair that can read a file with
+         * the given extension. If there is no matching reader found, the RawImageReader is returned.
+         * \param   extension   Extension to look for.
+         * \return  An iterator to the corresponding reader-property pair.
+         */
+        std::map<AbstractImageReader*, MetaProperty*>::const_iterator findReader(const std::string& extension) const;
 
     };
 
-
-    struct checkExt {
-        checkExt( std::string str ) : _str(str) {}
-        bool operator()( const std::pair<AbstractImageReader*, MetaProperty*>& v ) const { 
-            return v.first->acceptsExtension(this->_str); 
-        }
-    private:
-        std::string _str;
-    };
 }
 
 #endif // GENERICIMAGEREADER_H__

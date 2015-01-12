@@ -36,18 +36,15 @@ namespace campvis {
 
     AdvDVRVis::AdvDVRVis(DataContainer* dc)
         : AutoEvaluationPipeline(dc)
-        , _tcp(&_canvasSize)
         , _lsp()
         , _imageReader()
-        , _vr(&_canvasSize, new AdvOptimizedRaycaster(&_canvasSize))
+        , _ve(&_canvasSize, new SliceExtractor(nullptr), new AdvOptimizedRaycaster(nullptr))
     {
-        _tcp.addLqModeProcessor(&_vr);
-        addEventListenerToBack(&_tcp);
+        addEventListenerToBack(&_ve);
 
-        addProcessor(&_tcp);
         addProcessor(&_lsp);
         addProcessor(&_imageReader);
-        addProcessor(&_vr);
+        addProcessor(&_ve);
     }
 
     AdvDVRVis::~AdvDVRVis() {
@@ -57,20 +54,19 @@ namespace campvis {
     void AdvDVRVis::init() {
         AutoEvaluationPipeline::init();
 
-        _vr.p_outputImage.setValue("combine");
+        _ve.p_outputImage.setValue("combine");
         _renderTargetID.setValue("combine");
 
         _imageReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/smallHeart.mhd"));
         _imageReader.p_targetImageID.setValue("reader.output");
-        _imageReader.p_targetImageID.addSharedProperty(&_vr.p_inputVolume);
-        _imageReader.p_targetImageID.addSharedProperty(&_tcp.p_image);
+        _imageReader.p_targetImageID.addSharedProperty(&_ve.p_inputVolume);
 
         Geometry1DTransferFunction* dvrTF = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .05f));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.12f, .15f), cgt::col4(85, 0, 0, 128), cgt::col4(255, 0, 0, 128)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.19f, .28f), cgt::col4(89, 89, 89, 155), cgt::col4(89, 89, 89, 155)));
         dvrTF->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.41f, .51f), cgt::col4(170, 170, 128, 64), cgt::col4(192, 192, 128, 64)));
-        static_cast<TransferFunctionProperty*>(_vr.getNestedProperty("RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
-        static_cast<FloatProperty*>(_vr.getNestedProperty("RaycasterProps::SamplingRate"))->setValue(4.f);
+        static_cast<TransferFunctionProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::TransferFunction"))->replaceTF(dvrTF);
+        static_cast<FloatProperty*>(_ve.getNestedProperty("VolumeRendererProperties::RaycasterProps::SamplingRate"))->setValue(4.f);
     }
 
 }

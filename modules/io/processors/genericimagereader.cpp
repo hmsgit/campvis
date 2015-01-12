@@ -40,34 +40,45 @@
 #include "modules/io/processors/vtkimagereader.h"
 
 namespace campvis {
+    namespace {
+        struct checkExtension {
+            checkExtension(const std::string& str) : _str(str) {}
+
+            bool operator()(const std::pair<AbstractImageReader*, MetaProperty*>& v) const { 
+                return v.first->acceptsExtension(this->_str); 
+            }
+
+        private:
+            std::string _str;
+        };
+    }
+
     const std::string GenericImageReader::loggerCat_ = "CAMPVis.modules.io.GenericImageReader";
 
     GenericImageReader::GenericImageReader() 
         : AbstractProcessor()
         , p_url("Url", "Image URL", "", StringProperty::OPEN_FILENAME)
         , p_targetImageID("TargetImageName", "Target Image ID", "AbstractImageReader.output", DataNameProperty::WRITE)
+        , _currentlyVisible(nullptr)
     {
         addProperty(p_url);
         addProperty(p_targetImageID);
         p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);
 
-        this->addReader(new CsvdImageReader());        
-        this->addReader(new LtfImageReader());
-        this->addReader(new MhdImageReader());
-        this->addReader(new NiftiImageReader());
-        this->addReader(new RawImageReader());
-        this->addReader(new VtkImageReader());
+        addReader(new CsvdImageReader());        
+        addReader(new LtfImageReader());
+        addReader(new MhdImageReader());
+        addReader(new NiftiImageReader());
+        addReader(new RawImageReader());
+        addReader(new VtkImageReader());
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
-        this->addReader(new DevilImageReader());
+        addReader(new DevilImageReader());
 #endif
-
-        this->_ext = "";
-        this->_currentlyVisible = nullptr;
     }
     
     GenericImageReader::~GenericImageReader() {
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); ++it) {
+        for (auto it = _readers.begin(); it != _readers.end(); ++it) {
             delete it->second;
             delete it->first;
         }
@@ -78,7 +89,7 @@ namespace campvis {
     }
 
     void GenericImageReader::deinit() {
-        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = this->_readers.begin(); it != this->_readers.end(); ++it) {
+        for(std::map<AbstractImageReader*, MetaProperty*>::iterator it = _readers.begin(); it != _readers.end(); ++it) {
             // deinit MetaProperty first!
             if (nullptr != it->second) {
                 it->second->deinit();
@@ -91,33 +102,28 @@ namespace campvis {
     }
 
     void GenericImageReader::updateResult(DataContainer& data) {
-        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(this->_ext));
-        if(it != this->_readers.end()) {
-            if (this->_currentlyVisible != it->second) {
-                if(nullptr != this->_currentlyVisible) {
-                    this->_currentlyVisible->setVisible(false);
-                }
-                (it->second)->setVisible(true);
-                this->_currentlyVisible = it->second;
-            }
+        const std::string extension = cgt::FileSystem::fileExtension(p_url.getValue());
+        auto it = findReader(extension);
+
+        if (it != this->_readers.end()) {
             it->first->process(data);
         }
     }
 
-    void GenericImageReader::setVisibibility(const std::string& extention, bool visibility) {
-        std::string _ext = extention;
-        std::map<AbstractImageReader*, MetaProperty*>::iterator it = std::find_if(this->_readers.begin(), this->_readers.end(), checkExt(_ext));
-        if(it != this->_readers.end()) {
-            if(nullptr != this->_currentlyVisible) {
-                this->_currentlyVisible->setVisible(!visibility);
-            }
-            (it->second)->setVisible(visibility);
+    void GenericImageReader::updateVisibility(const std::string& extension) {
+        if (_currentlyVisible != nullptr) {
+            _currentlyVisible->setVisible(false);
+            _currentlyVisible = nullptr;
+        }
+
+        auto it = findReader(extension);
+        if (it != this->_readers.end()) {
+            it->second->setVisible(true);
             this->_currentlyVisible = it->second;
-            //(it->first)->process(data);
         }
     }
 
-    int GenericImageReader::addReader(AbstractImageReader* reader) {
+    void GenericImageReader::addReader(AbstractImageReader* reader) {
         MetaProperty* meta = new MetaProperty(reader->getName() + "MetaProp", reader->getName());
         meta->addPropertyCollection(*reader);
         meta->setVisible(false);
@@ -128,28 +134,21 @@ namespace campvis {
         p_targetImageID.addSharedProperty(&reader->p_targetImageID);
         reader->p_targetImageID.setVisible(false);
 
-        this->_readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
-        return 0;
+        _readers.insert(std::pair<AbstractImageReader*, MetaProperty*>(reader, meta));
     }
 
     void GenericImageReader::onUrlPropertyChanged(const AbstractProperty* prop) {
-        // first set visibility of old extension to false
-        setVisibibility(_ext, false);
-
         // now update extension
-        const std::string& url = this->p_url.getValue();
-        size_t extPos = url.rfind('.');
-        if (extPos != std::string::npos) {
-            this->_ext = url.substr(extPos);
-        }
-
-        // set visibility of new extension's properties to true
-        setVisibibility(_ext, true);
-
+        std::string extension = cgt::FileSystem::fileExtension(p_url.getValue());
+        updateVisibility(extension);
     }
 
-    void GenericImageReader::adjustToNewExtension() {
+    std::map<AbstractImageReader*, MetaProperty*>::const_iterator GenericImageReader::findReader(const std::string& extension) const {
+        auto it = std::find_if(_readers.begin(), _readers.end(), checkExtension(extension));
+        if (it == _readers.end())
+            it = std::find_if(_readers.begin(), _readers.end(), checkExtension("raw"));
 
+        return it;
     }
 
 }

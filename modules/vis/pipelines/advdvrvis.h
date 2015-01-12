@@ -31,9 +31,8 @@
 #include "modules/modulesapi.h"
 #include "modules/pipelinefactory.h"
 #include "modules/base/processors/lightsourceprovider.h"
-#include "modules/base/processors/trackballcameraprovider.h"
-#include "modules/io/processors/mhdimagereader.h"
-#include "modules/vis/processors/volumerenderer.h"
+#include "modules/io/processors/genericimagereader.h"
+#include "modules/vis/processors/volumeexplorer.h"
 
 namespace campvis {
     class CAMPVIS_MODULES_API AdvDVRVis : public AutoEvaluationPipeline {
@@ -57,10 +56,9 @@ namespace campvis {
 
 
     protected:
-        TrackballCameraProvider _tcp;
         LightSourceProvider _lsp;
-        MhdImageReader _imageReader;
-        VolumeRenderer _vr;
+        GenericImageReader _imageReader;
+        VolumeExplorer _ve;
     };
 
     // Instantiate template to register the pipelines.
