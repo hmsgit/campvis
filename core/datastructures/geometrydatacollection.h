@@ -95,7 +95,7 @@ namespace campvis {
          * Renders this GeometryDataCollection.
          * Must be called from a valid OpenGL context.
          */
-        virtual void render(GLenum mode = GL_POLYGON) const;
+        virtual void render(GLenum mode = GL_TRIANGLE_FAN) const;
         
         /**
          * Returns the geometry extent in world coordinates.

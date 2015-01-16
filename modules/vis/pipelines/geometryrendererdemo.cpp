@@ -102,7 +102,7 @@ namespace campvis {
     
         _cubeRenderer.p_geometryID.setValue("cube");
         _cubeRenderer.p_renderTargetID.setValue("cube.render");
-        _cubeRenderer.p_renderMode.selectById("polygon");
+        _cubeRenderer.p_renderMode.selectById("trianglefan");
         _cubeRenderer.p_showWireframe.setValue(false);
         _cubeRenderer.p_textureID.setValue("CampTexture");
         _cubeRenderer.p_coloringMode.selectByOption(GeometryRenderer::TEXTURE_COLOR);

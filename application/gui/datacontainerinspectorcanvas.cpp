@@ -245,7 +245,7 @@ namespace campvis {
         }
         _paintShader->setIgnoreUniformLocationError(false);
 
-        _quad->render(GL_POLYGON);
+        _quad->render(GL_TRIANGLE_FAN);
         LGL_ERROR;
     }
 

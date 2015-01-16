@@ -48,9 +48,9 @@ namespace campvis {
 
         /**
          * Renders a [-1, 1]^2 quad in the XY plane having texture coordinates [0, 1]^2.
-         * \param   mode    OpenGL rendering mode (defaults to GL_POLYGON).
+         * \param   mode    OpenGL rendering mode (defaults to GL_TRIANGLE_FAN).
          */
-        void renderQuad(GLenum mode = GL_POLYGON);
+        void renderQuad(GLenum mode = GL_TRIANGLE_FAN);
 
     private:
         /// Private Constructor, must be called from valid OpenGL context.
