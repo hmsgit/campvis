@@ -72,11 +72,13 @@ namespace campvis {
         DataNameProperty p_outputImage;     ///< ID for output gradient volume
 
         FloatProperty p_resampleScale;      ///< Resampling Scale
+        IVec3Property p_targetSize;         ///< Size of resampled image
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
-
+        virtual void updateProperties(DataContainer& dataContainer);
+        
         cgt::Shader* _shader;               ///< Shader for resampling
 
         static const std::string loggerCat_;
@@ -85,3 +87,4 @@ namespace campvis {
 }
 
 #endif // GLIMAGERESAMPLER_H__
+

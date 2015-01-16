@@ -44,11 +44,13 @@ namespace campvis {
         , p_inputImage("InputImage", "Input Image", "", DataNameProperty::READ)
         , p_outputImage("OutputImage", "Output Image", "GlImageResampler.out", DataNameProperty::WRITE)
         , p_resampleScale("ResampleScale", "Resampling Scale", .5f, .01f, 10.f)
+        , p_targetSize("TargetSize", "Size of Resampled Image", cgt::ivec3(128), cgt::ivec3(1), cgt::ivec3(1024))
         , _shader(0)
     {
-        addProperty(p_inputImage);
+        addProperty(p_inputImage, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_outputImage);
-        addProperty(p_resampleScale);
+        addProperty(p_resampleScale, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_targetSize);
     }
 
     GlImageResampler::~GlImageResampler() {
@@ -73,7 +75,8 @@ namespace campvis {
 
         if (img != 0) {
             cgt::vec3 originalSize(img->getSize());
-            cgt::ivec3 resampledSize(cgt::ceil(originalSize * p_resampleScale.getValue()));
+            //cgt::ivec3 resampledSize(cgt::ceil(originalSize * p_resampleScale.getValue()));
+            const cgt::ivec3& resampledSize = p_targetSize.getValue();
 
             cgt::TextureUnit inputUnit;
             inputUnit.activate();
@@ -115,4 +118,14 @@ namespace campvis {
         }
     }
 
+    void GlImageResampler::updateProperties(DataContainer& dataContainer) {
+        ImageRepresentationGL::ScopedRepresentation img(dataContainer, p_inputImage.getValue());
+
+        if (img != 0) {
+            p_targetSize.setMaxValue(cgt::ivec3(img->getSize()) * int(p_resampleScale.getMaxValue()));
+            p_targetSize.setValue(cgt::ivec3(cgt::vec3(img->getSize()) * p_resampleScale.getValue()));
+        }
+    }
+
 }
+
