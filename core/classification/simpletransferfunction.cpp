@@ -103,5 +103,9 @@ namespace campvis {
         return _rightColor;
     }
 
+    cgt::vec2 SimpleTransferFunction::getVisibilityDomain() const {
+        return cgt::vec2(0.f, 1.f);
+    }
+
 
 }

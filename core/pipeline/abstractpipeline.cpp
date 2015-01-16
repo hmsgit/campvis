@@ -107,7 +107,7 @@ namespace campvis {
         cgt::GlContextManager::getRef().acquireContext(_canvas, false);
 
         while (! _stopExecution) {
-            if (_enabled && _pipelineDirty) {
+            if (_enabled /*&& _pipelineDirty*/) {
                 // mark pipeline as not dirty
                 _pipelineDirty = false;
 
@@ -118,11 +118,11 @@ namespace campvis {
                 _canvas->getPainter()->paint();
             }
 
-            if (!_stopExecution && (!_enabled || !_pipelineDirty)) {
-                cgt::GlContextManager::getRef().releaseContext(_canvas, false);
-                _evaluationCondition.wait(lock);
-                cgt::GlContextManager::getRef().acquireContext(_canvas, false);
-            }
+//             if (!_stopExecution && (!_enabled || !_pipelineDirty)) {
+//                 cgt::GlContextManager::getRef().releaseContext(_canvas, false);
+//                 _evaluationCondition.wait(lock);
+//                 cgt::GlContextManager::getRef().acquireContext(_canvas, false);
+//             }
         }
 
         cgt::GlContextManager::getRef().releaseContext(_canvas, false);
@@ -154,7 +154,7 @@ namespace campvis {
 
         // execute processor if needed
         if (processor->getEnabled() && !processor->isLocked()) {
-            if (! processor->isValid()) {
+            //if (! processor->isValid()) {
                 tbb::tick_count startTime;
                 if (processor->getClockExecutionTime())
                     startTime = tbb::tick_count::now();
@@ -173,7 +173,7 @@ namespace campvis {
                     tbb::tick_count endTime = tbb::tick_count::now();
                     LINFO("Executed processor " << processor->getName() << " duration: " << (endTime - startTime).seconds());
                 }
-            }
+            //}
         }
     }
 

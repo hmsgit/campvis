@@ -55,6 +55,8 @@ namespace campvis {
     }
 
     void AdvOptimizedRaycaster::init() {
+
+
         RaycastingProcessor::init();
 
         _vhm = new VoxelHierarchyMapper();
@@ -74,7 +76,7 @@ namespace campvis {
             validate(INVALID_BBV);
         }
         
-        if (_vhm->getTexture() == nullptr) {
+        if (_vhm->getHierarchyTexture() == nullptr) {
             LERROR("Could not retreive voxel hierarchy lookup structure.");
             return;
         }
@@ -84,15 +86,20 @@ namespace campvis {
         if (p_enableShading.getValue() == false || light != nullptr) {
             _shader->activate();
 
-            cgt::TextureUnit bbvUnit;
+            cgt::TextureUnit xorUnit, bbvUnit;
+            xorUnit.activate();
+            _vhm->getXorBitmaskTexture()->bind();
+            _shader->setUniform("_xorBitmask", xorUnit.getUnitNumber());
+
             bbvUnit.activate();
-            _vhm->getTexture()->bind();
+            _vhm->getHierarchyTexture()->bind();
             {
                 cgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
                 _shader->setUniform("_vvTexture", bbvUnit.getUnitNumber());
                 _shader->setUniform("_vvVoxelSize", static_cast<int>(_vhm->getBrickSize()));
                 _shader->setUniform("_vvVoxelDepth", static_cast<int>(_vhm->getBrickDepth()));
                 _shader->setUniform("_vvMaxMipMapLevel", static_cast<int>(_vhm->getMaxMipmapLevel()));
+                _shader->setUniform("_vvSize", _vhm->getHierarchyTexture()->getDimensions());
             }
 
             if (p_enableShading.getValue() && light != nullptr) {
@@ -103,11 +110,12 @@ namespace campvis {
             createAndAttachTexture(GL_RGBA8);
             createAndAttachTexture(GL_RGBA32F);
             createAndAttachTexture(GL_RGBA32F);
+            createAndAttachTexture(GL_RGBA32F);
             createAndAttachDepthTexture();
 
 
-            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
-            glDrawBuffers(3, buffers);
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 , GL_COLOR_ATTACHMENT3  };
+            glDrawBuffers(4, buffers);
 
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

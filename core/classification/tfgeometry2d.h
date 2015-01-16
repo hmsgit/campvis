@@ -75,6 +75,11 @@ namespace campvis {
          * \return 
          */
         std::vector<KeyPoint>& getKeyPoints();
+        
+        /**
+         * Returns the intensity domain of this TFGeometry1D.
+         */
+        cgt::vec2 getIntensityDomain() const;
 
         /**
          * Renders this transfer function geometry to the current active OpenGL context.

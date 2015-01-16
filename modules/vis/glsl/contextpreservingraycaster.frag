@@ -103,8 +103,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
             // compute gradient (needed for shading and normals)
             vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition) * 10;
 
-            color.rgb = calculatePhongShading(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
-            float SI = getPhongShadingIntensity(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient);
+            color.rgb = calculatePhongShading(textureToWorld(_volumeTextureParams, samplePosition), _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
+            float SI = getPhongShadingIntensity(textureToWorld(_volumeTextureParams, samplePosition), _lightSource, _cameraPosition, gradient);
 
             // accomodate for variable sampling rates
             color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);

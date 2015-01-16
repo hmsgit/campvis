@@ -64,12 +64,16 @@ namespace campvis {
         void createHierarchy(const ImageRepresentationGL* image, AbstractTransferFunction* transferFunction);
 
 
-        cgt::Texture* getTexture() { return _hierarchyTexture; }
+        cgt::Texture* getXorBitmaskTexture() { return _xorBitmaskTexture; }
+        cgt::Texture* getHierarchyTexture() { return _hierarchyTexture; }
+
         size_t getBrickSize() { return _brickSize; }
         size_t getBrickDepth() { return _brickDepth; }
         GLuint getMaxMipmapLevel() { return _maxMipmapLevel; }
 
     private:
+
+        void createXorBitmaskTexture();
 
         /**
          * Computes the maximum level of mipmapping.
@@ -92,10 +96,12 @@ namespace campvis {
         size_t _brickDepth;                         ///< number of voxel a brick is covering in its depth dimension
         GLuint _maxMipmapLevel;                     ///< Maximum mipmap level
 
+        cgt::Shader* _xorBitmaskShader;             ///< Shader to create the XOR bitmask texture
         cgt::Shader* _hierarchyRendererShader;      ///< Shader to render the initial hierarchy texture
         cgt::Shader* _mimapRendererShader;          ///< Shader to render the mipmap pyramid
 
         cgt::FramebufferObject* _fbo;               ///< FBO used for rendering
+        cgt::Texture* _xorBitmaskTexture;           ///< Texture holding the 128x128 possible combinations of uvec4 bitmasks
         cgt::Texture* _hierarchyTexture;            ///< The OpenGL texture storing the voxel hierarchy
 
         FaceGeometry* _quad;

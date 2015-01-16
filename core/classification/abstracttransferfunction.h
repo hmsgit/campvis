@@ -91,6 +91,13 @@ namespace campvis {
         virtual size_t getDimensionality() const = 0;
 
         /**
+         * Returns the intensity domain where this TF has it's non-transparent parts.
+         * I.e. the minimum and the maximum intensity being opaque.
+         * \return  The intensity domain where this TF has it's non-transparent parts.
+         */
+        virtual cgt::vec2 getVisibilityDomain() const = 0;
+
+        /**
          * Binds the transfer function OpenGL texture to the given texture and sets up uniforms.
          * \note    Calling thread must have a valid OpenGL context.
          * \param   shader                      Shader used for rendering

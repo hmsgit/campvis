@@ -25,6 +25,7 @@
 layout(location = 0) out vec4 out_Color;     ///< outgoing fragment color
 layout(location = 1) out vec4 out_FHP;       ///< outgoing fragment first hitpoint
 layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit normal
+layout(location = 3) out vec4 out_count;       ///< outgoing fragment first hit normal
 
 #include "tools/gradient.frag"
 #include "tools/raycasting.frag"
@@ -55,13 +56,15 @@ uniform TextureParameters3D _volumeTextureParams;
 uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
+// XOR Bitmask texture
+uniform usampler2D _xorBitmask;
 
 // BBV Lookup volume
 uniform usampler2D _vvTexture;
 uniform int _vvVoxelSize;
 uniform int _vvVoxelDepth;
 uniform int _vvMaxMipMapLevel;
-
+uniform ivec3 _vvSize;
 
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
@@ -79,79 +82,105 @@ uniform float _shadowIntensity;
 // TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
-// converting the sample coordinates [0, 1]^3 to integer voxel coordinate in l-level of the voxelized texture. 
-ivec3 voxelToBrick(in vec3 voxel, int level) {
-    int res = 1 << level;
+float originalTFar = -1.0;
+const int MAXSTEPS = 100;
+float OFFSET = 0.001;
 
-    return ivec3(floor(voxel.x / (_vvVoxelSize * res)), floor(voxel.y / (_vvVoxelSize * res)), floor(voxel.z / _vvVoxelDepth));
+
+// a minimal version of the method above
+// (we assume: ray always hits the box)
+float IntersectBoxOnlyTFar(in vec3 origin, in vec3 dir, in vec3 box_min, in vec3 box_max)
+{
+    vec3 tmin = (box_min - origin) / dir; 
+    vec3 tmax = (box_max - origin) / dir; 
+
+    vec3 real_max = max(tmin,tmax);
+
+    // the minimal maximum is tFar
+    // clamp to 1.0
+    return min(1.0, min( min(real_max.x, real_max.y), real_max.z)); 
 }
 
-// Looks up the l mipmap level of voxelized texture of the render data and returns the value in samplePosition coordinates.
-// samplePosition is in texture coordiantes [0, 1]
-// level is the level in the hierarchy
-uint lookupInBbv(in vec3 samplePosition, in int level) {
-    ivec3 byte = voxelToBrick(samplePosition * _volumeTextureParams._size, level);
-    uint texel = uint(texelFetch(_vvTexture, byte.xy, level).r);
-
-    return texel;
+bool intersectBits(in uvec4 bitRay, in ivec2 texel, in int level, out uvec4 intersectionBitmask)
+{
+    //texel = clamp(texel, ivec2(0), ivec2(_vvSize / pow(2.0, level)) - 2);
+    // Fetch bitmask from hierarchy and compute intersection via bitwise AND
+    intersectionBitmask = (bitRay & texelFetch(_vvTexture, texel, level));
+    return (intersectionBitmask != uvec4(0));
 }
 
-// Converts the ray to bitmask which can be intersect with voxelized volume
-void rayMapToMask(in vec3 samplePos, in vec3 entryPoint, in vec3 direction, in int level, out uint mask, inout float tFar) {
-    int res = 1 << level ;							//< the number of voxels from voxelized volume data which are mapped into 
-                                                    //< voxelized volume in l-th level of hierarchy 
+bool intersectHierarchy2(in vec3 origin, in vec3 direction, in int level, in vec3 posTNear, inout float tFar, out uvec4 intersectionBitmask) {
+    // Calculate pixel coordinates ([0,width]x[0,height])
+    // of the current position along the ray
+    float res = float(1 << (_vvMaxMipMapLevel - level));
+    ivec2 pixelCoord = ivec2(posTNear.xy * res);
 
-    // calculating the voxel which the ray's origin will start from.
-    // BoxLlf is the lower-left corner of the voxel.
-    // BoxUrb is the upper-right corner of the voxel.
-    // NOTE: the z-direction coordinate is not important. So, we simply put BoxLlf.z = 0 and BoxUrb.z = 1. Because we are 
-    //		 going to intersect the raybitmask with the bitmask of the voxel in z-direction to find the intersection point.
-    vec3 brickVoxel = floor((samplePos * _volumeTextureParams._size) / vec3(_vvVoxelSize * res, _vvVoxelSize * res, _vvVoxelDepth)) * vec3(_vvVoxelSize * res, _vvVoxelSize * res, _vvVoxelDepth);
-    vec3 boxLlf = vec3((brickVoxel * _volumeTextureParams._sizeRCP).xy, 0.0f);
-    vec3 boxUrb = vec3((boxLlf + (_volumeTextureParams._sizeRCP * vec3(_vvVoxelSize * res, _vvVoxelSize * res, _vvVoxelDepth))).xy, 1.0f);
+    // Voxel width and height in the unit cube
+    vec2 voxelWH = vec2(1.0) / res;
 
-    // here, tmin and tmax for the ray which is intersecting with the voxel is computed. 
-    vec3 tMin = (boxLlf - entryPoint) / direction;
-    vec3 tMax = (boxUrb - entryPoint) / direction;
+    // Compute voxel stack (AABB) in the unit cube
+    // belonging to this pixel position
+    vec2 box_min = pixelCoord * voxelWH; // (left, bottom)
 
-    // As tmin and tmax values are not necessary tmin and tmax values and value should be resorted, to find the 
-    // exit point of the voxel we just compute minimum value of maximum values in tmin and tmax.
-    vec3 tFarVec = max(tMin, tMax);
-    tFar = min(tFar, min(tFarVec.x, min(tFarVec.y, tFarVec.z)));
+    // Compute intersection with the bounding box
+    // It is always assumed that an intersection occurs and
+    // that the position of posTNear remains the same
+    tFar = IntersectBoxOnlyTFar(origin, direction,
+        vec3(box_min, 0.0),
+        vec3(box_min + voxelWH, 1.0));
 
-    // Here we are going to calculate the entry and exit point from the voxel by calculated tFar.
-    int bit1 = clamp(int(floor(samplePos.z * 32)), 0, 31);
-    int bit2 = clamp(int(floor((entryPoint.z + tFar * direction.z) * 32)), 0, 31);
+    // Now test if some of the bits intersect
+    float zFar = (tFar * direction.z) + origin.z ;
 
-    // setting the bits of the bitmask values.
-    mask = bitfieldInsert(uint(0x0), uint(0xffffffff), max((min(bit1, bit2)), 0), min(abs(bit2 - bit1) + 1, 32));
-    
-    // HACK HACK HACK
-    // right now, the bitmask generation for ray is not working correctly.
-    mask = 0xffffffff;
+    // Fetch bitmask for ray and intersect with current pixel
+    return intersectBits(
+        texture(_xorBitmask, vec2(min(posTNear.z, zFar), max(posTNear.z, zFar))),
+        pixelCoord, 
+        level, 
+        intersectionBitmask);
 }
 
-// intersects the ray bitmask and voxelized data bitmap.
-// bitray: ray bitmask,
-// texel: the texel coordinate in the voxelized volume data,
-// level: the level of the texture,
-// intersectionBitmask: the result bitmask of intersecting the data in texel of the voxelized volume data and ray bitmask.
-// it returns wherther there was an intersection or not.
-bool intersectBits(in uint bitRay, in vec3 texel, in int level, out uint intersectionBitmask) {
-   // Fetch bitmask from hierarchy and compute intersection via bitwise AND
-   intersectionBitmask = (bitRay & lookupInBbv(texel, level));
-   return (intersectionBitmask != uint(0));
-}
+float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in float tFar) {
+    // Compute the exit position of the ray with the scene’s BB
+    // tFar = rayBoxIntersection(origin, direction, vec3(0.0), vec3(1.0), tNear);
+    // if (tFar > originalTFar) {
+    //     vec3 foo = origin + tFar * direction;
+    //     out_FHN = vec4(foo, 1.0);
+    //     tFar = originalTFar;
+    // }
 
-// 
-bool intersectHierarchy(in int level, in vec3 samplePos, in vec3 entryPoint, in vec3 direction, inout float tFar, out uint intersectionBitmask) {
-   uint rayBitmask = uint(0);
+    // Set current position along the ray to the ray’s origin
+    vec3 posTNear = origin;
+    bool intersectionFound = false;
+    uvec4 intersectionBitmask = uvec4(0);
 
-   // Mapping the ray to a bitmask
-   rayMapToMask(samplePos, entryPoint, direction, level, rayBitmask, tFar);
+    // It’s faster to not start at the coarsest level
+    int level = _vvMaxMipMapLevel / 2;
+    for (int i = 0; (i < MAXSTEPS) && (tNear < tFar) && (!intersectionFound); i++) {
+        float newTFar = 1.0;
+        if (intersectHierarchy2(origin, direction, level, posTNear, newTFar, intersectionBitmask)) {
+            // If we are at mipmap level 0 and an intersection occurred,
+            // we have found an intersection of the ray with the volume
+            intersectionFound = (level == 0);
 
-   // Intersect the ray bitmask with current pixel
-   return intersectBits(rayBitmask, samplePos, level, intersectionBitmask);
+            // Otherwise we have to move down one level and
+            // start testing from there
+            --level;
+        }
+        else {
+            // If no intersection occurs, we have to advance the
+            // position on the ray to test the next element of the hierachy.
+            // Furthermore, add a small offset computed beforehand to
+            // handle floating point inaccuracy.
+            tNear = newTFar + OFFSET;
+            posTNear = origin + tNear * direction;
+
+            // Move one level up
+            ++level;
+        }
+    }
+
+    return tNear;
 }
 
 /**
@@ -160,79 +189,37 @@ bool intersectHierarchy(in int level, in vec3 samplePos, in vec3 entryPoint, in 
 vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords) {
     vec4 result = vec4(0.0);
     vec3 direction = exitPoint - entryPoint;
+    
+    // Adjust direction a bit to prevent division by zero
+    direction.x = (abs(direction.x) < 0.0000001) ? 0.0000001 : direction.x;
+    direction.y = (abs(direction.y) < 0.0000001) ? 0.0000001 : direction.y;
+    direction.z = (abs(direction.z) < 0.0000001) ? 0.0000001 : direction.z;
+
     float tNear = 0.0;
-    float tFar = length(direction);
-    direction = normalize(direction);
+    float tFar = 1.0;
+    OFFSET = (0.25 / (1 << _vvMaxMipMapLevel)) / tFar; //< offset value used to avoid self-intersection or previous voxel intersection.
+
 
     jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     float firstHitT = -1.0f;
-  
+
+    tNear = clipFirstHitpoint(entryPoint, direction, tNear, tFar);
+    tFar -= clipFirstHitpoint(exitPoint, -direction, tNear, tFar);
+
+
+    originalTFar = tFar;
+    tNear *= length(direction);
+    tFar *= length(direction);
+    direction = normalize(direction);
  
     // compute sample position
     vec3 samplePosition = entryPoint.rgb + tNear * direction;
 
-    bool intersectionFound = false;
-    uint intersectionBitmask = uint(0);
-    int level = min(3, _vvMaxMipMapLevel);			//< start from a level of hierarchy. We are trying to start from one of the levels in middle (not coarse and not best).
-    float offset = (0.0025 / int(1 << int(_vvMaxMipMapLevel))) / length(direction);	//< offset value used to avoid self-intersection or previous voxel intersection.
-    int i = 0;
-    float newTfar = 1.0f;							//< tFar calculated for the point where the ray is going out of current texel in voxelized data.
-    while(!intersectionFound && (tNear <= tFar) && (level >= 0) && (level < _vvMaxMipMapLevel) && (i < 100)) {
-        newTfar = tFar;								//< because it will be compared to calculated tFar in intersectHierarchy function.
+    out_FHP = vec4(samplePosition, 1.0);
+    out_FHN = vec4(entryPoint.rgb + tFar * direction, 1.0);
 
-        // intersects the ray with the hierarchy of voxelized volume texture.
-        if(intersectHierarchy(level, samplePosition, entryPoint, direction, newTfar, intersectionBitmask)) {
-            // if the level is 0, the intersection is found, otherwise check the intersection in a higher level of hierarchy.
-            intersectionFound = (level == 0);               
-            level--;
-        } else {
-            // The beginning part of the ray is cut and going to a coarser level of hierarchy.
-            tNear = newTfar + offset;
-            samplePosition = entryPoint + tNear * direction;
-            level++;                
-        }
-
-        i++;
-    }
-
-              
-    if(!intersectionFound) {
-        result = vec4(0, 0, 0, 0);
-        return result;
-    }
-
-    bool tFarIntersectionFound = false;
-    uint tFarIntersectionBitmask = uint(0);
-    int tFarLevel = min(3, _vvMaxMipMapLevel);
-    int k = 0;
-    float tFarDec = 0.0;
-    float newTnear = 1.0f;
-    vec3 tFarSamplePosition = exitPoint - tFarDec * direction;
-    while(!tFarIntersectionFound && (tFarDec <= tFar) && (tFarLevel >= 0) && (tFarLevel < _vvMaxMipMapLevel) && (k < 100)) {
-        newTnear = tFar;
-
-        if(intersectHierarchy(tFarLevel, tFarSamplePosition, exitPoint, -direction, newTnear, tFarIntersectionBitmask)) {
-            tFarIntersectionFound = (tFarLevel == 0);               
-            tFarLevel--;
-        } else {
-            tFarDec = newTnear + offset;
-            tFarSamplePosition = exitPoint - tFarDec * direction;
-            tFarLevel++;
-
-                
-        }
-
-        k++;
-    }
-              
-    if(!tFarIntersectionFound) {
-        result = vec4(0, 0, 0, 0);
-        return result;
-    }
-
-    tFar -= tFarDec;
-
+    out_count = vec4(tNear, tFar, originalTFar, 0.0);
     while (tNear < tFar) {
         vec3 samplePosition = entryPoint.rgb + tNear * direction;
 
@@ -240,46 +227,13 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         float intensity = texture(_volume, samplePosition).r;
         vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
 
-#ifdef INTERSECTION_REFINEMENT
-        if (color.a <= 0.0) {
-            // we're within void, make the steps bigger
-            _inVoid = true;
-        } else {
-            if (_inVoid) {
-                float formerT = t - _samplingStepSize;
-
-                // we just left the void, perform intersection refinement
-                for (float stepPower = 0.5; stepPower > 0.1; stepPower /= 2.0) {
-                    // compute refined sample position
-                    float newT = formerT + _samplingStepSize * stepPower;
-                    vec3 newSamplePosition = entryPoint.rgb + newT * direction;
-
-                    // lookup refined intensity + TF
-                    float newIntensity = texture(_volume, newSamplePosition).r;
-                    vec4 newColor = lookupTF(_transferFunction, _transferFunctionParams, newIntensity);
-
-                    if (newColor.a <= 0.0) {
-                        // we're back in the void - look on the right-hand side
-                        formerT = newT;
-                    }
-                    else {
-                        // we're still in the matter - look on the left-hand side
-                        samplePosition = newSamplePosition;
-                        color = newColor;
-                        t -= _samplingStepSize * stepPower;
-                    }
-                }
-                _inVoid = false;
-            }
-        }
-#endif
-
         // perform compositing
         if (color.a > 0.0) {
 #ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)
             vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
-            color.rgb = calculatePhongShading(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
+            vec4 worldPos = _volumeTextureParams._textureToWorldMatrix * vec4(samplePosition, 1.0); // calling textureToWorld here crashes Intel HD driver and nVidia driver in debug mode, hence, let's calc it manually...
+            color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
 #endif
 
             // accomodate for variable sampling rates
@@ -291,20 +245,21 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // save first hit ray parameter for depth value calculation
         if (firstHitT < 0.0 && result.a > 0.0) {
             firstHitT = tNear;
-            out_FHP = vec4(samplePosition, 1.0);
-            out_FHN = vec4(normalize(computeGradient(_volume, _volumeTextureParams, samplePosition)), 1.0);
+//            out_FHP = vec4(samplePosition, 1.0);
+//            out_FHN = vec4(normalize(computeGradient(_volume, _volumeTextureParams, samplePosition)), 1.0);
         }
 
         // early ray termination
-        if (result.a > 0.975) {
-            result.a = 1.0;
-            tNear = tFar;
-
-                
-        }
+        // if (result.a > 0.975) {
+        //     result.a = 1.0;
+        //     tNear = tFar;
+        // 
+        //         
+        // }
 
         // advance to the next evaluation point along the ray
         tNear += _samplingStepSize;
+        out_count.w += 1.0;
     }
 
          
@@ -326,6 +281,7 @@ void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
     vec3 frontPos = texture(_entryPoints, p).rgb;
     vec3 backPos = texture(_exitPoints, p).rgb;
+    out_count = vec4(1.0, 0.5, 0.0, 1.0);
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {

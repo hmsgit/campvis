@@ -157,4 +157,8 @@ namespace campvis {
         _keyPoints.insert(lb, kp);
     }
 
+    cgt::vec2 TFGeometry1D::getIntensityDomain() const {
+        return cgt::vec2(_keyPoints.front()._position, _keyPoints.back()._position);
+    }
+
 }

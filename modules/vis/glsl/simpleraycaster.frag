@@ -95,7 +95,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // simple and expensive implementation of hard shadows
         if (color.a > 0.1) {
             // compute direction from sample to light
-            vec3 L = normalize(_lightSource._position - textureToWorld(_volumeTextureParams, samplePosition).xyz) * _samplingStepSize;
+            vec3 L = normalize(_lightSource._position - textureToWorld(_volumeTextureParams, samplePosition)) * _samplingStepSize;
 
             bool finished = false;
             vec3 position = samplePosition + L;
@@ -122,7 +122,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 #ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)
             vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
-            color.rgb = calculatePhongShading(textureToWorld(_volumeTextureParams, samplePosition).xyz, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
+            vec4 worldPos = _volumeTextureParams._textureToWorldMatrix * vec4(samplePosition, 1.0); // calling textureToWorld here crashes Intel HD driver and nVidia driver in debug mode, hence, let's calc it manually...
+            color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
 #endif
 
             // accomodate for variable sampling rates

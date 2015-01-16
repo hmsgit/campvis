@@ -22,26 +22,10 @@
 // 
 // ================================================================================================
 
-in vec3 ex_TexCoord;        ///< incoming texture coordinate
-in vec4 ex_Position;        ///< incoming texture coordinate
-
-out uvec4 result;
+layout(location = 0) out vec4 result;
  
-#include "tools/texture2d.frag"
-
-uniform usampler2D _voxelTexture;
-uniform int _level; // read from this mipmap level
-
+uniform usampler1D _bitmaskTexture;
 
 void main() {
-    // compute texel to fetch
-    ivec2 coord = ivec2(gl_FragCoord.xy - 0.5) * 2;
-
-    /// Lookup 4 neighbor texels ( ~ voxel stacks)
-    uvec4 val1 = texelFetch(_voxelTexture, coord, _level);
-    uvec4 val2 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(1, 0));
-    uvec4 val3 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(0, 1));
-    uvec4 val4 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(1, 1));
-
-    result = val1 | val2 | val3 | val4;
+    result = texelFetch(_bitmaskTexture, int(gl_FragCoord.x), 0) ^ texelFetch(_bitmaskTexture, int(gl_FragCoord.y) + 1, 0);
 }
