@@ -22,10 +22,29 @@
 // 
 // ================================================================================================
 
-layout(location = 0) out vec4 result;
- 
-uniform usampler1D _bitmaskTexture;
+layout(location = 0) out uvec4 result;
 
 void main() {
-    result = texelFetch(_bitmaskTexture, int(gl_FragCoord.x), 0) ^ texelFetch(_bitmaskTexture, int(gl_FragCoord.y) + 1, 0);
+    const uint ALL_ONES = uint(0xFFFFFFFF);
+    uvec4[129] bitmask;
+    for (int e = 0; e < 4; ++e) {
+        for (int b = 0; b < 32; ++b) {
+            int idx = 32*e + b;
+
+            if (e == 0)
+                bitmask[idx] = uvec4(ALL_ONES << b, ALL_ONES, ALL_ONES, ALL_ONES);
+            else if (e == 1)
+                bitmask[idx] = uvec4(0, ALL_ONES << b, ALL_ONES, ALL_ONES);
+            else if (e == 2)
+                bitmask[idx] = uvec4(0, 0, ALL_ONES << b, ALL_ONES);
+            else if (e == 3)
+                bitmask[idx] = uvec4(0, 0, 0, ALL_ONES << b);
+        }
+    }
+    bitmask[128] = uvec4(0);
+
+    int a = clamp(int(gl_FragCoord.x), 0, 127);
+    int b = clamp(int(gl_FragCoord.y) + 1, 0, 128);
+
+    result = bitmask[a] ^ bitmask[b];
 }

@@ -83,7 +83,7 @@ uniform float _shadowIntensity;
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
 float originalTFar = -1.0;
-const int MAXSTEPS = 100;
+const int MAXSTEPS = 50;
 float OFFSET = 0.001;
 
 
@@ -109,7 +109,7 @@ bool intersectBits(in uvec4 bitRay, in ivec2 texel, in int level, out uvec4 inte
     return (intersectionBitmask != uvec4(0));
 }
 
-bool intersectHierarchy2(in vec3 origin, in vec3 direction, in int level, in vec3 posTNear, inout float tFar, out uvec4 intersectionBitmask) {
+bool intersectHierarchy2(in vec3 origin, in vec3 direction, in int level, in vec3 posTNear, out float tFar, out uvec4 intersectionBitmask) {
     // Calculate pixel coordinates ([0,width]x[0,height])
     // of the current position along the ray
     float res = float(1 << (_vvMaxMipMapLevel - level));
@@ -139,6 +139,8 @@ bool intersectHierarchy2(in vec3 origin, in vec3 direction, in int level, in vec
         level, 
         intersectionBitmask);
 }
+
+float lll;
 
 float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in float tFar) {
     // Compute the exit position of the ray with the scene’s BB
@@ -180,6 +182,7 @@ float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in fl
         }
     }
 
+    lll = float(level);
     return tNear;
 }
 
@@ -200,18 +203,17 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     OFFSET = (0.25 / (1 << _vvMaxMipMapLevel)) / tFar; //< offset value used to avoid self-intersection or previous voxel intersection.
 
 
-    jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
+    //jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     float firstHitT = -1.0f;
 
-    tNear = clipFirstHitpoint(entryPoint, direction, tNear, tFar);
-    tFar -= clipFirstHitpoint(exitPoint, -direction, tNear, tFar);
-
+    tNear = clipFirstHitpoint(entryPoint, direction, 0.0, 1.0);
+    tFar -= clipFirstHitpoint(exitPoint, -direction, 0.0, 1.0);
 
     originalTFar = tFar;
-    tNear *= length(direction);
-    tFar *= length(direction);
-    direction = normalize(direction);
+    //tNear *= length(direction);
+    //tFar *= length(direction);
+    //direction = normalize(direction);
  
     // compute sample position
     vec3 samplePosition = entryPoint.rgb + tNear * direction;
@@ -219,7 +221,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     out_FHP = vec4(samplePosition, 1.0);
     out_FHN = vec4(entryPoint.rgb + tFar * direction, 1.0);
 
-    out_count = vec4(tNear, tFar, originalTFar, 0.0);
+    out_count = vec4(tNear, tFar, lll, 0.0);
     while (tNear < tFar) {
         vec3 samplePosition = entryPoint.rgb + tNear * direction;
 
@@ -231,9 +233,9 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (color.a > 0.0) {
 #ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)
-            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
-            vec4 worldPos = _volumeTextureParams._textureToWorldMatrix * vec4(samplePosition, 1.0); // calling textureToWorld here crashes Intel HD driver and nVidia driver in debug mode, hence, let's calc it manually...
-            color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
+            //vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
+            //vec4 worldPos = _volumeTextureParams._textureToWorldMatrix * vec4(samplePosition, 1.0); // calling textureToWorld here crashes Intel HD driver and nVidia driver in debug mode, hence, let's calc it manually...
+            //color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
 #endif
 
             // accomodate for variable sampling rates

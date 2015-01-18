@@ -66,31 +66,31 @@ void main() {
             for (int z = -1; z < _brickDepth + 1; ++z) {
                 for (int y = -1; y < _brickSize + 1; ++y) {
                     for (int x = -1; x < _brickSize + 1; ++x) {
-                        vec3 texCoord = clamp(llf + (vec3(x, y, z) / _volumeTextureParams._size), 0.0, 1.0);
+                        vec3 addendum = (vec3(x, y, z) / _volumeTextureParams._size);
+                        vec3 texCoord = clamp(llf + addendum, 0.0, 1.0);
+                        //float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texture(_volume, texCoord).r);
                         ivec3 voxel = ivec3(texCoord * _volumeTextureParams._size);
                         float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texelFetch(_volume, voxel, 0).r);
                         //float intensity = texture(_volume, voxel).r;
                         //vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
                         //if (color.a > 0) {
+                        //}
 
                         // if there was any data in the volume data in that voxel, set the bit.
                         if (intensity >= _tfDomain.x && intensity <= _tfDomain.y) {
-                            hasData = true;
+                            //result[e] |= (1 << d);
+                            if (e == 0)
+                                result.r |= (1 << d);
+                            else if (e == 1)
+                                result.g |= (1 << d);
+                            else if (e == 2)
+                                result.b |= (1 << d);
+                            else if (e == 3)
+                                result.a |= (1 << d);
                             break;
                         }
                     }
                 }
-            }
-
-            if (hasData) {
-                if (e == 0)
-                    result.r |= (1 << d);
-                else if (e == 1)
-                    result.g |= (1 << d);
-                else if (e == 2)
-                    result.b |= (1 << d);
-                else if (e == 3)
-                    result.a |= (1 << d);
             }
         }
     }

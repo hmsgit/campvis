@@ -212,71 +212,12 @@ namespace campvis {
     }
 
     void VoxelHierarchyMapper::createXorBitmaskTexture() {
-        int bits = 32; // bits per texture channel
-        GLuint all_1 = GLuint(pow(2.0,double(bits))-1);//)0x7FFFFFFFU; // (2^31 -1)
-        GLuint shifted_ones = all_1;
-        GLuint R,G,B,A;
-        int counter = 0;
-        std::vector<GLuint> bitmaskData;
-
-        for (int i = 0; i < 4*bits; i++) {
-            if (counter == bits) //reset
-            {
-                counter = 0;
-                shifted_ones = all_1;
-            }
-
-            if (i < bits) // first 31 texels: 1-bit in R
-            {
-                R = shifted_ones;
-                G = all_1;
-                B = all_1;
-                A = all_1;
-            }
-            if (bits <= i && i < 2*bits) // G
-            {
-                R = 0;
-                G = shifted_ones;
-                B = all_1;
-                A = all_1;
-            }
-            if (2*bits <= i && i < 3*bits) // B
-            {
-                R = 0;
-                G = 0;
-                B = shifted_ones;
-                A = all_1;
-            }
-            if (3*bits <= i && i < 4*bits) // A
-            {
-                R = 0;
-                G = 0;
-                B = 0;
-                A = shifted_ones;
-            }
-            bitmaskData.push_back(R); // R
-            bitmaskData.push_back(G); // G
-            bitmaskData.push_back(B); // B
-            bitmaskData.push_back(A); // A
-
-            counter++;
-            shifted_ones = shifted_ones >> 1;
-        }
-        GLuint* ptr = &bitmaskData.front();
-
-        cgt::TextureUnit bitmaskUnit, xorUnit;
-        bitmaskUnit.activate();
-        cgt::Texture* bitmaskTexture = new cgt::Texture(GL_TEXTURE_1D, cgt::ivec3(128, 1, 1), GL_RGBA32UI, reinterpret_cast<GLubyte*>(&bitmaskData.front()), GL_RGBA_INTEGER, GL_UNSIGNED_INT, cgt::Texture::NEAREST);
-        bitmaskTexture->bind();
-        bitmaskTexture->setWrapping(cgt::Texture::CLAMP);
-
+        cgt::TextureUnit xorUnit;
         xorUnit.activate();
         _xorBitmaskTexture = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(128, 128, 1), GL_RGBA32UI, cgt::Texture::NEAREST);
         _xorBitmaskTexture->setWrapping(cgt::Texture::CLAMP);
 
         _xorBitmaskShader->activate();
-        _xorBitmaskShader->setUniform("_bitmaskTexture", bitmaskUnit.getUnitNumber());
-
         _fbo->activate();
         _fbo->attachTexture(_xorBitmaskTexture, GL_COLOR_ATTACHMENT0, 0, 0);
         _fbo->isComplete();
