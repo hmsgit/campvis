@@ -30,9 +30,10 @@
 
 namespace campvis {
 
-    CudaConfidenceMapsDemo::CudaConfidenceMapsDemo(DataContainer* dc)
-        : AutoEvaluationPipeline(dc)
-        , _usIgtlReader()
+	CudaConfidenceMapsDemo::CudaConfidenceMapsDemo(DataContainer* dc)
+		: AutoEvaluationPipeline(dc)
+		, _usIgtlReader()
+		, _usCropFilter(&_canvasSize)
         , _usBlurFilter(&_canvasSize)
         , _usResampler(&_canvasSize)
         , _usMapsSolver()
@@ -55,7 +56,8 @@ namespace campvis {
         , _cgTimeslotRunningAverage(1.0f)
         , _statisticsLastUpdateTime()
     {
-        addProcessor(&_usIgtlReader);
+		addProcessor(&_usIgtlReader);
+		addProcessor(&_usCropFilter);
         addProcessor(&_usBlurFilter);
         addProcessor(&_usResampler);
         addProcessor(&_usMapsSolver);
@@ -96,7 +98,10 @@ namespace campvis {
         // Create connectors
         _usIgtlReader.p_targetImagePrefix.setValue("us.igtl.");
 
-        _usBlurFilter.p_inputImage.setValue("us.igtl.ImageClient");
+		_usCropFilter.p_inputImage.setValue("us.igtl.CAMPUS");
+		_usCropFilter.p_outputImage.setValue("us");
+
+        _usBlurFilter.p_inputImage.setValue("us");
         _usBlurFilter.p_outputImage.setValue("us.blurred");
         _usBlurFilter.p_outputImage.addSharedProperty(&_usResampler.p_inputImage);
         _usBlurFilter.p_outputImage.addSharedProperty(&_usFusion.p_blurredImageId);
@@ -107,7 +112,7 @@ namespace campvis {
         _usMapsSolver.p_outputConfidenceMap.setValue("us.confidence");
         _usMapsSolver.p_outputConfidenceMap.addSharedProperty(&_usFusion.p_confidenceImageID);
 
-        _usFusion.p_usImageId.setValue("us.igtl.ImageClient");
+        _usFusion.p_usImageId.setValue("us");
         _usFusion.p_targetImageID.setValue("us.fusion");
         _usFusion.p_view.setValue(12);
         _usFusion.p_renderToTexture.setValue(true);
@@ -150,12 +155,13 @@ namespace campvis {
 
                 // Make sure that the whole pipeline gets invalidated
                 _usBlurFilter.invalidate(AbstractProcessor::INVALID_RESULT);
-                _usBlurFilter.invalidate(AbstractProcessor::INVALID_RESULT);
+                _usCropFilter.invalidate(AbstractProcessor::INVALID_RESULT);
                 _usResampler.invalidate(AbstractProcessor::INVALID_RESULT);
                 _usMapsSolver.invalidate(AbstractProcessor::INVALID_RESULT);
                 _usFusion.invalidate(AbstractProcessor::INVALID_RESULT);
 
-                executeProcessorAndCheckOpenGLState(&_usIgtlReader);
+				executeProcessorAndCheckOpenGLState(&_usIgtlReader);
+				executeProcessorAndCheckOpenGLState(&_usCropFilter);
                 executeProcessorAndCheckOpenGLState(&_usBlurFilter);
                 executeProcessorAndCheckOpenGLState(&_usResampler);
 
@@ -165,21 +171,23 @@ namespace campvis {
 
                 executeProcessorAndCheckOpenGLState(&_usFusion);
                 executeProcessorAndCheckOpenGLState(&_usFanRenderer);
+                
+                auto endTime = tbb::tick_count::now();
 
                 if ((startTime - _statisticsLastUpdateTime).seconds() > 0.5f) {
                     _statisticsLastUpdateTime = startTime;
 
-                    tbb::tick_count endTime = tbb::tick_count::now();
                     auto ms = (endTime - startTime).seconds() * 1000.0f;
+                    auto solverMs = (solverEndTime - solverStartTime).seconds() * 1000.0f;
                     std::stringstream string;
                     string << "Execution time: " << static_cast<int>(ms) << "ms" << std::endl;
+                    string << "Solver time: " << static_cast<int>(solverMs) << "ms" << std::endl;
                     string << "CG Iterations: " << _usMapsSolver.getActualConjugentGradientIterations() << std::endl;
                     string << "Error: " << _usMapsSolver.getResidualNorm() << std::endl;
                     _usFanRenderer.p_text.setValue(string.str());
                 }
 
 
-                auto endTime = tbb::tick_count::now();
                 auto ms = (solverEndTime - solverStartTime).seconds() * 1000.0f;
                 auto iterationsPerMs = _usMapsSolver.getActualConjugentGradientIterations() / ms;
 
@@ -195,7 +203,7 @@ namespace campvis {
                 _cgTimeslotRunningAverage = _cgTimeslotRunningAverage * (1.0f - expAlpha) + timeSlot * expAlpha;
 
                 int iterations = static_cast<int>(_cgTimeslotRunningAverage * _cgIterationsPerMsRunningAverage);
-                p_iterations.setValue(iterations);
+				p_iterations.setValue(iterations);
             }
         }
     }

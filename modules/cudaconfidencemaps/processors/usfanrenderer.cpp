@@ -101,7 +101,7 @@ namespace campvis {
             float innerRadius = p_innerRadius.getValue();
 
             // calculate bounding box of the US fan
-            cgt::vec3 bbCenter = cgt::vec3(0, cos(halfAngle)*innerRadius/2.0f + 0.5, 0.0f);
+            cgt::vec3 bbCenter = cgt::vec3(0.0f, cos(halfAngle)*innerRadius/2.0f + 0.5f, 0.0f);
             float bbHeight = 1.0f - cos(halfAngle)*innerRadius;
             float bbWidth = sin(halfAngle) * 2.0f;
 
@@ -136,7 +136,7 @@ namespace campvis {
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
 
-            glClearColor(0.1, 0.1, 0.1, 0.0);
+            glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             _grid->render(GL_TRIANGLE_STRIP);
             _shader->deactivate();

@@ -42,13 +42,13 @@ namespace campvis {
         , p_resetResult("ResetSolution", "Reset solution vector")
         , p_use8Neighbourhood("Use8Neighbourhood", "Use 8 Neighbourhood (otherwise 4)", true)
         , p_iterations("IterationCount", "Conjugate Gradient Iterations", 200, 1, 500)
-        , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001, 10)
-        , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001, 10)
-        , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001, 200)
-        , p_paramGamma("Gamma", "Gamma (Diagonal penalty)", 0.03f, 0.001, 0.5)
+        , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001f, 10.0f)
+        , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001f, 10.0f)
+        , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001f, 200.0f)
+        , p_paramGamma("Gamma", "Gamma (Diagonal penalty)", 0.03f, 0.001f, 0.5f)
         , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Use Alpha-Beta-Filter", true)
-        , p_filterAlpha("FilterAlpha", "Filter Alpha", 0.36f, 0.0, 1.0)
-        , p_filterBeta("FilterBeta", "Filter Beta", 0.005f, 0.0, 1.0)
+        , p_filterAlpha("FilterAlpha", "Filter Alpha", 0.36f, 0.0f, 1.0f)
+        , p_filterBeta("FilterBeta", "Filter Beta", 0.005f, 0.0f, 1.0f)
         , _solver()
     {
 
@@ -99,7 +99,7 @@ namespace campvis {
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
             _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma, use8Neighbourhood);
-            _solver.solve(iterations, 1e-10);
+            _solver.solve(iterations, 1e-10f);
 
             const float *solution = _solver.getSolution(size.x, size.y);
 

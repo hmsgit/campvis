@@ -84,7 +84,8 @@ namespace campvis {
         /// \see AbstractProcessor::updateProperties
         virtual void updateProperties(DataContainer& dataContainer);
 
-        cgt::Shader* _shader;               ///< Shader for resampling
+        cgt::Shader* _shader2D;             ///< Shader for cropping 2D data
+        cgt::Shader* _shader3D;             ///< Shader for cropping 3D data
 
         static const std::string loggerCat_;
     };

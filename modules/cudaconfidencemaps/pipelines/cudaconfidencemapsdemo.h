@@ -29,8 +29,8 @@
 
 #include "modules/base/processors/matrixprocessor.h"
 #include "core/pipeline/autoevaluationpipeline.h"
-#include "modules/devil/processors/devilimagereader.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
+#include "modules/preprocessing/processors/glimagecrop.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
 #include "modules/cudaconfidencemaps/processors/cudaconfidencemapssolver.h"
 #include "modules/cudaconfidencemaps/processors/usfanrenderer.h"
@@ -72,7 +72,7 @@ namespace campvis {
 
     protected:
         OpenIGTLinkClient _usIgtlReader;
-        DevilImageReader _usReader;
+		GlImageCrop      _usCropFilter;
         GlGaussianFilter _usBlurFilter;
         GlImageResampler _usResampler;
         CudaConfidenceMapsSolver _usMapsSolver;

@@ -1,10 +1,16 @@
-# CMake file for vis module
+# modules/cudaconfidencemaps/cudaconfidencemaps.cmake
+# CMake file for the cuda confidence maps module
 
-IF(${ModuleEnabled})
-    # Find CUDA
+# Set module status (valid values are STABLE, TESTING and EXPERIMENTAL)
+SET(ThisModStatus EXPERIMENTAL)
+# Set whether this module has external dependencies that are not shipped with CAMPVis.
+SET(ThisModExternalDependencies TRUE)
+
+# The files and assignments need only to be parsed if the module is enabled
+IF(ModuleEnabled)
     FIND_PACKAGE(CUDA REQUIRED)
 
-    if(CUDA_FOUND)
+    IF(CUDA_FOUND)
         # Source files:
         FILE(GLOB ThisModSources RELATIVE ${ModulesDir}
             modules/cudaconfidencemaps/core/*.cpp
@@ -21,35 +27,42 @@ IF(${ModuleEnabled})
             modules/cudaconfidencemaps/processors/*.h
         )
 
-        IF(NOT WIN32)
+        # Define the GLSL shader path, so that all needed shaders will be deployed to target directory
+        SET(ThisModShaderDirectories "modules/cudaconfidencemaps/glsl")
+
+        # Define dependency modules
+        SET(ThisModDependencies preprocessing advancedusvis openigtlink fontrendering)
+
+        IF(WIN32)
+            SET(CUDA_PROPAGATE_HOST_FLAGS ON)
+        ELSE()
             # Otherwise -std=c++11 is passed to the compiler on linux. However official
             # c++11 support for cuda is only available in CUDA 7
-            set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+            SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
         ENDIF()
 
+        # Enable optimizations when building a release version
         IF(CMAKE_BUILD_TYPE MATCHES RELEASE)
-            # Enable optimizations when building a release version
-            set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3)
+            SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3)
         ENDIF()
 
-        # Build CUDA sources
-        file(GLOB cuda_SOURCES modules/cudaconfidencemaps/core/*.cu)
-        CUDA_ADD_LIBRARY(CudaConfidenceMaps_CUDA STATIC
+        # CUSP Include directory
+        CUDA_INCLUDE_DIRECTORIES(${ThisModDir}/ext/cusplibrary-0.4.0)
+
+        # Build CUDA portion of the code (STATICALLY!?)
+        FILE(GLOB cuda_SOURCES modules/cudaconfidencemaps/core/*.cu)
+        CUDA_ADD_LIBRARY(cudaconfidencemaps-cuda STATIC
             ${cuda_SOURCES}
             )        
 
         # Make sure code can find the CUSP include files included with this module
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};"-I ${ThisModDir}/ext/cusplibrary-0.4.0")
+        #SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};"-I ${ThisModDir}/ext/cusplibrary-0.4.0")
+        set(CUDA_NVCC_FLAGS "ajkladjfl" CACHE STRING "adsf")
 
-        LIST(APPEND ThisModExternalLibs CudaConfidenceMaps_CUDA)
-
-        SET(ThisModShaderDirectories "modules/cudaconfidencemaps/glsl")
-        SET(ThisModDependencies base io)
-    else()
+        # Link CUDA code to module
+        LIST(APPEND ThisModExternalLibs cudaconfidencemaps-cuda)
+    ELSE()
         MESSAGE(FATAL_ERROR "Could not find CUDA SDK.")
-    endif()
+    ENDIF()
 
-ENDIF(${ModuleEnabled})
-
-SET(ThisModStatus EXPERIMENTAL)
-SET(ThisModExternalDependencies TRUE)
+ENDIF(ModuleEnabled)

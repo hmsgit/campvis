@@ -26,16 +26,12 @@ in vec3 ex_TexCoord;
 out vec4 out_Color;
 
 #ifdef GLRESAMPLER_3D
-#include "tools/texture3d.frag"
 uniform sampler3D _texture;
-uniform TextureParameters3D _textureParams;
 uniform float _zTexCoord;
 #endif
 
 #ifdef GLRESAMPLER_2D
-#include "tools/texture2d.frag"
 uniform sampler2D _texture;
-uniform TextureParameters2D _textureParams;
 #endif
 
 void main() {

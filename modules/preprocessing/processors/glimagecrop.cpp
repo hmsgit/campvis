@@ -62,13 +62,18 @@ namespace campvis {
     void GlImageCrop::init() {
         VisualizationProcessor::init();
 
-        _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimagecrop.frag", "");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
+        _shader2D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimagecrop.frag", "#define GLIMAGECROP_2D\n");
+        _shader2D->setAttributeLocation(0, "in_Position");
+        _shader2D->setAttributeLocation(1, "in_TexCoord");
+
+        _shader3D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glimagecrop.frag", "#define GLIMAGECROP_3D\n");
+        _shader3D->setAttributeLocation(0, "in_Position");
+        _shader3D->setAttributeLocation(1, "in_TexCoord");
     }
 
     void GlImageCrop::deinit() {
-        ShdrMgr.dispose(_shader);
+        ShdrMgr.dispose(_shader2D);
+        ShdrMgr.dispose(_shader3D);
         VisualizationProcessor::deinit();
     }
 
@@ -77,18 +82,24 @@ namespace campvis {
 
         if (img != 0) {
             cgt::ivec3 outputSize = cgt::abs(p_urb.getValue() - p_llf.getValue());
+            bool isTexture2D = img->getParent()->getDimensionality() == 2;
+            if (isTexture2D) {
+                outputSize.z = 1;
+            }
 
             cgt::TextureUnit inputUnit;
             inputUnit.activate();
 
             // create texture for result
-            cgt::Texture* resultTexture = new cgt::Texture(GL_TEXTURE_3D, outputSize, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
+            cgt::Texture* resultTexture = new cgt::Texture(isTexture2D ? GL_TEXTURE_2D : GL_TEXTURE_3D, outputSize, img->getTexture()->getInternalFormat(), cgt::Texture::LINEAR);
 
             // activate shader and bind textures
-            _shader->activate();
-            _shader->setUniform("_offset", p_llf.getValue());
-            _shader->setUniform("_outputSize", outputSize);
-            img->bind(_shader, inputUnit);
+            auto shader = isTexture2D ? _shader2D : _shader3D;
+
+            shader->activate();
+            shader->setUniform("_offset", p_llf.getValue());
+            shader->setUniform("_outputSize", outputSize);
+            img->bind(shader, inputUnit);
 
             // activate FBO and attach texture
             _fbo->activate();
@@ -96,16 +107,18 @@ namespace campvis {
 
             // render quad to compute difference measure by shader
             for (int z = 0; z < outputSize.z; ++z) {
-                _shader->setUniform("_zTexel", z);
+                if (!isTexture2D) {
+                    shader->setUniform("_zTexel", z);
+                }
                 _fbo->attachTexture(resultTexture, GL_COLOR_ATTACHMENT0, 0, z);
                 QuadRdr.renderQuad();
             }
             _fbo->detachAll();
             _fbo->deactivate();
-            _shader->deactivate();
+            shader->deactivate();
 
             // put resulting image into DataContainer
-            ImageData* id = new ImageData(3, outputSize, img.getImageData()->getNumChannels());
+            ImageData* id = new ImageData(isTexture2D ? 2 : 3, outputSize, img.getImageData()->getNumChannels());
             ImageRepresentationGL::create(id, resultTexture);
             const ImageMappingInformation& imi = img->getParent()->getMappingInformation();
             id->setMappingInformation(ImageMappingInformation(img->getSize(), imi.getOffset() + (cgt::vec3(p_llf.getValue()) * imi.getVoxelSize()), imi.getVoxelSize(), imi.getCustomTransformation()));
