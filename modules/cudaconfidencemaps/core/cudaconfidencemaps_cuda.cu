@@ -69,6 +69,32 @@ namespace cuda {
         float systemSolveTime;
     };
 
+    template <typename ValueType>
+    class iteration_monitor : public cusp::default_monitor<ValueType>
+    {
+        typedef typename cusp::norm_type<ValueType>::type Real;
+        typedef cusp::default_monitor<ValueType> super;
+
+    public:
+        template <typename Vector>
+        iteration_monitor(const Vector& b, size_t iteration_limit = 500)
+            : super(b, iteration_limit, 0.0f, 0.0f)
+        { }
+
+        template <typename Vector>
+        bool finished(const Vector& r)
+        {
+            // Only if the maximum iteration count has been reached, actually go ahead and
+            // compute the error
+            if (super::iteration_count() >= super::iteration_limit()) {
+                super::r_norm = cusp::blas::nrm2(r);
+                return true;
+            }
+
+            return false;
+        }
+    };
+
     CudaConfidenceMapsSystemSolver::CudaConfidenceMapsSystemSolver()
         : _gpuData(new CudaConfidenceMapsSystemGPUData())
     {
@@ -146,17 +172,17 @@ namespace cuda {
         _gpuData->abFilterBeta = beta;
     }
 
-
+    // FIXME: Remove errorTolerance parameter
     void CudaConfidenceMapsSystemSolver::solve(int maximumIterations, float errorTolerance) {
         // Measure execution time and record it in the _gpuData datastructure
         CUDAClock clock; clock.start();
 
         // The solution is computed using Conjugate Gradient with a Diagonal (Jacobi) preconditioner
-        cusp::default_monitor<float> monitor(_gpuData->b_d, maximumIterations, errorTolerance);
+        iteration_monitor<float> monitor(_gpuData->b_d, maximumIterations);
         cusp::precond::diagonal<float, cusp::device_memory> M(_gpuData->L_d);
         cusp::krylov::cg(_gpuData->L_d, _gpuData->x_d, _gpuData->b_d, monitor, M);
         _gpuData->solutionResidualNorm = monitor.residual_norm();
-        _gpuData->iterationCount = monitor.iteration_count();
+        _gpuData->iterationCount = static_cast<int>(monitor.iteration_count());
 
         if (alphaBetaFilterEnabled()) {
             // X' = X' + V'
@@ -396,13 +422,13 @@ namespace cuda {
         // Since the image will be needed by the CUDA kernel, it needs to be copied on the GPU first
         cudaMemcpy(thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]), imageData, numElements, cudaMemcpyHostToDevice);
         if (_gpuData->use8Neighbourhood) {   
-            k_buildSystem<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), _gpuData->L_d.values.pitch,
+            k_buildSystem<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), static_cast<int>(_gpuData->L_d.values.pitch),
                                                  thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]),
                                                  imageWidth, imageHeight,
                                                  gradientScaling, alpha, beta, gamma, _gpuData->isUpsideDown);
         }
         else {
-            k_buildSystem4Neighbourhood<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), _gpuData->L_d.values.pitch,
+            k_buildSystem4Neighbourhood<<<dimGrid, dimBlock>>>(thrust::raw_pointer_cast(&_gpuData->L_d.values.values[0]), static_cast<int>(_gpuData->L_d.values.pitch),
                                                  thrust::raw_pointer_cast(&_gpuData->imageBuffer_d[0]),
                                                  imageWidth, imageHeight,
                                                  gradientScaling, alpha, beta, gamma, _gpuData->isUpsideDown);            

@@ -4,7 +4,7 @@
 namespace campvis {
 namespace cuda {
 
-    class CudaConfidenceMapsSystemGPUData;
+    struct CudaConfidenceMapsSystemGPUData;
 
     class CudaConfidenceMapsSystemSolver {
     public:
