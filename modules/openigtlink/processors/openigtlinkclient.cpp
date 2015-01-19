@@ -154,8 +154,14 @@ namespace campvis {
 
                 imageMessage->GetSpacing(voxelSize.elem);
                 imageMessage->GetDimensions(size_i.elem);
-                cgt::svec3 size(size_i);                
+                cgt::svec3 size(size_i);
                 imageMessage->GetOrigin(imageOffset.elem);
+
+                // If the voxel size boundled with the packet is practically 0.0f, make it 1.0f
+                // this makes sure we don't get invalid mapping informations (non invertable matrix)
+                if (minElem(voxelSize) <= 1e-10f) {
+                    voxelSize = 1.0f;
+                }
 
                 size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;
                 ImageData* image = new ImageData(dimensionality, size, wtp._numChannels);
