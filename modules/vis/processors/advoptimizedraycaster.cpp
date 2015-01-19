@@ -110,7 +110,6 @@ namespace campvis {
             createAndAttachTexture(GL_RGBA8);
             createAndAttachTexture(GL_RGBA32F);
             createAndAttachTexture(GL_RGBA32F);
-            createAndAttachTexture(GL_RGBA32F);
             createAndAttachDepthTexture();
 
 

@@ -118,11 +118,11 @@ namespace campvis {
                 _canvas->getPainter()->paint();
             }
 
-//             if (!_stopExecution && (!_enabled || !_pipelineDirty)) {
-//                 cgt::GlContextManager::getRef().releaseContext(_canvas, false);
-//                 _evaluationCondition.wait(lock);
-//                 cgt::GlContextManager::getRef().acquireContext(_canvas, false);
-//             }
+            if (!_stopExecution && (!_enabled || !_pipelineDirty)) {
+                cgt::GlContextManager::getRef().releaseContext(_canvas, false);
+                _evaluationCondition.wait(lock);
+                cgt::GlContextManager::getRef().acquireContext(_canvas, false);
+            }
         }
 
         cgt::GlContextManager::getRef().releaseContext(_canvas, false);

@@ -25,7 +25,6 @@
 layout(location = 0) out vec4 out_Color;     ///< outgoing fragment color
 layout(location = 1) out vec4 out_FHP;       ///< outgoing fragment first hitpoint
 layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit normal
-layout(location = 3) out vec4 out_count;       ///< outgoing fragment first hit normal
 
 #include "tools/gradient.frag"
 #include "tools/raycasting.frag"
@@ -83,7 +82,7 @@ uniform float _shadowIntensity;
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
 float originalTFar = -1.0;
-const int MAXSTEPS = 50;
+const int MAXSTEPS = 20;
 float OFFSET = 0.001;
 
 
@@ -98,7 +97,7 @@ float IntersectBoxOnlyTFar(in vec3 origin, in vec3 dir, in vec3 box_min, in vec3
 
     // the minimal maximum is tFar
     // clamp to 1.0
-    return min(1.0, min( min(real_max.x, real_max.y), real_max.z)); 
+    return min(1.0, min( min(real_max.x, real_max.y), real_max.z));
 }
 
 bool intersectBits(in uvec4 bitRay, in ivec2 texel, in int level, out uvec4 intersectionBitmask)
@@ -140,7 +139,6 @@ bool intersectHierarchy2(in vec3 origin, in vec3 direction, in int level, in vec
         intersectionBitmask);
 }
 
-float lll;
 
 float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in float tFar) {
     // Compute the exit position of the ray with the scene’s BB
@@ -182,7 +180,6 @@ float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in fl
         }
     }
 
-    lll = float(level);
     return tNear;
 }
 
@@ -198,30 +195,18 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     direction.y = (abs(direction.y) < 0.0000001) ? 0.0000001 : direction.y;
     direction.z = (abs(direction.z) < 0.0000001) ? 0.0000001 : direction.z;
 
-    float tNear = 0.0;
-    float tFar = 1.0;
-    OFFSET = (0.25 / (1 << _vvMaxMipMapLevel)) / tFar; //< offset value used to avoid self-intersection or previous voxel intersection.
+    OFFSET = (0.25 / (1 << _vvMaxMipMapLevel)); //< offset value used to avoid self-intersection or previous voxel intersection.
 
-
-    //jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
+    jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
 
     float firstHitT = -1.0f;
 
-    tNear = clipFirstHitpoint(entryPoint, direction, 0.0, 1.0);
-    tFar -= clipFirstHitpoint(exitPoint, -direction, 0.0, 1.0);
+    float tNear = clipFirstHitpoint(entryPoint, direction, 0.0, 1.0);
+    float tFar = 1.0 - clipFirstHitpoint(exitPoint, -direction, 0.0, 1.0);
 
-    originalTFar = tFar;
-    //tNear *= length(direction);
-    //tFar *= length(direction);
-    //direction = normalize(direction);
- 
     // compute sample position
     vec3 samplePosition = entryPoint.rgb + tNear * direction;
 
-    out_FHP = vec4(samplePosition, 1.0);
-    out_FHN = vec4(entryPoint.rgb + tFar * direction, 1.0);
-
-    out_count = vec4(tNear, tFar, lll, 0.0);
     while (tNear < tFar) {
         vec3 samplePosition = entryPoint.rgb + tNear * direction;
 
@@ -233,9 +218,9 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         if (color.a > 0.0) {
 #ifdef ENABLE_SHADING
             // compute gradient (needed for shading and normals)
-            //vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
-            //vec4 worldPos = _volumeTextureParams._textureToWorldMatrix * vec4(samplePosition, 1.0); // calling textureToWorld here crashes Intel HD driver and nVidia driver in debug mode, hence, let's calc it manually...
-            //color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
+            vec3 gradient = computeGradient(_volume, _volumeTextureParams, samplePosition);
+            vec4 worldPos = _volumeTextureParams._textureToWorldMatrix * vec4(samplePosition, 1.0); // calling textureToWorld here crashes Intel HD driver and nVidia driver in debug mode, hence, let's calc it manually...
+            color.rgb = calculatePhongShading(worldPos.xyz / worldPos.w, _lightSource, _cameraPosition, gradient, color.rgb);
 #endif
 
             // accomodate for variable sampling rates
@@ -247,21 +232,20 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
         // save first hit ray parameter for depth value calculation
         if (firstHitT < 0.0 && result.a > 0.0) {
             firstHitT = tNear;
-//            out_FHP = vec4(samplePosition, 1.0);
-//            out_FHN = vec4(normalize(computeGradient(_volume, _volumeTextureParams, samplePosition)), 1.0);
+            out_FHP = vec4(samplePosition, 1.0);
+            out_FHN = vec4(normalize(computeGradient(_volume, _volumeTextureParams, samplePosition)), 1.0);
         }
 
         // early ray termination
-        // if (result.a > 0.975) {
-        //     result.a = 1.0;
-        //     tNear = tFar;
-        // 
-        //         
-        // }
+        if (result.a > 0.975) {
+            result.a = 1.0;
+            tNear = tFar;
+        
+                
+        }
 
         // advance to the next evaluation point along the ray
         tNear += _samplingStepSize;
-        out_count.w += 1.0;
     }
 
          
@@ -283,7 +267,6 @@ void main() {
     vec2 p = gl_FragCoord.xy * _viewportSizeRCP;
     vec3 frontPos = texture(_entryPoints, p).rgb;
     vec3 backPos = texture(_exitPoints, p).rgb;
-    out_count = vec4(1.0, 0.5, 0.0, 1.0);
 
     //determine whether the ray has to be casted
     if (frontPos == backPos) {
