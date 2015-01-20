@@ -82,5 +82,13 @@ namespace campvis {
         return "Image Series";
     }
 
+    cgt::Bounds ImageSeries::getWorldBounds() const {
+        cgt::Bounds b;
+        for (size_t i = 0; i < _images.size(); ++i) {
+            b.addVolume(static_cast<const ImageData*>(_images[i].getData())->getWorldBounds());
+        }
+        return b;
+    }
+
 
 }

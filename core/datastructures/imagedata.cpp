@@ -88,13 +88,11 @@ namespace campvis {
     }
 
     cgt::Bounds ImageData::getWorldBounds() const {
-        return cgt::Bounds(_mappingInformation.getOffset(), _mappingInformation.getOffset() + (cgt::vec3(_size) * _mappingInformation.getVoxelSize()));
+        return getWorldBounds(cgt::svec3(0, 0, 0), cgt::svec3(_size));
     }
 
     cgt::Bounds ImageData::getWorldBounds(const cgt::svec3& llf, const cgt::svec3& urb) const {
-        return cgt::Bounds(
-            _mappingInformation.getOffset() + (cgt::vec3(llf) * _mappingInformation.getVoxelSize()),
-            _mappingInformation.getOffset() + (cgt::vec3(urb) * _mappingInformation.getVoxelSize()));
+        return cgt::Bounds(_mappingInformation.getVoxelToWorldMatrix() * cgt::vec3(llf), _mappingInformation.getVoxelToWorldMatrix() * cgt::vec3(urb));
     }
 
     size_t ImageData::getNumElements() const {
