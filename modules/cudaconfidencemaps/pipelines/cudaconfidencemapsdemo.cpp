@@ -30,18 +30,17 @@
 
 namespace campvis {
 
-	CudaConfidenceMapsDemo::CudaConfidenceMapsDemo(DataContainer* dc)
-		: AutoEvaluationPipeline(dc)
-		, _usIgtlReader()
-		, _usCropFilter(&_canvasSize)
+    CudaConfidenceMapsDemo::CudaConfidenceMapsDemo(DataContainer* dc)
+        : AutoEvaluationPipeline(dc)
+        , _usIgtlReader()
+        , _usCropFilter(&_canvasSize)
         , _usBlurFilter(&_canvasSize)
         , _usResampler(&_canvasSize)
         , _usMapsSolver()
         , _usFusion(&_canvasSize)
         , _usFanRenderer(&_canvasSize)
-        , p_iterations("Iterations", "Number of CG Iterations", 150, 1, 500)
         , p_autoIterationCount("AutoIterationCount", "Estimate iteration count based on time slot", true)
-        , p_timeSlot("TimeSlot", "Milliseconds per frame", 32.0f, 10.0f, 250.0f)
+        , p_millisecondBudget("MillisecondBudget", "Milliseconds per frame", 32.0f, 10.0f, 1000.0f)
         , p_connectToIGTLinkServer("ConnectToIGTLink", "Connect/Disconnect to IGTLink")
         , p_gaussianFilterSize("GaussianSigma", "Blur amount", 2.5f, 1.0f, 10.0f)
         , p_resamplingScale("ResampleScale", "Resample Scale", 0.25f, 0.01f, 1.0f)
@@ -52,21 +51,18 @@ namespace campvis {
         , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Alpha-Beta-Filter", true)
         , p_fanHalfAngle("FanHalfAngle", "Fan Half Angle", 37.0f, 1.0f, 90.0f)
         , p_fanInnerRadius("FanInnerRadius", "Fan Inner Radius", 0.222f, 0.001f, 0.999f)
-        , _cgIterationsPerMsRunningAverage(1.0f)
-        , _cgTimeslotRunningAverage(1.0f)
         , _statisticsLastUpdateTime()
     {
-		addProcessor(&_usIgtlReader);
-		addProcessor(&_usCropFilter);
+        addProcessor(&_usIgtlReader);
+        addProcessor(&_usCropFilter);
         addProcessor(&_usBlurFilter);
         addProcessor(&_usResampler);
         addProcessor(&_usMapsSolver);
         addProcessor(&_usFusion);
         addProcessor(&_usFanRenderer);
 
-        addProperty(p_iterations);
         addProperty(p_autoIterationCount);
-        addProperty(p_timeSlot);
+        addProperty(p_millisecondBudget);
         addProperty(p_connectToIGTLinkServer);
         addProperty(p_gaussianFilterSize);
         addProperty(p_resamplingScale);
@@ -98,8 +94,8 @@ namespace campvis {
         // Create connectors
         _usIgtlReader.p_targetImagePrefix.setValue("us.igtl.");
 
-		_usCropFilter.p_inputImage.setValue("us.igtl.CAMPUS");
-		_usCropFilter.p_outputImage.setValue("us");
+        _usCropFilter.p_inputImage.setValue("us.igtl.CAMPUS");
+        _usCropFilter.p_outputImage.setValue("us");
 
         _usBlurFilter.p_inputImage.setValue("us");
         _usBlurFilter.p_outputImage.setValue("us.blurred");
@@ -125,9 +121,6 @@ namespace campvis {
         _renderTargetID.setValue("us.fused_fan");
 
         // Bind pipeline proeprties to processor properties
-        p_iterations.addSharedProperty(&_usMapsSolver.p_iterations);
-        //p_autoIterationCount.addSharedProperty();
-        //p_timeSlot.addSharedProperty();
         p_connectToIGTLinkServer.addSharedProperty(&_usIgtlReader.p_connect);
         p_gaussianFilterSize.addSharedProperty(&_usBlurFilter.p_sigma);
         p_resamplingScale.addSharedProperty(&_usResampler.p_resampleScale);
@@ -151,6 +144,7 @@ namespace campvis {
         else {
             // Only launch the pipeline if the IgtlReader has recieved new data
             if (!_usIgtlReader.isValid()) {
+                float millisecondBudget = p_millisecondBudget.getValue();
                 auto startTime = tbb::tick_count::now();
 
                 // Make sure that the whole pipeline gets invalidated
@@ -160,12 +154,13 @@ namespace campvis {
                 _usMapsSolver.invalidate(AbstractProcessor::INVALID_RESULT);
                 _usFusion.invalidate(AbstractProcessor::INVALID_RESULT);
 
-				executeProcessorAndCheckOpenGLState(&_usIgtlReader);
-				executeProcessorAndCheckOpenGLState(&_usCropFilter);
-                executeProcessorAndCheckOpenGLState(&_usBlurFilter);
+                executeProcessorAndCheckOpenGLState(&_usIgtlReader);
+                executeProcessorAndCheckOpenGLState(&_usCropFilter);
+                executeProcessorAndCheckOpenGLState(&_usBlurFilter) ;
                 executeProcessorAndCheckOpenGLState(&_usResampler);
 
                 auto solverStartTime = tbb::tick_count::now();
+                _usMapsSolver.p_millisecondBudget.setValue(millisecondBudget);
                 executeProcessorAndCheckOpenGLState(&_usMapsSolver);
                 auto solverEndTime = tbb::tick_count::now();
 
@@ -186,24 +181,6 @@ namespace campvis {
                     string << "Error: " << _usMapsSolver.getResidualNorm() << std::endl;
                     _usFanRenderer.p_text.setValue(string.str());
                 }
-
-
-                auto ms = (solverEndTime - solverStartTime).seconds() * 1000.0f;
-                auto iterationsPerMs = _usMapsSolver.getActualConjugentGradientIterations() / ms;
-
-
-                // Factor out the time needed for pre- and postprocessing the image from the time slot
-                float timeSlot = (p_timeSlot.getValue() -
-                                 (solverStartTime - startTime).seconds() * 1000.0f -
-                                 (endTime - solverEndTime).seconds() * 1000.0f);
-
-                // Compute the running average using an exponential filter
-                float expAlpha = 0.05f;
-                _cgIterationsPerMsRunningAverage = _cgIterationsPerMsRunningAverage * (1.0f - expAlpha) + iterationsPerMs * expAlpha;
-                _cgTimeslotRunningAverage = _cgTimeslotRunningAverage * (1.0f - expAlpha) + timeSlot * expAlpha;
-
-                int iterations = static_cast<int>(_cgTimeslotRunningAverage * _cgIterationsPerMsRunningAverage);
-				p_iterations.setValue(iterations);
             }
         }
     }

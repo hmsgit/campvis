@@ -90,7 +90,7 @@ namespace campvis {
 
         BoolProperty  p_use8Neighbourhood;          ///< Wether to use 8- or 4-neighbourhood
 
-        NumericProperty<int> p_iterations;          ///< Number of CG-Iterations to do
+        FloatProperty p_millisecondBudget;          ///< Maximum number of ms the solver can run
 
         FloatProperty p_gradientScaling;
         FloatProperty p_paramAlpha;

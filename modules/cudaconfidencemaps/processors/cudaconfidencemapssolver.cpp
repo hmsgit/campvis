@@ -41,7 +41,7 @@ namespace campvis {
         , p_outputConfidenceMap("OutputConfidenceMap", "Output Confidence Map", "us.confidence", DataNameProperty::WRITE)
         , p_resetResult("ResetSolution", "Reset solution vector")
         , p_use8Neighbourhood("Use8Neighbourhood", "Use 8 Neighbourhood (otherwise 4)", true)
-        , p_iterations("IterationCount", "Conjugate Gradient Iterations", 200, 1, 500)
+        , p_millisecondBudget("IterationCount", "Conjugate Gradient Iterations", 25.0f, 1.0f, 1000.0f)
         , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001f, 10.0f)
         , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001f, 10.0f)
         , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001f, 200.0f)
@@ -57,7 +57,7 @@ namespace campvis {
 
         addProperty(p_resetResult);
         addProperty(p_use8Neighbourhood);
-        addProperty(p_iterations);
+        addProperty(p_millisecondBudget);
         addProperty(p_gradientScaling);
         addProperty(p_paramAlpha);
         addProperty(p_paramBeta);
@@ -84,7 +84,7 @@ namespace campvis {
         ImageRepresentationLocal::ScopedRepresentation img(data, p_inputImage.getValue());
         if (img != 0) {
             bool use8Neighbourhood = p_use8Neighbourhood.getValue();
-            int iterations = p_iterations.getValue();
+            float millisecondBudget = p_millisecondBudget.getValue();
             float gradientScaling = p_gradientScaling.getValue();
             float alpha = p_paramAlpha.getValue();
             float beta = p_paramBeta.getValue();
@@ -99,7 +99,7 @@ namespace campvis {
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
             _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma, use8Neighbourhood);
-            _solver.solve(iterations, 1e-10f);
+            _solver.solve(millisecondBudget);
 
             const float *solution = _solver.getSolution(size.x, size.y);
 

@@ -160,7 +160,7 @@ namespace campvis {
                 // If the voxel size boundled with the packet is practically 0.0f, make it 1.0f
                 // this makes sure we don't get invalid mapping informations (non invertable matrix)
                 if (minElem(voxelSize) <= 1e-10f) {
-                    voxelSize = 1.0f;
+                    voxelSize = cgt::vec3(1.0f);
                 }
 
                 size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;

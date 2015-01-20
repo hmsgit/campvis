@@ -1,5 +1,6 @@
 #include "cudaconfidencemaps_cuda.h"
 #include "cudautils.h"
+#include "cuspmonitors.h"
 
 #include <cusp/blas.h>
 #include <cusp/dia_matrix.h>
@@ -67,32 +68,6 @@ namespace cuda {
         float solutionResidualNorm;
         float systemCreationTime;
         float systemSolveTime;
-    };
-
-    template <typename ValueType>
-    class iteration_monitor : public cusp::default_monitor<ValueType>
-    {
-        typedef typename cusp::norm_type<ValueType>::type Real;
-        typedef cusp::default_monitor<ValueType> super;
-
-    public:
-        template <typename Vector>
-        iteration_monitor(const Vector& b, size_t iteration_limit = 500)
-            : super(b, iteration_limit, 0.0f, 0.0f)
-        { }
-
-        template <typename Vector>
-        bool finished(const Vector& r)
-        {
-            // Only if the maximum iteration count has been reached, actually go ahead and
-            // compute the error
-            if (super::iteration_count() >= super::iteration_limit()) {
-                super::r_norm = cusp::blas::nrm2(r);
-                return true;
-            }
-
-            return false;
-        }
     };
 
     CudaConfidenceMapsSystemSolver::CudaConfidenceMapsSystemSolver()
@@ -173,12 +148,12 @@ namespace cuda {
     }
 
     // FIXME: Remove errorTolerance parameter
-    void CudaConfidenceMapsSystemSolver::solve(int maximumIterations, float errorTolerance) {
+    void CudaConfidenceMapsSystemSolver::solve(float millisecondBudget) {
         // Measure execution time and record it in the _gpuData datastructure
         CUDAClock clock; clock.start();
 
         // The solution is computed using Conjugate Gradient with a Diagonal (Jacobi) preconditioner
-        iteration_monitor<float> monitor(_gpuData->b_d, maximumIterations);
+        deadline_monitor<float> monitor(_gpuData->b_d, millisecondBudget);
         cusp::precond::diagonal<float, cusp::device_memory> M(_gpuData->L_d);
         cusp::krylov::cg(_gpuData->L_d, _gpuData->x_d, _gpuData->b_d, monitor, M);
         _gpuData->solutionResidualNorm = monitor.residual_norm();

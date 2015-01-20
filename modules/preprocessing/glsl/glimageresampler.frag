@@ -35,7 +35,7 @@ uniform sampler2D _texture;
 #endif
 
 void main() {
-	#ifdef GLRESAMPLER_3D
+    #ifdef GLRESAMPLER_3D
     vec4 sample = texture(_texture, vec3(ex_TexCoord.xy, _zTexCoord));
     #endif
 

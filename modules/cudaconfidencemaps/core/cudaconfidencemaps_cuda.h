@@ -58,10 +58,9 @@ namespace cuda {
         /**
          * After calling \see uploadImage(), this functions launches a solver on the GPU that will solve
          * the diffusion problem.
-         * \param   maximumIterations maximum number of iterations the solver will preform
-         * \param   errorTolerance    if the solution error sinks below this value, the solver stops early
+         * \param   millisecondBudget the time budget the solver has to come up with a solution.
          */
-        void solve(int maximumIterations, float errorTolerance);
+        void solve(float millisecondBudget);
 
         /**
          * Returns a host buffer of the last solution computed by the solver. The pointer is guaranteed to

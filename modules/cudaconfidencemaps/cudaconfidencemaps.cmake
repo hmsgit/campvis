@@ -47,17 +47,16 @@ IF(ModuleEnabled)
         ENDIF()
 
         # CUSP Include directory
-        CUDA_INCLUDE_DIRECTORIES(${ThisModDir}/ext/cusplibrary-0.4.0)
+        CUDA_INCLUDE_DIRECTORIES(
+            ${ThisModDir}/ext/cusplibrary-0.4.0
+            ${TBB_INCLUDE_DIR}
+            )
 
         # Build CUDA portion of the code (STATICALLY!?)
         FILE(GLOB cuda_SOURCES modules/cudaconfidencemaps/core/*.cu)
         CUDA_ADD_LIBRARY(cudaconfidencemaps-cuda STATIC
             ${cuda_SOURCES}
             )        
-
-        # Make sure code can find the CUSP include files included with this module
-        #SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};"-I ${ThisModDir}/ext/cusplibrary-0.4.0")
-        set(CUDA_NVCC_FLAGS "ajkladjfl" CACHE STRING "adsf")
 
         # Link CUDA code to module
         LIST(APPEND ThisModExternalLibs cudaconfidencemaps-cuda)

@@ -72,7 +72,7 @@ namespace campvis {
 
     protected:
         OpenIGTLinkClient _usIgtlReader;
-		GlImageCrop      _usCropFilter;
+        GlImageCrop      _usCropFilter;
         GlGaussianFilter _usBlurFilter;
         GlImageResampler _usResampler;
         CudaConfidenceMapsSolver _usMapsSolver;
@@ -80,9 +80,8 @@ namespace campvis {
         UsFanRenderer _usFanRenderer;
 
 
-        NumericProperty<int> p_iterations;
         BoolProperty   p_autoIterationCount;
-        FloatProperty  p_timeSlot;
+        FloatProperty  p_millisecondBudget;
 
         ButtonProperty p_connectToIGTLinkServer;
 
@@ -98,9 +97,6 @@ namespace campvis {
         FloatProperty  p_fanHalfAngle;
         FloatProperty  p_fanInnerRadius;
 
-
-        float _cgIterationsPerMsRunningAverage;
-        float _cgTimeslotRunningAverage;
         tbb::tick_count _statisticsLastUpdateTime;
     };
 
