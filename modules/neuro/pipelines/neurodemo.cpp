@@ -62,15 +62,15 @@ namespace campvis {
         _tcp.p_image.setValue("ImageGroup");
         _renderTargetID.setValue("result");
 
-        _ctReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_CT.nii"));
+        _ctReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_Data/K_CT_CoregT1.am"));
         _ctReader.p_targetImageID.setValue("ct.image");
         _ctReader.s_validated.connect(this, &NeuroDemo::onReaderValidated);
 
-        _t1Reader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_T1_bet.nii"));
+        _t1Reader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_Data/K_T1_bet04.GB306.am"));
         _t1Reader.p_targetImageID.setValue("t1_tf.image");
         _t1Reader.s_validated.connect(this, &NeuroDemo::onReaderValidated);
 
-        _petReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_PET.nii"));
+        _petReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_Data/K_PET-CoregNMI_fl.am"));
         _petReader.p_targetImageID.setValue("pet.image");
         _petReader.s_validated.connect(this, &NeuroDemo::onReaderValidated);
 

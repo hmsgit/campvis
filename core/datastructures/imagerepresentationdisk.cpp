@@ -60,8 +60,8 @@ namespace campvis {
         std::ifstream file(_url.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
         if (file.is_open()) {
             size_t fileSize = static_cast<size_t>(file.tellg());
-            if (fileSize < numBytes) {
-                LERROR("File is smaller than expected.");
+            if (fileSize < numBytes + _offset) {
+                LERROR("File is smaller than expected, " << (numBytes + _offset) - fileSize << " Bytes missing.");
                 return WeaklyTypedPointer(_type, _parent->getNumChannels(), 0);
             }
 
