@@ -126,7 +126,7 @@ namespace campvis {
                 endpos = str.find_first_of(delimiter, strpos);
                 toReturn.push_back(StringUtils::trim(str.substr(strpos, endpos - strpos), whitespace));
             }
-            strpos = endpos + delimiter.length();
+            strpos = endpos + delimiter.length() - 1;
         }
         return toReturn;
     }
