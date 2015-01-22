@@ -25,10 +25,6 @@
 // XOR Bitmask texture
 uniform usampler2D _xorBitmask;
 
-// BBV Lookup volume
-uniform usampler2D _voxelHierarchy;
-uniform int _vhMaxMipMapLevel;
-
 const int MAXSTEPS = 20;
 float OFFSET = 0.001;
 
@@ -46,17 +42,17 @@ float IntersectBoxOnlyTFar(in vec3 origin, in vec3 dir, in vec3 box_min, in vec3
     return min(1.0, min( min(real_max.x, real_max.y), real_max.z));
 }
 
-bool intersectBits(in uvec4 bitRay, in ivec2 texel, in int level, out uvec4 intersectionBitmask)
+bool intersectBits(usampler2D vhTexture, in uvec4 bitRay, in ivec2 texel, in int level, out uvec4 intersectionBitmask)
 {
     // Fetch bitmask from hierarchy and compute intersection via bitwise AND
-    intersectionBitmask = (bitRay & texelFetch(_voxelHierarchy, texel, level));
+    intersectionBitmask = (bitRay & texelFetch(vhTexture, texel, level));
     return (intersectionBitmask != uvec4(0));
 }
 
-bool intersectHierarchy(in vec3 origin, in vec3 direction, in int level, in vec3 posTNear, out float tFar, out uvec4 intersectionBitmask) {
+bool intersectHierarchy(usampler2D vhTexture, int vhMaxMipmapLevel, in vec3 origin, in vec3 direction, in int level, in vec3 posTNear, out float tFar, out uvec4 intersectionBitmask) {
     // Calculate pixel coordinates ([0,width]x[0,height])
     // of the current position along the ray
-    float res = float(1 << (_vhMaxMipMapLevel - level));
+    float res = float(1 << (vhMaxMipmapLevel - level));
     ivec2 pixelCoord = ivec2(posTNear.xy * res);
 
     // Voxel width and height in the unit cube
@@ -78,20 +74,18 @@ bool intersectHierarchy(in vec3 origin, in vec3 direction, in int level, in vec3
 
     // Fetch bitmask for ray and intersect with current pixel
     return intersectBits(
+        vhTexture,
         texture(_xorBitmask, vec2(min(posTNear.z, zFar), max(posTNear.z, zFar))),
         pixelCoord, 
         level, 
         intersectionBitmask);
 }
 
-float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in float tFar) {
-    // Compute the exit position of the ray with the scene’s BB
-    // tFar = rayBoxIntersection(origin, direction, vec3(0.0), vec3(1.0), tNear);
-    // if (tFar > originalTFar) {
-    //     vec3 foo = origin + tFar * direction;
-    //     out_FHN = vec4(foo, 1.0);
-    //     tFar = originalTFar;
-    // }
+float clipFirstHitpoint(usampler2D vhTexture, int vhMaxMipmapLevel, in vec3 origin, in vec3 direction, in float tNear, in float tFar) {
+    // clip start/endpoint to bounding box
+    vec2 clipPoints = intersectAABB(origin, direction, vec3(0.0), vec3(1.0));
+    if (clipPoints.x > clipPoints.y)
+        return tFar;
 
     // Set current position along the ray to the ray’s origin
     vec3 posTNear = origin;
@@ -99,10 +93,10 @@ float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in fl
     uvec4 intersectionBitmask = uvec4(0);
 
     // It’s faster to not start at the coarsest level
-    int level = _vhMaxMipMapLevel / 2;
+    int level = vhMaxMipmapLevel / 2;
     for (int i = 0; (i < MAXSTEPS) && (tNear < tFar) && (!intersectionFound); i++) {
         float newTFar = 1.0;
-        if (intersectHierarchy(origin, direction, level, posTNear, newTFar, intersectionBitmask)) {
+        if (intersectHierarchy(vhTexture, vhMaxMipmapLevel, origin, direction, level, posTNear, newTFar, intersectionBitmask)) {
             // If we are at mipmap level 0 and an intersection occurred,
             // we have found an intersection of the ray with the volume
             intersectionFound = (level == 0);
@@ -124,5 +118,5 @@ float clipFirstHitpoint(in vec3 origin, in vec3 direction, in float tNear, in fl
         }
     }
 
-    return tNear;
+    return clamp(tNear, 0.0, tFar);
 }

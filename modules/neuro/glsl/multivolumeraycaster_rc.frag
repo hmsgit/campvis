@@ -33,6 +33,8 @@ layout(location = 2) out vec4 out_FHN;       ///< outgoing fragment first hit no
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
 
+#include "modules/vis/glsl/voxelhierarchy.frag"
+
 uniform vec2 _viewportSizeRCP;
 uniform float _jitterStepSizeMultiplier;
 
@@ -63,11 +65,61 @@ uniform TFParameters1D _transferFunctionParams1;
 uniform TFParameters1D _transferFunctionParams2;
 uniform TFParameters1D _transferFunctionParams3;
 
+// Voxel Hierarchy Lookup volumes
+uniform usampler2D _voxelHierarchy1;
+uniform usampler2D _voxelHierarchy2;
+uniform usampler2D _voxelHierarchy3;
+uniform int _vhMaxMipMapLevel1;
+uniform int _vhMaxMipMapLevel2;
+uniform int _vhMaxMipMapLevel3;
+
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
 uniform float _samplingStepSize;
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
+
+vec2 clipVolume(usampler2D vhTexture, int vhMaxMipmapLevel, TextureParameters3D volumeParams, in vec3 entryPoint, in vec3 exitPoint) {
+    vec3 startPosTex = worldToTexture(volumeParams, entryPoint).xyz;
+    vec3 endPosTex = worldToTexture(volumeParams, exitPoint).xyz;
+    vec3 directionTex = endPosTex - startPosTex;
+
+    float tNear = clipFirstHitpoint(vhTexture, vhMaxMipmapLevel, startPosTex, directionTex, 0.0, 1.0);
+    float tFar = 1.0 - clipFirstHitpoint(vhTexture, vhMaxMipmapLevel, endPosTex, -directionTex, 0.0, 1.0);
+
+    return vec2(tNear, tFar);
+}
+
+#define RAYCASTING_STEP(worldPosition, CLIP, volume, volumeParams, tf, tfParams, result, firstHitT, tNear) \
+    { \
+    if (tNear >= CLIP.x && tNear <= CLIP.y) { \
+        vec3 samplePosition = worldToTexture(volumeParams, worldPosition).xyz; \
+        if (all(greaterThanEqual(samplePosition, vec3(0.0, 0.0, 0.0))) && all(lessThanEqual(samplePosition, vec3(1.0, 1.0, 1.0)))) { \
+            // lookup intensity and TF  \
+            float intensity = texture(volume, samplePosition).r; \
+            vec4 color = lookupTF(tf, tfParams, intensity); \
+            \
+            // perform compositing \
+            if (color.a > 0.0) { \
+                // compute gradient (needed for shading and normals) \
+                vec3 gradient = computeGradient(volume, volumeParams, samplePosition); \
+                color.rgb = calculatePhongShading(worldPosition, _lightSource, _cameraPosition, gradient, color.rgb); \
+                \
+                // accomodate for variable sampling rates \
+                color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP); \
+                result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a); \
+                result.a = result.a + (1.0 -result.a) * color.a; \
+                \
+                // save first hit ray parameter for depth value calculation \
+                if (firstHitT < 0.0 && result.a > 0.01) { \
+                    firstHitT = tNear; \
+                    out_FHP = vec4(worldPosition, 1.0); \
+                    out_FHN = vec4(gradient, 1.0); \
+                } \
+            } \
+        } \
+    } \
+    }
 
 /**
  * Performs the raycasting and returns the final fragment color.
@@ -78,104 +130,47 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
     // calculate ray parameters
     vec3 direction = exitPoint.rgb - entryPoint.rgb;
-    float t = 0.0;
-    float tend = length(direction);
-    direction = normalize(direction);
 
-    jitterEntryPoint(entryPoint, direction, _samplingStepSize * _jitterStepSizeMultiplier);
+    OFFSET = (0.25 / (1 << _vhMaxMipMapLevel1)); //< offset value used to avoid self-intersection or previous voxel intersection.
 
-    while (t < tend) {
+    vec2 clip1 = clipVolume(_voxelHierarchy1, _vhMaxMipMapLevel1, _volumeParams1, entryPoint, exitPoint);
+    vec2 clip2 = clipVolume(_voxelHierarchy2, _vhMaxMipMapLevel2, _volumeParams2, entryPoint, exitPoint);
+    vec2 clip3 = clipVolume(_voxelHierarchy3, _vhMaxMipMapLevel3, _volumeParams3, entryPoint, exitPoint);
+    float tNear = min(clip1.x, min(clip2.x, clip3.x));
+    float tFar = max(clip1.y, max(clip2.y, clip3.y));
+
+    jitterFloat(tNear, -_samplingStepSize * _jitterStepSizeMultiplier);
+
+    while (tNear < tFar) {
         // compute sample position
-        vec3 worldPosition = entryPoint.rgb + t * direction;
-
-
+        vec3 worldPosition = entryPoint.rgb + tNear * direction;
+    
+    
         // FIRST volume
-        vec3 samplePosition1 = worldToTexture(_volumeParams1, worldPosition).xyz;
-        if (all(greaterThanEqual(samplePosition1, vec3(0.0, 0.0, 0.0))) && all(lessThanEqual(samplePosition1, vec3(1.0, 1.0, 1.0)))) {
-            // lookup intensity and TF
-            float intensity = texture(_volume1, samplePosition1).r;
-            vec4 color = lookupTF(_transferFunction1, _transferFunctionParams1, intensity);
-
-            // perform compositing
-            if (color.a > 0.0) {
-                // compute gradient (needed for shading and normals)
-                vec3 gradient = computeGradient(_volume1, _volumeParams1, samplePosition1);
-                color.rgb = calculatePhongShading(worldPosition, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
-
-                // accomodate for variable sampling rates
-                color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-                result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
-                result.a = result.a + (1.0 -result.a) * color.a;
-            }
-        }
-
+        RAYCASTING_STEP(worldPosition, clip1, _volume1, _volumeParams1, _transferFunction1, _transferFunctionParams1, result, firstHitT, tNear);
 
         // SECOND volume
-        vec3 samplePosition2 = worldToTexture(_volumeParams2, worldPosition).xyz;
-        if (all(greaterThanEqual(samplePosition2, vec3(0.0, 0.0, 0.0))) && all(lessThanEqual(samplePosition2, vec3(1.0, 1.0, 1.0)))) {
-            // lookup intensity and TF
-            float intensity = texture(_volume2, samplePosition2).r;
-            vec4 color = lookupTF(_transferFunction2, _transferFunctionParams2, intensity);
-
-            // perform compositing
-            if (color.a > 0.0) {
-                // compute gradient (needed for shading and normals)
-                vec3 gradient = computeGradient(_volume2, _volumeParams2, samplePosition2);
-                color.rgb = calculatePhongShading(worldPosition, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
-
-                // accomodate for variable sampling rates
-                color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-                result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
-                result.a = result.a + (1.0 -result.a) * color.a;
-            }
-        }
-
+        RAYCASTING_STEP(worldPosition, clip2, _volume2, _volumeParams2, _transferFunction2, _transferFunctionParams2, result, firstHitT, tNear);
 
         // THIRD volume
-        vec3 samplePosition3 = worldToTexture(_volumeParams3, worldPosition).xyz;
-        if (all(greaterThanEqual(samplePosition3, vec3(0.0, 0.0, 0.0))) && all(lessThanEqual(samplePosition3, vec3(1.0, 1.0, 1.0)))) {
-            // lookup intensity and TF
-            float intensity = texture(_volume3, samplePosition3).r;
-            vec4 color = lookupTF(_transferFunction3, _transferFunctionParams3, intensity);
-
-            // perform compositing
-            if (color.a > 0.0) {
-                // compute gradient (needed for shading and normals)
-                vec3 gradient = computeGradient(_volume3, _volumeParams3, samplePosition3);
-                color.rgb = calculatePhongShading(worldPosition, _lightSource, _cameraPosition, gradient, color.rgb, color.rgb, vec3(1.0, 1.0, 1.0));
-
-                // accomodate for variable sampling rates
-                color.a = 1.0 - pow(1.0 - color.a, _samplingStepSize * SAMPLING_BASE_INTERVAL_RCP);
-                result.rgb = result.rgb + color.rgb * color.a  * (1.0 - result.a);
-                result.a = result.a + (1.0 -result.a) * color.a;
-            }
-        }
-
-
-
-        // save first hit ray parameter for depth value calculation
-        if (firstHitT < 0.0 && result.a > 0.0) {
-            firstHitT = t;
-            out_FHP = vec4(worldPosition, 1.0);
-            out_FHN = vec4(normalize(computeGradient(_volume1, _volumeParams1, worldPosition)), 1.0);
-        }
-
+        RAYCASTING_STEP(worldPosition, clip3, _volume3, _volumeParams3, _transferFunction3, _transferFunctionParams3, result, firstHitT, tNear);
+        
         // early ray termination
         if (result.a > 0.975) {
             result.a = 1.0;
-            t = tend;
+            tNear = tFar;
         }
-
+    
         // advance to the next evaluation point along the ray
-        t += _samplingStepSize;
+        tNear += _samplingStepSize;
     }
 
     // calculate depth value from ray parameter
-    gl_FragDepth = 1.0;
+    gl_FragDepth = 0.98765;
     if (firstHitT >= 0.0) {
         float depthEntry = texture(_entryPointsDepth, texCoords).z;
         float depthExit = texture(_exitPointsDepth, texCoords).z;
-        gl_FragDepth = calculateDepthValue(firstHitT/tend, depthEntry, depthExit);
+        gl_FragDepth = calculateDepthValue(firstHitT, depthEntry, depthExit);
     }
     return result;
 }

@@ -33,6 +33,7 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
+#include "modules/vis/tools/voxelhierarchymapper.h"
 
 namespace cgt {
     class Shader;
@@ -52,6 +53,12 @@ namespace neuro {
      */
     class CAMPVIS_MODULES_API MultiVolumeRaycaster : public VisualizationProcessor, public HasProcessorDecorators {
     public:
+        enum AdditionalInvalidationLevels {
+            INVALID_VOXEL_HIERARCHY1 = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL,
+            INVALID_VOXEL_HIERARCHY2 = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 1,
+            INVALID_VOXEL_HIERARCHY3 = AbstractProcessor::FIRST_FREE_TO_USE_INVALIDATION_LEVEL << 2
+        };
+
         /**
          * Constructs a new MultiVolumeRaycaster Processor
          **/
@@ -77,7 +84,9 @@ namespace neuro {
         /// \see AbstractProcessor::getProcessorState()
         virtual ProcessorState getProcessorState() const { return AbstractProcessor::TESTING; };
 
-        DataNameProperty p_sourceImagesId;      ///< ID for input images (either single image or image series)
+        DataNameProperty p_sourceImage1;        ///< ID for first input images
+        DataNameProperty p_sourceImage2;        ///< ID for second input images
+        DataNameProperty p_sourceImage3;        ///< ID for third input images
         DataNameProperty p_geometryImageId;     ///< image ID for the optional rendered geometry to integrate into the EEP
         DataNameProperty p_camera;              ///< input camra
         DataNameProperty p_lightId;             ///< input light source
@@ -119,6 +128,12 @@ namespace neuro {
             const RenderData* entrypoints, 
             const RenderData* exitpoints,
             const LightSourceData* light);
+
+
+        VoxelHierarchyMapper* _vhm1;
+        VoxelHierarchyMapper* _vhm2;
+        VoxelHierarchyMapper* _vhm3;
+
 
         static const std::string loggerCat_;
     };

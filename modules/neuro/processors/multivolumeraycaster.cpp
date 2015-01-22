@@ -48,7 +48,9 @@ namespace neuro {
 
     MultiVolumeRaycaster::MultiVolumeRaycaster(IVec2Property* viewportSizeProp)
         : VisualizationProcessor(viewportSizeProp)
-        , p_sourceImagesId("SourceImagesId", "Input Image(s)", "", DataNameProperty::READ)
+        , p_sourceImage1("SourceImage1", "First Input Image", "", DataNameProperty::READ)
+        , p_sourceImage2("SourceImage2", "Second Input Image", "", DataNameProperty::READ)
+        , p_sourceImage3("SourceImage3", "Third Input Image", "", DataNameProperty::READ)
         , p_geometryImageId("GeometryImageId", "Rendered Geometry to Integrate (optional)", "", DataNameProperty::READ)
         , p_camera("Camera", "Camera ID", "camera", DataNameProperty::READ)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
@@ -59,18 +61,21 @@ namespace neuro {
         , p_jitterStepSizeMultiplier("jitterStepSizeMultiplier", "Jitter Step Size Multiplier", 1.f, 0.f, 1.f)
         , p_samplingRate("SamplingRate", "Sampling Rate", 2.f, 0.1f, 10.f, 0.1f)
         , _eepShader(nullptr)
+        , _rcShader(nullptr)
     {
         addDecorator(new ProcessorDecoratorGradient());
 
-        addProperty(p_sourceImagesId, INVALID_PROPERTIES | INVALID_RESULT);
+        addProperty(p_sourceImage1, INVALID_PROPERTIES | INVALID_RESULT | INVALID_VOXEL_HIERARCHY1);
+        addProperty(p_sourceImage2, INVALID_PROPERTIES | INVALID_RESULT | INVALID_VOXEL_HIERARCHY2);
+        addProperty(p_sourceImage3, INVALID_PROPERTIES | INVALID_RESULT | INVALID_VOXEL_HIERARCHY3);
         addProperty(p_geometryImageId);
         addProperty(p_camera);
         addProperty(p_lightId);
         addProperty(p_outputImageId);
 
-        addProperty(p_transferFunction1);
-        addProperty(p_transferFunction2);
-        addProperty(p_transferFunction3);
+        addProperty(p_transferFunction1, INVALID_RESULT | INVALID_VOXEL_HIERARCHY1);
+        addProperty(p_transferFunction2, INVALID_RESULT | INVALID_VOXEL_HIERARCHY2);
+        addProperty(p_transferFunction3, INVALID_RESULT | INVALID_VOXEL_HIERARCHY3);
         addProperty(p_jitterStepSizeMultiplier);
         addProperty(p_samplingRate);
 
@@ -95,30 +100,59 @@ namespace neuro {
             _rcShader->setAttributeLocation(0, "in_Position");
             _rcShader->setAttributeLocation(1, "in_TexCoord");
         }
+
+        _vhm1 = new VoxelHierarchyMapper();
+        _vhm2 = new VoxelHierarchyMapper();
+        _vhm3 = new VoxelHierarchyMapper();
     }
 
     void MultiVolumeRaycaster::deinit() {
         ShdrMgr.dispose(_eepShader);
-        _eepShader = 0;
+        _eepShader = nullptr;
+        ShdrMgr.dispose(_rcShader);
+        _rcShader = nullptr;
+
+        delete _vhm1;
+        delete _vhm2;
+        delete _vhm3;
+
         VisualizationProcessor::deinit();
     }
 
     void MultiVolumeRaycaster::updateResult(DataContainer& dataContainer) {
-        ImageRepresentationGL::ScopedRepresentation singleImage(dataContainer, p_sourceImagesId.getValue(), true);
-        ScopedTypedData<ImageSeries> imageSeries(dataContainer, p_sourceImagesId.getValue(), true);
+        ImageRepresentationGL::ScopedRepresentation image1(dataContainer, p_sourceImage1.getValue());
+        ImageRepresentationGL::ScopedRepresentation image2(dataContainer, p_sourceImage2.getValue());
+        ImageRepresentationGL::ScopedRepresentation image3(dataContainer, p_sourceImage3.getValue());
         ScopedTypedData<CameraData> camera(dataContainer, p_camera.getValue());
         ScopedTypedData<RenderData> geometryImage(dataContainer, p_geometryImageId.getValue(), true);
         ScopedTypedData<LightSourceData> light(dataContainer, p_lightId.getValue());
 
         std::vector<const ImageRepresentationGL*> images;
-        if (singleImage != nullptr)
-            images.push_back(singleImage);
-        else if (imageSeries != nullptr) {
-            for (size_t i = 0; i < imageSeries->getNumImages(); ++i) {
-                images.push_back(static_cast<const ImageData*>(imageSeries->getImage(i).getData())->getRepresentation<ImageRepresentationGL>());
-                cgtAssert(images.back() != nullptr, "We have a nullptr in our image list, this is WRONG! Did a conversion fail?");
+        if (image1) {
+            images.push_back(image1);
+
+            if (getInvalidationLevel() & INVALID_VOXEL_HIERARCHY1){
+                _vhm1->createHierarchy(image1, p_transferFunction1.getTF());
+                validate(INVALID_VOXEL_HIERARCHY1);
             }
         }
+        if (image2) {
+            images.push_back(image2);
+
+            if (getInvalidationLevel() & INVALID_VOXEL_HIERARCHY2){
+                _vhm2->createHierarchy(image2, p_transferFunction2.getTF());
+                validate(INVALID_VOXEL_HIERARCHY2);
+            }
+        }
+        if (image3) {
+            images.push_back(image3);
+
+            if (getInvalidationLevel() & INVALID_VOXEL_HIERARCHY3){
+                _vhm3->createHierarchy(image3, p_transferFunction3.getTF());
+                validate(INVALID_VOXEL_HIERARCHY3);
+            }
+        }
+        
 
         if (images.size() >= 3 && camera != nullptr) {
             auto eepp = computeEntryExitPoints(images, camera, geometryImage);
@@ -138,22 +172,24 @@ namespace neuro {
     }
 
     void MultiVolumeRaycaster::updateProperties(DataContainer& dataContainer) {
-        ScopedTypedData<ImageData> img(dataContainer, p_sourceImagesId.getValue(), true);
-        ScopedTypedData<ImageSeries> is(dataContainer, p_sourceImagesId.getValue(), true);
+        ImageRepresentationGL::ScopedRepresentation image1(dataContainer, p_sourceImage1.getValue());
+        ImageRepresentationGL::ScopedRepresentation image2(dataContainer, p_sourceImage2.getValue());
+        ImageRepresentationGL::ScopedRepresentation image3(dataContainer, p_sourceImage3.getValue());
 
-        if (img != nullptr) {
-            p_transferFunction1.setImageHandle(img.getDataHandle());
-        }
-        else if (is != nullptr && is->getNumImages() == 3) {
-            p_transferFunction1.setImageHandle(is->getImage(0));
-            p_transferFunction2.setImageHandle(is->getImage(1));
-            p_transferFunction3.setImageHandle(is->getImage(2));
-        }
-        else {
+        if (image1)
+            p_transferFunction1.setImageHandle(image1.getDataHandle());
+        else
             p_transferFunction1.setImageHandle(DataHandle(nullptr));
+
+        if (image2)
+            p_transferFunction2.setImageHandle(image2.getDataHandle());
+        else
             p_transferFunction2.setImageHandle(DataHandle(nullptr));
+
+        if (image3)
+            p_transferFunction3.setImageHandle(image3.getDataHandle());
+        else
             p_transferFunction3.setImageHandle(DataHandle(nullptr));
-        }
     }
 
     void MultiVolumeRaycaster::updateShader() {
@@ -255,17 +291,6 @@ namespace neuro {
     RenderData* MultiVolumeRaycaster::performRaycasting(DataContainer& dataContainer, const std::vector<const ImageRepresentationGL*>& images, const CameraData* camera, const RenderData* entrypoints, const RenderData* exitpoints, const LightSourceData* light) {
         cgtAssert(_rcShader != nullptr, "EEP Shader must not be 0.");
 
-        // little hack to support LOD texture lookup for the gradients:
-        // if texture does not yet have mipmaps, create them.
-        const cgt::Texture* tex = images.front()->getTexture();
-        if (tex->getFilter() != cgt::Texture::MIPMAP) {
-            const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
-            glGenerateMipmap(GL_TEXTURE_3D);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            LGL_ERROR;
-        }
-
         _rcShader->activate();
 
         decorateRenderProlog(dataContainer, _rcShader);
@@ -273,7 +298,9 @@ namespace neuro {
         _rcShader->setUniform("_jitterStepSizeMultiplier", p_jitterStepSizeMultiplier.getValue());
 
         // compute sampling step size relative to volume size
-        float samplingStepSize = .1f / p_samplingRate.getValue();
+        float samplingStepSize = .001f / p_samplingRate.getValue();
+        if (p_lqMode.getValue())
+            samplingStepSize /= 4.f;
         _rcShader->setUniform("_samplingStepSize", samplingStepSize);
 
         // compute and set camera parameters
@@ -287,16 +314,41 @@ namespace neuro {
         _rcShader->setUniform("const_to_z_w_2", 0.5f*((f+n)/(f-n))+0.5f);
 
         // bind input textures
-        cgt::TextureUnit volumeUnit, entryUnit, entryUnitDepth, exitUnit, exitUnitDepth, tf1Unit, tf2Unit, tf3Unit;
-        images[0]->bind(_rcShader, volumeUnit, "_volume1", "_volumeParams1");
-        images[1]->bind(_rcShader, volumeUnit, "_volume2", "_volumeParams2");
-        images[2]->bind(_rcShader, volumeUnit, "_volume3", "_volumeParams3");
+        cgt::TextureUnit volumeUnit1, volumeUnit2, volumeUnit3, entryUnit, entryUnitDepth, exitUnit, exitUnitDepth, tf1Unit, tf2Unit, tf3Unit;
+        images[0]->bind(_rcShader, volumeUnit1, "_volume1", "_volumeParams1");
+        images[1]->bind(_rcShader, volumeUnit2, "_volume2", "_volumeParams2");
+        images[2]->bind(_rcShader, volumeUnit3, "_volume3", "_volumeParams3");
         p_transferFunction1.getTF()->bind(_rcShader, tf1Unit, "_transferFunction1", "_transferFunctionParams1");
         p_transferFunction2.getTF()->bind(_rcShader, tf2Unit, "_transferFunction2", "_transferFunctionParams2");
         p_transferFunction3.getTF()->bind(_rcShader, tf3Unit, "_transferFunction3", "_transferFunctionParams3");
         entrypoints->bind(_rcShader, entryUnit, entryUnitDepth, "_entryPoints", "_entryPointsDepth", "_entryParams");
         exitpoints->bind(_rcShader, exitUnit, exitUnitDepth, "_exitPoints", "_exitPointsDepth", "_exitParams");
         light->bind(_rcShader, "_lightSource");
+
+        // bind voxel hierarchies
+        cgt::TextureUnit xorUnit, vhUnit1, vhUnit2, vhUnit3;
+        xorUnit.activate();
+        _vhm1->getXorBitmaskTexture()->bind();
+        _rcShader->setUniform("_xorBitmask", xorUnit.getUnitNumber());
+
+        vhUnit1.activate();
+        _vhm1->getHierarchyTexture()->bind();
+        _rcShader->setUniform("_voxelHierarchy1", vhUnit1.getUnitNumber());
+        _rcShader->setUniform("_vhMaxMipMapLevel1", static_cast<int>(_vhm1->getMaxMipmapLevel()));
+
+        if (_vhm2) {
+            vhUnit2.activate();
+            _vhm2->getHierarchyTexture()->bind();
+            _rcShader->setUniform("_voxelHierarchy2", vhUnit2.getUnitNumber());
+            _rcShader->setUniform("_vhMaxMipMapLevel2", static_cast<int>(_vhm2->getMaxMipmapLevel()));
+        }
+
+        if (_vhm3) {
+            vhUnit3.activate();
+            _vhm3->getHierarchyTexture()->bind();
+            _rcShader->setUniform("_voxelHierarchy3", vhUnit3.getUnitNumber());
+            _rcShader->setUniform("_vhMaxMipMapLevel3", static_cast<int>(_vhm3->getMaxMipmapLevel()));
+        }
 
         FramebufferActivationGuard fag(this);
         createAndAttachTexture(GL_RGBA8);
