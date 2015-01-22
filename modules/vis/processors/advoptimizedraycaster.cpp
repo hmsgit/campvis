@@ -84,6 +84,9 @@ namespace campvis {
         ScopedTypedData<LightSourceData> light(data, p_lightId.getValue());
 
         if (p_enableShading.getValue() == false || light != nullptr) {
+            // undo MIPMAP hack from RaycastingProcessor, as mipmapping results in artifacts during ray clipping...
+            const_cast<cgt::Texture*>(image->getTexture())->setFilter(cgt::Texture::LINEAR);
+
             _shader->activate();
 
             cgt::TextureUnit xorUnit, bbvUnit;
@@ -95,11 +98,8 @@ namespace campvis {
             _vhm->getHierarchyTexture()->bind();
             {
                 cgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
-                _shader->setUniform("_vvTexture", bbvUnit.getUnitNumber());
-                _shader->setUniform("_vvVoxelSize", static_cast<int>(_vhm->getBrickSize()));
-                _shader->setUniform("_vvVoxelDepth", static_cast<int>(_vhm->getBrickDepth()));
-                _shader->setUniform("_vvMaxMipMapLevel", static_cast<int>(_vhm->getMaxMipmapLevel()));
-                _shader->setUniform("_vvSize", _vhm->getHierarchyTexture()->getDimensions());
+                _shader->setUniform("_voxelHierarchy", bbvUnit.getUnitNumber());
+                _shader->setUniform("_vhMaxMipMapLevel", static_cast<int>(_vhm->getMaxMipmapLevel()));
             }
 
             if (p_enableShading.getValue() && light != nullptr) {
@@ -113,7 +113,7 @@ namespace campvis {
             createAndAttachDepthTexture();
 
 
-            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 , GL_COLOR_ATTACHMENT3  };
+            static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };
             glDrawBuffers(4, buffers);
 
             glEnable(GL_DEPTH_TEST);

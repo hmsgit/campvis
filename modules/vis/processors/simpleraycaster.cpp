@@ -69,9 +69,9 @@ namespace campvis {
 
         if (p_enableShading.getValue() == false || light != nullptr) {
             FramebufferActivationGuard fag(this);
-            createAndAttachTexture(GL_RGBA8, GL_COLOR_ATTACHMENT0);
-            createAndAttachTexture(GL_RGBA32F, GL_COLOR_ATTACHMENT1);
-            createAndAttachTexture(GL_RGBA32F, GL_COLOR_ATTACHMENT2);
+            createAndAttachTexture(GL_RGBA8);
+            createAndAttachTexture(GL_RGBA32F);
+            createAndAttachTexture(GL_RGBA32F);
             createAndAttachDepthTexture();
 
             static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 , GL_COLOR_ATTACHMENT2 };

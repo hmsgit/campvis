@@ -102,7 +102,7 @@ namespace campvis {
                     const_cast<cgt::Texture*>(tex)->setFilter(cgt::Texture::MIPMAP);
                     glGenerateMipmap(GL_TEXTURE_3D);
                     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
                     LGL_ERROR;
                 }
 

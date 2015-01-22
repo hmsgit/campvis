@@ -75,7 +75,6 @@ namespace campvis {
 
         if (img != 0) {
             cgt::vec3 originalSize(img->getSize());
-            //cgt::ivec3 resampledSize(cgt::ceil(originalSize * p_resampleScale.getValue()));
             const cgt::ivec3& resampledSize = p_targetSize.getValue();
 
             cgt::TextureUnit inputUnit;
