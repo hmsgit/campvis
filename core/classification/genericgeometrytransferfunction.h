@@ -59,6 +59,13 @@ namespace campvis {
          * Destructor, make sure to delete the OpenGL texture beforehand by calling deinit() with a valid OpenGL context!
          */
         virtual ~GenericGeometryTransferFunction();
+
+        /**
+         * Returns the intensity domain where this TF has it's non-transparent parts.
+         * I.e. the minimum and the maximum intensity being opaque.
+         * \return  cgt::vec2(0.f, 1.f)
+         */
+        virtual cgt::vec2 getVisibilityDomain() const;
         
         /**
          * Initializes the Shader, hence, this methods has to be called from a thread with a valid OpenGL context!
@@ -126,6 +133,20 @@ namespace campvis {
 
     template<class T>
     campvis::GenericGeometryTransferFunction<T>::~GenericGeometryTransferFunction() {
+    }
+
+    template<class T>
+    cgt::vec2 campvis::GenericGeometryTransferFunction<T>::getVisibilityDomain() const {
+        if (_geometries.empty())
+            return cgt::vec2(-1.f, -1.f);
+        else {
+            cgt::vec2 minmax(1.f, 0.f);
+            for (size_t i = 0; i < _geometries.size(); ++i) {
+                minmax.x = std::min(minmax.x, _geometries[i]->getIntensityDomain().x);
+                minmax.y = std::max(minmax.y, _geometries[i]->getIntensityDomain().y);
+            }
+            return minmax;
+        }
     }
 
     template<class T>

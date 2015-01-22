@@ -58,6 +58,13 @@ namespace campvis {
          */
         virtual size_t getDimensionality() const;
 
+        /**
+         * Returns the intensity domain where this TF has it's non-transparent parts.
+         * I.e. the minimum and the maximum intensity being opaque.
+         * \return  cgt::vec2(0.f, 1.f)
+         */
+        virtual cgt::vec2 getVisibilityDomain() const;
+
         const cgt::col4& getLeftColor() const;
         void setLeftColor(const cgt::col4& color);
         const cgt::col4& getRightColor() const;

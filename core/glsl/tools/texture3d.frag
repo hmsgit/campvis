@@ -59,8 +59,9 @@ vec4 textureToWorld(in TextureParameters3D texParams, in vec4 texCoords) {
  * \param   texCoords   texture coordinates
  * \return  \a texCoords transformes to woorld coordinates.
  */
-vec4 textureToWorld(in TextureParameters3D texParams, in vec3 texCoords) {
-    return textureToWorld(texParams, vec4(texCoords, 1.0));
+vec3 textureToWorld(in TextureParameters3D texParams, in vec3 texCoords) {
+    vec4 v = textureToWorld(texParams, vec4(texCoords, 1.0));
+    return v.xyz;
 }
 
 /**

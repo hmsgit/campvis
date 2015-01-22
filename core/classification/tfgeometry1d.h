@@ -111,6 +111,11 @@ namespace campvis {
         void addKeyPoint(float position, const cgt::col4& color);
 
         /**
+         * Returns the intensity domain of this TFGeometry1D.
+         */
+        cgt::vec2 getIntensityDomain() const;
+
+        /**
          * Creates a simple quad geometry for the given interval.
          * A quad geometry consists of two KeyPoints.
          * \param   interval    Interval the geometry resides in, must be in [0, 1].

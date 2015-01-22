@@ -22,26 +22,29 @@
 // 
 // ================================================================================================
 
-in vec3 ex_TexCoord;        ///< incoming texture coordinate
-in vec4 ex_Position;        ///< incoming texture coordinate
-
-out uvec4 result;
- 
-#include "tools/texture2d.frag"
-
-uniform usampler2D _voxelTexture;
-uniform int _level; // read from this mipmap level
-
+layout(location = 0) out uvec4 result;
 
 void main() {
-    // compute texel to fetch
-    ivec2 coord = ivec2(gl_FragCoord.xy - 0.5) * 2;
+    const uint ALL_ONES = uint(0xFFFFFFFF);
+    uvec4[129] bitmask;
+    for (int e = 0; e < 4; ++e) {
+        for (int b = 0; b < 32; ++b) {
+            int idx = 32*e + b;
 
-    /// Lookup 4 neighbor texels ( ~ voxel stacks)
-    uvec4 val1 = texelFetch(_voxelTexture, coord, _level);
-    uvec4 val2 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(1, 0));
-    uvec4 val3 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(0, 1));
-    uvec4 val4 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(1, 1));
+            if (e == 0)
+                bitmask[idx] = uvec4(ALL_ONES << b, ALL_ONES, ALL_ONES, ALL_ONES);
+            else if (e == 1)
+                bitmask[idx] = uvec4(0, ALL_ONES << b, ALL_ONES, ALL_ONES);
+            else if (e == 2)
+                bitmask[idx] = uvec4(0, 0, ALL_ONES << b, ALL_ONES);
+            else if (e == 3)
+                bitmask[idx] = uvec4(0, 0, 0, ALL_ONES << b);
+        }
+    }
+    bitmask[128] = uvec4(0);
 
-    result = val1 | val2 | val3 | val4;
+    int a = clamp(int(gl_FragCoord.x), 0, 127);
+    int b = clamp(int(gl_FragCoord.y) + 1, 0, 128);
+
+    result = bitmask[a] ^ bitmask[b];
 }
