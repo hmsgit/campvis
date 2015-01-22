@@ -66,11 +66,13 @@ namespace campvis {
         virtual const std::string getName() const { return getId(); };
         static const std::string getId() { return "CudaConfidenceMapsDemo"; };
 
-        void onRenderTargetSizeChanged(const AbstractProperty *prop);
-
-        //void execute();
-
     protected:
+        virtual void onPropertyChanged(const AbstractProperty* prop);
+
+        void toggleIGTLConnection();
+        void setAdvancedPropertiesVisibility(bool visible);
+
+        // Processors
         OpenIGTLinkClient _usIgtlReader;
         GlImageCrop      _usCropFilter;
         GlGaussianFilter _usBlurFilter;
@@ -79,23 +81,28 @@ namespace campvis {
         AdvancedUsFusion _usFusion;
         UsFanRenderer _usFanRenderer;
 
-
-        BoolProperty   p_autoIterationCount;
+        // Basic options
         FloatProperty  p_millisecondBudget;
-
-        ButtonProperty p_connectToIGTLinkServer;
-
-        FloatProperty  p_gaussianFilterSize;
+        ButtonProperty p_connectDisconnectButton;
         FloatProperty  p_resamplingScale;
+        FloatProperty  p_beta;
 
+        BoolProperty   p_showAdvancedOptions;
+
+        // Advanced options (hidden by default)
+        BoolProperty   p_useAlphaBetaFilter;
+        FloatProperty  p_gaussianFilterSize;
         FloatProperty  p_gradientScaling;
         FloatProperty  p_alpha;
-        FloatProperty  p_beta;
         FloatProperty  p_gamma;
-        BoolProperty   p_useAlphaBetaFilter;
-
         FloatProperty  p_fanHalfAngle;
         FloatProperty  p_fanInnerRadius;
+        StringProperty p_recordingDirectory;
+        BoolProperty   p_enableRecording;
+
+        // Variables to keep track of file naming when recording...
+        int _recordedFrames;
+        std::string _filePrefix;
 
         tbb::tick_count _statisticsLastUpdateTime;
     };
