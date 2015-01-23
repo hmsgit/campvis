@@ -143,8 +143,8 @@ namespace {
                             throw cgt::FileException("Unsupported BoundingBox structure in file.", p_url.getValue());
                         cgt::vec3 llf, urb;
                         for (size_t i = 0; i < 3; ++i) {
-                            llf[i] = StringUtils::fromString<float>(parts[i+1]);
-                            urb[i] = StringUtils::fromString<float>(parts[i+4]);
+                            llf[i] = StringUtils::fromString<float>(parts[2*i + 1]);
+                            urb[i] = StringUtils::fromString<float>(parts[2*i + 2]);
                         }
                         imageOffset = llf;
                         voxelSize = (urb - llf) / cgt::vec3(size);
