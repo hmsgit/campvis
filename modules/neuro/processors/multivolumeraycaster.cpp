@@ -195,6 +195,8 @@ namespace neuro {
     void MultiVolumeRaycaster::updateShader() {
         _eepShader->setHeaders(generateHeader());
         _eepShader->rebuild();
+        _rcShader->setHeaders(generateHeader());
+        _rcShader->rebuild();
     }
 
     std::pair<RenderData*, RenderData*> MultiVolumeRaycaster::computeEntryExitPoints(const std::vector<const ImageRepresentationGL*>& images, const CameraData* camera, const RenderData* geometryImage) {
@@ -300,7 +302,7 @@ namespace neuro {
         // compute sampling step size relative to volume size
         float samplingStepSize = .001f / p_samplingRate.getValue();
         if (p_lqMode.getValue())
-            samplingStepSize /= 4.f;
+            samplingStepSize *= 4.f;
         _rcShader->setUniform("_samplingStepSize", samplingStepSize);
 
         // compute and set camera parameters

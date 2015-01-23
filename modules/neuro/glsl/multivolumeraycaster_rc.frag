@@ -166,7 +166,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     }
 
     // calculate depth value from ray parameter
-    gl_FragDepth = 0.98765;
+    gl_FragDepth = 1.0;
     if (firstHitT >= 0.0) {
         float depthEntry = texture(_entryPointsDepth, texCoords).z;
         float depthExit = texture(_exitPointsDepth, texCoords).z;

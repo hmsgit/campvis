@@ -33,7 +33,9 @@
 #include "modules/base/processors/lightsourceprovider.h"
 #include "modules/base/processors/trackballcameraprovider.h"
 #include "modules/io/processors/genericimagereader.h"
+#include "modules/neuro/processors/multivolumemprrenderer.h"
 #include "modules/neuro/processors/multivolumeraycaster.h"
+#include "modules/vis/processors/rendertargetcompositor.h"
 
 namespace campvis {
     class CAMPVIS_MODULES_API NeuroDemo : public AutoEvaluationPipeline {
@@ -60,12 +62,20 @@ namespace campvis {
         void onReaderValidated(AbstractProcessor* p);
 
 
+        void onEvent(cgt::Event* e);
+
         LightSourceProvider _lsp;
         TrackballCameraProvider _tcp;
         GenericImageReader _ctReader;
         GenericImageReader _t1Reader;
         GenericImageReader _petReader;
+
+        neuro::MultiVolumeMprRenderer _mvmpr;
         neuro::MultiVolumeRaycaster _mvr;
+
+        RenderTargetCompositor _rtc;
+    private:
+        std::vector<cgt::vec3> _mprBasePoints;
     };
 
     // Instantiate template to register the pipelines.
