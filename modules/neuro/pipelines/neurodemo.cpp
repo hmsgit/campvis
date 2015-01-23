@@ -70,19 +70,19 @@ namespace campvis {
         _tcp.p_image.setValue("ct.image");
         _renderTargetID.setValue("composed");
 
-        _t1Reader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_Data/K_T1_bet04.GB306.am"));
+        _t1Reader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_Data/K_T1_bet04.GB306.am"));
         _t1Reader.p_targetImageID.setValue("t1_tf.image");
         _t1Reader.p_targetImageID.addSharedProperty(&_mvmpr.p_sourceImage1);
         _t1Reader.p_targetImageID.addSharedProperty(&_mvr.p_sourceImage1);
         _t1Reader.s_validated.connect(this, &NeuroDemo::onReaderValidated);
 
-        _ctReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_Data/K_CT_CoregT1.am"));
+        _ctReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_Data/K_CT_CoregT1.am"));
         _ctReader.p_targetImageID.setValue("ct.image");
         _ctReader.p_targetImageID.addSharedProperty(&_mvmpr.p_sourceImage2);
         _ctReader.p_targetImageID.addSharedProperty(&_mvr.p_sourceImage2);
         _ctReader.s_validated.connect(this, &NeuroDemo::onReaderValidated);
 
-        _petReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_export/K_Data/K_PET-CoregNMI_fl.am"));
+        _petReader.p_url.setValue(ShdrMgr.completePath("D:/Medical Data/K_Data/K_PET-CoregNMI_fl.am"));
         _petReader.p_targetImageID.setValue("pet.image");
         _petReader.p_targetImageID.addSharedProperty(&_mvmpr.p_sourceImage3);
         _petReader.p_targetImageID.addSharedProperty(&_mvr.p_sourceImage3);
@@ -107,7 +107,7 @@ namespace campvis {
 
         _mvmpr.p_relativeToImageCenter.setValue(false);
         _mvmpr.p_use2DProjection.setValue(false);
-        _mvmpr.p_planeSize.setValue(150.f);
+        _mvmpr.p_planeSize.setValue(200.f);
         _mvmpr.p_outputImageId.setValue("result.mpr");
         _mvmpr.p_outputImageId.addSharedProperty(&_rtc.p_firstImageId);
         _mvmpr.p_outputImageId.addSharedProperty(&_mvr.p_geometryImageId);

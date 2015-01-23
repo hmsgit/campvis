@@ -114,7 +114,7 @@ vec2 clipVolume(usampler2D vhTexture, int vhMaxMipmapLevel, TextureParameters3D 
                 if (firstHitT < 0.0 && result.a > 0.01) { \
                     firstHitT = tNear; \
                     out_FHP = vec4(worldPosition, 1.0); \
-                    out_FHN = vec4(gradient, 1.0); \
+                    out_FHN = vec4(normalize(gradient), 1.0); \
                 } \
             } \
         } \

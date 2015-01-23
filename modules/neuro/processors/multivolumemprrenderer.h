@@ -96,6 +96,9 @@ namespace neuro {
         BoolProperty p_use2DProjection;                  ///< Use 3D Rendering instead of 2D
         BoolProperty p_relativeToImageCenter;           ///< Flag whether to construct image plane relative to image center
 
+        BoolProperty p_showWireframe;                   ///< Show wire frame
+        FloatProperty p_lineWidth;                      ///< Line Width when rendering lines
+        FloatProperty p_transparency;                   ///< Minimum transparency of the rendered image
 
     protected:
         /// \see AbstractProcessor::updateResult

@@ -22,7 +22,9 @@
 // 
 // ================================================================================================
 
-in vec3 ex_TexCoord;
+in vec3 geom_TexCoord;
+noperspective in vec3 geom_EdgeDistance;
+
 out vec4 out_Color;
 
 #include "tools/texture3d.frag"
@@ -44,6 +46,9 @@ uniform TFParameters1D _transferFunctionParams1;
 uniform TFParameters1D _transferFunctionParams2;
 uniform TFParameters1D _transferFunctionParams3;
 
+uniform vec4 _wireframeColor;
+uniform float _lineWidth = 1.0;
+uniform float _transparency;
 
 vec4 lookupTexture(vec3 worldPosition, sampler3D volume, TextureParameters3D volumeParams, sampler1D tf, TFParameters1D tfParams) {
     vec3 texCoord = worldToTexture(volumeParams, worldPosition).xyz;
@@ -55,13 +60,25 @@ vec4 lookupTexture(vec3 worldPosition, sampler3D volume, TextureParameters3D vol
 }
 
 void main() {
-    vec4 color1 = lookupTexture(ex_TexCoord, _volume1, _volumeParams1, _transferFunction1, _transferFunctionParams1);
-    vec4 color2 = lookupTexture(ex_TexCoord, _volume2, _volumeParams2, _transferFunction2, _transferFunctionParams2);
-    vec4 color3 = lookupTexture(ex_TexCoord, _volume3, _volumeParams3, _transferFunction3, _transferFunctionParams3);
+    vec4 color1 = lookupTexture(geom_TexCoord, _volume1, _volumeParams1, _transferFunction1, _transferFunctionParams1);
+    vec4 color2 = lookupTexture(geom_TexCoord, _volume2, _volumeParams2, _transferFunction2, _transferFunctionParams2);
+    vec4 color3 = lookupTexture(geom_TexCoord, _volume3, _volumeParams3, _transferFunction3, _transferFunctionParams3);
 
     out_Color = color1 + color2 + color3;
     if (out_Color.w > 1.0)
         out_Color /= out_Color.w;
 
-    out_Color = vec4(mix(out_Color.rgb, vec3(0.0, 0.0, 0.0), out_Color.a), 1.0);
+    //out_Color = vec4(mix(out_Color.rgb, vec3(0.0, 0.0, 0.0), out_Color.a), 1.0);
+    out_Color = vec4(mix(out_Color.rgb, vec3(0.0, 0.0, 0.0), out_Color.a), max(out_Color.a, 1.0 - _transparency));
+
+#ifdef WIREFRAME_RENDERING
+    // Find the smallest distance to the edges
+    float d = min(geom_EdgeDistance.x, min(geom_EdgeDistance.y, geom_EdgeDistance.z)) * 2.0;
+
+    // perform anti-aliasing
+    float mixVal = smoothstep(_lineWidth - 1.0, _lineWidth + 1.0, d);
+
+    // Mix the surface color with the line color
+    out_Color = mix(vec4(1.0), out_Color, mixVal);
+#endif
 }

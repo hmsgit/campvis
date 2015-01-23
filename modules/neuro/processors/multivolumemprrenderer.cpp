@@ -61,6 +61,9 @@ namespace neuro {
         , p_planeSize("PlaneSize", "Clipping Plane Size", 100.f, 0.f, 1000.f, 1.f, 1)
         , p_use2DProjection("Use3dRendering", "Use 3D Rendering instead of 2D", true)
         , p_relativeToImageCenter("RelativeToImageCenter", "Construct Plane Relative to Image Center", true)
+        , p_showWireframe("ShowWireframe", "Show Wireframe", true)
+        , p_lineWidth("LineWidth", "Line Width", 1.f, .1f, 10.f)
+        , p_transparency("Transparency", "Minimum Transparency", 0.5f, 0.f, 1.f)
         , _shader(nullptr)
     {
         addProperty(p_sourceImage1, INVALID_PROPERTIES | INVALID_RESULT);
@@ -78,6 +81,10 @@ namespace neuro {
         addProperty(p_planeSize);
         addProperty(p_use2DProjection, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_relativeToImageCenter);
+
+        addProperty(p_showWireframe, INVALID_RESULT | INVALID_SHADER);
+        addProperty(p_lineWidth);
+        addProperty(p_transparency);
     }
 
     MultiVolumeMprRenderer::~MultiVolumeMprRenderer() {
@@ -87,7 +94,7 @@ namespace neuro {
     void MultiVolumeMprRenderer::init() {
         VisualizationProcessor::init();
 
-        _shader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/neuro/glsl/multivolumemprrenderer.frag", generateHeader(), "400");
+        _shader = ShdrMgr.load("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.geom", "modules/neuro/glsl/multivolumemprrenderer.frag", generateHeader());
         if (_shader != nullptr) {
             _shader->setAttributeLocation(0, "in_Position");
             _shader->setAttributeLocation(1, "in_TexCoord");
@@ -143,7 +150,13 @@ namespace neuro {
                 // perform the rendering
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
-                cgt::Shader::IgnoreUniformLocationErrorGuard guard(_shader);
+                _shader->setUniform("_lineWidth", p_lineWidth.getValue());
+                _shader->setUniform("_transparency", p_transparency.getValue());
+
+                // calculate viewport matrix for NDC -> viewport conversion
+                cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
+                cgt::mat4 viewportMatrix = cgt::mat4::createTranslation(cgt::vec3(halfViewport, 0.f)) * cgt::mat4::createScale(cgt::vec3(halfViewport, 1.f));
+                _shader->setUniform("_viewportMatrix", viewportMatrix);
 
                 if (p_use2DProjection.getValue()) {
                     // generate a camera position that simulates 2D rendering
@@ -193,7 +206,12 @@ namespace neuro {
     }
 
     std::string MultiVolumeMprRenderer::generateHeader() const {
-        return "";
+        std::string toReturn = "#define HAS_GEOMETRY_SHADER\n";
+
+        if (p_showWireframe.getValue())
+            toReturn += "#define WIREFRAME_RENDERING\n";
+
+        return toReturn;
     }
 
     void MultiVolumeMprRenderer::updateProperties(DataContainer& dataContainer) {
