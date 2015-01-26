@@ -60,8 +60,9 @@ namespace campvis {
         , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001, 10)
         , p_alpha("Alpha", "Alpha", 2.0f, 0.0f, 10.0f)
         , p_gamma("Gamma", "Gamma", 0.03f, 0.0f, 0.4f, 0.001, 4)
-        , p_fanHalfAngle("FanHalfAngle", "Fan Half Angle", 37.0f, 1.0f, 90.0f)
+        , p_fanHalfAngle("FanHalfAngle", "Fan Half Angle", 28.0f, 1.0f, 90.0f)
         , p_fanInnerRadius("FanInnerRadius", "Fan Inner Radius", 0.222f, 0.001f, 0.999f)
+        , p_useSpacingEncodedFanGeometry("UseSpacingEncodedFanGeomtry", "Use spacing encoded fan geometry", true)
         , p_recordingDirectory("RecordingDirectory", "Recording output direcotry", "D:\\us_acquisitions\\")
         , p_enableRecording("EnableRecording", "Enable recording", false)
         , _recordedFrames(0)
@@ -187,6 +188,17 @@ namespace campvis {
             _usMapsSolver.p_millisecondBudget.setValue(millisecondBudget);
             executeProcessorAndCheckOpenGLState(&_usMapsSolver);
             auto solverEndTime = tbb::tick_count::now();
+
+            // Read fan geomtry from encoded image...
+            if (p_useSpacingEncodedFanGeometry.getValue()) {
+                ImageRepresentationGL::ScopedRepresentation img(*_data, _usCropFilter.p_inputImage.getValue());
+                auto image = reinterpret_cast<const ImageData*>(_data->getData(_usCropFilter.p_inputImage.getValue()).getData());
+                if (image != nullptr) {
+                    cgt::vec3 encodedData = image->getMappingInformation().getVoxelSize();
+                    p_fanHalfAngle.setValue(encodedData.x / 2.0f);
+                    p_fanInnerRadius.setValue(encodedData.y);
+                }
+            }
 
             executeProcessorAndCheckOpenGLState(&_usFusion);
             executeProcessorAndCheckOpenGLState(&_usFanRenderer);

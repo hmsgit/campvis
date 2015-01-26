@@ -97,6 +97,7 @@ namespace campvis {
         FloatProperty  p_gamma;
         FloatProperty  p_fanHalfAngle;
         FloatProperty  p_fanInnerRadius;
+        BoolProperty   p_useSpacingEncodedFanGeometry; // Fan geometry is transmitted to campvis encoded in the x and y component of the voxel size (FOV in deg, innerRadius)
         StringProperty p_recordingDirectory;
         BoolProperty   p_enableRecording;
 

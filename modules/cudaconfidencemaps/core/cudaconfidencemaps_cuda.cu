@@ -2,7 +2,12 @@
 #include "cudautils.h"
 #include "cuspmonitors.h"
 
+#ifndef GIT_CUSP_VERSION
 #include <cusp/blas.h>
+#else
+#include <algorithm>
+#include <cusp/blas/blas.h>
+#endif
 #include <cusp/dia_matrix.h>
 #include <cusp/krylov/cg.h>
 #include <cusp/precond/diagonal.h>

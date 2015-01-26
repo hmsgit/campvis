@@ -13,10 +13,17 @@ namespace cuda {
      * norm when the iteration count is reached.
      */
     template <typename ValueType>
+#ifndef GIT_CUSP_VERSION
     class iteration_monitor : public cusp::default_monitor<ValueType>
     {
         typedef typename cusp::norm_type<ValueType>::type Real;
         typedef cusp::default_monitor<ValueType> super;
+#else
+    class iteration_monitor : public cusp::monitor<ValueType>
+    {
+        typedef typename cusp::detail::norm_type<ValueType>::type Real;
+        typedef cusp::monitor<ValueType> super;
+#endif
 
     public:
         template <typename Vector>
@@ -42,10 +49,17 @@ namespace cuda {
      * This monitor allows to set a deadline, after which the computation has to stop.
      */
     template <typename ValueType>
+#ifndef GIT_CUSP_VERSION
     class deadline_monitor : public cusp::default_monitor<ValueType>
     {
         typedef typename cusp::norm_type<ValueType>::type Real;
         typedef cusp::default_monitor<ValueType> super;
+#else
+    class deadline_monitor : public cusp::monitor<ValueType>
+    {
+        typedef typename cusp::detail::norm_type<ValueType>::type Real;
+        typedef cusp::monitor<ValueType> super;
+#endif
 
     public:
         template <typename Vector>
@@ -54,18 +68,24 @@ namespace cuda {
         { }
 
         template <typename Vector>
-        bool finished(const Vector& r)
-        {
+        bool finished(const Vector& r) {
             // Only if the deadline is reached, stop and compute the error
             if ((tbb::tick_count::now() - _startTime).seconds() > _seconds) {
-                super::r_norm = cusp::blas::nrm2(r);
+                r_norm = cusp::blas::nrm2(r);
                 return true;
             }
 
             return false;
         }
 
+        Real residual_norm(void) const {
+            return r_norm;
+        }
+
+
     private:
+        Real r_norm;
+
         tbb::tick_count _startTime;
         float _seconds;
     };
