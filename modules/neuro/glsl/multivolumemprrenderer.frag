@@ -26,6 +26,7 @@ in vec3 geom_TexCoord;
 noperspective in vec3 geom_EdgeDistance;
 
 out vec4 out_Color;
+out vec4 out_Picking;
 
 #include "tools/texture3d.frag"
 #include "tools/transferfunction.frag"
@@ -65,11 +66,15 @@ void main() {
     vec4 color3 = lookupTexture(geom_TexCoord, _volume3, _volumeParams3, _transferFunction3, _transferFunctionParams3);
 
     out_Color = color1 + color2 + color3;
-    if (out_Color.w > 1.0)
-        out_Color /= out_Color.w;
+    if (out_Color.a > 1.0)
+        out_Color /= out_Color.a;
 
-    //out_Color = vec4(mix(out_Color.rgb, vec3(0.0, 0.0, 0.0), out_Color.a), 1.0);
-    out_Color = vec4(mix(out_Color.rgb, vec3(0.0, 0.0, 0.0), out_Color.a), max(out_Color.a, 1.0 - _transparency));
+    float maxElem = max(out_Color.x, max(out_Color.y, out_Color.z));
+    if (maxElem > 1.0)
+        out_Color.xyz /= maxElem;
+
+    float alpha = max(out_Color.a, 1.0 - _transparency);
+    out_Color = vec4(mix(vec3(0.0, 0.0, 0.0), out_Color.rgb, alpha), alpha);
 
 #ifdef WIREFRAME_RENDERING
     // Find the smallest distance to the edges
@@ -81,4 +86,7 @@ void main() {
     // Mix the surface color with the line color
     out_Color = mix(vec4(1.0), out_Color, mixVal);
 #endif
+
+    // write world position to picking target
+    out_Picking = vec4(geom_TexCoord, 1.0);
 }

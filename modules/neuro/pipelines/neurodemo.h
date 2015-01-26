@@ -25,7 +25,9 @@
 #ifndef NEURODEMO_H__
 #define NEURODEMO_H__
 
+#include "core/eventhandlers/mwheeltonumericpropertyeventlistener.h"
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/pipeline/viewportsplitter.h"
 
 #include "modules/modulesapi.h"
 #include "modules/pipelinefactory.h"
@@ -52,17 +54,23 @@ namespace campvis {
 
         /// \see AutoEvaluationPipeline::init()
         virtual void init();
+        virtual void deinit();
 
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
         /// \see AbstractPipeline::getId()
         static const std::string getId() { return "NeuroDemo"; };
 
+        /// \see AbstractPipeline::executePipeline()
+        virtual void executePipeline();
+
     protected:
         void onReaderValidated(AbstractProcessor* p);
 
 
-        void onEvent(cgt::Event* e);
+        void onSplitterEvent(size_t index, cgt::Event* e);
+
+        void addBasePoint(bool clear, const cgt::vec3& position);
 
         LightSourceProvider _lsp;
         TrackballCameraProvider _tcp;
@@ -70,10 +78,16 @@ namespace campvis {
         GenericImageReader _t1Reader;
         GenericImageReader _petReader;
 
-        neuro::MultiVolumeMprRenderer _mvmpr;
+        neuro::MultiVolumeMprRenderer _mvmpr2D;
+        neuro::MultiVolumeMprRenderer _mvmpr3D;
         neuro::MultiVolumeRaycaster _mvr;
 
         RenderTargetCompositor _rtc;
+
+        ViewportSplitter _horizontalSplitter;
+
+        MWheelToNumericPropertyEventListener _slicePositionEventHandler;
+
     private:
         std::vector<cgt::vec3> _mprBasePoints;
     };

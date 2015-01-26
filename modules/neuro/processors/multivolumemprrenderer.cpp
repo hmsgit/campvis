@@ -57,7 +57,7 @@ namespace neuro {
         , p_transferFunction2("TransferFunction2", "Transfer Function for Second image", new SimpleTransferFunction(256))
         , p_transferFunction3("TransferFunction3", "Transfer Function for Third image", new SimpleTransferFunction(256))
         , p_planeNormal("PlaneNormal", "Clipping Plane Normal", cgt::vec3(0.f, 0.f, 1.f), cgt::vec3(-1.f), cgt::vec3(1.f), cgt::vec3(.1f), cgt::ivec3(2))
-        , p_planeDistance("PlaneDistance", "Clipping Plane Distance", 0.f, -1000.f, 1000.f, 1.f, 1)
+        , p_planeDistance("PlaneDistance", "Clipping Plane Distance", 0.f, -1000.f, 1000.f, .5f, 1)
         , p_planeSize("PlaneSize", "Clipping Plane Size", 100.f, 0.f, 1000.f, 1.f, 1)
         , p_use2DProjection("Use3dRendering", "Use 3D Rendering instead of 2D", true)
         , p_relativeToImageCenter("RelativeToImageCenter", "Construct Plane Relative to Image Center", true)
@@ -150,8 +150,10 @@ namespace neuro {
                 // perform the rendering
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
-                _shader->setUniform("_lineWidth", p_lineWidth.getValue());
-                _shader->setUniform("_transparency", p_transparency.getValue());
+                if (p_showWireframe.getValue()) {
+                    _shader->setUniform("_lineWidth", p_lineWidth.getValue());
+                    _shader->setUniform("_transparency", p_transparency.getValue());
+                }
 
                 // calculate viewport matrix for NDC -> viewport conversion
                 cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
@@ -187,12 +189,17 @@ namespace neuro {
                 p_transferFunction3.getTF()->bind(_shader, tf3Unit, "_transferFunction3", "_transferFunctionParams3");
 
                 FramebufferActivationGuard fag(this);
-                createAndAttachColorTexture();
+                createAndAttachTexture(GL_RGBA8);
+                createAndAttachTexture(GL_RGBA32F);
                 createAndAttachDepthTexture();
+
+                static const GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+                glDrawBuffers(2, buffers);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 slice.render(GL_TRIANGLE_FAN);
 
+                glDrawBuffers(1, buffers);
                 _shader->deactivate();
                 cgt::TextureUnit::setZeroUnit();
                 glDisable(GL_DEPTH_TEST);
