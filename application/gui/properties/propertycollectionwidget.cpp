@@ -70,7 +70,7 @@ namespace campvis {
         _layout->setSpacing(8);
         _layout->setMargin(0);
         setLayout(_layout);
-        connect(this, SIGNAL(s_propertyVisibilityChanged(const AbstractProperty*)), this, SLOT(onWidgetVisibilityChanged(const AbstractProperty*)), Qt::QueuedConnection);
+        connect(this, SIGNAL(s_propertyVisibilityChanged(const AbstractProperty*)), this, SLOT(onWidgetVisibilityChanged(const AbstractProperty*)));
         connect(this, SIGNAL(propertyAdded(AbstractProperty*)), this, SLOT(addProperty(AbstractProperty*)));
         connect(this, SIGNAL(propertyRemoved(AbstractProperty*, QWidget*)), this, SLOT(removeProperty(AbstractProperty*, QWidget*)));
     }
