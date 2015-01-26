@@ -71,21 +71,6 @@ namespace campvis {
          * \param   callee  Factory method to call to create an instance of type T
          * \return  The registration index.
          */
-        //template<typename T>
-        //size_t registerProcessor(std::function<AbstractProcessor*()> callee) {
-        //    tbb::spin_mutex::scoped_lock lock(_mutex);
-
-        //    auto it = _processorMap.lower_bound(T::getId());
-        //    if (it == _processorMap.end() || it->first != T::getId()) {
-        //        _processorMap.insert(it, std::make_pair(T::getId(), callee));
-        //    }
-        //    else {
-        //        cgtAssert(false, "Registered two processors with the same ID.");
-        //    }
-
-        //    return _processorMap.size();
-        //}
-
         template<typename T>
         size_t registerProcessor(std::function<AbstractProcessor*(IVec2Property*)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
