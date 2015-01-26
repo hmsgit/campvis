@@ -33,6 +33,7 @@
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
+#include "../../processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -70,9 +71,13 @@ namespace campvis {
 
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "VolumeRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "VolumeRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Combines proxy geometry generator, entry/exit point generator and raycasting into one easy-to-use volume renderer."; };
         /// \see AbstractProcessor::getAuthor()
@@ -125,6 +130,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class ProcessorRegistrar<VolumeRenderer>;
 }
 
 #endif // VOLUMERENDERER_H__

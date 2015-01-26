@@ -37,35 +37,11 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include "core/properties/numericproperty.h"
 
 namespace campvis {
     class AbstractProcessor;
     class DataContainer;
-
-    //template<typename... Args>
-    class VArgs {
-    private:
-    public:
-        //std::string _processorName; 
-        
-        //Args*... type;
-        //void *func;
-        AbstractProcessor*(*_createFunction)(...);
-
-        template<typename... Args>
-        VArgs(std::function<AbstractProcessor*(Args...)> *_createFunction) {
-            //this->_processorName = _processorName;
-            this->_createFunction = _createFunction;
-        }
-        //template<typename... Args>
-        //VArgs(std::function < AbstractProcessor*(Args*...)> *create) {
-        //	this->create = create;
-        //}
-
-        //template<typename... Args>
-        //std::function < AbstractProcessor*(Args*...)> *create;
-        //std::map< std::string, std::function < AbstractProcessor*(Args...)>> _processorMap;
-    };
 
     /**
      * Factory for creating processors by their name.
@@ -85,11 +61,9 @@ namespace campvis {
     
         static void deinit();
         
-        template<typename... Args>
         std::vector<std::string> getRegisteredProcessors() const;
 
-        template<typename... Args>
-        AbstractProcessor* createProcessor(const std::string& id, Args... args) const;
+        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp) const;
 
         /**
          * Statically registers the processor of type T using \a callee as factory method.
@@ -97,18 +71,33 @@ namespace campvis {
          * \param   callee  Factory method to call to create an instance of type T
          * \return  The registration index.
          */
-        template<typename T, typename... Args>
-        size_t registerProcessor(AbstractProcessor*(callee)(Args...)) {
+        //template<typename T>
+        //size_t registerProcessor(std::function<AbstractProcessor*()> callee) {
+        //    tbb::spin_mutex::scoped_lock lock(_mutex);
+
+        //    auto it = _processorMap.lower_bound(T::getId());
+        //    if (it == _processorMap.end() || it->first != T::getId()) {
+        //        _processorMap.insert(it, std::make_pair(T::getId(), callee));
+        //    }
+        //    else {
+        //        cgtAssert(false, "Registered two processors with the same ID.");
+        //    }
+
+        //    return _processorMap.size();
+        //}
+
+        template<typename T>
+        size_t registerProcessor(std::function<AbstractProcessor*(IVec2Property*)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
             auto it = _processorMap.lower_bound(T::getId());
             if (it == _processorMap.end() || it->first != T::getId()) {
-                _processorMap.insert(it, std::make_pair(T::getId(), VArgs(callee)));
+                _processorMap.insert(it, std::make_pair(T::getId(), callee));
             }
             else {
                 cgtAssert(false, "Registered two processors with the same ID.");
             }
-            
+
             return _processorMap.size();
         }
         
@@ -116,7 +105,7 @@ namespace campvis {
         mutable tbb::spin_mutex _mutex;
         static tbb::atomic<ProcessorFactory*> _singleton;    ///< the singleton object
 
-        std::map< std::string, VArgs> _processorMap;
+        std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)>> _processorMap;
 
 
     };
@@ -124,7 +113,7 @@ namespace campvis {
 
 // ================================================================================================
 
-    template<typename T, typename... Args>
+    template<typename T>
     class ProcessorRegistrar {
     public:
         /**
@@ -132,9 +121,13 @@ namespace campvis {
          * \param   args  DataContainer for the created processor to work on.
          * \return  A newly created processor of type T. Caller has to take ownership of the pointer.
          */
-        static AbstractProcessor* create(Args... args) {
-            size_t argc = sizeof...(args);
-            //return new T(args);
+        //static AbstractProcessor* create() {
+        //    return new T();
+        //}
+
+
+        static AbstractProcessor* create(IVec2Property* viewPortSizeProp) {
+            return new T(viewPortSizeProp);
         }
 
     private:
@@ -142,8 +135,8 @@ namespace campvis {
         static const size_t _factoryId;
     };
 
-    template<typename T, typename... Args>
-    const size_t ProcessorRegistrar<T, Args...>::_factoryId = ProcessorFactory::getRef().registerProcessor<T, Args...>(&ProcessorRegistrar<T, Args...>::create);
+    template<typename T>
+    const size_t ProcessorRegistrar<T>::_factoryId = ProcessorFactory::getRef().registerProcessor<T>(&ProcessorRegistrar<T>::create);
 
 }
 

@@ -49,7 +49,6 @@ namespace campvis {
         _singleton = nullptr;
     }
 
-    template<typename... Args>
     std::vector<std::string> ProcessorFactory::getRegisteredProcessors() const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
 
@@ -60,15 +59,14 @@ namespace campvis {
         return toReturn;
     }
 
-    template<typename... Args>
-    AbstractProcessor* ProcessorFactory::createProcessor(const std::string& id, Args... args) const {
+    AbstractProcessor* ProcessorFactory::createProcessor(const std::string& id, IVec2Property* viewPortSizeProp) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
 
         auto it = _processorMap.find(id);
         if (it == _processorMap.end())
             return nullptr;
         else
-            return (it->second)._createFunction(args);
+            return (it->second)(viewPortSizeProp);
     }
 
 }
