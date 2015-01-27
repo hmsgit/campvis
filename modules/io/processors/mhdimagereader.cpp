@@ -58,9 +58,16 @@ namespace campvis {
 
     void MhdImageReader::updateResult(DataContainer& data) {
         try {
+            std::ifstream file(p_url.getValue(), std::ios::in);
+            if (! file.good())
+                throw cgt::FileException("Could not open file.", p_url.getValue());
+
             // start parsing
-            TextFileParser tfp(p_url.getValue(), true, "=");
+            TextFileParser tfp(file, true, "=");
             tfp.parse<TextFileParser::ItemSeparatorLines>();
+            file.close();
+
+            const TextFileParser::TokenGroup* rootNode = tfp.getRootGroup();
 
             // init optional parameters with sane default values
             std::string url;
@@ -75,11 +82,11 @@ namespace campvis {
             cgt::vec3 imageOffset(0.f);
 
             // image type
-            if (tfp.hasKey("ObjectType")) {
-                if (tfp.getString("ObjectType") == "Image") {
+            if (rootNode->hasKey("ObjectType")) {
+                if (rootNode->getString("ObjectType") == "Image") {
                     numChannels = 1;
                 }
-                else if (tfp.getString("ObjectType") == "TensorImage") {
+                else if (rootNode->getString("ObjectType") == "TensorImage") {
                     numChannels = 6;
                 }
                 else {
@@ -92,18 +99,18 @@ namespace campvis {
             }
 
             // dimensionality and size
-            dimensionality = tfp.getSizeT("NDims");
+            dimensionality = rootNode->getSizeT("NDims");
             if (dimensionality == 2)
-                size = cgt::svec3(tfp.getSvec2("DimSize"), 1);
+                size = cgt::svec3(rootNode->getSvec2("DimSize"), 1);
             else if (dimensionality == 3)
-                size = tfp.getSvec3("DimSize");
+                size = rootNode->getSvec3("DimSize");
             else {
                 LERROR("Error while parsing MHD header: Unsupported dimensionality: " << dimensionality);
                 return;
             }
 
             // element type
-            std::string et = tfp.getString("ElementType");
+            std::string et = rootNode->getString("ElementType");
             if (et == "MET_UCHAR")
                 pt = WeaklyTypedPointer::UINT8;
             else if (et == "MET_CHAR")
@@ -124,45 +131,45 @@ namespace campvis {
             }
 
             // further optional parameters:
-            if (tfp.hasKey("HeaderSize")) {
+            if (rootNode->hasKey("HeaderSize")) {
                 // header size can be -1...
-                int tmp = tfp.getInt("HeaderSize");
+                int tmp = rootNode->getInt("HeaderSize");
                 if (tmp >= 0)
                     offset = static_cast<int>(tmp);
             }
-            if (tfp.hasKey("ElementByteOrderMSB"))
-                e = (tfp.getBool("ElementByteOrderMSB") ? EndianHelper::IS_BIG_ENDIAN : EndianHelper::IS_LITTLE_ENDIAN);
+            if (rootNode->hasKey("ElementByteOrderMSB"))
+                e = (rootNode->getBool("ElementByteOrderMSB") ? EndianHelper::IS_BIG_ENDIAN : EndianHelper::IS_LITTLE_ENDIAN);
             
-            if (tfp.hasKey("ElementSpacing")) {
+            if (rootNode->hasKey("ElementSpacing")) {
                 if (dimensionality == 3)
-                    voxelSize = tfp.getVec3("ElementSpacing");
+                    voxelSize = rootNode->getVec3("ElementSpacing");
                 else if (dimensionality == 2)
-                    voxelSize = cgt::vec3(tfp.getVec2("ElementSpacing"), 1.f);
+                    voxelSize = cgt::vec3(rootNode->getVec2("ElementSpacing"), 1.f);
             }
-            if (tfp.hasKey("Position")) {
+            if (rootNode->hasKey("Position")) {
                 if (dimensionality == 3)
-                    imageOffset = tfp.getVec3("Position");
+                    imageOffset = rootNode->getVec3("Position");
                 else if (dimensionality == 2)
-                    imageOffset = cgt::vec3(tfp.getVec2("Position"), 0.f);
+                    imageOffset = cgt::vec3(rootNode->getVec2("Position"), 0.f);
             }
-            if (tfp.hasKey("Offset")) {
+            if (rootNode->hasKey("Offset")) {
                 if (dimensionality == 3)
-                    imageOffset = tfp.getVec3("Offset");
+                    imageOffset = rootNode->getVec3("Offset");
                 else if (dimensionality == 2)
-                    imageOffset = cgt::vec3(tfp.getVec2("Offset"), 0.f);
+                    imageOffset = cgt::vec3(rootNode->getVec2("Offset"), 0.f);
             }
-            if (tfp.hasKey("VolumePosition")) {
+            if (rootNode->hasKey("VolumePosition")) {
                 if (dimensionality == 3)
-                    imageOffset = tfp.getVec3("VolumePosition");
+                    imageOffset = rootNode->getVec3("VolumePosition");
                 else if (dimensionality == 2)
-                    imageOffset = cgt::vec3(tfp.getVec2("VolumePosition"), 0.f);
+                    imageOffset = cgt::vec3(rootNode->getVec2("VolumePosition"), 0.f);
             }
-            if (tfp.hasKey("ElementNumberOfChannels")) {
-                numChannels = tfp.getSizeT("ElementNumberOfChannels");
+            if (rootNode->hasKey("ElementNumberOfChannels")) {
+                numChannels = rootNode->getSizeT("ElementNumberOfChannels");
             }
 
             // get raw image location:
-            url = StringUtils::trim(tfp.getString("ElementDataFile"));
+            url = StringUtils::trim(rootNode->getString("ElementDataFile"));
             if (url == "LOCAL") {
                 url = p_url.getValue();
                 // find beginning of local data:
