@@ -219,7 +219,7 @@ namespace campvis {
                 groupHierarchy.pop();
             }
             else {
-                std::vector<std::string> tokens = StringUtils::split(currentLine, delimiters);
+                std::vector<std::string> tokens = StringUtils::splitStringsafe(currentLine, delimiters, '"');
                 if (tokens.size() == 2) {
                     if (caseSensitiveKeys)
                         groupHierarchy.top()->_tokens.insert(std::make_pair(StringUtils::trim(tokens[0], whitespace), StringUtils::trim(tokens[1], whitespace)));

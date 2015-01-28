@@ -114,7 +114,7 @@ namespace campvis {
                 }
 
                 // push string in quotes onto toReturn
-                toReturn.push_back(toPush);
+                toReturn.push_back(StringUtils::trim(toPush, whitespace));
                 // use the following if whitespace trimming is necessary in between <quote>s
                 //toReturn.push_back(StringUtils::trim(toPush, whitespace));
 
@@ -126,7 +126,7 @@ namespace campvis {
                 endpos = str.find_first_of(delimiter, strpos);
                 toReturn.push_back(StringUtils::trim(str.substr(strpos, endpos - strpos), whitespace));
             }
-            strpos = endpos + delimiter.length() - 1;
+            strpos = endpos + 1;
         }
         return toReturn;
     }

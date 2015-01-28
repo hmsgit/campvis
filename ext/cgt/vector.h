@@ -817,7 +817,7 @@ template<class T> inline T max(const CGT_BASE_TYPE<T>& v) { \
 template<class T> inline T minElem(const CGT_BASE_TYPE<T>& v) { \
     size_t minElem = 0; \
     for (size_t i = 1; i < v.size; ++i) \
-        if(v.elem[i] > v.elem[minElem]) \
+        if(v.elem[i] < v.elem[minElem]) \
             minElem = i; \
     return v.elem[minElem]; \
 }

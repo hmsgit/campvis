@@ -137,7 +137,7 @@ namespace campvis {
                     if (_splitMode == HORIZONTAL)
                         _copyShader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(float(i) * evps.x, 0.f, 0.f)));
                     else if (_splitMode == VERTICAL)
-                        _copyShader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, float(i) * evps.y, 0.f)));
+                        _copyShader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, float(_numSubViews - i - 1) * evps.y, 0.f)));
 
                     _quad->render(GL_TRIANGLE_FAN);
                 }
