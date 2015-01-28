@@ -33,8 +33,12 @@
 
 #include "core/classification/simpletransferfunction.h"
 
+#include "../../raycasterfactory.h"
+
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
+
+    //static const std::string* raycastingProcessorName = &RaycasterFactory::getRef().getRegisteredRaycasters()[0];
 
     VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
@@ -71,6 +75,15 @@ namespace campvis {
         _eepGenerator.p_entryImageID.setVisible(false);
         _eepGenerator.p_exitImageID.setVisible(false);
         addProperty(p_eepProps, AbstractProcessor::VALID);
+
+        const std::vector<std::string>& raycasters = RaycasterFactory::getRef().getRegisteredRaycasters();
+        for (int i = 0; i < raycasters.size(); i++) {
+            p_raycastingProcSelector.addOption(GenericOption<std::string>(raycasters[i], raycasters[i]));
+        }
+        if (_raycaster != nullptr) {
+            p_raycastingProcSelector.selectByOption(_raycaster->getName());
+        }
+        addProperty(p_raycastingProcSelector);
 
         p_raycasterProps.addPropertyCollection(*_raycaster);
         _raycaster->p_lqMode.setVisible(false);
@@ -189,6 +202,37 @@ namespace campvis {
             _raycaster->p_targetImageID.setValue(p_outputImage.getValue() + ".raycasted");
             _orientationOverlay.p_passThroughImageId.setValue(p_outputImage.getValue() + ".raycasted");
         }
+        if (prop == &p_raycastingProcSelector) {
+            // Change to previous raycaster if "Select Processor" is selected
+            if (p_raycastingProcSelector.getOptionId() == p_raycastingProcSelector.getOptions()[0]._id) {
+                p_raycastingProcSelector.selectById(_raycaster->getName());
+                return;
+            }
+            if (p_raycastingProcSelector.getOptionId() == _raycaster->getName()) {
+                return;
+            }
+
+            RaycastingProcessor *currentRaycaster = _raycaster;
+            removeProperty(p_raycasterProps);
+            //p_raycasterProps.deinitAllProperties();
+            p_raycasterProps.clearProperties();
+
+            _raycaster = RaycasterFactory::getRef().createRaycaster(p_raycastingProcSelector.getOptionId(), p_viewportSizeProp);
+
+            p_raycasterProps.addPropertyCollection(*_raycaster);
+            //_raycaster->p_lqMode.setVisible(false);
+            //_raycaster->p_camera.setVisible(false);
+            //_raycaster->p_sourceImageID.setVisible(false);
+            //_raycaster->p_entryImageID.setVisible(false);
+            //_raycaster->p_exitImageID.setVisible(false);
+            //_raycaster->p_targetImageID.setVisible(false);
+
+            addProperty(p_raycasterProps, AbstractProcessor::VALID);
+
+            delete currentRaycaster;
+            invalidate(RAYCASTER_INVALID);
+        }
+
         VisualizationProcessor::onPropertyChanged(prop);
     }
 
