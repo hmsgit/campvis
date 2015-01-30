@@ -82,6 +82,18 @@ namespace fontrendering {
          */
         void renderText(const std::string& text, const cgt::vec2& position, const cgt::vec4& color, const cgt::mat4& transformationMatrix = cgt::mat4::identity);
 
+
+        /**
+         * Renders the given text with the given parameters into the current framebuffer.
+         * \param   text                    The text to render (currently only ASCII-256 support).
+         * \param   position                Position where to start rendering the text (in normalized [-1, 1] coordinates).
+         * \param   color                   Color of the text to render.
+         * \param   pickingInformation      Color to render into the picking info texture (second FBO color attachment).
+         * \param   transformationMatrix    Additional transformation matrix that is applied to each rendered vertex.
+         */
+        void renderTextWithPickingInformation(const std::string& text, const cgt::vec2& position, const cgt::vec4& color, const cgt::vec4& pickingInfo, const cgt::mat4& transformationMatrix = cgt::mat4::identity);
+
+
     private:
         /// Struct storing glyph parameters of each printable ASCII character
         struct {

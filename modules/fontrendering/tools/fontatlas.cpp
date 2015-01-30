@@ -196,5 +196,13 @@ namespace campvis {
             LGL_ERROR;
         }
 
+        void FontAtlas::renderTextWithPickingInformation(const std::string& text, const cgt::vec2& position, const cgt::vec4& color, const cgt::vec4& pickingInfo, const cgt::mat4& transformationMatrix /*= cgt::mat4::identity*/) {
+            _shader->activate();
+            _shader->setUniform("_pickingColor", pickingInfo);
+            _shader->deactivate();
+
+            renderText(text, position, color, transformationMatrix);
+        }
+
     }
 }
