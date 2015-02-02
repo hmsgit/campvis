@@ -34,6 +34,7 @@
 #include "core/classification/simpletransferfunction.h"
 
 #include "../../raycasterfactory.h"
+#include "cgt/opengljobprocessor.h"
 
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
@@ -203,22 +204,26 @@ namespace campvis {
             _orientationOverlay.p_passThroughImageId.setValue(p_outputImage.getValue() + ".raycasted");
         }
         if (prop == &p_raycastingProcSelector) {
+            RaycastingProcessor *currentRaycaster = _raycaster;
             // Change to previous raycaster if "Select Processor" is selected
             if (p_raycastingProcSelector.getOptionId() == p_raycastingProcSelector.getOptions()[0]._id) {
-                p_raycastingProcSelector.selectById(_raycaster->getName());
+                p_raycastingProcSelector.selectById(currentRaycaster->getName());
                 return;
             }
-            if (p_raycastingProcSelector.getOptionId() == _raycaster->getName()) {
+            if (p_raycastingProcSelector.getOptionId() == currentRaycaster->getName()) {
                 return;
             }
 
-            RaycastingProcessor *currentRaycaster = _raycaster;
-            removeProperty(p_raycasterProps);
-            //p_raycasterProps.deinitAllProperties();
+            p_lqMode.removeSharedProperty(&currentRaycaster->p_lqMode);
+            p_inputVolume.removeSharedProperty(&currentRaycaster->p_sourceImageID);
+            p_camera.removeSharedProperty(&currentRaycaster->p_camera);
+            p_outputImage.removeSharedProperty(&currentRaycaster->p_targetImageID);
             p_raycasterProps.clearProperties();
-
+            p_raycasterProps.deinitAllProperties();
+            removeProperty(p_raycasterProps);
+            currentRaycaster->s_invalidated.disconnect(this);
+            
             _raycaster = RaycasterFactory::getRef().createRaycaster(p_raycastingProcSelector.getOptionId(), p_viewportSizeProp);
-
             p_raycasterProps.addPropertyCollection(*_raycaster);
             //_raycaster->p_lqMode.setVisible(false);
             //_raycaster->p_camera.setVisible(false);
@@ -226,9 +231,16 @@ namespace campvis {
             //_raycaster->p_entryImageID.setVisible(false);
             //_raycaster->p_exitImageID.setVisible(false);
             //_raycaster->p_targetImageID.setVisible(false);
-
             addProperty(p_raycasterProps, AbstractProcessor::VALID);
 
+            p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
+            p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
+            p_camera.addSharedProperty(&_raycaster->p_camera);
+            p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
+            _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+            
+            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+            currentRaycaster->deinit();
             delete currentRaycaster;
             invalidate(RAYCASTER_INVALID);
         }
