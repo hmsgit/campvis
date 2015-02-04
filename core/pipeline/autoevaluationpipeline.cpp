@@ -150,6 +150,10 @@ namespace campvis {
     void AutoEvaluationPipeline::findDataNamePropertiesAndAddToPortMap(const HasPropertyCollection* hpc) {
         const PropertyCollection& pc = hpc->getProperties();
 
+        // const_cast okay, since we're just connecting to signals
+        const_cast<HasPropertyCollection*>(hpc)->s_propertyAdded.connect(this, &AutoEvaluationPipeline::onPropertyCollectionPropertyAdded);
+        const_cast<HasPropertyCollection*>(hpc)->s_propertyRemoved.connect(this, &AutoEvaluationPipeline::onPropertyCollectionPropertyRemoved);
+
         // traverse property collection
         for (size_t i = 0; i < pc.size(); ++i) {
             if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(pc[i])) {
@@ -167,6 +171,58 @@ namespace campvis {
             else if (MetaProperty* mp = dynamic_cast<MetaProperty*>(pc[i])) {
                 // if MetaProperty, recursively check its PropertyCollection
                 findDataNamePropertiesAndAddToPortMap(mp);
+            }
+        }
+    }
+
+    void AutoEvaluationPipeline::onPropertyCollectionPropertyAdded(AbstractProperty* property) {
+        // check whether the incoming property is of the correct type (we only care about DataNameProperties)
+        if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(property)) {
+            // check whether this property is already present in the port map
+            IteratorMapType::iterator it = _iteratorMap.find(dnp);
+            if (it == _iteratorMap.end()) {
+
+                // add to port map and register to changed signal
+                if (dnp->getAccessInfo() == DataNameProperty::READ) {
+                    tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
+                    std::pair<PortMapType::iterator, bool> result = _portMap.insert(std::make_pair(dnp->getValue(), dnp));
+                    cgtAssert(result.second, "Could not insert Property into port map!");
+                    if (result.second) {
+                        _iteratorMap[dnp] = result.first;
+                        dnp->s_changed.connect(this, &AutoEvaluationPipeline::onDataNamePropertyChanged);
+                    }
+                }
+
+            }
+            else {
+                // this should not happen, otherwise we did something wrong before.
+                cgtAssert(false, "This property is already in iterator map!");
+            }
+        }
+
+    }
+
+    void AutoEvaluationPipeline::onPropertyCollectionPropertyRemoved(AbstractProperty* property) {
+        // check whether the incoming property is of the correct type (we only care about DataNameProperties)
+        if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(property)) {
+            // find string-iterator pair for the given property
+            IteratorMapType::iterator it = _iteratorMap.find(dnp);
+            if (it != _iteratorMap.end()) {
+                if (dnp->getAccessInfo() == DataNameProperty::READ) {
+                    // remove from port map and deregister from changed signal
+                    dnp->s_changed.disconnect(this);
+
+                    // acquire a write-lock since we erase the old value from our port map
+                    tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, true);
+
+                    // remove the property from the port map
+                    _portMap.unsafe_erase(it->second);
+                    _iteratorMap.unsafe_erase(it);
+                }
+            }
+            else {
+                // this should not happen, otherwise we did something wrong before.
+                cgtAssert(false, "Could not find Property in iterator map!");
             }
         }
     }

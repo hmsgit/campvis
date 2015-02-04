@@ -142,7 +142,7 @@ namespace campvis {
     void HasPropertyCollection::clearProperties() {
         for (auto it = _properties.begin(); it != _properties.end(); ++it) {
             (*it)->s_changed.disconnect(this);
-            s_propertyRemoved.emitSignal(*it);
+            s_propertyRemoved.triggerSignal(*it);
         }
 
         _properties.clear();
