@@ -9,12 +9,10 @@ LIST(APPEND CampvisModulesHeaders
     modulesapi.h
     gen_pipelineregistration.h
     pipelinefactory.h
-    processorfactory.h
 	raycasterfactory.h
 )
 LIST(APPEND CampvisModulesSources
     pipelinefactory.cpp
-    processorfactory.cpp
 	raycasterfactory.cpp
 )
 
