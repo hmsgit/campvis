@@ -178,12 +178,11 @@ namespace campvis {
     void AutoEvaluationPipeline::onPropertyCollectionPropertyAdded(AbstractProperty* property) {
         // check whether the incoming property is of the correct type (we only care about DataNameProperties)
         if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(property)) {
-            // check whether this property is already present in the port map
-            IteratorMapType::iterator it = _iteratorMap.find(dnp);
-            if (it == _iteratorMap.end()) {
-
-                // add to port map and register to changed signal
-                if (dnp->getAccessInfo() == DataNameProperty::READ) {
+            if (dnp->getAccessInfo() == DataNameProperty::READ) {
+                // check whether this property is already present in the port map
+                IteratorMapType::iterator it = _iteratorMap.find(dnp);
+                if (it == _iteratorMap.end()) {
+                    // add to port map and register to changed signal
                     tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
                     std::pair<PortMapType::iterator, bool> result = _portMap.insert(std::make_pair(dnp->getValue(), dnp));
                     cgtAssert(result.second, "Could not insert Property into port map!");
@@ -192,23 +191,21 @@ namespace campvis {
                         dnp->s_changed.connect(this, &AutoEvaluationPipeline::onDataNamePropertyChanged);
                     }
                 }
-
-            }
-            else {
-                // this should not happen, otherwise we did something wrong before.
-                cgtAssert(false, "This property is already in iterator map!");
+                else {
+                    // this should not happen, otherwise we did something wrong before.
+                    cgtAssert(false, "This property is already in iterator map!");
+                }
             }
         }
-
     }
 
     void AutoEvaluationPipeline::onPropertyCollectionPropertyRemoved(AbstractProperty* property) {
         // check whether the incoming property is of the correct type (we only care about DataNameProperties)
         if (DataNameProperty* dnp = dynamic_cast<DataNameProperty*>(property)) {
-            // find string-iterator pair for the given property
-            IteratorMapType::iterator it = _iteratorMap.find(dnp);
-            if (it != _iteratorMap.end()) {
-                if (dnp->getAccessInfo() == DataNameProperty::READ) {
+            if (dnp->getAccessInfo() == DataNameProperty::READ) {
+                // find string-iterator pair for the given property
+                IteratorMapType::iterator it = _iteratorMap.find(dnp);
+                if (it != _iteratorMap.end()) {
                     // remove from port map and deregister from changed signal
                     dnp->s_changed.disconnect(this);
 
@@ -219,10 +216,10 @@ namespace campvis {
                     _portMap.unsafe_erase(it->second);
                     _iteratorMap.unsafe_erase(it);
                 }
-            }
-            else {
-                // this should not happen, otherwise we did something wrong before.
-                cgtAssert(false, "Could not find Property in iterator map!");
+                else {
+                    // this should not happen, otherwise we did something wrong before.
+                    cgtAssert(false, "Could not find Property in iterator map!");
+                }
             }
         }
     }

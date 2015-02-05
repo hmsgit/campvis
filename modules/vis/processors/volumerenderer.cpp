@@ -109,6 +109,9 @@ namespace campvis {
         p_camera.addSharedProperty(&_orientationOverlay.p_camera);
 
         p_outputImage.addSharedProperty(&_orientationOverlay.p_targetImageId);
+
+
+        s_processorCanBeDeleted.connect(this, &VolumeRenderer::onProcessorCanBeDeleted);
     }
 
     VolumeRenderer::~VolumeRenderer() {
@@ -219,11 +222,11 @@ namespace campvis {
             p_camera.removeSharedProperty(&currentRaycaster->p_camera);
             p_outputImage.removeSharedProperty(&currentRaycaster->p_targetImageID);
             p_raycasterProps.clearProperties();
-            p_raycasterProps.deinitAllProperties();
-            removeProperty(p_raycasterProps);
+            //p_raycasterProps.deinitAllProperties();
+            //removeProperty(p_raycasterProps);
             currentRaycaster->s_invalidated.disconnect(this);
             
-            _raycaster = RaycasterFactory::getRef().createRaycaster(p_raycastingProcSelector.getOptionId(), p_viewportSizeProp);
+            _raycaster = RaycasterFactory::getRef().createRaycaster(p_raycastingProcSelector.getOptionId(), _viewportSizeProperty);
             p_raycasterProps.addPropertyCollection(*_raycaster);
             //_raycaster->p_lqMode.setVisible(false);
             //_raycaster->p_camera.setVisible(false);
@@ -231,7 +234,7 @@ namespace campvis {
             //_raycaster->p_entryImageID.setVisible(false);
             //_raycaster->p_exitImageID.setVisible(false);
             //_raycaster->p_targetImageID.setVisible(false);
-            addProperty(p_raycasterProps, AbstractProcessor::VALID);
+            //addProperty(p_raycasterProps, AbstractProcessor::VALID);
 
             p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
             p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
@@ -241,8 +244,12 @@ namespace campvis {
             
             cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
             currentRaycaster->deinit();
-            delete currentRaycaster;
+            _raycaster->init();
             invalidate(RAYCASTER_INVALID);
+
+            // queue the deletion of currentRaycaster as signal, to ensure that the deletion does
+            // not happen before all previously emitted signals have been handled.
+            s_processorCanBeDeleted.queueSignal(currentRaycaster);
         }
 
         VisualizationProcessor::onPropertyChanged(prop);
@@ -263,5 +270,10 @@ namespace campvis {
     RaycastingProcessor* VolumeRenderer::getRaycastingProcessor() {
         return _raycaster;
     }
+
+    void VolumeRenderer::onProcessorCanBeDeleted(AbstractProcessor* processor) {
+        delete processor;
+    }
+
 }
 
