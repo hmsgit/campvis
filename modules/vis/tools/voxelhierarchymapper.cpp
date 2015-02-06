@@ -88,7 +88,8 @@ namespace campvis {
         // since the texture is a 2D texture and the elements store the depth  will pack VOXEL_DEPTH number of values along the z axis into one block, the _dimBricks.z is 
         _dimBricks.z = 128;
 
-        _dimPackedBricks = _dimBricks;
+        _dimPackedBricks.x = std::max(_dimBricks.x, _dimBricks.y);
+        _dimPackedBricks.y = std::max(_dimBricks.x, _dimBricks.y);
         _dimPackedBricks.z = 1;
 
         _maxMipmapLevel = computeMaxLevel(_dimPackedBricks.x, _dimPackedBricks.y);
@@ -140,7 +141,7 @@ namespace campvis {
             _fbo->attachTexture(_hierarchyTexture, GL_COLOR_ATTACHMENT0, level+1, 0);
             _fbo->isComplete();
 
-            glViewport(0, 0, static_cast<GLsizei>(resX / 2.0), static_cast<GLsizei>(resY / 2.0));
+            glViewport(0, 0, std::max(1, static_cast<GLsizei>(resX / 2.0)), std::max(1, static_cast<GLsizei>(resY / 2.0)));
             _quad->render(GL_TRIANGLE_FAN);
         }
 
@@ -175,7 +176,7 @@ namespace campvis {
 
         int div = 2;
         for (GLuint level = 1; level <= _maxMipmapLevel; ++level) {
-            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA32UI, _hierarchyTexture->getWidth()/div, _hierarchyTexture->getHeight()/div, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA32UI, std::max(1, _hierarchyTexture->getWidth()/div), std::max(1, _hierarchyTexture->getHeight()/div), 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
             div = div << 1;
             LGL_ERROR;
         }

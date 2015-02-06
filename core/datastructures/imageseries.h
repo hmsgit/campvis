@@ -35,7 +35,7 @@ namespace campvis {
     /**
      * Class encapsulating a series of images.
      */
-    class CAMPVIS_CORE_API ImageSeries : public AbstractData {
+    class CAMPVIS_CORE_API ImageSeries : public AbstractData, public IHasWorldBounds {
     public:
         /**
          * Constructor
@@ -69,6 +69,12 @@ namespace campvis {
         /// \see AbstractData::getTypeAsString()
         virtual std::string getTypeAsString() const;
         
+        /**
+         * Returns the data extent in world coordinates.
+         * \return  The data extent in world coordinates.
+         */
+        virtual cgt::Bounds getWorldBounds() const;
+
         /**
          * Appends the image \a image to the series.
          * \param   image   Image to be added.

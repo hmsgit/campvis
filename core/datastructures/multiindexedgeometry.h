@@ -109,6 +109,14 @@ namespace campvis {
          * \param   mode    OpenGL rendering mode for this mesh
          */
         virtual void render(GLenum mode) const;
+        
+        /**
+         * Renders multiple instances of this GeometryData.
+         * Must be called from a valid OpenGL context.
+         * \param   count   Number of instances
+         * \param   mode    OpenGL rendering mode
+         */
+        virtual void renderInstanced(GLsizei count, GLenum mode = GL_TRIANGLE_FAN) const;
 
         /// \see GeometryData::getWorldBounds
         virtual cgt::Bounds getWorldBounds() const;
@@ -130,8 +138,6 @@ namespace campvis {
         void deleteIndicesBuffer() const;
 
         std::vector<uint16_t> _indices;                 ///< Index list defining the faces
-        std::vector<void*> _offsets;                    ///< Byte offsets for each primitive to render
-        std::vector<GLsizei> _counts;                   ///< Numer of vertices for each primitive to render
 
         std::vector<cgt::vec3> _vertices;               ///< The list of the vertex positions of the face.
         std::vector<cgt::vec3> _textureCoordinates;     ///< The list of vertex texture coordinates, may be empty.

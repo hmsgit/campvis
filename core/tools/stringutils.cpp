@@ -78,16 +78,24 @@ namespace campvis {
         return toReturn;
     }
 
-    std::vector<std::string> StringUtils::split(const std::string& line, const std::string& delimiter) {
+    std::vector<std::string> StringUtils::split(const std::string& line, const std::string& delimiter, bool delimiterIsSet /*= false*/) {
         std::vector<std::string> toReturn;
         std::string::size_type linepos = 0;
         std::string::size_type endpos = 0;
 
         // we are at the beginning of an entry, skip whitespaces and check if not already reached end of line
         while (endpos != std::string::npos) {
-            endpos = line.find_first_of(delimiter, linepos);
+            if (delimiterIsSet)
+                endpos = line.find_first_of(delimiter, linepos);
+            else
+                endpos = line.find(delimiter, linepos);
+                
             toReturn.push_back(line.substr(linepos, endpos - linepos));
-            linepos = endpos + delimiter.length();
+
+            if (delimiterIsSet)
+                linepos = endpos + 1;
+            else
+                linepos = endpos + delimiter.length();
         }
         return toReturn;
     }
@@ -114,7 +122,7 @@ namespace campvis {
                 }
 
                 // push string in quotes onto toReturn
-                toReturn.push_back(toPush);
+                toReturn.push_back(StringUtils::trim(toPush, whitespace));
                 // use the following if whitespace trimming is necessary in between <quote>s
                 //toReturn.push_back(StringUtils::trim(toPush, whitespace));
 
@@ -126,7 +134,7 @@ namespace campvis {
                 endpos = str.find_first_of(delimiter, strpos);
                 toReturn.push_back(StringUtils::trim(str.substr(strpos, endpos - strpos), whitespace));
             }
-            strpos = endpos + delimiter.length();
+            strpos = endpos + 1;
         }
         return toReturn;
     }

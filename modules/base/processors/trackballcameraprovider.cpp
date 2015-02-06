@@ -166,7 +166,7 @@ namespace campvis {
 
     void TrackballCameraProvider::updateProperties(DataContainer& data) {
         // convert data
-        ScopedTypedData<ImageData> img(data, p_image.getValue());
+        ScopedTypedData<IHasWorldBounds> img(data, p_image.getValue());
         if (img != 0) {
             reinitializeCamera(img->getWorldBounds());
         }

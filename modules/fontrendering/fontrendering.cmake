@@ -25,10 +25,16 @@ IF(${ModuleEnabled})
 
 	# Header files (including GLSL files so that they'll appear in VS projects)
 	FILE(GLOB ThisModHeaders RELATIVE ${ModulesDir}
+		modules/fontrendering/glsl/*.frag
+		modules/fontrendering/glsl/*.geom
+		modules/fontrendering/glsl/*.vert
 		modules/fontrendering/pipelines/*.h
 		modules/fontrendering/processors/*.h
 		modules/fontrendering/tools/*.h
 	)
+
+	LIST (APPEND ThisModShaderDirectories "modules/fontrendering/fonts")
+	LIST (APPEND ThisModShaderDirectories "modules/fontrendering/glsl")
 
 	SET(ThisModDependencies base)
 ENDIF(${ModuleEnabled})

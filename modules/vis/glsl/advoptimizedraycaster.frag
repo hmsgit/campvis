@@ -57,6 +57,10 @@ uniform TextureParameters3D _volumeTextureParams;
 uniform sampler1D _transferFunction;
 uniform TFParameters1D _transferFunctionParams;
 
+// Voxel Hierarchy Lookup volume
+uniform usampler2D _voxelHierarchy;
+uniform int _vhMaxMipMapLevel;
+
 uniform LightSource _lightSource;
 uniform vec3 _cameraPosition;
 
@@ -81,8 +85,8 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
 
     float firstHitT = -1.0f;
 
-    float tNear = clipFirstHitpoint(entryPoint, direction, 0.0, 1.0);
-    float tFar = 1.0 - clipFirstHitpoint(exitPoint, -direction, 0.0, 1.0);
+    float tNear = clipFirstHitpoint(_voxelHierarchy, _vhMaxMipMapLevel, entryPoint, direction, 0.0, 1.0);
+    float tFar = 1.0 - clipFirstHitpoint(_voxelHierarchy, _vhMaxMipMapLevel, exitPoint, -direction, 0.0, 1.0);
 
     // compute sample position
     vec3 samplePosition = entryPoint.rgb + tNear * direction;
@@ -134,7 +138,7 @@ vec4 performRaycasting(in vec3 entryPoint, in vec3 exitPoint, in vec2 texCoords)
     if (firstHitT >= 0.0) {
         float depthEntry = texture(_entryPointsDepth, texCoords).z;
         float depthExit = texture(_exitPointsDepth, texCoords).z;
-        gl_FragDepth = calculateDepthValue(firstHitT/tFar, depthEntry, depthExit);
+        gl_FragDepth = calculateDepthValue(firstHitT, depthEntry, depthExit);
     }
 
     return result;

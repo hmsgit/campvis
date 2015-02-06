@@ -89,10 +89,7 @@ namespace campvis {
 
         /// \see RaycastingProcessor::generateHeader()
         virtual std::string generateHeader() const;
-
-        /// Renders the voxelized volume
-        void renderVv(DataContainer& dh); 
-
+        
         VoxelHierarchyMapper* _vhm;
 
         static const std::string loggerCat_;

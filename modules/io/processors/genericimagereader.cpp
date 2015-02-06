@@ -32,6 +32,7 @@
 #include "core/datastructures/genericimagerepresentationlocal.h"
 #include "core/tools/textfileparser.h"
 
+#include "modules/io/processors/amirameshreader.h"
 #include "modules/io/processors/csvdimagereader.h"
 #include "modules/io/processors/ltfimagereader.h"
 #include "modules/io/processors/mhdimagereader.h"
@@ -65,6 +66,7 @@ namespace campvis {
         addProperty(p_targetImageID);
         p_url.s_changed.connect(this, &GenericImageReader::onUrlPropertyChanged);
 
+        addReader(new AmiraMeshReader());        
         addReader(new CsvdImageReader());        
         addReader(new LtfImageReader());
         addReader(new MhdImageReader());

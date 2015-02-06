@@ -72,7 +72,7 @@ namespace campvis {
         /**
          * Gets called when the property has changed, so that widget can update its state.
          */
-        virtual void onWidgetVisibilityChanged(QWidget* widget, bool visibility);
+        virtual void onWidgetVisibilityChanged(const AbstractProperty* prop);
 
         /**
          * Creates the property widget for \a prop, connects all neccesary signals, etc.
@@ -87,7 +87,7 @@ namespace campvis {
         void removeProperty(AbstractProperty* prop, QWidget* widget);
 
     signals:
-        void s_widgetVisibilityChanged(QWidget* widget, bool visibility);
+        void s_propertyVisibilityChanged(const AbstractProperty* prop);
 
         void propertyAdded(AbstractProperty* prop);
         void propertyRemoved(AbstractProperty* prop, QWidget* widget);

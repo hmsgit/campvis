@@ -28,6 +28,7 @@
 
 #include <QComboBox>
 #include <QLineEdit>
+#include <QSortFilterProxyModel>
 
 namespace campvis {
     DataNamePropertyWidget::DataNamePropertyWidget(DataNameProperty* property, DataContainer* dc, QWidget* parent /*= 0*/)
@@ -39,6 +40,11 @@ namespace campvis {
             _combobox = new QComboBox(this);
             _combobox->setEditable(true);
 
+            QSortFilterProxyModel* proxy = new QSortFilterProxyModel(_combobox);
+            proxy->setSourceModel(_combobox->model());
+            _combobox->model()->setParent(proxy); // combo's current model must be reparented, otherwise QComboBox::setModel() will delete it
+            _combobox->setModel(proxy);
+
             if (dc != 0) {
                 std::vector< std::pair<std::string, DataHandle> > tmp = dc->getDataHandlesCopy();
                 QStringList sl;
@@ -48,6 +54,7 @@ namespace campvis {
                 dc->s_dataAdded.connect(this, &DataNamePropertyWidget::onDataAdded);
                 connect(this, SIGNAL(s_dataAddedQt(const QString&, QtDataHandle)), this, SLOT(onDataAddedQt(const QString&, QtDataHandle)));
 
+                _combobox->model()->sort(Qt::AscendingOrder);
                 setCurrentComboBoxText(QString::fromStdString(property->getValue()));
             }
 
@@ -106,6 +113,7 @@ namespace campvis {
     void DataNamePropertyWidget::onDataAddedQt(const QString& key, QtDataHandle dh) {
         if (_combobox->findText(key) == -1) {
             _combobox->addItem(key);
+            _combobox->model()->sort(Qt::AscendingOrder);
         }
     }
 

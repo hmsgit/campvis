@@ -709,16 +709,16 @@ namespace campvis {
                 0.0f,              0.0f,              0.0f,            1.0f);
 
             float qfac = header.pixdim[0];
-            if(fabs(qfac) < 0.1f)
+            if (fabs(qfac) < 0.1f)
                 qfac = 1.0f;
             cgt::mat4 sc = cgt::mat4::createScale(cgt::vec3(1.0f, 1.0f, qfac));
 
-            cgt::mat4 os = cgt::mat4::createTranslation(cgt::vec3(header.qoffset_x, header.qoffset_y, header.qoffset_z));
-            pToW = os * rot2 * sc;
+            //cgt::mat4 os = cgt::mat4::createTranslation(cgt::vec3(header.qoffset_x, header.qoffset_y, header.qoffset_z));
+            pToW = rot2 * sc;//os * rot2 * sc;
         }
 
         // Nifti transformations give us the center of the first voxel, we translate to correct:
-        pToW = pToW * cgt::mat4::createTranslation(-spacing * 0.5f);
+        // pToW = pToW * cgt::mat4::createTranslation(-spacing * 0.5f);
         // TODO: implement arbitrary transformations into ImageMappingInformation
 
         cgt::svec3 imageSize(dimensions);

@@ -34,6 +34,7 @@
 #include "core/properties/stringproperty.h"
 
 #include "modules/modulesapi.h"
+#include "modules/io/processors/abstractimagereader.h"
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include "modules/devil/processors/devilimagereader.h"
