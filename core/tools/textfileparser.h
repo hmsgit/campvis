@@ -38,14 +38,6 @@
 #include <string>
 #include <vector>
 
-namespace {
-    std::string getLine(std::istream s, char delim) {
-        std::string toReturn;
-        std::getline(s, toReturn, delim);
-        return toReturn;
-    }
-}
-
 namespace campvis {
 
     /**

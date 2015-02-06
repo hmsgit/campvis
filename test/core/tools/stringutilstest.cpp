@@ -113,7 +113,7 @@ TEST_F(StringUtilTest, splitTest) {
 
     parsed = StringUtils::splitStringsafe("one two three", " ", '|');
     parsed = StringUtils::splitStringsafe("one 'two three' 'four fi\'\'ve' six \' \' ", " ", '\'');
-    std::string str2[] = { "one", "two three", "four fi\'ve", "six", " " , "^_^"};//{"one", "two", "three", "^_^"};    // "^_^" is used to indicate last token 
+    std::string str2[] = { "one", "two three", "four fi\'ve", "six", "" , "^_^"};//{"one", "two", "three", "^_^"};    // "^_^" is used to indicate last token 
 
     for (int i= 0; "^_^" != str2[i] ; i++) {
         expected.push_back(str2[i]);

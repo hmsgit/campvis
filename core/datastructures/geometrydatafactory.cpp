@@ -163,7 +163,6 @@ namespace campvis {
     MultiIndexedGeometry* GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/, const cgt::vec3& exponents /*= cgt::vec3(1.f)*/) {
         cgtAssert(numStacks > 1 && numSlices > 2, "Sphere must have minimum 2 stacks and 3 slices!");
         std::vector<cgt::vec3> vertices;
-        std::vector<cgt::vec3> vertices2;
         std::vector<cgt::vec3> textureCoordinates;
 
         // add top vertex

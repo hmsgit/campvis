@@ -123,11 +123,14 @@ namespace campvis {
         _flairReader.p_targetImageID.addSharedProperty(&_mvr.p_sourceImage3);
         _flairReader.s_validated.connect(this, &ViscontestDemo::onReaderValidated);
 
-        Geometry1DTransferFunction* t1_tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .023f));
-        t1_tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.06f, .11f), cgt::col4(57, 57, 57, 32), cgt::col4(196, 196, 196, 16)));
-        _mvmpr2D.p_transferFunction1.replaceTF(t1_tf);
-        _mvmpr3D.p_transferFunction1.replaceTF(t1_tf->clone());
-        _mvr.p_transferFunction1.replaceTF(t1_tf->clone());
+        Geometry1DTransferFunction* t1_tf_rc = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .023f));
+        t1_tf_rc->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.06f, .11f), cgt::col4(57, 57, 57, 32), cgt::col4(196, 196, 196, 16)));
+        _mvr.p_transferFunction1.replaceTF(t1_tf_rc);
+
+        Geometry1DTransferFunction* t1_tf_mpr = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .023f));
+        t1_tf_mpr->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.06f, .4f), cgt::col4(57, 57, 57, 32), cgt::col4(196, 196, 196, 16)));
+        _mvmpr2D.p_transferFunction1.replaceTF(t1_tf_mpr);
+        _mvmpr3D.p_transferFunction1.replaceTF(t1_tf_mpr->clone());
 
         Geometry1DTransferFunction* ct_tf = new Geometry1DTransferFunction(128, cgt::vec2(0.f, .0421f));
         ct_tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(.381f, .779f), cgt::col4(0, 100, 150, 128), cgt::col4(0, 192, 255, 172)));
@@ -160,7 +163,6 @@ namespace campvis {
         _mvmpr3D.p_showWireframe.setValue(true);
         _mvmpr3D.p_transparency.setValue(0.5f);
         _mvmpr3D.p_outputImageId.addSharedProperty(&_rtc2.p_firstImageId);
-        //_mvmpr3D.p_outputImageId.addSharedProperty(&_mvr.p_geometryImageId);
         
         _mvr.p_outputImageId.setValue("result.rc");
         _mvr.p_outputImageId.addSharedProperty(&_rtc1.p_secondImageId);
@@ -168,7 +170,7 @@ namespace campvis {
 
         _rtc1.p_compositingMethod.selectByOption(RenderTargetCompositor::CompositingModeDepth);
         _rtc1.p_targetImageId.setValue("composed1");
-        _rtc1.p_targetImageId.addSharedProperty(&_rtc2.p_firstImageId);
+        _rtc1.p_targetImageId.addSharedProperty(&_rtc2.p_secondImageId);
 
         _rtc2.p_compositingMethod.selectByOption(RenderTargetCompositor::CompositingModeDepth);
         _rtc2.p_targetImageId.setValue("composed");
@@ -190,8 +192,6 @@ namespace campvis {
 
     void ViscontestDemo::onSplitterEvent(size_t index, cgt::Event* e) {
         if (typeid(*e) == typeid(cgt::MouseEvent)) {
-            cgt::MouseEvent* me = static_cast<cgt::MouseEvent*>(e);
-
             if (index == 0) {
                 _slicePositionEventHandler.onEvent(e);
             }

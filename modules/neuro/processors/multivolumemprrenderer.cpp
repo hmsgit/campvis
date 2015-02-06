@@ -151,14 +151,14 @@ namespace neuro {
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();
                 if (p_showWireframe.getValue()) {
+                    // calculate viewport matrix for NDC -> viewport conversion
+                    cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
+                    cgt::mat4 viewportMatrix = cgt::mat4::createTranslation(cgt::vec3(halfViewport, 0.f)) * cgt::mat4::createScale(cgt::vec3(halfViewport, 1.f));
+                    _shader->setUniform("_viewportMatrix", viewportMatrix);
+
                     _shader->setUniform("_lineWidth", p_lineWidth.getValue());
                     _shader->setUniform("_transparency", p_transparency.getValue());
                 }
-
-                // calculate viewport matrix for NDC -> viewport conversion
-                cgt::vec2 halfViewport = cgt::vec2(getEffectiveViewportSize()) / 2.f;
-                cgt::mat4 viewportMatrix = cgt::mat4::createTranslation(cgt::vec3(halfViewport, 0.f)) * cgt::mat4::createScale(cgt::vec3(halfViewport, 1.f));
-                _shader->setUniform("_viewportMatrix", viewportMatrix);
 
                 if (p_use2DProjection.getValue()) {
                     // generate a camera position that simulates 2D rendering

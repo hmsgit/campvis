@@ -170,7 +170,7 @@ namespace campvis {
             }
             if (rootNode->hasKey("TransformationMatrix")) {
                 std::string s = rootNode->getString("TransformationMatrix");
-                std::vector<std::string> elements = StringUtils::split(s, " \t");
+                std::vector<std::string> elements = StringUtils::split(s, " \t", true);
                 if (elements.size() == 16) {
                     for (size_t i = 0; i < 16; ++i) {
                         transformationMatrix.elem[i] = StringUtils::fromString<float>(elements[i]);

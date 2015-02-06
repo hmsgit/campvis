@@ -215,7 +215,7 @@ namespace campvis {
     template<typename T>
     const T* campvis::ImageData::getRepresentation(bool performConversion) const {
         // look, whether we already have a suitable representation
-        for (auto it = _representations.rbegin(); it != _representations.rend(); ++it) {
+        for (auto it = _representations.begin(); it != _representations.end(); ++it) {
             if (const T* tester = dynamic_cast<const T*>(*it)) {
                 return tester;
             }
@@ -226,7 +226,7 @@ namespace campvis {
             tbb::spin_mutex::scoped_lock lock(_conversionMutex);
 
             // in the meantime, there something might have changed, so check again whether there is a new rep.
-            for (auto it = _representations.rbegin(); it != _representations.rend(); ++it) {
+            for (auto it = _representations.begin(); it != _representations.end(); ++it) {
                 if (const T* tester = dynamic_cast<const T*>(*it)) {
                     return tester;
                 }
@@ -240,7 +240,7 @@ namespace campvis {
 
     template<typename T>
     const T* campvis::ImageData::tryPerformConversion() const {
-        for (auto it = _representations.rbegin(); it != _representations.rend(); ++it) {
+        for (auto it = _representations.begin(); it != _representations.end(); ++it) {
             const T* tester = ImageRepresentationConverter::getRef().tryConvertFrom<T>(*it);
             if (tester != 0) {
                 //LDEBUG("Performed a image representation conversion from " + std::string(typeid(**it).name()) + " to " + std::string(typeid(T).name()) + ".");

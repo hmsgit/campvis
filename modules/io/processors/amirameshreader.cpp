@@ -93,6 +93,7 @@ namespace {
             // cppcheck-suppress stlIfStrFind
             if (curLine.find("# AmiraMesh") != 0)
                 throw cgt::FileException("Could not identify as AmiraMesh file.", p_url.getValue());
+            // cppcheck-suppress stlIfStrFind
             if (curLine.find("# AmiraMesh BINARY-LITTLE-ENDIAN") != 0)
                 throw cgt::FileException("Unsupported format in AmiraMesh file.", p_url.getValue());
 
@@ -185,7 +186,7 @@ namespace {
 
 
             // compute offset
-            if ((curLine = advanceTo(file, "# Data section follows")).empty())
+            if (advanceTo(file, "# Data section follows").empty())
                 throw cgt::FileException("Malformed (or unsupported?) AmiraMesh file.", p_url.getValue());
 
             getTrimmedLine(file);

@@ -21,5 +21,5 @@ IF(${ModuleEnabled})
 	SET(ThisModShaderDirectories "modules/dti/glsl")
 ENDIF(${ModuleEnabled})
 
-SET(ThisModStatus EXPERIMENTAL)
+SET(ThisModStatus TESTING)
 SET(ThisModExternalDependencies FALSE)
