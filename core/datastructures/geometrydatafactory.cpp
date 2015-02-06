@@ -160,9 +160,10 @@ namespace campvis {
         return toReturn;
     }
 
-    MultiIndexedGeometry* GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/) {
+    MultiIndexedGeometry* GeometryDataFactory::createSphere(uint16_t numStacks /*= 6*/, uint16_t numSlices /*= 12*/, const cgt::vec3& exponents /*= cgt::vec3(1.f)*/) {
         cgtAssert(numStacks > 1 && numSlices > 2, "Sphere must have minimum 2 stacks and 3 slices!");
         std::vector<cgt::vec3> vertices;
+        std::vector<cgt::vec3> vertices2;
         std::vector<cgt::vec3> textureCoordinates;
 
         // add top vertex
@@ -175,7 +176,17 @@ namespace campvis {
 
             for (int j = 0; j < numSlices; ++j) {
                 float theta = static_cast<float>(j) * 2.f*cgt::PIf / static_cast<float>(numSlices);
-                vertices.push_back(cgt::vec3(cos(theta) * sin(phi), sin(theta) * sin(phi), cos(phi)));
+
+                // apply exponents for supersphere
+                cgt::vec3 theVertex(cos(theta) * sin(phi), sin(theta) * sin(phi), cos(phi));
+                for (size_t e = 0; e < 3; ++e) {
+                    if (theVertex[e] < 0)
+                        theVertex[e] = -pow(-theVertex[e], exponents[e]);
+                    else
+                        theVertex[e] = pow(theVertex[e], exponents[e]);
+                }
+
+                vertices.push_back(theVertex);
                 textureCoordinates.push_back(cgt::vec3(theta / (2.f * cgt::PIf), phi / cgt::PIf, 0.f));
             }
         }
