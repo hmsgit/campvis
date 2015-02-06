@@ -127,7 +127,7 @@ namespace dti {
                 vertices[i] *= p_scaling.getValue();
                 vertices[i] += p_offset.getValue();
 
-                //file.read((char*)scalars, sizeof(float) * header.n_scalars);
+                file.read((char*)scalars, sizeof(float) * header.n_scalars);
                 //if(header.n_scalars > 0)
                 //    fibers_.uncertainties_.push_back(scalars[0]);
                 //else

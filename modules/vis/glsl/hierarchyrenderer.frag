@@ -68,9 +68,9 @@ void main() {
                     for (int x = -1; x < _brickSize + 1; ++x) {
                         vec3 addendum = (vec3(x, y, z) / _volumeTextureParams._size);
                         vec3 texCoord = clamp(llf + addendum, 0.0, 1.0);
-                        //float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texture(_volume, texCoord).r);
-                        ivec3 voxel = ivec3(texCoord * _volumeTextureParams._size);
-                        float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texelFetch(_volume, voxel, 0).r);
+                        float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texture(_volume, texCoord).r);
+                        //ivec3 voxel = ivec3(texCoord * _volumeTextureParams._size);
+                        //float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texelFetch(_volume, voxel, 0).r);
                         //float intensity = texture(_volume, voxel).r;
                         //vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
                         //if (color.a > 0) {

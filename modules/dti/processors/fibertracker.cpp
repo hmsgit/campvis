@@ -224,7 +224,7 @@ namespace dti {
         for (size_t z = 0; z < strainData.getSize().z; z += inc) {
             for (size_t y = 0; y < strainData.getSize().y; y += inc) {
                 for (size_t x = 0; x < strainData.getSize().x; x += inc) {
-                    cgt::vec3 pos(x, y, z);
+                    cgt::vec3 pos = cgt::vec3(float(x), float(y), float(z));
                     if (cgt::lengthSq(getVec3FloatLinear(strainData, pos)) > threshold) {
                         seeds.push_back((VtW * cgt::vec4(pos, 1.f)).xyz());
                     }
