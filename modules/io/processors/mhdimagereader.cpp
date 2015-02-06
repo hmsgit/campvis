@@ -80,6 +80,7 @@ namespace campvis {
 
             cgt::vec3 voxelSize(1.f);
             cgt::vec3 imageOffset(0.f);
+            cgt::mat4 transformationMatrix = cgt::mat4::identity;
 
             // image type
             if (rootNode->hasKey("ObjectType")) {
@@ -167,6 +168,15 @@ namespace campvis {
             if (rootNode->hasKey("ElementNumberOfChannels")) {
                 numChannels = rootNode->getSizeT("ElementNumberOfChannels");
             }
+            if (rootNode->hasKey("TransformationMatrix")) {
+                std::string s = rootNode->getString("TransformationMatrix");
+                std::vector<std::string> elements = StringUtils::split(s, " \t");
+                if (elements.size() == 16) {
+                    for (size_t i = 0; i < 16; ++i) {
+                        transformationMatrix.elem[i] = StringUtils::fromString<float>(elements[i]);
+                    }
+                }
+            }
 
             // get raw image location:
             url = StringUtils::trim(rootNode->getString("ElementDataFile"));
@@ -199,7 +209,7 @@ namespace campvis {
             // all parsing done - lets create the image:
             ImageData* image = new ImageData(dimensionality, size, numChannels);
             ImageRepresentationDisk::create(image, url, pt, offset, e);
-            image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue()));
+            image->setMappingInformation(ImageMappingInformation(size, imageOffset + p_imageOffset.getValue(), voxelSize * p_voxelSize.getValue(), transformationMatrix));
             data.addData(p_targetImageID.getValue(), image);
         }
         catch (cgt::Exception& e) {
