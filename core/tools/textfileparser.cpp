@@ -47,7 +47,8 @@ namespace campvis {
     }
 
     bool TextFileParser::TokenGroup::hasKey(const std::string& key) const {
-        return (_tokens.find(key) != _tokens.end());
+        auto it = (_caseSensitiveKeys ? _tokens.find(key) : _tokens.find(StringUtils::lowercase(key)));
+        return (it != _tokens.end());
     }
 
     const std::string& TextFileParser::TokenGroup::getString(const std::string& key) const throw (cgt::Exception) {

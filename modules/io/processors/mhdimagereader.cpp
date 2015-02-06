@@ -63,7 +63,7 @@ namespace campvis {
                 throw cgt::FileException("Could not open file.", p_url.getValue());
 
             // start parsing
-            TextFileParser tfp(file, true, "=");
+            TextFileParser tfp(file, false, "=");
             tfp.parse<TextFileParser::ItemSeparatorLines>();
             file.close();
 
