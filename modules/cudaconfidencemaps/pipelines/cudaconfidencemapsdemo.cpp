@@ -38,6 +38,7 @@
 #include "core/datastructures/imagerepresentationgl.h"
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
+#include "cgt/event/keyevent.h"
 
 namespace campvis {
 
@@ -53,7 +54,7 @@ namespace campvis {
         , p_millisecondBudget("MillisecondBudget", "Milliseconds per frame", 24.0f, 10.0f, 60.0f)
         , p_connectDisconnectButton("ConnectToIGTLink", "Connect/Disconnect")
         , p_resamplingScale("ResampleScale", "Resample Scale", 0.25f, 0.01f, 1.0f)
-        , p_beta("Beta", "Beta", 20.0f, 1.0f, 200.0f)
+        , p_beta("Beta", "Beta", 60.0f, 1.0f, 200.0f)
         , p_showAdvancedOptions("ShowAdvancedOptions", "Advanced options...", false)
         , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Alpha-Beta-Filter", true)
         , p_gaussianFilterSize("GaussianSigma", "Blur amount", 2.5f, 1.0f, 10.0f)
@@ -95,6 +96,8 @@ namespace campvis {
         addProperty(p_fanInnerRadius);
         addProperty(p_recordingDirectory);
         addProperty(p_enableRecording);
+
+        addProperty(p_useSpacingEncodedFanGeometry);
 
         setAdvancedPropertiesVisibility(false);
     }
@@ -211,6 +214,7 @@ namespace campvis {
                 auto ms = (endTime - startTime).seconds() * 1000.0f;
                 auto solverMs = (solverEndTime - solverStartTime).seconds() * 1000.0f;
                 std::stringstream string;
+                string << "Mode: " << _usFusion.p_view.getOptionValue() << std::endl;
                 string << "Execution time: " << static_cast<int>(ms) << "ms" << std::endl;
                 string << "Solver time: " << static_cast<int>(solverMs) << "ms" << std::endl;
                 string << "CG Iterations: " << _usMapsSolver.getActualConjugentGradientIterations() << std::endl;
@@ -254,6 +258,64 @@ namespace campvis {
                         LERROR("Could not save image to file: " << ilGetError());
                     }
 #endif
+                }
+            }
+        }
+    }
+
+    void CudaConfidenceMapsDemo::onEvent(cgt::Event* e) {
+        // Allow for rapid switching between different visualizations
+        //  F1: Ultrasound only
+        //  F2: Sharpness
+        //  F3: LAB
+        //  F4: Color overlay
+        //  F5: CM only
+        if (typeid(*e) == typeid(cgt::KeyEvent)) {
+            cgt::KeyEvent *keyEvent = reinterpret_cast<cgt::KeyEvent*>(e);
+            if (keyEvent == nullptr) return;
+
+            if (keyEvent->pressed()) {
+                bool eventHandled = true;
+                switch (keyEvent->keyCode()) {
+                case cgt::KeyEvent::K_F1:
+                    _usFusion.p_view.setValue(0); // US only
+                    break;
+                case cgt::KeyEvent::K_F2:
+                    _usFusion.p_view.setValue(10); // Sharpness
+                    {
+                        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+                        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 1.0f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
+                        _usFusion.p_confidenceTF.replaceTF(tf);
+                    }
+                    break;
+                case cgt::KeyEvent::K_F3:
+                    _usFusion.p_view.setValue(8); // LAB
+                    {
+                        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+                        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 0.5f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
+                        _usFusion.p_confidenceTF.replaceTF(tf);
+                        _usFusion.p_hue.setValue(0.23f);
+                    }
+                    break;
+                case cgt::KeyEvent::K_F4:
+                    _usFusion.p_view.setValue(12); // Color overlay
+                    {
+                        Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+                        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 0.5f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
+                        _usFusion.p_confidenceTF.replaceTF(tf);
+                        _usFusion.p_hue.setValue(0.15f);
+                    }
+                    break;
+                case cgt::KeyEvent::K_F5:
+                    _usFusion.p_view.setValue(2); // CM Only
+                    break;
+                default:
+                    eventHandled = false;
+                };
+                if (eventHandled) {
+                    e->accept();
+                    // Force HUD statistics to be updated
+                    _statisticsLastUpdateTime = tbb::tick_count();
                 }
             }
         }

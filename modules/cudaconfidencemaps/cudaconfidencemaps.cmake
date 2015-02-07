@@ -46,9 +46,14 @@ IF(ModuleEnabled)
             SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3)
         ENDIF()
 
+        SET(CUSPLIBRARY_VERSION "0.4.0")
+        IF(CUSPLIBRARY_VERSION STREQUAL "0.4.0-git")
+            SET(CUDA_NVCC_FLAGS -DGIT_CUSP_VERSION)
+        ENDIF()
+
         # CUSP Include directory
         CUDA_INCLUDE_DIRECTORIES(
-            ${ThisModDir}/ext/cusplibrary-0.4.0
+            ${ThisModDir}/ext/cusplibrary-${CUSPLIBRARY_VERSION}
             ${TBB_INCLUDE_DIR}
             )
 

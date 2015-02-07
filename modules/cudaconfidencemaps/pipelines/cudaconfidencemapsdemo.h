@@ -41,6 +41,7 @@
 
 
 namespace campvis {
+
     class CudaConfidenceMapsDemo : public AutoEvaluationPipeline {
     public:
         /**
@@ -61,6 +62,9 @@ namespace campvis {
 
         /// \see AbstractPipeline::executePipeline()
         virtual void executePipeline();
+
+        /// \see AbstractPipeline::onEvent()
+        virtual void onEvent(cgt::Event* e);
 
         /// \see AbstractPipeline::getName()
         virtual const std::string getName() const { return getId(); };
