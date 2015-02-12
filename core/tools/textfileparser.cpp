@@ -198,7 +198,7 @@ namespace campvis {
     }
 
     TextFileParser::TokenGroup* TextFileParser::ItemSeparatorLines::operator()(std::istream& stream, bool caseSensitiveKeys, const std::string& delimiters, const std::string& whitespace) {
-        TokenGroup* rootNode = new TokenGroup();
+        TokenGroup* rootNode = new TokenGroup(caseSensitiveKeys);
         std::stack<TokenGroup*> groupHierarchy;
         groupHierarchy.push(rootNode);
         std::string currentLine;
@@ -212,7 +212,7 @@ namespace campvis {
             if (currentLine.substr(currentLine.length() - 1, 1) == "{") {
                 std::string groupName = StringUtils::trim(currentLine.substr(0, currentLine.length() - 1));
 
-                TokenGroup* tg = new TokenGroup();
+				TokenGroup* tg = new TokenGroup(caseSensitiveKeys);
                 groupHierarchy.top()->_tokenGroups.insert(std::make_pair(groupName, tg));
                 groupHierarchy.push(tg);
             }

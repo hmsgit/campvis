@@ -52,6 +52,10 @@ namespace campvis {
     public:
         struct CAMPVIS_CORE_API TokenGroup {
         public:
+			TokenGroup(bool caseSensitiveKeys)
+				: _caseSensitiveKeys(caseSensitiveKeys)
+			{};
+
             ~TokenGroup();
 
             /**
