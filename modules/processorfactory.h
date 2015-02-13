@@ -63,7 +63,7 @@ namespace campvis {
         
         std::vector<std::string> getRegisteredProcessors() const;
 
-        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp) const;
+        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp = 0) const;
 
         /**
          * Statically registers the processor of type T using \a callee as factory method.
@@ -72,7 +72,22 @@ namespace campvis {
          * \return  The registration index.
          */
         template<typename T>
-        size_t registerProcessor(std::function<AbstractProcessor*(IVec2Property*)> callee) {
+        size_t registerProcessor2(std::function<AbstractProcessor*(IVec2Property*)> callee) {
+            tbb::spin_mutex::scoped_lock lock(_mutex);
+
+            auto it = _processorMap2.lower_bound(T::getId());
+            if (it == _processorMap2.end() || it->first != T::getId()) {
+                _processorMap2.insert(it, std::make_pair(T::getId(), callee));
+            }
+            else {
+                cgtAssert(false, "Registered two processors with the same ID.");
+            }
+
+            return _processorMap2.size();
+        }
+
+        template<typename T>
+        size_t registerProcessor(std::function<AbstractProcessor*()> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
             auto it = _processorMap.lower_bound(T::getId());
@@ -85,14 +100,12 @@ namespace campvis {
 
             return _processorMap.size();
         }
-        
     private:
         mutable tbb::spin_mutex _mutex;
         static tbb::atomic<ProcessorFactory*> _singleton;    ///< the singleton object
 
-        std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)>> _processorMap;
-
-
+        std::map< std::string, std::function<AbstractProcessor*()>> _processorMap;
+        std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)>> _processorMap2;
     };
 
 
@@ -103,14 +116,25 @@ namespace campvis {
     public:
         /**
          * Static factory method for creating the processor of type T.
-         * \param   args  DataContainer for the created processor to work on.
          * \return  A newly created processor of type T. Caller has to take ownership of the pointer.
          */
-        //static AbstractProcessor* create() {
-        //    return new T();
-        //}
+        static AbstractProcessor* create() {
+            return new T();
+        }
 
-
+    private:
+        /// static helper field to ensure registration at static initialization time.
+        static const size_t _factoryId;
+    };
+    
+    template<typename T>
+    class ProcessorRegistrar2 {
+    public:
+        /**
+         * Static factory method for creating the processor of type T.
+         * \param   viewPortSizeProp  viewPortSizeProp for the created processor to work on.
+         * \return  A newly created processor of type T. Caller has to take ownership of the pointer.
+         */
         static AbstractProcessor* create(IVec2Property* viewPortSizeProp) {
             return new T(viewPortSizeProp);
         }
@@ -122,6 +146,8 @@ namespace campvis {
 
     template<typename T>
     const size_t ProcessorRegistrar<T>::_factoryId = ProcessorFactory::getRef().registerProcessor<T>(&ProcessorRegistrar<T>::create);
+    template<typename T>
+    const size_t ProcessorRegistrar2<T>::_factoryId = ProcessorFactory::getRef().registerProcessor2<T>(&ProcessorRegistrar2<T>::create);
 
 }
 

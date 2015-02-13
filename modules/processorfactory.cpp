@@ -53,7 +53,9 @@ namespace campvis {
         tbb::spin_mutex::scoped_lock lock(_mutex);
 
         std::vector<std::string> toReturn;
-        toReturn.reserve(_processorMap.size());
+        toReturn.reserve(_processorMap2.size()+_processorMap.size());
+        for (auto it = _processorMap2.begin(); it != _processorMap2.end(); ++it)
+            toReturn.push_back(it->first);
         for (auto it = _processorMap.begin(); it != _processorMap.end(); ++it)
             toReturn.push_back(it->first);
         return toReturn;
@@ -61,12 +63,20 @@ namespace campvis {
 
     AbstractProcessor* ProcessorFactory::createProcessor(const std::string& id, IVec2Property* viewPortSizeProp) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
-
-        auto it = _processorMap.find(id);
-        if (it == _processorMap.end())
-            return nullptr;
-        else
-            return (it->second)(viewPortSizeProp);
+        
+        if (viewPortSizeProp != nullptr) {
+            auto it = _processorMap2.find(id);
+            if (it == _processorMap2.end())
+                return nullptr;
+            else
+                return (it->second)(viewPortSizeProp);
+        } else {
+            auto it = _processorMap.find(id);
+            if (it == _processorMap.end())
+                return nullptr;
+            else
+                return (it->second)();
+        }
     }
 
 }

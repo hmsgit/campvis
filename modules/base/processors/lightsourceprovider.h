@@ -32,6 +32,7 @@
 #include "core/properties/floatingpointproperty.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace campvis {
     /**
@@ -49,9 +50,13 @@ namespace campvis {
          * Destructor
          **/
         virtual ~LightSourceProvider();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "LightSourceProvider"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "LightSourceProvider"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates LightSourceData and stores it in the DataContainer."; };
         /// \see AbstractProcessor::getAuthor()
@@ -74,6 +79,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class ProcessorRegistrar<LightSourceProvider>;
 }
 
 #endif // LIGHTSOURCEPROVIDER_H__

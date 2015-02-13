@@ -184,7 +184,7 @@ namespace campvis {
     };
 
     // Instantiate template to register the pipelines.
-    template class ProcessorRegistrar<VolumeExplorer>;
+    template class ProcessorRegistrar2<VolumeExplorer>;
 }
 
 #endif // VOLUMEEXPLORER_H__
