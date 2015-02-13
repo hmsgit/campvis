@@ -35,8 +35,11 @@
 
 #include <map>
 #include <string>
+#include <type_traits>
 #include <vector>
 #include <functional>
+
+#include "core/pipeline/visualizationprocessor.h"
 #include "core/properties/numericproperty.h"
 
 namespace campvis {
@@ -81,7 +84,8 @@ namespace campvis {
                 _processorMap.insert(it, std::make_pair(T::getId(), callee));
             }
             else {
-                cgtAssert(false, "Registered two processors with the same ID.");
+                // do nothing, a double registration may occure due to having the ProcessorRegistrar
+                // being referenced in both campvis-application and campvis-modules
             }
 
             return _processorMap.size();
@@ -102,7 +106,8 @@ namespace campvis {
                 _processorMap2.insert(it, std::make_pair(T::getId(), callee));
             }
             else {
-                cgtAssert(false, "Registered two processors with the same ID.");
+                // do nothing, a double registration may occure due to having the ProcessorRegistrar
+                // being referenced in both campvis-application and campvis-modules
             }
 
             return _processorMap2.size();
@@ -119,9 +124,13 @@ namespace campvis {
 
 // ================================================================================================
 
+    template<typename T, bool>
+    class ProcessorRegistrarSwitch {
+    };
+
     template<typename T>
-    class ProcessorRegistrar {
-    public:
+    class ProcessorRegistrarSwitch<T, false> {
+            public:
         /**
          * Static factory method for creating the processor of type T.
          * \return  A newly created processor of type T. Caller has to take ownership of the pointer.
@@ -130,13 +139,16 @@ namespace campvis {
             return new T();
         }
 
-    private:
         /// static helper field to ensure registration at static initialization time.
         static const size_t _factoryId;
     };
-    
+
     template<typename T>
-    class ProcessorRegistrar2 {
+    const size_t ProcessorRegistrarSwitch<T, false>::_factoryId = ProcessorFactory::getRef().registerProcessor<T>(&ProcessorRegistrarSwitch<T, false>::create);
+
+
+    template<typename T>
+    class ProcessorRegistrarSwitch<T, true> {
     public:
         /**
          * Static factory method for creating the processor of type T.
@@ -147,15 +159,23 @@ namespace campvis {
             return new T(viewPortSizeProp);
         }
 
-    private:
         /// static helper field to ensure registration at static initialization time.
         static const size_t _factoryId;
     };
 
     template<typename T>
-    const size_t ProcessorRegistrar<T>::_factoryId = ProcessorFactory::getRef().registerProcessor<T>(&ProcessorRegistrar<T>::create);
+    const size_t ProcessorRegistrarSwitch<T, true>::_factoryId = ProcessorFactory::getRef().registerProcessor2<T>(&ProcessorRegistrarSwitch<T, true>::create);
+
+
+
+
     template<typename T>
-    const size_t ProcessorRegistrar2<T>::_factoryId = ProcessorFactory::getRef().registerProcessor2<T>(&ProcessorRegistrar2<T>::create);
+    class SmartProcessorRegistrar {
+        static const size_t _helperField;
+    };
+
+    template<typename T>
+    const size_t campvis::SmartProcessorRegistrar<T>::_helperField = ProcessorRegistrarSwitch< T, std::is_base_of<VisualizationProcessor, T>::value >::_factoryId;
 
 }
 

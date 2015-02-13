@@ -80,7 +80,7 @@ namespace campvis {
     };
 
     // Instantiate template to register the pipelines.
-    template class ProcessorRegistrar<LightSourceProvider>;
+    template class SmartProcessorRegistrar<LightSourceProvider>;
 }
 
 #endif // LIGHTSOURCEPROVIDER_H__
