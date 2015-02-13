@@ -222,8 +222,6 @@ namespace campvis {
             p_camera.removeSharedProperty(&currentRaycaster->p_camera);
             p_outputImage.removeSharedProperty(&currentRaycaster->p_targetImageID);
             p_raycasterProps.clearProperties();
-            //p_raycasterProps.deinitAllProperties();
-            //removeProperty(p_raycasterProps);
             currentRaycaster->s_invalidated.disconnect(this);
             
             _raycaster = RaycasterFactory::getRef().createRaycaster(p_raycastingProcSelector.getOptionId(), _viewportSizeProperty);
@@ -234,7 +232,6 @@ namespace campvis {
             //_raycaster->p_entryImageID.setVisible(false);
             //_raycaster->p_exitImageID.setVisible(false);
             //_raycaster->p_targetImageID.setVisible(false);
-            //addProperty(p_raycasterProps, AbstractProcessor::VALID);
 
             p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
             p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
@@ -243,8 +240,17 @@ namespace campvis {
             _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
             
             cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-            currentRaycaster->deinit();
             _raycaster->init();
+            _raycaster->p_sourceImageID.setValue(currentRaycaster->p_sourceImageID.getValue());
+            _raycaster->p_entryImageID.setValue(currentRaycaster->p_entryImageID.getValue());
+            _raycaster->p_exitImageID.setValue(currentRaycaster->p_exitImageID.getValue());
+            _raycaster->p_targetImageID.setValue(currentRaycaster->p_targetImageID.getValue());
+            _raycaster->p_camera.setValue(currentRaycaster->p_camera.getValue());
+            //_raycaster->p_transferFunction.replaceTF(currentRaycaster->p_transferFunction.getTF());
+            _raycaster->p_jitterStepSizeMultiplier.setValue(currentRaycaster->p_jitterStepSizeMultiplier.getValue());
+            _raycaster->p_samplingRate.setValue(currentRaycaster->p_samplingRate.getValue());
+
+            currentRaycaster->deinit();
             invalidate(RAYCASTER_INVALID);
 
             // queue the deletion of currentRaycaster as signal, to ensure that the deletion does
