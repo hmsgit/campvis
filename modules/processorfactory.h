@@ -65,8 +65,30 @@ namespace campvis {
 
         AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp = 0) const;
 
+        
         /**
-         * Statically registers the processor of type T using \a callee as factory method.
+         * Statically registers the processor of type T with construction T() using \a callee as factory method.
+         * \note    The template instantiation of ProcessorRegistrar takes care of calling this method.
+         * \param   callee  Factory method to call to create an instance of type T
+         * \return  The registration index.
+         */
+        template<typename T>
+        size_t registerProcessor(std::function<AbstractProcessor*()> callee) {
+            tbb::spin_mutex::scoped_lock lock(_mutex);
+
+            auto it = _processorMap.lower_bound(T::getId());
+            if (it == _processorMap.end() || it->first != T::getId()) {
+                _processorMap.insert(it, std::make_pair(T::getId(), callee));
+            }
+            else {
+                cgtAssert(false, "Registered two processors with the same ID.");
+            }
+
+            return _processorMap.size();
+        }
+
+        /**
+         * Statically registers the processor of type T with constructor T(IVec2Property) using \a callee as factory method.
          * \note    The template instantiation of ProcessorRegistrar takes care of calling this method.
          * \param   callee  Factory method to call to create an instance of type T
          * \return  The registration index.
@@ -86,20 +108,6 @@ namespace campvis {
             return _processorMap2.size();
         }
 
-        template<typename T>
-        size_t registerProcessor(std::function<AbstractProcessor*()> callee) {
-            tbb::spin_mutex::scoped_lock lock(_mutex);
-
-            auto it = _processorMap.lower_bound(T::getId());
-            if (it == _processorMap.end() || it->first != T::getId()) {
-                _processorMap.insert(it, std::make_pair(T::getId(), callee));
-            }
-            else {
-                cgtAssert(false, "Registered two processors with the same ID.");
-            }
-
-            return _processorMap.size();
-        }
     private:
         mutable tbb::spin_mutex _mutex;
         static tbb::atomic<ProcessorFactory*> _singleton;    ///< the singleton object
