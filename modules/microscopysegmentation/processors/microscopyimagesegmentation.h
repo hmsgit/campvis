@@ -43,6 +43,7 @@
 #include "modules/vis/processors/sliceextractor.h"
 
 #include <vector>
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -113,9 +114,13 @@ namespace campvis {
 
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "MicroscopyImageSegmentation"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "MicroscopyImageSegmentation"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Combines a volume raycaster and 3 slice views for explorative volume visualization."; };
         /// \see AbstractProcessor::getAuthor()
@@ -223,6 +228,8 @@ namespace campvis {
         int insertNextVoxelAt;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<MicroscopyImageSegmentation>;
 }
 
 #endif // MICROSCOPYIMAGESEGMENTATION_H__

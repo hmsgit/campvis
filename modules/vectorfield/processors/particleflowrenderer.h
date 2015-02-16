@@ -37,6 +37,7 @@
 #include "core/datastructures/geometrydata.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class BufferObject;
@@ -65,9 +66,13 @@ namespace campvis {
          * Destructor
          **/
         virtual ~ParticleFlowRenderer();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "ParticleFlowRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "ParticleFlowRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Visualization of a flow field using a particle system."; };
         /// \see AbstractProcessor::getAuthor()
@@ -146,6 +151,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<ParticleFlowRenderer>;
 }
 
 #endif // PARTICLEFLOWRENDERER_H__

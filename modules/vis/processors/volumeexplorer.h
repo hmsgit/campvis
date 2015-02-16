@@ -38,7 +38,7 @@
 #include "modules/modulesapi.h"
 #include "modules/vis/processors/volumerenderer.h"
 #include "modules/vis/processors/sliceextractor.h"
-#include "../../processorfactory.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;

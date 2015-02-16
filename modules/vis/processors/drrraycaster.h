@@ -33,6 +33,7 @@
 #include "core/properties/transferfunctionproperty.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -55,9 +56,13 @@ namespace campvis {
          * Destructor
          **/
         virtual ~DRRRaycaster();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "DRRRaycaster"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "DRRRaycaster"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Creates a Digitally Reconstructed Radiograph."; };
         /// \see AbstractProcessor::getAuthor()
@@ -82,6 +87,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<DRRRaycaster>;
 }
 
 #endif // DRRRAYCASTER_H__

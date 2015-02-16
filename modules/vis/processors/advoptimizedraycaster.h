@@ -32,6 +32,7 @@
 
 #include "modules/modulesapi.h"
 #include "modules/vis/tools/voxelhierarchymapper.h"
+#include "modules/processorfactory.h"
 
 #include <string>
 
@@ -61,9 +62,13 @@ namespace campvis {
          * Destructor
          **/
         virtual ~AdvOptimizedRaycaster();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "AdvOptimizedRaycaster"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "AdvOptimizedRaycaster"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Performs advanced ray casting to render sparse and big volumes faster."; };
         /// \see AbstractProcessor::getAuthor()
@@ -95,6 +100,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<AdvOptimizedRaycaster>;
 }
 
 #endif // AdvOptimizedRaycaster_H__

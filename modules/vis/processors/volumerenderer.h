@@ -33,7 +33,7 @@
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
 #include "modules/vis/processors/simpleraycaster.h"
-#include "../../processorfactory.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;

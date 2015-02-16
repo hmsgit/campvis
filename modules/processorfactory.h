@@ -76,19 +76,19 @@ namespace campvis {
          * \return  The registration index.
          */
         template<typename T>
-        size_t registerProcessor(std::function<AbstractProcessor*()> callee) {
+        size_t registerProcessorWithDefaultConstructor(std::function<AbstractProcessor*()> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
-            auto it = _processorMap.lower_bound(T::getId());
-            if (it == _processorMap.end() || it->first != T::getId()) {
-                _processorMap.insert(it, std::make_pair(T::getId(), callee));
+            auto it = _processorMapDefault.lower_bound(T::getId());
+            if (it == _processorMapDefault.end() || it->first != T::getId()) {
+                _processorMapDefault.insert(it, std::make_pair(T::getId(), callee));
             }
             else {
                 // do nothing, a double registration may occure due to having the ProcessorRegistrar
                 // being referenced in both campvis-application and campvis-modules
             }
 
-            return _processorMap.size();
+            return _processorMapDefault.size();
         }
 
         /**
@@ -98,27 +98,27 @@ namespace campvis {
          * \return  The registration index.
          */
         template<typename T>
-        size_t registerProcessor2(std::function<AbstractProcessor*(IVec2Property*)> callee) {
+        size_t registerProcessorWithIVec2PropParam(std::function<AbstractProcessor*(IVec2Property*)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
-            auto it = _processorMap2.lower_bound(T::getId());
-            if (it == _processorMap2.end() || it->first != T::getId()) {
-                _processorMap2.insert(it, std::make_pair(T::getId(), callee));
+            auto it = _processorMapWithIVec2Param.lower_bound(T::getId());
+            if (it == _processorMapWithIVec2Param.end() || it->first != T::getId()) {
+                _processorMapWithIVec2Param.insert(it, std::make_pair(T::getId(), callee));
             }
             else {
                 // do nothing, a double registration may occure due to having the ProcessorRegistrar
                 // being referenced in both campvis-application and campvis-modules
             }
 
-            return _processorMap2.size();
+            return _processorMapWithIVec2Param.size();
         }
 
     private:
         mutable tbb::spin_mutex _mutex;
         static tbb::atomic<ProcessorFactory*> _singleton;    ///< the singleton object
 
-        std::map< std::string, std::function<AbstractProcessor*()>> _processorMap;
-        std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)>> _processorMap2;
+        std::map< std::string, std::function<AbstractProcessor*()>> _processorMapDefault;
+        std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)>> _processorMapWithIVec2Param;
     };
 
 
@@ -144,7 +144,7 @@ namespace campvis {
     };
 
     template<typename T>
-    const size_t ProcessorRegistrarSwitch<T, false>::_factoryId = ProcessorFactory::getRef().registerProcessor<T>(&ProcessorRegistrarSwitch<T, false>::create);
+    const size_t ProcessorRegistrarSwitch<T, false>::_factoryId = ProcessorFactory::getRef().registerProcessorWithDefaultConstructor<T>(&ProcessorRegistrarSwitch<T, false>::create);
 
 
     template<typename T>
@@ -164,7 +164,7 @@ namespace campvis {
     };
 
     template<typename T>
-    const size_t ProcessorRegistrarSwitch<T, true>::_factoryId = ProcessorFactory::getRef().registerProcessor2<T>(&ProcessorRegistrarSwitch<T, true>::create);
+    const size_t ProcessorRegistrarSwitch<T, true>::_factoryId = ProcessorFactory::getRef().registerProcessorWithIVec2PropParam<T>(&ProcessorRegistrarSwitch<T, true>::create);
 
 
 

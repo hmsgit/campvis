@@ -41,6 +41,7 @@
 #include "core/properties/transferfunctionproperty.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -69,9 +70,13 @@ namespace campvis {
 
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "SliceRenderer2D"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "SliceRenderer2D"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Applies a transfer function and other modifiers to a 2D input image"; };
         /// \see AbstractProcessor::getAuthor()
@@ -107,6 +112,8 @@ namespace campvis {
         cgt::ivec3 _lastImgSize;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<SliceRenderer2D>;
 }
 
 #endif // SLICERENDERER2D_H__

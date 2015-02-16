@@ -76,7 +76,7 @@ namespace campvis {
 
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
         /// \see cgt::EventListener::onEvent()
         virtual void onEvent(cgt::Event* e);
 

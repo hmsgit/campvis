@@ -82,6 +82,7 @@ namespace campvis {
          * \note    When overwriting this method, make sure to call the base class version at the end.
          */
         virtual void deinit();
+        
 
         DataNameProperty p_sourceImageID;                ///< image ID for input image
         DataNameProperty p_entryImageID;                 ///< image ID for output entry points image

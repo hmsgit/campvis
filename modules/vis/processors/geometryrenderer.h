@@ -32,6 +32,7 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -66,8 +67,12 @@ namespace campvis {
         /// \see AbstractProcessor::deinit
         virtual void deinit();
 
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "GeometryRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "GeometryRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Renders Geometry."; };
         /// \see AbstractProcessor::getAuthor()
@@ -115,6 +120,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<GeometryRenderer>;
 }
 
 #endif // GEOMETRYRENDERER_H__
