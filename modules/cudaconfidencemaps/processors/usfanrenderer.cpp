@@ -136,7 +136,7 @@ namespace campvis {
             FramebufferActivationGuard fag(this);
             createAndAttachColorTexture();
 
-            glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+            glClearColor(0.02f, 0.02f, 0.02f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             _grid->render(GL_TRIANGLE_STRIP);
             _shader->deactivate();
