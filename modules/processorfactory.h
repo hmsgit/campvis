@@ -33,14 +33,14 @@
 
 #include "modules/modulesapi.h"
 
+#include <functional>
 #include <map>
 #include <string>
 #include <type_traits>
+#include <typeindex>
 #include <vector>
-#include <functional>
 
 #include "core/pipeline/visualizationprocessor.h"
-#include "core/properties/numericproperty.h"
 
 namespace campvis {
     class AbstractProcessor;
@@ -79,15 +79,18 @@ namespace campvis {
         size_t registerProcessorWithDefaultConstructor(std::function<AbstractProcessor*()> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
-            auto it = _processorMapDefault.lower_bound(T::getId());
-            if (it == _processorMapDefault.end() || it->first != T::getId()) {
-                _processorMapDefault.insert(it, std::make_pair(T::getId(), callee));
+            auto it = _processorTypeMap.find(T::getId());
+            if (it != _processorTypeMap.end()) {
+                // check, whether the type is the same, then a double registration is okay since it
+                // may occur due to having the ProcessorRegistrar being referenced in both 
+                // campvis-application and campvis-modules.
+                cgtAssert(std::type_index(typeid(T)) == it->second, "Tried to register two different processor types with the same ID.");
             }
             else {
-                // do nothing, a double registration may occure due to having the ProcessorRegistrar
-                // being referenced in both campvis-application and campvis-modules
+                _processorTypeMap.insert(it, std::make_pair(T::getId(), std::type_index(typeid(T))));
             }
 
+            _processorMapDefault[T::getId()] = callee;
             return _processorMapDefault.size();
         }
 
@@ -101,15 +104,18 @@ namespace campvis {
         size_t registerProcessorWithIVec2PropParam(std::function<AbstractProcessor*(IVec2Property*)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
-            auto it = _processorMapWithIVec2Param.lower_bound(T::getId());
-            if (it == _processorMapWithIVec2Param.end() || it->first != T::getId()) {
-                _processorMapWithIVec2Param.insert(it, std::make_pair(T::getId(), callee));
+            auto it = _processorTypeMap.find(T::getId());
+            if (it != _processorTypeMap.end()) {
+                // check, whether the type is the same, then a double registration is okay since it
+                // may occur due to having the ProcessorRegistrar being referenced in both 
+                // campvis-application and campvis-modules.
+                cgtAssert(std::type_index(typeid(T)) == it->second, "Tried to register two different processor types with the same ID.");
             }
             else {
-                // do nothing, a double registration may occure due to having the ProcessorRegistrar
-                // being referenced in both campvis-application and campvis-modules
+                _processorTypeMap.insert(it, std::make_pair(T::getId(), std::type_index(typeid(T))));
             }
 
+            _processorMapWithIVec2Param[T::getId()] = callee;
             return _processorMapWithIVec2Param.size();
         }
 
@@ -117,8 +123,9 @@ namespace campvis {
         mutable tbb::spin_mutex _mutex;
         static tbb::atomic<ProcessorFactory*> _singleton;    ///< the singleton object
 
-        std::map< std::string, std::function<AbstractProcessor*()>> _processorMapDefault;
-        std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)>> _processorMapWithIVec2Param;
+        std::map< std::string, std::type_index> _processorTypeMap;
+        std::map< std::string, std::function<AbstractProcessor*()> > _processorMapDefault;
+        std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)> > _processorMapWithIVec2Param;
     };
 
 
@@ -166,9 +173,11 @@ namespace campvis {
     template<typename T>
     const size_t ProcessorRegistrarSwitch<T, true>::_factoryId = ProcessorFactory::getRef().registerProcessorWithIVec2PropParam<T>(&ProcessorRegistrarSwitch<T, true>::create);
 
-
-
-
+    
+    /**
+     * Smart processor registrar that uses type traits to deduce the base type of the processor to
+     * register and forwards its registration to the corresponding ProcessorRegistrarSwitch<T, bool>.
+     */
     template<typename T>
     class SmartProcessorRegistrar {
         static const size_t _helperField;
