@@ -41,7 +41,9 @@ namespace campvis {
         , p_outputConfidenceMap("OutputConfidenceMap", "Output Confidence Map", "us.confidence", DataNameProperty::WRITE)
         , p_resetResult("ResetSolution", "Reset solution vector")
         , p_use8Neighbourhood("Use8Neighbourhood", "Use 8 Neighbourhood (otherwise 4)", true)
-        , p_millisecondBudget("IterationCount", "Conjugate Gradient Iterations", 25.0f, 1.0f, 1000.0f)
+        , p_useFixedIterationCount("UseFixedIterationCount", "Use Fixed Iteration Count", false)
+        , p_millisecondBudget("MillisecondBudget", "(P)CG Solver Time Budget", 25.0f, 1.0f, 1000.0f)
+        , p_iterationBudget("IterationBudget", "(P)CG Solver Iteration Count", 100, 0, 1000)
         , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001f, 10.0f)
         , p_paramAlpha("Alpha", "Alpha (TGC)", 2.0f, 0.001f, 10.0f)
         , p_paramBeta("Beta", "Beta (Weight mapping)", 20.0f, 0.001f, 200.0f)
@@ -57,7 +59,9 @@ namespace campvis {
 
         addProperty(p_resetResult);
         addProperty(p_use8Neighbourhood);
+        addProperty(p_useFixedIterationCount);
         addProperty(p_millisecondBudget);
+        addProperty(p_iterationBudget);
         addProperty(p_gradientScaling);
         addProperty(p_paramAlpha);
         addProperty(p_paramBeta);
@@ -66,6 +70,8 @@ namespace campvis {
         addProperty(p_useAlphaBetaFilter);
         addProperty(p_filterAlpha);
         addProperty(p_filterBeta);
+
+        updatePropertyVisibility();
     }
 
     CudaConfidenceMapsSolver::~CudaConfidenceMapsSolver() { }
@@ -84,7 +90,6 @@ namespace campvis {
         ImageRepresentationLocal::ScopedRepresentation img(data, p_inputImage.getValue());
         if (img != 0) {
             bool use8Neighbourhood = p_use8Neighbourhood.getValue();
-            float millisecondBudget = p_millisecondBudget.getValue();
             float gradientScaling = p_gradientScaling.getValue();
             float alpha = p_paramAlpha.getValue();
             float beta = p_paramBeta.getValue();
@@ -98,8 +103,16 @@ namespace campvis {
             size_t elementCount = cgt::hmul(size);
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
+            // Copy the image on the GPU and generate the equation system
             _solver.uploadImage(image, size.x, size.y, gradientScaling, alpha, beta, gamma, use8Neighbourhood);
-            _solver.solve(millisecondBudget);
+
+            // Solve the equation system using Conjugate Gradient
+            if (p_useFixedIterationCount.getValue()) {
+                _solver.solveWithFixedIterationCount(p_iterationBudget.getValue());
+            }
+            else {
+                _solver.solveWithFixedTimeBudget(p_millisecondBudget.getValue());
+            }
 
             const float *solution = _solver.getSolution(size.x, size.y);
 
@@ -115,20 +128,27 @@ namespace campvis {
         }
     }
 
-    void CudaConfidenceMapsSolver::updateProperties(DataContainer& dataContainer) { }
+    void CudaConfidenceMapsSolver::onPropertyChanged(const AbstractProperty* prop) {
+        updatePropertyVisibility();
+    }
 
-    int CudaConfidenceMapsSolver::getActualConjugentGradientIterations() const
-    {
+    int CudaConfidenceMapsSolver::getActualConjugentGradientIterations() const {
         return _solver.getSolutionIterationCount();
     }
 
-    float CudaConfidenceMapsSolver::getResidualNorm() const
-    {
+    float CudaConfidenceMapsSolver::getResidualNorm() const {
         return _solver.getSolutionResidualNorm();
     }
 
     void CudaConfidenceMapsSolver::resetSolutionVector() {
         // Create a linear gradient image of the same size as the input image
         _solver.resetSolution();
+    }
+
+    void CudaConfidenceMapsSolver::updatePropertyVisibility() {
+        // Hide properties that currently do not affect the processor
+        bool useFixedIterationCount = p_useFixedIterationCount.getValue();
+        p_millisecondBudget.setVisible(!useFixedIterationCount);
+        p_iterationBudget.setVisible(useFixedIterationCount);
     }
 }

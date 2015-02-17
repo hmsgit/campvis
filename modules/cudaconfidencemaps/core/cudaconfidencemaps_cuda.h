@@ -56,11 +56,18 @@ namespace cuda {
         void setAlphaBetaFilterParameters(float alpha, float beta);
 
         /**
-         * After calling \see uploadImage(), this functions launches a solver on the GPU that will solve
+         * After calling \see uploadImage(), this function launches a solver on the GPU that will solve
          * the diffusion problem.
          * \param   millisecondBudget the time budget the solver has to come up with a solution.
          */
-        void solve(float millisecondBudget);
+        void solveWithFixedTimeBudget(float millisecondBudget);
+
+        /**
+         * After calling \see uploadImage(), this function lanuches a solver on the GPU that will solve
+         * the diffusion problem.
+         * \param  iterations the number of conjugate iterations the solver is allowed to take.
+         */ 
+        void solveWithFixedIterationCount(int iterations);
 
         /**
          * Returns a host buffer of the last solution computed by the solver. The pointer is guaranteed to
@@ -95,6 +102,7 @@ namespace cuda {
         float getSystemSolveTime() const;
 
     private:
+        void performOutputFiltering();
         void resizeDataStructures(int imageWidth, int imageHeight, bool isUpsideDown, bool use8Neighbourhood);
         void createSystemGPU(const unsigned char* imageData, int imageWidth, int imageHeight,
                              float gradientScaling, float alpha, float beta, float gamma, bool isUpsideDown=true);

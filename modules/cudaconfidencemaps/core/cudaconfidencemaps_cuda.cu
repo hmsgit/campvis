@@ -153,7 +153,7 @@ namespace cuda {
     }
 
     // FIXME: Remove errorTolerance parameter
-    void CudaConfidenceMapsSystemSolver::solve(float millisecondBudget) {
+    void CudaConfidenceMapsSystemSolver::solveWithFixedTimeBudget(float millisecondBudget) {
         // Measure execution time and record it in the _gpuData datastructure
         CUDAClock clock; clock.start();
 
@@ -164,24 +164,25 @@ namespace cuda {
         _gpuData->solutionResidualNorm = monitor.residual_norm();
         _gpuData->iterationCount = static_cast<int>(monitor.iteration_count());
 
-        if (alphaBetaFilterEnabled()) {
-            // X' = X' + V'
-            // R' = X - X'
-            cusp::blas::axpy(_gpuData->abFilterV_d, _gpuData->abFilterX_d, 1.0f);
-            cusp::blas::axpby(_gpuData->x_d, _gpuData->abFilterX_d, _gpuData->abFilterR_d, 1.0f, -1.0f);
+        // Applies alpha-beta-filtering (if enabled) and downloads solution
+        performOutputFiltering();
 
-            // X' = X' + alpha * R'
-            // V' = V' + beta * R'
-            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterX_d, _gpuData->abFilterAlpha);
-            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterV_d, _gpuData->abFilterBeta);
+        _gpuData->systemSolveTime = clock.getElapsedMilliseconds();
+    }
 
-            // Download the smoothed solution to the host
-            _gpuData->x_h = _gpuData->abFilterX_d;
-        }
-        else {
-            // Downlaod the actual solution, which has been computed to the host
-            _gpuData->x_h = _gpuData->x_d;
-        }
+    void CudaConfidenceMapsSystemSolver::solveWithFixedIterationCount(int iterations) {
+        // Measure execution time and record it in the _gpuData datastructure
+        CUDAClock clock; clock.start();
+
+        // The solution is computed using Conjugate Gradient with a Diagonal (Jacobi) preconditioner
+        iteration_monitor<float> monitor(_gpuData->b_d, iterations);
+        cusp::precond::diagonal<float, cusp::device_memory> M(_gpuData->L_d);
+        cusp::krylov::cg(_gpuData->L_d, _gpuData->x_d, _gpuData->b_d, monitor, M);
+        _gpuData->solutionResidualNorm = monitor.residual_norm();
+        _gpuData->iterationCount = static_cast<int>(monitor.iteration_count());
+
+        // Applies alpha-beta-filtering (if enabled) and downloads solution
+        performOutputFiltering();
 
         _gpuData->systemSolveTime = clock.getElapsedMilliseconds();
     }
@@ -209,6 +210,26 @@ namespace cuda {
         return _gpuData->systemSolveTime;
     }
 
+    void CudaConfidenceMapsSystemSolver::performOutputFiltering() {
+        if (alphaBetaFilterEnabled()) {
+            // X' = X' + V'
+            // R' = X - X'
+            cusp::blas::axpy(_gpuData->abFilterV_d, _gpuData->abFilterX_d, 1.0f);
+            cusp::blas::axpby(_gpuData->x_d, _gpuData->abFilterX_d, _gpuData->abFilterR_d, 1.0f, -1.0f);
+
+            // X' = X' + alpha * R'
+            // V' = V' + beta * R'
+            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterX_d, _gpuData->abFilterAlpha);
+            cusp::blas::axpy(_gpuData->abFilterR_d, _gpuData->abFilterV_d, _gpuData->abFilterBeta);
+
+            // Download the smoothed solution to the host
+            _gpuData->x_h = _gpuData->abFilterX_d;
+        }
+        else {
+            // Downlaod the actual solution, which has been computed to the host
+            _gpuData->x_h = _gpuData->x_d;
+        }
+    }
 
     void CudaConfidenceMapsSystemSolver::resizeDataStructures(int imageWidth, int imageHeight, bool isUpsideDown, bool use8Neighbourhood) {
         // If the problem size changed, reset the solution vector, as well as all

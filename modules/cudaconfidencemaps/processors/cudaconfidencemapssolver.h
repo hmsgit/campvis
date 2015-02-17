@@ -77,8 +77,7 @@ namespace campvis {
          */
         virtual void updateResult(DataContainer& dataContainer);
 
-        /// \see AbstractProcessor::updateProperties
-        virtual void updateProperties(DataContainer& dataContainer);
+        virtual void onPropertyChanged(const AbstractProperty* prop);
 
         int getActualConjugentGradientIterations() const;
         float getResidualNorm() const;
@@ -86,13 +85,15 @@ namespace campvis {
         DataNameProperty p_inputImage;              ///< ID for input volume
         DataNameProperty p_outputConfidenceMap;     ///< ID for output gradient volume
 
-        ButtonProperty p_resetResult;
+        ButtonProperty p_resetResult;               ///< Resets solution vector to a linear confidence ramp
 
         BoolProperty  p_use8Neighbourhood;          ///< Wether to use 8- or 4-neighbourhood
+        BoolProperty  p_useFixedIterationCount;     ///< If set to true the CG iterations are fixed, and not determined by time budget
 
         FloatProperty p_millisecondBudget;          ///< Maximum number of ms the solver can run
+        IntProperty   p_iterationBudget;            ///< Number of CG iterations to perform per frame
 
-        FloatProperty p_gradientScaling;
+        FloatProperty p_gradientScaling;            ///< Multiplicaton factor for gradients
         FloatProperty p_paramAlpha;
         FloatProperty p_paramBeta;
         FloatProperty p_paramGamma;
@@ -103,6 +104,7 @@ namespace campvis {
         
     protected:
         void resetSolutionVector();
+        void updatePropertyVisibility();
 
         cuda::CudaConfidenceMapsSystemSolver _solver;
         
