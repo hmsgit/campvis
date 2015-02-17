@@ -28,6 +28,8 @@
 #include <sstream>
 #include <QDateTime>
 #include <QDir>
+#include <QClipboard>
+#include <QApplication>
 
 #ifdef CAMPVIS_HAS_MODULE_DEVIL
 #include <IL/il.h>
@@ -51,10 +53,14 @@ namespace campvis {
         , _usMapsSolver()
         , _usFusion(&_canvasSize)
         , _usFanRenderer(&_canvasSize)
-        , p_millisecondBudget("MillisecondBudget", "Milliseconds per frame", 24.0f, 10.0f, 60.0f)
+        , p_useFixedIterationCount("UseFixedIterationCount", "Use Fixed Iteration Count", false)
+        , p_millisecondBudget("MillisecondBudget", "(P)CG Milliseconds per frame", 24.0f, 10.0f, 60.0f)
+        , p_iterationBudget("IterationBudget", "(P)CG Iteration Count", 100, 0, 1000)
         , p_connectDisconnectButton("ConnectToIGTLink", "Connect/Disconnect")
         , p_resamplingScale("ResampleScale", "Resample Scale", 0.5f, 0.01f, 1.0f)
         , p_beta("Beta", "Beta", 80.0f, 1.0f, 200.0f)
+        , p_collectStatistics("CollectStatistics", "Collect Statistics", false)
+        , p_copyStatisticsToClipboard("CopyStatisticsToClipboard", "Copy Statistics To Clipboard as CSV")
         , p_showAdvancedOptions("ShowAdvancedOptions", "Advanced options...", false)
         , p_useAlphaBetaFilter("UseAlphaBetaFilter", "Alpha-Beta-Filter", true)
         , p_gaussianFilterSize("GaussianSigma", "Blur amount", 2.5f, 1.0f, 10.0f)
@@ -80,10 +86,14 @@ namespace campvis {
         addProcessor(&_usFusion);
         addProcessor(&_usFanRenderer);
 
+        addProperty(p_useFixedIterationCount);
         addProperty(p_millisecondBudget);
+        addProperty(p_iterationBudget);
         addProperty(p_connectDisconnectButton);
         addProperty(p_resamplingScale);
         addProperty(p_beta);
+        addProperty(p_collectStatistics);
+        addProperty(p_copyStatisticsToClipboard);
 
         addProperty(p_showAdvancedOptions);
 
@@ -100,6 +110,10 @@ namespace campvis {
         addProperty(p_useSpacingEncodedFanGeometry);
 
         setAdvancedPropertiesVisibility(false);
+
+        // Reserve memory for statistics, so that (hopefully) no reallocation happens at runtime
+        _statistics.reserve(1000);
+        _objectCreationTime = tbb::tick_count::now();
     }
 
     CudaConfidenceMapsDemo::~CudaConfidenceMapsDemo() {
@@ -149,8 +163,14 @@ namespace campvis {
 
         _renderTargetID.setValue("us.fused_fan");
 
-        // Bind pipeline proeprties to processor properties
+        // Bind buttons to event handlers
         p_connectDisconnectButton.s_clicked.connect(this, &CudaConfidenceMapsDemo::toggleIGTLConnection);
+        p_copyStatisticsToClipboard.s_clicked.connect(this, &CudaConfidenceMapsDemo::copyStatisticsToClipboard);
+
+        // Bind pipeline proeprties to processor properties
+        p_useFixedIterationCount.addSharedProperty(&_usMapsSolver.p_useFixedIterationCount);
+        p_millisecondBudget.addSharedProperty(&_usMapsSolver.p_millisecondBudget);
+        p_iterationBudget.addSharedProperty(&_usMapsSolver.p_iterationBudget);
 
         p_gaussianFilterSize.addSharedProperty(&_usBlurFilter.p_sigma);
         p_resamplingScale.addSharedProperty(&_usResampler.p_resampleScale);
@@ -172,25 +192,19 @@ namespace campvis {
         // FIXME: It would be better to check if a new image actually arrived, instead
         // of just checking the invaildation state of the IGTLReader
         if (!_usIgtlReader.isValid()) {
-            float millisecondBudget = p_millisecondBudget.getValue();
             auto startTime = tbb::tick_count::now();
 
-            // Make sure that the whole pipeline gets invalidated
+            // Make sure that the whole pipeline gets invalidated and executed
             _usBlurFilter.invalidate(AbstractProcessor::INVALID_RESULT);
             _usCropFilter.invalidate(AbstractProcessor::INVALID_RESULT);
             _usResampler.invalidate(AbstractProcessor::INVALID_RESULT);
             _usMapsSolver.invalidate(AbstractProcessor::INVALID_RESULT);
             _usFusion.invalidate(AbstractProcessor::INVALID_RESULT);
-
             executeProcessorAndCheckOpenGLState(&_usIgtlReader);
             executeProcessorAndCheckOpenGLState(&_usCropFilter);
             executeProcessorAndCheckOpenGLState(&_usBlurFilter) ;
             executeProcessorAndCheckOpenGLState(&_usResampler);
-
-            auto solverStartTime = tbb::tick_count::now();
-            _usMapsSolver.p_millisecondBudget.setValue(millisecondBudget);
             executeProcessorAndCheckOpenGLState(&_usMapsSolver);
-            auto solverEndTime = tbb::tick_count::now();
 
             // Read fan geomtry from encoded image...
             if (p_useSpacingEncodedFanGeometry.getValue()) {
@@ -212,7 +226,7 @@ namespace campvis {
                 _statisticsLastUpdateTime = startTime;
 
                 auto ms = (endTime - startTime).seconds() * 1000.0f;
-                auto solverMs = (solverEndTime - solverStartTime).seconds() * 1000.0f;
+                auto solverMs = _usMapsSolver.getActualSolverExecutionTime();
                 std::stringstream string;
                 string << "Mode: " << _usFusion.p_view.getOptionValue() << std::endl;
                 string << "Execution time: " << static_cast<int>(ms) << "ms" << std::endl;
@@ -259,6 +273,39 @@ namespace campvis {
                     }
 #endif
                 }
+            }
+
+            // Collect statistics
+            if (p_collectStatistics.getValue()) {
+                StatisticsEntry entry;
+                entry.time = (startTime - _objectCreationTime).seconds() * 1000.0f;
+
+                ImageRepresentationGL::ScopedRepresentation originalImage(*_data, _usCropFilter.p_outputImage.getValue());
+                ImageRepresentationGL::ScopedRepresentation downsampledImage(*_data, _usResampler.p_outputImage.getValue());
+
+                if (originalImage && downsampledImage) {
+                    entry.originalWidth = originalImage->getSize().x;
+                    entry.originalHeight = originalImage->getSize().y;
+                    entry.downsampledWidth = downsampledImage->getSize().x;
+                    entry.downsampledHeight = downsampledImage->getSize().y;
+                } else {
+                    LWARNING("Could not read image size");
+                    entry.originalWidth = entry.originalHeight = -1;
+                    entry.downsampledWidth = entry.downsampledHeight = -1;
+                }
+
+                entry.gaussianKernelSize = _usBlurFilter.p_sigma.getValue();
+                entry.scalingFactor = _usResampler.p_resampleScale.getValue();
+                entry.alpha = _usMapsSolver.p_paramAlpha.getValue();
+                entry.beta = _usMapsSolver.p_paramBeta.getValue();
+                entry.gamma = _usMapsSolver.p_paramGamma.getValue();
+                entry.gradientScaling = _usMapsSolver.p_gradientScaling.getValue();
+                entry.iterations = _usMapsSolver.getActualConjugentGradientIterations();
+                entry.solverExecutionTime = _usMapsSolver.getActualSolverExecutionTime();
+                entry.totalExecutionTime = (endTime - startTime).seconds() * 1000.0f;
+                entry.solverError = _usMapsSolver.getResidualNorm();
+
+                _statistics.push_back(entry);
             }
         }
     }
@@ -330,7 +377,11 @@ namespace campvis {
             // Prevent the program from changing the render target
             _renderTargetID.setValue("us.fused_fan");
         }
-        
+
+        bool useFixedIterationCount = p_useFixedIterationCount.getValue();
+        p_millisecondBudget.setVisible(!useFixedIterationCount);
+        p_iterationBudget.setVisible(useFixedIterationCount);
+
         AutoEvaluationPipeline::onPropertyChanged(prop);
     }
 
@@ -341,6 +392,40 @@ namespace campvis {
             _usIgtlReader.p_connect.click();
         else
             _usIgtlReader.p_disconnect.click();
+    }
+
+    void CudaConfidenceMapsDemo::copyStatisticsToClipboard() {
+        // Copy statistics to the clipboard in CSV format
+        std::cout << "Have " << _statistics.size() << " stats items" << std::endl;
+
+        std::stringstream stream;
+        stream << "time, originalWidth, originalHeight, downsampledWidth, downsampledHeight, gaussianKernelSize, scalingFactor, alpha, beta, gamma, gradientScaling, iterations, solverExecutionTime, totalExecutionTime, solverError" << std::endl;
+
+        for (auto& item : _statistics) {
+            stream << item.time << ", ";
+            stream << item.originalWidth << ", ";
+            stream << item.originalHeight << ", ";
+            stream << item.downsampledWidth << ", ";
+            stream << item.downsampledHeight << ", ";
+            stream << item.gaussianKernelSize << ", ";
+            stream << item.scalingFactor << ", ";
+            stream << item.alpha << ", ";
+            stream << item.beta << ", ";
+            stream << item.gamma << ", ";
+            stream << item.gradientScaling << ", ";
+            stream << item.iterations << ", ";
+            stream << item.solverExecutionTime << ", ";
+            stream << item.totalExecutionTime << ", ";
+            stream << item.solverError << std::endl;
+        }
+
+        // Copy CSV stream to clipboard
+        QClipboard *clipboard = QApplication::clipboard();
+        QString text = QString::fromStdString(stream.str());
+        clipboard->setText(text);
+
+        _statistics.clear();
+        _statistics.reserve(1000);
     }
 
     void CudaConfidenceMapsDemo::setAdvancedPropertiesVisibility(bool visible) {

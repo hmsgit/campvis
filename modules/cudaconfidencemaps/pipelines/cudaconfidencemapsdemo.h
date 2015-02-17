@@ -74,22 +74,28 @@ namespace campvis {
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
         void toggleIGTLConnection();
+        void copyStatisticsToClipboard();
         void setAdvancedPropertiesVisibility(bool visible);
 
         // Processors
         OpenIGTLinkClient _usIgtlReader;
-        GlImageCrop      _usCropFilter;
-        GlGaussianFilter _usBlurFilter;
-        GlImageResampler _usResampler;
+        GlImageCrop       _usCropFilter;
+        GlGaussianFilter  _usBlurFilter;
+        GlImageResampler  _usResampler;
         CudaConfidenceMapsSolver _usMapsSolver;
-        AdvancedUsFusion _usFusion;
-        UsFanRenderer _usFanRenderer;
+        AdvancedUsFusion  _usFusion;
+        UsFanRenderer     _usFanRenderer;
 
         // Basic options
+        BoolProperty   p_useFixedIterationCount;
         FloatProperty  p_millisecondBudget;
+        IntProperty    p_iterationBudget;
         ButtonProperty p_connectDisconnectButton;
         FloatProperty  p_resamplingScale;
         FloatProperty  p_beta;
+
+        BoolProperty   p_collectStatistics;
+        ButtonProperty p_copyStatisticsToClipboard;
 
         BoolProperty   p_showAdvancedOptions;
 
@@ -104,6 +110,22 @@ namespace campvis {
         BoolProperty   p_useSpacingEncodedFanGeometry; // Fan geometry is transmitted to campvis encoded in the x and y component of the voxel size (FOV in deg, innerRadius)
         StringProperty p_recordingDirectory;
         BoolProperty   p_enableRecording;
+
+        // Data structures to collect statistics
+        struct StatisticsEntry {
+            float time;
+            int originalWidth, originalHeight;
+            int downsampledWidth, downsampledHeight;
+            float gaussianKernelSize;
+            float scalingFactor;
+            float alpha, beta, gamma, gradientScaling;
+            int iterations;
+            float solverExecutionTime;
+            float totalExecutionTime;
+            float solverError;
+        };
+        std::vector<StatisticsEntry> _statistics;
+        tbb::tick_count _objectCreationTime;
 
         // Variables to keep track of file naming when recording...
         int _recordedFrames;

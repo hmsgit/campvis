@@ -136,6 +136,10 @@ namespace campvis {
         return _solver.getSolutionIterationCount();
     }
 
+    float CudaConfidenceMapsSolver::getActualSolverExecutionTime() const {
+        return _solver.getSystemSolveTime();
+    }
+
     float CudaConfidenceMapsSolver::getResidualNorm() const {
         return _solver.getSolutionResidualNorm();
     }

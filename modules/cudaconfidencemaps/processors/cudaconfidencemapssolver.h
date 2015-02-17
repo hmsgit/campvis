@@ -80,6 +80,7 @@ namespace campvis {
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
         int getActualConjugentGradientIterations() const;
+        float getActualSolverExecutionTime() const;
         float getResidualNorm() const;
 
         DataNameProperty p_inputImage;              ///< ID for input volume
