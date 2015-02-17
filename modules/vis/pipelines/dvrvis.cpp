@@ -103,7 +103,7 @@ namespace campvis {
         // this will all get better with scripting support.
         static_cast<BoolProperty*>(_vmEepGenerator.getProperty("applyMask"))->setValue(true);
         _vmRenderer.p_renderTargetID.addSharedProperty(static_cast<DataNameProperty*>(_vmEepGenerator.getProperty("maskID")));
-        _vmRenderer.p_renderMode.selectByOption(GL_POLYGON);
+        _vmRenderer.p_renderMode.selectByOption(GL_TRIANGLE_FAN);
 
         _renderTargetID.setValue("combine");
 

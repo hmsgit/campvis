@@ -59,8 +59,6 @@ namespace campvis {
     MultiIndexedGeometry::MultiIndexedGeometry(const MultiIndexedGeometry& rhs)
         : GeometryData(rhs)
         , _indices(rhs._indices)
-        , _offsets(rhs._offsets)
-        , _counts(rhs._counts)
         , _vertices(rhs._vertices)
         , _textureCoordinates(rhs._textureCoordinates)
         , _colors(rhs._colors)
@@ -80,8 +78,6 @@ namespace campvis {
 
         GeometryData::operator=(rhs);
         _indices = rhs._indices;
-        _offsets = rhs._offsets;
-        _counts = rhs._counts;
 
         _vertices = rhs._vertices;
         _textureCoordinates = rhs._textureCoordinates;
@@ -97,8 +93,6 @@ namespace campvis {
     MultiIndexedGeometry* MultiIndexedGeometry::clone() const {
         MultiIndexedGeometry* toReturn = new MultiIndexedGeometry(_vertices, _textureCoordinates, _colors, _normals);
         toReturn->_indices = _indices;
-        toReturn->_offsets = _offsets;
-        toReturn->_counts = _counts;
 
         return toReturn;
     }
@@ -121,12 +115,11 @@ namespace campvis {
     }
 
     void MultiIndexedGeometry::addPrimitive(const std::vector<uint16_t>& indices) {
-        _offsets.push_back(reinterpret_cast<void*>(_indices.size() * 2));
-        _counts.push_back(static_cast<GLsizei>(indices.size()));
+        if (! _indices.empty())
+            _indices.push_back(65535);
+
         _indices.insert(_indices.end(), indices.begin(), indices.end());
-
         _buffersDirty = true;
-
     }
 
     const std::vector<cgt::col4>& MultiIndexedGeometry::getPickingInformation() const {
@@ -140,7 +133,7 @@ namespace campvis {
     }
 
     void MultiIndexedGeometry::render(GLenum mode) const {
-        if (_counts.empty())
+        if (_indices.empty())
             return;
 
         createGLBuffers();
@@ -162,8 +155,41 @@ namespace campvis {
             vao.setVertexAttributePointer(4, _pickingBuffer);
         vao.bindIndexBuffer(_indicesBuffer);
 
-        const GLvoid** ptr = (const GLvoid**)(&_offsets.front()); // <- hidden reinterpret_cast<const GLvoid**> here, ugly OpenGL...
-        glMultiDrawElements(mode, &_counts.front(), GL_UNSIGNED_SHORT, ptr, static_cast<GLsizei>(_offsets.size()));
+        glEnable(GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex(65535);
+        glDrawElements(mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_SHORT, 0);
+        glDisable(GL_PRIMITIVE_RESTART);
+
+        LGL_ERROR;
+    }
+
+    void MultiIndexedGeometry::renderInstanced(GLsizei count, GLenum mode /*= GL_TRIANGLE_FAN*/) const {
+        if (_indices.empty())
+            return;
+
+        createGLBuffers();
+        if (_buffersDirty) {
+            LERROR("Cannot render without initialized OpenGL buffers.");
+            return;
+        }
+
+        cgt::VertexArrayObject vao;
+        if (_verticesBuffer)
+            vao.setVertexAttributePointer(0, _verticesBuffer);
+        if (_texCoordsBuffer)
+            vao.setVertexAttributePointer(1, _texCoordsBuffer);
+        if (_colorsBuffer)
+            vao.setVertexAttributePointer(2, _colorsBuffer);
+        if (_normalsBuffer)
+            vao.setVertexAttributePointer(3, _normalsBuffer);
+        if (_pickingBuffer)
+            vao.setVertexAttributePointer(4, _pickingBuffer);
+        vao.bindIndexBuffer(_indicesBuffer);
+
+        glEnable(GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex(65535);
+        glDrawElementsInstanced(mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_SHORT, 0, count);
+        glDisable(GL_PRIMITIVE_RESTART);
 
         LGL_ERROR;
     }

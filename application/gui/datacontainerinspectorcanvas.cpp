@@ -199,8 +199,8 @@ namespace campvis {
 
                 // compute transformation matrices
                 float renderTargetRatio = static_cast<float>(_quadSize.x) / static_cast<float>(_quadSize.y);
-                float sliceRatio = (static_cast<float>(id->getSize().x) * id->getMappingInformation().getVoxelSize().x)
-                                 / (static_cast<float>(id->getSize().y) * id->getMappingInformation().getVoxelSize().y);
+                float sliceRatio = (static_cast<float>(id->getSize().x) * std::abs(id->getMappingInformation().getVoxelSize().x))
+                                 / (static_cast<float>(id->getSize().y) * std::abs(id->getMappingInformation().getVoxelSize().y));
                 float ratioRatio = sliceRatio / renderTargetRatio;
                 cgt::mat4 viewMatrix = (ratioRatio > 1) ? cgt::mat4::createScale(cgt::vec3(1.f, 1.f / ratioRatio, 1.f)) : cgt::mat4::createScale(cgt::vec3(ratioRatio, 1.f, 1.f));
 
@@ -245,7 +245,7 @@ namespace campvis {
         }
         _paintShader->setIgnoreUniformLocationError(false);
 
-        _quad->render(GL_POLYGON);
+        _quad->render(GL_TRIANGLE_FAN);
         LGL_ERROR;
     }
 
@@ -291,8 +291,8 @@ namespace campvis {
 
             // compute transformation matrices
             float renderTargetRatio = static_cast<float>(_quadSize.x) / static_cast<float>(_quadSize.y);
-            float sliceRatio = (static_cast<float>(id->getSize().x) * id->getMappingInformation().getVoxelSize().x)
-                / (static_cast<float>(id->getSize().y) * id->getMappingInformation().getVoxelSize().y);
+            float sliceRatio = (static_cast<float>(id->getSize().x) * std::abs(id->getMappingInformation().getVoxelSize().x))
+                / (static_cast<float>(id->getSize().y) * std::abs(id->getMappingInformation().getVoxelSize().y));
             float ratioRatio = sliceRatio / renderTargetRatio;
 
             lookupTexelFloat /= (ratioRatio > 1) ? cgt::vec2(1.f, 1.f / ratioRatio) : cgt::vec2(ratioRatio, 1.f);

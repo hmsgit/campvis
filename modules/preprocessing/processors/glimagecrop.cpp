@@ -108,7 +108,7 @@ namespace campvis {
             ImageData* id = new ImageData(3, outputSize, img.getImageData()->getNumChannels());
             ImageRepresentationGL::create(id, resultTexture);
             const ImageMappingInformation& imi = img->getParent()->getMappingInformation();
-            id->setMappingInformation(ImageMappingInformation(img->getSize(), imi.getOffset() + (cgt::vec3(p_llf.getValue()) * imi.getVoxelSize()), imi.getVoxelSize(), imi.getRealWorldMapping()));
+            id->setMappingInformation(ImageMappingInformation(img->getSize(), imi.getOffset() + (cgt::vec3(p_llf.getValue()) * imi.getVoxelSize()), imi.getVoxelSize(), imi.getCustomTransformation()));
             data.addData(p_outputImage.getValue(), id);
 
             cgt::TextureUnit::setZeroUnit();

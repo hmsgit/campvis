@@ -129,6 +129,10 @@ namespace campvis {
         std::sort(_keyPoints.begin(), _keyPoints.end(), KeyPointSorter(_center._position));
     }
 
+    cgt::vec2 TFGeometry2D::getIntensityDomain() const {
+        return cgt::vec2(_keyPoints.front()._position.x, _keyPoints.back()._position.x);
+    }
+
 
 
 }

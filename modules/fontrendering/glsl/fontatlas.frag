@@ -23,11 +23,15 @@
 // ================================================================================================
 
 in vec3 ex_TexCoord;
-out vec4 out_Color;
+
+layout(location = 0) out vec4 out_Color;
+layout(location = 1) out vec4 out_Picking;
 
 uniform sampler2D _fontTexture;
 uniform vec4 _color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 _pickingColor = vec4(0.0);
 
 void main() {
     out_Color = vec4(texture2D(_fontTexture, ex_TexCoord.xy).r) * _color;
+    out_Picking = _pickingColor;
 }

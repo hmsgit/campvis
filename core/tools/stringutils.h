@@ -79,10 +79,11 @@ namespace campvis {
         /**
          * Splits the string \a str into pieces separated by the delimiters in \a delimiter.
          * \param str       String to split.
-         * \param delimiter Set of delimiters.
+         * \param delimiter Delimiter, if \a delimiterIsSet is true, this either character of this string is considered a delimiter.
+         * \param delimiterIsSet    Flag, whether \a delimiter is considered as set or as multi char string; defaults to false.
          * \return  Vector of the split substrings.
          */
-        static std::vector<std::string> split(const std::string& str, const std::string& delimiter);
+        static std::vector<std::string> split(const std::string& str, const std::string& delimiter, bool delimiterIsSet = false);
 
         /**
          * Splits the string \a str into trimmed pieces separated by the delimiters in \a delimiter.

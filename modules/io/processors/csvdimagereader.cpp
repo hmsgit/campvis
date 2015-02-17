@@ -43,7 +43,7 @@ namespace campvis {
         , p_imageOffset("ImageOffset", "Image Offset in mm", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f), cgt::vec3(0.1f))
         , p_voxelSize("VoxelSize", "Voxel Size in mm", cgt::vec3(1.f), cgt::vec3(-100.f), cgt::vec3(100.f), cgt::vec3(0.1f))
     {
-        this->_ext.push_back(".csv");
+        this->_ext.push_back("csv");
         this->p_targetImageID.setValue("CsvdImageReader.output");
 
         addProperty(p_url);
@@ -58,9 +58,16 @@ namespace campvis {
 
     void CsvdImageReader::updateResult(DataContainer& data) {
         try {
+            std::ifstream file(p_url.getValue(), std::ios::in);
+            if (! file.good())
+                throw cgt::FileException("Could not open file.", p_url.getValue());
+
             // start parsing
-            TextFileParser tfp(p_url.getValue(), true, "=");
+            TextFileParser tfp(file, true, "=");
             tfp.parse<TextFileParser::ItemSeparatorLines>();
+            file.close();
+
+            const TextFileParser::TokenGroup* rootNode = tfp.getRootGroup();
 
             // init optional parameters with sane default values
             cgt::svec3 size;
@@ -70,8 +77,8 @@ namespace campvis {
             cgt::vec3 imageOffset(0.f);
 
             // dimensionality and size
-            if (tfp.hasKey("Size")) {
-                size = tfp.getSvec3("Size");
+            if (rootNode->hasKey("Size")) {
+                size = rootNode->getSvec3("Size");
             }
             else {
                 LERROR("Error while parsing CSVD header: No Size specified.");
@@ -79,7 +86,7 @@ namespace campvis {
             }
 
             // element type
-            std::string et = tfp.getString("ElementType");
+            std::string et = rootNode->getString("ElementType");
             if (et == "UINT8")
                 pt = WeaklyTypedPointer::UINT8;
             else if (et == "INT8")
@@ -100,13 +107,13 @@ namespace campvis {
             }
 
             // dimensionality and size
-            if (tfp.hasKey("CsvFileBaseName")) {
+            if (rootNode->hasKey("CsvFileBaseName")) {
                 size_t dimensionality = 3;
                 ImageData* image = new ImageData(dimensionality, size, 1);
                 ImageRepresentationLocal* rep = 0;
                 size_t index = 0;
 
-                std::string url = StringUtils::trim(tfp.getString("CsvFileBaseName"));
+                std::string url = StringUtils::trim(rootNode->getString("CsvFileBaseName"));
                 url = cgt::FileSystem::cleanupPath(cgt::FileSystem::dirName(p_url.getValue()) + "/" + url);
 
                 // start parsing of CSV files

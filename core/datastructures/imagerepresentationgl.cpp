@@ -169,7 +169,6 @@ namespace campvis {
                 shader->setUniform(texParamsUniform + "._voxelSizeRCP", cgt::vec3(1.f) / _parent->getMappingInformation().getVoxelSize());
                 shader->setUniform(texParamsUniform + "._textureToWorldMatrix", _parent->getMappingInformation().getTextureToWorldMatrix());
                 shader->setUniform(texParamsUniform + "._worldToTextureMatrix", _parent->getMappingInformation().getWorldToTextureMatrix());
-                shader->setUniform(texParamsUniform + "._realWorldMapping", cgt::vec2(_parent->getMappingInformation().getRealWorldMapping()._shift, _parent->getMappingInformation().getRealWorldMapping()._scale));
                 break;
 
             default:

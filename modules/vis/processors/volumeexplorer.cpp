@@ -296,7 +296,7 @@ namespace campvis {
                     _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(srs.x, 0.f, 0.f)));
                     break;
             }
-            _quad->render(GL_POLYGON);
+            _quad->render(GL_TRIANGLE_FAN);
 
             _shader->setUniform("_renderBackground", false);
             decorateRenderEpilog(_shader);
@@ -311,7 +311,7 @@ namespace campvis {
                 _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
                 _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, 2.f * srs.y, 0.f)));
             }
-            _quad->render(GL_POLYGON);
+            _quad->render(GL_TRIANGLE_FAN);
         }
         if (ySliceImage != 0) {
             ySliceImage->bind(_shader, colorUnit, depthUnit);
@@ -323,7 +323,7 @@ namespace campvis {
                 _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
                 _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, srs.y, 0.f)));
             }
-            _quad->render(GL_POLYGON);
+            _quad->render(GL_TRIANGLE_FAN);
         }
         if (xSliceImage != 0) {
             xSliceImage->bind(_shader, colorUnit, depthUnit);
@@ -335,7 +335,7 @@ namespace campvis {
                 _shader->setUniform("_modelMatrix", cgt::mat4::createScale(cgt::vec3(srs.x, srs.y, .5f)));
                 _shader->setUniform("_viewMatrix", cgt::mat4::createTranslation(cgt::vec3(0.f, 0.f, 0.f)));
             }
-            _quad->render(GL_POLYGON);
+            _quad->render(GL_TRIANGLE_FAN);
         }
 
         _shader->deactivate();

@@ -25,32 +25,23 @@
 in vec3 ex_TexCoord;        ///< incoming texture coordinate
 in vec4 ex_Position;        ///< incoming texture coordinate
 
-out uint result;
+out uvec4 result;
  
 #include "tools/texture2d.frag"
 
 uniform usampler2D _voxelTexture;
-uniform TextureParameters2D _voxelTextureParams;
 uniform int _level; // read from this mipmap level
-
-uniform float _inverseTexSizeX; // 1.0 / mipmapLevelResolution
-uniform float _inverseTexSizeY; // 1.0 / mipmapLevelResolution
 
 
 void main() {
-    // texture coordinates of 4 neighbor texels in source voxel texture
-    vec2 offset1 = vec2(_inverseTexSizeX, 0.0);   // right
-    vec2 offset2 = vec2(0.0, _inverseTexSizeY);   // top
-    vec2 offset3 = vec2(_inverseTexSizeX, _inverseTexSizeY); // top right
-    vec2 coord; // this pixel    
-    coord.x = (((gl_FragCoord.x-0.5)*2.0)+0.5)*_inverseTexSizeX;
-    coord.y = (((gl_FragCoord.y-0.5)*2.0)+0.5)*_inverseTexSizeY;
+    // compute texel to fetch
+    ivec2 coord = ivec2(gl_FragCoord.xy - 0.5) * 2;
 
     /// Lookup 4 neighbor texels ( ~ voxel stacks)
-    uint val1 = uint(textureLod(_voxelTexture, vec2(coord), _level));
-    uint val2 = uint(textureLod(_voxelTexture, vec2(coord+offset1), _level) );
-    uint val3 = uint(textureLod(_voxelTexture, vec2(coord+offset2), _level) );
-    uint val4 = uint(textureLod(_voxelTexture, vec2(coord+offset3), _level) );
+    uvec4 val1 = texelFetch(_voxelTexture, coord, _level);
+    uvec4 val2 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(1, 0));
+    uvec4 val3 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(0, 1));
+    uvec4 val4 = texelFetchOffset(_voxelTexture, coord, _level, ivec2(1, 1));
 
     result = val1 | val2 | val3 | val4;
 }

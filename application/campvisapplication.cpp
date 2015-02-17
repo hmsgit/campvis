@@ -235,13 +235,7 @@ namespace campvis {
 
             _mainWindow->deinit();
             QuadRenderer::deinit();
-
-            // deinit OpenGL and cgt
-            cgt::deinitGL();
         }
-
-        // MainWindow dtor needs a valid CampVisApplication, so we need to call it here instead of during destruction.
-        delete _mainWindow;
 
         // now delete everything in the right order:
         for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
@@ -250,6 +244,12 @@ namespace campvis {
         }
         for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
             delete *it;
+        }
+
+        {
+            // Deinit everything OpenGL using the local context.
+            cgt::GLContextScopedLock lock(_localContext);
+            cgt::deinitGL();
         }
 
         GLJobProc.stop();

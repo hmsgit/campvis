@@ -94,6 +94,14 @@ namespace campvis {
          */
         void setupGUI();
 
+        /**
+         * Listens to resize events on _pipelinePropertiesWidget and resizes _pipelinePropertiesScrollArea accordingly
+         * \param   watched    the object that caused the event
+         * \param   event      the event to be filtered
+         */
+        bool eventFilter(QObject* watched, QEvent* event);
+
+
     protected:
 
         DataContainer* _dataContainer;                  ///< The DataContainer this widget is inspecting

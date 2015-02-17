@@ -59,10 +59,10 @@ namespace campvis {
         , p_importSimilar("ImportSimilar", "Import All Similar Files", false)
         , _shader(nullptr)
     {
-        this->_ext.push_back(".bmp");
-        this->_ext.push_back(".jpg");
-        this->_ext.push_back(".png");
-        this->_ext.push_back(".tif");
+        this->_ext.push_back("bmp");
+        this->_ext.push_back("jpg");
+        this->_ext.push_back("png");
+        this->_ext.push_back("tif");
         this->p_targetImageID.setValue("DevilImageReader.output");
 
         addProperty(p_url);

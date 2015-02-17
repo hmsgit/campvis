@@ -24,6 +24,8 @@
 
 #include "datacontainerfileloaderwidget.h"
 
+#include <QScrollBar>
+
 namespace campvis {
 
     const std::string DataContainerFileLoaderWidget::loggerCat_ = "CAMPVis.application.DataContainerFileLoaderWidget";
@@ -36,21 +38,20 @@ namespace campvis {
         , _fileName("fileName", "Image URL", "")
         , _propCollectionWidget(0)
     {
-        this->_parent = parentDataInspector;
-        this->_dataContainer = this->_parent->getDataContainer();
-        this->_imgReader = new GenericImageReader();
-        this->_imgReader->setVisibibility(".mhd", true);
+        _parent = parentDataInspector;
+        _dataContainer = _parent->getDataContainer();
+        _imgReader = new GenericImageReader();
         setupGUI();
     }
 
     DataContainerFileLoaderWidget::~DataContainerFileLoaderWidget() {
-        if (this->_dataContainer != 0) {
-            this->_dataContainer->s_dataAdded.disconnect(this);
+        if (_dataContainer != 0) {
+            _dataContainer->s_dataAdded.disconnect(this);
         }
     }
 
     void DataContainerFileLoaderWidget::setDataContainer(DataContainer* dataContainer) {
-        this->_dataContainer = dataContainer;
+        _dataContainer = dataContainer;
     }
 
     QSize DataContainerFileLoaderWidget::sizeHint() const {
@@ -61,33 +62,39 @@ namespace campvis {
     void DataContainerFileLoaderWidget::setupGUI() {
         setWindowTitle(tr("Browse File"));
 
-        this->_layout = new QGridLayout();
-        this->_layout->setSpacing(2);
+        _layout = new QGridLayout();
+        _layout->setSpacing(2);
         setLayout(_layout);
 
-        this->_pipelinePropertiesScrollArea = new QScrollArea(this);
-        this->_pipelinePropertiesScrollArea->setWidgetResizable(true);
-        this->_pipelinePropertiesScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        this->_pipelinePropertiesScrollArea->setFrameStyle(QScrollArea::NoFrame);
+        _pipelinePropertiesScrollArea = new QScrollArea(this);
+        _pipelinePropertiesScrollArea->setWidgetResizable(true);
+        _pipelinePropertiesScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        _pipelinePropertiesScrollArea->setFrameStyle(QScrollArea::NoFrame);
         
-        this->installEventFilter(this);
+        _propCollectionWidget = new PropertyCollectionWidget(_pipelinePropertiesScrollArea);
+        _propCollectionWidget->installEventFilter(this);
+        _pipelinePropertiesScrollArea->setWidget(_propCollectionWidget);
+        _propCollectionWidget->updatePropCollection(_imgReader, _dataContainer);
+        _layout->addWidget(_pipelinePropertiesScrollArea, 0, 0, 1, 2);
 
-        this->_propCollectionWidget = new PropertyCollectionWidget(this->_pipelinePropertiesScrollArea);
-        this->_layout->addWidget(this->_propCollectionWidget, 0, 0, 1, 2);
-        this->_propCollectionWidget->updatePropCollection(this->_imgReader, this->_dataContainer);
-
-        this->_btnLoadFile = new QPushButton(tr("Load"), this);
-        this->_layout->addWidget(this->_btnLoadFile, 1, 0, 1, 1);
-        this->_btnCancel = new QPushButton(tr("Cancel"), this);
-        this->_layout->addWidget(this->_btnCancel, 1, 1, 1, 1);
+        _btnLoadFile = new QPushButton(tr("Load"), this);
+        _layout->addWidget(_btnLoadFile, 1, 0, 1, 1);
+        _btnCancel = new QPushButton(tr("Cancel"), this);
+        _layout->addWidget(_btnCancel, 1, 1, 1, 1);
 
         qRegisterMetaType<QtDataHandle>("QtDataHandle");
-        connect(
-            this->_btnCancel, SIGNAL(clicked()),
-            this, SLOT(onBtnCancelClicked()));
-        connect(
-            this->_btnLoadFile, SIGNAL(clicked()),
-            this, SLOT(onBtnLoadFileClicked()));
+        connect(_btnCancel, SIGNAL(clicked()), this, SLOT(onBtnCancelClicked()));
+        connect( _btnLoadFile, SIGNAL(clicked()), this, SLOT(onBtnLoadFileClicked()));
+    }
+
+
+    bool DataContainerFileLoaderWidget::eventFilter(QObject* watched, QEvent* event) {
+        if (watched == _propCollectionWidget && event->type() == QEvent::Resize) {
+            _pipelinePropertiesScrollArea->setMinimumWidth(_propCollectionWidget->minimumSizeHint().width() +
+                _pipelinePropertiesScrollArea->verticalScrollBar()->width());
+        }
+
+        return false;
     }
 
     void DataContainerFileLoaderWidget::init() {
@@ -95,19 +102,19 @@ namespace campvis {
 
     void DataContainerFileLoaderWidget::deinit() {
         delete _imgReader;
-        this->_imgReader = nullptr;
+        _imgReader = nullptr;
     }
 
     void DataContainerFileLoaderWidget::onBtnCancelClicked() {
         delete _imgReader;
-        this->_imgReader = nullptr;
-        this->close();
+        _imgReader = nullptr;
+        close();
     }
 
     void DataContainerFileLoaderWidget::onBtnLoadFileClicked() {
-        this->_imgReader->process(*_dataContainer);
-        this->_parent->setDataContainer(_dataContainer);
-        this->close();
+        _imgReader->process(*_dataContainer);
+        _parent->setDataContainer(_dataContainer);
+        close();
     }
 
 }

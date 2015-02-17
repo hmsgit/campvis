@@ -39,8 +39,6 @@ struct TextureParameters3D {
     // Transformation matrices
     mat4 _textureToWorldMatrix;
     mat4 _worldToTextureMatrix;
-
-    vec2 _realWorldMapping;
 };
 
 /**
@@ -61,8 +59,9 @@ vec4 textureToWorld(in TextureParameters3D texParams, in vec4 texCoords) {
  * \param   texCoords   texture coordinates
  * \return  \a texCoords transformes to woorld coordinates.
  */
-vec4 textureToWorld(in TextureParameters3D texParams, in vec3 texCoords) {
-    return textureToWorld(texParams, vec4(texCoords, 1.0));
+vec3 textureToWorld(in TextureParameters3D texParams, in vec3 texCoords) {
+    vec4 v = textureToWorld(texParams, vec4(texCoords, 1.0));
+    return v.xyz;
 }
 
 /**
@@ -85,12 +84,4 @@ vec4 worldToTexture(in TextureParameters3D texParams, in vec4 worldCoords) {
  */
 vec4 worldToTexture(in TextureParameters3D texParams, in vec3 worldCoords) {
     return worldToTexture(texParams, vec4(worldCoords, 1.0));
-}
-
-float applyRealWorldMapping(in TextureParameters3D tex, in float value) {
-    return (value + tex._realWorldMapping.x) * tex._realWorldMapping.y;
-}
-
-float applyInverseRealWorldMapping(in TextureParameters3D tex, in float value) {
-    return (value - tex._realWorldMapping.x) / tex._realWorldMapping.y;
 }

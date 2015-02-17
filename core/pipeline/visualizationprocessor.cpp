@@ -88,6 +88,7 @@ namespace campvis {
     void VisualizationProcessor::createAndAttachTexture(GLint internalFormat) {
         GLenum attachment = 0;
         switch(internalFormat) {
+            case GL_R32F:
             case GL_RGB:
             case GL_RGB16F_ARB:
             case GL_RGBA:

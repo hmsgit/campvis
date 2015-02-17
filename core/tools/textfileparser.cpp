@@ -24,34 +24,44 @@
 
 #include "textfileparser.h"
 
+#include <stack>
 #include <sstream>
-
 
 namespace campvis {
 
-    TextFileParser::TextFileParser(const std::string& url, bool caseSensitiveKeys, const std::string& delimiters, const std::string& whitespace /*= " \t"*/) 
-        : _url(url)
+    TextFileParser::TextFileParser(std::istream& stream, bool caseSensitiveKeys, const std::string& delimiters, const std::string& whitespace /*= " \t"*/) 
+        : _stream(stream)
         , _caseSensitiveKeys(caseSensitiveKeys)
         , _delimiters(delimiters)
         , _whitespace(whitespace)
+        , _rootGroup(nullptr)
     {
     }
 
-    bool TextFileParser::hasKey(const std::string& key) const {
-        return (_tokens.find(key) != _tokens.end());
+    const TextFileParser::TokenGroup* TextFileParser::getRootGroup() const {
+        return _rootGroup;
     }
 
-    const std::string& TextFileParser::getString(const std::string& key) const throw (cgt::CorruptedFileException) {
+    TextFileParser::~TextFileParser() {
+        delete _rootGroup;
+    }
+
+    bool TextFileParser::TokenGroup::hasKey(const std::string& key) const {
+        auto it = (_caseSensitiveKeys ? _tokens.find(key) : _tokens.find(StringUtils::lowercase(key)));
+        return (it != _tokens.end());
+    }
+
+    const std::string& TextFileParser::TokenGroup::getString(const std::string& key) const throw (cgt::Exception) {
         std::map<std::string, std::string>::const_iterator it = (_caseSensitiveKeys ? _tokens.find(key) : _tokens.find(StringUtils::lowercase(key)));
         if (it == _tokens.end()) {
-            throw cgt::CorruptedFileException("No token with key " + key + " found.", _url);
+            throw cgt::Exception("No token with key " + key + " found.");
         }
         else {
             return it->second;
         }
     }
 
-    bool TextFileParser::getBool(const std::string& key) const throw (cgt::CorruptedFileException) {
+    bool TextFileParser::TokenGroup::getBool(const std::string& key) const throw (cgt::Exception) {
         std::string lc = StringUtils::lowercase(getString(key));
 
         if ((lc == "0") || (lc == "false"))
@@ -59,144 +69,171 @@ namespace campvis {
         else if ((lc == "1") || (lc == "true"))
             return true;
         else
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to bool.", _url);
+            throw cgt::Exception("Error parsing key " + key + " to bool.");
     }
 
-    int TextFileParser::getInt(const std::string& key) const throw (cgt::CorruptedFileException) {
+    int TextFileParser::TokenGroup::getInt(const std::string& key) const throw (cgt::Exception) {
         std::string str = getString(key);
         try {
             return StringUtils::fromString<int>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to int: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to int: " + e.what());
         }        
     }
 
-    cgt::ivec2 TextFileParser::getIvec2(const std::string& key) const  throw (cgt::CorruptedFileException){
+    cgt::ivec2 TextFileParser::TokenGroup::getIvec2(const std::string& key) const  throw (cgt::Exception){
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::ivec2>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to ivec2: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to ivec2: " + e.what());
         }        
     }
 
-    cgt::ivec3 TextFileParser::getIvec3(const std::string& key) const  throw (cgt::CorruptedFileException){
+    cgt::ivec3 TextFileParser::TokenGroup::getIvec3(const std::string& key) const  throw (cgt::Exception){
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::ivec3>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to ivec3: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to ivec3: " + e.what());
         }        
     }
 
-    cgt::ivec4 TextFileParser::getIvec4(const std::string& key) const  throw (cgt::CorruptedFileException){
+    cgt::ivec4 TextFileParser::TokenGroup::getIvec4(const std::string& key) const  throw (cgt::Exception){
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::ivec4>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to ivec4: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to ivec4: " + e.what());
         }        
     }
 
-    size_t TextFileParser::getSizeT(const std::string& key) const throw (cgt::CorruptedFileException) {
+    size_t TextFileParser::TokenGroup::getSizeT(const std::string& key) const throw (cgt::Exception) {
         std::string str = getString(key);
         try {
             return StringUtils::fromString<size_t>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to size_t: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to size_t: " + e.what());
         }        
     }
 
-    cgt::svec2 TextFileParser::getSvec2(const std::string& key) const  throw (cgt::CorruptedFileException){
+    cgt::svec2 TextFileParser::TokenGroup::getSvec2(const std::string& key) const  throw (cgt::Exception){
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::svec2>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to svec2: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to svec2: " + e.what());
         }        
     }
 
-    cgt::svec3 TextFileParser::getSvec3(const std::string& key) const  throw (cgt::CorruptedFileException){
+    cgt::svec3 TextFileParser::TokenGroup::getSvec3(const std::string& key) const  throw (cgt::Exception){
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::svec3>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to svec3: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to svec3: " + e.what());
         }        
     }
 
-    cgt::svec4 TextFileParser::getSvec4(const std::string& key) const  throw (cgt::CorruptedFileException){
+    cgt::svec4 TextFileParser::TokenGroup::getSvec4(const std::string& key) const  throw (cgt::Exception){
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::svec4>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to svec4: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to svec4: " + e.what());
         }        
     }
 
-    float TextFileParser::getFloat(const std::string& key) const throw (cgt::CorruptedFileException) {
+    float TextFileParser::TokenGroup::getFloat(const std::string& key) const throw (cgt::Exception) {
         std::string str = getString(key);
         try {
             return StringUtils::fromString<float>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to float: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to float: " + e.what());
         }        
     }
 
-    cgt::vec2 TextFileParser::getVec2(const std::string& key) const throw (cgt::CorruptedFileException) {
+    cgt::vec2 TextFileParser::TokenGroup::getVec2(const std::string& key) const throw (cgt::Exception) {
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::vec2>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to vec2: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to vec2: " + e.what());
         }        
     }
 
-    cgt::vec3 TextFileParser::getVec3(const std::string& key) const throw (cgt::CorruptedFileException) {
+    cgt::vec3 TextFileParser::TokenGroup::getVec3(const std::string& key) const throw (cgt::Exception) {
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::vec3>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to vec3: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to vec3: " + e.what());
         }        
     }
 
-    cgt::vec4 TextFileParser::getVec4(const std::string& key) const throw (cgt::CorruptedFileException) {
+    cgt::vec4 TextFileParser::TokenGroup::getVec4(const std::string& key) const throw (cgt::Exception) {
         std::string str = getString(key);
         try {
             return StringUtils::fromString<cgt::vec4>(str);
         }
         catch (std::exception& e) {
-            throw cgt::CorruptedFileException("Error parsing key " + key + " to vec4: " + e.what(), _url);
+            throw cgt::Exception("Error parsing key " + key + " to vec4: " + e.what());
         }        
     }
 
-// ================================================================================================
+    TextFileParser::TokenGroup::~TokenGroup() {
+        for (auto it = _tokenGroups.begin(); it != _tokenGroups.end(); ++it)
+            delete it->second;
+    }
 
-    template<>
-    std::vector<std::string> TextFileParser::readAndParseItems<TextFileParser::ItemSeparatorLines>() const throw (cgt::FileException, cgt::CorruptedFileException) {
-        cgt::File* file = FileSys.open(_url);
-        if (!file || !file->isOpen())
-            throw cgt::FileException("Could not open file " + _url + " for reading.", _url);
+    TextFileParser::TokenGroup* TextFileParser::ItemSeparatorLines::operator()(std::istream& stream, bool caseSensitiveKeys, const std::string& delimiters, const std::string& whitespace) {
+        TokenGroup* rootNode = new TokenGroup(caseSensitiveKeys);
+        std::stack<TokenGroup*> groupHierarchy;
+        groupHierarchy.push(rootNode);
+        std::string currentLine;
 
-        std::vector<std::string> lines;
-        while (!file->eof()) {
-            lines.push_back(file->getLine());
+        while (stream.good() && !stream.eof()) {
+            std::getline(stream, currentLine);
+            currentLine = StringUtils::trim(currentLine);
+            
+            if (currentLine == "")
+                continue;
+            if (currentLine.substr(currentLine.length() - 1, 1) == "{") {
+                std::string groupName = StringUtils::trim(currentLine.substr(0, currentLine.length() - 1));
+
+				TokenGroup* tg = new TokenGroup(caseSensitiveKeys);
+                groupHierarchy.top()->_tokenGroups.insert(std::make_pair(groupName, tg));
+                groupHierarchy.push(tg);
+            }
+            else if (currentLine == "}") {
+                groupHierarchy.pop();
+            }
+            else {
+                std::vector<std::string> tokens = StringUtils::splitStringsafe(currentLine, delimiters, '"');
+                if (tokens.size() == 2) {
+                    if (caseSensitiveKeys)
+                        groupHierarchy.top()->_tokens.insert(std::make_pair(StringUtils::trim(tokens[0], whitespace), StringUtils::trim(tokens[1], whitespace)));
+                    else
+                        groupHierarchy.top()->_tokens.insert(std::make_pair(StringUtils::lowercase(StringUtils::trim(tokens[0], whitespace)), StringUtils::trim(tokens[1], whitespace)));
+                }
+                else {
+                    throw cgt::Exception("Error parsing item '" + currentLine + "': expected single delimiter.");
+                }
+            }
         }
-        file->close();
-        delete file;
-        return lines;
+
+        return rootNode;
     }
 
 }

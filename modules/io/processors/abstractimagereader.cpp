@@ -36,7 +36,7 @@ namespace campvis {
     }
 
     bool AbstractImageReader::acceptsExtension(const std::string& extension) const {
-        for (std::vector<std::string>::const_iterator it = this->_ext.begin(); it != this->_ext.end(); ++it) {
+        for (auto it = this->_ext.begin(); it != this->_ext.end(); ++it) {
             if (*it == extension) {
                 return true;
             }

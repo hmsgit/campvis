@@ -43,22 +43,31 @@ namespace campvis {
     std::string VoxelHierarchyMapper::loggerCat_ = "CAMPVis.modules.vis.VoxelHierarchyMapper";
 
     VoxelHierarchyMapper::VoxelHierarchyMapper()
-        : _hierarchyRendererShader(nullptr)
+        : _xorBitmaskShader(nullptr)
+        , _hierarchyRendererShader(nullptr)
         , _mimapRendererShader(nullptr)
         , _fbo(nullptr)
+        , _xorBitmaskTexture(nullptr)
         , _hierarchyTexture(nullptr)
         , _quad(nullptr)
     {  
+        _xorBitmaskShader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/vis/glsl/xorbitmask.frag", "", "400");
         _hierarchyRendererShader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/vis/glsl/hierarchyrenderer.frag", "", "400");
         _mimapRendererShader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/vis/glsl/mipmaprenderer.frag", "", "400");
         _fbo = new cgt::FramebufferObject();
 
-        _quad = GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(1.f, 1.f, 0.f), cgt::vec3(0.f, 0.f, 0.f));
+        _quad = GeometryDataFactory::createQuad(cgt::vec3(-1.f), cgt::vec3(1.f), cgt::vec3(1.f, 1.f, 0.f), cgt::vec3(0.f, 0.f, 0.f));
+
+        createXorBitmaskTexture();
     }
 
     VoxelHierarchyMapper::~VoxelHierarchyMapper() {
+        ShdrMgr.dispose(_xorBitmaskShader);
         ShdrMgr.dispose(_hierarchyRendererShader);
         ShdrMgr.dispose(_mimapRendererShader);
+
+        delete _xorBitmaskTexture;
+        delete _hierarchyTexture;
         delete _quad;
     }
 
@@ -74,13 +83,14 @@ namespace campvis {
             _dimBricks.elem[i] = DIV_CEIL(_dimBricks.elem[i], _brickSize);
 
         // set the depth of the bricks
-        _brickDepth = _dimBricks.z / 32;
+        _brickDepth = DIV_CEIL(_dimBricks.z, 128);
 
         // since the texture is a 2D texture and the elements store the depth  will pack VOXEL_DEPTH number of values along the z axis into one block, the _dimBricks.z is 
-        _dimBricks.z = 32;
+        _dimBricks.z = 128;
 
-        _dimPackedBricks = _dimBricks;
-        _dimPackedBricks.z = _dimPackedBricks.z / 32;
+        _dimPackedBricks.x = std::max(_dimBricks.x, _dimBricks.y);
+        _dimPackedBricks.y = std::max(_dimBricks.x, _dimBricks.y);
+        _dimPackedBricks.z = 1;
 
         _maxMipmapLevel = computeMaxLevel(_dimPackedBricks.x, _dimPackedBricks.y);
 
@@ -127,14 +137,12 @@ namespace campvis {
             double resY = _hierarchyTexture->getHeight() / pow(2.0, static_cast<double>(level));
 
             _mimapRendererShader->setUniform("_level", static_cast<int>(level));
-            _mimapRendererShader->setUniform("_inverseTexSizeX", 1.f / static_cast<float>(resX));
-            _mimapRendererShader->setUniform("_inverseTexSizeY", 1.f / static_cast<float>(resY));
 
             _fbo->attachTexture(_hierarchyTexture, GL_COLOR_ATTACHMENT0, level+1, 0);
             _fbo->isComplete();
 
-            glViewport(0, 0, static_cast<GLsizei>(resX / 2.0), static_cast<GLsizei>(resY / 2.0));
-            _quad->render(GL_POLYGON);
+            glViewport(0, 0, std::max(1, static_cast<GLsizei>(resX / 2.0)), std::max(1, static_cast<GLsizei>(resY / 2.0)));
+            _quad->render(GL_TRIANGLE_FAN);
         }
 
         _fbo->deactivate();
@@ -153,7 +161,7 @@ namespace campvis {
         tempUnit.activate();
 
         // create new texture
-        _hierarchyTexture = new cgt::Texture(GL_TEXTURE_2D, _dimPackedBricks, GL_R32UI, cgt::Texture::NEAREST);
+        _hierarchyTexture = new cgt::Texture(GL_TEXTURE_2D, _dimPackedBricks, GL_RGBA32UI, cgt::Texture::NEAREST);
         _hierarchyTexture->setWrapping(cgt::Texture::CLAMP);
         LGL_ERROR;
 
@@ -168,7 +176,7 @@ namespace campvis {
 
         int div = 2;
         for (GLuint level = 1; level <= _maxMipmapLevel; ++level) {
-            glTexImage2D(GL_TEXTURE_2D, level, GL_R32UI, _hierarchyTexture->getWidth()/div, _hierarchyTexture->getHeight()/div, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA32UI, std::max(1, _hierarchyTexture->getWidth()/div), std::max(1, _hierarchyTexture->getHeight()/div), 0, GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
             div = div << 1;
             LGL_ERROR;
         }
@@ -180,8 +188,10 @@ namespace campvis {
 
         _hierarchyRendererShader->activate();
         _hierarchyRendererShader->setUniform("_projectionMatrix", cgt::mat4::createOrtho(0, 1, 0, 1, -1, 1));
-        _hierarchyRendererShader->setUniform("_voxelDepth", static_cast<GLuint>(_brickDepth));
-        _hierarchyRendererShader->setUniform("_voxelSize", static_cast<GLuint>(_brickSize));
+        _hierarchyRendererShader->setUniform("_brickSize", static_cast<GLint>(_brickSize));
+        _hierarchyRendererShader->setUniform("_brickDepth", static_cast<GLint>(_brickDepth));
+        _hierarchyRendererShader->setUniform("_hierarchySize", cgt::vec3(_dimPackedBricks));
+        _hierarchyRendererShader->setUniform("_tfDomain", transferFunction->getVisibilityDomain());
 
         cgt::TextureUnit volumeUnit, tfUnit;
         image->bind(_hierarchyRendererShader, volumeUnit, "_volume", "_volumeTextureParams");
@@ -192,7 +202,7 @@ namespace campvis {
         _fbo->isComplete();
         glViewport(0, 0, static_cast<GLsizei>(_hierarchyTexture->getWidth()), static_cast<GLsizei>(_hierarchyTexture->getHeight()));
 
-        _quad->render(GL_POLYGON);
+        _quad->render(GL_TRIANGLE_FAN);
 
         _fbo->deactivate();
         _hierarchyRendererShader->deactivate();    
@@ -201,5 +211,24 @@ namespace campvis {
 
         LDEBUG("...finished computing voxel visibilities.");
     }
+
+    void VoxelHierarchyMapper::createXorBitmaskTexture() {
+        cgt::TextureUnit xorUnit;
+        xorUnit.activate();
+        _xorBitmaskTexture = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(128, 128, 1), GL_RGBA32UI, cgt::Texture::NEAREST);
+        _xorBitmaskTexture->setWrapping(cgt::Texture::CLAMP);
+
+        _xorBitmaskShader->activate();
+        _fbo->activate();
+        _fbo->attachTexture(_xorBitmaskTexture, GL_COLOR_ATTACHMENT0, 0, 0);
+        _fbo->isComplete();
+        glViewport(0, 0, 128, 128);
+
+        _quad->render(GL_TRIANGLE_FAN);
+
+        _fbo->deactivate();
+        _xorBitmaskShader->deactivate();    
+    }
+
 
 }

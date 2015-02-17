@@ -71,7 +71,7 @@ namespace campvis {
         _layout->setSpacing(8);
         _layout->setMargin(0);
         setLayout(_layout);
-        connect(this, SIGNAL(s_widgetVisibilityChanged(QWidget*, bool)), this, SLOT(onWidgetVisibilityChanged(QWidget*, bool)));
+        connect(this, SIGNAL(s_propertyVisibilityChanged(const AbstractProperty*)), this, SLOT(onWidgetVisibilityChanged(const AbstractProperty*)), Qt::QueuedConnection);
         connect(this, SIGNAL(propertyAdded(AbstractProperty*)), this, SLOT(addProperty(AbstractProperty*)));
         connect(this, SIGNAL(propertyRemoved(AbstractProperty*, QWidget*)), this, SLOT(removeProperty(AbstractProperty*, QWidget*)));
     }
@@ -91,14 +91,18 @@ namespace campvis {
     }
 
     void PropertyCollectionWidget::onPropertyVisibilityChanged(const AbstractProperty* prop) {
+        // This method is not always called on the main thread, so it is not safe to check anything here.
+        // The event is instead forwarded using the QT sigslot mechanism through a queued connection to the
+        // main thread.
+
+        emit s_propertyVisibilityChanged(prop);
+    }
+
+    void PropertyCollectionWidget::onWidgetVisibilityChanged(const AbstractProperty* prop) {
         // const_cast does not harm anything.
         std::map<AbstractProperty*, QWidget*>::iterator item = _widgetMap.find(const_cast<AbstractProperty*>(prop));
         if (item != _widgetMap.end())
-            emit s_widgetVisibilityChanged(item->second, item->first->isVisible());
-    }
-
-    void PropertyCollectionWidget::onWidgetVisibilityChanged(QWidget* widget, bool visibility) {
-        widget->setVisible(visibility);
+            item->second->setVisible(item->first->isVisible());
     }
 
     void PropertyCollectionWidget::onPropCollectionPropAdded(AbstractProperty* prop) {

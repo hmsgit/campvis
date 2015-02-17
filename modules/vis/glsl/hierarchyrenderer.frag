@@ -25,7 +25,7 @@
 in vec3 ex_TexCoord;        ///< incoming texture coordinate
 in vec4 ex_Position;        ///< incoming texture coordinate
 
-out uint result;
+out uvec4 result;
  
 #include "tools/texture2d.frag"
 #include "tools/texture3d.frag"
@@ -42,47 +42,56 @@ uniform TFParameters1D _transferFunctionParams;
 uniform float _inverseTexSizeX; // 1.0 / mipmapLevelResolution
 uniform float _inverseTexSizeY; // 1.0 / mipmapLevelResolution
 
-uniform uint _voxelSize;
-uniform uint _voxelDepth;
+uniform int _brickSize;
+uniform int _brickDepth;
+uniform vec3 _hierarchySize;
+uniform vec2 _tfDomain;
 
 void main() {
-    result = uint(0);
+    result = uvec4(0);
 
-    vec3 startIdx = vec3(0, 0, 0);
-    vec3 endIdx = _volumeTextureParams._size - vec3(1, 1, 1);
+    // For each element in the uvec4 bitmask:
+    for (int e = 0; e < 4; ++e) {
+        // For each bit of the uint value, the corresponding area in the volume is checked, whether it's transparent or not. The bits are set accordingly.
+        for (int d = 0; d < 32; d++) {
+            vec3 llf = vec3(gl_FragCoord.xy / _hierarchySize.xy, float((e * 32) + d + 0.5) / 128.0);
+            //ivec3 llf = ivec3((gl_FragCoord.x - 0.5) * _brickSize, (gl_FragCoord.y - 0.5) * _brickSize, );
+            bool hasData = false;
 
-    // For each bit of the int value, the area is checked to find voxels or not. If some voxels were found, the bit is set or cleared.
-    for(int d = 0; d < 32; d++){
+            /** 
+             * For each bit _brickSize number of voxels in x and y direction and _brickDepth number of voxel in z-direction should be considered.
+             * Also, to make sure that all voxels are considered, one offset voxel is considered in x, y, and z boundary from each side so that
+             * each side will consider 2 more voxels.
+             */
+            for (int z = -1; z < _brickDepth + 1; ++z) {
+                for (int y = -1; y < _brickSize + 1; ++y) {
+                    for (int x = -1; x < _brickSize + 1; ++x) {
+                        vec3 addendum = (vec3(x, y, z) / _volumeTextureParams._size);
+                        vec3 texCoord = clamp(llf + addendum, 0.0, 1.0);
+                        float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texture(_volume, texCoord).r);
+                        //ivec3 voxel = ivec3(texCoord * _volumeTextureParams._size);
+                        //float intensity = mapIntensityToTFDomain(_transferFunctionParams._intensityDomain, texelFetch(_volume, voxel, 0).r);
+                        //float intensity = texture(_volume, voxel).r;
+                        //vec4 color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
+                        //if (color.a > 0) {
+                        //}
 
-        
-        vec3 samplePosition = vec3((gl_FragCoord.x - 0.5) * _voxelSize, (gl_FragCoord.y - 0.5) * _voxelSize, d * _voxelDepth);
-
-        bool hasData = false;
-        float intensity;
-        vec4 color;
-
-        /** For each bit _voxelSize number of voxels in x and y direction and _voxelDepth number of voxel in z-direction should be considered.
-         * Also, to make sure that all voxels are considered, one offset voxel is considered in x, y, and z boundary from each side so that
-         * each side will consider 2 more voxels.
-         */
-        for(int i = 0; i < (_voxelSize + 2) * (_voxelSize + 2) * (_voxelDepth + 2); i++){
-
-            // the offset value calculates which voxel should be checked.
-            ivec3 offset = ivec3(i % (_voxelSize + 2) - 1, (i / (_voxelSize + 2)) % (_voxelSize + 2) - 1, i / ((_voxelSize + 2) * (_voxelSize + 2)) - 1);
-            
-            vec3 s = clamp(samplePosition + vec3(0.5, 0.5, 0.5) + offset, startIdx, endIdx);
-            intensity = texture(_volume, s * _volumeTextureParams._sizeRCP).r;
-            color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
-
-            // if there was any data in the volume data in that voxel, set the bit.
-            if(color.a > 0){
-                hasData = true;
-                break;
+                        // if there was any data in the volume data in that voxel, set the bit.
+                        if (intensity >= _tfDomain.x && intensity <= _tfDomain.y) {
+                            //result[e] |= (1 << d);
+                            if (e == 0)
+                                result.r |= (1 << d);
+                            else if (e == 1)
+                                result.g |= (1 << d);
+                            else if (e == 2)
+                                result.b |= (1 << d);
+                            else if (e == 3)
+                                result.a |= (1 << d);
+                            break;
+                        }
+                    }
+                }
             }
-        }
-
-        if(hasData){
-            result |= (1 << d);
         }
     }
 }

@@ -32,6 +32,11 @@ void jitterEntryPoint(inout vec3 position, in vec3 direction, in float stepSize)
     position = position + direction * (stepSize * random);
 }
 
+void jitterFloat(inout float t, in float stepSize) {
+    float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453);
+    t += (stepSize * random);
+}
+
 /**
  * Computes the intersection of the given ray with the given axis-aligned box.
  * \param   rayOrigin       Origin of ray
@@ -59,6 +64,18 @@ float rayBoxIntersection(in vec3 rayOrigin, in vec3 rayDirection, in vec3 boxLlf
 
     return min(min(tMin.x, min(tMin.y, tMin.z))   ,    min(tMax.x, min(tMax.y, tMax.z)));
 }
+
+// compute the near and far intersections of the cube (stored in the x and y components) using the slab method
+// no intersection means vec.x > vec.y (really tNear > tFar)
+vec2 intersectAABB(vec3 rayOrigin, vec3 rayDirection, in vec3 boxLlf, in vec3 boxUrb) {
+    vec3 tMin = (boxLlf - rayOrigin) / rayDirection;
+    vec3 tMax = (boxUrb - rayOrigin) / rayDirection;
+    vec3 t1 = min(tMin, tMax);
+    vec3 t2 = max(tMin, tMax);
+    float tNear = max(max(t1.x, t1.y), t1.z);
+    float tFar = min(min(t2.x, t2.y), t2.z);
+    return vec2(tNear, tFar);
+};
 
 /**
  * Converts a depth value in eye space to the corresponding depth value in viewport space.

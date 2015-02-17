@@ -68,22 +68,23 @@ namespace campvis {
 
         /**
          * Creates an MultiIndexedGeometry storing a unit sphere around the origin.
-         * \param   numStacks     Number of stacks in the sphere
-         * \param   numSlices     Number of slices in the sphere
+         * \param   numStacks   Number of stacks in the sphere
+         * \param   numSlices   Number of slices in the sphere
+         * \param   exponents   Exponent for each dimension to define a supersphere (defines the roundness)
          * \return  MultiIndexedGeometry storing a unit sphere around the origin.
          */
-        static MultiIndexedGeometry* createSphere(uint16_t numStacks = 6, uint16_t numSlices = 12);
+        static MultiIndexedGeometry* createSphere(uint16_t numStacks = 6, uint16_t numSlices = 12, const cgt::vec3& exponents = cgt::vec3(1.f));
 
 
         /**
          * Creates an MultiIndexedGeometry storing a unit length arrow in Z direction starting from the origin.
          * \param   numSlices	Number of slices in the cylinder and cone
-		 * \param	tipLen		Length of arrow tip (between 0 and 1)
+         * \param	tipLen		Length of arrow tip (between 0 and 1)
          * \param   cylRadius	Radius of the cylinder (arrow shaft)
-		 * \param	tipRadius	Radius of the bottom of the arrow tip
+         * \param	tipRadius	Radius of the bottom of the arrow tip
          * \return  MultiIndexedGeometry storing a unit arrow in Z direction starting from the origin.
          */
-		static MultiIndexedGeometry* createArrow(uint16_t numSlices = 12, float tipLen = 0.35, float cylRadius = 0.05, float tipRadius = 0.15);
+        static MultiIndexedGeometry* createArrow(uint16_t numSlices = 12, float tipLen = 0.35, float cylRadius = 0.05, float tipRadius = 0.15);
     };
 
 }
