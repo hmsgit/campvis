@@ -31,6 +31,8 @@ namespace campvis {
         : AbstractPropertyWidget(property, false, dataContainer, parent)
         , _button(0)
     {
+        setLabelVisibile(false);
+
         _button = new QPushButton(QString::fromStdString(property->getTitle()), this);
         connect(_button, SIGNAL(clicked(bool)), this, SLOT(onButtonClicked(bool)));
         addWidget(_button);
