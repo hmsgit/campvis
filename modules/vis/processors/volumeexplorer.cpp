@@ -75,8 +75,6 @@ namespace campvis {
         cgtAssert(_sliceRenderer != nullptr, "Slice Rendering Processor must not be 0.");
 
         p_largeView.selectByOption(VOLUME);
-        
-        VolumeRenderer* test = dynamic_cast<VolumeRenderer*> (ProcessorFactory::getRef().createProcessor("VolumeRenderer", viewportSizeProp));
 
         addProperty(p_inputVolume, INVALID_PROPERTIES | CAMERA_INVALID);
         addProperty(p_outputImage);
