@@ -35,6 +35,7 @@
 #include "core/datastructures/geometrydata.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -63,9 +64,13 @@ namespace campvis {
          * Destructor
          **/
         virtual ~VectorFieldRenderer();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "VectorFieldRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "VectorFieldRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Renders vector fields with arrows"; };
         /// \see AbstractProcessor::getAuthor()
@@ -126,6 +131,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<VectorFieldRenderer>;
 }
 
 #endif // VECTORFIELDRENDERER_H__

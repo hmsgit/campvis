@@ -31,6 +31,7 @@
 #include "core/properties/allproperties.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -59,9 +60,13 @@ namespace campvis {
 
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "MprRenderer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "MprRenderer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Extracts arbitrary MPRs from images using a single clip plane."; };
         /// \see AbstractProcessor::getAuthor()
@@ -94,6 +99,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<MprRenderer>;
 }
 
 #endif // MPRRENDERER_H__

@@ -34,6 +34,7 @@
 #include "core/properties/numericproperty.h"
 
 #include "modules/modulesapi.h"
+#include "modules/processorfactory.h"
 
 namespace cgt {
     class Shader;
@@ -59,9 +60,13 @@ namespace campvis {
         virtual void init();
         /// \see AbstractProcessor::deinit
         virtual void deinit();
-
+        
+        /** 
+         * To be used in ProcessorFactory static methods
+         */
+        static const std::string getId() { return "GlIntensityQuantizer"; };
         /// \see AbstractProcessor::getName()
-        virtual const std::string getName() const { return "GlIntensityQuantizer"; };
+        virtual const std::string getName() const { return getId(); };
         /// \see AbstractProcessor::getDescription()
         virtual const std::string getDescription() const { return "Quantizes image intensities into a fixed number of bins using the GPU."; };
         /// \see AbstractProcessor::getAuthor()
@@ -84,6 +89,8 @@ namespace campvis {
         static const std::string loggerCat_;
     };
 
+    // Instantiate template to register the pipelines.
+    template class SmartProcessorRegistrar<GlIntensityQuantizer>;
 }
 
 #endif // GLINTENSITYQUANTIZER_H__

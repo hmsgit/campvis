@@ -328,7 +328,7 @@ namespace campvis {
         virtual size_t getVideoMemoryFootprint() const = 0;
         virtual AbstractData* clone() const = 0;
     };
-	
+    
     /* DataHandle */
 
     class DataHandle {
