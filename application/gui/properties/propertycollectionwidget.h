@@ -117,6 +117,7 @@ namespace campvis {
         DataContainer* _dataContainer;          ///< The DataContainer the properties shall work on
 
         QVBoxLayout* _layout;
+        QWidget* _strechWidget;
         std::map<AbstractProperty*, QWidget*> _widgetMap;
     };
 }

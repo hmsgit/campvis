@@ -36,9 +36,10 @@
 namespace campvis {
     PropertyCollectionWidget::PropertyCollectionWidget(QWidget* parent /*= 0*/)
         : QWidget(parent)
-        , _propCollection(0)
-        , _dataContainer(0)
-        , _layout(0)
+        , _propCollection(nullptr)
+        , _dataContainer(nullptr)
+        , _layout(nullptr)
+        , _strechWidget(nullptr)
     {
         setupWidget();
     }
@@ -70,6 +71,9 @@ namespace campvis {
         _layout->setSpacing(8);
         _layout->setMargin(0);
         setLayout(_layout);
+
+        _strechWidget = new QWidget(this);
+
         connect(this, SIGNAL(s_propertyVisibilityChanged(const AbstractProperty*)), this, SLOT(onWidgetVisibilityChanged(const AbstractProperty*)));
         connect(this, SIGNAL(propertyAdded(AbstractProperty*)), this, SLOT(addProperty(AbstractProperty*)));
         connect(this, SIGNAL(propertyRemoved(AbstractProperty*, QWidget*)), this, SLOT(removeProperty(AbstractProperty*, QWidget*)));
@@ -123,6 +127,9 @@ namespace campvis {
 
         _widgetMap.insert(std::make_pair(prop, propWidget));
         _layout->addWidget(propWidget);
+
+        _layout->removeWidget(_strechWidget);
+        _layout->addWidget(_strechWidget, 1);
 
         prop->s_visibilityChanged.connect(this, &PropertyCollectionWidget::onPropertyVisibilityChanged);
         prop->s_visibilityChanged.emitSignal(prop);

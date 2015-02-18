@@ -428,4 +428,13 @@ namespace campvis {
         _workflowWidget->setWorkflow(w);
     }
 
+    void MainWindow::enableKioskMode() {
+        ui.logViewerDock->hide();
+        ui.pipelineTreeDock->hide();
+        ui.pipelinePropertiesDock->hide();
+        ui.scriptingConsoleDock->hide();
+        ui.workflowDock->show();
+
+    }
+
 }
