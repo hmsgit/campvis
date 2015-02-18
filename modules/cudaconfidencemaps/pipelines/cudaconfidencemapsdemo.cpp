@@ -111,6 +111,9 @@ namespace campvis {
 
         setAdvancedPropertiesVisibility(false);
 
+        _canvasSize.setVisible(false);
+        _renderTargetID.setVisible(false);
+
         // Reserve memory for statistics, so that (hopefully) no reallocation happens at runtime
         _statistics.reserve(1000);
         _objectCreationTime = tbb::tick_count::now();
