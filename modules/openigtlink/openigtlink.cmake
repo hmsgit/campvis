@@ -38,6 +38,9 @@ IF(ModuleEnabled)
         LIST(APPEND ThisModExternalLibs ${OpenIGTLink_LIBRARIES})
         LIST(APPEND ThisModLinkDirectories ${OpenIGTLink_LIBRARY_DIRS})
         
+        LIST(APPEND ThisModExternalDllsDebug "${OpenIGTLink_LIBRARY_DIRS}/Debug/igtlutil.dll" "${OpenIGTLink_LIBRARY_DIRS}/Debug/OpenIGTLink.dll")
+        LIST(APPEND ThisModExternalDllsRelease "${OpenIGTLink_LIBRARY_DIRS}/Release/igtlutil.dll" "${OpenIGTLink_LIBRARY_DIRS}/Release/OpenIGTLink.dll")
+        
     ELSE()
         MESSAGE(FATAL_ERROR "Could not find OpenIGTLink. Please specify OpenIGTLink_DIR.")
     ENDIF()
