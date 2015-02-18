@@ -27,8 +27,12 @@
 
 #include <tbb/tick_count.h>
 
-#include "modules/base/processors/matrixprocessor.h"
+
 #include "core/pipeline/autoevaluationpipeline.h"
+#include "core/properties/buttonproperty.h"
+
+#include "modules/modulesapi.h"
+#include "modules/base/processors/matrixprocessor.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/preprocessing/processors/glimagecrop.h"
 #include "modules/preprocessing/processors/glimageresampler.h"
@@ -37,12 +41,11 @@
 #include "modules/openigtlink/processors/openigtlinkclient.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 
-#include "core/properties/buttonproperty.h"
 
 
 namespace campvis {
 
-    class CudaConfidenceMapsDemo : public AutoEvaluationPipeline {
+    class CAMPVIS_MODULES_API CudaConfidenceMapsDemo : public AutoEvaluationPipeline {
     public:
         /**
          * Creates a AutoEvaluationPipeline.

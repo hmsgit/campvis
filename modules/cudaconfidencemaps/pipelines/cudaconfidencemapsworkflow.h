@@ -27,12 +27,13 @@
 
 #include "core/pipeline/abstractworkflow.h"
 
+#include "modules/modulesapi.h"
 #include "modules/cudaconfidencemaps/pipelines/cudaconfidencemapsdemo.h"
 #include "modules/pipelinefactory.h"
 
 namespace campvis {
 
-    class CudaConfidenceMapsWorkflow : public AbstractWorkflow {
+    class CAMPVIS_MODULES_API CudaConfidenceMapsWorkflow : public AbstractWorkflow {
     public:
         enum Stages {
             MAIN_STAGE

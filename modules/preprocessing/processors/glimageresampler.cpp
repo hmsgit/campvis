@@ -81,7 +81,7 @@ namespace campvis {
 
         if (img != 0) {
             cgt::vec3 originalSize(img->getSize());
-            const cgt::ivec3& resampledSize = p_targetSize.getValue();
+            cgt::ivec3 resampledSize = p_targetSize.getValue();
             bool isTexture2D = img->getParent()->getDimensionality() == 2;
 
             // 2D textures should not be scaled along the z axis
