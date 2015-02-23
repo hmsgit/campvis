@@ -33,7 +33,6 @@
 
 #include "core/classification/simpletransferfunction.h"
 
-#include "../../raycasterfactory.h"
 #include "cgt/opengljobprocessor.h"
 
 namespace campvis {
@@ -77,7 +76,7 @@ namespace campvis {
         _eepGenerator.p_exitImageID.setVisible(false);
         addProperty(p_eepProps, AbstractProcessor::VALID);
 
-        const std::vector<std::string>& raycasters = RaycasterFactory::getRef().getRegisteredRaycasters();
+        const std::vector<std::string>& raycasters = ProcessorFactory::getRef().getRegisteredProcessors();
         for (int i = 0; i < raycasters.size(); i++) {
             p_raycastingProcSelector.addOption(GenericOption<std::string>(raycasters[i], raycasters[i]));
         }
@@ -224,7 +223,9 @@ namespace campvis {
             p_raycasterProps.clearProperties();
             currentRaycaster->s_invalidated.disconnect(this);
             
-            _raycaster = RaycasterFactory::getRef().createRaycaster(p_raycastingProcSelector.getOptionId(), _viewportSizeProperty);
+            _raycaster = dynamic_cast<RaycastingProcessor*>(ProcessorFactory::getRef().createProcessor(p_raycastingProcSelector.getOptionId(), _viewportSizeProperty));
+            cgtAssert(_raycaster != 0, "Raycaster must not be 0.");
+
             p_raycasterProps.addPropertyCollection(*_raycaster);
             //_raycaster->p_lqMode.setVisible(false);
             //_raycaster->p_camera.setVisible(false);
@@ -246,7 +247,7 @@ namespace campvis {
             _raycaster->p_exitImageID.setValue(currentRaycaster->p_exitImageID.getValue());
             _raycaster->p_targetImageID.setValue(currentRaycaster->p_targetImageID.getValue());
             _raycaster->p_camera.setValue(currentRaycaster->p_camera.getValue());
-            //_raycaster->p_transferFunction.replaceTF(currentRaycaster->p_transferFunction.getTF());
+            _raycaster->p_transferFunction.replaceTF(currentRaycaster->p_transferFunction.getTF()->clone());
             _raycaster->p_jitterStepSizeMultiplier.setValue(currentRaycaster->p_jitterStepSizeMultiplier.getValue());
             _raycaster->p_samplingRate.setValue(currentRaycaster->p_samplingRate.getValue());
 
