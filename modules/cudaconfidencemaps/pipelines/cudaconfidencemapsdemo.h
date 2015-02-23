@@ -32,6 +32,7 @@
 #include "core/properties/buttonproperty.h"
 
 #include "modules/modulesapi.h"
+#include "modules/pipelinefactory.h"
 #include "modules/base/processors/matrixprocessor.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/preprocessing/processors/glimagecrop.h"
@@ -77,12 +78,14 @@ namespace campvis {
         virtual void onPropertyChanged(const AbstractProperty* prop);
 
         void toggleIGTLConnection();
+		void resetSettingsToDefault();
         void copyStatisticsToClipboard();
         void setAdvancedPropertiesVisibility(bool visible);
 
         // Processors
         OpenIGTLinkClient _usIgtlReader;
         GlImageCrop       _usCropFilter;
+        GlGaussianFilter  _usPreBlur;
         GlGaussianFilter  _usBlurFilter;
         GlImageResampler  _usResampler;
         CudaConfidenceMapsSolver _usMapsSolver;
@@ -96,6 +99,8 @@ namespace campvis {
         ButtonProperty p_connectDisconnectButton;
         FloatProperty  p_resamplingScale;
         FloatProperty  p_beta;
+
+		ButtonProperty p_resetToDefault;
 
         BoolProperty   p_collectStatistics;
         ButtonProperty p_copyStatisticsToClipboard;
@@ -137,6 +142,7 @@ namespace campvis {
         tbb::tick_count _statisticsLastUpdateTime;
     };
 
+	template class PipelineRegistrar<CudaConfidenceMapsDemo>;
 }
 
 #endif // CUDACONFIDENCEMAPSDEMO_H__

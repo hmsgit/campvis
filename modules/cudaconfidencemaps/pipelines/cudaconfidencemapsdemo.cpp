@@ -48,6 +48,7 @@ namespace campvis {
         : AutoEvaluationPipeline(dc)
         , _usIgtlReader()
         , _usCropFilter(&_canvasSize)
+        , _usPreBlur(&_canvasSize)
         , _usBlurFilter(&_canvasSize)
         , _usResampler(&_canvasSize)
         , _usMapsSolver()
@@ -59,6 +60,7 @@ namespace campvis {
         , p_connectDisconnectButton("ConnectToIGTLink", "Connect/Disconnect")
         , p_resamplingScale("ResampleScale", "Resample Scale", 0.5f, 0.01f, 1.0f)
         , p_beta("Beta", "Beta", 80.0f, 1.0f, 200.0f)
+		, p_resetToDefault("ResetToDefault", "Reset Settings to Default")
         , p_collectStatistics("CollectStatistics", "Collect Statistics", false)
         , p_copyStatisticsToClipboard("CopyStatisticsToClipboard", "Copy Statistics To Clipboard as CSV")
         , p_showAdvancedOptions("ShowAdvancedOptions", "Advanced options...", false)
@@ -66,7 +68,7 @@ namespace campvis {
         , p_gaussianFilterSize("GaussianSigma", "Blur amount", 2.5f, 1.0f, 10.0f)
         , p_gradientScaling("GradientScaling", "Scaling factor for gradients", 2.0f, 0.001, 10)
         , p_alpha("Alpha", "Alpha", 2.0f, 0.0f, 10.0f)
-        , p_gamma("Gamma", "Gamma", 0.03f, 0.0f, 0.4f, 0.001, 4)
+        , p_gamma("Gamma", "Gamma", 0.05f, 0.0f, 0.4f, 0.001, 4)
         , p_fanHalfAngle("FanHalfAngle", "Fan Half Angle", 28.0f, 1.0f, 90.0f)
         , p_fanInnerRadius("FanInnerRadius", "Fan Inner Radius", 0.222f, 0.001f, 0.999f)
         , p_useSpacingEncodedFanGeometry("UseSpacingEncodedFanGeomtry", "Use spacing encoded fan geometry", true)
@@ -80,6 +82,7 @@ namespace campvis {
 
         addProcessor(&_usIgtlReader);
         addProcessor(&_usCropFilter);
+        addProcessor(&_usPreBlur);
         addProcessor(&_usBlurFilter);
         addProcessor(&_usResampler);
         addProcessor(&_usMapsSolver);
@@ -92,6 +95,7 @@ namespace campvis {
         addProperty(p_connectDisconnectButton);
         addProperty(p_resamplingScale);
         addProperty(p_beta);
+		addProperty(p_resetToDefault);
         addProperty(p_collectStatistics);
         addProperty(p_copyStatisticsToClipboard);
 
@@ -139,7 +143,11 @@ namespace campvis {
         _usIgtlReader.p_targetImagePrefix.setValue("us.igtl.");
 
         _usCropFilter.p_inputImage.setValue("us.igtl.CAMPUS");
-        _usCropFilter.p_outputImage.setValue("us");
+        _usCropFilter.p_outputImage.setValue("us.cropped");
+
+        _usPreBlur.p_inputImage.setValue("us.cropped");
+        _usPreBlur.p_outputImage.setValue("us");
+        _usPreBlur.p_sigma.setValue(.6f);
 
         _usBlurFilter.p_inputImage.setValue("us");
         _usBlurFilter.p_outputImage.setValue("us.blurred");
@@ -168,6 +176,7 @@ namespace campvis {
 
         // Bind buttons to event handlers
         p_connectDisconnectButton.s_clicked.connect(this, &CudaConfidenceMapsDemo::toggleIGTLConnection);
+		p_resetToDefault.s_clicked.connect(this, &CudaConfidenceMapsDemo::resetSettingsToDefault);
         p_copyStatisticsToClipboard.s_clicked.connect(this, &CudaConfidenceMapsDemo::copyStatisticsToClipboard);
 
         // Bind pipeline proeprties to processor properties
@@ -205,7 +214,8 @@ namespace campvis {
             _usFusion.invalidate(AbstractProcessor::INVALID_RESULT);
             executeProcessorAndCheckOpenGLState(&_usIgtlReader);
             executeProcessorAndCheckOpenGLState(&_usCropFilter);
-            executeProcessorAndCheckOpenGLState(&_usBlurFilter) ;
+            executeProcessorAndCheckOpenGLState(&_usPreBlur);
+            executeProcessorAndCheckOpenGLState(&_usBlurFilter);
             executeProcessorAndCheckOpenGLState(&_usResampler);
             executeProcessorAndCheckOpenGLState(&_usMapsSolver);
 
@@ -342,7 +352,7 @@ namespace campvis {
                     _usFusion.p_view.setValue(8); // LAB
                     {
                         Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
-                        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 0.5f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
+                        tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 0.5f), cgt::col4(0, 0, 0, 192), cgt::col4(0, 0, 0, 0)));
                         _usFusion.p_confidenceTF.replaceTF(tf);
                         _usFusion.p_hue.setValue(0.23f);
                     }
@@ -396,6 +406,15 @@ namespace campvis {
         else
             _usIgtlReader.p_disconnect.click();
     }
+
+	void CudaConfidenceMapsDemo::resetSettingsToDefault() {
+		p_resamplingScale.setValue(.5f);
+		p_gaussianFilterSize.setValue(2.5f);
+		p_gradientScaling.setValue(2.f);
+		p_alpha.setValue(2.f);
+		p_beta.setValue(80.f);
+		p_gamma.setValue(.05f);
+	}
 
     void CudaConfidenceMapsDemo::copyStatisticsToClipboard() {
         // Copy statistics to the clipboard in CSV format

@@ -83,6 +83,8 @@ namespace campvis {
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
+        /// \see AbstractProcessor::updateProperties
+        virtual void updateProperties(DataContainer& dataContainer);
 
         /**
          * Applys the morphology filter \a filter to \a inputImage.

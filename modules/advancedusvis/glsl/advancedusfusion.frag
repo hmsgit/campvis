@@ -61,6 +61,8 @@ uniform float _confidenceScaling;
 uniform float _hue;
 uniform float _blurredScale;
 
+uniform float _mixFactor = 0.5;
+
 void main() {
 #ifdef USE_3D_TEX
     vec3 texCoord = vec3(ex_TexCoord.xy, _usTextureParams._sizeRCP.z * (_sliceNumber + 0.5));
@@ -118,20 +120,24 @@ void main() {
             hcy.y = uncertainty;
             out_Color.xyz = hcy2rgb(hcy);
             break;
-        case 8:
+        case 8: // LAB
+            {
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
             vec3 lch = rgb2lch(out_Color.xyz);
             lch.z = 6.2831853 * _hue;
             lch.y = 100.0 * (uncertainty);
             out_Color.xyz = lch2rgb(lch);
             break;
+            }
         case 9:
+            {
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, texel.r);
             vec3 hlch = lab2lch(xyz2hlab(rgb2xyz(out_Color.xyz)));
             //hlch.z = 6.2831853 * _hue;
             //hlch.y = 100.0 * (uncertainty);
             out_Color.xyz = xyz2rgb(hlab2xyz(lch2lab(hlch)));
             break;
+            }
         case 10:
             float intensity = clamp(mix((2.0 * texel.r - blurred.r), blurred.r, uncertainty), 0.0f, 1.0f);
             out_Color = lookupTF(_transferFunction, _transferFunctionParams, intensity);
@@ -147,5 +153,22 @@ void main() {
             vec3 color = hsv2rgb(vec3(_hue, uncertainty, 0.8));
             out_Color.xyz = (uncertainty) * color + (1-uncertainty)*out_Color.xyz;
             break;
+        case 13: // hybrid
+            {
+            float mixFactor = _mixFactor;
+            if (mixFactor < 0.1)
+                mixFactor = 0.0;
+
+            float blurredIntensity = 1.0 - clamp(mix((2.0 * texel.r - blurred.r), blurred.r, uncertainty), 0.0, 1.0);
+
+            vec4 theColor = vec4(blurredIntensity);
+            vec3 lch = rgb2lch(theColor.xyz);
+            lch.z = 6.2831853 * _hue;
+            lch.y = 100.0 * (uncertainty);
+            theColor.xyz = lch2rgb(lch);
+
+            out_Color = mix(vec4(blurredIntensity), theColor, mixFactor);
+            break;
+            }
     }
 }

@@ -47,9 +47,7 @@ namespace cgt {
     }
 
     BufferObject::~BufferObject() {
-        if (_id != 0) {
-            GLGC.addGarbageBufferObject(_id);
-        }
+		glDeleteBuffers(1, &_id);
     }
 
     void BufferObject::bind() {

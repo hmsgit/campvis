@@ -41,7 +41,7 @@
 namespace campvis {
     const std::string AdvancedUsFusion::loggerCat_ = "CAMPVis.modules.vis.AdvancedUsFusion";
 
-    GenericOption<std::string> viewOptions[13] = {
+    GenericOption<std::string> viewOptions[14] = {
         GenericOption<std::string>("us", "Ultrasound Only"),
         GenericOption<std::string>("smoothed", "Smoothed US Only"),
         GenericOption<std::string>("cm", "Confidence Map US Only"),
@@ -54,7 +54,8 @@ namespace campvis {
         GenericOption<std::string>("mappingHunterLAB", "Mapping Uncertainty Hunter L*a*b*"),
         GenericOption<std::string>("mappingSharpness", "Mapping Uncertainty to Sharpness"),
         GenericOption<std::string>("pixelate", "Pixelate (Experimental)"),
-        GenericOption<std::string>("colorOverlay", "Color Overlay")
+        GenericOption<std::string>("colorOverlay", "Color Overlay"),
+        GenericOption<std::string>("mappingHybrid", "Hybrid Mapping to Chroma and Sharpness")
     };
 
     AdvancedUsFusion::AdvancedUsFusion(IVec2Property* viewportSizeProp)
@@ -68,10 +69,11 @@ namespace campvis {
         , p_sliceNumber("sliceNumber", "Slice Number", 0, 0, 0)
         , p_transferFunction("transferFunction", "Transfer Function", new SimpleTransferFunction(256))
         , p_confidenceTF("ConfidenceTF", "Confidence to Uncertainty TF", new Geometry1DTransferFunction(256))
-        , p_view("View", "Image to Render", viewOptions, 13)
+        , p_view("View", "Image to Render", viewOptions, 14)
         , p_blurredScaling("BlurredScaling", "Blurred Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_confidenceScaling("ConfidenceScaling", "Confidence Scaling", 1.f, .001f, 1000.f, 0.1f)
         , p_hue("Hue", "Hue for Uncertainty Mapping", .15f, 0.f, 1.f)
+        , p_mixFactor("MixFactor", "Mix Factor", .5f, 0.f, 1.f, .1f, 1)
         , p_use3DTexture("Use3DTexture", "Use 3D Texture", false)
         , _shader(0)
     {
@@ -88,6 +90,8 @@ namespace campvis {
         addProperty(p_view);
         addProperty(p_confidenceScaling);
         addProperty(p_hue);
+        addProperty(p_mixFactor);
+        p_mixFactor.setVisible(false);
 
         Geometry1DTransferFunction* tf = static_cast<Geometry1DTransferFunction*>(p_confidenceTF.getTF());
         tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 96), cgt::col4(0, 0, 0, 0)));
@@ -126,6 +130,7 @@ namespace campvis {
                 _shader->setUniform("_confidenceScaling", p_confidenceScaling.getValue());
                 _shader->setUniform("_hue", p_hue.getValue());
                 _shader->setUniform("_blurredScale", 1.f / p_blurredScaling.getValue());
+                _shader->setUniform("_mixFactor", p_mixFactor.getValue());
                 
                 cgt::TextureUnit usUnit, blurredUnit, confidenceUnit, tfUnit, tf2Unit;
                 img->bind(_shader, usUnit, "_usImage", "_usTextureParams");
@@ -192,6 +197,8 @@ namespace campvis {
             }
             p_use3DTexture.setValue(img->getDimensionality() == 3);
         }
+
+        p_mixFactor.setVisible(p_view.getOptionId() == "mappingHybrid");
     }
 
     std::string AdvancedUsFusion::generateHeader() const {

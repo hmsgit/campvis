@@ -89,6 +89,7 @@ namespace campvis {
         FloatProperty p_blurredScaling;
         FloatProperty p_confidenceScaling;
         FloatProperty p_hue;
+        FloatProperty p_mixFactor;
         BoolProperty p_use3DTexture;
 
     protected:
