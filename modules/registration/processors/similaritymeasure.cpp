@@ -97,16 +97,8 @@ namespace campvis {
     void SimilarityMeasure::init() {
         VisualizationProcessor::init();
         _sadssdCostFunctionShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasuresadssd.frag", "");
-        _sadssdCostFunctionShader->setAttributeLocation(0, "in_Position");
-        _sadssdCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
-
         _nccsnrCostFunctionShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/similaritymeasurenccsnr.frag", "");
-        _nccsnrCostFunctionShader->setAttributeLocation(0, "in_Position");
-        _nccsnrCostFunctionShader->setAttributeLocation(1, "in_TexCoord");
-
         _differenceShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/registration/glsl/differenceimage.frag", "");
-        _differenceShader->setAttributeLocation(0, "in_Position");
-        _differenceShader->setAttributeLocation(1, "in_TexCoord");
 
         _glr = new GlReduction(GlReduction::PLUS);
     }
@@ -168,13 +160,11 @@ namespace campvis {
         cgt::Shader* leShader = _sadssdCostFunctionShader;
         cgt::Texture* similarityTex = 0;
         cgt::Texture* similarityTex2 = 0;
-        similarityTex = new cgt::Texture(0, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, cgt::Texture::NEAREST);
-        similarityTex->uploadTexture();
+        similarityTex = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA32F, cgt::Texture::NEAREST);
         similarityTex->setWrapping(cgt::Texture::CLAMP);
         // NCC and SNR need a second texture and a different shader...
         if (p_metric.getOptionValue() == "NCC" || p_metric.getOptionValue() == "SNR") {
-            similarityTex2 = new cgt::Texture(0, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA, GL_RGBA32F, GL_FLOAT, cgt::Texture::NEAREST);
-            similarityTex2->uploadTexture();
+            similarityTex2 = new cgt::Texture(GL_TEXTURE_2D, cgt::ivec3(p_viewportSize.getValue(), 1), GL_RGBA32F, cgt::Texture::NEAREST);
             similarityTex2->setWrapping(cgt::Texture::CLAMP);
             leShader = _nccsnrCostFunctionShader;
         }
@@ -293,8 +283,7 @@ namespace campvis {
         referenceUnit.activate();
 
         // create temporary texture for result
-        cgt::Texture* differenceImage = new cgt::Texture(0, cgt::ivec3(size), GL_RED, GL_R32F, GL_FLOAT, cgt::Texture::LINEAR);
-        differenceImage->uploadTexture();
+        cgt::Texture* differenceImage = new cgt::Texture(GL_TEXTURE_3D, cgt::ivec3(size), GL_R32F, cgt::Texture::LINEAR);
         differenceImage->setWrapping(cgt::Texture::CLAMP_TO_EDGE);
 
         // bind input images

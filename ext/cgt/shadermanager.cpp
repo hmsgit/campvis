@@ -1288,10 +1288,12 @@ void Shader::setAttribute(GLint index, const Vector4<GLuint>& v) {
     glVertexAttrib4uiv(index, v.elem);
 }
 
+// ATTENTION: This method was deliberately deactivated, since it was not working as expected
+//            with AMD GPUs.
 // Attribute locations
-void Shader::setAttributeLocation(GLuint index, const std::string& name) {
-    glBindAttribLocation(id_, index, name.c_str());
-}
+//void Shader::setAttributeLocation(GLuint index, const std::string& name) {
+//    glBindAttribLocation(id_, index, name.c_str());
+//}
 
 GLint Shader::getAttributeLocation(const string& name) {
     GLint l;

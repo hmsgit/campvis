@@ -122,8 +122,6 @@ namespace campvis {
     void ManualTissueSegmenter::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/manualsegmentation/glsl/manualtissuesegmenter.frag", "");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
 
         _controlPoints.push_back(std::map< int, std::vector< ControlPoint > >());
         _segmentation.addLayer(TissueSegmentation::Layer());

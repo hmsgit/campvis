@@ -152,11 +152,7 @@ namespace campvis {
     template<class T>
     void campvis::GenericGeometryTransferFunction<T>::initShader() {
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/passthrough.frag", "");
-        if (_shader != 0) {
-            _shader->setAttributeLocation(0, "in_Position");
-            _shader->setAttributeLocation(2, "in_Color");
-        }
-        else {
+        if (_shader == nullptr) {
             LERROR("Could not create Shader for Rendering the TF into the lookup texture!");
         }
     }

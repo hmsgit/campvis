@@ -77,8 +77,6 @@ namespace campvis {
     void DevilImageReader::init() {
         AbstractImageReader::init();
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "#define NO_DEPTH\n");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void DevilImageReader::deinit() {

@@ -61,8 +61,6 @@ namespace campvis {
         _fbo = new cgt::FramebufferObject();
 
         _copyShader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "");
-        _copyShader->setAttributeLocation(0, "in_Position");
-        _copyShader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void ViewportSplitter::deinit() {

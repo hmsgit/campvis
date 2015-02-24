@@ -67,12 +67,7 @@ namespace campvis {
         VisualizationProcessor::init();
 
         _shader2D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glgaussianfilter.frag", "#define GAUSSIAN_2D\n");
-        _shader2D->setAttributeLocation(0, "in_Position");
-        _shader2D->setAttributeLocation(1, "in_TexCoord");
-
         _shader3D = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/glgaussianfilter.frag", "#define GAUSSIAN_3D\n");
-        _shader3D->setAttributeLocation(0, "in_Position");
-        _shader3D->setAttributeLocation(1, "in_TexCoord");
 
         // create kernel buffer
         cgt::TextureUnit inputUnit;

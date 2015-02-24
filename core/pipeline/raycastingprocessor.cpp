@@ -70,8 +70,6 @@ namespace campvis {
     void RaycastingProcessor::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", _fragmentShaderFilename, generateHeader(), _customGlslVersion);
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
 
         _minReduction = new GlReduction(GlReduction::MIN);
         _maxReduction = new GlReduction(GlReduction::MAX);

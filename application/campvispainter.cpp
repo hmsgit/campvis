@@ -129,8 +129,6 @@ namespace campvis {
     void CampVisPainter::init() {
         try {
             _copyShader = ShdrMgr.load("core/glsl/passthrough.vert", "core/glsl/copyimage.frag", "");
-            _copyShader->setAttributeLocation(0, "in_Position");
-            _copyShader->setAttributeLocation(1, "in_TexCoords");
         }
         catch (cgt::Exception& e) {
             LFATAL("Encountered cgt::Exception: " << e.what());

@@ -90,16 +90,7 @@ namespace neuro {
         VisualizationProcessor::init();
 
         _eepShader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/neuro/glsl/multivolumeraycaster_eep.frag", generateHeader());
-        if (_eepShader != nullptr) {
-            _eepShader->setAttributeLocation(0, "in_Position");
-            _eepShader->setAttributeLocation(1, "in_TexCoord");
-        }
-
         _rcShader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/neuro/glsl/multivolumeraycaster_rc.frag", generateHeader(), "400");
-        if (_rcShader != nullptr) {
-            _rcShader->setAttributeLocation(0, "in_Position");
-            _rcShader->setAttributeLocation(1, "in_TexCoord");
-        }
 
         _vhm1 = new VoxelHierarchyMapper();
         _vhm2 = new VoxelHierarchyMapper();

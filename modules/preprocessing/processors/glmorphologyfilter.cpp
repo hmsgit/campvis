@@ -71,12 +71,7 @@ namespace campvis {
         VisualizationProcessor::init();
 
         _erosionFilter = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/GlMorphologyFilter.frag", generateGlslHeader("min"));
-        _erosionFilter->setAttributeLocation(0, "in_Position");
-        _erosionFilter->setAttributeLocation(1, "in_TexCoord");
-
         _dilationFilter = ShdrMgr.load("core/glsl/passthrough.vert", "modules/preprocessing/glsl/GlMorphologyFilter.frag", generateGlslHeader("max"));
-        _dilationFilter->setAttributeLocation(0, "in_Position");
-        _dilationFilter->setAttributeLocation(1, "in_TexCoord");
     }
 
     void GlMorphologyFilter::deinit() {
