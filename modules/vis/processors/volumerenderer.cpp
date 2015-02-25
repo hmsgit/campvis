@@ -34,6 +34,7 @@
 #include "core/classification/simpletransferfunction.h"
 
 #include "cgt/opengljobprocessor.h"
+#include "core/tools/stringutils.h"
 
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
@@ -78,7 +79,9 @@ namespace campvis {
 
         const std::vector<std::string>& raycasters = ProcessorFactory::getRef().getRegisteredProcessors();
         for (int i = 0; i < raycasters.size(); i++) {
-            p_raycastingProcSelector.addOption(GenericOption<std::string>(raycasters[i], raycasters[i]));
+            // Probably not the best way
+            if (StringUtils::lowercase(raycasters[i]).find("raycaster") !=  std::string::npos)
+                p_raycastingProcSelector.addOption(GenericOption<std::string>(raycasters[i], raycasters[i]));
         }
         if (_raycaster != nullptr) {
             p_raycastingProcSelector.selectByOption(_raycaster->getName());
@@ -151,6 +154,7 @@ namespace campvis {
     }
 
     void VolumeRenderer::updateResult(DataContainer& data) {
+        int x = getInvalidationLevel();
         if (getInvalidationLevel() & PG_INVALID) {
             _pgGenerator.process(data);
         }
@@ -227,12 +231,12 @@ namespace campvis {
             cgtAssert(_raycaster != 0, "Raycaster must not be 0.");
 
             p_raycasterProps.addPropertyCollection(*_raycaster);
-            //_raycaster->p_lqMode.setVisible(false);
-            //_raycaster->p_camera.setVisible(false);
-            //_raycaster->p_sourceImageID.setVisible(false);
-            //_raycaster->p_entryImageID.setVisible(false);
-            //_raycaster->p_exitImageID.setVisible(false);
-            //_raycaster->p_targetImageID.setVisible(false);
+            _raycaster->p_lqMode.setVisible(false);
+            _raycaster->p_camera.setVisible(false);
+            _raycaster->p_sourceImageID.setVisible(false);
+            _raycaster->p_entryImageID.setVisible(false);
+            _raycaster->p_exitImageID.setVisible(false);
+            _raycaster->p_targetImageID.setVisible(false);
 
             p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
             p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
@@ -252,7 +256,7 @@ namespace campvis {
             _raycaster->p_samplingRate.setValue(currentRaycaster->p_samplingRate.getValue());
 
             currentRaycaster->deinit();
-            invalidate(RAYCASTER_INVALID);
+            invalidate(PG_INVALID | EEP_INVALID | RAYCASTER_INVALID | AbstractProcessor::INVALID_RESULT);
 
             // queue the deletion of currentRaycaster as signal, to ensure that the deletion does
             // not happen before all previously emitted signals have been handled.
