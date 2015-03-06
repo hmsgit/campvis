@@ -111,9 +111,6 @@ namespace campvis {
         p_camera.addSharedProperty(&_orientationOverlay.p_camera);
 
         p_outputImage.addSharedProperty(&_orientationOverlay.p_targetImageId);
-
-
-        s_processorCanBeDeleted.connect(this, &VolumeRenderer::onProcessorCanBeDeleted);
     }
 
     VolumeRenderer::~VolumeRenderer() {
@@ -210,6 +207,10 @@ namespace campvis {
             _orientationOverlay.p_passThroughImageId.setValue(p_outputImage.getValue() + ".raycasted");
         }
         if (prop == &p_raycastingProcSelector) {
+            // lock this processor while we exchange the ray caster to make sure nobody
+            // will call process() in between.
+            AbstractProcessor::ScopedLock lockGuard(this);
+
             RaycastingProcessor *currentRaycaster = _raycaster;
             // Change to previous raycaster if "Select Processor" is selected
             if (p_raycastingProcSelector.getOptionId() == p_raycastingProcSelector.getOptions()[0]._id) {
@@ -258,9 +259,7 @@ namespace campvis {
             currentRaycaster->deinit();
             invalidate(PG_INVALID | EEP_INVALID | RAYCASTER_INVALID | AbstractProcessor::INVALID_RESULT);
 
-            // queue the deletion of currentRaycaster as signal, to ensure that the deletion does
-            // not happen before all previously emitted signals have been handled.
-            s_processorCanBeDeleted.queueSignal(currentRaycaster);
+            delete currentRaycaster;
         }
 
         VisualizationProcessor::onPropertyChanged(prop);
@@ -280,10 +279,6 @@ namespace campvis {
 
     RaycastingProcessor* VolumeRenderer::getRaycastingProcessor() {
         return _raycaster;
-    }
-
-    void VolumeRenderer::onProcessorCanBeDeleted(AbstractProcessor* processor) {
-        delete processor;
     }
 
 }

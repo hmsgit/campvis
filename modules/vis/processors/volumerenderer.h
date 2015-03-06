@@ -135,20 +135,6 @@ namespace campvis {
         OrientationOverlay _orientationOverlay;
 
         static const std::string loggerCat_;
-
-    private:
-        /// Signal emitted when the processor in the signal's argument should be deleted
-        /// We perform this deletion through signals to ensure that all previouosly emitted signals
-        /// have been handled before the processor is deleted.
-        sigslot::signal1<AbstractProcessor*> s_processorCanBeDeleted;
-
-        /**
-         * Callback method for s_processorCanBeDeleted signal, deletes \a processor.
-         * We perform this deletion through signals to ensure that all previouosly emitted signals
-         * have been handled before the processor is deleted.
-         * \param   processor   Processor to delete.
-         */
-        void onProcessorCanBeDeleted(AbstractProcessor* processor);
     };
 
     // Instantiate template to register the pipelines.

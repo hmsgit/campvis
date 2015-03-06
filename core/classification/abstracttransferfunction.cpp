@@ -51,6 +51,9 @@ namespace campvis {
     }
 
     void AbstractTransferFunction::deinit() {
+        s_intensityDomainChanged.disconnect_all();
+        s_changed.disconnect_all();
+
         delete _texture;
         _texture = 0;
     }
