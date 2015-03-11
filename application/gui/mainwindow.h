@@ -144,6 +144,9 @@ namespace campvis {
         /// Slot to be called when _btnPipelineFactory was clicked;
         void onBtnPipelineFactoryClicked();
 
+        /// Slot to be called when _btnProcessorFactory was clicked;
+        void onBtnProcessorFactoryClicked();
+
         /// Slot to be called when all shaders shall be rebuilt.
         void onRebuildShadersClicked();
 
@@ -209,6 +212,9 @@ namespace campvis {
         LogViewerWidget* _logViewer;                        ///< Widget displaying log messages
         ScriptingWidget* _scriptingConsoleWidget;           ///< Widget showing the scripting console (if available)
         WorkflowControllerWidget* _workflowWidget;          ///< Widget showing the workflow controller
+        
+        QComboBox* _cbProcessorFactory;                      ///< Combobox for selecting the Processor from the ProcessorFactory
+        QPushButton* _btnProcessorFactory;                   ///< Button to add a Processor from the factory to the selected Pipeline
 
         QPushButton* _btnLuaLoad;
         QPushButton* _btnLuaSave;

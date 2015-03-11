@@ -64,19 +64,31 @@ namespace campvis {
     AbstractProcessor* ProcessorFactory::createProcessor(const std::string& id, IVec2Property* viewPortSizeProp) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
         
-        if (viewPortSizeProp != nullptr) {
-            auto it = _processorMapWithIVec2Param.find(id);
-            if (it == _processorMapWithIVec2Param.end())
-                return nullptr;
-            else
+        auto it = _processorMapWithIVec2Param.find(id);
+        if (it != _processorMapWithIVec2Param.end()) {
+            if (viewPortSizeProp != nullptr)
                 return (it->second)(viewPortSizeProp);
-        } else {
-            auto it = _processorMapDefault.find(id);
-            if (it == _processorMapDefault.end())
-                return nullptr;
-            else
-                return (it->second)();
+            IVec2Property* viewport = new IVec2Property("ViewportSize", "Viewport Size", cgt::ivec2(200), cgt::ivec2(0, 0), cgt::ivec2(10000));
+
+            return (it->second)(viewport);
         }
+
+        auto pos = _processorMapDefault.find(id);
+        if (pos != _processorMapDefault.end())
+            return (pos->second)();
+        
+        return nullptr;
+
+        //if (viewPortSizeProp != nullptr) {
+        //        return nullptr;
+        //    else
+        //} else {
+        //    auto it = _processorMapDefault.find(id);
+        //    if (it == _processorMapDefault.end())
+        //        return nullptr;
+
+        //    return (it->second)();
+        //}
     }
 
 }

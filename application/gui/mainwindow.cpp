@@ -97,30 +97,40 @@ namespace campvis {
         _containerWidget = new QWidget(this);
         QGridLayout* _cwLayout = new QGridLayout(_containerWidget);
 
+        int rowPosition = 0;
         _cbPipelineFactory = new QComboBox(_containerWidget);
         std::vector<std::string> registeredPipelines = PipelineFactory::getRef().getRegisteredPipelines();
         for (std::vector<std::string>::const_iterator it = registeredPipelines.begin(); it != registeredPipelines.end(); ++it)
             _cbPipelineFactory->addItem(QString::fromStdString(*it));
-        _cwLayout->addWidget(_cbPipelineFactory, 0, 0);
+        _cwLayout->addWidget(_cbPipelineFactory, rowPosition, 0);
 
         _btnPipelineFactory = new QPushButton("Add Pipeline", _containerWidget);
-        _cwLayout->addWidget(_btnPipelineFactory, 0, 1);
+        _cwLayout->addWidget(_btnPipelineFactory, rowPosition++, 1);
 
         _pipelineWidget = new PipelineTreeWidget(this);
         _containerWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        _cwLayout->addWidget(_pipelineWidget, 1, 0, 1, 2);
+        _cwLayout->addWidget(_pipelineWidget, rowPosition++, 0, 1, 2);
 
         _btnExecute = new QPushButton("Execute Selected Pipeline/Processor", _containerWidget);
-        _cwLayout->addWidget(_btnExecute, 2, 0, 1, 2);
+        _cwLayout->addWidget(_btnExecute, rowPosition++, 0, 1, 2);
+
+        _cbProcessorFactory = new QComboBox(_containerWidget);
+        std::vector<std::string> registeredProcessors = ProcessorFactory::getRef().getRegisteredProcessors();
+        for (std::vector<std::string>::const_iterator it = registeredProcessors.begin(); it != registeredProcessors.end(); ++it)
+            _cbProcessorFactory->addItem(QString::fromStdString(*it));
+        _cwLayout->addWidget(_cbProcessorFactory, rowPosition, 0);
+
+        _btnProcessorFactory = new QPushButton("Add Processor", _containerWidget);
+        _cwLayout->addWidget(_btnProcessorFactory, rowPosition++, 1);
 
         _btnShowDataContainerInspector = new QPushButton("Inspect DataContainer of Selected Pipeline", _containerWidget);
-        _cwLayout->addWidget(_btnShowDataContainerInspector, 3, 0, 1, 2);
+        _cwLayout->addWidget(_btnShowDataContainerInspector, rowPosition++, 0, 1, 2);
 
 #ifdef CAMPVIS_HAS_SCRIPTING
         _btnLuaLoad = new QPushButton("Load Script", _containerWidget);
-        _cwLayout->addWidget(_btnLuaLoad, 4, 0, 1, 2);
+        _cwLayout->addWidget(_btnLuaLoad, rowPosition++, 0, 1, 2);
         _btnLuaSave = new QPushButton("Save Script", _containerWidget);
-        _cwLayout->addWidget(_btnLuaSave, 5, 0, 1, 2);
+        _cwLayout->addWidget(_btnLuaSave, rowPosition++, 0, 1, 2);
         connect(
             _btnLuaLoad, SIGNAL(clicked()), 
             this, SLOT(onBtnLuaLoadClicked()));
@@ -190,6 +200,9 @@ namespace campvis {
         connect(
             _btnPipelineFactory, SIGNAL(clicked()), 
             this, SLOT(onBtnPipelineFactoryClicked()));
+        connect(
+            _btnProcessorFactory, SIGNAL(clicked()), 
+            this, SLOT(onBtnProcessorFactoryClicked()));
 
         _application->s_PipelinesChanged.connect(this, &MainWindow::onPipelinesChanged);
         _application->s_DataContainersChanged.connect(this, &MainWindow::onDataContainersChanged);
@@ -235,7 +248,7 @@ namespace campvis {
     void MainWindow::onDataContainersChanged() {
         std::vector<AbstractPipeline*> pipelines;
         std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
-
+        
         emit updatePipelineWidget(_application->_dataContainers, pipelines);
     }
 
@@ -408,6 +421,32 @@ namespace campvis {
         }
         AbstractPipeline* p = PipelineFactory::getRef().createPipeline(name, dc);
         _application->addPipeline(name, p);
+    }
+
+    void MainWindow::onBtnProcessorFactoryClicked() {
+        cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+
+        std::string name = this->_cbProcessorFactory->currentText().toStdString();
+        DataContainer* dc = _selectedDataContainer;
+        if (_selectedPipeline == nullptr) 
+            return;
+        AbstractProcessor* selectedProcessor = _selectedProcessor;
+        if (selectedProcessor == nullptr) {
+            selectedProcessor = _selectedPipeline->getProcessors().at(0);
+            if (selectedProcessor == nullptr)
+                return;
+        }
+
+        AbstractProcessor* p = ProcessorFactory::getRef().createProcessor(name);
+        p->init();
+        
+        _selectedPipeline->addProcessor(p);
+
+        std::vector<AbstractPipeline*> pipelines;
+        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
+        //_pipelineWidget->update(_application->_dataContainers, pipelines);
+
+        emit updatePipelineWidget(_application->_dataContainers, pipelines);
     }
 
     void MainWindow::onRebuildShadersClicked() {
