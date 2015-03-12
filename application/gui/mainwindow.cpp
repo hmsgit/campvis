@@ -430,21 +430,16 @@ namespace campvis {
         DataContainer* dc = _selectedDataContainer;
         if (_selectedPipeline == nullptr) 
             return;
-        AbstractProcessor* selectedProcessor = _selectedProcessor;
-        if (selectedProcessor == nullptr) {
-            selectedProcessor = _selectedPipeline->getProcessors().at(0);
-            if (selectedProcessor == nullptr)
-                return;
-        }
 
-        AbstractProcessor* p = ProcessorFactory::getRef().createProcessor(name);
-        p->init();
+        AbstractProcessor* p = ProcessorFactory::getRef().createProcessor(name, &_selectedPipeline->getCanvasSize());
+        if (p == nullptr)
+            return;
         
+        p->init();
         _selectedPipeline->addProcessor(p);
 
         std::vector<AbstractPipeline*> pipelines;
         std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
-        //_pipelineWidget->update(_application->_dataContainers, pipelines);
 
         emit updatePipelineWidget(_application->_dataContainers, pipelines);
     }

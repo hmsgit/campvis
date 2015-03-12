@@ -68,9 +68,8 @@ namespace campvis {
         if (it != _processorMapWithIVec2Param.end()) {
             if (viewPortSizeProp != nullptr)
                 return (it->second)(viewPortSizeProp);
-            IVec2Property* viewport = new IVec2Property("ViewportSize", "Viewport Size", cgt::ivec2(200), cgt::ivec2(0, 0), cgt::ivec2(10000));
-
-            return (it->second)(viewport);
+            LDEBUGC("CAMPVis.modules.ProcessorFactory", "ViewPortSize should not be NULL");
+            return nullptr;
         }
 
         auto pos = _processorMapDefault.find(id);
@@ -78,17 +77,6 @@ namespace campvis {
             return (pos->second)();
         
         return nullptr;
-
-        //if (viewPortSizeProp != nullptr) {
-        //        return nullptr;
-        //    else
-        //} else {
-        //    auto it = _processorMapDefault.find(id);
-        //    if (it == _processorMapDefault.end())
-        //        return nullptr;
-
-        //    return (it->second)();
-        //}
     }
 
 }

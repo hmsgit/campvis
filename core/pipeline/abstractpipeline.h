@@ -194,6 +194,12 @@ namespace campvis {
          * \return  The DataHandle named _renderTargetID in the pipeline's DataContainer, 0 if no such handle exists.
          */
         const std::string& getRenderTargetID() const;
+        
+        /**
+         * Returns the canvas size 
+         * \return  The IVec2Property with current canvas size on it
+         */
+        IVec2Property getCanvasSize() {return _canvasSize;}
 
         /// Signal emitted at the end of AbstractPipeline::init()
         sigslot::signal0 s_init;

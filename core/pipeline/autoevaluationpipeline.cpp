@@ -46,9 +46,9 @@ namespace campvis {
         AbstractPipeline::init();
 
         // connect invalidation of each processor
-        for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
-            (*it)->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
-        }
+        //for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
+        //    (*it)->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
+        //}
 
         _data->s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
     }
@@ -75,6 +75,7 @@ namespace campvis {
         findDataNamePropertiesAndAddToPortMap(processor);
 
         AbstractPipeline::addProcessor(processor);
+        processor->s_invalidated.connect(this, &AutoEvaluationPipeline::onProcessorInvalidated);
     }
 
     void AutoEvaluationPipeline::executePipeline() {
