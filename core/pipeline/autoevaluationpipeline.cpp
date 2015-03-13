@@ -1,25 +1,25 @@
 // ================================================================================================
-// 
+//
 // This file is part of the CAMPVis Software Framework.
-// 
+//
 // If not explicitly stated otherwise: Copyright (C) 2012-2014, all rights reserved,
 //      Christian Schulte zu Berge <christian.szb@in.tum.de>
 //      Chair for Computer Aided Medical Procedures
 //      Technische Universitaet Muenchen
 //      Boltzmannstr. 3, 85748 Garching b. Muenchen, Germany
-// 
+//
 // For a full list of authors and contributors, please refer to the file "AUTHORS.txt".
-// 
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 // except in compliance with the License. You may obtain a copy of the License at
-// 
+//
 // http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed under the 
-// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
-// either express or implied. See the License for the specific language governing permissions 
+//
+// Unless required by applicable law or agreed to in writing, software distributed under the
+// License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+// either express or implied. See the License for the specific language governing permissions
 // and limitations under the License.
-// 
+//
 // ================================================================================================
 
 #include "autoevaluationpipeline.h"
@@ -34,7 +34,7 @@
 namespace campvis {
     const std::string AutoEvaluationPipeline::loggerCat_ = "CAMPVis.core.datastructures.AutoEvaluationPipeline";
 
-    AutoEvaluationPipeline::AutoEvaluationPipeline(DataContainer* dc) 
+    AutoEvaluationPipeline::AutoEvaluationPipeline(DataContainer* dc)
         : AbstractPipeline(dc)
     {
     }
@@ -44,16 +44,13 @@ namespace campvis {
 
     void AutoEvaluationPipeline::init() {
         AbstractPipeline::init();
-        _data->s_dataAdded.connect(this, &AutoEvaluationPipeline::onDataContainerDataAdded);
     }
 
     void AutoEvaluationPipeline::deinit() {
-        _data->s_dataAdded.disconnect(this);
-
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
             (*it)->s_invalidated.disconnect(this);
         }
-    
+
         AbstractPipeline::deinit();
     }
 
@@ -73,7 +70,7 @@ namespace campvis {
     }
 
     void AutoEvaluationPipeline::executePipeline() {
-        // execute each processor once 
+        // execute each processor once
         // (AbstractProcessor::process() takes care of executing only invalid processors)
         for (size_t i = 0; i < _processors.size(); ++i) {
             executeProcessorAndCheckOpenGLState(_processors[i]);
@@ -129,6 +126,8 @@ namespace campvis {
 
     void AutoEvaluationPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
         {
+            AbstractPipeline::onDataContainerDataAdded(name, dh);
+
             // acquire read lock
             tbb::spin_rw_mutex::scoped_lock lock(_pmMutex, false);
 

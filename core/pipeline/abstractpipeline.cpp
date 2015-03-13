@@ -64,6 +64,8 @@ namespace campvis {
     }
 
     void AbstractPipeline::init() {
+        _data->s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
+
         initAllProperties();
 
         // initialize all processors:
@@ -81,6 +83,8 @@ namespace campvis {
     }
 
     void AbstractPipeline::deinit() {
+        _data->s_dataAdded.disconnect(this);
+
         // use trigger signal to enforce blocking call
         s_deinit.triggerSignal();
 
@@ -276,6 +280,10 @@ namespace campvis {
         return _processors[index];
     }
 
+    void AbstractPipeline::onDataContainerDataAdded(std::string name, DataHandle dh) {
+        if (name == _renderTargetID.getValue())
+            setPipelineDirty();
+    }
     void AbstractPipeline::forceExecuteProcessor(AbstractProcessor* processor) {
         bool enabledState = processor->getEnabled();
         
@@ -285,7 +293,6 @@ namespace campvis {
 
         processor->setEnabled(enabledState);
     }
-
 
 
 }
