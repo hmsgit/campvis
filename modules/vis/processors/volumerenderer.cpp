@@ -46,9 +46,11 @@ namespace campvis {
         , p_pgProps("PGGProps", "Proxy Geometry Generator")
         , p_eepProps("EEPProps", "Entry/Exit Points Generator")
         , p_raycasterProps("RaycasterProps", "Raycaster")
+        , p_orientationOverlayProps("OrientationOverlayProps", "Orientation Overlay")
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
         , _raycaster(raycaster)
+        , _orientationOverlay(viewportSizeProp)
     {
         _raycaster->setViewportSizeProperty(viewportSizeProp);
 
@@ -79,15 +81,20 @@ namespace campvis {
         _raycaster->p_targetImageID.setVisible(false);
         addProperty(p_raycasterProps, AbstractProcessor::VALID);
 
+        p_orientationOverlayProps.addPropertyCollection(_orientationOverlay);
+        addProperty(p_orientationOverlayProps, VALID);
+
         // setup shared properties
         p_inputVolume.addSharedProperty(&_pgGenerator.p_sourceImageID);
         p_inputVolume.addSharedProperty(&_eepGenerator.p_sourceImageID);
         p_inputVolume.addSharedProperty(&_raycaster->p_sourceImageID);
+        p_inputVolume.addSharedProperty(&_orientationOverlay.p_sourceImageId);
 
         p_camera.addSharedProperty(&_eepGenerator.p_camera);
         p_camera.addSharedProperty(&_raycaster->p_camera);
+        p_camera.addSharedProperty(&_orientationOverlay.p_camera);
 
-        p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
+        p_outputImage.addSharedProperty(&_orientationOverlay.p_targetImageId);
     }
 
     VolumeRenderer::~VolumeRenderer() {
@@ -98,6 +105,7 @@ namespace campvis {
         VisualizationProcessor::init();
         _pgGenerator.init();
         _eepGenerator.init();
+        _orientationOverlay.init();
         _raycaster->init();
 
         p_lqMode.addSharedProperty(&_raycaster->p_lqMode);
@@ -105,6 +113,7 @@ namespace campvis {
         _pgGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _eepGenerator.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
         _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
+        _orientationOverlay.s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
 
         glGenQueries(1, &_timerQueryRaycaster);
     }
@@ -115,10 +124,12 @@ namespace campvis {
         _pgGenerator.s_invalidated.disconnect(this);
         _eepGenerator.s_invalidated.disconnect(this);
         _raycaster->s_invalidated.disconnect(this);
+        _orientationOverlay.s_invalidated.disconnect(this);
 
         _pgGenerator.deinit();
         _eepGenerator.deinit();
         _raycaster->deinit();
+        _orientationOverlay.deinit();
 
         VisualizationProcessor::deinit();
     }
@@ -144,6 +155,8 @@ namespace campvis {
                 _raycaster->process(data);
             }            
         }
+
+        _orientationOverlay.process(data);
 
         validate(INVALID_RESULT | PG_INVALID | EEP_INVALID | RAYCASTER_INVALID);
     }
@@ -172,6 +185,9 @@ namespace campvis {
 
             _eepGenerator.p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
             _raycaster->p_exitImageID.setValue(p_outputImage.getValue() + ".exitpoints");
+
+            _raycaster->p_targetImageID.setValue(p_outputImage.getValue() + ".raycasted");
+            _orientationOverlay.p_passThroughImageId.setValue(p_outputImage.getValue() + ".raycasted");
         }
         VisualizationProcessor::onPropertyChanged(prop);
     }
@@ -179,6 +195,7 @@ namespace campvis {
     void VolumeRenderer::setViewportSizeProperty(IVec2Property* viewportSizeProp) {
         _eepGenerator.setViewportSizeProperty(viewportSizeProp);
         _raycaster->setViewportSizeProperty(viewportSizeProp);
+        _orientationOverlay.setViewportSizeProperty(viewportSizeProp);
 
         VisualizationProcessor::setViewportSizeProperty(viewportSizeProp);
     }

@@ -41,6 +41,8 @@ public:
     TextureReaderTga();
     virtual Texture* loadTexture(const std::string& filename, Texture::Filter filter, bool compress = false,
                                  bool keepPixels = false, bool createOGLTex = true, bool textureRectangle = false);
+
+    Texture* loadTextureArray(const std::vector<std::string>& filenames, Texture::Filter filter);
 };
 
 

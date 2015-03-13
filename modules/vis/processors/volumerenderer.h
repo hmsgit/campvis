@@ -32,6 +32,7 @@
 #include "modules/modulesapi.h"
 #include "modules/vis/processors/eepgenerator.h"
 #include "modules/vis/processors/proxygeometrygenerator.h"
+#include "modules/vis/processors/orientationoverlay.h"
 #include "modules/vis/processors/simpleraycaster.h"
 #include "modules/processorfactory.h"
 
@@ -104,6 +105,7 @@ namespace campvis {
         MetaProperty p_pgProps;                     ///< MetaProperty for properties of the ProxyGeometryGenerator processor
         MetaProperty p_eepProps;                    ///< MetaProperty for properties of the EEPGenerator processor
         MetaProperty p_raycasterProps;              ///< MetaProperty for properties of the raycasting processor
+        MetaProperty p_orientationOverlayProps;     ///< MetaProperty for properties of the OrientationOverlay processor
 
     protected:
         /// \see AbstractProcessor::updateResult
@@ -126,6 +128,8 @@ namespace campvis {
         ProxyGeometryGenerator _pgGenerator;
         EEPGenerator _eepGenerator;
         RaycastingProcessor* _raycaster;
+
+        OrientationOverlay _orientationOverlay;
 
         static const std::string loggerCat_;
     };
