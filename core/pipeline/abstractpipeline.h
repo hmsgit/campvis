@@ -199,7 +199,7 @@ namespace campvis {
          * Returns the canvas size 
          * \return  The IVec2Property with current canvas size on it
          */
-        IVec2Property getCanvasSize() {return _canvasSize;}
+        IVec2Property& getCanvasSize() {return _canvasSize;}
 
         /// Signal emitted at the end of AbstractPipeline::init()
         sigslot::signal0 s_init;

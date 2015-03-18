@@ -431,7 +431,9 @@ namespace campvis {
         if (_selectedPipeline == nullptr) 
             return;
 
-        AbstractProcessor* p = ProcessorFactory::getRef().createProcessor(name, &_selectedPipeline->getCanvasSize());
+        IVec2Property temp = _selectedPipeline->getCanvasSize();
+        IVec2Property *viewPort = new IVec2Property(temp.getName(), temp.getTitle(), temp.getValue(), temp.getMinValue(), temp.getMaxValue(), temp.getStepValue());
+        AbstractProcessor* p = ProcessorFactory::getRef().createProcessor(name, viewPort);
         if (p == nullptr)
             return;
         
