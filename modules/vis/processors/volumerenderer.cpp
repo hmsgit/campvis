@@ -52,6 +52,7 @@ namespace campvis {
         , p_eepProps("EEPProps", "Entry/Exit Points Generator")
         , p_raycasterProps("RaycasterProps", "Raycaster")
         , p_orientationOverlayProps("OrientationOverlayProps", "Orientation Overlay")
+        , p_raycastingProcSelector("RaycasterSelector", "RaycasterSelector", new GenericOption<std::string>("select", "Select Processor"), 1)
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
         , _raycaster(raycaster)
