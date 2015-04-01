@@ -93,6 +93,20 @@ namespace campvis {
         virtual void onDataContainerDataAdded(std::string name, DataHandle dh);
 
         /**
+         * Callback when a property was added to one of the PropertyCollections.
+         * This property will be added to the port map.
+         * \param   property    Property that was added to the collection.
+         */
+        virtual void onPropertyCollectionPropertyAdded(AbstractProperty* property);
+
+        /**
+         * Callback when a property was removed from one of the PropertyCollections.
+         * This property will be removed from the port map.
+         * \param   property    Property that was added removed from collection.
+         */
+        virtual void onPropertyCollectionPropertyRemoved(AbstractProperty* property);
+
+        /**
          * Recursively looks for all DataNameProperties in \a pc and adds them to the port map.
          * If \a pc contains a MetaProperty, it will be seached recursively.
          * \param   pc  PropertyCollection to search for DataNameProperties.

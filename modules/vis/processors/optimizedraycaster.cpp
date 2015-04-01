@@ -37,7 +37,6 @@ namespace campvis {
 
     OptimizedRaycaster::OptimizedRaycaster(IVec2Property* viewportSizeProp)
         : RaycastingProcessor(viewportSizeProp, "modules/vis/glsl/optimizedraycaster.frag", true)
-        , p_targetImageID("targetImageID", "Output Image", "", DataNameProperty::WRITE)
         , p_enableShading("EnableShading", "Enable Shading", true)
         , p_lightId("LightId", "Input Light Source", "lightsource", DataNameProperty::READ)
         , p_enableShadowing("EnableShadowing", "Enable Hard Shadows (Expensive!)", false)
@@ -51,7 +50,6 @@ namespace campvis {
 
         addProperty(p_enableShading, INVALID_RESULT | INVALID_PROPERTIES | INVALID_SHADER);
         addProperty(p_lightId);
-        addProperty(p_targetImageID);
         addProperty(p_enableIntersectionRefinement, INVALID_RESULT | INVALID_SHADER);
         addProperty(p_useEmptySpaceSkipping, INVALID_RESULT | INVALID_BBV);
 

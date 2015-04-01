@@ -61,22 +61,26 @@ namespace campvis {
         return toReturn;
     }
 
+    std::vector<std::string> ProcessorFactory::getRegisteredRaycastingProcessors() const {
+        return _raycastingProcessors;
+    }
+
     AbstractProcessor* ProcessorFactory::createProcessor(const std::string& id, IVec2Property* viewPortSizeProp) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
         
-        if (viewPortSizeProp != nullptr) {
-            auto it = _processorMapWithIVec2Param.find(id);
-            if (it == _processorMapWithIVec2Param.end())
-                return nullptr;
-            else
+        auto it = _processorMapWithIVec2Param.find(id);
+        if (it != _processorMapWithIVec2Param.end()) {
+            if (viewPortSizeProp != nullptr)
                 return (it->second)(viewPortSizeProp);
-        } else {
-            auto it = _processorMapDefault.find(id);
-            if (it == _processorMapDefault.end())
-                return nullptr;
-            else
-                return (it->second)();
+            LDEBUGC("CAMPVis.modules.ProcessorFactory", "ViewPortSize should not be NULL");
+            return nullptr;
         }
+
+        auto pos = _processorMapDefault.find(id);
+        if (pos != _processorMapDefault.end())
+            return (pos->second)();
+        
+        return nullptr;
     }
 
 }

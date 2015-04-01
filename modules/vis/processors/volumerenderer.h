@@ -25,6 +25,7 @@
 #ifndef VOLUMERENDERER_H__
 #define VOLUMERENDERER_H__
 
+#include "sigslot/sigslot.h"
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/raycastingprocessor.h"
 #include "core/properties/allproperties.h"
@@ -106,6 +107,8 @@ namespace campvis {
         MetaProperty p_eepProps;                    ///< MetaProperty for properties of the EEPGenerator processor
         MetaProperty p_raycasterProps;              ///< MetaProperty for properties of the raycasting processor
         MetaProperty p_orientationOverlayProps;     ///< MetaProperty for properties of the OrientationOverlay processor
+
+        GenericOptionProperty<std::string> p_raycastingProcSelector;   ///< Name of the RaycastingProcessor to be used
 
     protected:
         /// \see AbstractProcessor::updateResult

@@ -191,9 +191,12 @@ Texture* TextureReaderTga::loadTexture(const std::string& filename, Texture::Fil
 }
 
 Texture* TextureReaderTga::loadTextureArray(const std::vector<std::string>& filenames, Texture::Filter filter) {
+    if (filenames.empty())
+        return nullptr;
+
     GLubyte* data = nullptr;
-    GLint format;
-    GLint internalFormat;
+    GLint format = 0;
+    GLint internalFormat = 0;
     GLenum dataType = GL_UNSIGNED_BYTE;
     size_t numBytesPerTexture = 0;
     cgt::ivec3 dimensions;

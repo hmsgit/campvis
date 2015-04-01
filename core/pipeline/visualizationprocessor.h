@@ -122,7 +122,12 @@ namespace campvis {
          * \param   viewportSizeProp    Pointer to the property defining the viewport size, must not be 0.
          */
         virtual void setViewportSizeProperty(IVec2Property* viewportSizeProp);
-
+        
+        /**
+         * Returns the effective viewport size considering LQ mode.
+         * \return  lqMode ? _viewportSize/2 : _viewportSize
+         */
+        cgt::ivec2 getEffectiveViewportSize() const;
 
         BoolProperty p_lqMode;                      ///< Flag whether to enable LQ mode (halfsamples effective viewport size)
 
@@ -154,12 +159,6 @@ namespace campvis {
          * using the default attachment.
          */
         void createAndAttachDepthTexture();
-
-        /**
-         * Returns the effective viewport size considering LQ mode.
-         * \return  lqMode ? _viewportSize/2 : _viewportSize
-         */
-        cgt::ivec2 getEffectiveViewportSize() const;
 
         /**
          * Returns the current viewport size as ivec3.

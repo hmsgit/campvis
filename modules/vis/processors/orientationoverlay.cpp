@@ -114,7 +114,6 @@ namespace campvis {
             createAndAttachColorTexture();
             createAndAttachDepthTexture();
 
-            glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (passthroughImage) {
@@ -127,6 +126,7 @@ namespace campvis {
                 _passthroughShader->deactivate();
             }
 
+            glEnable(GL_DEPTH_TEST);
             _shader->activate();
 
             cgt::TextureUnit textureUnit;
@@ -144,7 +144,6 @@ namespace campvis {
 
             _cubeGeometry->render(GL_TRIANGLE_FAN);
 
-            glDepthFunc(GL_LESS);
             glDisable(GL_DEPTH_TEST);
 
             _shader->deactivate();
