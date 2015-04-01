@@ -61,6 +61,10 @@ namespace campvis {
         return toReturn;
     }
 
+    std::vector<std::string> ProcessorFactory::getRegisteredRaycastingProcessors() const {
+        return _raycastingProcessors;
+    }
+
     AbstractProcessor* ProcessorFactory::createProcessor(const std::string& id, IVec2Property* viewPortSizeProp) const {
         tbb::spin_mutex::scoped_lock lock(_mutex);
         

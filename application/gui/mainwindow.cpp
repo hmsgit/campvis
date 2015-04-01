@@ -427,7 +427,6 @@ namespace campvis {
         cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
 
         std::string name = this->_cbProcessorFactory->currentText().toStdString();
-        DataContainer* dc = _selectedDataContainer;
         if (_selectedPipeline == nullptr) 
             return;
 

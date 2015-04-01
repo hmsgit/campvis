@@ -41,6 +41,7 @@
 #include <vector>
 
 #include "core/pipeline/visualizationprocessor.h"
+#include "core/pipeline/raycastingprocessor.h"
 
 namespace campvis {
     class AbstractProcessor;
@@ -64,9 +65,26 @@ namespace campvis {
     
         static void deinit();
         
+        /**
+         * Returns the list of all registered Processors.
+         * \return  A std::vector of the string IDs of all registered processors.
+         */
         std::vector<std::string> getRegisteredProcessors() const;
 
-        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp = 0) const;
+        /**
+         * Returns the list of all registered raycasting processors (all registered processors 
+         * inheriting from RaycastingProcessor).
+         * \return  A std::vector of the string IDs of all registered raycasting processors.
+         */
+        std::vector<std::string> getRegisteredRaycastingProcessors() const;
+
+        /**
+         * Factory method to create a processor from the given string ID.
+         * \param   id                  String ID of the processor to create.
+         * \param   viewPortSizeProp    Pointer to the viewport size property that the created VisualizationProcessor should use. If the created processor is no VisualizationProcessor, then this argument is ignored. Defaults to nullptr.
+         * \return  Pointer to the newly created processor, may be nullptr. Caller has to take ownership of the returned pointer.
+         */
+        AbstractProcessor* createProcessor(const std::string& id, IVec2Property* viewPortSizeProp = nullptr) const;
 
         
         /**
@@ -78,6 +96,10 @@ namespace campvis {
         template<typename T>
         size_t registerProcessorWithDefaultConstructor(std::function<AbstractProcessor*()> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
+
+            // add to list of raycasting processors if needed
+            if (std::is_base_of<RaycastingProcessor, T>::value)
+                _raycastingProcessors.push_back(T::getId());
 
             auto it = _processorTypeMap.find(T::getId());
             if (it != _processorTypeMap.end()) {
@@ -104,6 +126,10 @@ namespace campvis {
         size_t registerProcessorWithIVec2PropParam(std::function<AbstractProcessor*(IVec2Property*)> callee) {
             tbb::spin_mutex::scoped_lock lock(_mutex);
 
+            // add to list of raycasting processors if needed
+            if (std::is_base_of<RaycastingProcessor, T>::value)
+                _raycastingProcessors.push_back(T::getId());
+
             auto it = _processorTypeMap.find(T::getId());
             if (it != _processorTypeMap.end()) {
                 // check, whether the type is the same, then a double registration is okay since it
@@ -126,6 +152,8 @@ namespace campvis {
         std::map< std::string, std::type_index> _processorTypeMap;
         std::map< std::string, std::function<AbstractProcessor*()> > _processorMapDefault;
         std::map< std::string, std::function<AbstractProcessor*(IVec2Property*)> > _processorMapWithIVec2Param;
+
+        std::vector<std::string> _raycastingProcessors;
     };
 
 

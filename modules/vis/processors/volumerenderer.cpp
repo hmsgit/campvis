@@ -39,8 +39,6 @@
 namespace campvis {
     const std::string VolumeRenderer::loggerCat_ = "CAMPVis.modules.vis.VolumeRenderer";
 
-    //static const std::string* raycastingProcessorName = &RaycasterFactory::getRef().getRegisteredRaycasters()[0];
-
     VolumeRenderer::VolumeRenderer(IVec2Property* viewportSizeProp, RaycastingProcessor* raycaster)
         : VisualizationProcessor(viewportSizeProp)
         , p_inputVolume("InputVolume", "Input Volume", "", DataNameProperty::READ)
@@ -52,7 +50,7 @@ namespace campvis {
         , p_eepProps("EEPProps", "Entry/Exit Points Generator")
         , p_raycasterProps("RaycasterProps", "Raycaster")
         , p_orientationOverlayProps("OrientationOverlayProps", "Orientation Overlay")
-        , p_raycastingProcSelector("RaycasterSelector", "RaycasterSelector", new GenericOption<std::string>("select", "Select Processor"), 1)
+        , p_raycastingProcSelector("RaycasterSelector", "Select Raycaster to Use", nullptr, 0)
         , _pgGenerator()
         , _eepGenerator(viewportSizeProp)
         , _raycaster(raycaster)
@@ -78,11 +76,9 @@ namespace campvis {
         _eepGenerator.p_exitImageID.setVisible(false);
         addProperty(p_eepProps, AbstractProcessor::VALID);
 
-        const std::vector<std::string>& raycasters = ProcessorFactory::getRef().getRegisteredProcessors();
-        for (int i = 0; i < raycasters.size(); i++) {
-            // Probably not the best way
-            if (StringUtils::lowercase(raycasters[i]).find("raycaster") !=  std::string::npos)
-                p_raycastingProcSelector.addOption(GenericOption<std::string>(raycasters[i], raycasters[i]));
+        const std::vector<std::string>& raycasters = ProcessorFactory::getRef().getRegisteredRaycastingProcessors();
+        for (size_t i = 0; i < raycasters.size(); i++) {
+            p_raycastingProcSelector.addOption(GenericOption<std::string>(raycasters[i], raycasters[i]));
         }
         if (_raycaster != nullptr) {
             p_raycastingProcSelector.selectByOption(_raycaster->getName());
@@ -152,7 +148,6 @@ namespace campvis {
     }
 
     void VolumeRenderer::updateResult(DataContainer& data) {
-        int x = getInvalidationLevel();
         if (getInvalidationLevel() & PG_INVALID) {
             _pgGenerator.process(data);
         }
@@ -213,11 +208,6 @@ namespace campvis {
             AbstractProcessor::ScopedLock lockGuard(this);
 
             RaycastingProcessor *currentRaycaster = _raycaster;
-            // Change to previous raycaster if "Select Processor" is selected
-            if (p_raycastingProcSelector.getOptionId() == p_raycastingProcSelector.getOptions()[0]._id) {
-                p_raycastingProcSelector.selectById(currentRaycaster->getName());
-                return;
-            }
             if (p_raycastingProcSelector.getOptionId() == currentRaycaster->getName()) {
                 return;
             }

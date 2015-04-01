@@ -110,8 +110,6 @@ namespace campvis {
 
         GenericOptionProperty<std::string> p_raycastingProcSelector;   ///< Name of the RaycastingProcessor to be used
 
-        sigslot::signal2<RaycastingProcessor*, RaycastingProcessor*> s_raycasterChanged;    ///< Signal emited when the raycaster is changed
-
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
