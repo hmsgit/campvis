@@ -32,7 +32,6 @@
 
 #include "cgt/assert.h"
 #include "cgt/logmanager.h"
-#include "cgt/openglgarbagecollector.h"
 #include "cgt/glcontextmanager.h"
 
 namespace cgt {
@@ -59,7 +58,6 @@ namespace cgt {
     {
         _pause = 0;
         _context= nullptr;
-        _performGarbageCollection = false;
     }
 
     OpenGLJobProcessor::~OpenGLJobProcessor() {
@@ -88,12 +86,9 @@ namespace cgt {
                 // execute and delete the job
                 jobToDo->execute();
                 delete jobToDo;
-
-                performGarbageCollectionIfNecessary();
             }
 
             while (_pause > 0 && !_stopExecution) {
-                performGarbageCollectionIfNecessary();
                 cgt::GlContextManager::getRef().releaseContext(_context, false);
                 _evaluationCondition.wait(lock);
                 cgt::GlContextManager::getRef().acquireContext(_context, false);
@@ -101,7 +96,6 @@ namespace cgt {
             }
 
             if (! hadWork && !_stopExecution) {
-                performGarbageCollectionIfNecessary();
                 cgt::GlContextManager::getRef().releaseContext(_context, false);
                 _evaluationCondition.wait(lock);
                 cgt::GlContextManager::getRef().acquireContext(_context, false);
@@ -140,19 +134,6 @@ namespace cgt {
     cgt::GLCanvas* OpenGLJobProcessor::getContext() {
         return _context;
     }
-
-    void OpenGLJobProcessor::enqueueGarbageCollection() {
-        _performGarbageCollection = true;
-        _evaluationCondition.notify_all();
-    }
-
-    void OpenGLJobProcessor::performGarbageCollectionIfNecessary() {
-        if (_performGarbageCollection && cgt::OpenGLGarbageCollector::isInited()) {
-            _performGarbageCollection = false;
-            GLGC.deleteGarbage();
-        }
-    }
-
 
 }
 

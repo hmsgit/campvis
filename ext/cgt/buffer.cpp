@@ -27,8 +27,6 @@
  **********************************************************************/
 
 #include "buffer.h"
-#include "cgt/openglgarbagecollector.h"
-
 
 namespace cgt {
     BufferObject::BufferObject(TargetType target, UsageType usage) throw (cgt::Exception)
@@ -47,7 +45,7 @@ namespace cgt {
     }
 
     BufferObject::~BufferObject() {
-		glDeleteBuffers(1, &_id);
+        glDeleteBuffers(1, &_id);
     }
 
     void BufferObject::bind() {

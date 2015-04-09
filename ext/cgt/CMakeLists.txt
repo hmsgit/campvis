@@ -35,7 +35,6 @@ SET(CGT_SOURCES
 	init.cpp
 	logmanager.cpp
 	job.cpp
-	openglgarbagecollector.cpp
 	opengljobprocessor.cpp
 	painter.cpp
 	runnable.cpp
