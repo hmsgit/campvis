@@ -207,6 +207,12 @@ namespace campvis {
         void setPipelineDirty();
 
         /**
+         * Forces the execution of the given processor regardless of its invalidation or enabled state.
+         * \param   processor   Processor to execute.
+         */
+        void forceExecuteProcessor(AbstractProcessor* processor);
+
+        /**
          * Executes the processor \a processor on the pipeline's data and locks its properties meanwhile.
          * \param   processor   Processor to execute.
          */
