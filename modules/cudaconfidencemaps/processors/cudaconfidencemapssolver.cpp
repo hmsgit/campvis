@@ -100,7 +100,6 @@ namespace campvis {
             _solver.setAlphaBetaFilterParameters(p_filterAlpha.getValue(), p_filterBeta.getValue());
 
             cgt::ivec3 size = img->getSize();
-            size_t elementCount = cgt::hmul(size);
             auto image = (unsigned char*)img->getWeaklyTypedPointer()._pointer;
 
             // Copy the image on the GPU and generate the equation system

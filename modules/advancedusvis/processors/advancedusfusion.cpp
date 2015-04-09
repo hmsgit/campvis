@@ -156,7 +156,6 @@ namespace campvis {
                     _shader->deactivate();
                     ImageData* id = new ImageData(img->getParent()->getDimensionality(), size, 3);
                     ImageRepresentationGL::create(id, resultTexture);
-                    const ImageMappingInformation& imi = img->getParent()->getMappingInformation();
                     id->setMappingInformation(img->getParent()->getMappingInformation());
                     cgt::TextureUnit::setZeroUnit();
 
