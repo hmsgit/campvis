@@ -30,7 +30,7 @@
 #include "modules/modulesapi.h"
 #include "modules/pipelinefactory.h"
 
-#include "modules/io/processors/mhdimagereader.h"
+#include "modules/io/processors/genericimagereader.h"
 #include "modules/advancedusvis/processors/advancedusfusion.h"
 #include "modules/preprocessing/processors/glgaussianfilter.h"
 #include "modules/vis/processors/quadview.h"
@@ -62,8 +62,8 @@ namespace campvis {
         virtual void keyEvent(cgt::KeyEvent* e);
 
     protected:
-        MhdImageReader _usReader;
-        MhdImageReader _confidenceReader;
+        GenericImageReader _usReader;
+        GenericImageReader _confidenceReader;
 
         AdvancedUsFusion _usFusion1;
         AdvancedUsFusion _usFusion2;

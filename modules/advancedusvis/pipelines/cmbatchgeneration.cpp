@@ -51,6 +51,8 @@ namespace campvis {
         , _usFusion(&_canvasSize)
         , p_autoExecution("AutoExecution", "Automatic Execution", false)
         , p_sourcePath("SourcePath", "Source Files Path", "", StringProperty::DIRECTORY)
+        , p_targetPathCm("TargetPathCm", "Target Path Confidence Map Files", "", StringProperty::DIRECTORY)
+        , p_targetPathColorOverlay("TargetPathColorOverlay", "Target Path Color Overlay Files", "", StringProperty::DIRECTORY)
         , p_targetPathColor("TargetPathColor", "Target Path Color Files", "", StringProperty::DIRECTORY)
         , p_targetPathFuzzy("TargetPathFuzzy", "Target Path Fuzzy Files", "", StringProperty::DIRECTORY)
         , p_range("Range", "Files Range", cgt::ivec2(0, 1), cgt::ivec2(0, 0), cgt::ivec2(10000, 10000))
@@ -63,6 +65,8 @@ namespace campvis {
 
         addProperty(p_autoExecution);
         addProperty(p_sourcePath);
+        addProperty(p_targetPathCm);
+        addProperty(p_targetPathColorOverlay);
         addProperty(p_targetPathColor);
         addProperty(p_targetPathFuzzy);
         addProperty(p_range);
@@ -75,13 +79,15 @@ namespace campvis {
     void CmBatchGeneration::init() {
         AutoEvaluationPipeline::init();
 
-        p_sourcePath.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase");
-        p_targetPathColor.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\color");
-        p_targetPathFuzzy.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\gallenblase\\fuzzy");
+        p_sourcePath.setValue("D:\\cm_stuff\\original");
+        p_targetPathCm.setValue("D:\\cm_stuff\\cm");
+        p_targetPathColorOverlay.setValue("D:\\cm_stuff\\colorOverlay");
+        p_targetPathColor.setValue("D:\\cm_stuff\\color");
+        p_targetPathFuzzy.setValue("D:\\cm_stuff\\fuzzy");
         p_range.setValue(cgt::ivec2(0, 1));
         p_execute.s_clicked.connect(this, &CmBatchGeneration::execute);
 
-        _usReader.p_url.setValue("D:\\Medical Data\\US Confidence Vis\\Pasing 13-02-26\\04-02-22-212506_Perez11_20040222_212506_20040222_220332\\11_niere_re_durch_leber2\\original\\export0000.bmp");
+        _usReader.p_url.setValue("D:\\cm_stuff\\original\\export0000.bmp");
         _usReader.p_targetImageID.setValue("us.image");
         _usReader.p_importType.selectById("localIntensity");
         _usReader.p_targetImageID.addSharedProperty(&_confidenceGenerator.p_sourceImageID);
@@ -97,6 +103,10 @@ namespace campvis {
         //_confidenceGenerator.p_origin.setValue(cgt::vec2(320.f, 35.f));
         //_confidenceGenerator.p_angles.setValue(cgt::vec2(45.f / 180.f * cgt::PIf, 135.f / 180.f * cgt::PIf));
         _confidenceGenerator.p_lengths.setValue(cgt::vec2(116.f, 543.f));
+        _confidenceGenerator.p_alpha.setValue(2.f);
+        _confidenceGenerator.p_beta.setValue(80.f);
+        _confidenceGenerator.p_gamma.setValue(.05f);
+
 
         _usFusion.p_targetImageID.setValue("us.fused");
         _usFusion.p_view.selectById("mappingSharpness");
@@ -112,6 +122,8 @@ namespace campvis {
         _usFusion.p_transferFunction.replaceTF(tf);
 
         _renderTargetID.setValue("us.fused");
+
+        setEnabled(false);
     }
 
     void CmBatchGeneration::deinit() {
@@ -125,6 +137,10 @@ namespace campvis {
         p_autoExecution.setValue(false);
 
         cgt::GLContextScopedLock lock(_canvas);
+
+        getDataContainer().removeData(_confidenceGenerator.p_targetImageID.getValue());
+        getDataContainer().removeData(_confidenceGenerator.p_targetImageID.getValue() + "velocities");
+
         for (int i = p_range.getValue().x; i < p_range.getValue().y; ++i) {
             executePass(i);
         }
@@ -142,7 +158,7 @@ namespace campvis {
         ss << p_sourcePath.getValue() << "\\" << "export" << std::setfill('0') << std::setw(4) << path << ".bmp";
         _usReader.p_url.setValue(ss.str());
 
-        executeProcessor(&_usReader);
+        forceExecuteProcessor(&_usReader);
 
         DataHandle dh = _data->getData(_usReader.p_targetImageID.getValue());
         if (dh.getData() != 0) {
@@ -151,16 +167,52 @@ namespace campvis {
             }
         }
 
-        executeProcessor(&_confidenceGenerator);
-        executeProcessor(&_usBlurFilter);
+        forceExecuteProcessor(&_confidenceGenerator);
+        forceExecuteProcessor(&_usBlurFilter);
+        _usFusion.p_transferFunction.setAutoFitWindowToData(false);
+        _usFusion.p_transferFunction.getTF()->setIntensityDomain(cgt::vec2(0.f, 1.f));
 
-        _usFusion.p_view.selectById("mappingLAB");
-        executeProcessor(&_usFusion);
-        save(path, p_targetPathColor.getValue());
+        {
+            // Confidence Map
+            Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+            tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 1.0f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
+            _usFusion.p_confidenceTF.replaceTF(tf);
+            _usFusion.p_view.selectById("cm");
+            forceExecuteProcessor(&_usFusion);
+            save(path, p_targetPathCm.getValue());
+        }
 
-//         _usFusion.p_view.selectById("mappingSharpness");
-//         executeProcessor(&_usFusion);
-//         save(path, p_targetPathFuzzy.getValue());
+        {
+            // Color Overlay mapping
+            Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+            tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 0.45f), cgt::col4(0, 0, 0, 224), cgt::col4(0, 0, 0, 0)));
+            _usFusion.p_confidenceTF.replaceTF(tf);
+            _usFusion.p_hue.setValue(0.15f);
+            _usFusion.p_view.selectById("colorOverlay");
+            forceExecuteProcessor(&_usFusion);
+            save(path, p_targetPathColorOverlay.getValue());
+        }
+
+        {
+            // LAB mapping
+            Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+            tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 0.5f), cgt::col4(0, 0, 0, 224), cgt::col4(0, 0, 0, 0)));
+            _usFusion.p_confidenceTF.replaceTF(tf);
+            _usFusion.p_hue.setValue(0.23f);
+            _usFusion.p_view.selectById("mappingLAB");
+            forceExecuteProcessor(&_usFusion);
+            save(path, p_targetPathColor.getValue());
+        }
+
+        {
+            // Fuzziness mapping
+            Geometry1DTransferFunction* tf = new Geometry1DTransferFunction(256);
+            tf->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.0f, 1.0f), cgt::col4(0, 0, 0, 255), cgt::col4(0, 0, 0, 0)));
+            _usFusion.p_confidenceTF.replaceTF(tf);
+            _usFusion.p_view.selectById("mappingSharpness");
+            forceExecuteProcessor(&_usFusion);
+            save(path, p_targetPathFuzzy.getValue());
+        }
         
     }
 

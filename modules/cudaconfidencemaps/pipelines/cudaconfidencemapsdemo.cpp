@@ -423,7 +423,8 @@ namespace campvis {
         std::stringstream stream;
         stream << "time, originalWidth, originalHeight, downsampledWidth, downsampledHeight, gaussianKernelSize, scalingFactor, alpha, beta, gamma, gradientScaling, iterations, solverExecutionTime, totalExecutionTime, solverError" << std::endl;
 
-        for (auto& item : _statistics) {
+        for (auto it = _statistics.begin(); it != _statistics.end(); ++it) {
+            auto& item = *it;
             stream << item.time << ", ";
             stream << item.originalWidth << ", ";
             stream << item.originalHeight << ", ";

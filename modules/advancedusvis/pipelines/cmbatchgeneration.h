@@ -84,6 +84,8 @@ namespace campvis {
         BoolProperty p_autoExecution;
 
         StringProperty p_sourcePath;
+        StringProperty p_targetPathCm;
+        StringProperty p_targetPathColorOverlay;
         StringProperty p_targetPathColor;
         StringProperty p_targetPathFuzzy;
         IVec2Property p_range;
