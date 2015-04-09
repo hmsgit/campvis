@@ -196,6 +196,10 @@ namespace campvis {
 
                 ++i;
             }
+            else if (pipelinesToAdd[i] == "-k") {
+                // set kiosk mode
+                _mainWindow->enableKioskMode();
+            }
             else {
                 DataContainer* dc = createAndAddDataContainer("DataContainer #" + StringUtils::toString(_dataContainers.size() + 1));
                 AbstractPipeline* p = PipelineFactory::getRef().createPipeline(pipelinesToAdd[i].toStdString(), dc);

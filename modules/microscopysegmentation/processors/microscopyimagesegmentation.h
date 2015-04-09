@@ -44,6 +44,8 @@
 
 #include <vector>
 #include "modules/processorfactory.h"
+#include <memory>
+#include "core/datastructures/facegeometry.h"
 
 namespace cgt {
     class Shader;
@@ -177,7 +179,7 @@ namespace campvis {
         void updateProperties(DataContainer& dc);
 
         cgt::Shader* _shader;                           ///< Shader for slice rendering
-        FaceGeometry* _quad;
+        std::unique_ptr<FaceGeometry> _quad;
 
         TrackballCameraProvider _tcp;
         VolumeRenderer _vr;

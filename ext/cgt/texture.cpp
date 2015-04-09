@@ -368,7 +368,7 @@ void Texture::applyWrapping() {
         glTexParameteri(type_, GL_TEXTURE_WRAP_R, wrap);
 }
 
-void Texture::uploadTexture(GLubyte* data, GLint format, GLenum dataType) {
+void Texture::uploadTexture(const GLubyte* data, GLint format, GLenum dataType) {
     bind();
 
     switch (type_) {

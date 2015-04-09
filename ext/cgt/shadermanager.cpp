@@ -479,7 +479,7 @@ void Shader::activate() {
 }
 
 void Shader::activate(GLint id) {
-#if CGT_DEBUG
+#ifdef CGT_DEBUG
     if (cgt::getGlInt(GL_CURRENT_PROGRAM) != 0)
         LWARNING("Binding a new Shader while another Shader is active. Do you really want to do this?");
 #endif

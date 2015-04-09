@@ -99,6 +99,12 @@ namespace campvis {
          */
         void setWorkflow(AbstractWorkflow* w);
 
+        /**
+         * Enables the kiosk mode of the MainWindow.
+         * In kiosk mode, all docks but the main canvas and the workflow dock are hidden.
+         */
+        void enableKioskMode();
+
     protected:
         /**
          * Listens to resize events on _pipelinePropertiesWidget and resizes _pipelinePropertiesScrollArea accordingly
@@ -119,8 +125,8 @@ namespace campvis {
          * Slot to be called by the PipelineWidget when the selected item changes.
          * \param   index   Index of the selected item
          */
-        void onPipelineWidgetItemClicked(const QModelIndex& index);
-        
+        void onPipelineWidgetItemChanged(const QModelIndex& index);
+
         /**
          * Slot to be called when _btnExecute was clicked.
          */
@@ -163,7 +169,7 @@ namespace campvis {
         /**
          * Slot to be called by the application when its collection of DataContainers has changed.
          */
-        void onDataContainersChanged();
+        void onDataContainersChanged(); 
 
         /**
          * Setup Qt GUI stuff

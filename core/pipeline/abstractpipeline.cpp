@@ -276,6 +276,16 @@ namespace campvis {
         return _processors[index];
     }
 
+    void AbstractPipeline::forceExecuteProcessor(AbstractProcessor* processor) {
+        bool enabledState = processor->getEnabled();
+        
+        processor->setEnabled(true);
+        processor->invalidate(AbstractProcessor::INVALID_RESULT);
+        executeProcessor(processor);
+
+        processor->setEnabled(enabledState);
+    }
+
 
 
 }

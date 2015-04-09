@@ -67,7 +67,6 @@ namespace campvis {
 
     void ViewportSplitter::deinit() {
         delete _fbo;
-        delete _quad;
         ShdrMgr.dispose(_copyShader);
     }
 

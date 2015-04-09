@@ -59,6 +59,13 @@ namespace campvis {
          */
         virtual ~AbstractPropertyWidget();
 
+        /**
+         * Shows or hides the label that appears on the left hand side of the widget.
+         *
+         * \param   isVisible       Wether the label should be shown or not
+         */
+        void setLabelVisibile(bool isVisible);
+
     protected:
         /**
          * Adds a widget to the local Qt layout.

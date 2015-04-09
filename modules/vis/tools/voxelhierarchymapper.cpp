@@ -68,7 +68,6 @@ namespace campvis {
 
         delete _xorBitmaskTexture;
         delete _hierarchyTexture;
-        delete _quad;
     }
 
     void VoxelHierarchyMapper::createHierarchy(const ImageRepresentationGL* image, AbstractTransferFunction* transferFunction) {

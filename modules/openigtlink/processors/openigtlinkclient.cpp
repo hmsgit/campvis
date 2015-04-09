@@ -83,9 +83,6 @@ namespace campvis {
     OpenIGTLinkClient::~OpenIGTLinkClient() {
         if (_receiverRunning)
             stopReceiver();
-
-        if (_receiverThread)
-        delete _receiverThread;
     }
 
     void OpenIGTLinkClient::init() {
@@ -157,8 +154,14 @@ namespace campvis {
 
                 imageMessage->GetSpacing(voxelSize.elem);
                 imageMessage->GetDimensions(size_i.elem);
-                cgt::svec3 size(size_i);                
+                cgt::svec3 size(size_i);
                 imageMessage->GetOrigin(imageOffset.elem);
+
+                // If the voxel size boundled with the packet is practically 0.0f, make it 1.0f
+                // this makes sure we don't get invalid mapping informations (non invertable matrix)
+                if (minElem(voxelSize) <= 1e-10f) {
+                    voxelSize = cgt::vec3(1.0f);
+                }
 
                 size_t dimensionality = (size_i[2] == 1) ? ((size_i[1] == 1) ? 1 : 2) : 3;
                 ImageData* image = new ImageData(dimensionality, size, wtp._numChannels);
@@ -507,6 +510,7 @@ namespace campvis {
 
             _receiverRunning = false;
             delete _receiverThread;
+            _receiverThread = nullptr;
         }
         catch (std::exception& e) {
             LERRORC("CAMPVis.modules.base.MatrixProcessor", "Caught exception during _thread.join: " << e.what());

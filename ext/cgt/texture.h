@@ -204,7 +204,7 @@ public:
      * \param format            OpenGL Format of the data in \a data.
      * \param dataType          OpenGL data type of the data in \a data.
      */
-    void uploadTexture(GLubyte* data, GLint format, GLenum dataType);
+    void uploadTexture(const GLubyte* data, GLint format, GLenum dataType);
     
     /**
      * Download texture from the GPU to a newly allocated buffer with

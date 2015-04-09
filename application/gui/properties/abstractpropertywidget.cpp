@@ -67,6 +67,11 @@ namespace campvis {
         _property->s_changed.disconnect(this);
     }
 
+    void AbstractPropertyWidget::setLabelVisibile(bool isVisible) {
+        if (_titleLabel)
+            _titleLabel->setVisible(isVisible);
+    }
+
     void AbstractPropertyWidget::addWidget(QWidget* widget, int stretch) {
         _layout->addWidget(widget, stretch);
     }

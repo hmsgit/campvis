@@ -26,6 +26,7 @@
 #define TENSORGLYPHRENDERER_H__
 
 #include <string>
+#include <memory>
 
 #include "core/pipeline/visualizationprocessor.h"
 #include "core/pipeline/abstractprocessordecorator.h"
@@ -122,8 +123,8 @@ namespace campvis {
         void renderTensorGlyph(const GenericImageRepresentationLocal<float, 3>* evals, const GenericImageRepresentationLocal<float, 9>* evecs, const cgt::vec3& position);
 
         cgt::Shader* _shader;               ///< Shader for glyph rendering
-        GeometryData* _ellipsoidGeometry;   ///< Geometry for ellipsoid rendering
-        GeometryData* _cubeGeometry;        ///< Geometry for cuboid rendering
+        std::unique_ptr<GeometryData> _ellipsoidGeometry;   ///< Geometry for ellipsoid rendering
+        std::unique_ptr<GeometryData> _cubeGeometry;        ///< Geometry for cuboid rendering
 
         static const std::string loggerCat_;
     };

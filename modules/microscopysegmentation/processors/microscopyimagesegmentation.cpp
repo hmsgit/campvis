@@ -216,7 +216,7 @@ namespace campvis {
         _sliceExtractor.deinit();
         VisualizationProcessor::deinit();
         ShdrMgr.dispose(_shader);
-        delete _quad;
+        _quad = nullptr; // Object is automatically deleted
     }
 
     void MicroscopyImageSegmentation::updateResult(DataContainer& data) {

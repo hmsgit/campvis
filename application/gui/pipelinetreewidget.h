@@ -171,6 +171,11 @@ namespace campvis {
         virtual QSize sizeHint() const;
 
 
+    signals:
+        /// Emitted whenever the currently selected item changes
+        void itemChanged(const QModelIndex& index);
+
+
     public slots:
         /**
          * Updates the data in the tree view by the given collection of pipelines \a pipelines.
@@ -178,6 +183,10 @@ namespace campvis {
          */
         void update(const std::vector<DataContainer*>& dataContainers, const std::vector<AbstractPipeline*>& pipelines);
 
+
+    protected:
+
+        virtual void selectionChanged(const QItemSelection& selected, const QItemSelection &deselected);
 
     private:
         /**

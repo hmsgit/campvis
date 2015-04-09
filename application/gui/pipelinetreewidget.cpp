@@ -379,6 +379,13 @@ namespace campvis {
         updateGeometry();
     }
 
+    void PipelineTreeWidget::selectionChanged(const QItemSelection& selected, const QItemSelection &deselected) {
+        QTreeView::selectionChanged(selected, deselected);
+        QModelIndexList selection = this->selectedIndexes();
+        if (!selection.isEmpty())
+            emit itemChanged(selection.first());
+    }
+
     void PipelineTreeWidget::setupWidget() {
         _treeModel = new PipelineTreeModel(this);
         cgtAssert(_treeModel != 0, "Failed creating TreeViewWidget model.");

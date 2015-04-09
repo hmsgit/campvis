@@ -81,6 +81,7 @@ namespace campvis {
         DataNameProperty p_confidenceImageID;
         DataNameProperty p_targetImageID;                  ///< image ID for output image
 
+        BoolProperty p_renderToTexture;
         IntProperty p_sliceNumber;                       ///< number of the slice to extract
         TransferFunctionProperty p_transferFunction;     ///< Transfer function
         TransferFunctionProperty p_confidenceTF;         ///< Transfer function confidence to uncertainty
@@ -88,13 +89,14 @@ namespace campvis {
         FloatProperty p_blurredScaling;
         FloatProperty p_confidenceScaling;
         FloatProperty p_hue;
+        FloatProperty p_mixFactor;
         BoolProperty p_use3DTexture;
 
     protected:
         /// \see AbstractProcessor::updateResult
         virtual void updateResult(DataContainer& dataContainer);
         /// adapts the range of the p_sliceNumber property to the image
-        virtual void updateProperties(DataContainer dc);
+        virtual void updateProperties(DataContainer& dc);
 
         std::string generateHeader() const;
 

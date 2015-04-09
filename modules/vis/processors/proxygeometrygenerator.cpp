@@ -71,8 +71,8 @@ namespace campvis {
                 cgt::vec3 texURB(static_cast<float>(p_clipX.getValue().y), static_cast<float>(p_clipY.getValue().y), static_cast<float>(p_clipZ.getValue().y));
                 texURB /= numSlices;
 
-                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(texLLF, texURB));
-                data.addData(p_geometryID.getValue(), cube);
+                std::unique_ptr<MeshGeometry> cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(texLLF, texURB));
+                data.addData(p_geometryID.getValue(), cube.release());
             }
             else {
                 LERROR("Input image must have dimensionality of 3.");

@@ -31,6 +31,8 @@
 #include "core/properties/datanameproperty.h"
 #include "core/properties/numericproperty.h"
 
+#include <memory>
+
 namespace cgt {
     class FramebufferObject;
     class Shader;
@@ -126,7 +128,7 @@ namespace campvis {
         bool _mousePressed;                         ///< Flag whether the mous was pressed in this view (to correctly compute the view of the event)
         size_t _viewIndexOfEvent;                   ///< Index of the sub view for the forwarded event.
 
-        FaceGeometry* _quad;                        ///< Geometry used for rendering
+        std::unique_ptr<FaceGeometry> _quad;        ///< Geometry used for rendering
         cgt::FramebufferObject* _fbo;               ///< The FBO used for rendering
         IVec2Property* p_viewportSizeProperty;      ///< Pointer to the property defining the viewport (canvas) size.
         cgt::Shader* _copyShader;                   ///< Shader used for rendering

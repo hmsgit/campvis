@@ -135,7 +135,7 @@ namespace campvis {
         _localDataContainer.clear();
         _textures.clear();
         ShdrMgr.dispose(_paintShader);
-        delete _quad;
+        _quad = nullptr;
 
         GLCtxtMgr.removeContext(this);
     }
@@ -262,8 +262,6 @@ namespace campvis {
     }
 
     void DataContainerInspectorCanvas::createQuad() {
-        delete _quad;
-        _quad = 0;
         _quad = GeometryDataFactory::createQuad(cgt::vec3(0.f), cgt::vec3(1.f), cgt::vec3(0.f, 1.f, 0.f), cgt::vec3(1.f, 0.f, 0.f));
     }
 
@@ -431,7 +429,7 @@ namespace campvis {
         }
 
         if (maxSlices == 1)
-            maxSlices = -1;
+            maxSlices = 0;
         p_currentSlice.setMaxValue(maxSlices - 1);
         _texturesDirty = false;
         _geometriesDirty = false;

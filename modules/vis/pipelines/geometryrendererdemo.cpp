@@ -77,13 +77,13 @@ namespace campvis {
         _geometryReader.s_validated.connect(this, &GeometryRendererDemo::onProcessorValidated);
 
         // create Teapot
-        MultiIndexedGeometry* teapot = GeometryDataFactory::createTeapot();
+        auto teapot = GeometryDataFactory::createTeapot();
         teapot->applyTransformationToVertices(cgt::mat4::createTranslation(cgt::vec3(5.f, 10.f, 5.f)) * cgt::mat4::createScale(cgt::vec3(16.f)));
-        getDataContainer().addData("teapot", teapot);
+        getDataContainer().addData("teapot", teapot.release());
 
         // create cube
-        MeshGeometry* cube = GeometryDataFactory::createCube(cgt::Bounds(cgt::vec3(7.f), cgt::vec3(9.f)), cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
-        getDataContainer().addData("cube", cube);
+        auto cube = GeometryDataFactory::createCube(cgt::Bounds(cgt::vec3(7.f), cgt::vec3(9.f)), cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
+        getDataContainer().addData("cube", cube.release());
 
         // setup pipeline
         _geometryReader.p_url.setValue(ShdrMgr.completePath("/modules/vis/sampledata/left_ventricle_mesh.vtk"));

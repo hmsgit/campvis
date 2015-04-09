@@ -84,7 +84,8 @@ namespace campvis {
         virtual void updateResult(DataContainer& dataContainer);
         virtual void updateProperties(DataContainer& dataContainer);
         
-        cgt::Shader* _shader;               ///< Shader for resampling
+        cgt::Shader* _shader2D;               ///< Shader for resampling 2D textures
+        cgt::Shader* _shader3D;               ///< Shader for resampling 3D textures
 
         static const std::string loggerCat_;
     };

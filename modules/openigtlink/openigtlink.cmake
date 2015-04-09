@@ -3,7 +3,7 @@
 
 # Set module status (valid values are STABLE, TESTING and EXPERIMENTAL)
 SET(ThisModStatus EXPERIMENTAL)
-# Set whether this module has external dependencies that are not shipped this CAMPVis.
+# Set whether this module has external dependencies that are not shipped with CAMPVis.
 SET(ThisModExternalDependencies TRUE)
 
 # The files and assignments need only to be parsed if the module is enabled

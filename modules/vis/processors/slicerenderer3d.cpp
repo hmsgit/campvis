@@ -89,13 +89,12 @@ namespace campvis {
                 // The closing face is the slice proxy geometry.
                 // This is probably not the fastest, but an elegant solution, which also supports arbitrary slice orientations. :)
                 cgt::Bounds volumeExtent = img->getParent()->getWorldBounds();
-                MeshGeometry* cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
+                std::unique_ptr<MeshGeometry> cube = GeometryDataFactory::createCube(volumeExtent, cgt::Bounds(cgt::vec3(0.f), cgt::vec3(1.f)));
 
                 cgt::vec3 normal(0.f, 0.f, 1.f);
                 float p = img->getParent()->getMappingInformation().getOffset().z + (p_sliceNumber.getValue() * img->getParent()->getMappingInformation().getVoxelSize().z);
                 MeshGeometry clipped = cube->clipAgainstPlane(p, normal, true);
                 const FaceGeometry& slice = clipped.getFaces().back(); // the last face is the closing face
-                delete cube;
 
                 glEnable(GL_DEPTH_TEST);
                 _shader->activate();

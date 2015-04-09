@@ -107,6 +107,7 @@ namespace fontrendering {
         FT_Face _ftFace;                ///< Pointer to the font face
         cgt::Texture* _texture;         ///< OpenGL texture storing the texture atlas
         cgt::Shader* _shader;           ///< Shader used for font rendering
+        int _height;
 
         static const int MAX_TEXTURE_WIDTH;
         static const std::string loggerCat_;
