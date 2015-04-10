@@ -117,8 +117,6 @@ namespace campvis {
             LDEBUG("Generated a " << w << " x "<< h << " texture atlas");
         
             _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/fontrendering/glsl/fontatlas.frag", "");
-            _shader->setAttributeLocation(0, "in_Position");
-            _shader->setAttributeLocation(1, "in_TexCoord");
             LGL_ERROR;
         }
 

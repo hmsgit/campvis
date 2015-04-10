@@ -75,8 +75,6 @@ namespace campvis {
     void MprRenderer::init() {
         VisualizationProcessor::init();
         _shader = ShdrMgr.load("core/glsl/passthrough.vert", "modules/vis/glsl/mprrenderer.frag", "");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
     }
 
     void MprRenderer::deinit() {

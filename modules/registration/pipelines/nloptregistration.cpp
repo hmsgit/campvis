@@ -26,14 +26,13 @@
 
 #include "cgt/event/keyevent.h"
 #include "cgt/openglgarbagecollector.h"
+#include "cgt/opengljobprocessor.h"
 #include "cgt/painter.h"
 
 #include "core/classification/geometry1dtransferfunction.h"
 #include "core/classification/tfgeometry1d.h"
 #include "core/datastructures/renderdata.h"
 #include "core/tools/glreduction.h"
-#include "core/tools/job.h"
-#include "core/tools/opengljobprocessor.h"
 
 namespace campvis {
     static const GenericOption<nlopt::algorithm> optimizers[3] = {
@@ -117,7 +116,8 @@ namespace campvis {
 
     void NloptRegistration::onPerformOptimizationClicked() {
         // Evaluation of the similarity measure needs an OpenGL context, so we need to create an OpenGL job for this.
-        GLJobProc.enqueueJob(_canvas, makeJobOnHeap(this, &NloptRegistration::performOptimization), OpenGLJobProcessor::SerialJob);
+        cgt::GLContextScopedLock lockGuard(_canvas);
+        performOptimization();
     }
 
     void NloptRegistration::performOptimization() {

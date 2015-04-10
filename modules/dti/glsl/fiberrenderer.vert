@@ -22,9 +22,9 @@
 // 
 // ================================================================================================
 
-in vec3 in_Position;        ///< incoming vertex position
-in vec3 in_TexCoord;        ///< incoming texture coordinate
-in vec4 in_Color;           ///< incoming color
+layout(location = 0) in vec3 in_Position;        ///< incoming vertex position
+layout(location = 1) in vec3 in_TexCoord;        ///< incoming texture coordinate
+layout(location = 2) in vec4 in_Color;           ///< incoming color
 
 out vec3 vert_TexCoord;       ///< outgoing texture coordinate
 out vec4 vert_Position;       ///< outgoing world coordinates

@@ -393,7 +393,9 @@ public:
     static void setAttribute(GLint index, const Vector4<GLuint>& v);
 
     // Attribute locations
-    void setAttributeLocation(GLuint index, const std::string& name);
+    // ATTENTION: This method was deliberately deactivated, since it was not working as expected
+    //            with AMD GPUs.
+    // void setAttributeLocation(GLuint index, const std::string& name);
     GLint getAttributeLocation(const std::string& name);
 
     // Normalized attributes

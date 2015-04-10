@@ -93,12 +93,7 @@ namespace neuro {
 
     void MultiVolumeMprRenderer::init() {
         VisualizationProcessor::init();
-
         _shader = ShdrMgr.load("modules/vis/glsl/geometryrenderer.vert", "modules/vis/glsl/geometryrenderer.geom", "modules/neuro/glsl/multivolumemprrenderer.frag", generateHeader());
-        if (_shader != nullptr) {
-            _shader->setAttributeLocation(0, "in_Position");
-            _shader->setAttributeLocation(1, "in_TexCoord");
-        }
     }
 
     void MultiVolumeMprRenderer::deinit() {

@@ -75,8 +75,6 @@ namespace campvis {
         VisualizationProcessor::init();
 
         _shader = ShdrMgr.loadWithCustomGlslVersion("core/glsl/passthrough.vert", "", "modules/advancedusvis/glsl/pointpredicateevaluator.frag", generateHeader(), "400");
-        _shader->setAttributeLocation(0, "in_Position");
-        _shader->setAttributeLocation(1, "in_TexCoord");
         p_histogram.s_headerChanged.connect(this, &PointPredicateEvaluator::onHistogramHeaderChanged);
     }
 

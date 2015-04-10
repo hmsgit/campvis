@@ -242,7 +242,7 @@ namespace campvis {
     }
 
     bool MultiIndexedGeometry::hasTextureCoordinates() const {
-        return ! _textureCoordinates.empty();
+        return !_textureCoordinates.empty();
     }
 
     bool MultiIndexedGeometry::hasPickingInformation() const {

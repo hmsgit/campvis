@@ -111,8 +111,6 @@ namespace campvis {
         initAllProperties();
 
         _paintShader = ShdrMgr.load("core/glsl/passthrough.vert", "application/glsl/datacontainerinspector.frag", "");
-        _paintShader->setAttributeLocation(0, "in_Position");
-        _paintShader->setAttributeLocation(1, "in_TexCoords");
         createQuad();
 
         // set this as painter to get notified when window size changes

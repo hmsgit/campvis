@@ -58,13 +58,6 @@ namespace campvis {
             LERROR("Could not load Shader for OpenGL reduction. Reduction will not work!");
             return;
         }
-
-        _shader1d->setAttributeLocation(0, "in_Position");
-        _shader1d->setAttributeLocation(1, "in_TexCoord");
-        _shader2d->setAttributeLocation(0, "in_Position");
-        _shader2d->setAttributeLocation(1, "in_TexCoord");
-        _shader3d->setAttributeLocation(0, "in_Position");
-        _shader3d->setAttributeLocation(1, "in_TexCoord");
     }
 
     GlReduction::~GlReduction() {
