@@ -28,7 +28,8 @@
 
 #include "cgt/framebufferobject.h"
 #include "cgt/logmanager.h"
-#include "cgt/openglgarbagecollector.h"
+
+#include <string.h> // memset
 
 namespace cgt {
 
@@ -44,7 +45,7 @@ FramebufferObject::FramebufferObject()
 
 FramebufferObject::~FramebufferObject()
 {
-    GLGC.addGarbageFramebufferObject(id_);
+    glDeleteFramebuffersEXT(1, &id_);
 }
 
 void FramebufferObject::activate()

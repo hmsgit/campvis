@@ -31,7 +31,6 @@
 
 #include "cgt/gpucapabilities.h"
 #include "cgt/filesystem.h"
-#include "cgt/openglgarbagecollector.h"
 
 namespace cgt {
 
@@ -64,7 +63,7 @@ Texture::Texture(GLenum type, const cgt::ivec3& dimensions, GLint internalFormat
 
 Texture::~Texture() {
     if (id_)
-        GLGC.addGarbageTexture(id_);
+        glDeleteTextures(1, &id_);
 }
 
 

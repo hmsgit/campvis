@@ -51,6 +51,8 @@ TextureUnit::TextureUnit(bool keep)
 
 TextureUnit::~TextureUnit() {
     if (assigned_ && !keep_) {
+        tbb::spin_mutex::scoped_lock lock(mutex_);
+
         busyUnits_.at(number_) = false;
         totalActive_--;
     }

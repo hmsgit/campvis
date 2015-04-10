@@ -232,6 +232,14 @@ namespace campvis {
         void executeProcessorAndCheckOpenGLState(AbstractProcessor* processor);
 
         /**
+         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
+         * If \a name equals the name of the renderTarget, setPipelineDirty will be called.
+         * \param   name    Name of the added data.
+         * \param   dh      DataHandle to the newly added data.
+         */
+        virtual void onDataContainerDataAdded(std::string name, DataHandle dh);
+
+        /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * The default behaviour is just to set the invalidation level to invalid.
          * \param   prop    Property that emitted the signal
