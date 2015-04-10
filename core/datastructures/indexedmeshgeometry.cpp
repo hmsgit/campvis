@@ -203,11 +203,11 @@ namespace campvis {
     }
 
     bool IndexedMeshGeometry::hasTextureCoordinates() const {
-        return ! _textureCoordinates.empty();
+        return !_textureCoordinates.empty();
     }
 
     bool IndexedMeshGeometry::hasPickingInformation() const {
-        return _pickingInformation.empty();
+        return !_pickingInformation.empty();
     }
 
     void IndexedMeshGeometry::applyTransformationToVertices(const cgt::mat4& t) {
