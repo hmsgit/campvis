@@ -29,6 +29,8 @@
 #include "cgt/framebufferobject.h"
 #include "cgt/logmanager.h"
 
+#include <string.h> // memset
+
 namespace cgt {
 
 const std::string FramebufferObject::loggerCat_("cgt.FramebufferObject");
