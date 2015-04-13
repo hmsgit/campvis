@@ -52,7 +52,6 @@ uniform float _samplingStepSize;
 uniform float _shift;
 uniform float _scale;
 
-// TODO: copy+paste from Voreen - eliminate or improve.
 const float SAMPLING_BASE_INTERVAL_RCP = 200.0;
 
 /**

@@ -246,7 +246,6 @@ namespace campvis {
             rd->addColorTexture(id);
 
             // create fake depth image
-            // TODO: think of a better solution to this...
             ImageData* idDepth = new ImageData(dimensionality, imageSize, 1);
             float* ptr = new float[cgt::hmul(imageSize)];
             memset(ptr, 0, cgt::hmul(imageSize) * sizeof(float));

@@ -84,10 +84,6 @@ QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
 
 QtCanvas::~QtCanvas() {}
 
-void QtCanvas::init() {
-    GLCanvas::init();
-}
-
 void QtCanvas::initializeGL() {
 }
 
@@ -273,7 +269,7 @@ KeyEvent::KeyCode QtCanvas::getKey(int key) {
         case Qt::Key_Down     : return cgt::KeyEvent::K_DOWN;
         case Qt::Key_PageUp   : return cgt::KeyEvent::K_PAGEUP;
         case Qt::Key_PageDown     : return cgt::KeyEvent::K_PAGEDOWN;
-        case Qt::Key_Shift    : return cgt::KeyEvent::K_LSHIFT;  //TODO: qt only knows one shift, control, meta and alt
+        case Qt::Key_Shift    : return cgt::KeyEvent::K_LSHIFT;  // Qt only knows one shift, control, meta and alt
         case Qt::Key_Control : return cgt::KeyEvent::K_LCTRL;//...
         case Qt::Key_Meta : return cgt::KeyEvent::K_RMETA;//...
         case Qt::Key_Alt  : return cgt::KeyEvent::K_LALT;//...

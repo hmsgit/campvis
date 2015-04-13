@@ -179,9 +179,6 @@ public:
     /// Getter
     bool isDoubleBuffered() const { return doubleBuffered_; }
 
-    /// Getter
-    bool isInitialized() const { return initialized_; }
-
     /// Acqures this canvas as current context
     virtual void acquireAsCurrentContext() = 0;
     /// Releases this canvas as current context
@@ -204,7 +201,6 @@ protected:
     bool    stereoViewing_;
     bool    fullscreen_;
     bool    autoFlush_; ///< whether to call glFlush or swap automatically
-    bool    initialized_; // FIXME: does this make sense?
 
     Painter* painter_;  ///< the painter that will be used for rendering
 

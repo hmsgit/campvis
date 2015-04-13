@@ -49,7 +49,6 @@
 
 //Interaction
 //#include "glcanvas.h"
-// FIXME: include glcanvas and guiapplication, include glut/qt/sdl-canvas/application/libs depending on macros
 #include "cgt/mouse.h"
 #include "cgt/camera.h"
 #include "cgt/navigation/navigation.h"

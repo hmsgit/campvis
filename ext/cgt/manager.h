@@ -195,10 +195,9 @@ void ResourceManager<T>::dispose(T* ptr) {
 template <class T>
 void ResourceManager<T>::addPath(std::string path) {
     tbb::spin_mutex::scoped_lock lock(this->mutex_);
-
     pathList_.push_front(path);
+
     // remove duplicates
-    //TODO: better use std::set<> here
     pathList_.sort();
     pathList_.unique();
 }

@@ -57,7 +57,8 @@ namespace campvis {
 
 
     void AbstractProcessor::lockProcessor() {
-        while (_locked.compare_and_swap(true, false) == true) // TODO: busy waiting us fu**ing ugly...
+        // hopefully, it does not take too long.
+        while (_locked.compare_and_swap(true, false) == true)
             std::this_thread::yield();
         _locked = true;
         lockAllProperties();

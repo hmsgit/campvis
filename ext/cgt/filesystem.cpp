@@ -53,9 +53,6 @@
 
 using std::string;
 
-//TODO: should really switch to exceptions instead of just logging with LERROR. joerg
-// see http://en.wikipedia.org/wiki/Aliasing_%28computing%29#Conflicts_with_optimization
-
 // anonymous namespace
 namespace {
 

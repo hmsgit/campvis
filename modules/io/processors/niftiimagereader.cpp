@@ -719,7 +719,6 @@ namespace campvis {
 
         // Nifti transformations give us the center of the first voxel, we translate to correct:
         // pToW = pToW * cgt::mat4::createTranslation(-spacing * 0.5f);
-        // TODO: implement arbitrary transformations into ImageMappingInformation
 
         cgt::svec3 imageSize(dimensions);
         if (numVolumes <= 1) {

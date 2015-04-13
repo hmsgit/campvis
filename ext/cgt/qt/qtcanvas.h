@@ -70,9 +70,6 @@ public:
     virtual ~QtCanvas();
 
 
-    /// initialize canvas
-    virtual void init();
-
     /**
      * Called by the Qt framework once at the beginning, before rendering starts.
      * This function calls the corresponding GLCanvas method \a initialize.

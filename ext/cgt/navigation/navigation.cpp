@@ -57,9 +57,7 @@ void Navigation::rotateView(float angle, const vec3& axis) {
 
 // Rotate the Camera about horizontal and vertical angles given by the user
 void Navigation::rotateViewHV(float anglehorz, float anglevert) {
-
-// FIXME: rotateViewHorz(anglehorz);rotateViewVert(anglevert) would be much more generic ... but maybe more expensive ...
-
+    // rotateViewHorz(anglehorz);rotateViewVert(anglevert) would be much more generic ... but maybe more expensive ...
     // for now, we use quaternion rotation... we'll have to benchmark this
     quat horz = quat::createQuat(anglehorz, getCamera()->getUpVector());
     quat vert = quat::createQuat(anglevert, getCamera()->getStrafe());
@@ -78,8 +76,6 @@ void Navigation::rotateViewHV(float anglehorz, float anglevert) {
     getCamera()->setFocus(getCamera()->getPosition() + getCamera()->getFocalLength()*look);
     updateClippingPlanes();
 }
-
-// FIXME: the following few functions should be inline
 
 void Navigation::rotateView(float angle, float x, float y, float z) {
     rotateView(angle, vec3(x, y, z));

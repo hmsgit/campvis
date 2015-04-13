@@ -48,7 +48,6 @@ GLCanvas::GLCanvas(const std::string& title,
       stereoViewing_(false),
       fullscreen_(false),
       autoFlush_(true),
-      initialized_(false),
       painter_(0) ,
       eventHandler_(new EventHandler())
 {}
@@ -78,8 +77,7 @@ void GLCanvas::paint() {
 }
 
 void GLCanvas::init() {
-    if (!initialized_)
-        initialized_ = true;
+    // nothing here, may be implemented in sub classes.
 }
 
 void GLCanvas::setPainter(Painter* p, bool initP) {

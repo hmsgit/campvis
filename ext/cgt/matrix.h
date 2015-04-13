@@ -35,7 +35,7 @@
 #include "cgt/assert.h"
 
 /*
-    FIXME build a SSE-optimized mat4
+    TODO: build a SSE-optimized mat4
 */
 
 /*

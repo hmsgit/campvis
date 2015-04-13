@@ -62,7 +62,7 @@ namespace campvis {
          *
          * \param   str     Input string to parse.
          *
-         * \note    TODO: The detection algorithm is a little simplified and will not yield correct results
+         * \note    The detection algorithm is a little simplified and may not yield correct results
          *          in every case.
          **/
         static std::vector<std::string> parseFloats(const std::string& str);

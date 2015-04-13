@@ -325,7 +325,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyRotateUp_              ; ///< at which key code rotate up
         KeyEvent::KeyCode keyRotateDown_            ; ///< at which key code rotate down
         int keyRotateMod_                           ; ///< at which modifiers to rotate by keys
-        bool keyRotatePressed_                      ; // FIXME: cannot remember. not in use anyway...
+        bool keyRotatePressed_                      ;
         MouseEvent::MouseButtons mouseMoveButton_   ;
         int mouseMoveMod_                           ;
         float keyMoveAcuteness_                     ;
@@ -334,7 +334,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyMoveUp_                ;
         KeyEvent::KeyCode keyMoveDown_              ;
         int keyMoveMod_                             ;
-        bool keyMovePressed_                        ; // FIXME: cannot remember, not in use
+        bool keyMovePressed_                        ;
         MouseEvent::MouseButtons mouseZoomButton_   ;
         vec2 mouseZoomInDirection_                  ;
         int mouseZoomMod_                           ;
@@ -346,7 +346,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyZoomIn_                ;
         KeyEvent::KeyCode keyZoomOut_               ;
         int keyZoomMod_                             ;
-        bool keyZoomPressed_                        ; // FIXME: cannot remember, not in use
+        bool keyZoomPressed_                        ;
         MouseEvent::MouseButtons mouseRollButton_   ;
         float mouseRollAcuteness_                   ;
         int mouseRollMod_                           ;
@@ -358,7 +358,7 @@ class CGT_API Trackball : public Navigation {
         KeyEvent::KeyCode keyRollLeft_              ;
         KeyEvent::KeyCode keyRollRight_             ;
         int keyRollMod_                             ;
-        bool keyRollPressed_                        ; // FIXME: cannot remember, not in use
+        bool keyRollPressed_                        ;
 
         bool tracking_; ///< Are we tracking mouse move events? Only when we received a
                         ///< mousePressEvent before.

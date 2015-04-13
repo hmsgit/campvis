@@ -34,9 +34,8 @@
 
 namespace campvis {
 
-    static const GenericOption<std::string> filterModes[2] = {
-        GenericOption<std::string>("median", "Median"),
-        GenericOption<std::string>("gauss", "Gauss"),
+    static const GenericOption<std::string> filterModes[1] = {
+        GenericOption<std::string>("median", "Median")
     };
 
     const std::string ImageFilter::loggerCat_ = "CAMPVis.modules.classification.ImageFilter";
@@ -45,7 +44,7 @@ namespace campvis {
         : AbstractProcessor()
         , p_sourceImageID("InputVolume", "Input Volume ID", "volume", DataNameProperty::READ)
         , p_targetImageID("OutputGradients", "Output Gradient Volume ID", "gradients", DataNameProperty::WRITE)
-        , p_filterMode("FilterMode", "Filter Mode", filterModes, 2)
+        , p_filterMode("FilterMode", "Filter Mode", filterModes, 1)
         , p_kernelSize("KernelSize", "Kernel Size", 3, 3, 15)
         , p_sigma("Sigma", "Sigma", 1.f, .1f, 10.f, 0.1f)
     {
@@ -71,11 +70,6 @@ namespace campvis {
                 tbb::parallel_for(
                     tbb::blocked_range<size_t>(0, input->getNumElements()), 
                     ImageFilterMedian(input, output, p_kernelSize.getValue()));
-            }
-            else if (p_filterMode.getOptionValue() == "gauss") {
-                tbb::parallel_for(
-                    tbb::blocked_range<size_t>(0, input->getNumElements()), 
-                    ImageFilterGauss(input, output, p_kernelSize.getValue(), p_sigma.getValue()));
             }
 
             data.addData(p_targetImageID.getValue(), id);
