@@ -30,7 +30,10 @@
 
 namespace cgt {
     void invokeThread(Runnable* r) {
+        r->_initFunction();
         r->run();
+        r->_deinitFunction();
+
         r->_running = false;
     }
     
@@ -38,6 +41,8 @@ namespace cgt {
         : _stopExecution()
         , _thread(0) 
     {
+        _initFunction = [] () {};
+        _deinitFunction = [] () {};
         _stopExecution = false;
         _running = false;
     }
@@ -49,11 +54,13 @@ namespace cgt {
         delete _thread;
     }
 
-    void Runnable::stop() {
+    void Runnable::stop(std::function<void(void)> deinitFunction) {
         if (_thread == 0)
             return;
 
-        _stopExecution = true; 
+        _deinitFunction = deinitFunction;
+        _stopExecution = true;
+
         try { 
             if (_thread->joinable())
                 _thread->join(); 
@@ -63,11 +70,12 @@ namespace cgt {
         } 
     }
 
-    void Runnable::start() { 
+    void Runnable::start(std::function<void(void)> initFunction) {
+        _initFunction = initFunction;
         _thread = new std::thread(&invokeThread, this);
         _running = true;
     }
-
+    
 // ================================================================================================
     
     RunnableWithConditionalWait::RunnableWithConditionalWait() 
@@ -78,14 +86,16 @@ namespace cgt {
 
     }
 
-    void RunnableWithConditionalWait::stop() {
+    void RunnableWithConditionalWait::stop(std::function<void(void)> deinitFunction) {
+        _deinitFunction = deinitFunction;
+
         while (_running) {
             _stopExecution = true;
             _evaluationCondition.notify_all();
             std::this_thread::yield();
         }
 
-        Runnable::stop();
+        Runnable::stop(deinitFunction);
     }
 }
 

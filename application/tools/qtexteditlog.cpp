@@ -44,7 +44,7 @@ namespace campvis {
                 _logDisplay, SLOT(append(const QString&)));
     }
 
-    void QTextEditLog::logFiltered(const std::string& cat, LogLevel level, const std::string& msg,
+    void QTextEditLog::logFiltered(const std::string& cat, cgt::LogLevel level, const std::string& msg,
                                    const std::string& /*extendedInfo*/)
     {
         std::string output = "";

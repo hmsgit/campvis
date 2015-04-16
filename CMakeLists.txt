@@ -105,15 +105,9 @@ EXPORT(PACKAGE CAMPVis)
 
 # = Copy Windows DLLs to binary dir for improved development experience =======
 IF(WIN32)
-    # gather Qt4 DLLs - TODO: remove redundant naming of required components 
-    FIND_PACKAGE(Qt4DLLs COMPONENTS QtCore QtGui QtOpenGL QtNetwork QtXmlPatterns)
-    LIST(APPEND CampvisExternalDllsDebug ${QT_DEBUG_DLLS})
-    LIST(APPEND CampvisExternalDllsRelease ${QT_RELEASE_DLLS})
-
-    LIST(REMOVE_DUPLICATES CampvisExternalDllsDebug)
-    LIST(REMOVE_DUPLICATES CampvisExternalDllsRelease)
-
     IF(CAMPVIS_COPY_EXTERNAL_DLLS)
+        LIST(REMOVE_DUPLICATES CampvisExternalDllsDebug)
+        LIST(REMOVE_DUPLICATES CampvisExternalDllsRelease)
         COPY_EXTERNAL_DLLS(CampvisExternalDllsDebug CampvisExternalDllsRelease false)
     ENDIF()
 ENDIF()

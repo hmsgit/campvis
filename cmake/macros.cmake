@@ -263,6 +263,16 @@ MACRO(LIST_SUBDIRECTORIES Result Directory AbsolutePath)
   LIST(SORT ${Result})
 ENDMACRO(LIST_SUBDIRECTORIES)
 
+# Resolve Qt5 DLL locations
+MACRO(RESOLVE_QT5_DLL_LOCATIONS Components)
+    FOREACH(component ${Components})
+        GET_TARGET_PROPERTY(DebugLocation "Qt5::${component}" LOCATION_DEBUG)
+        GET_TARGET_PROPERTY(ReleaseLocation "Qt5::${component}" LOCATION)
+        LIST(APPEND CampvisExternalDllsDebug ${DebugLocation})
+        LIST(APPEND CampvisExternalDllsRelease ${ReleaseLocation})
+    ENDFOREACH()    
+ENDMACRO(RESOLVE_QT5_DLL_LOCATIONS)
+
 # copies the passed debug and release DLLs to bin/Debug and bin/Release, resp.
 MACRO(COPY_EXTERNAL_DLLS DebugDLLs ReleaseDLLs failOnError)
     MESSAGE(STATUS "* Copying external DLLs")

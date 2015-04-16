@@ -37,7 +37,6 @@
 
 #ifdef CGT_WITH_WMI
     #include <wbemidl.h>
-    #include <comdef.h>
 #endif
 
 namespace cgt {

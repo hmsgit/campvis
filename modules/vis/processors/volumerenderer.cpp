@@ -236,18 +236,20 @@ namespace campvis {
             p_outputImage.addSharedProperty(&_raycaster->p_targetImageID);
             _raycaster->s_invalidated.connect(this, &VolumeRenderer::onProcessorInvalidated);
             
-            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-            _raycaster->init();
-            _raycaster->p_sourceImageID.setValue(currentRaycaster->p_sourceImageID.getValue());
-            _raycaster->p_entryImageID.setValue(currentRaycaster->p_entryImageID.getValue());
-            _raycaster->p_exitImageID.setValue(currentRaycaster->p_exitImageID.getValue());
-            _raycaster->p_targetImageID.setValue(currentRaycaster->p_targetImageID.getValue());
-            _raycaster->p_camera.setValue(currentRaycaster->p_camera.getValue());
-            _raycaster->p_transferFunction.replaceTF(currentRaycaster->p_transferFunction.getTF()->clone());
-            _raycaster->p_jitterStepSizeMultiplier.setValue(currentRaycaster->p_jitterStepSizeMultiplier.getValue());
-            _raycaster->p_samplingRate.setValue(currentRaycaster->p_samplingRate.getValue());
+            GLJobProc.enqueueJobBlocking([&]() {
+                _raycaster->init();
+                _raycaster->p_sourceImageID.setValue(currentRaycaster->p_sourceImageID.getValue());
+                _raycaster->p_entryImageID.setValue(currentRaycaster->p_entryImageID.getValue());
+                _raycaster->p_exitImageID.setValue(currentRaycaster->p_exitImageID.getValue());
+                _raycaster->p_targetImageID.setValue(currentRaycaster->p_targetImageID.getValue());
+                _raycaster->p_camera.setValue(currentRaycaster->p_camera.getValue());
+                _raycaster->p_transferFunction.replaceTF(currentRaycaster->p_transferFunction.getTF()->clone());
+                _raycaster->p_jitterStepSizeMultiplier.setValue(currentRaycaster->p_jitterStepSizeMultiplier.getValue());
+                _raycaster->p_samplingRate.setValue(currentRaycaster->p_samplingRate.getValue());
 
-            currentRaycaster->deinit();
+                currentRaycaster->deinit();
+            });
+
             invalidate(PG_INVALID | EEP_INVALID | RAYCASTER_INVALID | AbstractProcessor::INVALID_RESULT);
 
             delete currentRaycaster;

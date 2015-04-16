@@ -147,14 +147,6 @@ namespace campvis {
         virtual void paint();
 
         /**
-         * Gets called when the data collection of this pipeline has changed and thus has notified its observers.
-         * If \a name equals the name of the renderTarget, the s_renderTargetChanged signal will be emitted.
-         * \param   name    Name of the added data.
-         * \param   dh      DataHandle to the newly added data.
-         */
-        void onDataContainerDataAdded(const std::string& name, DataHandle dh);
-
-        /**
          * Slot getting called when one of the observed properties changed and notifies its observers.
          * \param   prop    Property that emitted the signal
          */

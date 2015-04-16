@@ -44,7 +44,9 @@ namespace cgt {
 /**
  * Qt implementation of GLCanvas. Inherits QGLWidget and combines the Qt methods and cgt methods.
  */
-class CGT_API QtCanvas : public GLCanvas, public QGLWidget {
+class CGT_API QtCanvas : public QGLWidget, public GLCanvas {
+    Q_OBJECT;
+
 public:
     /**
      * The constructor. Allows the user to specify a shared widget that this canvas will share
@@ -53,21 +55,24 @@ public:
      *
      * @param parent The parent widget of this canvas.
      * @param shared If this is true, this canvas will share its OpenGL context with the static \a shareWidget_.
-     * @param f Qt::Wflags can be passed to this constructor to control the qt features, like stereo-buffering.
+     * @param f Qt::WindowFlags can be passed to this constructor to control the qt features, like stereo-buffering.
      * @param useCustomEventloop Are the incoming events supposed to be handled by the standard callbacks or not?
      * @param name A name can be passed for debugging purposes.
      */
     QtCanvas(const std::string& title = "",
              const ivec2& size = ivec2(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT),
              const Buffers buffers = RGBADD,
-             QWidget* parent = 0, bool shared = false, Qt::WFlags f = 0, char* name = 0);
+             QWidget* parent = 0, bool shared = false, Qt::WindowFlags f = 0, char* name = 0);
 
-    QtCanvas(QWidget* parent, bool shared = false, Qt::WFlags f = 0, char* name = 0);
+    QtCanvas(QWidget* parent, bool shared = false, Qt::WindowFlags f = 0, char* name = 0);
 
     /**
      * Destructor. Closes window (if canvas is a window).
      */
     virtual ~QtCanvas();
+
+    virtual void moveThreadAffinity(void* threadPointer) override;
+    virtual void* getCurrentThreadPointer() override;
 
 
     /**
@@ -147,7 +152,15 @@ public:
     static KeyEvent::KeyCode getKey(int key);
     static QGLFormat getQGLFormat(const Buffers buffers);
 
+signals:
+    void s_sizeChangedExternally(int w, int h);
+
+protected slots:
+    void sizeChangedExternally(int w, int h);
+
 protected:
+
+
     static QGLWidget* shareWidget_;     ///< widget that this canvas shares the OpenGL context with
 
 };

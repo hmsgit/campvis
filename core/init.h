@@ -32,6 +32,7 @@
 #include <vector>
 
 namespace cgt {
+    class Runnable;
     class GLCanvas;
 }
 
@@ -50,6 +51,13 @@ namespace campvis {
      * Deinitializes the CAMPVis core stuff.
      */
     CAMPVIS_CORE_API void deinit();
+
+    /**
+    * Starts the given Runnable and assigns the canvas' thread affinity to the runnable's thread.
+    * \param   runnable    Runnable to start.
+    * \param   canvas      Canvas whose thread affinity should be set to the thread of \a runnable.
+    */
+    CAMPVIS_CORE_API void startOpenGlThreadAndMoveQtThreadAffinity(cgt::Runnable* runnable, cgt::GLCanvas* canvas);
 
 
     /**

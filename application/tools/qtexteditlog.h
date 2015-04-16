@@ -33,14 +33,12 @@
 #include <QTextEdit>
 #include <QTextDocument>
 
-using namespace cgt;
-
 namespace campvis {
 
     /**
      * QTextEditLog implements logging to a QTextEdit instance.
      */
-    class CAMPVIS_APPLICATION_API QTextEditLog : private QObject, public Log {
+    class CAMPVIS_APPLICATION_API QTextEditLog : private QObject, public cgt::Log {
 
         Q_OBJECT
 
@@ -77,7 +75,7 @@ namespace campvis {
 
     protected:
         QTextEdit* _logDisplay;
-        void logFiltered(const std::string &cat, LogLevel level, const std::string &msg, const std::string &extendedInfo="");
+        void logFiltered(const std::string &cat, cgt::LogLevel level, const std::string &msg, const std::string &extendedInfo="");
     };
 }
 

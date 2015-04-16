@@ -101,6 +101,19 @@ public:
     virtual void swap() = 0;
 
     /**
+     * Moves the thread affinity of this OpenGL canvas to the provided thread.
+     * ATTENTION:   This method uses a void pointer to pass some thread-identifying object.
+     *              Every subclass of GLCanvas may expect this pointer to be of a certain type.
+     *              Make sure, that you are aware of passing an object of correct type, i.e. a 
+     *              pointer you created through getCurrentThreadPointer().
+     * \param	threadPointer   Pointer to some object, has to be of the same type as the one
+     *                          of the pointer returned by getCurrentThreadPointer().
+     */
+    virtual void moveThreadAffinity(void* threadPointer);
+
+    virtual void* getCurrentThreadPointer();
+
+    /**
      * If we use several GLCanvases, we have to switch the OpenGL context when we switch between
      * canvases; this method sets the context of this canvas as the current one.
      *

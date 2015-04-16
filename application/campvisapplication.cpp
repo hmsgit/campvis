@@ -52,6 +52,7 @@
 #include "tools/qtjobprocessor.h"
 
 #include <QApplication>
+#include <QThread>
 
 #ifdef CAMPVIS_HAS_SCRIPTING
 #include "scripting/glue/luavmstate.h"
@@ -93,12 +94,11 @@ namespace campvis {
 #endif
         }
 
-        _localContext = new QtThreadedCanvas("", cgt::ivec2(16, 16));
+        _localContext = new cgt::QtThreadedCanvas("", cgt::ivec2(16, 16));
         campvis::init(_localContext, searchPaths);
 
         _mainWindow = new MainWindow(this);
-        cgt::GLContextScopedLock lock(_localContext);
-        {
+        GLJobProc.enqueueJobBlocking([&]() {
             _mainWindow->init();
 
             // load textureData from file
@@ -133,7 +133,7 @@ namespace campvis {
             if (! _luaVmState->injectGlobalObjectPointer(this, "campvis::CampVisApplication *", "application"))
                 LERROR("Could not inject the pipeline into the Lua VM.");
 #endif
-        }
+        });
 
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
@@ -184,6 +184,12 @@ namespace campvis {
 
         for (auto it = _workflows.begin(); it != _workflows.end(); ++it)
             (*it)->deinit();
+
+        // Stop the OpenGLJobProcessor and pass Qt thread affinity back to this thread.
+        QThread* mainThread = QThread::currentThread();
+        GLJobProc.stop([&] () {
+            this->_localContext->context()->moveToThread(mainThread);
+        });
 
         {
             // Deinit everything OpenGL related using the local context.
@@ -255,7 +261,8 @@ namespace campvis {
 
         GLCtxtMgr.releaseContext(canvas, false);
         s_PipelinesChanged.emitSignal();
-        pipeline->start();
+
+        startOpenGlThreadAndMoveQtThreadAffinity(pipeline, canvas);
     }
 
     void CampVisApplication::initGlContextAndPipeline(cgt::GLCanvas* canvas, AbstractPipeline* pipeline) {
@@ -286,7 +293,7 @@ namespace campvis {
 
     void CampVisApplication::rebuildAllShadersFromFiles() {
         // rebuilding all shaders has to be done from OpenGL context, use the local one.
-        GLJobProc.enqueueJob(makeJobOnHeap(this, &CampVisApplication::triggerShaderRebuild));
+        GLJobProc.enqueueJob(cgt::makeJobOnHeap(this, &CampVisApplication::triggerShaderRebuild));
     }
 
     void CampVisApplication::triggerShaderRebuild() {

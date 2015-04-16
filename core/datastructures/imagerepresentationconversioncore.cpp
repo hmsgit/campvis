@@ -41,8 +41,10 @@ namespace campvis {
                 return nullptr;
             }
 
-            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
+            ImageRepresentationGL* toReturn = nullptr;
+            GLJobProc.enqueueJobBlocking([&]() {
+                toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), wtp);
+            });
 
             switch (wtp._baseType) {
             case WeaklyTypedPointer::UINT8:
@@ -74,8 +76,10 @@ namespace campvis {
             return toReturn;
         }
         else if (const ImageRepresentationLocal* tester = dynamic_cast<const ImageRepresentationLocal*>(source)) {
-            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-            ImageRepresentationGL* toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
+            ImageRepresentationGL* toReturn = nullptr;
+            GLJobProc.enqueueJobBlocking([&]() {
+                toReturn = ImageRepresentationGL::create(const_cast<ImageData*>(tester->getParent()), tester->getWeaklyTypedPointer());
+            });
             return toReturn;
         }
 
@@ -92,12 +96,15 @@ namespace campvis {
             return ImageRepresentationLocal::create(tester->getParent(), tester->getWeaklyTypedPointer());
         }
         else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
-            cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-            WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
-            if (wtp._pointer != nullptr)
-                return ImageRepresentationLocal::create(source->getParent(), wtp);
+            ImageRepresentationLocal* toReturn = nullptr;
 
-            return nullptr;
+            GLJobProc.enqueueJobBlocking([&]() {
+                WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerCopy();
+                if (wtp._pointer != nullptr)
+                    toReturn = ImageRepresentationLocal::create(source->getParent(), wtp);
+            });
+
+            return toReturn;
         }
 
         return nullptr;

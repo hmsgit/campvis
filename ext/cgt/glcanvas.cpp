@@ -57,6 +57,15 @@ GLCanvas::~GLCanvas() {
     delete eventHandler_;
 }
 
+void GLCanvas::moveThreadAffinity(void* threadPointer) {
+    // as a default behavior, do nothing 
+    cgtAssert(threadPointer == nullptr, "Expected a nullptr. If this assertion was raised, make sure that you implemented the corresponding subclass of GLCanvas correctly.");
+}
+
+void* GLCanvas::getCurrentThreadPointer() {
+    return nullptr;
+}
+
 void GLCanvas::sizeChanged(const ivec2& size) {
     size_ = size;
     if (painter_)

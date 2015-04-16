@@ -62,26 +62,6 @@ namespace cgt {
 
     public:
         /**
-         * Scope guard to ensure that encapsulated job is synchronously executed in an arbitrary OpenGL context.
-         * This scope guard checks whether current thread is OpenGLJobProcessor thread. If so, it
-         * does nothing. If this thread is not the OpenGL thread, the OpenGLJobProcessor is paused,
-         * an arbitrary OpenGL context acquired. Upon destruction the OpenGLJobProcessor is resumed.
-         */
-        class CGT_API ScopedSynchronousGlJobExecution {
-        public:
-            ScopedSynchronousGlJobExecution();
-            ~ScopedSynchronousGlJobExecution();
-
-        private:
-            // disable copying
-            explicit ScopedSynchronousGlJobExecution(const ScopedSynchronousGlJobExecution& rhs);
-            ScopedSynchronousGlJobExecution& operator=(ScopedSynchronousGlJobExecution rhs);
-
-            cgt::GLContextScopedLock* _lock;
-        };
-
-
-        /**
          * Destructor, deletes all unfinished jobs.
          */
         virtual ~OpenGLJobProcessor();
@@ -122,6 +102,15 @@ namespace cgt {
          * \param   job         Job to enqueue, PriorityPool takes ownership of this Job!
          */
         void enqueueJob(AbstractJob* job);
+
+        /**
+         * Enqueues the given job and blockes the execution until the job has been processed.
+         * 
+         * \note    OpenGLJobProcessor takes ownership of \a job.
+         * \param   fn         Functor defining job to execute!
+         */
+        void enqueueJobBlocking(std::function<void(void)> fn);
+
 
     protected:
         // Protected constructor since it's a singleton

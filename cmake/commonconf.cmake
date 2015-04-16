@@ -196,10 +196,19 @@ ENDIF()
  
 # minimum Qt version
 IF(CAMPVIS_BUILD_APPLICATION)
-    FIND_PACKAGE(Qt4 ${CampvisRequiredQtVersion} REQUIRED QtCore QtGui QtOpenGL)
-    INCLUDE(${QT_USE_FILE})
+    SET(CampvisRequiredQtVersion "5.0")
+    
+    # Tell CMake to run moc when necessary:
+    SET(CMAKE_AUTOMOC ON)
+    # As moc files are generated in the binary dir, tell CMake to always look for includes there:
+    SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+    
+    FIND_PACKAGE(Qt5Widgets REQUIRED)
+    FIND_PACKAGE(Qt5OpenGL REQUIRED)
+    
+    RESOLVE_QT5_DLL_LOCATIONS("Core;Gui;OpenGL;Widgets")
+
     SET(CGT_WITH_QT true)
-    SET(CampvisRequiredQtVersion "4.8")
 ENDIF(CAMPVIS_BUILD_APPLICATION)
 
 

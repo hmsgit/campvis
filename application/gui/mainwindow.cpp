@@ -435,8 +435,6 @@ namespace campvis {
     }
 
     void MainWindow::onBtnProcessorFactoryClicked() {
-        cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
-
         std::string name = this->_cbProcessorFactory->currentText().toStdString();
         if (_selectedPipeline == nullptr) 
             return;
@@ -447,9 +445,11 @@ namespace campvis {
         if (p == nullptr)
             return;
         
-        p->init();
-        _selectedPipeline->addProcessor(p);
+        GLJobProc.enqueueJobBlocking([&]() {
+            p->init();
+        });
 
+        _selectedPipeline->addProcessor(p);
         emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 

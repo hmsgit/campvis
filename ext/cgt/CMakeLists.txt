@@ -77,9 +77,11 @@ ENDIF(CGT_WITH_QT)
 # define library target
 ################################################################################
 ADD_LIBRARY(cgt ${CGT_SOURCES} ${CGT_HEADERS})
-ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(cgt ${CampvisGlobalExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(cgt ${CampvisGlobalExternalLibs})
+
+qt5_use_modules(cgt Widgets OpenGL)
 
 # if CGT is built as a shared library, CMake will define the following flag to instruct the code to
 # export DLL symbols

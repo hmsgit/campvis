@@ -386,17 +386,10 @@ namespace campvis {
     }
 
     void DataContainerInspectorWidget::init() {
-        if (_canvas != 0)
-            _canvas->init();
-
         _inited = true;
     }
 
     void DataContainerInspectorWidget::deinit() {
-        _inited = false;
-        if (_canvas != 0)
-            _canvas->deinit();
-
         _pcWidget->updatePropCollection(0, 0);
 
         if (_dataContainer != 0) {
@@ -408,6 +401,8 @@ namespace campvis {
 
         if(_propEditorWid != nullptr)
             _propEditorWid->deinit();
+
+        _inited = false;
     }
 
     void DataContainerInspectorWidget::onDCTWidgetSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {

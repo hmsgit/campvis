@@ -70,7 +70,6 @@ namespace campvis {
         static_cast<Geometry1DTransferFunction*>(p_transferFunction.getTF())->addGeometry(TFGeometry1D::createQuad(cgt::vec2(0.f, 1.f), cgt::col4(0, 0, 0, 255), cgt::col4(255, 255, 255, 255)));
 
         GLCtxtMgr.registerContextAndInitGlew(this, "DataContainerInspector");
-        GLCtxtMgr.releaseContext(this, false);
         
         addProperty(p_currentSlice);
         addProperty(p_transferFunction);
@@ -103,10 +102,12 @@ namespace campvis {
         p_renderGChannel.setVisible(false);
         p_renderBChannel.setVisible(false);
         p_renderAChannel.setVisible(false);
+
+        init();
     }
 
     DataContainerInspectorCanvas::~DataContainerInspectorCanvas() {
-
+        deinit();
     }
 
     void DataContainerInspectorCanvas::init() {
@@ -157,15 +158,16 @@ namespace campvis {
             _geometriesDirty = false;
         }
 
-        if (_textures.empty()) {
-            return;
-        }
-
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glViewport(0, 0, size_.x, size_.y);
         glClearColor(0.7f, 0.7f, 0.7f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         LGL_ERROR;
+
+        if (_textures.empty()) {
+            glPopAttrib();
+            return;
+        }
 
         // update layout dimensions
         _numTiles.x = ceil(sqrt(static_cast<float>(_textures.size())));
@@ -252,13 +254,17 @@ namespace campvis {
     void DataContainerInspectorCanvas::invalidate() {
         // only if inited
         if (_quad != 0 && _paintShader != 0) {
+            this->makeCurrent();
+            paint();
+            this->swap();
             // avoid recursive paints.
-            if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
-                SimpleJobProc.enqueueJob([this] () {
-                    cgt::GLContextScopedLock lock(this);
-                    paint();
-                });
-            }
+//             if (! cgt::GlContextManager::getRef().checkWhetherThisThreadHasAcquiredOpenGlContext()) {
+//                 SimpleJobProc.enqueueJob(
+//                     [this] () {
+//                     cgt::GLContextScopedLock lock(this);
+//                     paint();
+//                 });
+//             }
         }
     }
 

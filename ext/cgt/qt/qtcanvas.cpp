@@ -28,6 +28,9 @@
 
 #include "qtcanvas.h"
 
+#include <QThread>
+#include <QOpenGLContext>
+
 namespace cgt {
 
 // shared context widget
@@ -36,9 +39,9 @@ QGLWidget* QtCanvas::shareWidget_ = 0;
 QtCanvas::QtCanvas(const std::string& title,
                    const ivec2& size,
                    const Buffers buffers,
-                   QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
+                   QWidget* parent, bool shared, Qt::WindowFlags f, char* /*name*/)
     : GLCanvas(title, size, buffers)
-    , QGLWidget(getQGLFormat(buffers), parent, (shared ? shareWidget_ : 0), f)
+    , QGLWidget(getQGLFormat(buffers), 0, (shared ? shareWidget_ : 0), f)
 {
     resize(size.x, size.y);
     if (shared && shareWidget_ == 0)
@@ -60,11 +63,13 @@ QtCanvas::QtCanvas(const std::string& title,
     depthSize_ = format().depthBufferSize();
     doubleBuffered_ = doubleBuffer();
     stereoViewing_ = format().stereo();
+
+    connect(this, SIGNAL(s_sizeChangedExternally(int, int)), this, SLOT(sizeChangedExternally(int, int)));
 }
 
-QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
+QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WindowFlags f, char* /*name*/)
     : GLCanvas()
-    , QGLWidget(parent, (shared ? shareWidget_ : 0), f)
+    , QGLWidget(0, (shared ? shareWidget_ : 0), f)
 {
     if (shared && shareWidget_ == 0)
         shareWidget_ = this;
@@ -83,6 +88,15 @@ QtCanvas::QtCanvas(QWidget* parent, bool shared, Qt::WFlags f, char* /*name*/)
 }
 
 QtCanvas::~QtCanvas() {}
+
+void QtCanvas::moveThreadAffinity(void* threadPointer) {
+    QThread* qThreadPointer = static_cast<QThread*>(threadPointer);
+    this->context()->moveToThread(qThreadPointer);
+}
+
+void* QtCanvas::getCurrentThreadPointer() {
+    return QThread::currentThread();
+}
 
 void QtCanvas::initializeGL() {
 }
@@ -105,7 +119,7 @@ void QtCanvas::update() {
 
 void QtCanvas::swap() {
     QGLWidget::swapBuffers();
-    this->makeCurrent();
+    QGLWidget::makeCurrent();
 }
 
 void QtCanvas::toggleFullScreen() {
@@ -566,7 +580,9 @@ KeyEvent::KeyCode QtCanvas::getKey(int key) {
 }
 
 void QtCanvas::setSize(ivec2 newSize) {
-    QWidget::resize(newSize.x, newSize.y);
+    // pass size change command through Qt's event messaging system to enforce execution in GUI thread.
+    // (setSize() may be called externally from a different thread).
+    emit s_sizeChangedExternally(newSize.x, newSize.y);
 }
 
 QSize QtCanvas::sizeHint() const {
@@ -576,11 +592,15 @@ QSize QtCanvas::sizeHint() const {
 }
 
 void QtCanvas::acquireAsCurrentContext() {
-    this->makeCurrent();
+    QGLWidget::makeCurrent();
 }
 
 void QtCanvas::releaseAsCurrentContext() {
-    this->doneCurrent();
+    QGLWidget::doneCurrent();
+}
+
+void QtCanvas::sizeChangedExternally(int w, int h) {
+    QWidget::resize(w, h);
 }
 
 

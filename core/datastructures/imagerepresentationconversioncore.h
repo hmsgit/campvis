@@ -96,16 +96,17 @@ namespace campvis {
 
             else if (const ImageRepresentationGL* tester = dynamic_cast<const ImageRepresentationGL*>(source)) {
                 // converting from GL representation
-                cgt::OpenGLJobProcessor::ScopedSynchronousGlJobExecution jobGuard;
+                GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>* toReturn = nullptr;
+                GLJobProc.enqueueJobBlocking([&]() {
+                    if (cgt::Texture::calcMatchingDataType(tester->getTexture()->getInternalFormat()) != TypeTraits<BASETYPE, NUMCHANNELS>::glDataType)
+                        LDEBUGC("CAMPVis.core.datastructures.GenericLocalConversion", "Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");
 
-                if (cgt::Texture::calcMatchingDataType(tester->getTexture()->getInternalFormat()) != TypeTraits<BASETYPE, NUMCHANNELS>::glDataType)
-                    LDEBUGC("CAMPVis.core.datastructures.GenericLocalConversion", "Performing conversion between data types, you may lose information or the resulting data may show other unexpected features.");
+                    WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerConvert(TypeTraits<BASETYPE, NUMCHANNELS>::glDataType);
+                    if (wtp._pointer != nullptr)
+                        toReturn = GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
+                });
 
-                WeaklyTypedPointer wtp = tester->getWeaklyTypedPointerConvert(TypeTraits<BASETYPE, NUMCHANNELS>::glDataType);
-                if (wtp._pointer != nullptr)
-                    return GenericImageRepresentationLocal<BASETYPE, NUMCHANNELS>::create(tester->getParent(), static_cast<ElementType*>(wtp._pointer));
-
-                return nullptr;
+                return toReturn;
             }
 
             else if (const ThisType* tester = dynamic_cast<const ThisType*>(source)) {

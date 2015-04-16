@@ -38,6 +38,7 @@
 
 namespace cgt {
     class GLCanvas;
+    class QtCanvas;
     class QtThreadedCanvas;
     class Texture;
 }
@@ -170,7 +171,7 @@ namespace campvis {
         void triggerShaderRebuild();
 
         /// A local OpenGL context used for initialization
-        cgt::GLCanvas* _localContext;
+        cgt::QtCanvas* _localContext;
         /// Main window hosting GUI stuff
         MainWindow* _mainWindow;
 

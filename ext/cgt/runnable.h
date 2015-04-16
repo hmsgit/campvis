@@ -33,6 +33,7 @@
 
 #include <ext/threading.h>
 #include <tbb/atomic.h>
+#include <functional>
 
 namespace cgt {
     class RunnableWithConditionalWait;
@@ -44,7 +45,10 @@ namespace cgt {
      * and waits for the thread to finish. Hence, you should test for _stopExecution in your run() method.
      */
     class CGT_API Runnable {
+        // the launch function needs to be a free function but have access to Runnable's internals.
         friend void invokeThread(Runnable* r);
+
+        // We do not want to expose _running, but to RunnableWithConditionalWait needs access.
         friend class RunnableWithConditionalWait;
 
     public:
@@ -52,22 +56,24 @@ namespace cgt {
          * Creates a new Runnable object
          */
         Runnable();
-
+        
         /**
          * Destructor, stops and waits for the thread to finish if the thread is still running.
          */
         virtual ~Runnable();
-
+        
         /**
-         * Creates the new thread evaluating the run() method.
+         * Creates the new thread first calling provided function and the calling the run() method.
+         * \param   initFunction    Function to run as first code in the newly created thread (for initing purposes), defaults to a NOP.
          * \sa  Runnable::run
          */
-        virtual void start();
+        virtual void start(std::function<void(void)> initFunction = [] () {});
 
         /**
          * Sets the _stopExecution flag and waits for the thread to finish.
+         * \param   deinitFunction  Function to run as last code in the thread (for deiniting purposes), defaults to a NOP.
          */
-        virtual void stop();
+        virtual void stop(std::function<void(void)> deinitFunction = [] () {});
 
         /**
          * Entrance point for the new thread. To be overwritten in subclasses.
@@ -75,7 +81,9 @@ namespace cgt {
         virtual void run() = 0;
 
     protected:
-        tbb::atomic<bool> _stopExecution;       ///< Flag whether the thread should stop
+        tbb::atomic<bool> _stopExecution;           ///< Flag whether the thread should stop
+        std::function<void(void)> _initFunction;    ///< Function to execute in the thread as very first code.
+        std::function<void(void)> _deinitFunction;  ///< Function to execute in the thread as very last code.
 
     private:
         /// Runnables are not copyable
@@ -83,8 +91,8 @@ namespace cgt {
         /// Runnables are not copyable
         Runnable& operator =(Runnable const&);
 
-        std::thread* _thread;                    ///< Thread of the Runnable
-        tbb::atomic<bool> _running;
+        std::thread* _thread;                       ///< Thread of the Runnable
+        tbb::atomic<bool> _running;                 ///< Flag whether the thread is still running
     };
 
 
@@ -102,7 +110,7 @@ namespace cgt {
          * Creates a new RunnableWithConditionalWait object
          */
         RunnableWithConditionalWait();
-
+        
         /**
          * Destructor, stops and waits for thread to finish if the thread is still running.
          */
@@ -111,7 +119,7 @@ namespace cgt {
         /**
          * Sets the _stopExecution flag and waits for the thread to finish.
          */
-        virtual void stop();
+        virtual void stop(std::function<void(void)> deinitFunction = [] () {});
 
     protected:
         /// conditional wait to be used when there are currently no jobs to process

@@ -31,6 +31,12 @@
 #include "gpucapabilitieswindows.h"
 #include "logmanager.h"
 
+#ifdef CGT_WITH_WMI
+    // due to some weird include hierarchies, comdef.h is missing an assert define in MSVC 2010, so we provide it with one.
+    #define assert(_Expression) 
+    #include <comdef.h>
+#endif
+
 #include <windows.h>
 #include <WinBase.h>
 #include <tchar.h>

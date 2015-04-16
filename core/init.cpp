@@ -72,7 +72,7 @@ namespace campvis {
 
         GLCtxtMgr.releaseContext(backgroundGlContext, false);
         GLJobProc.setContext(backgroundGlContext);
-        GLJobProc.start();
+        startOpenGlThreadAndMoveQtThreadAffinity(cgt::OpenGLJobProcessor::getPtr(), backgroundGlContext);
     }
 
     void deinit() {
@@ -89,6 +89,36 @@ namespace campvis {
         ImageRepresentationConverter::deinit();
         PipelineFactory::deinit();
         ProcessorFactory::deinit();
+    }
+
+    CAMPVIS_CORE_API void startOpenGlThreadAndMoveQtThreadAffinity(cgt::Runnable* runnable, cgt::GLCanvas* canvas) {
+        // welcome to a complex signalling ping-pong to move the OpenGL context thread affinity
+        // we will use targetThread as signalling variable and initialize it with nullptr:
+        void* targetThread = nullptr;
+
+        // start the new thread with special init function
+        runnable->start([&]() {
+            // the init function sets the signal variable to this thread's thread.
+            targetThread = canvas->getCurrentThreadPointer();
+
+            // wait until the signal variable has been reset to nullptr, since later calls in this 
+            // thread may rely on the QGLContext's thread affinity already been moved.
+            while (targetThread != nullptr)
+                std::this_thread::yield();
+
+            targetThread = nullptr;
+        });
+
+        // Meanwhile in the main thread:
+        // wait until the signal variable has been set by the freshly created thread
+        while (targetThread == nullptr)
+            std::this_thread::yield();
+
+        // set the QGLContext's thread affinity
+        canvas->moveThreadAffinity(targetThread);
+
+        // reset the signal variable so that the new thread can continue.
+        targetThread = nullptr;
     }
 
     CAMPVIS_CORE_API std::string completePath(const std::string& filename) {

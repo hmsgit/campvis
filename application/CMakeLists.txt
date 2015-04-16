@@ -106,13 +106,7 @@ FOREACH(ModFile ${CampvisModulesApplicationToBeMocced})
     LIST(APPEND CampvisApplicationToBeMocced ${ModFileRelative})
 ENDFOREACH()
 
-#
-# Qt related stuff:
-#
-QT4_WRAP_CPP(CampvisApplicationMoc ${CampvisApplicationToBeMocced})
-LIST(APPEND CampvisApplicationSources ${CampvisApplicationMoc})
-
-QT4_WRAP_UI(CampvisApplicationFormsHeaders ${CampvisApplicationForms})
+QT5_WRAP_UI(CampvisApplicationFormsHeaders ${CampvisApplicationForms})
 LIST(APPEND CampvisApplicationSources ${CampvisApplicationFormsHeaders})
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
@@ -127,13 +121,15 @@ ADD_LIBRARY(campvis-application-lib
     ${CampvisApplicationSources} ${CampvisApplicationHeaders}
     ${CampvisApplicationMoc}
 )
-ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
+ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs})
-TARGET_LINK_LIBRARIES(campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
+qt5_use_modules(campvis-application-lib Widgets OpenGL)
 
 # if campvis-core is built as a shared library, CMake will define the following flag to instruct
 # the code to export DLL symbols
 SET_TARGET_PROPERTIES(campvis-application-lib PROPERTIES DEFINE_SYMBOL "CAMPVIS_APPLICATION_BUILD_DLL")
+
 
 IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisApplicationSources ${CampvisHome} "")
@@ -144,8 +140,8 @@ INSTALL(TARGETS campvis-application-lib DESTINATION exports EXPORT campvis-targe
 
 
 ADD_EXECUTABLE(campvis-application "campvis.cpp")
-TARGET_LINK_LIBRARIES(campvis-application campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
-
+TARGET_LINK_LIBRARIES(campvis-application campvis-application-lib ${CampvisMainLibs} ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs})
+qt5_use_modules(campvis-application Widgets OpenGL)
 
 
 IF(CAMPVIS_DEPLOY_SHADERS)

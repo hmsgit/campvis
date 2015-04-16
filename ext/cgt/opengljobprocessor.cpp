@@ -36,24 +36,6 @@
 
 namespace cgt {
 
-    OpenGLJobProcessor::ScopedSynchronousGlJobExecution::ScopedSynchronousGlJobExecution()
-        : _lock(nullptr)
-    {
-        if (! GLCtxtMgr.checkWhetherThisThreadHasAcquiredOpenGlContext()) {
-            GLJobProc.pause();
-            _lock = new cgt::GLContextScopedLock(GLJobProc.getContext());
-        }
-    }
-
-    OpenGLJobProcessor::ScopedSynchronousGlJobExecution::~ScopedSynchronousGlJobExecution() {
-        if (_lock != nullptr) {
-            delete _lock;
-            GLJobProc.resume();
-        }
-    }
-
-// ================================================================================================
-    
     OpenGLJobProcessor::OpenGLJobProcessor()
     {
         _pause = 0;
@@ -133,6 +115,14 @@ namespace cgt {
 
     cgt::GLCanvas* OpenGLJobProcessor::getContext() {
         return _context;
+    }
+
+    void OpenGLJobProcessor::enqueueJobBlocking(std::function<void(void)> fn) {
+        char signalVariable = 0;
+        enqueueJob(cgt::makeJobOnHeap([&signalVariable, fn]() { fn(); signalVariable = 1; }));
+
+        while (signalVariable == 0)
+            std::this_thread::yield();
     }
 
 }
