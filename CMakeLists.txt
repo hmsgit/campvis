@@ -7,6 +7,7 @@ SET(CAMPVIS_VERSION 1.0.0)
 # = Global Build Options ======================================================
 OPTION(BUILD_SHARED_LIBS            "Build shared libraries (strongly recommended!)"                ON)
 OPTION(CAMPVIS_DEBUG                "Activate debug code?"                                          ON)
+OPTION(CAMPVIS_BUILD_LIB_CGT        "Build CGT Library"                                             ON)
 OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                                     ON)
 OPTION(CAMPVIS_BUILD_MODULES        "Build CAMPVis Modules"                                         ON)
 OPTION(CAMPVIS_ENABLE_SCRIPTING     "Add support for scripting CAMPVis using Lua"                   OFF)
@@ -26,6 +27,10 @@ ENDIF()
 # = Further Build Options =====================================================
 SET(CAMPVIS_DEFAULT_ENABLED_MODULES "STABLE_NO_DEPENDENCIES" CACHE STRING "Default CAMPVis modules to activate")
 SET_PROPERTY(CACHE CAMPVIS_DEFAULT_ENABLED_MODULES PROPERTY STRINGS "NONE" "STABLE_NO_DEPENDENCIES" "STABLE_WITH_EXTERNAL_DEPENDENCIES" "TESTING" "ALL")
+
+IF(NOT BUILD_SHARED_LIBS)
+    MESSAGE(WARNING "Building shared libraries is turned off. Thus, CAMPVis will most probably not work as intended!\nPlease turn BUILD_SHARED_LIBS on unless you know what you're doing!")
+ENDIF(NOT BUILD_SHARED_LIBS)
 
 # propagate CAMPVIS_ENABLE_SCRIPTING to CAMPVIS_BUILD_LIB_LUA to support deprecated code
 IF (CAMPVIS_ENABLE_SCRIPTING)

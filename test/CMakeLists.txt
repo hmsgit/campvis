@@ -1,6 +1,6 @@
-PROJECT(test-campvis)
+PROJECT(campvis-test)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
-MESSAGE(STATUS "Configuring googletest for campvis Modules")
+MESSAGE(STATUS "Configuring CAMPVis Test")
 
 FILE(GLOB TestCampvisHeaders RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     *.h
@@ -26,13 +26,13 @@ endif()
 
 
 LINK_DIRECTORIES(${CampvisGlobalLinkDirectories} ${CampvisModulesLinkDirectories})
-ADD_EXECUTABLE(test-campvis
+ADD_EXECUTABLE(campvis-test
     ${TestCampvisSources} ${TestCampvisHeaders} 
 )
 
 ADD_DEFINITIONS(${CampvisGlobalDefinitions} ${CampvisModulesDefinitions} ${CampvisApplicationDefinitions} ${QT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${CampvisGlobalIncludeDirs} ${CampvisModulesIncludeDirs} ${CampvisHome}/ext/gtest-1.7.0/ ${CampvisHome}/ext/gtest-1.7.0/include)
-TARGET_LINK_LIBRARIES(test-campvis gtest sigslot cgt campvis-core campvis-modules ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(campvis-test gtest sigslot cgt campvis-core campvis-modules ${CampvisGlobalExternalLibs} ${CampvisModulesExternalLibs} ${QT_LIBRARIES})
 
 if (CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(TestCampvisSources ${CampvisHome}/test "")

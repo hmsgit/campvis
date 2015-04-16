@@ -167,11 +167,6 @@ MACRO(INCLUDE_MODULE ModuleDirectory ModuleListFile)
 
         # add definition that this module is activated
         LIST(APPEND CampvisGlobalDefinitions -DCAMPVIS_HAS_MODULE_${ModuleDirectoryUpper})
-
-        # parse all header files for pipeline classes to add them to the pipeline registration
-        FOREACH(HeaderFile ${ThisModHeaders})
-            PARSE_HEADER_FOR_PIPELINE("modules/${HeaderFile}")
-        ENDFOREACH()
     ENDIF(${CAMPVIS_BUILD_MODULE_${ModDirUpper}})
 
     # unset module settings to avoid duplicates if module cmake file misses sth.
