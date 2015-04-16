@@ -45,6 +45,9 @@ namespace campvis {
     }
 
     DataContainerFileLoaderWidget::~DataContainerFileLoaderWidget() {
+        delete _imgReader;
+        _imgReader = nullptr;
+
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);
         }
@@ -95,14 +98,6 @@ namespace campvis {
         }
 
         return false;
-    }
-
-    void DataContainerFileLoaderWidget::init() {
-    }
-
-    void DataContainerFileLoaderWidget::deinit() {
-        delete _imgReader;
-        _imgReader = nullptr;
     }
 
     void DataContainerFileLoaderWidget::onBtnCancelClicked() {

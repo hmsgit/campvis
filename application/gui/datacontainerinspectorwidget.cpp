@@ -89,10 +89,6 @@ namespace campvis {
     }
 
     DataContainerInspectorWidget::~DataContainerInspectorWidget() {
-        if (_dataContainer != 0) {
-            _dataContainer->s_dataAdded.disconnect(this);
-        }
-
         delete _pcWidget;
         _pcWidget = nullptr;
     }
@@ -390,17 +386,11 @@ namespace campvis {
     }
 
     void DataContainerInspectorWidget::deinit() {
-        _pcWidget->updatePropCollection(0, 0);
+        _canvas->deinit();
 
         if (_dataContainer != 0) {
             _dataContainer->s_dataAdded.disconnect(this);
         }
-
-        _dataContainer = 0;
-        _dctWidget->update(0);
-
-        if(_propEditorWid != nullptr)
-            _propEditorWid->deinit();
 
         _inited = false;
     }
@@ -527,8 +517,8 @@ namespace campvis {
     void DataContainerInspectorWidget::onBtnLoadFileClicked() {
         // delete previous PropertyEditor, then create a new one
         // the final one will be deleted with deinit()
-        if(nullptr != _propEditorWid)
-            _propEditorWid->deinit();
+        if (nullptr != _propEditorWid)
+            delete _propEditorWid;
 
         _propEditorWid = new DataContainerFileLoaderWidget(this, nullptr);
         _propEditorWid->setVisible(true);

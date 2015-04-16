@@ -66,18 +66,7 @@ namespace campvis {
          * \return QSize(300, 350)
          */
         QSize sizeHint() const;
-        
-        /**
-         * Initializes the OpenGL stuff (e.g. shaders).
-         * Must be called with a valid and locked OpenGL context.
-         */
-        virtual void init();
 
-        /**
-         * Deinitializes the OpenGL stuff (e.g. shaders).
-         * Must be called with a valid and locked OpenGL context.
-         */
-        void deinit();
 
     private slots:
         /**

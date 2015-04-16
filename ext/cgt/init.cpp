@@ -112,22 +112,15 @@ void initGL(GLCanvas* backgroundGlContext, InitFeature::Features featureset) {
 }
 
 void deinitGL() {
-    GLCanvas* backgroundGlContext = GLJobProc.getContext();
-    {
-        // Deinit everything OpenGL related using the local context.
-        GLContextScopedLock lock(backgroundGlContext);
-
-        if (GpuCapabilities::isInited())
-            GpuCapabilities::deinit();
+    if (GpuCapabilities::isInited())
+        GpuCapabilities::deinit();
 #ifdef _MSC_VER
-        if (GpuCapabilitiesWindows::isInited())
-            GpuCapabilitiesWindows::deinit();
+    if (GpuCapabilitiesWindows::isInited())
+        GpuCapabilitiesWindows::deinit();
 #endif
-        if (ShaderManager::isInited())
-            ShaderManager::deinit();
-    }
+    if (ShaderManager::isInited())
+        ShaderManager::deinit();
 
-    GLJobProc.stop();
     OpenGLJobProcessor::deinit();
     GlContextManager::deinit();
 }

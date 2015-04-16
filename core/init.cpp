@@ -76,12 +76,17 @@ namespace campvis {
     }
 
     void deinit() {
-        {
-            // Deinit everything OpenGL related using the background context.
-            cgt::GLContextScopedLock lock(GLJobProc.getContext());
-            QuadRenderer::deinit();
-        }
+        // Stop the OpenGLJobProcessor and pass Qt thread affinity back to this thread.
+        cgt::GLCanvas* backgroundContext = GLJobProc.getContext();
+        void* mainThread = backgroundContext->getCurrentThreadPointer();
+        GLJobProc.stop([&]() {
+            backgroundContext->moveThreadAffinity(mainThread);
+        });
 
+        // now cleanly acquire this context again
+        backgroundContext->acquireAsCurrentContext();
+
+        QuadRenderer::deinit();
         cgt::deinitGL();
         cgt::deinit();
 

@@ -31,6 +31,7 @@
 #include "gtest/gtest.h"
 #include <stdio.h>
 #include <QApplication>
+#include <QThread>
 
 #include "sigslot/sigslot.h"
 
@@ -52,7 +53,6 @@ bool _initialized;
 cgt::GLCanvas* _localContext = nullptr;
 static const std::string loggerCat_;
 
-
 void init() {
     std::vector<std::string> searchPaths;
 #ifdef CAMPVIS_SOURCE_DIR
@@ -64,8 +64,7 @@ void init() {
     
     _localContext = new cgt::QtThreadedCanvas("", cgt::ivec2(16, 16));
     cgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext, "Local Context");
-    GLCtxtMgr.releaseContext(_localContext, false);
-
+    
     _initialized = true;
 }
 
@@ -78,29 +77,25 @@ void deinit() {
 
 GTEST_API_ int main(int argc, char **argv) {
     printf("Running main() from main.cpp\n");
-
-    // Make Xlib and GLX thread safe under X11
-    QCoreApplication::setAttribute(Qt::AA_X11InitThreads);
     app = new QApplication(argc, argv);
 
+    // Make Xlib and GLX thread safe under X11
+    QApplication::setAttribute(Qt::AA_X11InitThreads);
+
     testing::InitGoogleTest(&argc, argv);
-    init();
     int ret;
-    
-    std::thread testThread([&] () {
-        {
-            cgt::GLContextScopedLock lock(_localContext);
-            ret= RUN_ALL_TESTS();
-        }
 
-        deinit();
-        app->exit();
-    });
+    init();
+    {
+        cgt::GLContextScopedLock lock(_localContext);
+        ret = RUN_ALL_TESTS();
 
-    app->exec();
-    testThread.join();
+    }
+
+    deinit();
+
+    app->quit();
     delete app;
-
     printf("main() returned with %d\n", ret);
-    return ret;
+    return 0;
 }

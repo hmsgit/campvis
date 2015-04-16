@@ -107,7 +107,6 @@ namespace campvis {
     }
 
     DataContainerInspectorCanvas::~DataContainerInspectorCanvas() {
-        deinit();
     }
 
     void DataContainerInspectorCanvas::init() {
@@ -253,7 +252,7 @@ namespace campvis {
 
     void DataContainerInspectorCanvas::invalidate() {
         // only if inited
-        if (_quad != 0 && _paintShader != 0) {
+        if (_quad != 0 && _paintShader != 0 && this->isVisible()) {
             this->makeCurrent();
             paint();
             this->swap();

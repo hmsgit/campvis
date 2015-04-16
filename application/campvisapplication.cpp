@@ -185,16 +185,7 @@ namespace campvis {
         for (auto it = _workflows.begin(); it != _workflows.end(); ++it)
             (*it)->deinit();
 
-        // Stop the OpenGLJobProcessor and pass Qt thread affinity back to this thread.
-        QThread* mainThread = QThread::currentThread();
-        GLJobProc.stop([&] () {
-            this->_localContext->context()->moveToThread(mainThread);
-        });
-
-        {
-            // Deinit everything OpenGL related using the local context.
-            cgt::GLContextScopedLock lock(_localContext);
-
+        GLJobProc.enqueueJobBlocking([&]() {
             delete _errorTexture;
 
             // Deinit pipeline and painter first
@@ -203,7 +194,9 @@ namespace campvis {
             }
 
             _mainWindow->deinit();
-        }
+        });
+
+        delete _mainWindow;
 
         // now delete everything in the right order:
         for (auto it = _pipelines.begin(); it != _pipelines.end(); ++it) {

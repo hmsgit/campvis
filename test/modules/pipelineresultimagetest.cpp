@@ -84,6 +84,7 @@ protected:
     void init() {
         // create pipeline
         _pipeline = PipelineFactory::getRef().createPipeline(_pipelineName, _dataContainer);
+        ASSERT_TRUE(_pipeline != nullptr);
 
         if (_pipeline != nullptr) {
             // setup pipeline
@@ -172,14 +173,17 @@ TEST_F(PipelineWriteResultImageTest, VectorFieldDemo) {
     _pipelineName = "VectorFieldDemo";
     _fileName = _basePath + "vectorfielddemo.png";
     init();
-    execute();
 
+    if (! _pipeline)
+        return;
+
+    execute();
     AbstractProperty* p = _pipeline->getProperty("SliceNuber");
     if (IntProperty* tester = dynamic_cast<IntProperty*>(p)) {
-    	tester->setValue(64);
+        tester->setValue(64);
     }
-
     execute();
+
     EXPECT_TRUE(_wroteFile);
 }
 
@@ -187,8 +191,11 @@ TEST_F(PipelineWriteResultImageTest, DVRVis) {
     _pipelineName = "DVRVis";
     _fileName = _basePath + "dvrvis.png";
     init();
-    execute();
 
+    if (! _pipeline)
+        return;
+
+    execute();
     auto properties = _pipeline->getProcessors();
     for (auto it = properties.begin(); it != properties.end(); ++it) {
         if (TrackballCameraProvider* tcp = dynamic_cast<TrackballCameraProvider*>(*it)) {
@@ -206,8 +213,11 @@ TEST_F(PipelineWriteResultImageTest, TensorDemo) {
     _pipelineName = "TensorDemo";
     _fileName = _basePath + "tensordemo.png";
     init();
-    execute();
 
+    if (! _pipeline)
+        return;
+
+    execute();
     AbstractProperty* p = _pipeline->getProperty("SliceNuber");
     if (IntProperty* tester = dynamic_cast<IntProperty*>(p)) {
         tester->setValue(6);
