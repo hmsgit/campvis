@@ -18,7 +18,7 @@ IF(${ModuleEnabled})
 		modules/dti/processors/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/dti/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/dti/glsl")
 ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus TESTING)

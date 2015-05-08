@@ -30,5 +30,5 @@ IF(${ModuleEnabled})
 	)
 ENDIF(${ModuleEnabled})
 
-SET(ThisModStatus STABLE)
+SET(ThisModStatus TESTING)
 SET(ThisModExternalDependencies FALSE)

@@ -33,11 +33,11 @@ IF(${ModuleEnabled})
 		modules/fontrendering/tools/*.h
 	)
 
-	LIST (APPEND ThisModShaderDirectories "modules/fontrendering/fonts")
-	LIST (APPEND ThisModShaderDirectories "modules/fontrendering/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/fontrendering/fonts")
+	LIST(APPEND ThisModShaderDirectories "modules/fontrendering/glsl")
 
 	SET(ThisModDependencies base)
 ENDIF(${ModuleEnabled})
 
-SET(ThisModStatus TESTING)
+SET(ThisModStatus STABLE)
 SET(ThisModExternalDependencies FALSE)

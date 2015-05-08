@@ -33,5 +33,5 @@ IF(${ModuleEnabled})
 	SET(ThisModDependencies vis)
 ENDIF(${ModuleEnabled})
 
-SET(ThisModStatus TESTING)
+SET(ThisModStatus EXPERIMENTAL)
 SET(ThisModExternalDependencies TRUE)

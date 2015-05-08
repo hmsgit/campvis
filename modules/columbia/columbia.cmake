@@ -18,7 +18,7 @@ IF(${ModuleEnabled})
 		modules/columbia/processors/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/columbia/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/columbia/glsl")
 ENDIF(${ModuleEnabled})
 
 SET(ThisModStatus EXPERIMENTAL)

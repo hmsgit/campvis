@@ -16,7 +16,7 @@ IF(${ModuleEnabled})
 		modules/ivus_tc/processors/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/ivus_tc/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/ivus_tc/glsl")
 	SET(ThisModDependencies base io devil vis advancedusvis)
 ENDIF(${ModuleEnabled})
 

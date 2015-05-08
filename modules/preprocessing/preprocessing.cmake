@@ -16,7 +16,7 @@ IF(${ModuleEnabled})
 		modules/preprocessing/tools/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/preprocessing/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/preprocessing/glsl")
 	SET(ThisModDependencies vis)
 ENDIF(${ModuleEnabled})
 

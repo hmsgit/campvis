@@ -24,8 +24,8 @@ IF(${ModuleEnabled})
 	FILE(GLOB ThisModApplicationHeaders RELATIVE ${ModulesDir} modules/advancedusvis/widgets/*.h)
 	FILE(GLOB ThisModApplicationToBeMocced RELATIVE ${ModulesDir} modules/advancedusvis/widgets/*.h)
 
-	SET(ThisModShaderDirectories "modules/advancedusvis/glsl")
-	SET(ThisModShaderDirectories "modules/advancedusvis/sampledata")
+	LIST(APPEND ThisModShaderDirectories "modules/advancedusvis/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/advancedusvis/sampledata")
 	SET(ThisModDependencies vis io preprocessing randomwalk)
 ENDIF(${ModuleEnabled})
 

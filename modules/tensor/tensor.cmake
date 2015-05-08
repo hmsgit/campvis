@@ -14,8 +14,8 @@ IF(${ModuleEnabled})
 		modules/tensor/pipelines/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/tensor/glsl")
-	SET(ThisModShaderDirectories "modules/tensor/sampledata")
+	LIST(APPEND ThisModShaderDirectories "modules/tensor/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/tensor/sampledata")
 	SET(ThisModDependencies io vis)
 ENDIF(${ModuleEnabled})
 

@@ -2,7 +2,7 @@
 # CMake file for the openigtlink module
 
 # Set module status (valid values are STABLE, TESTING and EXPERIMENTAL)
-SET(ThisModStatus EXPERIMENTAL)
+SET(ThisModStatus TESTING)
 # Set whether this module has external dependencies that are not shipped with CAMPVis.
 SET(ThisModExternalDependencies TRUE)
 

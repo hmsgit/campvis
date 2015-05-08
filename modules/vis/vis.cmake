@@ -18,8 +18,8 @@ IF(${ModuleEnabled})
 		modules/vis/tools/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/vis/glsl")
-	SET(ThisModShaderDirectories "modules/vis/sampledata")
+	LIST(APPEND ThisModShaderDirectories "modules/vis/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/vis/sampledata")
 	SET(ThisModDependencies base io)
 ENDIF(${ModuleEnabled})
 

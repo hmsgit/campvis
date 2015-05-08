@@ -16,7 +16,7 @@ IF(${ModuleEnabled})
 		modules/manualsegmentation/tools/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/manualsegmentation/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/manualsegmentation/glsl")
 	SET(ThisModDependencies io itk vis)
 ENDIF(${ModuleEnabled})
 

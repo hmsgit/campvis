@@ -15,7 +15,7 @@ IF(${ModuleEnabled})
 		modules/ixpv/processors/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/ixpv/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/ixpv/glsl")
 	SET(ThisModDependencies vis devil io)
 ENDIF(${ModuleEnabled})
 

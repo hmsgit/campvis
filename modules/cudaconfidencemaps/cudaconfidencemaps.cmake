@@ -2,7 +2,7 @@
 # CMake file for the cuda confidence maps module
 
 # Set module status (valid values are STABLE, TESTING and EXPERIMENTAL)
-SET(ThisModStatus EXPERIMENTAL)
+SET(ThisModStatus TESTING)
 # Set whether this module has external dependencies that are not shipped with CAMPVis.
 SET(ThisModExternalDependencies TRUE)
 
@@ -28,7 +28,7 @@ IF(ModuleEnabled)
         )
 
         # Define the GLSL shader path, so that all needed shaders will be deployed to target directory
-        SET(ThisModShaderDirectories "modules/cudaconfidencemaps/glsl")
+        LIST(APPEND ThisModShaderDirectories "modules/cudaconfidencemaps/glsl")
 
         # Define dependency modules
         SET(ThisModDependencies preprocessing advancedusvis openigtlink fontrendering)

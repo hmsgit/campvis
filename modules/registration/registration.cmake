@@ -24,7 +24,7 @@ IF(${ModuleEnabled})
 		modules/registration/tools/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/registration/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/registration/glsl")
 	SET(ThisModDependencies vis io)
 ENDIF(${ModuleEnabled})
 

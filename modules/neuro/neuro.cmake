@@ -18,8 +18,8 @@ IF(${ModuleEnabled})
 		modules/neuro/tools/*.h
 	)
 
-	SET(ThisModShaderDirectories "modules/neuro/glsl")
-	SET(ThisModShaderDirectories "modules/neuro/sampledata")
+	LIST(APPEND ThisModShaderDirectories "modules/neuro/glsl")
+	LIST(APPEND ThisModShaderDirectories "modules/neuro/sampledata")
 	SET(ThisModDependencies base io preprocessing vis)
 ENDIF(${ModuleEnabled})
 
