@@ -45,10 +45,6 @@
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/quadrenderer.h"
 
-#ifdef Q_WS_X11
-#include <X11/Xlib.h>
-#endif
-
 QApplication *app;
 /// Flag, whether CampVisApplication was correctly initialized
 bool _initialized;
@@ -143,10 +139,6 @@ void deinit() {
 
 GTEST_API_ int main(int argc, char **argv) {
     printf("Running main() from main.cpp\n");
-
-#ifdef Q_WS_X11
-    XInitThreads();
-#endif
 
     app = new QApplication(argc, argv);
 

@@ -24,10 +24,6 @@
 
 #include "application/campvisapplication.h"
 
-#ifdef Q_WS_X11
-#include <X11/Xlib.h>
-#endif
-  
 using namespace campvis;
 
 /**
@@ -38,10 +34,6 @@ using namespace campvis;
  * \return  0 if program exited successfully
  **/
 int main(int argc, char** argv) {
-    #ifdef Q_WS_X11
-        XInitThreads();
-    #endif
-
     CampVisApplication app(argc, argv);
     app.init();
     int toReturn = app.run();

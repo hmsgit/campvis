@@ -105,6 +105,7 @@ void QtCanvas::update() {
 
 void QtCanvas::swap() {
     QGLWidget::swapBuffers();
+    this->makeCurrent();
 }
 
 void QtCanvas::toggleFullScreen() {
