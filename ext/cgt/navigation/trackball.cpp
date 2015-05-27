@@ -34,7 +34,7 @@
 
 namespace cgt {
 
-Trackball::Trackball(IHasCamera* hcam, const ivec2& viewportSize, bool defaultEventHandling, Timer* continuousSpinTimer)
+Trackball::Trackball(AbstractCameraProxy* hcam, const ivec2& viewportSize, bool defaultEventHandling, Timer* continuousSpinTimer)
     : Navigation(hcam),
       viewportSize_(viewportSize),
       continuousSpin_(false),
@@ -265,12 +265,22 @@ void Trackball::move(vec2 newMouse) {
 }
 
 void Trackball::zoom(float factor) {
-    // zoom factor is inverse proportional to scaling of the look vector, so invert:
-    factor = 1.f / factor;
-    getCamera()->setPosition( (1.f-factor) * getCamera()->getFocus()
-                              + factor * getCamera()->getPosition());
-    updateClippingPlanes();
-    hcam_->update();
+    if (getCamera()->getProjectionMode() == Camera::ORTHOGRAPHIC) {
+        auto frustum = getCamera()->getFrustum();
+        frustum.setLeft(frustum.getLeft() / factor);
+        frustum.setRight(frustum.getRight() / factor);
+        frustum.setBottom(frustum.getBottom() / factor);
+        frustum.setTop(frustum.getTop() / factor);
+        getCamera()->setFrustum(frustum);
+    }
+    else {
+        // zoom factor is inverse proportional to scaling of the look vector, so invert:
+        factor = 1.f / factor;
+        getCamera()->setPosition( (1.f-factor) * getCamera()->getFocus()
+                                  + factor * getCamera()->getPosition());
+        updateClippingPlanes();
+        hcam_->update();
+    }
 }
 
 void Trackball::zoom(vec2 newMouse) {

@@ -53,16 +53,17 @@ namespace campvis {
         , p_automationMode("AutomationMode", "Automation Mode", automationOptions, 3)
         , p_image("ReferenceImage", "Reference Image", "", DataNameProperty::READ)
         , p_llf("LLF", "Bounding Box LLF", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
-        , p_urb("URB", "Bounding Box URB", cgt::vec3(0.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
+        , p_urb("URB", "Bounding Box URB", cgt::vec3(1.f), cgt::vec3(-10000.f), cgt::vec3(10000.f))
         , _canvasSize(canvasSize)
         , _trackball(nullptr)
     {
         _dirty = false;
+        p_automationMode.selectByOption(FullAutomatic);
 
-        addProperty(p_automationMode);
+        addProperty(p_automationMode, INVALID_RESULT | INVALID_PROPERTIES);
         addProperty(p_image, INVALID_RESULT | INVALID_PROPERTIES);
-        addProperty(p_llf);
-        addProperty(p_urb);
+        addProperty(p_llf, INVALID_RESULT | INVALID_PROPERTIES);
+        addProperty(p_urb, INVALID_RESULT | INVALID_PROPERTIES);
 
         if (_canvasSize != nullptr) {
             _canvasSize->s_changed.connect(this, &TrackballCameraProvider::onRenderTargetSizeChanged);
@@ -165,10 +166,53 @@ namespace campvis {
     }
 
     void TrackballCameraProvider::updateProperties(DataContainer& data) {
-        // convert data
-        ScopedTypedData<IHasWorldBounds> img(data, p_image.getValue());
-        if (img != 0) {
-            reinitializeCamera(img->getWorldBounds());
+        if (p_automationMode.getOptionValue() == FullAutomatic) {
+            // convert data
+            ScopedTypedData<IHasWorldBounds> img(data, p_image.getValue());
+            if (img != 0) {
+                cgt::Bounds b = img->getWorldBounds();
+                p_llf.setValue(b.getLLF());
+                p_urb.setValue(b.getURB());
+
+                reinitializeCamera(b);
+            }
+
+            p_position.setVisible(false);
+            p_focus.setVisible(false);
+            p_upVector.setVisible(false);
+            p_fov.setVisible(false);
+            p_aspectRatio.setVisible(false);
+            p_clippingPlanes.setVisible(false);
+
+            p_image.setVisible(true);
+            p_llf.setVisible(false);
+            p_urb.setVisible(false);
+        }
+        else if (p_automationMode.getOptionValue() == SemiAutomatic) {
+            reinitializeCamera(cgt::Bounds(p_llf.getValue(), p_urb.getValue()));
+
+            p_position.setVisible(false);
+            p_focus.setVisible(false);
+            p_upVector.setVisible(false);
+            p_fov.setVisible(false);
+            p_aspectRatio.setVisible(false);
+            p_clippingPlanes.setVisible(false);
+
+            p_image.setVisible(false);
+            p_llf.setVisible(true);
+            p_urb.setVisible(true);
+        }
+        else if (p_automationMode.getOptionValue() == FullManual) {
+            p_position.setVisible(true);
+            p_focus.setVisible(true);
+            p_upVector.setVisible(true);
+            p_fov.setVisible(true);
+            p_aspectRatio.setVisible(true);
+            p_clippingPlanes.setVisible(true);
+
+            p_image.setVisible(false);
+            p_llf.setVisible(false);
+            p_urb.setVisible(false);
         }
     }
 
@@ -202,9 +246,9 @@ namespace campvis {
     }
 
     void TrackballCameraProvider::reinitializeCamera(const cgt::Bounds& worldBounds) {
-        cgt::vec3 pos = worldBounds.center() - cgt::vec3(0, 0, cgt::length(worldBounds.diagonal()));
-
         if (_trackball->getSceneBounds() != worldBounds) {
+            cgt::vec3 pos = worldBounds.center() - cgt::vec3(0, 0, cgt::length(worldBounds.diagonal()));
+
             _trackball->setSceneBounds(worldBounds);
             _trackball->setCenter(worldBounds.center());
             _trackball->reinitializeCamera(pos, worldBounds.center(), p_upVector.getValue());

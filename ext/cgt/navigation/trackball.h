@@ -65,7 +65,7 @@ class CGT_API Trackball : public Navigation {
         ///                           cgt::Timer-object. As we need a toolkit-specific timer,
         ///                           trackball cannot create it itself, the user has to provide
         ///                           it to the constructor.
-        Trackball(IHasCamera* hcam, const ivec2& viewportSize, bool defaultEventHandling = true, Timer* continousSpinTimer = NULL);
+        Trackball(AbstractCameraProxy* hcam, const ivec2& viewportSize, bool defaultEventHandling = true, Timer* continousSpinTimer = NULL);
 
         /// Destructor
         virtual ~Trackball();

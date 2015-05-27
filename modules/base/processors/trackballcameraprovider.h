@@ -48,7 +48,7 @@ namespace campvis {
     /**
      * Generates CameraData objects.
      */
-    class CAMPVIS_MODULES_API TrackballCameraProvider : public CameraProvider, public cgt::EventListener, public cgt::IHasCamera {
+    class CAMPVIS_MODULES_API TrackballCameraProvider : public CameraProvider, public cgt::EventListener, public cgt::AbstractCameraProxy {
     public:
         /// Trackball automation mode
         enum AutomationMode {
@@ -67,6 +67,16 @@ namespace campvis {
          **/
         virtual ~TrackballCameraProvider();
 
+
+        /// \see AbstractProcessor::getName()
+        virtual const std::string getName() const { return "TrackballCameraProvider"; };
+        /// \see AbstractProcessor::getDescription()
+        virtual const std::string getDescription() const { return "Provides trackball navigation interaction metaphors when generating CameraData objects."; };
+        /// \see AbstractProcessor::getAuthor()
+        virtual const std::string getAuthor() const { return "Christian Schulte zu Berge <christian.szb@in.tum.de>"; };
+        /// \see AbstractProcessor::getProcessorState()
+        virtual ProcessorState getProcessorState() const { return AbstractProcessor::STABLE; };
+
         /// \see AbstractProcessor::init()
         virtual void init();
         /// \see AbstractProcessor::deinit()
@@ -78,10 +88,10 @@ namespace campvis {
         /// \see cgt::EventListener::onEvent()
         virtual void onEvent(cgt::Event* e);
 
-        /// \see cgt::Camera::IHasCamera::getCamera()
+        /// \see cgt::Camera::AbstractCameraProxy::getCamera()
         virtual cgt::Camera* getCamera();
 
-        /// \see cgt::Camera::IHasCamera::update()
+        /// \see cgt::Camera::AbstractCameraProxy::update()
         virtual void update();
 
 
