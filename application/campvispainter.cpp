@@ -74,7 +74,8 @@ namespace campvis {
         const ImageRepresentationGL* repGL = nullptr;
         if (dh.getData() != nullptr) {
             rd = dynamic_cast<const RenderData*>(dh.getData());
-            repGL = dynamic_cast<const ImageRepresentationGL*>(dh.getData());
+            if (const ImageData* id = dynamic_cast<const ImageData*>(dh.getData()))
+                repGL = id->getRepresentation<ImageRepresentationGL>();
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -118,6 +119,8 @@ namespace campvis {
 
         _copyShader->deactivate();
         LGL_ERROR;
+
+        _pipeline->paint();
 
         getCanvas()->swap();
     }

@@ -128,6 +128,13 @@ namespace campvis {
         virtual void executePipeline() = 0;
 
         /**
+         * Paints an additional overlay directly onto the frame buffer.
+         * Gets called from CampvisPainter just after copying the rendered image and just before
+         * swapping the canvas' buffers. The default implementation performs nothing.
+         */
+        virtual void paint();
+
+        /**
          * Returns the DataContainer of this pipeline, const version.
          * \return _data
          */

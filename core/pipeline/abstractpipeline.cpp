@@ -145,6 +145,10 @@ namespace campvis {
         }
     }
 
+    void AbstractPipeline::paint() {
+        // render nothing. May be overridden in sub classes.
+    }
+
     const DataContainer& AbstractPipeline::getDataContainer() const {
         return *_data;
     }
@@ -293,6 +297,5 @@ namespace campvis {
 
         processor->setEnabled(enabledState);
     }
-
-
+    
 }
