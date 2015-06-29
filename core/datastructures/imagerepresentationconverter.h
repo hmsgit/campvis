@@ -25,9 +25,6 @@
 #ifndef IMAGEREPRESENTATIONCONVERTER_H__
 #define IMAGEREPRESENTATIONCONVERTER_H__
 
-#include "cgt/logmanager.h"
-#include "cgt/singleton.h"
-
 #include <tbb/atomic.h>
 #include <tbb/spin_mutex.h>
 
@@ -35,12 +32,8 @@
 #include "core/datastructures/abstractimagerepresentation.h"
 
 #include <map>
-#include <string>
 #include <typeindex>
 #include <typeinfo>
-#include <vector>
-
-class QWidget;
 
 namespace campvis {
     /**

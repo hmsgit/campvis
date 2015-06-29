@@ -25,7 +25,6 @@
 #include "imagerepresentationconversionitk.h"
 
 #include "cgt/assert.h"
-#include "cgt/logmanager.h"
 #include "cgt/opengljobprocessor.h"
 
 namespace campvis {

@@ -25,7 +25,6 @@
 #include "imagerepresentationconversioncore.h"
 
 #include "cgt/assert.h"
-#include "cgt/logmanager.h"
 
 namespace campvis {
 

@@ -10,7 +10,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 # Global Build Options
 #
 
-OPTION(BUILD_SHARED_LIBS            "Build shared libraries?"                                       ON)
+OPTION(BUILD_SHARED_LIBS            "Build shared libraries (strongly recommended!)"                ON)
 #OPTION(CAMPVIS_PRECOMPILED_HEADER   "Use pre-compiled headers?"                                     ON)
 OPTION(CAMPVIS_DEBUG                "Activate debug code?"                                          ON)
 OPTION(CAMPVIS_BUILD_APPLICATION    "Build CAMPVis Application"                                     ON)

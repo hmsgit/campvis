@@ -24,11 +24,6 @@
 
 #include "imagerepresentationconverter.h"
 
-#include <functional>
-
-#include "core/properties/abstractproperty.h"
-#include "core/gen_converterregistration.h"
-
 namespace campvis {
 
     tbb::atomic<ImageRepresentationConverter*> ImageRepresentationConverter::_singleton;

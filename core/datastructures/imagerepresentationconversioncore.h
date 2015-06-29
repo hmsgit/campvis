@@ -25,10 +25,10 @@
 #ifndef IMAGEREPRESENTATIONCONVERSIONCORE_H__
 #define IMAGEREPRESENTATIONCONVERSIONCORE_H__
 
+#include "cgt/logmanager.h"
 #include "cgt/opengljobprocessor.h"
 
 #include "core/coreapi.h"
-
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"
@@ -73,7 +73,7 @@ namespace campvis {
         INSTANTIATE_TEMPLATE_N(2);
         INSTANTIATE_TEMPLATE_N(3);
         INSTANTIATE_TEMPLATE_N(4);
-		INSTANTIATE_TEMPLATE_N(6);
+        INSTANTIATE_TEMPLATE_N(6);
 
 
 // = Template definition ==========================================================================

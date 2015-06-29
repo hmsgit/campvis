@@ -25,8 +25,9 @@
 #ifndef IMAGEREPRESENTATIONCONVERSIONITK_H__
 #define IMAGEREPRESENTATIONCONVERSIONITK_H__
 
-#include "core/coreapi.h"
+#include "cgt/logmanager.h"
 
+#include "core/coreapi.h"
 #include "core/datastructures/imagerepresentationconversioncore.h"
 #include "core/datastructures/imagerepresentationdisk.h"
 #include "core/datastructures/imagerepresentationlocal.h"

@@ -43,11 +43,6 @@ FOREACH(CampvisModulesCoreHeader ${CampvisModulesCoreHeaders})
     LIST(APPEND CampvisCoreHeaders ${ModHeaderFile})
 ENDFOREACH()
 
-FOREACH(HeaderFile ${CampvisCoreHeaders})
-    PARSE_HEADER_FOR_CONVERTER(${HeaderFile})
-ENDFOREACH()
-WRITE_CONVERTER_REGISTRATION("gen_converterregistration.h")
-
 ADD_LIBRARY(campvis-core 
     ${CampvisCoreSources} ${CampvisCoreHeaders} 
 )
