@@ -346,6 +346,13 @@ namespace sigslot {
         /// \see Runnable:run
         virtual void run();
 
+
+        /**
+         * Halts the calling thread until the current signal queue has been flushed.
+         * Flushing means that all signals currently in the signal queue have been fully handled.
+         */
+        void waitForSignalQueueFlushed();
+
     private:
         /// Private constructor only for singleton
         signal_manager();
@@ -444,6 +451,11 @@ namespace sigslot {
     class SIGSLOT_API _signal_base
     {
     public:
+        ~_signal_base() {
+            if (signal_manager::isInited())
+                signal_manager::getRef().waitForSignalQueueFlushed();
+        }
+
         virtual void slot_disconnect(has_slots* pslot) = 0;
         virtual void slot_duplicate(has_slots const* poldslot, has_slots* pnewslot) = 0;
 
