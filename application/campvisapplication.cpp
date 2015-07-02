@@ -39,6 +39,7 @@
 #include "application/gui/mainwindow.h"
 #include "application/gui/mdi/mdidockablewindow.h"
 
+#include "core/init.h"
 #include "core/tools/simplejobprocessor.h"
 #include "core/tools/stringutils.h"
 #include "core/tools/quadrenderer.h"
@@ -74,103 +75,62 @@ namespace campvis {
         // Make Xlib and GLX thread safe under X11
         QApplication::setAttribute(Qt::AA_X11InitThreads);
 
-        sigslot::signal_manager::init();
-        sigslot::signal_manager::getRef().start();
-        cgt::GlContextManager::init();
-        OpenGLJobProcessor::init();
-        SimpleJobProcessor::init();
-        QtJobProcessor::init();
     }
 
     CampVisApplication::~CampVisApplication() {
         cgtAssert(_initialized == false, "Destructing initialized CampVisApplication, deinitialize first!");
-
-        sigslot::signal_manager::getRef().stop();
-        sigslot::signal_manager::deinit();
     }
 
     void CampVisApplication::init() {
         cgtAssert(_initialized == false, "Tried to initialize CampVisApplication twice.");
 
-        // Init CGT
-        cgt::InitFeature::Features featureset = cgt::InitFeature::ALL;
-        cgt::init(featureset);
-        LogMgr.getConsoleLog()->addCat("", true);
-
-        _mainWindow = new MainWindow(this);
-
-        // create a local OpenGL context and init GL
-        _localContext = new QtThreadedCanvas("", cgt::ivec2(16, 16));
-        cgt::GlContextManager::getRef().registerContextAndInitGlew(_localContext, "Local Context");
-
-        cgt::initGL(featureset);
-        ShdrMgr.setDefaultGlslVersion("330");
-        LGL_ERROR;
-
-        QuadRenderer::init();
-        
+        std::vector<std::string> searchPaths;
         if (_argc > 0) {
             // ugly hack
             std::string basePath(_argv[0]);
-            basePath = cgt::FileSystem::parentDir(basePath);
-            ShdrMgr.addPath(basePath);
-            ShdrMgr.addPath(basePath + "/core/glsl");
-
-            basePath = cgt::FileSystem::parentDir(cgt::FileSystem::parentDir(basePath));
-            ShdrMgr.addPath(basePath);
-            ShdrMgr.addPath(basePath + "/core/glsl");
-
+            searchPaths.push_back(cgt::FileSystem::parentDir(basePath));
+            searchPaths.push_back(cgt::FileSystem::parentDir(cgt::FileSystem::parentDir(basePath)));
 #ifdef CAMPVIS_SOURCE_DIR
-            {
-                std::string sourcePath = CAMPVIS_SOURCE_DIR;
-                ShdrMgr.addPath(sourcePath);
-                ShdrMgr.addPath(sourcePath + "/core/glsl");
-            }
+            searchPaths.push_back(CAMPVIS_SOURCE_DIR);
 #endif
         }
 
-        _mainWindow->init();
+        _localContext = new QtThreadedCanvas("", cgt::ivec2(16, 16));
+        campvis::init(_localContext, searchPaths);
 
-        // ensure matching OpenGL specs
-        LINFO("Using Graphics Hardware " << GpuCaps.getVendorAsString() << " " << GpuCaps.getGlRendererString() << " on " << GpuCaps.getOSVersionString());
-        LINFO("Supported OpenGL " << GpuCaps.getGlVersion() << ", GLSL " << GpuCaps.getShaderVersion());
-        if (GpuCaps.getGlVersion() < cgt::GpuCapabilities::GlVersion::CGT_GL_VERSION_3_3) {
-            LERROR("Your system does not support OpenGL 3.3, which is mandatory. CAMPVis will probably not work as intended.");
-        }
-        if (GpuCaps.getShaderVersion() < cgt::GpuCapabilities::GlVersion::SHADER_VERSION_330) {
-            LERROR("Your system does not support GLSL Shader Version 3.30, which is mandatory. CAMPVis will probably not work as intended.");
-        }
+        _mainWindow = new MainWindow(this);
+        cgt::GLContextScopedLock lock(_localContext);
+        {
+            _mainWindow->init();
 
-
-        // load textureData from file
-        cgt::TextureReaderTga trt;
-        _errorTexture = trt.loadTexture(ShdrMgr.completePath("application/data/no_input.tga"), cgt::Texture::LINEAR);
-
+            // load textureData from file
+            cgt::TextureReaderTga trt;
+            _errorTexture = trt.loadTexture(ShdrMgr.completePath("application/data/no_input.tga"), cgt::Texture::LINEAR);
 
 #ifdef CAMPVIS_HAS_SCRIPTING
-        // create and store Lua VM for this very pipeline
-        _luaVmState = new LuaVmState();
-        _luaVmState->redirectLuaPrint();
+            // create and store Lua VM for this very pipeline
+            _luaVmState = new LuaVmState();
+            _luaVmState->redirectLuaPrint();
 
-        // Let Lua know where CAMPVis modules are located
-        if (! _luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
-            LERROR("Error setting up Lua VM.");
-        if (! _luaVmState->execString("package.path = package.path .. ';" CAMPVIS_LUA_SCRIPTS_PATH "'"))
-            LERROR("Error setting up Lua VM.");
+            // Let Lua know where CAMPVis modules are located
+            if (! _luaVmState->execString("package.cpath = '" CAMPVIS_LUA_MODS_PATH "'"))
+                LERROR("Error setting up Lua VM.");
+            if (! _luaVmState->execString("package.path = package.path .. ';" CAMPVIS_LUA_SCRIPTS_PATH "'"))
+                LERROR("Error setting up Lua VM.");
 
-        // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
-        if (! _luaVmState->execString("require(\"campvis\")"))
-            LERROR("Error setting up Lua VM.");
-        if (! _luaVmState->execString("require(\"cgt\")"))
-            LERROR("Error setting up Lua VM.");
+            // Load CAMPVis' core Lua module to have SWIG glue for AutoEvaluationPipeline available
+            if (! _luaVmState->execString("require(\"campvis\")"))
+                LERROR("Error setting up Lua VM.");
+            if (! _luaVmState->execString("require(\"cgt\")"))
+                LERROR("Error setting up Lua VM.");
 
-        if (! _luaVmState->execString("pipelines = {}"))
-            LERROR("Error setting up Lua VM.");
+            if (! _luaVmState->execString("pipelines = {}"))
+                LERROR("Error setting up Lua VM.");
 
-        if (! _luaVmState->execString("inspect = require 'inspect'"))
-            LERROR("Error setting up Lua VM.");
+            if (! _luaVmState->execString("inspect = require 'inspect'"))
+                LERROR("Error setting up Lua VM.");
 #endif
-        GLCtxtMgr.releaseContext(_localContext, false);
+        }
 
         // parse argument list and create pipelines
         QStringList pipelinesToAdd = this->arguments();
@@ -207,10 +167,7 @@ namespace campvis {
                     addPipeline(pipelinesToAdd[i].toStdString(), p);
             }
         }
-
-        GLJobProc.setContext(_localContext);
-        GLJobProc.start();
-
+        
         _initialized = true;
     }
 
@@ -237,7 +194,6 @@ namespace campvis {
             }
 
             _mainWindow->deinit();
-            QuadRenderer::deinit();
         }
 
         // now delete everything in the right order:
@@ -248,21 +204,8 @@ namespace campvis {
             delete *it;
         }
 
-        {
-            // Deinit everything OpenGL using the local context.
-            cgt::GLContextScopedLock lock(_localContext);
-            cgt::deinitGL();
-        }
-
-        GLJobProc.stop();
-        OpenGLJobProcessor::deinit();
-        SimpleJobProcessor::deinit();
-
-        cgt::GlContextManager::deinit();
-        cgt::deinit();
-
+        campvis::deinit();
         PropertyWidgetFactory::deinit();
-        ImageRepresentationConverter::deinit();
         PipelineFactory::deinit();
 
         _initialized = false;
@@ -318,8 +261,6 @@ namespace campvis {
         cgt::GlContextManager::getRef().registerContextAndInitGlew(canvas, pipeline->getName());
 
         pipeline->init();
-        LGL_ERROR;
-        canvas->getPainter()->init();
         LGL_ERROR;
 
         // enable pipeline and invalidate all processors

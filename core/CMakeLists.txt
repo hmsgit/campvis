@@ -6,6 +6,7 @@ MESSAGE(STATUS "Configuring CAMPVis Core")
 
 # glob sources from core directories
 FILE(GLOB CampvisCoreSources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.cpp
     classification/*.cpp
     datastructures/*.cpp
     eventhandlers/*.cpp
