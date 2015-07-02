@@ -239,17 +239,11 @@ namespace campvis {
     }
 
     void MainWindow::onPipelinesChanged() {
-        std::vector<AbstractPipeline*> pipelines;
-        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
-
-        emit updatePipelineWidget(_application->_dataContainers, pipelines);
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
     void MainWindow::onDataContainersChanged() {
-        std::vector<AbstractPipeline*> pipelines;
-        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
-        
-        emit updatePipelineWidget(_application->_dataContainers, pipelines);
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
     void MainWindow::onPipelineWidgetItemChanged(const QModelIndex& index) {
@@ -439,10 +433,7 @@ namespace campvis {
         p->init();
         _selectedPipeline->addProcessor(p);
 
-        std::vector<AbstractPipeline*> pipelines;
-        std::for_each(_application->_pipelines.begin(), _application->_pipelines.end(), [&] (const CampVisApplication::PipelineRecord& pr) { pipelines.push_back(pr._pipeline); });
-
-        emit updatePipelineWidget(_application->_dataContainers, pipelines);
+        emit updatePipelineWidget(_application->_dataContainers, _application->_pipelines);
     }
 
     void MainWindow::onRebuildShadersClicked() {

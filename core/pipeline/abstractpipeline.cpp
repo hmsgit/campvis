@@ -52,6 +52,8 @@ namespace campvis {
     {
         cgtAssert(_data != 0, "Pointer to the DataContainer for this pipeline must not be 0!");
 
+        _painter.reset(new PipelinePainter(nullptr, this));
+
         _enabled = false;
         _pipelineDirty = true;
 
@@ -60,12 +62,12 @@ namespace campvis {
     }
 
     AbstractPipeline::~AbstractPipeline() {
-
     }
 
     void AbstractPipeline::init() {
         _data->s_dataAdded.connect(this, &AbstractPipeline::onDataContainerDataAdded);
 
+        _painter->init();
         initAllProperties();
 
         // initialize all processors:
@@ -89,6 +91,7 @@ namespace campvis {
         s_deinit.triggerSignal();
 
         deinitAllProperties();
+        _painter->deinit();
 
         // deinitialize all processors:
         for (std::vector<AbstractProcessor*>::iterator it = _processors.begin(); it != _processors.end(); ++it) {
@@ -240,7 +243,13 @@ namespace campvis {
     }
 
     void AbstractPipeline::setCanvas(cgt::GLCanvas* canvas) {
+        if (_canvas != nullptr)
+            _canvas->setPainter(nullptr);
+
         _canvas = canvas;
+
+        if (_canvas != nullptr)
+            _canvas->setPainter(_painter.get());
     }
 
     void AbstractPipeline::setRenderTargetSize(const cgt::ivec2& size) {
@@ -297,5 +306,10 @@ namespace campvis {
 
         processor->setEnabled(enabledState);
     }
-    
+
+    const std::unique_ptr<PipelinePainter>& AbstractPipeline::getPipelinePainter() const {
+        return _painter;
+    }
+
+
 }

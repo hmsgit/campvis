@@ -80,25 +80,13 @@ void GLCanvas::init() {
     // nothing here, may be implemented in sub classes.
 }
 
-void GLCanvas::setPainter(Painter* p, bool initP) {
+void GLCanvas::setPainter(Painter* p) {
     painter_ = p;
     painter_->setCanvas(this);
-    if (initP)
-        initPainter();
 }
 
 Painter* GLCanvas::getPainter() const {
     return painter_;
-}
-
-void GLCanvas::initPainter() {
-    if (painter_) {
-        {
-            GLContextScopedLock lock(this);
-            painter_->init();
-        }
-        painter_->sizeChanged(size_);
-    }
 }
 
 EventHandler* GLCanvas::getEventHandler() const {

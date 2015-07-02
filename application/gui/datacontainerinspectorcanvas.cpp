@@ -114,7 +114,7 @@ namespace campvis {
         createQuad();
 
         // set this as painter to get notified when window size changes
-        setPainter(this, false);
+        setPainter(this);
         getEventHandler()->addEventListenerToFront(this);
 
         _geometryRenderer.init();

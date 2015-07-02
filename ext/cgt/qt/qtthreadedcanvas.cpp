@@ -51,7 +51,8 @@ namespace cgt {
     }
 
     void QtThreadedCanvas::paintEvent(QPaintEvent* /* event */) {
-        painter_->repaint();
+        if (painter_ != nullptr)
+            painter_->repaint();
     }
 
 }

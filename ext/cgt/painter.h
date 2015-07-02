@@ -73,7 +73,7 @@ public:
     virtual void init() {};
 
     /// Set the Canvas on which painter will draw
-    void setCanvas(GLCanvas* canvas);
+    virtual void setCanvas(GLCanvas* canvas);
 
     /// Get the associated Canvas
     GLCanvas* getCanvas() const;

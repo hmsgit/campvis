@@ -132,17 +132,9 @@ public:
 
     /// Set the painter the Canvas will use to draw it's content
     /// @param p the Painter
-    /// @initPainter wheather to initialize the painter, @see GLCanvas::initPainter()
-    void setPainter(Painter* p, bool initPainter = true);
+    void setPainter(Painter* p);
 
     Painter* getPainter() const;
-
-    /// Calls init()- and sizeChanged()-method of the canvas' painter. These methods shall
-    /// initializes OpenGL context (and maybe some user dependant stuff of the painter) and
-    /// make the painter adapt to the current width and height of the canvas.
-    /// @see Painter::init()
-    /// @see Painter::sizeChanged()
-    void initPainter();
 
     EventHandler* getEventHandler() const;
     void setEventHandler(EventHandler* handler);

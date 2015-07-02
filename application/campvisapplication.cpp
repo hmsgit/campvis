@@ -35,7 +35,6 @@
 #include "cgt/texturereadertga.h"
 #include "cgt/qt/qtthreadedcanvas.h"
 
-#include "application/campvispainter.h"
 #include "application/gui/properties/propertywidgetfactory.h"
 #include "application/gui/mainwindow.h"
 #include "application/gui/mdi/mdidockablewindow.h"
@@ -45,6 +44,7 @@
 #include "core/tools/quadrenderer.h"
 #include "core/pipeline/abstractpipeline.h"
 #include "core/pipeline/abstractworkflow.h"
+#include "core/pipeline/pipelinepainter.h"
 #include "core/datastructures/imagerepresentationconverter.h"
 #include "core/pipeline/visualizationprocessor.h"
 
@@ -218,8 +218,8 @@ namespace campvis {
         cgtAssert(_initialized, "Tried to deinitialize uninitialized CampVisApplication.");
 
         // Stop all pipeline threads.
-        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            it->_pipeline->stop();
+        for (auto it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            (*it)->stop();
         }
 
         for (auto it = _workflows.begin(); it != _workflows.end(); ++it)
@@ -232,9 +232,8 @@ namespace campvis {
             delete _errorTexture;
 
             // Deinit pipeline and painter first
-            for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-                it->_pipeline->deinit();
-                it->_painter->deinit();
+            for (auto it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+                (*it)->deinit();
             }
 
             _mainWindow->deinit();
@@ -242,11 +241,10 @@ namespace campvis {
         }
 
         // now delete everything in the right order:
-        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            delete it->_painter;
-            delete it->_pipeline;
+        for (auto it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            delete *it;
         }
-        for (std::vector<DataContainer*>::iterator it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
+        for (auto it = _dataContainers.begin(); it != _dataContainers.end(); ++it) {
             delete *it;
         }
 
@@ -291,14 +289,10 @@ namespace campvis {
         cgt::QtThreadedCanvas* canvas = new cgt::QtThreadedCanvas("CAMPVis", cgt::ivec2(512, 512));
         canvas->init();
 
-        CampVisPainter* painter = new CampVisPainter(canvas, pipeline);
-        canvas->setPainter(painter, false);
         pipeline->setCanvas(canvas);
-        painter->setErrorTexture(_errorTexture);
+        pipeline->getPipelinePainter()->setErrorTexture(_errorTexture);
 
-        PipelineRecord pr = { pipeline, painter };
-        _pipelines.push_back(pr);
-
+        _pipelines.push_back(pipeline);
         _pipelineWindows[pipeline] = _mainWindow->addVisualizationPipelineWidget(name, canvas);
 
         // initialize context (GLEW) and pipeline in OpenGL thread)
@@ -362,8 +356,8 @@ namespace campvis {
             LINFO("Rebuilding shaders from file successful.");
         }
 
-        for (std::vector<PipelineRecord>::iterator it = _pipelines.begin(); it != _pipelines.end(); ++it) {
-            for (std::vector<AbstractProcessor*>::const_iterator pit = it->_pipeline->getProcessors().begin(); pit != it->_pipeline->getProcessors().end(); ++pit) {
+        for (auto it = _pipelines.begin(); it != _pipelines.end(); ++it) {
+            for (auto pit = (*it)->getProcessors().cbegin(); pit != (*it)->getProcessors().cend(); ++pit) {
                 if (VisualizationProcessor* tester = dynamic_cast<VisualizationProcessor*>(*pit)) {
                 	tester->invalidate(AbstractProcessor::INVALID_RESULT);
                 }
