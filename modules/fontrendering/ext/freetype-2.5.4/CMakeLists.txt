@@ -51,6 +51,7 @@
 
 
 cmake_minimum_required(VERSION 2.6)
+MESSAGE(STATUS "  Configuring external library: freetype")
 
 # CMAKE_TOOLCHAIN_FILE must be set before `project' is called, which
 # configures the base build environment and references the toolchain file
@@ -111,12 +112,12 @@ add_definitions("-D_CRT_SECURE_NO_WARNINGS")
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
 # Create the configuration file
-message(STATUS "Creating directory, ${PROJECT_BINARY_DIR}/include/freetype2.")
+#message(STATUS "Creating directory, ${PROJECT_BINARY_DIR}/include/freetype2.")
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/freetype2)
 
 # For the auto-generated ftconfig.h file
 include_directories(BEFORE "${PROJECT_BINARY_DIR}/include/freetype2")
-message(STATUS "Creating ${PROJECT_BINARY_DIR}/include/freetype2/ftconfig.h.")
+#message(STATUS "Creating ${PROJECT_BINARY_DIR}/include/freetype2/ftconfig.h.")
 execute_process(
   COMMAND sed -e "s/FT_CONFIG_OPTIONS_H/<ftoption.h>/" -e "s/FT_CONFIG_STANDARD_LIBRARY_H/<ftstdlib.h>/" -e "s?/undef ?#undef ?"
   INPUT_FILE ${PROJECT_SOURCE_DIR}/builds/unix/ftconfig.in
@@ -252,4 +253,5 @@ include(CPack)
 # add make dist target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-# eof
+# define export targets
+INSTALL(TARGETS freetype DESTINATION exports EXPORT campvis-targets)

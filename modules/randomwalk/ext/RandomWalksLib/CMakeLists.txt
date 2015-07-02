@@ -3,7 +3,7 @@
 ################################################################################
 PROJECT(RandomWalksLib)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
-MESSAGE(STATUS "  Configuring external RandomWalksLib Library")
+MESSAGE(STATUS "  Configuring external library: RandomWalksLib")
 
 # all RandomWalksLibHeaders except ViennaCL related stuff
 SET(RandomWalksLibHeaders ConfidenceMaps2D.h
@@ -43,3 +43,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 ADD_LIBRARY(RandomWalksLib ${CampvisSharedStaticModulesFix} ${RandomWalksLibSources} ${RandomWalksLibHeaders})
 TARGET_LINK_LIBRARIES(RandomWalksLib ${RandomWalksLibExternalLibs})
+
+# define export targets
+INSTALL(TARGETS RandomWalksLib DESTINATION exports EXPORT campvis-targets)

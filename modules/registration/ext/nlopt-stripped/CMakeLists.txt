@@ -1,4 +1,5 @@
 PROJECT(NLOPT)
+MESSAGE(STATUS "  Configuring external library: nlopt")
 
 #==============================================================================
 # NLOPT CMake file
@@ -152,4 +153,5 @@ ELSE(NLOPT_BUILD_SHARED)
 ENDIF(NLOPT_BUILD_SHARED)
 
 
-
+# define export targets
+INSTALL(TARGETS nlopt DESTINATION exports EXPORT campvis-targets)

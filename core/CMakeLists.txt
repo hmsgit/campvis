@@ -59,3 +59,6 @@ IF(CAMPVIS_GROUP_SOURCE_FILES)
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreSources ${CampvisHome} "")
     DEFINE_SOURCE_GROUPS_FROM_SUBDIR(CampvisCoreHeaders ${CampvisHome} "")
 ENDIF()
+
+
+INSTALL(TARGETS campvis-core DESTINATION exports EXPORT campvis-targets)

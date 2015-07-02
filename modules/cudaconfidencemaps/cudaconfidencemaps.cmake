@@ -61,7 +61,9 @@ IF(ModuleEnabled)
         FILE(GLOB cuda_SOURCES modules/cudaconfidencemaps/core/*.cu)
         CUDA_ADD_LIBRARY(cudaconfidencemaps-cuda STATIC
             ${cuda_SOURCES}
-            )        
+            )
+        
+        INSTALL(TARGETS cudaconfidencemaps-cuda DESTINATION exports EXPORT campvis-targets)
 
         # Link CUDA code to module
         LIST(APPEND ThisModExternalLibs cudaconfidencemaps-cuda)
